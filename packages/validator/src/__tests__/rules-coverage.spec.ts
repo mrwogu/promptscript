@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import type { Program, SourceLocation, Block, Value } from '@promptscript/core';
+import type {
+  Program,
+  SourceLocation,
+  Block,
+  PrimitiveValue,
+  TypeExpression,
+  Value,
+} from '@promptscript/core';
+import { createBlockBody } from '@promptscript/core';
 import { allRules, getRuleById, getRuleByName } from '../rules/index.js';
 import { deprecated } from '../rules/deprecated.js';
 import { validPath, isValidPath } from '../rules/valid-path.js';
@@ -1023,6 +1031,146 @@ describe('valid-params rule (PS009) coverage', () => {
   it('should handle AST without meta', () => {
     const ast = createTestProgram({
       meta: undefined,
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  function createTypedFieldProgram(
+    expression: TypeExpression,
+    defaultValue: PrimitiveValue
+  ): Program {
+    return createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'params',
+          loc,
+          content: { type: 'ObjectContent', properties: {}, loc },
+          canonicalBody: createBlockBody(
+            [
+              {
+                type: 'FieldEntry',
+                name: 'field',
+                loc,
+                value: { type: 'TypeExpressionValueNode', expression, loc },
+                defaultValue: { type: 'ScalarValueNode', value: defaultValue, loc },
+              },
+            ],
+            loc
+          ),
+        },
+      ],
+    });
+  }
+
+  it('should report a block field default that is not the declared type', () => {
+    const ast = createTypedFieldProgram({ type: 'TypeExpression', kind: 'boolean', loc }, 'yes');
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('expected boolean, got string');
+  });
+
+  it('should pass a block field default of the declared type', () => {
+    const ast = createTypedFieldProgram({ type: 'TypeExpression', kind: 'boolean', loc }, false);
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should report a block field default outside the declared enum', () => {
+    const ast = createTypedFieldProgram(
+      { type: 'TypeExpression', kind: 'enum', constraints: { options: ['dev', 'prod'] }, loc },
+      'staging'
+    );
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('expected one of "dev", "prod"');
+  });
+
+  it('should report a block field default outside the declared range', () => {
+    const ast = createTypedFieldProgram(
+      { type: 'TypeExpression', kind: 'range', constraints: { min: 1, max: 10 }, loc },
+      42
+    );
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('at most 10');
+  });
+
+  it('should report a block field default below the declared range', () => {
+    const ast = createTypedFieldProgram(
+      { type: 'TypeExpression', kind: 'range', constraints: { min: 5, max: 10 }, loc },
+      1
+    );
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('at least 5');
+  });
+
+  it('should point at the default value, not the field', () => {
+    const defaultLoc: SourceLocation = { file: 'test.prs', line: 7, column: 22 };
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'params',
+          loc,
+          content: { type: 'ObjectContent', properties: {}, loc },
+          canonicalBody: createBlockBody(
+            [
+              {
+                type: 'FieldEntry',
+                name: 'verbose',
+                loc,
+                value: {
+                  type: 'TypeExpressionValueNode',
+                  expression: { type: 'TypeExpression', kind: 'boolean', loc },
+                  loc,
+                },
+                defaultValue: { type: 'ScalarValueNode', value: 'yes', loc: defaultLoc },
+              },
+            ],
+            loc
+          ),
+        },
+      ],
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages[0]!.location).toEqual(defaultLoc);
+  });
+
+  it('should ignore typed block fields without a default', () => {
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'params',
+          loc,
+          content: { type: 'ObjectContent', properties: {}, loc },
+          canonicalBody: createBlockBody(
+            [
+              {
+                type: 'FieldEntry',
+                name: 'field',
+                loc,
+                value: {
+                  type: 'TypeExpressionValueNode',
+                  expression: { type: 'TypeExpression', kind: 'number', loc },
+                  loc,
+                },
+              },
+            ],
+            loc
+          ),
+        },
+      ],
     });
     const { ctx, messages } = createRuleContext(ast);
     validParams.validate(ctx);
