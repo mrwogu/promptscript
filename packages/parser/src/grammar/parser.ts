@@ -36,6 +36,7 @@ import {
   Dash,
   StringLiteral,
   NumberLiteral,
+  EnvVar,
   TextBlock,
   TemplateOpen,
   TemplateClose,
@@ -261,7 +262,7 @@ export class PromptScriptParser extends CstParser {
 
   /**
    * value
-   *   : StringLiteral | NumberLiteral | True | False | Null
+   *   : StringLiteral | NumberLiteral | EnvVar | True | False | Null
    *   | TextBlock | array | paramDefList | object | typeExpr | templateExpr | Identifier
    *
    * Note: paramDefList must come before object since both start with LBrace,
@@ -271,6 +272,7 @@ export class PromptScriptParser extends CstParser {
     this.OR([
       { ALT: () => this.CONSUME(StringLiteral) },
       { ALT: () => this.CONSUME(NumberLiteral) },
+      { ALT: () => this.CONSUME(EnvVar) },
       { ALT: () => this.CONSUME(True) },
       { ALT: () => this.CONSUME(False) },
       { ALT: () => this.CONSUME(Null) },

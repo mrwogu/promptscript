@@ -34,6 +34,7 @@ import {
   RelativePath,
   SshPath,
   UrlPath,
+  EnvVar,
 } from '../lexer/tokens.js';
 
 describe('PSLexer', () => {
@@ -219,6 +220,29 @@ describe('PSLexer', () => {
       expect(result.tokens).toHaveLength(1);
       expect(result.tokens[0]!.tokenType).toBe(SshPath);
       expect(result.tokens[0]!.image).toBe('git@github.com:acme/skills/@fragments/security@1.2.0');
+    });
+  });
+
+  describe('EnvVar token', () => {
+    it('should lex an environment variable reference', () => {
+      const result = tokenize('${API_KEY}');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(EnvVar);
+      expect(result.tokens[0]!.image).toBe('${API_KEY}');
+    });
+
+    it('should lex an environment variable reference with a fallback', () => {
+      const result = tokenize('${PORT:-3000}');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(EnvVar);
+      expect(result.tokens[0]!.image).toBe('${PORT:-3000}');
+    });
+
+    it('should reject a name that starts with a digit', () => {
+      const result = tokenize('${1PORT}');
+      expect(result.errors.length).toBeGreaterThan(0);
     });
   });
 

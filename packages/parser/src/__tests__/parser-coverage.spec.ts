@@ -798,6 +798,97 @@ describe('visitor coverage - edge cases', () => {
     });
   });
 
+  describe('unquoted environment variables', () => {
+    it('should interpolate an unquoted env var used as a value', () => {
+      process.env['UNQUOTED_ENV_VAR'] = 'from-env';
+      const source = `
+        @meta { id: "test" syntax: "1.5.0" }
+        @config {
+          value: \${UNQUOTED_ENV_VAR}
+        }
+      `;
+      const result = parse(source, { interpolateEnv: true });
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        expect(configBlock.content.properties['value']).toBe('from-env');
+      }
+      delete process.env['UNQUOTED_ENV_VAR'];
+    });
+
+    it('should apply the fallback of an unquoted env var', () => {
+      delete process.env['UNQUOTED_MISSING_VAR'];
+      const source = `
+        @meta { id: "test" syntax: "1.5.0" }
+        @config {
+          port: \${UNQUOTED_MISSING_VAR:-3000}
+        }
+      `;
+      const result = parse(source, { interpolateEnv: true });
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        expect(configBlock.content.properties['port']).toBe('3000');
+      }
+    });
+
+    it('should keep the reference when interpolation is disabled', () => {
+      process.env['UNQUOTED_DISABLED_VAR'] = 'should-not-appear';
+      const source = `
+        @meta { id: "test" syntax: "1.5.0" }
+        @config {
+          value: \${UNQUOTED_DISABLED_VAR}
+        }
+      `;
+      const result = parse(source, { interpolateEnv: false });
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        expect(configBlock.content.properties['value']).toBe('${UNQUOTED_DISABLED_VAR}');
+      }
+      delete process.env['UNQUOTED_DISABLED_VAR'];
+    });
+
+    it('should accept unquoted env vars inside arrays', () => {
+      const source = `
+        @meta { id: "test" syntax: "1.5.0" }
+        @config {
+          hosts: [\${UNQUOTED_ARRAY_VAR:-localhost}, "example.com"]
+        }
+      `;
+      const result = parse(source, { interpolateEnv: true });
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        expect(configBlock.content.properties['hosts']).toEqual(['localhost', 'example.com']);
+      }
+    });
+
+    it('should record the syntax feature for an unquoted env var', () => {
+      const source = `
+        @meta { id: "test" syntax: "1.5.0" }
+        @config { value: \${FEATURE_FLAG_VAR:-off} }
+      `;
+      const result = parse(source, { interpolateEnv: true });
+
+      expect(result.ast?.syntaxFeatures?.map((usage) => usage.feature)).toContain('env-var-value');
+    });
+
+    it('should not record the feature for a quoted env var', () => {
+      const source = `
+        @meta { id: "test" syntax: "1.5.0" }
+        @config { value: "\${QUOTED_FLAG_VAR:-off}" }
+      `;
+      const result = parse(source, { interpolateEnv: true });
+
+      expect(result.ast?.syntaxFeatures ?? []).toHaveLength(0);
+    });
+  });
+
   describe('type expressions', () => {
     it('should parse range type expressions', () => {
       const source = `
