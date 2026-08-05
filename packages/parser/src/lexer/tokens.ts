@@ -272,6 +272,15 @@ export const StringLiteral = createToken({
   pattern: /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/,
 });
 
+/**
+ * Environment variable reference used where a value is expected:
+ * `${NAME}` or `${NAME:-fallback}`.
+ */
+export const EnvVar = createToken({
+  name: 'EnvVar',
+  pattern: /\$\{[A-Za-z_]\w*(?::-[^}]*)?\}/,
+});
+
 export const NumberLiteral = createToken({
   name: 'NumberLiteral',
   pattern: /-?\d+(?:\.\d+)?/,
@@ -342,6 +351,7 @@ export const allTokens: TokenType[] = [
   // Literals
   StringLiteral,
   NumberLiteral,
+  EnvVar,
 
   // Identifier (catch-all for names)
   Identifier,

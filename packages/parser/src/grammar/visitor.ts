@@ -145,6 +145,7 @@ interface FieldCstCtx {
 interface ValueCstCtx {
   StringLiteral?: IToken[];
   NumberLiteral?: IToken[];
+  EnvVar?: IToken[];
   True?: IToken[];
   False?: IToken[];
   Null?: IToken[];
@@ -884,6 +885,15 @@ class PromptScriptVisitor extends BaseVisitor {
 
     if (ctx.NumberLiteral) {
       return parseFloat(ctx.NumberLiteral[0]!.image);
+    }
+
+    if (ctx.EnvVar) {
+      const token = ctx.EnvVar[0]!;
+      this.syntaxFeatures.push({
+        feature: SYNTAX_FEATURES.ENV_VAR_VALUE,
+        location: this.loc(token),
+      });
+      return this.interpolateEnv ? this.interpolateEnvVars(token.image) : token.image;
     }
 
     if (ctx.True) {
