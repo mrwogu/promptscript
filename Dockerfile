@@ -22,9 +22,8 @@ RUN apk upgrade --no-cache && apk add --no-cache python3 make g++
 
 WORKDIR /build
 
-# Update npm before installing pnpm so the image does not retain vulnerable
-# packages bundled with the base image's npm.
-RUN npm install --global npm@12.0.2 pnpm@10.34.5
+# Install pnpm for the build; npm is removed from the final runtime image.
+RUN npm install --global pnpm@10.34.5
 
 # Copy package files first for better layer caching
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -78,11 +77,11 @@ WORKDIR /app
 COPY --from=builder /build/dist/packages/cli/ ./
 COPY --from=builder /build/dist/packages/server/ ./node_modules/@promptscript/server/
 
-# Update npm before installing production dependencies so the runtime image
-# does not retain vulnerable packages bundled with the base image's npm.
-RUN npm install --global npm@12.0.2 && \
-    npm install --omit=dev && \
-    npm cache clean --force
+# npm is only needed to install production dependencies. Remove it afterward
+# so the runtime image does not ship npm's bundled transitive dependencies.
+RUN npm install --omit=dev && \
+    npm cache clean --force && \
+    rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 # Create workspace directory and set permissions
 # Use existing 'node' user (UID/GID 1000) from node:alpine base image
