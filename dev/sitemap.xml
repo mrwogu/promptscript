@@ -601,6 +601,10 @@
          <lastmod>2026-08-05</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/interpolateEnvVars/</loc>
+         <lastmod>2026-08-05</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/interpolateText/</loc>
          <lastmod>2026-08-05</lastmod>
     </url>
