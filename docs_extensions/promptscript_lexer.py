@@ -71,12 +71,14 @@ IMPORT_PATH_PATTERN = (
 FENCED_CODE_PATTERN = r"(```)([\w+#.-]*)([^\n]*\n)([\s\S]*?)(```)"
 
 # Info strings that Pygments does not know under the name Markdown authors
-# and the TextMate grammar use.
+# and the TextMate grammar use. Names that only some Pygments releases
+# recognise are mapped too, so the docs render the same on every version.
 FENCE_LANGUAGE_ALIASES = {
     "cjs": "javascript",
     "jsonc": "json",
     "mjs": "javascript",
     "patch": "diff",
+    "tsx": "typescript",
     "yml": "yaml",
 }
 
