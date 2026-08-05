@@ -26,6 +26,10 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # The grammar check asks the Pygments lexer which fence languages it can
+      # highlight, so the docs lexer has to be importable here too.
+      - run: python3 -m pip install --quiet --disable-pip-version-check pygments
+
       - run: pnpm grammar:check
 
       - run: pnpm nx package vscode

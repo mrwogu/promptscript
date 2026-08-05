@@ -8,6 +8,7 @@
  *   1 - Missing token coverage
  */
 
+import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { BLOCK_TYPES } from '../packages/core/src/types/constants.js';
@@ -383,6 +384,82 @@ for (const stringRule of ['double-string', 'single-string', 'triple-string']) {
       syncErrors.push(`TextMate ${stringRule} is missing ${requiredInclude}`);
     }
   }
+}
+
+// --- Embedded fenced code ---
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+const fenceRules = Object.entries(grammar.repository ?? {}).filter(([name]) =>
+  name.startsWith('fenced-')
+);
+
+if (!grammar.repository?.['triple-string']?.patterns?.some((p) => p.include === '#fenced-code')) {
+  syncErrors.push('TextMate triple-string is missing #fenced-code');
+}
+
+const fenceLanguages = new Set<string>();
+for (const [name, rule] of fenceRules) {
+  if (name === 'fenced-code' || name === 'fenced-plain') continue;
+
+  const infoStringGroup = rule.begin?.match(/\(([\w|]+)\)/);
+  if (!infoStringGroup) {
+    syncErrors.push(`TextMate ${name} does not name the languages it covers`);
+    continue;
+  }
+  for (const language of infoStringGroup[1]!.split('|')) {
+    fenceLanguages.add(language);
+  }
+  if (!rule.contentName?.startsWith('meta.embedded.block.')) {
+    syncErrors.push(`TextMate ${name} is missing a meta.embedded.block scope`);
+  }
+}
+
+if (fenceLanguages.size === 0) {
+  syncErrors.push('TextMate grammar defines no embedded fence languages');
+}
+
+// The Pygments lexer resolves the info string at runtime, so the guard is
+// that every language TextMate claims is one Pygments can actually load.
+const PYGMENTS_FENCE_PROBE = [
+  'import json, sys',
+  "sys.path.insert(0, 'docs_extensions')",
+  'from promptscript_lexer import PromptScriptLexer, fence_sublexer',
+  'names = json.load(sys.stdin)',
+  'unknown = [name for name in names if fence_sublexer(name) is None]',
+  'sample = \'@knowledge {\\n  api: """\\n  ```javascript\\n  const answer = 42;\\n  ```\\n  """\\n}\\n\'',
+  'tokens = list(PromptScriptLexer().get_tokens(sample))',
+  'delegates = any(str(token).startswith("Token.Keyword") and value == "const" for token, value in tokens)',
+  'json.dump({"unknown": unknown, "delegates": delegates}, sys.stdout)',
+].join('\n');
+
+const pygmentsFences = spawnSync('python3', ['-c', PYGMENTS_FENCE_PROBE], {
+  input: JSON.stringify([...fenceLanguages]),
+  encoding: 'utf-8',
+});
+
+if (pygmentsFences.status !== 0) {
+  syncErrors.push(`Could not query the Pygments lexers: ${pygmentsFences.stderr.trim()}`);
+} else {
+  const result = JSON.parse(pygmentsFences.stdout) as { unknown: string[]; delegates: boolean };
+  for (const language of result.unknown) {
+    syncErrors.push(`Pygments cannot highlight fenced ${language} that TextMate claims`);
+  }
+  if (!result.delegates) {
+    syncErrors.push('Pygments lexer does not delegate fenced code to other lexers');
+  }
+}
+
+const monacoMultiline = (prsLanguageDefinition.tokenizer as Record<string, unknown[]>)[
+  'multilineString'
+];
+const monacoEmbeds = monacoMultiline?.some(
+  (rule) => Array.isArray(rule) && isRecord(rule[1]) && 'nextEmbedded' in rule[1]
+);
+if (!monacoEmbeds) {
+  syncErrors.push('Monaco multilineString does not embed fenced code');
 }
 
 if (missing.length > 0 || syncErrors.length > 0) {
