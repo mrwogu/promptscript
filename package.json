@@ -38,7 +38,7 @@
     "@nx/eslint": "22.7.5",
     "@nx/eslint-plugin": "22.7.5",
     "@nx/js": "23.1.1",
-    "@nx/vite": "22.7.5",
+    "@nx/vite": "23.1.1",
     "@nx/vitest": "22.7.5",
     "@swc-node/register": "~1.12.1",
     "@swc/cli": "~0.8.1",
