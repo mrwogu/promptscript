@@ -15,7 +15,7 @@
 # Stage 1: Builder
 # -----------------------------------------------------------------------------
 # Build the CLI from source with all development dependencies
-FROM node:25-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Update Alpine packages, including OpenSSL, before installing build tools.
 RUN apk upgrade --no-cache && apk add --no-cache python3 make g++
@@ -58,7 +58,7 @@ RUN pnpm build
 # Stage 2: Runtime
 # -----------------------------------------------------------------------------
 # Minimal runtime image with only production dependencies
-FROM node:25-alpine AS runtime
+FROM node:24-alpine AS runtime
 
 # Image metadata
 LABEL org.opencontainers.image.title="PromptScript CLI" \
