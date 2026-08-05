@@ -667,6 +667,24 @@ describe('visitor coverage - edge cases', () => {
       }
     });
 
+    it('should leave incomplete env expressions unchanged', () => {
+      const source = `
+        @meta { id: "test" }
+        @config {
+          value: "\${MISSING_ENV_VAR_TEST:-unterminated"
+        }
+      `;
+      const result = parse(source, { interpolateEnv: true });
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        expect(configBlock.content.properties['value']).toBe(
+          '${MISSING_ENV_VAR_TEST:-unterminated'
+        );
+      }
+    });
+
     it('should warn and use empty string for missing env var without default', () => {
       delete process.env['MISSING_NO_DEFAULT_VAR'];
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});

@@ -37,6 +37,7 @@ import {
   createCanonicalOverrideBlock,
   createCanonicalProgram,
   createValueNode,
+  interpolateEnvVars,
   normalizeLegacyHeadingEntries,
   SYNTAX_FEATURES,
 } from '@promptscript/core';
@@ -1253,25 +1254,7 @@ class PromptScriptVisitor extends BaseVisitor {
    * For missing variables without default: warns and returns empty string.
    */
   private interpolateEnvVars(text: string): string {
-    // Match ${VAR} or ${VAR:-default}
-    // VAR must start with letter or underscore, followed by word characters
-    const envVarPattern = /\$\{([A-Za-z_]\w*)(?::-([^}]*))?\}/g;
-
-    return text.replace(envVarPattern, (_match, varName: string, defaultValue?: string) => {
-      const envValue = this.envProvider(varName);
-
-      if (envValue !== undefined) {
-        return envValue;
-      }
-
-      if (defaultValue !== undefined) {
-        return defaultValue;
-      }
-
-      // Warn and return empty string (like Linux behavior)
-      console.warn(`Warning: Environment variable '${varName}' is not set, using empty string`);
-      return '';
-    });
+    return interpolateEnvVars(text, this.envProvider);
   }
 
   /**
