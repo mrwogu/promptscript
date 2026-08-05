@@ -17,13 +17,14 @@
 # Build the CLI from source with all development dependencies
 FROM node:25-alpine AS builder
 
-# Install build dependencies for native modules
-RUN apk add --no-cache python3 make g++
+# Update Alpine packages, including OpenSSL, before installing build tools.
+RUN apk upgrade --no-cache && apk add --no-cache python3 make g++
 
 WORKDIR /build
 
-# Install pnpm (corepack may not be available in all Node.js alpine images)
-RUN npm install -g pnpm@10
+# Update npm before installing pnpm so the image does not retain vulnerable
+# packages bundled with the base image's npm.
+RUN npm install --global npm@12.0.2 pnpm@10.34.5
 
 # Copy package files first for better layer caching
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -67,8 +68,8 @@ LABEL org.opencontainers.image.title="PromptScript CLI" \
       org.opencontainers.image.vendor="PromptScript" \
       org.opencontainers.image.licenses="MIT"
 
-# Install git (required for prs pull and simple-git)
-RUN apk add --no-cache git
+# Update Alpine packages, including OpenSSL, before installing git.
+RUN apk upgrade --no-cache && apk add --no-cache git
 
 # Set up application directory
 WORKDIR /app
@@ -77,8 +78,10 @@ WORKDIR /app
 COPY --from=builder /build/dist/packages/cli/ ./
 COPY --from=builder /build/dist/packages/server/ ./node_modules/@promptscript/server/
 
-# Install production dependencies only
-RUN npm install --omit=dev && \
+# Update npm before installing production dependencies so the runtime image
+# does not retain vulnerable packages bundled with the base image's npm.
+RUN npm install --global npm@12.0.2 && \
+    npm install --omit=dev && \
     npm cache clean --force
 
 # Create workspace directory and set permissions

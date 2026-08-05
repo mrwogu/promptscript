@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { existsSync } from 'fs';
 import { readFile } from 'fs/promises';
-import { loadConfig, findConfigFile, CONFIG_FILES, loadEffectiveConfig } from '../config/loader.js';
+import {
+  loadConfig,
+  findConfigFile,
+  CONFIG_FILES,
+  loadEffectiveConfig,
+  interpolateEnvVars,
+} from '../config/loader.js';
 
 // Mock fs modules
 vi.mock('fs', () => ({
@@ -202,6 +208,32 @@ syntax: "1.0.0"
         expect.stringContaining("Environment variable 'MISSING_VAR' is not set")
       );
       warnSpy.mockRestore();
+    });
+  });
+
+  describe('interpolateEnvVars', () => {
+    it('should leave incomplete expressions unchanged', () => {
+      const text = 'prefix ${MISSING:-unterminated';
+
+      expect(interpolateEnvVars(text)).toBe(text);
+    });
+
+    it('should interpolate multiple variables without regex backtracking', () => {
+      process.env['FIRST_VAR'] = 'first';
+      delete process.env['SECOND_VAR'];
+
+      expect(interpolateEnvVars('${FIRST_VAR}:${SECOND_VAR:-second}')).toBe('first:second');
+    });
+
+    it.each(['${MISSING_VAR', '${1MISSING_VAR}', '${MISSING_VAR:invalid}'])(
+      'should leave invalid expressions unchanged: %s',
+      (text) => {
+        expect(interpolateEnvVars(text)).toBe(text);
+      }
+    );
+
+    it('should preserve nested-looking default text', () => {
+      expect(interpolateEnvVars('${MISSING_VAR:-a${OTHER_VAR}}')).toBe('a${OTHER_VAR}');
     });
   });
 

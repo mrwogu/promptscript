@@ -5,3 +5,4 @@ export * from './path.js';
 export * from './version.js';
 export * from './levenshtein.js';
 export * from './markers.js';
+export * from './interpolate-env.js';

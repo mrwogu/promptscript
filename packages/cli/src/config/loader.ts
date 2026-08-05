@@ -1,6 +1,7 @@
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { parse as parseYaml } from 'yaml';
+import { interpolateEnvVars as interpolateEnvironmentVariables } from '@promptscript/core';
 import type { PromptScriptConfig } from '@promptscript/core';
 import { loadUserConfig } from './user-config.js';
 import { loadEnvOverrides } from './env-config.js';
@@ -22,25 +23,7 @@ export const CONFIG_FILES = [
  * For missing variables without default: warns and returns empty string.
  */
 export function interpolateEnvVars(text: string): string {
-  // Match ${VAR} or ${VAR:-default}
-  // VAR must start with letter or underscore, followed by word characters
-  const envVarPattern = /\$\{([A-Za-z_]\w*)(?::-([^}]*))?\}/g;
-
-  return text.replace(envVarPattern, (_match, varName: string, defaultValue?: string) => {
-    const envValue = process.env[varName];
-
-    if (envValue !== undefined) {
-      return envValue;
-    }
-
-    if (defaultValue !== undefined) {
-      return defaultValue;
-    }
-
-    // Warn and return empty string (like Linux behavior)
-    console.warn(`Warning: Environment variable '${varName}' is not set, using empty string`);
-    return '';
-  });
+  return interpolateEnvironmentVariables(text, (name) => process.env[name]);
 }
 
 /**
