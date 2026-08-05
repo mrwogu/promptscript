@@ -15,7 +15,7 @@ const __dirname = path.dirname(__filename);
 
 const config: Config = {
   path: path.resolve(__dirname, '../packages/core/src/types/config.ts'),
-  tsconfig: path.resolve(__dirname, '../tsconfig.base.json'),
+  tsconfig: path.resolve(__dirname, '../tsconfig.schema.json'),
   type: 'PromptScriptConfig',
   schemaId: 'https://getpromptscript.dev/latest/schema/config.json',
   expose: 'export',
@@ -23,7 +23,7 @@ const config: Config = {
   jsDoc: 'extended',
   sortProps: true,
   strictTuples: false,
-  skipTypeCheck: true,
+  skipTypeCheck: false,
   encodeRefs: true,
   extraTags: ['example', 'default'],
 };

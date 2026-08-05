@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@promptscript/*": ["packages/*/src/index.ts"],
+      "@promptscript/core": ["packages/core/src/index.ts"],
+      "@promptscript/parser": ["packages/parser/src/index.ts"],
+      "@promptscript/resolver": ["packages/resolver/src/index.ts"],
+      "@promptscript/validator": ["packages/validator/src/index.ts"],
+      "@promptscript/compiler": ["packages/compiler/src/index.ts"],
+      "@promptscript/formatters": ["packages/formatters/src/index.ts"],
+      "@promptscript/cli": ["packages/cli/src/index.ts"],
+      "@promptscript/importer": ["packages/importer/src/index.ts"],
+      "@promptscript/server": ["packages/server/src/index.ts"]
+    }
+  }
+}
