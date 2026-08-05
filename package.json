@@ -36,7 +36,7 @@
     "@eslint/js": "^10.0.1",
     "@nx/esbuild": "22.7.5",
     "@nx/eslint": "22.7.5",
-    "@nx/eslint-plugin": "22.7.5",
+    "@nx/eslint-plugin": "23.1.1",
     "@nx/js": "23.1.1",
     "@nx/vite": "22.7.5",
     "@nx/vitest": "22.7.5",
