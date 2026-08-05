@@ -152,14 +152,28 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
     ],
 
     multilineString: [
+      // Fenced code hands its body to the language named by the info string.
+      // Monaco colours it only when that language is registered; the plain
+      // fence rule keeps the delimiters styled either way.
+      [/(```)([\w+#.-]+)/, { token: 'string.fence', next: '@embeddedCode.$2', nextEmbedded: '$2' }],
+      [/```/, 'string.fence', '@plainFence'],
       [/\{\{/, 'variable.template', '@templateExpressionInString'],
       // Environment variables inside multiline strings
       [/\$\{[A-Za-z_][A-Za-z0-9_]*(?::-[^}]*)?\}/, 'variable.env'],
-      [/[^"{$]+/, 'string'],
+      [/[^"{$`]+/, 'string'],
       [/\$(?!\{)/, 'string'],
       [/\{(?!\{)/, 'string'],
+      [/`/, 'string'],
       [/"""/, 'string', '@pop'],
       [/"/, 'string'],
+    ],
+
+    embeddedCode: [[/```/, { token: 'string.fence', next: '@pop', nextEmbedded: '@pop' }]],
+
+    plainFence: [
+      [/```/, 'string.fence', '@pop'],
+      [/[^`]+/, 'string'],
+      [/`/, 'string'],
     ],
 
     templateExpressionInString: [
@@ -224,6 +238,7 @@ export const prsThemeRules: Monaco.editor.ITokenThemeRule[] = [
   { token: 'variable.name', foreground: 'fb923c' },
   { token: 'variable.env', foreground: 'fbbf24' },
   { token: 'string.url', foreground: '67e8f9' },
+  { token: 'string.fence', foreground: '64748b' },
 ];
 
 /**
