@@ -44,7 +44,7 @@
     "@swc/cli": "~0.8.1",
     "@swc/core": "~1.15.47",
     "@swc/helpers": "~0.5.23",
-    "@types/node": "25.9.3",
+    "@types/node": "26.1.2",
     "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.65.0",
     "@vitest/coverage-v8": "^4.1.10",
