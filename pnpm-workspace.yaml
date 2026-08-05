@@ -18,6 +18,7 @@ overrides:
   axios@1.16.0: 1.18.0
   brace-expansion@2.1.1: 2.1.4
   brace-expansion@5.0.6: 5.0.9
+  brace-expansion@5.0.8: 5.0.9
   dompurify: ^3.4.13
   fast-uri@3.1.0: 3.1.5
   fast-uri@3.1.2: 3.1.5
