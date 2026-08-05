@@ -1,5 +1,9 @@
 {
   "$schema": "https://typedoc.org/schema.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext"
+  },
   "entryPoints": ["packages/*/src/index.ts"],
   "out": "docs/api-reference",
   "plugin": ["typedoc-plugin-markdown"],
