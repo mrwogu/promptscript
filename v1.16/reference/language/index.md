@@ -1,0 +1,2000 @@
+# Language Reference
+
+Complete specification of the PromptScript language.
+
+## Choose a Topic
+
+| Goal                                       | Reference                                                                                                          |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Understand a complete `.prs` file          | [File Anatomy](https://getpromptscript.dev/v1.16/reference/language/file-anatomy/index.md)                         |
+| Choose valid block body shapes             | [Values and Block Bodies](https://getpromptscript.dev/v1.16/reference/language/values-and-block-bodies/index.md)   |
+| Predict inheritance and import results     | [Composition and Precedence](https://getpromptscript.dev/v1.16/reference/language/composition/index.md)            |
+| Understand declaration order               | [Execution Order](https://getpromptscript.dev/v1.16/reference/language/execution-order/index.md)                   |
+| Choose `@extend`, `field!`, or `@override` | [Merge and Replacement](https://getpromptscript.dev/v1.16/reference/language/merge-and-replacement/index.md)       |
+| Customize generated headings               | [Section Headers](https://getpromptscript.dev/v1.16/reference/language/section-headers/index.md)                   |
+| Upgrade syntax and resolve diagnostics     | [Versions and Diagnostics](https://getpromptscript.dev/v1.16/reference/language/versions-and-diagnostics/index.md) |
+
+Use this page as the complete block and grammar catalog. Task-oriented pages above explain decisions and show resolved results step by step.
+
+## File Structure
+
+A PromptScript file (`.prs`) consists of:
+
+```
+# Comments start with #
+
+@meta { ... }           # Required: Metadata
+@inherit @path          # Optional: Inheritance
+@use @path [as alias]   # Optional: Imports
+
+@identity { ... }       # Content blocks
+@context { ... }
+@standards { ... }
+@restrictions { ... }
+@shortcuts { ... }
+@params { ... }
+@guards { ... }
+@skills { ... }
+@agents { ... }
+@workflows { ... }
+@hooks { ... }
+@mcpServers { ... }
+@plugins { ... }
+@knowledge { ... }
+@examples { ... }
+@local { ... }
+
+@extend path { ... }    # Block modifications
+@override path { ... }  # Atomic replacement of an existing target
+```
+
+Syntax `1.5.0` resolves top-level declarations in source order. Put `@meta` first, then imports, local blocks, and modifications in the order they should apply. See [Execution Order](https://getpromptscript.dev/v1.16/reference/language/execution-order/index.md). Contextual `@header` entries live inside supported owner blocks, not at the top level.
+
+## [@meta](https://github.com/meta "GitHub User: meta") Block (Required)
+
+Every PromptScript file must have a `@meta` block defining metadata:
+
+```
+@meta {
+  id: "project-id"           # Required: Unique identifier
+  syntax: "1.0.0"            # Required: PromptScript syntax version (semver)
+
+  # Optional fields
+  org: "Company Name"
+  team: "Frontend"
+  tags: [frontend, react, typescript]
+}
+```
+
+| Field    | Required | Description                          |
+| -------- | -------- | ------------------------------------ |
+| `id`     | Yes      | Unique identifier (string)           |
+| `syntax` | Yes      | PromptScript syntax version (semver) |
+| `org`    | No       | Organization name                    |
+| `team`   | No       | Team name                            |
+| `tags`   | No       | Array of tags                        |
+| `params` | No       | Parameter definitions for templates  |
+
+### Parameter Definitions
+
+The `params` field defines parameters for parameterized inheritance:
+
+```
+@meta {
+  id: "@stacks/typescript-lib"
+  syntax: "1.0.0"
+  params: {
+    # Required string parameter
+    projectName: string
+
+    # Optional with default value
+    runtime: string = "node18"
+
+    # Optional parameter (no default, can be undefined)
+    debug?: boolean
+
+    # Enum parameter with constrained values
+    testFramework: enum("vitest", "jest", "mocha") = "vitest"
+
+    # Number parameter
+    port: number = 3000
+  }
+}
+```
+
+**Parameter Types:**
+
+| Type      | Syntax                 | Values                |
+| --------- | ---------------------- | --------------------- |
+| `string`  | `name: string`         | Any text              |
+| `number`  | `count: number`        | Integers and floats   |
+| `boolean` | `enabled: boolean`     | `true` or `false`     |
+| `enum`    | `mode: enum("a", "b")` | One of listed options |
+
+**Parameter Modifiers:**
+
+| Pattern                    | Meaning                     |
+| -------------------------- | --------------------------- |
+| `name: string`             | Required, must be provided  |
+| `name?: string`            | Optional, can be omitted    |
+| `name: string = "default"` | Optional with default value |
+
+## Syntax Versions
+
+The `syntax` field in `@meta` declares which version of the PromptScript language the file uses. Versions follow semver.
+
+### Known Versions
+
+| Version | Status  | Blocks and features                                                                                                                        |
+| ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `1.0.0` | Stable  | `@identity`, `@context`, `@standards`, `@restrictions`, `@knowledge`, `@shortcuts`, `@commands`, `@guards`, `@params`, `@skills`, `@local` |
+| `1.1.0` | Stable  | All 1.0.0 blocks + `@agents`, `@workflows`; reserves internal `@prompts`                                                                   |
+| `1.2.0` | Stable  | All 1.1.0 blocks + `@examples`                                                                                                             |
+| `1.3.0` | Stable  | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
+| `1.4.0` | Stable  | All 1.3.0 features + `@hooks`, `@mcpServers`, `@plugins`                                                                                   |
+| `1.5.0` | Current | All 1.4.0 features + `@header` section titles, `@override` replacement, declaration order, unquoted `${VAR}` values                        |
+
+Block Availability
+
+`@workflows` emits workflow files such as `.claude/workflows/<name>.md`. `@prompts` is internal. `@hooks`, `@mcpServers`, and `@plugins` require syntax `1.4.0`.
+
+### Block Version Requirements
+
+| Block         | Minimum Syntax Version |
+| ------------- | ---------------------- |
+| `@agents`     | `1.1.0`                |
+| `@workflows`  | `1.1.0`                |
+| `@prompts`    | `1.1.0`                |
+| `@examples`   | `1.2.0`                |
+| `@hooks`      | `1.4.0`                |
+| `@mcpServers` | `1.4.0`                |
+| `@plugins`    | `1.4.0`                |
+
+All other built-in blocks are available from `1.0.0`. Regular block field replacement with `field!: value` requires syntax `1.3.0`. Generated section title overrides with `@header`, atomic target replacement with `@override`, and unquoted `${VAR}` values require syntax `1.5.0`.
+
+### Validation (PS018, PS019)
+
+The validator enforces syntax version compatibility:
+
+- **PS018 (`syntax-version-compat`)**: warns when the resolved program uses blocks or syntax features that require a higher version than declared in `@meta`. This includes requirements inherited, imported, or included through skill composition.
+- **PS019 (`unknown-block-name`)**: warns when a block name is not a known PromptScript type, and suggests the closest match for typos.
+
+### Upgrading
+
+To automatically update the `syntax` field to the required version for the resolved syntax you use:
+
+```bash
+prs validate --fix          # Fix syntax versions in .prs files
+prs upgrade                 # Upgrade all .prs files to the latest syntax version
+```
+
+`prs validate --fix` rewrites the `syntax: "..."` line in each `@meta` block to the minimum version required by resolved blocks and syntax features. It follows inheritance, imports, and skill composition.
+
+`prs upgrade` upgrades all files to the latest known syntax version regardless of what blocks they use.
+
+## [@inherit](https://github.com/inherit "GitHub User: inherit") Declaration
+
+Single inheritance from another PromptScript file:
+
+```
+# From registry namespace
+@inherit @company/frontend-team
+
+# Relative path
+@inherit ./parent
+
+# With version constraint
+@inherit @company/frontend-team@1.0.0
+
+# With parameters (see Parameterized Inheritance below)
+@inherit @stacks/react-app(projectName: "my-app", port: 3000)
+```
+
+Single Inheritance
+
+Each file can only have one `@inherit` declaration. Use `@use` for composition.
+
+## [@use](https://github.com/use "GitHub User: use") Declaration
+
+Import and merge fragments for composition (like mixins):
+
+```
+# Import from registry - blocks are merged into current file
+@use @core/guards/compliance
+
+# Import with alias - blocks merged AND available for @extend
+@use @core/guards/security as sec
+
+# Import relative
+@use ./fragments/logging
+
+# Multiple imports - all merged in order
+@use @core/standards/typescript
+@use @core/restrictions/security
+@use ./local-config
+
+# With parameters (see Parameterized Inheritance below)
+@use ./fragments/testing(framework: "vitest", coverage: 90) as testing
+```
+
+### Merge Behavior
+
+When you use `@use`, all blocks from the imported file are merged into your file:
+
+- **TextContent**: Concatenated (source + target), with automatic deduplication of identical content
+- **ObjectContent**: Deep merged (the imported source wins same-shape key conflicts)
+- **ArrayContent**: Unique concatenation (preserves order, removes duplicates)
+
+For incompatible block shapes, the existing target body wins. Under syntax `1.5.0`, later declarations can modify the merged result, so a local block, `@extend`, or `@override` placed after `@use` can become the final value. See [Composition and Precedence](https://getpromptscript.dev/v1.16/reference/language/composition/index.md) for the normative matrix.
+
+```
+# Source: @core/guards/security
+@restrictions {
+  - "Never expose secrets"
+}
+
+# Target: ./project.prs
+@use @core/guards/security
+
+@restrictions {
+  - "Follow OWASP guidelines"
+}
+
+# Result after merge:
+# @restrictions contains both items (source first, then target)
+```
+
+### Alias for [@extend](https://github.com/extend "GitHub User: extend") Access
+
+When you provide an alias, imported blocks are also stored with a prefix for use with `@extend`:
+
+```
+@use @core/typescript as ts
+
+# Now you can extend imported blocks
+@extend ts.standards {
+  testing: { coverage: 90 }
+}
+```
+
+When to Use Alias
+
+- **Without alias**: Simple include/mixin behavior - blocks are merged directly
+- **With alias**: When you need to selectively extend specific imported blocks
+
+### Block Filtering
+
+Control which blocks are imported using the reserved `only` and `exclude` parameters:
+
+```
+# Import only skills and context blocks
+@use ./shared-config(only: ["skills", "context"])
+
+# Import everything except knowledge
+@use ./shared-config(exclude: ["knowledge"])
+
+# Combine with template parameters
+@use ./shared-config(exclude: ["knowledge"], mode: "strict")
+
+# Combine with alias
+@use ./shared-config(only: ["skills"]) as shared
+```
+
+**Rules:**
+
+- `only` and `exclude` are mutually exclusive — using both is a validation error (PS021)
+- Values are block type names: `identity`, `context`, `standards`, `knowledge`, `skills`, `shortcuts`, `commands`, `guards`, `restrictions`, `agents`, etc.
+- Unknown block names produce a warning (for forward compatibility)
+- Block filtering does not apply to `@inherit` directives
+
+### Skill Filtering
+
+When importing from a repository or directory that contains multiple skills, control which individual skills are imported using the reserved `includes` and `excludes` parameters:
+
+```
+# Import only specific skills from a remote repo
+@use github.com/owner/repo/skills(includes: ["code-review", "testing"])
+
+# Import all skills except specific ones
+@use github.com/owner/repo/skills(excludes: ["legacy-support"])
+
+# Combine with version pinning (version comes before params)
+@use github.com/owner/repo/skills@2.10.0(includes: ["code-review"])
+
+# Combine with block-level filtering
+@use github.com/owner/repo/skills(only: ["skills"], includes: ["code-review"])
+```
+
+**Rules:**
+
+- `includes` and `excludes` are mutually exclusive — using both is a validation error (PS021)
+- Values are skill names (the keys inside the `@skills` block, matching the skill's frontmatter `name`)
+- If neither is specified, all skills are imported (current behavior)
+- Skill filtering applies to imports that produce a `@skills` block (directory imports, remote repo imports)
+- Can be combined with `only`/`exclude` block filters — they operate at different levels (blocks vs skills within a block)
+- When combining with version pinning, the version must come before the params: `@use github.com/owner/repo@2.10.0(includes: [...])`, not after
+- If an excluded skill is a dependency of an included skill, resolution will fail — this is expected user error
+
+## Content Blocks
+
+Every block and `@extend` body uses the same ordered content model. A body can interleave properties, free-form text, dash list items, and inline `@use` declarations:
+
+```
+@context {
+  project: "Checkout Service"
+  """Shared context appears at this point in the body."""
+  - "Keep payment data out of logs"
+  @use ./team-context
+  environment: production
+}
+```
+
+The parser preserves this source order. Tools that consume the canonical AST can read the ordered `body.entries` sequence directly. Existing integrations can continue using the mutable `Program`, `Block`, and `BlockContent` interfaces, which remain available as a compatibility projection.
+
+### [@identity](https://github.com/identity "GitHub User: identity")
+
+Core identity and persona definition:
+
+```
+@identity {
+  """
+  You are an expert frontend developer specializing in React.
+  You write clean, maintainable, and well-tested code.
+  """
+}
+```
+
+The identity block defines who the AI assistant should be.
+
+**Formatter Behavior:**
+
+| Formatter       | How [@identity](https://github.com/identity "GitHub User: identity") is used                           |
+| --------------- | ------------------------------------------------------------------------------------------------------ |
+| **GitHub**      | Included in the output as introductory text                                                            |
+| **Claude**      | Placed at the beginning of CLAUDE.md                                                                   |
+| **Cursor**      | If it starts with "You are...", used as full intro; otherwise generates "You are working on {project}" |
+| **Antigravity** | Included in project description                                                                        |
+
+Best Practice
+
+Start your `@identity` with "You are..." for consistent output across all formatters. Multiline strings are automatically dedented to remove source indentation.
+
+### [@context](https://github.com/context "GitHub User: context")
+
+Project context and environment:
+
+```
+@context {
+  project: "Checkout Service"
+  team: "Payments"
+  environment: production
+
+  """
+  Additional context as text.
+  This service handles payment processing for the e-commerce platform.
+  """
+}
+```
+
+Supports both key-value properties and text content. `project`, `languages`, `runtime`, `monorepo`, `techStack` and `architecture` get dedicated rendering; every other property renders as a `Label: value` list item under the context section.
+
+### [@standards](https://github.com/standards "GitHub User: standards")
+
+Coding standards and conventions using category-based arrays:
+
+```
+@standards {
+  code: [
+    "Use clean code principles",
+    "Prefer hooks and composition patterns",
+    "Write tests for all code (80% coverage minimum)",
+    "Use vitest as the test framework"
+  ]
+
+  naming: [
+    "Components: PascalCase",
+    "Functions: camelCase",
+    "Constants: UPPER_SNAKE_CASE"
+  ]
+
+  documentation: [
+    "Document all public APIs",
+    "Use JSDoc format"
+  ]
+}
+```
+
+Standards are organized by category with each category containing an array of human-readable rules. **You can use any category name** (e.g., `code`, `naming`, `security`, `api`, `documentation`) - all keys are supported and will generate corresponding subsections in the output.
+
+Backwards Compatibility
+
+The `errors` key is automatically mapped to `error-handling` in the output for backwards compatibility.
+
+#### Structured Keys: git, config, documentation, diagrams
+
+Four keys render as dedicated sections instead of code-standard subsections: `git` (commit conventions), `config` (tool configuration), `documentation` (doc standards), and `diagrams` (diagram preferences). Each known field gets specialized rendering (e.g. `git.format`, `git.types`, `diagrams.format`).
+
+**Custom fields are kept.** Any extra key inside these objects renders as a generic `Label: value` list item - `true` renders as a bare label, `false`/`null` are dropped, nested objects render inline as `key: value` pairs. Known fields accept the same shapes: `true` emits the built-in wording, while a string replaces it with your own text:
+
+```
+@standards {
+  git: {
+    format: "Conventional Commits"
+    branch: "(feat|fix)/{project}/{issue-id}"
+    mergeRequest: {
+      title: "merge commit summary"
+      description: "purpose and issue link"
+    }
+    requireReview: true
+  }
+}
+```
+
+Renders on Markdown instruction targets (e.g. Claude Code, Factory AI) as:
+
+```markdown
+## Git Commits
+
+- Format: Conventional Commits
+- Branch: (feat|fix)/{project}/{issue-id}
+- Merge Request: title: merge commit summary, description: purpose and issue link
+- Require Review
+```
+
+Cursor target
+
+Cursor uses its compact `key: value` style instead of humanized labels (`- branch: (feat|fix)/{project}/{issue-id}`, `- requireReview`).
+
+Free-form text is also supported via a triple-quoted string:
+
+```
+@standards {
+  """
+  ## Security
+
+  - Validate all inputs
+  - Never log secrets
+  """
+}
+```
+
+Per-target support
+
+Free-form text `@standards` currently renders only for the Factory target. Other targets render property-style `@standards` content only.
+
+### [@restrictions](https://github.com/restrictions "GitHub User: restrictions")
+
+Things the AI should never do:
+
+```
+@restrictions {
+  - "Never expose API keys or secrets in code"
+  - "Never commit sensitive data to version control"
+  - "Always validate user input before processing"
+  - "Never use deprecated APIs"
+}
+```
+
+Restrictions are concatenated during inheritance.
+
+### [@shortcuts](https://github.com/shortcuts "GitHub User: shortcuts")
+
+Custom commands for quick actions:
+
+```
+@shortcuts {
+  "/review": "Review code for quality and best practices"
+
+  "/test": """
+    Write unit tests using:
+    - Vitest as the test runner
+    - Testing Library for DOM testing
+    - MSW for API mocking
+  """
+
+  "/refactor": "Suggest refactoring improvements for cleaner code"
+}
+```
+
+Shortcuts from child files override parent shortcuts with the same name.
+
+#### Cursor Slash Commands (1.6+)
+
+Multi-line shortcuts are automatically converted to executable slash commands:
+
+| Shortcut Type | Output Location              | Behavior                                    |
+| ------------- | ---------------------------- | ------------------------------------------- |
+| Single-line   | `.cursor/rules/project.mdc`  | Listed as documentation in Commands section |
+| Multi-line    | `.cursor/commands/<name>.md` | Executable via `/name` in Cursor chat       |
+
+**Example:**
+
+```
+@meta { id: "cursor-slash-commands" syntax: "1.0.0" }
+
+@shortcuts {
+  # Single-line → documentation only
+  "/review": "Review code quality"
+
+  # Multi-line → .cursor/commands/test.md
+  "/test": """
+    Write unit tests using:
+    - Vitest as the test runner
+    - AAA pattern (Arrange, Act, Assert)
+  """
+}
+```
+
+Generates `.cursor/commands/test.md`:
+
+```markdown
+Write unit tests using: - Vitest as the test runner - AAA pattern (Arrange, Act, Assert)
+```
+
+Using Cursor Commands
+
+Type `/` in Cursor chat to see available commands, then select to execute.
+
+#### GitHub Copilot Output
+
+Shortcuts are handled differently based on their type:
+
+| Shortcut Type                 | Output Location                    | Behavior                                            |
+| ----------------------------- | ---------------------------------- | --------------------------------------------------- |
+| Simple string                 | `copilot-instructions.md`          | Listed in `## shortcuts` section                    |
+| Object without `prompt: true` | `copilot-instructions.md`          | Listed in `## shortcuts` section (uses description) |
+| Object with `prompt: true`    | `.github/prompts/<name>.prompt.md` | Generates separate prompt file                      |
+
+#### GitHub Copilot Prompts
+
+To generate `.github/prompts/*.prompt.md` files for GitHub Copilot, use the object syntax with `prompt: true`:
+
+```
+@meta { id: "github-prompts-example" syntax: "1.0.0" }
+
+@shortcuts {
+  # Simple string → listed in ## shortcuts section
+  "/review": "Review code for quality"
+
+  # Object with prompt: true → generates .github/prompts/test.prompt.md
+  "/test": {
+    prompt: true
+    description: "Write unit tests"
+    content: """
+      Write unit tests using:
+      - Vitest as the test runner
+      - AAA pattern (Arrange, Act, Assert)
+    """
+  }
+
+  # Agent mode prompt with tools
+  "/deploy": {
+    prompt: true
+    description: "Deploy to production"
+    mode: agent
+    tools: [run_terminal, read_file]
+    content: """
+      Deploy the application to production:
+      1. Run tests
+      2. Build the project
+      3. Deploy to staging
+      4. Run smoke tests
+      5. Deploy to production
+    """
+  }
+}
+```
+
+| Property      | Type     | Required | Description                              |
+| ------------- | -------- | -------- | ---------------------------------------- |
+| `prompt`      | boolean  | Yes      | Must be `true` to generate a prompt file |
+| `description` | string   | Yes      | Shown in prompt picker UI                |
+| `content`     | string   | Yes      | The prompt instructions                  |
+| `mode`        | string   | No       | Set to `"agent"` for agentic prompts     |
+| `tools`       | string[] | No       | Tools available in agent mode            |
+
+Output Mode Required
+
+Prompt files are only generated when using `version: multifile` or `version: full` in your target configuration:
+
+````text
+```yaml
+targets:
+  - github:
+      version: multifile  # Enables .github/prompts/*.prompt.md
+````
+
+````
+
+**Generated file** (`.github/prompts/test.prompt.md`):
+
+```markdown
+---
+description: 'Write unit tests'
+---
+
+Write unit tests using:
+
+- Vitest as the test runner
+- AAA pattern (Arrange, Act, Assert)
+````
+
+#### Antigravity Workflows
+
+For Antigravity, shortcuts with `steps` property generate workflow files:
+
+```
+@shortcuts {
+  "/deploy": {
+    description: "Deploy the application"
+    steps: ["Build the project", "Run tests", "Deploy to staging"]
+  }
+}
+```
+
+| Property      | Type     | Description                    |
+| ------------- | -------- | ------------------------------ |
+| `description` | string   | Workflow description           |
+| `steps`       | string[] | Ordered list of workflow steps |
+
+Generates `.agent/workflows/deploy.md` with numbered steps.
+
+### [@params](https://github.com/params "GitHub User: params")
+
+Configurable parameters:
+
+```
+@params {
+  strictness: range(1..5) = 3
+  format?: enum("json", "text", "markdown") = "text"
+  verbose: boolean = false
+}
+```
+
+| Syntax        | Description                                           |
+| ------------- | ----------------------------------------------------- |
+| `name: type`  | Required parameter                                    |
+| `name?: type` | Optional parameter                                    |
+| `= value`     | Default value, rejected when it does not match `type` |
+
+Available types:
+
+| Type              | Accepts                   |
+| ----------------- | ------------------------- |
+| `string`          | Any string                |
+| `number`          | Any number                |
+| `boolean`         | `true` or `false`         |
+| `range(min..max)` | A number within the range |
+| `enum("a", "b")`  | One of the listed strings |
+
+### [@guards](https://github.com/guards "GitHub User: guards")
+
+Runtime validation rules and file targeting:
+
+```
+@guards {
+  maxFileSize: 1000
+  allowedLanguages: [typescript, javascript, css]
+
+  # Glob patterns for file-specific rules (used by multifile formatters)
+  globs: ["**/*.ts", "**/*.tsx"]
+
+  """
+  Additional guard rules as text.
+  """
+}
+```
+
+The `globs` property is used by multifile formatters (GitHub, Claude, Cursor) to generate path-specific instruction files.
+
+#### GitHub Copilot `applyTo` Integration
+
+When using `version: multifile` or `version: full` for GitHub Copilot, the `globs` patterns generate separate instruction files with `applyTo` frontmatter:
+
+```
+@meta { id: "guards-applyto-example" syntax: "1.0.0" }
+
+@guards {
+  globs: ["**/*.ts", "**/*.tsx", "**/*.spec.ts", "**/*.test.ts"]
+}
+
+@standards {
+  typescript: [
+    "Use strict TypeScript with no any types",
+    "Prefer interfaces over type aliases"
+  ]
+
+  testing: [
+    "Use Vitest for unit tests",
+    "Follow AAA pattern (Arrange, Act, Assert)"
+  ]
+}
+```
+
+This generates:
+
+**`.github/instructions/typescript.instructions.md`:**
+
+```markdown
+---
+applyTo:
+  - '**/*.ts'
+  - '**/*.tsx'
+---
+
+# TypeScript-specific rules
+
+- Use strict TypeScript with no any types
+- Prefer interfaces over type aliases
+```
+
+**`.github/instructions/testing.instructions.md`:**
+
+```markdown
+---
+applyTo:
+  - '**/*.spec.ts'
+  - '**/*.test.ts'
+---
+
+# Testing-specific rules
+
+- Use Vitest for unit tests
+- Follow AAA pattern (Arrange, Act, Assert)
+```
+
+Version Required
+
+Path-specific instruction files are only generated with `version: multifile` or `version: full`:
+
+````text
+```yaml
+targets:
+  - github:
+      version: multifile
+````
+
+```
+
+#### Named Instruction Entries
+
+For projects with multiple path-specific instruction files, use named entries in `@guards` to generate individual instruction files with their own `applyTo` patterns:
+
+```
+
+@meta { id: "named-guards-example" syntax: "1.0.0" }
+
+@guards { angular-components: { applyTo: \["apps/admin/**/\*.ts", "apps/webview/**/*.ts"\] description: "Angular component coding standards" content: """ Use OnPush change detection for all components. Always implement OnDestroy for cleanup. """ } inversify: { applyTo: \["apps/api/\*\*/*.ts"\] description: "InversifyJS DI coding standards" content: """ Use constructor injection with inject decorator. Register all bindings in the container module. """ } }
+
+```
+
+Each named entry generates a separate instruction file per target:
+
+- **Multifile targets** (`version: multifile` or `full`): `.claude/rules/<name>.md`, `.cursor/rules/<name>.mdc`, `.github/instructions/<name>.instructions.md` with `applyTo` frontmatter, and `.factory/skills/<name>/SKILL.md` with scope info in the description
+- **Antigravity** (any version): `.agent/rules/<name>.md` with glob activation
+
+Named entries support three properties:
+
+| Property | Required | Description |
+| --- | --- | --- |
+| `applyTo` | Yes | Glob patterns for file targeting (alias: `paths`) |
+| `description` | No | Human-readable description (defaults to `<name> rules`) |
+| `content` | No | Full instruction content (triple-quoted markdown) |
+
+Named entries and `globs` + `@standards` auto-split can coexist in the same `@guards` block.
+
+#### Merge Behavior with `@use`
+
+When multiple `@use`'d files contribute `@guards` blocks with named entries:
+
+- Named entries from different files are preserved as separate keys (ObjectContent deep merge)
+- If two files define the same entry name, the importing file's entry takes precedence
+- `globs` arrays are concatenated with deduplication
+
+### [@skills](https://github.com/skills "GitHub User: skills")
+
+Define reusable skills that AI assistants can invoke:
+
+```
+
+@meta { id: "skills-example" syntax: "1.0.0" }
+
+@skills { commit: { description: "Create git commits" disableModelInvocation: true context: "fork" agent: "general-purpose" allowedTools: ["Bash", "Read", "Write"] content: """ When creating commits: 1. Use conventional commit format 2. Include Co-Authored-By trailer 3. Never amend existing commits """ }
+
+review: { description: "Review code changes" userInvocable: true content: """ Perform thorough code review checking: - Type safety - Error handling - Security vulnerabilities """ } }
+
+````
+
+| Property | Type | Formatter | Description |
+| --- | --- | --- | --- |
+| `description` | string | All | Human-readable description |
+| `content` | string | All | Detailed skill instructions |
+| `disableModelInvocation` | boolean | GitHub, Factory | Prevent model from auto-invoking skill |
+| `userInvocable` | boolean | Claude, Factory | Allow user to manually invoke skill |
+| `context` | string | Claude | Context mode: `"fork"` or `"inherit"` |
+| `agent` | string | Claude | Agent type: `"general-purpose"`, etc. |
+| `allowedTools` | string[] | Claude, Factory | Tools the skill can use |
+
+Skills are output differently based on the formatter:
+
+**GitHub Output** (`.github/skills/commit/SKILL.md`, version: full):
+
+```markdown
+---
+name: commit
+description: 'Create git commits'
+disable-model-invocation: true
+---
+
+When creating commits:
+
+1. Use conventional commit format
+2. Include Co-Authored-By trailer
+3. Never amend existing commits
+````
+
+**Claude Output** (`.claude/skills/commit/SKILL.md`, version: full):
+
+```markdown
+---
+name: 'commit'
+description: 'Create git commits'
+context: fork
+agent: general-purpose
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+disable-model-invocation: true
+---
+
+When creating commits:
+
+1. Use conventional commit format
+2. Include Co-Authored-By trailer
+3. Never amend existing commits
+```
+
+### [@agents](https://github.com/agents "GitHub User: agents")
+
+Define specialized AI agents for target platforms with native agent support:
+
+```
+@meta { id: "agents-example" syntax: "1.1.0" }
+
+@agents {
+  code-reviewer: {
+    description: "Reviews code for quality and best practices"
+    tools: ["Read", "Grep", "Glob", "Bash"]
+    model: "sonnet"
+    content: """
+      You are a senior code reviewer ensuring high standards.
+
+      When invoked:
+      1. Run git diff to see recent changes
+      2. Focus on modified files
+      3. Begin review immediately
+
+      Review checklist:
+      - Code is clear and readable
+      - Functions and variables are well-named
+      - No duplicated code
+      - Proper error handling
+    """
+  }
+
+  debugger: {
+    description: "Debugging specialist for errors and test failures"
+    tools: ["Read", "Edit", "Bash", "Grep", "Glob"]
+    disallowedTools: ["Write"]
+    model: "inherit"
+    permissionMode: "acceptEdits"
+    skills: ["error-handling", "testing-patterns"]
+    content: """
+      You are an expert debugger specializing in root cause analysis.
+    """
+  }
+}
+```
+
+| Property              | Type     | Required | Description                                                                    |
+| --------------------- | -------- | -------- | ------------------------------------------------------------------------------ |
+| `description`         | string   | Yes      | When the agent should be invoked                                               |
+| `content`             | string   | No       | Additional system prompt for the subagent                                      |
+| `tools`               | string[] | No       | Allowed tools (inherits all if omitted)                                        |
+| `model`               | string   | No       | AI model to use (platform-specific values)                                     |
+| `reasoningEffort`     | string   | No       | Target-native reasoning level                                                  |
+| `specModel`           | string   | No       | Model for Specification/planning mode (GitHub, Factory only)                   |
+| `specReasoningEffort` | string   | No       | Reasoning effort for spec mode: `low`, `medium`, `high` (Factory only)         |
+| `disallowedTools`     | string[] | No       | Tools to deny (Claude only)                                                    |
+| `permissionMode`      | string   | No       | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` (Claude only) |
+| `skills`              | string[] | No       | Named skills available to the agent                                            |
+| `mcpServers`          | string[] | No       | Named top-level MCP servers available to the agent                             |
+| `sandboxMode`         | string   | No       | Target-native sandbox policy                                                   |
+| `nicknameCandidates`  | string[] | No       | Candidate display names for spawned agents                                     |
+
+Agents output by platform:
+
+**GitHub Output** (`.github/agents/code-reviewer.md`, version: full)
+
+Supports: `name`, `description`, `tools`, `model`, `specModel`. Tool and model names are automatically mapped to GitHub Copilot's format:
+
+- Tools: `Read` → `read`, `Grep`/`Glob` → `search`, `Bash` → `execute`
+- Models: `sonnet` → `Claude Sonnet 4.5`, `opus` → `Claude Opus 4.5`, `haiku` → `Claude Haiku 4.5`
+
+```markdown
+---
+name: code-reviewer
+description: Reviews code for quality and best practices
+tools: ['read', 'search', 'execute']
+model: Claude Sonnet 4.5
+---
+
+You are a senior code reviewer ensuring high standards.
+
+When invoked:
+
+1. Run git diff to see recent changes
+2. Focus on modified files
+3. Begin review immediately
+
+Review checklist:
+
+- Code is clear and readable
+- Functions and variables are well-named
+- No duplicated code
+- Proper error handling
+```
+
+**Claude Output** (`.claude/agents/code-reviewer.md`, version: full)
+
+Supports all properties including `disallowedTools`, `permissionMode`, `skills`:
+
+```markdown
+---
+name: code-reviewer
+description: Reviews code for quality and best practices
+tools: ['Read', 'Grep', 'Glob', 'Bash']
+model: sonnet
+---
+
+You are a senior code reviewer ensuring high standards.
+
+When invoked:
+
+1. Run git diff to see recent changes
+2. Focus on modified files
+3. Begin review immediately
+
+Review checklist:
+
+- Code is clear and readable
+- Functions and variables are well-named
+- No duplicated code
+- Proper error handling
+```
+
+Agent Platform Features
+
+Agents can reference `@skills` and `@mcpServers`. Project lifecycle automation is defined separately through `@hooks`. Target-native support varies by formatter.
+
+### [@local](https://github.com/local "GitHub User: local")
+
+Private instructions not committed to version control:
+
+```
+@local {
+  """
+  Private development notes and local configuration.
+  This content is not committed to git.
+
+  Local environment setup:
+  - API keys are in .env.local
+  - Use staging backend at localhost:8080
+  """
+}
+```
+
+Or with key-value properties:
+
+```
+@local {
+  apiEndpoint: "http://localhost:8080"
+  debugMode: true
+  customPaths: ["/tmp/dev" "/var/local"]
+
+  """
+  Additional local notes...
+  """
+}
+```
+
+[@local](https://github.com/local "GitHub User: local") Output
+
+The `@local` block generates `CLAUDE.local.md` when using the Claude formatter with `version: full`. This file should be added to `.gitignore`.
+
+### [@commands](https://github.com/commands "GitHub User: commands")
+
+Alias for `@shortcuts`. The `@commands` block is functionally identical to `@shortcuts` — both define command aliases. Use `@shortcuts` in new files; `@commands` is supported for backward compatibility.
+
+```
+@commands {
+  "/review": "Review code for quality and best practices"
+  "/test": "Write unit tests with Vitest"
+}
+```
+
+### [@knowledge](https://github.com/knowledge "GitHub User: knowledge")
+
+Reference documentation and knowledge:
+
+```
+@knowledge {
+  """
+  ## API Reference
+
+  ### Authentication
+  - POST /api/auth/login - User login
+  - POST /api/auth/logout - User logout
+
+  ### Users
+  - GET /api/users - List users
+  - GET /api/users/:id - Get user by ID
+
+  ## Architecture Notes
+
+  The service follows a clean architecture pattern with:
+  - Controllers for HTTP handling
+  - Services for business logic
+  - Repositories for data access
+  """
+}
+```
+
+### [@examples](https://github.com/examples "GitHub User: examples")
+
+Structured few-shot examples for AI assistants (requires syntax `1.2.0`):
+
+```
+@meta {
+  id: "commit-style"
+  syntax: "1.2.0"
+}
+
+@examples {
+  feat-commit: {
+    description: "Feature commit with scope"
+    input: "Added user authentication with JWT tokens"
+    output: "feat(auth): add JWT-based user authentication"
+  }
+
+  multiline-example: {
+    input: """
+      const x = users.filter(u => u.active).map(u => u.email);
+    """
+    output: """
+      const activeEmails = users
+        .filter(u => u.active)
+        .map(u => u.email);
+    """
+  }
+}
+```
+
+| Property      | Required | Description                               |
+| ------------- | -------- | ----------------------------------------- |
+| `input`       | Yes      | The input the AI receives                 |
+| `output`      | Yes      | The expected output the AI should produce |
+| `description` | No       | Human-readable label for the example      |
+
+Examples can also be defined inline within a `@skills` entry via the `examples` property, scoping them to that specific skill.
+
+See the [Examples guide](https://getpromptscript.dev/v1.16/guides/examples/index.md) for a full walkthrough.
+
+### [@workflows](https://github.com/workflows "GitHub User: workflows")
+
+Defines portable workflow definitions. Available since syntax `1.1.0`. Targets that support workflows emit dedicated workflow files (e.g. Claude emits `.claude/workflows/<name>.md`).
+
+```
+@workflows {
+  release: {
+    description: "Prepare release"
+    content: """
+      Review changes, validate packages, and prepare release metadata.
+    """
+  }
+}
+```
+
+Each workflow entry is an object with:
+
+| Field         | Required | Description                       |
+| ------------- | -------- | --------------------------------- |
+| `description` | No       | Short description of the workflow |
+| `content`     | No       | Workflow instructions (multiline) |
+
+### [@hooks](https://github.com/hooks "GitHub User: hooks")
+
+Defines portable lifecycle hooks. Requires syntax `1.4.0`. Formatters map portable events to each target's native event system and configuration format.
+
+```
+@hooks {
+  protect-generated-files: {
+    event: "pre-tool-use"
+    matcher: "Edit|Write"
+    script: {
+      path: ".promptscript/scripts/protect.mjs"
+      interpreter: "node"
+      args: ["--strict"]
+    }
+    cwd: "project"
+    timeoutMs: 5000
+    statusMessage: "Checking generated files"
+    continueOnFailure: false
+    enabled: true
+  }
+}
+```
+
+Portable events:
+
+| Event                  | Description                       |
+| ---------------------- | --------------------------------- |
+| `pre-terminal-command` | Fires before a terminal command   |
+| `pre-tool-use`         | Fires before a tool invocation    |
+| `post-tool-use`        | Fires after a tool invocation     |
+| `session-start`        | Fires when a session begins       |
+| `setup`                | Alias for `session-start`         |
+| `subagent-start`       | Fires when a subagent is launched |
+| `notification`         | Fires on notification events      |
+| `stop`                 | Fires when the agent stops        |
+
+Each hook entry is an object with:
+
+| Field               | Required | Type     | Description                                                                        |
+| ------------------- | -------- | -------- | ---------------------------------------------------------------------------------- |
+| `event`             | Yes      | string   | Portable event name (see above)                                                    |
+| `command`           | One of   | string[] | Non-empty source argument array                                                    |
+| `script`            | One of   | object   | Repository-local script descriptor                                                 |
+| `cwd`               | No       | string   | `"project"` or a forward-slash path relative to project root                       |
+| `matcher`           | No       | string   | Target-native tool name matcher pattern                                            |
+| `timeoutMs`         | No       | number   | Timeout in ms (100-600000)                                                         |
+| `statusMessage`     | No       | string   | Status message shown during execution                                              |
+| `continueOnFailure` | No       | boolean  | Whether to continue if hook fails                                                  |
+| `enabled`           | No       | boolean  | Whether the hook is enabled (default: true)                                        |
+| `targets`           | No       | object   | Target-specific overrides, including an optional replacement `command` or `script` |
+
+Exactly one of `command` or `script` is required. A `script` object contains:
+
+| Field         | Required | Type     | Description                                                |
+| ------------- | -------- | -------- | ---------------------------------------------------------- |
+| `path`        | Yes      | string   | File under `.promptscript/scripts/` using forward slashes  |
+| `interpreter` | Yes      | string   | Whitelisted executable name                                |
+| `args`        | No       | string[] | Additional arguments, preserved without shell re-splitting |
+
+Supported interpreters are `python3`, `python`, `node`, `deno`, `bun`, `ruby`, `php`, `perl`, `bash`, `sh`, `zsh`, `pwsh`, and `powershell`. The compiler requires the path to exist as a regular file and rejects traversal and symlink escapes from `.promptscript/scripts/`. Browser compilation applies the same location checks to the virtual filesystem.
+
+Shell interpolation (`$()`, backticks, `${...}`) is forbidden in command arguments, and `command` must contain at least one argument - PS034 rejects empty arrays and hooks without an executable command are omitted from target output. Target adapters preserve argument boundaries when they serialize an array or script descriptor as a native command string. Script paths and arguments are shell-quoted as data.
+
+`cwd: "project"` requests execution from the resolved PromptScript project root. Other `cwd` values must be portable relative paths and resolve from that root. Absolute paths, backslashes, empty path segments, `.` segments, and `..` traversal are rejected. Hook configuration location does not set the command working directory.
+
+`matcher` uses each target's tool vocabulary, such as Factory `Execute` or `Read` and Claude `Edit|Write`. GitHub emits it only for `preToolUse`, `postToolUse`, `subagentStart`, and `notification`. A matcher written for one target can match nothing on another, so review generated hook files per target.
+
+Target overrides use the target name as the key:
+
+```
+targets: {
+  factory: { matcher: "Execute" command: ["node", "check-factory.mjs"] }
+  vscode: { script: { path: ".promptscript/scripts/check.py" interpreter: "python3" } }
+  github: { enabled: false }
+}
+```
+
+VS Code Copilot Agent Hooks are emitted separately at `.github/hooks/promptscript-vscode.json` when a `vscode` override is present. They use PascalCase events, camelCase tool input fields, and currently ignore matcher values. GitHub Copilot CLI and cloud-agent hooks remain in `.github/hooks/promptscript.json` and use lower camelCase events.
+
+`multifile` and `full` modes emit target-native hook files. `simple` mode preserves its single-file contract and reports a compatibility warning.
+
+| Target         | Output                                   | Event naming    | Timeout field |
+| -------------- | ---------------------------------------- | --------------- | ------------- |
+| Factory Droid  | `.factory/hooks.json`                    | PascalCase      | `timeout`     |
+| GitHub Copilot | `.github/hooks/promptscript.json`        | lower camelCase | `timeoutSec`  |
+| Claude Code    | `.claude/settings.json`                  | PascalCase      | `timeout`     |
+| Cursor         | `.cursor/hooks.json`                     | lower camelCase | `timeout`     |
+| Codex          | `.codex/hooks.json`                      | PascalCase      | `timeout`     |
+| Gemini CLI     | `.gemini/settings.json`                  | PascalCase      | `timeout`     |
+| Windsurf       | `.windsurf/hooks.json`                   | snake_case      | -             |
+| Grok Build     | `.grok/hooks/promptscript.json`          | PascalCase      | `timeout`     |
+| VS Code Agent  | `.github/hooks/promptscript-vscode.json` | PascalCase      | `timeout`     |
+
+GitHub output uses the version 1 repository-hook schema shared by Copilot CLI and cloud agent. Factory output uses the preferred dedicated project hook file. Factory still accepts `hooks` inside `.factory/settings.json` only as a fallback. `prs compile` reports `PS4002` when that fallback file still carries a non-PromptScript-owned `hooks` key. `prs hooks install factory` migrates unambiguous legacy entries, preserves unrelated settings, and refuses partial migrations when event names or entries are ambiguous. Formatters report `PS4002` when a target cannot represent an event or optional field instead of silently dropping it.
+
+When `@hooks` is removed or stops emitting, the CLI deletes the obsolete hook file (`.factory/hooks.json`, `.github/hooks/promptscript.json`, or `.github/hooks/promptscript-vscode.json`) only when every command in it carries the PromptScript ownership marker, and prunes managed directories (such as `.github/hooks/`) that the removal leaves empty.
+
+Every built-in target has an explicit hook capability classification. Targets without native project hooks and modes that cannot emit additional files report `PS4002` with a fallback such as `prs compile --watch`. See [Hooks and Workflows](https://getpromptscript.dev/v1.16/features/automation/#hook-capability-matrix) for the complete 48-target matrix and project-root behavior.
+
+### [@mcpServers](https://github.com/mcpServers "GitHub User: mcpServers")
+
+Defines project-local MCP (Model Context Protocol) server configurations. Requires syntax `1.4.0`. Servers are mapped to target-native MCP config files.
+
+```
+@mcpServers {
+  security-scanner: {
+    transport: "stdio"
+    command: ["node", "./tools/security-scanner.mjs"]
+    env: {
+      LOG_LEVEL: "info"
+    }
+  }
+}
+```
+
+| Field       | Required | Type     | Description                           |
+| ----------- | -------- | -------- | ------------------------------------- |
+| `transport` | Yes      | string   | `stdio`, `http`, or `sse`             |
+| `command`   | Yes\*    | string[] | Non-empty argument array (stdio only) |
+| `url`       | Yes\*    | string   | HTTP(S) URL (http/sse only)           |
+| `env`       | No       | object   | Non-secret environment values         |
+
+Plaintext values are rejected for secret-bearing environment keys. Current target serializers emit string environment values only, so provide credentials through target-native runtime or secret management rather than `.prs` source.
+
+`command` is a single array in source, and each target serializer splits it into that target's native shape. JSON hosts receive the executable in `command` and the remaining entries in `args`, with `args` omitted when the command takes none:
+
+```json
+{
+  "mcpServers": {
+    "security-scanner": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./tools/security-scanner.mjs"],
+      "env": { "LOG_LEVEL": "info" }
+    }
+  }
+}
+```
+
+VS Code is the exception to the wrapper key: `.vscode/mcp.json` nests servers under `servers` instead of `mcpServers`. TOML hosts keep the array form under `[mcp_servers.<name>]`.
+
+**Target Support:** The `@mcpServers` block is emitted to target-native MCP config files. See [Configuration Reference](https://getpromptscript.dev/v1.16/reference/config/#mcp-hooks-plugins-support) for the full list of supported targets and their output paths.
+
+Agents can reference MCP servers by name via the `mcpServers` field in `@agents`:
+
+```
+@agents {
+  reviewer: {
+    description: "Code reviewer"
+    content: "Review code changes."
+    mcpServers: ["security-scanner", "linear"]
+  }
+}
+```
+
+### [@plugins](https://github.com/plugins "GitHub User: plugins")
+
+Defines portable plugin bundles that group skills, hooks, and MCP servers. Requires syntax `1.4.0`.
+
+```
+@plugins {
+  security-suite: {
+    description: "Security review tooling"
+    version: "1.0.0"
+    skills: ["security-review"]
+    hooks: ["protect-generated-files"]
+    mcpServers: ["security-scanner"]
+  }
+}
+```
+
+| Field         | Required | Type     | Description                     |
+| ------------- | -------- | -------- | ------------------------------- |
+| `description` | No       | string   | Plugin description              |
+| `version`     | No       | string   | Semantic version (e.g. `1.0.0`) |
+| `skills`      | No       | string[] | Referenced skill names          |
+| `hooks`       | No       | string[] | Referenced hook IDs             |
+| `mcpServers`  | No       | string[] | Referenced MCP server names     |
+
+Marketplace publishing and installation are outside the compiler scope.
+
+**Target Support:** Plugins are emitted to `.factory/plugins.json` (Factory), `.cursor/plugins.json` (Cursor), `.codex/plugins.json` (Codex), and `.grok/plugins.json` (Grok).
+
+## [@extend](https://github.com/extend "GitHub User: extend") Block
+
+Modify inherited or existing blocks:
+
+```
+# Extend a top-level block
+@extend identity {
+  """
+  Additional identity information.
+  """
+}
+
+# Extend a nested path
+@extend standards.code {
+  frameworks: [react vue]
+}
+
+# Extend multiple levels deep
+@extend standards.code.testing {
+  e2e: true
+  coverage: 90
+}
+```
+
+### Replacing Regular Block Fields
+
+Syntax `1.3.0` adds explicit replacement for regular block fields. Add `!` after a field name inside `@extend` to replace its complete prior value:
+
+```
+@meta { id: "project" syntax: "1.4.0" }
+
+@inherit ./company-base
+
+@extend standards {
+  testing!: ["Use Vitest"]
+  linting: ["Use ESLint"]
+}
+```
+
+`testing!` replaces the inherited `testing` value. Unmarked `linting` keeps the normal merge behavior. Replacement also works after `@use`, with aliased imports, and at nested target paths:
+
+```
+@use ./shared as shared
+
+@extend shared.standards.tooling {
+  frameworks!: ["Vue"]
+}
+```
+
+If the field does not exist, replacement sets it. Later overlays operate on the resulting value. The modifier applies only to direct fields in regular block extensions. Skill properties retain their dedicated merge and sealing semantics, so `!` is rejected when `@extend` targets `@skills`.
+
+The `!` modifier cannot be combined with a default value: `field!: value = default` is rejected, because a replacement and a fallback default are mutually exclusive.
+
+### Skill-Specific Extend Semantics
+
+When `@extend` targets a skill definition inside `@skills`, properties follow dedicated merge strategies:
+
+| Strategy          | Properties                                                                                                                    |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Replace**       | `content`, `description`, `trigger`, `userInvocable`, `allowedTools`, `disableModelInvocation`, `context`, `agent`, `license` |
+| **Append**        | `references`, `requires`                                                                                                      |
+| **Shallow merge** | `params`, `inputs`, `outputs`                                                                                                 |
+
+### Reference Negation
+
+Prefix an entry with `!` in an `@extend` block to remove it from the base before appending:
+
+```
+@extend skills.code-review {
+  references: [
+    "!references/deprecated.md"
+    "references/replacement.md"
+  ]
+}
+```
+
+Path matching is normalized (`"!./foo.md"` matches `"foo.md"`). Only works in `@extend` blocks on append-strategy properties (`references`, `requires`).
+
+### Sealed Properties
+
+Prevent `@extend` from overriding specific replace-strategy properties:
+
+```
+@skills {
+  expert: {
+    content: """..."""
+    sealed: ["content", "description"]
+  }
+}
+```
+
+`sealed: true` seals all replace-strategy properties. Attempting to override a sealed property is a compilation error. Append-strategy properties are not affected.
+
+### Overlay Consistency Warnings
+
+The resolver emits warnings during compile when an `@extend` overlay drifts from its base. These warnings are always shown (not gated by `--verbose` or `--strict`):
+
+| Warning            | Trigger                                                                     |
+| ------------------ | --------------------------------------------------------------------------- |
+| Orphaned extend    | `@extend` targets a block that doesn't exist (base removed/renamed)         |
+| Stale skill target | `@extend` inside `@skills` would create a new skill not defined by the base |
+| Negation orphan    | `!entry` in `references`/`requires` doesn't match any base element          |
+
+These come from the resolver, not the validator (`PS0XX` rules). They appear during `prs compile`, not `prs validate`. See the [Skill Overlays Guide](https://getpromptscript.dev/v1.16/guides/skill-overlays/index.md) for examples and remediation.
+
+## Values
+
+### Primitive Types
+
+| Type    | Examples             |
+| ------- | -------------------- |
+| String  | `"hello"`, `'world'` |
+| Number  | `42`, `3.14`, `-10`  |
+| Boolean | `true`, `false`      |
+| Null    | `null`               |
+
+### Strings
+
+PromptScript supports two string syntaxes:
+
+#### Single-line Strings
+
+Use double or single quotes for short, single-line values:
+
+```
+@shortcuts {
+  "/review": "Review code for quality and best practices"
+  "/help": 'Show available commands'
+}
+```
+
+#### Multi-line Strings
+
+Use triple quotes (`"""`) for content that spans multiple lines:
+
+```
+@shortcuts {
+  "/test": """
+    Write unit tests using:
+    - Vitest as the test runner
+    - AAA pattern (Arrange, Act, Assert)
+    - Target >90% coverage
+  """
+}
+```
+
+Multi-line strings:
+
+- Preserve line breaks and formatting
+- Are ideal for lists, instructions, and documentation
+- Can be used anywhere a string is expected
+
+When to Use Which
+
+| Content Type                 | Recommended Syntax |
+| ---------------------------- | ------------------ |
+| Short description (1 line)   | `"..."` or `'...'` |
+| Multiple lines, lists, steps | `"""..."""`        |
+| Code examples, documentation | `"""..."""`        |
+
+Both forms are semantically equivalent - choose based on readability.
+
+#### Example: Mixed Usage
+
+```
+@shortcuts {
+  # Single-line - simple description
+  "/review": "Review code for quality and best practices"
+
+  # Multi-line - detailed instructions
+  "/deploy": """
+    Deploy to production:
+    1. Run tests: pnpm test
+    2. Build: pnpm build
+    3. Deploy: pnpm deploy:prod
+  """
+
+  # Single-line - short command
+  "/format": "Run prettier on all files"
+}
+```
+
+### Identifiers
+
+Bare words are treated as strings:
+
+```
+@meta {
+  team: Frontend  # Same as "Frontend"
+}
+```
+
+### Arrays
+
+```
+tags: [frontend react typescript]
+patterns: ["hooks" "composition" "render props"]
+numbers: [1 2 3]
+```
+
+### Objects
+
+```
+code: {
+  style: "functional"
+  testing: {
+    required: true
+    coverage: 80
+  }
+}
+```
+
+### Template Expressions
+
+Use `{{variable}}` syntax to reference template parameters:
+
+```
+@meta {
+  id: "template-example"
+  syntax: "1.0.0"
+  params: {
+    projectName: string
+    port: number = 3000
+  }
+}
+
+@identity {
+  """
+  You are working on {{projectName}}.
+  """
+}
+
+@context {
+  project: {{projectName}}
+  devServer: "http://localhost:{{port}}"
+}
+```
+
+Template expressions are resolved during inheritance resolution when parameters are bound.
+
+**Valid Variable Names:**
+
+- Must start with a letter or underscore
+- Can contain letters, numbers, and underscores
+- Examples: `{{name}}`, `{{projectName}}`, `{{_internal}}`
+
+**Template vs Environment Variables:**
+
+| Syntax    | Resolved        | Purpose               |
+| --------- | --------------- | --------------------- |
+| `{{var}}` | At resolve time | Template parameters   |
+| `${VAR}`  | At parse time   | Environment variables |
+
+```
+# Environment variable - from system at parse time
+apiUrl: "${API_URL:-https://api.example.com}"
+
+# Template variable - from @inherit params at resolve time
+project: {{projectName}}
+```
+
+## Type Expressions
+
+### Range
+
+Numeric range constraint:
+
+```
+strictness: range(1..10)
+verbosity: range(0..5) = 2
+```
+
+### Enum
+
+String enumeration:
+
+```
+format: enum("json", "text", "markdown")
+level: enum("debug", "info", "warn", "error") = "info"
+```
+
+## Comments
+
+Single-line comments with `#`:
+
+```
+# This is a comment
+@meta {
+  id: "project"  # Inline comment
+  syntax: "1.0.0"
+}
+```
+
+## URL Imports
+
+PromptScript supports Go-module-style bare URL imports in `@use` and `@inherit` declarations. A URL import references a Git repository directly by its host path — no registry alias required.
+
+### Basic URL Import
+
+```
+@meta { id: "my-project" syntax: "1.0.0" }
+
+# Import from a public GitHub repo
+@use github.com/acme/shared-standards/@fragments/security
+
+# Import from GitLab
+@use gitlab.com/myorg/prompts/@stacks/python
+```
+
+### Extended Version Syntax
+
+Append a version specifier after the import path with `@`:
+
+```
+# Exact tag
+@use github.com/acme/shared-standards/@org/base@1.2.0
+
+# Semver range (latest compatible patch)
+@use github.com/acme/shared-standards/@org/base@^1.0.0
+
+# Branch
+@use github.com/acme/shared-standards/@org/base@main
+```
+
+| Specifier | Meaning                               |
+| --------- | ------------------------------------- |
+| `@1.2.0`  | Exact tag `v1.2.0` or `1.2.0`         |
+| `@^1.0.0` | Latest tag matching `^1.0.0` (semver) |
+| `@main`   | Tip of branch `main`                  |
+| (none)    | Default branch as configured          |
+
+### Auto-Discovery
+
+When the imported path does not contain `.prs` files, PromptScript automatically discovers and converts native AI plugin files:
+
+| Source File Pattern                       | Imported As        |
+| ----------------------------------------- | ------------------ |
+| `SKILL.md` in root or `skills/` directory | `@skills` block    |
+| `.claude/agents/*.md`                     | `@agents` block    |
+| `.claude/commands/*.md`                   | `@shortcuts` block |
+| `.github/skills/*/SKILL.md`               | `@skills` block    |
+
+This means you can import skills from any repository — including projects that were not authored with PromptScript:
+
+```
+@meta { id: "my-project" syntax: "1.0.0" }
+
+# Repo has SKILL.md but no .prs files — auto-discovered
+@use github.com/some-org/claude-skills/skills/tdd-workflow
+```
+
+### Alias vs URL Import
+
+Registry aliases (configured via `registries` in `promptscript.yaml`) are a shorthand for URL imports. Both resolve to the same Git fetch:
+
+```
+# With alias (configured as @company -> github.com/acme/base)
+@inherit @company/@org/base
+
+# Equivalent full URL import
+@inherit github.com/acme/base/@org/base
+```
+
+See [Registry Aliases](https://getpromptscript.dev/v1.16/guides/registry/#registry-aliases) for alias configuration.
+
+## Path References
+
+Path syntax for imports and inheritance:
+
+| Format     | Example                            | Description          |
+| ---------- | ---------------------------------- | -------------------- |
+| Namespaced | `@company/team`                    | Registry namespace   |
+| Versioned  | `@company/team@1.0.0`              | With version         |
+| Relative   | `./parent`                         | Relative path        |
+| Nested     | `@company/guards/security`         | Nested path          |
+| URL        | `github.com/org/repo/@path`        | Go-style URL import  |
+| URL+ver    | `github.com/org/repo/@path@^1.0.0` | URL with version     |
+| SSH        | `git@github.com:org/repo/@path`    | SCP-style Git import |
+
+## Reserved Words
+
+The following are reserved and cannot be used as identifiers:
+
+**Literals:**
+
+- `true`, `false`, `null`
+
+**Type expressions (for [@params](https://github.com/params "GitHub User: params")):**
+
+- `range`, `enum`
+
+**Directives:**
+
+- `meta`, `inherit`, `use`, `extend`, `as`
+
+**Block names:**
+
+- `identity`, `context`, `standards`, `restrictions`
+- `knowledge`, `shortcuts`, `commands`, `guards`, `params`
+- `skills`, `agents`, `local`
+- `workflows`, `hooks`, `mcpServers`, `plugins`, `examples`
+- `prompts` (reserved for internal prompt output)
+
+Internal Block Type
+
+The name `prompts` is reserved but is not a user-facing block. Prompt files are generated from `@shortcuts` with `prompt: true` for targets such as GitHub Copilot. Use the user-facing `@workflows` block for reusable procedures.
+
+## File Extensions
+
+| Extension       | Description                       |
+| --------------- | --------------------------------- |
+| `.prs`          | PromptScript source file          |
+| `.promptscript` | Alternative extension (supported) |
+
+## Known Issues & Gotchas
+
+### Multiline Strings in Objects
+
+Multiline strings (`"""..."""`) cannot be used as "loose" content inside an object with curly braces. They must always be assigned to a key.
+
+**❌ Invalid:**
+
+````
+@standards {
+  diagrams: {
+    format: "Mermaid"
+    types: [flowchart sequence]
+    """
+    Example:
+    ```
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPGCIGAObVScRJJly5YZtRLYNUkAFkY+jBEHGt2rAE808DcjBRmAd0Y4RWcXBgARwBXTkYYAF1bORsQG1ltAFFiMlhEEABfCIZOLGp7fCJSchgqWhAGADdzOAg2fABGTKA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+mermaid
+    flowchart LR
+      A[Input] --> B[Process] --> C[Output]
+    ```
+    """
+  }
+}
+````
+
+This will cause a parse error:
+
+```text
+Expecting token of type --> RBrace <-- but found --> '"""...
+```
+
+**✅ Valid - assign to a key:**
+
+````
+@standards {
+  diagrams: {
+    format: "Mermaid"
+    types: [flowchart sequence]
+    example: """
+      ```
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPGCIGAObVScRJJly5YZtRLYNUkAFkY+jBEHGt2rAE808DcjBRmAd0Y4RWcXBgARwBXTkYYAF1bOSJSchgjEBsQEABfCIZOLGp7fFiyShp6EAA3czgINnwARjSgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+mermaid
+      flowchart LR
+        A[Input] --> B[Process] --> C[Output]
+      ```
+    """
+  }
+}
+````
+
+**✅ Valid - use at block level:**
+
+```
+@knowledge {
+  """
+  Multiline content works directly in blocks
+  without needing a key assignment.
+  """
+}
+```
+
+Rule of Thumb
+
+Inside `{ }` braces, everything needs a key. Multiline strings without keys only work directly inside blocks like `@identity { ... }` or `@knowledge { ... }`.
+
+## Environment Variable Interpolation
+
+String values can reference environment variables for dynamic configuration:
+
+```
+@context {
+  api-endpoint: "${API_ENDPOINT}"
+  environment: "${NODE_ENV:-development}"
+}
+```
+
+### Syntax
+
+| Pattern           | Description                         |
+| ----------------- | ----------------------------------- |
+| `${VAR}`          | Substitute with variable value      |
+| `${VAR:-default}` | Substitute with variable or default |
+
+Syntax `1.5.0` accepts a reference without quotes wherever a value is expected, which keeps single-variable fields readable:
+
+```
+@meta {
+  id: "unquoted-env-vars"
+  syntax: "1.5.0"
+}
+
+@context {
+  environment: ${NODE_ENV:-development}
+  regions: [${PRIMARY_REGION:-us-east-1}, "eu-west-1"]
+}
+```
+
+The value is always a string. Quote the reference when the field mixes it with other text.
+
+### Examples
+
+```
+@meta {
+  id: "env-vars-example"
+  syntax: "1.0.0"
+}
+
+@context {
+  project: "My App - ${PROJECT_NAME:-default}"
+
+  """
+  Running in ${NODE_ENV:-development} mode.
+  API Key: ${API_KEY}
+  """
+}
+```
+
+Missing Variables
+
+If a variable is not set and no default is provided:
+
+```text
+- An empty string is substituted
+- A warning is logged to the console
+
+This follows Linux shell behavior for unset variables.
+```
+
+Best Practices
+
+1. **Always provide defaults** for non-sensitive values
+1. **Never commit secrets** - use environment variables for API keys
+1. **Document required variables** in your project README
+
+## Generated Section Headers
+
+Syntax `1.5.0` lets source files override human-readable section titles without forking a formatter. Place contextual `@header` directives directly inside a registered owner block:
+
+```
+@meta {
+  id: "localized-project"
+  syntax: "1.5.0"
+}
+
+@standards {
+  @header "Coding Rules"
+  @header git-commits "Commit Rules"
+  @header documentation "Dokumentacja zespołu"
+
+  code: ["Use strict TypeScript"]
+  git: { format: "conventional" }
+  documentation: { verifyAfter: true }
+}
+```
+
+- `@header "Title"` names the block's primary generated section.
+- `@header <section-key> "Title"` names a derived section.
+- Titles must be non-empty, single-line strings.
+- Canonical section keys use kebab-case.
+- Source overrides take precedence over formatter configuration and target defaults.
+- Overrides change only human-readable titles. Filenames, frontmatter properties, XML tags, and structured JSON, TOML, or YAML keys stay unchanged.
+- Ordinary `header` and `headers` fields remain domain data, including nested HTTP headers in `@mcpServers`.
+
+| Section key           | Primary owner   | Fallback owners           | Keyless `@header` owner   |
+| --------------------- | --------------- | ------------------------- | ------------------------- |
+| `project`             | `@identity`     | `@context`                | `@identity`               |
+| `tech-stack`          | `@context`      | `@standards`              | -                         |
+| `architecture`        | `@context`      | -                         | -                         |
+| `context`             | `@context`      | -                         | `@context`                |
+| `code-standards`      | `@standards`    | -                         | `@standards`              |
+| `git-commits`         | `@standards`    | -                         | -                         |
+| `configuration-files` | `@standards`    | -                         | -                         |
+| `commands`            | `@shortcuts`    | `@commands`, `@knowledge` | `@shortcuts`, `@commands` |
+| `post-work`           | `@knowledge`    | -                         | -                         |
+| `documentation`       | `@standards`    | -                         | -                         |
+| `diagrams`            | `@standards`    | -                         | -                         |
+| `knowledge`           | `@knowledge`    | -                         | `@knowledge`              |
+| `restrictions`        | `@restrictions` | -                         | `@restrictions`           |
+| `examples`            | `@examples`     | -                         | `@examples`               |
+
+For registered text-only primary owners, syntax `1.5.0` also recognizes an initial `## Heading` as a compatibility fallback:
+
+```
+@identity {
+  """
+  ## Project Instructions
+  Follow repository conventions.
+  """
+}
+```
+
+The formatter emits that heading once and preserves the remaining body. Explicit `@header` metadata always wins over this fallback. Syntax `1.4.x` and earlier keep the heading as ordinary body text, so existing output remains unchanged.
+
+## Hook Target Executable Overrides
+
+An `@hooks` target override supports `event`, `command`, `script`, `matcher`, `timeoutMs`, `statusMessage`, `continueOnFailure`, `enabled`, and `cwd`. A target may define either `command` or `script` to replace the base executable for that target. It inherits the base executable when neither field is present, and PS034 rejects overrides that define both.
+
+Replacement executables use the same command interpolation, script path, interpreter, and argument validation as base executables. Enabled target scripts are included in Node and browser compiler resource validation. Disabled target overrides emit no hook and do not require their script resource.
+
+## Terminal Command Hook Portability
+
+`pre-terminal-command` supplies deterministic native defaults for terminal policy: Factory `Execute`, Claude and Codex `Bash`, Windsurf `pre_run_command`, Cursor `run_terminal_cmd`, Gemini `run_shell_command`, and VS Code `run_in_terminal`. Set `targets.<name>.matcher` to replace a native tool name. Cursor, Gemini, and VS Code emit `PS4002` because their coverage is best effort. GitHub Copilot CLI/cloud and Grok omit the event with `PS4002` because their repository hook contracts do not guarantee terminal interception.
+
+## Hook Project Root Failure
+
+Environment-root and Git-root wrappers exit non-zero before an interpreter or command runs when they cannot resolve a non-empty project root. Native-cwd and workspace-cwd targets retain host-provided cwd fields and report `PS4002` because PromptScript cannot independently verify the host cwd. No target wrapper falls back to the process working directory.
+
+## Canonical Block Shape Reference
+
+See [Block Shapes](https://getpromptscript.dev/v1.16/reference/block-shapes/index.md) for the canonical shape, compatibility forms, merge rules, diagnostics, and formatter behavior of every built-in block.
+
+## Atomic Replacement with [@override](https://github.com/override "GitHub User: override")
+
+Syntax `1.5.0` adds `@override` for replacing a complete existing target:
+
+```text
+@standards {
+  testing: ["Use Jest", "Use Mocha"]
+  tooling: { runner: "jest" coverage: 80 }
+}
+
+@override standards.testing {
+  ["Use Vitest"]
+}
+
+@override standards.tooling.runner {
+  "vitest"
+}
+
+@extend standards {
+  testing: ["Require coverage"]
+}
+```
+
+`@override standards.testing` replaces the complete array. The later `@extend` then adds to that replacement. A root override replaces the complete block body:
+
+```text
+@override standards {
+  testing: ["Use Vitest"]
+}
+```
+
+Root replacements accept regular text, object, array, or mixed block bodies. Nested replacements also accept standalone object, string, number, boolean, and `null` values. The complete target path must already exist when the operation runs. Missing targets and traversal through scalar values are errors.
+
+Operations use declaration order in syntax `1.5.0`. This includes `@inherit`, top-level `@use`, local blocks, `@extend`, and `@override`. An `@override` used with an older declared syntax also uses declaration order so replacement remains deterministic, while PS018 requests a syntax upgrade.
+
+Use the forms according to intent:
+
+| Form        | Behavior                                                       |
+| ----------- | -------------------------------------------------------------- |
+| `@extend`   | Add or merge content using the target shape's merge policy.    |
+| `field!`    | Compatibility replacement for one direct regular extend field. |
+| `@override` | Replace one complete existing block or nested target value.    |
+
+`@override` cannot change or remove sealed skill properties. `@override { ... }` without a target remains a legal custom block named `override`.
+
+This complete example exercises root and nested replacement shapes:
+
+```
+@meta { id: "override-shapes" syntax: "1.5.0" }
+
+@identity { """Old identity""" }
+@restrictions { - "Old restriction" }
+@standards {
+  testing: ["Use Jest"]
+  config: { enabled: true retries: 1 }
+}
+
+@override identity { "New identity" }
+@override restrictions { ["No unsafe casts"] }
+@override standards {
+  """Required engineering rules."""
+  testing: ["Use Vitest"]
+  config: { enabled: true retries: 1 }
+  - "Document failures"
+}
+@override standards.config.enabled { false }
+@override standards.config.retries { 3 }
+```
