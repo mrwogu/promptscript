@@ -118,7 +118,7 @@ describe('prs-language', () => {
 
     it('should compile as a Monarch grammar', async () => {
       const { compile } =
-        await import('monaco-editor/esm/vs/editor/standalone/common/monarch/monarchCompile.js');
+        await import('monaco-editor/editor/standalone/common/monarch/monarchCompile.js');
 
       expect(() => compile(PRS_LANGUAGE_ID, prsLanguageDefinition)).not.toThrow();
     });
