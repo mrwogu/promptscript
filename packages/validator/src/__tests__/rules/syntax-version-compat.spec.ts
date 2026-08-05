@@ -172,6 +172,38 @@ describe('PS018: syntax-version-compat', () => {
     ]);
   });
 
+  it('should report unquoted environment variables below their minimum version', () => {
+    const usageLoc = { file: 'env.prs', line: 5, column: 12, offset: 96 };
+    const ast = makeAst('1.4.0');
+    ast.syntaxFeatures = [
+      {
+        feature: 'env-var-value',
+        location: usageLoc,
+      },
+    ];
+
+    const messages = validate(ast);
+
+    expect(messages).toEqual([
+      expect.objectContaining({
+        message: expect.stringContaining('env-var-value'),
+        location: usageLoc,
+      }),
+    ]);
+  });
+
+  it('should accept unquoted environment variables at the minimum version', () => {
+    const ast = makeAst('1.5.0');
+    ast.syntaxFeatures = [
+      {
+        feature: 'env-var-value',
+        location: { file: 'env.prs', line: 5, column: 12, offset: 96 },
+      },
+    ];
+
+    expect(validate(ast)).toHaveLength(0);
+  });
+
   it('should report section header overrides at their exact usage location', () => {
     const ast = makeAst('1.4.0');
     const usageLoc = { file: 'headers.prs', line: 7, column: 5, offset: 82 };
