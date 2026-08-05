@@ -5,6 +5,7 @@ Syntax highlighting and language support for [PromptScript](https://getpromptscr
 ## Features
 
 - Syntax highlighting for all PromptScript constructs
+- Embedded highlighting for fenced code inside `"""` text blocks
 - Bracket matching and auto-closing for `{}`, `[]`, `()`, `""`, `''`, `{{}}`
 - Code folding for `@block { }` directives
 - Comment toggling with `Cmd+/` / `Ctrl+/`
@@ -24,6 +25,7 @@ Syntax highlighting and language support for [PromptScript](https://getpromptscr
 | Constants             | `true`, `false`, `null`                                  |
 | Types                 | `string`, `number`, `boolean`, `enum(...)`, `range(...)` |
 | Comments              | `# line comment`                                         |
+| Fenced code           | ` ```ts ` … ` ``` ` inside a `"""` block                 |
 
 ## Learn More
 
