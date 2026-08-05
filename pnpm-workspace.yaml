@@ -10,6 +10,11 @@ allowBuilds:
 
 autoInstallPeers: true
 
+# monaco-editor pins a DOMPurify release with a known ALLOWED_ATTR pollution
+# advisory; the override keeps the patched line until monaco ships it.
+overrides:
+  dompurify: ^3.4.13
+
 ignoredBuiltDependencies:
   - nx
 
