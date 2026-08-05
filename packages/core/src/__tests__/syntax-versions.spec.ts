@@ -173,6 +173,7 @@ describe('syntax feature capabilities', () => {
       SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
       SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE,
       SYNTAX_FEATURES.EXPLICIT_OVERRIDE,
+      SYNTAX_FEATURES.ENV_VAR_VALUE,
     ]);
     expect(getFeaturesForVersion('9.9.9')).toBeUndefined();
   });
@@ -181,6 +182,7 @@ describe('syntax feature capabilities', () => {
     expect(getMinimumVersionForFeature(SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE)).toBe('1.3.0');
     expect(getMinimumVersionForFeature(SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE)).toBe('1.5.0');
     expect(getMinimumVersionForFeature(SYNTAX_FEATURES.EXPLICIT_OVERRIDE)).toBe('1.5.0');
+    expect(getMinimumVersionForFeature(SYNTAX_FEATURES.ENV_VAR_VALUE)).toBe('1.5.0');
     expect(getMinimumVersionForFeature('unknown-feature' as SyntaxFeature)).toBeUndefined();
   });
 

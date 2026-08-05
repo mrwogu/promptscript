@@ -8,6 +8,7 @@ export const SYNTAX_FEATURES = {
   REGULAR_BLOCK_REPLACE: 'regular-block-replace',
   SECTION_HEADER_OVERRIDE: 'section-header-override',
   EXPLICIT_OVERRIDE: 'explicit-override',
+  ENV_VAR_VALUE: 'env-var-value',
 } as const;
 
 export type SyntaxFeature = (typeof SYNTAX_FEATURES)[keyof typeof SYNTAX_FEATURES];
@@ -158,6 +159,7 @@ export const SYNTAX_VERSIONS: Readonly<Record<string, SyntaxVersionDef>> = {
       SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
       SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE,
       SYNTAX_FEATURES.EXPLICIT_OVERRIDE,
+      SYNTAX_FEATURES.ENV_VAR_VALUE,
     ],
   },
 };
