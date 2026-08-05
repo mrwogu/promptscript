@@ -53,7 +53,9 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
       ],
 
       // Contextual operations require a target path before the body.
-      [/@override(?=\s+[a-zA-Z_][\w-]*(?:\.[a-zA-Z_][\w-]*)*\s*\{)/, 'keyword.directive'],
+      // Monarch reads a literal @word in a pattern as an attribute reference,
+      // so the directive name is wrapped in a group to keep it literal.
+      [/@(?:override)(?=\s+[a-zA-Z_][\w-]*(?:\.[a-zA-Z_][\w-]*)*\s*\{)/, 'keyword.directive'],
 
       // Directives
       [

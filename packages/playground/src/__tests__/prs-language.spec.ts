@@ -116,6 +116,13 @@ describe('prs-language', () => {
       expect(Array.isArray(tokenizer.multilineString)).toBe(true);
     });
 
+    it('should compile as a Monarch grammar', async () => {
+      const { compile } =
+        await import('monaco-editor/esm/vs/editor/standalone/common/monarch/monarchCompile.js');
+
+      expect(() => compile(PRS_LANGUAGE_ID, prsLanguageDefinition)).not.toThrow();
+    });
+
     it('should have single-quoted string tokenizer rules', () => {
       const tokenizer = prsLanguageDefinition.tokenizer;
       expect(tokenizer.stringSingle).toBeDefined();
