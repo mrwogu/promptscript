@@ -250,8 +250,8 @@ Layer 2 replaces `description` (allowed), appends to `references`, but **cannot*
 
 @extend base.skills.code-review {
   references: [
-    "!references/product-patterns.md"
-    "references/bu-architecture.md"
+    "!references/product-patterns.md",
+    "references/bu-architecture.md",
     "references/bu-modules.md"
   ]
   requires: ["security-scan"]
