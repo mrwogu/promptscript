@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-08-05T10:57:14.876Z | source: .promptscript/project.prs | target: github
+# promptscript-generated: 2026-08-05T11:01:45.248Z | source: .promptscript/project.prs | target: github
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -1043,7 +1043,7 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | `1.2.0` | Adds `@examples` (few-shot input/output pairs)                                                                          |
 | `1.3.0` | Adds explicit regular block field replacement in `@extend`                                                              |
 | `1.4.0` | Adds `@hooks`, `@mcpServers`, and `@plugins`                                                                            |
-| `1.5.0` | Adds `@header` section titles and `@override` block or nested value replacement                                         |
+| `1.5.0` | Adds `@header` section titles, `@override` replacement, and unquoted `${VAR}` values                                    |
 
 ### Block Version Requirements
 
@@ -1060,6 +1060,7 @@ All other built-in blocks are available from `1.0.0`.
 Regular block field replacement with `field!: value` requires syntax `1.3.0`.
 Generated section title overrides with `@header` require syntax `1.5.0`.
 Atomic replacement with `@override` requires syntax `1.5.0`.
+Unquoted `${VAR}` references as values require syntax `1.5.0`.
 
 ### Generated Section Headers
 

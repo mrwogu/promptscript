@@ -160,7 +160,7 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | `1.2.0` | Stable  | All 1.1.0 blocks + `@examples`                                                                                                             |
 | `1.3.0` | Stable  | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
 | `1.4.0` | Stable  | All 1.3.0 features + `@hooks`, `@mcpServers`, `@plugins`                                                                                   |
-| `1.5.0` | Current | All 1.4.0 features + `@header` section titles, `@override` replacement, declaration order                                                  |
+| `1.5.0` | Current | All 1.4.0 features + `@header` section titles, `@override` replacement, declaration order, unquoted `${VAR}` values                        |
 
 !!! note "Block Availability"
 `@workflows` emits workflow files such as `.claude/workflows/<name>.md`.
@@ -179,7 +179,7 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | `@plugins`    | `1.4.0`                |
 
 All other built-in blocks are available from `1.0.0`.
-Regular block field replacement with `field!: value` requires syntax `1.3.0`. Generated section title overrides with `@header` and atomic target replacement with `@override` require syntax `1.5.0`.
+Regular block field replacement with `field!: value` requires syntax `1.3.0`. Generated section title overrides with `@header`, atomic target replacement with `@override`, and unquoted `${VAR}` values require syntax `1.5.0`.
 
 ### Validation (PS018, PS019)
 
@@ -2281,6 +2281,24 @@ String values can reference environment variables for dynamic configuration:
 | ----------------- | ----------------------------------- |
 | `${VAR}`          | Substitute with variable value      |
 | `${VAR:-default}` | Substitute with variable or default |
+
+Syntax `1.5.0` accepts a reference without quotes wherever a value is expected,
+which keeps single-variable fields readable:
+
+```promptscript
+@meta {
+  id: "unquoted-env-vars"
+  syntax: "1.5.0"
+}
+
+@context {
+  environment: ${NODE_ENV:-development}
+  regions: [${PRIMARY_REGION:-us-east-1}, "eu-west-1"]
+}
+```
+
+The value is always a string. Quote the reference when the field mixes it with
+other text.
 
 ### Examples
 
