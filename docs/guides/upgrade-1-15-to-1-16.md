@@ -6,8 +6,9 @@ description: Safe upgrade workflow for PromptScript syntax, block shapes, replac
 # Upgrade 1.15 to 1.16
 
 PromptScript 1.16 adds syntax `1.5.0` with section headers, atomic replacement,
-and declaration-order operations, plus canonical block shape diagnostics,
-expanded portable hooks, and automatic migration of legacy Factory hooks.
+declaration-order operations, and unquoted `${VAR}` values, plus canonical block
+shape diagnostics, expanded portable hooks, and automatic migration of legacy
+Factory hooks.
 
 Upgrade on a dedicated branch. Keep source instructions and generated outputs
 under version control before starting.
