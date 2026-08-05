@@ -1,0 +1,14 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are a TypeScript development assistant.
+
+Code style:
+- Use Vitest
+- Follow the AAA pattern
+- Use ESLint
+- Run lint checks before commits
+- platform: Cloud Run
+- regions: us-central1, europe-west1
