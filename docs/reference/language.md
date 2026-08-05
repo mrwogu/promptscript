@@ -795,11 +795,11 @@ Configurable parameters:
 </a>
 <!-- playground-link-end -->
 
-| Syntax        | Description        |
-| ------------- | ------------------ |
-| `name: type`  | Required parameter |
-| `name?: type` | Optional parameter |
-| `= value`     | Default value      |
+| Syntax        | Description                                           |
+| ------------- | ----------------------------------------------------- |
+| `name: type`  | Required parameter                                    |
+| `name?: type` | Optional parameter                                    |
+| `= value`     | Default value, rejected when it does not match `type` |
 
 Available types:
 
