@@ -50,7 +50,7 @@ does not support every nested target or skill property.
 ## Atomic Replacement with `@override`
 
 ```promptscript
-@meta { id: "replacement" syntax: "1.6.0" }
+@meta { id: "replacement" syntax: "1.5.0" }
 
 @standards {
   testing: ["Use Jest", "Use Mocha"]

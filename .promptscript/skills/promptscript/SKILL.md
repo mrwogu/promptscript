@@ -49,7 +49,7 @@ PromptScript is a domain-specific language that compiles `.prs` files into nativ
 
 ## File Structure
 
-A `.prs` file contains ordered declarations. Syntax `1.6.0` applies `@inherit`,
+A `.prs` file contains ordered declarations. Syntax `1.5.0` applies `@inherit`,
 `@use`, local blocks, `@extend`, and `@override` in source order. Put `@meta`
 first.
 
@@ -77,7 +77,7 @@ first.
 @plugins { ... }        # Capability bundles (syntax 1.4.0+)
 @local { ... }          # Private config (not committed)
 @extend path { ... }    # Modify imported blocks
-@override path { ... }  # Replace one complete existing target (syntax 1.6.0+)
+@override path { ... }  # Replace one complete existing target (syntax 1.5.0+)
 @custom-name { ... }    # Arbitrary named blocks
 ```
 
@@ -675,7 +675,7 @@ Merge rules:
 - Arrays: unique concatenation
 - Shape mismatch: existing target body wins
 
-Under syntax `1.6.0`, later local blocks, `@extend`, and `@override`
+Under syntax `1.5.0`, later local blocks, `@extend`, and `@override`
 operations apply to the accumulated import result in declaration order.
 
 ### Block Filtering
@@ -760,10 +760,10 @@ merge and sealing semantics.
 
 #### Replacing complete targets with @override
 
-Syntax `1.6.0` adds atomic replacement for an existing block or nested value:
+Syntax `1.5.0` adds atomic replacement for an existing block or nested value:
 
 ```
-@meta { id: "project" syntax: "1.6.0" }
+@meta { id: "project" syntax: "1.5.0" }
 
 @standards {
   testing: ["Use Jest", "Use Mocha"]
@@ -1039,8 +1039,7 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | `1.2.0` | Adds `@examples` (few-shot input/output pairs)                                                                          |
 | `1.3.0` | Adds explicit regular block field replacement in `@extend`                                                              |
 | `1.4.0` | Adds `@hooks`, `@mcpServers`, and `@plugins`                                                                            |
-| `1.5.0` | Adds generated section title overrides with contextual `@header`                                                        |
-| `1.6.0` | Adds atomic block and nested value replacement with contextual `@override`                                              |
+| `1.5.0` | Adds `@header` section titles and `@override` block or nested value replacement                                         |
 
 ### Block Version Requirements
 
@@ -1056,7 +1055,7 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 All other built-in blocks are available from `1.0.0`.
 Regular block field replacement with `field!: value` requires syntax `1.3.0`.
 Generated section title overrides with `@header` require syntax `1.5.0`.
-Atomic replacement with `@override` requires syntax `1.6.0`.
+Atomic replacement with `@override` requires syntax `1.5.0`.
 
 ### Generated Section Headers
 

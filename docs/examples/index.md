@@ -146,7 +146,7 @@ Real-world PromptScript configuration examples.
 ```promptscript
 @meta {
   id: "my-project"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -171,7 +171,7 @@ Real-world PromptScript configuration examples.
 ```promptscript
 @meta {
   id: "react-app"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -213,7 +213,7 @@ Real-world PromptScript configuration examples.
 ```promptscript
 @meta {
   id: "api-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -268,7 +268,7 @@ Real-world PromptScript configuration examples.
 ```yaml
 # promptscript.yaml
 id: basic-example
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -282,7 +282,7 @@ targets:
 ```yaml
 # promptscript.yaml
 id: local-registry-example
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -309,7 +309,7 @@ watch:
 ```yaml
 # promptscript.yaml
 id: git-registry-example
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs

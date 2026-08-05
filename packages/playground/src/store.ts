@@ -111,7 +111,7 @@ export interface PlaygroundState {
 
 export const DEFAULT_FILE = `@meta {
   id: "skills-example"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {

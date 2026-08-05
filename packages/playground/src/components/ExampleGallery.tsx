@@ -24,7 +24,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "hello-world"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -46,7 +46,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "minimal-project"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -70,7 +70,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "context-example"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -108,7 +108,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "env-vars-example"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -160,7 +160,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "coding-assistant"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: [development, typescript]
 }
 
@@ -210,7 +210,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "frontend-project"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 # Inherit from promptscript-registry (github.com/mrwogu/promptscript-registry)
@@ -250,7 +250,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "my-react-app"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 # Inherit from template with parameters
@@ -274,7 +274,7 @@ export const EXAMPLES: Example[] = [
         path: 'react-template.prs',
         content: `@meta {
   id: "react-template"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   params: {
     # Required: Name of the project
     projectName: string
@@ -330,7 +330,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "team-project"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 # Inherit from local base file
@@ -359,7 +359,7 @@ export const EXAMPLES: Example[] = [
         path: 'base.prs',
         content: `@meta {
   id: "team-base"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -398,7 +398,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "knowledge-example"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -456,7 +456,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "filtered-imports"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 # Import only standards and restrictions from shared config
@@ -480,7 +480,7 @@ export const EXAMPLES: Example[] = [
         path: 'shared.prs',
         content: `@meta {
   id: "shared-config"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -524,7 +524,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "skill-filtered-imports"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 # Import only specific skills from a shared skill library
@@ -547,7 +547,7 @@ export const EXAMPLES: Example[] = [
         path: 'skill-library.prs',
         content: `@meta {
   id: "skill-library"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @skills {
@@ -593,7 +593,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "field-replacement"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -638,7 +638,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "ordered-composition"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @inherit ./base
@@ -661,7 +661,7 @@ export const EXAMPLES: Example[] = [
         path: 'base.prs',
         content: `@meta {
   id: "base"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @standards {
@@ -674,7 +674,7 @@ export const EXAMPLES: Example[] = [
         path: 'quality.prs',
         content: `@meta {
   id: "quality"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @standards {
@@ -695,7 +695,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "localized-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -729,7 +729,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "few-shot-examples"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -794,7 +794,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "guard-dependencies"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -869,7 +869,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "skills-with-examples"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -942,7 +942,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "skills-example"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -1017,7 +1017,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "guards-example"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -1081,7 +1081,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "agents-example"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -1154,7 +1154,7 @@ export const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "checkout-agent-platform"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["payments", "typescript"]
 }
 
@@ -1267,7 +1267,7 @@ console.log('Validation complete');
         path: 'project.prs',
         content: `@meta {
   id: "banking-review"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 # Layer 1: import the generic base skill under an alias
@@ -1301,7 +1301,7 @@ console.log('Validation complete');
         path: 'base-skill.prs',
         content: `@meta {
   id: "base-skill"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @skills {
@@ -1330,7 +1330,7 @@ console.log('Validation complete');
         path: 'project.prs',
         content: `@meta {
   id: "compliance-overlay"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @use ./base-skill as base
@@ -1358,7 +1358,7 @@ console.log('Validation complete');
         path: 'base-skill.prs',
         content: `@meta {
   id: "base-skill"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @skills {
@@ -1393,7 +1393,7 @@ console.log('Validation complete');
         path: 'project.prs',
         content: `@meta {
   id: "ops"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @skills {
@@ -1419,7 +1419,7 @@ console.log('Validation complete');
         path: 'phases/health-scan.prs',
         content: `@meta {
   id: "health-scan"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @knowledge {
@@ -1447,7 +1447,7 @@ console.log('Validation complete');
         path: 'phases/triage.prs',
         content: `@meta {
   id: "triage"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   params: {
     severity: string = "all"
   }
@@ -1473,7 +1473,7 @@ console.log('Validation complete');
         path: 'phases/code-fix.prs',
         content: `@meta {
   id: "code-fix"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @restrictions {
@@ -1510,7 +1510,7 @@ console.log('Validation complete');
         path: 'project.prs',
         content: `@meta {
   id: "checkout-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["checkout", "payments", "production"]
 }
 
@@ -1602,7 +1602,7 @@ console.log('Validation complete');
         path: 'org-base.prs',
         content: `@meta {
   id: "commerce-org-base"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["commerce", "typescript"]
 }
 
@@ -1638,7 +1638,7 @@ console.log('Validation complete');
         path: 'payment-policy.prs',
         content: `@meta {
   id: "payment-policy"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["payments", "pci"]
   params: {
     provider: enum("Stripe", "Adyen") = "Stripe"
@@ -1673,7 +1673,7 @@ console.log('Validation complete');
         path: 'project.prs',
         content: `@meta {
   id: "enterprise-project"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: [enterprise, typescript, react]
 }
 
@@ -1782,7 +1782,7 @@ console.log('Validation complete');
         path: 'org-base.prs',
         content: `@meta {
   id: "org-base"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {

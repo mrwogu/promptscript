@@ -413,7 +413,7 @@ describe('validateCommand --fix', () => {
     await validateCommand({ fix: true });
 
     expect(readFileSync(join(tmpDir, '.promptscript', 'project.prs'), 'utf-8')).toContain(
-      'syntax: "1.6.0"'
+      'syntax: "1.5.0"'
     );
   });
 

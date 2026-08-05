@@ -8,7 +8,7 @@ describe('ExampleGallery — gallery examples compile', () => {
   it('uses current syntax for every PromptScript file', () => {
     for (const example of EXAMPLES) {
       for (const file of example.files.filter((candidate) => candidate.path.endsWith('.prs'))) {
-        expect(file.content, `${example.id}:${file.path}`).toContain('syntax: "1.6.0"');
+        expect(file.content, `${example.id}:${file.path}`).toContain('syntax: "1.5.0"');
       }
     }
   });

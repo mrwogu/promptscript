@@ -27,7 +27,7 @@ automation, a release workflow, and a plugin bundle:
 ```promptscript
 @meta {
   id: "checkout-agent-platform"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["payments", "typescript"]
 }
 
@@ -121,7 +121,7 @@ Use full target modes to generate native capability files:
 
 ```yaml
 id: checkout-agent-platform
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 targets:
   - claude:

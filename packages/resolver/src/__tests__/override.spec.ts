@@ -40,7 +40,7 @@ afterEach(async () => {
 describe('explicit override resolution', () => {
   it('replaces nested values and lets later extensions merge the replacement', async () => {
     const directory = await createProject(`
-      @meta { id: "ordered" syntax: "1.6.0" }
+      @meta { id: "ordered" syntax: "1.5.0" }
       @standards {
         testing: ["Use Jest"]
         linting: ["Use Biome"]
@@ -73,7 +73,7 @@ describe('explicit override resolution', () => {
   it('replaces inherited and aliased imported targets', async () => {
     const directory = await createProject(
       `
-        @meta { id: "child" syntax: "1.6.0" }
+        @meta { id: "child" syntax: "1.5.0" }
         @inherit ./parent
         @use ./shared as shared
         @override context.runtime { "bun" }
@@ -81,11 +81,11 @@ describe('explicit override resolution', () => {
       `,
       {
         'parent.prs': `
-          @meta { id: "parent" syntax: "1.6.0" }
+          @meta { id: "parent" syntax: "1.5.0" }
           @context { runtime: "node" }
         `,
         'shared.prs': `
-          @meta { id: "shared" syntax: "1.6.0" }
+          @meta { id: "shared" syntax: "1.5.0" }
           @standards { testing: ["Use Jest"] }
         `,
       }
@@ -106,7 +106,7 @@ describe('explicit override resolution', () => {
 
   it('uses declaration order when override syntax enables sequential operations', async () => {
     const directory = await createProject(`
-      @meta { id: "sequential" syntax: "1.6.0" }
+      @meta { id: "sequential" syntax: "1.5.0" }
       @standards { testing: ["First"] }
       @override standards.testing { ["Second"] }
       @standards { linting: ["Keep duplicate layer"] }
@@ -127,13 +127,13 @@ describe('explicit override resolution', () => {
   it('lets later inherit operations replace earlier block values', async () => {
     const directory = await createProject(
       `
-        @meta { id: "sequential-inherit" syntax: "1.6.0" }
+        @meta { id: "sequential-inherit" syntax: "1.5.0" }
         @context { runtime: "local" localOnly: true }
         @inherit ./parent
       `,
       {
         'parent.prs': `
-          @meta { id: "parent" syntax: "1.6.0" }
+          @meta { id: "parent" syntax: "1.5.0" }
           @context { runtime: "parent" parentOnly: true }
         `,
       }
@@ -157,13 +157,13 @@ describe('explicit override resolution', () => {
   it('imports skills whose names collide with object prototypes', async () => {
     const directory = await createProject(
       `
-        @meta { id: "prototype-skill" syntax: "1.6.0" }
+        @meta { id: "prototype-skill" syntax: "1.5.0" }
         @skills { review: { description: "Review" content: "Review code" } }
         @use ./shared
       `,
       {
         'shared.prs': `
-          @meta { id: "shared" syntax: "1.6.0" }
+          @meta { id: "shared" syntax: "1.5.0" }
           @skills {
             toString: { description: "Stringify" content: "Stringify output" }
           }
@@ -184,7 +184,7 @@ describe('explicit override resolution', () => {
 
   it('keeps block aliases in declaration order', async () => {
     const directory = await createProject(`
-      @meta { id: "alias-order" syntax: "1.6.0" }
+      @meta { id: "alias-order" syntax: "1.5.0" }
       @shortcuts { test: { description: "Old" } }
       @override shortcuts.test { { description: "New" } }
       @commands { build: { description: "Build" } }
@@ -207,14 +207,14 @@ describe('explicit override resolution', () => {
   it('does not let later import aliases reinterpret earlier override targets', async () => {
     const directory = await createProject(
       `
-        @meta { id: "future-alias" syntax: "1.6.0" }
+        @meta { id: "future-alias" syntax: "1.5.0" }
         @commands { test: { description: "Old" } }
         @override commands.test { { description: "New" } }
         @use ./shared as commands
       `,
       {
         'shared.prs': `
-          @meta { id: "shared" syntax: "1.6.0" }
+          @meta { id: "shared" syntax: "1.5.0" }
           @standards { testing: ["Use Vitest"] }
         `,
       }
@@ -233,14 +233,14 @@ describe('explicit override resolution', () => {
     });
   });
 
-  it('keeps legacy phase order before syntax 1.6.0 without overrides', async () => {
+  it('keeps legacy phase order before syntax 1.5.0 without overrides', async () => {
     const legacyDirectory = await createProject(`
-      @meta { id: "legacy" syntax: "1.5.0" }
+      @meta { id: "legacy" syntax: "1.4.0" }
       @extend standards { testing: ["Extended first"] }
       @standards { testing: ["Declared later"] }
     `);
     const sequentialDirectory = await createProject(`
-      @meta { id: "sequential" syntax: "1.6.0" }
+      @meta { id: "sequential" syntax: "1.5.0" }
       @extend standards { testing: ["Ignored before target"] }
       @standards { testing: ["Declared later"] }
     `);
@@ -272,13 +272,13 @@ describe('explicit override resolution', () => {
   it('requires imports to precede overrides', async () => {
     const directory = await createProject(
       `
-        @meta { id: "ordered-import" syntax: "1.6.0" }
+        @meta { id: "ordered-import" syntax: "1.5.0" }
         @override standards.testing { ["Too early"] }
         @use ./shared
       `,
       {
         'shared.prs': `
-          @meta { id: "shared" syntax: "1.6.0" }
+          @meta { id: "shared" syntax: "1.5.0" }
           @standards { testing: ["Imported"] }
         `,
       }
@@ -301,7 +301,7 @@ describe('explicit override resolution', () => {
 
   it('supports root bodies, nested primitives, and complete replacement', async () => {
     const directory = await createProject(`
-      @meta { id: "shapes" syntax: "1.6.0" }
+      @meta { id: "shapes" syntax: "1.5.0" }
       @identity { """Old identity""" }
       @restrictions { - "Old restriction" }
       @standards {
@@ -352,7 +352,7 @@ describe('explicit override resolution', () => {
   it('composes each replacement before later ordered operations', async () => {
     const directory = await createProject(
       `
-        @meta { id: "composition" syntax: "1.6.0" }
+        @meta { id: "composition" syntax: "1.5.0" }
         @skills {
           workflow: { description: "Old" content: "Old workflow" }
           @use ./old-phase
@@ -364,13 +364,13 @@ describe('explicit override resolution', () => {
       `,
       {
         'old-phase.prs': `
-          @meta { id: "old-phase" syntax: "1.6.0" }
+          @meta { id: "old-phase" syntax: "1.5.0" }
           @skills {
             old-phase: { description: "Old phase" content: "Run old phase" }
           }
         `,
         'phase.prs': `
-          @meta { id: "phase" syntax: "1.6.0" }
+          @meta { id: "phase" syntax: "1.5.0" }
           @skills {
             phase: { description: "Phase" content: "Run phase" }
           }
@@ -401,7 +401,7 @@ describe('explicit override resolution', () => {
   it('lets later overrides replace composed skill content', async () => {
     const directory = await createProject(
       `
-        @meta { id: "composition-override" syntax: "1.6.0" }
+        @meta { id: "composition-override" syntax: "1.5.0" }
         @skills {
           workflow: { description: "Workflow" content: "Parent workflow" }
           @use ./phase
@@ -410,7 +410,7 @@ describe('explicit override resolution', () => {
       `,
       {
         'phase.prs': `
-          @meta { id: "phase" syntax: "1.6.0" }
+          @meta { id: "phase" syntax: "1.5.0" }
           @skills {
             phase: { description: "Phase" content: "Run phase" }
           }
@@ -436,7 +436,7 @@ describe('explicit override resolution', () => {
 
   it('does not retry failed inline composition after later operations', async () => {
     const directory = await createProject(`
-      @meta { id: "failed-composition" syntax: "1.6.0" }
+      @meta { id: "failed-composition" syntax: "1.5.0" }
       @skills {
         workflow: { description: "Workflow" content: "Parent workflow" }
         @use ./missing
@@ -460,7 +460,7 @@ describe('explicit override resolution', () => {
 
   it('normalizes unexpected ordered extension failures', async () => {
     const directory = await createProject(`
-      @meta { id: "extension-error" syntax: "1.6.0" }
+      @meta { id: "extension-error" syntax: "1.5.0" }
       @extend missing { enabled: true }
     `);
     const logger: Logger = {
@@ -519,7 +519,7 @@ describe('explicit override resolution', () => {
 
   it('cannot bypass sealed skill properties', async () => {
     const directory = await createProject(`
-      @meta { id: "sealed" syntax: "1.6.0" }
+      @meta { id: "sealed" syntax: "1.5.0" }
       @skills {
         review: {
           description: "Review code"
@@ -546,7 +546,7 @@ describe('explicit override resolution', () => {
 
   it('rejects complete skill replacement that changes sealed contracts', async () => {
     const directory = await createProject(`
-      @meta { id: "sealed-root" syntax: "1.6.0" }
+      @meta { id: "sealed-root" syntax: "1.5.0" }
       @skills {
         review: {
           description: "Review code"

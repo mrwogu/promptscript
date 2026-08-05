@@ -73,7 +73,7 @@ Generated Files
 <div class="init-demo__file-preview">
 <div class="init-demo__file-preview-header">promptscript.yaml</div>
 <pre class="init-demo__file-preview-content"><span class="key">id:</span> <span class="str">my-app</span>
-<span class="key">syntax:</span> <span class="str">"1.6.0"</span>
+<span class="key">syntax:</span> <span class="str">"1.5.0"</span>
 
 <span class="key">targets:</span>
   - <span class="str">github</span>
@@ -88,7 +88,7 @@ Generated Files
 <div class="init-demo__file-preview-header">.promptscript/project.prs</div>
 <pre class="init-demo__file-preview-content"><span class="kw">@meta</span> {
   <span class="key">id:</span> <span class="str">"my-app"</span>
-  <span class="key">syntax:</span> <span class="str">"1.6.0"</span>
+  <span class="key">syntax:</span> <span class="str">"1.5.0"</span>
 }
 
 <span class="kw">@inherit</span> <span class="str">@company/react-app</span>
@@ -144,7 +144,7 @@ Open `.promptscript/project.prs` and customize:
 ```promptscript
 @meta {
   id: "my-project"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -465,7 +465,7 @@ You are a Python developer working on a FastAPI service.
 ```promptscript
 @meta {
   id: "api-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -533,7 +533,7 @@ The `promptscript.yaml` file controls compilation:
 
 ```yaml
 id: my-project
-syntax: "1.6.0"
+syntax: "1.5.0"
 
 # Input settings
 input:

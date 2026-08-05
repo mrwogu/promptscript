@@ -30,7 +30,6 @@ This project demonstrates canonical PromptScript block bodies.
 
 - /review: Review code quality
 - /test: Run tests
-- /typecheck: Check types
 
 ## donts
 

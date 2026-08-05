@@ -18,7 +18,7 @@ one canonical body shape.
 | `mixed`  | Properties plus prose or list entries | `@context`                                   |
 
 ```promptscript
-@meta { id: "body-shapes" syntax: "1.6.0" }
+@meta { id: "body-shapes" syntax: "1.5.0" }
 
 @identity {
   """
@@ -67,7 +67,7 @@ Common remediation:
 | Mixed body with formatter-dependent fields | Separate portable fields from prose |
 
 ```promptscript
-@meta { id: "canonical-shortcut" syntax: "1.6.0" }
+@meta { id: "canonical-shortcut" syntax: "1.5.0" }
 
 @shortcuts {
   "/review": {

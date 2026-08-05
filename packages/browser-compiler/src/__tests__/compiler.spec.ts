@@ -183,9 +183,9 @@ describe('compile', () => {
     );
   });
 
-  it('should report explicit overrides declared below syntax 1.6.0', async () => {
+  it('should report explicit overrides declared below syntax 1.5.0', async () => {
     const files = {
-      'project.prs': `@meta { id: "test" syntax: "1.5.0" }
+      'project.prs': `@meta { id: "test" syntax: "1.4.0" }
 @standards { testing: ["Use Jest"] }
 @override standards.testing { ["Use Vitest"] }
 `,
@@ -205,7 +205,7 @@ describe('compile', () => {
 
   it('should retain syntax warnings when explicit override resolution fails', async () => {
     const files = {
-      'project.prs': `@meta { id: "test" syntax: "1.5.0" }
+      'project.prs': `@meta { id: "test" syntax: "1.4.0" }
 @standards { testing: ["Use Jest"] }
 @override standards.missing { true }
 `,
@@ -229,7 +229,7 @@ describe('compile', () => {
 
   it('should honor configured syntax compatibility severity on override errors', async () => {
     const files = {
-      'project.prs': `@meta { id: "test" syntax: "1.5.0" }
+      'project.prs': `@meta { id: "test" syntax: "1.4.0" }
 @standards { testing: ["Use Jest"] }
 @override standards.missing { true }
 `,

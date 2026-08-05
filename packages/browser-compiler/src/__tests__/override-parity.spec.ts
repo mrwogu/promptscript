@@ -6,7 +6,7 @@ import { VirtualFileSystem } from '../virtual-fs.js';
 describe('explicit override browser parity regressions', () => {
   it('compiles ordered replacements into formatter output', async () => {
     const files = {
-      'project.prs': `@meta { id: "parity" syntax: "1.6.0" }
+      'project.prs': `@meta { id: "parity" syntax: "1.5.0" }
 @inherit ./parent
 @use ./shared as shared
 @override context.runtime { "bun" }
@@ -16,10 +16,10 @@ describe('explicit override browser parity regressions', () => {
   linting!: ["Use ESLint"]
 }
 `,
-      'parent.prs': `@meta { id: "parent" syntax: "1.6.0" }
+      'parent.prs': `@meta { id: "parent" syntax: "1.5.0" }
 @context { runtime: "node" }
 `,
-      'shared.prs': `@meta { id: "shared" syntax: "1.6.0" }
+      'shared.prs': `@meta { id: "shared" syntax: "1.5.0" }
 @standards {
   testing: ["Use Jest"]
   linting: ["Use Biome"]
@@ -44,11 +44,11 @@ describe('explicit override browser parity regressions', () => {
   it('lets later inherit operations replace earlier block values', async () => {
     const resolver = new BrowserResolver({
       fs: new VirtualFileSystem({
-        'project.prs': `@meta { id: "sequential-inherit" syntax: "1.6.0" }
+        'project.prs': `@meta { id: "sequential-inherit" syntax: "1.5.0" }
 @context { runtime: "local" localOnly: true }
 @inherit ./parent
 `,
-        'parent.prs': `@meta { id: "parent" syntax: "1.6.0" }
+        'parent.prs': `@meta { id: "parent" syntax: "1.5.0" }
 @context { runtime: "parent" parentOnly: true }
 `,
       }),
@@ -66,7 +66,7 @@ describe('explicit override browser parity regressions', () => {
   it('reports semantic errors at the override directive', async () => {
     const resolver = new BrowserResolver({
       fs: new VirtualFileSystem({
-        'project.prs': `@meta { id: "invalid-parity" syntax: "1.6.0" }
+        'project.prs': `@meta { id: "invalid-parity" syntax: "1.5.0" }
 @standards { testing: { runner: "jest" } }
 @override standards.testing.runner.name { "vitest" }
 `,
@@ -86,12 +86,12 @@ describe('explicit override browser parity regressions', () => {
   it('preserves duplicate skill errors before later overrides', async () => {
     const resolver = new BrowserResolver({
       fs: new VirtualFileSystem({
-        'project.prs': `@meta { id: "duplicate-skill" syntax: "1.6.0" }
+        'project.prs': `@meta { id: "duplicate-skill" syntax: "1.5.0" }
 @skills { review: { description: "Local" content: "Local review" } }
 @use ./shared
 @override skills.review.description { "Updated local review" }
 `,
-        'shared.prs': `@meta { id: "shared" syntax: "1.6.0" }
+        'shared.prs': `@meta { id: "shared" syntax: "1.5.0" }
 @skills { review: { description: "Imported" content: "Imported review" } }
 `,
       }),
@@ -113,11 +113,11 @@ describe('explicit override browser parity regressions', () => {
   it('preserves imported skill output directories through overrides', async () => {
     const resolver = new BrowserResolver({
       fs: new VirtualFileSystem({
-        'project.prs': `@meta { id: "output-dir" syntax: "1.6.0" }
+        'project.prs': `@meta { id: "output-dir" syntax: "1.5.0" }
 @use ./shared as shared into "skills/team"
 @override shared.skills.review.description { "Updated review" }
 `,
-        'shared.prs': `@meta { id: "shared" syntax: "1.6.0" }
+        'shared.prs': `@meta { id: "shared" syntax: "1.5.0" }
 @skills { review: { description: "Imported" content: "Imported review" } }
 `,
       }),
@@ -141,14 +141,14 @@ describe('explicit override browser parity regressions', () => {
   it('applies later overrides after inline composition', async () => {
     const resolver = new BrowserResolver({
       fs: new VirtualFileSystem({
-        'project.prs': `@meta { id: "composition" syntax: "1.6.0" }
+        'project.prs': `@meta { id: "composition" syntax: "1.5.0" }
 @skills {
   workflow: { description: "Workflow" content: "Parent workflow" }
   @use ./phase
 }
 @override skills.workflow.content { "Final workflow" }
 `,
-        'phase.prs': `@meta { id: "phase" syntax: "1.6.0" }
+        'phase.prs': `@meta { id: "phase" syntax: "1.5.0" }
 @skills { phase: { description: "Phase" content: "Run phase" } }
 `,
       }),
@@ -171,7 +171,7 @@ describe('explicit override browser parity regressions', () => {
   it('does not retry failed inline composition after later operations', async () => {
     const resolver = new BrowserResolver({
       fs: new VirtualFileSystem({
-        'project.prs': `@meta { id: "failed-composition" syntax: "1.6.0" }
+        'project.prs': `@meta { id: "failed-composition" syntax: "1.5.0" }
 @skills {
   workflow: { description: "Workflow" content: "Parent workflow" }
   @use ./missing
@@ -193,7 +193,7 @@ describe('explicit override browser parity regressions', () => {
   it('normalizes unexpected ordered extension failures', async () => {
     const resolver = new BrowserResolver({
       fs: new VirtualFileSystem({
-        'project.prs': `@meta { id: "extension-error" syntax: "1.6.0" }
+        'project.prs': `@meta { id: "extension-error" syntax: "1.5.0" }
 @extend missing { enabled: true }
 `,
       }),

@@ -10,15 +10,14 @@ organization version.
 
 ## Syntax Versions
 
-| Version | Added capability                                    |
-| ------- | --------------------------------------------------- |
-| `1.0.0` | Core instruction and composition blocks             |
-| `1.1.0` | Agents and workflows                                |
-| `1.2.0` | Few-shot examples                                   |
-| `1.3.0` | Direct regular field replacement with `field!`      |
-| `1.4.0` | Hooks, MCP servers, and plugins                     |
-| `1.5.0` | Contextual generated section headers                |
-| `1.6.0` | Atomic `@override` and declaration-order operations |
+| Version | Added capability                                                                 |
+| ------- | -------------------------------------------------------------------------------- |
+| `1.0.0` | Core instruction and composition blocks                                          |
+| `1.1.0` | Agents and workflows                                                             |
+| `1.2.0` | Few-shot examples                                                                |
+| `1.3.0` | Direct regular field replacement with `field!`                                   |
+| `1.4.0` | Hooks, MCP servers, and plugins                                                  |
+| `1.5.0` | Contextual section headers, atomic `@override`, and declaration-order operations |
 
 Use the minimum required version for reusable published fragments. Use current
 syntax for new project entry files.

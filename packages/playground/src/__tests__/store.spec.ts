@@ -33,7 +33,7 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
 
 describe('PlaygroundStore', () => {
   it('starts new sessions with a valid current PromptScript example', async () => {
-    expect(DEFAULT_FILE).toContain('syntax: "1.6.0"');
+    expect(DEFAULT_FILE).toContain('syntax: "1.5.0"');
     expect(DEFAULT_FILE).toContain('@header "Engineering Standards"');
 
     const result = await compile({ 'project.prs': DEFAULT_FILE }, 'project.prs');

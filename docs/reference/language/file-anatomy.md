@@ -6,7 +6,7 @@ description: Complete PromptScript 1.6 file structure and recommended declaratio
 # File Anatomy
 
 A `.prs` file contains metadata, composition directives, content blocks, and
-modification operations. Syntax `1.6.0` applies top-level declarations in
+modification operations. Syntax `1.5.0` applies top-level declarations in
 source order.
 
 ## Recommended Structure
@@ -14,7 +14,7 @@ source order.
 ```promptscript
 @meta {
   id: "checkout-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 # 1. Establish base layers.

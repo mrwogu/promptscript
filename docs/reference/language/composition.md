@@ -8,7 +8,7 @@ description: Normative inheritance, import, and local composition precedence
 Composition uses two layers of rules:
 
 1. Each operation has a merge policy.
-2. Syntax `1.6.0` applies operations in declaration order.
+2. Syntax `1.5.0` applies operations in declaration order.
 
 ## Normative Precedence
 
@@ -27,21 +27,21 @@ Its same-shape values win against the accumulated target.
 
 ```promptscript
 # base.prs
-@meta { id: "base" syntax: "1.6.0" }
+@meta { id: "base" syntax: "1.5.0" }
 @standards {
   testing: ["Use Jest"]
   coverage: 80
 }
 
 # quality.prs
-@meta { id: "quality" syntax: "1.6.0" }
+@meta { id: "quality" syntax: "1.5.0" }
 @standards {
   coverage: 90
   review: ["Require approval"]
 }
 
 # project.prs
-@meta { id: "project" syntax: "1.6.0" }
+@meta { id: "project" syntax: "1.5.0" }
 @inherit ./base
 @use ./quality
 @standards {

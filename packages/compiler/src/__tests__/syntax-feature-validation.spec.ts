@@ -13,13 +13,13 @@ afterEach(() => {
 });
 
 describe('syntax feature validation after resolution', () => {
-  it('should report explicit overrides declared below syntax 1.6.0', async () => {
+  it('should report explicit overrides declared below syntax 1.5.0', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'promptscript-syntax-feature-'));
     directories.push(directory);
     const entryPath = join(directory, 'project.prs');
     writeFileSync(
       entryPath,
-      `@meta { id: "test" syntax: "1.5.0" }
+      `@meta { id: "test" syntax: "1.4.0" }
 @standards { testing: ["Use Jest"] }
 @override standards.testing { ["Use Vitest"] }
 `
@@ -48,7 +48,7 @@ describe('syntax feature validation after resolution', () => {
     const entryPath = join(directory, 'project.prs');
     writeFileSync(
       entryPath,
-      `@meta { id: "test" syntax: "1.5.0" }
+      `@meta { id: "test" syntax: "1.4.0" }
 @standards { testing: ["Use Jest"] }
 @override standards.missing { true }
 `
@@ -80,7 +80,7 @@ describe('syntax feature validation after resolution', () => {
     const entryPath = join(directory, 'project.prs');
     writeFileSync(
       entryPath,
-      `@meta { id: "test" syntax: "1.5.0" }
+      `@meta { id: "test" syntax: "1.4.0" }
 @standards { testing: ["Use Jest"] }
 @override standards.missing { true }
 `

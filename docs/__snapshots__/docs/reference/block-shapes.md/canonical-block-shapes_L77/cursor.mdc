@@ -19,7 +19,6 @@ Code style:
 Commands:
 /review - Review code quality
 /test - Run tests
-/typecheck - Check types
 
 Reference:
 Keep generated instructions aligned with PromptScript source.

@@ -3373,7 +3373,7 @@ describe('BrowserResolver', () => {
   describe('explicit override resolution', () => {
     it('applies ordered replacements and later extensions', async () => {
       const fs = new VirtualFileSystem({
-        'project.prs': `@meta { id: "override" syntax: "1.6.0" }
+        'project.prs': `@meta { id: "override" syntax: "1.5.0" }
 @standards { testing: ["Use Jest"] config: { runner: "jest" coverage: 80 } }
 @override standards.testing { ["Use Vitest"] }
 @extend standards { testing: ["Require coverage"] }
@@ -3396,14 +3396,14 @@ describe('BrowserResolver', () => {
 
     it('replaces inherited and aliased imported values', async () => {
       const fs = new VirtualFileSystem({
-        'project.prs': `@meta { id: "child" syntax: "1.6.0" }
+        'project.prs': `@meta { id: "child" syntax: "1.5.0" }
 @inherit ./parent
 @use ./shared as shared
 @override context.runtime { "bun" }
 @override shared.standards.testing { ["Use Vitest"] }`,
-        'parent.prs': `@meta { id: "parent" syntax: "1.6.0" }
+        'parent.prs': `@meta { id: "parent" syntax: "1.5.0" }
 @context { runtime: "node" }`,
-        'shared.prs': `@meta { id: "shared" syntax: "1.6.0" }
+        'shared.prs': `@meta { id: "shared" syntax: "1.5.0" }
 @standards { testing: ["Use Jest"] }`,
       });
       const resolver = new BrowserResolver({ fs });

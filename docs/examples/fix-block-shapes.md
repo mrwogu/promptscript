@@ -36,7 +36,7 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 **Correct: explicit command object**
 
 ```promptscript
-@meta { id: "shape-remediation" syntax: "1.6.0" }
+@meta { id: "shape-remediation" syntax: "1.5.0" }
 
 @shortcuts {
   "/review": {
@@ -73,7 +73,7 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 **Correct: canonical array body**
 
 ```promptscript
-@meta { id: "canonical-restrictions" syntax: "1.6.0" }
+@meta { id: "canonical-restrictions" syntax: "1.5.0" }
 
 @restrictions {
   - "Never expose secrets"

@@ -26,7 +26,7 @@ describe('canonical AST', () => {
 
   it('preserves explicit overrides in declaration order and legacy projections', () => {
     const source = `
-      @meta { id: "override-order" syntax: "1.6.0" }
+      @meta { id: "override-order" syntax: "1.5.0" }
       @standards { testing: ["Old"] }
       @override standards.testing { ["Use Vitest"] }
       @extend standards.testing { - "Require coverage" }
@@ -47,7 +47,7 @@ describe('canonical AST', () => {
 
   it('parses regular block bodies and standalone override values', () => {
     const ast = parseCanonicalOrThrow(`
-      @meta { id: "override-values" syntax: "1.6.0" }
+      @meta { id: "override-values" syntax: "1.5.0" }
       @standards { testing: ["Old"] }
       @override standards { testing: ["New"] }
       @override standards.testing { { runner: "vitest" } }
@@ -80,7 +80,7 @@ describe('canonical AST', () => {
 
   it('keeps override legal in fields, aliases, parameters, and path segments', () => {
     const ast = parseCanonicalOrThrow(`
-      @meta { id: "override-identifiers" syntax: "1.6.0" }
+      @meta { id: "override-identifiers" syntax: "1.5.0" }
       @params { override: "default" }
       @use ./shared as override
       @standards { override: true }

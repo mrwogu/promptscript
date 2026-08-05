@@ -126,7 +126,7 @@ Split by type of concern:
 # .promptscript/fragments/testing.prs
 @meta {
   id: "testing-fragment"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @standards {
@@ -306,7 +306,7 @@ When you `@use` a file, all blocks from the source are merged into your file:
 | Array content  | Unique concatenation (preserves order, dedupes)                |
 | Mixed content  | Text concatenated, properties deep merged                      |
 
-When block shapes conflict, existing target body wins. Under syntax `1.6.0`,
+When block shapes conflict, existing target body wins. Under syntax `1.5.0`,
 later local blocks and modification operations apply after an earlier import.
 
 **Example:**

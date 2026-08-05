@@ -5,9 +5,9 @@ description: Safe upgrade workflow for PromptScript syntax, block shapes, replac
 
 # Upgrade 1.15 to 1.16
 
-PromptScript 1.16 adds syntax `1.5.0` section headers, syntax `1.6.0` atomic
-replacement, canonical block shape diagnostics, expanded portable hooks, and
-automatic migration of legacy Factory hooks.
+PromptScript 1.16 adds syntax `1.5.0` with section headers, atomic replacement,
+and declaration-order operations, plus canonical block shape diagnostics,
+expanded portable hooks, and automatic migration of legacy Factory hooks.
 
 Upgrade on a dedicated branch. Keep source instructions and generated outputs
 under version control before starting.
@@ -40,7 +40,7 @@ package manager instead.
 
 ## 3. Audit Declaration Order and Preview
 
-Syntax `1.6.0` applies `@inherit`, `@use`, local blocks, `@extend`, and
+Syntax `1.5.0` applies `@inherit`, `@use`, local blocks, `@extend`, and
 `@override` in declaration order. Before changing syntax declarations, locate
 composition and modification directives:
 
@@ -123,7 +123,7 @@ Existing `field!` remains supported. Migrate only where atomic target
 replacement makes intent clearer.
 
 ```promptscript
-@meta { id: "service" syntax: "1.6.0" }
+@meta { id: "service" syntax: "1.5.0" }
 
 @standards {
   testing: ["Use Jest", "Use Mocha"]
