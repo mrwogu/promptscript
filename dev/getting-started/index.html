@@ -19,7 +19,7 @@
 </span></code></pre></div> </div> <div class=tabbed-block> <div class="language-bash highlight"><pre><span></span><code><span id=__span-2-1><a id=__codelineno-2-1 name=__codelineno-2-1 href=#__codelineno-2-1></a>yarn<span class=w> </span>global<span class=w> </span>add<span class=w> </span>@promptscript/cli
 </span></code></pre></div> </div> </div> </div> <p>Verify installation:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-3-1><a id=__codelineno-3-1 name=__codelineno-3-1 href=#__codelineno-3-1></a>prs<span class=w> </span>--version
 </span></code></pre></div> <h2 id=interactive-initialization>Interactive Initialization<a class=headerlink href=#interactive-initialization title="Permanent link">&para;</a></h2> <p>PromptScript guides you through setup with an interactive initializer that auto-detects your tech stack and helps you inherit standards from your organization's registry.</p> <!-- prettier-ignore --> <div class=init-demo id=init-demo> <div class=init-demo__wrapper> <div class=init-demo__terminal> <div class=init-demo__header> <span class="init-demo__dot init-demo__dot--red"></span> <span class="init-demo__dot init-demo__dot--yellow"></span> <span class="init-demo__dot init-demo__dot--green"></span> <span class=init-demo__title>Terminal</span> <button class=init-demo__replay title="Replay animation">↻ Replay</button> </div> <div class=init-demo__output></div> </div> <div class=init-demo__generated> <div class=init-demo__generated-header> <svg viewbox="0 0 24 24" fill=currentColor><path d="M21 7L9 19l-5.5-5.5l1.41-1.41L9 16.17L19.59 5.59z"/></svg> Generated Files </div> <div class=init-demo__files-grid> <div class=init-demo__file-preview> <div class=init-demo__file-preview-header>promptscript.yaml</div> <pre class=init-demo__file-preview-content><span class=key>id:</span> <span class=str>my-app</span>
-<span class=key>syntax:</span> <span class=str>"1.6.0"</span>
+<span class=key>syntax:</span> <span class=str>"1.5.0"</span>
 
 <span class=key>targets:</span>
   - <span class=str>github</span>
@@ -30,7 +30,7 @@
   <span class=key>rules:</span>
     <span class=key>empty-block:</span> <span class=str>warning</span></pre> </div> <div class=init-demo__file-preview> <div class=init-demo__file-preview-header>.promptscript/project.prs</div> <pre class=init-demo__file-preview-content><span class=kw>@meta</span> {
   <span class=key>id:</span> <span class=str>"my-app"</span>
-  <span class=key>syntax:</span> <span class=str>"1.6.0"</span>
+  <span class=key>syntax:</span> <span class=str>"1.5.0"</span>
 }
 
 <span class=kw>@inherit</span> <span class=str>@company/react-app</span>
@@ -43,7 +43,7 @@
 </span></code></pre></div> <p>This creates the scaffolding for your AI infrastructure:</p> <ul> <li><code>promptscript.yaml</code> - <strong>Compiler Configuration</strong> (minimal, comment-free YAML)</li> <li><code>.promptscript/project.prs</code> - <strong>Source of Truth</strong> (your rules, identity, and skills)</li> </ul> <p>Detected AI tools are preselected. If none are detected, choose targets interactively. For non-interactive setup, pass targets explicitly:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a>prs<span class=w> </span>init<span class=w> </span>--yes<span class=w> </span>--targets<span class=w> </span>claude<span class=w> </span>factory
 </span></code></pre></div> <p>PromptScript does not infer Copilot from <code>.github/workflows</code> and does not assign <code>AGENTS.md</code> to a specific tool.</p> <h3 id=2-define-your-policy>2. Define Your Policy<a class=headerlink href=#2-define-your-policy title="Permanent link">&para;</a></h3> <p>Open <code>.promptscript/project.prs</code> and customize:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;my-project&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.6.0&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.5.0&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
@@ -164,7 +164,7 @@
 </span><span id=__span-17-16><a id=__codelineno-17-16 name=__codelineno-17-16 href=#__codelineno-17-16></a><span class=k>-</span><span class=w> </span>Don&#39;t commit .env files
 </span></code></pre></div> <p><strong>After</strong> (.promptscript/project.prs):</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;api-service&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.6.0&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.5.0&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
@@ -207,7 +207,7 @@
 </span><span id=__span-18-15><a id=__codelineno-18-15 name=__codelineno-18-15 href=#__codelineno-18-15></a>│       └── refactor.md
 </span><span id=__span-18-16><a id=__codelineno-18-16 name=__codelineno-18-16 href=#__codelineno-18-16></a>└── .agent/rules/project.md            # Generated
 </span></code></pre></div> <h2 id=configuration>Configuration<a class=headerlink href=#configuration title="Permanent link">&para;</a></h2> <p>The <code>promptscript.yaml</code> file controls compilation:</p> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-19-1><a id=__codelineno-19-1 name=__codelineno-19-1 href=#__codelineno-19-1></a><span class=nt>id</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">my-project</span>
-</span><span id=__span-19-2><a id=__codelineno-19-2 name=__codelineno-19-2 href=#__codelineno-19-2></a><span class=nt>syntax</span><span class=p>:</span><span class=w> </span><span class=s>&quot;1.6.0&quot;</span>
+</span><span id=__span-19-2><a id=__codelineno-19-2 name=__codelineno-19-2 href=#__codelineno-19-2></a><span class=nt>syntax</span><span class=p>:</span><span class=w> </span><span class=s>&quot;1.5.0&quot;</span>
 </span><span id=__span-19-3><a id=__codelineno-19-3 name=__codelineno-19-3 href=#__codelineno-19-3></a>
 </span><span id=__span-19-4><a id=__codelineno-19-4 name=__codelineno-19-4 href=#__codelineno-19-4></a><span class=c1># Input settings</span>
 </span><span id=__span-19-5><a id=__codelineno-19-5 name=__codelineno-19-5 href=#__codelineno-19-5></a><span class=nt>input</span><span class=p>:</span>

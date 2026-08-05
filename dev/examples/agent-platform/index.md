@@ -19,7 +19,7 @@ This syntax 1.6 example connects reusable skills, MCP tools, a specialist agent,
 ```
 @meta {
   id: "checkout-agent-platform"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["payments", "typescript"]
 }
 
@@ -107,7 +107,7 @@ Use full target modes to generate native capability files:
 
 ```yaml
 id: checkout-agent-platform
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 targets:
   - claude:

@@ -1,13 +1,13 @@
 # File Anatomy
 
-A `.prs` file contains metadata, composition directives, content blocks, and modification operations. Syntax `1.6.0` applies top-level declarations in source order.
+A `.prs` file contains metadata, composition directives, content blocks, and modification operations. Syntax `1.5.0` applies top-level declarations in source order.
 
 ## Recommended Structure
 
 ```
 @meta {
   id: "checkout-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 # 1. Establish base layers.

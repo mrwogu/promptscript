@@ -48,7 +48,7 @@ A PromptScript file (`.prs`) consists of:
 @override path { ... }  # Atomic replacement of an existing target
 ```
 
-Syntax `1.6.0` resolves top-level declarations in source order. Put `@meta` first, then imports, local blocks, and modifications in the order they should apply. See [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md). Contextual `@header` entries live inside supported owner blocks, not at the top level.
+Syntax `1.5.0` resolves top-level declarations in source order. Put `@meta` first, then imports, local blocks, and modifications in the order they should apply. See [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md). Contextual `@header` entries live inside supported owner blocks, not at the top level.
 
 ## [@meta](https://github.com/meta "GitHub User: meta") Block (Required)
 
@@ -132,8 +132,7 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | `1.2.0` | Stable  | All 1.1.0 blocks + `@examples`                                                                                                             |
 | `1.3.0` | Stable  | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
 | `1.4.0` | Stable  | All 1.3.0 features + `@hooks`, `@mcpServers`, `@plugins`                                                                                   |
-| `1.5.0` | Stable  | All 1.4.0 features + generated section title overrides with contextual `@header`                                                           |
-| `1.6.0` | Current | All 1.5.0 features + atomic replacement with contextual `@override`                                                                        |
+| `1.5.0` | Current | All 1.4.0 features + `@header` section titles, `@override` replacement, declaration order, unquoted `${VAR}` values                        |
 
 Block Availability
 
@@ -151,7 +150,7 @@ Block Availability
 | `@mcpServers` | `1.4.0`                |
 | `@plugins`    | `1.4.0`                |
 
-All other built-in blocks are available from `1.0.0`. Regular block field replacement with `field!: value` requires syntax `1.3.0`. Generated section title overrides with `@header` require syntax `1.5.0`. Atomic target replacement with `@override` requires syntax `1.6.0`.
+All other built-in blocks are available from `1.0.0`. Regular block field replacement with `field!: value` requires syntax `1.3.0`. Generated section title overrides with `@header`, atomic target replacement with `@override`, and unquoted `${VAR}` values require syntax `1.5.0`.
 
 ### Validation (PS018, PS019)
 
@@ -226,7 +225,7 @@ When you use `@use`, all blocks from the imported file are merged into your file
 - **ObjectContent**: Deep merged (the imported source wins same-shape key conflicts)
 - **ArrayContent**: Unique concatenation (preserves order, removes duplicates)
 
-For incompatible block shapes, the existing target body wins. Under syntax `1.6.0`, later declarations can modify the merged result, so a local block, `@extend`, or `@override` placed after `@use` can become the final value. See [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md) for the normative matrix.
+For incompatible block shapes, the existing target body wins. Under syntax `1.5.0`, later declarations can modify the merged result, so a local block, `@extend`, or `@override` placed after `@use` can become the final value. See [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md) for the normative matrix.
 
 ```
 # Source: @core/guards/security
@@ -1803,6 +1802,22 @@ String values can reference environment variables for dynamic configuration:
 | `${VAR}`          | Substitute with variable value      |
 | `${VAR:-default}` | Substitute with variable or default |
 
+Syntax `1.5.0` accepts a reference without quotes wherever a value is expected, which keeps single-variable fields readable:
+
+```
+@meta {
+  id: "unquoted-env-vars"
+  syntax: "1.5.0"
+}
+
+@context {
+  environment: ${NODE_ENV:-development}
+  regions: [${PRIMARY_REGION:-us-east-1}, "eu-west-1"]
+}
+```
+
+The value is always a string. Quote the reference when the field mixes it with other text.
+
 ### Examples
 
 ```
@@ -1917,7 +1932,7 @@ See [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.
 
 ## Atomic Replacement with [@override](https://github.com/override "GitHub User: override")
 
-Syntax `1.6.0` adds `@override` for replacing a complete existing target:
+Syntax `1.5.0` adds `@override` for replacing a complete existing target:
 
 ```text
 @standards {
@@ -1948,7 +1963,7 @@ Syntax `1.6.0` adds `@override` for replacing a complete existing target:
 
 Root replacements accept regular text, object, array, or mixed block bodies. Nested replacements also accept standalone object, string, number, boolean, and `null` values. The complete target path must already exist when the operation runs. Missing targets and traversal through scalar values are errors.
 
-Operations use declaration order in syntax `1.6.0`. This includes `@inherit`, top-level `@use`, local blocks, `@extend`, and `@override`. An `@override` used with an older declared syntax also uses declaration order so replacement remains deterministic, while PS018 requests a syntax upgrade.
+Operations use declaration order in syntax `1.5.0`. This includes `@inherit`, top-level `@use`, local blocks, `@extend`, and `@override`. An `@override` used with an older declared syntax also uses declaration order so replacement remains deterministic, while PS018 requests a syntax upgrade.
 
 Use the forms according to intent:
 
@@ -1963,7 +1978,7 @@ Use the forms according to intent:
 This complete example exercises root and nested replacement shapes:
 
 ```
-@meta { id: "override-shapes" syntax: "1.6.0" }
+@meta { id: "override-shapes" syntax: "1.5.0" }
 
 @identity { """Old identity""" }
 @restrictions { - "Old restriction" }

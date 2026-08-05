@@ -31,7 +31,7 @@ Arrays deduplicate and append according to block merge policy. Objects merge rec
 ## Atomic Replacement with `@override`
 
 ```
-@meta { id: "replacement" syntax: "1.6.0" }
+@meta { id: "replacement" syntax: "1.5.0" }
 
 @standards {
   testing: ["Use Jest", "Use Mocha"]

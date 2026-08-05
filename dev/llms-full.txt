@@ -59,7 +59,7 @@ promptscript.yaml
 
 ```
 id: my-app
-syntax: "1.6.0"
+syntax: "1.5.0"
 
 targets:
   - github
@@ -76,7 +76,7 @@ validation:
 ```
 @meta {
   id: "my-app"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @inherit @company/react-app
@@ -125,7 +125,7 @@ Open `.promptscript/project.prs` and customize:
 ```
 @meta {
   id: "my-project"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -394,7 +394,7 @@ You are a Python developer working on a FastAPI service.
 ```
 @meta {
   id: "api-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -456,7 +456,7 @@ The `promptscript.yaml` file controls compilation:
 
 ```yaml
 id: my-project
-syntax: "1.6.0"
+syntax: "1.5.0"
 
 # Input settings
 input:
@@ -930,7 +930,7 @@ The checkout service owns payment authorization, retries, and webhook handling. 
 
 Acceptance criteria:
 
-- Every `.prs` file uses syntax `1.6.0`.
+- Every `.prs` file uses syntax `1.5.0`.
 - `prs validate --strict` succeeds.
 - The resolved testing standard is `Minimum 95% coverage for payment flows`.
 - Generated output contains the payment security skill and reviewer agent.
@@ -967,7 +967,7 @@ Create `.promptscript/org-base.prs`:
 ```
 @meta {
   id: "commerce-org-base"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["commerce", "typescript"]
 }
 
@@ -1008,7 +1008,7 @@ Create `.promptscript/payment-policy.prs`:
 ```
 @meta {
   id: "payment-policy"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["payments", "pci"]
   params: {
     provider: enum("Stripe", "Adyen") = "Stripe"
@@ -1040,7 +1040,7 @@ Create `.promptscript/project.prs`:
 ```
 @meta {
   id: "checkout-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["checkout", "payments", "production"]
 }
 
@@ -1147,7 +1147,7 @@ Create `promptscript.yaml`:
 
 ```yaml
 id: checkout-service
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -1352,7 +1352,7 @@ Then fix PromptScript source, rerun the dry run and full diff, and repeat the co
 
 ## Production Checklist
 
-- Source files use syntax `1.6.0`.
+- Source files use syntax `1.5.0`.
 - Composition order has a written reason.
 - Replacement values are asserted by reviewers or tests.
 - Existing target files have recoverable backups.
@@ -2607,7 +2607,7 @@ A PromptScript file (`.prs`) consists of:
 @override path { ... }  # Atomic replacement of an existing target
 ```
 
-Syntax `1.6.0` resolves top-level declarations in source order. Put `@meta` first, then imports, local blocks, and modifications in the order they should apply. See [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md). Contextual `@header` entries live inside supported owner blocks, not at the top level.
+Syntax `1.5.0` resolves top-level declarations in source order. Put `@meta` first, then imports, local blocks, and modifications in the order they should apply. See [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md). Contextual `@header` entries live inside supported owner blocks, not at the top level.
 
 ## [@meta](https://github.com/meta "GitHub User: meta") Block (Required)
 
@@ -2691,8 +2691,7 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | `1.2.0` | Stable  | All 1.1.0 blocks + `@examples`                                                                                                             |
 | `1.3.0` | Stable  | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
 | `1.4.0` | Stable  | All 1.3.0 features + `@hooks`, `@mcpServers`, `@plugins`                                                                                   |
-| `1.5.0` | Stable  | All 1.4.0 features + generated section title overrides with contextual `@header`                                                           |
-| `1.6.0` | Current | All 1.5.0 features + atomic replacement with contextual `@override`                                                                        |
+| `1.5.0` | Current | All 1.4.0 features + `@header` section titles, `@override` replacement, declaration order, unquoted `${VAR}` values                        |
 
 Block Availability
 
@@ -2710,7 +2709,7 @@ Block Availability
 | `@mcpServers` | `1.4.0`                |
 | `@plugins`    | `1.4.0`                |
 
-All other built-in blocks are available from `1.0.0`. Regular block field replacement with `field!: value` requires syntax `1.3.0`. Generated section title overrides with `@header` require syntax `1.5.0`. Atomic target replacement with `@override` requires syntax `1.6.0`.
+All other built-in blocks are available from `1.0.0`. Regular block field replacement with `field!: value` requires syntax `1.3.0`. Generated section title overrides with `@header`, atomic target replacement with `@override`, and unquoted `${VAR}` values require syntax `1.5.0`.
 
 ### Validation (PS018, PS019)
 
@@ -2785,7 +2784,7 @@ When you use `@use`, all blocks from the imported file are merged into your file
 - **ObjectContent**: Deep merged (the imported source wins same-shape key conflicts)
 - **ArrayContent**: Unique concatenation (preserves order, removes duplicates)
 
-For incompatible block shapes, the existing target body wins. Under syntax `1.6.0`, later declarations can modify the merged result, so a local block, `@extend`, or `@override` placed after `@use` can become the final value. See [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md) for the normative matrix.
+For incompatible block shapes, the existing target body wins. Under syntax `1.5.0`, later declarations can modify the merged result, so a local block, `@extend`, or `@override` placed after `@use` can become the final value. See [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md) for the normative matrix.
 
 ```
 # Source: @core/guards/security
@@ -4362,6 +4361,22 @@ String values can reference environment variables for dynamic configuration:
 | `${VAR}`          | Substitute with variable value      |
 | `${VAR:-default}` | Substitute with variable or default |
 
+Syntax `1.5.0` accepts a reference without quotes wherever a value is expected, which keeps single-variable fields readable:
+
+```
+@meta {
+  id: "unquoted-env-vars"
+  syntax: "1.5.0"
+}
+
+@context {
+  environment: ${NODE_ENV:-development}
+  regions: [${PRIMARY_REGION:-us-east-1}, "eu-west-1"]
+}
+```
+
+The value is always a string. Quote the reference when the field mixes it with other text.
+
 ### Examples
 
 ```
@@ -4476,7 +4491,7 @@ See [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.
 
 ## Atomic Replacement with [@override](https://github.com/override "GitHub User: override")
 
-Syntax `1.6.0` adds `@override` for replacing a complete existing target:
+Syntax `1.5.0` adds `@override` for replacing a complete existing target:
 
 ```text
 @standards {
@@ -4507,7 +4522,7 @@ Syntax `1.6.0` adds `@override` for replacing a complete existing target:
 
 Root replacements accept regular text, object, array, or mixed block bodies. Nested replacements also accept standalone object, string, number, boolean, and `null` values. The complete target path must already exist when the operation runs. Missing targets and traversal through scalar values are errors.
 
-Operations use declaration order in syntax `1.6.0`. This includes `@inherit`, top-level `@use`, local blocks, `@extend`, and `@override`. An `@override` used with an older declared syntax also uses declaration order so replacement remains deterministic, while PS018 requests a syntax upgrade.
+Operations use declaration order in syntax `1.5.0`. This includes `@inherit`, top-level `@use`, local blocks, `@extend`, and `@override`. An `@override` used with an older declared syntax also uses declaration order so replacement remains deterministic, while PS018 requests a syntax upgrade.
 
 Use the forms according to intent:
 
@@ -4522,7 +4537,7 @@ Use the forms according to intent:
 This complete example exercises root and nested replacement shapes:
 
 ```
-@meta { id: "override-shapes" syntax: "1.6.0" }
+@meta { id: "override-shapes" syntax: "1.5.0" }
 
 @identity { """Old identity""" }
 @restrictions { - "Old restriction" }
@@ -4545,14 +4560,14 @@ This complete example exercises root and nested replacement shapes:
 
 # File Anatomy
 
-A `.prs` file contains metadata, composition directives, content blocks, and modification operations. Syntax `1.6.0` applies top-level declarations in source order.
+A `.prs` file contains metadata, composition directives, content blocks, and modification operations. Syntax `1.5.0` applies top-level declarations in source order.
 
 ## Recommended Structure
 
 ```
 @meta {
   id: "checkout-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 # 1. Establish base layers.
@@ -4621,7 +4636,7 @@ PromptScript preserves body entries in source order. Every built-in block has on
 | `mixed`  | Properties plus prose or list entries | `@context`                                   |
 
 ```
-@meta { id: "body-shapes" syntax: "1.6.0" }
+@meta { id: "body-shapes" syntax: "1.5.0" }
 
 @identity {
   """
@@ -4662,7 +4677,7 @@ Common remediation:
 | Mixed body with formatter-dependent fields | Separate portable fields from prose |
 
 ```
-@meta { id: "canonical-shortcut" syntax: "1.6.0" }
+@meta { id: "canonical-shortcut" syntax: "1.5.0" }
 
 @shortcuts {
   "/review": {
@@ -4687,7 +4702,7 @@ See [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.
 Composition uses two layers of rules:
 
 1. Each operation has a merge policy.
-1. Syntax `1.6.0` applies operations in declaration order.
+1. Syntax `1.5.0` applies operations in declaration order.
 
 ## Normative Precedence
 
@@ -4705,21 +4720,21 @@ For multiple `@use` declarations, each later import becomes the new source. Its 
 
 ```
 # base.prs
-@meta { id: "base" syntax: "1.6.0" }
+@meta { id: "base" syntax: "1.5.0" }
 @standards {
   testing: ["Use Jest"]
   coverage: 80
 }
 
 # quality.prs
-@meta { id: "quality" syntax: "1.6.0" }
+@meta { id: "quality" syntax: "1.5.0" }
 @standards {
   coverage: 90
   review: ["Require approval"]
 }
 
 # project.prs
-@meta { id: "project" syntax: "1.6.0" }
+@meta { id: "project" syntax: "1.5.0" }
 @inherit ./base
 @use ./quality
 @standards {
@@ -4752,7 +4767,7 @@ See [Execution Order](https://getpromptscript.dev/dev/reference/language/executi
 
 # Execution Order
 
-Syntax `1.6.0` preserves top-level operation order. This removes ambiguity when imports, local blocks, extensions, and replacements target the same value.
+Syntax `1.5.0` preserves top-level operation order. This removes ambiguity when imports, local blocks, extensions, and replacements target the same value.
 
 ## Resolution Sequence
 
@@ -4772,7 +4787,7 @@ Diagram shows recommended organization, not a fixed phase reordering. Resolver e
 ## Order Changes Results
 
 ```
-@meta { id: "ordered-operations" syntax: "1.6.0" }
+@meta { id: "ordered-operations" syntax: "1.5.0" }
 
 @standards {
   testing: ["Use Jest"]
@@ -4802,7 +4817,7 @@ Reversing `@extend` and `@override` discards the extension because replacement r
 - Local duplicate blocks apply at their source positions.
 - Imported source values use import merge policy before later operations.
 - Sealed skill properties remain protected regardless of operation order.
-- Older syntax using `@override` still resolves deterministically, but PS018 requests syntax `1.6.0`.
+- Older syntax using `@override` still resolves deterministically, but PS018 requests syntax `1.5.0`.
 
 ## Review Checklist
 
@@ -4845,7 +4860,7 @@ Arrays deduplicate and append according to block merge policy. Objects merge rec
 ## Atomic Replacement with `@override`
 
 ```
-@meta { id: "replacement" syntax: "1.6.0" }
+@meta { id: "replacement" syntax: "1.5.0" }
 
 @standards {
   testing: ["Use Jest", "Use Mocha"]
@@ -4886,7 +4901,7 @@ Syntax `1.5.0` introduced contextual `@header` entries. They change human-readab
 ```
 @meta {
   id: "localized-project"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @standards {
@@ -4935,15 +4950,14 @@ See [Generated Section Headers](https://getpromptscript.dev/dev/reference/langua
 
 ## Syntax Versions
 
-| Version | Added capability                                    |
-| ------- | --------------------------------------------------- |
-| `1.0.0` | Core instruction and composition blocks             |
-| `1.1.0` | Agents and workflows                                |
-| `1.2.0` | Few-shot examples                                   |
-| `1.3.0` | Direct regular field replacement with `field!`      |
-| `1.4.0` | Hooks, MCP servers, and plugins                     |
-| `1.5.0` | Contextual generated section headers                |
-| `1.6.0` | Atomic `@override` and declaration-order operations |
+| Version | Added capability                                                                                       |
+| ------- | ------------------------------------------------------------------------------------------------------ |
+| `1.0.0` | Core instruction and composition blocks                                                                |
+| `1.1.0` | Agents and workflows                                                                                   |
+| `1.2.0` | Few-shot examples                                                                                      |
+| `1.3.0` | Direct regular field replacement with `field!`                                                         |
+| `1.4.0` | Hooks, MCP servers, and plugins                                                                        |
+| `1.5.0` | Contextual section headers, atomic `@override`, declaration-order operations, unquoted `${VAR}` values |
 
 Use the minimum required version for reusable published fragments. Use current syntax for new project entry files.
 
@@ -9041,7 +9055,7 @@ Use `@use` to import and merge fragments (like mixins):
 PromptScript 1.6 applies declarations in source order. Import merge policy and later operations are separate decisions:
 
 ```
-@meta { id: "service" syntax: "1.6.0" }
+@meta { id: "service" syntax: "1.5.0" }
 
 @inherit @stacks/typescript-lib
 @use @core/security
@@ -9066,7 +9080,7 @@ Create reusable fragments:
 # @fragments/testing.prs
 @meta {
   id: "@fragments/testing"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @standards {
@@ -9496,10 +9510,10 @@ Update version constraints or registry.
 
 ## Replacing Complete Values
 
-Use `@extend` when inherited content should be merged. Use `@override` with syntax `1.6.0` when the complete existing value should be replaced:
+Use `@extend` when inherited content should be merged. Use `@override` with syntax `1.5.0` when the complete existing value should be replaced:
 
 ```text
-@meta { id: "project" syntax: "1.6.0" }
+@meta { id: "project" syntax: "1.5.0" }
 @inherit @company/base
 
 @override standards.testing {
@@ -9624,7 +9638,7 @@ Split by type of concern:
 # .promptscript/fragments/testing.prs
 @meta {
   id: "testing-fragment"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @standards {
@@ -9780,7 +9794,7 @@ When you `@use` a file, all blocks from the source are merged into your file:
 | Array content  | Unique concatenation (preserves order, dedupes)                |
 | Mixed content  | Text concatenated, properties deep merged                      |
 
-When block shapes conflict, existing target body wins. Under syntax `1.6.0`, later local blocks and modification operations apply after an earlier import.
+When block shapes conflict, existing target body wins. Under syntax `1.5.0`, later local blocks and modification operations apply after an earlier import.
 
 **Example:**
 
@@ -14612,7 +14626,7 @@ Use major version bumps and provide migration guides for breaking changes.
 
 # Upgrade 1.15 to 1.16
 
-PromptScript 1.16 adds syntax `1.5.0` section headers, syntax `1.6.0` atomic replacement, canonical block shape diagnostics, expanded portable hooks, and automatic migration of legacy Factory hooks.
+PromptScript 1.16 adds syntax `1.5.0` with section headers, atomic replacement, declaration-order operations, and unquoted `${VAR}` values, plus canonical block shape diagnostics, expanded portable hooks, and automatic migration of legacy Factory hooks.
 
 Upgrade on a dedicated branch. Keep source instructions and generated outputs under version control before starting.
 
@@ -14640,7 +14654,7 @@ For repository-local installations, update lockfile through the project's packag
 
 ## 3. Audit Declaration Order and Preview
 
-Syntax `1.6.0` applies `@inherit`, `@use`, local blocks, `@extend`, and `@override` in declaration order. Before changing syntax declarations, locate composition and modification directives:
+Syntax `1.5.0` applies `@inherit`, `@use`, local blocks, `@extend`, and `@override` in declaration order. Before changing syntax declarations, locate composition and modification directives:
 
 ```bash
 rg -n '^\s*@(inherit|use|extend|override)\b' --glob '*.prs' .
@@ -14700,7 +14714,7 @@ See [Values and Block Bodies](https://getpromptscript.dev/dev/reference/language
 Existing `field!` remains supported. Migrate only where atomic target replacement makes intent clearer.
 
 ```
-@meta { id: "service" syntax: "1.6.0" }
+@meta { id: "service" syntax: "1.5.0" }
 
 @standards {
   testing: ["Use Jest", "Use Mocha"]
@@ -15581,10 +15595,10 @@ Choose modification syntax by migration intent:
 
 - Keep `@extend` when old and new values should merge or append.
 - Keep `field!` as a compatibility form for replacing one direct regular field inside `@extend`.
-- Use `@override` with syntax `1.6.0` when one complete existing block or nested value must replace the previous value.
+- Use `@override` with syntax `1.5.0` when one complete existing block or nested value must replace the previous value.
 
 ```
-@meta { id: "migrated-project" syntax: "1.6.0" }
+@meta { id: "migrated-project" syntax: "1.5.0" }
 
 @standards {
   testing: ["Use Jest", "Use Mocha"]
@@ -16316,7 +16330,7 @@ The checkout service owns payment authorization, retries, and webhook handling. 
 
 Acceptance criteria:
 
-- Every `.prs` file uses syntax `1.6.0`.
+- Every `.prs` file uses syntax `1.5.0`.
 - `prs validate --strict` succeeds.
 - The resolved testing standard is `Minimum 95% coverage for payment flows`.
 - Generated output contains the payment security skill and reviewer agent.
@@ -16353,7 +16367,7 @@ Create `.promptscript/org-base.prs`:
 ```
 @meta {
   id: "commerce-org-base"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["commerce", "typescript"]
 }
 
@@ -16394,7 +16408,7 @@ Create `.promptscript/payment-policy.prs`:
 ```
 @meta {
   id: "payment-policy"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["payments", "pci"]
   params: {
     provider: enum("Stripe", "Adyen") = "Stripe"
@@ -16426,7 +16440,7 @@ Create `.promptscript/project.prs`:
 ```
 @meta {
   id: "checkout-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["checkout", "payments", "production"]
 }
 
@@ -16533,7 +16547,7 @@ Create `promptscript.yaml`:
 
 ```yaml
 id: checkout-service
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -16738,7 +16752,7 @@ Then fix PromptScript source, rerun the dry run and full diff, and repeat the co
 
 ## Production Checklist
 
-- Source files use syntax `1.6.0`.
+- Source files use syntax `1.5.0`.
 - Composition order has a written reason.
 - Replacement values are asserted by reviewers or tests.
 - Existing target files have recoverable backups.
@@ -16772,7 +16786,7 @@ my-project/
 ```
 @meta {
   id: "minimal-example"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -16806,7 +16820,7 @@ my-project/
 
 ```yaml
 id: minimal-example
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -16881,7 +16895,7 @@ To also generate for Claude and Cursor:
 ```yaml
 # promptscript.yaml
 id: minimal-example
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -16915,21 +16929,21 @@ Goal: predict final values when several layers modify the same block.
 
 ```
 # base.prs
-@meta { id: "base" syntax: "1.6.0" }
+@meta { id: "base" syntax: "1.5.0" }
 @standards {
   testing: ["Use Jest"]
   coverage: 80
 }
 
 # quality.prs
-@meta { id: "quality" syntax: "1.6.0" }
+@meta { id: "quality" syntax: "1.5.0" }
 @standards {
   coverage: 90
   review: ["Require approval"]
 }
 
 # project.prs
-@meta { id: "project" syntax: "1.6.0" }
+@meta { id: "project" syntax: "1.5.0" }
 @inherit ./base
 @use ./quality
 @standards {
@@ -16976,7 +16990,7 @@ See [Composition and Precedence](https://getpromptscript.dev/dev/reference/langu
 Goal: choose operation matching change intent.
 
 ```
-@meta { id: "merge-vs-replace" syntax: "1.6.0" }
+@meta { id: "merge-vs-replace" syntax: "1.5.0" }
 
 @standards {
   testing: ["Use Jest"]
@@ -17054,7 +17068,7 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 **Correct: explicit command object**
 
 ```
-@meta { id: "shape-remediation" syntax: "1.6.0" }
+@meta { id: "shape-remediation" syntax: "1.5.0" }
 
 @shortcuts {
   "/review": {
@@ -17079,7 +17093,7 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 **Correct: canonical array body**
 
 ```
-@meta { id: "canonical-restrictions" syntax: "1.6.0" }
+@meta { id: "canonical-restrictions" syntax: "1.5.0" }
 
 @restrictions {
   - "Never expose secrets"
@@ -17106,7 +17120,7 @@ Goal: customize human-readable headings while preserving native file contracts.
 ```
 @meta {
   id: "localized-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -17165,7 +17179,7 @@ Goal: fail terminal commands while the current Git diff contains whitespace erro
 ```
 @meta {
   id: "portable-hooks-example"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @hooks {
@@ -17199,7 +17213,7 @@ Goal: fail terminal commands while the current Git diff contains whitespace erro
 ```yaml
 # promptscript.yaml
 id: portable-hooks-example
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -18030,7 +18044,7 @@ acme-promptscript-registry/
 ```
 @meta {
   id: "@frontend/base"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   team: "Frontend Platform"
 }
 
@@ -18151,7 +18165,7 @@ acme-promptscript-registry/
 # checkout-app/promptscript/project.prs
 @meta {
   id: "checkout-app"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 # In a multi-file setup, you would inherit from frontend base:
@@ -19236,7 +19250,7 @@ This syntax 1.6 example connects reusable skills, MCP tools, a specialist agent,
 ```
 @meta {
   id: "checkout-agent-platform"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["payments", "typescript"]
 }
 
@@ -19324,7 +19338,7 @@ Use full target modes to generate native capability files:
 
 ```yaml
 id: checkout-agent-platform
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 targets:
   - claude:

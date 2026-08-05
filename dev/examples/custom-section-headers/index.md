@@ -5,7 +5,7 @@ Goal: customize human-readable headings while preserving native file contracts.
 ```
 @meta {
   id: "localized-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {

@@ -397,7 +397,7 @@ Use `@use` to import and merge fragments (like mixins):
 PromptScript 1.6 applies declarations in source order. Import merge policy and later operations are separate decisions:
 
 ```
-@meta { id: "service" syntax: "1.6.0" }
+@meta { id: "service" syntax: "1.5.0" }
 
 @inherit @stacks/typescript-lib
 @use @core/security
@@ -422,7 +422,7 @@ Create reusable fragments:
 # @fragments/testing.prs
 @meta {
   id: "@fragments/testing"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @standards {
@@ -852,10 +852,10 @@ Update version constraints or registry.
 
 ## Replacing Complete Values
 
-Use `@extend` when inherited content should be merged. Use `@override` with syntax `1.6.0` when the complete existing value should be replaced:
+Use `@extend` when inherited content should be merged. Use `@override` with syntax `1.5.0` when the complete existing value should be replaced:
 
 ```text
-@meta { id: "project" syntax: "1.6.0" }
+@meta { id: "project" syntax: "1.5.0" }
 @inherit @company/base
 
 @override standards.testing {

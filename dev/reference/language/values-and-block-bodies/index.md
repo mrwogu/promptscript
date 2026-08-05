@@ -12,7 +12,7 @@ PromptScript preserves body entries in source order. Every built-in block has on
 | `mixed`  | Properties plus prose or list entries | `@context`                                   |
 
 ```
-@meta { id: "body-shapes" syntax: "1.6.0" }
+@meta { id: "body-shapes" syntax: "1.5.0" }
 
 @identity {
   """
@@ -53,7 +53,7 @@ Common remediation:
 | Mixed body with formatter-dependent fields | Separate portable fields from prose |
 
 ```
-@meta { id: "canonical-shortcut" syntax: "1.6.0" }
+@meta { id: "canonical-shortcut" syntax: "1.5.0" }
 
 @shortcuts {
   "/review": {

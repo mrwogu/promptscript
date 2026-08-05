@@ -16,7 +16,7 @@ Goal: fail terminal commands while the current Git diff contains whitespace erro
 ```
 @meta {
   id: "portable-hooks-example"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @hooks {
@@ -50,7 +50,7 @@ Goal: fail terminal commands while the current Git diff contains whitespace erro
 ```yaml
 # promptscript.yaml
 id: portable-hooks-example
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs

@@ -1,6 +1,6 @@
 # Execution Order
 
-Syntax `1.6.0` preserves top-level operation order. This removes ambiguity when imports, local blocks, extensions, and replacements target the same value.
+Syntax `1.5.0` preserves top-level operation order. This removes ambiguity when imports, local blocks, extensions, and replacements target the same value.
 
 ## Resolution Sequence
 
@@ -20,7 +20,7 @@ Diagram shows recommended organization, not a fixed phase reordering. Resolver e
 ## Order Changes Results
 
 ```
-@meta { id: "ordered-operations" syntax: "1.6.0" }
+@meta { id: "ordered-operations" syntax: "1.5.0" }
 
 @standards {
   testing: ["Use Jest"]
@@ -50,7 +50,7 @@ Reversing `@extend` and `@override` discards the extension because replacement r
 - Local duplicate blocks apply at their source positions.
 - Imported source values use import merge policy before later operations.
 - Sealed skill properties remain protected regardless of operation order.
-- Older syntax using `@override` still resolves deterministically, but PS018 requests syntax `1.6.0`.
+- Older syntax using `@override` still resolves deterministically, but PS018 requests syntax `1.5.0`.
 
 ## Review Checklist
 

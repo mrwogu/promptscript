@@ -15,7 +15,7 @@ The checkout service owns payment authorization, retries, and webhook handling. 
 
 Acceptance criteria:
 
-- Every `.prs` file uses syntax `1.6.0`.
+- Every `.prs` file uses syntax `1.5.0`.
 - `prs validate --strict` succeeds.
 - The resolved testing standard is `Minimum 95% coverage for payment flows`.
 - Generated output contains the payment security skill and reviewer agent.
@@ -52,7 +52,7 @@ Create `.promptscript/org-base.prs`:
 ```
 @meta {
   id: "commerce-org-base"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["commerce", "typescript"]
 }
 
@@ -93,7 +93,7 @@ Create `.promptscript/payment-policy.prs`:
 ```
 @meta {
   id: "payment-policy"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["payments", "pci"]
   params: {
     provider: enum("Stripe", "Adyen") = "Stripe"
@@ -125,7 +125,7 @@ Create `.promptscript/project.prs`:
 ```
 @meta {
   id: "checkout-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   tags: ["checkout", "payments", "production"]
 }
 
@@ -232,7 +232,7 @@ Create `promptscript.yaml`:
 
 ```yaml
 id: checkout-service
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -437,7 +437,7 @@ Then fix PromptScript source, rerun the dry run and full diff, and repeat the co
 
 ## Production Checklist
 
-- Source files use syntax `1.6.0`.
+- Source files use syntax `1.5.0`.
 - Composition order has a written reason.
 - Replacement values are asserted by reviewers or tests.
 - Existing target files have recoverable backups.

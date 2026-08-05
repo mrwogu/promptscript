@@ -47,7 +47,7 @@ promptscript.yaml
 
 ```
 id: my-app
-syntax: "1.6.0"
+syntax: "1.5.0"
 
 targets:
   - github
@@ -64,7 +64,7 @@ validation:
 ```
 @meta {
   id: "my-app"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @inherit @company/react-app
@@ -113,7 +113,7 @@ Open `.promptscript/project.prs` and customize:
 ```
 @meta {
   id: "my-project"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -382,7 +382,7 @@ You are a Python developer working on a FastAPI service.
 ```
 @meta {
   id: "api-service"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -444,7 +444,7 @@ The `promptscript.yaml` file controls compilation:
 
 ```yaml
 id: my-project
-syntax: "1.6.0"
+syntax: "1.5.0"
 
 # Input settings
 input:

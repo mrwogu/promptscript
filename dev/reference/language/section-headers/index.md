@@ -5,7 +5,7 @@ Syntax `1.5.0` introduced contextual `@header` entries. They change human-readab
 ```
 @meta {
   id: "localized-project"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @standards {
