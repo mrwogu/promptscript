@@ -6,6 +6,7 @@ highlighting style used in the PromptScript Playground.
 """
 
 from pygments.lexer import RegexLexer, bygroups
+from pygments.lexers import get_lexer_by_name
 from pygments.token import (
     Comment,
     Keyword,
@@ -17,6 +18,7 @@ from pygments.token import (
     Text,
     Whitespace,
 )
+from pygments.util import ClassNotFound
 
 BLOCK_DIRECTIVES = (
     "identity",
@@ -63,6 +65,55 @@ IMPORT_PATH_PATTERN = (
     # import keyword. Documentation uses it for placeholders such as @path.
     + r"|@[A-Za-z_][A-Za-z0-9_-]*"
 )
+
+# A Markdown fence inside a text block: opening fence with an optional info
+# string, the code, and the closing fence.
+FENCED_CODE_PATTERN = r"(```)([\w+#.-]*)([^\n]*\n)([\s\S]*?)(```)"
+
+# Info strings that Pygments does not know under the name Markdown authors
+# and the TextMate grammar use.
+FENCE_LANGUAGE_ALIASES = {
+    "cjs": "javascript",
+    "jsonc": "json",
+    "mjs": "javascript",
+    "patch": "diff",
+    "yml": "yaml",
+}
+
+_SUBLEXER_CACHE = {}
+
+
+def fence_sublexer(name):
+    """Return a lexer for a fence info string, or None when unknown."""
+    if not name:
+        return None
+    if name not in _SUBLEXER_CACHE:
+        try:
+            _SUBLEXER_CACHE[name] = get_lexer_by_name(
+                FENCE_LANGUAGE_ALIASES.get(name, name), stripnl=False
+            )
+        except ClassNotFound:
+            _SUBLEXER_CACHE[name] = None
+    return _SUBLEXER_CACHE[name]
+
+
+def fenced_code_callback(lexer, match):
+    """Highlight a fenced code block with the lexer named by its info string."""
+    del lexer
+
+    yield match.start(1), String.Delimiter, match.group(1)
+    yield match.start(2), Name.Tag, match.group(2)
+    yield match.start(3), String.Doc, match.group(3)
+
+    code = match.group(4)
+    sublexer = fence_sublexer(match.group(2))
+    if sublexer is None:
+        yield match.start(4), String.Doc, code
+    else:
+        for index, token, value in sublexer.get_tokens_unprocessed(code):
+            yield match.start(4) + index, token, value
+
+    yield match.start(5), String.Delimiter, match.group(5)
 
 
 class PromptScriptLexer(RegexLexer):
@@ -257,17 +308,19 @@ class PromptScriptLexer(RegexLexer):
             (r"[$\{]", String.Single),
         ],
         "docstring": [
+            # Fenced code, highlighted with the lexer its info string names
+            (FENCED_CODE_PATTERN, fenced_code_callback),
             # Template expressions
             (TEMPLATE_VAR_PATTERN, bygroups(Punctuation, Name.Variable, Punctuation)),
             # Environment variables inside docstrings
             (ENV_VAR_PATTERN, Name.Variable),
             # End of docstring
             (r'"""', String.Doc, "#pop"),
-            # Content
-            (r'[^"${]+', String.Doc),
+            # Content, stopping at a backtick so fences get their turn
+            (r'[^"${`]+', String.Doc),
             # Quote not part of closing
             (r'"(?!"")', String.Doc),
-            (r"[$\{]", String.Doc),
+            (r"[$\{`]", String.Doc),
         ],
     }
 
