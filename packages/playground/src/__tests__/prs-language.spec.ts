@@ -123,6 +123,27 @@ describe('prs-language', () => {
       expect(() => compile(PRS_LANGUAGE_ID, prsLanguageDefinition)).not.toThrow();
     });
 
+    it('should hand fenced code to the language named by the info string', () => {
+      const rules = prsLanguageDefinition.tokenizer.multilineString as unknown[];
+      const embedded = rules.find((rule) => {
+        if (!Array.isArray(rule)) return false;
+        const [pattern, action] = rule as unknown[];
+        return pattern instanceof RegExp && isRecord(action) && 'nextEmbedded' in action;
+      });
+
+      expect(embedded).toBeDefined();
+      const [pattern, action] = embedded as [RegExp, Record<string, unknown>];
+      expect(pattern.exec('```javascript')?.[2]).toBe('javascript');
+      expect(action['nextEmbedded']).toBe('$2');
+      expect(action['next']).toBe('@embeddedCode.$2');
+    });
+
+    it('should leave an unlabelled fence to the plain fence state', () => {
+      const tokenizer = prsLanguageDefinition.tokenizer;
+      expect(tokenizer.embeddedCode).toBeDefined();
+      expect(tokenizer.plainFence).toBeDefined();
+    });
+
     it('should have single-quoted string tokenizer rules', () => {
       const tokenizer = prsLanguageDefinition.tokenizer;
       expect(tokenizer.stringSingle).toBeDefined();
