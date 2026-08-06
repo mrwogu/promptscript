@@ -87,10 +87,7 @@ function compactLines(lines: string[]): string[] {
   const selected: string[] = [];
   let bytes = 0;
   for (let index = lines.length - 1; index >= 0; index -= 1) {
-    const line = lines[index];
-    if (line === undefined || line === '') {
-      continue;
-    }
+    const line = lines[index]!;
     const lineBytes = Buffer.byteLength(`${line}\n`);
     if (selected.length >= MAX_SPOOL_RECORDS || bytes + lineBytes > MAX_SPOOL_BYTES) {
       break;

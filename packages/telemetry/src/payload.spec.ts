@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildTelemetryBatches } from './payload.js';
+import { MAX_DURATION_SUM_MS } from './schema.js';
 import type { SpoolRecord, TelemetryEvent } from './types.js';
 
 function record(event: TelemetryEvent, overrides: Partial<SpoolRecord> = {}): SpoolRecord {
@@ -57,6 +58,16 @@ describe('buildTelemetryBatches', () => {
     expect(batches.map((batch) => batch.payload.app_version)).toEqual(['1.16.0', '1.17.0']);
   });
 
+  it('keeps different event keys in one metadata batch', () => {
+    const batches = buildTelemetryBatches([
+      record({ name: 'feature', feature: 'strict', count: 1 }),
+      record({ name: 'feature', feature: 'dry_run', count: 1 }),
+    ]);
+
+    expect(batches).toHaveLength(1);
+    expect(batches[0]?.payload.events).toHaveLength(2);
+  });
+
   it('keeps aggregate values inside collector bounds', () => {
     const batches = buildTelemetryBatches([
       record({ name: 'feature', feature: 'strict', count: 1_000_000 }),
@@ -65,6 +76,27 @@ describe('buildTelemetryBatches', () => {
 
     expect(batches).toHaveLength(2);
     expect(batches.map((batch) => batch.payload.events[0]?.count)).toEqual([1_000_000, 1]);
+  });
+
+  it('does not merge command durations beyond collector bounds', () => {
+    const batches = buildTelemetryBatches([
+      record({
+        name: 'command',
+        command: 'compile',
+        outcome: 'success',
+        count: 1,
+        duration_ms_sum: MAX_DURATION_SUM_MS,
+      }),
+      record({
+        name: 'command',
+        command: 'compile',
+        outcome: 'success',
+        count: 1,
+        duration_ms_sum: 1,
+      }),
+    ]);
+
+    expect(batches).toHaveLength(2);
   });
 
   it('limits each batch to 25 unique events', () => {

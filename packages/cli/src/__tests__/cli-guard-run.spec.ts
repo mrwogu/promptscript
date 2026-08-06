@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 
 // Mock all command modules to prevent side effects during import
@@ -88,5 +89,25 @@ describe('cli guard run() - Issue 1', () => {
 
     expect(mockParseAsync).toHaveBeenCalledTimes(1);
     expect(mockParseAsync).toHaveBeenCalledWith(['node', 'prs', '--help']);
+  });
+
+  it('should run automatically when imported as the CLI entry point', async () => {
+    const originalArgv = process.argv[1];
+    const entrypoint = fileURLToPath(new URL('../cli.ts', import.meta.url));
+    process.argv[1] = entrypoint;
+    mockParseAsync.mockResolvedValue(undefined);
+
+    try {
+      vi.resetModules();
+      await import('../cli.js');
+
+      expect(mockParseAsync).toHaveBeenCalledWith(process.argv);
+    } finally {
+      if (originalArgv === undefined) {
+        process.argv.splice(1, 1);
+      } else {
+        process.argv[1] = originalArgv;
+      }
+    }
   });
 });

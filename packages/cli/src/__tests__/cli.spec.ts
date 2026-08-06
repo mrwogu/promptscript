@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 // Mock all command modules first
 vi.mock('../commands/init', () => ({
@@ -25,6 +25,20 @@ vi.mock('../commands/diff', () => ({
 
 vi.mock('../commands/registry/index', () => ({
   registerRegistryCommands: vi.fn(),
+}));
+
+const mockPrepareCliTelemetry = vi.fn().mockResolvedValue(undefined);
+const mockFinishCliTelemetry = vi.fn();
+const mockFlushCliTelemetry = vi.fn().mockResolvedValue(undefined);
+
+vi.mock('../telemetry/session', () => ({
+  prepareCliTelemetry: mockPrepareCliTelemetry,
+  finishCliTelemetry: mockFinishCliTelemetry,
+  flushCliTelemetry: mockFlushCliTelemetry,
+}));
+
+vi.mock('../commands/telemetry', () => ({
+  telemetryCommand: vi.fn(),
 }));
 
 vi.mock('../commands/hook', () => ({
@@ -73,6 +87,10 @@ const createChainableMock = (): Record<string, ReturnType<typeof vi.fn>> => ({
 
 // Create chainable mock for command
 mockCommand.mockImplementation(() => createChainableMock());
+
+afterEach(() => {
+  delete process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'];
+});
 
 // Mock commander with class
 vi.mock('commander', () => {
@@ -266,6 +284,46 @@ describe('cli', () => {
       expect(mockSkillsRemove).toHaveBeenCalledWith('test-arg', { dryRun: false });
       expect(mockSkillsList).toHaveBeenCalled();
       expect(mockSkillsUpdate).toHaveBeenCalledWith('test-arg', { dryRun: false });
+    });
+
+    it('should guard detached telemetry flush and finish command telemetry', async () => {
+      const preAction = mockHook.mock.calls.find((call) => call[0] === 'preAction')?.[1] as (
+        thisCommand: { opts: () => Record<string, unknown> },
+        actionCommand: { name: () => string }
+      ) => Promise<void>;
+      const postAction = mockHook.mock.calls.find((call) => call[0] === 'postAction')?.[1] as (
+        thisCommand: unknown,
+        actionCommand: unknown
+      ) => void;
+
+      process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'] = '1';
+      await preAction({ opts: () => ({}) }, { name: () => '__telemetry-flush' });
+      expect(mockPrepareCliTelemetry).not.toHaveBeenCalled();
+
+      delete process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'];
+      await preAction({ opts: () => ({ quiet: true }) }, { name: () => 'telemetry' });
+      expect(mockPrepareCliTelemetry).toHaveBeenCalledWith(
+        expect.objectContaining({ name: expect.any(Function) }),
+        expect.stringMatching(/^\d+\.\d+\.\d+/)
+      );
+
+      postAction(undefined, undefined);
+      expect(mockFinishCliTelemetry).toHaveBeenCalled();
+    });
+
+    it('should finish telemetry and rethrow parse errors', async () => {
+      const error = new Error('parse failed');
+      mockParseAsync.mockReset();
+      mockParseAsync.mockRejectedValue(error);
+      mockFinishCliTelemetry.mockClear();
+
+      const { run } = await import('../cli.js');
+
+      await expect(run(['node', 'prs', 'compile'])).rejects.toBe(error);
+      expect(mockFinishCliTelemetry).toHaveBeenCalledWith('error');
+      expect(mockFinishCliTelemetry).toHaveBeenCalledWith();
+
+      mockParseAsync.mockReset();
     });
   });
 });

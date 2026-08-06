@@ -62,6 +62,26 @@ describe('postTelemetry', () => {
     expect(fetchImplementation).not.toHaveBeenCalled();
   });
 
+  it('rejects malformed endpoints without fetching', async () => {
+    const fetchImplementation = vi.fn<TelemetryFetch>();
+
+    const result = await postTelemetry('not-a-url', payload, 100, fetchImplementation);
+
+    expect(result).toBe('rejected');
+    expect(fetchImplementation).not.toHaveBeenCalled();
+  });
+
+  it('retries responses outside the HTTP status ranges', async () => {
+    const fetchImplementation = vi.fn<TelemetryFetch>().mockResolvedValue({
+      ok: false,
+      status: 0,
+    } as Response);
+
+    await expect(
+      postTelemetry('https://telemetry.example/v1/events', payload, 100, fetchImplementation)
+    ).resolves.toBe('retryable');
+  });
+
   it('classifies network failures as unknown to prevent duplicate delivery', async () => {
     const fetchImplementation = vi.fn<TelemetryFetch>().mockRejectedValue(new Error('offline'));
 

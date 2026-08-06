@@ -40,9 +40,6 @@ function copyEvent(event: TelemetryEvent): TelemetryEvent {
 }
 
 function canAggregate(target: TelemetryEvent, source: TelemetryEvent): boolean {
-  if (eventKey(target) !== eventKey(source)) {
-    return false;
-  }
   if (target.count + source.count > MAX_EVENT_COUNT) {
     return false;
   }

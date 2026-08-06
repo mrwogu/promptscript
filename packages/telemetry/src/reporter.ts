@@ -96,8 +96,6 @@ function shouldFlush(config: ResolvedTelemetryConfig, now: number): boolean {
   return !Number.isFinite(timestamp) || now - timestamp >= FLUSH_INTERVAL_MS;
 }
 
-const spawnDetached: SpawnDetached = (command, args, options) => spawn(command, args, options);
-
 export function maybeSpawnFlush(
   config: ResolvedTelemetryConfig,
   options: {
@@ -119,7 +117,7 @@ export function maybeSpawnFlush(
     return false;
   }
   try {
-    const child = (options.spawn ?? spawnDetached)(
+    const child = (options.spawn ?? spawn)(
       options.executable ?? process.execPath,
       [entrypoint, '__telemetry-flush'],
       {

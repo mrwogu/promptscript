@@ -85,6 +85,41 @@ describe('TelemetrySession', () => {
 });
 
 describe('maybeSpawnFlush', () => {
+  it('does not spawn when the spool is empty', () => {
+    const cacheDirectory = directory();
+    const spawn = vi.fn(() => ({ unref: vi.fn() }));
+
+    expect(
+      maybeSpawnFlush(config(cacheDirectory), {
+        environment: {},
+        entrypoint: '/prs.js',
+        spawn,
+      })
+    ).toBe(false);
+    expect(spawn).not.toHaveBeenCalled();
+  });
+
+  it('spawns immediately when the spool reaches the record threshold', () => {
+    const cacheDirectory = directory();
+    for (let index = 0; index < 50; index += 1) {
+      new TelemetrySession({
+        config: config(cacheDirectory),
+        metadata,
+        command: 'compile',
+      }).finish('success');
+    }
+    const spawn = vi.fn(() => ({ unref: vi.fn() }));
+
+    expect(
+      maybeSpawnFlush(config(cacheDirectory), {
+        environment: {},
+        entrypoint: '/prs.js',
+        spawn,
+      })
+    ).toBe(true);
+    expect(spawn).toHaveBeenCalledOnce();
+  });
+
   it('spawns one detached guarded child when records are due', () => {
     const cacheDirectory = directory();
     new TelemetrySession({
@@ -117,6 +152,53 @@ describe('maybeSpawnFlush', () => {
       })
     );
     expect(unref).toHaveBeenCalledOnce();
+  });
+
+  it('uses process defaults when options are omitted', () => {
+    const cacheDirectory = directory();
+    new TelemetrySession({
+      config: config(cacheDirectory),
+      metadata,
+      command: 'compile',
+    }).finish('success');
+    const spawn = vi.fn(() => ({ unref: vi.fn() }));
+    const originalArgv = process.argv[1];
+    process.argv[1] = '/prs.js';
+
+    try {
+      expect(maybeSpawnFlush(config(cacheDirectory), { spawn })).toBe(true);
+      expect(spawn).toHaveBeenCalledWith(
+        process.execPath,
+        ['/prs.js', '__telemetry-flush'],
+        expect.any(Object)
+      );
+    } finally {
+      if (originalArgv === undefined) {
+        process.argv.splice(1, 1);
+      } else {
+        process.argv[1] = originalArgv;
+      }
+    }
+  });
+
+  it('returns false when detached spawn fails', () => {
+    const cacheDirectory = directory();
+    new TelemetrySession({
+      config: config(cacheDirectory),
+      metadata,
+      command: 'compile',
+    }).finish('success');
+    const spawn = vi.fn(() => {
+      throw new Error('spawn failed');
+    });
+
+    expect(
+      maybeSpawnFlush(config(cacheDirectory), {
+        environment: {},
+        entrypoint: '/prs.js',
+        spawn,
+      })
+    ).toBe(false);
   });
 
   it('does not spawn recursively or before the interval', () => {
