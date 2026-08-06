@@ -19,6 +19,9 @@ The CLI looks for configuration in this order:
 id: full-example
 syntax: '1.4.0'
 
+# Anonymous aggregate usage telemetry
+telemetry: true
+
 # ===================
 # Input Configuration
 # ===================
@@ -187,6 +190,7 @@ includePromptScriptSkill: true # default: true
 | `syntax`                   | string                  | Yes      | PromptScript syntax version                     |
 | `targets`                  | `TargetEntry[]`         | Yes      | Output targets and target-specific options      |
 | `description`              | string                  | No       | Project description                             |
+| `telemetry`                | boolean                 | No       | Enable anonymous aggregate usage telemetry      |
 | `extends`                  | string                  | No       | Base configuration file to merge                |
 | `inherit`                  | string                  | No       | Registry configuration inherited by the project |
 | `input`                    | object                  | No       | Entry point and source file globs               |
@@ -204,6 +208,16 @@ includePromptScriptSkill: true # default: true
 | `policies`                 | array                   | No       | Extension compliance policies                   |
 
 `id`, `syntax`, and `targets` are required even when `input.entry` uses its default. See the [Policy Engine guide](https://getpromptscript.dev/dev/guides/policy-engine/index.md) for `policies` syntax.
+
+### telemetry
+
+Anonymous aggregate usage telemetry is enabled by default. Set `telemetry: false` to disable every telemetry network request for this project:
+
+```yaml
+telemetry: false
+```
+
+Project and user opt-outs are hard vetoes. Environment opt-in cannot override them. See [Anonymous Usage Telemetry](https://getpromptscript.dev/dev/reference/telemetry/index.md) for collected fields, delivery behavior, and all opt-out controls.
 
 ### input
 
@@ -894,7 +908,7 @@ formatting:
   prettier: true
 
   # Option 2: Explicit path to Prettier config
-  prettier: "./config/.prettierrc"
+  prettier: './config/.prettierrc'
 
   # Option 3: Inline options (overrides .prettierrc)
   proseWrap: always
