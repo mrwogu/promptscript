@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -25,6 +25,33 @@ afterEach(() => {
 });
 
 describe('resolveCliTelemetryConfig', () => {
+  it('loads an explicitly selected absolute project configuration', async () => {
+    const cwd = directory();
+    const projectPath = join(cwd, 'custom.yaml');
+    writeFileSync(projectPath, "id: project\nsyntax: '1.0'\ntelemetry: true\n");
+
+    const config = await resolveCliTelemetryConfig({
+      cwd,
+      config: projectPath,
+      userConfigPath: join(cwd, 'missing-user.yaml'),
+    });
+
+    expect(config.enabled).toBe(true);
+  });
+
+  it('loads a project configuration selected by environment', async () => {
+    const cwd = directory();
+    writeFileSync(join(cwd, 'promptscript.yaml'), "id: project\nsyntax: '1.0'\ntelemetry: true\n");
+    process.env['PROMPTSCRIPT_CONFIG'] = 'promptscript.yaml';
+
+    const config = await resolveCliTelemetryConfig({
+      cwd,
+      userConfigPath: join(cwd, 'missing-user.yaml'),
+    });
+
+    expect(config.enabled).toBe(true);
+  });
+
   it('loads project and user vetoes before enabling telemetry', async () => {
     const cwd = directory();
     const userConfigPath = join(cwd, 'user.yaml');
@@ -104,12 +131,59 @@ describe('resolveCliTelemetryConfig', () => {
     expect(config.vetoes).toContain('configuration unavailable');
   });
 
+  it('fails closed for a user configuration directory', async () => {
+    const cwd = directory();
+    const userConfigPath = join(cwd, 'user-config');
+    mkdirSync(userConfigPath);
+
+    const config = await resolveCliTelemetryConfig({ cwd, userConfigPath });
+
+    expect(config.enabled).toBe(false);
+    expect(config.vetoes).toContain('configuration unavailable');
+  });
+
+  it('allows a valid user configuration without a telemetry setting', async () => {
+    const cwd = directory();
+    writeFileSync(join(cwd, 'user.yaml'), "version: '1'\n");
+
+    const config = await resolveCliTelemetryConfig({
+      cwd,
+      userConfigPath: join(cwd, 'user.yaml'),
+    });
+
+    expect(config.enabled).toBe(true);
+  });
+
+  it('fails closed for non-boolean user telemetry configuration', async () => {
+    const cwd = directory();
+    const userConfigPath = join(cwd, 'user.yaml');
+    writeFileSync(userConfigPath, "version: '1'\ntelemetry: sometimes\n");
+
+    const config = await resolveCliTelemetryConfig({ cwd, userConfigPath });
+
+    expect(config.enabled).toBe(false);
+    expect(config.vetoes).toContain('configuration unavailable');
+  });
+
   it('fails closed for non-boolean project telemetry configuration', async () => {
     const cwd = directory();
     writeFileSync(
       join(cwd, 'promptscript.yaml'),
       "id: project\nsyntax: '1.0'\ntelemetry: sometimes\n"
     );
+
+    const config = await resolveCliTelemetryConfig({
+      cwd,
+      userConfigPath: join(cwd, 'missing-user.yaml'),
+    });
+
+    expect(config.enabled).toBe(false);
+    expect(config.vetoes).toContain('configuration unavailable');
+  });
+
+  it('fails closed when the project configuration cannot be parsed', async () => {
+    const cwd = directory();
+    writeFileSync(join(cwd, 'promptscript.yaml'), 'id: [\n');
 
     const config = await resolveCliTelemetryConfig({
       cwd,
@@ -165,5 +239,13 @@ describe('setUserTelemetryEnabled', () => {
     );
 
     expect(readFileSync(configPath, 'utf8')).toBe(source);
+  });
+
+  it('propagates non-missing user config read errors', async () => {
+    const cwd = directory();
+    const configPath = join(cwd, 'config-directory');
+    mkdirSync(configPath);
+
+    await expect(setUserTelemetryEnabled(false, configPath)).rejects.toThrow();
   });
 });
