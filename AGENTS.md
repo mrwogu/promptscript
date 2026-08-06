@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- PromptScript 2026-08-04T19:05:28.032Z | source: .promptscript/project.prs | target: factory - do not edit -->
+<!-- PromptScript 2026-08-06T10:43:22.131Z | source: .promptscript/project.prs | target: factory - do not edit -->
 
 ## Project
 
@@ -117,7 +117,7 @@ flowchart TB
 
 - Format: Conventional Commits
 - Types: feat, fix, docs, style, refactor, test, chore
-- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, server, vscode) or domain scope (ci, docker) — scopes appear in the release changelog grouped by package
+- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, server, vscode, telemetry) or domain scope (ci, docker) - scopes appear in the release changelog grouped by package
 - Example: `feat(parser): add support for multiline strings`
 - Reference: https://www.conventionalcommits.org/
 - Max Subject Length: 70
