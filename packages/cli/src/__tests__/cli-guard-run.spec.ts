@@ -29,7 +29,7 @@ vi.mock('@promptscript/core', async (importOriginal) => ({
   getPackageVersion: vi.fn().mockReturnValue('1.0.0'),
 }));
 
-const mockParse = vi.fn();
+const mockParseAsync = vi.fn();
 
 // Mock commander
 vi.mock('commander', () => {
@@ -53,7 +53,7 @@ vi.mock('commander', () => {
       argument = chainable.argument;
       action = chainable.action;
       command = chainable.command;
-      parse = mockParse;
+      parseAsync = mockParseAsync;
     },
   };
 });
@@ -66,10 +66,10 @@ describe('cli guard run() - Issue 1', () => {
   });
 
   beforeEach(() => {
-    mockParse.mockClear();
+    mockParseAsync.mockClear();
   });
 
-  it('should NOT call program.parse() automatically on module import', async () => {
+  it('should NOT call program.parseAsync() automatically on module import', async () => {
     // Force a fresh module import
     vi.resetModules();
 
@@ -77,16 +77,16 @@ describe('cli guard run() - Issue 1', () => {
     await import('../cli.js');
 
     // parse should not have been called because the module is not the entry point
-    expect(mockParse).not.toHaveBeenCalled();
+    expect(mockParseAsync).not.toHaveBeenCalled();
   });
 
-  it('should call program.parse() when run() is called explicitly', async () => {
+  it('should call program.parseAsync() when run() is called explicitly', async () => {
     vi.resetModules();
     const { run } = await import('../cli.js');
 
-    run(['node', 'prs', '--help']);
+    await run(['node', 'prs', '--help']);
 
-    expect(mockParse).toHaveBeenCalledTimes(1);
-    expect(mockParse).toHaveBeenCalledWith(['node', 'prs', '--help']);
+    expect(mockParseAsync).toHaveBeenCalledTimes(1);
+    expect(mockParseAsync).toHaveBeenCalledWith(['node', 'prs', '--help']);
   });
 });

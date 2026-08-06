@@ -17,6 +17,10 @@
       "type": "string",
       "description": "Project description"
     },
+    "telemetry": {
+      "type": "boolean",
+      "description": "Enable anonymous aggregate usage telemetry for this project"
+    },
     "extends": {
       "type": "string",
       "description": "Extend another configuration file. Paths are resolved relative to the current config file.",

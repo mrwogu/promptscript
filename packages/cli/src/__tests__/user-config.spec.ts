@@ -40,6 +40,7 @@ describe('config/user-config', () => {
     mockReadFile.mockResolvedValue(
       `
 version: '1'
+telemetry: false
 registry:
   git:
     url: https://github.com/my-org/registry.git
@@ -56,6 +57,7 @@ defaults:
 
     expect(mockExistsSync).toHaveBeenCalledWith(customPath);
     expect(config.version).toBe('1');
+    expect(config.telemetry).toBe(false);
     expect(config.registry?.git?.url).toBe('https://github.com/my-org/registry.git');
     expect(config.registry?.git?.ref).toBe('main');
     expect(config.defaults?.team).toBe('frontend');

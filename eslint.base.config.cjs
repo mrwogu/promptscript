@@ -30,6 +30,9 @@ const nxPlugin = require('@nx/eslint-plugin');
  * │                      ┌──────────┐                               │
  * │                      │   cli    │                               │
  * │                      └──────────┘                               │
+ * │                      ┌───────────┐                              │
+ * │                      │ telemetry │                              │
+ * │                      └───────────┘                              │
  * │                                                                 │
  * └─────────────────────────────────────────────────────────────────┘
  */
@@ -37,6 +40,11 @@ const moduleBoundaryRules = [
   // Core has no dependencies - it's the foundation
   {
     sourceTag: 'scope:core',
+    onlyDependOnLibsWithTags: [],
+  },
+  // Telemetry is a Node-only leaf with no workspace dependencies
+  {
+    sourceTag: 'scope:telemetry',
     onlyDependOnLibsWithTags: [],
   },
   // Parser depends only on core
@@ -87,6 +95,7 @@ const moduleBoundaryRules = [
       'scope:browser-compiler',
       'scope:importer',
       'scope:server',
+      'scope:telemetry',
     ],
   },
   // Browser compiler depends on core, parser, validator, formatters

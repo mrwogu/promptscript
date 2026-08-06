@@ -53,7 +53,7 @@ const mockHook = vi.fn().mockReturnThis();
 const mockArgument = vi.fn().mockReturnThis();
 const capturedActions: Array<(...args: unknown[]) => unknown> = [];
 const mockAction = vi.fn().mockReturnThis();
-const mockParse = vi.fn();
+const mockParseAsync = vi.fn();
 
 // Create a chainable mock that supports nested command() calls
 const createChainableMock = (): Record<string, ReturnType<typeof vi.fn>> => ({
@@ -84,7 +84,7 @@ vi.mock('commander', () => {
       option = mockOption;
       hook = mockHook;
       command = mockCommand;
-      parse = mockParse;
+      parseAsync = mockParseAsync;
     },
   };
 });
@@ -171,7 +171,7 @@ describe('cli', () => {
       const { run } = await import('../cli.js');
       run(['node', 'prs', 'init', '--team', 'frontend']);
 
-      expect(mockParse).toHaveBeenCalledWith(['node', 'prs', 'init', '--team', 'frontend']);
+      expect(mockParseAsync).toHaveBeenCalledWith(['node', 'prs', 'init', '--team', 'frontend']);
     });
 
     it('should register --migrate option for init command', async () => {
@@ -192,6 +192,14 @@ describe('cli', () => {
       run(['node', 'prs', 'update-check']);
 
       expect(mockCommand).toHaveBeenCalledWith('update-check');
+    });
+
+    it('should register telemetry commands', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'telemetry', 'status']);
+
+      expect(mockCommand).toHaveBeenCalledWith('telemetry');
+      expect(mockCommand).toHaveBeenCalledWith('__telemetry-flush', { hidden: true });
     });
 
     it('should register registry command group', async () => {

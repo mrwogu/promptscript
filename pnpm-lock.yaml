@@ -178,6 +178,9 @@ importers:
       '@promptscript/server':
         specifier: workspace:^
         version: link:../server
+      '@promptscript/telemetry':
+        specifier: workspace:^
+        version: link:../telemetry
       '@promptscript/validator':
         specifier: workspace:^
         version: link:../validator
@@ -388,6 +391,12 @@ importers:
       '@fastify/rate-limit':
         specifier: ^11.2.0
         version: 11.2.0
+
+  packages/telemetry:
+    dependencies:
+      '@swc/helpers':
+        specifier: ~0.5.23
+        version: 0.5.23
 
   packages/validator:
     dependencies:

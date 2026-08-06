@@ -1,0 +1,19 @@
+{
+  "name": "telemetry",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/telemetry/src",
+  "projectType": "library",
+  "tags": ["scope:telemetry", "type:lib"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/telemetry",
+        "main": "packages/telemetry/src/index.ts",
+        "tsConfig": "packages/telemetry/tsconfig.lib.json",
+        "assets": ["packages/telemetry/*.md", "packages/telemetry/telemetry-schema/**/*"]
+      }
+    }
+  }
+}

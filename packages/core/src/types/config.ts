@@ -195,6 +195,9 @@ export interface PromptScriptConfig {
   /** Project description */
   description?: string;
 
+  /** Enable anonymous aggregate usage telemetry for this project */
+  telemetry?: boolean;
+
   /**
    * Extend another configuration file.
    * Paths are resolved relative to the current config file.
@@ -423,6 +426,8 @@ export interface PromptScriptConfig {
  */
 export interface UserConfig {
   version: '1';
+  /** Enable anonymous aggregate usage telemetry by default */
+  telemetry?: boolean;
   registry?: {
     git?: {
       url: string;
