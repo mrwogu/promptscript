@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 
 // Mock all command modules to prevent side effects during import
@@ -29,7 +30,7 @@ vi.mock('@promptscript/core', async (importOriginal) => ({
   getPackageVersion: vi.fn().mockReturnValue('1.0.0'),
 }));
 
-const mockParse = vi.fn();
+const mockParseAsync = vi.fn();
 
 // Mock commander
 vi.mock('commander', () => {
@@ -53,7 +54,7 @@ vi.mock('commander', () => {
       argument = chainable.argument;
       action = chainable.action;
       command = chainable.command;
-      parse = mockParse;
+      parseAsync = mockParseAsync;
     },
   };
 });
@@ -66,10 +67,10 @@ describe('cli guard run() - Issue 1', () => {
   });
 
   beforeEach(() => {
-    mockParse.mockClear();
+    mockParseAsync.mockClear();
   });
 
-  it('should NOT call program.parse() automatically on module import', async () => {
+  it('should NOT call program.parseAsync() automatically on module import', async () => {
     // Force a fresh module import
     vi.resetModules();
 
@@ -77,16 +78,36 @@ describe('cli guard run() - Issue 1', () => {
     await import('../cli.js');
 
     // parse should not have been called because the module is not the entry point
-    expect(mockParse).not.toHaveBeenCalled();
+    expect(mockParseAsync).not.toHaveBeenCalled();
   });
 
-  it('should call program.parse() when run() is called explicitly', async () => {
+  it('should call program.parseAsync() when run() is called explicitly', async () => {
     vi.resetModules();
     const { run } = await import('../cli.js');
 
-    run(['node', 'prs', '--help']);
+    await run(['node', 'prs', '--help']);
 
-    expect(mockParse).toHaveBeenCalledTimes(1);
-    expect(mockParse).toHaveBeenCalledWith(['node', 'prs', '--help']);
+    expect(mockParseAsync).toHaveBeenCalledTimes(1);
+    expect(mockParseAsync).toHaveBeenCalledWith(['node', 'prs', '--help']);
+  });
+
+  it('should run automatically when imported as the CLI entry point', async () => {
+    const originalArgv = process.argv[1];
+    const entrypoint = fileURLToPath(new URL('../cli.ts', import.meta.url));
+    process.argv[1] = entrypoint;
+    mockParseAsync.mockResolvedValue(undefined);
+
+    try {
+      vi.resetModules();
+      await import('../cli.js');
+
+      expect(mockParseAsync).toHaveBeenCalledWith(process.argv);
+    } finally {
+      if (originalArgv === undefined) {
+        process.argv.splice(1, 1);
+      } else {
+        process.argv[1] = originalArgv;
+      }
+    }
   });
 });

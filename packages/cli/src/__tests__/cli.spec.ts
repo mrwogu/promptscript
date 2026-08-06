@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 // Mock all command modules first
 vi.mock('../commands/init', () => ({
@@ -27,6 +27,20 @@ vi.mock('../commands/registry/index', () => ({
   registerRegistryCommands: vi.fn(),
 }));
 
+const mockPrepareCliTelemetry = vi.fn().mockResolvedValue(undefined);
+const mockFinishCliTelemetry = vi.fn();
+const mockFlushCliTelemetry = vi.fn().mockResolvedValue(undefined);
+
+vi.mock('../telemetry/session', () => ({
+  prepareCliTelemetry: mockPrepareCliTelemetry,
+  finishCliTelemetry: mockFinishCliTelemetry,
+  flushCliTelemetry: mockFlushCliTelemetry,
+}));
+
+vi.mock('../commands/telemetry', () => ({
+  telemetryCommand: vi.fn(),
+}));
+
 vi.mock('../commands/hook', () => ({
   hookCommand: vi.fn(),
 }));
@@ -53,7 +67,7 @@ const mockHook = vi.fn().mockReturnThis();
 const mockArgument = vi.fn().mockReturnThis();
 const capturedActions: Array<(...args: unknown[]) => unknown> = [];
 const mockAction = vi.fn().mockReturnThis();
-const mockParse = vi.fn();
+const mockParseAsync = vi.fn();
 
 // Create a chainable mock that supports nested command() calls
 const createChainableMock = (): Record<string, ReturnType<typeof vi.fn>> => ({
@@ -74,6 +88,10 @@ const createChainableMock = (): Record<string, ReturnType<typeof vi.fn>> => ({
 // Create chainable mock for command
 mockCommand.mockImplementation(() => createChainableMock());
 
+afterEach(() => {
+  delete process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'];
+});
+
 // Mock commander with class
 vi.mock('commander', () => {
   return {
@@ -84,7 +102,7 @@ vi.mock('commander', () => {
       option = mockOption;
       hook = mockHook;
       command = mockCommand;
-      parse = mockParse;
+      parseAsync = mockParseAsync;
     },
   };
 });
@@ -171,7 +189,7 @@ describe('cli', () => {
       const { run } = await import('../cli.js');
       run(['node', 'prs', 'init', '--team', 'frontend']);
 
-      expect(mockParse).toHaveBeenCalledWith(['node', 'prs', 'init', '--team', 'frontend']);
+      expect(mockParseAsync).toHaveBeenCalledWith(['node', 'prs', 'init', '--team', 'frontend']);
     });
 
     it('should register --migrate option for init command', async () => {
@@ -192,6 +210,14 @@ describe('cli', () => {
       run(['node', 'prs', 'update-check']);
 
       expect(mockCommand).toHaveBeenCalledWith('update-check');
+    });
+
+    it('should register telemetry commands', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'telemetry', 'status']);
+
+      expect(mockCommand).toHaveBeenCalledWith('telemetry');
+      expect(mockCommand).toHaveBeenCalledWith('__telemetry-flush', { hidden: true });
     });
 
     it('should register registry command group', async () => {
@@ -258,6 +284,46 @@ describe('cli', () => {
       expect(mockSkillsRemove).toHaveBeenCalledWith('test-arg', { dryRun: false });
       expect(mockSkillsList).toHaveBeenCalled();
       expect(mockSkillsUpdate).toHaveBeenCalledWith('test-arg', { dryRun: false });
+    });
+
+    it('should guard detached telemetry flush and finish command telemetry', async () => {
+      const preAction = mockHook.mock.calls.find((call) => call[0] === 'preAction')?.[1] as (
+        thisCommand: { opts: () => Record<string, unknown> },
+        actionCommand: { name: () => string }
+      ) => Promise<void>;
+      const postAction = mockHook.mock.calls.find((call) => call[0] === 'postAction')?.[1] as (
+        thisCommand: unknown,
+        actionCommand: unknown
+      ) => void;
+
+      process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'] = '1';
+      await preAction({ opts: () => ({}) }, { name: () => '__telemetry-flush' });
+      expect(mockPrepareCliTelemetry).not.toHaveBeenCalled();
+
+      delete process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'];
+      await preAction({ opts: () => ({ quiet: true }) }, { name: () => 'telemetry' });
+      expect(mockPrepareCliTelemetry).toHaveBeenCalledWith(
+        expect.objectContaining({ name: expect.any(Function) }),
+        expect.stringMatching(/^\d+\.\d+\.\d+/)
+      );
+
+      postAction(undefined, undefined);
+      expect(mockFinishCliTelemetry).toHaveBeenCalled();
+    });
+
+    it('should finish telemetry and rethrow parse errors', async () => {
+      const error = new Error('parse failed');
+      mockParseAsync.mockReset();
+      mockParseAsync.mockRejectedValue(error);
+      mockFinishCliTelemetry.mockClear();
+
+      const { run } = await import('../cli.js');
+
+      await expect(run(['node', 'prs', 'compile'])).rejects.toBe(error);
+      expect(mockFinishCliTelemetry).toHaveBeenCalledWith('error');
+      expect(mockFinishCliTelemetry).toHaveBeenCalledWith();
+
+      mockParseAsync.mockReset();
     });
   });
 });

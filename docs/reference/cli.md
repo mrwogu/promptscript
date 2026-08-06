@@ -41,6 +41,25 @@ These options are available for all commands:
 
 ## Commands
 
+### prs telemetry
+
+Inspect or change user-level anonymous telemetry settings.
+
+```bash
+prs telemetry status
+prs telemetry enable
+prs telemetry disable
+```
+
+`status` displays the effective setting, active vetoes, collector endpoint,
+queued record count, spool size, and latest delivery status. `enable` and
+`disable` update `~/.promptscript/config.yaml` atomically while preserving YAML
+comments.
+
+Project config, `DO_NOT_TRACK`, and `PROMPTSCRIPT_TELEMETRY=false` remain hard
+vetoes even after `prs telemetry enable`. Telemetry management commands do not
+create telemetry events. See [Anonymous Usage Telemetry](telemetry.md).
+
 ### prs init
 
 Initialize PromptScript in the current directory.

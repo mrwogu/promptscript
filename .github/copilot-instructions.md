@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-<!-- PromptScript 2026-08-04T19:05:28.029Z | source: .promptscript/project.prs | target: github - do not edit -->
+<!-- PromptScript 2026-08-06T10:43:22.128Z | source: .promptscript/project.prs | target: github - do not edit -->
 
 ## project
 
@@ -137,7 +137,7 @@ The project is organized as a monorepo with these packages:
 - Keep commit message subject line max 70 characters
 - Format: `<type>(<scope>): <description>`
 - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
-- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, server, vscode) or domain scope (ci, docker) — scopes appear in the release changelog grouped by package
+- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, server, vscode, telemetry) or domain scope (ci, docker) - scopes appear in the release changelog grouped by package
 - Example: `feat(parser): add support for multiline strings`
 
 ## configuration-files

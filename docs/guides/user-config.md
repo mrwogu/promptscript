@@ -13,6 +13,7 @@ Create `~/.promptscript/config.yaml`:
 
 ```yaml
 version: '1'
+telemetry: false
 
 registry:
   git:
@@ -33,6 +34,18 @@ defaults:
 ```
 
 ## Fields
+
+### `telemetry`
+
+Controls anonymous aggregate usage telemetry for every project unless a project
+also opts out. Default is `true`.
+
+```yaml
+telemetry: false
+```
+
+Any telemetry opt-out is a hard veto rather than a normal priority override.
+`DO_NOT_TRACK`, user config, and project config can each disable delivery.
 
 ### `registry`
 
@@ -79,6 +92,8 @@ Override any config value with environment variables:
 | `PROMPTSCRIPT_REGISTRY_URL`     | `registry.url`           |
 | `PROMPTSCRIPT_CACHE_TTL`        | `registry.cache.ttl`     |
 | `PROMPTSCRIPT_CACHE_ENABLED`    | `registry.cache.enabled` |
+| `PROMPTSCRIPT_TELEMETRY`        | `telemetry`              |
+| `DO_NOT_TRACK`                  | Disables telemetry       |
 
 Example:
 

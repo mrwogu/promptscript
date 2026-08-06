@@ -18,6 +18,28 @@ describe('config/merge-config', () => {
     expect(result.targets).toEqual(['github']);
   });
 
+  it('should preserve any explicit telemetry opt-out', () => {
+    const result = mergeConfigs(
+      { version: '1', telemetry: true },
+      { ...baseProjectConfig, telemetry: false },
+      { telemetry: true },
+      { telemetry: true }
+    );
+
+    expect(result.telemetry).toBe(false);
+  });
+
+  it('should apply telemetry opt-in when no source opts out', () => {
+    const result = mergeConfigs(
+      { version: '1', telemetry: true },
+      baseProjectConfig,
+      {},
+      undefined
+    );
+
+    expect(result.telemetry).toBe(true);
+  });
+
   it('should apply user config registry as base', () => {
     const userConfig: UserConfig = {
       version: '1',

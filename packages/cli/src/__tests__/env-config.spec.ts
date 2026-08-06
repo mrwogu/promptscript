@@ -11,6 +11,7 @@ describe('config/env-config', () => {
     delete process.env['PROMPTSCRIPT_REGISTRY_URL'];
     delete process.env['PROMPTSCRIPT_CACHE_TTL'];
     delete process.env['PROMPTSCRIPT_CACHE_ENABLED'];
+    delete process.env['PROMPTSCRIPT_TELEMETRY'];
   });
 
   afterEach(() => {
@@ -95,6 +96,20 @@ describe('config/env-config', () => {
 
     // gitRef alone should not create a registry.git entry
     expect(overrides.registry?.git).toBeUndefined();
+  });
+
+  it.each([
+    ['true', true],
+    ['1', true],
+    ['false', false],
+    ['0', false],
+    ['off', false],
+  ])('should parse PROMPTSCRIPT_TELEMETRY=%s', (value, expected) => {
+    process.env['PROMPTSCRIPT_TELEMETRY'] = value;
+
+    const overrides = loadEnvOverrides();
+
+    expect(overrides.telemetry).toBe(expected);
   });
 
   it('should combine multiple env vars', () => {

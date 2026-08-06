@@ -79,6 +79,23 @@ export function mergeConfigs(
   // Start with project config as the base
   const merged: PromptScriptConfig = { ...projectConfig };
 
+  const telemetryValues = [
+    userConfig.telemetry,
+    projectConfig.telemetry,
+    envOverrides.telemetry,
+    cliFlags?.telemetry,
+  ];
+  if (telemetryValues.includes(false)) {
+    merged.telemetry = false;
+  } else {
+    const explicitTelemetry = telemetryValues.find(
+      (value): value is boolean => value !== undefined
+    );
+    if (explicitTelemetry !== undefined) {
+      merged.telemetry = explicitTelemetry;
+    }
+  }
+
   // Apply user config registry as base (lowest priority for registry)
   if (userConfig.registry) {
     const userRegistry = userConfigToProjectRegistry(userConfig.registry);

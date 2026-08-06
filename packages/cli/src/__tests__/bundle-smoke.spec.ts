@@ -118,5 +118,27 @@ describe('bundle smoke tests', () => {
       expect(output).toContain('serve');
       expect(output).toContain('--port');
     });
+
+    it('should display telemetry status from the bundled CLI', () => {
+      if (!isBundleBuilt()) {
+        console.log('Skipping: bundle not built (run `nx build cli` first)');
+        return;
+      }
+
+      const output = execFileSync('node', [binPath, 'telemetry', 'status'], {
+        encoding: 'utf-8',
+        cwd: distRoot,
+        timeout: 10000,
+        env: {
+          ...process.env,
+          PROMPTSCRIPT_TELEMETRY: 'false',
+          PROMPTSCRIPT_NO_UPDATE_CHECK: '1',
+        },
+      });
+
+      expect(output).toContain('Enabled: no');
+      expect(output).toContain('Endpoint: https://telemetry.guziak.net/v1/events');
+      expect(output).toContain('Disabled by: PROMPTSCRIPT_TELEMETRY');
+    });
   });
 });

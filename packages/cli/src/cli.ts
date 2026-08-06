@@ -7,6 +7,7 @@ import { initCommand } from './commands/init.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const CLI_VERSION = getPackageVersion(__dirname, '../package.json');
 
 import { compileCommand } from './commands/compile.js';
 import { validateCommand } from './commands/validate.js';
@@ -26,6 +27,8 @@ import { importCommand } from './commands/import.js';
 import { upgradeCommand } from './commands/upgrade.js';
 import { hookCommand } from './commands/hook.js';
 import { hooksCommand } from './commands/hooks.js';
+import { telemetryCommand } from './commands/telemetry.js';
+import { finishCliTelemetry, flushCliTelemetry, prepareCliTelemetry } from './telemetry/session.js';
 import {
   skillsAddCommand,
   skillsRemoveCommand,
@@ -38,11 +41,17 @@ const program = new Command();
 program
   .name('prs')
   .description('PromptScript CLI - Standardize AI instructions')
-  .version(getPackageVersion(__dirname, '../package.json'))
+  .version(CLI_VERSION)
   .option('--verbose', 'Enable verbose output')
   .option('--debug', 'Enable debug output (includes verbose)')
   .option('--quiet', 'Suppress non-error output')
   .hook('preAction', async (thisCommand, actionCommand) => {
+    if (
+      actionCommand.name() === '__telemetry-flush' &&
+      process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'] === '1'
+    ) {
+      return;
+    }
     const opts = thisCommand.opts();
     // Set global context based on flags (debug > verbose > quiet)
     if (opts['quiet']) {
@@ -62,8 +71,14 @@ program
       setContext({ logLevel: LogLevel.Verbose });
     }
 
-    // Skip version check for update-check command (it does its own check)
-    if (actionCommand.name() === 'update-check') {
+    await prepareCliTelemetry(actionCommand, CLI_VERSION);
+
+    // Skip version check when the command performs its own networking or is internal.
+    if (
+      actionCommand.name() === 'update-check' ||
+      actionCommand.name() === 'telemetry' ||
+      actionCommand.name() === '__telemetry-flush'
+    ) {
       return;
     }
 
@@ -74,6 +89,9 @@ program
         printUpdateNotification(updateInfo);
       }
     });
+  })
+  .hook('postAction', () => {
+    finishCliTelemetry();
   });
 
 program
@@ -189,6 +207,17 @@ program
   .action(checkCommand);
 
 program.command('update-check').description('Check for CLI updates').action(updateCheckCommand);
+
+program
+  .command('telemetry')
+  .argument('<action>', 'Action: status, enable, or disable')
+  .description('Manage anonymous usage telemetry')
+  .action(telemetryCommand);
+
+program
+  .command('__telemetry-flush', { hidden: true })
+  .description('Flush queued anonymous telemetry')
+  .action(flushCliTelemetry);
 
 program
   .command('serve')
@@ -316,11 +345,18 @@ registerRegistryCommands(registry);
  * Run the CLI.
  * @param args - Command line arguments (defaults to process.argv)
  */
-export function run(args: string[] = process.argv): void {
-  program.parse(args);
+export async function run(args: string[] = process.argv): Promise<void> {
+  try {
+    await program.parseAsync(args);
+  } catch (error) {
+    finishCliTelemetry('error');
+    throw error;
+  } finally {
+    finishCliTelemetry();
+  }
 }
 
 // Run if executed directly as the entry point
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  run();
+  await run();
 }

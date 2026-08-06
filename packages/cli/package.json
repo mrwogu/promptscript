@@ -41,6 +41,7 @@
     "@promptscript/importer": "workspace:^",
     "@promptscript/formatters": "workspace:^",
     "@promptscript/server": "workspace:^",
+    "@promptscript/telemetry": "workspace:^",
     "@promptscript/core": "workspace:^",
     "@promptscript/parser": "workspace:^",
     "@promptscript/resolver": "workspace:^",
