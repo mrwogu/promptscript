@@ -343,6 +343,7 @@ with `includePromptScriptSkill: false`.
 | [Language Reference](https://getpromptscript.dev/reference/language/)            | Complete PromptScript syntax                                |
 | [CLI Reference](https://getpromptscript.dev/reference/cli/)                      | Commands and options                                        |
 | [Configuration Reference](https://getpromptscript.dev/reference/config/)         | Targets, registries, builds, policies, and formatting       |
+| [Anonymous Usage Telemetry](https://getpromptscript.dev/reference/telemetry/)    | Collected fields, delivery, and opt-out controls            |
 | [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/) | Syntax, block shape, and hook migration guide               |
 | [Enterprise Guide](https://getpromptscript.dev/guides/enterprise/)               | Organization-wide adoption and governance                   |
 

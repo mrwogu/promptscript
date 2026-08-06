@@ -264,6 +264,7 @@ nav:
       - Policy Engine: guides/policy-engine.md
       - CI/CD Integration: guides/ci.md
       - User Configuration: guides/user-config.md
+      - Anonymous Usage Telemetry: reference/telemetry.md
       - Guard Dependencies: guides/guard-dependencies.md
   - Target Reference:
       - Platform Matrix: reference/formatters/index.md
