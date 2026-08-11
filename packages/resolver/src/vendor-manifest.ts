@@ -23,6 +23,11 @@ export interface VendorManifest {
   dependencies: Record<string, VendorManifestEntry>;
 }
 
+interface GitProcessResult {
+  code: number | null;
+  signal: NodeJS.Signals | null;
+}
+
 export function getVendorRepositoryRelativePath(repoUrl: string): string {
   const sshMatch = /^git@([^:]+):(.+)$/.exec(repoUrl);
   const candidate = sshMatch
@@ -183,87 +188,60 @@ export async function verifyGitRepositoryCheckout(
   const trackedFiles = new Map<string, { objectId: string; executable: boolean }>();
   const treeProcess = spawn('git', [...commonArgs, 'ls-tree', '-r', '-z', expectedCommit], {
     env: environment,
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
-  const treeStdout = treeProcess.stdout;
-  const treeStderr = treeProcess.stderr;
-  if (!treeStdout || !treeStderr) {
-    treeProcess.kill();
-    throw new Error('Git ls-tree did not provide output streams');
-  }
-  await new Promise<void>((resolve, reject) => {
-    let pendingRecord = Buffer.alloc(0);
-    const stderrChunks: Buffer[] = [];
-    let stderrBytes = 0;
-    let stderrTruncated = false;
-    let parseError: Error | null = null;
-    let streamError: Error | null = null;
-    let spawnError: Error | null = null;
+  let processError: Error | null = null;
+  const processCompletion = new Promise<GitProcessResult>((resolveProcess) => {
+    treeProcess.once('error', (error: Error) => {
+      processError = new Error(`Failed to run git ls-tree: ${error.message}`, { cause: error });
+      resolveProcess({ code: null, signal: null });
+    });
+    treeProcess.once('close', (code, signal) => {
+      resolveProcess({ code, signal });
+    });
+  });
 
-    const killTreeProcess = (): void => {
-      if (!treeProcess.killed) {
-        treeProcess.kill();
-      }
-    };
-
-    const recordParseError = (error: unknown): void => {
-      if (parseError || streamError) {
-        return;
-      }
-      parseError = error instanceof Error ? error : new Error(String(error));
-      killTreeProcess();
-    };
-
-    const recordStreamError = (streamName: string, error: unknown): void => {
-      if (parseError || streamError) {
-        return;
-      }
-      const message = error instanceof Error ? error.message : String(error);
-      streamError = new Error(`Failed to read git ls-tree ${streamName}: ${message}`, {
-        cause: error,
-      });
-      killTreeProcess();
-    };
-
-    const captureStderr = (chunk: Buffer): void => {
+  const stderrChunks: Buffer[] = [];
+  let stderrBytes = 0;
+  let stderrTruncated = false;
+  const stderrCompletion = (async (): Promise<void> => {
+    for await (const chunk of treeProcess.stderr as AsyncIterable<Buffer>) {
       const remaining = MAX_GIT_STDERR_BYTES - stderrBytes;
-      if (remaining <= 0) {
-        stderrTruncated = true;
-        return;
+      if (remaining > 0) {
+        const captured = chunk.subarray(0, remaining);
+        stderrChunks.push(Buffer.from(captured));
+        stderrBytes += captured.length;
       }
-      const capturedLength = Math.min(chunk.length, remaining);
-      if (capturedLength > 0) {
-        stderrChunks.push(Buffer.from(chunk.subarray(0, capturedLength)));
-        stderrBytes += capturedLength;
-      }
-      if (capturedLength < chunk.length) {
+      if (chunk.length > remaining) {
         stderrTruncated = true;
       }
-    };
+    }
+  })();
 
-    const processRow = (row: string): void => {
-      const separator = row.indexOf('\t');
-      const metadata = row.slice(0, separator).split(' ');
-      const path = row.slice(separator + 1);
-      if (separator < 0 || metadata.length !== 3 || metadata[1] !== 'blob') {
-        throw new Error(`Unsupported Git tree entry in vendored repository: ${path}`);
-      }
-      const mode = metadata[0];
-      if (mode !== '100644' && mode !== '100755') {
-        throw new Error(`Unsupported Git tree mode in vendored repository: ${path}`);
-      }
-      trackedFiles.set(path, {
-        objectId: metadata[2]!,
-        executable: mode === '100755',
-      });
-    };
-
-    const consumeStdout = (chunk: Buffer): void => {
+  let pendingRecord = Buffer.alloc(0);
+  let stdoutError: Error | null = null;
+  try {
+    for await (const chunk of treeProcess.stdout as AsyncIterable<Buffer>) {
       const output = pendingRecord.length > 0 ? Buffer.concat([pendingRecord, chunk]) : chunk;
       let recordStart = 0;
       let separator = output.indexOf(0, recordStart);
       while (separator >= 0) {
         if (separator > recordStart) {
-          processRow(output.toString('utf8', recordStart, separator));
+          const row = output.toString('utf8', recordStart, separator);
+          const metadataSeparator = row.indexOf('\t');
+          const metadata = row.slice(0, metadataSeparator).split(' ');
+          const path = row.slice(metadataSeparator + 1);
+          if (metadataSeparator < 0 || metadata.length !== 3 || metadata[1] !== 'blob') {
+            throw new Error(`Unsupported Git tree entry in vendored repository: ${path}`);
+          }
+          const mode = metadata[0];
+          if (mode !== '100644' && mode !== '100755') {
+            throw new Error(`Unsupported Git tree mode in vendored repository: ${path}`);
+          }
+          trackedFiles.set(path, {
+            objectId: metadata[2]!,
+            executable: mode === '100755',
+          });
         }
         recordStart = separator + 1;
         separator = output.indexOf(0, recordStart);
@@ -273,65 +251,29 @@ export async function verifyGitRepositoryCheckout(
       if (pendingRecord.length > MAX_GIT_TREE_RECORD_BYTES) {
         throw new Error(`Git ls-tree record exceeds ${MAX_GIT_TREE_RECORD_BYTES} bytes`);
       }
-    };
+    }
+  } catch (error) {
+    stdoutError = error instanceof Error ? error : new Error(String(error));
+    treeProcess.kill();
+  }
 
-    treeStdout.on('data', (chunk: Buffer) => {
-      if (parseError || streamError) {
-        return;
-      }
-      try {
-        consumeStdout(chunk);
-      } catch (error) {
-        recordParseError(error);
-      }
-    });
-    treeStderr.on('data', (chunk: Buffer) => {
-      captureStderr(chunk);
-    });
-    treeStdout.once('error', (error: unknown) => {
-      recordStreamError('stdout', error);
-    });
-    treeStderr.once('error', (error: unknown) => {
-      recordStreamError('stderr', error);
-    });
-    treeProcess.once('error', (error: Error) => {
-      if (!parseError && !streamError && !spawnError) {
-        spawnError = error;
-        killTreeProcess();
-      }
-    });
-    treeProcess.once('close', (code, signal) => {
-      if (!parseError && !streamError && !spawnError) {
-        try {
-          if (code === 0 && pendingRecord.length > 0) {
-            throw new Error('Git ls-tree output ended with an unterminated record');
-          }
-        } catch (error) {
-          recordParseError(error);
-        }
-      }
-      const stderrOutput = Buffer.concat(stderrChunks, stderrBytes).toString('utf8');
-      const stderrDetails = stderrTruncated ? `${stderrOutput}\n[stderr truncated]` : stderrOutput;
-      const details = stderrDetails.trim();
-
-      if (parseError) {
-        reject(parseError);
-      } else if (streamError) {
-        reject(streamError);
-      } else if (spawnError) {
-        reject(
-          new Error(`Failed to run git ls-tree: ${spawnError.message}`, {
-            cause: spawnError,
-          })
-        );
-      } else if (code !== 0) {
-        const status = signal ? `signal ${signal}` : `exit code ${code ?? 'unknown'}`;
-        reject(new Error(`Git ls-tree failed with ${status}${details ? `: ${details}` : ''}`));
-      } else {
-        resolve();
-      }
-    });
-  });
+  const [{ code, signal }] = await Promise.all([processCompletion, stderrCompletion]);
+  if (processError) {
+    throw processError;
+  }
+  if (stdoutError) {
+    throw stdoutError;
+  }
+  if (code !== 0) {
+    const stderrOutput = Buffer.concat(stderrChunks, stderrBytes).toString('utf8');
+    const stderrDetails = stderrTruncated ? `${stderrOutput}\n[stderr truncated]` : stderrOutput;
+    const details = stderrDetails.trim();
+    const status = signal ? `signal ${signal}` : `exit code ${code ?? 'unknown'}`;
+    throw new Error(`Git ls-tree failed with ${status}${details ? `: ${details}` : ''}`);
+  }
+  if (pendingRecord.length > 0) {
+    throw new Error('Git ls-tree output ended with an unterminated record');
+  }
 
   const worktreeFiles: string[] = [];
   async function collectFiles(currentDirectory: string, prefix: string): Promise<void> {

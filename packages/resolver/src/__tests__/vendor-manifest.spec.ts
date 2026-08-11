@@ -20,6 +20,10 @@ import {
 const tempDirectories: string[] = [];
 const execFileAsync = promisify(execFile);
 
+interface FakeGitOptions {
+  isolatedPath?: boolean;
+}
+
 async function createTempDirectory(): Promise<string> {
   const directory = await mkdtemp(join(tmpdir(), 'prs-vendor-manifest-'));
   tempDirectories.push(directory);
@@ -47,6 +51,40 @@ async function initializeVendoredGitRepository(directory: string): Promise<strin
   const result = await execFileAsync('git', ['-C', directory, 'rev-parse', 'HEAD']);
   await rename(join(directory, '.git'), join(directory, VENDOR_GIT_DIR));
   return result.stdout.trim();
+}
+
+async function withFakeGit(
+  script: string,
+  callback: () => Promise<void>,
+  options: FakeGitOptions = {}
+): Promise<void> {
+  const fakeGitDirectory = await createTempDirectory();
+  const fakeGitPath = join(fakeGitDirectory, 'git');
+  const realGitPath = (await execFileAsync('which', ['git'])).stdout.trim();
+  await writeFile(
+    fakeGitPath,
+    `#!/bin/sh
+${script}
+exec "${realGitPath}" "$@"
+`
+  );
+  await chmod(fakeGitPath, 0o755);
+
+  const originalPath = process.env['PATH'];
+  process.env['PATH'] = options.isolatedPath
+    ? fakeGitDirectory
+    : originalPath
+      ? `${fakeGitDirectory}${delimiter}${originalPath}`
+      : fakeGitDirectory;
+  try {
+    await callback();
+  } finally {
+    if (originalPath === undefined) {
+      delete process.env['PATH'];
+    } else {
+      process.env['PATH'] = originalPath;
+    }
+  }
 }
 
 afterEach(async () => {
@@ -228,11 +266,8 @@ describe('vendor manifest', () => {
       const objectId = (
         await execFileAsync('git', ['-C', repositoryDir, 'hash-object', '--no-filters', 'base.prs'])
       ).stdout.trim();
-      const fakeGitDirectory = await createTempDirectory();
-      const realGitPath = (await execFileAsync('which', ['git'])).stdout.trim();
-      await writeFile(
-        join(fakeGitDirectory, 'git'),
-        `#!/bin/sh
+      await withFakeGit(
+        `
 if [ "$3" = "ls-tree" ]; then
   index=0
   while [ "$index" -lt 20000 ]; do
@@ -241,23 +276,82 @@ if [ "$3" = "ls-tree" ]; then
   done
   exit 0
 fi
-exec "${realGitPath}" "$@"
-`
-      );
-      await chmod(join(fakeGitDirectory, 'git'), 0o755);
-
-      const originalPath = process.env['PATH'];
-      process.env['PATH'] = originalPath
-        ? `${fakeGitDirectory}${delimiter}${originalPath}`
-        : fakeGitDirectory;
-      try {
-        await expect(verifyVendoredGitRepository(repositoryDir, commit)).resolves.toBeUndefined();
-      } finally {
-        if (originalPath === undefined) {
-          delete process.env['PATH'];
-        } else {
-          process.env['PATH'] = originalPath;
+`,
+        async () => {
+          await expect(verifyVendoredGitRepository(repositoryDir, commit)).resolves.toBeUndefined();
         }
+      );
+    }
+  );
+
+  it.skipIf(process.platform === 'win32')(
+    'reports streamed Git tree process failures',
+    async () => {
+      const repositoryDir = await createTempDirectory();
+      await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+      const commit = await initializeVendoredGitRepository(repositoryDir);
+
+      await withFakeGit(
+        `
+if [ "$3" = "rev-parse" ]; then
+  /bin/rm "$0"
+fi
+`,
+        async () => {
+          await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+            'Failed to run git ls-tree'
+          );
+        },
+        { isolatedPath: true }
+      );
+    }
+  );
+
+  it.skipIf(process.platform === 'win32')(
+    'rejects failed and malformed streamed Git tree output',
+    async () => {
+      const repositoryDir = await createTempDirectory();
+      await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+      const commit = await initializeVendoredGitRepository(repositoryDir);
+      const objectId = (
+        await execFileAsync('git', ['-C', repositoryDir, 'hash-object', '--no-filters', 'base.prs'])
+      ).stdout.trim();
+      const cases = [
+        {
+          script: `
+if [ "$3" = "ls-tree" ]; then
+  "${process.execPath}" -e 'process.stderr.write("x".repeat(70000), () => process.exit(7))'
+  exit $?
+fi
+`,
+          expected: '[stderr truncated]',
+        },
+        {
+          script: `
+if [ "$3" = "ls-tree" ]; then
+  "${process.execPath}" -e 'process.stdout.write("x".repeat(1048577))'
+  exit $?
+fi
+`,
+          expected: 'record exceeds',
+        },
+        {
+          script: `
+if [ "$3" = "ls-tree" ]; then
+  printf '100644 blob %s\tbase.prs' '${objectId}'
+  exit 0
+fi
+`,
+          expected: 'unterminated record',
+        },
+      ];
+
+      for (const testCase of cases) {
+        await withFakeGit(testCase.script, async () => {
+          await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+            testCase.expected
+          );
+        });
       }
     }
   );
