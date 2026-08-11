@@ -1,0 +1,101 @@
+# GitHub Copilot Formatter
+
+| Property          | Value                                    |
+| ----------------- | ---------------------------------------- |
+| **Tier**          | Custom                                   |
+| **Main output**   | `.github/copilot-instructions.md`        |
+| **Dot directory** | `.github/`                               |
+| **Skills**        | Yes (`.github/skills/<name>/SKILL.md`)   |
+| **Agents**        | Yes (`.github/agents/<name>.md`)         |
+| **Commands**      | Yes (`.github/prompts/<name>.prompt.md`) |
+| **Local files**   | No                                       |
+
+## Output Files
+
+| File              | Path                               | Purpose                                                       |
+| ----------------- | ---------------------------------- | ------------------------------------------------------------- |
+| Main instructions | `.github/copilot-instructions.md`  | Primary rule file                                             |
+| Lifecycle hooks   | `.github/hooks/promptscript.json`  | Copilot CLI and cloud agent hooks in multifile and full modes |
+| Skills            | `.github/skills/<name>/SKILL.md`   | Reusable skill definitions                                    |
+| Prompts           | `.github/prompts/<name>.prompt.md` | Slash commands                                                |
+| Agents            | `.github/agents/<name>.md`         | Agent configurations                                          |
+| Agents index      | `AGENTS.md`                        | Top-level agents file                                         |
+
+## Supported Features
+
+| Feature                    | Supported |
+| -------------------------- | --------- |
+| Markdown Output            | Yes       |
+| MDC Format                 | No        |
+| Code Blocks                | Yes       |
+| Mermaid Diagrams           | Yes       |
+| Single File Output         | Yes       |
+| Multiple Rule Files        | Yes       |
+| Workflow Files             | No        |
+| Nested Directory Structure | No        |
+| YAML Frontmatter           | Yes       |
+| Description in Frontmatter | No        |
+| Globs in Frontmatter       | Yes       |
+| Activation Type            | No        |
+| Glob Pattern Targeting     | Yes       |
+| Always Apply Rules         | Yes       |
+| Manual Activation          | No        |
+| Auto/Model Activation      | No        |
+| Structured Examples        | Yes       |
+| Character Limit Validation | No        |
+| Content Section Splitting  | Yes       |
+| Guard Dependencies         | Yes       |
+| Context File Inclusion     | No        |
+| @-Mentions                 | No        |
+| Tool Integration           | No        |
+| Path-Specific Rules        | Yes       |
+| Prompt Files               | Yes       |
+| Slash Commands             | Yes       |
+| Skills                     | Yes       |
+| Agent Instructions         | Yes       |
+| Local Memory               | No        |
+| Nested Memory              | No        |
+
+## Limitations & Quirks
+
+- Three output modes: `simple` (single file), `multifile` (path-specific instructions + prompts), `full` (+ skills, agents, AGENTS.md)
+- Path-specific instructions use `applyTo` frontmatter for glob targeting
+- Prompt files (`.github/prompts/*.prompt.md`) support agent mode with `mode: agent` and `tools` list
+- Skills go to `.github/skills/<name>/SKILL.md` with YAML frontmatter
+- Agents go to `.github/agents/<name>.md` + top-level `AGENTS.md`
+- `@shortcuts` with `prompt: true` become prompt files; without `prompt` they become instruction files
+- `@hooks` uses `.github/hooks/promptscript.json` for Copilot CLI and cloud agent in `multifile` and `full` modes
+- Hook commands use GitHub's shell-specific `bash` and `powershell` fields
+- Hook `matcher` values match GitHub Copilot tool names and are emitted only for `preToolUse`, `postToolUse`, `subagentStart`, and `notification`; other targets use different tool-name vocabularies, so a matcher that works here may match nothing elsewhere
+- `pre-terminal-command` is omitted from the shared Copilot CLI/cloud file with `PS4002` because those hosts do not provide one guaranteed repository-level terminal contract
+- `notification` hooks run in Copilot CLI but do not fire in Copilot cloud agent; PromptScript reports `PS4002`
+- `.github/hooks/promptscript-vscode.json` belongs to VS Code Agent integration installed by `prs hooks install copilot`
+- A `vscode` target override emits this file separately and uses PascalCase events; `pre-terminal-command` defaults to `run_in_terminal`, but VS Code currently ignores matcher values and reports best-effort `PS4002`
+- When `@hooks` is removed or no longer emits, the CLI removes a fully PromptScript-owned `.github/hooks/promptscript.json` and prunes the now-empty `.github/hooks/` directory
+
+## Example Output
+
+```text
+project-root/
+├── .github/
+│   ├── copilot-instructions.md        # Main instructions
+│   ├── instructions/
+│   │   └── frontend.instructions.md   # Path-specific (applyTo globs)
+│   ├── prompts/
+│   │   └── review.prompt.md           # Slash command / prompt
+│   ├── skills/
+│   │   └── my-skill/
+│   │       └── SKILL.md               # Skill definition
+│   ├── hooks/
+│   │   ├── promptscript.json           # Copilot CLI/cloud hooks
+│   │   └── promptscript-vscode.json    # VS Code Agent hooks, when overridden
+│   └── agents/
+│       └── reviewer.md                # Agent config
+└── AGENTS.md                          # Top-level agents file
+```
+
+## Official Documentation
+
+- [GitHub Copilot Custom Instructions](https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot)
+- [GitHub Copilot Prompt Files](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files)
+- [GitHub Copilot Hooks Reference](https://docs.github.com/en/copilot/reference/hooks-reference)
