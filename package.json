@@ -34,7 +34,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.6",
     "@eslint/js": "^10.0.1",
-    "@nx/esbuild": "22.7.5",
+    "@nx/esbuild": "23.1.1",
     "@nx/eslint": "22.7.5",
     "@nx/eslint-plugin": "23.1.1",
     "@nx/js": "23.1.1",
