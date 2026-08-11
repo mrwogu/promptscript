@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { execFile } from 'child_process';
+import { execFile, spawn } from 'child_process';
 import { lstat, readFile, readdir, realpath } from 'fs/promises';
 import { basename, dirname, isAbsolute, join, posix, relative, sep } from 'path';
 import { promisify } from 'util';
@@ -8,6 +8,8 @@ export const VENDOR_MANIFEST_FILE = '.vendor-manifest.json';
 export const VENDOR_GIT_DIR = '.promptscript-git';
 const execFileAsync = promisify(execFile);
 const NULL_DEVICE = process.platform === 'win32' ? 'NUL' : '/dev/null';
+const MAX_GIT_STDERR_BYTES = 64 * 1024;
+const MAX_GIT_TREE_RECORD_BYTES = 1024 * 1024;
 
 export interface VendorManifestEntry {
   commit: string;
@@ -19,6 +21,11 @@ export interface VendorManifestEntry {
 export interface VendorManifest {
   version: 1;
   dependencies: Record<string, VendorManifestEntry>;
+}
+
+interface GitProcessResult {
+  code: number | null;
+  signal: NodeJS.Signals | null;
 }
 
 export function getVendorRepositoryRelativePath(repoUrl: string): string {
@@ -151,9 +158,12 @@ export async function verifyGitRepositoryCheckout(
     await lstat(join(gitDir, 'objects', 'info', 'alternates'));
     throw new Error(`Git object alternates are not allowed in vendor metadata: ${gitDir}`);
   } catch (error) {
-    if (
-      !(typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT')
-    ) {
+    if (!(
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      error.code === 'ENOENT'
+    )) {
       throw error;
     }
   }
@@ -175,25 +185,100 @@ export async function verifyGitRepositoryCheckout(
     throw new Error(`Vendored repository commit does not match the lockfile: ${directory}`);
   }
 
-  const tree = await execFileAsync('git', [...commonArgs, 'ls-tree', '-r', '-z', expectedCommit], {
-    env: environment,
-  });
   const trackedFiles = new Map<string, { objectId: string; executable: boolean }>();
-  for (const row of tree.stdout.split('\0').filter(Boolean)) {
-    const separator = row.indexOf('\t');
-    const metadata = row.slice(0, separator).split(' ');
-    const path = row.slice(separator + 1);
-    if (separator < 0 || metadata.length !== 3 || metadata[1] !== 'blob') {
-      throw new Error(`Unsupported Git tree entry in vendored repository: ${path}`);
-    }
-    const mode = metadata[0];
-    if (mode !== '100644' && mode !== '100755') {
-      throw new Error(`Unsupported Git tree mode in vendored repository: ${path}`);
-    }
-    trackedFiles.set(path, {
-      objectId: metadata[2]!,
-      executable: mode === '100755',
+  const treeProcess = spawn('git', [...commonArgs, 'ls-tree', '-r', '-z', expectedCommit], {
+    env: environment,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  let processError: Error | null = null;
+  const processCompletion = new Promise<GitProcessResult>((resolveProcess) => {
+    treeProcess.once('error', (error: Error) => {
+      processError = new Error(`Failed to run git ls-tree: ${error.message}`, { cause: error });
+      resolveProcess({ code: null, signal: null });
     });
+    treeProcess.once('close', (code, signal) => {
+      resolveProcess({ code, signal });
+    });
+  });
+
+  const stderrChunks: Buffer[] = [];
+  let stderrBytes = 0;
+  let stderrTruncated = false;
+  const stderrCompletion = (async (): Promise<void> => {
+    for await (const chunk of treeProcess.stderr as AsyncIterable<Buffer>) {
+      const remaining = MAX_GIT_STDERR_BYTES - stderrBytes;
+      if (remaining > 0) {
+        const captured = chunk.subarray(0, remaining);
+        stderrChunks.push(Buffer.from(captured));
+        stderrBytes += captured.length;
+      }
+      if (chunk.length > remaining) {
+        stderrTruncated = true;
+      }
+    }
+  })();
+
+  let pendingRecord = Buffer.alloc(0);
+  let stdoutError: Error | null = null;
+  try {
+    for await (const chunk of treeProcess.stdout as AsyncIterable<Buffer>) {
+      const output = pendingRecord.length > 0 ? Buffer.concat([pendingRecord, chunk]) : chunk;
+      let recordStart = 0;
+      let separator = output.indexOf(0, recordStart);
+      while (separator >= 0) {
+        if (separator > recordStart) {
+          const row = output.toString('utf8', recordStart, separator);
+          const metadataSeparator = row.indexOf('\t');
+          const metadata = row.slice(0, metadataSeparator).split(' ');
+          const path = row.slice(metadataSeparator + 1);
+          const [mode, entryType, objectId, ...extraFields] = metadata;
+          if (
+            metadataSeparator < 0 ||
+            entryType !== 'blob' ||
+            extraFields.length > 0 ||
+            mode === undefined ||
+            objectId === undefined
+          ) {
+            throw new Error(`Unsupported Git tree entry in vendored repository: ${path}`);
+          }
+          if (mode !== '100644' && mode !== '100755') {
+            throw new Error(`Unsupported Git tree mode in vendored repository: ${path}`);
+          }
+          trackedFiles.set(path, {
+            objectId,
+            executable: mode === '100755',
+          });
+        }
+        recordStart = separator + 1;
+        separator = output.indexOf(0, recordStart);
+      }
+      pendingRecord =
+        recordStart < output.length ? Buffer.from(output.subarray(recordStart)) : Buffer.alloc(0);
+      if (pendingRecord.length > MAX_GIT_TREE_RECORD_BYTES) {
+        throw new Error(`Git ls-tree record exceeds ${MAX_GIT_TREE_RECORD_BYTES} bytes`);
+      }
+    }
+  } catch (error) {
+    stdoutError = error instanceof Error ? error : new Error(String(error), { cause: error });
+    treeProcess.kill();
+  }
+
+  const [{ code, signal }] = await Promise.all([processCompletion, stderrCompletion]);
+  if (processError) {
+    throw processError;
+  }
+  if (stdoutError) {
+    throw stdoutError;
+  }
+  if (code !== 0) {
+    const stderrOutput = Buffer.concat(stderrChunks, stderrBytes).toString('utf8');
+    const stderrDetails = stderrTruncated ? `${stderrOutput}\n[stderr truncated]` : stderrOutput;
+    const details = stderrDetails.trim();
+    const status = signal ? `signal ${signal}` : `exit code ${code ?? 'unknown'}`;
+    throw new Error(`Git ls-tree failed with ${status}${details ? `: ${details}` : ''}`);
+  }
+  if (pendingRecord.length > 0) {
+    throw new Error('Git ls-tree output ended with an unterminated record');
   }
 
   const worktreeFiles: string[] = [];
@@ -291,14 +376,12 @@ export async function loadVendorManifest(vendorDir: string): Promise<VendorManif
           });
         }
       } catch (backupError) {
-        if (
-          !(
-            typeof backupError === 'object' &&
-            backupError !== null &&
-            'code' in backupError &&
-            backupError.code === 'ENOENT'
-          )
-        ) {
+        if (!(
+          typeof backupError === 'object' &&
+          backupError !== null &&
+          'code' in backupError &&
+          backupError.code === 'ENOENT'
+        )) {
           throw backupError;
         }
       }
