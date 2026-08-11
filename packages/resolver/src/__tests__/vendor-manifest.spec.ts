@@ -64,6 +64,13 @@ async function withFakeGit(
   await writeFile(
     fakeGitPath,
     `#!/bin/sh
+# Resolve the subcommand by name so scripts do not depend on git flag positions.
+subcommand=''
+for arg in "$@"; do
+  case "$arg" in
+    ls-tree|rev-parse|hash-object) subcommand="$arg"; break ;;
+  esac
+done
 ${script}
 exec "${realGitPath}" "$@"
 `
@@ -268,7 +275,7 @@ describe('vendor manifest', () => {
       ).stdout.trim();
       await withFakeGit(
         `
-if [ "$3" = "ls-tree" ]; then
+if [ "$subcommand" = "ls-tree" ]; then
   index=0
   while [ "$index" -lt 20000 ]; do
     printf '100644 blob %s\tbase.prs\\000' '${objectId}'
@@ -293,7 +300,7 @@ fi
 
       await withFakeGit(
         `
-if [ "$3" = "rev-parse" ]; then
+if [ "$subcommand" = "rev-parse" ]; then
   /bin/rm "$0"
 fi
 `,
@@ -319,7 +326,7 @@ fi
       const cases = [
         {
           script: `
-if [ "$3" = "ls-tree" ]; then
+if [ "$subcommand" = "ls-tree" ]; then
   "${process.execPath}" -e 'process.stderr.write("x".repeat(70000), () => process.exit(7))'
   exit $?
 fi
@@ -328,7 +335,7 @@ fi
         },
         {
           script: `
-if [ "$3" = "ls-tree" ]; then
+if [ "$subcommand" = "ls-tree" ]; then
   "${process.execPath}" -e 'process.stdout.write("x".repeat(1048577))'
   exit $?
 fi
@@ -337,7 +344,7 @@ fi
         },
         {
           script: `
-if [ "$3" = "ls-tree" ]; then
+if [ "$subcommand" = "ls-tree" ]; then
   printf '100644 blob %s\tbase.prs' '${objectId}'
   exit 0
 fi

@@ -231,15 +231,21 @@ export async function verifyGitRepositoryCheckout(
           const metadataSeparator = row.indexOf('\t');
           const metadata = row.slice(0, metadataSeparator).split(' ');
           const path = row.slice(metadataSeparator + 1);
-          if (metadataSeparator < 0 || metadata.length !== 3 || metadata[1] !== 'blob') {
+          const [mode, entryType, objectId, ...extraFields] = metadata;
+          if (
+            metadataSeparator < 0 ||
+            entryType !== 'blob' ||
+            extraFields.length > 0 ||
+            mode === undefined ||
+            objectId === undefined
+          ) {
             throw new Error(`Unsupported Git tree entry in vendored repository: ${path}`);
           }
-          const mode = metadata[0];
           if (mode !== '100644' && mode !== '100755') {
             throw new Error(`Unsupported Git tree mode in vendored repository: ${path}`);
           }
           trackedFiles.set(path, {
-            objectId: metadata[2]!,
+            objectId,
             executable: mode === '100755',
           });
         }
@@ -253,7 +259,7 @@ export async function verifyGitRepositoryCheckout(
       }
     }
   } catch (error) {
-    stdoutError = error instanceof Error ? error : new Error(String(error));
+    stdoutError = error instanceof Error ? error : new Error(String(error), { cause: error });
     treeProcess.kill();
   }
 
