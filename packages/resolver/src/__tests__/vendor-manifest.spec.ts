@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { execFile } from 'child_process';
 import { chmod, mkdtemp, mkdir, rename, rm, symlink, unlink, writeFile } from 'fs/promises';
-import { join } from 'path';
+import { delimiter, join } from 'path';
 import { tmpdir } from 'os';
 import { promisify } from 'util';
 import {
@@ -218,6 +218,49 @@ describe('vendor manifest', () => {
       repositoryDir
     );
   });
+
+  it.skipIf(process.platform === 'win32')(
+    'streams large Git tree output while validating a checkout',
+    async () => {
+      const repositoryDir = await createTempDirectory();
+      await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+      const commit = await initializeVendoredGitRepository(repositoryDir);
+      const objectId = (
+        await execFileAsync('git', ['-C', repositoryDir, 'hash-object', '--no-filters', 'base.prs'])
+      ).stdout.trim();
+      const fakeGitDirectory = await createTempDirectory();
+      const realGitPath = (await execFileAsync('which', ['git'])).stdout.trim();
+      await writeFile(
+        join(fakeGitDirectory, 'git'),
+        `#!/bin/sh
+if [ "$3" = "ls-tree" ]; then
+  index=0
+  while [ "$index" -lt 20000 ]; do
+    printf '100644 blob %s\tbase.prs\\000' '${objectId}'
+    index=$((index + 1))
+  done
+  exit 0
+fi
+exec "${realGitPath}" "$@"
+`
+      );
+      await chmod(join(fakeGitDirectory, 'git'), 0o755);
+
+      const originalPath = process.env['PATH'];
+      process.env['PATH'] = originalPath
+        ? `${fakeGitDirectory}${delimiter}${originalPath}`
+        : fakeGitDirectory;
+      try {
+        await expect(verifyVendoredGitRepository(repositoryDir, commit)).resolves.toBeUndefined();
+      } finally {
+        if (originalPath === undefined) {
+          delete process.env['PATH'];
+        } else {
+          process.env['PATH'] = originalPath;
+        }
+      }
+    }
+  );
 
   it('rejects worktree changes even when the editable manifest hash is updated', async () => {
     const vendorDir = await createTempDirectory();
