@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.17.1](https://github.com/mrwogu/promptscript/compare/v1.17.0...v1.17.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* **cli:** filter Factory skill frontmatter on init ([#395](https://github.com/mrwogu/promptscript/issues/395)) ([e360846](https://github.com/mrwogu/promptscript/commit/e360846a42820df5207673014aeabd26ef01276c))
+* **cli:** secure vendor directory replacement ([26d120a](https://github.com/mrwogu/promptscript/commit/26d120ae21f3ac36cf95682e13caf90016c3fd61))
+* **resolver:** allow safe Git symlinks ([1288aa2](https://github.com/mrwogu/promptscript/commit/1288aa2030bfe8a61d82c9578da43b09d56613b1))
+* **validator:** refine authority injection checks ([4535804](https://github.com/mrwogu/promptscript/commit/4535804ae526aad78729deb8f4acf471d3476874))
+
 ## [1.17.0](https://github.com/mrwogu/promptscript/compare/v1.16.0...v1.17.0) (2026-08-11)
 
 
