@@ -425,6 +425,30 @@ fi
     );
   });
 
+  it('rejects Git HTTP alternates', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    const infoDir = join(repositoryDir, VENDOR_GIT_DIR, 'objects', 'info');
+    await writeFile(join(infoDir, 'http-alternates'), 'https://example.com/objects');
+
+    await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+      'Git HTTP alternates'
+    );
+  });
+
+  it('rejects Git common directories', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    const gitDir = join(repositoryDir, VENDOR_GIT_DIR);
+    await writeFile(join(gitDir, 'commondir'), '../shared-git');
+
+    await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+      'Git common directories'
+    );
+  });
+
   it('rejects a checkout at a different commit', async () => {
     const repositoryDir = await createTempDirectory();
     await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
@@ -469,14 +493,78 @@ fi
     );
   });
 
-  it('rejects unsupported Git tree modes', async () => {
+  it('accepts tracked symbolic links to repository files', async () => {
     const repositoryDir = await createTempDirectory();
     await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
     await symlink('base.prs', join(repositoryDir, 'linked.prs'));
     const commit = await initializeVendoredGitRepository(repositoryDir);
 
+    await expect(verifyVendoredGitRepository(repositoryDir, commit)).resolves.toBeUndefined();
+    await expect(hashVendorRepository(repositoryDir)).resolves.toMatch(/^sha256-/);
+  });
+
+  it('rejects symbolic links that escape the repository', async () => {
+    const fixtureDir = await createTempDirectory();
+    const repositoryDir = join(fixtureDir, 'repository');
+    await mkdir(repositoryDir);
+    await writeFile(join(fixtureDir, 'outside.prs'), '@meta { id: "outside" }');
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    await symlink('../outside.prs', join(repositoryDir, 'linked.prs'));
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+
     await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
-      'Unsupported Git tree mode'
+      'Symbolic links must resolve inside vendor repositories'
+    );
+  });
+
+  it('rejects symbolic links targeting retained Git metadata', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    await symlink(`${VENDOR_GIT_DIR}/config`, join(repositoryDir, 'linked'));
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+
+    await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+      'Symbolic links must resolve inside vendor repositories'
+    );
+  });
+
+  it('rejects symbolic links targeting untracked files', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    await symlink('untracked.prs', join(repositoryDir, 'linked.prs'));
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await writeFile(join(repositoryDir, 'untracked.prs'), '@meta { id: "untracked" }');
+
+    await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+      'Symbolic links must target tracked regular files'
+    );
+  });
+
+  it('rejects symbolic links targeting directories', async () => {
+    const repositoryDir = await createTempDirectory();
+    const targetDir = join(repositoryDir, 'target');
+    await mkdir(targetDir);
+    await writeFile(join(targetDir, 'base.prs'), '@meta { id: "base" }');
+    await symlink('target', join(repositoryDir, 'linked'));
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+
+    await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+      'Symbolic links must resolve to regular files'
+    );
+  });
+
+  it('rejects retargeted symbolic links', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    await writeFile(join(repositoryDir, 'other.prs'), '@meta { id: "other" }');
+    const linkPath = join(repositoryDir, 'linked.prs');
+    await symlink('base.prs', linkPath);
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await unlink(linkPath);
+    await symlink('other.prs', linkPath);
+
+    await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+      'contents do not match commit'
     );
   });
 
@@ -682,6 +770,36 @@ fi
 
     await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
       'partial Git object sources'
+    );
+  });
+
+  it('rejects worktree-specific Git configuration', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config'),
+      '\n[extensions]\n\tworktreeConfig = true\n',
+      { flag: 'a' }
+    );
+
+    await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+      'External or partial Git object sources'
+    );
+  });
+
+  it('rejects oversized Git config before invoking verification commands', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config'),
+      `\n# ${'x'.repeat(1024 * 1024)}\n`,
+      { flag: 'a' }
+    );
+
+    await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+      'Vendor Git config exceeds'
     );
   });
 
