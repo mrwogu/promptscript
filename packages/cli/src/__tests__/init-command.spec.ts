@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { parse as parseYaml } from 'yaml';
-import { initCommand } from '../commands/init.js';
+import { addPromptScriptMarker, getSkillWrites, initCommand } from '../commands/init.js';
 import { type CliServices } from '../services.js';
+import { FormatterRegistry } from '@promptscript/formatters';
 
 // Mock prettier/loader
 const mockFindPrettierConfig = vi.fn();
@@ -805,6 +806,106 @@ describe('commands/init', () => {
       expect(writtenContent).not.toContain('<!-- PromptScript');
       // Frontmatter should still be valid
       expect(writtenContent).toMatch(/^---\n/);
+    });
+
+    it('should filter Factory skill frontmatter during initialization', () => {
+      const writes = getSkillWrites(['factory', 'claude']);
+      const sourceSkill = writes.find(
+        (write) => write.path === '.promptscript/skills/promptscript/SKILL.md'
+      );
+      const factorySkill = writes.find(
+        (write) => write.path === '.factory/skills/promptscript/SKILL.md'
+      );
+      const claudeSkill = writes.find(
+        (write) => write.path === '.claude/skills/promptscript/SKILL.md'
+      );
+
+      expect(sourceSkill).toBeDefined();
+      expect(factorySkill).toBeDefined();
+      expect(claudeSkill).toBeDefined();
+      expect(sourceSkill?.content).toContain('license: MIT');
+      expect(sourceSkill?.content).toContain('allowed-tools:');
+      expect(factorySkill?.content).toContain('# promptscript-generated: true');
+      expect(claudeSkill?.content).toContain('license: MIT');
+      expect(claudeSkill?.content).toContain('allowed-tools:');
+
+      const sourceFrontmatterMatch = sourceSkill?.content.match(/^---\n([\s\S]*?)\n---/);
+      const factoryFrontmatterMatch = factorySkill?.content.match(/^---\n([\s\S]*?)\n---/);
+      const claudeFrontmatterMatch = claudeSkill?.content.match(/^---\n([\s\S]*?)\n---/);
+      expect(sourceFrontmatterMatch).toBeDefined();
+      expect(factoryFrontmatterMatch).toBeDefined();
+      expect(claudeFrontmatterMatch).toBeDefined();
+
+      const sourceFrontmatter = parseYaml(sourceFrontmatterMatch![1]!) as Record<string, unknown>;
+      const factoryFrontmatter = parseYaml(factoryFrontmatterMatch![1]!) as Record<string, unknown>;
+      const claudeFrontmatter = parseYaml(claudeFrontmatterMatch![1]!) as Record<string, unknown>;
+
+      expect(Object.keys(factoryFrontmatter)).toEqual(['name', 'description', 'user-invocable']);
+      expect(factoryFrontmatter).toEqual({
+        name: 'promptscript',
+        description: sourceFrontmatter['description'],
+        'user-invocable': true,
+      });
+      expect(sourceFrontmatter['license']).toBe('MIT');
+      expect(sourceFrontmatter['allowed-tools']).toBeDefined();
+      expect(claudeFrontmatter['license']).toBe(sourceFrontmatter['license']);
+      expect(claudeFrontmatter['allowed-tools']).toEqual(sourceFrontmatter['allowed-tools']);
+      expect(factorySkill?.content.slice(factoryFrontmatterMatch![0].length)).toBe(
+        sourceSkill?.content.slice(sourceFrontmatterMatch![0].length)
+      );
+    });
+
+    it('should mark untransformed skill content when formatter has no transform hook', () => {
+      const claudeFormatter = FormatterRegistry.get('claude');
+      if (!claudeFormatter) {
+        throw new Error('Claude formatter is not registered');
+      }
+
+      const formatterWithoutTransform = Object.create(claudeFormatter) as typeof claudeFormatter;
+      Object.defineProperty(formatterWithoutTransform, 'transformInjectedSkillContent', {
+        configurable: true,
+        value: undefined,
+      });
+      const originalGet = FormatterRegistry.get;
+      const getSpy = vi.spyOn(FormatterRegistry, 'get');
+
+      try {
+        getSpy.mockImplementation((target) => {
+          if (target === 'claude') return formatterWithoutTransform;
+          return originalGet.call(FormatterRegistry, target);
+        });
+
+        const writes = getSkillWrites(['claude']);
+        const sourceSkill = writes.find(
+          (write) => write.path === '.promptscript/skills/promptscript/SKILL.md'
+        );
+        const claudeSkill = writes.find(
+          (write) => write.path === '.claude/skills/promptscript/SKILL.md'
+        );
+
+        expect(claudeSkill?.content).toBe(sourceSkill?.content);
+        expect(claudeSkill?.content).toContain('# promptscript-generated: true');
+      } finally {
+        getSpy.mockRestore();
+      }
+    });
+
+    it('should preserve existing PromptScript markers', () => {
+      const yamlContent = '---\n# promptscript-generated: true\nname: promptscript\n---\n';
+      const legacyHtmlContent =
+        '<!-- PromptScript 2026-07-27T16:59:01.673Z | source: project.prs | target: claude - do not edit -->\n\n---\nname: promptscript\n---\n';
+
+      expect(addPromptScriptMarker(yamlContent)).toBe(yamlContent);
+      expect(addPromptScriptMarker(legacyHtmlContent)).toBe(legacyHtmlContent);
+      expect(addPromptScriptMarker('# Plain skill')).toBe('# Plain skill');
+    });
+
+    it('should insert YAML marker into existing frontmatter', () => {
+      const content = '---\nname: promptscript\n---\n# Plain skill';
+
+      expect(addPromptScriptMarker(content)).toBe(
+        '---\n# promptscript-generated: true\nname: promptscript\n---\n# Plain skill'
+      );
     });
   });
 
