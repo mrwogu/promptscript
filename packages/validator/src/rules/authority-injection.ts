@@ -12,36 +12,37 @@ import { walkText } from '../walker.js';
  */
 const AUTHORITY_PATTERNS: RegExp[] = [
   // Mandatory/strict mode indicators
-  /\[?\s{0,10}MANDATORY\s{0,10}(?:POLICY|UPDATE|FOOTER|INSTRUCTION|DIRECTIVE)\s{0,10}\]?/i,
+  /\[?\s{0,10}\bMANDATORY\b\s{0,10}(?:POLICY|UPDATE|FOOTER|INSTRUCTION|DIRECTIVE)\b\s{0,10}\]?/i,
   /\[\s{0,10}OVERRIDE\s{0,10}\]/i,
-  /\[?\s{0,10}STRICT[_\s]{0,10}MODE\s{0,10}[:\s]{1,10}ON\s{0,10}\]?/i,
-  /\[?\s{0,10}SYSTEM\s{0,10}(?:OVERRIDE|UPDATE|DIRECTIVE)\s{0,10}\]?/i,
-  /\[?\s{0,10}ADMIN(?:ISTRATOR)?\s{0,10}(?:MODE|OVERRIDE|ACCESS)\s{0,10}\]?/i,
-  /\[?\s{0,10}ROOT\s{0,10}(?:ACCESS|MODE|OVERRIDE)\s{0,10}\]?/i,
-  /\[?\s{0,10}PRIORITY\s{0,10}(?:OVERRIDE|ONE|ALPHA)\s{0,10}\]?/i,
-  /\[?\s{0,10}EMERGENCY\s{0,10}(?:PROTOCOL|OVERRIDE|MODE)\s{0,10}\]?/i,
+  /\[?\s{0,10}\bSTRICT[_\s]{0,10}MODE\b\s{0,10}[:\s]{1,10}ON\b\s{0,10}\]?/i,
+  /\[?\s{0,10}\bSYSTEM\b\s{0,10}(?:OVERRIDE|UPDATE|DIRECTIVE)\b\s{0,10}\]?/i,
+  /\[?\s{0,10}\bADMIN(?:ISTRATOR)?\b\s{0,10}(?:MODE|OVERRIDE|ACCESS)\b\s{0,10}\]?/i,
+  /\[?\s{0,10}\bROOT\b\s{0,10}(?:ACCESS|MODE|OVERRIDE)\b\s{0,10}\]?/i,
+  /\[?\s{0,10}\bPRIORITY\b\s{0,10}(?:OVERRIDE|ONE|ALPHA)\b\s{0,10}\]?/i,
+  /\[?\s{0,10}\bEMERGENCY\b\s{0,10}(?:PROTOCOL|OVERRIDE|MODE)\b\s{0,10}\]?/i,
 
   // Warning suppression patterns
   // Removed because it triggers false positives on valid agent instructions (e.g., "do not notify user")
   // /(?:DO\s{1,10}NOT|NEVER|DON'?T)\s{1,10}(?:WARN|ALERT|NOTIFY|FLAG|REPORT)/i,
-  /(?:DO\s{1,10}NOT|NEVER|DON'?T)\s{1,10}(?:PROVIDE|SHOW|DISPLAY|INCLUDE)\s{1,10}(?:SECURITY\s{1,10})?WARNINGS?/i,
-  /(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\s{1,10}(?:ALL\s{1,10})?WARNINGS?/i,
-  /(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\s{1,10}(?:ALL\s{1,10})?(?:SECURITY\s{1,10})?(?:ALERTS?|NOTIFICATIONS?)/i,
-  /IGNORE\s{1,10}(?:ALL\s{1,10})?(?:SAFETY\s{1,10})?WARNINGS?/i,
-  /(?:SKIP|BYPASS)\s{1,10}(?:ALL\s{1,10})?(?:SAFETY\s{1,10})?(?:CHECKS?|VALIDATION)/i,
+  /\b(?:DO\s{1,10}NOT|NEVER|DON'?T)\b\s{1,10}(?:PROVIDE|SHOW|DISPLAY|INCLUDE)\b\s{1,10}(?:SECURITY\s{1,10})?WARNINGS?\b/i,
+  /\b(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\b\s{1,10}(?:ALL\s{1,10})?WARNINGS?\b/i,
+  /\b(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\b\s{1,10}(?:ALL\s{1,10})?(?:SECURITY\s{1,10})?(?:ALERTS?|NOTIFICATIONS?)\b/i,
+  /\bIGNORE\b\s{1,10}(?:ALL\s{1,10})?(?:SAFETY\s{1,10})?WARNINGS?\b/i,
+  /(?:^|[.!?:;]\s{0,10})\s{0,10}(?:[-*]\s{1,10})?(?:PLEASE\s{1,10})?\b(?:SKIP|BYPASS)\b\s{1,10}(?:CHECKS?|VALIDATION)\b/im,
+  /\b(?:SKIP|BYPASS)\b\s{1,10}(?:(?:ALL\s{1,10})(?:SAFETY\s{1,10})?|SAFETY\s{1,10})(?:CHECKS?|VALIDATION)\b/i,
 
   // Execute/follow verbatim patterns
-  /EXECUTE\s{1,10}(?:THIS\s{1,10})?VERBATIM/i,
-  /FOLLOW\s{1,10}(?:THESE?\s{1,10})?INSTRUCTIONS?\s{1,10}(?:EXACTLY|PRECISELY|LITERALLY)/i,
-  /(?:MUST|SHALL|WILL)\s{1,10}(?:ALWAYS\s{1,10})?COMPLY/i,
-  /(?:ABSOLUTE|UNCONDITIONAL)\s{1,10}(?:COMPLIANCE|OBEDIENCE)/i,
-  /NO\s{1,10}(?:EXCEPTIONS?|DEVIATIONS?)\s{1,10}(?:ALLOWED|PERMITTED)/i,
+  /\bEXECUTE\b\s{1,10}(?:THIS\s{1,10})?VERBATIM\b/i,
+  /\bFOLLOW\b\s{1,10}(?:THESE?\s{1,10})?INSTRUCTIONS?\s{1,10}(?:EXACTLY|PRECISELY|LITERALLY)\b/i,
+  /\b(?:MUST|SHALL|WILL)\b\s{1,10}(?:ALWAYS\s{1,10})?COMPLY\b/i,
+  /\b(?:ABSOLUTE|UNCONDITIONAL)\b\s{1,10}(?:COMPLIANCE|OBEDIENCE)\b/i,
+  /\bNO\b\s{1,10}(?:EXCEPTIONS?|DEVIATIONS?)\s{1,10}(?:ALLOWED|PERMITTED)\b/i,
 
   // Authority assertion patterns
-  /THIS\s{1,10}(?:OVERRIDES?|SUPERSEDES?|REPLACES?)\s{1,10}(?:ALL\s{1,10})?(?:PREVIOUS|PRIOR|OTHER)/i,
-  /(?:HIGHEST|TOP|MAXIMUM)\s{1,10}PRIORITY\s{1,10}(?:INSTRUCTION|DIRECTIVE|ORDER)/i,
-  /(?:CORE|FUNDAMENTAL|BASE)\s{1,10}(?:DIRECTIVE|INSTRUCTION)\s{1,10}(?:UPDATE|OVERRIDE)/i,
-  /NEW\s{1,10}(?:SYSTEM|CORE|BASE)\s{1,10}(?:INSTRUCTIONS?|DIRECTIVES?|RULES?)/i,
+  /\bTHIS\b\s{1,10}(?:OVERRIDES?|SUPERSEDES?|REPLACES?)\s{1,10}(?:ALL\s{1,10})?(?:PREVIOUS|PRIOR|OTHER)\b/i,
+  /\b(?:HIGHEST|TOP|MAXIMUM)\b\s{1,10}PRIORITY\s{1,10}(?:INSTRUCTION|DIRECTIVE|ORDER)\b/i,
+  /\b(?:CORE|FUNDAMENTAL|BASE)\b\s{1,10}(?:DIRECTIVE|INSTRUCTION)\s{1,10}(?:UPDATE|OVERRIDE)\b/i,
+  /\bNEW\b\s{1,10}(?:SYSTEM|CORE|BASE)\s{1,10}(?:INSTRUCTIONS?|DIRECTIVES?|RULES?)\b/i,
 ];
 
 /**
@@ -51,7 +52,52 @@ const AUTHORITY_PATTERNS: RegExp[] = [
  * Handles indented fences (common in triple-quoted content blocks).
  */
 function stripFencedCodeBlocks(text: string): string {
-  return text.replace(/^\s*```[\s\S]*?^\s*```/gm, '');
+  const lines = text.split('\n');
+  const output: string[] = [];
+  let pendingFence: string[] = [];
+  let insideFence = false;
+  let fenceCharacter = '';
+  let fenceLength = 0;
+
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index]!;
+    const renderedLine = index < lines.length - 1 ? `${line}\n` : line;
+    const trimmedLine = line.trimStart();
+    const currentCharacter = trimmedLine[0];
+    let currentLength = 0;
+    if (currentCharacter === '`' || currentCharacter === '~') {
+      while (trimmedLine[currentLength] === currentCharacter) {
+        currentLength += 1;
+      }
+    }
+    const closesFence =
+      insideFence &&
+      currentCharacter === fenceCharacter &&
+      currentLength >= fenceLength &&
+      trimmedLine.slice(currentLength).trim() === '';
+    const opensFence = !insideFence && currentLength >= 3;
+
+    if (closesFence) {
+      insideFence = false;
+      pendingFence = [];
+      fenceCharacter = '';
+      fenceLength = 0;
+    } else if (opensFence) {
+      insideFence = true;
+      fenceCharacter = currentCharacter!;
+      fenceLength = currentLength;
+      pendingFence.push(renderedLine);
+    } else if (insideFence) {
+      pendingFence.push(renderedLine);
+    } else {
+      output.push(renderedLine);
+    }
+  }
+
+  if (insideFence) {
+    output.push(...pendingFence);
+  }
+  return output.join('');
 }
 
 /**
@@ -72,8 +118,9 @@ export const authorityInjection: ValidationRule = {
       ctx.ast,
       (text, loc) => {
         const strippedText = stripFencedCodeBlocks(text);
+        const normalizedText = strippedText.replace(/\s+/g, ' ');
         for (const pattern of AUTHORITY_PATTERNS) {
-          if (pattern.test(strippedText)) {
+          if (pattern.test(strippedText) || pattern.test(normalizedText)) {
             ctx.report({
               message: `Authority injection pattern detected: ${pattern.source}`,
               location: loc,
