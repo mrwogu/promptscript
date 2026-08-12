@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { parse as parseYaml } from 'yaml';
-import { getSkillWrites, initCommand } from '../commands/init.js';
+import { addPromptScriptMarker, getSkillWrites, initCommand } from '../commands/init.js';
 import { type CliServices } from '../services.js';
 
 // Mock prettier/loader
@@ -831,6 +831,13 @@ describe('commands/init', () => {
       expect(factoryFrontmatter).not.toContain('compatibility:');
       expect(factoryFrontmatter).not.toContain('allowed-tools:');
       expect(factorySkill?.content).toContain('# PromptScript Language Guide');
+    });
+
+    it('should preserve existing PromptScript markers', () => {
+      const content = '---\n# promptscript-generated: true\nname: promptscript\n---\n';
+
+      expect(addPromptScriptMarker(content)).toBe(content);
+      expect(addPromptScriptMarker('# Plain skill')).toBe('# Plain skill');
     });
   });
 

@@ -576,9 +576,12 @@ export function getSkillWrites(targets: AIToolTarget[]): PlannedWrite[] {
       const targetSkillDir = getTargetSkillDir(target, skillName);
       if (targetSkillDir && !writes.some((write) => write.path === targetSkillDir.path)) {
         const formatter = FormatterRegistry.get(target);
-        const targetContent = formatter?.transformInjectedSkillContent
-          ? addPromptScriptMarker(formatter.transformInjectedSkillContent(rawSkillContent))
-          : skillContent;
+        let targetContent = skillContent;
+        if (formatter?.transformInjectedSkillContent) {
+          targetContent = addPromptScriptMarker(
+            formatter.transformInjectedSkillContent(rawSkillContent)
+          );
+        }
         writes.push({ path: targetSkillDir.path, content: targetContent });
       }
     }
@@ -592,13 +595,12 @@ export function getSkillWrites(targets: AIToolTarget[]): PlannedWrite[] {
 /**
  * Add a PromptScript marker without putting HTML comments after YAML frontmatter.
  */
-function addPromptScriptMarker(content: string): string {
+export function addPromptScriptMarker(content: string): string {
   const hasMarker =
     content.includes('<!-- PromptScript') || content.includes('# promptscript-generated:');
-  if (!hasMarker && content.startsWith('---')) {
-    return `---\n# promptscript-generated: true${content.slice(3)}`;
-  }
-  return content;
+  return !hasMarker && content.startsWith('---')
+    ? `---\n# promptscript-generated: true${content.slice(3)}`
+    : content;
 }
 
 /**
