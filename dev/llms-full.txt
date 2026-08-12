@@ -6290,6 +6290,10 @@ prs vendor sync
 
 Sync fails if any locked commit cannot be downloaded. After syncing, compilation uses the vendored files and makes no network requests for locked remote imports.
 
+Tracked symbolic links must resolve to tracked regular files inside the same repository and outside retained Git metadata. Broken, external, directory, and retargeted symbolic links fail verification.
+
+Vendor commands reject a symbolic link or filesystem escape in the `.promptscript/` parent before reading, replacing, or cleaning vendor content.
+
 #### prs vendor check
 
 Verify that the vendor directory matches the current lockfile.
@@ -12127,6 +12131,10 @@ prs vendor check
 
 `prs vendor sync` fails if an exact locked commit cannot be downloaded. After a successful sync, compilation resolves locked remote imports from the vendor directory without network requests.
 
+Tracked symbolic links are accepted only when they resolve to tracked regular files inside the same repository and outside retained Git metadata. Broken, external, directory, and retargeted symbolic links fail repository verification.
+
+Vendor commands reject a symbolic link or filesystem escape in the `.promptscript/` parent before reading, replacing, or cleaning vendor content.
+
 ### Vendor Directory Structure
 
 ```text
@@ -12514,6 +12522,8 @@ PromptScript includes built-in validation rules to detect potential prompt injec
 | PS012   | `obfuscated-content`  | Sanitization pipeline for encoded malicious content          | warning          |
 | PS013   | `path-traversal`      | Detects path traversal attacks in use declarations           | error            |
 | PS014   | `unicode-security`    | Detects RTL override, invisible chars, homoglyphs            | warning          |
+
+PS011 detects imperative `skip` or `bypass` instructions and phrases qualified by `all` or `safety`. Descriptive guidance such as "templates bypass validation" is not an authority directive.
 
 ### Obfuscation Detection (PS012)
 
