@@ -1,4 +1,14 @@
-import { mkdir, mkdtemp, readFile, readdir, rename, rm, writeFile } from 'fs/promises';
+import {
+  lstat,
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  realpath,
+  rename,
+  rm,
+  writeFile,
+} from 'fs/promises';
 import { existsSync } from 'fs';
 import { basename, dirname, join, resolve } from 'path';
 import { parse as parseYaml } from 'yaml';
@@ -11,6 +21,7 @@ import {
   getVendorRepositoryRelativePath,
   GitRegistry,
   hashVendorRepository,
+  isInsideCachePath,
   loadVendorManifest,
   normalizeGitUrl,
   resolveVendoredRepository,
@@ -53,11 +64,11 @@ export async function vendorSyncCommand(options: VendorSyncOptions): Promise<voi
     }
 
     const vendorDir = resolve(VENDOR_DIR);
+    await validateVendorParentDirectory(vendorDir, true);
     const recoveredBackup = await recoverVendorDirectory(vendorDir);
     if (recoveredBackup) {
       ConsoleOutput.warn(`Recovered interrupted vendor update: ${recoveredBackup}`);
     }
-    await mkdir(dirname(vendorDir), { recursive: true });
     const stagingDir = await mkdtemp(join(dirname(vendorDir), '.vendor-stage-'));
     try {
       const manifest: VendorManifest = { version: 1, dependencies: {} };
@@ -149,6 +160,7 @@ export async function vendorCheckCommand(_options: VendorCheckOptions): Promise<
     const deps = getRepositoryDependencies(lockfile);
     validateDependencyPaths(deps);
     const vendorDir = resolve(VENDOR_DIR);
+    await validateVendorParentDirectory(vendorDir, false);
     const recoveredBackup = await recoverVendorDirectory(vendorDir);
     if (recoveredBackup) {
       ConsoleOutput.warn(`Recovered interrupted vendor update: ${recoveredBackup}`);
@@ -267,6 +279,39 @@ function toCloneUrl(repoUrl: string): string {
   return /^[a-z][a-z\d+.-]*:\/\//i.test(repoUrl) || repoUrl.startsWith('git@')
     ? repoUrl
     : `https://${repoUrl}`;
+}
+
+async function validateVendorParentDirectory(
+  vendorDir: string,
+  createIfMissing: boolean
+): Promise<void> {
+  const projectRoot = await realpath('.');
+  const parentDir = dirname(vendorDir);
+  if (createIfMissing) {
+    await mkdir(parentDir, { recursive: true });
+  }
+  try {
+    const [metadata, parentRealPath] = await Promise.all([lstat(parentDir), realpath(parentDir)]);
+    if (
+      metadata.isSymbolicLink() ||
+      !metadata.isDirectory() ||
+      parentRealPath === projectRoot ||
+      !isInsideCachePath(parentRealPath, projectRoot)
+    ) {
+      throw new Error(`Unsafe vendor parent directory: ${parentDir}`);
+    }
+  } catch (error) {
+    if (
+      !createIfMissing &&
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      error.code === 'ENOENT'
+    ) {
+      return;
+    }
+    throw error;
+  }
 }
 
 async function replaceVendorDirectory(

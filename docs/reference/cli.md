@@ -1089,6 +1089,10 @@ prs vendor sync
 
 Sync fails if any locked commit cannot be downloaded. After syncing, compilation uses the vendored files and makes no network requests for locked remote imports.
 
+Tracked symbolic links must resolve to tracked regular files inside the same repository and outside retained Git metadata. Broken, external, directory, and retargeted symbolic links fail verification.
+
+Vendor commands reject a symbolic link or filesystem escape in the `.promptscript/` parent before reading, replacing, or cleaning vendor content.
+
 #### prs vendor check
 
 Verify that the vendor directory matches the current lockfile.

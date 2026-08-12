@@ -9,9 +9,11 @@ const {
   mockExistsSync,
   mockReadFile,
   mockWriteFile,
+  mockLstat,
   mockMkdir,
   mockMkdtemp,
   mockReaddir,
+  mockRealpath,
   mockRename,
   mockRm,
   mockCloneAtTag,
@@ -36,9 +38,16 @@ const {
   const mockExistsSync = vi.fn();
   const mockReadFile = vi.fn();
   const mockWriteFile = vi.fn().mockResolvedValue(undefined);
+  const mockLstat = vi.fn().mockResolvedValue({
+    isDirectory: () => true,
+    isSymbolicLink: () => false,
+  });
   const mockMkdir = vi.fn().mockResolvedValue(undefined);
   const mockMkdtemp = vi.fn().mockResolvedValue('/project/.promptscript/.vendor-stage-test');
   const mockReaddir = vi.fn().mockResolvedValue([]);
+  const mockRealpath = vi
+    .fn()
+    .mockImplementation(async (path: string) => (path === '.' ? process.cwd() : path));
   const mockRename = vi.fn().mockResolvedValue(undefined);
   const mockRm = vi.fn().mockResolvedValue(undefined);
   const mockCloneAtTag = vi.fn().mockResolvedValue(undefined);
@@ -68,9 +77,11 @@ const {
     mockExistsSync,
     mockReadFile,
     mockWriteFile,
+    mockLstat,
     mockMkdir,
     mockMkdtemp,
     mockReaddir,
+    mockRealpath,
     mockRename,
     mockRm,
     mockCloneAtTag,
@@ -100,11 +111,13 @@ vi.mock('../../config/loader.js', () => ({ loadConfig: mockLoadConfig }));
 vi.mock('fs', () => ({ existsSync: mockExistsSync }));
 
 vi.mock('fs/promises', () => ({
+  lstat: mockLstat,
   readFile: mockReadFile,
   writeFile: mockWriteFile,
   mkdir: mockMkdir,
   mkdtemp: mockMkdtemp,
   readdir: mockReaddir,
+  realpath: mockRealpath,
   rename: mockRename,
   rm: mockRm,
 }));
@@ -127,6 +140,11 @@ vi.mock('@promptscript/resolver', () => ({
       .replace(/\.git$/, '')
   ),
   hashVendorRepository: vi.fn().mockResolvedValue('sha256-vendor'),
+  isInsideCachePath: vi.fn((filePath: string, cachePath: string) => {
+    const normalizedFile = filePath.replaceAll('\\', '/');
+    const normalizedCache = cachePath.replaceAll('\\', '/').replace(/\/$/, '');
+    return normalizedFile === normalizedCache || normalizedFile.startsWith(`${normalizedCache}/`);
+  }),
   loadVendorManifest: mockLoadVendorManifest,
   normalizeGitUrl: vi.fn((url: string) => url.replace(/\.git$/, '')),
   resolveVendoredRepository: mockResolveVendoredRepository,
@@ -158,6 +176,11 @@ describe('vendorSyncCommand', () => {
     mockCheckoutCommit.mockResolvedValue(undefined);
     mockLoadConfig.mockResolvedValue({});
     mockReaddir.mockResolvedValue([]);
+    mockLstat.mockResolvedValue({
+      isDirectory: () => true,
+      isSymbolicLink: () => false,
+    });
+    mockRealpath.mockImplementation(async (path: string) => (path === '.' ? process.cwd() : path));
     mockRename.mockResolvedValue(undefined);
     mockRm.mockResolvedValue(undefined);
   });
@@ -181,6 +204,23 @@ describe('vendorSyncCommand', () => {
     expect(mockFail).toHaveBeenCalledWith('Vendor sync failed');
     expect(mockRename).not.toHaveBeenCalled();
     expect(process.exitCode).toBe(1);
+  });
+
+  it('rejects a symbolic link as the vendor parent directory', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+    mockLstat.mockResolvedValue({
+      isDirectory: () => false,
+      isSymbolicLink: () => true,
+    });
+
+    await vendorSyncCommand({});
+
+    expect(mockFail).toHaveBeenCalledWith('Vendor sync failed');
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Unsafe vendor parent directory')
+    );
+    expect(mockMkdtemp).not.toHaveBeenCalled();
   });
 
   it('should not clone dependencies in dry-run mode', async () => {
