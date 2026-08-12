@@ -529,12 +529,15 @@ describe('vendorCheckCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
-  it('should fail when vendor directory does not exist', async () => {
+  it('should fail when vendor parent and directory do not exist', async () => {
     mockExistsSync.mockImplementation((p: string) => {
       if (p === 'promptscript.lock') return true;
       return false;
     });
     mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+    mockLstat.mockRejectedValueOnce(
+      Object.assign(new Error('vendor parent missing'), { code: 'ENOENT' })
+    );
 
     await vendorCheckCommand({});
 
