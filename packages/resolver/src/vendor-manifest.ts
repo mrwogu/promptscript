@@ -1,8 +1,10 @@
 import { createHash } from 'crypto';
 import { execFile, spawn } from 'child_process';
-import { lstat, readFile, readdir, realpath } from 'fs/promises';
-import { basename, dirname, isAbsolute, join, posix, relative, sep } from 'path';
+import { constants } from 'fs';
+import { lstat, open, readFile, readdir, readlink, realpath } from 'fs/promises';
+import { basename, dirname, join, posix, relative, sep } from 'path';
 import { promisify } from 'util';
+import { isInsideCachePath } from './reference-hasher.js';
 
 export const VENDOR_MANIFEST_FILE = '.vendor-manifest.json';
 export const VENDOR_GIT_DIR = '.promptscript-git';
@@ -10,6 +12,7 @@ const execFileAsync = promisify(execFile);
 const NULL_DEVICE = process.platform === 'win32' ? 'NUL' : '/dev/null';
 const MAX_GIT_STDERR_BYTES = 64 * 1024;
 const MAX_GIT_TREE_RECORD_BYTES = 1024 * 1024;
+const MAX_GIT_CONFIG_BYTES = 1024 * 1024;
 
 export interface VendorManifestEntry {
   commit: string;
@@ -26,6 +29,75 @@ export interface VendorManifest {
 interface GitProcessResult {
   code: number | null;
   signal: NodeJS.Signals | null;
+}
+
+interface TrackedGitFile {
+  objectId: string;
+  executable: boolean;
+  symbolicLink: boolean;
+}
+
+function hashGitBlob(content: Buffer): string {
+  return createHash('sha1').update(`blob ${content.length}\0`).update(content).digest('hex');
+}
+
+async function readBoundedRegularFile(
+  filePath: string,
+  maxBytes: number,
+  description: string
+): Promise<Buffer> {
+  const flags = constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0) | (constants.O_NONBLOCK ?? 0);
+  const handle = await open(filePath, flags);
+  try {
+    const metadata = await handle.stat();
+    if (!metadata.isFile()) {
+      throw new Error(`${description} is not a regular file: ${filePath}`);
+    }
+    const content = Buffer.alloc(maxBytes + 1);
+    let offset = 0;
+    while (offset < content.length) {
+      const { bytesRead } = await handle.read(content, offset, content.length - offset, null);
+      if (bytesRead === 0) {
+        break;
+      }
+      offset += bytesRead;
+    }
+    if (offset > maxBytes) {
+      throw new Error(`${description} exceeds ${maxBytes} bytes: ${filePath}`);
+    }
+    return content.subarray(0, offset);
+  } finally {
+    await handle.close();
+  }
+}
+
+async function resolveSafeRepositorySymlink(
+  symlinkPath: string,
+  repositoryRoot: string,
+  gitMetadataRoot: string
+): Promise<string> {
+  let targetPath: string;
+  try {
+    targetPath = await realpath(symlinkPath);
+  } catch (error) {
+    throw new Error(`Symbolic links must resolve inside vendor repositories: ${symlinkPath}`, {
+      cause: error,
+    });
+  }
+  if (
+    targetPath === repositoryRoot ||
+    !isInsideCachePath(targetPath, repositoryRoot) ||
+    isInsideCachePath(targetPath, gitMetadataRoot)
+  ) {
+    throw new Error(`Symbolic links must resolve inside vendor repositories: ${symlinkPath}`);
+  }
+  const targetMetadata = await lstat(targetPath);
+  if (!targetMetadata.isFile()) {
+    throw new Error(
+      `Symbolic links must resolve to regular files in vendor repositories: ${symlinkPath}`
+    );
+  }
+  return targetPath;
 }
 
 export function getVendorRepositoryRelativePath(repoUrl: string): string {
@@ -88,6 +160,8 @@ export function isValidVendorManifest(value: unknown): value is VendorManifest {
 
 export async function hashVendorRepository(directory: string): Promise<string> {
   const hash = createHash('sha256');
+  const repositoryRoot = await realpath(directory);
+  const gitMetadataRoot = join(repositoryRoot, VENDOR_GIT_DIR);
 
   async function visit(currentDirectory: string, prefix: string): Promise<void> {
     const entries = await readdir(currentDirectory, { withFileTypes: true });
@@ -104,9 +178,12 @@ export async function hashVendorRepository(directory: string): Promise<string> {
       const entryPath = join(currentDirectory, entry.name);
       const relativePath = posix.join(prefix, entry.name);
       if (entry.isSymbolicLink()) {
-        throw new Error(`Symbolic links are not allowed in vendor repositories: ${entryPath}`);
-      }
-      if (entry.isDirectory()) {
+        await resolveSafeRepositorySymlink(entryPath, repositoryRoot, gitMetadataRoot);
+        // Hash link text so retargeting changes integrity without following external content.
+        hash.update(`symlink:${relativePath}\0`);
+        hash.update(await readlink(entryPath, { encoding: 'buffer' }));
+        hash.update('\0');
+      } else if (entry.isDirectory()) {
         hash.update(`directory:${relativePath}\0`);
         await visit(entryPath, relativePath);
       } else if (entry.isFile()) {
@@ -141,32 +218,53 @@ export async function verifyGitRepositoryCheckout(
       }
     }
   }
+  async function rejectMetadataPath(relativePath: string, message: string): Promise<void> {
+    try {
+      await lstat(join(gitDir, ...relativePath.split('/')));
+      throw new Error(`${message}: ${gitDir}`);
+    } catch (error) {
+      if (!(
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'ENOENT'
+      )) {
+        throw error;
+      }
+    }
+  }
   const gitMetadata = await lstat(gitDir);
   if (!gitMetadata.isDirectory() || gitMetadata.isSymbolicLink()) {
     throw new Error(`Invalid vendor Git metadata directory: ${gitDir}`);
   }
   await rejectMetadataSymlinks(gitDir);
-  const localConfig = await readFile(join(gitDir, 'config'), 'utf-8');
+  const [repositoryRoot, gitMetadataRoot] = await Promise.all([
+    realpath(directory),
+    realpath(gitDir),
+  ]);
+  const localConfigContent = await readBoundedRegularFile(
+    join(gitDir, 'config'),
+    MAX_GIT_CONFIG_BYTES,
+    'Vendor Git config'
+  );
+  const localConfig = localConfigContent.toString('utf-8');
   if (
-    /^\s*\[(?:include|includeif)\b/im.test(localConfig) ||
+    /^[ \t]*\[(?:include|includeif)\b/im.test(localConfig) ||
     /\bpromisor\s*=\s*true\b/i.test(localConfig) ||
-    /\bpartialclone/i.test(localConfig)
+    /\bpartialclone/i.test(localConfig) ||
+    /\bworktreeconfig\s*=\s*true\b/i.test(localConfig)
   ) {
     throw new Error(`External or partial Git object sources are not allowed: ${gitDir}`);
   }
-  try {
-    await lstat(join(gitDir, 'objects', 'info', 'alternates'));
-    throw new Error(`Git object alternates are not allowed in vendor metadata: ${gitDir}`);
-  } catch (error) {
-    if (!(
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      error.code === 'ENOENT'
-    )) {
-      throw error;
-    }
-  }
+  await rejectMetadataPath('commondir', 'Git common directories are not allowed');
+  await rejectMetadataPath(
+    'objects/info/alternates',
+    'Git object alternates are not allowed in vendor metadata'
+  );
+  await rejectMetadataPath(
+    'objects/info/http-alternates',
+    'Git HTTP alternates are not allowed in vendor metadata'
+  );
   const commonArgs = [`--git-dir=${gitDir}`, `--work-tree=${directory}`];
   const environment: NodeJS.ProcessEnv = {
     PATH: process.env['PATH'],
@@ -185,7 +283,7 @@ export async function verifyGitRepositoryCheckout(
     throw new Error(`Vendored repository commit does not match the lockfile: ${directory}`);
   }
 
-  const trackedFiles = new Map<string, { objectId: string; executable: boolean }>();
+  const trackedFiles = new Map<string, TrackedGitFile>();
   const treeProcess = spawn('git', [...commonArgs, 'ls-tree', '-r', '-z', expectedCommit], {
     env: environment,
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -241,12 +339,13 @@ export async function verifyGitRepositoryCheckout(
           ) {
             throw new Error(`Unsupported Git tree entry in vendored repository: ${path}`);
           }
-          if (mode !== '100644' && mode !== '100755') {
+          if (mode !== '100644' && mode !== '100755' && mode !== '120000') {
             throw new Error(`Unsupported Git tree mode in vendored repository: ${path}`);
           }
           trackedFiles.set(path, {
             objectId,
             executable: mode === '100755',
+            symbolicLink: mode === '120000',
           });
         }
         recordStart = separator + 1;
@@ -281,7 +380,9 @@ export async function verifyGitRepositoryCheckout(
     throw new Error('Git ls-tree output ended with an unterminated record');
   }
 
-  const worktreeFiles: string[] = [];
+  let worktreeFileCount = 0;
+  const regularFiles: string[] = [];
+  const worktreeSymlinks = new Map<string, Buffer>();
   async function collectFiles(currentDirectory: string, prefix: string): Promise<void> {
     const entries = await readdir(currentDirectory, { withFileTypes: true });
     for (const entry of entries) {
@@ -291,13 +392,32 @@ export async function verifyGitRepositoryCheckout(
       const entryPath = join(currentDirectory, entry.name);
       const relativePath = posix.join(prefix, entry.name);
       if (entry.isSymbolicLink()) {
-        throw new Error(`Symbolic links are not allowed in vendor repositories: ${entryPath}`);
-      }
-      if (entry.isDirectory()) {
+        const tracked = trackedFiles.get(relativePath);
+        if (!tracked?.symbolicLink) {
+          throw new Error(`Symbolic links are not allowed for regular files: ${entryPath}`);
+        }
+        const targetPath = await resolveSafeRepositorySymlink(
+          entryPath,
+          repositoryRoot,
+          gitMetadataRoot
+        );
+        const targetRelativePath = relative(repositoryRoot, targetPath).split(sep).join('/');
+        const trackedTarget = trackedFiles.get(targetRelativePath);
+        if (!trackedTarget || trackedTarget.symbolicLink) {
+          throw new Error(`Symbolic links must target tracked regular files: ${entryPath}`);
+        }
+        worktreeFileCount += 1;
+        worktreeSymlinks.set(relativePath, await readlink(entryPath, { encoding: 'buffer' }));
+      } else if (entry.isDirectory()) {
         await collectFiles(entryPath, relativePath);
       } else if (entry.isFile()) {
         if (!allowedUntrackedFiles.has(relativePath)) {
           const tracked = trackedFiles.get(relativePath);
+          if (tracked?.symbolicLink) {
+            throw new Error(
+              `Vendored repository symbolic links do not match commit ${expectedCommit}`
+            );
+          }
           if (tracked && process.platform !== 'win32') {
             const metadata = await lstat(entryPath);
             if (Boolean(metadata.mode & 0o111) !== tracked.executable) {
@@ -306,7 +426,8 @@ export async function verifyGitRepositoryCheckout(
               );
             }
           }
-          worktreeFiles.push(relativePath);
+          worktreeFileCount += 1;
+          regularFiles.push(relativePath);
         }
       } else {
         throw new Error(`Unsupported vendor repository entry: ${entryPath}`);
@@ -316,14 +437,14 @@ export async function verifyGitRepositoryCheckout(
   await collectFiles(directory, '');
 
   if (
-    worktreeFiles.length !== trackedFiles.size ||
-    worktreeFiles.some((path) => !trackedFiles.has(path))
+    worktreeFileCount !== trackedFiles.size ||
+    regularFiles.some((path) => !trackedFiles.has(path))
   ) {
     throw new Error(`Vendored repository contents do not match commit ${expectedCommit}`);
   }
   const batchSize = 100;
-  for (let index = 0; index < worktreeFiles.length; index += batchSize) {
-    const paths = worktreeFiles.slice(index, index + batchSize);
+  for (let index = 0; index < regularFiles.length; index += batchSize) {
+    const paths = regularFiles.slice(index, index + batchSize);
     const filePaths = paths.map((path) => join(directory, ...path.split('/')));
     const objects = await execFileAsync(
       'git',
@@ -335,6 +456,13 @@ export async function verifyGitRepositoryCheckout(
       objectIds.length !== paths.length ||
       paths.some((path, offset) => objectIds[offset] !== trackedFiles.get(path)?.objectId)
     ) {
+      throw new Error(`Vendored repository contents do not match commit ${expectedCommit}`);
+    }
+  }
+  for (const [path, linkTarget] of worktreeSymlinks) {
+    const tracked = trackedFiles.get(path);
+    // Git stores symlink target text as a blob, so no object database read is needed.
+    if (!tracked || hashGitBlob(linkTarget) !== tracked.objectId) {
       throw new Error(`Vendored repository contents do not match commit ${expectedCommit}`);
     }
   }
@@ -419,11 +547,8 @@ export async function resolveVendoredRepository(
       realpath(fullPath),
       lstat(fullPath),
     ]);
-    const containment = relative(vendorRealPath, repositoryRealPath);
     if (
-      containment === '..' ||
-      containment.startsWith(`..${sep}`) ||
-      isAbsolute(containment) ||
+      !isInsideCachePath(repositoryRealPath, vendorRealPath) ||
       repositoryRealPath === vendorRealPath
     ) {
       throw new Error(`Vendored dependency escapes the vendor directory: ${repoUrl}`);
