@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { parse as parseYaml } from 'yaml';
-import { initCommand } from '../commands/init.js';
+import { getSkillWrites, initCommand } from '../commands/init.js';
 import { type CliServices } from '../services.js';
 
 // Mock prettier/loader
@@ -805,6 +805,32 @@ describe('commands/init', () => {
       expect(writtenContent).not.toContain('<!-- PromptScript');
       // Frontmatter should still be valid
       expect(writtenContent).toMatch(/^---\n/);
+    });
+
+    it('should filter Factory skill frontmatter during initialization', () => {
+      const writes = getSkillWrites(['factory']);
+      const sourceSkill = writes.find(
+        (write) => write.path === '.promptscript/skills/promptscript/SKILL.md'
+      );
+      const factorySkill = writes.find(
+        (write) => write.path === '.factory/skills/promptscript/SKILL.md'
+      );
+
+      expect(sourceSkill).toBeDefined();
+      expect(factorySkill).toBeDefined();
+      expect(sourceSkill?.content).toContain('license: MIT');
+      expect(sourceSkill?.content).toContain('allowed-tools:');
+      expect(factorySkill?.content).toContain('# promptscript-generated: true');
+      expect(factorySkill?.content).toContain('name: promptscript');
+      expect(factorySkill?.content).toContain('description:');
+      expect(factorySkill?.content).toContain('user-invocable: true');
+      const factoryFrontmatter = factorySkill?.content.match(/^---\n([\s\S]*?)\n---/)?.[1];
+      expect(factoryFrontmatter).toBeDefined();
+      expect(factoryFrontmatter).not.toContain('license: MIT');
+      expect(factoryFrontmatter).not.toContain('metadata:');
+      expect(factoryFrontmatter).not.toContain('compatibility:');
+      expect(factoryFrontmatter).not.toContain('allowed-tools:');
+      expect(factorySkill?.content).toContain('# PromptScript Language Guide');
     });
   });
 

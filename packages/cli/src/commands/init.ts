@@ -565,17 +565,7 @@ export function getSkillWrites(targets: AIToolTarget[]): PlannedWrite[] {
   const skillSource = resolve(BUNDLED_SKILLS_DIR, skillName, 'SKILL.md');
   try {
     const rawSkillContent = readFileSync(skillSource, 'utf-8');
-    // Add PromptScript marker so `prs compile` can safely overwrite these files.
-    // Use YAML comment inside frontmatter to avoid breaking tools like Factory AI
-    // that cannot parse HTML comments between frontmatter and content body.
-    let skillContent = rawSkillContent;
-    const hasMarker =
-      rawSkillContent.includes('<!-- PromptScript') ||
-      rawSkillContent.includes('# promptscript-generated:');
-    if (!hasMarker && rawSkillContent.startsWith('---')) {
-      const yamlMarker = '# promptscript-generated: true';
-      skillContent = `---\n${yamlMarker}${rawSkillContent.slice(3)}`;
-    }
+    const skillContent = addPromptScriptMarker(rawSkillContent);
 
     writes.push({
       path: `.promptscript/skills/${skillName}/SKILL.md`,
@@ -585,7 +575,11 @@ export function getSkillWrites(targets: AIToolTarget[]): PlannedWrite[] {
     for (const target of targets) {
       const targetSkillDir = getTargetSkillDir(target, skillName);
       if (targetSkillDir && !writes.some((write) => write.path === targetSkillDir.path)) {
-        writes.push({ path: targetSkillDir.path, content: skillContent });
+        const formatter = FormatterRegistry.get(target);
+        const targetContent = formatter?.transformInjectedSkillContent
+          ? addPromptScriptMarker(formatter.transformInjectedSkillContent(rawSkillContent))
+          : skillContent;
+        writes.push({ path: targetSkillDir.path, content: targetContent });
       }
     }
   } catch {
@@ -593,6 +587,18 @@ export function getSkillWrites(targets: AIToolTarget[]): PlannedWrite[] {
   }
 
   return writes;
+}
+
+/**
+ * Add a PromptScript marker without putting HTML comments after YAML frontmatter.
+ */
+function addPromptScriptMarker(content: string): string {
+  const hasMarker =
+    content.includes('<!-- PromptScript') || content.includes('# promptscript-generated:');
+  if (!hasMarker && content.startsWith('---')) {
+    return `---\n# promptscript-generated: true${content.slice(3)}`;
+  }
+  return content;
 }
 
 /**
