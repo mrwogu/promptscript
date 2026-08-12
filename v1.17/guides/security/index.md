@@ -125,6 +125,8 @@ PromptScript includes built-in validation rules to detect potential prompt injec
 | PS013   | `path-traversal`      | Detects path traversal attacks in use declarations           | error            |
 | PS014   | `unicode-security`    | Detects RTL override, invisible chars, homoglyphs            | warning          |
 
+PS011 detects imperative `skip` or `bypass` instructions and phrases qualified by `all` or `safety`. Descriptive guidance such as "templates bypass validation" is not an authority directive.
+
 ### Obfuscation Detection (PS012)
 
 The `obfuscated-content` rule implements a **sanitization pipeline** that decodes encoded content and checks for malicious patterns. This prevents bypass attacks where attackers encode malicious instructions.
