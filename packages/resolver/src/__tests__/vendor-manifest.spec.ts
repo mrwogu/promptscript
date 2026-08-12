@@ -351,6 +351,15 @@ fi
 `,
           expected: 'unterminated record',
         },
+        {
+          script: `
+if [ "$subcommand" = "ls-tree" ]; then
+  printf '100600 blob %s\tbase.prs\\000' '${objectId}'
+  exit 0
+fi
+`,
+          expected: 'Unsupported Git tree mode',
+        },
       ];
 
       for (const testCase of cases) {
@@ -565,6 +574,20 @@ fi
 
     await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
       'contents do not match commit'
+    );
+  });
+
+  it('rejects tracked symbolic links replaced by regular files', async () => {
+    const repositoryDir = await createTempDirectory();
+    const filePath = join(repositoryDir, 'linked.prs');
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    await symlink('base.prs', filePath);
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await unlink(filePath);
+    await writeFile(filePath, '@meta { id: "replacement" }');
+
+    await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+      'symbolic links do not match commit'
     );
   });
 
