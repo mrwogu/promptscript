@@ -275,6 +275,30 @@ describe('GitRegistry — extended methods', () => {
       const cached = await cache.getTagsMeta(repoUrl);
       expect(cached?.tags).toContain('v3.0.0');
     });
+
+    it('reports timeout from ls-remote before returning tags', async () => {
+      mockGit.listRemote.mockRejectedValueOnce(new Error('operation timed out'));
+
+      await expect(registry.listTags('https://github.com/org/repo.git')).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after'),
+      });
+    });
+
+    it('rethrows non-timeout ls-remote errors unchanged', async () => {
+      const failure = new Error('remote unavailable');
+      mockGit.listRemote.mockRejectedValueOnce(failure);
+
+      await expect(registry.listTags('https://github.com/org/repo.git')).rejects.toBe(failure);
+    });
+
+    it('normalizes non-Error ls-remote failures before timeout detection', async () => {
+      mockGit.listRemote.mockRejectedValueOnce('remote unavailable');
+
+      await expect(registry.listTags('https://github.com/org/repo.git')).rejects.toBe(
+        'remote unavailable'
+      );
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -442,6 +466,22 @@ describe('GitRegistry — extended methods', () => {
         )
       ).rejects.toThrow(GitCloneError);
     });
+
+    it('reports timeout from the initial sparse clone', async () => {
+      mockGit.clone.mockRejectedValueOnce(new Error('operation timed out'));
+
+      await expect(
+        registry.cloneSparse(
+          'https://github.com/org/repo.git',
+          'main',
+          join(testCacheDir, 'sparse-timeout'),
+          'src/'
+        )
+      ).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after'),
+      });
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -579,6 +619,25 @@ describe('GitRegistry — extended methods', () => {
         )
       ).rejects.toThrow(GitCloneError);
     });
+
+    it('reports timeout when the fallback clone stalls', async () => {
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockRejectedValueOnce(new Error('operation timed out'));
+
+      await expect(
+        registry.cloneAtTag(
+          'https://github.com/org/repo.git',
+          'v1.0.0',
+          join(testCacheDir, 'fb-timeout'),
+          'git@github.com:org/repo.git'
+        )
+      ).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after'),
+      });
+      expect(mockGit.clone).toHaveBeenCalledTimes(2);
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -621,6 +680,26 @@ describe('GitRegistry — extended methods', () => {
           'git@github.com:org/repo.git'
         )
       ).rejects.toThrow(GitAuthError);
+    });
+
+    it('reports timeout when the sparse fallback clone stalls', async () => {
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockRejectedValueOnce(new Error('operation timed out'));
+
+      await expect(
+        registry.cloneSparse(
+          'https://github.com/org/repo.git',
+          'main',
+          join(testCacheDir, 'sparse-fb-timeout'),
+          'src/',
+          'git@github.com:org/repo.git'
+        )
+      ).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after'),
+      });
+      expect(mockGit.clone).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -697,6 +776,90 @@ describe('GitRegistry — extended methods', () => {
       expect((error as Error).message).toContain('timed out after 25ms');
       expect(mockGit.fetch).toHaveBeenCalledTimes(1);
     });
+
+    it('reports timeout while applying repository config', async () => {
+      mockGit.raw.mockRejectedValueOnce(new Error('operation timed out'));
+
+      await expect(
+        registry.checkoutCommit(join(testCacheDir, 'checkout-config-timeout'), 'deadbeef')
+      ).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after'),
+      });
+      expect(mockGit.fetch).not.toHaveBeenCalled();
+    });
+
+    it('reports timeout while unshallowing a commit', async () => {
+      mockGit.fetch
+        .mockRejectedValueOnce(new Error('commit not found'))
+        .mockRejectedValueOnce(new Error('operation timed out'));
+
+      await expect(
+        registry.checkoutCommit(join(testCacheDir, 'checkout-unshallow-timeout'), 'deadbeef')
+      ).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after'),
+      });
+      expect(mockGit.fetch).toHaveBeenNthCalledWith(2, ['--unshallow']);
+    });
+
+    it('reports timeout while performing the full fetch fallback', async () => {
+      mockGit.fetch
+        .mockRejectedValueOnce(new Error('commit not found'))
+        .mockRejectedValueOnce(new Error('unshallow not supported'))
+        .mockRejectedValueOnce(new Error('operation timed out'));
+
+      await expect(
+        registry.checkoutCommit(join(testCacheDir, 'checkout-full-fetch-timeout'), 'deadbeef')
+      ).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after'),
+      });
+      expect(mockGit.fetch).toHaveBeenNthCalledWith(3, ['origin']);
+    });
+
+    it('reports timeout while checking out the pinned commit', async () => {
+      mockGit.checkout.mockRejectedValueOnce(new Error('operation timed out'));
+
+      await expect(
+        registry.checkoutCommit(join(testCacheDir, 'checkout-checkout-timeout'), 'deadbeef')
+      ).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after'),
+      });
+      expect(mockGit.reset).not.toHaveBeenCalled();
+    });
+
+    it('rethrows non-timeout repository config failures', async () => {
+      const failure = new Error('config failed');
+      mockGit.raw.mockRejectedValueOnce(failure);
+
+      await expect(
+        registry.checkoutCommit(join(testCacheDir, 'checkout-config-failure'), 'deadbeef')
+      ).rejects.toBe(failure);
+      expect(mockGit.fetch).not.toHaveBeenCalled();
+    });
+
+    it('rethrows a non-timeout full-fetch failure', async () => {
+      const failure = new Error('full fetch failed');
+      mockGit.fetch
+        .mockRejectedValueOnce(new Error('commit not found'))
+        .mockRejectedValueOnce(new Error('unshallow not supported'))
+        .mockRejectedValueOnce(failure);
+
+      await expect(
+        registry.checkoutCommit(join(testCacheDir, 'checkout-full-fetch-failure'), 'deadbeef')
+      ).rejects.toBe(failure);
+    });
+
+    it('rethrows non-timeout checkout failures', async () => {
+      const failure = new Error('checkout failed');
+      mockGit.checkout.mockRejectedValueOnce(failure);
+
+      await expect(
+        registry.checkoutCommit(join(testCacheDir, 'checkout-failure'), 'deadbeef')
+      ).rejects.toBe(failure);
+    });
   });
 
   describe('removeRemote()', () => {
@@ -706,6 +869,26 @@ describe('GitRegistry — extended methods', () => {
       await registry.removeRemote(targetDir);
 
       expect(mockGit.raw).toHaveBeenCalledWith(['remote', 'remove', 'origin']);
+    });
+
+    it('reports timeout while removing the origin URL', async () => {
+      mockGit.raw.mockRejectedValueOnce(new Error('operation timed out'));
+
+      await expect(
+        registry.removeRemote(join(testCacheDir, 'remove-remote-timeout'))
+      ).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after'),
+      });
+    });
+
+    it('rethrows non-timeout origin removal failures', async () => {
+      const failure = new Error('remote removal failed');
+      mockGit.raw.mockRejectedValueOnce(failure);
+
+      await expect(registry.removeRemote(join(testCacheDir, 'remove-remote-failure'))).rejects.toBe(
+        failure
+      );
     });
   });
 });

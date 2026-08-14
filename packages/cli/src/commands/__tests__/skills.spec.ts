@@ -2589,6 +2589,268 @@ describe('skillsAddCommand frontmatter validation', () => {
     );
   });
 
+  it('fails when the transaction lock cannot be opened', async () => {
+    mockOpen.mockRejectedValueOnce('lock open failed');
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockConsoleError).toHaveBeenCalledWith('lock open failed');
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('treats a lock that disappears during stale checking as active', async () => {
+    const lockError = Object.assign(new Error('lock exists'), { code: 'EEXIST' });
+    const missingLockError = Object.assign(new Error('lock disappeared'), { code: 'ENOENT' });
+    mockOpen.mockRejectedValueOnce(lockError);
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath.includes('.promptscript-skills-add.lock')) {
+        return Promise.reject(missingLockError);
+      }
+      return Promise.reject(new Error(`unexpected read: ${filePath}`));
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Another "prs skills add" is already running')
+    );
+    expect(mockOpen).toHaveBeenCalledTimes(1);
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('uses lock mtime when stale metadata is malformed', async () => {
+    arrangeValidation({ skillContent: '---\nname: foo\n---\nbody' });
+    mockOpen.mockRejectedValueOnce(Object.assign(new Error('lock exists'), { code: 'EEXIST' }));
+    mockOpen.mockResolvedValueOnce(mockLockFile);
+    mockStat.mockResolvedValueOnce({ mtimeMs: Date.now() - 60 * 60 * 1000 });
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath.includes('.promptscript-skills-add.lock')) {
+        return Promise.resolve('{malformed');
+      }
+      if (filePath.includes('prs-skill-validate-xyz')) {
+        return Promise.resolve('---\nname: foo\n---\nbody');
+      }
+      if (filePath.includes('entry.prs')) {
+        return Promise.resolve(SAMPLE_PRS_FOR_VALIDATION);
+      }
+      return Promise.reject(new Error(`unexpected read: ${filePath}`));
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockStat).toHaveBeenCalledWith(expect.stringContaining('.promptscript-skills-add.lock'));
+    expect(mockOpen).toHaveBeenCalledTimes(2);
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('recovers when stale-lock stat reports that the lock was removed', async () => {
+    const lockError = Object.assign(new Error('lock exists'), { code: 'EEXIST' });
+    mockOpen.mockRejectedValueOnce(lockError).mockResolvedValueOnce(mockLockFile);
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath.includes('.promptscript-skills-add.lock')) {
+        return Promise.resolve('{malformed');
+      }
+      return Promise.reject(new Error(`unexpected read: ${filePath}`));
+    });
+    mockStat.mockRejectedValueOnce(
+      Object.assign(new Error('lock disappeared'), { code: 'ENOENT' })
+    );
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockOpen).toHaveBeenCalledTimes(2);
+    expect(mockSucceed).not.toHaveBeenCalled();
+    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('unexpected read'));
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('cleans up a lock when writing lock metadata fails', async () => {
+    const writeError = new Error('lock metadata write failed');
+    mockLockFile.writeFile.mockRejectedValueOnce(writeError);
+    mockLockFile.close.mockRejectedValueOnce(new Error('close failed'));
+    mockRm.mockRejectedValueOnce(new Error('lock cleanup failed'));
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockLockFile.close).toHaveBeenCalled();
+    expect(mockRm).toHaveBeenCalledWith(expect.stringContaining('.promptscript-skills-add.lock'), {
+      force: true,
+    });
+    expect(mockConsoleError).toHaveBeenCalledWith('lock metadata write failed');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('fails after both lock acquisition attempts remain occupied', async () => {
+    const lockError = Object.assign(new Error('lock exists'), { code: 'EEXIST' });
+    mockOpen.mockRejectedValue(lockError);
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath.includes('.promptscript-skills-add.lock')) {
+        return Promise.resolve(
+          JSON.stringify({ acquiredAt: Date.now(), pid: 99999999, token: 'stale' })
+        );
+      }
+      return Promise.reject(new Error(`unexpected read: ${filePath}`));
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockOpen).toHaveBeenCalledTimes(2);
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Cannot acquire skills add lock')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('ignores lock close and metadata cleanup failures during release', async () => {
+    arrangeValidation({ skillContent: '---\nname: foo\n---\nbody' });
+    mockLockFile.close.mockRejectedValueOnce(new Error('close failed'));
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath.includes('.promptscript-skills-add.lock')) {
+        return Promise.reject(new Error('metadata read failed'));
+      }
+      if (filePath.includes('prs-skill-validate-xyz')) {
+        return Promise.resolve('---\nname: foo\n---\nbody');
+      }
+      if (filePath.includes('entry.prs')) {
+        return Promise.resolve(SAMPLE_PRS_FOR_VALIDATION);
+      }
+      return Promise.reject(new Error(`unexpected read: ${filePath}`));
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    expect(mockLockFile.close).toHaveBeenCalled();
+    expect(process.exitCode).not.toBe(1);
+  });
+
+  it('does not remove a lock owned by another transaction during release', async () => {
+    arrangeValidation({ skillContent: '---\nname: foo\n---\nbody' });
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath.includes('.promptscript-skills-add.lock')) {
+        return Promise.resolve(
+          JSON.stringify({ acquiredAt: Date.now(), pid: process.pid, token: 'other-owner' })
+        );
+      }
+      if (filePath.includes('prs-skill-validate-xyz')) {
+        return Promise.resolve('---\nname: foo\n---\nbody');
+      }
+      if (filePath.includes('entry.prs')) {
+        return Promise.resolve(SAMPLE_PRS_FOR_VALIDATION);
+      }
+      return Promise.reject(new Error(`unexpected read: ${filePath}`));
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    expect(mockRm).not.toHaveBeenCalledWith(
+      expect.stringContaining('.promptscript-skills-add.lock'),
+      { force: true }
+    );
+  });
+
+  it('reports a non-ENOENT stat failure before an atomic write', async () => {
+    arrangeValidation({ skillContent: '---\nname: foo\n---\nbody' });
+    mockStat.mockRejectedValueOnce(new Error('stat failed'));
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockConsoleError).toHaveBeenCalledWith('stat failed');
+    expect(mockRename).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('treats a lockfile removed during the initial read as missing', async () => {
+    arrangeValidation({ skillContent: '---\nname: foo\n---\nbody', lockExists: true });
+    const missingLockfile = Object.assign(new Error('lockfile disappeared'), { code: 'ENOENT' });
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath === 'promptscript.lock') {
+        return Promise.reject(missingLockfile);
+      }
+      if (filePath.includes('prs-skill-validate-xyz')) {
+        return Promise.resolve('---\nname: foo\n---\nbody');
+      }
+      if (filePath.includes('entry.prs')) {
+        return Promise.resolve(SAMPLE_PRS_FOR_VALIDATION);
+      }
+      return Promise.reject(new Error(`unexpected read: ${filePath}`));
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Cannot read promptscript.lock')
+    );
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('removes a newly created lockfile when a post-write failure triggers rollback', async () => {
+    const originalEntry = SAMPLE_PRS_FOR_VALIDATION;
+    let currentEntry = originalEntry;
+    let currentLockfile: string | undefined;
+    let pendingEntry = '';
+    let pendingLockfile = '';
+    let rollbackStarted = false;
+    let lockfileExists = false;
+
+    arrangeValidation({
+      skillContent: '---\nname: foo\n---\nbody',
+      prsContent: originalEntry,
+    });
+    mockExistsSync.mockImplementation((filePath: string) => {
+      if (filePath === 'promptscript.lock') return lockfileExists;
+      if (filePath.includes('prs-skill-validate-xyz')) return !filePath.endsWith('.prs');
+      return filePath.includes('entry.prs');
+    });
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath === 'promptscript.lock') return Promise.resolve(currentLockfile);
+      if (filePath.includes('prs-skill-validate-xyz')) {
+        return Promise.resolve('---\nname: foo\n---\nbody');
+      }
+      if (filePath.includes('entry.prs')) {
+        return Promise.resolve(rollbackStarted ? originalEntry : currentEntry);
+      }
+      return Promise.reject(new Error(`unexpected read: ${filePath}`));
+    });
+    mockWriteFile.mockImplementation(async (filePath: string, fileContent: string) => {
+      if (filePath.endsWith('entry.prs')) {
+        pendingEntry = fileContent;
+      }
+      if (filePath.endsWith('promptscript.lock')) {
+        pendingLockfile = fileContent;
+      }
+    });
+    mockRename.mockImplementation(async (_temporaryFile: string, filePath: string) => {
+      if (filePath === 'entry.prs') currentEntry = pendingEntry;
+      if (filePath === 'promptscript.lock') {
+        currentLockfile = pendingLockfile;
+        lockfileExists = true;
+      }
+    });
+    mockRm.mockImplementation(async (filePath: string) => {
+      if (filePath === 'promptscript.lock') {
+        lockfileExists = false;
+        currentLockfile = undefined;
+      }
+    });
+    mockSucceed.mockImplementationOnce(() => {
+      rollbackStarted = true;
+      throw new Error('post-write failure');
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockRm).toHaveBeenCalledWith('promptscript.lock', { force: true });
+    expect(currentLockfile).toBeUndefined();
+    expect(currentEntry).toBe(originalEntry);
+    expect(mockConsoleError).toHaveBeenCalledWith('post-write failure');
+    expect(process.exitCode).toBe(1);
+  });
+
   it('preserves a concurrently-created lockfile during rollback', async () => {
     const originalEntry = SAMPLE_PRS_FOR_VALIDATION;
     const concurrentLockfile = '{"version":1,"dependencies":{"other":"process"}}';
@@ -2720,6 +2982,49 @@ describe('skillsAddCommand frontmatter validation', () => {
       mockWriteFile.mock.calls.filter((call) => String(call[0]).endsWith('promptscript.lock'))
     ).toHaveLength(1);
     expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('Cannot roll back'));
+  });
+
+  it('reports rollback conflicts when both project files change concurrently', async () => {
+    let currentEntry = SAMPLE_PRS_FOR_VALIDATION;
+    let currentLockfile: string | undefined;
+    let pendingEntry = '';
+    let pendingLockfile = '';
+
+    arrangeValidation({ skillContent: '---\nname: x\n---\nbody' });
+    mockExistsSync.mockImplementation((filePath: string) => {
+      if (filePath === 'promptscript.lock') return currentLockfile !== undefined;
+      if (filePath.includes('prs-skill-validate-xyz')) return !filePath.endsWith('.prs');
+      return filePath.includes('entry.prs');
+    });
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath === 'promptscript.lock') return Promise.resolve(currentLockfile);
+      if (filePath.includes('prs-skill-validate-xyz')) {
+        return Promise.resolve('---\nname: x\n---\nbody');
+      }
+      if (filePath.includes('entry.prs')) return Promise.resolve(currentEntry);
+      return Promise.reject(new Error(`unexpected read: ${filePath}`));
+    });
+    mockWriteFile.mockImplementation(async (filePath: string, fileContent: string) => {
+      if (filePath.endsWith('entry.prs')) pendingEntry = fileContent;
+      if (filePath.endsWith('promptscript.lock')) pendingLockfile = fileContent;
+    });
+    mockRename.mockImplementation(async (_temporaryFile: string, filePath: string) => {
+      if (filePath === 'entry.prs') currentEntry = pendingEntry;
+      if (filePath === 'promptscript.lock') currentLockfile = pendingLockfile;
+    });
+    mockSucceed.mockImplementationOnce(() => {
+      currentEntry = `${currentEntry}// concurrent entry\n`;
+      currentLockfile = `${currentLockfile}# concurrent lock\n`;
+      throw new Error('post-write failure');
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('failed to roll back project files')
+    );
+    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('Cannot roll back'));
+    expect(process.exitCode).toBe(1);
   });
 
   it('rolls back an existing lockfile when its write fails', async () => {

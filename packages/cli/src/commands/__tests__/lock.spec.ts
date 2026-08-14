@@ -392,6 +392,84 @@ describe('lockCommand', () => {
     );
   });
 
+  it('should apply the configured timeout to authenticated resolution', async () => {
+    const timeout = 25;
+    const auth = { type: 'token' as const, token: 'secret' };
+
+    const result = await resolveRemoteDependency(
+      'github.com/company/base',
+      ['v1.2.0'],
+      undefined,
+      false,
+      undefined,
+      auth,
+      { timeout }
+    );
+
+    expect(result.commit).toBe('1234567890abcdef1234567890abcdef12345678');
+    expect(mockCreateRegistryOptions).toHaveBeenNthCalledWith(1, {
+      url: 'https://github.com/company/base.git',
+      auth,
+      timeout,
+    });
+    expect(mockCreateRegistryOptions).toHaveBeenNthCalledWith(2, {
+      url: 'https://github.com/company/base.git',
+      auth,
+      timeout,
+    });
+    expect(mockGetCommitHash).toHaveBeenCalledWith('v1.2.0');
+    expect(mockValidateRemoteAccess).not.toHaveBeenCalled();
+  });
+
+  it('should stop fallback resolution for timeout errors wrapped in a cause', async () => {
+    const cause = Object.assign(new Error('remote authentication failed'), {
+      code: 'ETIMEDOUT',
+    });
+    mockValidateRemoteAccess.mockRejectedValueOnce(new Error('remote probe failed', { cause }));
+
+    await expect(
+      resolveRemoteDependency(
+        'github.com/company/base',
+        ['latest'],
+        undefined,
+        false,
+        'git@github.com:company/base.git',
+        undefined,
+        { timeout: 25 }
+      )
+    ).rejects.toThrow('remote probe failed');
+
+    expect(mockValidateRemoteAccess).toHaveBeenCalledTimes(1);
+  });
+
+  it('should ignore non-timeout Git error codes during fallback handling', async () => {
+    const failure = Object.assign(new Error('remote probe failed'), { code: 'EOTHER' });
+    mockValidateRemoteAccess.mockRejectedValueOnce(failure);
+
+    await expect(
+      resolveRemoteDependency('github.com/company/base', ['latest'], undefined, false)
+    ).rejects.toBe(failure);
+  });
+
+  it('should surface timeout failures from lock command', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockExistsSync.mockReturnValue(false);
+    mockValidateRemoteAccess.mockResolvedValueOnce({
+      accessible: false,
+      error: 'Timed out after 25ms while contacting https://github.com/company/base.git',
+    });
+
+    await lockCommand({});
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to generate lockfile');
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should refresh existing pins with --update', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({
