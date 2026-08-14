@@ -470,7 +470,14 @@ async function isStaleSkillsAddLock(lockPath: string): Promise<boolean> {
   }
 
   if (metadata && Number.isInteger(metadata.pid) && metadata.pid > 0) {
-    return !isProcessAlive(metadata.pid);
+    if (!isProcessAlive(metadata.pid)) {
+      return true;
+    }
+    // A recycled PID can look alive forever, so age still expires the lock.
+    return (
+      Number.isFinite(metadata.acquiredAt) &&
+      Date.now() - metadata.acquiredAt > SKILLS_ADD_LOCK_STALE_MS
+    );
   }
 
   try {
