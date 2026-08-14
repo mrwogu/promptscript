@@ -670,10 +670,10 @@ error.
 
 !!! warning "Output paths stay inside the output directory"
 A target `output` that resolves outside the output directory (`../`, or an
-absolute path pointing elsewhere) aborts the compile before any file is
-written. Use `--output` or `output.baseDir` to change where the whole build
-lands; a base directory outside the project is allowed and reported as a
-warning.
+absolute path pointing elsewhere, including through a symlink) aborts the
+compile before any file is written. Use `--output` or `output.baseDir` to
+change where the whole build lands; a base directory outside the project is
+allowed and reported as a warning.
 
 !!! tip "Disabling Targets"
 Setting `enabled: false` skips the target during compilation.

@@ -1,6 +1,7 @@
 import type { TargetConfig } from '@promptscript/core';
 import { DEFAULT_OUTPUT_PATHS } from '@promptscript/core';
-import { resolve, relative, isAbsolute, sep } from 'path';
+import * as fs from 'fs';
+import { basename, dirname, resolve, relative, isAbsolute, sep } from 'path';
 
 /**
  * Detect output path conflicts: multiple targets writing to the same file.
@@ -33,13 +34,60 @@ export function detectOutputConflicts(
  */
 export function validateOutputPath(outputPath: string, outputRoot: string): string | undefined {
   const resolved = resolveOutputPath(outputPath, outputRoot);
-  const rel = relative(resolve(outputRoot), resolved);
+  const root = resolve(outputRoot);
+  const rel = relative(root, resolved);
 
-  if (rel === '' || rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
+  if (!isPathContained(rel, false)) {
     return `Output path "${outputPath}" escapes the output directory ${outputRoot}`;
   }
 
+  try {
+    // Lexical paths can cross a symlink, so compare resolved filesystem paths too.
+    const realRoot = resolveThroughExistingAncestor(root);
+    const realResolved = resolveThroughExistingAncestor(resolved);
+    if (!isPathContained(relative(realRoot, realResolved), false)) {
+      return `Output path "${outputPath}" escapes the output directory ${outputRoot}`;
+    }
+  } catch {
+    // Filesystem probing can race with writes or fail due to permissions.
+  }
+
   return undefined;
+}
+
+/**
+ * Check directory containment while allowing the directory itself.
+ */
+export function isPathInsideDir(dir: string, root: string): boolean {
+  const rel = relative(resolve(root), resolveOutputPath(dir, root));
+  return isPathContained(rel, true);
+}
+
+function isPathContained(rel: string, allowEqual: boolean): boolean {
+  return (
+    (allowEqual && rel === '') ||
+    (rel !== '' && rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))
+  );
+}
+
+function resolveThroughExistingAncestor(path: string): string {
+  const missingSegments: string[] = [];
+  let current = path;
+
+  while (!fs.existsSync(current)) {
+    const parent = dirname(current);
+    if (parent === current) {
+      return path;
+    }
+    missingSegments.unshift(basename(current));
+    current = parent;
+  }
+
+  const realpathSync = fs.realpathSync?.native ?? fs.realpathSync;
+  if (typeof realpathSync !== 'function') {
+    throw new Error('realpathSync is unavailable');
+  }
+  return resolve(realpathSync(current), ...missingSegments);
 }
 
 /**

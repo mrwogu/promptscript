@@ -173,6 +173,7 @@ describe('findConfigInDir', () => {
 import {
   detectBuildOutputCollisions,
   detectOutputConflicts,
+  isPathInsideDir,
   resolveOutputPath,
   validateOutputPath,
 } from '../utils/conflict-detector.js';
@@ -241,6 +242,17 @@ describe('validateOutputPath', () => {
     'weird..name.md',
   ])('should accept project-local path %s', (outputPath) => {
     expect(validateOutputPath(outputPath, '/repo/project')).toBeUndefined();
+  });
+});
+
+describe('isPathInsideDir', () => {
+  it('should allow a directory equal to the root', () => {
+    expect(isPathInsideDir('.', '/repo/project')).toBe(true);
+    expect(isPathInsideDir('/repo/project', '/repo/project')).toBe(true);
+  });
+
+  it('should reject a directory outside the root', () => {
+    expect(isPathInsideDir('../sibling', '/repo/project')).toBe(false);
   });
 });
 

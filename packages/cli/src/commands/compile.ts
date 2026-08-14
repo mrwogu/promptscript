@@ -13,7 +13,7 @@ import type {
   BuildProfileConfig,
   Lockfile,
 } from '@promptscript/core';
-import { isValidLockfile } from '@promptscript/core';
+import { ErrorCode, isValidLockfile, PSError } from '@promptscript/core';
 
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
 import { loadEffectiveConfig, CONFIG_FILES } from '../config/loader.js';
@@ -26,7 +26,11 @@ import { type CliServices, createDefaultServices } from '../services.js';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { parse as parseYaml } from 'yaml';
 import { stripMarkers } from '../utils/markers.js';
-import { detectOutputConflicts, validateOutputPath } from '../utils/conflict-detector.js';
+import {
+  detectOutputConflicts,
+  isPathInsideDir,
+  validateOutputPath,
+} from '../utils/conflict-detector.js';
 import {
   cleanupManagedOutputs,
   createHookOutputSafely,
@@ -448,8 +452,9 @@ async function writeOutputs(
     .map((output) => validateOutputPath(output.path, outputRoot))
     .filter((message): message is string => message !== undefined);
   if (escaping.length > 0) {
-    throw new Error(
-      `Refusing to write outside the output directory:\n${escaping.map((m) => `  - ${m}`).join('\n')}`
+    throw new PSError(
+      `Refusing to write outside the output directory:\n${escaping.map((m) => `  - ${m}`).join('\n')}`,
+      ErrorCode.INVALID_PATH
     );
   }
 
@@ -987,7 +992,7 @@ async function compileCommandWithResult(
     // Writing to a sibling directory is a supported build-profile layout, but a
     // base directory that leaves the project comes from a checked-in file, so
     // say where the files are going instead of doing it silently.
-    if (!options.output && configuredOutput && validateOutputPath(configuredOutput, projectRoot)) {
+    if (!options.output && configuredOutput && !isPathInsideDir(configuredOutput, projectRoot)) {
       ConsoleOutput.warning(
         `Configured output directory "${configuredOutput}" is outside the project root ${projectRoot}`
       );

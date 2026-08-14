@@ -939,6 +939,27 @@ describe('compile command - createCliLogger warn path', () => {
     );
   });
 
+  it('should not warn when output directory is the project root', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      registry: { path: './registry' },
+      output: { baseDir: '.' },
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([['CLAUDE.md', { path: 'CLAUDE.md', content: '# Claude\n' }]]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/repo/promptscript' }, mockServices);
+
+    expect(mockWarning).not.toHaveBeenCalledWith(
+      expect.stringContaining('is outside the project root')
+    );
+  });
+
   it('should let --output override a build profile output', async () => {
     mockLoadConfig.mockResolvedValue({
       targets: ['claude'],
