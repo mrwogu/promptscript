@@ -1,7 +1,7 @@
 import type { Block, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from './base-formatter.js';
 import type { ConventionRenderer } from './convention-renderer.js';
-import type { FormatOptions, FormatterOutput, FormatterWarning, SkillFileConfig } from './types.js';
+import type { FormatOptions, FormatterOutput, FormatterWarning } from './types.js';
 import { extractHooks, type HookTargetOverride } from './hook-adapters.js';
 import {
   appendTargetHookCapabilityWarnings,
@@ -32,7 +32,34 @@ export interface MarkdownCommandConfig {
 /**
  * Configuration for a markdown-based skill file.
  */
-export type MarkdownSkillConfig = SkillFileConfig;
+export interface MarkdownSkillConfig {
+  /** Skill name */
+  name: string;
+  /** Description */
+  description: string;
+  /** Optional argument hint */
+  argumentHint?: string;
+  /** Skill content/instructions */
+  content: string;
+  /** Resource files to copy alongside the skill file */
+  resources?: Array<{
+    relativePath: string;
+    content: string;
+    origin?: string;
+    executable?: boolean;
+  }>;
+  /** Raw frontmatter from source SKILL.md for pass-through */
+  rawFrontmatter?: string;
+  /** License identifier from SKILL.md frontmatter */
+  license?: string;
+  /** Pre-extracted examples from the skill's nested examples property */
+  examples?: Array<{ name: string; input: string; output: string; description?: string }>;
+  /**
+   * Relative output directory underneath the target's skill folder.
+   * Overrides the default `<dotDir>/skills/<name>` layout when provided.
+   */
+  outputDir?: string;
+}
 
 /**
  * Configuration for a markdown-based agent file.

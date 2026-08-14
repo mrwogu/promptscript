@@ -2397,6 +2397,41 @@ describe('FactoryFormatter', () => {
       expect(droids ?? []).toHaveLength(0);
     });
 
+    it('should skip agents whose name is unsafe for a file path', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'unsafe/name': {
+                  description: 'Unsafe droid',
+                  content: 'Do not emit this droid.',
+                },
+                safe: {
+                  description: 'Safe droid',
+                  content: 'Emit this droid.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const droids = result.additionalFiles?.filter((f) => f.path.includes('droids/')) ?? [];
+
+      expect(result.content).toContain('# AGENTS.md');
+      expect(droids).toHaveLength(1);
+      expect(droids[0]?.path).toBe('.factory/droids/safe.md');
+      expect(droids[0]?.content).toContain('name: safe');
+    });
+
     it('should convert dots to hyphens in droid names', () => {
       const ast: Program = {
         ...createMinimalProgram(),

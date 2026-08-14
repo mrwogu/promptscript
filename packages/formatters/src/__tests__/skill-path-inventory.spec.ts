@@ -112,6 +112,9 @@ describe('Target catalog skill metadata', () => {
     expect(definition.skillPath.basePath).toBe(formatter.getSkillBasePath());
     expect(definition.skillPath.fileName).toBe(formatter.getSkillFileName());
     expect(definition.features.hasSkills).toBe(formatter.getSkillBasePath() !== null);
+    const capabilities = formatterCapabilities(formatter);
+    expect(definition.features.hasAgents).toBe(capabilities.hasAgents);
+    expect(definition.features.hasCommands).toBe(capabilities.hasCommands);
   });
 });
 
@@ -169,6 +172,78 @@ function programWithSkill(): Program {
   } as Program;
 }
 
+interface FormatterCapabilities {
+  hasAgents: boolean;
+  hasCommands: boolean;
+}
+
+/**
+ * Formatter exposes skill paths, but not agent or command capability flags.
+ * Probe supported versions to derive those flags from emitted file contracts.
+ */
+function formatterCapabilities(formatter: Formatter): FormatterCapabilities {
+  const paths: string[] = [];
+  for (const version of supportedVersions(formatter)) {
+    const output = formatter.format(programWithCapabilities(), version ? { version } : undefined);
+    paths.push(...collectPaths(output));
+  }
+
+  return {
+    hasAgents: hasFileWithStem(paths, 'capability-agent'),
+    hasCommands: hasFileWithStem(paths, 'capability-command'),
+  };
+}
+
+function hasFileWithStem(paths: readonly string[], stem: string): boolean {
+  return paths.some((path) => {
+    const fileName = path.split('/').pop() ?? '';
+    return fileName.startsWith(`${stem}.`);
+  });
+}
+
+function programWithCapabilities(): Program {
+  const loc = { file: 'test.prs', line: 1, column: 1 };
+  return {
+    type: 'Program',
+    uses: [],
+    extends: [],
+    loc,
+    blocks: [
+      {
+        type: 'Block',
+        name: 'shortcuts',
+        content: {
+          type: 'ObjectContent',
+          properties: {
+            'capability-command': {
+              description: 'Command used to verify formatter capabilities',
+              prompt: true,
+              content: 'Run the capability probe.',
+            },
+          },
+          loc,
+        },
+        loc,
+      },
+      {
+        type: 'Block',
+        name: 'agents',
+        content: {
+          type: 'ObjectContent',
+          properties: {
+            'capability-agent': {
+              description: 'Agent used to verify formatter capabilities',
+              content: 'Run the capability probe.',
+            },
+          },
+          loc,
+        },
+        loc,
+      },
+    ],
+  } as Program;
+}
+
 /**
  * A formatter that writes skill files must declare where it writes them,
  * otherwise the catalog, `prs init` scaffolding and the auto-injected
@@ -179,18 +254,29 @@ describe('Emitted skill paths', () => {
     const formatter = FormatterRegistry.get(name)!;
     const declaredBase = formatter.getSkillBasePath();
     const emitted = new Set<string>();
+    const errors: string[] = [];
 
     for (const version of supportedVersions(formatter)) {
       let output: FormatterOutput;
       try {
         output = formatter.format(programWithSkill(), version ? { version } : undefined);
-      } catch {
-        // Versions that reject this input cannot emit skill files either.
+      } catch (error: unknown) {
+        errors.push(
+          `${version ?? 'default'}: ${error instanceof Error ? error.message : String(error)}`
+        );
         continue;
       }
       for (const path of collectPaths(output)) {
         if (SKILL_FILE_PATTERN.test(path)) emitted.add(path);
       }
+    }
+
+    if (declaredBase !== null) {
+      expect(errors, `${name} failed while probing skill output`).toHaveLength(0);
+      expect(
+        emitted.size,
+        `${name} declared skill support but emitted no skill files`
+      ).toBeGreaterThan(0);
     }
 
     for (const path of emitted) {

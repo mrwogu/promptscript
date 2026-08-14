@@ -279,7 +279,7 @@ export const TARGET_DEFINITIONS = {
       defaultEnabled: false,
       defaultVersion: 'full',
       hasSkills: true,
-      hasAgents: false,
+      hasAgents: true,
       hasCommands: false,
     },
   },

@@ -562,6 +562,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     const props = this.getProps(agentsBlock.content);
 
     for (const [name, value] of Object.entries(props)) {
+      if (!this.isSafeAgentName(name)) continue;
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         const obj = value as Record<string, Value>;
         const description = obj['description'] ? this.valueToString(obj['description']) : '';
