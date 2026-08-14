@@ -8,6 +8,8 @@ import {
 
 const FIRST_INTEGRITY = `sha256-${'a'.repeat(64)}`;
 const SECOND_INTEGRITY = `sha256-${'b'.repeat(64)}`;
+const EXPECTED_AGGREGATE =
+  'sha256-9761de7a372bdc7e0acbbba10dd4b2f095eb9a00edb353f3bf620e0139a75e74';
 
 function dependency(integrity: string, source: 'md' | undefined = 'md'): LockfileDependency {
   return {
@@ -37,8 +39,8 @@ describe('skill lock integrity', () => {
       firstChild,
     ]);
 
-    expect(firstHash).toBe(secondHash);
-    expect(firstHash).toMatch(/^sha256-[0-9a-f]{64}$/);
+    expect(firstHash).toBe(EXPECTED_AGGREGATE);
+    expect(secondHash).toBe(EXPECTED_AGGREGATE);
   });
 
   it('keeps the pending marker when a child is missing or incomplete', () => {
