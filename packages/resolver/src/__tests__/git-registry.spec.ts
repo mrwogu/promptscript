@@ -243,6 +243,21 @@ describe('GitRegistry', () => {
       const exists = await registry.exists('@company/base');
       expect(exists).toBe(false);
     });
+
+    it('should rethrow typed timeout errors', async () => {
+      mockGit.clone.mockRejectedValueOnce(new Error('Network timeout'));
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+        timeout: 25,
+      });
+
+      await expect(registry.exists('@company/base')).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after 25ms'),
+      });
+    });
   });
 
   describe('list', () => {
@@ -277,6 +292,21 @@ describe('GitRegistry', () => {
 
       const files = await registry.list('@company');
       expect(files).toEqual([]);
+    });
+
+    it('should rethrow typed timeout errors', async () => {
+      mockGit.clone.mockRejectedValueOnce(new Error('Network timeout'));
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+        timeout: 25,
+      });
+
+      await expect(registry.list('@company')).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after 25ms'),
+      });
     });
   });
 

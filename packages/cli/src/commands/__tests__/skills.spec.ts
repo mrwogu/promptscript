@@ -14,6 +14,10 @@ const {
   mockMkdtemp,
   mockRm,
   mockRename,
+  mockChmod,
+  mockOpen,
+  mockStat,
+  mockLockFile,
   mockValidateRemoteAccess,
   mockValidateSkillFrontmatter,
   mockFormatSkillValidationIssues,
@@ -48,6 +52,15 @@ const {
   const mockMkdtemp = vi.fn().mockResolvedValue('/tmp/prs-skill-default');
   const mockRm = vi.fn().mockResolvedValue(undefined);
   const mockRename = vi.fn().mockResolvedValue(undefined);
+  const mockChmod = vi.fn().mockResolvedValue(undefined);
+  const mockLockFile = {
+    close: vi.fn().mockResolvedValue(undefined),
+    writeFile: vi.fn().mockResolvedValue(undefined),
+  };
+  const mockOpen = vi.fn().mockResolvedValue(mockLockFile);
+  const mockStat = vi
+    .fn()
+    .mockRejectedValue(Object.assign(new Error('not found'), { code: 'ENOENT' }));
   const mockValidateRemoteAccess = vi.fn().mockResolvedValue({
     accessible: true,
     headCommit: 'abc1234567890123456789012345678901234567890'.slice(0, 40),
@@ -105,6 +118,10 @@ const {
     mockMkdtemp,
     mockRm,
     mockRename,
+    mockChmod,
+    mockOpen,
+    mockStat,
+    mockLockFile,
   };
 });
 
@@ -145,6 +162,9 @@ vi.mock('fs/promises', () => ({
   mkdtemp: mockMkdtemp,
   rm: mockRm,
   rename: mockRename,
+  chmod: mockChmod,
+  open: mockOpen,
+  stat: mockStat,
 }));
 
 vi.mock('yaml', () => ({
@@ -183,6 +203,16 @@ import {
 beforeEach(() => {
   mockFindConfigFile.mockReturnValue(null);
   mockCollectRemoteImports.mockResolvedValue([]);
+  mockOpen.mockReset();
+  mockOpen.mockResolvedValue(mockLockFile);
+  mockLockFile.close.mockReset();
+  mockLockFile.close.mockResolvedValue(undefined);
+  mockLockFile.writeFile.mockReset();
+  mockLockFile.writeFile.mockResolvedValue(undefined);
+  mockStat.mockReset();
+  mockStat.mockRejectedValue(Object.assign(new Error('not found'), { code: 'ENOENT' }));
+  mockChmod.mockReset();
+  mockChmod.mockResolvedValue(undefined);
 });
 
 describe('normalizeSkillSource', () => {
@@ -549,6 +579,8 @@ describe('skillsAddCommand', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.exitCode = undefined;
+    mockWriteFile.mockReset();
+    mockWriteFile.mockResolvedValue(undefined);
   });
 
   it('should reject local paths starting with ./', async () => {
@@ -706,6 +738,168 @@ describe('skillsAddCommand', () => {
       dependencies: Record<string, { source?: string }>;
     };
     expect(lockContent.dependencies['github.com/company/skills/SKILL.md']?.source).toBe('md');
+  });
+
+  it('should acquire and release a project-scoped transaction lock', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      return false;
+    });
+    let lockMetadata = '';
+    mockLockFile.writeFile.mockImplementation(async (data: string) => {
+      lockMetadata = data;
+    });
+    mockReadFile.mockImplementation((filePath: string) =>
+      Promise.resolve(
+        filePath.includes('.promptscript-skills-add.lock') ? lockMetadata : SAMPLE_PRS
+      )
+    );
+
+    await skillsAddCommand('github.com/company/skills/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    expect(mockOpen).toHaveBeenCalledWith(
+      expect.stringContaining('.promptscript-skills-add.lock'),
+      'wx',
+      0o600
+    );
+    expect(mockLockFile.writeFile).toHaveBeenCalledWith(expect.any(String), 'utf-8');
+    expect(mockLockFile.close).toHaveBeenCalled();
+    expect(mockRm).toHaveBeenCalledWith(expect.stringContaining('.promptscript-skills-add.lock'), {
+      force: true,
+    });
+  });
+
+  it('should fail when another skills add transaction owns the lock', async () => {
+    const lockError = Object.assign(new Error('lock exists'), { code: 'EEXIST' });
+    mockOpen.mockRejectedValueOnce(lockError);
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath.includes('.promptscript-skills-add.lock')) {
+        return Promise.resolve(
+          JSON.stringify({ acquiredAt: Date.now(), pid: process.pid, token: 'other' })
+        );
+      }
+      return Promise.resolve(SAMPLE_PRS);
+    });
+
+    await skillsAddCommand('github.com/company/skills/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Another "prs skills add" is already running')
+    );
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should recover from a stale transaction lock', async () => {
+    const lockError = Object.assign(new Error('lock exists'), { code: 'EEXIST' });
+    mockOpen.mockRejectedValueOnce(lockError).mockResolvedValueOnce(mockLockFile);
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath.includes('.promptscript-skills-add.lock')) {
+        return Promise.resolve(
+          JSON.stringify({
+            acquiredAt: Date.now() - 60 * 60 * 1000,
+            pid: 99999999,
+            token: 'stale',
+          })
+        );
+      }
+      return Promise.resolve(SAMPLE_PRS);
+    });
+
+    await skillsAddCommand('github.com/company/skills/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    expect(mockOpen).toHaveBeenCalledTimes(2);
+    expect(mockRm).toHaveBeenCalledWith(expect.stringContaining('.promptscript-skills-add.lock'), {
+      force: true,
+    });
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('should preserve existing file modes during atomic writes', async () => {
+    const originalLockfile = JSON.stringify({
+      version: 1,
+      dependencies: {
+        'https://github.com/org/repo': {
+          version: 'latest',
+          commit: 'old',
+          integrity: 'sha256-pending',
+        },
+      },
+    });
+    arrangeValidation({
+      skillContent: '---\nname: x\n---\nbody',
+      lockExists: true,
+      lockContent: originalLockfile,
+    });
+    mockStat.mockResolvedValue({ mode: 0o100600 });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    expect(mockChmod).toHaveBeenCalledTimes(2);
+    expect(mockChmod).toHaveBeenNthCalledWith(1, expect.stringContaining('entry.prs'), 0o600);
+    expect(mockChmod).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('promptscript.lock'),
+      0o600
+    );
+  });
+
+  it('should preserve existing mode when rolling back an atomic write', async () => {
+    const originalEntry = SAMPLE_PRS_FOR_VALIDATION;
+    const originalLockfile = JSON.stringify({
+      version: 1,
+      dependencies: {
+        'https://github.com/org/repo': {
+          version: 'latest',
+          commit: 'old',
+          integrity: 'sha256-pending',
+        },
+      },
+    });
+    let currentEntry = originalEntry;
+    arrangeValidation({
+      skillContent: '---\nname: x\n---\nbody',
+      lockExists: true,
+      lockContent: originalLockfile,
+      prsContent: originalEntry,
+    });
+    mockStat.mockResolvedValue({ mode: 0o100600 });
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath === 'promptscript.lock') return Promise.resolve(originalLockfile);
+      if (filePath.includes('prs-skill-validate-xyz')) {
+        return Promise.resolve('---\nname: x\n---\nbody');
+      }
+      if (filePath.includes('entry.prs')) return Promise.resolve(currentEntry);
+      return Promise.reject(new Error(`unexpected read: ${filePath}`));
+    });
+    mockWriteFile.mockImplementation(async (filePath: string, fileContent: string) => {
+      if (filePath.endsWith('promptscript.lock')) {
+        throw new Error('lockfile temp write failed');
+      }
+      if (filePath.endsWith('entry.prs')) {
+        currentEntry = fileContent;
+      }
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    expect(currentEntry).toBe(originalEntry);
+    expect(
+      mockChmod.mock.calls.filter(
+        (call) => String(call[0]).includes('entry.prs') && call[1] === 0o600
+      )
+    ).toHaveLength(2);
   });
 
   it('should warn if skill is already imported', async () => {
