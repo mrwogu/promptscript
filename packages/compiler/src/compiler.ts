@@ -434,6 +434,10 @@ export class Compiler {
     const formatErrors: CompileError[] = [];
     const formatWarnings: ValidationMessage[] = [];
     const outputPathOwners = new Map<string, string>();
+    // Content as produced by the formatter, before the generated marker is added.
+    // Markers embed the target name and a timestamp, so comparing marked content
+    // would report every shared path as a conflict.
+    const outputPathContents = new Map<string, string>();
 
     for (const { formatter, config } of this.loadedFormatters) {
       const formatterStart = Date.now();
@@ -459,18 +463,25 @@ export class Compiler {
           });
         }
 
-        // Warn if multiple formatters target the same output path
+        // Warn if multiple formatters target the same output path with different content
         const existingOwner = outputPathOwners.get(output.path);
         if (existingOwner) {
-          formatWarnings.push({
-            ruleId: 'PS4001',
-            ruleName: 'output-path-collision',
-            severity: 'warning',
-            message: `Output path '${output.path}' is written by both '${existingOwner}' and '${formatter.name}'. The latter will overwrite the former.`,
-            suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
-          });
+          if (outputPathContents.get(output.path) === output.content) {
+            this.logger.debug(
+              `  Output path '${output.path}' already written by '${existingOwner}' with identical content. No conflict.`
+            );
+          } else {
+            formatWarnings.push({
+              ruleId: 'PS4001',
+              ruleName: 'output-path-collision',
+              severity: 'warning',
+              message: `Output path '${output.path}' is written by both '${existingOwner}' and '${formatter.name}' with different content. The latter will overwrite the former.`,
+              suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
+            });
+          }
         }
         outputPathOwners.set(output.path, formatter.name);
+        outputPathContents.set(output.path, output.content);
 
         // Add PromptScript marker to all outputs for overwrite detection
         const markedOutput = addMarkerToOutput(output, sourceLabel, formatter.name);
@@ -503,13 +514,19 @@ export class Compiler {
             // Check for path collisions with previously written outputs
             const existingAdditionalOwner = outputPathOwners.get(additionalFile.path);
             if (existingAdditionalOwner) {
-              formatWarnings.push({
-                ruleId: 'PS4001',
-                ruleName: 'output-path-collision',
-                severity: 'warning',
-                message: `Output path '${additionalFile.path}' is written by both '${existingAdditionalOwner}' and '${formatter.name}'. The latter will overwrite the former.`,
-                suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
-              });
+              if (outputPathContents.get(additionalFile.path) === additionalFile.content) {
+                this.logger.debug(
+                  `  Output path '${additionalFile.path}' already written by '${existingAdditionalOwner}' with identical content. No conflict.`
+                );
+              } else {
+                formatWarnings.push({
+                  ruleId: 'PS4001',
+                  ruleName: 'output-path-collision',
+                  severity: 'warning',
+                  message: `Output path '${additionalFile.path}' is written by both '${existingAdditionalOwner}' and '${formatter.name}' with different content. The latter will overwrite the former.`,
+                  suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
+                });
+              }
               // Skip writing this additional file — preserve the original owner's output
               if (additionalFile.additionalFiles) {
                 queue.push(...additionalFile.additionalFiles);
@@ -517,6 +534,7 @@ export class Compiler {
               continue;
             }
             outputPathOwners.set(additionalFile.path, formatter.name);
+            outputPathContents.set(additionalFile.path, additionalFile.content);
 
             outputs.set(
               additionalFile.path,
@@ -556,12 +574,19 @@ export class Compiler {
         }
 
         const skillPath = `${skillBasePath}/promptscript/${skillFileName}`;
+        const injectedContent = formatter.transformInjectedSkillContent
+          ? formatter.transformInjectedSkillContent(this.options.skillContent)
+          : this.options.skillContent;
         const existingOwner = outputPathOwners.get(skillPath);
         if (existingOwner) {
           // If the same formatter already output the promptscript skill (e.g. via
           // auto-discovered @skills block), silently skip — the content is identical.
           // Only warn when a *different* formatter caused the collision.
-          if (existingOwner !== formatter.name) {
+          if (outputPathContents.get(skillPath) === injectedContent) {
+            this.logger.debug(
+              `  Skill path '${skillPath}' already written by '${existingOwner}' with identical content. No conflict.`
+            );
+          } else if (existingOwner !== formatter.name) {
             formatWarnings.push({
               ruleId: 'PS4001',
               ruleName: 'output-path-collision',
@@ -577,12 +602,11 @@ export class Compiler {
           continue;
         }
         outputPathOwners.set(skillPath, `${formatter.name}:promptscript-skill`);
+        outputPathContents.set(skillPath, injectedContent);
 
         const skillOutput: FormatterOutput = {
           path: skillPath,
-          content: formatter.transformInjectedSkillContent
-            ? formatter.transformInjectedSkillContent(this.options.skillContent)
-            : this.options.skillContent,
+          content: injectedContent,
         };
         outputs.set(skillPath, addMarkerToOutput(skillOutput, sourceLabel, 'promptscript'));
         this.logger.verbose(`  → ${skillPath} (auto-injected promptscript skill)`);

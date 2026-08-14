@@ -884,6 +884,72 @@ describe('Compiler', () => {
       expect(result.outputs.get('AGENTS.md')?.managedOutputFiles).toEqual(['.factory/hooks.json']);
     });
 
+    it('should not warn when formatters write identical content to one path', async () => {
+      const ast = createTestProgram();
+      const formatter1 = createMockFormatter('codex', 'AGENTS.md');
+      const formatter2 = createMockFormatter('amp', 'AGENTS.md');
+      vi.mocked(formatter1.format).mockReturnValue({
+        path: 'AGENTS.md',
+        content: '# Shared AGENTS output',
+      });
+      vi.mocked(formatter2.format).mockReturnValue({
+        path: 'AGENTS.md',
+        content: '# Shared AGENTS output',
+      });
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(false);
+      expect(result.outputs.get('AGENTS.md')?.content).toContain('# Shared AGENTS output');
+    });
+
+    it('should not warn when formatters emit an identical additional file', async () => {
+      const ast = createTestProgram();
+      const sharedSkill = {
+        path: '.agents/skills/demo/SKILL.md',
+        content: '---\nname: demo\n---\n\nShared body.\n',
+      };
+      const formatter1: Formatter = {
+        ...createMockFormatter('codex', 'AGENTS.md'),
+        format: vi.fn(() => ({
+          path: 'AGENTS.md',
+          content: '# Codex',
+          additionalFiles: [sharedSkill],
+        })),
+      };
+      const formatter2: Formatter = {
+        ...createMockFormatter('cursor', '.cursor/rules/project.mdc'),
+        format: vi.fn(() => ({
+          path: '.cursor/rules/project.mdc',
+          content: '# Cursor',
+          additionalFiles: [sharedSkill],
+        })),
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(false);
+      expect(result.outputs.has('.agents/skills/demo/SKILL.md')).toBe(true);
+    });
+
     it('should warn and skip when additional file collides with existing output (PS4001)', async () => {
       const ast = createTestProgram();
 
@@ -1238,7 +1304,7 @@ describe('Compiler', () => {
       expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(true);
     });
 
-    it('should produce collision warning when two formatters share dotDir', async () => {
+    it('should not warn when two formatters share dotDir with identical content', async () => {
       const ast = createTestProgram();
       const cline = createMockFormatter('cline', '.clinerules', '.agents/skills', 'SKILL.md');
       const codex = createMockFormatter('codex', 'AGENTS.md', '.agents/skills', 'SKILL.md');
@@ -1253,7 +1319,27 @@ describe('Compiler', () => {
       const collisionWarnings = result.warnings.filter(
         (w) => w.ruleId === 'PS4001' && w.message.includes('.agents/skills/promptscript/SKILL.md')
       );
-      expect(collisionWarnings.length).toBeGreaterThanOrEqual(1);
+      expect(collisionWarnings).toEqual([]);
+    });
+
+    it('should warn when two formatters share dotDir with different content', async () => {
+      const ast = createTestProgram();
+      const cline = createMockFormatter('cline', '.clinerules', '.agents/skills', 'SKILL.md');
+      const codex: Formatter = {
+        ...createMockFormatter('codex', 'AGENTS.md', '.agents/skills', 'SKILL.md'),
+        transformInjectedSkillContent: (content: string) => `${content}\n<!-- codex flavour -->`,
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [cline, codex], skillContent });
+      const result = await compiler.compile('test.prs');
+      expect(result.success).toBe(true);
+      const collisionWarnings = result.warnings.filter(
+        (w) => w.ruleId === 'PS4001' && w.message.includes('.agents/skills/promptscript/SKILL.md')
+      );
+      expect(collisionWarnings.length).toBe(1);
     });
 
     it('should inject skill for multiple formatters with different paths', async () => {
