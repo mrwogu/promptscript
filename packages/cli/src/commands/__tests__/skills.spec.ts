@@ -830,6 +830,56 @@ describe('skillsAddCommand', () => {
     expect(mockSucceed).toHaveBeenCalledWith('Skill added');
   });
 
+  it('should recover from a lock past the stale window with a recycled pid', async () => {
+    const lockError = Object.assign(new Error('lock exists'), { code: 'EEXIST' });
+    mockOpen.mockRejectedValueOnce(lockError).mockResolvedValueOnce(mockLockFile);
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath.includes('.promptscript-skills-add.lock')) {
+        return Promise.resolve(
+          JSON.stringify({
+            acquiredAt: Date.now() - 60 * 60 * 1000,
+            pid: process.pid,
+            token: 'recycled',
+          })
+        );
+      }
+      return Promise.resolve(SAMPLE_PRS);
+    });
+
+    await skillsAddCommand('github.com/company/skills/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    expect(mockOpen).toHaveBeenCalledTimes(2);
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('should keep a fresh lock owned by a live pid', async () => {
+    const lockError = Object.assign(new Error('lock exists'), { code: 'EEXIST' });
+    mockOpen.mockRejectedValueOnce(lockError);
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath.includes('.promptscript-skills-add.lock')) {
+        return Promise.resolve(
+          JSON.stringify({
+            acquiredAt: Date.now() - 60 * 1000,
+            pid: process.pid,
+            token: 'fresh',
+          })
+        );
+      }
+      return Promise.resolve(SAMPLE_PRS);
+    });
+
+    await skillsAddCommand('github.com/company/skills/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Another "prs skills add" is already running')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
   it('does not remove a replacement lock when stale quarantine loses a race', async () => {
     arrangeValidation({ skillContent: '---\nname: foo\n---\nbody' });
     const lockError = Object.assign(new Error('lock exists'), { code: 'EEXIST' });

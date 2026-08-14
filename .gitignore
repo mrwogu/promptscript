@@ -56,6 +56,10 @@ testem.log
 # Temporary
 temp/
 
+# prs skills add transaction lock
+/.promptscript-skills-add.lock
+/.promptscript-skills-add.lock.stale-*
+
 # Misc
 /.sass-cache
 /connect.lock

@@ -960,6 +960,7 @@ Plain `http://` sources are rejected to prevent MITM. Use `https://`, `git@`, or
 For SSH input, the lockfile retains the SSH clone URL so later skill updates do not require HTTPS access.
 `--skip-validation` skips only SKILL.md frontmatter checks. Remote access, cloning, commit pinning, file existence checks, and integrity hashing still run.
 The `.prs` file and lockfile are written transactionally from the command user's perspective. If the lockfile write fails after the `.prs` file changes, the original contents are restored when the lockfile still contains the command's update. Concurrent lockfile changes are left untouched and reported as rollback conflicts. If restoration also fails, the error reports the rollback failure.
+Concurrent runs are serialized through a `.promptscript-skills-add.lock` file in the project root. A second run fails fast instead of interleaving writes. A lock is reclaimed when its owning process is gone or when it is older than 30 minutes, so a recycled process ID cannot block the command permanently. Add `.promptscript-skills-add.lock` to `.gitignore`.
 
 **Examples:**
 
