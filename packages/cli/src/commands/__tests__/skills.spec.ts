@@ -102,6 +102,8 @@ const {
   };
 });
 
+import type { LockfileDependency } from '@promptscript/core';
+
 vi.mock('../../output/console.js', () => ({
   createSpinner: vi.fn(() => mockSpinner),
   ConsoleOutput: {
@@ -171,6 +173,7 @@ import {
   skillsUpdateCommand,
   normalizeSkillSource,
 } from '../skills.js';
+import { calculateManagedSkillIntegrity } from '../../utils/skill-lock-integrity.js';
 
 beforeEach(() => {
   mockFindConfigFile.mockReturnValue(null);
@@ -2441,6 +2444,8 @@ describe('skillsAddCommand frontmatter validation', () => {
 
   it('updates sibling skill pins when adding to a shared repository', async () => {
     const sibling = 'github.com/org/repo/skills/foo';
+    const childIntegrity = `sha256-${'c'.repeat(64)}`;
+    mockHashContent.mockReturnValue(childIntegrity);
     arrangeValidation({
       skillContent: '---\nname: skill\n---\nbody',
       lockExists: true,
@@ -2470,13 +2475,19 @@ describe('skillsAddCommand frontmatter validation', () => {
 
     const lockWriteCall = mockWriteFile.mock.calls.find((call) => call[0] === 'promptscript.lock')!;
     const lock = JSON.parse(lockWriteCall[1] as string) as {
-      dependencies: Record<string, { integrity?: string; skills?: string[] }>;
+      dependencies: Record<string, LockfileDependency>;
     };
-    expect(lock.dependencies[sibling]?.integrity).toBe('sha256-deadbeef');
+    expect(lock.dependencies[sibling]?.integrity).toBe(childIntegrity);
     expect(lock.dependencies['https://github.com/org/repo']?.skills).toEqual([
       sibling,
       'github.com/org/repo/skills/bar@v1.0.0',
     ]);
+    expect(lock.dependencies['https://github.com/org/repo']?.integrity).toBe(
+      calculateManagedSkillIntegrity(lock.dependencies, [
+        sibling,
+        'github.com/org/repo/skills/bar@v1.0.0',
+      ])
+    );
   });
 
   it('clones the default branch before checking out a commit selector', async () => {
@@ -2723,6 +2734,48 @@ describe('skillsUpdateCommand frontmatter re-validation', () => {
     expect(lock.dependencies['github.com/org/repo/skills/foo/SKILL.md']!.integrity).toBe(
       'sha256-newhash'
     );
+  });
+
+  it('refreshes shared-repository aggregate integrity during update', async () => {
+    const firstChild = 'github.com/org/repo/skills/foo/SKILL.md';
+    const secondChild = 'github.com/org/repo/skills/bar/SKILL.md';
+    const owner = 'https://github.com/org/repo';
+    const childIntegrity = `sha256-${'d'.repeat(64)}`;
+    const lockContent = JSON.stringify({
+      version: 1,
+      dependencies: {
+        [firstChild]: { ...lockEntry, integrity: childIntegrity },
+        [secondChild]: { ...lockEntry, integrity: childIntegrity },
+        [owner]: {
+          version: 'v1.0.0',
+          commit: 'old',
+          integrity: 'sha256-pending',
+          source: 'md',
+          skills: [firstChild, secondChild],
+        },
+      },
+    });
+    mockHashContent.mockReturnValue(childIntegrity);
+    mockMkdtemp.mockResolvedValue('/tmp/prs-skill-validate-xyz');
+    mockExistsSync.mockImplementation(
+      (p: string) => p === 'promptscript.lock' || p.includes('prs-skill-validate-xyz')
+    );
+    mockReadFile.mockImplementation((p: string) =>
+      p === 'promptscript.lock'
+        ? Promise.resolve(lockContent)
+        : Promise.resolve('---\nname: skill\n---')
+    );
+
+    await skillsUpdateCommand(undefined, {});
+
+    const lockWriteCall = mockWriteFile.mock.calls.find((call) => call[0] === 'promptscript.lock')!;
+    const lock = JSON.parse(lockWriteCall[1] as string) as {
+      dependencies: Record<string, LockfileDependency>;
+    };
+    expect(lock.dependencies[owner]!.integrity).toBe(
+      calculateManagedSkillIntegrity(lock.dependencies, [firstChild, secondChild])
+    );
+    expect(lock.dependencies[owner]!.integrity).not.toBe('sha256-pending');
   });
 
   it('skips an entry when re-validation reports errors', async () => {

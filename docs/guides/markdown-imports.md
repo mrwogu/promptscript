@@ -86,6 +86,16 @@ prs skills update
 Both `prs skills add` and `prs skills update` resolve the requested tag, branch, commit, or semver range to an exact commit. They clone that resolved ref, recompute the real `sha256` integrity hash, and validate the SKILL.md frontmatter against the [Agent Skills spec](https://agentskills.io/specification) before touching `promptscript.lock`. Use `--strict` to treat warnings as errors (useful in CI) or `--skip-validation` to bypass the check when the upstream is in flux. Plain `http://` sources are rejected to prevent MITM.
 When a skill is added with a `git@` source, its canonical repository entry also stores `gitUrl` so later updates continue using SSH.
 
+For a repository owner entry with `source: md` and a `skills` list, `integrity` is an
+aggregate SRI hash. PromptScript hashes a canonical JSON array containing each
+managed child source key and its concrete child integrity, sorted by source key.
+`prs lock`, `prs skills add`, and `prs skills update` recompute this value whenever
+the owner is emitted or preserved. If a listed child is missing or has a pending
+or otherwise incomplete integrity, the owner remains `sha256-pending`. Ordinary
+registry dependencies and leaf Markdown entries are never aggregated. Existing
+lockfiles remain valid and are refreshed when one of these commands next writes or
+previews the lockfile.
+
 ## Lock file: version pinning
 
 When a `.prs` file contains remote markdown imports, `prs skills add` or `prs lock` generates a `promptscript.lock` file recording the exact resolved commit for each dependency:
@@ -97,7 +107,7 @@ dependencies:
   https://github.com/anthropics/skills:
     version: 1.0.0
     commit: a3f8c2d1b0e94567890abcdef1234567890abcde
-    integrity: sha256-pending
+    integrity: sha256-5fb42506e17f17329465d2ef8c3a91f19ab030538395939b7c09d67d65868eb7
     source: md
     skills:
       - github.com/anthropics/skills/commit@1.0.0

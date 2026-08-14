@@ -112,6 +112,8 @@ vi.mock('yaml', () => ({
 }));
 
 import { lockCommand, resolveRemoteDependency } from '../lock.js';
+import type { LockfileDependency } from '@promptscript/core';
+import { calculateManagedSkillIntegrity } from '../../utils/skill-lock-integrity.js';
 
 describe('lockCommand', () => {
   beforeEach(() => {
@@ -675,6 +677,50 @@ describe('lockCommand', () => {
     expect(parsed.dependencies['github.com/org/skills/SKILL.md']).toBeDefined();
     expect(parsed.dependencies['github.com/org/skills/SKILL.md']!.source).toBe('md');
     expect(parsed.dependencies['https://github.com/org/skills']!.source).toBe('md');
+  });
+
+  it('should aggregate managed child integrity during dry-run', async () => {
+    const child = 'github.com/org/skills/SKILL.md';
+    const owner = 'https://github.com/org/skills';
+    const childIntegrity = `sha256-${'a'.repeat(64)}`;
+    const existingDependencies = {
+      [child]: {
+        version: 'latest',
+        commit: 'b'.repeat(40),
+        integrity: childIntegrity,
+        source: 'md' as const,
+      },
+      [owner]: {
+        version: 'latest',
+        commit: 'b'.repeat(40),
+        integrity: 'sha256-pending',
+        source: 'md' as const,
+        skills: [child],
+      },
+    };
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({ version: 1, dependencies: existingDependencies })
+    );
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await lockCommand({ dryRun: true });
+    const printed = logSpy.mock.calls[0]?.[0];
+    logSpy.mockRestore();
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    const lock = JSON.parse(String(printed)) as {
+      dependencies: Record<string, LockfileDependency>;
+    };
+    expect(lock.dependencies[child]!.integrity).toBe(childIntegrity);
+    expect(lock.dependencies[owner]!.integrity).toBe(
+      calculateManagedSkillIntegrity(lock.dependencies, [child])
+    );
+    expect(lock.dependencies[owner]!.integrity).not.toBe('sha256-pending');
   });
 
   it('should merge metadata for an md-sourced dependency that is still requested', async () => {
