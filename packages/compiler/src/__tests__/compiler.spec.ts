@@ -917,6 +917,73 @@ describe('Compiler', () => {
       );
     });
 
+    it('should merge managed metadata from identical main output collisions', async () => {
+      const ast = createTestProgram();
+      const formatter1 = createMockFormatter('codex', 'AGENTS.md');
+      const formatter2 = createMockFormatter('amp', 'AGENTS.md');
+      vi.mocked(formatter1.format).mockReturnValue({
+        path: 'AGENTS.md',
+        content: '# Shared AGENTS output',
+        managedOutputDirectories: ['.codex/rules'],
+        managedOutputFiles: ['.codex/settings.json'],
+      });
+      vi.mocked(formatter2.format).mockReturnValue({
+        path: 'AGENTS.md',
+        content: '# Shared AGENTS output',
+        managedOutputDirectories: ['.amp/rules'],
+        managedOutputFiles: ['.amp/settings.json'],
+      });
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(false);
+      expect(result.outputs.get('AGENTS.md')?.managedOutputDirectories).toEqual([
+        '.codex/rules',
+        '.amp/rules',
+      ]);
+      expect(result.outputs.get('AGENTS.md')?.managedOutputFiles).toEqual([
+        '.codex/settings.json',
+        '.amp/settings.json',
+      ]);
+    });
+
+    it('should warn when identical main content has different write settings', async () => {
+      const ast = createTestProgram();
+      const formatter1 = createMockFormatter('formatter-a', 'shared.md');
+      const formatter2 = createMockFormatter('formatter-b', 'shared.md');
+      vi.mocked(formatter1.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# Shared content',
+        mode: 0o644,
+      });
+      vi.mocked(formatter2.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# Shared content',
+        mode: 0o755,
+      });
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.warnings.filter((w) => w.ruleId === 'PS4001')).toHaveLength(1);
+      expect(result.outputs.get('shared.md')?.mode).toBe(0o755);
+    });
+
     it('should preserve the first owner for identical main output collisions', async () => {
       const ast = createTestProgram();
       const formatterA = createMockFormatter('formatter-a', 'shared.md');
@@ -1025,6 +1092,41 @@ describe('Compiler', () => {
       expect(result.success).toBe(true);
       expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(false);
       expect(result.outputs.has('.agents/skills/demo/SKILL.md')).toBe(true);
+    });
+
+    it('should warn when identical additional content has different modes', async () => {
+      const ast = createTestProgram();
+      const formatter1: Formatter = {
+        ...createMockFormatter('formatter-a', 'a.md'),
+        format: vi.fn(() => ({
+          path: 'a.md',
+          content: '# A',
+          additionalFiles: [{ path: 'scripts/run.sh', content: 'echo test\n', mode: 0o644 }],
+        })),
+      };
+      const formatter2: Formatter = {
+        ...createMockFormatter('formatter-b', 'b.md'),
+        format: vi.fn(() => ({
+          path: 'b.md',
+          content: '# B',
+          additionalFiles: [{ path: 'scripts/run.sh', content: 'echo test\n', mode: 0o755 }],
+        })),
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      const collisionWarning = result.warnings.find((w) => w.ruleId === 'PS4001');
+      expect(collisionWarning?.message).toContain('write settings');
+      expect(collisionWarning?.message).toContain('first output will be preserved');
+      expect(result.outputs.get('scripts/run.sh')?.mode).toBe(0o644);
     });
 
     it('should warn and skip when additional file collides with existing output (PS4001)', async () => {
@@ -1349,6 +1451,40 @@ describe('Compiler', () => {
       const skillOutput = result.outputs.get('.claude/skills/promptscript/SKILL.md');
       expect(skillOutput?.content).toContain('User-defined promptscript skill');
       expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(true);
+    });
+
+    it('should report injected skill transform failures as formatter errors', async () => {
+      const ast = createTestProgram();
+      const formatter: Formatter = {
+        ...createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md'),
+        format: vi.fn(() => ({
+          path: 'CLAUDE.md',
+          content: '# Claude',
+          additionalFiles: [
+            {
+              path: '.claude/skills/promptscript/SKILL.md',
+              content: skillContent,
+            },
+          ],
+        })),
+        transformInjectedSkillContent: () => {
+          throw new Error('invalid injected skill');
+        },
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [formatter], skillContent });
+      const result = await compiler.compile('test.prs');
+
+      expect(result.success).toBe(false);
+      expect(result.errors).toContainEqual(
+        expect.objectContaining({
+          code: 'PS4000',
+          message: expect.stringContaining('invalid injected skill'),
+        })
+      );
     });
 
     it('should warn when different formatter already output the skill at same path', async () => {
