@@ -662,8 +662,10 @@ async function saveLockfile(lockfile: Lockfile): Promise<void> {
 interface SkillsAddRollbackState {
   entryFile: string;
   originalEntryContent: string;
+  updatedEntryContent: string;
   originalLockfileContent: string | undefined;
   updatedLockfileContent: string;
+  entryWriteCompleted: boolean;
   lockfileWriteCompleted: boolean;
 }
 
@@ -674,6 +676,9 @@ function isMissingFileError(error: unknown): boolean {
 }
 
 async function readLockfileForRollback(): Promise<string | undefined> {
+  if (!existsSync(LOCKFILE_PATH)) {
+    return undefined;
+  }
   try {
     return await readLockfileContent();
   } catch (error) {
@@ -684,35 +689,76 @@ async function readLockfileForRollback(): Promise<string | undefined> {
   }
 }
 
-async function rollbackSkillsAdd(state: SkillsAddRollbackState): Promise<Error | undefined> {
-  const rollbackErrors: Error[] = [];
+async function assertFileUnchanged(
+  filePath: string,
+  originalContent: string | undefined
+): Promise<void> {
+  const currentContent =
+    filePath === LOCKFILE_PATH
+      ? await readLockfileForRollback()
+      : await readFile(filePath, 'utf-8');
+  if (currentContent !== originalContent) {
+    throw new Error(
+      `Cannot update ${filePath}: it changed during skills add; leaving current contents untouched`
+    );
+  }
+}
 
-  try {
-    const currentLockfileContent = await readLockfileForRollback();
-    if (currentLockfileContent === state.originalLockfileContent) {
-      // The lockfile write did not change its contents.
-    } else if (
-      state.lockfileWriteCompleted &&
-      currentLockfileContent === state.updatedLockfileContent
-    ) {
-      if (state.originalLockfileContent === undefined) {
-        await rm(LOCKFILE_PATH, { force: true });
-      } else {
-        await writeFile(LOCKFILE_PATH, state.originalLockfileContent, 'utf-8');
-      }
-    } else {
-      throw new Error(
-        `Cannot roll back ${LOCKFILE_PATH}: it changed during skills add; leaving current contents untouched`
-      );
-    }
-  } catch (error) {
-    rollbackErrors.push(error instanceof Error ? error : new Error(String(error)));
+async function rollbackFile(
+  filePath: string,
+  originalContent: string | undefined,
+  updatedContent: string,
+  writeCompleted: boolean
+): Promise<Error | undefined> {
+  if (!writeCompleted) {
+    return undefined;
   }
 
   try {
-    await writeFile(state.entryFile, state.originalEntryContent, 'utf-8');
+    const currentContent =
+      filePath === LOCKFILE_PATH
+        ? await readLockfileForRollback()
+        : await readFile(filePath, 'utf-8');
+    if (currentContent === originalContent) {
+      return undefined;
+    }
+    if (currentContent !== updatedContent) {
+      throw new Error(
+        `Cannot roll back ${filePath}: it changed during skills add; leaving current contents untouched`
+      );
+    }
+    if (originalContent === undefined) {
+      await rm(filePath, { force: true });
+    } else {
+      await writeFile(filePath, originalContent, 'utf-8');
+    }
+    return undefined;
   } catch (error) {
-    rollbackErrors.push(error instanceof Error ? error : new Error(String(error)));
+    return error instanceof Error ? error : new Error(String(error));
+  }
+}
+
+async function rollbackSkillsAdd(state: SkillsAddRollbackState): Promise<Error | undefined> {
+  const rollbackErrors: Error[] = [];
+
+  const entryRollbackError = await rollbackFile(
+    state.entryFile,
+    state.originalEntryContent,
+    state.updatedEntryContent,
+    state.entryWriteCompleted
+  );
+  if (entryRollbackError) {
+    rollbackErrors.push(entryRollbackError);
+  }
+
+  const lockfileRollbackError = await rollbackFile(
+    LOCKFILE_PATH,
+    state.originalLockfileContent,
+    state.updatedLockfileContent,
+    state.lockfileWriteCompleted
+  );
+  if (lockfileRollbackError) {
+    rollbackErrors.push(lockfileRollbackError);
   }
 
   if (rollbackErrors.length === 0) {
@@ -785,15 +831,13 @@ export async function skillsAddCommand(
     // Load lockfile early — we need it for collision detection AND to write
     // the new entry below.
     let originalLockfileContent: string | undefined;
-    if (existsSync(LOCKFILE_PATH)) {
-      try {
-        originalLockfileContent = await readLockfileContent();
-      } catch (error) {
-        throw new Error(
-          `Cannot read ${LOCKFILE_PATH}: ${error instanceof Error ? error.message : String(error)}`,
-          { cause: error }
-        );
-      }
+    try {
+      originalLockfileContent = await readLockfileForRollback();
+    } catch (error) {
+      throw new Error(
+        `Cannot read ${LOCKFILE_PATH}: ${error instanceof Error ? error.message : String(error)}`,
+        { cause: error }
+      );
     }
     const lockfile = await loadLockfile(originalLockfileContent);
     const parsedSource = parseSkillSource(source);
@@ -921,13 +965,18 @@ export async function skillsAddCommand(
     rollbackState = {
       entryFile,
       originalEntryContent: content,
+      updatedEntryContent: updatedContent,
       originalLockfileContent,
       updatedLockfileContent,
+      entryWriteCompleted: false,
       lockfileWriteCompleted: false,
     };
 
     // Write both files as one transaction from the user's perspective.
+    await assertFileUnchanged(entryFile, content);
     await writeFile(entryFile, updatedContent, 'utf-8');
+    rollbackState.entryWriteCompleted = true;
+    await assertFileUnchanged(LOCKFILE_PATH, originalLockfileContent);
     await writeFile(LOCKFILE_PATH, updatedLockfileContent, 'utf-8');
     rollbackState.lockfileWriteCompleted = true;
 
