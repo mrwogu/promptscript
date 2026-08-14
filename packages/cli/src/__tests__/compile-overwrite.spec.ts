@@ -241,6 +241,50 @@ describe('compile command - overwrite protection', () => {
     consoleErrorSpy.mockRestore();
   });
 
+  describe('when a target output escapes the output directory', () => {
+    it('should refuse to write anything', async () => {
+      const escaping = '../outside/CLAUDE.md';
+      const outputs = new Map([
+        ['CLAUDE.md', createMockOutput('CLAUDE.md', 'content')],
+        [escaping, createMockOutput(escaping, 'content')],
+      ]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      await compileCommand({}, mockServices);
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Refusing to write outside the output directory')
+      );
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('should refuse an absolute path outside the output directory', async () => {
+      const escaping = '/etc/promptscript-owned.md';
+      const outputs = new Map([[escaping, createMockOutput(escaping, 'content')]]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      await compileCommand({}, mockServices);
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+    });
+  });
+
   describe('when file does not exist', () => {
     it('should write file normally without prompting', async () => {
       const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'content')]]);

@@ -26,7 +26,7 @@ import { type CliServices, createDefaultServices } from '../services.js';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { parse as parseYaml } from 'yaml';
 import { stripMarkers } from '../utils/markers.js';
-import { detectOutputConflicts } from '../utils/conflict-detector.js';
+import { detectOutputConflicts, validateOutputPath } from '../utils/conflict-detector.js';
 import {
   cleanupManagedOutputs,
   createHookOutputSafely,
@@ -439,6 +439,19 @@ async function writeOutputs(
   let overwriteAll = false;
   const conflicts: string[] = [];
   const targetErrors: string[] = [];
+
+  // Pre-flight: a target `output` comes from the config file, so a checked-in
+  // path may point anywhere the user can write. Reject the whole run before
+  // writing anything rather than planting files outside the output directory.
+  const outputRoot = options.output ?? process.cwd();
+  const escaping = [...outputs.values()]
+    .map((output) => validateOutputPath(output.path, outputRoot))
+    .filter((message): message is string => message !== undefined);
+  if (escaping.length > 0) {
+    throw new Error(
+      `Refusing to write outside the output directory:\n${escaping.map((m) => `  - ${m}`).join('\n')}`
+    );
+  }
 
   // Pre-flight: in non-interactive mode without --force, detect every
   // ownership conflict before writing anything so a refused overwrite cannot
@@ -971,6 +984,14 @@ async function compileCommandWithResult(
     }
 
     const configuredOutput = options.output ?? buildProfile?.output ?? config.output?.baseDir;
+    // Writing to a sibling directory is a supported build-profile layout, but a
+    // base directory that leaves the project comes from a checked-in file, so
+    // say where the files are going instead of doing it silently.
+    if (!options.output && configuredOutput && validateOutputPath(configuredOutput, projectRoot)) {
+      ConsoleOutput.warning(
+        `Configured output directory "${configuredOutput}" is outside the project root ${projectRoot}`
+      );
+    }
     const effectiveOptions = {
       ...options,
       output: resolveOutputBase(projectRoot, configuredOutput),

@@ -1,6 +1,6 @@
 import type { TargetConfig } from '@promptscript/core';
 import { DEFAULT_OUTPUT_PATHS } from '@promptscript/core';
-import { resolve, relative, isAbsolute } from 'path';
+import { resolve, relative, isAbsolute, sep } from 'path';
 
 /**
  * Detect output path conflicts: multiple targets writing to the same file.
@@ -28,21 +28,15 @@ export function detectOutputConflicts(
 }
 
 /**
- * Validate that an output path is project-relative and does not contain traversal.
+ * Validate that an output path stays inside the directory it is written to.
  * Returns an error message if invalid, or undefined if valid.
  */
-export function validateOutputPath(outputPath: string, projectRoot?: string): string | undefined {
-  // Reject absolute paths that escape the project root
-  if (isAbsolute(outputPath) && projectRoot) {
-    const rel = relative(projectRoot, outputPath);
-    if (rel.startsWith('..') || isAbsolute(rel)) {
-      return `Output path "${outputPath}" escapes project root`;
-    }
-  }
+export function validateOutputPath(outputPath: string, outputRoot: string): string | undefined {
+  const resolved = resolveOutputPath(outputPath, outputRoot);
+  const rel = relative(resolve(outputRoot), resolved);
 
-  // Reject path traversal patterns
-  if (outputPath.includes('..')) {
-    return `Output path "${outputPath}" contains path traversal`;
+  if (rel === '' || rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
+    return `Output path "${outputPath}" escapes the output directory ${outputRoot}`;
   }
 
   return undefined;

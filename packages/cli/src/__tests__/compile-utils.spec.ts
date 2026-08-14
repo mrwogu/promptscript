@@ -215,21 +215,33 @@ describe('validateOutputPath', () => {
   it('should reject an absolute path outside the project root', () => {
     const result = validateOutputPath('/outside/generated.md', '/repo/project');
 
-    expect(result).toBe('Output path "/outside/generated.md" escapes project root');
+    expect(result).toBe(
+      'Output path "/outside/generated.md" escapes the output directory /repo/project'
+    );
   });
 
   it('should reject a relative path containing traversal', () => {
     const result = validateOutputPath('../generated.md', '/repo/project');
 
-    expect(result).toBe('Output path "../generated.md" contains path traversal');
+    expect(result).toBe('Output path "../generated.md" escapes the output directory /repo/project');
   });
 
-  it.each(['/repo/project/generated.md', 'generated/output.md'])(
-    'should accept project-local path %s',
-    (outputPath) => {
-      expect(validateOutputPath(outputPath, '/repo/project')).toBeUndefined();
-    }
-  );
+  it('should reject traversal that only escapes after a subdirectory', () => {
+    expect(validateOutputPath('nested/../../generated.md', '/repo/project')).toBeDefined();
+  });
+
+  it('should reject the output directory itself', () => {
+    expect(validateOutputPath('.', '/repo/project')).toBeDefined();
+  });
+
+  it.each([
+    '/repo/project/generated.md',
+    'generated/output.md',
+    'nested/../generated.md',
+    'weird..name.md',
+  ])('should accept project-local path %s', (outputPath) => {
+    expect(validateOutputPath(outputPath, '/repo/project')).toBeUndefined();
+  });
 });
 
 describe('detectBuildOutputCollisions', () => {

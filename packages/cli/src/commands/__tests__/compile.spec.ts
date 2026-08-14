@@ -934,6 +934,9 @@ describe('compile command - createCliLogger warn path', () => {
       },
     ]);
     expect(mockWriteFile).toHaveBeenCalledWith('/repo/logstrip/AGENTS.md', '# Agents\n', 'utf-8');
+    expect(mockWarning).toHaveBeenCalledWith(
+      expect.stringContaining('is outside the project root')
+    );
   });
 
   it('should let --output override a build profile output', async () => {
@@ -1323,8 +1326,7 @@ describe('compile command - createCliLogger warn path', () => {
       expect(mockWatch).toHaveBeenCalledTimes(1);
 
       const changeHandler = mockWatcherOn.mock.calls.find(([event]) => event === 'change')?.[1] as
-        | ((path: string) => void)
-        | undefined;
+        ((path: string) => void) | undefined;
       changeHandler?.('/repo/promptscript/.promptscript/project.prs');
       await vi.runAllTimersAsync();
 
@@ -1379,8 +1381,7 @@ describe('compile command - createCliLogger warn path', () => {
       ).toBe(false);
 
       const changeHandler = mockWatcherOn.mock.calls.find(([event]) => event === 'change')?.[1] as
-        | ((path: string) => void)
-        | undefined;
+        ((path: string) => void) | undefined;
       expect(changeHandler).toBeDefined();
       mockSpinnerStart.mockImplementationOnce(() => {
         throw 'watch rebuild failed';
