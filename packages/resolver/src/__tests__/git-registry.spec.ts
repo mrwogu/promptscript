@@ -1120,6 +1120,28 @@ describe('validateRemoteAccess', () => {
     expect(result.error).toContain('network');
   });
 
+  it('should not classify timeout in a repository URL as a timeout', async () => {
+    mockGit.listRemote.mockRejectedValue(
+      new Error('Authentication failed for https://example.com/timeout-repo')
+    );
+
+    const result = await validateRemoteAccess('https://example.com/timeout-repo');
+
+    expect(result.accessible).toBe(false);
+    expect(result.error).toContain('Authentication failed');
+    expect(result.error).not.toContain('Timed out');
+  });
+
+  it('should not classify a missing remote ref named timeout as a timeout', async () => {
+    mockGit.listRemote.mockRejectedValue(new Error("Could not find remote ref 'timeout'"));
+
+    const result = await validateRemoteAccess('https://github.com/org/repo.git', 'timeout');
+
+    expect(result.accessible).toBe(false);
+    expect(result.error).toContain('Failed to reach');
+    expect(result.error).not.toContain('Timed out');
+  });
+
   it('should bound a stalled ls-remote and report an actionable timeout', async () => {
     mockGit.listRemote.mockRejectedValue(new Error('block timeout reached'));
 

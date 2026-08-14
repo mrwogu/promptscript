@@ -1,4 +1,15 @@
-import { writeFile, readFile, readdir, mkdtemp, rm, rename, chmod, open, stat } from 'fs/promises';
+import {
+  writeFile,
+  readFile,
+  readdir,
+  mkdtemp,
+  rm,
+  rename,
+  chmod,
+  open,
+  lstat,
+  stat,
+} from 'fs/promises';
 import { resolve, join, basename, dirname } from 'path';
 import { existsSync } from 'fs';
 import { tmpdir } from 'os';
@@ -498,7 +509,18 @@ async function acquireSkillsAddLock(): Promise<SkillsAddLockHandle> {
           { cause: error }
         );
       }
-      await rm(lockPath, { force: true });
+      const quarantinePath = `${lockPath}.stale-${process.pid}-${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2)}`;
+      try {
+        await rename(lockPath, quarantinePath);
+      } catch (renameError) {
+        if (getErrorCode(renameError) === 'ENOENT') {
+          continue;
+        }
+        throw renameError;
+      }
+      await rm(quarantinePath, { force: true });
     }
   }
   throw new Error(`Cannot acquire skills add lock: ${resolve(SKILLS_ADD_LOCK_PATH)}`);
@@ -786,7 +808,13 @@ async function saveLockfile(lockfile: Lockfile): Promise<void> {
 async function writeFileAtomically(filePath: string, content: string): Promise<void> {
   let originalMode: number | undefined;
   try {
-    originalMode = (await stat(filePath)).mode & 0o7777;
+    const details = await lstat(filePath);
+    if (details.isSymbolicLink()) {
+      throw new Error(
+        `Refusing to replace symlink "${filePath}" during atomic write. Remove the symlink first or update its target directly.`
+      );
+    }
+    originalMode = details.mode & 0o7777;
   } catch (error) {
     if (getErrorCode(error) !== 'ENOENT') {
       throw error;

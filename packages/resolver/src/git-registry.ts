@@ -1158,25 +1158,31 @@ function createRemoteValidationGit(baseDir: string | undefined, timeout: number)
 }
 
 function isGitTimeoutError(error: Error): boolean {
-  const message = error.message.toLowerCase();
   const errorWithCode = error as Error & { cause?: unknown; code?: unknown };
   const code = typeof errorWithCode.code === 'string' ? errorWithCode.code.toLowerCase() : '';
   const cause = errorWithCode.cause;
-  const causeMessage = cause instanceof Error ? cause.message.toLowerCase() : '';
   const causeCode =
     cause instanceof Error &&
     'code' in cause &&
     typeof (cause as { code?: unknown }).code === 'string'
       ? ((cause as { code: string }).code ?? '').toLowerCase()
       : '';
+
+  const containsTimeoutMessage = (message: string): boolean => {
+    const withoutUrlsAndRefs = message
+      .toLowerCase()
+      .replace(/\b[a-z][a-z\d+.-]*:\/\/[^\s'"]+|git@[\w.-]+:[^\s'"]+/g, '')
+      .replace(/\b(?:remote\s+)?ref(?:erence)?\s+["']?[^\s"']+/g, '')
+      .replace(/\bremote\s+branch\s+["']?[^\s"']+/g, '');
+    return /(?:^|[\s:()[\],.!?])(timeout|timed out|etimedout)(?=$|[\s:()[\],.!?])/i.test(
+      withoutUrlsAndRefs
+    );
+  };
+
   return (
-    message.includes('timeout') ||
-    message.includes('timed out') ||
-    message.includes('etimedout') ||
     code === 'etimedout' ||
-    causeMessage.includes('timeout') ||
-    causeMessage.includes('timed out') ||
-    causeMessage.includes('etimedout') ||
+    containsTimeoutMessage(error.message) ||
+    (cause instanceof Error && containsTimeoutMessage(cause.message)) ||
     causeCode === 'etimedout'
   );
 }

@@ -16,6 +16,7 @@ const {
   mockRename,
   mockChmod,
   mockOpen,
+  mockLstat,
   mockStat,
   mockLockFile,
   mockValidateRemoteAccess,
@@ -58,6 +59,9 @@ const {
     writeFile: vi.fn().mockResolvedValue(undefined),
   };
   const mockOpen = vi.fn().mockResolvedValue(mockLockFile);
+  const mockLstat = vi
+    .fn()
+    .mockRejectedValue(Object.assign(new Error('not found'), { code: 'ENOENT' }));
   const mockStat = vi
     .fn()
     .mockRejectedValue(Object.assign(new Error('not found'), { code: 'ENOENT' }));
@@ -120,6 +124,7 @@ const {
     mockRename,
     mockChmod,
     mockOpen,
+    mockLstat,
     mockStat,
     mockLockFile,
   };
@@ -164,6 +169,7 @@ vi.mock('fs/promises', () => ({
   rename: mockRename,
   chmod: mockChmod,
   open: mockOpen,
+  lstat: mockLstat,
   stat: mockStat,
 }));
 
@@ -209,6 +215,8 @@ beforeEach(() => {
   mockLockFile.close.mockResolvedValue(undefined);
   mockLockFile.writeFile.mockReset();
   mockLockFile.writeFile.mockResolvedValue(undefined);
+  mockLstat.mockReset();
+  mockLstat.mockRejectedValue(Object.assign(new Error('not found'), { code: 'ENOENT' }));
   mockStat.mockReset();
   mockStat.mockRejectedValue(Object.assign(new Error('not found'), { code: 'ENOENT' }));
   mockChmod.mockReset();
@@ -822,6 +830,41 @@ describe('skillsAddCommand', () => {
     expect(mockSucceed).toHaveBeenCalledWith('Skill added');
   });
 
+  it('does not remove a replacement lock when stale quarantine loses a race', async () => {
+    arrangeValidation({ skillContent: '---\nname: foo\n---\nbody' });
+    const lockError = Object.assign(new Error('lock exists'), { code: 'EEXIST' });
+    const lockDisappeared = Object.assign(new Error('lock disappeared'), { code: 'ENOENT' });
+    mockOpen.mockRejectedValueOnce(lockError).mockResolvedValueOnce(mockLockFile);
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath.includes('.promptscript-skills-add.lock')) {
+        return Promise.resolve(
+          JSON.stringify({ acquiredAt: Date.now() - 60 * 60 * 1000, pid: 99999999, token: 'stale' })
+        );
+      }
+      if (filePath.includes('prs-skill-validate-xyz')) {
+        return Promise.resolve('---\nname: foo\n---\nbody');
+      }
+      if (filePath.includes('entry.prs')) {
+        return Promise.resolve(SAMPLE_PRS_FOR_VALIDATION);
+      }
+      return Promise.reject(new Error(`unexpected read: ${filePath}`));
+    });
+    mockRename.mockRejectedValueOnce(lockDisappeared);
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockOpen).toHaveBeenCalledTimes(2);
+    expect(mockRename).toHaveBeenCalledWith(
+      expect.stringContaining('.promptscript-skills-add.lock'),
+      expect.stringContaining('.promptscript-skills-add.lock.stale-')
+    );
+    expect(mockRm).not.toHaveBeenCalledWith(
+      expect.stringContaining('.promptscript-skills-add.lock'),
+      { force: true }
+    );
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
   it('should preserve existing file modes during atomic writes', async () => {
     const originalLockfile = JSON.stringify({
       version: 1,
@@ -838,7 +881,7 @@ describe('skillsAddCommand', () => {
       lockExists: true,
       lockContent: originalLockfile,
     });
-    mockStat.mockResolvedValue({ mode: 0o100600 });
+    mockLstat.mockResolvedValue({ mode: 0o100600, isSymbolicLink: () => false });
 
     await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', {
       file: 'entry.prs',
@@ -872,7 +915,7 @@ describe('skillsAddCommand', () => {
       lockContent: originalLockfile,
       prsContent: originalEntry,
     });
-    mockStat.mockResolvedValue({ mode: 0o100600 });
+    mockLstat.mockResolvedValue({ mode: 0o100600, isSymbolicLink: () => false });
     mockReadFile.mockImplementation((filePath: string) => {
       if (filePath === 'promptscript.lock') return Promise.resolve(originalLockfile);
       if (filePath.includes('prs-skill-validate-xyz')) {
@@ -2744,14 +2787,47 @@ describe('skillsAddCommand frontmatter validation', () => {
     );
   });
 
-  it('reports a non-ENOENT stat failure before an atomic write', async () => {
+  it('reports a non-ENOENT lstat failure before an atomic write', async () => {
     arrangeValidation({ skillContent: '---\nname: foo\n---\nbody' });
-    mockStat.mockRejectedValueOnce(new Error('stat failed'));
+    mockLstat.mockRejectedValueOnce(new Error('lstat failed'));
 
     await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
 
-    expect(mockConsoleError).toHaveBeenCalledWith('stat failed');
+    expect(mockConsoleError).toHaveBeenCalledWith('lstat failed');
     expect(mockRename).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('preserves an entry symlink when atomic write rejects it', async () => {
+    arrangeValidation({ skillContent: '---\nname: foo\n---\nbody' });
+    mockLstat.mockResolvedValue({
+      mode: 0o120777,
+      isSymbolicLink: () => true,
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('symlink'));
+    expect(mockRename).not.toHaveBeenCalled();
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('preserves a lockfile symlink when atomic write rejects it', async () => {
+    arrangeValidation({
+      skillContent: '---\nname: foo\n---\nbody',
+      lockExists: true,
+    });
+    mockLstat.mockImplementation(async (filePath: string) => ({
+      mode: 0o100600,
+      isSymbolicLink: () => filePath.endsWith('promptscript.lock'),
+    }));
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('symlink'));
+    expect(mockRename).toHaveBeenCalledTimes(1);
+    expect(mockRename.mock.calls[0]?.[1]).toEqual(expect.stringContaining('entry.prs'));
     expect(process.exitCode).toBe(1);
   });
 
