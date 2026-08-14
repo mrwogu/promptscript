@@ -24,6 +24,7 @@ const mockGit = {
   checkout: vi.fn().mockResolvedValue(undefined),
   reset: vi.fn().mockResolvedValue(undefined),
   revparse: vi.fn().mockResolvedValue('abc123def456'),
+  raw: vi.fn().mockResolvedValue(''),
   env: vi.fn().mockReturnThis(),
   listRemote: vi.fn().mockResolvedValue(''),
 };
@@ -50,6 +51,7 @@ describe('GitRegistry', () => {
     mockGit.checkout.mockResolvedValue(undefined);
     mockGit.reset.mockResolvedValue(undefined);
     mockGit.revparse.mockResolvedValue('abc123def456');
+    mockGit.raw.mockResolvedValue('');
     mockGit.env.mockReturnThis();
     mockGit.listRemote.mockResolvedValue('');
 
@@ -337,6 +339,75 @@ describe('GitRegistry', () => {
       const hash = await registry.getCommitHash();
       expect(hash).toBe('abc123def456');
     });
+
+    it('should report timeout while reading the current commit', async () => {
+      mockGit.revparse
+        .mockResolvedValueOnce('abc123def456')
+        .mockRejectedValueOnce(new Error('operation timed out'));
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+      });
+
+      await expect(registry.getCommitHash()).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after'),
+      });
+      expect(mockGit.revparse).toHaveBeenCalledTimes(2);
+    });
+
+    it('should report timeout while caching the current commit', async () => {
+      mockGit.revparse.mockRejectedValueOnce(new Error('operation timed out'));
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+      });
+
+      await expect(registry.getCommitHash()).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after'),
+      });
+      expect(mockGit.revparse).toHaveBeenCalledTimes(1);
+    });
+
+    it('should rethrow a non-timeout commit lookup error', async () => {
+      mockGit.revparse
+        .mockResolvedValueOnce('abc123def456')
+        .mockRejectedValueOnce(new Error('revparse failed'));
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+      });
+
+      await expect(registry.getCommitHash()).rejects.toThrow('revparse failed');
+    });
+
+    it('should preserve non-Error commit lookup failures', async () => {
+      mockGit.revparse
+        .mockResolvedValueOnce('abc123def456')
+        .mockRejectedValueOnce('revparse failed');
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+      });
+
+      await expect(registry.getCommitHash()).rejects.toBe('revparse failed');
+    });
+
+    it('should preserve non-Error current commit read failures', async () => {
+      mockGit.revparse.mockRejectedValueOnce('current commit read failed');
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+      });
+
+      await expect(registry.getCommitHash()).rejects.toBe('current commit read failed');
+    });
   });
 
   describe('authentication', () => {
@@ -446,6 +517,22 @@ describe('GitRegistry', () => {
     });
   });
 
+  it('should use the default timeout for invalid timeout values', async () => {
+    const registry = new GitRegistry({
+      url: 'https://github.com/org/repo.git',
+      cacheDir: testCacheDir,
+      timeout: 0,
+    });
+
+    await registry.fetch('@company/base');
+
+    expect(simpleGit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timeout: { block: 60_000, stdErr: false, stdOut: false },
+      })
+    );
+  });
+
   describe('error handling', () => {
     it('should throw GitAuthError on authentication failure', async () => {
       mockGit.clone.mockRejectedValueOnce(new Error('Authentication failed'));
@@ -524,6 +611,44 @@ describe('GitRegistry', () => {
       });
 
       await expect(registry.fetch('@company/base')).rejects.toThrow(GitCloneError);
+    });
+
+    it('should report timeout while recovering a missing branch', async () => {
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Could not find remote branch feature'))
+        .mockImplementationOnce(async (_url: string, targetPath: string) => {
+          await fs.mkdir(targetPath, { recursive: true });
+        });
+      mockGit.fetch.mockRejectedValueOnce(new Error('operation timed out'));
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        ref: 'feature',
+        cacheDir: testCacheDir,
+      });
+
+      await expect(registry.fetch('@company/base')).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after'),
+      });
+    });
+
+    it('should report timeout from a configured fallback clone', async () => {
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockRejectedValueOnce(new Error('operation timed out'));
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        fallbackUrl: 'git@github.com:org/repo.git',
+        cacheDir: testCacheDir,
+      });
+
+      await expect(registry.fetch('@company/base')).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out after'),
+      });
+      expect(mockGit.clone).toHaveBeenCalledTimes(2);
     });
 
     it('should detect permission denied as auth error', async () => {
@@ -749,6 +874,44 @@ describe('GitRegistry', () => {
 
       await registry.fetch('@company/security');
       expect(mockGit.fetch).toHaveBeenCalledWith(['origin', '--tags', '--depth=1']);
+    });
+
+    it('should preserve timeout errors while refreshing a stale cache', async () => {
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+        cache: { enabled: true, ttl: 1 },
+      });
+
+      await registry.fetch('@company/base');
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      mockGit.fetch.mockRejectedValueOnce(new Error('operation timed out'));
+
+      await expect(registry.fetch('@company/security')).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out'),
+      });
+      expect(mockGit.clone).toHaveBeenCalledTimes(1);
+    });
+
+    it('should report timeout during tag fallback while refreshing a stale cache', async () => {
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+        cache: { enabled: true, ttl: 1 },
+      });
+
+      await registry.fetch('@company/base');
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      mockGit.fetch
+        .mockRejectedValueOnce(new Error('Could not find remote branch'))
+        .mockRejectedValueOnce(new Error('operation timed out'));
+
+      await expect(registry.fetch('@company/security')).rejects.toMatchObject({
+        name: 'GitCloneError',
+        message: expect.stringContaining('timed out'),
+      });
+      expect(mockGit.clone).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1004,6 +1167,43 @@ describe('validateRemoteAccess', () => {
     expect(result.accessible).toBe(false);
     expect(result.error).toContain('Timed out after 25ms');
     expect(result.error).not.toContain('Authentication failed');
+  });
+
+  it('should classify timeout codes nested in an error cause', async () => {
+    const cause = Object.assign(new Error('remote authentication failed'), {
+      code: 'ETIMEDOUT',
+    });
+    mockGit.listRemote.mockRejectedValue(new Error('remote probe failed', { cause }));
+
+    const result = await validateRemoteAccess('https://github.com/org/repo.git', undefined, {
+      timeout: 25,
+    });
+
+    expect(result.accessible).toBe(false);
+    expect(result.error).toContain('Timed out after 25ms');
+  });
+
+  it('should ignore non-timeout causes during network error classification', async () => {
+    const cause = new Error('connection reset');
+    mockGit.listRemote.mockRejectedValue(new Error('remote probe failed', { cause }));
+
+    const result = await validateRemoteAccess('https://github.com/org/repo.git');
+
+    expect(result.accessible).toBe(false);
+    expect(result.error).toContain('Failed to reach');
+  });
+
+  it('should normalize invalid validation timeout values', async () => {
+    mockGit.listRemote.mockRejectedValue(new Error('block timeout reached'));
+
+    const result = await validateRemoteAccess('https://github.com/org/repo.git', undefined, {
+      timeout: Number.NaN,
+    });
+
+    expect(result.error).toContain('Timed out after 60000ms');
+    expect(simpleGit).toHaveBeenCalledWith({
+      timeout: { block: 60_000, stdErr: false, stdOut: false },
+    });
   });
 });
 
