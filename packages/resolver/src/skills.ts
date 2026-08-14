@@ -1074,8 +1074,25 @@ export interface NativeSkillOptions {
    * Defaults to undefined (disabled). Typically set to `.agents`.
    */
   universalDir?: string;
+  /**
+   * Project root the universal directory sits in. Without it the root is
+   * guessed as the parent of `localPath`, which only holds while `localPath`
+   * is the `.promptscript` directory.
+   */
+  projectRoot?: string;
   /** Logger for reporting skipped files and resolution decisions. */
   logger?: Logger;
+}
+
+/**
+ * Resolve the directory the universal directory (`.agents`, ...) sits in.
+ *
+ * @param localPath - Base path for local discovery
+ * @param projectRoot - Configured project root, when known
+ * @returns Absolute path to search the universal directory under
+ */
+function universalRoot(localPath: string, projectRoot: string | undefined): string {
+  return projectRoot ? resolve(projectRoot) : resolve(localPath, '..');
 }
 
 /**
@@ -1197,7 +1214,9 @@ export async function resolveNativeSkills(
   if (!isSkillsDir && localPath) {
     const discoveryDirs: string[] = [resolve(localPath, 'skills')];
     if (options?.universalDir && localPath) {
-      discoveryDirs.push(resolve(localPath, '..', options.universalDir, 'skills'));
+      discoveryDirs.push(
+        resolve(universalRoot(localPath, options.projectRoot), options.universalDir, 'skills')
+      );
     }
 
     for (const dir of discoveryDirs) {
@@ -1264,7 +1283,13 @@ export async function resolveNativeSkills(
             : null;
           const universalCandidate =
             options?.universalDir && localPath
-              ? resolve(localPath, '..', options.universalDir, 'skills', skillName, 'SKILL.md')
+              ? resolve(
+                  universalRoot(localPath, options.projectRoot),
+                  options.universalDir,
+                  'skills',
+                  skillName,
+                  'SKILL.md'
+                )
               : null;
           const registryCandidate = resolve(registryPath, '@skills', skillName, 'SKILL.md');
 
@@ -1349,8 +1374,7 @@ export async function resolveNativeSkills(
           const refResources = await resolveSkillReferences(skillRefs, skillDir, logger);
           const existingResources =
             (updatedSkill['resources'] as
-              | Array<{ relativePath: string; content: string }>
-              | undefined) ?? [];
+              Array<{ relativePath: string; content: string }> | undefined) ?? [];
           updatedSkill['resources'] = [
             ...existingResources,
             ...refResources.map((r) => ({
@@ -1368,8 +1392,7 @@ export async function resolveNativeSkills(
           const scriptResources = await resolveSkillScripts(skillScripts, skillDir, logger);
           const existingResources =
             (updatedSkill['resources'] as
-              | Array<{ relativePath: string; content: string }>
-              | undefined) ?? [];
+              Array<{ relativePath: string; content: string }> | undefined) ?? [];
           updatedSkill['resources'] = [
             ...existingResources,
             ...scriptResources.map((r) => ({
@@ -1526,7 +1549,7 @@ export async function resolveNativeCommands(
   // Universal commands (don't overwrite local)
   if (options?.universalDir) {
     const universalCommands = await discoverCommandFiles(
-      resolve(localPath, '..', options.universalDir, 'commands'),
+      resolve(universalRoot(localPath, options.projectRoot), options.universalDir, 'commands'),
       logger
     );
     for (const [name, value] of Object.entries(universalCommands)) {
@@ -1766,7 +1789,7 @@ export async function resolveNativeAgents(
   // Universal agents (don't overwrite local)
   if (options?.universalDir) {
     const universalAgents = await discoverAgentFiles(
-      resolve(localPath, '..', options.universalDir, 'agents'),
+      resolve(universalRoot(localPath, options.projectRoot), options.universalDir, 'agents'),
       logger
     );
     for (const [name, value] of Object.entries(universalAgents)) {

@@ -244,25 +244,25 @@ export class Resolver {
     });
 
     // Resolve native skill files (replace @skills content with SKILL.md files if available)
+    const discoveryOptions = {
+      ...this.options.skills,
+      projectRoot: this.loader.getProjectRoot(),
+      logger: this.logger,
+    };
+
     ast = await resolveNativeSkills(
       ast,
       this.loader.getRegistryPath(),
       absPath,
       this.loader.getLocalPath(),
-      { ...this.options.skills, logger: this.logger }
+      discoveryOptions
     );
 
     // Auto-discover command files from local and universal directories
-    ast = await resolveNativeCommands(ast, absPath, this.loader.getLocalPath(), {
-      ...this.options.skills,
-      logger: this.logger,
-    });
+    ast = await resolveNativeCommands(ast, absPath, this.loader.getLocalPath(), discoveryOptions);
 
     // Auto-discover agent files from local and universal directories
-    ast = await resolveNativeAgents(ast, absPath, this.loader.getLocalPath(), {
-      ...this.options.skills,
-      logger: this.logger,
-    });
+    ast = await resolveNativeAgents(ast, absPath, this.loader.getLocalPath(), discoveryOptions);
 
     this.logger.debug(`Resolved ${sources.length} source file(s)`);
     return {

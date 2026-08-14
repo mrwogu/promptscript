@@ -793,6 +793,64 @@ Universal skill content.
       expect(resources[0]!.relativePath).toBe('data.csv');
     });
 
+    it('should look for the universal directory under an explicit projectRoot', async () => {
+      // localPath is the project root itself, so the universal directory is a
+      // child of it rather than a sibling of localPath
+      const projectRoot = join(testDir, 'project');
+      const agentsSkillDir = join(projectRoot, '.agents', 'skills', 'in-project-skill');
+      await mkdir(agentsSkillDir, { recursive: true });
+      await writeFile(
+        join(agentsSkillDir, 'SKILL.md'),
+        `---
+name: in-project-skill
+description: Lives inside the project
+---
+
+In-project skill content.
+`
+      );
+
+      const result = await resolveNativeSkills(
+        createProgram([]),
+        registryPath,
+        join(projectRoot, 'test.prs'),
+        projectRoot,
+        { universalDir: '.agents', projectRoot }
+      );
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const skillsContent = skillsBlock!.content as ObjectContent;
+      const skill = skillsContent.properties['in-project-skill'] as Record<string, unknown>;
+      expect((skill['content'] as TextContent).value).toContain('In-project skill content.');
+    });
+
+    it('should not discover a universal directory above the project root', async () => {
+      const projectRoot = join(testDir, 'project');
+      const outsideSkillDir = join(testDir, '.agents', 'skills', 'outside-skill');
+      await mkdir(projectRoot, { recursive: true });
+      await mkdir(outsideSkillDir, { recursive: true });
+      await writeFile(
+        join(outsideSkillDir, 'SKILL.md'),
+        `---
+name: outside-skill
+description: Lives next to the project
+---
+
+Outside skill content.
+`
+      );
+
+      const result = await resolveNativeSkills(
+        createProgram([]),
+        registryPath,
+        join(projectRoot, 'test.prs'),
+        projectRoot,
+        { universalDir: '.agents', projectRoot }
+      );
+
+      expect(result.blocks.find((b) => b.name === 'skills')).toBeUndefined();
+    });
+
     it('should ignore a SKILL.md that PromptScript generated', async () => {
       const localPath = join(testDir, '.promptscript');
       const agentsSkillDir = join(testDir, '.agents', 'skills', 'generated-skill');

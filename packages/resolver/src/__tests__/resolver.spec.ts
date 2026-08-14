@@ -33,6 +33,14 @@ describe('Resolver', () => {
       const loader = resolver.getLoader();
       expect(loader.getRegistryPath()).toBe(resolve(FIXTURES_DIR, 'registry'));
     });
+
+    it('should expose the project root used for discovery', () => {
+      const r = createResolver({
+        registryPath: '/registry',
+        localPath: '/project/.promptscript',
+      });
+      expect(r.getLoader().getProjectRoot()).toBe(resolve('/project'));
+    });
   });
 
   describe('resolve', () => {
