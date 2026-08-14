@@ -43,6 +43,19 @@ describe('skill lock integrity', () => {
     expect(secondHash).toBe(EXPECTED_AGGREGATE);
   });
 
+  it('produces the same aggregate for uppercase and lowercase integrity', () => {
+    const child = 'github.com/org/repo/skills/child';
+    const lowercaseHash = calculateManagedSkillIntegrity({ [child]: dependency(FIRST_INTEGRITY) }, [
+      child,
+    ]);
+    const uppercaseHash = calculateManagedSkillIntegrity(
+      { [child]: dependency(FIRST_INTEGRITY.toUpperCase()) },
+      [child]
+    );
+
+    expect(uppercaseHash).toBe(lowercaseHash);
+  });
+
   it('keeps the pending marker when no children are managed', () => {
     const integrity = calculateManagedSkillIntegrity({}, []);
 
