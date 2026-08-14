@@ -28,6 +28,23 @@ describe('FileLoader', () => {
       });
       expect(loader.getLocalPath()).toBe('/local');
     });
+
+    it('should fall back to project root instead of cwd', () => {
+      const loader = new FileLoader({
+        registryPath: '/registry',
+        projectRoot: '/project',
+      });
+      expect(loader.getLocalPath()).toBe('/project');
+    });
+
+    it('should prefer explicit local path over project root', () => {
+      const loader = new FileLoader({
+        registryPath: '/registry',
+        localPath: '/project/.promptscript',
+        projectRoot: '/project',
+      });
+      expect(loader.getLocalPath()).toBe('/project/.promptscript');
+    });
   });
 
   describe('load', () => {

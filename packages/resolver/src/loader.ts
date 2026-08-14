@@ -56,7 +56,7 @@ export function buildRegistryMarker(repoUrl: string, path: string, version: stri
 export interface LoaderOptions {
   /** Base path for registry lookups (@namespace/...) */
   registryPath: string;
-  /** Base path for local/relative file resolution */
+  /** Base path for local/relative file resolution (defaults to projectRoot, then cwd) */
   localPath?: string;
   /** Project root used as the traversal safety boundary */
   projectRoot?: string;
@@ -79,7 +79,9 @@ export class FileLoader {
 
   constructor(options: LoaderOptions) {
     this.registryPath = options.registryPath;
-    this.localPath = resolve(options.localPath ?? process.cwd());
+    // Falling back to cwd when a projectRoot is declared would resolve local
+    // skills, commands and agents from outside the project being compiled.
+    this.localPath = resolve(options.localPath ?? options.projectRoot ?? process.cwd());
     this.projectRoot = resolve(
       options.projectRoot ??
         (basename(this.localPath) === '.promptscript' ? dirname(this.localPath) : this.localPath)
