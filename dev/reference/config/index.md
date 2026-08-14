@@ -647,12 +647,16 @@ Factory defaults to `rulesMode: monolith`, which preserves the existing single-f
 | Field           | Type                    | Default         | Description                                            |
 | --------------- | ----------------------- | --------------- | ------------------------------------------------------ |
 | `enabled`       | boolean                 | `true`          | Whether target is enabled                              |
-| `output`        | string                  | (see above)     | Custom output path                                     |
+| `output`        | string                  | (see above)     | Custom output path, relative to the output directory   |
 | `convention`    | string                  | `markdown`      | Output convention (`xml` or `markdown`)                |
 | `version`       | string                  | `full`          | Format version (varies by target, see below)           |
 | `rulesMode`     | `monolith` or `split`   | `monolith`      | Factory always-on rule layout                          |
 | `skillBaseDir`  | string                  | target-specific | Custom base directory for generated skill files        |
 | `includeSkills` | boolean or string array | `true`          | Emit all skills, no skills, or only listed skill names |
+
+Output paths stay inside the output directory
+
+A target `output` that resolves outside the output directory (`../`, or an absolute path pointing elsewhere, including through a symlink) aborts the compile before any file is written. Use `--output` or `output.baseDir` to change where the whole build lands; a base directory outside the project is allowed and reported as a warning.
 
 Disabling Targets
 
