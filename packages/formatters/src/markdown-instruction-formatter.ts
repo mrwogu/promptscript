@@ -2,6 +2,7 @@ import type { Block, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from './base-formatter.js';
 import type { ConventionRenderer } from './convention-renderer.js';
 import type { FormatOptions, FormatterOutput, FormatterWarning } from './types.js';
+import { extractHooks, type HookTarget } from './hook-adapters.js';
 import {
   appendTargetHookCapabilityWarnings,
   getTargetHookCapabilityWarnings,
@@ -192,9 +193,10 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     }
 
     const hookWarnings = getTargetHookCapabilityWarnings(ast, this.name, version);
+    const hasEnabledHooks = this.hasEnabledHooks(ast);
     const unsupportedWarnings = this.getUnsupportedBlockWarnings(
       ast,
-      hookWarnings.length > 0 ? new Set(['hooks']) : undefined
+      hookWarnings.length > 0 || !hasEnabledHooks ? new Set(['hooks']) : undefined
     );
     const warnedOutput =
       unsupportedWarnings.length > 0
@@ -202,6 +204,16 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
         : output;
 
     return appendTargetHookCapabilityWarnings(warnedOutput, ast, this.name, version);
+  }
+
+  protected hasEnabledHooks(ast: Program): boolean {
+    const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
+    if (!hooksBlock) return false;
+
+    return extractHooks(hooksBlock).some((hook) => {
+      const targetOverride = hook.targets?.[this.name as HookTarget];
+      return (targetOverride?.enabled ?? hook.enabled) !== false;
+    });
   }
 
   /**

@@ -66,18 +66,19 @@ Output formatters for 49 AI coding targets.
 
 **AGENTS.md targets:**
 
-| Formatter   | Output Path |
-| :---------- | :---------- |
-| Aider       | `AGENTS.md` |
-| Amazon Q    | `AGENTS.md` |
-| Deep Agents | `AGENTS.md` |
-| Devin       | `AGENTS.md` |
-| ForgeCode   | `AGENTS.md` |
-| Jules       | `AGENTS.md` |
-| Kimi        | `AGENTS.md` |
-| Mimo        | `AGENTS.md` |
-| Warp        | `AGENTS.md` |
-| Zed         | `AGENTS.md` |
+| Formatter    | Output Path |
+| :----------- | :---------- |
+| Aider        | `AGENTS.md` |
+| Amazon Q     | `AGENTS.md` |
+| Deep Agents  | `AGENTS.md` |
+| Devin        | `AGENTS.md` |
+| ForgeCode    | `AGENTS.md` |
+| Hermes Agent | `AGENTS.md` |
+| Jules        | `AGENTS.md` |
+| Kimi         | `AGENTS.md` |
+| Mimo         | `AGENTS.md` |
+| Warp         | `AGENTS.md` |
+| Zed          | `AGENTS.md` |
 
 ## Public API
 

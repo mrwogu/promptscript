@@ -129,6 +129,8 @@ Keep generated files reviewed.`,
     const unsupportedNames = [
       'skills',
       'agents',
+      'workflows',
+      'prompts',
       'shortcuts',
       'guards',
       'local',
@@ -154,6 +156,8 @@ Keep generated files reviewed.`,
     expect(output.additionalFiles ?? []).toHaveLength(0);
     expect(output.content).not.toContain('skills content');
     expect(output.content).not.toContain('agents content');
+    expect(output.content).not.toContain('workflows content');
+    expect(output.content).not.toContain('prompts content');
     expect(output.content).not.toContain('shortcuts content');
     expect(output.warnings).toHaveLength(unsupportedNames.length);
     expect(output.warnings).toEqual(
@@ -196,5 +200,28 @@ Keep generated files reviewed.`,
         location: hooksLocation,
       }),
     ]);
+  });
+
+  it('does not warn for hooks disabled for Hermes', () => {
+    const formatter = new HermesFormatter();
+    const ast = createProgram([
+      createBlock(
+        'hooks',
+        {
+          type: 'ObjectContent',
+          properties: {
+            verify: {
+              event: 'post-tool-use',
+              command: ['echo', 'verify'],
+              enabled: false,
+            },
+          },
+          loc: createLoc(2),
+        },
+        2
+      ),
+    ]);
+
+    expect(formatter.format(ast).warnings).toBeUndefined();
   });
 });

@@ -255,7 +255,7 @@ Hermes output mapping:
 - Main output: `AGENTS.md`
 - `simple`, `multifile`, and `full`: same single `AGENTS.md` output
 - Supported: instruction content rendered by the shared AGENTS.md formatter
-- Unsupported: skills, agents, commands, scoped rules, local files, hooks, MCP servers, and plugins
+- Unsupported: skills, agents, commands, workflows, prompts, scoped rules, local files, hooks, MCP servers, and plugins
 - Unsupported blocks are omitted with non-fatal `PS4002` warnings carrying source locations
 
 PromptScript does not invent `.hermes.md` or unverified native Hermes
