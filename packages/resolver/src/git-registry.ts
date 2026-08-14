@@ -16,7 +16,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import type { SimpleGit, SimpleGitOptions } from 'simple-git';
 import { simpleGit } from 'simple-git';
-import { FileNotFoundError } from '@promptscript/core';
+import { FileNotFoundError, isGitTimeoutError } from '@promptscript/core';
 import type { Registry } from './registry.js';
 import { GitCacheManager } from './git-cache-manager.js';
 import type { RegistryCache } from './registry-cache.js';
@@ -1155,36 +1155,6 @@ function createRemoteValidationGit(baseDir: string | undefined, timeout: number)
   git.env('GIT_TERMINAL_PROMPT', '0');
   git.env('GCM_INTERACTIVE', 'never');
   return git;
-}
-
-function isGitTimeoutError(error: Error): boolean {
-  const errorWithCode = error as Error & { cause?: unknown; code?: unknown };
-  const code = typeof errorWithCode.code === 'string' ? errorWithCode.code.toLowerCase() : '';
-  const cause = errorWithCode.cause;
-  const causeCode =
-    cause instanceof Error &&
-    'code' in cause &&
-    typeof (cause as { code?: unknown }).code === 'string'
-      ? ((cause as { code: string }).code ?? '').toLowerCase()
-      : '';
-
-  const containsTimeoutMessage = (message: string): boolean => {
-    const withoutUrlsAndRefs = message
-      .toLowerCase()
-      .replace(/\b[a-z][a-z\d+.-]*:\/\/[^\s'"]+|git@[\w.-]+:[^\s'"]+/g, '')
-      .replace(/\b(?:remote\s+)?ref(?:erence)?\s+["']?[^\s"']+/g, '')
-      .replace(/\bremote\s+branch\s+["']?[^\s"']+/g, '');
-    return /(?:^|[\s:()[\],.!?])(timeout|timed out|etimedout)(?=$|[\s:()[\],.!?])/i.test(
-      withoutUrlsAndRefs
-    );
-  };
-
-  return (
-    code === 'etimedout' ||
-    containsTimeoutMessage(error.message) ||
-    (cause instanceof Error && containsTimeoutMessage(cause.message)) ||
-    causeCode === 'etimedout'
-  );
 }
 
 function createGitTimeoutError(url: string, timeout: number, cause: Error): GitCloneError {

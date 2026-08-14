@@ -6,7 +6,7 @@ import type { LockOptions } from '../types.js';
 import { loadConfig, findConfigFile } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import type { Lockfile, LockfileDependency } from '@promptscript/core';
-import { LOCKFILE_VERSION, isValidLockfile } from '@promptscript/core';
+import { LOCKFILE_VERSION, isGitTimeoutError, isValidLockfile } from '@promptscript/core';
 import { collectRemoteImports } from './lock-scanner.js';
 import {
   createGitRegistry,
@@ -36,36 +36,6 @@ interface RequestedDependency {
 export interface RemoteDependencyOptions {
   /** Maximum wall-clock time for each Git operation in milliseconds */
   timeout?: number;
-}
-
-function isGitTimeoutError(error: Error): boolean {
-  const errorWithCode = error as Error & { code?: unknown; cause?: unknown };
-  const code = typeof errorWithCode.code === 'string' ? errorWithCode.code.toLowerCase() : '';
-  const cause = errorWithCode.cause;
-  const causeCode =
-    cause instanceof Error &&
-    'code' in cause &&
-    typeof (cause as { code?: unknown }).code === 'string'
-      ? (cause as { code: string }).code.toLowerCase()
-      : '';
-
-  const containsTimeoutMessage = (message: string): boolean => {
-    const withoutUrlsAndRefs = message
-      .toLowerCase()
-      .replace(/\b[a-z][a-z\d+.-]*:\/\/[^\s'"]+|git@[\w.-]+:[^\s'"]+/g, '')
-      .replace(/\b(?:remote\s+)?ref(?:erence)?\s+["']?[^\s"']+/g, '')
-      .replace(/\bremote\s+branch\s+["']?[^\s"']+/g, '');
-    return /(?:^|[\s:()[\],.!?])(timeout|timed out|etimedout)(?=$|[\s:()[\],.!?])/i.test(
-      withoutUrlsAndRefs
-    );
-  };
-
-  return (
-    code === 'etimedout' ||
-    containsTimeoutMessage(error.message) ||
-    (cause instanceof Error && containsTimeoutMessage(cause.message)) ||
-    causeCode === 'etimedout'
-  );
 }
 
 /**

@@ -45,3 +45,6 @@ export * from './target-catalog.js';
 
 // Hook capabilities
 export * from './hook-capabilities.js';
+
+// Git timeout classification
+export * from './git-timeout.js';
