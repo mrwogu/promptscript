@@ -1494,6 +1494,36 @@ describe('CursorFormatter', () => {
       );
     });
 
+    it('should skip agents whose name is unsafe for a file path', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '../escape': { description: 'Traversal attempt', content: 'Body.' },
+                reviewer: { description: 'Safe agent', content: 'Body.' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const paths = result.additionalFiles?.map((f) => f.path) ?? [];
+      expect(paths).toContain('.cursor/agents/reviewer.md');
+      expect(paths.some((p) => p.includes('..'))).toBe(false);
+    });
+
     it('should emit the same skill file as other .agents/skills targets', () => {
       const ast = skillsProgram({
         review: { description: 'Code review skill', content: 'Review code.' },

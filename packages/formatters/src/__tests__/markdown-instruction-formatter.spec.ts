@@ -874,6 +874,34 @@ describe('MarkdownInstructionFormatter', () => {
       expect(agentFile?.path).toBe('.test/agents/helper.md');
     });
 
+    it('should skip agents whose name is unsafe for a file path', () => {
+      const agentFormatter = new TestFormatter({ hasAgents: true });
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '../escape': { description: 'Traversal attempt', content: 'Body.' },
+                helper: { description: 'A helper agent', content: 'Help with tasks' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = agentFormatter.format(ast, { version: 'full' });
+
+      const paths = result.additionalFiles?.map((f) => f.path) ?? [];
+      expect(paths).toContain('.test/agents/helper.md');
+      expect(paths.some((p) => p.includes('..'))).toBe(false);
+    });
+
     it('should not include agents when hasAgents is false', () => {
       const ast: Program = {
         ...createMinimalProgram(),

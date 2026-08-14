@@ -539,6 +539,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     for (const [name, value] of Object.entries(props)) {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
+        if (!this.isSafeAgentName(name)) continue;
         const obj = value as Record<string, Value>;
         const description = obj['description'] ? this.valueToString(obj['description']) : '';
         if (!description) continue; // description is required

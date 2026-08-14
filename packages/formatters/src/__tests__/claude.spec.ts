@@ -828,6 +828,33 @@ describe('ClaudeFormatter', () => {
     });
 
     describe('agent file generation', () => {
+      it('should skip agents whose name is unsafe for a file path', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  '../escape': { description: 'Traversal attempt', content: 'Body.' },
+                  reviewer: { description: 'Safe agent', content: 'Body.' },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'full' });
+
+        const paths = result.additionalFiles?.map((f) => f.path) ?? [];
+        expect(paths).toContain('.claude/agents/reviewer.md');
+        expect(paths.some((p) => p.includes('..'))).toBe(false);
+      });
+
       it('should generate agent files in full mode with @agents block', () => {
         const ast: Program = {
           ...createMinimalProgram(),

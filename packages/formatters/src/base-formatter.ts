@@ -933,6 +933,13 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * Check if an agent name is safe for use in file paths.
+   */
+  protected isSafeAgentName(name: string): boolean {
+    return this.isSafeName(name);
+  }
+
+  /**
    * Serialize a string as a YAML scalar, quoting only when required.
    */
   protected yamlString(value: string): string {

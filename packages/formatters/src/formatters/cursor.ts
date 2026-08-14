@@ -410,6 +410,7 @@ export class CursorFormatter extends BaseFormatter {
       const props = this.getProps(agentsBlock.content);
       for (const [agentName, value] of Object.entries(props)) {
         if (value && typeof value === 'object' && !Array.isArray(value)) {
+          if (!this.isSafeAgentName(agentName)) continue;
           const obj = value as Record<string, Value>;
           const description = obj['description'] ? this.valueToString(obj['description']) : '';
           const content = obj['content'] ? this.valueToString(obj['content']) : '';
