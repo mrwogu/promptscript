@@ -54,6 +54,7 @@ import { KimiFormatter } from '../formatters/kimi.js';
 import { MimoFormatter } from '../formatters/mimo.js';
 import { DeepAgentsFormatter } from '../formatters/deep-agents.js';
 import { ForgecodeFormatter } from '../formatters/forgecode.js';
+import { HermesFormatter } from '../formatters/hermes.js';
 import {
   extractSectionsFromOutput,
   normalizeSectionName,
@@ -289,6 +290,7 @@ function buildAllFormatters(): Formatter[] {
     new MimoFormatter(),
     new DeepAgentsFormatter(),
     new ForgecodeFormatter(),
+    new HermesFormatter(),
   ];
 }
 

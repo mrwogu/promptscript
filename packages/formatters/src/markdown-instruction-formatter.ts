@@ -1,8 +1,11 @@
 import type { Block, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from './base-formatter.js';
 import type { ConventionRenderer } from './convention-renderer.js';
-import type { FormatOptions, FormatterOutput } from './types.js';
-import { appendTargetHookCapabilityWarnings } from './hook-capability-warnings.js';
+import type { FormatOptions, FormatterOutput, FormatterWarning } from './types.js';
+import {
+  appendTargetHookCapabilityWarnings,
+  getTargetHookCapabilityWarnings,
+} from './hook-capability-warnings.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -126,6 +129,8 @@ export interface MarkdownFormatterConfig {
   hooksConfigPath?: string;
   /** Hook adapter target name (default: same as formatter name) */
   hookAdapterTarget?: 'claude' | 'cursor' | 'codex' | 'factory';
+  /** PromptScript blocks omitted by this target with compatibility warnings. */
+  unsupportedBlocks?: readonly string[];
 }
 
 /**
@@ -186,7 +191,70 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
       output = this.formatSimple(ast, options);
     }
 
-    return appendTargetHookCapabilityWarnings(output, ast, this.name, version);
+    const hookWarnings = getTargetHookCapabilityWarnings(ast, this.name, version);
+    const unsupportedWarnings = this.getUnsupportedBlockWarnings(
+      ast,
+      hookWarnings.length > 0 ? new Set(['hooks']) : undefined
+    );
+    const warnedOutput =
+      unsupportedWarnings.length > 0
+        ? { ...output, warnings: [...(output.warnings ?? []), ...unsupportedWarnings] }
+        : output;
+
+    return appendTargetHookCapabilityWarnings(warnedOutput, ast, this.name, version);
+  }
+
+  /**
+   * Report blocks that have no verified project-local output contract.
+   * Native target files are never invented for these blocks.
+   */
+  protected getUnsupportedBlockWarnings(
+    ast: Program,
+    skippedBlocks: ReadonlySet<string> = new Set()
+  ): FormatterWarning[] {
+    const unsupportedBlocks = new Set(this.config.unsupportedBlocks ?? []);
+    if (unsupportedBlocks.size === 0) return [];
+
+    const warnings: FormatterWarning[] = [];
+    for (const block of ast.blocks) {
+      if (block.name.startsWith('__')) continue;
+      const canonicalName = block.name === 'commands' ? 'shortcuts' : block.name;
+      if (skippedBlocks.has(canonicalName)) continue;
+      if (!unsupportedBlocks.has(canonicalName)) continue;
+
+      const blockLabel = canonicalName === 'shortcuts' ? '@shortcuts/@commands' : `@${block.name}`;
+      warnings.push({
+        code: 'PS4002',
+        message: `Target "${this.name}" cannot emit ${blockLabel} and will omit it.`,
+        suggestion: this.getUnsupportedBlockSuggestion(canonicalName),
+        location: block.loc,
+      });
+    }
+
+    return warnings;
+  }
+
+  /**
+   * Provide a safe migration path for an omitted block.
+   */
+  protected getUnsupportedBlockSuggestion(blockName: string): string {
+    switch (blockName) {
+      case 'skills':
+        return 'Move required skill guidance into AGENTS.md-supported instruction blocks.';
+      case 'agents':
+        return 'Move required agent guidance into AGENTS.md-supported instruction blocks.';
+      case 'shortcuts':
+        return 'Move command guidance into @knowledge or another AGENTS.md-supported instruction block.';
+      case 'guards':
+        return 'Move scoped guidance into AGENTS.md-supported instruction blocks.';
+      case 'local':
+        return 'Move local guidance into the project-local AGENTS.md file.';
+      case 'mcpServers':
+      case 'plugins':
+        return 'Configure this integration through the target runtime; no project-local Hermes contract is verified.';
+      default:
+        return 'Move the content into an AGENTS.md-supported instruction block.';
+    }
   }
 
   // ============================================================
@@ -908,7 +976,9 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
   }
 
   protected commands(ast: Program, renderer: ConventionRenderer): string | null {
-    const shortcuts = this.findBlock(ast, 'shortcuts');
+    const shortcuts = this.isBlockUnsupported('shortcuts')
+      ? undefined
+      : this.findBlock(ast, 'shortcuts');
     const knowledge = this.findBlock(ast, 'knowledge');
 
     const commandLines: string[] = [];
@@ -921,9 +991,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
       }
     }
 
-    if (commandLines.length === 0) return null;
-
-    let content = renderer.renderCodeBlock(commandLines.join('\n'));
+    let content = commandLines.length > 0 ? renderer.renderCodeBlock(commandLines.join('\n')) : '';
 
     if (knowledge) {
       const text = this.extractText(knowledge.content);
@@ -935,9 +1003,15 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
       }
     }
 
+    if (!content) return null;
+
     return (
       renderer.renderSection(this.getRenderedSectionName(ast, 'commands', renderer), content) + '\n'
     );
+  }
+
+  protected isBlockUnsupported(blockName: string): boolean {
+    return (this.config.unsupportedBlocks ?? []).includes(blockName);
   }
 
   protected postWork(ast: Program, renderer: ConventionRenderer): string | null {

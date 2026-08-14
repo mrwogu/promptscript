@@ -69,6 +69,7 @@ import { KimiFormatter } from './formatters/kimi.js';
 import { MimoFormatter } from './formatters/mimo.js';
 import { DeepAgentsFormatter } from './formatters/deep-agents.js';
 import { ForgecodeFormatter } from './formatters/forgecode.js';
+import { HermesFormatter } from './formatters/hermes.js';
 
 /**
  * Exhaustive map of built-in target names to their formatter classes.
@@ -130,4 +131,5 @@ export const BUILTIN_FORMATTERS = {
   mimo: MimoFormatter,
   'deep-agents': DeepAgentsFormatter,
   forgecode: ForgecodeFormatter,
+  hermes: HermesFormatter,
 } as const satisfies Record<KnownTarget, FormatterClass>;

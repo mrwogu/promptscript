@@ -502,6 +502,7 @@ export const selectOutputsForFormatter = (
     mimo: [/^AGENTS\.md$/],
     'deep-agents': [/^AGENTS\.md$/],
     forgecode: [/^AGENTS\.md$/],
+    hermes: [/^AGENTS\.md$/],
   };
 
   const patterns = formatterPatterns[formatter];
@@ -562,6 +563,7 @@ export const selectOutputsForFormatter = (
     mimo: 'AGENTS.md',
     'deep-agents': 'AGENTS.md',
     forgecode: 'AGENTS.md',
+    hermes: 'AGENTS.md',
   };
 
   const mainPattern = mainFilePatterns[formatter];

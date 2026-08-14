@@ -20,7 +20,11 @@ import type { SimpleFormatterResult } from '../create-simple-formatter.js';
 export function createAgentsMdTarget(
   name: string,
   description: string,
-  options?: { mcpConfigPath?: string; mcpConfigFormat?: 'json' | 'toml' }
+  options?: {
+    mcpConfigPath?: string;
+    mcpConfigFormat?: 'json' | 'toml';
+    unsupportedBlocks?: readonly string[];
+  }
 ): SimpleFormatterResult {
   return createSimpleMarkdownFormatter({
     name,
@@ -33,5 +37,6 @@ export function createAgentsMdTarget(
     hasCommands: false,
     ...(options?.mcpConfigPath ? { mcpConfigPath: options.mcpConfigPath } : {}),
     ...(options?.mcpConfigFormat ? { mcpConfigFormat: options.mcpConfigFormat } : {}),
+    ...(options?.unsupportedBlocks ? { unsupportedBlocks: options.unsupportedBlocks } : {}),
   });
 }

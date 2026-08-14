@@ -18,7 +18,7 @@ import type { KnownTarget } from './types/config.js';
  * - `base`: Formatters extending BaseFormatter directly (GitHub, Cursor, Claude, Antigravity)
  * - `markdown-instruction`: Formatters extending MarkdownInstructionFormatter
  * - `simple`: Formatters created via createSimpleMarkdownFormatter
- * - `agents-md-only`: Future AGENTS.md-only targets (Task 6)
+ * - `agents-md-only`: Targets using the project-local AGENTS.md contract
  */
 export type TargetFamily = 'base' | 'markdown-instruction' | 'simple' | 'agents-md-only';
 
@@ -694,6 +694,19 @@ export const TARGET_DEFINITIONS = {
     outputPath: 'AGENTS.md',
     family: 'agents-md-only',
     skillPath: { basePath: '.forge/skills', fileName: 'SKILL.md' },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'simple',
+      hasSkills: false,
+      hasAgents: false,
+      hasCommands: false,
+    },
+  },
+  hermes: {
+    name: 'hermes',
+    outputPath: 'AGENTS.md',
+    family: 'agents-md-only',
+    skillPath: { basePath: null, fileName: null },
     features: {
       defaultEnabled: false,
       defaultVersion: 'simple',

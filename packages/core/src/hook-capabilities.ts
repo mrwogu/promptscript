@@ -1,20 +1,12 @@
 import type { KnownTarget } from './types/config.js';
 
 export type HookSupportStatus =
-  | 'native'
-  | 'compatible'
-  | 'agent-scoped'
-  | 'plugin-only'
-  | 'unsupported';
+  'native' | 'compatible' | 'agent-scoped' | 'plugin-only' | 'unsupported';
 
 export type HookTimeoutUnit = 'milliseconds' | 'seconds' | 'none';
 
 export type HookProjectRootStrategy =
-  | 'environment'
-  | 'git-root'
-  | 'native-cwd'
-  | 'workspace-cwd'
-  | 'none';
+  'environment' | 'git-root' | 'native-cwd' | 'workspace-cwd' | 'none';
 
 export type HookTerminalGuarantee = 'guaranteed' | 'best-effort' | 'not-guaranteed';
 
@@ -306,6 +298,7 @@ export const HOOK_CAPABILITIES = {
   mimo: UNSUPPORTED_CAPABILITY,
   'deep-agents': UNSUPPORTED_CAPABILITY,
   forgecode: UNSUPPORTED_CAPABILITY,
+  hermes: UNSUPPORTED_CAPABILITY,
 } as const satisfies Record<KnownTarget, HookCapability>;
 
 export const VSCODE_HOOK_CAPABILITY: HookCapability = {

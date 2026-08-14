@@ -512,7 +512,8 @@ export type KnownTarget =
   | 'kimi'
   | 'mimo'
   | 'deep-agents'
-  | 'forgecode';
+  | 'forgecode'
+  | 'hermes';
 
 /**
  * Branded type for custom (user-registered) target names.
@@ -591,6 +592,7 @@ export const KNOWN_TARGETS: readonly KnownTarget[] = [
   'mimo',
   'deep-agents',
   'forgecode',
+  'hermes',
 ] as const;
 
 /**
@@ -674,4 +676,5 @@ export const DEFAULT_OUTPUT_PATHS: Record<string, string> = {
   mimo: 'AGENTS.md',
   'deep-agents': 'AGENTS.md',
   forgecode: 'AGENTS.md',
+  hermes: 'AGENTS.md',
 };

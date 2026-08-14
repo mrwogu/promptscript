@@ -59,6 +59,7 @@ const EXPECTED_SKILL_PATHS: Record<string, { basePath: string | null; fileName: 
   mimo: { basePath: null, fileName: null },
   'deep-agents': { basePath: null, fileName: null },
   forgecode: { basePath: null, fileName: null },
+  hermes: { basePath: null, fileName: null },
 };
 
 describe('Skill path inventory verification', () => {

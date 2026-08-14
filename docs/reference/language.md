@@ -1524,7 +1524,7 @@ Every built-in target has an explicit hook capability classification. Targets
 without native project hooks and modes that cannot emit additional files
 report `PS4002` with a fallback such as `prs compile --watch`. See
 [Hooks and Workflows](../features/automation.md#hook-capability-matrix) for the
-complete 48-target matrix and project-root behavior.
+complete 49-target matrix and project-root behavior.
 
 ### @mcpServers
 

@@ -86,6 +86,7 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
     mimo: { enabled: false, version: 'simple' },
     'deep-agents': { enabled: false, version: 'simple' },
     forgecode: { enabled: false, version: 'simple' },
+    hermes: { enabled: false, version: 'simple' },
   },
   formatting: {
     tabWidth: 2,

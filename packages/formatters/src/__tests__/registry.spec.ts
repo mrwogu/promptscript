@@ -565,6 +565,7 @@ describe('FormatterRegistry', () => {
         'iflow',
         'openclaw',
         'codebuddy',
+        'hermes',
       ];
 
       // Assert

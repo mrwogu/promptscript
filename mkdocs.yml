@@ -85,7 +85,7 @@ plugins:
       markdown_description: |
         PromptScript is an agent platform configuration language. It defines
         instructions, skills, agents, MCP servers, plugins, hooks, workflows,
-        and policies once, then compiles native output for 48 AI coding agent
+        and policies once, then compiles native output for 49 AI coding agent
         targets.
       sections:
         Getting Started:
@@ -98,7 +98,7 @@ plugins:
           - features/skills.md: Portable skills, resources, scripts, and contracts
           - features/integrations.md: MCP servers and plugin bundles
           - features/automation.md: Lifecycle hooks, workflows, and build automation
-          - features/target-platforms.md: All 48 target platforms and output families
+          - features/target-platforms.md: All 49 target platforms and output families
         Reference:
           - reference/language.md: Complete PromptScript language specification
           - reference/language/file-anatomy.md: Complete PromptScript file structure
@@ -114,7 +114,7 @@ plugins:
           - reference/cli/hook.md: Low-level hook runtime contract
           - reference/config.md: Configuration file format
         Target Platforms:
-          - reference/formatters/index.md: All 48 supported AI agent targets
+          - reference/formatters/index.md: All 49 supported AI agent targets
           - reference/formatters/claude.md: Claude Code output format, skills, agents, local files
           - reference/formatters/github.md: GitHub Copilot output format, instructions, prompts, skills
           - reference/formatters/cursor.md: Cursor output format, MDC frontmatter, commands

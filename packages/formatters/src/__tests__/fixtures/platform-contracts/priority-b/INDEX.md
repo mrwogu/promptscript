@@ -6,12 +6,13 @@ skill/agent paths only from a confirmed fixture (Task 27).
 
 ## Family index
 
-| Target      | Source URL                                                         | Retrieved  | Expected path (initial) | Scope           |
-| ----------- | ------------------------------------------------------------------ | ---------- | ----------------------- | --------------- |
-| kimi        | https://moonshotai.github.io/kimi-cli/en/customization/skills.html | 2026-07-17 | `AGENTS.md`             | formatter-scope |
-| mimo        | https://github.com/XiaomiMiMo/MiMo-Code                            | 2026-07-17 | `AGENTS.md`             | formatter-scope |
-| deep-agents | https://docs.langchain.com/oss/python/deepagents/overview          | 2026-07-17 | `AGENTS.md` (memory)    | formatter-scope |
-| forgecode   | https://forgecode.dev/docs/skills/                                 | 2026-07-17 | `AGENTS.md`             | formatter-scope |
+| Target      | Source URL                                                                   | Retrieved  | Expected path (initial) | Scope           |
+| ----------- | ---------------------------------------------------------------------------- | ---------- | ----------------------- | --------------- |
+| kimi        | https://moonshotai.github.io/kimi-cli/en/customization/skills.html           | 2026-07-17 | `AGENTS.md`             | formatter-scope |
+| mimo        | https://github.com/XiaomiMiMo/MiMo-Code                                      | 2026-07-17 | `AGENTS.md`             | formatter-scope |
+| deep-agents | https://docs.langchain.com/oss/python/deepagents/overview                    | 2026-07-17 | `AGENTS.md` (memory)    | formatter-scope |
+| forgecode   | https://forgecode.dev/docs/skills/                                           | 2026-07-17 | `AGENTS.md`             | formatter-scope |
+| hermes      | https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files | 2026-08-14 | `AGENTS.md`             | formatter-scope |
 
 ## Per-target notes
 
@@ -41,6 +42,11 @@ skill/agent paths only from a confirmed fixture (Task 27).
   skills. AGENTS.md contract not explicitly documented on the skills page but
   ForgeCode reads AGENTS.md as the cross-tool standard (confirm in Task 27
   fixture).
+- **Hermes Agent** (Nous Research): The official
+  [context-files documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files)
+  identifies project-local `AGENTS.md` as the workspace instruction file.
+  The official [skills documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills)
+  does not verify a project-local skill output path for PromptScript.
 
 ## PromptScript action (Task 27)
 
@@ -53,6 +59,8 @@ For each verified target:
 - Expose headless, worktree, session, and HITL controls only when they are
   stable project configuration, not runtime flags.
 - Keep unsupported capabilities as `planned` or `not-supported`.
+- Hermes uses only root `AGENTS.md`; no `.hermes.md` or unverified native
+  skills, agents, commands, hooks, MCP, or plugin output is emitted.
 
 ## Out of scope for Priority B
 

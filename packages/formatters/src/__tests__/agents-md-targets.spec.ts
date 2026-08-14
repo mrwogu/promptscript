@@ -3,7 +3,7 @@ import { FormatterRegistry } from '../index.js';
 import { KNOWN_TARGETS } from '@promptscript/core';
 import type { Program } from '@promptscript/core';
 
-const AGENTS_MD_TARGETS = ['aider', 'amazon-q', 'warp', 'zed', 'jules', 'devin'] as const;
+const AGENTS_MD_TARGETS = ['aider', 'amazon-q', 'warp', 'zed', 'jules', 'devin', 'hermes'] as const;
 
 function createLoc() {
   return { file: 'test.prs', line: 1, column: 0 };

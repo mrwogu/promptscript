@@ -61,6 +61,7 @@ import { KimiFormatter } from '../formatters/kimi.js';
 import { MimoFormatter } from '../formatters/mimo.js';
 import { DeepAgentsFormatter } from '../formatters/deep-agents.js';
 import { ForgecodeFormatter } from '../formatters/forgecode.js';
+import { HermesFormatter } from '../formatters/hermes.js';
 import type { Formatter, FormatOptions } from '../types.js';
 
 /**
@@ -925,6 +926,14 @@ describe('Golden Files Tests', () => {
       extension: 'md',
       options: { version: 'simple' },
     },
+    {
+      name: 'hermes',
+      formatter: new HermesFormatter(),
+      version: 'simple',
+      goldenFile: 'hermes/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
   ];
 
   // Legacy configs for backward compatibility tests (Tier 0 only)
@@ -1508,6 +1517,7 @@ describe('Golden Files Tests', () => {
         new MimoFormatter(),
         new DeepAgentsFormatter(),
         new ForgecodeFormatter(),
+        new HermesFormatter(),
       ];
 
       expect(allFormatters.length).toBe(KNOWN_TARGETS.length);

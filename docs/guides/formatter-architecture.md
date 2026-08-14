@@ -9,7 +9,7 @@ This guide explains the internal architecture of PromptScript formatters, focusi
 
 ## Overview
 
-PromptScript compiles to 48 AI agent targets. Rich native formatters, AGENTS.md targets, and shared
+PromptScript compiles to 49 AI agent targets. Rich native formatters, AGENTS.md targets, and shared
 Markdown formatters map the same PromptScript source to each platform's instruction and capability
 contracts. Shared extraction and rendering logic preserves semantic parity where native platforms
 support equivalent features.

@@ -2,7 +2,7 @@
 
 > **Internal package** - Part of the [PromptScript](https://github.com/mrwogu/promptscript) monorepo.
 
-Output formatters for 48 AI coding targets.
+Output formatters for 49 AI coding targets.
 
 ## Supported Formatters
 
