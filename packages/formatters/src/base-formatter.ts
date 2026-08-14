@@ -1,4 +1,4 @@
-import { normalize, isAbsolute, sep } from 'path';
+import { posix } from 'path';
 import type {
   Block,
   BlockContent,
@@ -762,8 +762,26 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
-   * Filter resource files to only include safe paths.
-   * Rejects paths with traversal, absolute paths, and unsafe names.
+   * Normalize a resource path to a safe, portable relative path.
+   */
+  protected normalizeResourcePath(relativePath: string): string | null {
+    const portablePath = relativePath.replace(/\\/g, '/');
+    if (portablePath.startsWith('/')) return null;
+
+    const sourceSegments = portablePath.split('/');
+    if (sourceSegments.some((segment) => segment === '..')) return null;
+
+    const normalized = posix.normalize(portablePath);
+    if (normalized === '.' || normalized.startsWith('../')) return null;
+
+    const normalizedSegments = normalized.split('/');
+    if (normalizedSegments.some((segment) => !isPortablePathSegment(segment))) return null;
+
+    return normalized;
+  }
+
+  /**
+   * Filter resource files to only include safe canonical paths.
    */
   protected sanitizeResourceFiles(
     resources: Array<{ relativePath: string; content: string; executable?: boolean }> | undefined,
@@ -771,18 +789,22 @@ export abstract class BaseFormatter implements Formatter {
   ): FormatterOutput[] {
     if (!resources || resources.length === 0) return [];
 
-    return resources
-      .filter((r) => {
-        const normalized = normalize(r.relativePath);
-        if (isAbsolute(normalized)) return false;
-        const segments = normalized.split(sep);
-        return !segments.some((s) => s === '..');
-      })
-      .map((r) => ({
-        path: `${targetDir}/${r.relativePath}`,
-        content: r.content,
-        mode: r.executable === undefined ? undefined : r.executable ? 0o755 : 0o644,
-      }));
+    const outputs = new Map<string, FormatterOutput>();
+    for (const resource of resources) {
+      const relativePath = this.normalizeResourcePath(resource.relativePath);
+      if (!relativePath) continue;
+
+      const outputPath = `${targetDir}/${relativePath}`;
+      if (outputs.has(outputPath)) continue;
+
+      outputs.set(outputPath, {
+        path: outputPath,
+        content: resource.content,
+        mode: resource.executable === undefined ? undefined : resource.executable ? 0o755 : 0o644,
+      });
+    }
+
+    return [...outputs.values()];
   }
 
   /**
@@ -945,26 +967,58 @@ export abstract class BaseFormatter implements Formatter {
   protected yamlString(value: string): string {
     const needsQuoting =
       value === '' ||
-      /^[{[*&!|>'"?%@`-]/.test(value) ||
+      value.trim() !== value ||
+      /[\r\n\t]/.test(value) ||
+      /^[,:[\]{}#&*!|>'"%@`?+-]/.test(value) ||
       value.includes("'") ||
       value.includes('"') ||
-      value.includes(': ') ||
+      value.includes(':') ||
       value.includes(' #') ||
-      value === 'true' ||
-      value === 'false' ||
-      value === 'null' ||
-      value === 'yes' ||
-      value === 'no';
+      /^(?:~|null|true|false|yes|no|on|off)$/i.test(value) ||
+      /^\.(?:inf|nan)$/i.test(value) ||
+      /^[-+]?(?:\d|\.\d)/.test(value) ||
+      value === '---' ||
+      value === '...';
 
     if (!needsQuoting) {
       return value;
     }
 
-    if (value.includes("'")) {
-      const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-      return `"${escaped}"`;
+    if (/[\r\n\t]/.test(value) || value.includes("'")) {
+      return JSON.stringify(value);
     }
     return `'${value}'`;
+  }
+
+  /**
+   * Preserve raw skill frontmatter while supplying mandatory skill fields.
+   */
+  protected mergeRequiredSkillFrontmatter(
+    rawFrontmatter: string,
+    name: string,
+    description: string
+  ): string {
+    const hasTopLevelKey = (key: string): boolean =>
+      rawFrontmatter.split(/\r?\n/).some((line) => {
+        if (/^[ \t]/.test(line)) return false;
+        const separatorIndex = line.indexOf(':');
+        if (separatorIndex < 0) return false;
+        const rawKey = line
+          .slice(0, separatorIndex)
+          .trim()
+          .replace(/^\uFEFF/, '');
+        return rawKey === key || rawKey === `'${key}'` || rawKey === `"${key}"`;
+      });
+
+    const generatedFields: string[] = [];
+    if (!hasTopLevelKey('name')) {
+      generatedFields.push(`name: ${this.yamlString(name)}`);
+    }
+    if (!hasTopLevelKey('description')) {
+      generatedFields.push(`description: ${this.yamlString(description)}`);
+    }
+
+    return [...generatedFields, rawFrontmatter].filter((entry) => entry.length > 0).join('\n');
   }
 
   /**
@@ -1024,9 +1078,11 @@ export abstract class BaseFormatter implements Formatter {
     // YAML frontmatter
     lines.push('---');
     if (config.rawFrontmatter) {
-      lines.push(config.rawFrontmatter);
+      lines.push(
+        this.mergeRequiredSkillFrontmatter(config.rawFrontmatter, config.name, config.description)
+      );
     } else {
-      lines.push(`name: ${config.name}`);
+      lines.push(`name: ${this.yamlString(config.name)}`);
       lines.push(`description: ${this.yamlString(config.description)}`);
       if (config.argumentHint) {
         lines.push(`argument-hint: ${this.yamlString(config.argumentHint)}`);

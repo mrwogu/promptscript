@@ -492,9 +492,16 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     // YAML frontmatter — filter raw frontmatter to only Factory-supported fields
     lines.push('---');
     if (factoryConfig.rawFrontmatter) {
-      lines.push(...this.filterFactoryFrontmatter(factoryConfig.rawFrontmatter));
+      const filteredFrontmatter = this.filterFactoryFrontmatter(factoryConfig.rawFrontmatter);
+      lines.push(
+        this.mergeRequiredSkillFrontmatter(
+          filteredFrontmatter.join('\n'),
+          skillName,
+          factoryConfig.description
+        )
+      );
     } else {
-      lines.push(`name: ${skillName}`);
+      lines.push(`name: ${this.yamlString(skillName)}`);
       lines.push(`description: ${this.yamlString(factoryConfig.description)}`);
       if (factoryConfig.argumentHint) {
         lines.push(`argument-hint: ${this.yamlString(factoryConfig.argumentHint)}`);
