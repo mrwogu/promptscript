@@ -1114,13 +1114,15 @@ async function resolveUniversalDiscoveryDir(
   }
 
   const segments = portableDir.split('/').filter((segment) => segment.length > 0);
-  if (segments.length === 0 || segments.some((segment) => segment === '..')) {
+  if (
+    segments.length === 0 ||
+    segments.some((segment) => segment === '..' || /^[a-zA-Z]:/.test(segment))
+  ) {
     return null;
   }
 
   const root = universalRoot(localPath, options.projectRoot);
   const candidate = resolve(root, ...segments, contentDir);
-  if (!isInside(root, candidate)) return null;
 
   try {
     const [realRoot, realCandidate] = await Promise.all([realpath(root), realpath(candidate)]);

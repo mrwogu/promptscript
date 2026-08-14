@@ -360,6 +360,32 @@ describe('Compiler', () => {
       }
     });
 
+    it('should append the default extension before resolving a missing entry', async () => {
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [],
+      });
+
+      await compiler.compile('missing-entry');
+
+      expect(mockResolve).toHaveBeenCalledWith(resolve(process.cwd(), 'missing-entry.prs'));
+    });
+
+    it('should preserve registry aliases during entry resolution', async () => {
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [],
+      });
+
+      await compiler.compile('@vendor/project');
+
+      expect(mockResolve).toHaveBeenCalledWith('@vendor/project');
+    });
+
     it('should verify lockfile hashes with the entry resolver', async () => {
       const workspace = createMarkedWorkspace();
       mockResolve.mockResolvedValue(createSuccessfulResolverResult());

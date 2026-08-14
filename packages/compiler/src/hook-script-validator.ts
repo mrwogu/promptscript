@@ -1,5 +1,5 @@
 import { lstat, realpath } from 'fs/promises';
-import { existsSync, realpathSync, statSync } from 'fs';
+import { realpathSync, statSync } from 'fs';
 import { dirname, isAbsolute, relative, resolve, sep } from 'path';
 import type { Program } from '@promptscript/core';
 import { extractHooks, getEnabledHookScriptResources } from '@promptscript/formatters';
@@ -17,15 +17,12 @@ function isInside(root: string, candidate: string): boolean {
 
 function isProjectMarker(directory: string, marker: (typeof PROJECT_MARKERS)[number]): boolean {
   const markerPath = resolve(directory, marker);
-  if (!existsSync(markerPath)) return false;
-  if (marker === '.promptscript') {
-    try {
-      return statSync(markerPath).isDirectory();
-    } catch {
-      return false;
-    }
+  try {
+    const markerStat = statSync(markerPath);
+    return marker !== '.promptscript' || markerStat.isDirectory();
+  } catch {
+    return false;
   }
-  return true;
 }
 
 /**

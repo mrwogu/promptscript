@@ -948,6 +948,45 @@ Generated skill content.
       expect(skill['__rawFrontmatter']).toBeUndefined();
     });
 
+    it('should ignore an explicitly declared local SKILL.md that PromptScript generated', async () => {
+      const localPath = join(testDir, '.promptscript');
+      const localSkillDir = join(localPath, 'skills', 'generated-skill');
+      await mkdir(localSkillDir, { recursive: true });
+
+      await writeFile(
+        join(localSkillDir, 'SKILL.md'),
+        `---
+# promptscript-generated: 2026-07-27T16:59:01.673Z | source: project.prs | target: codex
+name: generated-skill
+description: Emitted by a previous compilation
+---
+
+Generated skill content.
+`
+      );
+
+      const ast = createProgram([
+        createSkillsBlock({
+          'generated-skill': { content: 'Authored content.' },
+        }),
+      ]);
+
+      const result = await resolveNativeSkills(
+        ast,
+        registryPath,
+        join(localPath, 'test.prs'),
+        localPath,
+        { universalDir: '.agents' }
+      );
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const skillsContent = skillsBlock!.content as ObjectContent;
+      const skill = skillsContent.properties['generated-skill'] as Record<string, unknown>;
+
+      expect(skill['content']).toBe('Authored content.');
+      expect(skill['__rawFrontmatter']).toBeUndefined();
+    });
+
     it('should prefer .promptscript/skills/ over .agents/skills/', async () => {
       const localPath = join(testDir, '.promptscript');
       const localSkillDir = join(localPath, 'skills', 'my-skill');
