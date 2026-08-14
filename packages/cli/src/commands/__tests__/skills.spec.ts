@@ -13,6 +13,7 @@ const {
   mockReaddir,
   mockMkdtemp,
   mockRm,
+  mockRename,
   mockValidateRemoteAccess,
   mockValidateSkillFrontmatter,
   mockFormatSkillValidationIssues,
@@ -46,6 +47,7 @@ const {
   const mockReaddir = vi.fn();
   const mockMkdtemp = vi.fn().mockResolvedValue('/tmp/prs-skill-default');
   const mockRm = vi.fn().mockResolvedValue(undefined);
+  const mockRename = vi.fn().mockResolvedValue(undefined);
   const mockValidateRemoteAccess = vi.fn().mockResolvedValue({
     accessible: true,
     headCommit: 'abc1234567890123456789012345678901234567890'.slice(0, 40),
@@ -102,6 +104,7 @@ const {
     mockDefaultGitTimeoutMs,
     mockMkdtemp,
     mockRm,
+    mockRename,
   };
 });
 
@@ -143,6 +146,7 @@ vi.mock('fs/promises', () => ({
   readdir: mockReaddir,
   mkdtemp: mockMkdtemp,
   rm: mockRm,
+  rename: mockRename,
 }));
 
 vi.mock('yaml', () => ({
@@ -616,7 +620,7 @@ describe('skillsAddCommand', () => {
     expect(mockSucceed).toHaveBeenCalledWith('Skill added');
 
     const writeCalls = mockWriteFile.mock.calls as unknown[][];
-    const lockWriteCall = writeCalls.find((call) => call[0] === 'promptscript.lock');
+    const lockWriteCall = writeCalls.find((call) => String(call[0]).endsWith('promptscript.lock'));
     const lockContent = JSON.parse(lockWriteCall![1] as string) as {
       dependencies: Record<string, { gitUrl?: string }>;
     };
@@ -698,7 +702,7 @@ describe('skillsAddCommand', () => {
     expect(writtenContent).toContain('@use github.com/company/skills/SKILL.md');
 
     // Check the lockfile was written
-    const lockWriteCall = writeCalls.find((call) => call[0] === 'promptscript.lock');
+    const lockWriteCall = writeCalls.find((call) => String(call[0]).endsWith('promptscript.lock'));
     expect(lockWriteCall).toBeDefined();
     const lockContent = JSON.parse(lockWriteCall![1] as string) as {
       dependencies: Record<string, { source?: string }>;
@@ -982,7 +986,9 @@ describe('skillsAddCommand', () => {
       undefined,
       { timeout: 60_000 }
     );
-    const lockWriteCall = mockWriteFile.mock.calls.find((call) => call[0] === 'promptscript.lock')!;
+    const lockWriteCall = mockWriteFile.mock.calls.find((call) =>
+      String(call[0]).endsWith('promptscript.lock')
+    )!;
     const writtenLock = JSON.parse(lockWriteCall[1] as string) as {
       dependencies: Record<string, unknown>;
     };
@@ -1023,7 +1029,9 @@ describe('skillsAddCommand', () => {
       undefined,
       { timeout: 60_000 }
     );
-    const lockWriteCall = mockWriteFile.mock.calls.find((call) => call[0] === 'promptscript.lock')!;
+    const lockWriteCall = mockWriteFile.mock.calls.find((call) =>
+      String(call[0]).endsWith('promptscript.lock')
+    )!;
     const writtenLock = JSON.parse(lockWriteCall[1] as string) as {
       dependencies: Record<string, unknown>;
     };
@@ -1105,7 +1113,7 @@ describe('skillsAddCommand', () => {
     // Assert
     expect(mockSucceed).toHaveBeenCalledWith('Skill added');
     const writeCalls = mockWriteFile.mock.calls as unknown[][];
-    const lockWriteCall = writeCalls.find((call) => call[0] === 'promptscript.lock');
+    const lockWriteCall = writeCalls.find((call) => String(call[0]).endsWith('promptscript.lock'));
     expect(lockWriteCall).toBeDefined();
     const lockContent = JSON.parse(lockWriteCall![1] as string) as {
       dependencies: Record<string, { commit: string; skills?: string[]; source?: string }>;
@@ -1205,7 +1213,7 @@ describe('skillsRemoveCommand', () => {
     expect(prsWriteCall).toBeDefined();
     const writtenContent = prsWriteCall![1] as string;
     expect(writtenContent).not.toContain('@use github.com/org/repo/SKILL.md');
-    const lockWriteCall = writeCalls.find((call) => call[0] === 'promptscript.lock');
+    const lockWriteCall = writeCalls.find((call) => String(call[0]).endsWith('promptscript.lock'));
     const writtenLock = JSON.parse(lockWriteCall![1] as string) as {
       dependencies: Record<string, unknown>;
     };
@@ -1258,7 +1266,9 @@ describe('skillsRemoveCommand', () => {
 
     await skillsRemoveCommand('skills/foo', {});
 
-    const lockWriteCall = mockWriteFile.mock.calls.find((call) => call[0] === 'promptscript.lock')!;
+    const lockWriteCall = mockWriteFile.mock.calls.find((call) =>
+      String(call[0]).endsWith('promptscript.lock')
+    )!;
     const writtenLock = JSON.parse(lockWriteCall[1] as string) as {
       dependencies: Record<
         string,
@@ -2269,7 +2279,9 @@ describe('skillsUpdateCommand', () => {
 
     await skillsUpdateCommand(undefined, {});
 
-    const lockWriteCall = mockWriteFile.mock.calls.find((call) => call[0] === 'promptscript.lock')!;
+    const lockWriteCall = mockWriteFile.mock.calls.find((call) =>
+      String(call[0]).endsWith('promptscript.lock')
+    )!;
     const lock = JSON.parse(lockWriteCall[1] as string) as {
       dependencies: Record<string, unknown>;
     };
@@ -2369,7 +2381,7 @@ describe('skillsAddCommand frontmatter validation', () => {
     expect(mockCloneAtTag).toHaveBeenCalled();
     expect(mockSucceed).toHaveBeenCalledWith('Skill added');
     const writeCalls = mockWriteFile.mock.calls as unknown[][];
-    const lockWriteCall = writeCalls.find((c) => c[0] === 'promptscript.lock');
+    const lockWriteCall = writeCalls.find((c) => String(c[0]).endsWith('promptscript.lock'));
     const lock = JSON.parse(lockWriteCall![1] as string) as {
       dependencies: Record<string, { integrity: string }>;
     };
@@ -2407,7 +2419,7 @@ describe('skillsAddCommand frontmatter validation', () => {
       return Promise.reject(new Error(`unexpected read: ${p}`));
     });
     mockWriteFile.mockImplementation(async (filePath: string, fileContent: string) => {
-      if (filePath === 'promptscript.lock') {
+      if (filePath.endsWith('promptscript.lock')) {
         throw new Error('lockfile write failed');
       }
       currentEntry = fileContent;
@@ -2424,7 +2436,9 @@ describe('skillsAddCommand frontmatter validation', () => {
       expect.objectContaining({ force: true })
     );
     expect(
-      (mockWriteFile.mock.calls as unknown[][]).filter((call) => call[0] === 'promptscript.lock')
+      (mockWriteFile.mock.calls as unknown[][]).filter((call) =>
+        String(call[0]).endsWith('promptscript.lock')
+      )
     ).toHaveLength(0);
     expect(mockConsoleError).toHaveBeenCalledWith(
       expect.stringContaining('changed during skills add')
@@ -2498,7 +2512,7 @@ describe('skillsAddCommand frontmatter validation', () => {
       return Promise.reject(new Error(`unexpected read: ${p}`));
     });
     mockWriteFile.mockImplementation(async (filePath: string, fileContent: string) => {
-      if (filePath === 'promptscript.lock') {
+      if (filePath.endsWith('promptscript.lock')) {
         throw new Error('lockfile write failed');
       }
       currentEntry = `${fileContent}// concurrent edit\n`;
@@ -2508,9 +2522,9 @@ describe('skillsAddCommand frontmatter validation', () => {
     await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
 
     expect(currentEntry).toContain('// concurrent edit');
-    expect(mockWriteFile.mock.calls.filter((call) => call[0] === 'promptscript.lock')).toHaveLength(
-      1
-    );
+    expect(
+      mockWriteFile.mock.calls.filter((call) => String(call[0]).endsWith('promptscript.lock'))
+    ).toHaveLength(1);
     expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('Cannot roll back'));
   });
 
@@ -2543,7 +2557,7 @@ describe('skillsAddCommand frontmatter validation', () => {
       return Promise.reject(new Error(`unexpected read: ${p}`));
     });
     mockWriteFile.mockImplementation(async (filePath: string, fileContent: string) => {
-      if (filePath === 'promptscript.lock') {
+      if (filePath.endsWith('promptscript.lock')) {
         throw new Error('lock write failed');
       }
       currentEntry = fileContent;
@@ -2556,9 +2570,9 @@ describe('skillsAddCommand frontmatter validation', () => {
 
     expect(currentEntry).toBe(originalEntry);
     expect(currentLockfile).toBe(originalLockfile);
-    expect(mockWriteFile.mock.calls.filter((call) => call[0] === 'promptscript.lock')).toHaveLength(
-      1
-    );
+    expect(
+      mockWriteFile.mock.calls.filter((call) => String(call[0]).endsWith('promptscript.lock'))
+    ).toHaveLength(1);
     expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
     expect(process.exitCode).toBe(1);
   });
@@ -2609,9 +2623,9 @@ describe('skillsAddCommand frontmatter validation', () => {
     expect(entryWrites).toHaveLength(2);
     expect(entryWrites[1]?.[1]).toBe(SAMPLE_PRS_FOR_VALIDATION);
     expect(currentEntry).toBe(SAMPLE_PRS_FOR_VALIDATION);
-    expect(mockWriteFile.mock.calls.filter((call) => call[0] === 'promptscript.lock')).toHaveLength(
-      0
-    );
+    expect(
+      mockWriteFile.mock.calls.filter((call) => String(call[0]).endsWith('promptscript.lock'))
+    ).toHaveLength(0);
     expect(mockConsoleError).toHaveBeenCalledWith(
       expect.stringContaining('Cannot update promptscript.lock')
     );
@@ -2738,7 +2752,9 @@ describe('skillsAddCommand frontmatter validation', () => {
       file: 'entry.prs',
     });
 
-    const lockWriteCall = mockWriteFile.mock.calls.find((call) => call[0] === 'promptscript.lock')!;
+    const lockWriteCall = mockWriteFile.mock.calls.find((call) =>
+      String(call[0]).endsWith('promptscript.lock')
+    )!;
     const lock = JSON.parse(lockWriteCall[1] as string) as {
       dependencies: Record<string, LockfileDependency>;
     };
@@ -2788,7 +2804,7 @@ describe('skillsAddCommand frontmatter validation', () => {
     expect(process.exitCode).toBe(1);
     // No write to entry.prs nor lockfile.
     const writeCalls = mockWriteFile.mock.calls as unknown[][];
-    expect(writeCalls.find((c) => c[0] === 'promptscript.lock')).toBeUndefined();
+    expect(writeCalls.find((c) => String(c[0]).endsWith('promptscript.lock'))).toBeUndefined();
   });
 
   it('surfaces warnings non-strict but still installs', async () => {
@@ -2889,7 +2905,7 @@ describe('skillsAddCommand frontmatter validation', () => {
       return Promise.reject(new Error(`unexpected read: ${p}`));
     });
     mockWriteFile.mockImplementation(async (filePath: string, fileContent: string) => {
-      if (filePath === 'promptscript.lock') {
+      if (filePath.endsWith('promptscript.lock')) {
         throw new Error('lock write failed');
       }
       currentEntry = fileContent;
@@ -2903,13 +2919,104 @@ describe('skillsAddCommand frontmatter validation', () => {
     const entryWrites = mockWriteFile.mock.calls.filter((call) =>
       String(call[0]).includes('entry.prs')
     );
-    const lockWrites = mockWriteFile.mock.calls.filter((call) => call[0] === 'promptscript.lock');
+    const lockWrites = mockWriteFile.mock.calls.filter((call) =>
+      String(call[0]).endsWith('promptscript.lock')
+    );
     expect(entryWrites).toHaveLength(2);
     expect(entryWrites[0]?.[1]).not.toBe(originalEntry);
     expect(entryWrites[1]?.[1]).toBe(originalEntry);
     expect(currentEntry).toBe(originalEntry);
     expect(lockWrites).toHaveLength(1);
     expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('cleans up the temporary entry file when its write fails', async () => {
+    arrangeValidation({
+      skillContent: '---\nname: x\n---\nbody',
+      prsContent: SAMPLE_PRS_FOR_VALIDATION,
+    });
+    mockMkdtemp.mockReset();
+    mockMkdtemp
+      .mockResolvedValueOnce('/tmp/prs-skill-validate-xyz')
+      .mockResolvedValueOnce('/tmp/prs-atomic-entry');
+    mockWriteFile.mockImplementation(async (filePath: string) => {
+      if (filePath.endsWith('entry.prs')) {
+        throw new Error('entry temp write failed');
+      }
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
+    expect(mockRename).not.toHaveBeenCalled();
+    expect(mockRm).toHaveBeenCalledWith(
+      '/tmp/prs-atomic-entry',
+      expect.objectContaining({ recursive: true, force: true })
+    );
+    expect(mockConsoleError).toHaveBeenCalledWith('entry temp write failed');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('cleans up the temporary lockfile when its write fails', async () => {
+    const originalEntry = SAMPLE_PRS_FOR_VALIDATION;
+    const originalLockfile = JSON.stringify({
+      version: 1,
+      dependencies: {
+        'https://github.com/org/repo': {
+          version: 'latest',
+          commit: 'old',
+          integrity: 'sha256-pending',
+        },
+      },
+    });
+    arrangeValidation({
+      skillContent: '---\nname: x\n---\nbody',
+      lockExists: true,
+      lockContent: originalLockfile,
+      prsContent: originalEntry,
+    });
+    mockMkdtemp.mockReset();
+    mockMkdtemp
+      .mockResolvedValueOnce('/tmp/prs-skill-validate-xyz')
+      .mockResolvedValueOnce('/tmp/prs-atomic-entry')
+      .mockResolvedValueOnce('/tmp/prs-atomic-lock')
+      .mockResolvedValueOnce('/tmp/prs-atomic-rollback');
+    let currentEntry = originalEntry;
+    mockReadFile.mockImplementation((filePath: string) => {
+      if (filePath === 'promptscript.lock') return Promise.resolve(originalLockfile);
+      if (filePath.includes('prs-skill-validate-xyz')) {
+        return Promise.resolve('---\nname: x\n---\nbody');
+      }
+      if (filePath.includes('entry.prs')) return Promise.resolve(currentEntry);
+      return Promise.reject(new Error(`unexpected read: ${filePath}`));
+    });
+    mockWriteFile.mockImplementation(async (filePath: string, fileContent: string) => {
+      if (filePath.endsWith('promptscript.lock')) {
+        throw new Error('lockfile temp write failed');
+      }
+      if (filePath.endsWith('entry.prs')) {
+        currentEntry = fileContent;
+      }
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    expect(currentEntry).toBe(originalEntry);
+    expect(mockRename).toHaveBeenCalledTimes(2);
+    expect(mockRename).not.toHaveBeenCalledWith(
+      '/tmp/prs-atomic-lock/promptscript.lock',
+      'promptscript.lock'
+    );
+    expect(mockRm).toHaveBeenCalledWith(
+      '/tmp/prs-atomic-lock',
+      expect.objectContaining({ recursive: true, force: true })
+    );
+    expect(mockConsoleError).toHaveBeenCalledWith('lockfile temp write failed');
     expect(process.exitCode).toBe(1);
   });
 
@@ -3079,7 +3186,7 @@ describe('skillsUpdateCommand frontmatter re-validation', () => {
     await skillsUpdateCommand(undefined, {});
 
     const writeCalls = mockWriteFile.mock.calls as unknown[][];
-    const lockWriteCall = writeCalls.find((c) => c[0] === 'promptscript.lock');
+    const lockWriteCall = writeCalls.find((c) => String(c[0]).endsWith('promptscript.lock'));
     const lock = JSON.parse(lockWriteCall![1] as string) as {
       dependencies: Record<string, { integrity: string }>;
     };
@@ -3217,7 +3324,7 @@ describe('skillsUpdateCommand frontmatter re-validation', () => {
       expect.stringContaining('github.com/org/repo/skills/foo/SKILL.md: validation warnings')
     );
     const writeCalls = mockWriteFile.mock.calls as unknown[][];
-    expect(writeCalls.find((c) => c[0] === 'promptscript.lock')).toBeDefined();
+    expect(writeCalls.find((c) => String(c[0]).endsWith('promptscript.lock'))).toBeDefined();
   });
 
   it('skips an update when the validation clone fails', async () => {
