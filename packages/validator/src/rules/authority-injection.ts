@@ -87,6 +87,9 @@ const AUTHORITY_PATTERNS: RegExp[] = [
 const SUPPRESSION_PATTERN_MAP = new Map(
   WARNING_SUPPRESSION_PATTERNS.map(({ detection, suppression }) => [detection, suppression])
 );
+// Every pattern is scanned twice per text node, so compiling the global variant
+// once keeps validation cost proportional to the input, not the pattern count.
+const GLOBAL_PATTERN_CACHE = new Map<RegExp, RegExp>();
 const DEFENSIVE_HEADING_NAMES = new Set([
   "don't",
   "don'ts",
@@ -107,11 +110,6 @@ interface NormalizedText {
   sourceEnds: number[];
 }
 
-interface FenceInfo {
-  character: '`' | '~';
-  length: number;
-}
-
 interface MarkdownListItem {
   indentation: number;
   range: TextRange;
@@ -130,18 +128,18 @@ function getSpaceIndentation(line: string): number | undefined {
   return line[index] === '\t' ? undefined : index;
 }
 
-function getFenceInfo(line: string): FenceInfo | undefined {
+function isFenceDelimiter(line: string): boolean {
   const trimmedLine = line.trimStart();
   const character = trimmedLine[0];
   if (character !== '`' && character !== '~') {
-    return undefined;
+    return false;
   }
 
   let length = 0;
   while (trimmedLine[length] === character) {
     length++;
   }
-  return length >= 3 ? { character, length } : undefined;
+  return length >= 3;
 }
 
 function getMarkdownListItem(
@@ -277,9 +275,10 @@ function findDefensiveListItems(text: string): TextRange[] {
     const newlineIndex = text.indexOf('\n', lineStart);
     const lineEnd = newlineIndex === -1 ? text.length : newlineIndex;
     const line = text.slice(lineStart, lineEnd);
-    const fence = getFenceInfo(line);
 
-    if (!insideFence && fence !== undefined) {
+    // Only unterminated fences survive stripFencedCodeBlocks, so everything
+    // after one stays fenced and never earns an exemption.
+    if (!insideFence && isFenceDelimiter(line)) {
       insideFence = true;
     } else if (!insideFence) {
       const commentStart = line.indexOf('<!--');
@@ -353,7 +352,6 @@ function findDefensiveListItems(text: string): TextRange[] {
     lineStart = newlineIndex + 1;
   }
 
-  resetDefensiveContext();
   return ranges;
 }
 
@@ -511,15 +509,26 @@ function hasSuppressionMatchInSafeItem(
   return false;
 }
 
+function toGlobalPattern(pattern: RegExp): RegExp {
+  const cached = GLOBAL_PATTERN_CACHE.get(pattern);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
+  // matchAll clones the pattern, so the cached instance keeps lastIndex at 0.
+  const globalPattern = new RegExp(pattern.source, flags);
+  GLOBAL_PATTERN_CACHE.set(pattern, globalPattern);
+  return globalPattern;
+}
+
 function hasUnexemptMatch(
   pattern: RegExp,
   candidate: string,
   listItems: readonly TextRange[],
   normalized?: NormalizedText
 ): boolean {
-  const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
-  const globalPattern = new RegExp(pattern.source, flags);
-  for (const match of candidate.matchAll(globalPattern)) {
+  for (const match of candidate.matchAll(toGlobalPattern(pattern))) {
     const matchIndex = match.index ?? 0;
     const matchText = match[0] ?? '';
     let range: TextRange;
