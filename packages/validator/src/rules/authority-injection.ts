@@ -144,53 +144,6 @@ function getFenceInfo(line: string): FenceInfo | undefined {
   return length >= 3 ? { character, length } : undefined;
 }
 
-function getHeadingTitle(line: string): string | undefined {
-  const normalizedLine = line.endsWith('\r') ? line.slice(0, -1) : line;
-  const indentation = getSpaceIndentation(normalizedLine);
-  if (indentation === undefined || indentation > 3) {
-    return undefined;
-  }
-  let index = indentation;
-  if (normalizedLine[index] !== '#') {
-    return undefined;
-  }
-
-  let hashCount = 0;
-  while (normalizedLine[index] === '#' && hashCount < 6) {
-    index++;
-    hashCount++;
-  }
-  if (hashCount === 0 || !isHorizontalWhitespace(normalizedLine[index])) {
-    return undefined;
-  }
-
-  while (isHorizontalWhitespace(normalizedLine[index])) {
-    index++;
-  }
-  if (index >= normalizedLine.length) {
-    return undefined;
-  }
-
-  let end = normalizedLine.length;
-  while (isHorizontalWhitespace(normalizedLine[end - 1])) {
-    end--;
-  }
-
-  let titleEnd = end;
-  while (titleEnd > index && normalizedLine[titleEnd - 1] === '#') {
-    titleEnd--;
-  }
-  if (titleEnd < end && isHorizontalWhitespace(normalizedLine[titleEnd - 1])) {
-    while (isHorizontalWhitespace(normalizedLine[titleEnd - 1])) {
-      titleEnd--;
-    }
-    end = titleEnd;
-  }
-
-  const title = normalizedLine.slice(index, end).toLowerCase();
-  return DEFENSIVE_HEADING_NAMES.has(title) ? title : undefined;
-}
-
 function getMarkdownListItem(
   line: string,
   lineStart: number,
@@ -308,8 +261,7 @@ function findDefensiveListItems(text: string): TextRange[] {
   let listIndentStack: MarkdownListItem[] = [];
   let unsafeListContext = false;
   let insideFence = false;
-  let fenceCharacter: FenceInfo['character'] | undefined;
-  let fenceLength = 0;
+  let insideHtmlComment = false;
   let lineStart = 0;
 
   const resetDefensiveContext = (): void => {
@@ -327,69 +279,70 @@ function findDefensiveListItems(text: string): TextRange[] {
     const line = text.slice(lineStart, lineEnd);
     const fence = getFenceInfo(line);
 
-    if (insideFence) {
-      const closesFence =
-        fence !== undefined &&
-        fence.character === fenceCharacter &&
-        fence.length >= fenceLength &&
-        line.trimStart().slice(fence.length).trim() === '';
-      if (closesFence) {
-        insideFence = false;
-        fenceCharacter = undefined;
-        fenceLength = 0;
-      }
-    } else if (fence !== undefined) {
+    if (!insideFence && fence !== undefined) {
       insideFence = true;
-      fenceCharacter = fence.character;
-      fenceLength = fence.length;
-    } else {
-      const headingTitle = getAnyHeadingTitle(line);
-      if (isThematicBreak(line) || isSetextUnderline(line)) {
+    } else if (!insideFence) {
+      const commentStart = line.indexOf('<!--');
+      const commentEnd = line.indexOf('-->');
+      if (insideHtmlComment) {
         resetDefensiveContext();
         resetListContext();
-      } else if (headingTitle !== undefined) {
-        const headingIndent = getSpaceIndentation(line);
-        while (
-          headingIndent !== undefined &&
-          listIndentStack.length > 0 &&
-          listIndentStack[listIndentStack.length - 1]!.indentation >= headingIndent
-        ) {
-          listIndentStack.pop();
+        if (commentEnd !== -1) {
+          insideHtmlComment = false;
         }
-        const nestedHeading =
-          listIndentStack.length > 0 ||
-          (unsafeListContext && headingIndent !== undefined && headingIndent > 0);
+      } else if (commentStart !== -1 || commentEnd !== -1) {
         resetDefensiveContext();
-        if (!nestedHeading) {
-          unsafeListContext = false;
-        }
-        if (!nestedHeading && getHeadingTitle(line) !== undefined) {
-          defensiveHeading = true;
-        }
+        resetListContext();
+        insideHtmlComment = commentStart !== -1 && commentEnd < commentStart;
       } else {
-        const item = getMarkdownListItem(line, lineStart, lineEnd);
-        if (item !== undefined) {
+        const headingTitle = getAnyHeadingTitle(line);
+        if (isThematicBreak(line) || isSetextUnderline(line)) {
+          resetDefensiveContext();
+          resetListContext();
+        } else if (headingTitle !== undefined) {
+          const headingIndent = getSpaceIndentation(line);
           while (
+            headingIndent !== undefined &&
             listIndentStack.length > 0 &&
-            item.indentation <= listIndentStack[listIndentStack.length - 1]!.indentation
+            listIndentStack[listIndentStack.length - 1]!.indentation >= headingIndent
           ) {
             listIndentStack.pop();
           }
-          listIndentStack.push(item);
-          if (item.indentation === 0) {
+          const nestedHeading =
+            listIndentStack.length > 0 ||
+            (unsafeListContext && headingIndent !== undefined && headingIndent > 0);
+          resetDefensiveContext();
+          if (!nestedHeading) {
             unsafeListContext = false;
           }
-          if (
-            defensiveHeading &&
-            !unsafeListContext &&
-            listIndentStack.length === 1 &&
-            item.safe &&
-            item.indentation <= 3
-          ) {
-            ranges.push(item.range);
+          if (!nestedHeading && isDefensiveHeadingTitle(headingTitle)) {
+            defensiveHeading = true;
           }
-        } else if (hasTabIndentedListItem(line)) {
-          unsafeListContext = true;
+        } else {
+          const item = getMarkdownListItem(line, lineStart, lineEnd);
+          if (item !== undefined) {
+            while (
+              listIndentStack.length > 0 &&
+              item.indentation <= listIndentStack[listIndentStack.length - 1]!.indentation
+            ) {
+              listIndentStack.pop();
+            }
+            listIndentStack.push(item);
+            if (item.indentation === 0) {
+              unsafeListContext = false;
+            }
+            if (
+              defensiveHeading &&
+              !unsafeListContext &&
+              listIndentStack.length === 1 &&
+              item.safe &&
+              item.indentation <= 3
+            ) {
+              ranges.push(item.range);
+            }
+          } else if (hasTabIndentedListItem(line)) {
+            unsafeListContext = true;
+          }
         }
       }
     }
@@ -421,12 +374,37 @@ function getAnyHeadingTitle(line: string): string | undefined {
     index++;
     hashCount++;
   }
-  if (hashCount === 0) {
-    return undefined;
-  }
 
   const remainder = normalizedLine.slice(index);
   return remainder === '' || isHorizontalWhitespace(remainder[0]) ? remainder : undefined;
+}
+
+function isDefensiveHeadingTitle(title: string): boolean {
+  let start = 0;
+  while (isHorizontalWhitespace(title[start])) {
+    start++;
+  }
+  if (start >= title.length) {
+    return false;
+  }
+
+  let end = title.length;
+  while (isHorizontalWhitespace(title[end - 1])) {
+    end--;
+  }
+
+  let titleEnd = end;
+  while (titleEnd > start && title[titleEnd - 1] === '#') {
+    titleEnd--;
+  }
+  if (titleEnd < end && isHorizontalWhitespace(title[titleEnd - 1])) {
+    while (isHorizontalWhitespace(title[titleEnd - 1])) {
+      titleEnd--;
+    }
+    end = titleEnd;
+  }
+
+  return DEFENSIVE_HEADING_NAMES.has(title.slice(start, end).toLowerCase());
 }
 
 function normalizeText(text: string): NormalizedText {
@@ -469,22 +447,68 @@ function normalizeText(text: string): NormalizedText {
   };
 }
 
-function isRangeWithinListItem(range: TextRange, listItems: readonly TextRange[]): boolean {
-  let low = 0;
-  let high = listItems.length - 1;
-
-  while (low <= high) {
-    const middle = low + Math.floor((high - low) / 2);
-    const item = listItems[middle]!;
-    if (item.start <= range.start) {
-      low = middle + 1;
+function getNormalizedRange(
+  sourceRange: TextRange,
+  normalized: NormalizedText
+): TextRange | undefined {
+  let startLow = 0;
+  let startHigh = normalized.sourceStarts.length;
+  while (startLow < startHigh) {
+    const middle = startLow + Math.floor((startHigh - startLow) / 2);
+    if (normalized.sourceStarts[middle]! < sourceRange.start) {
+      startLow = middle + 1;
     } else {
-      high = middle - 1;
+      startHigh = middle;
     }
   }
 
-  const item = high >= 0 ? listItems[high] : undefined;
-  return item !== undefined && range.end <= item.end;
+  let endLow = startLow;
+  let endHigh = normalized.sourceEnds.length;
+  while (endLow < endHigh) {
+    const middle = endLow + Math.floor((endHigh - endLow) / 2);
+    if (normalized.sourceEnds[middle]! <= sourceRange.end) {
+      endLow = middle + 1;
+    } else {
+      endHigh = middle;
+    }
+  }
+
+  return startLow < endLow ? { start: startLow, end: endLow } : undefined;
+}
+
+function hasSuppressionMatchInSafeItem(
+  suppressionPattern: RegExp,
+  candidate: string,
+  range: TextRange,
+  listItems: readonly TextRange[],
+  normalized?: NormalizedText
+): boolean {
+  let low = 0;
+  let high = listItems.length;
+  while (low < high) {
+    const middle = low + Math.floor((high - low) / 2);
+    if (listItems[middle]!.end <= range.start) {
+      low = middle + 1;
+    } else {
+      high = middle;
+    }
+  }
+
+  for (let index = low; index < listItems.length; index++) {
+    const item = listItems[index]!;
+    if (item.start >= range.end) {
+      break;
+    }
+
+    const itemRange = normalized === undefined ? item : getNormalizedRange(item, normalized);
+    if (
+      itemRange !== undefined &&
+      suppressionPattern.test(candidate.slice(itemRange.start, itemRange.end))
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function hasUnexemptMatch(
@@ -501,24 +525,19 @@ function hasUnexemptMatch(
     let range: TextRange;
     if (normalized === undefined) {
       range = { start: matchIndex, end: matchIndex + matchText.length };
-    } else if (
-      matchText.length > 0 &&
-      matchIndex < normalized.sourceStarts.length &&
-      matchIndex + matchText.length <= normalized.sourceEnds.length
-    ) {
+    } else {
+      const matchEnd = matchIndex + matchText.length - 1;
       range = {
         start: normalized.sourceStarts[matchIndex]!,
-        end: normalized.sourceEnds[matchIndex + matchText.length - 1]!,
+        end: normalized.sourceEnds[matchEnd]!,
       };
-    } else {
-      return true;
     }
 
     const suppressionPattern = SUPPRESSION_PATTERN_MAP.get(pattern);
     if (
       suppressionPattern === undefined ||
       !suppressionPattern.test(matchText) ||
-      !isRangeWithinListItem(range, listItems)
+      !hasSuppressionMatchInSafeItem(suppressionPattern, candidate, range, listItems, normalized)
     ) {
       return true;
     }
