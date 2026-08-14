@@ -170,7 +170,12 @@ const UNIVERSAL_SENTINELS = [
   'ZZSTDDIAGRAMS',
   'ZZRESTRICT',
   'ZZKNOWLEDGE',
+  'ZZSHORTCUTDOC',
 ] as const;
+
+const TARGET_OMITTED_UNIVERSAL_SENTINELS: Readonly<Record<string, readonly string[]>> = {
+  hermes: ['ZZSHORTCUTDOC'],
+};
 
 /**
  * Sentinels gated by a feature-matrix entry. Presence is asserted exactly when
@@ -270,6 +275,7 @@ describe('Compilation matrix smoke tests', () => {
       const blob = [...result.outputs.values()].map((output) => output.content).join('\n');
 
       for (const sentinel of UNIVERSAL_SENTINELS) {
+        if (TARGET_OMITTED_UNIVERSAL_SENTINELS[target]?.includes(sentinel)) continue;
         expect(blob, `${target} (${version}) dropped ${sentinel}`).toContain(sentinel);
       }
     });

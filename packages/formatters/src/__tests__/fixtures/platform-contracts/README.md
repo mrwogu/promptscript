@@ -46,7 +46,8 @@ platform-contracts/
     ├── kimi/
     ├── mimo/
     ├── deep-agents/
-    └── forgecode/
+    ├── forgecode/
+    └── hermes/
 ```
 
 ## Scope classification

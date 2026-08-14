@@ -72,22 +72,49 @@ export interface SimpleFormatterResult {
 function buildVersions(
   outputPath: string,
   dotDir: string,
-  hasSkills: boolean
+  hasSkills: boolean,
+  hasAgents: boolean,
+  hasCommands: boolean,
+  skillFileName: string,
+  mcpConfigPath?: string
 ): SimpleFormatterVersions {
   // Determine whether the outputPath looks like a file inside a dotDir
   // (e.g. '.windsurf/rules/project.md') or a standalone file (e.g. 'AGENTS.md').
   const isNested = outputPath.startsWith(dotDir + '/');
-  const simpleDesc = isNested ? `Single ${outputPath} file` : `Single ${outputPath} file`;
-  const multifileDesc = !hasSkills
-    ? `Single ${outputPath} file`
-    : isNested
-      ? `Single ${outputPath} file (skills via full mode)`
-      : `${outputPath} + ${dotDir}/skills/<name>/SKILL.md`;
-  const fullDesc = !hasSkills
-    ? `Single ${outputPath} file`
-    : isNested
-      ? `${outputPath} + ${dotDir}/skills/<name>/SKILL.md`
-      : `Multifile + ${dotDir}/skills/<name>/SKILL.md`;
+  const simpleDesc = `Single ${outputPath} file`;
+  const skillPath = `${dotDir}/skills/<name>/${skillFileName}`;
+  const commandPath = `${dotDir}/commands/<name>.md`;
+  const agentPath = `${dotDir}/agents/<name>.md`;
+
+  const describeAdditionalFiles = (
+    version: 'multifile' | 'full',
+    paths: readonly string[],
+    skillsInFullMode: boolean
+  ): string => {
+    if (paths.length === 0 && skillsInFullMode) {
+      return `Single ${outputPath} file (skills via full mode)`;
+    }
+    if (paths.length === 0) return `Single ${outputPath} file`;
+
+    const prefix = !isNested && version === 'full' && hasSkills ? 'Multifile' : outputPath;
+    const suffix = skillsInFullMode ? ' (skills via full mode)' : '';
+    return `${prefix} + ${paths.join(' + ')}${suffix}`;
+  };
+
+  const multifilePaths: string[] = [];
+  const skillsInFullMode = hasSkills && isNested;
+  if (hasSkills && !skillsInFullMode) multifilePaths.push(skillPath);
+  if (hasCommands) multifilePaths.push(commandPath);
+  if (mcpConfigPath) multifilePaths.push(mcpConfigPath);
+
+  const fullPaths: string[] = [];
+  if (hasSkills) fullPaths.push(skillPath);
+  if (hasCommands) fullPaths.push(commandPath);
+  if (hasAgents) fullPaths.push(agentPath);
+  if (mcpConfigPath) fullPaths.push(mcpConfigPath);
+
+  const multifileDesc = describeAdditionalFiles('multifile', multifilePaths, skillsInFullMode);
+  const fullDesc = describeAdditionalFiles('full', fullPaths, false);
 
   return {
     simple: { name: 'simple', description: simpleDesc, outputPath },
@@ -133,7 +160,15 @@ export function createSimpleMarkdownFormatter(opts: SimpleFormatterOptions): Sim
     unsupportedBlocks,
   } = opts;
 
-  const versions = buildVersions(outputPath, dotDir, hasSkills);
+  const versions = buildVersions(
+    outputPath,
+    dotDir,
+    hasSkills,
+    hasAgents,
+    hasCommands,
+    skillFileName,
+    mcpConfigPath
+  );
 
   // Create a named class so `formatter.constructor.name` is meaningful.
   class SimpleFormatter extends MarkdownInstructionFormatter {
