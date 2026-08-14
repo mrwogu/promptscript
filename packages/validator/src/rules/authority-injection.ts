@@ -425,7 +425,21 @@ function normalizeText(text: string): NormalizedText {
 }
 
 function isRangeWithinListItem(range: TextRange, listItems: readonly TextRange[]): boolean {
-  return listItems.some((item) => range.start >= item.start && range.end <= item.end);
+  let low = 0;
+  let high = listItems.length - 1;
+
+  while (low <= high) {
+    const middle = low + Math.floor((high - low) / 2);
+    const item = listItems[middle]!;
+    if (item.start <= range.start) {
+      low = middle + 1;
+    } else {
+      high = middle - 1;
+    }
+  }
+
+  const item = high >= 0 ? listItems[high] : undefined;
+  return item !== undefined && range.end <= item.end;
 }
 
 function hasUnexemptMatch(
