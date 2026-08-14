@@ -39,7 +39,7 @@ export function calculateManagedSkillIntegrity(
     if (integrity === undefined || !isConcreteIntegrity(integrity)) {
       return PENDING_INTEGRITY;
     }
-    entries.push({ source, integrity });
+    entries.push({ source, integrity: integrity.toLowerCase() });
   }
 
   entries.sort((left, right) => {
