@@ -1,5 +1,5 @@
 import { lstat, realpath } from 'fs/promises';
-import { existsSync, statSync } from 'fs';
+import { existsSync, realpathSync, statSync } from 'fs';
 import { dirname, isAbsolute, relative, resolve, sep } from 'path';
 import type { Program } from '@promptscript/core';
 import { extractHooks, getEnabledHookScriptResources } from '@promptscript/formatters';
@@ -35,7 +35,14 @@ function isProjectMarker(directory: string, marker: (typeof PROJECT_MARKERS)[num
  * @returns Marked project root, or undefined when no marker exists
  */
 export function findProjectRootMarker(entryPath: string): string | undefined {
-  const start = dirname(resolve(entryPath));
+  const resolvedEntryPath = resolve(entryPath);
+  let canonicalEntryPath: string;
+  try {
+    canonicalEntryPath = realpathSync.native(resolvedEntryPath);
+  } catch {
+    canonicalEntryPath = resolvedEntryPath;
+  }
+  const start = dirname(canonicalEntryPath);
 
   for (const marker of PROJECT_MARKERS) {
     let directory = start;

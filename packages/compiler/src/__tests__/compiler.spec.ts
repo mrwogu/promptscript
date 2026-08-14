@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { CanonicalProgram, Program, SourceLocation } from '@promptscript/core';
 import type { Formatter, CompilerOptions } from '../types.js';
 import { FormatterRegistry } from '@promptscript/formatters';
-import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
 // Create mock classes before importing Compiler
@@ -246,6 +246,9 @@ describe('Compiler', () => {
         await compiler.compile(join(linkRoot, 'entry.prs'));
 
         expect(mockResolverConstructor).toHaveBeenCalledTimes(2);
+        expect(mockResolverConstructor).toHaveBeenLastCalledWith(
+          expect.objectContaining({ projectRoot: realpathSync(workspace.root) })
+        );
       } finally {
         rmSync(workspace.root, { recursive: true, force: true });
         rmSync(linkParent, { recursive: true, force: true });
@@ -299,6 +302,61 @@ describe('Compiler', () => {
       } finally {
         rmSync(workspace.root, { recursive: true, force: true });
         rmSync(entry, { force: true });
+      }
+    });
+
+    it('should preserve an explicit native skill project root', async () => {
+      const workspace = createMarkedWorkspace();
+      const skillRoot = mkdtempSync(join(tmpdir(), 'promptscript-skill-root-'));
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: {
+            registryPath: '/registry',
+            skills: { universalDir: '.agents', projectRoot: skillRoot },
+          },
+          formatters: [],
+        });
+
+        await compiler.compile(workspace.entry);
+
+        expect(mockResolverConstructor).toHaveBeenCalledTimes(2);
+        expect(mockResolverConstructor).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            skills: expect.objectContaining({ projectRoot: skillRoot }),
+          })
+        );
+      } finally {
+        rmSync(workspace.root, { recursive: true, force: true });
+        rmSync(skillRoot, { recursive: true, force: true });
+      }
+    });
+
+    it('should resolve relative entries from cwd before applying the inferred root', async () => {
+      const workspace = createMarkedWorkspace();
+      const nestedDir = join(workspace.root, 'nested');
+      const nestedEntry = join(nestedDir, 'nested.prs');
+      const originalCwd = process.cwd();
+      mkdirSync(nestedDir, { recursive: true });
+      writeFileSync(nestedEntry, '@meta { id: "nested" }\n');
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        process.chdir(nestedDir);
+        const compiler = new Compiler({
+          resolver: { registryPath: '/registry' },
+          formatters: [],
+        });
+
+        await compiler.compile('nested.prs');
+
+        expect(mockResolve).toHaveBeenCalledWith(realpathSync(resolve(nestedDir, 'nested.prs')));
+      } finally {
+        process.chdir(originalCwd);
+        rmSync(workspace.root, { recursive: true, force: true });
       }
     });
 
@@ -1527,7 +1585,7 @@ describe('compile (standalone)', () => {
     const result = await compile('./test.prs');
 
     expect(result.success).toBe(true);
-    expect(mockResolve).toHaveBeenCalledWith('./test.prs');
+    expect(mockResolve).toHaveBeenCalledWith(resolve('./test.prs'));
     expect(mockValidate).toHaveBeenCalled();
   });
 
@@ -1596,7 +1654,7 @@ describe('Compiler.compileFile', () => {
     const result = await compiler.compileFile('./test.prs');
 
     expect(result.success).toBe(true);
-    expect(mockResolve).toHaveBeenCalledWith('./test.prs');
+    expect(mockResolve).toHaveBeenCalledWith(resolve('./test.prs'));
 
     vi.restoreAllMocks();
   });

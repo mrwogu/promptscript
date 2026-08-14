@@ -1095,6 +1095,41 @@ function universalRoot(localPath: string, projectRoot: string | undefined): stri
   return projectRoot ? resolve(projectRoot) : resolve(localPath, '..');
 }
 
+function isInside(root: string, candidate: string): boolean {
+  const relation = relative(root, candidate);
+  return (
+    relation === '' ||
+    (relation !== '..' && !relation.startsWith(`..${sep}`) && !isAbsolute(relation))
+  );
+}
+
+async function resolveUniversalDiscoveryDir(
+  localPath: string,
+  options: NativeSkillOptions,
+  contentDir: 'skills' | 'commands' | 'agents'
+): Promise<string | null> {
+  const portableDir = options.universalDir?.replace(/\\/g, '/');
+  if (!portableDir || portableDir.startsWith('/') || /^[a-zA-Z]:\//.test(portableDir)) {
+    return null;
+  }
+
+  const segments = portableDir.split('/').filter((segment) => segment.length > 0);
+  if (segments.length === 0 || segments.some((segment) => segment === '..')) {
+    return null;
+  }
+
+  const root = universalRoot(localPath, options.projectRoot);
+  const candidate = resolve(root, ...segments, contentDir);
+  if (!isInside(root, candidate)) return null;
+
+  try {
+    const [realRoot, realCandidate] = await Promise.all([realpath(root), realpath(candidate)]);
+    return isInside(realRoot, realCandidate) ? realCandidate : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Check whether a file is PromptScript compilation output.
  *
@@ -1210,14 +1245,14 @@ export async function resolveNativeSkills(
   // Auto-discover skills from local and universal directories
   // Tracks discovered skill name → absolute directory path for later resolution
   const discoveredSkillPaths = new Map<string, string>();
+  const universalSkillsDir =
+    !isSkillsDir && localPath && options?.universalDir
+      ? await resolveUniversalDiscoveryDir(localPath, options, 'skills')
+      : null;
 
   if (!isSkillsDir && localPath) {
     const discoveryDirs: string[] = [resolve(localPath, 'skills')];
-    if (options?.universalDir && localPath) {
-      discoveryDirs.push(
-        resolve(universalRoot(localPath, options.projectRoot), options.universalDir, 'skills')
-      );
-    }
+    if (universalSkillsDir) discoveryDirs.push(universalSkillsDir);
 
     for (const dir of discoveryDirs) {
       const discovered = await discoverSkillDirs(dir);
@@ -1281,16 +1316,9 @@ export async function resolveNativeSkills(
           const localCandidate = localPath
             ? resolve(localPath, 'skills', skillName, 'SKILL.md')
             : null;
-          const universalCandidate =
-            options?.universalDir && localPath
-              ? resolve(
-                  universalRoot(localPath, options.projectRoot),
-                  options.universalDir,
-                  'skills',
-                  skillName,
-                  'SKILL.md'
-                )
-              : null;
+          const universalCandidate = universalSkillsDir
+            ? resolve(universalSkillsDir, skillName, 'SKILL.md')
+            : null;
           const registryCandidate = resolve(registryPath, '@skills', skillName, 'SKILL.md');
 
           if (localCandidate && (await fileExists(localCandidate))) return localCandidate;
@@ -1548,13 +1576,13 @@ export async function resolveNativeCommands(
 
   // Universal commands (don't overwrite local)
   if (options?.universalDir) {
-    const universalCommands = await discoverCommandFiles(
-      resolve(universalRoot(localPath, options.projectRoot), options.universalDir, 'commands'),
-      logger
-    );
-    for (const [name, value] of Object.entries(universalCommands)) {
-      if (!(name in allCommands)) {
-        allCommands[name] = value;
+    const universalCommandsDir = await resolveUniversalDiscoveryDir(localPath, options, 'commands');
+    if (universalCommandsDir) {
+      const universalCommands = await discoverCommandFiles(universalCommandsDir, logger);
+      for (const [name, value] of Object.entries(universalCommands)) {
+        if (!(name in allCommands)) {
+          allCommands[name] = value;
+        }
       }
     }
   }
@@ -1788,13 +1816,13 @@ export async function resolveNativeAgents(
 
   // Universal agents (don't overwrite local)
   if (options?.universalDir) {
-    const universalAgents = await discoverAgentFiles(
-      resolve(universalRoot(localPath, options.projectRoot), options.universalDir, 'agents'),
-      logger
-    );
-    for (const [name, value] of Object.entries(universalAgents)) {
-      if (!(name in allAgents)) {
-        allAgents[name] = value;
+    const universalAgentsDir = await resolveUniversalDiscoveryDir(localPath, options, 'agents');
+    if (universalAgentsDir) {
+      const universalAgents = await discoverAgentFiles(universalAgentsDir, logger);
+      for (const [name, value] of Object.entries(universalAgents)) {
+        if (!(name in allAgents)) {
+          allAgents[name] = value;
+        }
       }
     }
   }

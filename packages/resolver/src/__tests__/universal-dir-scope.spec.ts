@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { Block, ObjectContent } from '@promptscript/core';
@@ -94,6 +94,27 @@ describe('universal directory scope', () => {
     expect(skillNames(result.ast!.blocks)).toEqual(['in-project-skill']);
   });
 
+  it('should preserve an explicit universal discovery root', async () => {
+    const { workspace, projectRoot } = await createWorkspace();
+    const discoveryRoot = join(workspace, 'shared-skills');
+    await writeSkill(join(discoveryRoot, '.agents'), 'shared-skill');
+
+    const resolver = new Resolver({
+      registryPath: projectRoot,
+      projectRoot,
+      cache: false,
+      skills: {
+        universalDir: '.agents',
+        projectRoot: discoveryRoot,
+      },
+    });
+
+    const result = await resolver.resolve(join(projectRoot, 'project.prs'));
+
+    expect(result.errors).toEqual([]);
+    expect(skillNames(result.ast!.blocks)).toEqual(['shared-skill']);
+  });
+
   it('should not discover skills from a universal directory above the project root', async () => {
     const { workspace, projectRoot } = await createWorkspace();
     await writeSkill(join(workspace, '.agents'), 'outside-skill');
@@ -170,5 +191,63 @@ describe('universal directory scope', () => {
 
     expect(result.errors).toEqual([]);
     expect(skillNames(result.ast!.blocks)).toEqual(['custom-local-skill']);
+  });
+
+  it('should reject absolute universal directories', async () => {
+    const { workspace, projectRoot } = await createWorkspace();
+    const outsideUniversalDir = join(workspace, 'outside-agents');
+    await writeSkill(outsideUniversalDir, 'outside-skill');
+
+    const resolver = new Resolver({
+      registryPath: projectRoot,
+      projectRoot,
+      cache: false,
+      skills: { universalDir: outsideUniversalDir },
+    });
+
+    const result = await resolver.resolve(join(projectRoot, 'project.prs'));
+
+    expect(result.errors).toEqual([]);
+    expect(skillNames(result.ast!.blocks)).toEqual([]);
+  });
+
+  it('should reject traversing universal directories', async () => {
+    const { workspace, projectRoot } = await createWorkspace();
+    await writeSkill(join(workspace, '.agents'), 'outside-skill');
+
+    const resolver = new Resolver({
+      registryPath: projectRoot,
+      projectRoot,
+      cache: false,
+      skills: { universalDir: '../.agents' },
+    });
+
+    const result = await resolver.resolve(join(projectRoot, 'project.prs'));
+
+    expect(result.errors).toEqual([]);
+    expect(skillNames(result.ast!.blocks)).toEqual([]);
+  });
+
+  it('should reject universal directory symlinks that leave the project root', async () => {
+    const { workspace, projectRoot } = await createWorkspace();
+    const outsideUniversalDir = join(workspace, 'outside-agents');
+    await writeSkill(outsideUniversalDir, 'outside-skill');
+    await writeCommand(outsideUniversalDir, 'outside-command');
+    await writeAgent(outsideUniversalDir, 'outside-agent');
+    await symlink(outsideUniversalDir, join(projectRoot, '.agents'));
+
+    const resolver = new Resolver({
+      registryPath: projectRoot,
+      projectRoot,
+      cache: false,
+      skills: { universalDir: '.agents' },
+    });
+
+    const result = await resolver.resolve(join(projectRoot, 'project.prs'));
+
+    expect(result.errors).toEqual([]);
+    expect(skillNames(result.ast!.blocks)).toEqual([]);
+    expect(objectBlockNames(result.ast!.blocks, 'shortcuts')).toEqual([]);
+    expect(objectBlockNames(result.ast!.blocks, 'agents')).toEqual([]);
   });
 });

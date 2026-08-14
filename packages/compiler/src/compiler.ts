@@ -48,6 +48,18 @@ function resolverCacheKey(projectRoot: string): string {
   }
 }
 
+function resolveEntryPath(entryPath: string): string {
+  if (entryPath.startsWith('@')) return entryPath;
+  const fileName =
+    entryPath.endsWith('.prs') || entryPath.endsWith('.md') ? entryPath : `${entryPath}.prs`;
+  const absolutePath = isAbsolute(fileName) ? fileName : resolve(process.cwd(), fileName);
+  try {
+    return realpathSync.native(absolutePath);
+  } catch {
+    return absolutePath;
+  }
+}
+
 function normalizeRepositoryKey(value: string): string {
   return value
     .replace(/^(?:https?:\/\/|git:\/\/)/i, '')
@@ -182,6 +194,10 @@ export class Compiler {
     this.logger.debug(`Compiler initialized with ${this.loadedFormatters.length} formatters`);
   }
 
+  private hasExplicitResolverScope(): boolean {
+    return Boolean(this.options.resolver.localPath || this.options.resolver.projectRoot);
+  }
+
   /**
    * Get the resolver to use for an entry file.
    *
@@ -193,7 +209,7 @@ export class Compiler {
    * @returns Resolver scoped to the entry file's project root
    */
   private resolverFor(entryPath: string): Resolver {
-    if (this.options.resolver.localPath || this.options.resolver.projectRoot) {
+    if (this.hasExplicitResolverScope()) {
       return this.resolver;
     }
 
@@ -207,7 +223,11 @@ export class Compiler {
     const cached = this.entryResolvers.get(cacheKey);
     if (cached) return cached;
 
-    const resolver = new Resolver({ ...this.options.resolver, projectRoot, logger: this.logger });
+    const resolver = new Resolver({
+      ...this.options.resolver,
+      projectRoot: cacheKey,
+      logger: this.logger,
+    });
     if (this.entryResolvers.size >= MAX_ENTRY_RESOLVERS) {
       // Bound per-project caches for long-lived watch and server compilers.
       const oldestKey = this.entryResolvers.keys().next().value;
@@ -229,7 +249,10 @@ export class Compiler {
       `Targets: ${this.loadedFormatters.map((f) => f.formatter.name).join(', ')}`
     );
 
-    const resolver = this.resolverFor(entryPath);
+    const resolvedEntryPath = this.hasExplicitResolverScope()
+      ? entryPath
+      : resolveEntryPath(entryPath);
+    const resolver = this.resolverFor(resolvedEntryPath);
     const startTotal = Date.now();
     const stats: CompileStats = {
       resolveTime: 0,
@@ -248,7 +271,7 @@ export class Compiler {
     let resolved: ResolvedAST;
 
     try {
-      resolved = await resolver.resolve(entryPath);
+      resolved = await resolver.resolve(resolvedEntryPath);
     } catch (err) {
       stats.resolveTime = Date.now() - startResolve;
       stats.totalTime = Date.now() - startTotal;
@@ -464,7 +487,7 @@ export class Compiler {
       inferProjectRoot(
         this.options.resolver.localPath,
         this.options.resolver.projectRoot,
-        entryPath
+        resolvedEntryPath
       )
     );
     stats.validateTime = Date.now() - startValidate;
