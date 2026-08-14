@@ -41,11 +41,18 @@ describe('validateOutputPath symlink containment', () => {
     expect(validateOutputPath('docs/generated.md', outputRoot)).toBeUndefined();
   });
 
-  it('falls back to lexical containment for a broken symlink', async () => {
+  it('rejects a path through a broken symlink', async () => {
     const { outputRoot } = await createOutputRoot();
     await symlink(join(outputRoot, '..', 'missing'), join(outputRoot, 'docs'), 'dir');
 
     expect(() => validateOutputPath('docs/generated.md', outputRoot)).not.toThrow();
-    expect(validateOutputPath('docs/generated.md', outputRoot)).toBeUndefined();
+    expect(validateOutputPath('docs/generated.md', outputRoot)).toContain('cannot be verified');
+  });
+
+  it('rejects a dangling symlink at the final output path', async () => {
+    const { root, outputRoot } = await createOutputRoot();
+    await symlink(join(root, 'missing.md'), join(outputRoot, 'generated.md'));
+
+    expect(validateOutputPath('generated.md', outputRoot)).toContain('cannot be verified');
   });
 });

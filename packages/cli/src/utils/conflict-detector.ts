@@ -49,7 +49,7 @@ export function validateOutputPath(outputPath: string, outputRoot: string): stri
       return `Output path "${outputPath}" escapes the output directory ${outputRoot}`;
     }
   } catch {
-    // Filesystem probing can race with writes or fail due to permissions.
+    return `Output path "${outputPath}" cannot be verified inside the output directory ${outputRoot}`;
   }
 
   return undefined;
@@ -74,10 +74,24 @@ function resolveThroughExistingAncestor(path: string): string {
   const missingSegments: string[] = [];
   let current = path;
 
-  while (!fs.existsSync(current)) {
+  while (true) {
+    try {
+      fs.lstatSync(current);
+      break;
+    } catch (error: unknown) {
+      if (
+        typeof error !== 'object' ||
+        error === null ||
+        !('code' in error) ||
+        error.code !== 'ENOENT'
+      ) {
+        throw error;
+      }
+    }
+
     const parent = dirname(current);
     if (parent === current) {
-      return path;
+      throw new Error(`No existing ancestor for ${path}`);
     }
     missingSegments.unshift(basename(current));
     current = parent;

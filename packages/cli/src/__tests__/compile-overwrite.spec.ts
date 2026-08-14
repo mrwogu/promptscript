@@ -13,6 +13,7 @@ const {
   mockExistsSync,
   mockIsTTY,
   mockCreateHookOutputSafely,
+  mockRewriteHookOutputIfUnchanged,
   mockLoadConfig,
   mockChokidarWatch,
   mockWatcherOn,
@@ -27,6 +28,7 @@ const {
   const mockExistsSync = vi.fn();
   const mockIsTTY = vi.fn();
   const mockCreateHookOutputSafely = vi.fn();
+  const mockRewriteHookOutputIfUnchanged = vi.fn();
   const mockLoadConfig = vi.fn();
   const mockWatcherOn = vi.fn().mockReturnThis();
   const mockChokidarWatch = vi.fn().mockReturnValue({
@@ -46,6 +48,7 @@ const {
     mockExistsSync,
     mockIsTTY,
     mockCreateHookOutputSafely,
+    mockRewriteHookOutputIfUnchanged,
     mockLoadConfig,
     mockChokidarWatch,
     mockWatcherOn,
@@ -122,10 +125,15 @@ vi.mock('chalk', () => ({
 }));
 
 // Mock fs.existsSync for the entry file check
-vi.mock('fs', () => ({
-  existsSync: (path: string) => (path.endsWith('promptscript.lock') ? false : mockExistsSync(path)),
-  readFileSync: vi.fn().mockReturnValue(''),
-}));
+vi.mock('fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('fs')>();
+  return {
+    ...actual,
+    existsSync: (path: string) =>
+      path.endsWith('promptscript.lock') ? false : mockExistsSync(path),
+    readFileSync: vi.fn().mockReturnValue(''),
+  };
+});
 
 // Mock pager for isTTY
 vi.mock('../output/pager.js', () => ({
@@ -137,14 +145,22 @@ vi.mock('../utils/managed-output-cleanup.js', async (importOriginal) => {
   return {
     ...actual,
     createHookOutputSafely: mockCreateHookOutputSafely.mockImplementation(
-      async (path: string, _outputRoot: string, content: string) => {
+      async (path: string, _outputRoot: string, content: string, mode?: number) => {
         await mockWriteFile(path, content, 'utf-8');
+        if (mode !== undefined) await mockChmod(path, mode);
         return true;
       }
     ),
-    rewriteHookOutputIfUnchanged: vi.fn(
-      async (path: string, _outputRoot: string, _expectedContent: string, content: string) => {
+    rewriteHookOutputIfUnchanged: mockRewriteHookOutputIfUnchanged.mockImplementation(
+      async (
+        path: string,
+        _outputRoot: string,
+        _expectedContent: string,
+        content: string,
+        mode?: number
+      ) => {
         await mockWriteFile(path, content, 'utf-8');
+        if (mode !== undefined) await mockChmod(path, mode);
         return true;
       }
     ),
@@ -327,6 +343,12 @@ describe('compile command - overwrite protection', () => {
       await compileCommand({}, mockServices);
 
       expect(mockWriteFile).toHaveBeenCalledWith(resolve('CLAUDE.md'), 'content', 'utf-8');
+      expect(mockCreateHookOutputSafely).toHaveBeenCalledWith(
+        resolve('CLAUDE.md'),
+        process.cwd(),
+        'content',
+        undefined
+      );
       expect(mockPrompts.select).not.toHaveBeenCalled();
     });
   });
@@ -397,6 +419,13 @@ describe('compile command - overwrite protection', () => {
       await compileCommand({}, mockServices);
 
       expect(mockWriteFile).toHaveBeenCalledWith(resolve('CLAUDE.md'), 'new content', 'utf-8');
+      expect(mockRewriteHookOutputIfUnchanged).toHaveBeenCalledWith(
+        resolve('CLAUDE.md'),
+        process.cwd(),
+        expect.stringContaining(PROMPTSCRIPT_MARKER),
+        'new content',
+        undefined
+      );
       expect(mockPrompts.select).not.toHaveBeenCalled();
     });
 

@@ -152,10 +152,14 @@ vi.mock('chalk', () => ({
   },
 }));
 
-vi.mock('fs', () => ({
-  existsSync: (...args: unknown[]) => mockExistsSync(...args),
-  readFileSync: vi.fn().mockReturnValue(''),
-}));
+vi.mock('fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('fs')>();
+  return {
+    ...actual,
+    existsSync: (...args: unknown[]) => mockExistsSync(...args),
+    readFileSync: vi.fn().mockReturnValue(''),
+  };
+});
 
 vi.mock('../../output/pager.js', () => ({
   isTTY: (...args: unknown[]) => mockIsTTY(...args),
@@ -179,12 +183,22 @@ vi.mock('../../utils/managed-output-cleanup.js', async (importOriginal) => {
     mergePromptScriptCodexConfig: vi.fn().mockReturnValue(undefined),
     mergePromptScriptHookOutput: vi.fn().mockReturnValue(undefined),
     removePromptScriptOwnedCodexHooks: vi.fn().mockReturnValue(undefined),
-    rewriteHookOutputIfUnchanged: (...args: unknown[]) => mockRewriteHookOutputIfUnchanged(...args),
+    rewriteHookOutputIfUnchanged: async (...args: unknown[]) => {
+      const rewritten = await mockRewriteHookOutputIfUnchanged(...args);
+      const mode = args[4];
+      if (rewritten && typeof mode === 'number') {
+        await mockChmod(String(args[0]), mode);
+      }
+      return rewritten;
+    },
     removeHookOutputIfUnchanged: (...args: unknown[]) => mockRemoveHookOutputIfUnchanged(...args),
-    createHookOutputSafely: vi.fn(async (path: string, _root: string, content: string) => {
-      await mockWriteFile(path, content, 'utf-8');
-      return true;
-    }),
+    createHookOutputSafely: vi.fn(
+      async (path: string, _root: string, content: string, mode?: number) => {
+        await mockWriteFile(path, content, 'utf-8');
+        if (mode !== undefined) await mockChmod(path, mode);
+        return true;
+      }
+    ),
   };
 });
 
