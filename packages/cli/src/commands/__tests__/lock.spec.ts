@@ -442,6 +442,52 @@ describe('lockCommand', () => {
     expect(mockValidateRemoteAccess).toHaveBeenCalledTimes(1);
   });
 
+  it('should continue fallback when a repository URL contains timeout', async () => {
+    mockValidateRemoteAccess
+      .mockResolvedValueOnce({
+        accessible: false,
+        error: 'Authentication failed for https://example.com/timeout-repo',
+      })
+      .mockResolvedValueOnce({
+        accessible: true,
+        headCommit: '1234567890abcdef1234567890abcdef12345678',
+      });
+
+    const result = await resolveRemoteDependency(
+      'https://example.com/timeout-repo',
+      ['latest'],
+      undefined,
+      false,
+      'https://github.com/company/base',
+      undefined,
+      { timeout: 25 }
+    );
+
+    expect(result.commit).toBe('1234567890abcdef1234567890abcdef12345678');
+    expect(mockValidateRemoteAccess).toHaveBeenCalledTimes(2);
+  });
+
+  it('should not classify a missing remote ref named timeout as a timeout', async () => {
+    mockValidateRemoteAccess.mockResolvedValueOnce({
+      accessible: false,
+      error: "Could not find remote ref 'timeout'",
+    });
+
+    await expect(
+      resolveRemoteDependency(
+        'github.com/company/timeout-repo',
+        ['latest'],
+        undefined,
+        false,
+        undefined,
+        undefined,
+        { timeout: 25 }
+      )
+    ).rejects.toThrow("Could not find remote ref 'timeout'");
+
+    expect(mockValidateRemoteAccess).toHaveBeenCalledTimes(1);
+  });
+
   it('should ignore non-timeout Git error codes during fallback handling', async () => {
     const failure = Object.assign(new Error('remote probe failed'), { code: 'EOTHER' });
     mockValidateRemoteAccess.mockRejectedValueOnce(failure);
