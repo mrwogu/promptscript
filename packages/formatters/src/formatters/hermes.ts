@@ -5,6 +5,8 @@ export type HermesVersion = 'simple' | 'multifile' | 'full';
 const HERMES_UNSUPPORTED_BLOCKS = [
   'skills',
   'agents',
+  'workflows',
+  'prompts',
   'shortcuts',
   'guards',
   'local',

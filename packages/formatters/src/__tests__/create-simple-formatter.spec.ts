@@ -389,6 +389,21 @@ describe('createSimpleMarkdownFormatter', () => {
       expect(VERSIONS.multifile.description).toContain('.agents/skills/<name>/SKILL.md');
       expect(VERSIONS.full.description).toContain('.agents/skills/<name>/SKILL.md');
     });
+
+    it('should describe no-skills targets as single-file outputs', () => {
+      const { VERSIONS } = createSimpleMarkdownFormatter({
+        name: 'test',
+        outputPath: 'AGENTS.md',
+        description: 'Test',
+        mainFileHeader: '# AGENTS.md',
+        dotDir: '.agents',
+        hasSkills: false,
+      });
+
+      for (const version of ['simple', 'multifile', 'full'] as const) {
+        expect(VERSIONS[version].description).toBe('Single AGENTS.md file');
+      }
+    });
   });
 
   describe('formatting output', () => {

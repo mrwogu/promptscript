@@ -28,8 +28,8 @@ configuration, or plugin manifests.
 
 ## Limitations
 
-- Skills, agents, shortcuts/commands, hooks, MCP servers, and plugins have no
-  verified project-local Hermes contract.
+- Skills, agents, shortcuts/commands, workflows, prompts, hooks, MCP servers,
+  and plugins have no verified project-local Hermes contract.
 - Do not emit `.hermes.md` or target-specific native files without a verified
   official contract.
 

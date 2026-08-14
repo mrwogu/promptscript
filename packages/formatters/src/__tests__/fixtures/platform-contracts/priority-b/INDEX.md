@@ -60,7 +60,8 @@ For each verified target:
   stable project configuration, not runtime flags.
 - Keep unsupported capabilities as `planned` or `not-supported`.
 - Hermes uses only root `AGENTS.md`; no `.hermes.md` or unverified native
-  skills, agents, commands, hooks, MCP, or plugin output is emitted.
+  skills, agents, commands, workflows, prompts, hooks, MCP, or plugin output
+  is emitted.
 
 ## Out of scope for Priority B
 
