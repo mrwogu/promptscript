@@ -5,7 +5,7 @@
 **Agent platform configuration as code**
 
 Define instructions, skills, agents, MCP servers, hooks, workflows, and policies once. Compile
-native configuration for 48 AI coding platforms.
+native configuration for 49 AI coding platforms.
 
 [![npm version](https://img.shields.io/npm/v/@promptscript/cli.svg)](https://www.npmjs.com/package/@promptscript/cli)
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
@@ -206,7 +206,7 @@ unsupported platform-specific features.
 | Automation              | `@hooks`, `@workflows`                                            | Lifecycle hooks and repeatable workflow files                                    |
 | Monorepo delivery       | `builds` in `promptscript.yaml`                                   | Scoped output for packages and applications                                      |
 
-## 48 Built-In Targets
+## 49 Built-In Targets
 
 | Platform       | Primary and rich output                                          |
 | :------------- | :--------------------------------------------------------------- |
@@ -220,9 +220,9 @@ unsupported platform-specific features.
 | Antigravity    | `.agent/rules/`, workflows and MCP configuration                 |
 | Grok           | `AGENTS.md`, agents, skills, commands and integrations           |
 
-PromptScript also supports 10 AGENTS.md targets and 29 Markdown instruction targets, including
+PromptScript also supports 11 AGENTS.md targets and 29 Markdown instruction targets, including
 Windsurf, Cline, Roo Code, Continue, Aider, Amazon Q, Warp, Zed, OpenHands, Qwen Code, Kimi, Mimo,
-Deep Agents, and ForgeCode.
+Deep Agents, ForgeCode, and Hermes Agent.
 
 See the [complete target and capability matrix](https://getpromptscript.dev/reference/formatters/).
 

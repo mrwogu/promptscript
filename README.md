@@ -6,7 +6,7 @@
 **Agent platform configuration as code**
 
 _Define instructions, skills, agents, MCP servers, hooks, workflows, and policies once. Compile
-native configuration for 48 AI coding platforms._
+native configuration for 49 AI coding platforms._
 
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/mrwogu/promptscript/graph/badge.svg?token=MPUCPQLVWR)](https://codecov.io/github/mrwogu/promptscript)
@@ -275,14 +275,14 @@ PromptScript validates Agent Skills metadata, resolves dependencies and resource
 native skill path for each selected platform. Agents can reference those skills and receive
 target-native model, reasoning, sandbox, tool, permission, and MCP settings.
 
-## 48 Built-In Targets
+## 49 Built-In Targets
 
-PromptScript ships 48 output targets:
+PromptScript ships 49 output targets:
 
 - **9 rich native formatters** - Claude Code, GitHub Copilot, Cursor, Factory AI, Codex, Gemini CLI,
   OpenCode, Antigravity, and Grok
-- **10 AGENTS.md targets** - Aider, Amazon Q, Warp, Zed, Jules, Devin, Kimi, Mimo, Deep Agents, and
-  ForgeCode
+- **11 AGENTS.md targets** - Aider, Amazon Q, Warp, Zed, Jules, Devin, Kimi, Mimo, Deep Agents,
+  ForgeCode, and Hermes Agent
 - **29 Markdown instruction targets** - Windsurf, Cline, Roo Code, Continue, Augment, Goose, Kilo
   Code, OpenHands, Qwen Code, and more
 

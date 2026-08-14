@@ -100,6 +100,7 @@ describe('Platform contract fixture integrity', () => {
       'priority-b/mimo',
       'priority-b/deep-agents',
       'priority-b/forgecode',
+      'priority-b/hermes',
     ];
     for (const dir of expectedDirs) {
       const indexPath = join(FIXTURES_DIR, dir, 'INDEX.md');

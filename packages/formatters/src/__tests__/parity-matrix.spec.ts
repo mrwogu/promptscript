@@ -54,6 +54,7 @@ import { KimiFormatter } from '../formatters/kimi.js';
 import { MimoFormatter } from '../formatters/mimo.js';
 import { DeepAgentsFormatter } from '../formatters/deep-agents.js';
 import { ForgecodeFormatter } from '../formatters/forgecode.js';
+import { HermesFormatter } from '../formatters/hermes.js';
 import type { Formatter } from '../types.js';
 import {
   PARITY_MATRIX,
@@ -391,6 +392,7 @@ describe('Parity Matrix Tests', () => {
     formatters.set('mimo', new MimoFormatter());
     formatters.set('deep-agents', new DeepAgentsFormatter());
     formatters.set('forgecode', new ForgecodeFormatter());
+    formatters.set('hermes', new HermesFormatter());
   });
 
   afterEach(() => {

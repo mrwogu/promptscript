@@ -115,6 +115,7 @@ const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
   mcpjam: 'MCPJam',
   iflow: 'iFlow',
   forgecode: 'ForgeCode',
+  hermes: 'Hermes Agent',
 };
 
 /** Custom formatters with dedicated pages and hand-written overrides. */

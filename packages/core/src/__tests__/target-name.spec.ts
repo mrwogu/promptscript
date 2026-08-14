@@ -70,6 +70,7 @@ describe('TargetName branded type', () => {
         'mimo',
         'deep-agents',
         'forgecode',
+        'hermes',
       ];
 
       // Assert

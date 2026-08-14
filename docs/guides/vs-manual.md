@@ -33,7 +33,7 @@ Without PromptScript, teams maintain separate configuration files for each AI to
 
 ## The PromptScript Approach
 
-With PromptScript, you write one `.prs` file and compile to all 48 targets:
+With PromptScript, you write one `.prs` file and compile to all 49 targets:
 
 === "Single source file"
 
@@ -81,7 +81,7 @@ With PromptScript, you write one `.prs` file and compile to all 48 targets:
 
     | Benefit | How |
     |---------|-----|
-    | **Single source of truth** | One `.prs` file, up to 48 target outputs |
+    | **Single source of truth** | One `.prs` file, up to 49 target outputs |
     | **Compile-time validation** | Errors caught before deployment |
     | **Hierarchical inheritance** | Org → Team → Project |
     | **Full audit trail** | Git history on `.prs` files |
@@ -92,7 +92,7 @@ With PromptScript, you write one `.prs` file and compile to all 48 targets:
 
 | Aspect          | Manual                | PromptScript                                  |
 | --------------- | --------------------- | --------------------------------------------- |
-| Files per repo  | 5-48                  | 2 source files plus generated outputs         |
+| Files per repo  | 5-49                  | 2 source files plus generated outputs         |
 | Update a policy | 100+ manual edits     | Registry update, dependency update, recompile |
 | Add new tool    | Write new file format | `prs compile`                                 |
 | Validation      | None                  | Compile-time + CI/CD                          |

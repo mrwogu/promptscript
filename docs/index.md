@@ -1,6 +1,6 @@
 ---
 title: 'PromptScript - Agent Platform Configuration as Code'
-description: 'Define AI instructions, skills, agents, MCP servers, hooks, workflows, and policies once. Compile native configuration for 48 AI coding agent platforms.'
+description: 'Define AI instructions, skills, agents, MCP servers, hooks, workflows, and policies once. Compile native configuration for 49 AI coding agent platforms.'
 meta:
   - name: keywords
     content: PromptScript, agent platform, configuration as code, AI instructions, AI agents, AI skills, MCP servers, GitHub Copilot, Claude Code, Cursor, Factory AI, Codex, AI governance, PromptOps
@@ -29,7 +29,7 @@ hide:
 <div class="home-hero__copy">
 <div class="home-eyebrow">Agent platform configuration as code</div>
 <h1>Define your agent platform once.<br><span>Compile it everywhere.</span></h1>
-<p class="home-hero__lead">One composable source for instructions, skills, agents, MCP servers, hooks, workflows, and policies. Inherit it across teams and compile native configuration for 48 AI coding platforms.</p>
+<p class="home-hero__lead">One composable source for instructions, skills, agents, MCP servers, hooks, workflows, and policies. Inherit it across teams and compile native configuration for 49 AI coding platforms.</p>
 <div class="home-hero__actions">
 <a href="getting-started/" class="home-button home-button--primary">Get started</a>
 <a href="#native-output" class="home-button home-button--secondary">See native output</a>
@@ -233,7 +233,7 @@ hide:
 <li>No runtime proxy between developers and their tools</li>
 <li>New targets without rewriting source configuration</li>
 </ul>
-<a href="reference/formatters/" class="home-text-link">Explore all 48 target formats <span>→</span></a>
+<a href="reference/formatters/" class="home-text-link">Explore all 49 target formats <span>→</span></a>
 </div>
 <div class="home-native__files">
 <div class="home-target-card">

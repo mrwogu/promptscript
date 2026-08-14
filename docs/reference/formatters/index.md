@@ -1,11 +1,11 @@
 ---
 title: Supported Formatters
-description: All 48 AI agent targets supported by PromptScript
+description: All 49 AI agent targets supported by PromptScript
 ---
 
 # Supported Formatters
 
-<p class="formatter-page__subtitle">PromptScript compiles one agent platform definition to native files for <strong>48 AI coding agent targets</strong>.</p>
+<p class="formatter-page__subtitle">PromptScript compiles one agent platform definition to native files for <strong>49 AI coding agent targets</strong>.</p>
 
 <div class="formatter-tiers">
   <div class="formatter-tier-badge formatter-tier-badge--custom">
@@ -13,7 +13,7 @@ description: All 48 AI agent targets supported by PromptScript
     <span class="formatter-tier-badge__label">Rich native</span>
   </div>
   <div class="formatter-tier-badge formatter-tier-badge--t1">
-    <span class="formatter-tier-badge__count">10</span>
+    <span class="formatter-tier-badge__count">11</span>
     <span class="formatter-tier-badge__label">AGENTS.md</span>
   </div>
   <div class="formatter-tier-badge formatter-tier-badge--t2">
@@ -185,6 +185,7 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
 | Devin                         | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | ForgeCode                     | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | Grok                          | Tier 3 | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
+| Hermes Agent                  | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | iFlow                         | Tier 3 | `.iflow/rules/project.md`         | Yes    | No     | No    | No       |
 | Jules                         | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | Kimi                          | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
@@ -242,3 +243,20 @@ Agent-level `mcpServers` references are emitted by Claude Code, Cursor, and Fact
 Shared Markdown targets use `MarkdownInstructionFormatter` for consistent instructions, skills,
 commands, and agents where enabled. Each target keeps its own output path, capability flags, and
 native directory conventions.
+
+### Hermes Agent
+
+Hermes Agent uses the project-local `AGENTS.md` workspace instruction
+contract. See the official [context-files documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files)
+and [skills documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills).
+
+Hermes output mapping:
+
+- Main output: `AGENTS.md`
+- `simple`, `multifile`, and `full`: same single `AGENTS.md` output
+- Supported: instruction content rendered by the shared AGENTS.md formatter
+- Unsupported: skills, agents, commands, scoped rules, local files, hooks, MCP servers, and plugins
+- Unsupported blocks are omitted with non-fatal `PS4002` warnings carrying source locations
+
+PromptScript does not invent `.hermes.md` or unverified native Hermes
+directories and files.

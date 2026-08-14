@@ -439,7 +439,7 @@ targets:
 
 **Available Targets:**
 
-PromptScript ships 48 built-in targets. See [Target Platforms](../features/target-platforms.md) for
+PromptScript ships 49 built-in targets. See [Target Platforms](../features/target-platforms.md) for
 platform families and [Supported Formatters](formatters/index.md) for the full capability matrix.
 
 | Target         | Default Output                    | Default Convention | Supported Versions                             |
@@ -492,6 +492,7 @@ platform families and [Supported Formatters](formatters/index.md) for the full c
 | `mimo`         | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `deep-agents`  | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `forgecode`    | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `hermes`       | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 
 ### MCP, Hooks, and Plugins Support { #mcp-hooks-plugins-support }
 

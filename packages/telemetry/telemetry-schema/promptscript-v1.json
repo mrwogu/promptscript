@@ -77,7 +77,8 @@
     "kimi",
     "mimo",
     "deep-agents",
-    "forgecode"
+    "forgecode",
+    "hermes"
   ],
   "limits": {
     "maxEvents": 25,

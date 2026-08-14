@@ -103,3 +103,5 @@ export { DeepAgentsFormatter, DEEP_AGENTS_VERSIONS } from './deep-agents.js';
 export type { DeepAgentsVersion } from './deep-agents.js';
 export { ForgecodeFormatter, FORGECODE_VERSIONS } from './forgecode.js';
 export type { ForgecodeVersion } from './forgecode.js';
+export { HermesFormatter, HERMES_VERSIONS } from './hermes.js';
+export type { HermesVersion } from './hermes.js';

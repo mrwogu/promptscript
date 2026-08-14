@@ -48,6 +48,8 @@ export interface SimpleFormatterOptions {
   mcpConfigPath?: string;
   /** MCP config format (default: 'json') */
   mcpConfigFormat?: 'json' | 'toml';
+  /** PromptScript blocks that this target omits with compatibility warnings. */
+  unsupportedBlocks?: readonly string[];
 }
 
 /**
@@ -67,17 +69,25 @@ export interface SimpleFormatterResult {
 /**
  * Build version descriptions from the output path and dot directory.
  */
-function buildVersions(outputPath: string, dotDir: string): SimpleFormatterVersions {
+function buildVersions(
+  outputPath: string,
+  dotDir: string,
+  hasSkills: boolean
+): SimpleFormatterVersions {
   // Determine whether the outputPath looks like a file inside a dotDir
   // (e.g. '.windsurf/rules/project.md') or a standalone file (e.g. 'AGENTS.md').
   const isNested = outputPath.startsWith(dotDir + '/');
   const simpleDesc = isNested ? `Single ${outputPath} file` : `Single ${outputPath} file`;
-  const multifileDesc = isNested
-    ? `Single ${outputPath} file (skills via full mode)`
-    : `${outputPath} + ${dotDir}/skills/<name>/SKILL.md`;
-  const fullDesc = isNested
-    ? `${outputPath} + ${dotDir}/skills/<name>/SKILL.md`
-    : `Multifile + ${dotDir}/skills/<name>/SKILL.md`;
+  const multifileDesc = !hasSkills
+    ? `Single ${outputPath} file`
+    : isNested
+      ? `Single ${outputPath} file (skills via full mode)`
+      : `${outputPath} + ${dotDir}/skills/<name>/SKILL.md`;
+  const fullDesc = !hasSkills
+    ? `Single ${outputPath} file`
+    : isNested
+      ? `${outputPath} + ${dotDir}/skills/<name>/SKILL.md`
+      : `Multifile + ${dotDir}/skills/<name>/SKILL.md`;
 
   return {
     simple: { name: 'simple', description: simpleDesc, outputPath },
@@ -120,9 +130,10 @@ export function createSimpleMarkdownFormatter(opts: SimpleFormatterOptions): Sim
     skillFileName = 'SKILL.md',
     mcpConfigPath,
     mcpConfigFormat,
+    unsupportedBlocks,
   } = opts;
 
-  const versions = buildVersions(outputPath, dotDir);
+  const versions = buildVersions(outputPath, dotDir, hasSkills);
 
   // Create a named class so `formatter.constructor.name` is meaningful.
   class SimpleFormatter extends MarkdownInstructionFormatter {
@@ -140,6 +151,7 @@ export function createSimpleMarkdownFormatter(opts: SimpleFormatterOptions): Sim
         hasSkills,
         ...(mcpConfigPath ? { mcpConfigPath } : {}),
         ...(mcpConfigFormat ? { mcpConfigFormat } : {}),
+        ...(unsupportedBlocks ? { unsupportedBlocks } : {}),
       });
     }
 

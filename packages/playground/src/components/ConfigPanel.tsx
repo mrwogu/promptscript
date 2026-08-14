@@ -211,6 +211,7 @@ const TARGET_INFO: Record<
     supportsXml: false,
   },
   forgecode: { label: 'ForgeCode', versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  hermes: { label: 'Hermes Agent', versions: ['simple', 'multifile', 'full'], supportsXml: false },
 };
 
 const POPULAR_TARGETS: FormatterName[] = [
