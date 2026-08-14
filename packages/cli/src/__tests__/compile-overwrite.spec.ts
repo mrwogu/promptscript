@@ -429,6 +429,90 @@ describe('compile command - overwrite protection', () => {
       expect(mockPrompts.select).not.toHaveBeenCalled();
     });
 
+    it('should report a guarded rewrite failure for a regular output', async () => {
+      const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'new content')]]);
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(`# Header\n${PROMPTSCRIPT_MARKER}\n\nOld content`);
+      mockRewriteHookOutputIfUnchanged.mockResolvedValueOnce(false);
+
+      await compileCommand({}, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('changed or became unsafe while PromptScript was writing it')
+      );
+    });
+
+    it('should report a guarded rewrite failure for a hook output', async () => {
+      const path = '.github/hooks/promptscript.json';
+      const outputs = new Map([[path, createMockOutput(path, '{"version":1,"hooks":{}}')]]);
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(
+        JSON.stringify({
+          version: 1,
+          hooks: {
+            preToolUse: [
+              {
+                type: 'command',
+                bash: 'echo old # promptscript-generated:owned',
+              },
+            ],
+          },
+        })
+      );
+      mockRewriteHookOutputIfUnchanged.mockResolvedValueOnce(false);
+
+      await compileCommand({}, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('changed while PromptScript was writing hooks')
+      );
+    });
+
+    it('should report a guarded mode update failure for unchanged output', async () => {
+      const outputs = new Map([
+        [
+          'script.sh',
+          {
+            ...createMockOutput('script.sh', 'same content'),
+            mode: 0o755,
+          },
+        ],
+      ]);
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue('same content');
+      mockRewriteHookOutputIfUnchanged.mockResolvedValueOnce(false);
+
+      await compileCommand({}, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('changed or became unsafe while PromptScript was updating its mode')
+      );
+    });
+
     it('should overwrite a fully owned generated hook file', async () => {
       const path = '.github/hooks/promptscript.json';
       const outputs = new Map([[path, createMockOutput(path, '{"version":1,"hooks":{}}')]]);

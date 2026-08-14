@@ -97,11 +97,7 @@ function resolveThroughExistingAncestor(path: string): string {
     current = parent;
   }
 
-  const realpathSync = fs.realpathSync?.native ?? fs.realpathSync;
-  if (typeof realpathSync !== 'function') {
-    throw new Error('realpathSync is unavailable');
-  }
-  return resolve(realpathSync(current), ...missingSegments);
+  return resolve(fs.realpathSync.native(current), ...missingSegments);
 }
 
 /**

@@ -1,12 +1,33 @@
 import { mkdir, mkdtemp, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+const fsProbe = vi.hoisted(() => ({
+  errorCode: undefined as string | undefined,
+}));
+
+vi.mock('fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('fs')>();
+  return {
+    ...actual,
+    lstatSync: (path: import('fs').PathLike) => {
+      if (fsProbe.errorCode) {
+        const error = new Error('Filesystem probe failed') as NodeJS.ErrnoException;
+        error.code = fsProbe.errorCode;
+        throw error;
+      }
+      return actual.lstatSync(path);
+    },
+  };
+});
+
 import { validateOutputPath } from './conflict-detector.js';
 
 const temporaryDirectories: string[] = [];
 
 afterEach(async () => {
+  fsProbe.errorCode = undefined;
   await Promise.all(
     temporaryDirectories
       .splice(0)
@@ -52,6 +73,20 @@ describe('validateOutputPath symlink containment', () => {
   it('rejects a dangling symlink at the final output path', async () => {
     const { root, outputRoot } = await createOutputRoot();
     await symlink(join(root, 'missing.md'), join(outputRoot, 'generated.md'));
+
+    expect(validateOutputPath('generated.md', outputRoot)).toContain('cannot be verified');
+  });
+
+  it('rejects a path when filesystem metadata cannot be read', async () => {
+    const { outputRoot } = await createOutputRoot();
+    fsProbe.errorCode = 'EACCES';
+
+    expect(validateOutputPath('generated.md', outputRoot)).toContain('cannot be verified');
+  });
+
+  it('rejects a path when no existing ancestor can be verified', async () => {
+    const { outputRoot } = await createOutputRoot();
+    fsProbe.errorCode = 'ENOENT';
 
     expect(validateOutputPath('generated.md', outputRoot)).toContain('cannot be verified');
   });
