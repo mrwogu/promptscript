@@ -850,11 +850,11 @@ describe('authority-injection rule (PS011)', () => {
     it('does not exempt suppression patterns spanning continuation lines', () => {
       const ast = createProgramWithText(
         'guards',
-        "### Don'ts\n- Skip\n  validation before activation"
+        "### Don'ts\n- Skip\n  validation before activation\n- Ignore all warnings"
       );
       const messages = validate(ast, [authorityInjection]);
 
-      expect(messages.length).toBeGreaterThan(0);
+      expect(messages).toHaveLength(1);
     });
 
     it('does not exempt suppression guidance in prose', () => {
