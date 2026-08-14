@@ -1,3 +1,4 @@
+import { realpathSync } from 'fs';
 import { noopLogger, type Logger, type PSError } from '@promptscript/core';
 import { FormatterRegistry, formatProgram } from '@promptscript/formatters';
 import {
@@ -10,7 +11,11 @@ import { Validator, type ValidatorConfig, type ValidationMessage } from '@prompt
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'path';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- imported for upcoming formatter integration
 import { verifyReferenceIntegrity } from './reference-verifier.js';
-import { inferProjectRoot, validateHookScriptResources } from './hook-script-validator.js';
+import {
+  findProjectRootMarker,
+  inferProjectRoot,
+  validateHookScriptResources,
+} from './hook-script-validator.js';
 import type {
   CompilerOptions,
   CompileResult,
@@ -30,6 +35,17 @@ import type {
 interface LoadedFormatter {
   formatter: Formatter;
   config?: TargetConfig;
+}
+
+/** Maximum number of project-scoped resolvers retained by a long-lived compiler. */
+export const MAX_ENTRY_RESOLVERS = 50;
+
+function resolverCacheKey(projectRoot: string): string {
+  try {
+    return realpathSync.native(projectRoot);
+  } catch {
+    return resolve(projectRoot);
+  }
 }
 
 function normalizeRepositoryKey(value: string): string {
@@ -181,12 +197,23 @@ export class Compiler {
       return this.resolver;
     }
 
-    const projectRoot = inferProjectRoot(undefined, undefined, entryPath);
-    const cached = this.entryResolvers.get(projectRoot);
+    const projectRoot = findProjectRootMarker(entryPath);
+    if (!projectRoot) {
+      // Keep cwd-based resolution when an entry is outside a marked project.
+      return this.resolver;
+    }
+
+    const cacheKey = resolverCacheKey(projectRoot);
+    const cached = this.entryResolvers.get(cacheKey);
     if (cached) return cached;
 
     const resolver = new Resolver({ ...this.options.resolver, projectRoot, logger: this.logger });
-    this.entryResolvers.set(projectRoot, resolver);
+    if (this.entryResolvers.size >= MAX_ENTRY_RESOLVERS) {
+      // Bound per-project caches for long-lived watch and server compilers.
+      const oldestKey = this.entryResolvers.keys().next().value;
+      if (oldestKey !== undefined) this.entryResolvers.delete(oldestKey);
+    }
+    this.entryResolvers.set(cacheKey, resolver);
     return resolver;
   }
 

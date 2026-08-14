@@ -2,7 +2,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { CanonicalProgram, Program, SourceLocation } from '@promptscript/core';
 import type { Formatter, CompilerOptions } from '../types.js';
 import { FormatterRegistry } from '@promptscript/formatters';
+import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
 // Create mock classes before importing Compiler
 const mockResolve = vi.fn();
@@ -10,9 +12,14 @@ const mockValidate = vi.fn();
 const mockUpdateConfig = vi.fn();
 const mockVerifyReferenceHashes = vi.fn().mockResolvedValue([]);
 const mockRegistryCacheConstructor = vi.fn();
+const mockResolverConstructor = vi.fn();
 
 vi.mock('@promptscript/resolver', () => ({
   Resolver: class MockResolver {
+    constructor(options: unknown) {
+      mockResolverConstructor(options);
+    }
+
     resolve = mockResolve;
     verifyReferenceHashes = mockVerifyReferenceHashes;
   },
@@ -41,11 +48,23 @@ vi.mock('@promptscript/validator', () => ({
 }));
 
 // Import after mocks are set up
-import { Compiler, createCompiler, compile } from '../compiler.js';
+import { MAX_ENTRY_RESOLVERS, Compiler, createCompiler, compile } from '../compiler.js';
 
 afterEach(() => {
   vi.unstubAllEnvs();
 });
+
+function createMarkedWorkspace(): { root: string; entry: string } {
+  const root = mkdtempSync(join(tmpdir(), 'promptscript-compiler-'));
+  writeFileSync(join(root, 'package.json'), '{}');
+  const entry = join(root, 'entry.prs');
+  writeFileSync(entry, '@meta { id: "compiler-test" }\n');
+  return { root, entry };
+}
+
+function createSuccessfulResolverResult() {
+  return createResolveSuccess(createTestProgram());
+}
 
 /**
  * Create a minimal valid AST for testing.
@@ -174,6 +193,163 @@ describe('Compiler', () => {
 
       const compiler = createCompiler(options);
       expect(compiler).toBeInstanceOf(Compiler);
+    });
+
+    it('should preserve cwd registry lookup defaults in compile', async () => {
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      await compile('entry.prs', { formatters: [] });
+
+      expect(mockResolverConstructor).toHaveBeenCalledWith(
+        expect.objectContaining({ registryPath: process.cwd() })
+      );
+    });
+
+    it('should reuse one entry resolver for entries under one marked root', async () => {
+      const workspace = createMarkedWorkspace();
+      const secondEntry = join(workspace.root, 'second.prs');
+      writeFileSync(secondEntry, '@meta { id: "second" }\n');
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: { registryPath: '/registry' },
+          formatters: [],
+        });
+
+        await compiler.compile(workspace.entry);
+        await compiler.compile(secondEntry);
+
+        expect(mockResolverConstructor).toHaveBeenCalledTimes(2);
+      } finally {
+        rmSync(workspace.root, { recursive: true, force: true });
+      }
+    });
+
+    it('should share an entry resolver across symlinked roots', async () => {
+      const workspace = createMarkedWorkspace();
+      const linkParent = mkdtempSync(join(tmpdir(), 'promptscript-compiler-link-'));
+      const linkRoot = join(linkParent, 'linked-root');
+      symlinkSync(workspace.root, linkRoot, 'dir');
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: { registryPath: '/registry' },
+          formatters: [],
+        });
+
+        await compiler.compile(workspace.entry);
+        await compiler.compile(join(linkRoot, 'entry.prs'));
+
+        expect(mockResolverConstructor).toHaveBeenCalledTimes(2);
+      } finally {
+        rmSync(workspace.root, { recursive: true, force: true });
+        rmSync(linkParent, { recursive: true, force: true });
+      }
+    });
+
+    it('should use the configured local path for entries elsewhere', async () => {
+      const workspace = createMarkedWorkspace();
+      const entry = join(tmpdir(), `promptscript-local-entry-${Date.now()}.prs`);
+      writeFileSync(entry, '@meta { id: "outside" }\n');
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: { registryPath: '/registry', localPath: workspace.root },
+          formatters: [],
+        });
+
+        await compiler.compile(entry);
+
+        expect(mockResolverConstructor).toHaveBeenCalledTimes(1);
+        expect(mockResolverConstructor).toHaveBeenCalledWith(
+          expect.objectContaining({ localPath: workspace.root })
+        );
+      } finally {
+        rmSync(workspace.root, { recursive: true, force: true });
+        rmSync(entry, { force: true });
+      }
+    });
+
+    it('should use the configured project root for entries elsewhere', async () => {
+      const workspace = createMarkedWorkspace();
+      const entry = join(tmpdir(), `promptscript-project-entry-${Date.now()}.prs`);
+      writeFileSync(entry, '@meta { id: "outside" }\n');
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: { registryPath: '/registry', projectRoot: workspace.root },
+          formatters: [],
+        });
+
+        await compiler.compile(entry);
+
+        expect(mockResolverConstructor).toHaveBeenCalledTimes(1);
+        expect(mockResolverConstructor).toHaveBeenCalledWith(
+          expect.objectContaining({ projectRoot: workspace.root })
+        );
+      } finally {
+        rmSync(workspace.root, { recursive: true, force: true });
+        rmSync(entry, { force: true });
+      }
+    });
+
+    it('should verify lockfile hashes with the entry resolver', async () => {
+      const workspace = createMarkedWorkspace();
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: {
+            registryPath: '/registry',
+            lockfile: { version: 1, dependencies: {}, references: {} },
+          },
+          formatters: [],
+        });
+
+        const result = await compiler.compile(workspace.entry);
+
+        expect(result.success).toBe(true);
+        expect(mockVerifyReferenceHashes).toHaveBeenCalledOnce();
+      } finally {
+        rmSync(workspace.root, { recursive: true, force: true });
+      }
+    });
+
+    it('should evict oldest entry resolvers after reaching the bound', async () => {
+      const workspaces = Array.from({ length: MAX_ENTRY_RESOLVERS + 1 }, () =>
+        createMarkedWorkspace()
+      );
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: { registryPath: '/registry' },
+          formatters: [],
+        });
+
+        for (const workspace of workspaces) {
+          await compiler.compile(workspace.entry);
+        }
+
+        const cache = (compiler as unknown as { entryResolvers: Map<string, unknown> })
+          .entryResolvers;
+        expect(cache.size).toBeLessThanOrEqual(MAX_ENTRY_RESOLVERS);
+      } finally {
+        for (const workspace of workspaces) {
+          rmSync(workspace.root, { recursive: true, force: true });
+        }
+      }
     });
 
     it('should load formatter instances', () => {

@@ -43,6 +43,63 @@ describe('resolveNativeSkills', () => {
     loc: { file: 'test.prs', line: 1, column: 1, offset: 0 },
   });
 
+  it('should use the legacy universal parent fallback for a .promptscript local path', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(testDir, '.agents', 'skills', 'fallback-skill');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: fallback-skill\ndescription: Fallback skill\n---\n\nFallback body.\n'
+    );
+
+    const ast = createProgram([]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'project.prs'),
+      localPath,
+      { universalDir: '.agents' }
+    );
+
+    const skillsBlock = result.blocks.find((block) => block.name === 'skills');
+    expect(skillsBlock).toBeDefined();
+    expect(Object.keys((skillsBlock!.content as ObjectContent).properties)).toEqual([
+      'fallback-skill',
+    ]);
+  });
+
+  it('should replace an explicitly declared skill from the universal candidate', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(testDir, '.agents', 'skills', 'foo');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: foo\ndescription: Universal foo\n---\n\nUniversal foo body.\n'
+    );
+    await mkdir(localPath, { recursive: true });
+    await symlink(join(testDir, 'missing-skills'), join(localPath, 'skills'));
+
+    const ast = createProgram([
+      createSkillsBlock({
+        foo: {},
+      }),
+    ]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'project.prs'),
+      localPath,
+      { universalDir: '.agents', projectRoot: testDir }
+    );
+
+    const skillsBlock = result.blocks.find((block) => block.name === 'skills');
+    const foo = (skillsBlock!.content as ObjectContent).properties['foo'] as Record<
+      string,
+      unknown
+    >;
+    expect((foo['content'] as TextContent).value).toContain('Universal foo body.');
+  });
+
   describe('when no @skills block exists', () => {
     it('should return AST unchanged', async () => {
       const ast = createProgram([

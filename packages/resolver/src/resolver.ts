@@ -244,9 +244,16 @@ export class Resolver {
     });
 
     // Resolve native skill files (replace @skills content with SKILL.md files if available)
+    // Preserve the parent fallback for custom local paths.
+    const configuredProjectRoot = this.options.projectRoot ?? this.options.skills?.projectRoot;
+    const projectRoot =
+      configuredProjectRoot ??
+      (basename(this.loader.getLocalPath()) === '.promptscript'
+        ? this.loader.getProjectRoot()
+        : undefined);
     const discoveryOptions = {
       ...this.options.skills,
-      projectRoot: this.loader.getProjectRoot(),
+      ...(projectRoot ? { projectRoot } : {}),
       logger: this.logger,
     };
 

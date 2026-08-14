@@ -1,8 +1,11 @@
 import { lstat, realpath } from 'fs/promises';
+import { existsSync, statSync } from 'fs';
 import { dirname, isAbsolute, relative, resolve, sep } from 'path';
 import type { Program } from '@promptscript/core';
 import { extractHooks, getEnabledHookScriptResources } from '@promptscript/formatters';
 import type { CompileError } from './types.js';
+
+const PROJECT_MARKERS = ['.promptscript', '.git', 'package.json'] as const;
 
 function isInside(root: string, candidate: string): boolean {
   const relation = relative(root, candidate);
@@ -12,12 +15,51 @@ function isInside(root: string, candidate: string): boolean {
   );
 }
 
+function isProjectMarker(directory: string, marker: (typeof PROJECT_MARKERS)[number]): boolean {
+  const markerPath = resolve(directory, marker);
+  if (!existsSync(markerPath)) return false;
+  if (marker === '.promptscript') {
+    try {
+      return statSync(markerPath).isDirectory();
+    } catch {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Find a project root marker above an entry file.
+ *
+ * @param entryPath - Path to the entry file
+ * @returns Marked project root, or undefined when no marker exists
+ */
+export function findProjectRootMarker(entryPath: string): string | undefined {
+  const start = dirname(resolve(entryPath));
+
+  for (const marker of PROJECT_MARKERS) {
+    let directory = start;
+    while (true) {
+      if (isProjectMarker(directory, marker)) return directory;
+      const parent = dirname(directory);
+      if (parent === directory) break;
+      directory = parent;
+    }
+  }
+
+  return undefined;
+}
+
 export function inferProjectRoot(
   localPath: string | undefined,
   configuredProjectRoot: string | undefined,
   entryPath?: string
 ): string {
   if (configuredProjectRoot) return resolve(configuredProjectRoot);
+  if (!localPath && entryPath) {
+    const markedRoot = findProjectRootMarker(entryPath);
+    if (markedRoot) return markedRoot;
+  }
   const local = localPath
     ? resolve(localPath)
     : entryPath
