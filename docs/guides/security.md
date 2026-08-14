@@ -131,7 +131,7 @@ PromptScript includes built-in validation rules to detect potential prompt injec
 | PS013   | `path-traversal`      | Detects path traversal attacks in use declarations           | error            |
 | PS014   | `unicode-security`    | Detects RTL override, invisible chars, homoglyphs            | warning          |
 
-PS011 detects imperative `skip` or `bypass` instructions and phrases qualified by `all` or `safety`. Suppression-pattern matches in top-level Markdown list items under defensive headings such as `Don'ts`, `Do not`, `Forbidden`, or `Restrictions` are treated as defensive guidance. Prose, arbitrary headings, nested list items, and authority or execute patterns remain errors. Unclosed fenced code blocks are scanned.
+PS011 detects imperative `skip` or `bypass` instructions and phrases qualified by `all` or `safety`. Suppression-pattern matches in top-level Markdown list items under defensive ATX headings such as `Don'ts`, `Do not`, `Forbidden`, or `Restrictions` are treated as defensive guidance. Tab-indented, nested, continuation-line, prose, arbitrary-heading, setext-heading, and thematic-break content remains fail-closed and is scanned. Authority or execute patterns remain errors. Unclosed fenced code blocks are scanned.
 
 ### Obfuscation Detection (PS012)
 

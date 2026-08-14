@@ -75,8 +75,22 @@ interface FenceInfo {
   length: number;
 }
 
+interface MarkdownListItem {
+  indentation: number;
+  range: TextRange;
+  safe: boolean;
+}
+
 function isHorizontalWhitespace(character: string | undefined): boolean {
   return character === ' ' || character === '\t';
+}
+
+function getSpaceIndentation(line: string): number | undefined {
+  let index = 0;
+  while (line[index] === ' ') {
+    index++;
+  }
+  return line[index] === '\t' ? undefined : index;
 }
 
 function getFenceInfo(line: string): FenceInfo | undefined {
@@ -95,12 +109,12 @@ function getFenceInfo(line: string): FenceInfo | undefined {
 
 function getHeadingTitle(line: string): string | undefined {
   const normalizedLine = line.endsWith('\r') ? line.slice(0, -1) : line;
-  let index = 0;
-  while (isHorizontalWhitespace(normalizedLine[index])) {
-    index++;
+  const indentation = getSpaceIndentation(normalizedLine);
+  if (indentation === undefined || indentation > 3) {
+    return undefined;
   }
-  const indentation = index;
-  if (indentation > 3 || normalizedLine[index] !== '#') {
+  let index = indentation;
+  if (normalizedLine[index] !== '#') {
     return undefined;
   }
 
@@ -140,16 +154,18 @@ function getHeadingTitle(line: string): string | undefined {
   return DEFENSIVE_HEADING_NAMES.has(title) ? title : undefined;
 }
 
-function getMarkdownListItemIndent(line: string): number | undefined {
-  let index = 0;
-  while (isHorizontalWhitespace(line[index])) {
-    index++;
-  }
-  const indentation = index;
-  if (indentation > 3) {
+function getMarkdownListItem(
+  line: string,
+  lineStart: number,
+  lineEnd: number
+): MarkdownListItem | undefined {
+  const indentation = getSpaceIndentation(line);
+  if (indentation === undefined) {
     return undefined;
   }
 
+  let index = indentation;
+  let digitCount = 0;
   const marker = line[index];
   if (marker === '-' || marker === '+' || marker === '*') {
     index++;
@@ -157,6 +173,7 @@ function getMarkdownListItemIndent(line: string): number | undefined {
     const numberStart = index;
     while (line[index] !== undefined && line[index]! >= '0' && line[index]! <= '9') {
       index++;
+      digitCount++;
     }
     if (index === numberStart || (line[index] !== '.' && line[index] !== ')')) {
       return undefined;
@@ -164,17 +181,108 @@ function getMarkdownListItemIndent(line: string): number | undefined {
     index++;
   }
 
-  return isHorizontalWhitespace(line[index]) ? indentation : undefined;
+  return isHorizontalWhitespace(line[index])
+    ? {
+        indentation,
+        range: { start: lineStart, end: lineEnd },
+        safe: digitCount <= 9,
+      }
+    : undefined;
+}
+
+function hasTabIndentedListItem(line: string): boolean {
+  let index = 0;
+  let hasTab = false;
+  while (isHorizontalWhitespace(line[index])) {
+    hasTab ||= line[index] === '\t';
+    index++;
+  }
+  if (!hasTab) {
+    return false;
+  }
+
+  const marker = line[index];
+  if (marker === '-' || marker === '+' || marker === '*') {
+    return isHorizontalWhitespace(line[index + 1]);
+  }
+
+  const numberStart = index;
+  while (line[index] !== undefined && line[index]! >= '0' && line[index]! <= '9') {
+    index++;
+  }
+  return (
+    index > numberStart &&
+    (line[index] === '.' || line[index] === ')') &&
+    isHorizontalWhitespace(line[index + 1])
+  );
+}
+
+function isThematicBreak(line: string): boolean {
+  const normalizedLine = line.endsWith('\r') ? line.slice(0, -1) : line;
+  const indentation = getSpaceIndentation(normalizedLine);
+  if (indentation === undefined || indentation > 3) {
+    return false;
+  }
+
+  const marker = normalizedLine[indentation];
+  if (marker !== '-' && marker !== '_' && marker !== '*') {
+    return false;
+  }
+
+  let markerCount = 0;
+  for (let index = indentation; index < normalizedLine.length; index++) {
+    const character = normalizedLine[index];
+    if (character === marker) {
+      markerCount++;
+    } else if (!isHorizontalWhitespace(character)) {
+      return false;
+    }
+  }
+  return markerCount >= 3;
+}
+
+function isSetextUnderline(line: string): boolean {
+  const normalizedLine = line.endsWith('\r') ? line.slice(0, -1) : line;
+  const indentation = getSpaceIndentation(normalizedLine);
+  if (indentation === undefined || indentation > 3) {
+    return false;
+  }
+
+  const marker = normalizedLine[indentation];
+  if (marker !== '=' && marker !== '-') {
+    return false;
+  }
+
+  let markerCount = 0;
+  for (let index = indentation; index < normalizedLine.length; index++) {
+    const character = normalizedLine[index];
+    if (character === marker) {
+      markerCount++;
+    } else if (!isHorizontalWhitespace(character)) {
+      return false;
+    }
+  }
+  return markerCount > 0;
 }
 
 function findDefensiveListItems(text: string): TextRange[] {
   const ranges: TextRange[] = [];
   let defensiveHeading = false;
-  let listIndent: number | undefined;
+  let listIndentStack: MarkdownListItem[] = [];
+  let unsafeListContext = false;
   let insideFence = false;
   let fenceCharacter: FenceInfo['character'] | undefined;
   let fenceLength = 0;
   let lineStart = 0;
+
+  const resetDefensiveContext = (): void => {
+    defensiveHeading = false;
+  };
+
+  const resetListContext = (): void => {
+    listIndentStack = [];
+    unsafeListContext = false;
+  };
 
   while (lineStart <= text.length) {
     const newlineIndex = text.indexOf('\n', lineStart);
@@ -198,22 +306,53 @@ function findDefensiveListItems(text: string): TextRange[] {
       fenceCharacter = fence.character;
       fenceLength = fence.length;
     } else {
-      const headingTitle = getHeadingTitle(line);
-      if (headingTitle !== undefined) {
-        defensiveHeading = true;
-        listIndent = undefined;
-      } else if (getAnyHeadingTitle(line) !== undefined) {
-        defensiveHeading = false;
-        listIndent = undefined;
-      } else if (defensiveHeading) {
-        const itemIndent = getMarkdownListItemIndent(line);
-        if (itemIndent !== undefined) {
-          if (listIndent === undefined) {
-            listIndent = itemIndent;
+      const headingTitle = getAnyHeadingTitle(line);
+      if (isThematicBreak(line) || isSetextUnderline(line)) {
+        resetDefensiveContext();
+        resetListContext();
+      } else if (headingTitle !== undefined) {
+        const headingIndent = getSpaceIndentation(line);
+        while (
+          headingIndent !== undefined &&
+          listIndentStack.length > 0 &&
+          listIndentStack[listIndentStack.length - 1]!.indentation >= headingIndent
+        ) {
+          listIndentStack.pop();
+        }
+        const nestedHeading =
+          listIndentStack.length > 0 ||
+          (unsafeListContext && headingIndent !== undefined && headingIndent > 0);
+        resetDefensiveContext();
+        if (!nestedHeading) {
+          unsafeListContext = false;
+        }
+        if (!nestedHeading && getHeadingTitle(line) !== undefined) {
+          defensiveHeading = true;
+        }
+      } else {
+        const item = getMarkdownListItem(line, lineStart, lineEnd);
+        if (item !== undefined) {
+          while (
+            listIndentStack.length > 0 &&
+            item.indentation <= listIndentStack[listIndentStack.length - 1]!.indentation
+          ) {
+            listIndentStack.pop();
           }
-          if (itemIndent === listIndent) {
-            ranges.push({ start: lineStart, end: lineEnd });
+          listIndentStack.push(item);
+          if (item.indentation === 0) {
+            unsafeListContext = false;
           }
+          if (
+            defensiveHeading &&
+            !unsafeListContext &&
+            listIndentStack.length === 1 &&
+            item.safe &&
+            item.indentation <= 3
+          ) {
+            ranges.push(item.range);
+          }
+        } else if (hasTabIndentedListItem(line)) {
+          unsafeListContext = true;
         }
       }
     }
@@ -224,16 +363,19 @@ function findDefensiveListItems(text: string): TextRange[] {
     lineStart = newlineIndex + 1;
   }
 
+  resetDefensiveContext();
   return ranges;
 }
 
 function getAnyHeadingTitle(line: string): string | undefined {
   const normalizedLine = line.endsWith('\r') ? line.slice(0, -1) : line;
-  let index = 0;
-  while (isHorizontalWhitespace(normalizedLine[index])) {
-    index++;
+  const indentation = getSpaceIndentation(normalizedLine);
+  if (indentation === undefined || indentation > 3) {
+    return undefined;
   }
-  if (index > 3 || normalizedLine[index] !== '#') {
+
+  let index = indentation;
+  if (normalizedLine[index] !== '#') {
     return undefined;
   }
 
@@ -242,9 +384,12 @@ function getAnyHeadingTitle(line: string): string | undefined {
     index++;
     hashCount++;
   }
-  return hashCount > 0 && isHorizontalWhitespace(normalizedLine[index])
-    ? normalizedLine.slice(index)
-    : undefined;
+  if (hashCount === 0) {
+    return undefined;
+  }
+
+  const remainder = normalizedLine.slice(index);
+  return remainder === '' || isHorizontalWhitespace(remainder[0]) ? remainder : undefined;
 }
 
 function normalizeText(text: string): NormalizedText {
