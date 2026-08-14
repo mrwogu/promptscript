@@ -113,7 +113,6 @@ vi.mock('yaml', () => ({
 
 import { lockCommand, resolveRemoteDependency } from '../lock.js';
 import type { LockfileDependency } from '@promptscript/core';
-import { calculateManagedSkillIntegrity } from '../../utils/skill-lock-integrity.js';
 
 describe('lockCommand', () => {
   beforeEach(() => {
@@ -718,9 +717,8 @@ describe('lockCommand', () => {
     };
     expect(lock.dependencies[child]!.integrity).toBe(childIntegrity);
     expect(lock.dependencies[owner]!.integrity).toBe(
-      calculateManagedSkillIntegrity(lock.dependencies, [child])
+      'sha256-73564491308abbaf4a48db5bfb81ae091f18531a137c04e47610e9efc91c1303'
     );
-    expect(lock.dependencies[owner]!.integrity).not.toBe('sha256-pending');
   });
 
   it('should merge metadata for an md-sourced dependency that is still requested', async () => {

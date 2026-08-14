@@ -173,7 +173,6 @@ import {
   skillsUpdateCommand,
   normalizeSkillSource,
 } from '../skills.js';
-import { calculateManagedSkillIntegrity } from '../../utils/skill-lock-integrity.js';
 
 beforeEach(() => {
   mockFindConfigFile.mockReturnValue(null);
@@ -1194,7 +1193,7 @@ describe('skillsRemoveCommand', () => {
     expect(writtenLock.dependencies).not.toHaveProperty('https://github.com/org/repo');
   });
 
-  it('should preserve a repo pin used by another remote import', async () => {
+  it('should reset managed integrity when preserving a repo pin for another import', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({
       targets: [],
@@ -1213,7 +1212,7 @@ describe('skillsRemoveCommand', () => {
         'https://github.com/org/repo': {
           version: 'v1.0.0',
           commit: 'a'.repeat(40),
-          integrity: 'sha256-pending',
+          integrity: `sha256-${'a'.repeat(64)}`,
           gitUrl: 'git@github.com:org/repo.git',
           skills: [source],
         },
@@ -1242,11 +1241,17 @@ describe('skillsRemoveCommand', () => {
 
     const lockWriteCall = mockWriteFile.mock.calls.find((call) => call[0] === 'promptscript.lock')!;
     const writtenLock = JSON.parse(lockWriteCall[1] as string) as {
-      dependencies: Record<string, { gitUrl?: string; skills?: string[]; source?: string }>;
+      dependencies: Record<
+        string,
+        { gitUrl?: string; integrity?: string; skills?: string[]; source?: string }
+      >;
     };
     expect(writtenLock.dependencies['https://github.com/org/repo']).toBeDefined();
     expect(writtenLock.dependencies['https://github.com/org/repo']?.skills).toBeUndefined();
     expect(writtenLock.dependencies['https://github.com/org/repo']?.source).toBeUndefined();
+    expect(writtenLock.dependencies['https://github.com/org/repo']?.integrity).toBe(
+      'sha256-pending'
+    );
     expect(writtenLock.dependencies['https://github.com/org/repo']?.gitUrl).toBe(
       'git@github.com:org/repo.git'
     );
@@ -2483,10 +2488,7 @@ describe('skillsAddCommand frontmatter validation', () => {
       'github.com/org/repo/skills/bar@v1.0.0',
     ]);
     expect(lock.dependencies['https://github.com/org/repo']?.integrity).toBe(
-      calculateManagedSkillIntegrity(lock.dependencies, [
-        sibling,
-        'github.com/org/repo/skills/bar@v1.0.0',
-      ])
+      'sha256-6413a8be8bfdcaff0655c050259633d4c5ad2de4dd12fb70122095d8814b527d'
     );
   });
 
@@ -2773,9 +2775,8 @@ describe('skillsUpdateCommand frontmatter re-validation', () => {
       dependencies: Record<string, LockfileDependency>;
     };
     expect(lock.dependencies[owner]!.integrity).toBe(
-      calculateManagedSkillIntegrity(lock.dependencies, [firstChild, secondChild])
+      'sha256-f81292a6746918d3050119e8fc4bfc14cf5ceea0c834a6e735eb09d70e9d56ae'
     );
-    expect(lock.dependencies[owner]!.integrity).not.toBe('sha256-pending');
   });
 
   it('skips an entry when re-validation reports errors', async () => {

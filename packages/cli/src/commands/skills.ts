@@ -11,7 +11,10 @@ import type { Lockfile, LockfileDependency } from '@promptscript/core';
 import { LOCKFILE_VERSION, isValidLockfile } from '@promptscript/core';
 import { LOCKFILE_PATH, resolveRemoteDependency } from './lock.js';
 import { collectRemoteImports, type RemoteImport } from './lock-scanner.js';
-import { refreshManagedSkillOwnerIntegrity } from '../utils/skill-lock-integrity.js';
+import {
+  PENDING_INTEGRITY,
+  refreshManagedSkillOwnerIntegrity,
+} from '../utils/skill-lock-integrity.js';
 import {
   validateSkillFrontmatter,
   formatSkillValidationIssues,
@@ -960,6 +963,7 @@ export async function skillsRemoveCommand(
         } else {
           delete repoDependency.skills;
           delete repoDependency.source;
+          repoDependency.integrity = PENDING_INTEGRITY;
         }
       }
     }
