@@ -207,7 +207,11 @@ export class GitRegistry implements Registry {
       const filePath = this.resolveFilePath(repoPath, basePath);
 
       return existsSync(filePath);
-    } catch {
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(this.url, this.timeout, error);
+      }
       return false;
     }
   }
@@ -232,7 +236,11 @@ export class GitRegistry implements Registry {
 
       const entries = await fs.readdir(dirPath, { withFileTypes: true });
       return entries.map((e) => (e.isDirectory() ? `${e.name}/` : e.name));
-    } catch {
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(this.url, this.timeout, error);
+      }
       return [];
     }
   }

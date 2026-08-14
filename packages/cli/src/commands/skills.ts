@@ -1,4 +1,4 @@
-import { writeFile, readFile, readdir, mkdtemp, rm, rename } from 'fs/promises';
+import { writeFile, readFile, readdir, mkdtemp, rm, rename, chmod, open, stat } from 'fs/promises';
 import { resolve, join, basename, dirname } from 'path';
 import { existsSync } from 'fs';
 import { tmpdir } from 'os';
@@ -396,6 +396,134 @@ function printValidationIssues(issues: readonly SkillValidationIssue[]): void {
  * occurrence of any of these directives.
  */
 const HEADER_DIRECTIVES = ['@use ', '@inherit ', '@meta '];
+const SKILLS_ADD_LOCK_PATH = '.promptscript-skills-add.lock';
+const SKILLS_ADD_LOCK_STALE_MS = 30 * 60 * 1000;
+
+interface SkillsAddLockHandle {
+  path: string;
+  token: string;
+  file: {
+    close(): Promise<void>;
+    writeFile(data: string, encoding: BufferEncoding): Promise<void>;
+  };
+}
+
+interface SkillsAddLockMetadata {
+  acquiredAt: number;
+  pid: number;
+  token: string;
+}
+
+function getErrorCode(error: unknown): string | undefined {
+  if (error instanceof Error && 'code' in error) {
+    const code = (error as { code?: unknown }).code;
+    return typeof code === 'string' ? code : undefined;
+  }
+  return undefined;
+}
+
+function isProcessAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return getErrorCode(error) === 'EPERM';
+  }
+}
+
+function isSkillsAddLockMetadata(value: unknown): value is SkillsAddLockMetadata {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'acquiredAt' in value &&
+    typeof value.acquiredAt === 'number' &&
+    'pid' in value &&
+    typeof value.pid === 'number' &&
+    'token' in value &&
+    typeof value.token === 'string'
+  );
+}
+
+async function isStaleSkillsAddLock(lockPath: string): Promise<boolean> {
+  let metadata: SkillsAddLockMetadata | undefined;
+  try {
+    const raw = await readFile(lockPath, 'utf-8');
+    const parsed: unknown = JSON.parse(raw);
+    if (isSkillsAddLockMetadata(parsed)) {
+      metadata = parsed;
+    }
+  } catch (error) {
+    if (getErrorCode(error) === 'ENOENT') {
+      return false;
+    }
+  }
+
+  if (metadata && Number.isInteger(metadata.pid) && metadata.pid > 0) {
+    return !isProcessAlive(metadata.pid);
+  }
+
+  try {
+    const details = await stat(lockPath);
+    return Date.now() - details.mtimeMs > SKILLS_ADD_LOCK_STALE_MS;
+  } catch (error) {
+    return getErrorCode(error) === 'ENOENT';
+  }
+}
+
+async function acquireSkillsAddLock(): Promise<SkillsAddLockHandle> {
+  const lockPath = resolve(SKILLS_ADD_LOCK_PATH);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const file = await open(lockPath, 'wx', 0o600);
+      const metadata: SkillsAddLockMetadata = {
+        acquiredAt: Date.now(),
+        pid: process.pid,
+        token: `${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      };
+      try {
+        await file.writeFile(JSON.stringify(metadata), 'utf-8');
+      } catch (error) {
+        await file.close().catch(() => {
+          // Best-effort close must not hide the write error.
+        });
+        await rm(lockPath, { force: true }).catch(() => {
+          // Best-effort cleanup must not hide the write error.
+        });
+        throw error;
+      }
+      return { path: lockPath, token: metadata.token, file };
+    } catch (error) {
+      if (getErrorCode(error) !== 'EEXIST') {
+        throw error;
+      }
+      if (!(await isStaleSkillsAddLock(lockPath))) {
+        throw new Error(
+          `Another "prs skills add" is already running for this project. Try again after it finishes.`,
+          { cause: error }
+        );
+      }
+      await rm(lockPath, { force: true });
+    }
+  }
+  throw new Error(`Cannot acquire skills add lock: ${resolve(SKILLS_ADD_LOCK_PATH)}`);
+}
+
+async function releaseSkillsAddLock(lock: SkillsAddLockHandle): Promise<void> {
+  try {
+    await lock.file.close();
+  } catch {
+    // Best-effort close must not leave the project lock behind.
+  }
+  try {
+    const raw = await readFile(lock.path, 'utf-8');
+    const metadata: unknown = JSON.parse(raw);
+    if (isSkillsAddLockMetadata(metadata) && metadata.token === lock.token) {
+      await rm(lock.path, { force: true });
+    }
+  } catch {
+    // Best-effort cleanup allows stale-lock recovery on the next invocation.
+  }
+}
 
 /**
  * Extract the base repository URL from a skill source path.
@@ -660,10 +788,22 @@ async function saveLockfile(lockfile: Lockfile): Promise<void> {
 }
 
 async function writeFileAtomically(filePath: string, content: string): Promise<void> {
+  let originalMode: number | undefined;
+  try {
+    originalMode = (await stat(filePath)).mode & 0o7777;
+  } catch (error) {
+    if (getErrorCode(error) !== 'ENOENT') {
+      throw error;
+    }
+  }
+
   const temporaryDirectory = await mkdtemp(join(dirname(filePath), `.${basename(filePath)}-`));
   const temporaryFile = join(temporaryDirectory, basename(filePath));
   try {
     await writeFile(temporaryFile, content, 'utf-8');
+    if (originalMode !== undefined) {
+      await chmod(temporaryFile, originalMode);
+    }
     await rename(temporaryFile, filePath);
   } finally {
     await rm(temporaryDirectory, { recursive: true, force: true }).catch(() => {
@@ -795,6 +935,7 @@ export async function skillsAddCommand(
 ): Promise<void> {
   const spinner = createSpinner('Adding skill...').start();
   let rollbackState: SkillsAddRollbackState | undefined;
+  let transactionLock: SkillsAddLockHandle | undefined;
 
   try {
     // Reject plain HTTP early (security): git over plaintext exposes the
@@ -820,6 +961,10 @@ export async function skillsAddCommand(
       spinner.fail(sourceError);
       process.exitCode = 1;
       return;
+    }
+
+    if (!options.dryRun) {
+      transactionLock = await acquireSkillsAddLock();
     }
 
     // Resolve target file
@@ -1011,6 +1156,10 @@ export async function skillsAddCommand(
     spinner.fail('Failed to add skill');
     ConsoleOutput.error(reportedError.message);
     process.exitCode = 1;
+  } finally {
+    if (transactionLock) {
+      await releaseSkillsAddLock(transactionLock);
+    }
   }
 }
 
