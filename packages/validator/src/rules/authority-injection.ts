@@ -10,6 +10,17 @@ import { walkText } from '../walker.js';
  * ones (\s*, \s+) to prevent ReDoS (Regular Expression Denial of Service) attacks.
  * This ensures O(n) matching time even on adversarial inputs.
  */
+const WARNING_SUPPRESSION_PATTERNS: RegExp[] = [
+  // Removed because it triggers false positives on valid agent instructions (e.g., "do not notify user")
+  // /(?:DO\s{1,10}NOT|NEVER|DON'?T)\s{1,10}(?:WARN|ALERT|NOTIFY|FLAG|REPORT)/i,
+  /\b(?:DO\s{1,10}NOT|NEVER|DON'?T)\b\s{1,10}(?:PROVIDE|SHOW|DISPLAY|INCLUDE)\b\s{1,10}(?:SECURITY\s{1,10})?WARNINGS?\b/i,
+  /\b(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\b\s{1,10}(?:ALL\s{1,10})?WARNINGS?\b/i,
+  /\b(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\b\s{1,10}(?:ALL\s{1,10})?(?:SECURITY\s{1,10})?(?:ALERTS?|NOTIFICATIONS?)\b/i,
+  /\bIGNORE\b\s{1,10}(?:ALL\s{1,10})?(?:SAFETY\s{1,10})?WARNINGS?\b/i,
+  /(?:^|[.!?:;]\s{0,10})\s{0,10}(?:[-*]\s{1,10})?(?:PLEASE\s{1,10})?\b(?:SKIP|BYPASS)\b\s{1,10}(?:CHECKS?|VALIDATION)\b/im,
+  /\b(?:SKIP|BYPASS)\b\s{1,10}(?:(?:ALL\s{1,10})(?:SAFETY\s{1,10})?|SAFETY\s{1,10})(?:CHECKS?|VALIDATION)\b/i,
+];
+
 const AUTHORITY_PATTERNS: RegExp[] = [
   // Mandatory/strict mode indicators
   /\[?\s{0,10}\bMANDATORY\b\s{0,10}(?:POLICY|UPDATE|FOOTER|INSTRUCTION|DIRECTIVE)\b\s{0,10}\]?/i,
@@ -22,14 +33,7 @@ const AUTHORITY_PATTERNS: RegExp[] = [
   /\[?\s{0,10}\bEMERGENCY\b\s{0,10}(?:PROTOCOL|OVERRIDE|MODE)\b\s{0,10}\]?/i,
 
   // Warning suppression patterns
-  // Removed because it triggers false positives on valid agent instructions (e.g., "do not notify user")
-  // /(?:DO\s{1,10}NOT|NEVER|DON'?T)\s{1,10}(?:WARN|ALERT|NOTIFY|FLAG|REPORT)/i,
-  /\b(?:DO\s{1,10}NOT|NEVER|DON'?T)\b\s{1,10}(?:PROVIDE|SHOW|DISPLAY|INCLUDE)\b\s{1,10}(?:SECURITY\s{1,10})?WARNINGS?\b/i,
-  /\b(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\b\s{1,10}(?:ALL\s{1,10})?WARNINGS?\b/i,
-  /\b(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\b\s{1,10}(?:ALL\s{1,10})?(?:SECURITY\s{1,10})?(?:ALERTS?|NOTIFICATIONS?)\b/i,
-  /\bIGNORE\b\s{1,10}(?:ALL\s{1,10})?(?:SAFETY\s{1,10})?WARNINGS?\b/i,
-  /(?:^|[.!?:;]\s{0,10})\s{0,10}(?:[-*]\s{1,10})?(?:PLEASE\s{1,10})?\b(?:SKIP|BYPASS)\b\s{1,10}(?:CHECKS?|VALIDATION)\b/im,
-  /\b(?:SKIP|BYPASS)\b\s{1,10}(?:(?:ALL\s{1,10})(?:SAFETY\s{1,10})?|SAFETY\s{1,10})(?:CHECKS?|VALIDATION)\b/i,
+  ...WARNING_SUPPRESSION_PATTERNS,
 
   // Execute/follow verbatim patterns
   /\bEXECUTE\b\s{1,10}(?:THIS\s{1,10})?VERBATIM\b/i,
@@ -44,6 +48,274 @@ const AUTHORITY_PATTERNS: RegExp[] = [
   /\b(?:CORE|FUNDAMENTAL|BASE)\b\s{1,10}(?:DIRECTIVE|INSTRUCTION)\s{1,10}(?:UPDATE|OVERRIDE)\b/i,
   /\bNEW\b\s{1,10}(?:SYSTEM|CORE|BASE)\s{1,10}(?:INSTRUCTIONS?|DIRECTIVES?|RULES?)\b/i,
 ];
+
+const SUPPRESSION_PATTERN_SET = new Set(WARNING_SUPPRESSION_PATTERNS);
+const DEFENSIVE_HEADING_NAMES = new Set([
+  "don't",
+  "don'ts",
+  'do not',
+  'forbidden',
+  'restriction',
+  'restrictions',
+]);
+
+interface TextRange {
+  start: number;
+  end: number;
+}
+
+interface NormalizedText {
+  value: string;
+  sourceStarts: number[];
+  sourceEnds: number[];
+}
+
+interface FenceInfo {
+  character: '`' | '~';
+  length: number;
+}
+
+function isHorizontalWhitespace(character: string | undefined): boolean {
+  return character === ' ' || character === '\t';
+}
+
+function getFenceInfo(line: string): FenceInfo | undefined {
+  const trimmedLine = line.trimStart();
+  const character = trimmedLine[0];
+  if (character !== '`' && character !== '~') {
+    return undefined;
+  }
+
+  let length = 0;
+  while (trimmedLine[length] === character) {
+    length++;
+  }
+  return length >= 3 ? { character, length } : undefined;
+}
+
+function getHeadingTitle(line: string): string | undefined {
+  const normalizedLine = line.endsWith('\r') ? line.slice(0, -1) : line;
+  let index = 0;
+  while (isHorizontalWhitespace(normalizedLine[index])) {
+    index++;
+  }
+  const indentation = index;
+  if (indentation > 3 || normalizedLine[index] !== '#') {
+    return undefined;
+  }
+
+  let hashCount = 0;
+  while (normalizedLine[index] === '#' && hashCount < 6) {
+    index++;
+    hashCount++;
+  }
+  if (hashCount === 0 || !isHorizontalWhitespace(normalizedLine[index])) {
+    return undefined;
+  }
+
+  while (isHorizontalWhitespace(normalizedLine[index])) {
+    index++;
+  }
+  if (index >= normalizedLine.length) {
+    return undefined;
+  }
+
+  let end = normalizedLine.length;
+  while (isHorizontalWhitespace(normalizedLine[end - 1])) {
+    end--;
+  }
+
+  let titleEnd = end;
+  while (titleEnd > index && normalizedLine[titleEnd - 1] === '#') {
+    titleEnd--;
+  }
+  if (titleEnd < end && isHorizontalWhitespace(normalizedLine[titleEnd - 1])) {
+    while (isHorizontalWhitespace(normalizedLine[titleEnd - 1])) {
+      titleEnd--;
+    }
+    end = titleEnd;
+  }
+
+  const title = normalizedLine.slice(index, end).toLowerCase();
+  return DEFENSIVE_HEADING_NAMES.has(title) ? title : undefined;
+}
+
+function getMarkdownListItemIndent(line: string): number | undefined {
+  let index = 0;
+  while (isHorizontalWhitespace(line[index])) {
+    index++;
+  }
+  const indentation = index;
+  if (indentation > 3) {
+    return undefined;
+  }
+
+  const marker = line[index];
+  if (marker === '-' || marker === '+' || marker === '*') {
+    index++;
+  } else {
+    const numberStart = index;
+    while (line[index] !== undefined && line[index]! >= '0' && line[index]! <= '9') {
+      index++;
+    }
+    if (index === numberStart || (line[index] !== '.' && line[index] !== ')')) {
+      return undefined;
+    }
+    index++;
+  }
+
+  return isHorizontalWhitespace(line[index]) ? indentation : undefined;
+}
+
+function findDefensiveListItems(text: string): TextRange[] {
+  const ranges: TextRange[] = [];
+  let defensiveHeading = false;
+  let listIndent: number | undefined;
+  let insideFence = false;
+  let fenceCharacter: FenceInfo['character'] | undefined;
+  let fenceLength = 0;
+  let lineStart = 0;
+
+  while (lineStart <= text.length) {
+    const newlineIndex = text.indexOf('\n', lineStart);
+    const lineEnd = newlineIndex === -1 ? text.length : newlineIndex;
+    const line = text.slice(lineStart, lineEnd);
+    const fence = getFenceInfo(line);
+
+    if (insideFence) {
+      const closesFence =
+        fence !== undefined &&
+        fence.character === fenceCharacter &&
+        fence.length >= fenceLength &&
+        line.trimStart().slice(fence.length).trim() === '';
+      if (closesFence) {
+        insideFence = false;
+        fenceCharacter = undefined;
+        fenceLength = 0;
+      }
+    } else if (fence !== undefined) {
+      insideFence = true;
+      fenceCharacter = fence.character;
+      fenceLength = fence.length;
+    } else {
+      const headingTitle = getHeadingTitle(line);
+      if (headingTitle !== undefined) {
+        defensiveHeading = true;
+        listIndent = undefined;
+      } else if (getAnyHeadingTitle(line) !== undefined) {
+        defensiveHeading = false;
+        listIndent = undefined;
+      } else if (defensiveHeading) {
+        const itemIndent = getMarkdownListItemIndent(line);
+        if (itemIndent !== undefined) {
+          if (listIndent === undefined) {
+            listIndent = itemIndent;
+          }
+          if (itemIndent === listIndent) {
+            ranges.push({ start: lineStart, end: lineEnd });
+          }
+        }
+      }
+    }
+
+    if (newlineIndex === -1) {
+      break;
+    }
+    lineStart = newlineIndex + 1;
+  }
+
+  return ranges;
+}
+
+function getAnyHeadingTitle(line: string): string | undefined {
+  const normalizedLine = line.endsWith('\r') ? line.slice(0, -1) : line;
+  let index = 0;
+  while (isHorizontalWhitespace(normalizedLine[index])) {
+    index++;
+  }
+  if (index > 3 || normalizedLine[index] !== '#') {
+    return undefined;
+  }
+
+  let hashCount = 0;
+  while (normalizedLine[index] === '#' && hashCount < 6) {
+    index++;
+    hashCount++;
+  }
+  return hashCount > 0 && isHorizontalWhitespace(normalizedLine[index])
+    ? normalizedLine.slice(index)
+    : undefined;
+}
+
+function normalizeText(text: string): NormalizedText {
+  const characters: string[] = [];
+  const sourceStarts: number[] = [];
+  const sourceEnds: number[] = [];
+  let index = 0;
+
+  while (index < text.length) {
+    if (/\s/.test(text[index]!)) {
+      const start = index;
+      index++;
+      while (index < text.length && /\s/.test(text[index]!)) {
+        index++;
+      }
+      characters.push(' ');
+      sourceStarts.push(start);
+      sourceEnds.push(index);
+      continue;
+    }
+
+    characters.push(text[index]!);
+    sourceStarts.push(index);
+    sourceEnds.push(index + 1);
+    index++;
+  }
+
+  return {
+    value: characters.join(''),
+    sourceStarts,
+    sourceEnds,
+  };
+}
+
+function isRangeWithinListItem(range: TextRange, listItems: readonly TextRange[]): boolean {
+  return listItems.some((item) => range.start >= item.start && range.end <= item.end);
+}
+
+function hasUnexemptMatch(
+  pattern: RegExp,
+  candidate: string,
+  listItems: readonly TextRange[],
+  normalized?: NormalizedText
+): boolean {
+  const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
+  const globalPattern = new RegExp(pattern.source, flags);
+  for (const match of candidate.matchAll(globalPattern)) {
+    const matchIndex = match.index ?? 0;
+    const matchText = match[0] ?? '';
+    let range: TextRange;
+    if (normalized === undefined) {
+      range = { start: matchIndex, end: matchIndex + matchText.length };
+    } else if (
+      matchText.length > 0 &&
+      matchIndex < normalized.sourceStarts.length &&
+      matchIndex + matchText.length <= normalized.sourceEnds.length
+    ) {
+      range = {
+        start: normalized.sourceStarts[matchIndex]!,
+        end: normalized.sourceEnds[matchIndex + matchText.length - 1]!,
+      };
+    } else {
+      return true;
+    }
+
+    if (!SUPPRESSION_PATTERN_SET.has(pattern) || !isRangeWithinListItem(range, listItems)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /**
  * Strip fenced code blocks from text before security scanning.
@@ -118,9 +390,13 @@ export const authorityInjection: ValidationRule = {
       ctx.ast,
       (text, loc) => {
         const strippedText = stripFencedCodeBlocks(text);
-        const normalizedText = strippedText.replace(/\s+/g, ' ');
+        const listItems = findDefensiveListItems(strippedText);
+        const normalizedText = normalizeText(strippedText);
         for (const pattern of AUTHORITY_PATTERNS) {
-          if (pattern.test(strippedText) || pattern.test(normalizedText)) {
+          if (
+            hasUnexemptMatch(pattern, strippedText, listItems) ||
+            hasUnexemptMatch(pattern, normalizedText.value, listItems, normalizedText)
+          ) {
             ctx.report({
               message: `Authority injection pattern detected: ${pattern.source}`,
               location: loc,
