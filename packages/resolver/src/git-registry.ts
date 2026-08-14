@@ -258,26 +258,71 @@ export class GitRegistry implements Registry {
    */
   async checkoutCommit(targetDir: string, commit: string): Promise<void> {
     const git = this.createGit(targetDir);
-    await git.raw(['config', 'core.autocrlf', 'false']);
-    await git.raw(['config', 'core.eol', 'lf']);
+    try {
+      await git.raw(['config', 'core.autocrlf', 'false']);
+      await git.raw(['config', 'core.eol', 'lf']);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(this.url, this.timeout, error);
+      }
+      throw err;
+    }
+
     try {
       await git.fetch(['origin', commit, '--depth=1']);
-    } catch {
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(this.url, this.timeout, error);
+      }
+
       // Commit may not be directly fetchable (shallow clone); try unshallow
       try {
         await git.fetch(['--unshallow']);
-      } catch {
+      } catch (unshallowErr) {
+        const error =
+          unshallowErr instanceof Error ? unshallowErr : new Error(String(unshallowErr));
+        if (isGitTimeoutError(error)) {
+          throw createGitTimeoutError(this.url, this.timeout, error);
+        }
+
         // If unshallow fails, try a full fetch
-        await git.fetch(['origin']);
+        try {
+          await git.fetch(['origin']);
+        } catch (fullFetchErr) {
+          const error =
+            fullFetchErr instanceof Error ? fullFetchErr : new Error(String(fullFetchErr));
+          if (isGitTimeoutError(error)) {
+            throw createGitTimeoutError(this.url, this.timeout, error);
+          }
+          throw fullFetchErr;
+        }
       }
     }
-    await git.checkout(commit);
-    await git.reset(['--hard', commit]);
+    try {
+      await git.checkout(commit);
+      await git.reset(['--hard', commit]);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(this.url, this.timeout, error);
+      }
+      throw err;
+    }
   }
 
   /** Remove clone transport metadata before a repository is vendored. */
   async removeRemote(targetDir: string): Promise<void> {
-    await this.createGit(targetDir).raw(['remote', 'remove', 'origin']);
+    try {
+      await this.createGit(targetDir).raw(['remote', 'remove', 'origin']);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(this.url, this.timeout, error);
+      }
+      throw err;
+    }
   }
 
   /**
@@ -291,8 +336,16 @@ export class GitRegistry implements Registry {
     const repoPath = await this.ensureCloned(targetRef);
 
     const git = this.createGit(repoPath);
-    const result = await git.revparse(['HEAD']);
-    return result.trim();
+    try {
+      const result = await git.revparse(['HEAD']);
+      return result.trim();
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(this.url, this.timeout, error);
+      }
+      throw err;
+    }
   }
 
   /**
@@ -323,6 +376,9 @@ export class GitRegistry implements Registry {
       await git.clone(cloneUrl, targetDir, cloneOptions);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(repoUrl, this.timeout, error);
+      }
       if (tag && this.isRefError(error)) {
         throw new GitRefNotFoundError(tag, repoUrl);
       }
@@ -334,6 +390,9 @@ export class GitRegistry implements Registry {
           } catch (fallbackErr) {
             const fbError =
               fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
+            if (isGitTimeoutError(fbError)) {
+              throw createGitTimeoutError(fallbackRepoUrl, this.timeout, fbError);
+            }
             if (this.isAccessError(fbError)) {
               throw new GitAuthError(
                 `Authentication failed for both ${repoUrl} and fallback ${fallbackRepoUrl}`,
@@ -376,7 +435,16 @@ export class GitRegistry implements Registry {
     }
 
     const git = this.createGit();
-    const raw = await git.listRemote(['--tags', this.auth ? this.transportUrl : repoUrl]);
+    let raw: string;
+    try {
+      raw = await git.listRemote(['--tags', this.auth ? this.transportUrl : repoUrl]);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(repoUrl, this.timeout, error);
+      }
+      throw err;
+    }
 
     // Parse "abc123\trefs/tags/v1.0.0" lines; strip peeled tag suffixes (^{})
     const tags = [
@@ -442,6 +510,9 @@ export class GitRegistry implements Registry {
       await this.doCloneSparse(git, repoUrl, ref, targetDir, sparsePath);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(repoUrl, this.timeout, error);
+      }
       if (this.isAccessError(error) && fallbackRepoUrl) {
         try {
           await this.doCloneSparse(git, fallbackRepoUrl, ref, targetDir, sparsePath);
@@ -449,6 +520,9 @@ export class GitRegistry implements Registry {
         } catch (fallbackErr) {
           const fbError =
             fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
+          if (isGitTimeoutError(fbError)) {
+            throw createGitTimeoutError(fallbackRepoUrl, this.timeout, fbError);
+          }
           if (this.isAccessError(fbError)) {
             throw new GitAuthError(
               `Authentication failed for both ${repoUrl} and fallback ${fallbackRepoUrl}`,
@@ -523,7 +597,10 @@ export class GitRegistry implements Registry {
           const commitHash = await this.getCurrentCommit(entry.path);
           await this.cacheManager.touch(this.url, ref, commitHash);
           return entry.path;
-        } catch {
+        } catch (err) {
+          if (err instanceof Error && isGitTimeoutError(err)) {
+            throw err;
+          }
           // If fetch fails, try a fresh clone
           await this.cacheManager.remove(this.url, ref);
         }
@@ -564,6 +641,10 @@ export class GitRegistry implements Registry {
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
 
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(this.url, this.timeout, error);
+      }
+
       // Check if ref doesn't exist first (more specific than auth errors)
       // A "branch not found" can sometimes look like an auth error to git
       if (this.isRefError(error)) {
@@ -575,6 +656,9 @@ export class GitRegistry implements Registry {
           await repoGit.checkout(ref);
         } catch (fetchErr) {
           const fetchError = fetchErr instanceof Error ? fetchErr : new Error(String(fetchErr));
+          if (isGitTimeoutError(fetchError)) {
+            throw createGitTimeoutError(this.url, this.timeout, fetchError);
+          }
           if (this.isRefError(fetchError)) {
             throw new GitRefNotFoundError(ref, this.url);
           }
@@ -634,6 +718,9 @@ export class GitRegistry implements Registry {
       await git.clone(url, targetPath, ['--depth=1', `--branch=${ref}`, '--single-branch']);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(url, this.timeout, error);
+      }
       if (this.isRefError(error)) {
         try {
           await git.clone(url, targetPath, ['--depth=1']);
@@ -642,6 +729,9 @@ export class GitRegistry implements Registry {
           await repoGit.checkout(ref);
         } catch (fetchErr) {
           const fetchError = fetchErr instanceof Error ? fetchErr : new Error(String(fetchErr));
+          if (isGitTimeoutError(fetchError)) {
+            throw createGitTimeoutError(url, this.timeout, fetchError);
+          }
           if (this.isRefError(fetchError)) {
             throw new GitRefNotFoundError(ref, url);
           }
@@ -669,6 +759,9 @@ export class GitRegistry implements Registry {
       await git.reset(['--hard', `origin/${ref}`]);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(this.url, this.timeout, error);
+      }
 
       // If ref is a tag or commit, try direct checkout
       if (this.isRefError(error)) {
@@ -676,7 +769,11 @@ export class GitRegistry implements Registry {
           await git.fetch(['origin', '--tags', '--depth=1']);
           await git.checkout(ref);
           return;
-        } catch {
+        } catch (fallbackErr) {
+          const error = fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
+          if (isGitTimeoutError(error)) {
+            throw createGitTimeoutError(this.url, this.timeout, error);
+          }
           throw new GitRefNotFoundError(ref, this.url);
         }
       }
@@ -690,8 +787,16 @@ export class GitRegistry implements Registry {
    */
   private async getCurrentCommit(repoPath: string): Promise<string> {
     const git = this.createGit(repoPath);
-    const result = await git.revparse(['HEAD']);
-    return result.trim();
+    try {
+      const result = await git.revparse(['HEAD']);
+      return result.trim();
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(this.url, this.timeout, error);
+      }
+      throw err;
+    }
   }
 
   /**
@@ -1046,13 +1151,36 @@ function createRemoteValidationGit(baseDir: string | undefined, timeout: number)
 
 function isGitTimeoutError(error: Error): boolean {
   const message = error.message.toLowerCase();
-  const errorWithCode = error as Error & { code?: unknown };
+  const errorWithCode = error as Error & { cause?: unknown; code?: unknown };
   const code = typeof errorWithCode.code === 'string' ? errorWithCode.code.toLowerCase() : '';
+  const cause = errorWithCode.cause;
+  const causeMessage = cause instanceof Error ? cause.message.toLowerCase() : '';
+  const causeCode =
+    cause instanceof Error &&
+    'code' in cause &&
+    typeof (cause as { code?: unknown }).code === 'string'
+      ? ((cause as { code: string }).code ?? '').toLowerCase()
+      : '';
   return (
     message.includes('timeout') ||
     message.includes('timed out') ||
     message.includes('etimedout') ||
-    code === 'etimedout'
+    code === 'etimedout' ||
+    causeMessage.includes('timeout') ||
+    causeMessage.includes('timed out') ||
+    causeMessage.includes('etimedout') ||
+    causeCode === 'etimedout'
+  );
+}
+
+function createGitTimeoutError(url: string, timeout: number, cause: Error): GitCloneError {
+  if (cause instanceof GitCloneError && isGitTimeoutError(cause)) {
+    return cause;
+  }
+  return new GitCloneError(
+    `Git operation timed out after ${timeout}ms while contacting ${url}`,
+    url,
+    cause
   );
 }
 

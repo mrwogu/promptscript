@@ -664,6 +664,7 @@ interface SkillsAddRollbackState {
   originalEntryContent: string;
   originalLockfileContent: string | undefined;
   updatedLockfileContent: string;
+  lockfileWriteCompleted: boolean;
 }
 
 function isMissingFileError(error: unknown): boolean {
@@ -690,7 +691,10 @@ async function rollbackSkillsAdd(state: SkillsAddRollbackState): Promise<Error |
     const currentLockfileContent = await readLockfileForRollback();
     if (currentLockfileContent === state.originalLockfileContent) {
       // The lockfile write did not change its contents.
-    } else if (currentLockfileContent === state.updatedLockfileContent) {
+    } else if (
+      state.lockfileWriteCompleted &&
+      currentLockfileContent === state.updatedLockfileContent
+    ) {
       if (state.originalLockfileContent === undefined) {
         await rm(LOCKFILE_PATH, { force: true });
       } else {
@@ -919,11 +923,13 @@ export async function skillsAddCommand(
       originalEntryContent: content,
       originalLockfileContent,
       updatedLockfileContent,
+      lockfileWriteCompleted: false,
     };
 
     // Write both files as one transaction from the user's perspective.
     await writeFile(entryFile, updatedContent, 'utf-8');
     await writeFile(LOCKFILE_PATH, updatedLockfileContent, 'utf-8');
+    rollbackState.lockfileWriteCompleted = true;
 
     spinner.succeed('Skill added');
     ConsoleOutput.newline();

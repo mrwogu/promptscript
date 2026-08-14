@@ -169,6 +169,31 @@ describe('GitRegistry — extended methods', () => {
         registry.cloneAtTag('https://github.com/org/repo.git', 'v1.0.0', join(testCacheDir, 't'))
       ).rejects.toThrow(GitCloneError);
     });
+
+    it('reports timeout before authentication when Git supplies ETIMEDOUT', async () => {
+      // Arrange
+      mockGit.clone.mockRejectedValueOnce(
+        Object.assign(new Error('Authentication failed while contacting remote'), {
+          code: 'ETIMEDOUT',
+        })
+      );
+
+      // Act / Assert
+      let error: unknown;
+      try {
+        await registry.cloneAtTag(
+          'https://github.com/org/repo.git',
+          'v1.0.0',
+          join(testCacheDir, 'timeout-target'),
+          'git@github.com:org/repo.git'
+        );
+      } catch (caught) {
+        error = caught;
+      }
+      expect(error).toBeInstanceOf(GitCloneError);
+      expect(error).not.toBeInstanceOf(GitAuthError);
+      expect(mockGit.clone).toHaveBeenCalledTimes(1);
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -646,6 +671,31 @@ describe('GitRegistry — extended methods', () => {
 
       expect(mockGit.fetch).toHaveBeenNthCalledWith(3, ['origin']);
       expect(mockGit.checkout).toHaveBeenCalledWith('cafe99');
+    });
+
+    it('reports checkout timeout before authentication', async () => {
+      mockGit.fetch.mockRejectedValueOnce(
+        Object.assign(new Error('Authentication failed while fetching remote'), {
+          code: 'ETIMEDOUT',
+        })
+      );
+
+      const timeoutRegistry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+        timeout: 25,
+      });
+
+      let error: unknown;
+      try {
+        await timeoutRegistry.checkoutCommit(join(testCacheDir, 'checkout-timeout'), 'deadbeef');
+      } catch (caught) {
+        error = caught;
+      }
+      expect(error).toBeInstanceOf(GitCloneError);
+      expect(error).not.toBeInstanceOf(GitAuthError);
+      expect((error as Error).message).toContain('timed out after 25ms');
+      expect(mockGit.fetch).toHaveBeenCalledTimes(1);
     });
   });
 
