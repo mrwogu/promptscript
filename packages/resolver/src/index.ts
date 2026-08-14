@@ -47,6 +47,7 @@ export {
   GitCloneError,
   GitAuthError,
   GitRefNotFoundError,
+  DEFAULT_GIT_TIMEOUT_MS,
   type GitRegistryOptions,
   type GitAuthOptions,
   type RemoteValidation,

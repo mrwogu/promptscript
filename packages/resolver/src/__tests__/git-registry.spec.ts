@@ -398,6 +398,22 @@ describe('GitRegistry', () => {
       expect(mockGit.env).toHaveBeenCalledWith('GIT_TERMINAL_PROMPT', '0');
       expect(mockGit.env).toHaveBeenCalledWith('GCM_INTERACTIVE', 'never');
     });
+
+    it('should apply a hard timeout to every registry Git client', async () => {
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+        timeout: 25,
+      });
+
+      await registry.fetch('@company/base');
+
+      expect(simpleGit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          timeout: { block: 25, stdErr: false, stdOut: false },
+        })
+      );
+    });
   });
 
   describe('error handling', () => {
@@ -942,6 +958,22 @@ describe('validateRemoteAccess', () => {
     expect(simpleGit).toHaveBeenCalledWith(expect.any(String), {
       timeout: { block: 25, stdErr: false, stdOut: false },
     });
+  });
+
+  it('should classify ETIMEDOUT as a timeout before authentication', async () => {
+    mockGit.listRemote.mockRejectedValue(
+      Object.assign(new Error('Authentication failed while contacting remote'), {
+        code: 'ETIMEDOUT',
+      })
+    );
+
+    const result = await validateRemoteAccess('https://github.com/org/repo.git', undefined, {
+      timeout: 25,
+    });
+
+    expect(result.accessible).toBe(false);
+    expect(result.error).toContain('Timed out after 25ms');
+    expect(result.error).not.toContain('Authentication failed');
   });
 });
 

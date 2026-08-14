@@ -344,6 +344,32 @@ describe('lockCommand', () => {
     expect(mockValidateRemoteAccess).not.toHaveBeenCalled();
   });
 
+  it('should apply the configured timeout to version lookup and validation', async () => {
+    const timeout = 25;
+
+    const result = await resolveRemoteDependency(
+      'github.com/company/base',
+      ['v1.2.0'],
+      undefined,
+      false,
+      undefined,
+      undefined,
+      { timeout }
+    );
+
+    expect(result.version).toBe('v1.2.0');
+    expect(mockCreateRegistryOptions).toHaveBeenCalledWith({
+      url: 'https://github.com/company/base.git',
+      auth: undefined,
+      timeout,
+    });
+    expect(mockValidateRemoteAccess).toHaveBeenCalledWith(
+      'https://github.com/company/base.git',
+      'v1.2.0',
+      { timeout }
+    );
+  });
+
   it('should refresh existing pins with --update', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({

@@ -26,10 +26,16 @@ import { parseGitUrl, parseVersionedPath, normalizeGitUrl } from './git-url-util
 const TAGS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 /** Default maximum wall-clock time for a Git operation. */
-const DEFAULT_GIT_TIMEOUT_MS = 60_000;
+export const DEFAULT_GIT_TIMEOUT_MS = 60_000;
 
 /** Semver tag pattern: optional "v" prefix followed by major.minor.patch */
 const SEMVER_TAG_RE = /^v?\d+\.\d+\.\d+/;
+
+function normalizeGitTimeout(timeout: number | undefined): number {
+  return timeout !== undefined && Number.isFinite(timeout) && timeout > 0
+    ? timeout
+    : DEFAULT_GIT_TIMEOUT_MS;
+}
 
 /**
  * Authentication options for Git registry.
@@ -151,7 +157,7 @@ export class GitRegistry implements Registry {
     this.subPath = options.path ?? '';
     this.auth = options.auth;
     this.cacheEnabled = options.cache?.enabled ?? true;
-    this.timeout = options.timeout ?? DEFAULT_GIT_TIMEOUT_MS;
+    this.timeout = normalizeGitTimeout(options.timeout);
     this.cacheManager = new GitCacheManager({
       cacheDir: options.cacheDir,
       ttl: options.cache?.ttl,
@@ -710,6 +716,8 @@ export class GitRegistry implements Registry {
     const options: Partial<SimpleGitOptions> = {
       timeout: {
         block: this.timeout,
+        stdErr: false,
+        stdOut: false,
       },
     };
 
@@ -1038,7 +1046,14 @@ function createRemoteValidationGit(baseDir: string | undefined, timeout: number)
 
 function isGitTimeoutError(error: Error): boolean {
   const message = error.message.toLowerCase();
-  return message.includes('timeout') || message.includes('timed out');
+  const errorWithCode = error as Error & { code?: unknown };
+  const code = typeof errorWithCode.code === 'string' ? errorWithCode.code.toLowerCase() : '';
+  return (
+    message.includes('timeout') ||
+    message.includes('timed out') ||
+    message.includes('etimedout') ||
+    code === 'etimedout'
+  );
 }
 
 /**
@@ -1057,10 +1072,7 @@ export async function validateRemoteAccess(
   ref?: string,
   options: RemoteValidationOptions = {}
 ): Promise<RemoteValidation> {
-  const timeout =
-    options.timeout !== undefined && Number.isFinite(options.timeout) && options.timeout > 0
-      ? options.timeout
-      : DEFAULT_GIT_TIMEOUT_MS;
+  const timeout = normalizeGitTimeout(options.timeout);
   const git = createRemoteValidationGit(undefined, timeout);
   try {
     const isCommit = ref !== undefined && /^[0-9a-f]{40}$/i.test(ref);
@@ -1103,6 +1115,13 @@ export async function validateRemoteAccess(
     const error = err instanceof Error ? err : new Error(String(err));
     const msg = error.message.toLowerCase();
 
+    if (isGitTimeoutError(error)) {
+      return {
+        accessible: false,
+        error: `Timed out after ${timeout}ms while contacting ${repoUrl}. Check your network connection and VPN settings.`,
+      };
+    }
+
     if (
       msg.includes('authentication') ||
       msg.includes('could not read from remote') ||
@@ -1112,13 +1131,6 @@ export async function validateRemoteAccess(
       return {
         accessible: false,
         error: `Authentication failed for ${repoUrl}. If behind a firewall/VPN, configure a GitHub personal access token.`,
-      };
-    }
-
-    if (isGitTimeoutError(error)) {
-      return {
-        accessible: false,
-        error: `Timed out after ${timeout}ms while contacting ${repoUrl}. Check your network connection and VPN settings.`,
       };
     }
 

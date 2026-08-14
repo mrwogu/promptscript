@@ -25,6 +25,7 @@ const {
   mockConsoleWarn,
   mockConsoleError,
   mockParse,
+  mockDefaultGitTimeoutMs,
 } = vi.hoisted(() => {
   const mockStart = vi.fn().mockReturnThis();
   const mockSucceed = vi.fn().mockReturnThis();
@@ -74,6 +75,7 @@ const {
   const mockConsoleWarn = vi.fn();
   const mockConsoleError = vi.fn();
   const mockParse = vi.fn();
+  const mockDefaultGitTimeoutMs = 60_000;
   return {
     mockSucceed,
     mockFail,
@@ -97,6 +99,7 @@ const {
     mockConsoleWarn,
     mockConsoleError,
     mockParse,
+    mockDefaultGitTimeoutMs,
     mockMkdtemp,
     mockRm,
   };
@@ -151,6 +154,7 @@ vi.mock('@promptscript/resolver', () => ({
   formatSkillValidationIssues: mockFormatSkillValidationIssues,
   hashContent: mockHashContent,
   createGitRegistry: mockCreateGitRegistry,
+  DEFAULT_GIT_TIMEOUT_MS: mockDefaultGitTimeoutMs,
   normalizeGitUrl: (url: string) => {
     const sshMatch = url.match(/^git@([^:]+):(.+)$/);
     const normalized = sshMatch ? `https://${sshMatch[1]}/${sshMatch[2]}` : url;
@@ -623,10 +627,13 @@ describe('skillsAddCommand', () => {
       ['latest'],
       undefined,
       false,
-      'git@github.com:org/repo.git'
+      'git@github.com:org/repo.git',
+      undefined,
+      { timeout: 60_000 }
     );
     expect(mockCreateGitRegistry).toHaveBeenCalledWith({
       url: 'git@github.com:org/repo.git',
+      timeout: 60_000,
     });
   });
 
@@ -905,7 +912,10 @@ describe('skillsAddCommand', () => {
       'https://github.com/org/repo',
       ['v1.2.3'],
       undefined,
-      false
+      false,
+      undefined,
+      undefined,
+      { timeout: 60_000 }
     );
   });
 
@@ -928,7 +938,10 @@ describe('skillsAddCommand', () => {
       'https://github.com/org/repo',
       ['v2.0.0', 'v2.0.0'],
       undefined,
-      false
+      false,
+      undefined,
+      undefined,
+      { timeout: 60_000 }
     );
   });
 
@@ -962,7 +975,10 @@ describe('skillsAddCommand', () => {
       'https://github.com/org/repo',
       ['v1.0.0'],
       aliasedOwner,
-      false
+      false,
+      undefined,
+      undefined,
+      { timeout: 60_000 }
     );
     const lockWriteCall = mockWriteFile.mock.calls.find((call) => call[0] === 'promptscript.lock')!;
     const writtenLock = JSON.parse(lockWriteCall[1] as string) as {
@@ -1000,7 +1016,10 @@ describe('skillsAddCommand', () => {
       'https://github.com/org/repo',
       ['v1.0.0'],
       regularPin,
-      false
+      false,
+      undefined,
+      undefined,
+      { timeout: 60_000 }
     );
     const lockWriteCall = mockWriteFile.mock.calls.find((call) => call[0] === 'promptscript.lock')!;
     const writtenLock = JSON.parse(lockWriteCall[1] as string) as {
@@ -2129,7 +2148,10 @@ describe('skillsUpdateCommand', () => {
       'https://github.com/org/repo',
       ['v1.0.0', 'v1.0.0'],
       undefined,
-      true
+      true,
+      undefined,
+      undefined,
+      { timeout: 60_000 }
     );
   });
 
@@ -2330,7 +2352,10 @@ describe('skillsAddCommand frontmatter validation', () => {
 
     await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
 
-    expect(mockCreateGitRegistry).toHaveBeenCalledWith({ url: 'https://github.com/org/repo' });
+    expect(mockCreateGitRegistry).toHaveBeenCalledWith({
+      url: 'https://github.com/org/repo',
+      timeout: 60_000,
+    });
     expect(mockCloneAtTag).toHaveBeenCalled();
     expect(mockSucceed).toHaveBeenCalledWith('Skill added');
     const writeCalls = mockWriteFile.mock.calls as unknown[][];
@@ -2345,6 +2370,33 @@ describe('skillsAddCommand frontmatter validation', () => {
     expect(mockRm).toHaveBeenCalledWith(
       '/tmp/prs-skill-validate-xyz',
       expect.objectContaining({ recursive: true, force: true })
+    );
+  });
+
+  it('preserves a concurrently-created lockfile during rollback', async () => {
+    arrangeValidation({ skillContent: '---\nname: x\n---\nbody' });
+    const concurrentLockfile = '{"version":1,"dependencies":{"other":"process"}}';
+    mockReadFile
+      .mockResolvedValueOnce(SAMPLE_PRS_FOR_VALIDATION)
+      .mockResolvedValueOnce('---\nname: x\n---\nbody')
+      .mockResolvedValueOnce(concurrentLockfile);
+    mockWriteFile
+      .mockImplementationOnce(async () => undefined)
+      .mockImplementationOnce(async () => {
+        throw new Error('lockfile write failed');
+      });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockRm).not.toHaveBeenCalledWith(
+      'promptscript.lock',
+      expect.objectContaining({ force: true })
+    );
+    expect(
+      (mockWriteFile.mock.calls as unknown[][]).filter((call) => call[0] === 'promptscript.lock')
+    ).toHaveLength(1);
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('changed during skills add')
     );
   });
 
@@ -2622,8 +2674,7 @@ describe('skillsAddCommand frontmatter validation', () => {
     expect(entryWrites).toHaveLength(2);
     expect(entryWrites[0]?.[1]).not.toBe(originalEntry);
     expect(entryWrites[1]?.[1]).toBe(originalEntry);
-    expect(lockWrites).toHaveLength(2);
-    expect(lockWrites[1]?.[1]).toBe(originalLockfile);
+    expect(lockWrites).toHaveLength(1);
     expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
     expect(process.exitCode).toBe(1);
   });
