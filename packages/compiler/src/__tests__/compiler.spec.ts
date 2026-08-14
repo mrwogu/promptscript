@@ -909,7 +909,84 @@ describe('Compiler', () => {
 
       expect(result.success).toBe(true);
       expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(false);
-      expect(result.outputs.get('AGENTS.md')?.content).toContain('# Shared AGENTS output');
+      expect(result.outputs.get('AGENTS.md')?.content).toMatch(
+        /^# Shared AGENTS output\n\n<!-- PromptScript .* \| target: codex - do not edit -->$/
+      );
+      expect(result.outputs.get('AGENTS.md')?.content).not.toContain(
+        '| target: amp - do not edit -->'
+      );
+    });
+
+    it('should preserve the first owner for identical main output collisions', async () => {
+      const ast = createTestProgram();
+      const formatterA = createMockFormatter('formatter-a', 'shared.md');
+      const formatterB = createMockFormatter('formatter-b', 'shared.md');
+      const formatterC = createMockFormatter('formatter-c', 'shared.md');
+      vi.mocked(formatterA.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# Shared content',
+      });
+      vi.mocked(formatterB.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# Shared content',
+      });
+      vi.mocked(formatterC.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# Different content',
+      });
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatterA, formatterB, formatterC],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      const collisionWarnings = result.warnings.filter((w) => w.ruleId === 'PS4001');
+      expect(collisionWarnings).toHaveLength(1);
+      expect(collisionWarnings[0]?.message).toContain("'formatter-a'");
+      expect(collisionWarnings[0]?.message).toContain("'formatter-c'");
+    });
+
+    it('should warn when main output returns to the first content after a difference', async () => {
+      const ast = createTestProgram();
+      const formatterA = createMockFormatter('formatter-a', 'shared.md');
+      const formatterB = createMockFormatter('formatter-b', 'shared.md');
+      const formatterC = createMockFormatter('formatter-c', 'shared.md');
+      vi.mocked(formatterA.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# First content',
+      });
+      vi.mocked(formatterB.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# Different content',
+      });
+      vi.mocked(formatterC.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# First content',
+      });
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatterA, formatterB, formatterC],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      const collisionWarnings = result.warnings.filter((w) => w.ruleId === 'PS4001');
+      expect(collisionWarnings).toHaveLength(2);
+      expect(collisionWarnings[0]?.message).toContain("'formatter-a'");
+      expect(collisionWarnings[0]?.message).toContain("'formatter-b'");
+      expect(collisionWarnings[1]?.message).toContain("'formatter-b'");
+      expect(collisionWarnings[1]?.message).toContain("'formatter-c'");
     });
 
     it('should not warn when formatters emit an identical additional file', async () => {
@@ -1247,7 +1324,7 @@ describe('Compiler', () => {
       expect(result.outputs.has('.gemini/skills/promptscript/SKILL.md')).toBe(false);
     });
 
-    it('should silently skip auto-injection when same formatter already output the skill', async () => {
+    it('should warn when same formatter already output a different skill', async () => {
       const ast = createTestProgram();
       const formatter: Formatter = {
         ...createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md'),
@@ -1271,8 +1348,7 @@ describe('Compiler', () => {
       expect(result.success).toBe(true);
       const skillOutput = result.outputs.get('.claude/skills/promptscript/SKILL.md');
       expect(skillOutput?.content).toContain('User-defined promptscript skill');
-      // Same formatter → no warning (auto-discovered skill takes precedence silently)
-      expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(false);
+      expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(true);
     });
 
     it('should warn when different formatter already output the skill at same path', async () => {

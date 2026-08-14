@@ -465,8 +465,10 @@ export class Compiler {
 
         // Warn if multiple formatters target the same output path with different content
         const existingOwner = outputPathOwners.get(output.path);
-        if (existingOwner) {
-          if (outputPathContents.get(output.path) === output.content) {
+        const isIdenticalOutput =
+          existingOwner !== undefined && outputPathContents.get(output.path) === output.content;
+        if (existingOwner !== undefined) {
+          if (isIdenticalOutput) {
             this.logger.debug(
               `  Output path '${output.path}' already written by '${existingOwner}' with identical content. No conflict.`
             );
@@ -480,28 +482,32 @@ export class Compiler {
             });
           }
         }
-        outputPathOwners.set(output.path, formatter.name);
-        outputPathContents.set(output.path, output.content);
 
-        // Add PromptScript marker to all outputs for overwrite detection
-        const markedOutput = addMarkerToOutput(output, sourceLabel, formatter.name);
-        const previousManagedDirectories = outputs.get(output.path)?.managedOutputDirectories ?? [];
-        const previousManagedFiles = outputs.get(output.path)?.managedOutputFiles ?? [];
-        const managedOutputDirectories = [
-          ...new Set([
-            ...previousManagedDirectories,
-            ...(markedOutput.managedOutputDirectories ?? []),
-          ]),
-        ];
-        const managedOutputFiles = [
-          ...new Set([...previousManagedFiles, ...(markedOutput.managedOutputFiles ?? [])]),
-        ];
-        outputs.set(output.path, {
-          ...markedOutput,
-          managedOutputDirectories:
-            managedOutputDirectories.length > 0 ? managedOutputDirectories : undefined,
-          managedOutputFiles: managedOutputFiles.length > 0 ? managedOutputFiles : undefined,
-        });
+        if (!isIdenticalOutput) {
+          outputPathOwners.set(output.path, formatter.name);
+          outputPathContents.set(output.path, output.content);
+
+          // Add PromptScript marker to all outputs for overwrite detection
+          const markedOutput = addMarkerToOutput(output, sourceLabel, formatter.name);
+          const previousManagedDirectories =
+            outputs.get(output.path)?.managedOutputDirectories ?? [];
+          const previousManagedFiles = outputs.get(output.path)?.managedOutputFiles ?? [];
+          const managedOutputDirectories = [
+            ...new Set([
+              ...previousManagedDirectories,
+              ...(markedOutput.managedOutputDirectories ?? []),
+            ]),
+          ];
+          const managedOutputFiles = [
+            ...new Set([...previousManagedFiles, ...(markedOutput.managedOutputFiles ?? [])]),
+          ];
+          outputs.set(output.path, {
+            ...markedOutput,
+            managedOutputDirectories:
+              managedOutputDirectories.length > 0 ? managedOutputDirectories : undefined,
+            managedOutputFiles: managedOutputFiles.length > 0 ? managedOutputFiles : undefined,
+          });
+        }
 
         // Also add any additional files (e.g., .cursor/commands/, .github/prompts/)
         // Recursively collect nested additionalFiles (e.g., skill resource files)
@@ -579,14 +585,12 @@ export class Compiler {
           : this.options.skillContent;
         const existingOwner = outputPathOwners.get(skillPath);
         if (existingOwner) {
-          // If the same formatter already output the promptscript skill (e.g. via
-          // auto-discovered @skills block), silently skip — the content is identical.
-          // Only warn when a *different* formatter caused the collision.
+          // Preserve previously written skills and warn on differing content.
           if (outputPathContents.get(skillPath) === injectedContent) {
             this.logger.debug(
               `  Skill path '${skillPath}' already written by '${existingOwner}' with identical content. No conflict.`
             );
-          } else if (existingOwner !== formatter.name) {
+          } else {
             formatWarnings.push({
               ruleId: 'PS4001',
               ruleName: 'output-path-collision',
@@ -594,10 +598,6 @@ export class Compiler {
               message: `Output path '${skillPath}' is already written by '${existingOwner}'. Skipping auto-injected PromptScript skill for '${formatter.name}'.`,
               suggestion: `The user-defined skill takes precedence. To use the bundled skill, remove the custom one or rename it.`,
             });
-          } else {
-            this.logger.debug(
-              `  Skill path '${skillPath}' already output by '${formatter.name}' (auto-discovered). Skipping auto-injection.`
-            );
           }
           continue;
         }
