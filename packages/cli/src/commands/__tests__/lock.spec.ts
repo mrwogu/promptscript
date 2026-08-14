@@ -344,6 +344,27 @@ describe('lockCommand', () => {
     expect(mockValidateRemoteAccess).not.toHaveBeenCalled();
   });
 
+  it('should preserve timeout errors instead of treating them as authentication failures', async () => {
+    mockValidateRemoteAccess.mockResolvedValueOnce({
+      accessible: false,
+      error: 'Timed out after 25ms while contacting https://github.com/company/base.git',
+    });
+
+    await expect(
+      resolveRemoteDependency(
+        'github.com/company/base',
+        ['latest'],
+        undefined,
+        false,
+        'git@github.com:company/base.git',
+        undefined,
+        { timeout: 25 }
+      )
+    ).rejects.toThrow('Timed out after 25ms');
+
+    expect(mockValidateRemoteAccess).toHaveBeenCalledTimes(1);
+  });
+
   it('should apply the configured timeout to version lookup and validation', async () => {
     const timeout = 25;
 

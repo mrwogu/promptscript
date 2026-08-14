@@ -35,6 +35,30 @@ export interface RemoteDependencyOptions {
   timeout?: number;
 }
 
+function isGitTimeoutError(error: Error): boolean {
+  const errorWithCode = error as Error & { code?: unknown; cause?: unknown };
+  const message = error.message.toLowerCase();
+  const code = typeof errorWithCode.code === 'string' ? errorWithCode.code.toLowerCase() : '';
+  const cause = errorWithCode.cause;
+  const causeMessage = cause instanceof Error ? cause.message.toLowerCase() : '';
+  const causeCode =
+    cause instanceof Error &&
+    'code' in cause &&
+    typeof (cause as { code?: unknown }).code === 'string'
+      ? (cause as { code: string }).code.toLowerCase()
+      : '';
+  return (
+    message.includes('timeout') ||
+    message.includes('timed out') ||
+    message.includes('etimedout') ||
+    code === 'etimedout' ||
+    causeMessage.includes('timeout') ||
+    causeMessage.includes('timed out') ||
+    causeMessage.includes('etimedout') ||
+    causeCode === 'etimedout'
+  );
+}
+
 /**
  * Generate or update promptscript.lock by resolving all remote imports.
  *
@@ -307,6 +331,9 @@ export async function resolveRemoteDependency(
       };
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
+      if (isGitTimeoutError(lastError)) {
+        break;
+      }
     }
   }
 
