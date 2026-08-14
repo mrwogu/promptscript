@@ -21,6 +21,7 @@ import {
   hashContent,
   createGitRegistry,
   normalizeGitUrl,
+  DEFAULT_GIT_TIMEOUT_MS,
   type SkillValidationIssue,
 } from '@promptscript/resolver';
 
@@ -62,11 +63,30 @@ function resolveSkillDependency(
   requestedVersions: string[],
   existing: LockfileDependency | undefined,
   forceUpdate: boolean,
-  gitUrl: string | undefined
+  gitUrl: string | undefined,
+  timeout = DEFAULT_GIT_TIMEOUT_MS
 ): Promise<LockfileDependency> {
   return gitUrl
-    ? resolveRemoteDependency(repoUrl, requestedVersions, existing, forceUpdate, gitUrl)
-    : resolveRemoteDependency(repoUrl, requestedVersions, existing, forceUpdate);
+    ? resolveRemoteDependency(
+        repoUrl,
+        requestedVersions,
+        existing,
+        forceUpdate,
+        gitUrl,
+        undefined,
+        {
+          timeout,
+        }
+      )
+    : resolveRemoteDependency(
+        repoUrl,
+        requestedVersions,
+        existing,
+        forceUpdate,
+        undefined,
+        undefined,
+        { timeout }
+      );
 }
 
 function isSkillMetadataEntry(key: string, dependency: LockfileDependency): boolean {
@@ -293,7 +313,10 @@ async function fetchAndValidateRemoteSkill(
   const repoName = basename(parseSkillSource(source).path.split('/')[2]!);
   const cloneDir = !skillFilePath.includes('/') ? join(tmp, repoName) : tmp;
   try {
-    const gitRegistry = createGitRegistry({ url: repoUrl });
+    const gitRegistry = createGitRegistry({
+      url: repoUrl,
+      timeout: DEFAULT_GIT_TIMEOUT_MS,
+    });
     const cloneRef =
       options.version === 'latest' || /^[0-9a-f]{40}$/i.test(options.version)
         ? undefined
@@ -640,16 +663,43 @@ interface SkillsAddRollbackState {
   entryFile: string;
   originalEntryContent: string;
   originalLockfileContent: string | undefined;
+  updatedLockfileContent: string;
+}
+
+function isMissingFileError(error: unknown): boolean {
+  return (
+    error instanceof Error && 'code' in error && (error as { code?: unknown }).code === 'ENOENT'
+  );
+}
+
+async function readLockfileForRollback(): Promise<string | undefined> {
+  try {
+    return await readLockfileContent();
+  } catch (error) {
+    if (isMissingFileError(error)) {
+      return undefined;
+    }
+    throw error;
+  }
 }
 
 async function rollbackSkillsAdd(state: SkillsAddRollbackState): Promise<Error | undefined> {
   const rollbackErrors: Error[] = [];
 
   try {
-    if (state.originalLockfileContent === undefined) {
-      await rm(LOCKFILE_PATH, { force: true });
+    const currentLockfileContent = await readLockfileForRollback();
+    if (currentLockfileContent === state.originalLockfileContent) {
+      // The lockfile write did not change its contents.
+    } else if (currentLockfileContent === state.updatedLockfileContent) {
+      if (state.originalLockfileContent === undefined) {
+        await rm(LOCKFILE_PATH, { force: true });
+      } else {
+        await writeFile(LOCKFILE_PATH, state.originalLockfileContent, 'utf-8');
+      }
     } else {
-      await writeFile(LOCKFILE_PATH, state.originalLockfileContent, 'utf-8');
+      throw new Error(
+        `Cannot roll back ${LOCKFILE_PATH}: it changed during skills add; leaving current contents untouched`
+      );
     }
   } catch (error) {
     rollbackErrors.push(error instanceof Error ? error : new Error(String(error)));
@@ -863,15 +913,17 @@ export async function skillsAddCommand(
       return;
     }
 
+    const updatedLockfileContent = stringifyYaml(lockfile);
     rollbackState = {
       entryFile,
       originalEntryContent: content,
       originalLockfileContent,
+      updatedLockfileContent,
     };
 
     // Write both files as one transaction from the user's perspective.
     await writeFile(entryFile, updatedContent, 'utf-8');
-    await saveLockfile(lockfile);
+    await writeFile(LOCKFILE_PATH, updatedLockfileContent, 'utf-8');
 
     spinner.succeed('Skill added');
     ConsoleOutput.newline();

@@ -33,6 +33,11 @@ interface RequestedDependency {
   auth?: GitAuthOptions;
 }
 
+export interface RemoteDependencyOptions {
+  /** Maximum wall-clock time for each Git operation in milliseconds */
+  timeout?: number;
+}
+
 /**
  * Generate or update promptscript.lock by resolving all remote imports.
  *
@@ -244,7 +249,8 @@ export async function resolveRemoteDependency(
   existing: LockfileDependency | undefined,
   forceUpdate: boolean,
   fallbackUrl?: string,
-  auth?: GitAuthOptions
+  auth?: GitAuthOptions,
+  options: RemoteDependencyOptions = {}
 ): Promise<LockfileDependency> {
   const canReuse =
     !forceUpdate &&
@@ -274,7 +280,8 @@ export async function resolveRemoteDependency(
         repoUrl,
         remoteUrl,
         requestedVersions,
-        candidateAuth
+        candidateAuth,
+        options
       );
       const resolvedRef = resolvedVersion === 'latest' ? undefined : resolvedVersion;
       const validation = candidateAuth
@@ -283,9 +290,12 @@ export async function resolveRemoteDependency(
             headCommit: await createGitRegistry({
               url: remoteUrl,
               auth: candidateAuth,
+              ...(options.timeout !== undefined ? { timeout: options.timeout } : {}),
             }).getCommitHash(resolvedRef),
           }
-        : await validateRemoteAccess(remoteUrl, resolvedRef);
+        : options.timeout !== undefined
+          ? await validateRemoteAccess(remoteUrl, resolvedRef, { timeout: options.timeout })
+          : await validateRemoteAccess(remoteUrl, resolvedRef);
       if (!validation.accessible || !validation.headCommit) {
         throw new Error(validation.error ?? `Could not resolve a commit for ${repoUrl}`);
       }
@@ -311,7 +321,8 @@ async function resolveRequestedVersion(
   repoUrl: string,
   remoteUrl: string,
   requestedVersions: string[],
-  auth?: GitAuthOptions
+  auth?: GitAuthOptions,
+  options: RemoteDependencyOptions = {}
 ): Promise<string> {
   const explicitVersions = [
     ...new Set(requestedVersions.filter((version) => version !== 'latest')),
@@ -321,7 +332,11 @@ async function resolveRequestedVersion(
   }
 
   if (explicitVersions.every(isSemverRange)) {
-    const registry = createGitRegistry({ url: remoteUrl, auth });
+    const registry = createGitRegistry({
+      url: remoteUrl,
+      auth,
+      ...(options.timeout !== undefined ? { timeout: options.timeout } : {}),
+    });
     const matchedVersion = await registry.resolveVersion(remoteUrl, explicitVersions);
     if (!matchedVersion) {
       throw new Error(`No remote version of ${repoUrl} matches ${explicitVersions.join(', ')}`);
