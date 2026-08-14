@@ -152,6 +152,7 @@ function shouldIncludeSkill(name: string, config?: TargetConfig): boolean {
  */
 export class Compiler {
   private readonly resolver: Resolver;
+  private readonly entryResolvers = new Map<string, Resolver>();
   private readonly validator: Validator;
   private readonly loadedFormatters: LoadedFormatter[];
   private readonly logger: Logger;
@@ -166,6 +167,30 @@ export class Compiler {
   }
 
   /**
+   * Get the resolver to use for an entry file.
+   *
+   * Hook script validation infers the project root from the entry path, so a
+   * resolver left on the cwd default would discover skills, commands and
+   * agents from a different directory than the one being compiled.
+   *
+   * @param entryPath - Path to the entry file
+   * @returns Resolver scoped to the entry file's project root
+   */
+  private resolverFor(entryPath: string): Resolver {
+    if (this.options.resolver.localPath || this.options.resolver.projectRoot) {
+      return this.resolver;
+    }
+
+    const projectRoot = inferProjectRoot(undefined, undefined, entryPath);
+    const cached = this.entryResolvers.get(projectRoot);
+    if (cached) return cached;
+
+    const resolver = new Resolver({ ...this.options.resolver, projectRoot, logger: this.logger });
+    this.entryResolvers.set(projectRoot, resolver);
+    return resolver;
+  }
+
+  /**
    * Compile a PromptScript file through the full pipeline.
    *
    * @param entryPath - Path to the entry file
@@ -177,6 +202,7 @@ export class Compiler {
       `Targets: ${this.loadedFormatters.map((f) => f.formatter.name).join(', ')}`
     );
 
+    const resolver = this.resolverFor(entryPath);
     const startTotal = Date.now();
     const stats: CompileStats = {
       resolveTime: 0,
@@ -195,7 +221,7 @@ export class Compiler {
     let resolved: ResolvedAST;
 
     try {
-      resolved = await this.resolver.resolve(entryPath);
+      resolved = await resolver.resolve(entryPath);
     } catch (err) {
       stats.resolveTime = Date.now() - startResolve;
       stats.totalTime = Date.now() - startTotal;
@@ -356,7 +382,7 @@ export class Compiler {
       }
 
       // Verify reference file hashes against lockfile
-      const hashErrors = await this.resolver.verifyReferenceHashes(this.options.resolver.lockfile);
+      const hashErrors = await resolver.verifyReferenceHashes(this.options.resolver.lockfile);
       for (const err of hashErrors) {
         compileErrors.push(this.toCompileError(err));
       }

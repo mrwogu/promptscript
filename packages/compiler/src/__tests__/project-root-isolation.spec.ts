@@ -74,6 +74,32 @@ describe('project root isolation', () => {
     }
   });
 
+  it('should infer the project root from the entry path when none is configured', async () => {
+    const outside = createDirectory('promptscript-outside-');
+    writeSkill(outside, 'cwd-skill');
+    const project = createDirectory('promptscript-project-');
+    writeSkill(project, 'entry-skill');
+    const entryPath = writeEntry(project);
+
+    const originalCwd = process.cwd();
+    process.chdir(outside);
+    try {
+      const compiler = new Compiler({
+        resolver: { registryPath: project },
+        formatters: [{ name: 'claude', config: { version: 'full' } }],
+      });
+
+      const result = await compiler.compile(entryPath);
+
+      expect(result.success).toBe(true);
+      const outputs = [...result.outputs.keys()];
+      expect(outputs).toContain('.claude/skills/entry-skill/SKILL.md');
+      expect(outputs).not.toContain('.claude/skills/cwd-skill/SKILL.md');
+    } finally {
+      process.chdir(originalCwd);
+    }
+  });
+
   it('should discover skills inside the project root without an explicit local path', async () => {
     const outside = createDirectory('promptscript-outside-');
     const project = createDirectory('promptscript-project-');
