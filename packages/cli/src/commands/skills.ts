@@ -1,4 +1,4 @@
-import { writeFile, readFile, readdir, mkdtemp, rm } from 'fs/promises';
+import { writeFile, readFile, readdir, mkdtemp, rm, rename } from 'fs/promises';
 import { resolve, join, basename, dirname } from 'path';
 import { existsSync } from 'fs';
 import { tmpdir } from 'os';
@@ -655,6 +655,19 @@ async function saveLockfile(lockfile: Lockfile): Promise<void> {
   await writeFile(LOCKFILE_PATH, stringifyYaml(lockfile), 'utf-8');
 }
 
+async function writeFileAtomically(filePath: string, content: string): Promise<void> {
+  const temporaryDirectory = await mkdtemp(join(dirname(filePath), `.${basename(filePath)}-`));
+  const temporaryFile = join(temporaryDirectory, basename(filePath));
+  try {
+    await writeFile(temporaryFile, content, 'utf-8');
+    await rename(temporaryFile, filePath);
+  } finally {
+    await rm(temporaryDirectory, { recursive: true, force: true }).catch(() => {
+      // Best-effort cleanup must not hide the write error.
+    });
+  }
+}
+
 interface SkillsAddRollbackState {
   entryFile: string;
   originalEntryContent: string;
@@ -726,7 +739,7 @@ async function rollbackFile(
     if (originalContent === undefined) {
       await rm(filePath, { force: true });
     } else {
-      await writeFile(filePath, originalContent, 'utf-8');
+      await writeFileAtomically(filePath, originalContent);
     }
     return undefined;
   } catch (error) {
@@ -969,10 +982,10 @@ export async function skillsAddCommand(
 
     // Write both files as one transaction from the user's perspective.
     await assertFileUnchanged(entryFile, content);
-    await writeFile(entryFile, updatedContent, 'utf-8');
+    await writeFileAtomically(entryFile, updatedContent);
     rollbackState.entryWriteCompleted = true;
     await assertFileUnchanged(LOCKFILE_PATH, originalLockfileContent);
-    await writeFile(LOCKFILE_PATH, updatedLockfileContent, 'utf-8');
+    await writeFileAtomically(LOCKFILE_PATH, updatedLockfileContent);
     rollbackState.lockfileWriteCompleted = true;
 
     spinner.succeed('Skill added');
