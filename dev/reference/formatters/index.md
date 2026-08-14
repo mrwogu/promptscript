@@ -1,10 +1,10 @@
 # Supported Formatters
 
-PromptScript compiles one agent platform definition to native files for **48 AI coding agent targets**.
+PromptScript compiles one agent platform definition to native files for **49 AI coding agent targets**.
 
 9 Rich native
 
-10 AGENTS.md
+11 AGENTS.md
 
 29 Markdown
 
@@ -86,6 +86,7 @@ Skills Agents Commands\](https://getpromptscript.dev/dev/features/target-platfor
 | Devin                                                                                    | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | ForgeCode                                                                                | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | Grok                                                                                     | Tier 3 | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
+| Hermes Agent                                                                             | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | iFlow                                                                                    | Tier 3 | `.iflow/rules/project.md`         | Yes    | No     | No    | No       |
 | Jules                                                                                    | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | Kimi                                                                                     | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
@@ -137,3 +138,17 @@ Agent-level `mcpServers` references are emitted by Claude Code, Cursor, and Fact
 ## Shared Markdown Formatters
 
 Shared Markdown targets use `MarkdownInstructionFormatter` for consistent instructions, skills, commands, and agents where enabled. Each target keeps its own output path, capability flags, and native directory conventions.
+
+### Hermes Agent
+
+Hermes Agent uses the project-local `AGENTS.md` workspace instruction contract. See the official [context-files documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files) and [skills documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills).
+
+Hermes output mapping:
+
+- Main output: `AGENTS.md`
+- `simple`, `multifile`, and `full`: same single `AGENTS.md` output
+- Supported: instruction content rendered by the shared AGENTS.md formatter
+- Unsupported: skills, agents, commands, workflows, prompts, scoped rules, local files, hooks, MCP servers, and plugins
+- Unsupported blocks are omitted with non-fatal `PS4002` warnings carrying source locations
+
+PromptScript does not invent `.hermes.md` or unverified native Hermes directories and files.

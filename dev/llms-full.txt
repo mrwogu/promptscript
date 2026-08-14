@@ -4,7 +4,7 @@
 
 PromptScript is an agent platform configuration language. It defines
 instructions, skills, agents, MCP servers, plugins, hooks, workflows,
-and policies once, then compiles native output for 48 AI coding agent
+and policies once, then compiles native output for 49 AI coding agent
 targets.
 
 
@@ -1368,7 +1368,7 @@ Then fix PromptScript source, rerun the dry run and full diff, and repeat the co
 
 PromptScript is an agent platform configuration language. A single `.prs` source defines the instructions, capabilities, integrations, and automation used by AI coding agents across a repository or organization.
 
-The compiler translates that source into native files for 48 built-in targets. Each target receives the formats and capabilities it supports, such as instruction files, native skills, custom agents, MCP configuration, lifecycle hooks, workflows, and plugins.
+The compiler translates that source into native files for 49 built-in targets. Each target receives the formats and capabilities it supports, such as instruction files, native skills, custom agents, MCP configuration, lifecycle hooks, workflows, and plugins.
 
 ## Platform Model
 
@@ -1475,7 +1475,7 @@ Target support varies because each AI platform exposes a different native contra
 - [Skills and Resources](https://getpromptscript.dev/dev/features/skills/index.md) - portable capability packages with references and scripts
 - [MCP and Plugins](https://getpromptscript.dev/dev/features/integrations/index.md) - tool servers and reusable capability bundles
 - [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md) - lifecycle automation and repeatable procedures
-- [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) - 48 built-in targets and output families
+- [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) - 49 built-in targets and output families
 
 ## Compile One or Many Projects
 
@@ -2156,7 +2156,7 @@ On Windows, GitHub, Codex, and Windsurf emit PowerShell-safe commands. The `pyth
 
 ### Hook Capability Matrix
 
-All 48 built-in targets have an explicit lifecycle-hook classification. `All` means all eight portable events; `watch` means `prs compile --watch`.
+All 49 built-in targets have an explicit lifecycle-hook classification. `All` means all eight portable events; `watch` means `prs compile --watch`.
 
 | Target         | Status       | Config path                       | Portable events                                  | Command format                 | Timeout       | Project root               | Fallback                  |
 | -------------- | ------------ | --------------------------------- | ------------------------------------------------ | ------------------------------ | ------------- | -------------------------- | ------------------------- |
@@ -2208,6 +2208,7 @@ All 48 built-in targets have an explicit lifecycle-hook classification. `All` me
 | `mimo`         | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `deep-agents`  | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `forgecode`    | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `hermes`       | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 
 Plugin-only and custom-agent APIs are not emitted as universal project hooks because they require runtime plugin code or selecting a non-default agent. Every non-native target and every unsupported output mode reports `PS4002` with the target-specific fallback. PromptScript never silently omits an enabled `@hooks` block.
 
@@ -2363,7 +2364,7 @@ Build profiles support nested `AGENTS.md` and platform-specific output inside mo
 
 # Target Platforms
 
-PromptScript includes 48 built-in output targets. All targets receive project instructions. Rich formatters additionally emit native skills, agents, commands, MCP configuration, hooks, workflows, or plugin manifests when their platform supports those concepts.
+PromptScript includes 49 built-in output targets. All targets receive project instructions. Rich formatters additionally emit native skills, agents, commands, MCP configuration, hooks, workflows, or plugin manifests when their platform supports those concepts.
 
 ## Platform Families
 
@@ -2395,6 +2396,7 @@ Targets using the shared AGENTS.md instruction contract:
 - Mimo
 - Deep Agents
 - ForgeCode
+- Hermes Agent
 
 ### Markdown Instruction Targets
 
@@ -2543,9 +2545,24 @@ Portable PromptScript source does not force every platform into one schema. Inst
 1. Unsupported target-specific behavior reports an actionable compatibility warning.
 1. Main instruction output remains available across all targets.
 
-Lifecycle hooks have an exhaustive 48-target capability registry. Native project hooks are currently emitted for Claude, Codex, Cursor, Factory, Gemini, GitHub, Grok, and Windsurf. Plugin-only, custom-agent-scoped, unsupported, and incompatible output modes report `PS4002` rather than silently omitting enabled hooks. See the [hook capability matrix](https://getpromptscript.dev/dev/features/automation/#hook-capability-matrix).
+Lifecycle hooks have an exhaustive 49-target capability registry. Native project hooks are currently emitted for Claude, Codex, Cursor, Factory, Gemini, GitHub, Grok, and Windsurf. Plugin-only, custom-agent-scoped, unsupported, and incompatible output modes report `PS4002` rather than silently omitting enabled hooks. See the [hook capability matrix](https://getpromptscript.dev/dev/features/automation/#hook-capability-matrix).
 
 Review generated output and compatibility warnings when adopting a new target or target version.
+
+### Hermes Agent
+
+Hermes Agent discovers project-local `AGENTS.md` files as workspace instructions. See the official [context-files documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files).
+
+| PromptScript capability                  | Hermes output | Contract                                                                                                                                                           |
+| ---------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Supported instruction blocks             | `AGENTS.md`   | `@identity`, `@context`, `@standards`, `@knowledge`, `@restrictions`, and `@examples` render into the single file                                                  |
+| `simple`, `multifile`, `full`            | `AGENTS.md`   | All aliases intentionally emit the same file                                                                                                                       |
+| Skills                                   | None          | No verified project-local Hermes skill output path; see the official [skills documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills) |
+| Agents, commands, workflows, and prompts | None          | No verified project-local native contract                                                                                                                          |
+| Scoped rules (`@guards`) and local files | None          | No verified project-local native contract                                                                                                                          |
+| Hooks, MCP servers, plugins              | None          | No verified project-local native contract; `PS4002` compatibility warnings include source locations                                                                |
+
+PromptScript does not create `.hermes.md`, native skill directories, agent files, command files, workflow files, prompt files, hook files, MCP configuration, or plugin manifests. Unsupported blocks are omitted with actionable non-fatal compatibility warnings. Move required guidance into supported `AGENTS.md` instruction blocks.
 
 ## Related Documentation
 
@@ -3769,7 +3786,7 @@ GitHub output uses the version 1 repository-hook schema shared by Copilot CLI an
 
 When `@hooks` is removed or stops emitting, the CLI deletes the obsolete hook file (`.factory/hooks.json`, `.github/hooks/promptscript.json`, or `.github/hooks/promptscript-vscode.json`) only when every command in it carries the PromptScript ownership marker, and prunes managed directories (such as `.github/hooks/`) that the removal leaves empty.
 
-Every built-in target has an explicit hook capability classification. Targets without native project hooks and modes that cannot emit additional files report `PS4002` with a fallback such as `prs compile --watch`. See [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/#hook-capability-matrix) for the complete 48-target matrix and project-root behavior.
+Every built-in target has an explicit hook capability classification. Targets without native project hooks and modes that cannot emit additional files report `PS4002` with a fallback such as `prs compile --watch`. See [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/#hook-capability-matrix) for the complete 49-target matrix and project-root behavior.
 
 ### [@mcpServers](https://github.com/mcpServers "GitHub User: mcpServers")
 
@@ -5551,7 +5568,7 @@ Instead of running `prs compile --watch` in a terminal, you can let your AI tool
 | `gemini`      | `GEMINI.md`                       | Gemini CLI         |
 | `factory`     | `AGENTS.md`                       | Factory AI         |
 
-See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for all 48 built-in targets.
+See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for all 49 built-in targets.
 
 ### prs build
 
@@ -6148,7 +6165,7 @@ prs skills add <source> [options]
 
 **Validation:**
 
-Before writing to the lockfile, `prs skills add` clones the target ref into a temporary directory, recomputes a real `sha256` integrity hash, and runs the [Agent Skills spec](https://agentskills.io/specification) validator against the SKILL.md frontmatter. Checks include:
+Before writing project files, `prs skills add` clones the target ref into a temporary directory, recomputes a real `sha256` integrity hash, and runs the [Agent Skills spec](https://agentskills.io/specification) validator against the SKILL.md frontmatter. Every Git operation, including semver lookup, `ls-remote`, commit probes, cloning, and checkout, has a 60-second hard timeout. A timeout fails with the repository URL and network troubleshooting guidance.
 
 - `name` present, ≤64 chars, matches `^[a-z0-9]+(-[a-z0-9]+)*$`, and equals the parent directory basename
 - `name` does not collide with another already-installed skill
@@ -6159,7 +6176,7 @@ Before writing to the lockfile, `prs skills add` clones the target ref into a te
 - Body length sanity check (warning at >500 lines)
 - Markdown references stay inside the skill directory and resolve to existing files
 
-Plain `http://` sources are rejected to prevent MITM. Use `https://`, `git@`, or `github.com/...` form. The fetched commit's integrity hash is written to `promptscript.lock`. For SSH input, the lockfile retains the SSH clone URL so later skill updates do not require HTTPS access.
+Plain `http://` sources are rejected to prevent MITM. Use `https://`, `git@`, or `github.com/...` form. The fetched commit's integrity hash is written to `promptscript.lock`. For SSH input, the lockfile retains the SSH clone URL so later skill updates do not require HTTPS access. `--skip-validation` skips only SKILL.md frontmatter checks. Remote access, cloning, commit pinning, file existence checks, and integrity hashing still run. The `.prs` file and lockfile are written transactionally from the command user's perspective. If the lockfile write fails after the `.prs` file changes, the original contents are restored when the lockfile still contains the command's update. Concurrent lockfile changes are left untouched and reported as rollback conflicts. If restoration also fails, the error reports the rollback failure. Concurrent runs are serialized through a `.promptscript-skills-add.lock` file in the project root. A second run fails fast instead of interleaving writes. A lock is reclaimed when its owning process is gone or when it is older than 30 minutes, so a recycled process ID cannot block the command permanently. Add `.promptscript-skills-add.lock` to `.gitignore`.
 
 **Examples:**
 
@@ -7159,7 +7176,7 @@ targets:
 
 **Available Targets:**
 
-PromptScript ships 48 built-in targets. See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for platform families and [Supported Formatters](https://getpromptscript.dev/dev/reference/formatters/index.md) for the full capability matrix.
+PromptScript ships 49 built-in targets. See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for platform families and [Supported Formatters](https://getpromptscript.dev/dev/reference/formatters/index.md) for the full capability matrix.
 
 | Target         | Default Output                    | Default Convention | Supported Versions                             |
 | -------------- | --------------------------------- | ------------------ | ---------------------------------------------- |
@@ -7211,6 +7228,7 @@ PromptScript ships 48 built-in targets. See [Target Platforms](https://getprompt
 | `mimo`         | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `deep-agents`  | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `forgecode`    | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `hermes`       | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 
 ### MCP, Hooks, and Plugins Support
 
@@ -7912,11 +7930,11 @@ registries:
 
 # Supported Formatters
 
-PromptScript compiles one agent platform definition to native files for **48 AI coding agent targets**.
+PromptScript compiles one agent platform definition to native files for **49 AI coding agent targets**.
 
 9 Rich native
 
-10 AGENTS.md
+11 AGENTS.md
 
 29 Markdown
 
@@ -7998,6 +8016,7 @@ Skills Agents Commands\](https://getpromptscript.dev/dev/features/target-platfor
 | Devin                                                                                    | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | ForgeCode                                                                                | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | Grok                                                                                     | Tier 3 | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
+| Hermes Agent                                                                             | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | iFlow                                                                                    | Tier 3 | `.iflow/rules/project.md`         | Yes    | No     | No    | No       |
 | Jules                                                                                    | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | Kimi                                                                                     | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
@@ -8049,6 +8068,20 @@ Agent-level `mcpServers` references are emitted by Claude Code, Cursor, and Fact
 ## Shared Markdown Formatters
 
 Shared Markdown targets use `MarkdownInstructionFormatter` for consistent instructions, skills, commands, and agents where enabled. Each target keeps its own output path, capability flags, and native directory conventions.
+
+### Hermes Agent
+
+Hermes Agent uses the project-local `AGENTS.md` workspace instruction contract. See the official [context-files documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files) and [skills documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills).
+
+Hermes output mapping:
+
+- Main output: `AGENTS.md`
+- `simple`, `multifile`, and `full`: same single `AGENTS.md` output
+- Supported: instruction content rendered by the shared AGENTS.md formatter
+- Unsupported: skills, agents, commands, workflows, prompts, scoped rules, local files, hooks, MCP servers, and plugins
+- Unsupported blocks are omitted with non-fatal `PS4002` warnings carrying source locations
+
+PromptScript does not invent `.hermes.md` or unverified native Hermes directories and files.
 
 # Claude Code Formatter
 
@@ -12523,7 +12556,7 @@ PromptScript includes built-in validation rules to detect potential prompt injec
 | PS013   | `path-traversal`      | Detects path traversal attacks in use declarations           | error            |
 | PS014   | `unicode-security`    | Detects RTL override, invisible chars, homoglyphs            | warning          |
 
-PS011 detects imperative `skip` or `bypass` instructions and phrases qualified by `all` or `safety`. Descriptive guidance such as "templates bypass validation" is not an authority directive.
+PS011 detects imperative `skip` or `bypass` instructions and phrases qualified by `all` or `safety`. Suppression-pattern matches in top-level Markdown list items under defensive ATX headings such as `Don'ts`, `Do not`, `Forbidden`, or `Restrictions` are treated as defensive guidance. Tab-indented, nested, continuation-line, prose, arbitrary-heading, setext-heading, and thematic-break content remains fail-closed and is scanned. Authority or execute patterns remain errors. Unclosed fenced code blocks are scanned.
 
 ### Obfuscation Detection (PS012)
 
@@ -16034,7 +16067,7 @@ This guide explains the internal architecture of PromptScript formatters, focusi
 
 ## Overview
 
-PromptScript compiles to 48 AI agent targets. Rich native formatters, AGENTS.md targets, and shared Markdown formatters map the same PromptScript source to each platform's instruction and capability contracts. Shared extraction and rendering logic preserves semantic parity where native platforms support equivalent features.
+PromptScript compiles to 49 AI agent targets. Rich native formatters, AGENTS.md targets, and shared Markdown formatters map the same PromptScript source to each platform's instruction and capability contracts. Shared extraction and rendering logic preserves semantic parity where native platforms support equivalent features.
 
 Formatter inputs follow the canonical and compatibility contracts in the [Block Shapes reference](https://getpromptscript.dev/dev/reference/block-shapes/index.md). That reference also identifies content whose output varies by target.
 
@@ -20174,11 +20207,11 @@ prs pull --refresh
 
 ## What is PromptScript?
 
-PromptScript is an agent platform configuration language and toolchain. You define instructions, skills, agents, integrations, automation, and policy once, then compile native output for 48 AI coding agent targets.
+PromptScript is an agent platform configuration language and toolchain. You define instructions, skills, agents, integrations, automation, and policy once, then compile native output for 49 AI coding agent targets.
 
 ## How many AI tools are supported?
 
-PromptScript currently compiles to **48 AI coding agent targets**. See the full list in [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) or the [formatter matrix](https://getpromptscript.dev/dev/reference/formatters/index.md).
+PromptScript currently compiles to **49 AI coding agent targets**. See the full list in [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) or the [formatter matrix](https://getpromptscript.dev/dev/reference/formatters/index.md).
 
 ## How do I install PromptScript?
 
@@ -20292,7 +20325,7 @@ GEMINI.md                          # Gemini CLI
 
 ## The PromptScript Approach
 
-With PromptScript, you write one `.prs` file and compile to all 48 targets:
+With PromptScript, you write one `.prs` file and compile to all 49 targets:
 
 ```
 @meta { id: "my-project" syntax: "1.0.0" }
@@ -20334,7 +20367,7 @@ GEMINI.md
 
 | Benefit                      | How                                                               |
 | ---------------------------- | ----------------------------------------------------------------- |
-| **Single source of truth**   | One `.prs` file, up to 48 target outputs                          |
+| **Single source of truth**   | One `.prs` file, up to 49 target outputs                          |
 | **Compile-time validation**  | Errors caught before deployment                                   |
 | **Hierarchical inheritance** | Org → Team → Project                                              |
 | **Full audit trail**         | Git history on `.prs` files                                       |
@@ -20345,7 +20378,7 @@ GEMINI.md
 
 | Aspect          | Manual                | PromptScript                                  |
 | --------------- | --------------------- | --------------------------------------------- |
-| Files per repo  | 5-48                  | 2 source files plus generated outputs         |
+| Files per repo  | 5-49                  | 2 source files plus generated outputs         |
 | Update a policy | 100+ manual edits     | Registry update, dependency update, recompile |
 | Add new tool    | Write new file format | `prs compile`                                 |
 | Validation      | None                  | Compile-time + CI/CD                          |
@@ -20742,7 +20775,7 @@ type FeatureStatus =
   | 'partial'; // Partially implemented
 ```
 
-The target catalog contains 48 formatters. The matrix currently classifies 37 of them. A missing entry means the target has not been classified for that feature, not that the feature is unsupported. The formatter registry and generated [platform matrix](https://getpromptscript.dev/dev/reference/formatters/index.md) remain the source of truth for target availability.
+The target catalog contains 49 formatters. The matrix currently classifies 37 of them. A missing entry means the target has not been classified for that feature, not that the feature is unsupported. The formatter registry and generated [platform matrix](https://getpromptscript.dev/dev/reference/formatters/index.md) remain the source of truth for target availability.
 
 ### Categories
 

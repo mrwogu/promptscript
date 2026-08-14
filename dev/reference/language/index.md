@@ -1210,7 +1210,7 @@ GitHub output uses the version 1 repository-hook schema shared by Copilot CLI an
 
 When `@hooks` is removed or stops emitting, the CLI deletes the obsolete hook file (`.factory/hooks.json`, `.github/hooks/promptscript.json`, or `.github/hooks/promptscript-vscode.json`) only when every command in it carries the PromptScript ownership marker, and prunes managed directories (such as `.github/hooks/`) that the removal leaves empty.
 
-Every built-in target has an explicit hook capability classification. Targets without native project hooks and modes that cannot emit additional files report `PS4002` with a fallback such as `prs compile --watch`. See [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/#hook-capability-matrix) for the complete 48-target matrix and project-root behavior.
+Every built-in target has an explicit hook capability classification. Targets without native project hooks and modes that cannot emit additional files report `PS4002` with a fallback such as `prs compile --watch`. See [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/#hook-capability-matrix) for the complete 49-target matrix and project-root behavior.
 
 ### [@mcpServers](https://github.com/mcpServers "GitHub User: mcpServers")
 

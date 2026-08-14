@@ -215,7 +215,7 @@ On Windows, GitHub, Codex, and Windsurf emit PowerShell-safe commands. The `pyth
 
 ### Hook Capability Matrix
 
-All 48 built-in targets have an explicit lifecycle-hook classification. `All` means all eight portable events; `watch` means `prs compile --watch`.
+All 49 built-in targets have an explicit lifecycle-hook classification. `All` means all eight portable events; `watch` means `prs compile --watch`.
 
 | Target         | Status       | Config path                       | Portable events                                  | Command format                 | Timeout       | Project root               | Fallback                  |
 | -------------- | ------------ | --------------------------------- | ------------------------------------------------ | ------------------------------ | ------------- | -------------------------- | ------------------------- |
@@ -267,6 +267,7 @@ All 48 built-in targets have an explicit lifecycle-hook classification. `All` me
 | `mimo`         | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `deep-agents`  | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `forgecode`    | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `hermes`       | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 
 Plugin-only and custom-agent APIs are not emitted as universal project hooks because they require runtime plugin code or selecting a non-default agent. Every non-native target and every unsupported output mode reports `PS4002` with the target-specific fallback. PromptScript never silently omits an enabled `@hooks` block.
 

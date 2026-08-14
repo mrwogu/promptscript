@@ -4,7 +4,7 @@
 
 PromptScript is an agent platform configuration language. It defines
 instructions, skills, agents, MCP servers, plugins, hooks, workflows,
-and policies once, then compiles native output for 48 AI coding agent
+and policies once, then compiles native output for 49 AI coding agent
 targets.
 
 
@@ -21,7 +21,7 @@ targets.
 - [Skills and Resources](https://getpromptscript.dev/dev/features/skills/index.md): Portable skills, resources, scripts, and contracts
 - [MCP Servers and Plugins](https://getpromptscript.dev/dev/features/integrations/index.md): MCP servers and plugin bundles
 - [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md): Lifecycle hooks, workflows, and build automation
-- [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md): All 48 target platforms and output families
+- [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md): All 49 target platforms and output families
 
 ## Reference
 
@@ -41,7 +41,7 @@ targets.
 
 ## Target Platforms
 
-- [Platform Matrix](https://getpromptscript.dev/dev/reference/formatters/index.md): All 48 supported AI agent targets
+- [Platform Matrix](https://getpromptscript.dev/dev/reference/formatters/index.md): All 49 supported AI agent targets
 - [Claude Code](https://getpromptscript.dev/dev/reference/formatters/claude/index.md): Claude Code output format, skills, agents, local files
 - [GitHub Copilot](https://getpromptscript.dev/dev/reference/formatters/github/index.md): GitHub Copilot output format, instructions, prompts, skills
 - [Cursor](https://getpromptscript.dev/dev/reference/formatters/cursor/index.md): Cursor output format, MDC frontmatter, commands

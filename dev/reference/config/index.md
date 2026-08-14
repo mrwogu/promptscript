@@ -430,7 +430,7 @@ targets:
 
 **Available Targets:**
 
-PromptScript ships 48 built-in targets. See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for platform families and [Supported Formatters](https://getpromptscript.dev/dev/reference/formatters/index.md) for the full capability matrix.
+PromptScript ships 49 built-in targets. See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for platform families and [Supported Formatters](https://getpromptscript.dev/dev/reference/formatters/index.md) for the full capability matrix.
 
 | Target         | Default Output                    | Default Convention | Supported Versions                             |
 | -------------- | --------------------------------- | ------------------ | ---------------------------------------------- |
@@ -482,6 +482,7 @@ PromptScript ships 48 built-in targets. See [Target Platforms](https://getprompt
 | `mimo`         | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `deep-agents`  | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `forgecode`    | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `hermes`       | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 
 ### MCP, Hooks, and Plugins Support
 

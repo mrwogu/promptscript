@@ -298,7 +298,7 @@ Instead of running `prs compile --watch` in a terminal, you can let your AI tool
 | `gemini`      | `GEMINI.md`                       | Gemini CLI         |
 | `factory`     | `AGENTS.md`                       | Factory AI         |
 
-See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for all 48 built-in targets.
+See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for all 49 built-in targets.
 
 ### prs build
 
@@ -895,7 +895,7 @@ prs skills add <source> [options]
 
 **Validation:**
 
-Before writing to the lockfile, `prs skills add` clones the target ref into a temporary directory, recomputes a real `sha256` integrity hash, and runs the [Agent Skills spec](https://agentskills.io/specification) validator against the SKILL.md frontmatter. Checks include:
+Before writing project files, `prs skills add` clones the target ref into a temporary directory, recomputes a real `sha256` integrity hash, and runs the [Agent Skills spec](https://agentskills.io/specification) validator against the SKILL.md frontmatter. Every Git operation, including semver lookup, `ls-remote`, commit probes, cloning, and checkout, has a 60-second hard timeout. A timeout fails with the repository URL and network troubleshooting guidance.
 
 - `name` present, ≤64 chars, matches `^[a-z0-9]+(-[a-z0-9]+)*$`, and equals the parent directory basename
 - `name` does not collide with another already-installed skill
@@ -906,7 +906,7 @@ Before writing to the lockfile, `prs skills add` clones the target ref into a te
 - Body length sanity check (warning at >500 lines)
 - Markdown references stay inside the skill directory and resolve to existing files
 
-Plain `http://` sources are rejected to prevent MITM. Use `https://`, `git@`, or `github.com/...` form. The fetched commit's integrity hash is written to `promptscript.lock`. For SSH input, the lockfile retains the SSH clone URL so later skill updates do not require HTTPS access.
+Plain `http://` sources are rejected to prevent MITM. Use `https://`, `git@`, or `github.com/...` form. The fetched commit's integrity hash is written to `promptscript.lock`. For SSH input, the lockfile retains the SSH clone URL so later skill updates do not require HTTPS access. `--skip-validation` skips only SKILL.md frontmatter checks. Remote access, cloning, commit pinning, file existence checks, and integrity hashing still run. The `.prs` file and lockfile are written transactionally from the command user's perspective. If the lockfile write fails after the `.prs` file changes, the original contents are restored when the lockfile still contains the command's update. Concurrent lockfile changes are left untouched and reported as rollback conflicts. If restoration also fails, the error reports the rollback failure. Concurrent runs are serialized through a `.promptscript-skills-add.lock` file in the project root. A second run fails fast instead of interleaving writes. A lock is reclaimed when its owning process is gone or when it is older than 30 minutes, so a recycled process ID cannot block the command permanently. Add `.promptscript-skills-add.lock` to `.gitignore`.
 
 **Examples:**
 

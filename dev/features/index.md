@@ -2,7 +2,7 @@
 
 PromptScript is an agent platform configuration language. A single `.prs` source defines the instructions, capabilities, integrations, and automation used by AI coding agents across a repository or organization.
 
-The compiler translates that source into native files for 48 built-in targets. Each target receives the formats and capabilities it supports, such as instruction files, native skills, custom agents, MCP configuration, lifecycle hooks, workflows, and plugins.
+The compiler translates that source into native files for 49 built-in targets. Each target receives the formats and capabilities it supports, such as instruction files, native skills, custom agents, MCP configuration, lifecycle hooks, workflows, and plugins.
 
 ## Platform Model
 
@@ -109,7 +109,7 @@ Target support varies because each AI platform exposes a different native contra
 - [Skills and Resources](https://getpromptscript.dev/dev/features/skills/index.md) - portable capability packages with references and scripts
 - [MCP and Plugins](https://getpromptscript.dev/dev/features/integrations/index.md) - tool servers and reusable capability bundles
 - [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md) - lifecycle automation and repeatable procedures
-- [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) - 48 built-in targets and output families
+- [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) - 49 built-in targets and output families
 
 ## Compile One or Many Projects
 

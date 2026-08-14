@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block announce %} <span class="announce-new">NEW</span> Agent Platform
 - define agents, skills, MCP servers, hooks, and workflows once in <code>.prs</code> and compile to
-48 native targets.
+49 native targets.
 <a href="{{ 'features/' | url }}">Read the guide &rarr;</a>
 {% endblock %} {% block extrahead %} {{ super() }} {# Open Graph and Twitter metadata #} {% set
 og_title = (page.meta.get('title') if page.meta else None) or page.title or config.site_name %} {%

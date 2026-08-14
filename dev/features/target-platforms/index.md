@@ -1,6 +1,6 @@
 # Target Platforms
 
-PromptScript includes 48 built-in output targets. All targets receive project instructions. Rich formatters additionally emit native skills, agents, commands, MCP configuration, hooks, workflows, or plugin manifests when their platform supports those concepts.
+PromptScript includes 49 built-in output targets. All targets receive project instructions. Rich formatters additionally emit native skills, agents, commands, MCP configuration, hooks, workflows, or plugin manifests when their platform supports those concepts.
 
 ## Platform Families
 
@@ -32,6 +32,7 @@ Targets using the shared AGENTS.md instruction contract:
 - Mimo
 - Deep Agents
 - ForgeCode
+- Hermes Agent
 
 ### Markdown Instruction Targets
 
@@ -180,9 +181,24 @@ Portable PromptScript source does not force every platform into one schema. Inst
 1. Unsupported target-specific behavior reports an actionable compatibility warning.
 1. Main instruction output remains available across all targets.
 
-Lifecycle hooks have an exhaustive 48-target capability registry. Native project hooks are currently emitted for Claude, Codex, Cursor, Factory, Gemini, GitHub, Grok, and Windsurf. Plugin-only, custom-agent-scoped, unsupported, and incompatible output modes report `PS4002` rather than silently omitting enabled hooks. See the [hook capability matrix](https://getpromptscript.dev/dev/features/automation/#hook-capability-matrix).
+Lifecycle hooks have an exhaustive 49-target capability registry. Native project hooks are currently emitted for Claude, Codex, Cursor, Factory, Gemini, GitHub, Grok, and Windsurf. Plugin-only, custom-agent-scoped, unsupported, and incompatible output modes report `PS4002` rather than silently omitting enabled hooks. See the [hook capability matrix](https://getpromptscript.dev/dev/features/automation/#hook-capability-matrix).
 
 Review generated output and compatibility warnings when adopting a new target or target version.
+
+### Hermes Agent
+
+Hermes Agent discovers project-local `AGENTS.md` files as workspace instructions. See the official [context-files documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files).
+
+| PromptScript capability                  | Hermes output | Contract                                                                                                                                                           |
+| ---------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Supported instruction blocks             | `AGENTS.md`   | `@identity`, `@context`, `@standards`, `@knowledge`, `@restrictions`, and `@examples` render into the single file                                                  |
+| `simple`, `multifile`, `full`            | `AGENTS.md`   | All aliases intentionally emit the same file                                                                                                                       |
+| Skills                                   | None          | No verified project-local Hermes skill output path; see the official [skills documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills) |
+| Agents, commands, workflows, and prompts | None          | No verified project-local native contract                                                                                                                          |
+| Scoped rules (`@guards`) and local files | None          | No verified project-local native contract                                                                                                                          |
+| Hooks, MCP servers, plugins              | None          | No verified project-local native contract; `PS4002` compatibility warnings include source locations                                                                |
+
+PromptScript does not create `.hermes.md`, native skill directories, agent files, command files, workflow files, prompt files, hook files, MCP configuration, or plugin manifests. Unsupported blocks are omitted with actionable non-fatal compatibility warnings. Move required guidance into supported `AGENTS.md` instruction blocks.
 
 ## Related Documentation
 

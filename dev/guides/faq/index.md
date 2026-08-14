@@ -2,11 +2,11 @@
 
 ## What is PromptScript?
 
-PromptScript is an agent platform configuration language and toolchain. You define instructions, skills, agents, integrations, automation, and policy once, then compile native output for 48 AI coding agent targets.
+PromptScript is an agent platform configuration language and toolchain. You define instructions, skills, agents, integrations, automation, and policy once, then compile native output for 49 AI coding agent targets.
 
 ## How many AI tools are supported?
 
-PromptScript currently compiles to **48 AI coding agent targets**. See the full list in [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) or the [formatter matrix](https://getpromptscript.dev/dev/reference/formatters/index.md).
+PromptScript currently compiles to **49 AI coding agent targets**. See the full list in [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) or the [formatter matrix](https://getpromptscript.dev/dev/reference/formatters/index.md).
 
 ## How do I install PromptScript?
 

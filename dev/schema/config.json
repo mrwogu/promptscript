@@ -529,6 +529,9 @@
             },
             "forgecode": {
               "$ref": "#/definitions/TargetConfig"
+            },
+            "hermes": {
+              "$ref": "#/definitions/TargetConfig"
             }
           },
           "additionalProperties": {
@@ -599,7 +602,8 @@
         "kimi",
         "mimo",
         "deep-agents",
-        "forgecode"
+        "forgecode",
+        "hermes"
       ],
       "description": "Known built-in output targets. These are the targets with first-class formatter support."
     },
