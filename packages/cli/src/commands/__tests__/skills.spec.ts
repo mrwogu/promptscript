@@ -2533,6 +2533,44 @@ describe('skillsAddCommand frontmatter validation', () => {
     expect(process.exitCode).not.toBe(1);
   });
 
+  it('completes after warning on an existing skill in the same repository', async () => {
+    const sibling = 'github.com/org/repo/skills/existing/SKILL.md';
+    arrangeValidation({
+      skillContent: '---\nname: x\n---',
+      lockExists: true,
+      lockContent: JSON.stringify({
+        version: 1,
+        dependencies: {
+          [sibling]: {
+            version: 'latest',
+            commit: 'old',
+            integrity: 'sha256-old',
+            source: 'md',
+          },
+          'https://github.com/org/repo': {
+            version: 'latest',
+            commit: 'old',
+            integrity: 'sha256-pending',
+            source: 'md',
+            skills: [sibling],
+          },
+        },
+      }),
+    });
+    mockValidateSkillFrontmatter
+      .mockReturnValueOnce({
+        valid: true,
+        issues: [{ severity: 'warning', code: 'SK050', message: 'description short' }],
+      })
+      .mockReturnValueOnce({ valid: true, issues: [] });
+
+    await skillsAddCommand('github.com/org/repo/skills/new/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockWarn).toHaveBeenCalledWith(`${sibling}: SKILL.md has validation warnings`);
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    expect(process.exitCode).not.toBe(1);
+  });
+
   it('treats warnings as errors when --strict is set', async () => {
     arrangeValidation({ skillContent: '---\nname: x\n---' });
     mockValidateSkillFrontmatter.mockReturnValue({
@@ -2547,6 +2585,46 @@ describe('skillsAddCommand frontmatter validation', () => {
     });
 
     expect(mockFail).toHaveBeenCalledWith('SKILL.md failed validation');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('rolls back both files when the lockfile write fails', async () => {
+    const originalEntry = SAMPLE_PRS_FOR_VALIDATION;
+    const originalLockfile = JSON.stringify({
+      version: 1,
+      dependencies: {
+        'https://github.com/org/repo': {
+          version: 'latest',
+          commit: 'old',
+          integrity: 'sha256-pending',
+        },
+      },
+    });
+    arrangeValidation({
+      skillContent: '---\nname: x\n---\nbody',
+      lockExists: true,
+      lockContent: originalLockfile,
+      prsContent: originalEntry,
+    });
+    mockWriteFile
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('lock write failed'))
+      .mockResolvedValue(undefined);
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    const entryWrites = mockWriteFile.mock.calls.filter((call) =>
+      String(call[0]).includes('entry.prs')
+    );
+    const lockWrites = mockWriteFile.mock.calls.filter((call) => call[0] === 'promptscript.lock');
+    expect(entryWrites).toHaveLength(2);
+    expect(entryWrites[0]?.[1]).not.toBe(originalEntry);
+    expect(entryWrites[1]?.[1]).toBe(originalEntry);
+    expect(lockWrites).toHaveLength(2);
+    expect(lockWrites[1]?.[1]).toBe(originalLockfile);
+    expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
     expect(process.exitCode).toBe(1);
   });
 

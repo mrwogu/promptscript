@@ -600,14 +600,18 @@ function findUseEndLine(lines: string[], startLine: number): number {
 /**
  * Load the lockfile from disk.
  */
-async function loadLockfile(): Promise<Lockfile> {
+async function readLockfileContent(): Promise<string> {
+  return readFile(LOCKFILE_PATH, 'utf-8');
+}
+
+async function loadLockfile(rawContent?: string): Promise<Lockfile> {
   const defaultLockfile: Lockfile = { version: LOCKFILE_VERSION, dependencies: {} };
-  if (!existsSync(LOCKFILE_PATH)) {
+  if (rawContent === undefined && !existsSync(LOCKFILE_PATH)) {
     return defaultLockfile;
   }
   let parsed: unknown;
   try {
-    const raw = await readFile(LOCKFILE_PATH, 'utf-8');
+    const raw = rawContent ?? (await readLockfileContent());
     parsed = parseYaml(raw, { maxAliasCount: 100 });
   } catch (error) {
     throw new Error(
@@ -628,6 +632,38 @@ async function saveLockfile(lockfile: Lockfile): Promise<void> {
   await writeFile(LOCKFILE_PATH, stringifyYaml(lockfile), 'utf-8');
 }
 
+interface SkillsAddRollbackState {
+  entryFile: string;
+  originalEntryContent: string;
+  originalLockfileContent: string | undefined;
+}
+
+async function rollbackSkillsAdd(state: SkillsAddRollbackState): Promise<Error | undefined> {
+  const rollbackErrors: Error[] = [];
+
+  try {
+    if (state.originalLockfileContent === undefined) {
+      await rm(LOCKFILE_PATH, { force: true });
+    } else {
+      await writeFile(LOCKFILE_PATH, state.originalLockfileContent, 'utf-8');
+    }
+  } catch (error) {
+    rollbackErrors.push(error instanceof Error ? error : new Error(String(error)));
+  }
+
+  try {
+    await writeFile(state.entryFile, state.originalEntryContent, 'utf-8');
+  } catch (error) {
+    rollbackErrors.push(error instanceof Error ? error : new Error(String(error)));
+  }
+
+  if (rollbackErrors.length === 0) {
+    return undefined;
+  }
+
+  return new Error(rollbackErrors.map((error) => error.message).join('; '));
+}
+
 /**
  * Add a remote skill to the project.
  *
@@ -641,6 +677,7 @@ export async function skillsAddCommand(
   options: SkillsAddOptions
 ): Promise<void> {
   const spinner = createSpinner('Adding skill...').start();
+  let rollbackState: SkillsAddRollbackState | undefined;
 
   try {
     // Reject plain HTTP early (security): git over plaintext exposes the
@@ -689,7 +726,18 @@ export async function skillsAddCommand(
 
     // Load lockfile early — we need it for collision detection AND to write
     // the new entry below.
-    const lockfile = await loadLockfile();
+    let originalLockfileContent: string | undefined;
+    if (existsSync(LOCKFILE_PATH)) {
+      try {
+        originalLockfileContent = await readLockfileContent();
+      } catch (error) {
+        throw new Error(
+          `Cannot read ${LOCKFILE_PATH}: ${error instanceof Error ? error.message : String(error)}`,
+          { cause: error }
+        );
+      }
+    }
+    const lockfile = await loadLockfile(originalLockfileContent);
     const parsedSource = parseSkillSource(source);
     const repoUrl = extractRepoUrl(source);
     const ownerEntry = findSkillOwnerEntry(lockfile, repoUrl);
@@ -810,10 +858,14 @@ export async function skillsAddCommand(
       return;
     }
 
-    // Write the modified .prs file
-    await writeFile(entryFile, updatedContent, 'utf-8');
+    rollbackState = {
+      entryFile,
+      originalEntryContent: content,
+      originalLockfileContent,
+    };
 
-    // Write lockfile
+    // Write both files as one transaction from the user's perspective.
+    await writeFile(entryFile, updatedContent, 'utf-8');
     await saveLockfile(lockfile);
 
     spinner.succeed('Skill added');
@@ -821,8 +873,18 @@ export async function skillsAddCommand(
     ConsoleOutput.success(`${newLine}  →  ${entryFile}`);
     ConsoleOutput.muted(`Lockfile updated: ${LOCKFILE_PATH}`);
   } catch (error) {
+    let reportedError = error instanceof Error ? error : new Error(String(error));
+    if (rollbackState) {
+      const rollbackError = await rollbackSkillsAdd(rollbackState);
+      if (rollbackError) {
+        reportedError = new Error(
+          `${reportedError.message}; failed to roll back project files: ${rollbackError.message}`,
+          { cause: reportedError }
+        );
+      }
+    }
     spinner.fail('Failed to add skill');
-    ConsoleOutput.error(error instanceof Error ? error.message : String(error));
+    ConsoleOutput.error(reportedError.message);
     process.exitCode = 1;
   }
 }

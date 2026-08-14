@@ -25,6 +25,9 @@ import { parseGitUrl, parseVersionedPath, normalizeGitUrl } from './git-url-util
 /** 24-hour TTL for cached tag lists */
 const TAGS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
+/** Default maximum wall-clock time for a Git operation. */
+const DEFAULT_GIT_TIMEOUT_MS = 60_000;
+
 /** Semver tag pattern: optional "v" prefix followed by major.minor.patch */
 const SEMVER_TAG_RE = /^v?\d+\.\d+\.\d+/;
 
@@ -148,7 +151,7 @@ export class GitRegistry implements Registry {
     this.subPath = options.path ?? '';
     this.auth = options.auth;
     this.cacheEnabled = options.cache?.enabled ?? true;
-    this.timeout = options.timeout ?? 60000;
+    this.timeout = options.timeout ?? DEFAULT_GIT_TIMEOUT_MS;
     this.cacheManager = new GitCacheManager({
       cacheDir: options.cacheDir,
       ttl: options.cache?.ttl,
@@ -1009,6 +1012,36 @@ export interface RemoteValidation {
 }
 
 /**
+ * Options for validating remote repository accessibility.
+ */
+export interface RemoteValidationOptions {
+  /** Maximum wall-clock time for each Git operation in milliseconds */
+  timeout?: number;
+}
+
+/**
+ * Create a non-interactive Git client with a hard operation timeout.
+ */
+function createRemoteValidationGit(baseDir: string | undefined, timeout: number): SimpleGit {
+  const options: Partial<SimpleGitOptions> = {
+    timeout: {
+      block: timeout,
+      stdErr: false,
+      stdOut: false,
+    },
+  };
+  const git = baseDir ? simpleGit(baseDir, options) : simpleGit(options);
+  git.env('GIT_TERMINAL_PROMPT', '0');
+  git.env('GCM_INTERACTIVE', 'never');
+  return git;
+}
+
+function isGitTimeoutError(error: Error): boolean {
+  const message = error.message.toLowerCase();
+  return message.includes('timeout') || message.includes('timed out');
+}
+
+/**
  * Validate that a remote Git repository is accessible via `git ls-remote`.
  *
  * Use this before writing a lockfile entry to catch auth/network problems early
@@ -1016,21 +1049,25 @@ export interface RemoteValidation {
  *
  * @param repoUrl - Repository URL to check (HTTPS or SSH)
  * @param ref - Optional branch, tag, or commit to resolve
+ * @param options - Optional Git operation timeout
  * @returns RemoteValidation result with accessibility status and optional commit hash
  */
 export async function validateRemoteAccess(
   repoUrl: string,
-  ref?: string
+  ref?: string,
+  options: RemoteValidationOptions = {}
 ): Promise<RemoteValidation> {
-  const git = simpleGit().env('GIT_TERMINAL_PROMPT', '0').env('GCM_INTERACTIVE', 'never');
+  const timeout =
+    options.timeout !== undefined && Number.isFinite(options.timeout) && options.timeout > 0
+      ? options.timeout
+      : DEFAULT_GIT_TIMEOUT_MS;
+  const git = createRemoteValidationGit(undefined, timeout);
   try {
     const isCommit = ref !== undefined && /^[0-9a-f]{40}$/i.test(ref);
     if (isCommit) {
       const probeDir = await fs.mkdtemp(join(tmpdir(), 'promptscript-ref-'));
       try {
-        const probe = simpleGit(probeDir)
-          .env('GIT_TERMINAL_PROMPT', '0')
-          .env('GCM_INTERACTIVE', 'never');
+        const probe = createRemoteValidationGit(probeDir, timeout);
         await probe.init();
         await probe.addRemote('origin', repoUrl);
         await probe.fetch(['origin', ref, '--depth=1']);
@@ -1075,6 +1112,13 @@ export async function validateRemoteAccess(
       return {
         accessible: false,
         error: `Authentication failed for ${repoUrl}. If behind a firewall/VPN, configure a GitHub personal access token.`,
+      };
+    }
+
+    if (isGitTimeoutError(error)) {
+      return {
+        accessible: false,
+        error: `Timed out after ${timeout}ms while contacting ${repoUrl}. Check your network connection and VPN settings.`,
       };
     }
 

@@ -3,6 +3,7 @@ import { existsSync, promises as fs } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { FileNotFoundError } from '@promptscript/core';
+import { simpleGit } from 'simple-git';
 import {
   GitRegistry,
   GitCloneError,
@@ -908,6 +909,39 @@ describe('validateRemoteAccess', () => {
     expect(result.error).toContain('Failed to reach');
     expect(result.error).toContain('https://github.com/org/repo.git');
     expect(result.error).toContain('network');
+  });
+
+  it('should bound a stalled ls-remote and report an actionable timeout', async () => {
+    mockGit.listRemote.mockRejectedValue(new Error('block timeout reached'));
+
+    const result = await validateRemoteAccess('https://github.com/org/repo.git', undefined, {
+      timeout: 25,
+    });
+
+    expect(result.accessible).toBe(false);
+    expect(result.error).toContain('Timed out after 25ms');
+    expect(result.error).toContain('https://github.com/org/repo.git');
+    expect(simpleGit).toHaveBeenCalledWith({
+      timeout: { block: 25, stdErr: false, stdOut: false },
+    });
+    expect(mockGit.env).toHaveBeenCalledWith('GIT_TERMINAL_PROMPT', '0');
+    expect(mockGit.env).toHaveBeenCalledWith('GCM_INTERACTIVE', 'never');
+  });
+
+  it('should bound a stalled commit probe and report an actionable timeout', async () => {
+    const commit = 'feedfacefeedfacefeedfacefeedfacefeedface';
+    mockGit.fetch.mockRejectedValue(new Error('block timeout reached'));
+
+    const result = await validateRemoteAccess('https://github.com/org/repo.git', commit, {
+      timeout: 25,
+    });
+
+    expect(result.accessible).toBe(false);
+    expect(result.error).toContain('Timed out after 25ms');
+    expect(result.error).toContain('https://github.com/org/repo.git');
+    expect(simpleGit).toHaveBeenCalledWith(expect.any(String), {
+      timeout: { block: 25, stdErr: false, stdOut: false },
+    });
   });
 });
 
