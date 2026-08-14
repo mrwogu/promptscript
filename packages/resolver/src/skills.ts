@@ -1402,9 +1402,7 @@ export async function resolveNativeSkills(
         const skillRefs = parsed.references;
         if (skillRefs && skillRefs.length > 0) {
           const refResources = await resolveSkillReferences(skillRefs, skillDir, logger);
-          const existingResources =
-            (updatedSkill['resources'] as
-              Array<{ relativePath: string; content: string }> | undefined) ?? [];
+          const existingResources = (updatedSkill['resources'] as Value[] | undefined) ?? [];
           updatedSkill['resources'] = [
             ...existingResources,
             ...refResources.map((r) => ({
@@ -1420,9 +1418,7 @@ export async function resolveNativeSkills(
         const skillScripts = parsed.scripts;
         if (skillScripts && skillScripts.length > 0) {
           const scriptResources = await resolveSkillScripts(skillScripts, skillDir, logger);
-          const existingResources =
-            (updatedSkill['resources'] as
-              Array<{ relativePath: string; content: string }> | undefined) ?? [];
+          const existingResources = (updatedSkill['resources'] as Value[] | undefined) ?? [];
           updatedSkill['resources'] = [
             ...existingResources,
             ...scriptResources.map((r) => ({

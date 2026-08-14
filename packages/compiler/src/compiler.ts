@@ -41,11 +41,7 @@ interface LoadedFormatter {
 export const MAX_ENTRY_RESOLVERS = 50;
 
 function resolverCacheKey(projectRoot: string): string {
-  try {
-    return realpathSync.native(projectRoot);
-  } catch {
-    return resolve(projectRoot);
-  }
+  return realpathSync.native(projectRoot);
 }
 
 function resolveEntryPath(entryPath: string): string {
