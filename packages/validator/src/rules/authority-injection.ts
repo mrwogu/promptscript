@@ -1,6 +1,11 @@
 import type { ValidationRule } from '../types.js';
 import { walkText } from '../walker.js';
 
+interface WarningSuppressionPattern {
+  detection: RegExp;
+  suppression: RegExp;
+}
+
 /**
  * Patterns that indicate attempts to inject authoritative override instructions.
  * These patterns are commonly used in prompt injection attacks to make AI models
@@ -10,15 +15,45 @@ import { walkText } from '../walker.js';
  * ones (\s*, \s+) to prevent ReDoS (Regular Expression Denial of Service) attacks.
  * This ensures O(n) matching time even on adversarial inputs.
  */
-const WARNING_SUPPRESSION_PATTERNS: RegExp[] = [
+const WARNING_SUPPRESSION_PATTERNS: WarningSuppressionPattern[] = [
   // Removed because it triggers false positives on valid agent instructions (e.g., "do not notify user")
-  // /(?:DO\s{1,10}NOT|NEVER|DON'?T)\s{1,10}(?:WARN|ALERT|NOTIFY|FLAG|REPORT)/i,
-  /\b(?:DO\s{1,10}NOT|NEVER|DON'?T)\b\s{1,10}(?:PROVIDE|SHOW|DISPLAY|INCLUDE)\b\s{1,10}(?:SECURITY\s{1,10})?WARNINGS?\b/i,
-  /\b(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\b\s{1,10}(?:ALL\s{1,10})?WARNINGS?\b/i,
-  /\b(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\b\s{1,10}(?:ALL\s{1,10})?(?:SECURITY\s{1,10})?(?:ALERTS?|NOTIFICATIONS?)\b/i,
-  /\bIGNORE\b\s{1,10}(?:ALL\s{1,10})?(?:SAFETY\s{1,10})?WARNINGS?\b/i,
-  /(?:^|[.!?:;]\s{0,10})\s{0,10}(?:[-*]\s{1,10})?(?:PLEASE\s{1,10})?\b(?:SKIP|BYPASS)\b\s{1,10}(?:CHECKS?|VALIDATION)\b/im,
-  /\b(?:SKIP|BYPASS)\b\s{1,10}(?:(?:ALL\s{1,10})(?:SAFETY\s{1,10})?|SAFETY\s{1,10})(?:CHECKS?|VALIDATION)\b/i,
+  // {
+  //   detection: /(?:DO\s{1,10}NOT|NEVER|DON'?T)\s{1,10}(?:WARN|ALERT|NOTIFY|FLAG|REPORT)/i,
+  //   suppression: /(?:DO[ \t]{1,10}NOT|NEVER|DON'?T)[ \t]{1,10}(?:WARN|ALERT|NOTIFY|FLAG|REPORT)/i,
+  // },
+  {
+    detection:
+      /\b(?:DO\s{1,10}NOT|NEVER|DON'?T)\b\s{1,10}(?:PROVIDE|SHOW|DISPLAY|INCLUDE)\b\s{1,10}(?:SECURITY\s{1,10})?WARNINGS?\b/i,
+    suppression:
+      /\b(?:DO[ \t]{1,10}NOT|NEVER|DON'?T)\b[ \t]{1,10}(?:PROVIDE|SHOW|DISPLAY|INCLUDE)\b[ \t]{1,10}(?:SECURITY[ \t]{1,10})?WARNINGS?\b/i,
+  },
+  {
+    detection: /\b(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\b\s{1,10}(?:ALL\s{1,10})?WARNINGS?\b/i,
+    suppression:
+      /\b(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\b[ \t]{1,10}(?:ALL[ \t]{1,10})?WARNINGS?\b/i,
+  },
+  {
+    detection:
+      /\b(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\b\s{1,10}(?:ALL\s{1,10})?(?:SECURITY\s{1,10})?(?:ALERTS?|NOTIFICATIONS?)\b/i,
+    suppression:
+      /\b(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\b[ \t]{1,10}(?:ALL[ \t]{1,10})?(?:SECURITY[ \t]{1,10})?(?:ALERTS?|NOTIFICATIONS?)\b/i,
+  },
+  {
+    detection: /\bIGNORE\b\s{1,10}(?:ALL\s{1,10})?(?:SAFETY\s{1,10})?WARNINGS?\b/i,
+    suppression: /\bIGNORE\b[ \t]{1,10}(?:ALL[ \t]{1,10})?(?:SAFETY[ \t]{1,10})?WARNINGS?\b/i,
+  },
+  {
+    detection:
+      /(?:^|[.!?:;]\s{0,10})\s{0,10}(?:[-*]\s{1,10})?(?:PLEASE\s{1,10})?\b(?:SKIP|BYPASS)\b\s{1,10}(?:CHECKS?|VALIDATION)\b/im,
+    suppression:
+      /(?:^|[.!?:;][ \t]{0,10})[ \t]{0,10}(?:[-*][ \t]{1,10})?(?:PLEASE[ \t]{1,10})?\b(?:SKIP|BYPASS)\b[ \t]{1,10}(?:CHECKS?|VALIDATION)\b/im,
+  },
+  {
+    detection:
+      /\b(?:SKIP|BYPASS)\b\s{1,10}(?:(?:ALL\s{1,10})(?:SAFETY\s{1,10})?|SAFETY\s{1,10})(?:CHECKS?|VALIDATION)\b/i,
+    suppression:
+      /\b(?:SKIP|BYPASS)\b[ \t]{1,10}(?:(?:ALL[ \t]{1,10})(?:SAFETY[ \t]{1,10})?|SAFETY[ \t]{1,10})(?:CHECKS?|VALIDATION)\b/i,
+  },
 ];
 
 const AUTHORITY_PATTERNS: RegExp[] = [
@@ -33,7 +68,7 @@ const AUTHORITY_PATTERNS: RegExp[] = [
   /\[?\s{0,10}\bEMERGENCY\b\s{0,10}(?:PROTOCOL|OVERRIDE|MODE)\b\s{0,10}\]?/i,
 
   // Warning suppression patterns
-  ...WARNING_SUPPRESSION_PATTERNS,
+  ...WARNING_SUPPRESSION_PATTERNS.map(({ detection }) => detection),
 
   // Execute/follow verbatim patterns
   /\bEXECUTE\b\s{1,10}(?:THIS\s{1,10})?VERBATIM\b/i,
@@ -49,7 +84,9 @@ const AUTHORITY_PATTERNS: RegExp[] = [
   /\bNEW\b\s{1,10}(?:SYSTEM|CORE|BASE)\s{1,10}(?:INSTRUCTIONS?|DIRECTIVES?|RULES?)\b/i,
 ];
 
-const SUPPRESSION_PATTERN_SET = new Set(WARNING_SUPPRESSION_PATTERNS);
+const SUPPRESSION_PATTERN_MAP = new Map(
+  WARNING_SUPPRESSION_PATTERNS.map(({ detection, suppression }) => [detection, suppression])
+);
 const DEFENSIVE_HEADING_NAMES = new Set([
   "don't",
   "don'ts",
@@ -399,15 +436,23 @@ function normalizeText(text: string): NormalizedText {
   let index = 0;
 
   while (index < text.length) {
-    if (/\s/.test(text[index]!)) {
+    if (isHorizontalWhitespace(text[index])) {
       const start = index;
       index++;
-      while (index < text.length && /\s/.test(text[index]!)) {
+      while (index < text.length && isHorizontalWhitespace(text[index])) {
         index++;
       }
       characters.push(' ');
       sourceStarts.push(start);
       sourceEnds.push(index);
+      continue;
+    }
+
+    if (text[index] === '\r' && text[index + 1] === '\n') {
+      characters.push('\n');
+      sourceStarts.push(index);
+      sourceEnds.push(index + 2);
+      index += 2;
       continue;
     }
 
@@ -469,7 +514,12 @@ function hasUnexemptMatch(
       return true;
     }
 
-    if (!SUPPRESSION_PATTERN_SET.has(pattern) || !isRangeWithinListItem(range, listItems)) {
+    const suppressionPattern = SUPPRESSION_PATTERN_MAP.get(pattern);
+    if (
+      suppressionPattern === undefined ||
+      !suppressionPattern.test(matchText) ||
+      !isRangeWithinListItem(range, listItems)
+    ) {
       return true;
     }
   }
