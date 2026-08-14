@@ -11,6 +11,7 @@ import type { Lockfile, LockfileDependency } from '@promptscript/core';
 import { LOCKFILE_VERSION, isValidLockfile } from '@promptscript/core';
 import { LOCKFILE_PATH, resolveRemoteDependency } from './lock.js';
 import { collectRemoteImports, type RemoteImport } from './lock-scanner.js';
+import { refreshManagedSkillOwnerIntegrity } from '../utils/skill-lock-integrity.js';
 import {
   validateSkillFrontmatter,
   formatSkillValidationIssues,
@@ -800,6 +801,7 @@ export async function skillsAddCommand(
       skills: [...repoSkills, source],
       ...(gitUrl ? { gitUrl } : {}),
     };
+    refreshManagedSkillOwnerIntegrity(lockfile.dependencies);
 
     if (options.dryRun) {
       spinner.succeed('Dry run — no files modified');
@@ -961,6 +963,7 @@ export async function skillsRemoveCommand(
         }
       }
     }
+    refreshManagedSkillOwnerIntegrity(lockfile.dependencies);
     if (lockfileChanged) {
       await saveLockfile(lockfile);
     }
@@ -1140,6 +1143,7 @@ export async function skillsUpdateCommand(
         }
       }
     }
+    refreshManagedSkillOwnerIntegrity(lockfile.dependencies);
 
     if (options.dryRun) {
       spinner.succeed('Dry run — lockfile not written');

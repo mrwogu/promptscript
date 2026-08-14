@@ -18,11 +18,14 @@ import {
 } from '@promptscript/resolver';
 import { generateLockfileReferences } from './lock-references.js';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
+import {
+  PENDING_INTEGRITY,
+  refreshManagedSkillOwnerIntegrity,
+} from '../utils/skill-lock-integrity.js';
 
 /** Path to the lockfile relative to cwd. */
 export const LOCKFILE_PATH = 'promptscript.lock';
 const UNRESOLVED_COMMIT = '0000000000000000000000000000000000000000';
-const UNRESOLVED_INTEGRITY = 'sha256-pending';
 
 interface RequestedDependency {
   versions: Set<string>;
@@ -176,6 +179,7 @@ export async function lockCommand(options: LockOptions): Promise<void> {
         }
       }
     }
+    refreshManagedSkillOwnerIntegrity(dependencies);
 
     const references = await generateLockfileReferences(
       config,
@@ -290,7 +294,7 @@ export async function resolveRemoteDependency(
         version: resolvedVersion,
         commit: validation.headCommit,
         integrity:
-          existing?.commit === validation.headCommit ? existing.integrity : UNRESOLVED_INTEGRITY,
+          existing?.commit === validation.headCommit ? existing.integrity : PENDING_INTEGRITY,
         ...(existing?.source ? { source: existing.source } : {}),
         ...(existing?.skills ? { skills: existing.skills } : {}),
         ...(fallbackUrl ? { gitUrl: fallbackUrl } : {}),
