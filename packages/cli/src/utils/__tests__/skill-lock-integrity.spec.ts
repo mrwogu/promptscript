@@ -43,6 +43,25 @@ describe('skill lock integrity', () => {
     expect(secondHash).toBe(EXPECTED_AGGREGATE);
   });
 
+  it('keeps the pending marker when no children are managed', () => {
+    const integrity = calculateManagedSkillIntegrity({}, []);
+
+    expect(integrity).toBe(PENDING_INTEGRITY);
+  });
+
+  it('handles duplicate child sources during canonical sorting', () => {
+    const child = 'github.com/org/repo/skills/child';
+    const dependencies = {
+      [child]: dependency(FIRST_INTEGRITY),
+    };
+
+    const integrity = calculateManagedSkillIntegrity(dependencies, [child, child]);
+
+    expect(integrity).toBe(
+      'sha256-2d94afc4a4b8b9c18f9256bf13c23700c25777ce5b54d9a50ff5199ae79dc142'
+    );
+  });
+
   it('keeps the pending marker when a child is missing or incomplete', () => {
     const child = 'github.com/org/repo/skills/child';
 
