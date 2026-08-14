@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import type { LockfileDependency } from '@promptscript/core';
 
 /** Integrity marker used when a dependency cannot claim a complete hash. */
