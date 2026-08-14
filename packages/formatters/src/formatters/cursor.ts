@@ -32,6 +32,12 @@ import { resolveSectionTitle, resolveSourceSectionTitle } from '../section-title
 export type CursorVersion = 'modern' | 'legacy' | 'multifile' | 'agents-md' | 'full';
 
 /**
+ * Cursor reads skills from the interoperable `.agents/skills` layout it shares
+ * with the other AGENTS.md ecosystem targets.
+ */
+const CURSOR_SKILL_BASE_PATH = '.agents/skills';
+
+/**
  * Cursor formatter version information.
  */
 export const CURSOR_VERSIONS = {
@@ -148,6 +154,14 @@ export class CursorFormatter extends BaseFormatter {
 
   override referencesMode(): 'directory' | 'inline' | 'none' {
     return 'inline';
+  }
+
+  override getSkillBasePath(): string | null {
+    return CURSOR_SKILL_BASE_PATH;
+  }
+
+  override getSkillFileName(): string | null {
+    return 'SKILL.md';
   }
 
   format(ast: Program, options?: FormatOptions): FormatterOutput {
@@ -385,29 +399,9 @@ export class CursorFormatter extends BaseFormatter {
     const additionalFiles = [...(result.additionalFiles ?? [])];
 
     // Generate native skill files (.agents/skills/<name>/SKILL.md)
-    const skillsBlock = this.findBlock(ast, 'skills');
-    if (skillsBlock) {
-      const props = this.getProps(skillsBlock.content);
-      for (const [skillName, value] of Object.entries(props)) {
-        if (value && typeof value === 'object' && !Array.isArray(value)) {
-          const obj = value as Record<string, Value>;
-          const description = obj['description'] ? this.valueToString(obj['description']) : '';
-          const content = obj['content'] ? this.valueToString(obj['content']) : '';
-          if (!description && !content) continue;
-
-          const skillLines: string[] = ['---'];
-          skillLines.push(`name: ${skillName}`);
-          if (description) skillLines.push(`description: "${this.yamlQuoted(description)}"`);
-          skillLines.push('---');
-          skillLines.push('');
-          if (content) skillLines.push(this.dedent(content));
-
-          additionalFiles.push({
-            path: `.agents/skills/${skillName}/SKILL.md`,
-            content: skillLines.join('\n') + '\n',
-          });
-        }
-      }
+    for (const skill of this.extractSkills(ast, options)) {
+      const skillFile = this.generateSkillFile(skill, options);
+      if (skillFile) additionalFiles.push(skillFile);
     }
 
     // Generate subagent files (.cursor/agents/<name>.md)

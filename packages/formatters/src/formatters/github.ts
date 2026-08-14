@@ -381,9 +381,9 @@ export class GitHubFormatter extends BaseFormatter {
     }
 
     // Generate skill files
-    const skills = this.extractSkills(ast, options);
+    const skills = this.extractCopilotSkills(ast, options);
     for (const skill of skills) {
-      additionalFiles.push(this.generateSkillFile(skill, options));
+      additionalFiles.push(this.generateCopilotSkillFile(skill, options));
     }
 
     // Generate custom agent files (.github/agents/)
@@ -672,7 +672,7 @@ export class GitHubFormatter extends BaseFormatter {
   /**
    * Extract skill configurations from @skills block.
    */
-  private extractSkills(ast: Program, options?: FormatOptions): SkillConfig[] {
+  private extractCopilotSkills(ast: Program, options?: FormatOptions): SkillConfig[] {
     const skillsBlock = this.findBlock(ast, 'skills');
     if (!skillsBlock) return [];
 
@@ -710,7 +710,7 @@ export class GitHubFormatter extends BaseFormatter {
   /**
    * Generate a .github/skills/<name>/SKILL.md file.
    */
-  private generateSkillFile(config: SkillConfig, options?: FormatOptions): FormatterOutput {
+  private generateCopilotSkillFile(config: SkillConfig, options?: FormatOptions): FormatterOutput {
     const lines: string[] = [];
 
     // YAML frontmatter

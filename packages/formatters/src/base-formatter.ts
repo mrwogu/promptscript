@@ -14,7 +14,7 @@ import {
 } from '@promptscript/core';
 import { ConventionRenderer } from './convention-renderer.js';
 import { StandardsExtractor } from './extractors/index.js';
-import type { FormatOptions, Formatter, FormatterOutput } from './types.js';
+import type { FormatOptions, Formatter, FormatterOutput, SkillFileConfig } from './types.js';
 
 /**
  * Abstract base formatter with common helper methods.
@@ -930,6 +930,144 @@ export abstract class BaseFormatter implements Formatter {
    */
   protected isSafeSkillName(name: string): boolean {
     return this.isSafeName(name);
+  }
+
+  /**
+   * Serialize a string as a YAML scalar, quoting only when required.
+   */
+  protected yamlString(value: string): string {
+    const needsQuoting =
+      value === '' ||
+      /^[{[*&!|>'"?%@`-]/.test(value) ||
+      value.includes("'") ||
+      value.includes('"') ||
+      value.includes(': ') ||
+      value.includes(' #') ||
+      value === 'true' ||
+      value === 'false' ||
+      value === 'null' ||
+      value === 'yes' ||
+      value === 'no';
+
+    if (!needsQuoting) {
+      return value;
+    }
+
+    if (value.includes("'")) {
+      const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      return `"${escaped}"`;
+    }
+    return `'${value}'`;
+  }
+
+  /**
+   * Extract skills from the @skills block, skipping unsafe names and skills
+   * excluded by the target's skill filter.
+   */
+  protected extractSkills(ast: Program, options?: FormatOptions): SkillFileConfig[] {
+    const skillsBlock = this.findBlock(ast, 'skills');
+    if (!skillsBlock) return [];
+
+    const skills: SkillFileConfig[] = [];
+    const props = this.getProps(skillsBlock.content);
+
+    for (const [name, value] of Object.entries(props)) {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        if (!this.isSafeSkillName(name)) continue;
+        if (!this.shouldIncludeSkill(name, options)) continue;
+        const obj = value as Record<string, Value>;
+        skills.push({
+          name,
+          description: obj['description'] ? this.valueToString(obj['description']) : name,
+          argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
+          content: obj['content'] ? this.valueToString(obj['content']) : '',
+          resources:
+            obj['resources'] && Array.isArray(obj['resources'])
+              ? (obj['resources'] as Array<Record<string, Value>>).map((r) => ({
+                  relativePath: r['relativePath'] as string,
+                  content: r['content'] as string,
+                  executable: typeof r['executable'] === 'boolean' ? r['executable'] : undefined,
+                }))
+              : undefined,
+          rawFrontmatter:
+            typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
+          examples: this.extractSkillExamples(obj),
+          outputDir: typeof obj['__outputDir'] === 'string' ? obj['__outputDir'] : undefined,
+        });
+      }
+    }
+
+    return skills;
+  }
+
+  /**
+   * Render a skill file at the target's skill base path.
+   * Returns null when the target declares no skill support.
+   */
+  protected generateSkillFile(
+    config: SkillFileConfig,
+    options?: FormatOptions
+  ): FormatterOutput | null {
+    const skillBasePath = this.getSkillBasePath();
+    const skillFileName = this.getSkillFileName();
+    if (!skillBasePath || !skillFileName) return null;
+
+    const lines: string[] = [];
+
+    // YAML frontmatter
+    lines.push('---');
+    if (config.rawFrontmatter) {
+      lines.push(config.rawFrontmatter);
+    } else {
+      lines.push(`name: ${config.name}`);
+      lines.push(`description: ${this.yamlString(config.description)}`);
+      if (config.argumentHint) {
+        lines.push(`argument-hint: ${this.yamlString(config.argumentHint)}`);
+      }
+    }
+    lines.push('---');
+    lines.push('');
+
+    if (config.content) {
+      lines.push(this.dedent(config.content));
+    }
+
+    // Append examples section if the skill has examples
+    if (config.examples && config.examples.length > 0) {
+      lines.push('');
+      lines.push('## Examples');
+      for (const example of config.examples) {
+        lines.push('');
+        lines.push(`### Example: ${example.name}`);
+        if (example.description) {
+          const safeDescription = example.description.replace(/[\r\n]+/g, ' ').trim();
+          lines.push('');
+          lines.push(safeDescription);
+        }
+        lines.push('');
+        lines.push('**Input:**');
+        lines.push('');
+        lines.push(this.renderCodeFence(this.dedent(example.input)));
+        lines.push('');
+        lines.push('**Output:**');
+        lines.push('');
+        lines.push(this.renderCodeFence(this.dedent(example.output)));
+      }
+    }
+
+    const skillDirPath = this.resolveSkillDir(
+      skillBasePath,
+      config.name,
+      config.outputDir,
+      options
+    );
+    const resourceFiles = this.sanitizeResourceFiles(config.resources, skillDirPath);
+
+    return {
+      path: `${skillDirPath}/${skillFileName}`,
+      content: lines.join('\n') + '\n',
+      additionalFiles: resourceFiles.length > 0 ? resourceFiles : undefined,
+    };
   }
 
   /**

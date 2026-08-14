@@ -110,6 +110,38 @@ export interface Formatter {
 }
 
 /**
+ * Configuration for a single generated skill file.
+ */
+export interface SkillFileConfig {
+  /** Skill name */
+  name: string;
+  /** Description */
+  description: string;
+  /** Optional argument hint */
+  argumentHint?: string;
+  /** Skill content/instructions */
+  content: string;
+  /** Resource files to copy alongside the skill file */
+  resources?: Array<{
+    relativePath: string;
+    content: string;
+    origin?: string;
+    executable?: boolean;
+  }>;
+  /** Raw frontmatter from source SKILL.md for pass-through */
+  rawFrontmatter?: string;
+  /** License identifier from SKILL.md frontmatter */
+  license?: string;
+  /** Pre-extracted examples from the skill's nested examples property */
+  examples?: Array<{ name: string; input: string; output: string; description?: string }>;
+  /**
+   * Relative output directory underneath the target's skill folder.
+   * Overrides the default `<skillBasePath>/<name>` layout when provided.
+   */
+  outputDir?: string;
+}
+
+/**
  * Factory function type for creating formatter instances.
  */
 export type FormatterFactory = () => Formatter;
