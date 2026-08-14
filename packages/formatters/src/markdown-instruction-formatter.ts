@@ -2,7 +2,7 @@ import type { Block, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from './base-formatter.js';
 import type { ConventionRenderer } from './convention-renderer.js';
 import type { FormatOptions, FormatterOutput, FormatterWarning } from './types.js';
-import { extractHooks, type HookTarget } from './hook-adapters.js';
+import { extractHooks, type HookTargetOverride } from './hook-adapters.js';
 import {
   appendTargetHookCapabilityWarnings,
   getTargetHookCapabilityWarnings,
@@ -211,8 +211,10 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (!hooksBlock) return false;
 
     return extractHooks(hooksBlock).some((hook) => {
-      const targetOverride = hook.targets?.[this.name as HookTarget];
-      return (targetOverride?.enabled ?? hook.enabled) !== false;
+      // Targets outside HookTarget (such as AGENTS.md-only ones) simply have no override.
+      const overrides: Readonly<Record<string, HookTargetOverride | undefined>> =
+        hook.targets ?? {};
+      return (overrides[this.name]?.enabled ?? hook.enabled) !== false;
     });
   }
 
@@ -1003,7 +1005,10 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
       }
     }
 
-    let content = commandLines.length > 0 ? renderer.renderCodeBlock(commandLines.join('\n')) : '';
+    const contentParts: string[] = [];
+    if (commandLines.length > 0) {
+      contentParts.push(renderer.renderCodeBlock(commandLines.join('\n')));
+    }
 
     if (knowledge) {
       const text = this.extractText(knowledge.content);
@@ -1011,14 +1016,17 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
       if (match) {
         const devCmds = match.replace('## Development Commands', '');
         const normalizedDevCmds = this.normalizeMarkdownForPrettier(devCmds);
-        content += '\n\n' + normalizedDevCmds.trim();
+        contentParts.push(normalizedDevCmds.trim());
       }
     }
 
-    if (!content) return null;
+    if (contentParts.length === 0) return null;
 
     return (
-      renderer.renderSection(this.getRenderedSectionName(ast, 'commands', renderer), content) + '\n'
+      renderer.renderSection(
+        this.getRenderedSectionName(ast, 'commands', renderer),
+        contentParts.join('\n\n')
+      ) + '\n'
     );
   }
 
