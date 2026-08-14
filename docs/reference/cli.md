@@ -945,7 +945,7 @@ prs skills add <source> [options]
 
 **Validation:**
 
-Before writing to the lockfile, `prs skills add` clones the target ref into a temporary directory, recomputes a real `sha256` integrity hash, and runs the [Agent Skills spec](https://agentskills.io/specification) validator against the SKILL.md frontmatter. Checks include:
+Before writing project files, `prs skills add` clones the target ref into a temporary directory, recomputes a real `sha256` integrity hash, and runs the [Agent Skills spec](https://agentskills.io/specification) validator against the SKILL.md frontmatter. Remote Git operations, including `ls-remote` and commit probes, have a 60-second hard timeout. A timeout fails with the repository URL and network troubleshooting guidance.
 
 - `name` present, ≤64 chars, matches `^[a-z0-9]+(-[a-z0-9]+)*$`, and equals the parent directory basename
 - `name` does not collide with another already-installed skill
@@ -958,6 +958,8 @@ Before writing to the lockfile, `prs skills add` clones the target ref into a te
 
 Plain `http://` sources are rejected to prevent MITM. Use `https://`, `git@`, or `github.com/...` form. The fetched commit's integrity hash is written to `promptscript.lock`.
 For SSH input, the lockfile retains the SSH clone URL so later skill updates do not require HTTPS access.
+`--skip-validation` skips only SKILL.md frontmatter checks. Remote access, cloning, commit pinning, file existence checks, and integrity hashing still run.
+The `.prs` file and lockfile are written transactionally from the command user's perspective. If the lockfile write fails after the `.prs` file changes, the original contents are restored. If restoration also fails, the error reports the rollback failure.
 
 **Examples:**
 

@@ -50,6 +50,7 @@ export {
   type GitRegistryOptions,
   type GitAuthOptions,
   type RemoteValidation,
+  type RemoteValidationOptions,
 } from './git-registry.js';
 
 // Git utilities

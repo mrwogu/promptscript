@@ -83,8 +83,9 @@ prs skills update
 # and updates promptscript.lock
 ```
 
-Both `prs skills add` and `prs skills update` resolve the requested tag, branch, commit, or semver range to an exact commit. They clone that resolved ref, recompute the real `sha256` integrity hash, and validate the SKILL.md frontmatter against the [Agent Skills spec](https://agentskills.io/specification) before touching `promptscript.lock`. Use `--strict` to treat warnings as errors (useful in CI) or `--skip-validation` to bypass the check when the upstream is in flux. Plain `http://` sources are rejected to prevent MITM.
+Both `prs skills add` and `prs skills update` resolve the requested tag, branch, commit, or semver range to an exact commit. They clone that resolved ref, recompute the real `sha256` integrity hash, and validate the SKILL.md frontmatter against the [Agent Skills spec](https://agentskills.io/specification) before touching `promptscript.lock`. Remote Git operations, including `ls-remote` and commit probes, have a 60-second hard timeout with actionable failure output. Use `--strict` to treat warnings as errors (useful in CI) or `--skip-validation` to skip only frontmatter checks. Remote access, cloning, commit pinning, file checks, and integrity hashing still run. Plain `http://` sources are rejected to prevent MITM.
 When a skill is added with a `git@` source, its canonical repository entry also stores `gitUrl` so later updates continue using SSH.
+`prs skills add` writes the `.prs` file and lockfile as one user-visible transaction. If the second write fails, both files are restored to their original contents. Rollback failures are reported explicitly.
 
 For a repository owner entry with `source: md` and a `skills` list, `integrity` is an
 aggregate SRI hash. PromptScript hashes a canonical JSON array containing each
