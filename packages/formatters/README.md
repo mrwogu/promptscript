@@ -94,7 +94,7 @@ Formatter (interface)
         |
         +-- MarkdownInstructionFormatter (abstract)
         |     |
-        |     +-- 40 shared markdown target formatters (Windsurf, Cline, ...)
+        |     +-- 41 shared markdown target formatters (Windsurf, Cline, ...)
         |
         +-- GitHubFormatter, ClaudeFormatter, CursorFormatter, ...
 ```

@@ -45,6 +45,7 @@ const FORMATTERS: { name: FormatterName; label: string; icon: string }[] = [
   { name: 'iflow', label: 'iFlow CLI', icon: '🌀' },
   { name: 'openclaw', label: 'OpenClaw', icon: '🦀' },
   { name: 'codebuddy', label: 'CodeBuddy', icon: '👥' },
+  { name: 'hermes', label: 'Hermes Agent', icon: 'H' },
 ];
 
 function CopyButton({ content }: { content: string }) {

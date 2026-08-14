@@ -96,6 +96,7 @@ describe('ConfigPanel', () => {
     expect(screen.getByText('Factory AI')).toBeInTheDocument();
     expect(screen.getByText('OpenCode')).toBeInTheDocument();
     expect(screen.getByText('Roo Code')).toBeInTheDocument();
+    expect(screen.getByText('Hermes Agent')).toBeInTheDocument();
   });
 
   it('should display formatting options', () => {

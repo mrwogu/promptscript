@@ -404,6 +404,42 @@ describe('createSimpleMarkdownFormatter', () => {
         expect(VERSIONS[version].description).toBe('Single AGENTS.md file');
       }
     });
+
+    it('should describe agent, command, and MCP outputs', () => {
+      const { VERSIONS } = createSimpleMarkdownFormatter({
+        name: 'test',
+        outputPath: 'AGENTS.md',
+        description: 'Test',
+        mainFileHeader: '# AGENTS.md',
+        dotDir: '.agents',
+        hasSkills: false,
+        hasAgents: true,
+        hasCommands: true,
+        mcpConfigPath: '.agents/mcp.json',
+      });
+
+      expect(VERSIONS.multifile.description).toBe(
+        'AGENTS.md + .agents/commands/<name>.md + .agents/mcp.json'
+      );
+      expect(VERSIONS.full.description).toBe(
+        'AGENTS.md + .agents/commands/<name>.md + .agents/agents/<name>.md + .agents/mcp.json'
+      );
+      expect(VERSIONS.multifile.description).not.toContain('Single');
+      expect(VERSIONS.full.description).not.toContain('Single');
+    });
+
+    it('should use custom skill file names in output metadata', () => {
+      const { VERSIONS } = createSimpleMarkdownFormatter({
+        name: 'test',
+        outputPath: '.test/rules/project.md',
+        description: 'Test',
+        mainFileHeader: '# Rules',
+        dotDir: '.test',
+        skillFileName: 'skill.md',
+      });
+
+      expect(VERSIONS.full.description).toContain('.test/skills/<name>/skill.md');
+    });
   });
 
   describe('formatting output', () => {
