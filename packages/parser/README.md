@@ -53,16 +53,23 @@ the legacy parse functions.
 
 ### Parser & Visitor
 
-| Export               | Description                                  |
-| :------------------- | :------------------------------------------- |
-| `PromptScriptParser` | Chevrotain parser class                      |
-| `createParser`       | Create an isolated parser instance           |
-| `parser`             | Legacy parser instance for direct consumers  |
-| `createVisitor`      | Create an isolated CST-to-AST visitor        |
-| `visitor`            | Legacy visitor instance for direct consumers |
+| Export               | Description                           |
+| :------------------- | :------------------------------------ |
+| `PromptScriptParser` | Chevrotain parser class               |
+| `createParser`       | Create an isolated parser instance    |
+| `parser`             | Deprecated shared parser instance     |
+| `createVisitor`      | Create an isolated CST-to-AST visitor |
+| `visitor`            | Deprecated shared visitor instance    |
 
-Parse helpers create parser and visitor instances per request. The legacy
-`parser` and `visitor` exports remain available for direct consumers.
+Parse helpers give every request exclusive ownership of a parser and a fresh
+visitor, so concurrent and reentrant parses cannot observe each other's tokens,
+diagnostics, or environment providers. Parser instances are pooled and reset on
+release, which keeps Chevrotain's grammar analysis cost out of the parse path.
+
+The `parser` and `visitor` exports remain for backward compatibility but are
+deprecated: both accumulate request state, so sharing them across concurrent or
+reentrant calls cross-contaminates results. Use `createParser` and
+`createVisitor` instead.
 
 ### Types
 

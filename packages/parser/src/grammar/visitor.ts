@@ -1369,5 +1369,10 @@ export function createVisitor(): PromptScriptVisitor {
  * Legacy visitor instance kept for direct consumers of the parser API.
  *
  * Parse helpers use createVisitor() so request state never leaks between calls.
+ *
+ * @deprecated Shared instance: interpolation settings, environment providers, and
+ * diagnostics accumulate on the visitor, so concurrent or reentrant use
+ * cross-contaminates results. Call {@link createVisitor} to obtain an instance
+ * scoped to one parse request.
  */
 export const visitor = createVisitor();

@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { PSLexer } from './lexer/lexer.js';
-import { createParser } from './grammar/parser.js';
+import { acquireParser, releaseParser } from './grammar/parser-pool.js';
 import { createVisitor, type EnvProvider } from './grammar/visitor.js';
 import type { CanonicalProgram, Program } from '@promptscript/core';
 import { ParseError, toLegacyProgram } from '@promptscript/core';
@@ -123,19 +123,25 @@ export function parseCanonical(source: string, options: ParseOptions = {}): Cano
   }
 
   // Parsing phase
-  const requestParser = createParser();
-  requestParser.input = lexResult.tokens;
-  const cst = requestParser.program();
+  const requestParser = acquireParser();
+  let cst;
+  try {
+    requestParser.input = lexResult.tokens;
+    cst = requestParser.program();
 
-  for (const err of requestParser.errors) {
-    errors.push(
-      new ParseError(err.message, {
-        file: filename,
-        // Chevrotain parser tokens always have startLine/startColumn
-        line: err.token.startLine!,
-        column: err.token.startColumn!,
-      })
-    );
+    // Errors must be drained before release because releasing resets the instance
+    for (const err of requestParser.errors) {
+      errors.push(
+        new ParseError(err.message, {
+          file: filename,
+          // Chevrotain parser tokens always have startLine/startColumn
+          line: err.token.startLine!,
+          column: err.token.startColumn!,
+        })
+      );
+    }
+  } finally {
+    releaseParser(requestParser);
   }
 
   if (errors.length > 0 && !isRecoveryMode) {

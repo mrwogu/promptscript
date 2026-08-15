@@ -570,6 +570,10 @@ export function createParser(): PromptScriptParser {
 /**
  * Legacy parser instance kept for direct consumers of the parser API.
  *
- * Parse helpers use createParser() so request state never leaks between calls.
+ * Parse helpers use pooled instances so request state never leaks between calls.
+ *
+ * @deprecated Shared instance: Chevrotain stores input, errors, and rule stacks
+ * on the parser, so concurrent or reentrant use cross-contaminates results. Call
+ * {@link createParser} to obtain an instance scoped to one parse request.
  */
 export const parser = createParser();

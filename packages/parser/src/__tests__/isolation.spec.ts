@@ -7,7 +7,14 @@ import {
   parseCanonical,
   parseCanonicalFile,
   parseFile,
+  PSLexer,
 } from '../index.js';
+import {
+  acquireParser,
+  clearParserPool,
+  pooledParserCount,
+  releaseParser,
+} from '../grammar/parser-pool.js';
 import type { CanonicalParseResult } from '../index.js';
 
 function readCanonicalField(result: CanonicalParseResult, name: string): string {
@@ -102,5 +109,67 @@ describe('parser request isolation', () => {
     expect(readCanonicalField(canonical, 'value')).toBe('source-b');
     expect(legacyFile.errors).toEqual([]);
     expect(canonicalFile.errors).toEqual([]);
+  });
+
+  it('does not leak parser errors between pooled requests', () => {
+    const failing = parseCanonical('@context { value: }', { filename: 'broken.prs' });
+    expect(failing.errors.length).toBeGreaterThan(0);
+
+    const succeeding = parseCanonical('@context { value: "ok" }', { filename: 'clean.prs' });
+    expect(succeeding.errors).toEqual([]);
+    expect(readCanonicalField(succeeding, 'value')).toBe('ok');
+  });
+
+  it('hands out distinct instances while a parse is in flight', () => {
+    clearParserPool();
+    const inFlight = acquireParser();
+    const nested = acquireParser();
+
+    expect(nested).not.toBe(inFlight);
+
+    releaseParser(nested);
+    releaseParser(inFlight);
+    expect(pooledParserCount()).toBe(2);
+  });
+
+  it('reuses released instances instead of rebuilding the grammar', () => {
+    clearParserPool();
+    const first = acquireParser();
+    releaseParser(first);
+
+    expect(acquireParser()).toBe(first);
+  });
+
+  it('clears request state when an instance returns to the pool', () => {
+    clearParserPool();
+    const instance = acquireParser();
+    instance.input = PSLexer.tokenize('@context { value: }').tokens;
+    instance.program();
+    expect(instance.errors.length).toBeGreaterThan(0);
+
+    releaseParser(instance);
+
+    const reused = acquireParser();
+    expect(reused).toBe(instance);
+    expect(reused.errors).toEqual([]);
+    expect(reused.input).toEqual([]);
+  });
+
+  it('keeps nested parses independent while the outer parser is checked out', () => {
+    clearParserPool();
+    let nested: CanonicalParseResult | undefined;
+    const outer = parseCanonical('@context { value: "${OUTER}" }', {
+      filename: 'outer.prs',
+      interpolateEnv: true,
+      envProvider: () => {
+        nested ??= parseCanonical('@context { value: }', { filename: 'nested.prs' });
+        return 'outer-value';
+      },
+    });
+
+    expect(nested?.errors.length).toBeGreaterThan(0);
+    expect(nested?.errors[0]?.location).toMatchObject({ file: 'nested.prs' });
+    expect(outer.errors).toEqual([]);
+    expect(readCanonicalField(outer, 'value')).toBe('outer-value');
   });
 });
