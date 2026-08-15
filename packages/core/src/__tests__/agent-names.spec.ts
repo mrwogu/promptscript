@@ -8,6 +8,7 @@ import {
   getAgentProvenanceEntries,
   qualifyAgentName,
   qualifyAgentProperties,
+  resolveAgentTargetPath,
   toNativeAgentName,
   type Block,
   type MixedContent,
@@ -322,5 +323,54 @@ describe('agent names', () => {
     ]);
 
     expect(findAgentConflicts(target, source, './shared')).toEqual([]);
+  });
+
+  it('returns undefined when an agent target path has no matching agent', () => {
+    const path = resolveAgentTargetPath(['agents', 'reviewer', 'description'], 0, 'team', {
+      'team.planner': { description: 'Plan' },
+    });
+
+    expect(path).toBeUndefined();
+  });
+
+  it('qualifies agent references nested inside arrays', () => {
+    const source = program([
+      block('agents', {
+        type: 'ObjectContent',
+        properties: {
+          reviewer: {
+            steps: [
+              {
+                agent: 'planner',
+                handoffs: ['reviewer', { agent: 'planner' }],
+              },
+              { agent: 'external', handoffs: ['reviewer'] },
+            ],
+          },
+          planner: { description: 'Plan' },
+        },
+        loc: LOC,
+      }),
+    ]);
+    const agents = source.blocks[0]!.content;
+    if (agents.type !== 'ObjectContent') {
+      throw new Error('Expected object agent content');
+    }
+
+    const result = qualifyAgentProperties(agents, 'team', source, './source', LOC);
+
+    expect(result.content).toMatchObject({
+      properties: {
+        'team.reviewer': {
+          steps: [
+            {
+              agent: 'team.planner',
+              handoffs: ['team.reviewer', { agent: 'team.planner' }],
+            },
+            { agent: 'external', handoffs: ['team.reviewer'] },
+          ],
+        },
+      },
+    });
   });
 });
