@@ -10,7 +10,11 @@ import { BUILTIN_FORMATTERS } from './builtin-formatters.js';
 
 const PROBE_LOCATION = { file: '<capability-probe>', line: 1, column: 1 };
 const PROBE_SKILL_CONTENT = 'Capability probe skill content.';
-const PROBE_MCP_URL = 'https://capability-probe.example/mcp';
+// Detection matches this marker rather than the surrounding URL: substring
+// checks against a host-shaped string are indistinguishable from URL
+// sanitization to static analysis.
+const PROBE_MCP_MARKER = 'promptscript-capability-probe-mcp';
+const PROBE_MCP_URL = `https://capability-probe.example/${PROBE_MCP_MARKER}`;
 
 /**
  * Find drift between canonical target metadata and formatter registrations.
@@ -114,7 +118,7 @@ function validateConditionalResources(
 
     const files = collectOutputFiles(output).slice(1);
     const skillFiles = files.filter((file) => file.content.includes(PROBE_SKILL_CONTENT));
-    const mcpFiles = files.filter((file) => file.content.includes(PROBE_MCP_URL));
+    const mcpFiles = files.filter((file) => file.content.includes(PROBE_MCP_MARKER));
 
     if (skillFiles.length > 0) {
       actualSkillVersions.add(version);

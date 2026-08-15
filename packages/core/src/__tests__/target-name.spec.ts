@@ -26,7 +26,34 @@ import {
   TargetCapabilitiesError,
   validateTargetCapabilities,
   type TargetCapability,
+  type TargetFeatureStatus,
 } from '../target-capabilities.js';
+
+interface DelegateDrift {
+  readonly target: KnownTarget;
+  readonly delegate: KnownTarget;
+  readonly featureId: string;
+  readonly driftedStatus: TargetFeatureStatus;
+}
+
+function buildDelegateDrift(): DelegateDrift {
+  const entry = Object.entries(TARGET_DELEGATES)[0];
+  if (!entry) {
+    throw new Error('No delegated targets are registered');
+  }
+  const [target, delegate] = entry as [KnownTarget, KnownTarget];
+  const feature = Object.entries(TARGET_DEFINITIONS[delegate].featureSupport)[0];
+  if (!feature) {
+    throw new Error(`Delegate "${delegate}" declares no feature support`);
+  }
+  const [featureId, status] = feature;
+  return {
+    target,
+    delegate,
+    featureId,
+    driftedStatus: status === 'supported' ? 'not-supported' : 'supported',
+  };
+}
 
 describe('TargetName branded type', () => {
   describe('KnownTarget', () => {
@@ -444,6 +471,38 @@ describe('Target catalog integrity', () => {
 
       expect(targetDefinition.featureSupport).toEqual(delegateDefinition.featureSupport);
     }
+  });
+
+  it('should report delegated feature drift in the definition catalog', () => {
+    const { target, delegate, featureId, driftedStatus } = buildDelegateDrift();
+    const definition = TARGET_DEFINITIONS[target];
+    const drifted: Record<KnownTarget, TargetDefinition> = {
+      ...TARGET_DEFINITIONS,
+      [target]: {
+        ...definition,
+        featureSupport: { ...definition.featureSupport, [featureId]: driftedStatus },
+      },
+    };
+
+    expect(validateTargetDefinitionConsistency(drifted)).toContain(
+      `${target}: feature "${featureId}" differs from delegated target "${delegate}"`
+    );
+  });
+
+  it('should report delegated feature drift in the capability registry', () => {
+    const { target, delegate, featureId, driftedStatus } = buildDelegateDrift();
+    const capabilities = Object.fromEntries(
+      KNOWN_TARGETS.map((name) => [name, getTargetCapability(name)])
+    ) as Record<KnownTarget, TargetCapability>;
+    const capability = capabilities[target];
+    capabilities[target] = {
+      ...capability,
+      featureSupport: { ...capability.featureSupport, [featureId]: driftedStatus },
+    };
+
+    expect(validateTargetCapabilities(capabilities)).toContain(
+      `${target}: feature "${featureId}" differs from delegated target "${delegate}"`
+    );
   });
 
   it('should resolve version aliases through the capability contract', () => {

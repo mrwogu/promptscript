@@ -1,5 +1,5 @@
-import { TARGET_DEFINITIONS } from '@promptscript/core';
-import { afterEach, describe, expect, it } from 'vitest';
+import { TARGET_DEFINITIONS, TARGET_DELEGATES } from '@promptscript/core';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BUILTIN_FORMATTERS } from '../builtin-formatters.js';
 import {
   isCanonicalTarget,
@@ -10,11 +10,14 @@ const target = 'github';
 const definition = TARGET_DEFINITIONS[target];
 const formatter = BUILTIN_FORMATTERS[target];
 const formatterRegistry = BUILTIN_FORMATTERS as unknown as Record<string, unknown>;
+const delegateRegistry = TARGET_DELEGATES as unknown as Record<string, string>;
 const originalOutputPath = definition.outputPath;
 const originalVersions = definition.versions;
 const originalResources = definition.resources;
 const originalSkillPath = { ...definition.skillPath };
 const originalReferencesMode = definition.referencesMode;
+const originalMcpConfigPath = definition.mcpConfigPath;
+const originalMcpConfigFormat = definition.mcpConfigFormat;
 const grokDefinition = TARGET_DEFINITIONS.grok;
 const originalGrokFeatureSupport = grokDefinition.featureSupport;
 
@@ -24,11 +27,21 @@ afterEach(() => {
     versions: originalVersions,
     resources: originalResources,
     referencesMode: originalReferencesMode,
+    mcpConfigPath: originalMcpConfigPath,
+    mcpConfigFormat: originalMcpConfigFormat,
   });
   Object.assign(definition.skillPath, originalSkillPath);
   Object.assign(grokDefinition, { featureSupport: originalGrokFeatureSupport });
   formatterRegistry[target] = formatter;
+  delete delegateRegistry['not-a-known-target'];
+  vi.restoreAllMocks();
 });
+
+function withoutMcpResource(): void {
+  Object.assign(definition, {
+    resources: definition.resources.filter((resource) => resource.kind !== 'mcp'),
+  });
+}
 
 describe('built-in formatter capability metadata', () => {
   it('matches formatter paths, conditional resources, and feature metadata', () => {
@@ -122,6 +135,78 @@ describe('built-in formatter capability metadata', () => {
       `${target}: reference mode differs from metadata`,
       `${target}: emitted skill path ".github/skills/capability-probe/SKILL.md" differs from metadata`,
     ]);
+  });
+
+  it('skips delegate entries that are not canonical targets', () => {
+    delegateRegistry['not-a-known-target'] = 'claude';
+
+    expect(validateBuiltinFormatterCapabilities()).toEqual([]);
+  });
+
+  it('reports a formatter probe that throws an error', () => {
+    vi.spyOn(formatter.prototype, 'format').mockImplementation(() => {
+      throw new Error('probe exploded');
+    });
+
+    expect(validateBuiltinFormatterCapabilities()).toContain(
+      `${target}: formatter probe for version "simple" failed: probe exploded`
+    );
+  });
+
+  it('reports a formatter probe that throws a non-error value', () => {
+    vi.spyOn(formatter.prototype, 'format').mockImplementation(() => {
+      throw 'probe rejected';
+    });
+
+    expect(validateBuiltinFormatterCapabilities()).toContain(
+      `${target}: formatter probe for version "simple" failed: probe rejected`
+    );
+  });
+
+  it('reports emitted skills that have no canonical skill metadata', () => {
+    Object.assign(definition.skillPath, { basePath: '' });
+
+    expect(validateBuiltinFormatterCapabilities()).toContain(
+      `${target}: formatter emits skills without canonical skill metadata`
+    );
+  });
+
+  it('reports emitted MCP config that has no canonical MCP metadata', () => {
+    Object.assign(definition, { mcpConfigPath: undefined });
+    withoutMcpResource();
+
+    expect(validateBuiltinFormatterCapabilities()).toContain(
+      `${target}: formatter emits MCP config without canonical MCP metadata`
+    );
+  });
+
+  it('reports an MCP config path that differs from the target definition', () => {
+    Object.assign(definition, { mcpConfigPath: '.other/mcp.json' });
+
+    expect(validateBuiltinFormatterCapabilities()).toContain(
+      `${target}: MCP config path ".vscode/mcp.json" differs from metadata`
+    );
+  });
+
+  it('reports an MCP config format that differs from metadata', () => {
+    Object.assign(definition, { mcpConfigFormat: 'toml' });
+
+    expect(validateBuiltinFormatterCapabilities()).toContain(
+      `${target}: MCP config format "json" differs from metadata`
+    );
+  });
+
+  it('reports resource versions declared but never emitted', () => {
+    const resources = definition.resources.map((resource) =>
+      resource.kind === 'mcp'
+        ? { ...resource, versions: [...resource.versions, 'simple'] }
+        : resource
+    );
+    Object.assign(definition, { resources });
+
+    expect(validateBuiltinFormatterCapabilities()).toContain(
+      `${target}: mcp resource declares un-emitted version "simple"`
+    );
   });
 });
 
