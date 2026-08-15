@@ -66,6 +66,11 @@ interface ParsedSkillFrontmatter {
   allowedTools?: string[];
 }
 
+interface ParsedYamlFrontmatter {
+  fields: Record<string, unknown>;
+  fieldLineOffsets: ReadonlyMap<string, number>;
+}
+
 const MAX_FRONTMATTER_BYTES = 256 * 1024;
 const MAX_FRONTMATTER_NODES = 10_000;
 const MAX_FRONTMATTER_DEPTH = 32;
@@ -91,11 +96,11 @@ const YAML_FRONTMATTER_OPTIONS = {
  */
 export function parseSkillMd(content: string, sourceFile = '<skill>'): ParsedSkillMd {
   const lines = content.split('\n');
-  const frontmatterStart = isFrontmatterDelimiter(lines[0], true) ? 0 : -1;
+  const frontmatterStart = findFrontmatterStart(lines);
   let frontmatterEnd = -1;
 
   if (frontmatterStart >= 0) {
-    for (let i = 1; i < lines.length; i++) {
+    for (let i = frontmatterStart + 1; i < lines.length; i++) {
       if (isFrontmatterDelimiter(lines[i])) {
         frontmatterEnd = i;
         break;
@@ -110,10 +115,12 @@ export function parseSkillMd(content: string, sourceFile = '<skill>'): ParsedSki
     const rawFrontmatter = stripFrontmatterMarkerLines(
       lines.slice(frontmatterStart + 1, frontmatterEnd).join('\n')
     );
+    const yamlFrontmatter = parseYamlFrontmatter(rawFrontmatter, sourceFile, frontmatterStart + 1);
     const parsed = parseFrontmatterFields(
-      parseYamlFrontmatter(rawFrontmatter, sourceFile, frontmatterStart + 1),
+      yamlFrontmatter.fields,
       sourceFile,
-      frontmatterStart + 1
+      frontmatterStart + 1,
+      yamlFrontmatter.fieldLineOffsets
     );
 
     const bodyContent = stripLeadingHtmlMarker(lines.slice(frontmatterEnd + 1).join('\n')).trim();
@@ -150,6 +157,14 @@ export function skillNameFromPath(filePath: string): string {
   return basename(filePath, '.md');
 }
 
+function findFrontmatterStart(lines: string[]): number {
+  let index = 0;
+  while (index < lines.length && (lines[index] ?? '').trim() === '') {
+    index++;
+  }
+  return isFrontmatterDelimiter(lines[index], true) ? index : -1;
+}
+
 function isFrontmatterDelimiter(line: string | undefined, allowBom = false): boolean {
   if (line === undefined) return false;
   const withoutCarriageReturn = line.endsWith('\r') ? line.slice(0, -1) : line;
@@ -157,14 +172,14 @@ function isFrontmatterDelimiter(line: string | undefined, allowBom = false): boo
     allowBom && withoutCarriageReturn.startsWith('\uFEFF')
       ? withoutCarriageReturn.slice(1)
       : withoutCarriageReturn;
-  return candidate === '---';
+  return candidate.trimEnd() === '---';
 }
 
 function parseYamlFrontmatter(
   source: string,
   sourceFile: string,
   lineOffset: number
-): Record<string, unknown> {
+): ParsedYamlFrontmatter {
   if (Buffer.byteLength(source, 'utf8') > MAX_FRONTMATTER_BYTES) {
     throw frontmatterError(
       `frontmatter exceeds ${MAX_FRONTMATTER_BYTES} bytes`,
@@ -174,7 +189,8 @@ function parseYamlFrontmatter(
     );
   }
 
-  const document = parseDocument(source.replace(/\r\n?/g, '\n'), YAML_FRONTMATTER_OPTIONS);
+  const normalizedSource = source.replace(/\r\n?/g, '\n');
+  const document = parseDocument(normalizedSource, YAML_FRONTMATTER_OPTIONS);
   if (document.errors.length > 0) {
     const error = document.errors[0]!;
     const position = error.linePos?.[0];
@@ -197,6 +213,7 @@ function parseYamlFrontmatter(
   }
 
   rejectUnsafeYamlNodes(document.contents, sourceFile, lineOffset);
+  const fieldLineOffsets = getTopLevelFieldLineOffsets(document.contents, normalizedSource);
 
   let value: unknown;
   try {
@@ -212,7 +229,7 @@ function parseYamlFrontmatter(
   }
 
   if (document.contents === null) {
-    return {};
+    return { fields: {}, fieldLineOffsets };
   }
   if (!isRecord(value)) {
     throw frontmatterError(
@@ -224,7 +241,36 @@ function parseYamlFrontmatter(
   }
 
   enforceFrontmatterLimits(value, sourceFile, lineOffset + 1);
-  return value;
+  return { fields: value, fieldLineOffsets };
+}
+
+function getTopLevelFieldLineOffsets(node: unknown, source: string): ReadonlyMap<string, number> {
+  const fieldLineOffsets = new Map<string, number>();
+  if (!isCollection(node)) return fieldLineOffsets;
+
+  for (const item of node.items) {
+    if (!isPair(item)) continue;
+    const key = getScalarString(item.key);
+    const line = getNodeLine(item.key, source);
+    if (key !== undefined && line !== undefined) {
+      fieldLineOffsets.set(key, line);
+    }
+  }
+
+  return fieldLineOffsets;
+}
+
+function getScalarString(node: unknown): string | undefined {
+  if (!isNode(node) || !('value' in node)) return undefined;
+  const value = node.value;
+  return typeof value === 'string' ? value : undefined;
+}
+
+function getNodeLine(node: unknown, source: string): number | undefined {
+  if (!isNode(node) || !('range' in node)) return undefined;
+  const range = node.range;
+  if (!Array.isArray(range) || typeof range[0] !== 'number') return undefined;
+  return source.slice(0, range[0]).split('\n').length;
 }
 
 function rejectUnsafeYamlNodes(node: unknown, sourceFile: string, lineOffset: number): void {
@@ -350,19 +396,71 @@ function frontmatterError(
 function parseFrontmatterFields(
   fields: Record<string, unknown>,
   sourceFile: string,
-  lineOffset: number
+  lineOffset: number,
+  fieldLineOffsets: ReadonlyMap<string, number>
 ): ParsedSkillFrontmatter {
-  const name = readOptionalString(fields, 'name', sourceFile, lineOffset);
-  const description = readOptionalString(fields, 'description', sourceFile, lineOffset);
-  const license = readOptionalString(fields, 'license', sourceFile, lineOffset);
-  const compatibility = readCompatibilityField(fields, sourceFile, lineOffset);
-  const params = parseParamsField(fields, sourceFile, lineOffset);
-  const inputs = parseContractFieldsField(fields, 'inputs', sourceFile, lineOffset);
-  const outputs = parseContractFieldsField(fields, 'outputs', sourceFile, lineOffset);
-  const references = parsePathField(fields, 'references', sourceFile, lineOffset);
-  const scripts = parsePathField(fields, 'scripts', sourceFile, lineOffset);
-  const metadata = parseMetadataField(fields, sourceFile, lineOffset);
-  const allowedTools = parseAllowedToolsField(fields, sourceFile, lineOffset);
+  const name = readOptionalString(
+    fields,
+    'name',
+    sourceFile,
+    getFieldLineOffset('name', fieldLineOffsets, lineOffset)
+  );
+  const description = readOptionalString(
+    fields,
+    'description',
+    sourceFile,
+    getFieldLineOffset('description', fieldLineOffsets, lineOffset)
+  );
+  const license = readOptionalString(
+    fields,
+    'license',
+    sourceFile,
+    getFieldLineOffset('license', fieldLineOffsets, lineOffset)
+  );
+  const compatibility = readCompatibilityField(
+    fields,
+    sourceFile,
+    getFieldLineOffset('compatibility', fieldLineOffsets, lineOffset)
+  );
+  const params = parseParamsField(
+    fields,
+    sourceFile,
+    getFieldLineOffset('params', fieldLineOffsets, lineOffset)
+  );
+  const inputs = parseContractFieldsField(
+    fields,
+    'inputs',
+    sourceFile,
+    getFieldLineOffset('inputs', fieldLineOffsets, lineOffset)
+  );
+  const outputs = parseContractFieldsField(
+    fields,
+    'outputs',
+    sourceFile,
+    getFieldLineOffset('outputs', fieldLineOffsets, lineOffset)
+  );
+  const references = parsePathField(
+    fields,
+    'references',
+    sourceFile,
+    getFieldLineOffset('references', fieldLineOffsets, lineOffset)
+  );
+  const scripts = parsePathField(
+    fields,
+    'scripts',
+    sourceFile,
+    getFieldLineOffset('scripts', fieldLineOffsets, lineOffset)
+  );
+  const metadata = parseMetadataField(
+    fields,
+    sourceFile,
+    getFieldLineOffset('metadata', fieldLineOffsets, lineOffset)
+  );
+  const allowedTools = parseAllowedToolsField(
+    fields,
+    sourceFile,
+    getFieldLineOffset('allowed-tools', fieldLineOffsets, lineOffset)
+  );
 
   return {
     name,
@@ -377,6 +475,15 @@ function parseFrontmatterFields(
     metadata,
     allowedTools,
   };
+}
+
+function getFieldLineOffset(
+  field: string,
+  fieldLineOffsets: ReadonlyMap<string, number>,
+  lineOffset: number
+): number {
+  const fieldLine = fieldLineOffsets.get(field);
+  return fieldLine === undefined ? lineOffset : lineOffset + fieldLine - 1;
 }
 
 function readOptionalString(
@@ -650,7 +757,11 @@ function parseTypedDefault(
       return toPromptValue(value, context, sourceFile, lineOffset);
     case 'number': {
       const numberValue =
-        typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN;
+        typeof value === 'number'
+          ? value
+          : typeof value === 'string' && value.trim().length > 0
+            ? Number(value)
+            : NaN;
       if (!Number.isFinite(numberValue)) {
         throw frontmatterError(
           `${context} default must be a finite number`,
@@ -750,7 +861,9 @@ function parseMetadataField(
 ): Record<string, string> | undefined {
   if (!Object.hasOwn(fields, 'metadata')) return undefined;
   const value = fields['metadata'];
-  if (!isRecord(value)) return undefined;
+  if (!isRecord(value)) {
+    throw frontmatterError('field "metadata" must be a mapping', sourceFile, lineOffset + 1, 1);
+  }
 
   const metadata = createSafeRecord<string>();
   for (const [key, item] of Object.entries(value)) {

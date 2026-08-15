@@ -571,36 +571,7 @@ export class Resolver {
     if (parsed.content) {
       skillProps['content'] = makeTextContent(parsed.content, absPath);
     }
-    if (parsed.params !== undefined) {
-      skillProps['params'] = parsed.params as unknown as Value;
-    }
-    if (parsed.inputs !== undefined) {
-      skillProps['inputs'] = parsed.inputs as unknown as Value;
-    }
-    if (parsed.outputs !== undefined) {
-      skillProps['outputs'] = parsed.outputs as unknown as Value;
-    }
-    if (parsed.compatibility !== undefined) {
-      skillProps['compatibility'] = parsed.compatibility;
-    }
-    if (parsed.metadata !== undefined) {
-      skillProps['metadata'] = parsed.metadata as unknown as Value;
-    }
-    if (parsed.allowedTools !== undefined) {
-      skillProps['allowedTools'] = parsed.allowedTools as unknown as Value;
-    }
-    if (parsed.license !== undefined) {
-      skillProps['license'] = parsed.license;
-    }
-    if (parsed.references !== undefined) {
-      skillProps['references'] = parsed.references as unknown as Value;
-    }
-    if (parsed.scripts !== undefined) {
-      skillProps['scripts'] = parsed.scripts as unknown as Value;
-    }
-    if (parsed.rawFrontmatter !== undefined) {
-      skillProps['__rawFrontmatter'] = parsed.rawFrontmatter;
-    }
+    addParsedSkillMetadata(skillProps, parsed);
 
     // Discover resource files alongside the SKILL.md and explicit reference
     // entries. This mirrors the behaviour of resolveNativeSkills() so a skill

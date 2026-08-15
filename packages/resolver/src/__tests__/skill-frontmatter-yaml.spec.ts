@@ -122,6 +122,15 @@ describe('YAML skill frontmatter', () => {
     expect(result.compatibility).toBe('claude-code, github-copilot');
   });
 
+  it('accepts trailing delimiter whitespace and leading blank lines', () => {
+    const result = parseSkillMd(
+      ['  ', '', '---  ', 'name: whitespace-safe', '---\t', 'Body'].join('\n')
+    );
+
+    expect(result.name).toBe('whitespace-safe');
+    expect(result.content).toBe('Body');
+  });
+
   it.each([
     ['top-level sequence', '- item', /top-level frontmatter value must be a YAML mapping/],
     ['non-string name', 'name: 42', /field "name" must be a string/],
@@ -152,6 +161,16 @@ describe('YAML skill frontmatter', () => {
     [
       'invalid number default',
       'params:\n  count:\n    type: number\n    default: nope',
+      /parameter "count" default must be a finite number/,
+    ],
+    [
+      'empty number default',
+      'params:\n  count:\n    type: number\n    default: ""',
+      /parameter "count" default must be a finite number/,
+    ],
+    [
+      'whitespace number default',
+      'params:\n  count:\n    type: number\n    default: "  "',
       /parameter "count" default must be a finite number/,
     ],
     [
@@ -191,6 +210,8 @@ describe('YAML skill frontmatter', () => {
       'metadata:\n  version: 1',
       /metadata value "version" must be a string/,
     ],
+    ['scalar metadata', 'metadata: foo', /field "metadata" must be a mapping/],
+    ['sequence metadata', 'metadata: [foo]', /field "metadata" must be a mapping/],
     [
       'invalid allowed tools',
       'allowed-tools: [Read, 1]',
@@ -224,7 +245,6 @@ describe('YAML skill frontmatter', () => {
         'references:',
         'scripts:',
         'allowed-tools:',
-        'metadata: some-value',
         '---',
         'Body',
       ].join('\n')
@@ -239,6 +259,27 @@ describe('YAML skill frontmatter', () => {
     expect(result.scripts).toEqual([]);
     expect(result.allowedTools).toEqual([]);
     expect(result.metadata).toBeUndefined();
+  });
+
+  it('reports field parser errors on the field line', () => {
+    const content = [
+      '---',
+      'name: example',
+      'description: Example skill',
+      'license: MIT',
+      'compatibility: 42',
+      '---',
+      'Body',
+    ].join('\n');
+    let error: unknown;
+
+    try {
+      parseSkillMd(content, '/tmp/skills/invalid/SKILL.md');
+    } catch (caught: unknown) {
+      error = caught;
+    }
+
+    expect(error).toMatchObject({ location: { line: 5, column: 1 } });
   });
 
   it('handles null optional fields', () => {

@@ -22,6 +22,8 @@ async function fileExists(path: string): Promise<boolean> {
 
 /**
  * Parse simple YAML-style frontmatter from a markdown file.
+ * Agents and commands intentionally use this legacy scalar parser; skills use
+ * parseSkillMd's full YAML parser because their metadata schema is richer.
  * Returns the frontmatter fields as a record, or an empty object if none present.
  */
 function parseFrontmatter(content: string): Record<string, string> {
