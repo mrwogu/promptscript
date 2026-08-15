@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { lstat, readdir, readFile } from 'fs/promises';
-import { basename, dirname, join, relative, resolve } from 'path';
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'path';
 import { parse } from '@promptscript/parser';
 import {
   noopLogger,
@@ -107,8 +107,45 @@ export interface ResolvedAST {
   canonicalAst?: CanonicalProgram | null;
   /** List of all source files involved in resolution */
   sources: string[];
+  /** Files and directories read while resolving the AST */
+  dependencies?: string[];
   /** List of errors encountered during resolution */
   errors: ResolveError[];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function collectDependencyPaths(value: unknown, dependencies: Set<string>): void {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectDependencyPaths(item, dependencies);
+    }
+    return;
+  }
+
+  if (!isRecord(value)) return;
+
+  const loc = value['loc'];
+  if (isRecord(loc) && typeof loc['file'] === 'string') {
+    const file = loc['file'];
+    if (isAbsolute(file)) dependencies.add(file);
+  }
+
+  if (typeof value['origin'] === 'string' && isAbsolute(value['origin'])) {
+    dependencies.add(value['origin']);
+  }
+
+  for (const child of Object.values(value)) {
+    collectDependencyPaths(child, dependencies);
+  }
+}
+
+function addDependencyPaths(dependencies: Set<string>, paths: readonly string[]): void {
+  for (const path of paths) {
+    dependencies.add(path);
+  }
 }
 
 /**
@@ -202,12 +239,13 @@ export class Resolver {
    */
   private async doResolve(absPath: string): Promise<ResolvedAST> {
     const sources: string[] = [absPath];
+    const dependencies = new Set<string>([absPath]);
     const errors: ResolveError[] = [];
 
     // Load and parse file
-    const parseData = await this.loadAndParse(absPath, sources, errors);
+    const parseData = await this.loadAndParse(absPath, sources, errors, dependencies);
     if (!parseData.ast) {
-      return { ast: null, sources, errors };
+      return { ast: null, sources, dependencies: [...dependencies], errors };
     }
 
     let ast = parseData.ast;
@@ -218,16 +256,16 @@ export class Resolver {
     this.logger.debug(`AST node count: ${this.countNodes(ast)}`);
 
     if (sequentialOperations) {
-      ast = await this.resolveSequentialOperations(ast, absPath, sources, errors);
+      ast = await this.resolveSequentialOperations(ast, absPath, sources, dependencies, errors);
     } else {
       // Preserve legacy phase ordering through syntax 1.5.x.
-      ast = await this.resolveInherit(ast, absPath, sources, errors);
-      ast = await this.resolveImports(ast, absPath, sources, errors);
+      ast = await this.resolveInherit(ast, absPath, sources, dependencies, errors);
+      ast = await this.resolveImports(ast, absPath, sources, dependencies, errors);
     }
 
     // Legacy phase order resolves inline composition after top-level imports.
     if (!sequentialOperations) {
-      ast = await this.resolveComposition(ast, absPath, sources, errors);
+      ast = await this.resolveComposition(ast, absPath, sources, dependencies, errors);
     }
 
     // Apply extensions
@@ -271,11 +309,27 @@ export class Resolver {
     // Auto-discover agent files from local and universal directories
     ast = await resolveNativeAgents(ast, absPath, this.loader.getLocalPath(), discoveryOptions);
 
+    const localDiscoveryPath = this.loader.getLocalPath();
+    for (const directory of ['skills', 'commands', 'agents', 'shared'] as const) {
+      dependencies.add(resolve(localDiscoveryPath, directory));
+    }
+    dependencies.add(resolve(this.loader.getRegistryPath(), '@skills'));
+    dependencies.add(resolve(this.loader.getProjectRoot(), '.promptscript', 'scripts'));
+    if (discoveryOptions.universalDir) {
+      for (const directory of ['skills', 'commands', 'agents'] as const) {
+        dependencies.add(
+          resolve(this.loader.getProjectRoot(), discoveryOptions.universalDir, directory)
+        );
+      }
+    }
+
+    collectDependencyPaths(ast, dependencies);
     this.logger.debug(`Resolved ${sources.length} source file(s)`);
     return {
       ast,
       canonicalAst: normalizeProgram(ast),
       sources: [...new Set(sources)],
+      dependencies: [...dependencies],
       errors,
     };
   }
@@ -284,6 +338,7 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
+    dependencies: Set<string>,
     errors: ResolveError[]
   ): Promise<Program> {
     const operations = normalizeProgram(ast).operations;
@@ -310,6 +365,7 @@ export class Resolver {
             },
             absPath,
             sources,
+            dependencies,
             errors,
             true
           );
@@ -322,6 +378,7 @@ export class Resolver {
             },
             absPath,
             sources,
+            dependencies,
             errors
           );
           result = { ...result, uses: [] };
@@ -338,7 +395,7 @@ export class Resolver {
                 }),
           };
           localBlockNames.add(block.name);
-          result = await this.resolveComposition(result, absPath, sources, errors);
+          result = await this.resolveComposition(result, absPath, sources, dependencies, errors);
           break;
         }
         case 'ExtendOperation': {
@@ -364,7 +421,7 @@ export class Resolver {
               ...result,
               blocks: applyExtend(result.blocks, extension, this.logger),
             };
-            result = await this.resolveComposition(result, absPath, sources, errors);
+            result = await this.resolveComposition(result, absPath, sources, dependencies, errors);
           } catch (error) {
             errors.push(
               error instanceof ResolveError
@@ -392,7 +449,7 @@ export class Resolver {
             result = applyOverride(result, override, {
               importMarkerPrefix: IMPORT_MARKER_PREFIX,
             });
-            result = await this.resolveComposition(result, absPath, sources, errors);
+            result = await this.resolveComposition(result, absPath, sources, dependencies, errors);
           } catch (error) {
             errors.push(
               error instanceof ResolveError
@@ -441,7 +498,8 @@ export class Resolver {
   private async loadAndParse(
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    errors: ResolveError[],
+    dependencies: Set<string>
   ): Promise<{ ast: Program | null }> {
     let source: string;
     try {
@@ -451,7 +509,7 @@ export class Resolver {
         // Directory fallback: if path looks like .prs was appended, try as directory
         if (absPath.endsWith('.prs')) {
           const possibleDir = absPath.slice(0, -4); // strip .prs
-          const dirResult = await this.tryDirectoryScan(possibleDir, sources, errors);
+          const dirResult = await this.tryDirectoryScan(possibleDir, sources, dependencies, errors);
           if (dirResult) return dirResult;
         }
         errors.push(new ResolveError(err.message));
@@ -593,6 +651,7 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
+    dependencies: Set<string>,
     errors: ResolveError[],
     parentWins = false
   ): Promise<Program> {
@@ -612,6 +671,7 @@ export class Resolver {
         parent = await this.resolve(parentPath);
       }
       sources.push(...parent.sources);
+      addDependencyPaths(dependencies, parent.dependencies ?? []);
       errors.push(...parent.errors);
 
       if (parent.ast) {
@@ -673,6 +733,7 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
+    dependencies: Set<string>,
     errors: ResolveError[]
   ): Promise<Program> {
     let result = ast;
@@ -693,6 +754,7 @@ export class Resolver {
         }
 
         sources.push(...imported.sources);
+        addDependencyPaths(dependencies, imported.dependencies ?? []);
         errors.push(...imported.errors);
 
         if (imported.ast) {
@@ -789,6 +851,7 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
+    dependencies: Set<string>,
     errors: ResolveError[]
   ): Promise<Program> {
     try {
@@ -814,6 +877,7 @@ export class Resolver {
           if (subResult.sources.length > 0) {
             sources.push(...subResult.sources);
           }
+          addDependencyPaths(dependencies, subResult.dependencies ?? []);
           if (subResult.errors.length > 0) {
             errors.push(...subResult.errors);
           }
@@ -862,6 +926,7 @@ export class Resolver {
     }
 
     const { repoUrl, path: subPath, version } = parsed;
+    const dependencies = new Set<string>();
 
     // Add to resolving set for circular dependency detection
     if (this.resolving.has(marker)) {
@@ -1007,6 +1072,7 @@ export class Resolver {
           );
         }
       }
+      dependencies.add(cachePath);
 
       // Resolve the file path within the cached repo. An empty sub-path means
       // the import targets the repository root (e.g. `@use github.com/foo/bar`)
@@ -1054,12 +1120,14 @@ export class Resolver {
       if (!isRoot && existsSync(resolvedFullPath) && isMdPath) {
         // Found a .md file — route through content detection
         this.logger.debug(`Found .md file: ${resolvedFullPath}`);
+        dependencies.add(resolvedFullPath);
         const source = await readFile(resolvedFullPath, 'utf-8');
         const mdResult = await this.loadAndParseMd(resolvedFullPath, source, errors);
         resolvedAST = mdResult.ast;
       } else if (!isRoot && existsSync(resolvedFullPath)) {
         // Found a .prs file — parse it
         this.logger.debug(`Found .prs file: ${resolvedFullPath}`);
+        dependencies.add(resolvedFullPath);
         const source = await this.loader.load(resolvedFullPath);
         const parseResult = parse(source, { filename: resolvedFullPath });
 
@@ -1116,7 +1184,8 @@ export class Resolver {
             `No .prs found, trying directory scan and auto-discovery: ${discoverDir}`
           );
 
-          const dirResult = await this.tryDirectoryScan(discoverDir, [marker], []);
+          dependencies.add(discoverDir);
+          const dirResult = await this.tryDirectoryScan(discoverDir, [marker], dependencies, []);
           if (dirResult?.ast) {
             resolvedAST = dirResult.ast;
           } else {
@@ -1138,8 +1207,13 @@ export class Resolver {
       const result: ResolvedAST = {
         ast: resolvedAST,
         sources: [marker],
+        dependencies: [...dependencies],
         errors: [],
       };
+      if (resolvedAST) {
+        collectDependencyPaths(resolvedAST, dependencies);
+        result.dependencies = [...dependencies];
+      }
 
       if (this.cacheEnabled) {
         this.cache.set(marker, result);
@@ -1165,8 +1239,10 @@ export class Resolver {
   private async tryDirectoryScan(
     dirPath: string,
     sources: string[],
+    dependencies: Set<string>,
     errors: ResolveError[]
   ): Promise<{ ast: Program | null } | null> {
+    dependencies.add(dirPath);
     let stat;
     try {
       stat = await lstat(dirPath);
@@ -1302,6 +1378,39 @@ export class Resolver {
    */
   clearCache(): void {
     this.cache.clear();
+  }
+
+  /**
+   * Invalidate cached resolutions affected by changed files.
+   *
+   * @param changedPaths - Files or directories that changed
+   */
+  invalidate(changedPaths: readonly string[]): void {
+    if (!this.cacheEnabled || changedPaths.length === 0) return;
+
+    const normalizedChanges = changedPaths.map((path) =>
+      isAbsolute(path) ? resolve(path) : resolve(this.loader.getProjectRoot(), path)
+    );
+    for (const [cacheKey, result] of this.cache) {
+      const dependencies = result.dependencies ?? result.sources;
+      if (dependencies.length === 0) {
+        this.cache.delete(cacheKey);
+        continue;
+      }
+
+      const affected = dependencies.some((dependency) => {
+        if (!isAbsolute(dependency)) return false;
+        const normalizedDependency = resolve(dependency);
+        return normalizedChanges.some((changedPath) => {
+          const relation = relative(normalizedDependency, changedPath);
+          return (
+            relation === '' ||
+            (relation !== '..' && !relation.startsWith(`..${sep}`) && !isAbsolute(relation))
+          );
+        });
+      });
+      if (affected) this.cache.delete(cacheKey);
+    }
   }
 
   /**

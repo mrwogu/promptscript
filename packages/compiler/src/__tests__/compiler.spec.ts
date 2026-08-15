@@ -13,6 +13,8 @@ const mockUpdateConfig = vi.fn();
 const mockVerifyReferenceHashes = vi.fn().mockResolvedValue([]);
 const mockRegistryCacheConstructor = vi.fn();
 const mockResolverConstructor = vi.fn();
+const mockInvalidate = vi.fn();
+const mockClearCache = vi.fn();
 
 vi.mock('@promptscript/resolver', () => ({
   Resolver: class MockResolver {
@@ -21,6 +23,8 @@ vi.mock('@promptscript/resolver', () => ({
     }
 
     resolve = mockResolve;
+    invalidate = mockInvalidate;
+    clearCache = mockClearCache;
     verifyReferenceHashes = mockVerifyReferenceHashes;
   },
   RegistryCache: class MockRegistryCache {
@@ -148,10 +152,11 @@ function createFailingFormatter(name: string, error: string): Formatter {
 /**
  * Helper to create a successful resolve result.
  */
-function createResolveSuccess(ast: Program) {
+function createResolveSuccess(ast: Program, dependencies: string[] = []) {
   return {
     ast,
     sources: ['test.prs'],
+    dependencies,
     errors: [],
   };
 }
@@ -2137,6 +2142,75 @@ describe('Compiler.watch', () => {
     await watcher.close();
 
     vi.restoreAllMocks();
+  });
+
+  it('should watch and invalidate resolved native dependencies', async () => {
+    const workspace = createMarkedWorkspace();
+    const importedSource = join(workspace.root, 'imported.prs');
+    const nativeSkill = join(workspace.root, '.promptscript', 'skills', 'review', 'SKILL.md');
+    const lockfile = join(workspace.root, 'promptscript.lock');
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('test');
+    const onCompile = vi.fn();
+    let changeHandler: ((path: string) => void) | undefined;
+    let watchedPaths: string[] = [];
+
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+    mockResolve.mockResolvedValue(createResolveSuccess(ast, [importedSource, nativeSkill]));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: vi.fn().mockImplementation((paths: string[]) => {
+          watchedPaths = paths;
+          return {
+            on: vi.fn().mockImplementation((event: string, handler: unknown) => {
+              if (event === 'change') {
+                changeHandler = handler as (path: string) => void;
+              }
+              return mockWatcher;
+            }),
+            close: vi.fn().mockResolvedValue(undefined),
+          };
+        }),
+      },
+    }));
+
+    try {
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry', projectRoot: workspace.root },
+        formatters: ['test'],
+      });
+
+      const watcher = await compiler.watch(workspace.entry, {
+        onCompile,
+        debounce: 10,
+      });
+
+      expect(watchedPaths).toEqual(
+        expect.arrayContaining([
+          importedSource,
+          nativeSkill,
+          join(workspace.root, 'promptscript.lock'),
+        ])
+      );
+
+      changeHandler?.(nativeSkill);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(mockInvalidate).toHaveBeenCalledWith([nativeSkill]);
+      expect(mockResolve).toHaveBeenCalledTimes(2);
+      expect(onCompile).toHaveBeenCalledOnce();
+
+      changeHandler?.(lockfile);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(mockClearCache).toHaveBeenCalled();
+      await watcher.close();
+    } finally {
+      rmSync(workspace.root, { recursive: true, force: true });
+      vi.restoreAllMocks();
+    }
   });
 
   it('should handle add events from watcher', async () => {

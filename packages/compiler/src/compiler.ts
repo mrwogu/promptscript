@@ -144,6 +144,45 @@ function normalizeOutputDir(dir: string): string {
     .join('/');
 }
 
+function watchPatternRegExp(pattern: string): RegExp {
+  const normalizedPattern = pattern.replace(/\\/g, '/');
+  let source = '^';
+  for (let index = 0; index < normalizedPattern.length; index++) {
+    const character = normalizedPattern[index]!;
+    if (character === '*') {
+      if (normalizedPattern[index + 1] === '*') {
+        if (normalizedPattern[index + 2] === '/') {
+          source += '(?:.*/)?';
+          index += 2;
+        } else {
+          source += '.*';
+          index++;
+        }
+      } else {
+        source += '[^/]*';
+      }
+      continue;
+    }
+    if (character === '?') {
+      source += '[^/]';
+      continue;
+    }
+    if ('.+^${}()|[]\\'.includes(character)) {
+      source += `\\${character}`;
+    } else {
+      source += character;
+    }
+  }
+  return new RegExp(`${source}$`);
+}
+
+function matchesWatchPattern(path: string, pattern: string, baseDir: string): boolean {
+  const normalizedPath = path.replace(/\\/g, '/');
+  const relativePath = relative(baseDir, path).replace(/\\/g, '/');
+  const matcher = watchPatternRegExp(pattern);
+  return matcher.test(relativePath) || matcher.test(normalizedPath);
+}
+
 function shouldIncludeSkill(name: string, config?: TargetConfig): boolean {
   const includeSkills = config?.includeSkills;
   if (includeSkills === false) return false;
@@ -214,6 +253,7 @@ export class Compiler {
   private readonly validator: Validator;
   private readonly loadedFormatters: LoadedFormatter[];
   private readonly logger: Logger;
+  private readonly resolvedDependencies = new Map<string, Set<string>>();
 
   constructor(private readonly options: CompilerOptions) {
     this.logger = options.logger ?? noopLogger;
@@ -267,6 +307,78 @@ export class Compiler {
     return resolver;
   }
 
+  private dependencyKey(entryPath: string): string {
+    return entryPath.startsWith('@') ? entryPath : resolveEntryPath(entryPath);
+  }
+
+  private recordResolvedDependencies(entryPath: string, resolved: ResolvedAST): void {
+    const dependencies = new Set<string>();
+    const paths = [
+      resolveEntryPath(entryPath),
+      ...(resolved.sources ?? []),
+      ...(resolved.dependencies ?? []),
+    ];
+    for (const path of paths) {
+      if (path.startsWith('@') || path.startsWith('__registry__:')) continue;
+      dependencies.add(isAbsolute(path) ? resolve(path) : resolve(process.cwd(), path));
+    }
+    this.resolvedDependencies.set(this.dependencyKey(entryPath), dependencies);
+  }
+
+  private watchProjectRoot(entryPath: string): string {
+    return resolve(
+      this.options.resolver.projectRoot ??
+        findProjectRootMarker(entryPath) ??
+        dirname(resolve(entryPath))
+    );
+  }
+
+  private watchDependencyPaths(entryPath: string): string[] {
+    const key = this.dependencyKey(entryPath);
+    const dependencies =
+      this.resolvedDependencies.get(key) ?? new Set<string>([resolveEntryPath(entryPath)]);
+    const projectRoot = this.watchProjectRoot(entryPath);
+    const configPaths = [
+      'promptscript.yaml',
+      'promptscript.yml',
+      '.promptscriptrc.yaml',
+      '.promptscriptrc.yml',
+      'promptscript.lock',
+    ].map((fileName) => resolve(projectRoot, fileName));
+
+    return [...new Set([...dependencies, ...configPaths])];
+  }
+
+  private pathMatchesDependency(path: string, dependency: string): boolean {
+    const relation = relative(resolve(dependency), resolve(path));
+    return (
+      relation === '' ||
+      (relation !== '..' && !relation.startsWith(`..${sep}`) && !isAbsolute(relation))
+    );
+  }
+
+  private invalidateResolvers(entryPath: string, changedFiles: readonly string[]): void {
+    const normalizedChanges = changedFiles.map((path) => resolve(path));
+    const configNames = new Set([
+      'promptscript.yaml',
+      'promptscript.yml',
+      '.promptscriptrc.yaml',
+      '.promptscriptrc.yml',
+      'promptscript.lock',
+    ]);
+    const projectRoot = this.watchProjectRoot(entryPath);
+    const configurationPaths = new Set(
+      [...configNames].map((fileName) => resolve(projectRoot, fileName))
+    );
+    const hasConfigurationChange = normalizedChanges.some((path) => configurationPaths.has(path));
+
+    const resolvers = [this.resolver, ...this.entryResolvers.values()];
+    for (const resolver of resolvers) {
+      resolver.invalidate(normalizedChanges);
+      if (hasConfigurationChange) resolver.clearCache();
+    }
+  }
+
   /**
    * Compile a PromptScript file through the full pipeline.
    *
@@ -302,7 +414,12 @@ export class Compiler {
 
     try {
       resolved = await resolver.resolve(resolvedEntryPath);
+      this.recordResolvedDependencies(entryPath, resolved);
     } catch (err) {
+      this.resolvedDependencies.set(
+        this.dependencyKey(entryPath),
+        new Set([resolveEntryPath(entryPath)])
+      );
       stats.resolveTime = Date.now() - startResolve;
       stats.totalTime = Date.now() - startTotal;
       this.logger.verbose(`Resolve failed (${stats.resolveTime}ms)`);
@@ -840,23 +957,55 @@ export class Compiler {
 
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let pendingChanges: string[] = [];
+    let compileRunning = false;
+    let compilePending = false;
+
+    if (!this.resolvedDependencies.has(this.dependencyKey(entryPath))) {
+      try {
+        await this.compile(entryPath);
+      } catch (error) {
+        options.onError?.(error instanceof Error ? error : new Error(String(error)));
+      }
+    }
+
+    const watchPaths = [...new Set([...watchPatterns, ...this.watchDependencyPaths(entryPath)])];
+    const activeWatcher = chokidar.watch(watchPaths, {
+      ignored: excludePatterns,
+      persistent: true,
+      ignoreInitial: true,
+    });
 
     const handleChange = async (changedFiles: string[]): Promise<void> => {
       try {
+        this.invalidateResolvers(entryPath, changedFiles);
         const result = await this.compile(entryPath);
+        const dependencyPaths = this.watchDependencyPaths(entryPath);
+        if (typeof activeWatcher.add === 'function') {
+          await activeWatcher.add(dependencyPaths);
+        }
         options.onCompile?.(result, changedFiles);
       } catch (error) {
         options.onError?.(error instanceof Error ? error : new Error(String(error)));
       }
     };
 
-    const watcher = chokidar.watch(watchPatterns, {
-      ignored: excludePatterns,
-      persistent: true,
-      ignoreInitial: true,
-    });
+    if (typeof activeWatcher.add === 'function') {
+      await activeWatcher.add(this.watchDependencyPaths(entryPath));
+    }
 
     const scheduleRecompile = (path: string): void => {
+      const absolutePath = isAbsolute(path) ? resolve(path) : resolve(baseDir, path);
+      const matchesInclude = includePatterns.some((pattern) =>
+        matchesWatchPattern(absolutePath, pattern, baseDir)
+      );
+      const matchesExclude = excludePatterns.some((pattern) =>
+        matchesWatchPattern(absolutePath, pattern, baseDir)
+      );
+      const matchesDependency = this.watchDependencyPaths(entryPath).some((dependency) =>
+        this.pathMatchesDependency(absolutePath, dependency)
+      );
+      if (matchesExclude || (!matchesInclude && !matchesDependency)) return;
+
       pendingChanges.push(path);
 
       if (debounceTimer) {
@@ -864,16 +1013,39 @@ export class Compiler {
       }
 
       debounceTimer = setTimeout(() => {
+        debounceTimer = null;
         const files = [...pendingChanges];
         pendingChanges = [];
-        handleChange(files);
+        if (compileRunning) {
+          compilePending = true;
+          pendingChanges.push(...files);
+          return;
+        }
+
+        compileRunning = true;
+        void (async (): Promise<void> => {
+          let changes = files;
+          do {
+            compilePending = false;
+            await handleChange(changes);
+            if (debounceTimer) {
+              clearTimeout(debounceTimer);
+              debounceTimer = null;
+            }
+            changes = [...pendingChanges];
+            pendingChanges = [];
+          } while (compilePending || changes.length > 0);
+          compileRunning = false;
+        })();
       }, debounceMs);
     };
 
-    watcher.on('change', scheduleRecompile);
-    watcher.on('add', scheduleRecompile);
+    activeWatcher.on('change', scheduleRecompile);
+    activeWatcher.on('add', scheduleRecompile);
+    activeWatcher.on('unlink', scheduleRecompile);
+    activeWatcher.on('unlinkDir', scheduleRecompile);
 
-    watcher.on('error', (error: unknown) => {
+    activeWatcher.on('error', (error: unknown) => {
       options.onError?.(error instanceof Error ? error : new Error(String(error)));
     });
 
@@ -882,7 +1054,7 @@ export class Compiler {
         if (debounceTimer) {
           clearTimeout(debounceTimer);
         }
-        await watcher.close();
+        await activeWatcher.close();
       },
     };
   }
