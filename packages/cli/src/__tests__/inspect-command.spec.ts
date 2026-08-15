@@ -371,4 +371,156 @@ describe('commands/inspect', () => {
     const output = (console.log as ReturnType<typeof vi.fn>).mock.calls.map((c) => c[0]).join('\n');
     expect(output).toContain('skills');
   });
+
+  it('should show text provenance and related diagnostics', async () => {
+    const overlayLoc = { file: '/project/overlay.prs', line: 2, column: 1, offset: 20 };
+    mockResolve.mockResolvedValue({
+      ast: {
+        type: 'Program',
+        loc: LOC,
+        uses: [],
+        extends: [],
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            loc: LOC,
+            content: {
+              type: 'ObjectContent',
+              properties: { code: { frameworks: ['react', 'vue'] } },
+              loc: LOC,
+            },
+          },
+        ],
+      },
+      sources: ['/project/test.prs', '/project/overlay.prs'],
+      provenance: {
+        version: 1,
+        entry: '/project/test.prs',
+        entries: [
+          {
+            path: 'standards',
+            kind: 'block',
+            source: LOC,
+            history: [
+              { operation: 'declaration', action: 'selected', source: LOC, chain: [] },
+              {
+                operation: 'extend',
+                action: 'merged',
+                source: overlayLoc,
+                strategy: 'merge',
+                target: 'standards',
+                chain: [
+                  {
+                    operation: 'extend',
+                    source: overlayLoc,
+                    target: 'standards',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            path: 'standards.code',
+            kind: 'field',
+            source: LOC,
+            history: [{ operation: 'declaration', action: 'selected', source: LOC, chain: [] }],
+          },
+          {
+            path: 'standards.code.frameworks[0]',
+            kind: 'list',
+            source: overlayLoc,
+            history: [
+              { operation: 'declaration', action: 'selected', source: LOC, chain: [] },
+              {
+                operation: 'extend',
+                action: 'appended',
+                source: overlayLoc,
+                strategy: 'append',
+                chain: [],
+              },
+            ],
+          },
+        ],
+      },
+      errors: [{ message: 'Overlay warning', location: overlayLoc }],
+    });
+
+    const { explainCommand } = await import('../commands/explain.js');
+    await explainCommand('standards', {});
+
+    const output = (console.log as ReturnType<typeof vi.fn>).mock.calls
+      .map((call) => call[0])
+      .join('\n');
+    expect(output).toContain('final:');
+    expect(output).toContain('extend/merged, merge, target standards');
+    expect(output).toContain('via extend');
+    expect(output).toContain('Diagnostics:');
+    expect(output).toContain('Overlay warning');
+    expect(output).toContain('standards.code.frameworks[0]');
+  });
+
+  it('should resolve indexed paths in JSON output', async () => {
+    mockResolve.mockResolvedValue(
+      makeResolvedAst({
+        'code-review': {
+          frameworks: ['react', 'vue'],
+        },
+      })
+    );
+
+    const { explainCommand } = await import('../commands/explain.js');
+    await explainCommand('skills.code-review.frameworks[0]', { format: 'json' });
+
+    const parsed = JSON.parse((console.log as ReturnType<typeof vi.fn>).mock.calls[0]![0]);
+    expect(parsed.entries[0]).toMatchObject({
+      path: 'skills.code-review.frameworks[0]',
+      value: 'react',
+    });
+  });
+
+  it('should report missing paths and missing entry files', async () => {
+    mockResolve.mockResolvedValue(
+      makeResolvedAst({
+        'code-review': { description: 'Review code' },
+      })
+    );
+
+    const { explainCommand } = await import('../commands/explain.js');
+    await explainCommand('skills.missing', {});
+    expect(process.exitCode).toBe(1);
+
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+    mockLoadConfig.mockResolvedValue({ registries: {} });
+    mockResolveRegistryPath.mockResolvedValue({ path: '/registry' });
+    mockExistsSync.mockReturnValue(false);
+    await explainCommand('skills.code-review', {});
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should report resolution failures and configuration errors', async () => {
+    mockResolve.mockResolvedValue({
+      ast: null,
+      sources: [],
+      errors: [{ message: 'Parse error' }],
+      provenance: { version: 1, entry: '/project/test.prs', entries: [] },
+    });
+
+    const { explainCommand } = await import('../commands/explain.js');
+    await explainCommand('standards', {});
+    expect(process.exitCode).toBe(1);
+
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+    mockExistsSync.mockReturnValue(false);
+    await explainCommand('standards', { cwd: '/workspace' });
+    expect(process.exitCode).toBe(1);
+
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+    mockLoadConfig.mockRejectedValue(new Error('bad config'));
+    await explainCommand('standards', {});
+    expect(process.exitCode).toBe(1);
+  });
 });

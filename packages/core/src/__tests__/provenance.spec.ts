@@ -1,11 +1,14 @@
 import {
   collectProvenance,
   collectProvenanceEvents,
+  collectProvenanceValueEvents,
   createBlockBody,
   createValueNode,
   normalizeProgram,
   prefixProvenance,
   toLegacyProgram,
+  type BlockEntry,
+  type CanonicalProgram,
   type Program,
   type Value,
 } from '../index.js';
@@ -129,6 +132,110 @@ describe('provenance', () => {
 
     expect(trace.entries.some((entry) => entry.path.includes('__layerTrace'))).toBe(false);
     expect(trace.entries.some((entry) => entry.path.includes('composedFrom'))).toBe(false);
+  });
+
+  it('collects canonical entry kinds and nested operation events', () => {
+    const inlineDeclaration = {
+      type: 'InlineUseDeclaration' as const,
+      path: {
+        type: 'PathReference' as const,
+        raw: './phase',
+        segments: ['phase'],
+        isRelative: true,
+        loc: BASE_LOC,
+      },
+      loc: BASE_LOC,
+    };
+    const entries = [
+      {
+        type: 'FieldEntry' as const,
+        name: 'value',
+        value: createValueNode('first', BASE_LOC),
+        loc: BASE_LOC,
+      },
+      {
+        type: 'FieldEntry' as const,
+        name: 'value',
+        value: createValueNode('second', CHILD_LOC),
+        loc: CHILD_LOC,
+      },
+      {
+        type: 'FieldEntry' as const,
+        name: 'nested',
+        value: createValueNode({ child: ['item'] }, CHILD_LOC),
+        loc: CHILD_LOC,
+      },
+      {
+        type: 'FieldEntry' as const,
+        name: '__private',
+        value: createValueNode('hidden', CHILD_LOC),
+        loc: CHILD_LOC,
+      },
+      {
+        type: 'ListEntry' as const,
+        value: createValueNode('list item', CHILD_LOC),
+        loc: CHILD_LOC,
+      },
+      { type: 'TextEntry' as const, text: 'text fragment', loc: CHILD_LOC },
+      { type: 'InlineUseEntry' as const, declaration: inlineDeclaration, loc: BASE_LOC },
+      {
+        type: 'PresentationEntry' as const,
+        title: 'Context',
+        source: 'explicit' as const,
+        titleLoc: CHILD_LOC,
+        loc: CHILD_LOC,
+      },
+    ] satisfies BlockEntry[];
+    const body = createBlockBody(entries, BASE_LOC);
+    const base = normalizeProgram(createProgram());
+    const canonical = {
+      ...base,
+      blocks: [{ ...base.blocks[0]!, name: 'context', body }],
+    } satisfies CanonicalProgram;
+    const events = collectProvenanceEvents(
+      body,
+      'context',
+      'extend',
+      CHILD_LOC,
+      'merged',
+      'append'
+    );
+    const replacementEvents = collectProvenanceValueEvents(
+      createValueNode({ nested: ['replacement'] }, CHILD_LOC),
+      'context.value',
+      CHILD_LOC
+    );
+    const trace = collectProvenance(canonical, {
+      entry: 'entry.prs',
+      events: [
+        ...events,
+        ...replacementEvents,
+        {
+          path: 'unmatched',
+          operation: 'override',
+          action: 'replaced',
+          source: CHILD_LOC,
+        },
+      ],
+    });
+
+    expect(
+      collectProvenanceEvents(undefined, 'context', 'extend', CHILD_LOC, 'merged')
+    ).toHaveLength(1);
+    expect(trace.entries.map((entry) => entry.path)).toEqual([
+      'context',
+      'context.$header',
+      'context.@use[0]',
+      'context.nested',
+      'context.nested.child',
+      'context.nested.child[0]',
+      'context.text[0]',
+      'context.value',
+      'context[0]',
+    ]);
+    expect(trace.entries.find((entry) => entry.path === 'context.value')?.history).toEqual(
+      expect.arrayContaining([expect.objectContaining({ operation: 'override' })])
+    );
   });
 
   it('exposes import and inheritance operations in history and chain', () => {
