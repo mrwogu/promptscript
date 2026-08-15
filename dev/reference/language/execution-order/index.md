@@ -17,6 +17,10 @@ flowchart LR
 
 Diagram shows recommended organization, not a fixed phase reordering. Resolver executes declarations in actual source order after metadata.
 
+## Composed Source Graph
+
+Resolver selects operation semantics from the complete reachable graph, not only the entry file. Inherited files, top-level imports, and inline composed operations. Inherited files, top-level imports, inline composed skills, and inline `@use` declarations carried by `@extend` bodies are inspected before resolution. If any reachable source declares syntax `1.5.0` or uses an ordered operation feature, the composed graph uses declaration order. A lower-version entry file remains valid, but PS018 reports the ordered-operation requirement at its source location. If no reachable source requires ordered operations, pre-1.5 projects retain legacy phase ordering. The resolver does not reject mixed-version composition; it applies ordered semantics and leaves PS018 to request a syntax upgrade.
+
 ## Order Changes Results
 
 ```

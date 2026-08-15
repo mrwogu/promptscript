@@ -4548,6 +4548,8 @@ Root replacements accept regular text, object, array, or mixed block bodies. Nes
 
 Operations use declaration order in syntax `1.5.0`. This includes `@inherit`, top-level `@use`, local blocks, `@extend`, and `@override`. An `@override` used with an older declared syntax also uses declaration order so replacement remains deterministic, while PS018 requests a syntax upgrade.
 
+Resolver derives operation mode from the complete reachable composition graph. Inherited files, top-level imports, and inline composed skills can enable declaration order for a lower-version entry file. Such mixed-version graphs remain valid, while PS018 reports the ordered-operation requirement. Graphs without ordered sources retain legacy phase ordering.
+
 Use the forms according to intent:
 
 | Form        | Behavior                                                       |
@@ -4740,6 +4742,8 @@ Composition uses two layers of rules:
 
 For multiple `@use` declarations, each later import becomes the new source. Its same-shape values win against the accumulated target.
 
+The operation mode comes from the effective composed graph. A `1.5.0` source or ordered operation in inherited, imported, inline-composed, or extension-carried content enables declaration order for the whole graph. Inline `@use` declarations inside an `@extend` body are part of that graph. Lower-version entry files still resolve, while PS018 reports the source requirement and recommends an upgrade. Graphs without ordered sources retain legacy phase ordering.
+
 ## Resolved Example
 
 ```
@@ -4807,6 +4811,10 @@ flowchart LR
 ```
 
 Diagram shows recommended organization, not a fixed phase reordering. Resolver executes declarations in actual source order after metadata.
+
+## Composed Source Graph
+
+Resolver selects operation semantics from the complete reachable graph, not only the entry file. Inherited files, top-level imports, and inline composed operations. Inherited files, top-level imports, inline composed skills, and inline `@use` declarations carried by `@extend` bodies are inspected before resolution. If any reachable source declares syntax `1.5.0` or uses an ordered operation feature, the composed graph uses declaration order. A lower-version entry file remains valid, but PS018 reports the ordered-operation requirement at its source location. If no reachable source requires ordered operations, pre-1.5 projects retain legacy phase ordering. The resolver does not reject mixed-version composition; it applies ordered semantics and leaves PS018 to request a syntax upgrade.
 
 ## Order Changes Results
 
@@ -4984,6 +4992,8 @@ See [Generated Section Headers](https://getpromptscript.dev/dev/reference/langua
 | `1.5.0` | Contextual section headers, atomic `@override`, declaration-order operations, unquoted `${VAR}` values |
 
 Use the minimum required version for reusable published fragments. Use current syntax for new project entry files.
+
+Operation semantics follow the complete reachable composition graph. An inherited, imported, inline-composed, or extension-carried source declaring `1.5.0` enables declaration order for the graph even when the entry file declares an older version. Inline `@use` declarations inside `@extend` bodies are included. PS018 reports that mixed-version requirement; it does not reject the composition.
 
 ## Upgrade Commands
 

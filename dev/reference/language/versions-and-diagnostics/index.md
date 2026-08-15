@@ -15,6 +15,8 @@
 
 Use the minimum required version for reusable published fragments. Use current syntax for new project entry files.
 
+Operation semantics follow the complete reachable composition graph. An inherited, imported, inline-composed, or extension-carried source declaring `1.5.0` enables declaration order for the graph even when the entry file declares an older version. Inline `@use` declarations inside `@extend` bodies are included. PS018 reports that mixed-version requirement; it does not reject the composition.
+
 ## Upgrade Commands
 
 ```bash
