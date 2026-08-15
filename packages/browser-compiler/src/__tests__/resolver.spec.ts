@@ -467,7 +467,14 @@ describe('BrowserResolver', () => {
 
       expect(result).toBe(ast);
       expect(errors).toEqual([]);
-      expect(events).toHaveLength(6);
+      // inputs and outputs live only in composition metadata, never in the
+      // final skill value, so they must not receive compose provenance
+      expect(events.map((event) => event.path)).toEqual([
+        'skills.missing.content',
+        'skills.missing.allowedTools',
+        'skills.missing.references',
+        'skills.missing.requires',
+      ]);
       expect(events.every((event) => event.reference === './second')).toBe(true);
     });
 
