@@ -998,7 +998,7 @@ export class BrowserResolver {
         ? agentsBlock.content.properties
         : undefined;
     const agentsIndex = importMarker ? 1 : pathParts[0] === 'agents' ? 0 : -1;
-    const namespace = importMarker ? rootName : '';
+    const namespace = importMarker ? (rootName ?? '') : '';
     const agentPath =
       agentProperties && (targetName === 'agents' || !importMarker)
         ? resolveAgentTargetPath(pathParts, agentsIndex, namespace, agentProperties)
