@@ -8186,14 +8186,14 @@ project-root/
 
 ## Output Files
 
-| File              | Path                               | Purpose                                                       |
-| ----------------- | ---------------------------------- | ------------------------------------------------------------- |
-| Main instructions | `.github/copilot-instructions.md`  | Primary rule file                                             |
-| Lifecycle hooks   | `.github/hooks/promptscript.json`  | Copilot CLI and cloud agent hooks in multifile and full modes |
-| Skills            | `.github/skills/<name>/SKILL.md`   | Reusable skill definitions                                    |
-| Prompts           | `.github/prompts/<name>.prompt.md` | Slash commands                                                |
-| Agents            | `.github/agents/<name>.md`         | Agent configurations                                          |
-| Agents index      | `AGENTS.md`                        | Top-level agents file                                         |
+| File              | Path                               | Purpose                                                           |
+| ----------------- | ---------------------------------- | ----------------------------------------------------------------- |
+| Main instructions | `.github/copilot-instructions.md`  | Primary rule file                                                 |
+| Lifecycle hooks   | `.github/hooks/promptscript.json`  | Copilot CLI and cloud agent hooks in `multifile` and `full` modes |
+| Skills            | `.github/skills/<name>/SKILL.md`   | Reusable skill definitions                                        |
+| Prompts           | `.github/prompts/<name>.prompt.md` | Slash commands                                                    |
+| Agents            | `.github/agents/<name>.md`         | Agent configurations                                              |
+| Agents index      | `AGENTS.md`                        | Top-level agents file                                             |
 
 ## Supported Features
 
@@ -8453,14 +8453,14 @@ project-root/
 
 ## Output Files
 
-| File              | Path                              | Purpose                                   |
-| ----------------- | --------------------------------- | ----------------------------------------- |
-| Main instructions | `AGENTS.md`                       | Primary rule file                         |
-| Always-on rules   | `.factory/rules/**/*.md`          | Split rule files when `rulesMode: split`  |
-| Lifecycle hooks   | `.factory/hooks.json`             | Project hooks in multifile and full modes |
-| Skills            | `.factory/skills/<name>/SKILL.md` | Reusable skill definitions                |
-| Commands          | `.factory/commands/<name>.md`     | Slash commands                            |
-| Agents            | `.factory/droids/<name>.md`       | Agent configurations                      |
+| File              | Path                              | Purpose                                       |
+| ----------------- | --------------------------------- | --------------------------------------------- |
+| Main instructions | `AGENTS.md`                       | Primary rule file                             |
+| Always-on rules   | `.factory/rules/**/*.md`          | Split rule files when `rulesMode: split`      |
+| Lifecycle hooks   | `.factory/hooks.json`             | Project hooks in `multifile` and `full` modes |
+| Skills            | `.factory/skills/<name>/SKILL.md` | Reusable skill definitions                    |
+| Commands          | `.factory/commands/<name>.md`     | Slash commands                                |
+| Agents            | `.factory/droids/<name>.md`       | Agent configurations                          |
 
 ## Supported Features
 
@@ -8565,7 +8565,7 @@ project-root/
 | **Tier**          | Custom                                 |
 | **Main output**   | `GEMINI.md`                            |
 | **Dot directory** | `.gemini/`                             |
-| **Skills**        | Yes (`.agents/skills/<name>/skill.md`) |
+| **Skills**        | Yes (`.gemini/skills/<name>/skill.md`) |
 | **Agents**        | No                                     |
 | **Commands**      | Yes (`.gemini/commands/<name>.toml`)   |
 | **Local files**   | No                                     |
@@ -8576,7 +8576,7 @@ project-root/
 | ----------------- | -------------------------------- | --------------------------------------------- |
 | Main instructions | `GEMINI.md`                      | Primary rule file                             |
 | Lifecycle hooks   | `.gemini/settings.json`          | Project hooks in `multifile` and `full` modes |
-| Skills            | `.agents/skills/<name>/skill.md` | Reusable skill definitions                    |
+| Skills            | `.gemini/skills/<name>/skill.md` | Reusable skill definitions                    |
 | Commands          | `.gemini/commands/<name>.toml`   | Slash commands                                |
 
 ## Supported Features

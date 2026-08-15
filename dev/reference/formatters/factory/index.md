@@ -12,14 +12,14 @@
 
 ## Output Files
 
-| File              | Path                              | Purpose                                   |
-| ----------------- | --------------------------------- | ----------------------------------------- |
-| Main instructions | `AGENTS.md`                       | Primary rule file                         |
-| Always-on rules   | `.factory/rules/**/*.md`          | Split rule files when `rulesMode: split`  |
-| Lifecycle hooks   | `.factory/hooks.json`             | Project hooks in multifile and full modes |
-| Skills            | `.factory/skills/<name>/SKILL.md` | Reusable skill definitions                |
-| Commands          | `.factory/commands/<name>.md`     | Slash commands                            |
-| Agents            | `.factory/droids/<name>.md`       | Agent configurations                      |
+| File              | Path                              | Purpose                                       |
+| ----------------- | --------------------------------- | --------------------------------------------- |
+| Main instructions | `AGENTS.md`                       | Primary rule file                             |
+| Always-on rules   | `.factory/rules/**/*.md`          | Split rule files when `rulesMode: split`      |
+| Lifecycle hooks   | `.factory/hooks.json`             | Project hooks in `multifile` and `full` modes |
+| Skills            | `.factory/skills/<name>/SKILL.md` | Reusable skill definitions                    |
+| Commands          | `.factory/commands/<name>.md`     | Slash commands                                |
+| Agents            | `.factory/droids/<name>.md`       | Agent configurations                          |
 
 ## Supported Features
 

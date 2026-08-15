@@ -373,6 +373,10 @@
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/TargetCapabilitiesError/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/UndefinedVariableError/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
@@ -394,6 +398,14 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/applyOverride/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/assertTargetDefinitionConsistency/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/assertValidTargetCapabilities/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
@@ -454,6 +466,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/createPathReference/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/createTargetCapability/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
@@ -581,11 +597,23 @@
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getTargetCapability/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getTargetDefinition/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getTargetFeatureStatus/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getTargetFeatures/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getTargetSectionCapability/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
@@ -749,6 +777,10 @@
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/resolveTargetVersion/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/resolveUseImport/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
@@ -786,6 +818,14 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/usesSequentialOperations/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/validateTargetCapabilities/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/validateTargetDefinitionConsistency/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
@@ -1141,11 +1181,31 @@
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/TargetCapability/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/TargetCapabilitySeed/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/TargetConfig/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/TargetDefinition/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/TargetResourceCapability/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/TargetSectionCapability/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/TargetVersionCapability/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
@@ -1345,7 +1405,27 @@
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/TargetFeatureStatus/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/TargetName/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/TargetReferenceMode/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/TargetSectionMap/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/TargetSectionSupport/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/TargetVersionMap/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
@@ -1449,7 +1529,15 @@
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/TARGET_CAPABILITIES/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/TARGET_DEFINITIONS/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/TARGET_DELEGATES/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
@@ -1649,6 +1737,10 @@
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/isCanonicalTarget/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/listFormatters/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
@@ -1686,6 +1778,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/unregisterFormatter/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/validateBuiltinFormatterCapabilities/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
