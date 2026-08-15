@@ -27,18 +27,22 @@ const MARKDOWN_RE = /\.(md|mdx|markdown)$/i;
  * @param projectRoot - Project root used both for resolving Prettier configs
  *   and to give each file a realistic absolute path
  * @param logger - Logger used for verbose / debug diagnostics
+ * @returns Post-format warning messages
  */
 export async function postFormatWithPrettier(
   outputs: Map<string, FormatterOutput>,
   projectRoot: string,
   logger: Logger
-): Promise<void> {
+): Promise<string[]> {
+  const warnings: string[] = [];
   let prettier: typeof import('prettier');
   try {
     prettier = await import('prettier');
   } catch {
-    logger.verbose('Prettier not available; skipping markdown post-format.');
-    return;
+    const warning = 'Prettier not available; skipping markdown post-format.';
+    warnings.push(warning);
+    logger.verbose(warning);
+    return warnings;
   }
 
   const queue: FormatterOutput[] = [];
@@ -54,9 +58,11 @@ export async function postFormatWithPrettier(
     try {
       config = await prettier.resolveConfig(absPath);
     } catch (err) {
-      logger.verbose(
-        `Could not resolve Prettier config for ${output.path}: ${err instanceof Error ? err.message : String(err)}`
-      );
+      const warning = `Could not resolve Prettier config for ${output.path}: ${
+        err instanceof Error ? err.message : String(err)
+      }`;
+      warnings.push(warning);
+      logger.verbose(warning);
     }
 
     try {
@@ -66,11 +72,15 @@ export async function postFormatWithPrettier(
         parser: 'markdown',
       });
     } catch (err) {
-      logger.verbose(
-        `Prettier rejected ${output.path}: ${err instanceof Error ? err.message : String(err)}`
-      );
+      const warning = `Prettier rejected ${output.path}: ${
+        err instanceof Error ? err.message : String(err)
+      }`;
+      warnings.push(warning);
+      logger.verbose(warning);
     }
   }
+
+  return warnings;
 }
 
 /**

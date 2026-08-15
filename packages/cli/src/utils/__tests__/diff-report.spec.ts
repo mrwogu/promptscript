@@ -204,6 +204,39 @@ describe('buildCompilationDiff', () => {
     );
   });
 
+  it('treats SKILL.md output with a late marker as PromptScript-owned', async () => {
+    const projectRoot = await createProject();
+    const marker = '# promptscript-generated: 2026-01-01T00:00:00.000Z';
+    const existingContent = [...Array.from({ length: 29 }, () => '---'), marker, 'old\n'].join(
+      '\n'
+    );
+    await writeFile(join(projectRoot, 'SKILL.md'), existingContent);
+
+    const report = await buildCompilationDiff({
+      projectRoot,
+      outputRoot: projectRoot,
+      entryPath: join(projectRoot, '.promptscript/project.prs'),
+      outputs: new Map([
+        [
+          'skill',
+          createOutput(
+            'SKILL.md',
+            [...Array.from({ length: 29 }, () => '---'), marker, 'new\n'].join('\n')
+          ),
+        ],
+      ]),
+      warnings: [],
+    });
+
+    expect(report.changes).toEqual([
+      expect.objectContaining({
+        path: 'SKILL.md',
+        kind: 'changed',
+        ownership: 'promptscript',
+      }),
+    ]);
+  });
+
   it('reports unreadable existing outputs and deduplicates warnings', async () => {
     const projectRoot = await createProject();
     await mkdir(join(projectRoot, 'directory-output'));

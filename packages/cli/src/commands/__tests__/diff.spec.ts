@@ -107,19 +107,26 @@ vi.mock('../../output/pager.js', () => ({
   })),
 }));
 
-const { mockPostFormatWithPrettier, mockPostFormatTransform } = vi.hoisted(() => {
-  // postFormatWithPrettier mutates outputs in place. The default transform is
-  // a no-op so existing tests are unaffected; tests that exercise the
-  // post-format parity fix set mockPostFormatTransform.apply to true.
-  const mockPostFormatTransform = { apply: false };
-  const mockPostFormatWithPrettier = vi.fn(async (outputs: Map<string, { content: string }>) => {
-    if (!mockPostFormatTransform.apply) return;
-    for (const output of outputs.values()) {
-      output.content = `prettier-normalised\n${output.content}`;
-    }
-  });
-  return { mockPostFormatWithPrettier, mockPostFormatTransform };
-});
+const { mockPostFormatWithPrettier, mockPostFormatTransform, mockPostFormatWarnings } = vi.hoisted(
+  () => {
+    // postFormatWithPrettier mutates outputs in place. The default transform is
+    // a no-op so existing tests are unaffected; tests that exercise the
+    // post-format parity fix set mockPostFormatTransform.apply to true.
+    const mockPostFormatTransform = { apply: false };
+    const mockPostFormatWarnings: string[] = [];
+    const mockPostFormatWithPrettier = vi.fn(
+      async (outputs: Map<string, { content: string }>): Promise<string[]> => {
+        if (mockPostFormatTransform.apply) {
+          for (const output of outputs.values()) {
+            output.content = `prettier-normalised\n${output.content}`;
+          }
+        }
+        return [...mockPostFormatWarnings];
+      }
+    );
+    return { mockPostFormatWithPrettier, mockPostFormatTransform, mockPostFormatWarnings };
+  }
+);
 
 vi.mock('../../prettier/post-format.js', () => ({
   postFormatWithPrettier: mockPostFormatWithPrettier,
@@ -148,6 +155,7 @@ describe('diffCommand', () => {
     process.exitCode = undefined;
     mockSpinner.text = '';
     mockPostFormatTransform.apply = false;
+    mockPostFormatWarnings.length = 0;
     mockIsVerbose.mockReturnValue(false);
     mockIsDebug.mockReturnValue(false);
   });
@@ -545,6 +553,54 @@ describe('diffCommand', () => {
     expect(mockPagerWrite).toHaveBeenCalledWith(
       expect.stringContaining('All files are up to date')
     );
+  });
+
+  it('should include Prettier post-format warnings in JSON reports', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([
+        [
+          'github',
+          {
+            path: 'README.md',
+            content: '<!-- PromptScript marker -->\ncontent\n',
+            target: 'github',
+            source: '.promptscript/project.prs',
+          },
+        ],
+      ]),
+    });
+    mockPostFormatWarnings.push('Prettier rejected README.md: invalid markdown');
+
+    await diffCommand({ format: 'json' });
+    const json = consoleLog.mock.calls[0]?.[0] as string;
+    consoleLog.mockRestore();
+
+    const report = JSON.parse(json) as {
+      warnings: Array<{ code: string; message: string }>;
+    };
+    expect(report.warnings).toEqual([
+      {
+        code: 'PRETTIER',
+        message: 'Prettier rejected README.md: invalid markdown',
+      },
+    ]);
   });
 
   it('should emit a machine-readable report without content by default', async () => {
