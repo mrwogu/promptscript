@@ -157,9 +157,6 @@ function contentAtPath(content: BlockContent, path: string): BlockContent | unde
   ) {
     return value as unknown as BlockContent;
   }
-  if (Array.isArray(value)) {
-    return { type: 'ArrayContent', elements: value, loc: content.loc };
-  }
   if (isValueRecord(value)) {
     return {
       type: 'ObjectContent',

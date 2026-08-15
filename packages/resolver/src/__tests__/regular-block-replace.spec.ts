@@ -294,6 +294,158 @@ ${directive}`
     ).toEqual(['merge', 'merge']);
   });
 
+  it('uses fallback skill strategies for nested extension targets', async () => {
+    const directory = await createTestDirectory();
+    const projectPath = join(directory, 'project.prs');
+    await writeFile(
+      projectPath,
+      `@meta { id: "nested-strategies" syntax: "1.3.0" }
+@skills {
+  review: {
+    description: { value: "Base description" }
+    references: ["base.md"]
+    inputs: { base: { type: "string" } }
+    custom: { original: "value" }
+  }
+}
+@extend skills.review.description {
+  value: "Updated description"
+}
+@extend skills.review.references {
+  item: ["new.md"]
+}
+@extend skills.review.inputs {
+  extra: { type: "string" }
+}
+@extend skills.review.custom {
+  original: "updated"
+}`
+    );
+    const resolver = new Resolver({
+      registryPath: directory,
+      localPath: directory,
+      cache: false,
+    });
+
+    const result = await resolver.resolve(projectPath);
+    const description = result.provenance.entries.find(
+      (entry) => entry.path === 'skills.review.description.value'
+    );
+    const references = result.provenance.entries.find(
+      (entry) => entry.path === 'skills.review.references.item'
+    );
+    const inputs = result.provenance.entries.find(
+      (entry) => entry.path === 'skills.review.inputs.extra'
+    );
+    const custom = result.provenance.entries.find((entry) => entry.path === 'skills.review.custom');
+
+    expect(result.errors).toEqual([]);
+    expect(description?.history).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          operation: 'extend',
+          action: 'replaced',
+          strategy: 'replace',
+        }),
+      ])
+    );
+    expect(references?.history).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          operation: 'extend',
+          action: 'appended',
+          strategy: 'append',
+        }),
+      ])
+    );
+    expect(inputs?.history).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          operation: 'extend',
+          action: 'merged',
+          strategy: 'merge',
+        }),
+      ])
+    );
+    expect(custom?.history).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          operation: 'extend',
+          action: 'merged',
+        }),
+      ])
+    );
+  });
+
+  it('handles nested extension paths through text, scalar, and array content', async () => {
+    const directory = await createTestDirectory();
+    const projectPath = join(directory, 'project.prs');
+    await writeFile(
+      projectPath,
+      `@meta { id: "content-paths" syntax: "1.3.0" }
+@standards {
+  text: """Original text"""
+  scalar: "Original scalar"
+}
+@extend standards.text.value {
+  """Updated text"""
+}
+@extend standards.scalar.value {
+  """Updated scalar"""
+}`
+    );
+    const resolver = new Resolver({
+      registryPath: directory,
+      localPath: directory,
+      cache: false,
+    });
+
+    const result = await resolver.resolve(projectPath);
+    const standards = getObjectProperties(result.ast?.blocks ?? [], 'standards');
+
+    expect(result.errors).toEqual([]);
+    expect(standards['text']).toEqual(
+      expect.objectContaining({ type: 'TextContent', value: 'Updated text' })
+    );
+    expect(standards['scalar']).toEqual({ value: 'Updated scalar' });
+  });
+
+  it('keeps provenance safe when extensions target replaced array blocks', async () => {
+    const directory = await createTestDirectory();
+    const projectPath = join(directory, 'project.prs');
+    await writeFile(
+      projectPath,
+      `@meta { id: "array-paths" syntax: "1.5.0" }
+@standards {
+  value: "Original"
+}
+@override standards { ["Replacement"] }
+@extend standards.missing {
+  value: "Ignored"
+}
+@extend standards.missing.path {
+  value: "Also ignored"
+}`
+    );
+    const resolver = new Resolver({
+      registryPath: directory,
+      localPath: directory,
+      cache: false,
+    });
+
+    const result = await resolver.resolve(projectPath);
+    const standards = result.ast?.blocks.find((block) => block.name === 'standards');
+
+    expect(result.errors).toEqual([]);
+    expect(standards?.content).toMatchObject({
+      type: 'ArrayContent',
+      elements: ['Replacement'],
+    });
+    expect(
+      result.provenance.entries.some((entry) => entry.path.startsWith('standards.missing'))
+    ).toBe(false);
+  });
+
   it('should reject the modifier for direct skill targets', () => {
     const ast = parseOrThrow(`
       @meta { id: "skills" syntax: "1.3.0" }

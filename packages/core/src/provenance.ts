@@ -291,28 +291,29 @@ function collectEventValuePaths(
 
 function finalNodeForEntry(
   body: BlockBody | undefined,
-  entry: BlockBody['entries'][number]
+  entry: Extract<BlockBody['entries'][number], { type: 'FieldEntry' | 'ListEntry' }>
 ): ValueNode | undefined {
   if (!body) return undefined;
-  if (entry.type === 'FieldEntry') {
-    const match = [...body.entries]
-      .reverse()
-      .find((candidate) => candidate.type === 'FieldEntry' && candidate.name === entry.name);
-    return match?.type === 'FieldEntry' ? match.value : undefined;
+  switch (entry.type) {
+    case 'FieldEntry': {
+      const match = [...body.entries]
+        .reverse()
+        .find((candidate) => candidate.type === 'FieldEntry' && candidate.name === entry.name);
+      return match?.type === 'FieldEntry' ? match.value : undefined;
+    }
+    case 'ListEntry': {
+      const sourceEntries = body.entries.filter(
+        (candidate): candidate is Extract<BlockBody['entries'][number], { type: 'ListEntry' }> =>
+          candidate.type === 'ListEntry'
+      );
+      const index = sourceEntries.findIndex(
+        (candidate) =>
+          JSON.stringify(valueNodeToValue(candidate.value)) ===
+          JSON.stringify(valueNodeToValue(entry.value))
+      );
+      return index >= 0 ? sourceEntries[index]?.value : undefined;
+    }
   }
-  if (entry.type === 'ListEntry') {
-    const sourceEntries = body.entries.filter(
-      (candidate): candidate is Extract<BlockBody['entries'][number], { type: 'ListEntry' }> =>
-        candidate.type === 'ListEntry'
-    );
-    const index = sourceEntries.findIndex(
-      (candidate) =>
-        JSON.stringify(valueNodeToValue(candidate.value)) ===
-        JSON.stringify(valueNodeToValue(entry.value))
-    );
-    return index >= 0 ? sourceEntries[index]?.value : undefined;
-  }
-  return undefined;
 }
 
 function finalListIndexForEntry(

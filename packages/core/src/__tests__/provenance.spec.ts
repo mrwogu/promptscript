@@ -182,6 +182,193 @@ describe('provenance', () => {
     ]);
   });
 
+  it('maps duplicate and structured list values to canonical positions', () => {
+    const duplicateArray = ['shared'];
+    const duplicateObject = { key: 'value' };
+    const template = {
+      type: 'TemplateExpression' as const,
+      name: 'phase',
+      loc: CHILD_LOC,
+    };
+    const typeExpression = {
+      type: 'TypeExpression' as const,
+      kind: 'string' as const,
+      loc: CHILD_LOC,
+    };
+    const removedLoc = { file: 'removed.prs', line: 8, column: 1, offset: 80 };
+    const extensionBody = createBlockBody(
+      [
+        {
+          type: 'ListEntry',
+          value: createValueNode(duplicateArray, CHILD_LOC),
+          loc: CHILD_LOC,
+        },
+        {
+          type: 'ListEntry',
+          value: createValueNode(duplicateArray, CHILD_LOC),
+          loc: CHILD_LOC,
+        },
+        {
+          type: 'ListEntry',
+          value: createValueNode(duplicateObject, CHILD_LOC),
+          loc: CHILD_LOC,
+        },
+        {
+          type: 'ListEntry',
+          value: createValueNode(template, CHILD_LOC),
+          loc: CHILD_LOC,
+        },
+        {
+          type: 'ListEntry',
+          value: createValueNode(typeExpression, CHILD_LOC),
+          loc: CHILD_LOC,
+        },
+        {
+          type: 'ListEntry',
+          value: createValueNode('removed', removedLoc),
+          loc: removedLoc,
+        },
+      ],
+      CHILD_LOC
+    );
+    const finalContent = {
+      type: 'ArrayContent' as const,
+      elements: [duplicateArray, duplicateArray, duplicateObject, template, typeExpression],
+      loc: CHILD_LOC,
+    };
+    const events = collectProvenanceEvents(
+      extensionBody,
+      'standards',
+      'extend',
+      CHILD_LOC,
+      'merged',
+      'merge',
+      {
+        finalContent,
+        baseContent: {
+          type: 'ArrayContent',
+          elements: [duplicateObject],
+          loc: BASE_LOC,
+        },
+      }
+    );
+
+    expect(events.map((event) => event.path)).toEqual([
+      'standards',
+      'standards[0]',
+      'standards[0][0]',
+      'standards[1]',
+      'standards[1][0]',
+      'standards[2]',
+      'standards[2].key',
+      'standards[3]',
+      'standards[4]',
+    ]);
+  });
+
+  it('skips composition metadata when resolving its source fails', () => {
+    const declaration = {
+      type: 'InlineUseDeclaration' as const,
+      path: {
+        type: 'PathReference' as const,
+        raw: './phase',
+        segments: ['phase'],
+        isRelative: true,
+        loc: BASE_LOC,
+      },
+      loc: BASE_LOC,
+    } satisfies InlineUseDeclaration;
+
+    expect(
+      collectCompositionProvenanceEvents(
+        [{ source: '/phase.prs' }],
+        [{ declaration }],
+        () => {
+          throw new Error('phase unavailable');
+        },
+        'ops'
+      )
+    ).toEqual([]);
+  });
+
+  it('preserves transitive composition links from child provenance', () => {
+    const declaration = {
+      type: 'InlineUseDeclaration' as const,
+      path: {
+        type: 'PathReference' as const,
+        raw: './phase',
+        segments: ['phase'],
+        isRelative: true,
+        loc: BASE_LOC,
+      },
+      loc: BASE_LOC,
+    } satisfies InlineUseDeclaration;
+    const childLink = {
+      operation: 'inherit' as const,
+      source: BASE_LOC,
+      target: 'base.prs',
+      reference: './base',
+    };
+    const childTrace = {
+      version: 1 as const,
+      entry: 'phase.prs',
+      entries: [
+        {
+          path: 'skills.phase.content',
+          kind: 'value' as const,
+          source: BASE_LOC,
+          history: [
+            {
+              operation: 'declaration' as const,
+              action: 'selected' as const,
+              source: BASE_LOC,
+              chain: [],
+            },
+            {
+              operation: 'generated' as const,
+              action: 'composed' as const,
+              source: BASE_LOC,
+              chain: [childLink],
+            },
+            {
+              operation: 'extend' as const,
+              action: 'merged' as const,
+              source: CHILD_LOC,
+              target: 'skills.phase',
+              reference: './phase',
+              alias: 'phase',
+              chain: [childLink],
+            },
+          ],
+        },
+      ],
+    };
+    const events = collectCompositionProvenanceEvents(
+      [
+        {
+          source: '/phase.prs',
+          loc: CHILD_LOC,
+          definitionLoc: BASE_LOC,
+          provenance: childTrace,
+        },
+      ],
+      [{ declaration }],
+      () => '/phase.prs',
+      'ops'
+    );
+
+    expect(events).not.toHaveLength(0);
+    const composition = events[0]!;
+    expect(composition.trace).toEqual(childTrace);
+    expect(composition.chain).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ operation: 'compose' }),
+        expect.objectContaining({ operation: 'inherit', target: 'base.prs' }),
+        expect.objectContaining({ operation: 'extend', target: 'skills.phase' }),
+      ])
+    );
+  });
+
   it('returns stable path ordering and versioned JSON shape', () => {
     const trace = collectProvenance(createProgram(), { entry: 'entry.prs' });
 
