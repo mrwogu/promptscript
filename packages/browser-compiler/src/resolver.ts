@@ -37,6 +37,7 @@ import {
   prepareBlockContentForMerge,
   reconcileBlockBodyAtPath,
   resolveUseImport,
+  resolveAgentTargetPath,
   SKILL_REPLACE_PROPERTY_NAMES,
   type TemplateContext,
 } from '@promptscript/core';
@@ -996,19 +997,15 @@ export class BrowserResolver {
       agentsBlock?.content.type === 'ObjectContent' || agentsBlock?.content.type === 'MixedContent'
         ? agentsBlock.content.properties
         : undefined;
-    const qualifiedAgentName =
-      targetName === 'agents' && pathParts.length > 2
-        ? importMarker
-          ? `${rootName}.${pathParts[2]}`
-          : `${pathParts[1]}.${pathParts[2]}`
+    const agentsIndex = importMarker ? 1 : pathParts[0] === 'agents' ? 0 : -1;
+    const namespace = importMarker ? rootName : '';
+    const agentPath =
+      agentProperties && (targetName === 'agents' || !importMarker)
+        ? resolveAgentTargetPath(pathParts, agentsIndex, namespace, agentProperties)
         : undefined;
-    if (
-      qualifiedAgentName &&
-      agentProperties &&
-      Object.hasOwn(agentProperties, qualifiedAgentName)
-    ) {
+    if (agentPath) {
       targetName = 'agents';
-      deepPath = [qualifiedAgentName, ...pathParts.slice(3)];
+      deepPath = agentPath;
     }
 
     const skillContext = targetName === 'skills';

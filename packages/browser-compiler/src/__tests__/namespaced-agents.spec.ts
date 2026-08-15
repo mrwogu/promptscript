@@ -54,6 +54,29 @@ describe('BrowserResolver namespaced agents', () => {
     });
   });
 
+  it('resolves overrides on multi-segment namespaced agents', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "project" syntax: "1.5.0" }
+@use ./team as outer
+@override outer.agents.inner.reviewer.description { "Updated reviewer" }
+`,
+      'team.prs': `@meta { id: "team" syntax: "1.5.0" }
+@agents { "inner.reviewer": { description: "Original reviewer" } }
+`,
+    });
+
+    const resolver = new BrowserResolver({ fs });
+    const result = await resolver.resolve('project.prs');
+    const agents = result.ast?.blocks.find((block) => block.name === 'agents');
+
+    expect(result.errors).toEqual([]);
+    expect(agents?.content).toMatchObject({
+      properties: {
+        'outer.inner.reviewer': { description: 'Updated reviewer' },
+      },
+    });
+  });
+
   it('extends direct and aliased qualified agents', async () => {
     const fs = new VirtualFileSystem({
       'project.prs': `@meta { id: "project" syntax: "1.5.0" }
@@ -76,6 +99,29 @@ describe('BrowserResolver namespaced agents', () => {
       properties: {
         'local.reviewer': { description: 'Updated local reviewer' },
         'frontend.reviewer': { description: 'Updated frontend reviewer' },
+      },
+    });
+  });
+
+  it('extends multi-segment namespaced agents', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "project" syntax: "1.5.0" }
+@use ./team as outer
+@extend outer.agents.inner.reviewer { description: "Updated reviewer" }
+`,
+      'team.prs': `@meta { id: "team" syntax: "1.5.0" }
+@agents { "inner.reviewer": { description: "Original reviewer" } }
+`,
+    });
+
+    const resolver = new BrowserResolver({ fs });
+    const result = await resolver.resolve('project.prs');
+    const agents = result.ast?.blocks.find((block) => block.name === 'agents');
+
+    expect(result.errors).toEqual([]);
+    expect(agents?.content).toMatchObject({
+      properties: {
+        'outer.inner.reviewer': { description: 'Updated reviewer' },
       },
     });
   });

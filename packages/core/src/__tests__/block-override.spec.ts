@@ -146,6 +146,25 @@ describe('block override', () => {
     });
   });
 
+  it('replaces a property on a multi-segment namespaced agent', () => {
+    const ast = program([
+      block('agents', {
+        'outer.inner.reviewer': { description: 'Original reviewer' },
+      }),
+    ]);
+
+    const result = applyOverride(
+      ast,
+      valueOverride('agents.outer.inner.reviewer.description', 'Updated reviewer')
+    );
+
+    expect(result.blocks[0]?.content).toMatchObject({
+      properties: {
+        'outer.inner.reviewer': { description: 'Updated reviewer' },
+      },
+    });
+  });
+
   it('converts standalone block bodies for nested replacements', () => {
     const nested = (
       entries: Parameters<typeof createBlockBody>[0],

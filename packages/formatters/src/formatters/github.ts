@@ -606,7 +606,10 @@ export class GitHubFormatter extends BaseFormatter {
 
         // Check if this shortcut should be a prompt file
         if (obj['prompt'] === true || obj['type'] === 'prompt') {
-          const handoffs = this.extractHandoffs(obj['handoffs']);
+          const handoffs = this.extractHandoffs(obj['handoffs']).map((handoff) => ({
+            ...handoff,
+            agent: this.getNativeAgentName(ast, handoff.agent),
+          }));
           prompts.push({
             name: promptName,
             description: obj['description'] ? this.valueToString(obj['description']) : name,

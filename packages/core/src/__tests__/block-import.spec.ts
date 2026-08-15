@@ -140,6 +140,32 @@ describe('block import', () => {
     ]);
   });
 
+  it('qualifies nested agent references under an alias', () => {
+    const source = program([
+      block('agents', {
+        reviewer: {
+          description: 'Review code',
+          agent: 'planner',
+          handoffs: [{ label: 'Plan work', agent: 'planner' }],
+        },
+        planner: { description: 'Plan work' },
+      }),
+    ]);
+
+    const result = resolveUseImport(program([]), use({ alias: 'team' }), source);
+    const agents = result.blocks.find((entry) => entry.name === 'agents');
+
+    expect(agents?.content).toMatchObject({
+      properties: {
+        'team.reviewer': {
+          agent: 'team.planner',
+          handoffs: [{ agent: 'team.planner' }],
+        },
+        'team.planner': { description: 'Plan work' },
+      },
+    });
+  });
+
   it('qualifies mixed agents and preserves other aliased blocks', () => {
     const source = program([
       {

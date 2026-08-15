@@ -58,15 +58,35 @@ export function createNativeAgentNameMap(names: readonly string[]): ReadonlyMap<
     const baseName = toNativeAgentName(name);
     let nativeName = baseName;
     let suffix = 2;
-    while (used.has(nativeName)) {
+    while (used.has(nativeName.toLowerCase())) {
       nativeName = `${baseName}-${suffix}`;
       suffix += 1;
     }
-    used.add(nativeName);
+    used.add(nativeName.toLowerCase());
     result.set(name, nativeName);
   }
 
   return result;
+}
+
+/**
+ * Resolve an agent property path after an `agents` target segment.
+ */
+export function resolveAgentTargetPath(
+  pathParts: readonly string[],
+  agentsIndex: number,
+  namespace: string,
+  agentProperties: Readonly<Record<string, Value>>
+): string[] | undefined {
+  const agentParts = pathParts.slice(agentsIndex + 1);
+  for (let count = agentParts.length; count > 0; count -= 1) {
+    const localName = agentParts.slice(0, count).join('.');
+    const qualifiedName = namespace ? `${namespace}.${localName}` : localName;
+    if (Object.hasOwn(agentProperties, qualifiedName)) {
+      return [qualifiedName, ...agentParts.slice(count)];
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -185,10 +205,13 @@ export function qualifyAgentProperties(
 ): { content: ObjectContent | MixedContent; provenance: AgentProvenance[] } {
   const properties: Record<string, Value> = {};
   const provenance: AgentProvenance[] = [];
+  const nameMap = new Map(
+    Object.keys(content.properties).map((name) => [name, qualifyAgentName(namespace, name)])
+  );
 
   for (const [name, value] of Object.entries(content.properties)) {
     const qualifiedName = qualifyAgentName(namespace, name);
-    properties[qualifiedName] = value;
+    properties[qualifiedName] = qualifyAgentReferences(value, nameMap);
     const originals = getAgentProvenanceEntries(source, name);
     const entries =
       originals.length > 0
@@ -219,4 +242,28 @@ export function qualifyAgentProperties(
     },
     provenance,
   };
+}
+
+function qualifyAgentReferences(value: Value, nameMap: ReadonlyMap<string, string>): Value {
+  if (Array.isArray(value)) {
+    return value.map((item) => qualifyAgentReferences(item, nameMap));
+  }
+  if (typeof value !== 'object' || value === null) {
+    return value;
+  }
+
+  const result: Record<string, Value> = {};
+  for (const [key, nested] of Object.entries(value)) {
+    result[key] =
+      key === 'agent' && typeof nested === 'string'
+        ? (nameMap.get(nested) ?? nested)
+        : key === 'handoffs' && Array.isArray(nested)
+          ? nested.map((handoff) =>
+              typeof handoff === 'string'
+                ? (nameMap.get(handoff) ?? handoff)
+                : qualifyAgentReferences(handoff, nameMap)
+            )
+          : qualifyAgentReferences(nested, nameMap);
+  }
+  return result;
 }

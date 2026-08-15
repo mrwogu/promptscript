@@ -22,6 +22,7 @@ import {
 } from './canonical-ast.js';
 import { ResolveError } from './errors/index.js';
 import { deepClone } from './utils/index.js';
+import { resolveAgentTargetPath } from './agent-names.js';
 
 export const SKILL_REPLACE_PROPERTY_NAMES = [
   'content',
@@ -544,20 +545,17 @@ export function applyOverride(
       ? agents.content.properties
       : undefined;
   if (agentProperties) {
-    const qualifiedName =
-      marker && parts.length > 2
-        ? `${root}.${parts[2]}`
-        : targetName === 'agents' && parts.length > 2
-          ? `${parts[1]}.${parts[2]}`
-          : override.targetPath;
-    if (
-      (targetName === 'agents' &&
-        parts.length > 2 &&
-        Object.hasOwn(agentProperties, qualifiedName)) ||
-      (!marker && Object.hasOwn(agentProperties, qualifiedName))
-    ) {
+    const agentsIndex = marker ? 1 : parts[0] === 'agents' ? 0 : -1;
+    const namespace = marker ? root : '';
+    const agentPath =
+      agentsIndex >= 0
+        ? resolveAgentTargetPath(parts, agentsIndex, namespace, agentProperties)
+        : !marker
+          ? resolveAgentTargetPath(parts, -1, '', agentProperties)
+          : undefined;
+    if (agentPath) {
       targetName = 'agents';
-      path = [qualifiedName, ...parts.slice(3)];
+      path = agentPath;
     }
   }
   const markerBlocks = marker ? getProperties(marker.content)?.['__blocks'] : undefined;

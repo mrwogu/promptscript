@@ -65,6 +65,23 @@ Qualified names are mapped consistently for native output. Dots become hyphens, 
 qualified names map to the same native name, a deterministic numeric suffix keeps the output
 collision-free. Resolved programs expose this information through `agentProvenance`.
 
+Nested aliases retain the full namespace. If `team.prs` imports `inner-team.prs` as `inner`, then
+an outer import as `frontend` resolves the inner team's `reviewer` agent to
+`frontend.inner.reviewer`:
+
+```promptscript
+# team.prs
+@use ./inner-team as inner
+
+# project.prs
+@use ./team as frontend
+```
+
+Known agent references are rewritten with the same namespace. For example, an imported definition
+that contains `agent: "reviewer"` or a handoff entry targeting `"reviewer"` points to
+`frontend.inner.reviewer` after resolution. Native output then uses
+`frontend-inner-reviewer` consistently for both the agent file and handoff target.
+
 ## Agent Properties
 
 | Property              | Required | Purpose                                               |

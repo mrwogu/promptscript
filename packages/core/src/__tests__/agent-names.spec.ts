@@ -49,6 +49,13 @@ describe('agent names', () => {
     ]);
   });
 
+  it('avoids native collisions that differ only by case', () => {
+    expect([...createNativeAgentNameMap(['team.reviewer', 'Team.reviewer'])]).toEqual([
+      ['Team.reviewer', 'Team-reviewer'],
+      ['team.reviewer', 'team-reviewer-2'],
+    ]);
+  });
+
   it('reads object and mixed agent blocks and returns empty non-object blocks', () => {
     const mixed: MixedContent = {
       type: 'MixedContent',

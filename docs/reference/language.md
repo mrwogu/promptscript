@@ -65,6 +65,20 @@ remain unchanged. Conflicting unaliased definitions produce a source-aware diagn
 silently overwriting an agent. Native output maps dots to hyphens, for example
 `frontend.reviewer` becomes `frontend-reviewer`.
 
+Namespaces can be nested through aliased imports:
+
+```promptscript
+# team.prs
+@use ./inner-team as inner
+
+# project.prs
+@use ./team as frontend
+```
+
+The inner team's `reviewer` resolves to `frontend.inner.reviewer`. Agent references are rewritten
+with the same qualified name, including `agent` fields and `handoffs` entries, so references do not
+retain the source-local `reviewer` name.
+
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAwsxIlOWOLzhYM1LLwDuEXL24AdVmoACIqb2C8KB3gF9eps+eW8ASjACOAVwjUYAE0S8AsjCkvsGTRCsODDUirwamEoW5nwA8mhYEGwYUO4AkkEhihisjDCa9nAw4ZE4vMgY4ikQlQC6ZnEJSawp6WTMMnBqAS6iigCeuvqGJtF8guyivABGUMyMANZdrBosk4SyegYUxpqSOb7ULuJbI5rOkqGMiWwnwztGezgdWIz2YkPbuyuY1KR3X0eKwA5vZpMdPmcVnAFtAoACoRoMMDRAiHpo5B0FmA5nI0d8NM9mEtIeiViRGGgAMohABuIXxQIiUHswMCjM0C1YzDksBcKNJBKIpHI8EFTLmjBS4u6KyIHFYLl4pXFMV4ACFJQteCRmC4IJApTdWMsNMx6dRQr1ldgyqcHqY+ABBLBCCCMXjOcgYPIidi8ZhgXg5XhECCSQLA3hSagorAgIy1Biiaj9fDCsiUGj0EAWuDNfAARgTQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
