@@ -152,7 +152,6 @@ export function parseCanonical(source: string, options: ParseOptions = {}): Cano
     } else {
       requestVisitor.resetEnvProvider();
     }
-    requestVisitor.resetDiagnostics();
     const ast = requestVisitor.visit(cst, filename) as CanonicalProgram;
     for (const diagnostic of requestVisitor.takeDiagnostics()) {
       errors.push(new ParseError(diagnostic.message, diagnostic.loc));
