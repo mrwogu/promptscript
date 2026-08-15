@@ -7,6 +7,7 @@ import type {
   Value,
 } from '@promptscript/core';
 import {
+  createNativeAgentNameMap,
   DEFAULT_PRETTIER_OPTIONS,
   isPortablePathSegment,
   reconcileBlockBody,
@@ -959,6 +960,23 @@ export abstract class BaseFormatter implements Formatter {
    */
   protected isSafeAgentName(name: string): boolean {
     return this.isSafeName(name);
+  }
+
+  /**
+   * Map all agent names consistently for a target's native files.
+   */
+  protected getNativeAgentNameMap(ast: Program): ReadonlyMap<string, string> {
+    const agentsBlock = this.findBlock(ast, 'agents');
+    return createNativeAgentNameMap(
+      agentsBlock ? Object.keys(this.getProps(agentsBlock.content)) : []
+    );
+  }
+
+  /**
+   * Return the deterministic native identifier for one agent.
+   */
+  protected getNativeAgentName(ast: Program, name: string): string {
+    return this.getNativeAgentNameMap(ast).get(name) ?? name.replace(/\./g, '-');
   }
 
   /**

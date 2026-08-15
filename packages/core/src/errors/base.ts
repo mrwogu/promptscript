@@ -23,6 +23,7 @@ export enum ErrorCode {
   UNKNOWN_PARAM = 'PS2011',
   PARAM_TYPE_MISMATCH = 'PS2012',
   UNDEFINED_VARIABLE = 'PS2013',
+  AGENT_NAME_CONFLICT = 'PS2014',
 
   // Registry resolve errors (2020-2029)
   UNKNOWN_ALIAS = 'PS2020',

@@ -36,6 +36,32 @@ agent can own a role, prompt, model, tool policy, skill set, and MCP access.
 }
 ```
 
+## Imported Agents and Namespaces
+
+An aliased `@use` qualifies every imported agent with the alias. This lets multiple fragments
+define the same local agent name without overwriting one another:
+
+```promptscript
+@use ./frontend-team as frontend
+@use ./backend-team as backend
+```
+
+If both fragments define `reviewer`, the resolved names are `frontend.reviewer` and
+`backend.reviewer`. An unaliased import keeps its original name when that name is unique:
+
+```promptscript
+@use ./shared-reviewer
+```
+
+The resulting agent remains `reviewer`. If an unaliased import conflicts with a local or another
+imported definition, compilation stops with a diagnostic that lists every source, import path,
+namespace, and the recommended alias or rename action. Definitions are never silently overwritten.
+
+Qualified names are mapped consistently for native output. Dots become hyphens, so
+`frontend.reviewer` becomes `frontend-reviewer` in filenames and native identifiers. If two
+qualified names map to the same native name, a deterministic numeric suffix keeps the output
+collision-free. Resolved programs expose this information through `agentProvenance`.
+
 ## Agent Properties
 
 | Property              | Required | Purpose                                               |

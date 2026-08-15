@@ -867,6 +867,7 @@ export class GitHubFormatter extends BaseFormatter {
 
     const agents: GitHubAgentConfig[] = [];
     const props = this.getProps(agentsBlock.content);
+    const nativeNames = this.getNativeAgentNameMap(ast);
     const mcpServersBlock = findMcpServersBlock(ast);
     const availableMcpServers = mcpServersBlock ? extractMcpServers(mcpServersBlock) : [];
 
@@ -877,7 +878,10 @@ export class GitHubFormatter extends BaseFormatter {
         const description = obj['description'] ? this.valueToString(obj['description']) : '';
         if (!description) continue; // description is required
 
-        const handoffs = this.extractHandoffs(obj['handoffs']);
+        const handoffs = this.extractHandoffs(obj['handoffs']).map((handoff) => ({
+          ...handoff,
+          agent: this.getNativeAgentName(ast, handoff.agent),
+        }));
         const mcpServersValue = obj['mcpServers'];
         const mcpServerNames = Array.isArray(mcpServersValue)
           ? mcpServersValue.filter(
@@ -888,7 +892,7 @@ export class GitHubFormatter extends BaseFormatter {
           mcpServerNames.includes(server.name)
         );
         agents.push({
-          name,
+          name: nativeNames.get(name) ?? name,
           description,
           tools: this.parseToolsArray(obj['tools']),
           model: obj['model'] ? this.valueToString(obj['model']) : undefined,

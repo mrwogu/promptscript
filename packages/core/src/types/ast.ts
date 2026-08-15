@@ -118,8 +118,28 @@ export interface Program extends BaseNode {
   extends: ExtendBlock[];
   /** Explicit replacement blocks (@override) */
   overrides?: OverrideBlock[];
+  /** Resolved agent names and their source/import provenance */
+  agentProvenance?: AgentProvenance[];
   /** Versioned syntax features retained after destructive resolution passes */
   syntaxFeatures?: SyntaxFeatureUsage[];
+}
+
+/**
+ * Provenance retained for a resolved agent definition.
+ */
+export interface AgentProvenance {
+  /** Resolved agent name */
+  name: string;
+  /** Source file that defined the agent */
+  source: string;
+  /** Import path used to bring the definition into the current program */
+  importPath?: string;
+  /** Namespace added by an aliased import */
+  namespace?: string;
+  /** How the definition entered the resolved program */
+  action: 'local' | 'imported' | 'qualified' | 'native';
+  /** Source location of the definition or import */
+  loc?: SourceLocation;
 }
 
 // ============================================================
@@ -688,11 +708,7 @@ export interface OverrideOperation extends CanonicalNode {
  * Ordered semantic declaration in a canonical program.
  */
 export type ProgramOperation =
-  | InheritOperation
-  | UseOperation
-  | BlockOperation
-  | ExtendOperation
-  | OverrideOperation;
+  InheritOperation | UseOperation | BlockOperation | ExtendOperation | OverrideOperation;
 
 /**
  * Immutable canonical program. Legacy collection fields are derived projections.
@@ -705,6 +721,7 @@ export interface CanonicalProgram extends CanonicalNode {
   readonly blocks: readonly CanonicalBlock[];
   readonly extends: readonly CanonicalExtendBlock[];
   readonly overrides?: readonly CanonicalOverrideBlock[];
+  readonly agentProvenance?: readonly DeepReadonly<AgentProvenance>[];
   readonly syntaxFeatures?: readonly DeepReadonly<SyntaxFeatureUsage>[];
   readonly operations: readonly ProgramOperation[];
 }

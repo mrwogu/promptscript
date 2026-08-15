@@ -10,6 +10,7 @@ import type {
   Logger,
   Program,
   Block,
+  MixedContent,
   ObjectContent,
   Value,
   TextContent,
@@ -1696,8 +1697,8 @@ function parseAgentFrontmatter(
 async function discoverAgentFiles(
   dir: string,
   logger: Logger = noopLogger
-): Promise<Record<string, Value>> {
-  const agents: Record<string, Value> = {};
+): Promise<Record<string, { value: Value; source: string }>> {
+  const agents: Record<string, { value: Value; source: string }> = {};
   try {
     const entries = await readdir(dir, { withFileTypes: true });
     for (const entry of entries) {
@@ -1775,7 +1776,7 @@ async function discoverAgentFiles(
           } as TextContent;
         }
 
-        agents[name] = agentProps;
+        agents[name] = { value: agentProps, source: fullPath };
         logger.verbose(`Auto-discovered agent: ${name} (from ${dir})`);
       } catch {
         logger.verbose(`Skipping unreadable agent file: ${entry.name}`);
@@ -1807,31 +1808,57 @@ export async function resolveNativeAgents(
 
   // Collect agents from discovery directories
   const allAgents: Record<string, Value> = {};
+  const discoveredSources = new Map<string, string>();
 
   // Local agents first
   const localAgents = await discoverAgentFiles(resolve(localPath, 'agents'), logger);
-  Object.assign(allAgents, localAgents);
+  for (const [name, agent] of Object.entries(localAgents)) {
+    allAgents[name] = agent.value;
+    discoveredSources.set(name, agent.source);
+  }
 
   // Universal agents (don't overwrite local)
   if (options?.universalDir) {
     const universalAgentsDir = await resolveUniversalDiscoveryDir(localPath, options, 'agents');
     if (universalAgentsDir) {
       const universalAgents = await discoverAgentFiles(universalAgentsDir, logger);
-      for (const [name, value] of Object.entries(universalAgents)) {
+      for (const [name, agent] of Object.entries(universalAgents)) {
         if (!(name in allAgents)) {
-          allAgents[name] = value;
+          allAgents[name] = agent.value;
+          discoveredSources.set(name, agent.source);
         }
       }
     }
   }
 
-  if (Object.keys(allAgents).length === 0) return ast;
-
   // Find existing @agents block
   const agentsBlock = ast.blocks.find((b) => b.name === 'agents');
-  const agentsContent: ObjectContent =
-    agentsBlock && agentsBlock.content.type === 'ObjectContent'
-      ? (agentsBlock.content as ObjectContent)
+  const existingProperties =
+    agentsBlock &&
+    (agentsBlock.content.type === 'ObjectContent' || agentsBlock.content.type === 'MixedContent')
+      ? agentsBlock.content.properties
+      : {};
+  const existingProvenance = ast.agentProvenance ?? [];
+  const knownNames = new Set(existingProvenance.map((entry) => entry.name));
+  const fallbackProvenance = Object.keys(existingProperties)
+    .filter((name) => !knownNames.has(name))
+    .map((name) => ({
+      name,
+      source: sourceFile,
+      action: 'local' as const,
+      loc: agentsBlock?.loc ?? { file: sourceFile, line: 1, column: 1, offset: 0 },
+    }));
+
+  if (Object.keys(allAgents).length === 0) {
+    return fallbackProvenance.length > 0
+      ? { ...ast, agentProvenance: [...existingProvenance, ...fallbackProvenance] }
+      : ast;
+  }
+
+  const agentsContent: ObjectContent | MixedContent =
+    agentsBlock &&
+    (agentsBlock.content.type === 'ObjectContent' || agentsBlock.content.type === 'MixedContent')
+      ? agentsBlock.content
       : {
           type: 'ObjectContent',
           properties: {},
@@ -1841,13 +1868,26 @@ export async function resolveNativeAgents(
   // Merge: existing agents take precedence over discovered ones
   const mergedProperties: Record<string, Value> = { ...allAgents };
   for (const [name, value] of Object.entries(agentsContent.properties)) {
-    mergedProperties[name] = value; // Explicit declarations win
+    mergedProperties[name] = value;
   }
 
   // Check if anything actually changed
   const existingKeys = new Set(Object.keys(agentsContent.properties));
   const hasNewAgents = Object.keys(allAgents).some((k) => !existingKeys.has(k));
-  if (!hasNewAgents) return ast;
+  const discoveredProvenance = Object.entries(allAgents)
+    .filter(([name]) => !existingKeys.has(name))
+    .map(([name]) => ({
+      name,
+      source: discoveredSources.get(name) ?? sourceFile,
+      action: 'native' as const,
+      loc: { file: discoveredSources.get(name) ?? sourceFile, line: 1, column: 1, offset: 0 },
+    }));
+  const nextProvenance = [...existingProvenance, ...fallbackProvenance, ...discoveredProvenance];
+  if (!hasNewAgents) {
+    return nextProvenance.length > existingProvenance.length
+      ? { ...ast, agentProvenance: nextProvenance }
+      : ast;
+  }
 
   const updatedBlock: Block = {
     ...(agentsBlock ?? {
@@ -1869,5 +1909,6 @@ export async function resolveNativeAgents(
   return {
     ...ast,
     blocks: updatedBlocks,
+    agentProvenance: nextProvenance,
   };
 }

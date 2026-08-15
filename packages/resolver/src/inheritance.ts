@@ -1,6 +1,8 @@
 import type { Program } from '@promptscript/core';
 import {
   deepMerge,
+  AgentConflictError,
+  findAgentConflicts,
   getSyntaxFeatureUsages,
   INHERITANCE_MERGE_POLICY,
   mergeBlockCollections,
@@ -22,6 +24,11 @@ import {
  * @returns Merged program
  */
 export function resolveInheritance(parent: Program, child: Program): Program {
+  const conflicts = findAgentConflicts(child, parent, parent.loc.file, child.inherit?.loc);
+  if (conflicts.length > 0) {
+    throw new AgentConflictError(conflicts, child.inherit?.loc);
+  }
+
   return {
     ...child,
     meta:
@@ -38,6 +45,10 @@ export function resolveInheritance(parent: Program, child: Program): Program {
     inherit: undefined,
     uses: child.uses,
     extends: child.extends,
+    agentProvenance:
+      parent.agentProvenance || child.agentProvenance
+        ? [...(parent.agentProvenance ?? []), ...(child.agentProvenance ?? [])]
+        : undefined,
     syntaxFeatures: [...getSyntaxFeatureUsages(parent), ...getSyntaxFeatureUsages(child)],
   };
 }

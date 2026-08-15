@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { CanonicalProgram, Program, SourceLocation } from '@promptscript/core';
+import {
+  AgentConflictError,
+  type CanonicalProgram,
+  type Program,
+  type SourceLocation,
+} from '@promptscript/core';
 import type { Formatter, CompilerOptions } from '../types.js';
 import { FormatterRegistry } from '@promptscript/formatters';
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
@@ -879,6 +884,44 @@ describe('Compiler', () => {
       expect(result.success).toBe(false);
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0]?.message).toContain('Import not found');
+    });
+
+    it('should expose agent conflict provenance in compile errors', async () => {
+      const conflict = new AgentConflictError(
+        [
+          {
+            name: 'reviewer',
+            provenance: [
+              { name: 'reviewer', source: 'project.prs', action: 'local' },
+              {
+                name: 'reviewer',
+                source: 'shared.prs',
+                importPath: './shared',
+                action: 'imported',
+              },
+            ],
+          },
+        ],
+        { file: 'project.prs', line: 2, column: 1 }
+      );
+      mockResolve.mockResolvedValue({
+        ast: null,
+        sources: ['project.prs', 'shared.prs'],
+        errors: [conflict],
+      });
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(false);
+      expect(result.errors[0]?.code).toBe('PS2014');
+      expect(result.errors[0]?.agentName).toBe('reviewer');
+      expect(result.errors[0]?.provenance).toHaveLength(2);
+      expect(result.errors[0]?.conflicts?.[0]?.name).toBe('reviewer');
     });
 
     it('should not proceed to validation if resolve fails', async () => {

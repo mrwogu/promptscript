@@ -536,8 +536,30 @@ export function applyOverride(
   const parts = override.targetPath.split('.');
   const root = parts[0]!;
   const marker = ast.blocks.find((block) => block.name === `${markerPrefix}${root}`);
-  const targetName = marker && parts.length > 1 ? parts[1]! : root;
-  const path = marker && parts.length > 1 ? parts.slice(2) : parts.slice(1);
+  let targetName = marker && parts.length > 1 ? parts[1]! : root;
+  let path = marker && parts.length > 1 ? parts.slice(2) : parts.slice(1);
+  const agents = ast.blocks.find((block) => block.name === 'agents');
+  const agentProperties =
+    agents?.content.type === 'ObjectContent' || agents?.content.type === 'MixedContent'
+      ? agents.content.properties
+      : undefined;
+  if (agentProperties) {
+    const qualifiedName =
+      marker && parts.length > 2
+        ? `${root}.${parts[2]}`
+        : targetName === 'agents' && parts.length > 2
+          ? `${parts[1]}.${parts[2]}`
+          : override.targetPath;
+    if (
+      (targetName === 'agents' &&
+        parts.length > 2 &&
+        Object.hasOwn(agentProperties, qualifiedName)) ||
+      (!marker && Object.hasOwn(agentProperties, qualifiedName))
+    ) {
+      targetName = 'agents';
+      path = [qualifiedName, ...(marker ? parts.slice(3) : [])];
+    }
+  }
   const markerBlocks = marker ? getProperties(marker.content)?.['__blocks'] : undefined;
   if (marker && Array.isArray(markerBlocks) && !markerBlocks.some((name) => name === targetName)) {
     throw new ResolveError(

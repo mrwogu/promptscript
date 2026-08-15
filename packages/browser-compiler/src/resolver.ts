@@ -16,6 +16,9 @@ import {
   CircularDependencyError,
   deepMerge,
   deepClone,
+  AgentConflictError,
+  ensureAgentProvenance,
+  findAgentConflicts,
   applyOverride,
   blockBodyToContent,
   consumeInlineUses,
@@ -433,6 +436,7 @@ export class BrowserResolver {
     ast = normalizeBlockAliases(ast, {
       preserveDeclarationOrder: sequentialOperations,
     });
+    ast = ensureAgentProvenance(ast, absPath);
 
     if (sequentialOperations) {
       ast = await this.resolveSequentialOperations(ast, absPath, sources, errors);
@@ -725,6 +729,10 @@ export class BrowserResolver {
       if (err instanceof CircularDependencyError) {
         throw err;
       }
+      if (err instanceof AgentConflictError) {
+        errors.push(err);
+        return ast;
+      }
       errors.push(
         new ResolveError(
           `Failed to resolve parent: ${err instanceof Error ? err.message : String(err)}`
@@ -814,6 +822,10 @@ export class BrowserResolver {
         if (err instanceof CircularDependencyError) {
           throw err;
         }
+        if (err instanceof AgentConflictError) {
+          errors.push(err);
+          continue;
+        }
         errors.push(
           new ResolveError(
             `Failed to resolve import: ${err instanceof Error ? err.message : String(err)}`
@@ -902,6 +914,11 @@ export class BrowserResolver {
    * Resolve inheritance by merging a parent program into a child program.
    */
   private resolveInheritance(parent: Program, child: Program): Program {
+    const conflicts = findAgentConflicts(child, parent, parent.loc.file, child.inherit?.loc);
+    if (conflicts.length > 0) {
+      throw new AgentConflictError(conflicts, child.inherit?.loc);
+    }
+
     return {
       ...child,
       meta:
@@ -918,6 +935,10 @@ export class BrowserResolver {
       inherit: undefined,
       uses: child.uses,
       extends: child.extends,
+      agentProvenance:
+        parent.agentProvenance || child.agentProvenance
+          ? [...(parent.agentProvenance ?? []), ...(child.agentProvenance ?? [])]
+          : undefined,
       syntaxFeatures: [...getSyntaxFeatureUsages(parent), ...getSyntaxFeatureUsages(child)],
     };
   }
@@ -968,6 +989,26 @@ export class BrowserResolver {
     if (importMarker && pathParts.length > 1) {
       targetName = pathParts[1] ?? rootName;
       deepPath = pathParts.slice(2);
+    }
+
+    const agentsBlock = blocks.find((block) => block.name === 'agents');
+    const agentProperties =
+      agentsBlock?.content.type === 'ObjectContent' || agentsBlock?.content.type === 'MixedContent'
+        ? agentsBlock.content.properties
+        : undefined;
+    const qualifiedAgentName =
+      targetName === 'agents' && pathParts.length > 2
+        ? importMarker
+          ? `${rootName}.${pathParts[2]}`
+          : `${pathParts[1]}.${pathParts[2]}`
+        : undefined;
+    if (
+      qualifiedAgentName &&
+      agentProperties &&
+      Object.hasOwn(agentProperties, qualifiedAgentName)
+    ) {
+      targetName = 'agents';
+      deepPath = [qualifiedAgentName, ...pathParts.slice(3)];
     }
 
     const skillContext = targetName === 'skills';

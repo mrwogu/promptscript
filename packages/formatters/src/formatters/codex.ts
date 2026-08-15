@@ -420,14 +420,16 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
     // Override agent files with full TOML including all fields
     const agentsBlock = ast.blocks.find((b) => b.name === 'agents');
     if (agentsBlock && agentsBlock.content.type === 'ObjectContent') {
+      const nativeNames = this.getNativeAgentNameMap(ast);
       for (const [agentName, agentValue] of Object.entries(agentsBlock.content.properties)) {
         if (typeof agentValue !== 'object' || agentValue === null || Array.isArray(agentValue))
           continue;
         if (!isValidAgentName(agentName)) continue;
         const agent = agentValue as Record<string, Value>;
-        const toml = serializeAgentToml(agentName, agent);
+        const nativeAgentName = nativeNames.get(agentName) ?? agentName;
+        const toml = serializeAgentToml(nativeAgentName, agent);
         extraFiles.push({
-          path: `.codex/agents/${agentName}.toml`,
+          path: `.codex/agents/${nativeAgentName}.toml`,
           content: toml,
         });
       }

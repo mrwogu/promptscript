@@ -415,6 +415,7 @@ export class CursorFormatter extends BaseFormatter {
     const agentsBlock = this.findBlock(ast, 'agents');
     if (agentsBlock) {
       const props = this.getProps(agentsBlock.content);
+      const nativeNames = this.getNativeAgentNameMap(ast);
       for (const [agentName, value] of Object.entries(props)) {
         if (value && typeof value === 'object' && !Array.isArray(value)) {
           if (!this.isSafeAgentName(agentName)) continue;
@@ -424,7 +425,8 @@ export class CursorFormatter extends BaseFormatter {
           if (!description && !content) continue;
 
           const agentLines: string[] = ['---'];
-          agentLines.push(`name: ${agentName}`);
+          const nativeAgentName = nativeNames.get(agentName) ?? agentName;
+          agentLines.push(`name: ${nativeAgentName}`);
           if (description) agentLines.push(`description: ${JSON.stringify(description)}`);
           const model = obj['model'];
           if (typeof model === 'string') agentLines.push(`model: ${model}`);
@@ -448,7 +450,7 @@ export class CursorFormatter extends BaseFormatter {
           if (content) agentLines.push(this.dedent(content));
 
           additionalFiles.push({
-            path: `.cursor/agents/${agentName}.md`,
+            path: `.cursor/agents/${nativeAgentName}.md`,
             content: agentLines.join('\n') + '\n',
           });
         }

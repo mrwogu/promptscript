@@ -173,6 +173,22 @@ export function applyExtend(blocks: Block[], ext: ExtendBlock, logger?: Logger):
     deepPath = pathParts.slice(2);
   }
 
+  const agentsBlock = blocks.find((block) => block.name === 'agents');
+  const agentProperties =
+    agentsBlock?.content.type === 'ObjectContent' || agentsBlock?.content.type === 'MixedContent'
+      ? agentsBlock.content.properties
+      : undefined;
+  const qualifiedAgentName =
+    targetName === 'agents' && pathParts.length > 2
+      ? importMarker
+        ? `${rootName}.${pathParts[2]}`
+        : `${pathParts[1]}.${pathParts[2]}`
+      : undefined;
+  if (qualifiedAgentName && agentProperties && Object.hasOwn(agentProperties, qualifiedAgentName)) {
+    targetName = 'agents';
+    deepPath = [qualifiedAgentName, ...pathParts.slice(3)];
+  }
+
   const resolvedBlockName = targetName ? (getOriginalBlockName(targetName) ?? targetName) : '';
   const skillContext = resolvedBlockName === 'skills';
   const replacementKeys = new Set(ext.replacements?.map((modifier) => modifier.property) ?? []);
