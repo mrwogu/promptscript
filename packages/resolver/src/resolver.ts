@@ -122,6 +122,11 @@ type PreflightRegistryImport =
       readonly error: unknown;
     };
 
+interface ParsedFile {
+  readonly ast: Program;
+  readonly errors: readonly ResolveError[];
+}
+
 /**
  * Resolver for PromptScript files with inheritance and import support.
  *
@@ -153,6 +158,8 @@ export class Resolver {
   private readonly gitRegistry: GitRegistry;
   private readonly registryCache: RegistryCache;
   private readonly preflightRegistryImports: Map<string, PreflightRegistryImport>;
+  private readonly operationModeCache: Map<string, boolean>;
+  private readonly parsedFiles: Map<string, ParsedFile>;
 
   constructor(options: ResolverOptions) {
     this.options = options;
@@ -163,6 +170,8 @@ export class Resolver {
     this.logger = options.logger ?? noopLogger;
     this.gitRegistry = new GitRegistry({ url: 'https://github.com/placeholder/placeholder.git' });
     this.preflightRegistryImports = new Map();
+    this.operationModeCache = new Map();
+    this.parsedFiles = new Map();
     const defaultCacheDir = join(
       process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp',
       '.promptscript',
@@ -210,6 +219,8 @@ export class Resolver {
       this.resolving.delete(absPath);
       if (isTopLevel) {
         this.preflightRegistryImports.clear();
+        this.operationModeCache.clear();
+        this.parsedFiles.clear();
       }
     }
   }
@@ -316,7 +327,13 @@ export class Resolver {
     absPath: string,
     visited: Set<string>
   ): Promise<boolean> {
-    if (usesSequentialOperations(ast)) return true;
+    const cachedMode = this.operationModeCache.get(absPath);
+    if (cachedMode !== undefined) return cachedMode;
+
+    if (usesSequentialOperations(ast)) {
+      this.operationModeCache.set(absPath, true);
+      return true;
+    }
 
     const references = [
       ...(ast.inherit ? [ast.inherit.path] : []),
@@ -365,10 +382,12 @@ export class Resolver {
           visited
         ))
       ) {
+        this.operationModeCache.set(absPath, true);
         return true;
       }
     }
 
+    this.operationModeCache.set(absPath, false);
     return false;
   }
 
@@ -535,6 +554,12 @@ export class Resolver {
     sources: string[],
     errors: ResolveError[]
   ): Promise<{ ast: Program | null }> {
+    const cachedFile = this.parsedFiles.get(absPath);
+    if (cachedFile) {
+      errors.push(...cachedFile.errors);
+      return { ast: cachedFile.ast };
+    }
+
     let source: string;
     try {
       source = await this.loader.load(absPath);
@@ -543,8 +568,18 @@ export class Resolver {
         // Directory fallback: if path looks like .prs was appended, try as directory
         if (absPath.endsWith('.prs')) {
           const possibleDir = absPath.slice(0, -4); // strip .prs
-          const dirResult = await this.tryDirectoryScan(possibleDir, sources, errors);
-          if (dirResult) return dirResult;
+          const dirErrors: ResolveError[] = [];
+          const dirResult = await this.tryDirectoryScan(possibleDir, sources, dirErrors);
+          if (dirResult) {
+            errors.push(...dirErrors);
+            if (dirResult.ast) {
+              this.parsedFiles.set(absPath, {
+                ast: dirResult.ast,
+                errors: dirErrors,
+              });
+            }
+            return dirResult;
+          }
         }
         errors.push(new ResolveError(err.message));
         return { ast: null };
@@ -554,7 +589,16 @@ export class Resolver {
 
     // Route .md files through content detection
     if (absPath.endsWith('.md')) {
-      return await this.loadAndParseMd(absPath, source, errors);
+      const mdErrors: ResolveError[] = [];
+      const result = await this.loadAndParseMd(absPath, source, mdErrors);
+      errors.push(...mdErrors);
+      if (result.ast) {
+        this.parsedFiles.set(absPath, {
+          ast: result.ast,
+          errors: mdErrors,
+        });
+      }
+      return result;
     }
 
     const parseResult = parse(source, { filename: absPath });
@@ -566,9 +610,14 @@ export class Resolver {
       return { ast: null };
     }
 
-    for (const err of parseResult.errors) {
-      errors.push(new ResolveError(err.message, err.location));
-    }
+    const parseErrors = parseResult.errors.map(
+      (err) => new ResolveError(err.message, err.location)
+    );
+    errors.push(...parseErrors);
+    this.parsedFiles.set(absPath, {
+      ast: parseResult.ast,
+      errors: parseErrors,
+    });
 
     return { ast: parseResult.ast };
   }
@@ -1404,6 +1453,8 @@ export class Resolver {
   clearCache(): void {
     this.cache.clear();
     this.preflightRegistryImports.clear();
+    this.operationModeCache.clear();
+    this.parsedFiles.clear();
   }
 
   /**

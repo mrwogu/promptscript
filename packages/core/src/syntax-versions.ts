@@ -231,23 +231,10 @@ export function getMinimumVersionForFeature(feature: SyntaxFeature): string | un
  * Select declaration-ordered resolution for syntax 1.5.0+ or ordered features.
  */
 export function usesSequentialOperations(ast: Program): boolean {
-  if (
-    getSyntaxFeatureUsages(ast).some(
-      (usage) =>
-        usage.feature === SYNTAX_FEATURES.ORDERED_OPERATIONS ||
-        usage.feature === SYNTAX_FEATURES.EXPLICIT_OVERRIDE
-    )
-  ) {
-    return true;
-  }
-
-  const syntaxVersion = ast.meta?.fields['syntax'];
-  const minimumVersion = getMinimumVersionForFeature(SYNTAX_FEATURES.ORDERED_OPERATIONS);
-  return (
-    typeof syntaxVersion === 'string' &&
-    isValidVersion(syntaxVersion) &&
-    minimumVersion !== undefined &&
-    compareVersions(syntaxVersion, minimumVersion) >= 0
+  return getSyntaxFeatureUsages(ast).some(
+    (usage) =>
+      usage.feature === SYNTAX_FEATURES.ORDERED_OPERATIONS ||
+      usage.feature === SYNTAX_FEATURES.EXPLICIT_OVERRIDE
   );
 }
 
