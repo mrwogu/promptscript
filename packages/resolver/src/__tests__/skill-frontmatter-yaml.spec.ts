@@ -785,6 +785,8 @@ describe('YAML skill frontmatter', () => {
     }
   });
 
+  // Tripping the node limit requires parsing more than 10000 YAML nodes, which
+  // outruns the default timeout on loaded CI runners with coverage enabled.
   it('counts null mapping values when enforcing the node limit', () => {
     const yaml = Array.from({ length: 3 }, (_, groupIndex) =>
       [
@@ -796,7 +798,7 @@ describe('YAML skill frontmatter', () => {
     expect(() => parseSkillMd(`---\n${yaml}\n---\nBody`)).toThrow(
       /frontmatter contains more than 10000 values/
     );
-  });
+  }, 30_000);
 
   it('reports non-Error YAML value resolution failures', () => {
     const toJsSpy = vi.spyOn(Document.prototype, 'toJS').mockImplementation(() => {
