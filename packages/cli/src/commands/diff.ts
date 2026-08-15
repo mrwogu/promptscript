@@ -88,6 +88,17 @@ function parseTargets(targets: TargetEntry[]): { name: string; config?: TargetCo
     .filter((target) => target.config?.enabled !== false);
 }
 
+/**
+ * Resolve universalDir config to NativeSkillOptions.
+ */
+function resolveUniversalDir(
+  universalDir: string | boolean | undefined
+): { universalDir: string } | undefined {
+  if (universalDir === false) return undefined;
+  if (typeof universalDir === 'string') return { universalDir };
+  return { universalDir: '.agents' };
+}
+
 async function loadDiffLockfile(projectRoot: string): Promise<Lockfile | undefined> {
   const lockfilePath = resolve(projectRoot, 'promptscript.lock');
   if (!existsSync(lockfilePath)) {
@@ -184,11 +195,18 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     const vendorDir = resolve(projectRoot, '.promptscript/vendor');
 
     if (!isJsonFormat) spinner.text = 'Resolving registry...';
-    const registry = await resolveRegistryPath(config, { vendorDir, lockfile });
+    const registry = await resolveRegistryPath(config, {
+      vendorDir,
+      lockfile,
+      readOnly: true,
+    });
 
     if (!isJsonFormat) spinner.text = 'Compiling...';
 
-    const targets = options.target ? [{ name: options.target }] : parseTargets(config.targets);
+    const parsedTargets = parseTargets(config.targets);
+    const targets = options.target
+      ? [parsedTargets.find((target) => target.name === options.target) ?? { name: options.target }]
+      : parsedTargets;
     const logger = createDiffLogger(isJsonFormat);
     const prettierOptions = await resolvePrettierOptions(config, projectRoot);
     const skillContent =
@@ -200,12 +218,15 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
         localPath: resolve(projectRoot, '.promptscript'),
         projectRoot,
         vendorDir,
+        readOnly: true,
         referenceRoots:
           registry.repositoryUrl && registry.repositoryPath
             ? { [registry.repositoryUrl]: [registry.repositoryPath] }
             : undefined,
         lockfile,
         registries: config.registries,
+        skills: resolveUniversalDir(config.universalDir),
+        skillTargets: config.skillTargets,
       },
       validator: config.validation,
       formatters: targets,

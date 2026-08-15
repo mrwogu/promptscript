@@ -498,6 +498,73 @@ describe('diffCommand', () => {
     expect(plainOutput.content).toBe('plain\n');
   });
 
+  it('should preserve configured target and skill options for an explicit target', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockResolvedValue({
+      targets: [
+        {
+          github: {
+            version: '2.0',
+            convention: 'xml',
+            output: 'custom/copilot.md',
+            skillBaseDir: '.github/skills',
+            includeSkills: ['review'],
+          },
+        },
+        { claude: { enabled: false } },
+      ],
+      validation: {},
+      includePromptScriptSkill: false,
+      universalDir: '.workspace',
+      skillTargets: { 'github.com/acme/registry': '.github/skills' },
+      registries: { acme: { url: 'https://github.com/acme/registry.git' } },
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map(),
+    });
+
+    await diffCommand({ format: 'json', target: 'github' });
+    consoleLog.mockRestore();
+
+    expect(mockResolveRegistryPath).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ readOnly: true })
+    );
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        formatters: [
+          {
+            name: 'github',
+            config: {
+              version: '2.0',
+              convention: 'xml',
+              output: 'custom/copilot.md',
+              skillBaseDir: '.github/skills',
+              includeSkills: ['review'],
+            },
+          },
+        ],
+        resolver: expect.objectContaining({
+          readOnly: true,
+          skills: { universalDir: '.workspace' },
+          skillTargets: { 'github.com/acme/registry': '.github/skills' },
+          registries: { acme: { url: 'https://github.com/acme/registry.git' } },
+        }),
+      })
+    );
+  });
+
   it('should emit JSON errors for unexpected machine-readable failures', async () => {
     const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
     mockLoadConfig.mockRejectedValue(new Error('Config load failure'));

@@ -77,6 +77,8 @@ import {
 export interface ResolverOptions extends LoaderOptions {
   /** Whether to cache resolved ASTs. Defaults to true. */
   cache?: boolean;
+  /** Refuse remote registry clones and cache metadata writes. */
+  readOnly?: boolean;
   /** Logger for verbose/debug output */
   logger?: Logger;
   /** Options for native skill resolution */
@@ -552,7 +554,12 @@ export class Resolver {
 
     if (parsed.references && parsed.references.length > 0) {
       try {
-        const refs = await resolveSkillReferences(parsed.references, skillDir, this.logger);
+        const refs = await resolveSkillReferences(
+          parsed.references,
+          skillDir,
+          this.logger,
+          absPath
+        );
         collected.push(...refs);
       } catch (err) {
         if (err instanceof ResolveError) {
@@ -956,6 +963,12 @@ export class Resolver {
             cacheMatchesLock = false;
           }
           if (!cacheMatchesLock) {
+            if (this.options.readOnly) {
+              throw new Error(
+                `Cached registry ${repoUrl}@${effectiveVersion} does not match locked commit ${lockedCommit}. ` +
+                  'Read-only resolution cannot repair the registry cache.'
+              );
+            }
             this.logger.verbose(
               `Registry cache does not match locked commit for ${repoUrl}. Re-cloning.`
             );
@@ -977,6 +990,12 @@ export class Resolver {
           }
         }
       } else {
+        if (this.options.readOnly) {
+          throw new Error(
+            `Registry ${repoUrl}@${effectiveVersion} is not available in the existing cache. ` +
+              'Read-only resolution cannot clone remote registries. Run `prs vendor sync` or `prs compile` first.'
+          );
+        }
         this.logger.verbose(`Registry cache miss, cloning: ${repoUrl}@${tag ?? 'default'}`);
         cachePath = this.registryCache.getCachePath(repoUrl, effectiveVersion);
 

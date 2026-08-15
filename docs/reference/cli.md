@@ -513,7 +513,10 @@ direct automation. `success: false` with `errors` means compilation or report ge
 
 Generated output paths are compared under the configured `output.baseDir`. The JSON report uses the
 same formatter output, configured header, and Prettier post-format pass as `prs compile`; `prs diff`
-never writes generated files.
+uses the complete configured target for `--target`, including version, convention, output path, and
+skill settings. It never writes generated files, registry checkouts, cache metadata, lockfiles, or
+temporary files. Git registries must already be available through vendor mode or a valid local
+cache; otherwise diff fails with an actionable error instead of fetching them.
 
 ---
 

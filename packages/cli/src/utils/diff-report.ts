@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { lstat, readFile } from 'node:fs/promises';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 import type { CompileError, CompileResult, FormatterOutput } from '@promptscript/compiler';
 import {
@@ -9,6 +9,7 @@ import {
   mergePromptScriptCodexConfig,
   mergePromptScriptHookOutput,
   removePromptScriptOwnedCodexHooks,
+  removePromptScriptOwnedHooks,
 } from './managed-output-cleanup.js';
 import { stripMarkers } from './markers.js';
 import { isPromptScriptOwnedOutput } from './output-ownership.js';
@@ -39,6 +40,7 @@ export interface CompilationDiffChange {
   source: string;
   kind: DiffChangeKind;
   ownership: DiffOwnership;
+  mode?: number;
   contentHash?: string;
   content?: string;
   warnings?: DiffWarning[];
@@ -416,6 +418,7 @@ export async function buildCompilationDiff(
       source: identity.source,
       ownership: 'promptscript' as const,
       contentHash: contentHash(desiredContent),
+      ...(output.mode !== undefined ? { mode: output.mode & 0o777 } : {}),
       ...(includeContent ? { content: canonicalContent(desiredContent) } : {}),
     };
 
@@ -423,8 +426,13 @@ export async function buildCompilationDiff(
       changes.push({ ...common, kind: 'added' });
     } else {
       let existingContent: string | undefined;
+      let existingMode: number | undefined;
       try {
         existingContent = await readFile(outputPath, 'utf8');
+        const existingStat = await lstat(outputPath);
+        if (existingStat.isFile() && !existingStat.isSymbolicLink()) {
+          existingMode = existingStat.mode & 0o777;
+        }
       } catch (error) {
         changes.push({
           ...common,
@@ -442,13 +450,17 @@ export async function buildCompilationDiff(
       }
 
       const planned = getPlannedContent(output, existingContent);
-      if (
+      const modeChanged =
+        existingMode !== undefined &&
+        output.mode !== undefined &&
+        existingMode !== (output.mode & 0o777);
+      const contentMatches =
         existingContent !== undefined &&
-        canonicalContent(existingContent) === canonicalContent(planned.content)
-      ) {
+        canonicalContent(existingContent) === canonicalContent(planned.content);
+      if (contentMatches && !modeChanged) {
         unchanged++;
       } else if (existingContent !== undefined) {
-        const owned = planned.safelyWritable;
+        const owned = planned.safelyWritable || (contentMatches && modeChanged);
         changes.push({
           ...common,
           kind: owned ? 'changed' : 'user-owned',
@@ -509,6 +521,37 @@ export async function buildCompilationDiff(
         ...(includeContent && existingContent
           ? { content: canonicalContent(existingContent) }
           : {}),
+      });
+    }
+    for (const rewrittenPath of cleanup.rewritten ?? []) {
+      let existingContent = '';
+      try {
+        existingContent = await readFile(rewrittenPath, 'utf8');
+      } catch {
+        // A file can disappear between the read-only cleanup scan and report.
+      }
+      const prunedHooks =
+        removePromptScriptOwnedHooks(rewrittenPath, existingContent) ??
+        removePromptScriptOwnedCodexHooks(rewrittenPath, existingContent);
+      if (!prunedHooks || prunedHooks.empty) continue;
+
+      const marker = parseMarkerMetadata(existingContent);
+      const owner = findManagedOutputOwner(
+        rewrittenPath,
+        options.outputs,
+        outputRoot,
+        options.entryPath,
+        projectRoot
+      );
+      const cleanedContent = prunedHooks.content;
+      changes.push({
+        target: owner?.target ?? marker.target ?? 'unknown',
+        path: reportPath(outputRoot, rewrittenPath),
+        source: reportSource(projectRoot, marker.source ?? owner?.source ?? options.entryPath),
+        kind: 'changed',
+        ownership: 'user',
+        contentHash: contentHash(cleanedContent),
+        ...(includeContent ? { content: canonicalContent(cleanedContent) } : {}),
       });
     }
   }

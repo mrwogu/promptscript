@@ -220,6 +220,7 @@ describe('cleanupManagedOutputs', () => {
 
     await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
       removed: [],
+      rewritten: [file],
       removedDirectories: [],
     });
     await expect(readFile(file, 'utf-8').then((value) => JSON.parse(value))).resolves.toEqual({

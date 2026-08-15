@@ -184,6 +184,9 @@ importers:
       '@promptscript/validator':
         specifier: workspace:^
         version: link:../validator
+      ajv:
+        specifier: ^8.20.0
+        version: 8.20.0
       chalk:
         specifier: ^6.0.0
         version: 6.0.0

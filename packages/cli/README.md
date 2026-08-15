@@ -346,7 +346,9 @@ prs diff --format json
 change kind, deterministic content hashes, warnings, and unsupported capability entries. Content is
 omitted by default; add `--include-content` when automation needs canonical output text. Reports
 with changes exit 0; compilation and report errors emit `success: false` and exit 1. See the
-[diff schema](https://getpromptscript.dev/schema/diff/v1.json).
+[diff schema](https://getpromptscript.dev/schema/diff/v1.json). Diff uses the complete configured
+target when `--target` selects one, never writes generated files or registry cache metadata, and
+requires Git registries to already exist in vendor mode or a valid local cache.
 
 ## CLI Commands
 

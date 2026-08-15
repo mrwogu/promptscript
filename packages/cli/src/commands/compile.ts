@@ -940,6 +940,13 @@ async function compileCommandWithResult(
         ConsoleOutput.muted(`Removed empty managed directory: ${removedDirectory}`);
       }
     }
+    for (const rewrittenPath of cleanupResult.rewritten ?? []) {
+      if (options.dryRun) {
+        ConsoleOutput.dryRun(`Would rewrite mixed managed hook file: ${rewrittenPath}`);
+      } else {
+        ConsoleOutput.muted(`Rewrote mixed managed hook file: ${rewrittenPath}`);
+      }
+    }
     // Report success only after every output and cleanup step completed, so a
     // write-phase failure never follows a "Compilation successful" line.
     spinner.succeed('Compilation successful');

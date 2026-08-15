@@ -91,6 +91,12 @@
           "type": "string",
           "enum": ["promptscript", "user", "unknown"]
         },
+        "mode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 511,
+          "description": "Desired POSIX permission bits for the output file."
+        },
         "contentHash": {
           "type": "string",
           "pattern": "^sha256-[0-9a-f]{64}$"

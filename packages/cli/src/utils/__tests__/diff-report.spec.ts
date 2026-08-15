@@ -1,7 +1,8 @@
-import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
+import { Ajv } from 'ajv';
 import type { FormatterOutput } from '@promptscript/compiler';
 import {
   buildCompilationDiff,
@@ -11,6 +12,18 @@ import {
 
 const MARKER = (timestamp: string, target: string): string =>
   `<!-- PromptScript ${timestamp} | source: .promptscript/project.prs | target: ${target} - do not edit -->`;
+
+async function loadDiffSchema(): Promise<Record<string, unknown>> {
+  return JSON.parse(
+    await readFile(new URL('../../../../../schema/diff-v1.json', import.meta.url), 'utf8')
+  ) as Record<string, unknown>;
+}
+
+async function expectValidDiffReport(report: unknown): Promise<void> {
+  const schema = await loadDiffSchema();
+  const validator = new Ajv({ strict: false }).compile(schema);
+  expect(validator(report), JSON.stringify(validator.errors)).toBe(true);
+}
 
 function createOutput(
   path: string,
@@ -85,6 +98,7 @@ describe('buildCompilationDiff', () => {
     });
 
     expect(first).toEqual(second);
+    expect(JSON.stringify(first, null, 2)).toBe(JSON.stringify(second, null, 2));
     expect(first.$schema).toBe(DIFF_SCHEMA_URL);
     expect(first.contentIncluded).toBe(true);
     expect(first.changes).toEqual(
@@ -312,6 +326,39 @@ describe('buildCompilationDiff', () => {
     );
   });
 
+  it.skipIf(process.platform === 'win32')('reports a skill script mode-only change', async () => {
+    const projectRoot = await createProject();
+    const scriptPath = join(projectRoot, 'check.sh');
+    await writeFile(scriptPath, '#!/bin/sh\necho check\n');
+    await chmod(scriptPath, 0o644);
+
+    const report = await buildCompilationDiff({
+      projectRoot,
+      outputRoot: projectRoot,
+      entryPath: join(projectRoot, '.promptscript/project.prs'),
+      outputs: new Map([
+        [
+          'check.sh',
+          {
+            ...createOutput('check.sh', '#!/bin/sh\necho check\n'),
+            mode: 0o755,
+          },
+        ],
+      ]),
+      warnings: [],
+    });
+
+    expect(report.changes).toEqual([
+      expect.objectContaining({
+        path: 'check.sh',
+        kind: 'changed',
+        ownership: 'user',
+        mode: 0o755,
+      }),
+    ]);
+    expect(report.summary).toMatchObject({ changed: 1, unchanged: 0 });
+  });
+
   it('sorts changes and warnings with stable tie breakers', async () => {
     const projectRoot = await createProject();
     const location = (file: string, line: number, column: number) => ({
@@ -437,6 +484,60 @@ describe('buildCompilationDiff', () => {
     );
     await expect(readFile(stalePath, 'utf8')).resolves.toBe(staleContent);
   });
+
+  it('reports mixed PromptScript and user hook rewrites', async () => {
+    const projectRoot = await createProject();
+    const hookPath = join(projectRoot, '.github/hooks/promptscript.json');
+    await mkdir(join(projectRoot, '.github/hooks'), { recursive: true });
+    await writeFile(
+      hookPath,
+      JSON.stringify({
+        version: 1,
+        hooks: {
+          preToolUse: [
+            {
+              type: 'command',
+              command: 'echo user',
+            },
+            {
+              type: 'command',
+              command: 'echo generated # promptscript-generated:owned',
+            },
+          ],
+        },
+      })
+    );
+
+    const report = await buildCompilationDiff({
+      projectRoot,
+      outputRoot: projectRoot,
+      entryPath: join(projectRoot, '.promptscript/project.prs'),
+      outputs: new Map([
+        [
+          'AGENTS.md',
+          {
+            ...createOutput('AGENTS.md', 'current\n', 'github', 'source.prs'),
+            managedOutputFiles: ['.github/hooks/promptscript.json'],
+          },
+        ],
+      ]),
+      warnings: [],
+      includeContent: true,
+    });
+
+    expect(report.changes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: '.github/hooks/promptscript.json',
+          target: 'github',
+          source: 'source.prs',
+          kind: 'changed',
+          ownership: 'user',
+          content: expect.stringContaining('echo user'),
+        }),
+      ])
+    );
+  });
 });
 
 describe('createCompilationDiffErrorReport', () => {
@@ -456,6 +557,41 @@ describe('createCompilationDiffErrorReport', () => {
       errors: expect.any(Array),
       summary: expect.any(Object),
     });
+    await expectValidDiffReport(fixture);
+  });
+
+  it('validates emitted success and resource-error reports against the schema', async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), 'promptscript-diff-schema-'));
+    try {
+      const successReport = await buildCompilationDiff({
+        projectRoot,
+        outputRoot: projectRoot,
+        entryPath: join(projectRoot, '.promptscript/project.prs'),
+        outputs: new Map([['new.md', createOutput('new.md', 'new\n')]]),
+        warnings: [],
+      });
+      const resourceErrorReport = createCompilationDiffErrorReport(
+        [
+          {
+            name: 'ResolveError',
+            code: 'PS2025',
+            message: 'Script file exceeds the resource size limit.',
+            location: {
+              file: join(projectRoot, 'skills/reviewer/SKILL.md'),
+              line: 1,
+              column: 1,
+            },
+          },
+        ],
+        [],
+        projectRoot
+      );
+
+      await expectValidDiffReport(JSON.parse(JSON.stringify(successReport)));
+      await expectValidDiffReport(JSON.parse(JSON.stringify(resourceErrorReport)));
+    } finally {
+      await rm(projectRoot, { recursive: true });
+    }
   });
 
   it('keeps compilation errors separate from a valid change report', () => {

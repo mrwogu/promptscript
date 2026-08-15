@@ -249,6 +249,8 @@ process.stdout.write('ready');
 export interface ManagedOutputCleanupResult {
   /** Obsolete files removed, or that would be removed in dry-run mode */
   removed: string[];
+  /** Mixed hook files rewritten to remove PromptScript-owned entries */
+  rewritten?: string[];
   /** Managed directories pruned because they became empty */
   removedDirectories: string[];
 }
@@ -285,6 +287,7 @@ export async function cleanupManagedOutputs(
   const managedFiles = collectManagedFiles(outputs, outputRoot);
   const desiredFiles = collectDesiredFiles(outputs, outputRoot);
   const removed: string[] = [];
+  const rewritten: string[] = [];
   const removedDirectories: string[] = [];
 
   for (const directory of managedDirectories) {
@@ -305,7 +308,7 @@ export async function cleanupManagedOutputs(
 
   for (const file of managedFiles) {
     if (desiredFiles.has(file)) continue;
-    await removeManagedFile(file, outputRoot, options.dryRun === true, removed);
+    await removeManagedFile(file, outputRoot, options.dryRun === true, removed, rewritten);
   }
 
   // Prune managed directories left empty by the removals (e.g. .github/hooks
@@ -327,7 +330,11 @@ export async function cleanupManagedOutputs(
     }
   }
 
-  return { removed, removedDirectories };
+  return {
+    removed,
+    ...(rewritten.length > 0 ? { rewritten } : {}),
+    removedDirectories,
+  };
 }
 
 interface PruneTracker {
@@ -456,7 +463,8 @@ async function removeManagedFile(
   file: string,
   outputRoot: string,
   dryRun: boolean,
-  removed: string[]
+  removed: string[],
+  rewritten: string[]
 ): Promise<void> {
   const fileStat = await safeLstat(file);
   if (!fileStat?.isFile() || fileStat.isSymbolicLink()) return;
@@ -470,7 +478,11 @@ async function removeManagedFile(
   try {
     if (!(await directoryGuardsMatch(guards))) return;
     if (dryRun) {
-      if (!prunedHooks || prunedHooks.empty) removed.push(file);
+      if (!prunedHooks || prunedHooks.empty) {
+        removed.push(file);
+      } else {
+        rewritten.push(file);
+      }
       return;
     }
 
@@ -479,7 +491,7 @@ async function removeManagedFile(
     if (!directoryStat?.isDirectory() || directoryStat.isSymbolicLink()) return;
 
     if (prunedHooks && !prunedHooks.empty) {
-      await guardedRewrite(
+      const didRewrite = await guardedRewrite(
         directory,
         basename(file),
         directoryStat,
@@ -487,6 +499,7 @@ async function removeManagedFile(
         content,
         prunedHooks.content
       );
+      if (didRewrite) rewritten.push(file);
       return;
     }
 

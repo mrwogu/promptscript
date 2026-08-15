@@ -48,6 +48,21 @@ export interface ParsedSkillMd {
   rawFrontmatter?: string;
 }
 
+function resourceLocation(
+  basePath: string,
+  sourceFile: string | undefined
+): {
+  file: string;
+  line: number;
+  column: number;
+} {
+  return {
+    file: sourceFile ?? resolve(basePath, 'SKILL.md'),
+    line: 1,
+    column: 1,
+  };
+}
+
 /**
  * Parse a SKILL.md file extracting frontmatter and content.
  *
@@ -297,7 +312,7 @@ function parseParamsBlock(
       paramType,
       optional: hasDefault,
       defaultValue,
-      loc: { file: '<skill>', line: 0, column: 0, offset: 0 },
+      loc: { file: '<skill>', line: 1, column: 1, offset: 0 },
     });
   }
 
@@ -874,12 +889,14 @@ export async function discoverSkillResources(
  * @param references - Relative paths listed in the SKILL.md frontmatter
  * @param basePath - Absolute path to the skill directory (anchor for relative paths)
  * @param logger - Optional logger for warnings
+ * @param sourceFile - Absolute path to the SKILL.md declaring the references
  * @returns Array of loaded SkillResource objects
  */
 export async function resolveSkillReferences(
   references: string[],
   basePath: string,
-  logger?: Logger
+  logger?: Logger,
+  sourceFile?: string
 ): Promise<SkillResource[]> {
   const resources: SkillResource[] = [];
   let totalSize = 0;
@@ -887,9 +904,7 @@ export async function resolveSkillReferences(
   for (const ref of references) {
     if (!isSafeRelativePath(ref)) {
       throw new ResolveError(`Unsafe path in references: ${ref} — path traversal not allowed`, {
-        file: basePath,
-        line: 0,
-        column: 0,
+        ...resourceLocation(basePath, sourceFile),
       });
     }
 
@@ -900,9 +915,7 @@ export async function resolveSkillReferences(
       content = await readFile(fullPath, 'utf-8');
     } catch {
       throw new ResolveError(`Reference file not found: ${ref}`, {
-        file: basePath,
-        line: 0,
-        column: 0,
+        ...resourceLocation(basePath, sourceFile),
       });
     }
 
@@ -911,7 +924,7 @@ export async function resolveSkillReferences(
     if (size > MAX_RESOURCE_SIZE) {
       throw new ResolveError(
         `Reference file exceeds ${MAX_RESOURCE_SIZE / 1_048_576}MB limit: ${ref}`,
-        { file: basePath, line: 0, column: 0 }
+        resourceLocation(basePath, sourceFile)
       );
     }
 
@@ -919,7 +932,7 @@ export async function resolveSkillReferences(
     if (totalSize > MAX_TOTAL_RESOURCE_SIZE) {
       throw new ResolveError(
         `Total reference size exceeds ${MAX_TOTAL_RESOURCE_SIZE / 1_048_576}MB limit for skill`,
-        { file: basePath, line: 0, column: 0 }
+        resourceLocation(basePath, sourceFile)
       );
     }
 
@@ -947,7 +960,7 @@ export async function resolveSkillReferences(
   if (deduplicated.length > MAX_RESOURCE_COUNT) {
     throw new ResolveError(
       `Too many reference files (${deduplicated.length}, max ${MAX_RESOURCE_COUNT})`,
-      { file: basePath, line: 0, column: 0 }
+      resourceLocation(basePath, sourceFile)
     );
   }
 
@@ -964,18 +977,18 @@ export async function resolveSkillReferences(
  * @param scripts - Relative paths listed in the SKILL.md frontmatter
  * @param basePath - Absolute path to the skill directory
  * @param logger - Optional logger for warnings
+ * @param sourceFile - Absolute path to the SKILL.md declaring the scripts
  * @returns Array of loaded SkillResource objects with origin and executable metadata
  */
 export async function resolveSkillScripts(
   scripts: string[],
   basePath: string,
-  logger?: Logger
+  logger?: Logger,
+  sourceFile?: string
 ): Promise<SkillResource[]> {
   if (scripts.length > MAX_RESOURCE_COUNT) {
     throw new ResolveError(`Too many script files (${scripts.length}, max ${MAX_RESOURCE_COUNT})`, {
-      file: basePath,
-      line: 0,
-      column: 0,
+      ...resourceLocation(basePath, sourceFile),
     });
   }
 
@@ -986,9 +999,7 @@ export async function resolveSkillScripts(
   for (const scriptPath of scripts) {
     if (!isSafeRelativePath(scriptPath)) {
       throw new ResolveError(`Unsafe path in scripts: ${scriptPath} — path traversal not allowed`, {
-        file: basePath,
-        line: 0,
-        column: 0,
+        ...resourceLocation(basePath, sourceFile),
       });
     }
 
@@ -998,9 +1009,7 @@ export async function resolveSkillScripts(
     // Reject duplicate basenames
     if (seenBasenames.has(basenameStr)) {
       throw new ResolveError(`Duplicate script basename: ${basenameStr}`, {
-        file: basePath,
-        line: 0,
-        column: 0,
+        ...resourceLocation(basePath, sourceFile),
       });
     }
     seenBasenames.add(basenameStr);
@@ -1010,9 +1019,7 @@ export async function resolveSkillScripts(
       content = await readFile(fullPath, 'utf-8');
     } catch {
       throw new ResolveError(`Script file not found: ${scriptPath}`, {
-        file: basePath,
-        line: 0,
-        column: 0,
+        ...resourceLocation(basePath, sourceFile),
       });
     }
 
@@ -1025,7 +1032,7 @@ export async function resolveSkillScripts(
     if (size > MAX_RESOURCE_SIZE) {
       throw new ResolveError(
         `Script file exceeds ${MAX_RESOURCE_SIZE / 1_048_576}MB limit: ${scriptPath}`,
-        { file: basePath, line: 0, column: 0 }
+        resourceLocation(basePath, sourceFile)
       );
     }
 
@@ -1033,7 +1040,7 @@ export async function resolveSkillScripts(
     if (totalSize > MAX_TOTAL_RESOURCE_SIZE) {
       throw new ResolveError(
         `Total script size exceeds ${MAX_TOTAL_RESOURCE_SIZE / 1_048_576}MB limit for skill`,
-        { file: basePath, line: 0, column: 0 }
+        resourceLocation(basePath, sourceFile)
       );
     }
 
@@ -1401,7 +1408,12 @@ export async function resolveNativeSkills(
         // Load reference files listed in the SKILL.md frontmatter
         const skillRefs = parsed.references;
         if (skillRefs && skillRefs.length > 0) {
-          const refResources = await resolveSkillReferences(skillRefs, skillDir, logger);
+          const refResources = await resolveSkillReferences(
+            skillRefs,
+            skillDir,
+            logger,
+            skillMdPath
+          );
           const existingResources = (updatedSkill['resources'] as Value[] | undefined) ?? [];
           updatedSkill['resources'] = [
             ...existingResources,
@@ -1417,7 +1429,12 @@ export async function resolveNativeSkills(
         // Load script files listed in the SKILL.md frontmatter
         const skillScripts = parsed.scripts;
         if (skillScripts && skillScripts.length > 0) {
-          const scriptResources = await resolveSkillScripts(skillScripts, skillDir, logger);
+          const scriptResources = await resolveSkillScripts(
+            skillScripts,
+            skillDir,
+            logger,
+            skillMdPath
+          );
           const existingResources = (updatedSkill['resources'] as Value[] | undefined) ?? [];
           updatedSkill['resources'] = [
             ...existingResources,
