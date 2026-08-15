@@ -230,7 +230,6 @@ function validateWritePathSymlinks(outputPath: string, outputRoot: string): stri
   let current = root;
   for (const segment of relativePath.split(/[\\/]/)) {
     current = resolve(current, segment);
-    if (!existsSync(current)) break;
     let stat: ReturnType<typeof lstatSync> | undefined;
     try {
       stat = lstatSync(current);
@@ -356,9 +355,8 @@ function getPlannedOutputs(
 
   const plannedPaths = new Set<string>();
   const planned = outputPlan.files.map((file) => {
-    plannedPaths.add(file.originalPath);
     plannedPaths.add(file.path);
-    const current = outputs.get(file.originalPath) ?? outputs.get(file.path);
+    const current = outputs.get(file.path);
     return {
       path: file.path,
       content: current?.content ?? file.content,

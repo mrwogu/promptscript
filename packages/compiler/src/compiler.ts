@@ -579,7 +579,6 @@ export class Compiler {
             content: injectedContent,
           };
           planCandidates.push({ output: skillOutput, owner: formatter.name, role: 'injected' });
-          this.logger.verbose(`  → ${skillPath} (auto-injected promptscript skill)`);
         } catch (err) {
           formatErrors.push({
             name: 'FormatterError',
@@ -602,18 +601,27 @@ export class Compiler {
         }
 
         const preservesExisting = collision.resolution === 'preserve-existing';
+        const skippedInjectedSkill = collision.incomingRole === 'injected' && preservesExisting;
         formatWarnings.push({
           ruleId: 'PS4001',
           ruleName: 'output-path-collision',
           severity: 'warning',
-          message:
-            `Output path '${collision.path}' is written by both '${collision.existingOwner}' and ` +
-            `'${collision.incomingOwner}' with different content or write settings. ` +
-            (preservesExisting
-              ? 'The first output will be preserved.'
-              : 'The latter will overwrite the former.'),
-          suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
+          message: skippedInjectedSkill
+            ? `Output path '${collision.path}' is already written by '${collision.existingOwner}'. ` +
+              `Skipping auto-injected PromptScript skill for '${collision.incomingOwner}'.`
+            : `Output path '${collision.path}' is written by both '${collision.existingOwner}' and ` +
+              `'${collision.incomingOwner}' with different content or write settings. ` +
+              (preservesExisting
+                ? 'The first output will be preserved.'
+                : 'The latter will overwrite the former.'),
+          suggestion: skippedInjectedSkill
+            ? 'The user-defined skill takes precedence. To use the bundled skill, remove the custom one or rename it.'
+            : 'Configure distinct output paths for these formatters, or disable one of them.',
         });
+      }
+
+      for (const file of outputPlan.injected) {
+        this.logger.verbose(`  → ${file.path} (auto-injected promptscript skill)`);
       }
 
       const markedFiles = outputPlan.files.map((file) => {
@@ -647,7 +655,7 @@ export class Compiler {
 
       for (const file of markedFiles) {
         const output: FormatterOutput = {
-          path: file.originalPath,
+          path: file.path,
           content: file.content,
           ...(file.mode !== undefined ? { mode: file.mode } : {}),
           ...(file.merge !== undefined ? { merge: file.merge } : {}),
@@ -658,7 +666,7 @@ export class Compiler {
             ? { managedOutputFiles: file.managedOutputFiles }
             : {}),
         };
-        outputs.set(file.originalPath, output);
+        outputs.set(file.path, output);
         if (file.role === 'resource') {
           this.logger.verbose(`  → ${file.path} (additional)`);
         }

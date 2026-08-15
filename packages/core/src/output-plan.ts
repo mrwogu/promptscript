@@ -327,16 +327,8 @@ export function createOutputPlan(candidates: readonly OutputPlanCandidate[]): Ou
 
       const replace = file.role === 'primary';
       if (replace) {
-        const merged = mergeManagedMetadata(existing, file);
-        selected.set(file.path, {
-          ...file,
-          ...(merged.managedOutputDirectories !== undefined
-            ? { managedOutputDirectories: merged.managedOutputDirectories }
-            : {}),
-          ...(merged.managedOutputFiles !== undefined
-            ? { managedOutputFiles: merged.managedOutputFiles }
-            : {}),
-        });
+        // Replacing output owns cleanup metadata; retaining loser paths expands cleanup scope.
+        selected.set(file.path, file);
       }
       collisions.push({
         path: file.path,

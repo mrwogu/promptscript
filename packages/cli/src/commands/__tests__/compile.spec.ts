@@ -391,9 +391,9 @@ describe('compile command - createCliLogger warn path', () => {
       success: true,
       outputs: new Map([
         [
-          './planned.md',
+          'planned.md',
           {
-            path: './planned.md',
+            path: 'planned.md',
             content: 'current planned content',
             mode: 0o700,
             merge: { format: 'json' as const, owner: 'current', operations: [] },
@@ -442,11 +442,7 @@ describe('compile command - createCliLogger warn path', () => {
   it('should reject planned outputs that traverse symlinks', async () => {
     mockExistsSync.mockImplementation((path: string) => {
       const value = String(path);
-      return (
-        value.includes('project.prs') ||
-        value.endsWith('promptscript.yaml') ||
-        value.includes('nested')
-      );
+      return value.includes('project.prs') || value.endsWith('promptscript.yaml');
     });
     mockLstatSync.mockReturnValue({ isSymbolicLink: () => true });
     mockCompile.mockResolvedValue({
@@ -467,11 +463,7 @@ describe('compile command - createCliLogger warn path', () => {
   it('should fail when planned output symlinks cannot be checked', async () => {
     mockExistsSync.mockImplementation((path: string) => {
       const value = String(path);
-      return (
-        value.includes('project.prs') ||
-        value.endsWith('promptscript.yaml') ||
-        value.includes('nested')
-      );
+      return value.includes('project.prs') || value.endsWith('promptscript.yaml');
     });
     mockLstatSync.mockImplementation(() => {
       throw new Error('permission denied');

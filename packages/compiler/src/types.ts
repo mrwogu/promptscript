@@ -188,7 +188,7 @@ export interface CompileStats {
 export interface CompileResult {
   /** Whether compilation succeeded */
   success: boolean;
-  /** Formatter outputs keyed by formatter name */
+  /** Formatter outputs keyed by normalized output path */
   outputs: Map<string, FormatterOutput>;
   /**
    * Shared filesystem-independent output plan.

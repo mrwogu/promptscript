@@ -600,12 +600,33 @@ describe('Compiler', () => {
       expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(result.outputs.size).toBe(1);
-      expect(result.outputs.has('./github/output.md')).toBe(true);
+      expect(result.outputs.has('github/output.md')).toBe(true);
 
-      const output = result.outputs.get('./github/output.md');
+      const output = result.outputs.get('github/output.md');
       expect(output).toBeDefined();
       expect(output?.content).toContain('github output');
       expect(output?.content).toContain('test-project');
+    });
+
+    it('keys outputs by normalized paths', async () => {
+      const ast = createTestProgram();
+      const formatter = createMockFormatter('normalized', './x.md');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.outputs.has('x.md')).toBe(true);
+      expect(result.outputs.has('./x.md')).toBe(false);
+      expect(result.outputs.get('x.md')?.path).toBe('x.md');
+      expect(result.outputPlan?.outputs.has('x.md')).toBe(true);
+      expect(result.outputPlan?.owners.get('x.md')).toBe('normalized');
     });
 
     it('should invoke canonical formatter capabilities', async () => {
@@ -640,7 +661,7 @@ describe('Compiler', () => {
 
       expect(result.success).toBe(true);
       expect(formatCanonical).toHaveBeenCalledOnce();
-      expect(result.outputs.get('./canonical/output.md')?.content).toContain('CanonicalProgram');
+      expect(result.outputs.get('canonical/output.md')?.content).toContain('CanonicalProgram');
     });
 
     it('should support multiple formatters', async () => {
@@ -661,9 +682,9 @@ describe('Compiler', () => {
 
       expect(result.success).toBe(true);
       expect(result.outputs.size).toBe(3);
-      expect(result.outputs.has('./github/output.md')).toBe(true);
-      expect(result.outputs.has('./claude/output.md')).toBe(true);
-      expect(result.outputs.has('./cursor/output.md')).toBe(true);
+      expect(result.outputs.has('github/output.md')).toBe(true);
+      expect(result.outputs.has('claude/output.md')).toBe(true);
+      expect(result.outputs.has('cursor/output.md')).toBe(true);
     });
 
     it('should include additionalFiles in outputs', async () => {
@@ -1065,7 +1086,7 @@ describe('Compiler', () => {
 
       expect(result.success).toBe(false);
       expect(result.outputs.size).toBe(1);
-      expect(result.outputs.has('./success/output.md')).toBe(true);
+      expect(result.outputs.has('success/output.md')).toBe(true);
       expect(result.errors).toHaveLength(1);
     });
 
@@ -1161,8 +1182,8 @@ describe('Compiler', () => {
       expect(collisionWarning?.message).toContain('AGENTS.md');
       expect(collisionWarning?.message).toContain('codex');
       expect(collisionWarning?.message).toContain('amp');
-      expect(result.outputs.get('AGENTS.md')?.managedOutputDirectories).toEqual(['.factory/rules']);
-      expect(result.outputs.get('AGENTS.md')?.managedOutputFiles).toEqual(['.factory/hooks.json']);
+      expect(result.outputs.get('AGENTS.md')?.managedOutputDirectories).toBeUndefined();
+      expect(result.outputs.get('AGENTS.md')?.managedOutputFiles).toBeUndefined();
     });
 
     it('should not warn when formatters write identical content to one path', async () => {
@@ -1602,16 +1623,24 @@ describe('Compiler', () => {
     it('should inject skill when skillContent provided and formatter supports skills', async () => {
       const ast = createTestProgram();
       const formatter = createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md');
+      const verbose = vi.fn();
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
       mockValidate.mockReturnValue(createValidationSuccess());
 
-      const compiler = createTestCompiler({ formatters: [formatter], skillContent });
+      const compiler = createTestCompiler({
+        formatters: [formatter],
+        skillContent,
+        logger: { debug: vi.fn(), verbose, warn: vi.fn() },
+      });
       const result = await compiler.compile('test.prs');
       expect(result.success).toBe(true);
       expect(result.outputs.has('.claude/skills/promptscript/SKILL.md')).toBe(true);
       const skillOutput = result.outputs.get('.claude/skills/promptscript/SKILL.md');
       expect(skillOutput?.content).toContain('PromptScript Language Skill');
+      expect(verbose).toHaveBeenCalledWith(
+        '  → .claude/skills/promptscript/SKILL.md (auto-injected promptscript skill)'
+      );
     });
 
     it('should inject skill into configured skillBaseDir', async () => {
@@ -1786,15 +1815,29 @@ describe('Compiler', () => {
         })),
       };
       const formatter2 = createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md');
+      const verbose = vi.fn();
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
       mockValidate.mockReturnValue(createValidationSuccess());
 
-      const compiler = createTestCompiler({ formatters: [formatter1, formatter2], skillContent });
+      const compiler = createTestCompiler({
+        formatters: [formatter1, formatter2],
+        skillContent,
+        logger: { debug: vi.fn(), verbose, warn: vi.fn() },
+      });
       const result = await compiler.compile('test.prs');
       expect(result.success).toBe(true);
-      // Different formatter → should warn
-      expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(true);
+      const collisionWarning = result.warnings.find((w) => w.ruleId === 'PS4001');
+      expect(collisionWarning?.message).toBe(
+        "Output path '.claude/skills/promptscript/SKILL.md' is already written by 'custom'. " +
+          "Skipping auto-injected PromptScript skill for 'claude'."
+      );
+      expect(collisionWarning?.suggestion).toBe(
+        'The user-defined skill takes precedence. To use the bundled skill, remove the custom one or rename it.'
+      );
+      expect(verbose).not.toHaveBeenCalledWith(
+        '  → .claude/skills/promptscript/SKILL.md (auto-injected promptscript skill)'
+      );
     });
 
     it('should not warn when two formatters share dotDir with identical content', async () => {
@@ -1947,7 +1990,7 @@ describe('compile (standalone)', () => {
 
     expect(result.success).toBe(true);
     expect(customFormatter.format).toHaveBeenCalled();
-    expect(result.outputs.has('./custom/output.md')).toBe(true);
+    expect(result.outputs.has('custom/output.md')).toBe(true);
   });
 
   it('should accept resolver options', async () => {

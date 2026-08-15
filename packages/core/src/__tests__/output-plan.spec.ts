@@ -136,6 +136,8 @@ describe('output plan', () => {
         output: {
           path: 'shared.md',
           content: 'replacement',
+          managedOutputDirectories: ['third'],
+          managedOutputFiles: ['third.json'],
         },
       },
     ];
@@ -144,11 +146,8 @@ describe('output plan', () => {
 
     expect(plan.outputs.get('shared.md')?.content).toBe('replacement');
     expect(plan.owners.get('shared.md')).toBe('third');
-    expect(plan.outputs.get('shared.md')?.managedOutputDirectories).toEqual(['first', 'second']);
-    expect(plan.outputs.get('shared.md')?.managedOutputFiles).toEqual([
-      'first.json',
-      'second.json',
-    ]);
+    expect(plan.outputs.get('shared.md')?.managedOutputDirectories).toEqual(['third']);
+    expect(plan.outputs.get('shared.md')?.managedOutputFiles).toEqual(['third.json']);
     expect(plan.collisions).toEqual([
       expect.objectContaining({
         path: 'shared.md',

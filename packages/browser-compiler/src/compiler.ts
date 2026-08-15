@@ -118,7 +118,7 @@ export interface CompileStats {
 export interface CompileResult {
   /** Whether compilation succeeded */
   success: boolean;
-  /** Formatter outputs keyed by output path */
+  /** Formatter outputs keyed by normalized output path */
   outputs: Map<string, FormatterOutput>;
   /** Maps each output path to the formatter name that produced it.
    *  Present on results from BrowserCompiler.compile(); may be absent in
@@ -365,8 +365,8 @@ export class BrowserCompiler {
 
     const outputOwners = outputPlan.owners;
     for (const file of outputPlan.files) {
-      outputs.set(file.originalPath, {
-        path: file.originalPath,
+      outputs.set(file.path, {
+        path: file.path,
         content: file.content,
         ...(file.mode !== undefined ? { mode: file.mode } : {}),
         ...(file.merge !== undefined ? { merge: file.merge } : {}),

@@ -503,8 +503,8 @@ describe('Issue 4: colliding formatter output paths', () => {
 @identity { """Test.""" }`,
     });
 
-    const formatterA = createStubFormatter('formatter-a', 'SHARED.md', 'Content A');
-    const formatterB = createStubFormatter('formatter-b', 'SHARED.md', 'Content B');
+    const formatterA = createStubFormatter('formatter-a', './SHARED.md', 'Content A');
+    const formatterB = createStubFormatter('formatter-b', './SHARED.md', 'Content B');
 
     const compiler = new BrowserCompiler({
       fs,
@@ -516,6 +516,9 @@ describe('Issue 4: colliding formatter output paths', () => {
     expect(result.success).toBe(true);
     // The output map should still contain the path (last formatter wins)
     expect(result.outputs.has('SHARED.md')).toBe(true);
+    expect(result.outputs.has('./SHARED.md')).toBe(false);
+    expect(result.outputs.get('SHARED.md')?.path).toBe('SHARED.md');
+    expect(result.outputPlan?.outputs.has('SHARED.md')).toBe(true);
     // outputOwners should track the last formatter that wrote to each path
     expect(result.outputOwners.get('SHARED.md')).toBe('formatter-b');
   });
