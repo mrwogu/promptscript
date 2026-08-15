@@ -1145,12 +1145,36 @@ export function mergePromptScriptCodexConfig(
   existingContent: string,
   generatedContent: string
 ): string | undefined {
-  const managedRootKey =
-    /^\s*(?:(?:max_threads|max_depth|agents_file)|"(?:max_threads|max_depth|agents_file)"|'(?:max_threads|max_depth|agents_file)')\s*=/;
+  const managedRootKeys = new Set(['max_threads', 'max_depth', 'agents_file']);
+  const isManagedRootAssignment = (line: string): boolean => {
+    const trimmed = line.trimStart();
+    const separatorIndex = trimmed.indexOf('=');
+    if (separatorIndex <= 0) return false;
+
+    let key = trimmed.slice(0, separatorIndex).trim();
+    if (
+      key.length >= 2 &&
+      ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'")))
+    ) {
+      key = key.slice(1, -1);
+    }
+    return managedRootKeys.has(key);
+  };
+  const isValidGeneratedAssignment = (line: string): boolean => {
+    const trimmed = line.trim();
+    const separatorIndex = trimmed.indexOf('=');
+    if (separatorIndex <= 0 || separatorIndex === trimmed.length - 1) {
+      return false;
+    }
+    return (
+      managedRootKeys.has(trimmed.slice(0, separatorIndex).trim()) &&
+      trimmed.slice(separatorIndex + 1).trim().length > 0
+    );
+  };
   const generatedLines = generatedContent.split('\n').filter((line) => line.trim().length > 0);
   if (
     generatedLines.length === 0 ||
-    generatedLines.some((line) => !/^\s*(?:max_threads|max_depth|agents_file)\s*=\s*.+$/.test(line))
+    generatedLines.some((line) => !isValidGeneratedAssignment(line))
   ) {
     return undefined;
   }
@@ -1158,7 +1182,7 @@ export function mergePromptScriptCodexConfig(
   let insideTable = false;
   const preserved = existingContent.split('\n').filter((line) => {
     if (/^\s*\[/.test(line)) insideTable = true;
-    return insideTable || !managedRootKey.test(line);
+    return insideTable || !isManagedRootAssignment(line);
   });
   const preservedContent = preserved.join('\n').trim();
   return `${generatedLines.join('\n')}${preservedContent ? `\n\n${preservedContent}` : ''}\n`;
