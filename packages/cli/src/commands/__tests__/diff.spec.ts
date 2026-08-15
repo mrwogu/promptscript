@@ -383,6 +383,132 @@ describe('diffCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('should reject an unsupported report format', async () => {
+    await diffCommand({ format: 'yaml' as unknown as 'text' | 'json' });
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      'Invalid output format: yaml. Expected text or json.'
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should reject an empty target configuration', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: [{}],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockReturnValue(false);
+
+    await diffCommand({ noPager: true });
+
+    expect(mockFail).toHaveBeenCalledWith('Error');
+    expect(ConsoleOutput.error).toHaveBeenCalledWith('Empty target configuration');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should emit a JSON error when the entry file is missing', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockReturnValue(false);
+
+    await diffCommand({ format: 'json' });
+    const json = consoleLog.mock.calls[0]?.[0] as string;
+    consoleLog.mockRestore();
+
+    const report = JSON.parse(json) as {
+      success: boolean;
+      errors: Array<{ code: string; message: string }>;
+    };
+    expect(report).toMatchObject({
+      success: false,
+      errors: [{ code: 'DIFF0002', message: expect.stringContaining('File not found') }],
+    });
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should preserve configured headers and target filtering in JSON mode', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const markedOutput = {
+      path: 'CLAUDE.md',
+      content: '---\ntitle: Project\n---\n<!-- PromptScript marker -->\ncontent\n',
+      target: 'github',
+      source: '.promptscript/project.prs',
+    };
+    const plainOutput = {
+      path: 'plain.md',
+      content: 'plain\n',
+      target: 'github',
+      source: '.promptscript/project.prs',
+    };
+    mockLoadConfig.mockResolvedValue({
+      targets: [{ github: {} }, { claude: { enabled: false } }],
+      validation: {},
+      includePromptScriptSkill: false,
+      output: { baseDir: 'generated', header: 'Generated header' },
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([
+        ['marked', markedOutput],
+        ['plain', plainOutput],
+      ]),
+    });
+
+    await diffCommand({ format: 'json' });
+    consoleLog.mockRestore();
+
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ formatters: [{ name: 'github', config: {} }] })
+    );
+    expect(markedOutput.content).toContain('---\n\nGenerated header\n');
+    expect(plainOutput.content).toBe('plain\n');
+  });
+
+  it('should emit JSON errors for unexpected machine-readable failures', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockRejectedValue(new Error('Config load failure'));
+
+    await diffCommand({ format: 'json' });
+    const json = consoleLog.mock.calls[0]?.[0] as string;
+    consoleLog.mockRestore();
+
+    const report = JSON.parse(json) as {
+      success: boolean;
+      errors: Array<{ code: string; message: string }>;
+    };
+    expect(report).toMatchObject({
+      success: false,
+      errors: [{ code: 'DIFF0000', message: 'Config load failure' }],
+    });
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should apply Prettier post-format before comparing (issue #307 drift fix)', async () => {
     // Arrange: disk content matches what compile writes AFTER prettier post-format.
     // Without the post-format call, diff would compare raw formatter output
@@ -615,5 +741,24 @@ describe('createDiffLogger', () => {
     const logger = createDiffLogger();
     logger.warn('post-format warning');
     expect(mockConsoleWarn).toHaveBeenCalledWith('post-format warning');
+  });
+
+  it('writes machine-readable diagnostics to stderr', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    mockIsVerbose.mockReturnValue(true);
+    mockIsDebug.mockReturnValue(true);
+    const logger = createDiffLogger(true);
+
+    logger.verbose('verbose diagnostic');
+    logger.debug('debug diagnostic');
+    logger.warn('warning diagnostic');
+
+    expect(consoleError).toHaveBeenNthCalledWith(1, 'verbose diagnostic');
+    expect(consoleError).toHaveBeenNthCalledWith(2, 'debug diagnostic');
+    expect(consoleError).toHaveBeenNthCalledWith(3, 'warning diagnostic');
+    expect(mockConsoleVerbose).not.toHaveBeenCalled();
+    expect(mockConsoleDebug).not.toHaveBeenCalled();
+    expect(mockConsoleWarn).not.toHaveBeenCalled();
+    consoleError.mockRestore();
   });
 });
