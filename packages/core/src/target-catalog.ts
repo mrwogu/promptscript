@@ -11,7 +11,13 @@
  * @module target-catalog
  */
 
-import type { KnownTarget } from './types/config.js';
+import { KNOWN_TARGETS, type KnownTarget } from './types/config.js';
+import { DEFAULT_OUTPUT_PATHS } from './target-output-paths.js';
+import {
+  createTargetCapability,
+  type TargetCapability,
+  validateTargetCapabilities,
+} from './target-capabilities.js';
 
 /**
  * Target family classification.
@@ -53,7 +59,7 @@ export interface DefaultFeatureProfile {
 /**
  * Complete metadata for a single built-in target.
  */
-export interface TargetDefinition {
+export interface TargetDefinition extends TargetCapability {
   /** Canonical target name (matches KnownTarget union member) */
   name: KnownTarget;
   /** Default output file path */
@@ -66,16 +72,24 @@ export interface TargetDefinition {
   features: DefaultFeatureProfile;
 }
 
+interface TargetDefinitionBase {
+  name: KnownTarget;
+  outputPath: string;
+  family: TargetFamily;
+  skillPath: SkillPathConfig;
+  features: DefaultFeatureProfile;
+}
+
 /**
  * Canonical target definitions.
  * Adding a new built-in target requires adding one entry here and one entry
  * in BUILTIN_FORMATTERS (packages/formatters/src/builtin-formatters.ts).
  */
-export const TARGET_DEFINITIONS = {
+const TARGET_DEFINITION_BASE = {
   // Original 7
   github: {
     name: 'github',
-    outputPath: '.github/copilot-instructions.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['github'],
     family: 'base',
     skillPath: { basePath: '.github/skills', fileName: 'SKILL.md' },
     features: {
@@ -88,7 +102,7 @@ export const TARGET_DEFINITIONS = {
   },
   claude: {
     name: 'claude',
-    outputPath: 'CLAUDE.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['claude'],
     family: 'base',
     skillPath: { basePath: '.claude/skills', fileName: 'SKILL.md' },
     features: {
@@ -101,7 +115,7 @@ export const TARGET_DEFINITIONS = {
   },
   cursor: {
     name: 'cursor',
-    outputPath: '.cursor/rules/project.mdc',
+    outputPath: DEFAULT_OUTPUT_PATHS['cursor'],
     family: 'base',
     skillPath: { basePath: '.agents/skills', fileName: 'SKILL.md' },
     features: {
@@ -114,7 +128,7 @@ export const TARGET_DEFINITIONS = {
   },
   antigravity: {
     name: 'antigravity',
-    outputPath: '.agent/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['antigravity'],
     family: 'base',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -127,7 +141,7 @@ export const TARGET_DEFINITIONS = {
   },
   factory: {
     name: 'factory',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['factory'],
     family: 'base',
     skillPath: { basePath: '.factory/skills', fileName: 'SKILL.md' },
     features: {
@@ -140,7 +154,7 @@ export const TARGET_DEFINITIONS = {
   },
   opencode: {
     name: 'opencode',
-    outputPath: 'OPENCODE.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['opencode'],
     family: 'base',
     skillPath: { basePath: '.opencode/skills', fileName: 'SKILL.md' },
     features: {
@@ -153,7 +167,7 @@ export const TARGET_DEFINITIONS = {
   },
   gemini: {
     name: 'gemini',
-    outputPath: 'GEMINI.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['gemini'],
     family: 'base',
     skillPath: { basePath: '.gemini/skills', fileName: 'skill.md' },
     features: {
@@ -167,7 +181,7 @@ export const TARGET_DEFINITIONS = {
   // Tier 1
   windsurf: {
     name: 'windsurf',
-    outputPath: '.windsurf/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['windsurf'],
     family: 'simple',
     skillPath: { basePath: '.windsurf/skills', fileName: 'SKILL.md' },
     features: {
@@ -180,7 +194,7 @@ export const TARGET_DEFINITIONS = {
   },
   cline: {
     name: 'cline',
-    outputPath: '.clinerules',
+    outputPath: DEFAULT_OUTPUT_PATHS['cline'],
     family: 'simple',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -193,7 +207,7 @@ export const TARGET_DEFINITIONS = {
   },
   roo: {
     name: 'roo',
-    outputPath: '.roorules',
+    outputPath: DEFAULT_OUTPUT_PATHS['roo'],
     family: 'simple',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -206,7 +220,7 @@ export const TARGET_DEFINITIONS = {
   },
   codex: {
     name: 'codex',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['codex'],
     family: 'simple',
     skillPath: { basePath: '.agents/skills', fileName: 'SKILL.md' },
     features: {
@@ -219,7 +233,7 @@ export const TARGET_DEFINITIONS = {
   },
   continue: {
     name: 'continue',
-    outputPath: '.continue/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['continue'],
     family: 'simple',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -233,7 +247,7 @@ export const TARGET_DEFINITIONS = {
   // Tier 2
   augment: {
     name: 'augment',
-    outputPath: '.augment/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['augment'],
     family: 'simple',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -246,7 +260,7 @@ export const TARGET_DEFINITIONS = {
   },
   goose: {
     name: 'goose',
-    outputPath: '.goosehints',
+    outputPath: DEFAULT_OUTPUT_PATHS['goose'],
     family: 'simple',
     skillPath: { basePath: '.goose/skills', fileName: 'SKILL.md' },
     features: {
@@ -259,7 +273,7 @@ export const TARGET_DEFINITIONS = {
   },
   kilo: {
     name: 'kilo',
-    outputPath: '.kilocode/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['kilo'],
     family: 'simple',
     skillPath: { basePath: '.kilocode/skills', fileName: 'SKILL.md' },
     features: {
@@ -272,7 +286,7 @@ export const TARGET_DEFINITIONS = {
   },
   amp: {
     name: 'amp',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['amp'],
     family: 'simple',
     skillPath: { basePath: '.agents/skills', fileName: 'SKILL.md' },
     features: {
@@ -285,7 +299,7 @@ export const TARGET_DEFINITIONS = {
   },
   trae: {
     name: 'trae',
-    outputPath: '.trae/rules/project_rules.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['trae'],
     family: 'simple',
     skillPath: { basePath: '.trae/skills', fileName: 'SKILL.md' },
     features: {
@@ -298,7 +312,7 @@ export const TARGET_DEFINITIONS = {
   },
   junie: {
     name: 'junie',
-    outputPath: '.junie/guidelines.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['junie'],
     family: 'simple',
     skillPath: { basePath: '.junie/skills', fileName: 'SKILL.md' },
     features: {
@@ -311,7 +325,7 @@ export const TARGET_DEFINITIONS = {
   },
   kiro: {
     name: 'kiro',
-    outputPath: '.kiro/steering/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['kiro'],
     family: 'simple',
     skillPath: { basePath: '.kiro/skills', fileName: 'SKILL.md' },
     features: {
@@ -325,7 +339,7 @@ export const TARGET_DEFINITIONS = {
   // Tier 3
   cortex: {
     name: 'cortex',
-    outputPath: '.cortex/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['cortex'],
     family: 'simple',
     skillPath: { basePath: '.cortex/skills', fileName: 'SKILL.md' },
     features: {
@@ -338,7 +352,7 @@ export const TARGET_DEFINITIONS = {
   },
   crush: {
     name: 'crush',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['crush'],
     family: 'simple',
     skillPath: { basePath: '.crush/skills', fileName: 'SKILL.md' },
     features: {
@@ -351,7 +365,7 @@ export const TARGET_DEFINITIONS = {
   },
   'command-code': {
     name: 'command-code',
-    outputPath: '.commandcode/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['command-code'],
     family: 'simple',
     skillPath: { basePath: '.commandcode/skills', fileName: 'SKILL.md' },
     features: {
@@ -364,7 +378,7 @@ export const TARGET_DEFINITIONS = {
   },
   kode: {
     name: 'kode',
-    outputPath: '.kode/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['kode'],
     family: 'simple',
     skillPath: { basePath: '.kode/skills', fileName: 'SKILL.md' },
     features: {
@@ -377,7 +391,7 @@ export const TARGET_DEFINITIONS = {
   },
   mcpjam: {
     name: 'mcpjam',
-    outputPath: '.mcpjam/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['mcpjam'],
     family: 'simple',
     skillPath: { basePath: '.mcpjam/skills', fileName: 'SKILL.md' },
     features: {
@@ -390,7 +404,7 @@ export const TARGET_DEFINITIONS = {
   },
   'mistral-vibe': {
     name: 'mistral-vibe',
-    outputPath: '.vibe/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['mistral-vibe'],
     family: 'simple',
     skillPath: { basePath: '.vibe/skills', fileName: 'SKILL.md' },
     features: {
@@ -403,7 +417,7 @@ export const TARGET_DEFINITIONS = {
   },
   mux: {
     name: 'mux',
-    outputPath: '.mux/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['mux'],
     family: 'simple',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -416,7 +430,7 @@ export const TARGET_DEFINITIONS = {
   },
   openhands: {
     name: 'openhands',
-    outputPath: '.openhands/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['openhands'],
     family: 'simple',
     skillPath: { basePath: '.openhands/skills', fileName: 'SKILL.md' },
     features: {
@@ -429,7 +443,7 @@ export const TARGET_DEFINITIONS = {
   },
   pi: {
     name: 'pi',
-    outputPath: '.pi/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['pi'],
     family: 'simple',
     skillPath: { basePath: '.pi/skills', fileName: 'SKILL.md' },
     features: {
@@ -442,7 +456,7 @@ export const TARGET_DEFINITIONS = {
   },
   qoder: {
     name: 'qoder',
-    outputPath: '.qoder/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['qoder'],
     family: 'simple',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -455,7 +469,7 @@ export const TARGET_DEFINITIONS = {
   },
   'qwen-code': {
     name: 'qwen-code',
-    outputPath: '.qwen/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['qwen-code'],
     family: 'simple',
     skillPath: { basePath: '.qwen/skills', fileName: 'SKILL.md' },
     features: {
@@ -468,7 +482,7 @@ export const TARGET_DEFINITIONS = {
   },
   zencoder: {
     name: 'zencoder',
-    outputPath: '.zencoder/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['zencoder'],
     family: 'simple',
     skillPath: { basePath: '.zencoder/skills', fileName: 'SKILL.md' },
     features: {
@@ -481,7 +495,7 @@ export const TARGET_DEFINITIONS = {
   },
   neovate: {
     name: 'neovate',
-    outputPath: '.neovate/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['neovate'],
     family: 'simple',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -494,7 +508,7 @@ export const TARGET_DEFINITIONS = {
   },
   pochi: {
     name: 'pochi',
-    outputPath: '.pochi/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['pochi'],
     family: 'simple',
     skillPath: { basePath: '.pochi/skills', fileName: 'SKILL.md' },
     features: {
@@ -507,7 +521,7 @@ export const TARGET_DEFINITIONS = {
   },
   adal: {
     name: 'adal',
-    outputPath: '.adal/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['adal'],
     family: 'simple',
     skillPath: { basePath: '.adal/skills', fileName: 'SKILL.md' },
     features: {
@@ -520,7 +534,7 @@ export const TARGET_DEFINITIONS = {
   },
   iflow: {
     name: 'iflow',
-    outputPath: '.iflow/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['iflow'],
     family: 'simple',
     skillPath: { basePath: '.iflow/skills', fileName: 'SKILL.md' },
     features: {
@@ -533,7 +547,7 @@ export const TARGET_DEFINITIONS = {
   },
   openclaw: {
     name: 'openclaw',
-    outputPath: 'INSTRUCTIONS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['openclaw'],
     family: 'simple',
     skillPath: { basePath: '.openclaw/skills', fileName: 'SKILL.md' },
     features: {
@@ -546,7 +560,7 @@ export const TARGET_DEFINITIONS = {
   },
   codebuddy: {
     name: 'codebuddy',
-    outputPath: '.codebuddy/rules/project.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['codebuddy'],
     family: 'simple',
     skillPath: { basePath: '.codebuddy/skills', fileName: 'SKILL.md' },
     features: {
@@ -560,7 +574,7 @@ export const TARGET_DEFINITIONS = {
   // AGENTS.md-only targets
   aider: {
     name: 'aider',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['aider'],
     family: 'agents-md-only',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -573,7 +587,7 @@ export const TARGET_DEFINITIONS = {
   },
   'amazon-q': {
     name: 'amazon-q',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['amazon-q'],
     family: 'agents-md-only',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -586,7 +600,7 @@ export const TARGET_DEFINITIONS = {
   },
   warp: {
     name: 'warp',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['warp'],
     family: 'agents-md-only',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -599,7 +613,7 @@ export const TARGET_DEFINITIONS = {
   },
   zed: {
     name: 'zed',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['zed'],
     family: 'agents-md-only',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -612,7 +626,7 @@ export const TARGET_DEFINITIONS = {
   },
   jules: {
     name: 'jules',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['jules'],
     family: 'agents-md-only',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -625,7 +639,7 @@ export const TARGET_DEFINITIONS = {
   },
   devin: {
     name: 'devin',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['devin'],
     family: 'agents-md-only',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -638,7 +652,7 @@ export const TARGET_DEFINITIONS = {
   },
   grok: {
     name: 'grok',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['grok'],
     family: 'base',
     skillPath: { basePath: '.claude/skills', fileName: 'SKILL.md' },
     features: {
@@ -652,7 +666,7 @@ export const TARGET_DEFINITIONS = {
   // Priority B CLI agents
   kimi: {
     name: 'kimi',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['kimi'],
     family: 'agents-md-only',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -665,7 +679,7 @@ export const TARGET_DEFINITIONS = {
   },
   mimo: {
     name: 'mimo',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['mimo'],
     family: 'agents-md-only',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -678,7 +692,7 @@ export const TARGET_DEFINITIONS = {
   },
   'deep-agents': {
     name: 'deep-agents',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['deep-agents'],
     family: 'agents-md-only',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -691,7 +705,7 @@ export const TARGET_DEFINITIONS = {
   },
   forgecode: {
     name: 'forgecode',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['forgecode'],
     family: 'agents-md-only',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -704,7 +718,7 @@ export const TARGET_DEFINITIONS = {
   },
   hermes: {
     name: 'hermes',
-    outputPath: 'AGENTS.md',
+    outputPath: DEFAULT_OUTPUT_PATHS['hermes'],
     family: 'agents-md-only',
     skillPath: { basePath: null, fileName: null },
     features: {
@@ -715,7 +729,83 @@ export const TARGET_DEFINITIONS = {
       hasCommands: false,
     },
   },
-} as const satisfies Record<KnownTarget, TargetDefinition>;
+} as const satisfies Record<KnownTarget, TargetDefinitionBase>;
+
+/**
+ * Complete target definitions with version, section, feature, hook, and
+ * resource capabilities attached to the compatibility catalog.
+ */
+export const TARGET_DEFINITIONS = Object.fromEntries(
+  KNOWN_TARGETS.map((name) => [
+    name,
+    {
+      ...TARGET_DEFINITION_BASE[name],
+      ...createTargetCapability(name, TARGET_DEFINITION_BASE[name]),
+    },
+  ])
+) as { readonly [Name in KnownTarget]: TargetDefinition };
+
+/**
+ * Capability-only view of the canonical target definitions.
+ */
+export const TARGET_CAPABILITIES = Object.fromEntries(
+  KNOWN_TARGETS.map((name) => [name, TARGET_DEFINITIONS[name]])
+) as unknown as { readonly [Name in KnownTarget]: TargetCapability };
+
+const CAPABILITY_ISSUES = validateTargetCapabilities(TARGET_CAPABILITIES);
+if (CAPABILITY_ISSUES.length > 0) {
+  throw new Error(`Invalid target capability registry: ${CAPABILITY_ISSUES.join('; ')}`);
+}
+
+/**
+ * Return contradictions between the target catalog and its capability data.
+ */
+export function validateTargetDefinitionConsistency(): string[] {
+  const issues: string[] = [];
+
+  for (const target of KNOWN_TARGETS) {
+    const definition = TARGET_DEFINITIONS[target];
+    if (definition.name !== target) {
+      issues.push(`${target}: definition name is "${definition.name}"`);
+    }
+    if (definition.outputPath !== DEFAULT_OUTPUT_PATHS[target]) {
+      issues.push(`${target}: output path does not match the canonical path map`);
+    }
+    if (definition.features.hasSkills !== (definition.skillPath.basePath !== null)) {
+      issues.push(`${target}: skill feature flag does not match the skill path`);
+    }
+    const resolvedDefault =
+      definition.versionAliases[definition.features.defaultVersion] ??
+      definition.features.defaultVersion;
+    if (!definition.versions[resolvedDefault]) {
+      issues.push(
+        `${target}: default version "${definition.features.defaultVersion}" is not supported`
+      );
+    }
+    if (definition.featureSupport['skills'] === 'supported' && !definition.features.hasSkills) {
+      issues.push(`${target}: skills are marked supported without a skill path`);
+    }
+    if (
+      definition.featureSupport['agent-instructions'] === 'supported' &&
+      !definition.features.hasAgents
+    ) {
+      issues.push(`${target}: agent instructions are marked supported without agent output`);
+    }
+    if (
+      definition.featureSupport['slash-commands'] === 'supported' &&
+      !definition.features.hasCommands
+    ) {
+      issues.push(`${target}: slash commands are marked supported without command output`);
+    }
+  }
+
+  return issues;
+}
+
+const TARGET_DEFINITION_ISSUES = validateTargetDefinitionConsistency();
+if (TARGET_DEFINITION_ISSUES.length > 0) {
+  throw new Error(`Inconsistent target catalog: ${TARGET_DEFINITION_ISSUES.join('; ')}`);
+}
 
 /**
  * Get the target definition for a known target.
@@ -729,6 +819,16 @@ export function getTargetDefinition(name: KnownTarget): TargetDefinition {
     throw new Error(`Unknown target: ${name}`);
   }
   return def;
+}
+
+/**
+ * Get the complete capability contract for a known target.
+ *
+ * @param name - The target name
+ * @returns The target capability contract
+ */
+export function getTargetCapability(name: KnownTarget): TargetCapability {
+  return TARGET_CAPABILITIES[name];
 }
 
 /**

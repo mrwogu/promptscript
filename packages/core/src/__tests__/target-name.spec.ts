@@ -10,9 +10,12 @@ import {
   TARGET_DEFINITIONS,
   getDefaultOutputPath,
   getTargetDefinition,
+  validateTargetDefinitionConsistency,
   getTargetFeatures,
   getTargetSkillPath,
+  getTargetCapability,
 } from '../target-catalog.js';
+import { resolveTargetVersion, validateTargetCapabilities } from '../target-capabilities.js';
 
 describe('TargetName branded type', () => {
   describe('KnownTarget', () => {
@@ -400,5 +403,30 @@ describe('Target catalog integrity', () => {
   it('should have no extra entries in TARGET_DEFINITIONS beyond KNOWN_TARGETS', () => {
     const catalogKeys = Object.keys(TARGET_DEFINITIONS);
     expect(catalogKeys).toHaveLength(KNOWN_TARGETS.length);
+  });
+
+  it('should have complete and consistent capability metadata', () => {
+    expect(validateTargetCapabilities(TARGET_DEFINITIONS)).toEqual([]);
+    expect(validateTargetDefinitionConsistency()).toEqual([]);
+  });
+
+  it('should resolve version aliases through the capability contract', () => {
+    expect(resolveTargetVersion(getTargetCapability('cursor'), 'standard')).toBe('modern');
+  });
+
+  it('should reject incomplete resource contracts', () => {
+    const incomplete = {
+      ...TARGET_DEFINITIONS.github,
+      resources: [],
+    };
+
+    const issues = validateTargetCapabilities({
+      ...TARGET_DEFINITIONS,
+      github: incomplete,
+    });
+
+    expect(issues).toContain('github: main output resource is missing');
+    expect(issues).toContain('github: MCP config resource is missing');
+    expect(issues).toContain('github: hook config resource is missing');
   });
 });

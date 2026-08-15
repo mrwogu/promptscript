@@ -188,19 +188,7 @@ export const DEFAULT_FILE = `@meta {
 `;
 
 /**
- * Explicit Playground overrides for targets that differ from the catalog
- * defaults (e.g. enabled by default, non-'full' default version).
- */
-const PLAYGROUND_OVERRIDES: Partial<Record<KnownTarget, Partial<TargetSettings>>> = {
-  github: { enabled: true, version: 'full' },
-  claude: { enabled: true, version: 'full' },
-  cursor: { enabled: true, version: 'standard' },
-  antigravity: { enabled: true, version: 'frontmatter' },
-};
-
-/**
- * Build default Playground target settings from catalog metadata plus
- * the small explicit override map above.
+ * Build default Playground target settings from the canonical target catalog.
  */
 function createDefaultTargets(): Record<KnownTarget, TargetSettings> {
   const targets = {} as Record<KnownTarget, TargetSettings>;
@@ -208,10 +196,9 @@ function createDefaultTargets(): Record<KnownTarget, TargetSettings> {
     KnownTarget,
     (typeof TARGET_DEFINITIONS)[KnownTarget],
   ][]) {
-    const override = PLAYGROUND_OVERRIDES[name];
     targets[name] = {
-      enabled: override?.enabled ?? def.features.defaultEnabled,
-      version: override?.version ?? def.features.defaultVersion,
+      enabled: def.features.defaultEnabled,
+      version: def.features.defaultVersion,
     };
   }
   return targets;
