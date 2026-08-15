@@ -235,6 +235,7 @@ Build organization, team, and project layers with deterministic merge rules:
 - Typed parameters turn shared stacks into reusable templates.
 - Sealed properties, reference negation, and overlay drift warnings keep extension layers safe.
 - `prs inspect <skill>` shows property and layer provenance.
+- `prs explain <path>` shows source locations and composition history for any resolved path.
 
 Remote imports are pinned in `promptscript.lock` with commit and integrity data. Vendor mode mirrors
 resolved dependencies into `.promptscript/vendor/` for offline and air-gapped builds.

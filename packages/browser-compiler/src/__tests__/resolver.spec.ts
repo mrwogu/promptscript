@@ -356,6 +356,34 @@ describe('BrowserResolver', () => {
       expect(result.sources).toContain('base.prs');
     });
 
+    it('exposes provenance for inherited and extended values', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@extend standards {
+  code: { style: "portable" }
+}`,
+        'base.prs': `@meta { id: "base" syntax: "1.0.0" }
+@standards {
+  code: { style: "strict" }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const entry = result.provenance.entries.find(
+        (candidate) => candidate.path === 'standards.code.style'
+      );
+
+      expect(result.errors).toEqual([]);
+      expect(entry?.history).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ operation: 'inherit' }),
+          expect.objectContaining({ operation: 'extend', action: 'merged' }),
+        ])
+      );
+    });
+
     it('should resolve @inherit from nested directory', async () => {
       const fs = new VirtualFileSystem({
         'sub/project.prs': `@meta { id: "child" syntax: "1.0.0" }

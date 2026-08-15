@@ -330,4 +330,45 @@ describe('commands/inspect', () => {
     expect(parsed.layers).toHaveLength(1);
     expect(parsed.composedFrom).not.toBeNull();
   });
+
+  it('should explain a nested non-skill path as stable JSON', async () => {
+    mockResolve.mockResolvedValue(
+      makeResolvedAst({
+        'code-review': {
+          description: 'Review',
+        },
+      })
+    );
+
+    const { explainCommand } = await import('../commands/explain.js');
+    await explainCommand('skills.code-review.description', {
+      format: 'json',
+    });
+
+    expect(process.exitCode).toBeUndefined();
+    const parsed = JSON.parse((console.log as ReturnType<typeof vi.fn>).mock.calls[0]![0]);
+    expect(parsed.version).toBe(1);
+    expect(parsed.path).toBe('skills.code-review.description');
+    expect(parsed.entries[0]).toMatchObject({
+      path: 'skills.code-review.description',
+      value: 'Review',
+    });
+  });
+
+  it('should accept block paths with a leading at sign', async () => {
+    mockResolve.mockResolvedValue(
+      makeResolvedAst({
+        'code-review': {
+          description: 'Review',
+        },
+      })
+    );
+
+    const { explainCommand } = await import('../commands/explain.js');
+    await explainCommand('@skills', {});
+
+    expect(process.exitCode).toBeUndefined();
+    const output = (console.log as ReturnType<typeof vi.fn>).mock.calls.map((c) => c[0]).join('\n');
+    expect(output).toContain('skills');
+  });
 });

@@ -43,6 +43,16 @@ describe('skill composition resolver', () => {
       expect(text).toContain('## Phase 1: health-scan');
       expect(text).toContain('## Phase 2: triage');
       expect(text).toContain('## Phase 3: autofix');
+
+      const contentProvenance = result.provenance.entries.find(
+        (entry) => entry.path === 'skills.ops.content'
+      );
+      expect(
+        contentProvenance?.history.some(
+          (step) =>
+            step.operation === 'compose' && step.chain.some((link) => link.operation === 'compose')
+        )
+      ).toBe(true);
     });
 
     it('preserves the original content preamble from the parent skill', async () => {

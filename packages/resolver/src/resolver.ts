@@ -25,7 +25,16 @@ import {
   interpolateAST,
   mergeBlockCollections,
   normalizeProgram,
+  collectProvenance,
+  collectProvenanceEvents,
+  collectProvenanceValueEvents,
+  emptyProvenance,
+  prefixProvenance,
   toLegacyBlock,
+  type ProvenanceEntry,
+  type ProvenanceEvent,
+  type ProvenanceLink,
+  type ProvenanceTrace,
   usesSequentialOperations,
   type TemplateContext,
 } from '@promptscript/core';
@@ -71,6 +80,19 @@ import {
   verifyGitRepositoryCheckout,
 } from './vendor-manifest.js';
 
+function effectiveCompositionPath(
+  blocks: readonly Program['blocks'][number][],
+  path: string
+): string {
+  const parts = path.split('.');
+  const root = parts[0];
+  if (!root || parts.length < 2) return path;
+  if (blocks.some((block) => block.name === `${IMPORT_MARKER_PREFIX}${root}`)) {
+    return parts.slice(1).join('.');
+  }
+  return path;
+}
+
 /**
  * Options for the resolver.
  */
@@ -107,6 +129,8 @@ export interface ResolvedAST {
   canonicalAst?: CanonicalProgram | null;
   /** List of all source files involved in resolution */
   sources: string[];
+  /** Public source and composition provenance for final values */
+  provenance: ProvenanceTrace;
   /** List of errors encountered during resolution */
   errors: ResolveError[];
 }
@@ -203,11 +227,18 @@ export class Resolver {
   private async doResolve(absPath: string): Promise<ResolvedAST> {
     const sources: string[] = [absPath];
     const errors: ResolveError[] = [];
+    const inheritedProvenance: ProvenanceEntry[] = [];
+    const provenanceEvents: ProvenanceEvent[] = [];
 
     // Load and parse file
     const parseData = await this.loadAndParse(absPath, sources, errors);
     if (!parseData.ast) {
-      return { ast: null, sources, errors };
+      return {
+        ast: null,
+        sources,
+        errors,
+        provenance: emptyProvenance(absPath),
+      };
     }
 
     let ast = parseData.ast;
@@ -218,16 +249,23 @@ export class Resolver {
     this.logger.debug(`AST node count: ${this.countNodes(ast)}`);
 
     if (sequentialOperations) {
-      ast = await this.resolveSequentialOperations(ast, absPath, sources, errors);
+      ast = await this.resolveSequentialOperations(
+        ast,
+        absPath,
+        sources,
+        errors,
+        inheritedProvenance,
+        provenanceEvents
+      );
     } else {
       // Preserve legacy phase ordering through syntax 1.5.x.
-      ast = await this.resolveInherit(ast, absPath, sources, errors);
-      ast = await this.resolveImports(ast, absPath, sources, errors);
+      ast = await this.resolveInherit(ast, absPath, sources, errors, false, inheritedProvenance);
+      ast = await this.resolveImports(ast, absPath, sources, errors, inheritedProvenance);
     }
 
     // Legacy phase order resolves inline composition after top-level imports.
     if (!sequentialOperations) {
-      ast = await this.resolveComposition(ast, absPath, sources, errors);
+      ast = await this.resolveComposition(ast, absPath, sources, errors, provenanceEvents);
     }
 
     // Apply extensions
@@ -235,6 +273,19 @@ export class Resolver {
       this.logger.debug(`Applying ${ast.extends.length} extension(s)`);
     }
     if (!sequentialOperations) {
+      const extensionBlocks = ast.blocks;
+      for (const extension of ast.extends) {
+        provenanceEvents.push(
+          ...collectProvenanceEvents(
+            extension.canonicalBody,
+            effectiveCompositionPath(extensionBlocks, extension.targetPath),
+            'extend',
+            extension.loc,
+            extension.replacements?.length ? 'replaced' : 'merged',
+            extension.replacements?.length ? 'replace' : 'merge'
+          )
+        );
+      }
       ast = applyExtends(ast, this.logger);
     }
 
@@ -276,6 +327,11 @@ export class Resolver {
       ast,
       canonicalAst: normalizeProgram(ast),
       sources: [...new Set(sources)],
+      provenance: collectProvenance(ast, {
+        entry: absPath,
+        inherited: inheritedProvenance,
+        events: provenanceEvents,
+      }),
       errors,
     };
   }
@@ -284,7 +340,9 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    errors: ResolveError[],
+    inheritedProvenance: ProvenanceEntry[],
+    provenanceEvents: ProvenanceEvent[]
   ): Promise<Program> {
     const operations = normalizeProgram(ast).operations;
     const localBlockNames = new Set<string>();
@@ -311,7 +369,8 @@ export class Resolver {
             absPath,
             sources,
             errors,
-            true
+            true,
+            inheritedProvenance
           );
           break;
         case 'UseOperation':
@@ -322,7 +381,8 @@ export class Resolver {
             },
             absPath,
             sources,
-            errors
+            errors,
+            inheritedProvenance
           );
           result = { ...result, uses: [] };
           break;
@@ -338,7 +398,13 @@ export class Resolver {
                 }),
           };
           localBlockNames.add(block.name);
-          result = await this.resolveComposition(result, absPath, sources, errors);
+          result = await this.resolveComposition(
+            result,
+            absPath,
+            sources,
+            errors,
+            provenanceEvents
+          );
           break;
         }
         case 'ExtendOperation': {
@@ -364,7 +430,23 @@ export class Resolver {
               ...result,
               blocks: applyExtend(result.blocks, extension, this.logger),
             };
-            result = await this.resolveComposition(result, absPath, sources, errors);
+            provenanceEvents.push(
+              ...collectProvenanceEvents(
+                extension.canonicalBody,
+                effectiveCompositionPath(result.blocks, extension.targetPath),
+                'extend',
+                extension.loc,
+                extension.replacements?.length ? 'replaced' : 'merged',
+                extension.replacements?.length ? 'replace' : 'merge'
+              )
+            );
+            result = await this.resolveComposition(
+              result,
+              absPath,
+              sources,
+              errors,
+              provenanceEvents
+            );
           } catch (error) {
             errors.push(
               error instanceof ResolveError
@@ -392,7 +474,33 @@ export class Resolver {
             result = applyOverride(result, override, {
               importMarkerPrefix: IMPORT_MARKER_PREFIX,
             });
-            result = await this.resolveComposition(result, absPath, sources, errors);
+            if (override.replacement.type === 'BlockReplacement') {
+              provenanceEvents.push(
+                ...collectProvenanceEvents(
+                  override.replacement.body,
+                  effectiveCompositionPath(result.blocks, override.targetPath),
+                  'override',
+                  override.loc,
+                  'replaced',
+                  'replace'
+                )
+              );
+            } else {
+              provenanceEvents.push(
+                ...collectProvenanceValueEvents(
+                  override.replacement.value,
+                  effectiveCompositionPath(result.blocks, override.targetPath),
+                  override.replacement.value.loc
+                )
+              );
+            }
+            result = await this.resolveComposition(
+              result,
+              absPath,
+              sources,
+              errors,
+              provenanceEvents
+            );
           } catch (error) {
             errors.push(
               error instanceof ResolveError
@@ -594,7 +702,8 @@ export class Resolver {
     absPath: string,
     sources: string[],
     errors: ResolveError[],
-    parentWins = false
+    parentWins = false,
+    inheritedProvenance: ProvenanceEntry[] = []
   ): Promise<Program> {
     if (!ast.inherit) {
       return ast;
@@ -613,6 +722,14 @@ export class Resolver {
       }
       sources.push(...parent.sources);
       errors.push(...parent.errors);
+      inheritedProvenance.push(
+        ...prefixProvenance(parent.provenance, {
+          operation: 'inherit',
+          source: deepClone(ast.inherit.loc),
+          target: parentPath,
+          reference: ast.inherit.path.raw,
+        } satisfies ProvenanceLink).entries
+      );
 
       if (parent.ast) {
         // Handle parameterized inheritance
@@ -673,7 +790,8 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    errors: ResolveError[],
+    inheritedProvenance: ProvenanceEntry[] = []
   ): Promise<Program> {
     let result = ast;
 
@@ -694,6 +812,15 @@ export class Resolver {
 
         sources.push(...imported.sources);
         errors.push(...imported.errors);
+        inheritedProvenance.push(
+          ...prefixProvenance(imported.provenance, {
+            operation: 'use',
+            source: deepClone(use.loc),
+            target: importPath,
+            reference: use.path.raw,
+            ...(use.alias ? { alias: use.alias } : {}),
+          } satisfies ProvenanceLink).entries
+        );
 
         if (imported.ast) {
           let resolvedImport = imported.ast;
@@ -789,9 +916,22 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    errors: ResolveError[],
+    provenanceEvents: ProvenanceEvent[] = []
   ): Promise<Program> {
     try {
+      const inlineUses = ast.blocks
+        .filter(
+          (block) =>
+            block.name === 'skills' &&
+            (block.content.type === 'ObjectContent' || block.content.type === 'MixedContent')
+        )
+        .flatMap((block) => {
+          if (block.content.type !== 'ObjectContent' && block.content.type !== 'MixedContent') {
+            return [];
+          }
+          return block.content.inlineUses?.map((declaration) => ({ block, declaration })) ?? [];
+        });
       ast = await resolveSkillComposition(ast, {
         currentFile: absPath,
         resolvePath: (ref: string, fromFile: string): string => {
@@ -823,6 +963,73 @@ export class Resolver {
           return subResult.ast;
         },
       });
+      const skillsBlock = ast.blocks.find(
+        (block) => block.name === 'skills' && block.content.type === 'ObjectContent'
+      );
+      if (skillsBlock?.content.type === 'ObjectContent') {
+        for (const [skillName, skillValue] of Object.entries(skillsBlock.content.properties)) {
+          if (typeof skillValue !== 'object' || skillValue === null || Array.isArray(skillValue)) {
+            continue;
+          }
+          const composed = (skillValue as Record<string, Value>)['__composedFrom'];
+          if (!Array.isArray(composed)) continue;
+          const usedInlineUses = new Set<number>();
+          for (const [index, phase] of composed.entries()) {
+            if (
+              typeof phase !== 'object' ||
+              phase === null ||
+              Array.isArray(phase) ||
+              typeof (phase as Record<string, unknown>)['source'] !== 'string'
+            ) {
+              continue;
+            }
+            const sourceFile = (phase as Record<string, unknown>)['source'] as string;
+            const matchedIndex = inlineUses.findIndex(({ declaration }, candidateIndex) => {
+              if (usedInlineUses.has(candidateIndex)) return false;
+              try {
+                return this.loader.resolveRef(declaration.path, absPath) === sourceFile;
+              } catch {
+                return false;
+              }
+            });
+            const useIndex = matchedIndex >= 0 ? matchedIndex : index;
+            usedInlineUses.add(useIndex);
+            const use = inlineUses[useIndex]?.declaration;
+            if (!use) continue;
+            const source = {
+              file: sourceFile,
+              line: 1,
+              column: 1,
+              offset: 0,
+            };
+            const chain: ProvenanceLink = {
+              operation: 'compose',
+              source: deepClone(use.loc),
+              target: source.file,
+              reference: use.path.raw,
+              ...(use.alias ? { alias: use.alias } : {}),
+            };
+            for (const property of [
+              'content',
+              'allowedTools',
+              'references',
+              'requires',
+              'inputs',
+              'outputs',
+            ]) {
+              provenanceEvents.push({
+                path: `skills.${skillName}.${property}`,
+                operation: 'compose',
+                action: 'composed',
+                source,
+                target: source.file,
+                reference: use.path.raw,
+                chain: [chain],
+              });
+            }
+          }
+        }
+      }
     } catch (err) {
       if (err instanceof ResolveError) {
         errors.push(err);
@@ -858,7 +1065,7 @@ export class Resolver {
     const parsed = parseRegistryMarker(marker);
     if (!parsed) {
       errors.push(new ResolveError(`Invalid registry marker: ${marker}`));
-      return { ast: null, sources: [marker], errors: [] };
+      return { ast: null, sources: [marker], errors: [], provenance: emptyProvenance(marker) };
     }
 
     const { repoUrl, path: subPath, version } = parsed;
@@ -1033,7 +1240,12 @@ export class Resolver {
             )
           );
           this.resolving.delete(marker);
-          return { ast: null, sources: [marker], errors };
+          return {
+            ast: null,
+            sources: [marker],
+            errors,
+            provenance: emptyProvenance(marker),
+          };
         }
         if (
           existsSync(resolvedFullPath) &&
@@ -1045,7 +1257,12 @@ export class Resolver {
             )
           );
           this.resolving.delete(marker);
-          return { ast: null, sources: [marker], errors };
+          return {
+            ast: null,
+            sources: [marker],
+            errors,
+            provenance: emptyProvenance(marker),
+          };
         }
       }
 
@@ -1092,7 +1309,12 @@ export class Resolver {
               )
             );
             this.resolving.delete(marker);
-            return { ast: null, sources: [marker], errors };
+            return {
+              ast: null,
+              sources: [marker],
+              errors,
+              provenance: emptyProvenance(marker),
+            };
           }
           if (existsSync(discoverDir) && !(await isRealPathInside(discoverDir, cachePath))) {
             errors.push(
@@ -1101,7 +1323,12 @@ export class Resolver {
               )
             );
             this.resolving.delete(marker);
-            return { ast: null, sources: [marker], errors };
+            return {
+              ast: null,
+              sources: [marker],
+              errors,
+              provenance: emptyProvenance(marker),
+            };
           }
         }
 
@@ -1139,6 +1366,9 @@ export class Resolver {
         ast: resolvedAST,
         sources: [marker],
         errors: [],
+        provenance: resolvedAST
+          ? collectProvenance(resolvedAST, { entry: marker })
+          : emptyProvenance(marker),
       };
 
       if (this.cacheEnabled) {

@@ -354,6 +354,7 @@ prs diff --all
 | `prs validate --fix`                                | Upgrade outdated syntax declarations when possible       |
 | `prs diff --all`                                    | Preview compiled output differences                      |
 | `prs inspect <skill>`                               | Show skill layers and property provenance                |
+| `prs explain <path>`                                | Show source and composition provenance                   |
 | `prs hooks install [tool]`                          | Integrate supported AI tools and protect generated files |
 | `prs skills <add\|remove\|list\|update>`            | Manage remote Markdown skills                            |
 | `prs registry <init\|validate\|publish\|list\|add>` | Manage registries and aliases                            |

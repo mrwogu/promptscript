@@ -4,6 +4,7 @@ export { validateCommand } from './validate.js';
 export { pullCommand } from './pull.js';
 export { diffCommand } from './diff.js';
 export { importCommand } from './import.js';
+export { explainCommand } from './explain.js';
 export {
   skillsAddCommand,
   skillsRemoveCommand,

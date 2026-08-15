@@ -463,6 +463,34 @@ prs inspect code-review --layers
 prs inspect code-review --format json
 ```
 
+### prs explain
+
+Explain source and composition provenance for any resolved block, field, nested
+value, list entry, or text fragment.
+
+```bash
+prs explain <path> [options]
+```
+
+**Arguments:**
+
+| Argument | Description                                          |
+| -------- | ---------------------------------------------------- |
+| `<path>` | Resolved path such as `standards.code.frameworks[0]` |
+
+**Options:**
+
+| Option                | Description                       |
+| --------------------- | --------------------------------- |
+| `--format <format>`   | Output format (text, json)        |
+| `-c, --config <path>` | Path to custom config file        |
+| `--cwd <dir>`         | Set the project working directory |
+
+```bash
+prs explain standards.code.frameworks[0]
+prs explain identity.text[0] --format json
+```
+
 ---
 
 ### prs diff

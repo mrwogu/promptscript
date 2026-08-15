@@ -28,6 +28,11 @@ import {
   getSyntaxFeatureUsages,
   normalizeBlockAliases,
   normalizeProgram,
+  collectProvenance,
+  collectProvenanceEvents,
+  collectProvenanceValueEvents,
+  emptyProvenance,
+  prefixProvenance,
   toLegacyBlock,
   usesSequentialOperations,
   composeBlockBodies,
@@ -51,6 +56,10 @@ import type {
   ExtendBlock,
   OverrideBlock,
   ParamArgument,
+  ProvenanceEntry,
+  ProvenanceEvent,
+  ProvenanceLink,
+  ProvenanceTrace,
 } from '@promptscript/core';
 
 /**
@@ -196,6 +205,8 @@ export interface ResolvedAST {
   canonicalAst?: CanonicalProgram | null;
   /** List of all source files involved in resolution */
   sources: string[];
+  /** Public source and composition provenance for final values */
+  provenance: ProvenanceTrace;
   /** List of errors encountered during resolution */
   errors: ResolveError[];
 }
@@ -204,6 +215,16 @@ export interface ResolvedAST {
  * Import marker block prefix for storing imported content.
  */
 const IMPORT_MARKER_PREFIX = '__import__';
+
+function effectiveCompositionPath(blocks: readonly Block[], path: string): string {
+  const parts = path.split('.');
+  const root = parts[0];
+  if (!root || parts.length < 2) return path;
+  if (blocks.some((block) => block.name === `${IMPORT_MARKER_PREFIX}${root}`)) {
+    return parts.slice(1).join('.');
+  }
+  return path;
+}
 
 // ── Skill-aware merge strategy sets ──────────────────────────────────
 //
@@ -421,11 +442,13 @@ export class BrowserResolver {
   private async doResolve(absPath: string): Promise<ResolvedAST> {
     const sources: string[] = [absPath];
     const errors: ResolveError[] = [];
+    const inheritedProvenance: ProvenanceEntry[] = [];
+    const provenanceEvents: ProvenanceEvent[] = [];
 
     // Load and parse file
     const parseData = this.loadAndParse(absPath, sources, errors);
     if (!parseData.ast) {
-      return { ast: null, sources, errors };
+      return { ast: null, sources, errors, provenance: emptyProvenance(absPath) };
     }
 
     let ast = parseData.ast;
@@ -435,15 +458,22 @@ export class BrowserResolver {
     });
 
     if (sequentialOperations) {
-      ast = await this.resolveSequentialOperations(ast, absPath, sources, errors);
+      ast = await this.resolveSequentialOperations(
+        ast,
+        absPath,
+        sources,
+        errors,
+        inheritedProvenance,
+        provenanceEvents
+      );
     } else {
-      ast = await this.resolveInherit(ast, absPath, sources, errors);
-      ast = await this.resolveImports(ast, absPath, sources, errors);
+      ast = await this.resolveInherit(ast, absPath, sources, errors, false, inheritedProvenance);
+      ast = await this.resolveImports(ast, absPath, sources, errors, inheritedProvenance);
     }
 
     // Legacy phase order resolves inline composition after top-level imports.
     if (!sequentialOperations) {
-      ast = await this.resolveComposition(ast, absPath, sources, errors);
+      ast = await this.resolveComposition(ast, absPath, sources, errors, provenanceEvents);
     }
 
     // Apply extensions
@@ -451,6 +481,19 @@ export class BrowserResolver {
       this.logger.debug(`Applying ${ast.extends.length} extension(s)`);
     }
     if (!sequentialOperations) {
+      const extensionBlocks = ast.blocks;
+      for (const extension of ast.extends) {
+        provenanceEvents.push(
+          ...collectProvenanceEvents(
+            extension.canonicalBody,
+            effectiveCompositionPath(extensionBlocks, extension.targetPath),
+            'extend',
+            extension.loc,
+            extension.replacements?.length ? 'replaced' : 'merged',
+            extension.replacements?.length ? 'replace' : 'merge'
+          )
+        );
+      }
       try {
         ast = this.applyExtends(ast);
       } catch (err) {
@@ -474,6 +517,11 @@ export class BrowserResolver {
       ast,
       canonicalAst: normalizeProgram(ast),
       sources: [...new Set(sources)],
+      provenance: collectProvenance(ast, {
+        entry: absPath,
+        inherited: inheritedProvenance,
+        events: provenanceEvents,
+      }),
       errors,
     };
   }
@@ -482,7 +530,9 @@ export class BrowserResolver {
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    errors: ResolveError[],
+    inheritedProvenance: ProvenanceEntry[],
+    provenanceEvents: ProvenanceEvent[]
   ): Promise<Program> {
     const operations = normalizeProgram(ast).operations;
     const localBlockNames = new Set<string>();
@@ -509,7 +559,8 @@ export class BrowserResolver {
             absPath,
             sources,
             errors,
-            true
+            true,
+            inheritedProvenance
           );
           break;
         case 'UseOperation':
@@ -520,7 +571,8 @@ export class BrowserResolver {
             },
             absPath,
             sources,
-            errors
+            errors,
+            inheritedProvenance
           );
           result = { ...result, uses: [] };
           break;
@@ -536,7 +588,13 @@ export class BrowserResolver {
                 }),
           };
           localBlockNames.add(block.name);
-          result = await this.resolveComposition(result, absPath, sources, errors);
+          result = await this.resolveComposition(
+            result,
+            absPath,
+            sources,
+            errors,
+            provenanceEvents
+          );
           break;
         }
         case 'ExtendOperation': {
@@ -562,7 +620,23 @@ export class BrowserResolver {
               ...result,
               blocks: this.applyExtend(result.blocks, extension),
             };
-            result = await this.resolveComposition(result, absPath, sources, errors);
+            provenanceEvents.push(
+              ...collectProvenanceEvents(
+                extension.canonicalBody,
+                effectiveCompositionPath(result.blocks, extension.targetPath),
+                'extend',
+                extension.loc,
+                extension.replacements?.length ? 'replaced' : 'merged',
+                extension.replacements?.length ? 'replace' : 'merge'
+              )
+            );
+            result = await this.resolveComposition(
+              result,
+              absPath,
+              sources,
+              errors,
+              provenanceEvents
+            );
           } catch (error) {
             errors.push(
               error instanceof ResolveError
@@ -590,7 +664,33 @@ export class BrowserResolver {
             result = applyOverride(result, override, {
               importMarkerPrefix: IMPORT_MARKER_PREFIX,
             });
-            result = await this.resolveComposition(result, absPath, sources, errors);
+            if (override.replacement.type === 'BlockReplacement') {
+              provenanceEvents.push(
+                ...collectProvenanceEvents(
+                  override.replacement.body,
+                  effectiveCompositionPath(result.blocks, override.targetPath),
+                  'override',
+                  override.loc,
+                  'replaced',
+                  'replace'
+                )
+              );
+            } else {
+              provenanceEvents.push(
+                ...collectProvenanceValueEvents(
+                  override.replacement.value,
+                  effectiveCompositionPath(result.blocks, override.targetPath),
+                  override.replacement.value.loc
+                )
+              );
+            }
+            result = await this.resolveComposition(
+              result,
+              absPath,
+              sources,
+              errors,
+              provenanceEvents
+            );
           } catch (error) {
             errors.push(
               error instanceof ResolveError
@@ -668,7 +768,8 @@ export class BrowserResolver {
     absPath: string,
     sources: string[],
     errors: ResolveError[],
-    parentWins = false
+    parentWins = false,
+    inheritedProvenance: ProvenanceEntry[] = []
   ): Promise<Program> {
     if (!ast.inherit) {
       return ast;
@@ -682,6 +783,14 @@ export class BrowserResolver {
       const parent = await this.resolve(parentPath);
       sources.push(...parent.sources);
       errors.push(...parent.errors);
+      inheritedProvenance.push(
+        ...prefixProvenance(parent.provenance, {
+          operation: 'inherit',
+          source: deepClone(ast.inherit.loc),
+          target: parentPath,
+          reference: ast.inherit.path.raw,
+        } satisfies ProvenanceLink).entries
+      );
 
       if (parent.ast) {
         // Handle parameterized inheritance (template interpolation)
@@ -742,7 +851,8 @@ export class BrowserResolver {
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    errors: ResolveError[],
+    inheritedProvenance: ProvenanceEntry[] = []
   ): Promise<Program> {
     let result = ast;
 
@@ -755,6 +865,15 @@ export class BrowserResolver {
         const imported = await this.resolve(importPath);
         sources.push(...imported.sources);
         errors.push(...imported.errors);
+        inheritedProvenance.push(
+          ...prefixProvenance(imported.provenance, {
+            operation: 'use',
+            source: deepClone(use.loc),
+            target: importPath,
+            reference: use.path.raw,
+            ...(use.alias ? { alias: use.alias } : {}),
+          } satisfies ProvenanceLink).entries
+        );
 
         if (imported.ast) {
           // Handle parameterized imports (template interpolation)
@@ -837,9 +956,22 @@ export class BrowserResolver {
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    errors: ResolveError[],
+    provenanceEvents: ProvenanceEvent[] = []
   ): Promise<Program> {
     try {
+      const inlineUses = ast.blocks
+        .filter(
+          (block) =>
+            block.name === 'skills' &&
+            (block.content.type === 'ObjectContent' || block.content.type === 'MixedContent')
+        )
+        .flatMap((block) => {
+          if (block.content.type !== 'ObjectContent' && block.content.type !== 'MixedContent') {
+            return [];
+          }
+          return block.content.inlineUses?.map((declaration) => ({ block, declaration })) ?? [];
+        });
       ast = await resolveSkillComposition(ast, {
         currentFile: absPath,
         resolvePath: (ref: string, fromFile: string): string => {
@@ -871,6 +1003,73 @@ export class BrowserResolver {
           return subResult.ast;
         },
       });
+      const skillsBlock = ast.blocks.find(
+        (block) => block.name === 'skills' && block.content.type === 'ObjectContent'
+      );
+      if (skillsBlock?.content.type === 'ObjectContent') {
+        for (const [skillName, skillValue] of Object.entries(skillsBlock.content.properties)) {
+          if (typeof skillValue !== 'object' || skillValue === null || Array.isArray(skillValue)) {
+            continue;
+          }
+          const composed = (skillValue as Record<string, Value>)['__composedFrom'];
+          if (!Array.isArray(composed)) continue;
+          const usedInlineUses = new Set<number>();
+          for (const [index, phase] of composed.entries()) {
+            if (
+              typeof phase !== 'object' ||
+              phase === null ||
+              Array.isArray(phase) ||
+              typeof (phase as Record<string, unknown>)['source'] !== 'string'
+            ) {
+              continue;
+            }
+            const sourceFile = (phase as Record<string, unknown>)['source'] as string;
+            const matchedIndex = inlineUses.findIndex(({ declaration }, candidateIndex) => {
+              if (usedInlineUses.has(candidateIndex)) return false;
+              try {
+                return this.resolveRef(declaration.path, absPath) === sourceFile;
+              } catch {
+                return false;
+              }
+            });
+            const useIndex = matchedIndex >= 0 ? matchedIndex : index;
+            usedInlineUses.add(useIndex);
+            const use = inlineUses[useIndex]?.declaration;
+            if (!use) continue;
+            const source = {
+              file: sourceFile,
+              line: 1,
+              column: 1,
+              offset: 0,
+            };
+            const chain: ProvenanceLink = {
+              operation: 'compose',
+              source: deepClone(use.loc),
+              target: source.file,
+              reference: use.path.raw,
+              ...(use.alias ? { alias: use.alias } : {}),
+            };
+            for (const property of [
+              'content',
+              'allowedTools',
+              'references',
+              'requires',
+              'inputs',
+              'outputs',
+            ]) {
+              provenanceEvents.push({
+                path: `skills.${skillName}.${property}`,
+                operation: 'compose',
+                action: 'composed',
+                source,
+                target: source.file,
+                reference: use.path.raw,
+                chain: [chain],
+              });
+            }
+          }
+        }
+      }
     } catch (err) {
       if (err instanceof ResolveError) {
         errors.push(err);
