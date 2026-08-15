@@ -681,6 +681,24 @@ export function mergeValueNodeLocations(
   return reconcileValueNode(selected, value);
 }
 
+export function reorderFieldEntries(
+  entries: readonly BlockEntry[],
+  properties: Record<string, Value>
+): BlockEntry[] {
+  const fieldOrder = new Map(Object.keys(properties).map((name, index) => [name, index]));
+  const orderedFields = entries
+    .filter((entry): entry is FieldEntry => entry.type === 'FieldEntry')
+    .sort(
+      (left, right) =>
+        (fieldOrder.get(left.name) ?? Number.MAX_SAFE_INTEGER) -
+        (fieldOrder.get(right.name) ?? Number.MAX_SAFE_INTEGER)
+    );
+  let fieldIndex = 0;
+  return entries.map((entry) =>
+    entry.type === 'FieldEntry' ? orderedFields[fieldIndex++]! : entry
+  );
+}
+
 export function reconcileBlockBody(body: BlockBody, content: BlockContent): BlockBody {
   const rawProperties =
     content.type === 'ObjectContent' || content.type === 'MixedContent' ? content.properties : {};
@@ -883,7 +901,7 @@ export function reconcileBlockBody(body: BlockBody, content: BlockContent): Bloc
     });
   }
 
-  return createBlockBody(reorderCanonicalFieldEntries(entries, properties), body.loc, {
+  return createBlockBody(reorderFieldEntries(entries, properties), body.loc, {
     projection: content.type,
     ...(text ? { text } : {}),
   });
@@ -915,24 +933,6 @@ export function prepareBlockContentForMerge(
   delete prepared.properties['items'];
   prepared.listItems = listItems;
   return prepared;
-}
-
-function reorderCanonicalFieldEntries(
-  entries: readonly BlockEntry[],
-  properties: Record<string, Value>
-): BlockEntry[] {
-  const fieldOrder = new Map(Object.keys(properties).map((name, index) => [name, index]));
-  const orderedFields = entries
-    .filter((entry): entry is FieldEntry => entry.type === 'FieldEntry')
-    .sort(
-      (left, right) =>
-        (fieldOrder.get(left.name) ?? Number.MAX_SAFE_INTEGER) -
-        (fieldOrder.get(right.name) ?? Number.MAX_SAFE_INTEGER)
-    );
-  let fieldIndex = 0;
-  return entries.map((entry) =>
-    entry.type === 'FieldEntry' ? orderedFields[fieldIndex++]! : entry
-  );
 }
 
 export function composeBlockBodies(
