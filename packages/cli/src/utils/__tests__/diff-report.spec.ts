@@ -621,6 +621,47 @@ describe('createCompilationDiffErrorReport', () => {
     }
   });
 
+  it('uses marker identity when managed paths use Windows separators', async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), 'promptscript-diff-windows-'));
+    try {
+      const staleDirectory = join(projectRoot, 'stale');
+      const stalePath = join(staleDirectory, 'file.md');
+      const staleContent = `${MARKER('2026-01-01T00:00:00.000Z', 'github')}\nstale\n`;
+      await mkdir(staleDirectory);
+      await writeFile(stalePath, staleContent);
+
+      const report = await buildCompilationDiff({
+        projectRoot,
+        outputRoot: projectRoot,
+        entryPath: join(projectRoot, '.promptscript/project.prs'),
+        outputs: new Map([
+          [
+            'current.md',
+            {
+              ...createOutput('current.md', 'current\n'),
+              managedOutputFiles: ['stale\\file.md'],
+            },
+          ],
+        ]),
+        warnings: [],
+      });
+
+      expect(report.changes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: 'stale/file.md',
+            target: 'github',
+            source: '.promptscript/project.prs',
+            kind: 'removed',
+            contentHash: expect.stringMatching(/^sha256-[0-9a-f]{64}$/),
+          }),
+        ])
+      );
+    } finally {
+      await rm(projectRoot, { recursive: true });
+    }
+  });
+
   it('does not write while building a report', async () => {
     const projectRoot = await mkdtemp(join(tmpdir(), 'promptscript-diff-readonly-'));
     try {
