@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { PSLexer } from './lexer/lexer.js';
-import { parser } from './grammar/parser.js';
-import { visitor, type EnvProvider } from './grammar/visitor.js';
+import { acquireParser, releaseParser } from './grammar/parser-pool.js';
+import { createVisitor, type EnvProvider } from './grammar/visitor.js';
 import type { CanonicalProgram, Program } from '@promptscript/core';
 import { ParseError, toLegacyProgram } from '@promptscript/core';
 
@@ -123,18 +123,25 @@ export function parseCanonical(source: string, options: ParseOptions = {}): Cano
   }
 
   // Parsing phase
-  parser.input = lexResult.tokens;
-  const cst = parser.program();
+  const requestParser = acquireParser();
+  let cst;
+  try {
+    requestParser.input = lexResult.tokens;
+    cst = requestParser.program();
 
-  for (const err of parser.errors) {
-    errors.push(
-      new ParseError(err.message, {
-        file: filename,
-        // Chevrotain parser tokens always have startLine/startColumn
-        line: err.token.startLine!,
-        column: err.token.startColumn!,
-      })
-    );
+    // Errors must be drained before release because releasing resets the instance
+    for (const err of requestParser.errors) {
+      errors.push(
+        new ParseError(err.message, {
+          file: filename,
+          // Chevrotain parser tokens always have startLine/startColumn
+          line: err.token.startLine!,
+          column: err.token.startColumn!,
+        })
+      );
+    }
+  } finally {
+    releaseParser(requestParser);
   }
 
   if (errors.length > 0 && !isRecoveryMode) {
@@ -144,15 +151,15 @@ export function parseCanonical(source: string, options: ParseOptions = {}): Cano
   // AST transformation phase
   try {
     // Configure visitor with interpolation setting
-    visitor.setInterpolateEnv(interpolateEnv);
+    const requestVisitor = createVisitor();
+    requestVisitor.setInterpolateEnv(interpolateEnv);
     if (envProvider) {
-      visitor.setEnvProvider(envProvider);
+      requestVisitor.setEnvProvider(envProvider);
     } else {
-      visitor.resetEnvProvider();
+      requestVisitor.resetEnvProvider();
     }
-    visitor.resetDiagnostics();
-    const ast = visitor.visit(cst, filename) as CanonicalProgram;
-    for (const diagnostic of visitor.takeDiagnostics()) {
+    const ast = requestVisitor.visit(cst, filename) as CanonicalProgram;
+    for (const diagnostic of requestVisitor.takeDiagnostics()) {
       errors.push(new ParseError(diagnostic.message, diagnostic.loc));
     }
     if (errors.length > 0 && !isRecoveryMode) {
