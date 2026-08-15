@@ -1093,7 +1093,17 @@ interface WatchEvent {
   path: string;
 }
 
-const DEFAULT_WATCH_INCLUDE = ['**/*.prs'];
+const DEFAULT_WATCH_INCLUDE = [
+  '**/*.prs',
+  '.promptscript/**/*',
+  '.agents/**/*',
+  'registry/**/*',
+  'promptscript.yaml',
+  'promptscript.yml',
+  '.promptscriptrc.yaml',
+  '.promptscriptrc.yml',
+  'promptscript.lock',
+];
 const DEFAULT_WATCH_EXCLUDE = ['**/node_modules/**', '**/.git/**', '.promptscript/vendor/**'];
 
 function watchForChanges(
@@ -1183,6 +1193,7 @@ function watchForChanges(
   watcher.on('change', (filename) => scheduleCompilation({ action: 'changed', path: filename }));
   watcher.on('add', (filename) => scheduleCompilation({ action: 'added', path: filename }));
   watcher.on('unlink', (filename) => scheduleCompilation({ action: 'removed', path: filename }));
+  watcher.on('unlinkDir', (filename) => scheduleCompilation({ action: 'removed', path: filename }));
 
   watcher.on('error', (error: unknown) => {
     const errorMessage = error instanceof Error ? error.message : String(error);
