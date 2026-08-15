@@ -290,6 +290,57 @@ describe('resolveInheritance', () => {
     });
   });
 
+  describe('agent composition', () => {
+    it('preserves provenance from parent and child agents', () => {
+      const parent = createProgram({
+        blocks: [
+          createBlock('agents', createObjectContent({ reviewer: { description: 'Review' } })),
+        ],
+        agentProvenance: [
+          {
+            name: 'reviewer',
+            source: 'parent.prs',
+            action: 'local',
+            loc: createLoc(),
+          },
+        ],
+      });
+      const child = createProgram({
+        blocks: [createBlock('agents', createObjectContent({ planner: { description: 'Plan' } }))],
+        agentProvenance: [
+          {
+            name: 'planner',
+            source: 'child.prs',
+            action: 'local',
+            loc: createLoc(),
+          },
+        ],
+      });
+
+      const result = resolveInheritance(parent, child);
+
+      expect(result.agentProvenance).toEqual([
+        expect.objectContaining({ name: 'reviewer', source: 'parent.prs' }),
+        expect.objectContaining({ name: 'planner', source: 'child.prs' }),
+      ]);
+    });
+
+    it('rejects conflicting inherited agent definitions', () => {
+      const parent = createProgram({
+        blocks: [
+          createBlock('agents', createObjectContent({ reviewer: { description: 'Parent' } })),
+        ],
+      });
+      const child = createProgram({
+        blocks: [
+          createBlock('agents', createObjectContent({ reviewer: { description: 'Child' } })),
+        ],
+      });
+
+      expect(() => resolveInheritance(parent, child)).toThrow(/Conflicting agent name/);
+    });
+  });
+
   describe('different content type merging', () => {
     it('should create MixedContent when merging Text with Object', () => {
       const parent = createProgram({

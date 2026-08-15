@@ -140,6 +140,39 @@ describe('block import', () => {
     ]);
   });
 
+  it('preserves existing provenance for aliased and unaliased imports', () => {
+    const source = program([block('agents', { reviewer: { description: 'Review code' } })], []);
+    source.agentProvenance = [
+      {
+        name: 'reviewer',
+        source: 'source.prs',
+        action: 'native',
+        loc: LOC,
+      },
+    ];
+
+    const unaliased = resolveUseImport(program([]), use(), source);
+    expect(unaliased.agentProvenance).toEqual([
+      expect.objectContaining({
+        name: 'reviewer',
+        source: 'source.prs',
+        importPath: './shared',
+        action: 'imported',
+      }),
+    ]);
+
+    const aliased = resolveUseImport(program([]), use({ alias: 'team' }), source);
+    expect(aliased.agentProvenance).toEqual([
+      expect.objectContaining({
+        name: 'team.reviewer',
+        source: 'source.prs',
+        importPath: './shared',
+        namespace: 'team',
+        action: 'qualified',
+      }),
+    ]);
+  });
+
   it('reports all provenance when an agent import conflicts', () => {
     const target = program([block('agents', { reviewer: { description: 'Local review' } })]);
     const source = program([block('agents', { reviewer: { description: 'Imported review' } })]);

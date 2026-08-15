@@ -31,6 +31,33 @@ import {
 const LOC = { file: 'legacy.prs', line: 1, column: 1, offset: 0 };
 
 describe('canonical AST compatibility', () => {
+  it('round-trips agent provenance through canonical and legacy projections', () => {
+    const provenance = [
+      {
+        name: 'team.reviewer',
+        source: 'team.prs',
+        namespace: 'team',
+        action: 'qualified' as const,
+        loc: LOC,
+      },
+    ];
+    const legacy: Program = {
+      type: 'Program',
+      uses: [],
+      blocks: [],
+      extends: [],
+      agentProvenance: provenance,
+      loc: LOC,
+    };
+
+    const canonical = normalizeProgram(legacy);
+    const projection = toLegacyProgram(canonical);
+
+    expect(canonical.agentProvenance).toEqual(provenance);
+    expect(projection.agentProvenance).toEqual(provenance);
+    expect(projection.agentProvenance).not.toBe(provenance);
+  });
+
   it('normalizes existing Program object literals without new fields', () => {
     const legacy: Program = {
       type: 'Program',

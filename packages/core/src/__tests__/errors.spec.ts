@@ -8,6 +8,7 @@ import {
   FileNotFoundError,
   CircularDependencyError,
   CircularGuardRequiresError,
+  AgentConflictError,
   GitCloneError,
   GitAuthError,
   GitRefNotFoundError,
@@ -148,6 +149,37 @@ describe('CircularGuardRequiresError', () => {
     const error = new CircularGuardRequiresError(['x', 'y', 'x']);
     expect(error.location).toBeUndefined();
     expect(error.message).toBe('Circular guard dependency detected: x → y → x');
+  });
+});
+
+describe('AgentConflictError', () => {
+  it('serializes conflict details and provenance', () => {
+    const error = new AgentConflictError(
+      [
+        {
+          name: 'team.reviewer',
+          provenance: [
+            {
+              name: 'team.reviewer',
+              source: 'team.prs',
+              namespace: 'team',
+              action: 'qualified',
+              loc: mockLocation,
+            },
+          ],
+        },
+      ],
+      mockLocation
+    );
+
+    expect(error.agentName).toBe('team.reviewer');
+    expect(error.provenance).toHaveLength(1);
+    expect(error.message).toContain('team.prs (namespace: team)');
+    expect(error.toJSON()).toMatchObject({
+      agentName: 'team.reviewer',
+      provenance: error.provenance,
+      conflicts: error.conflicts,
+    });
   });
 });
 

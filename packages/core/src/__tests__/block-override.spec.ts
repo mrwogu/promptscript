@@ -379,6 +379,30 @@ describe('block override', () => {
     });
   });
 
+  it('resolves direct and aliased qualified agent paths', () => {
+    const direct = applyOverride(
+      program([block('agents', { 'team.reviewer': { description: 'Original' } })]),
+      valueOverride('agents.team.reviewer', { description: 'Direct update' })
+    );
+    const aliased = applyOverride(
+      program([
+        block('__import__team', {
+          __source: './team.prs',
+          __blocks: ['agents'],
+        }),
+        block('agents', { 'team.reviewer': { description: 'Original' } }),
+      ]),
+      valueOverride('team.agents.reviewer.description', 'Aliased update')
+    );
+
+    expect(direct.blocks[0]?.content).toMatchObject({
+      properties: { 'team.reviewer': { description: 'Direct update' } },
+    });
+    expect(aliased.blocks[1]?.content).toMatchObject({
+      properties: { 'team.reviewer': { description: 'Aliased update' } },
+    });
+  });
+
   it('rejects blocks that were not exported by an imported alias', () => {
     const ast = program([
       block('__import__base', {

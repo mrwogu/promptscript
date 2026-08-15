@@ -120,4 +120,39 @@ describe('namespaced agent imports', () => {
     expect(result.errors[0]?.message).toContain('./second');
     expect(result.errors[0]?.message).toContain('Use a unique @use alias');
   });
+
+  it('reports conflicting inherited agent definitions without aborting resolution', async () => {
+    await writeFile(
+      join(directory, 'parent.prs'),
+      `
+@meta { id: "parent" syntax: "1.5.0" }
+@agents { reviewer: { description: "Parent reviewer" } }
+`
+    );
+    const projectPath = join(directory, 'project.prs');
+    await writeFile(
+      projectPath,
+      `
+@meta { id: "project" syntax: "1.5.0" }
+@agents { reviewer: { description: "Child reviewer" } }
+@inherit ./parent
+`
+    );
+
+    const resolver = new Resolver({
+      registryPath: directory,
+      localPath: directory,
+      cache: false,
+    });
+    const result = await resolver.resolve(projectPath);
+    const agents = result.ast?.blocks.find((block) => block.name === 'agents');
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.code).toBe('PS2014');
+    expect(agents?.content).toMatchObject({
+      properties: {
+        reviewer: { description: 'Child reviewer' },
+      },
+    });
+  });
 });

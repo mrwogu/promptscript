@@ -269,6 +269,48 @@ describe('applyExtends', () => {
   });
 
   describe('deep path extension', () => {
+    it('extends qualified agents through direct and aliased paths', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'agents',
+            createObjectContent({
+              'team.reviewer': { description: 'Original' },
+            })
+          ),
+          createBlock(
+            `${IMPORT_MARKER_PREFIX}team`,
+            createObjectContent({
+              __source: './team.prs',
+              __blocks: ['agents'],
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'agents.team.reviewer',
+            createObjectContent({ description: 'Direct update' })
+          ),
+          createExtendBlock(
+            'team.agents.reviewer',
+            createObjectContent({ description: 'Aliased update' })
+          ),
+        ],
+      });
+
+      const result = applyExtends(ast);
+      const agents = result.blocks.find((block) => block.name === 'agents');
+
+      expect(agents?.content).toMatchObject({
+        properties: {
+          'team.reviewer': { description: 'Aliased update' },
+        },
+      });
+      expect(result.blocks.some((block) => block.name === `${IMPORT_MARKER_PREFIX}team`)).toBe(
+        false
+      );
+    });
+
     it('preserves nested canonical locations from deep extensions', () => {
       const ast = parseOrThrow(
         `@standards {
