@@ -283,51 +283,9 @@ function getAvailableBlocks(ast: Program): string[] {
 }
 
 /**
- * All known target names.
+ * All known target names from the canonical core registry.
  */
-const ALL_FORMATTER_NAMES: FormatterName[] = [
-  // Tier 0
-  'github',
-  'cursor',
-  'claude',
-  'antigravity',
-  'factory',
-  'opencode',
-  'gemini',
-  // Tier 1
-  'windsurf',
-  'cline',
-  'roo',
-  'codex',
-  'continue',
-  // Tier 2
-  'augment',
-  'goose',
-  'kilo',
-  'amp',
-  'trae',
-  'junie',
-  'kiro',
-  // Tier 3
-  'cortex',
-  'crush',
-  'command-code',
-  'kode',
-  'mcpjam',
-  'mistral-vibe',
-  'mux',
-  'openhands',
-  'pi',
-  'qoder',
-  'qwen-code',
-  'zencoder',
-  'neovate',
-  'pochi',
-  'adal',
-  'iflow',
-  'openclaw',
-  'codebuddy',
-];
+const ALL_FORMATTER_NAMES: FormatterName[] = [...KNOWN_TARGETS];
 
 describe('Parity Matrix Tests', () => {
   const formatters: Map<FormatterName, Formatter> = new Map();

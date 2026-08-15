@@ -596,8 +596,8 @@ describe('Additional Feature Matrix Functions', () => {
       const lines = report.split('\n');
       const testLine = lines.find((l) => l.includes('Test Undefined'));
       expect(testLine).toBeDefined();
-      // Should contain '—' for the missing gemini status
-      expect(testLine).toContain('—');
+      // Should contain '-' for the missing gemini status
+      expect(testLine).toContain(' - |');
     } finally {
       FEATURE_MATRIX.pop();
     }
