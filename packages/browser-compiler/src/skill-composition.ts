@@ -15,6 +15,7 @@ import type {
   InlineUseDeclaration,
   ComposedPhase,
   SkillContractField,
+  SourceLocation,
   SyntaxFeatureUsage,
 } from '@promptscript/core';
 import {
@@ -215,6 +216,8 @@ interface ResolvedPhase {
   name: string;
   /** Absolute source path */
   source: string;
+  /** Source location of the composed skill definition */
+  loc: SourceLocation;
   /** Alias if specified */
   alias?: string;
   /** Skill description */
@@ -329,6 +332,7 @@ async function resolveInlineUse(
     phaseNumber,
     name: phaseName,
     source: absPath,
+    loc: inlineUse.loc,
     alias: inlineUse.alias,
     description: skillDef.description,
     skillContent: skillDef.content,
@@ -530,6 +534,7 @@ function composeIntoSkill(
     const composedPhase: ComposedPhase = {
       name: phase.name,
       source: phase.source,
+      loc: phase.loc,
       composedBlocks,
     };
 

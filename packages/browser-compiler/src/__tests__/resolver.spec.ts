@@ -386,7 +386,7 @@ describe('BrowserResolver', () => {
       );
     });
 
-    it('ignores malformed composition metadata while collecting matching provenance', async () => {
+    it('does not fabricate provenance for unmatched composition metadata', async () => {
       const loc = { file: 'project.prs', line: 1, column: 1, offset: 0 };
       const malformedUse = {
         type: 'InlineUseDeclaration',
@@ -467,8 +467,8 @@ describe('BrowserResolver', () => {
 
       expect(result).toBe(ast);
       expect(errors).toEqual([]);
-      expect(events).toHaveLength(12);
-      expect(events.every((event) => event.operation === 'compose')).toBe(true);
+      expect(events).toHaveLength(6);
+      expect(events.every((event) => event.reference === './second')).toBe(true);
     });
 
     it('should resolve @inherit from nested directory', async () => {
@@ -644,6 +644,28 @@ describe('BrowserResolver', () => {
       expect(result.ast).not.toBeNull();
       const standardsBlock = result.ast?.blocks.find((b) => b.name === 'standards');
       expect(standardsBlock).toBeDefined();
+    });
+
+    it('does not record provenance for a failed extension', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@skills {
+  ops: {
+    description: "Base"
+    sealed: ["description"]
+  }
+}
+@extend skills.ops { description: "Overlay" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const entry = result.provenance.entries.find(
+        (candidate) => candidate.path === 'skills.ops.description'
+      );
+
+      expect(result.errors).toHaveLength(1);
+      expect(entry?.history.some((step) => step.operation === 'extend')).toBe(false);
     });
 
     it('should replace marked inherited values and merge unmarked values', async () => {

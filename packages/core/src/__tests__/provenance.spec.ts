@@ -1,5 +1,6 @@
 import {
   collectProvenance,
+  collectCompositionProvenanceEvents,
   collectProvenanceEvents,
   collectProvenanceValueEvents,
   createBlockBody,
@@ -10,6 +11,7 @@ import {
   toLegacyProgram,
   type BlockEntry,
   type CanonicalProgram,
+  type InlineUseDeclaration,
   type Program,
   type Value,
 } from '../index.js';
@@ -103,6 +105,39 @@ describe('provenance', () => {
       source: CHILD_LOC,
       strategy: 'merge',
     });
+  });
+
+  it('matches composition provenance by source and preserves source locations', () => {
+    const declaration = {
+      type: 'InlineUseDeclaration',
+      path: {
+        type: 'PathReference',
+        raw: './phase',
+        segments: ['phase'],
+        isRelative: true,
+        loc: BASE_LOC,
+      },
+      loc: BASE_LOC,
+    } satisfies InlineUseDeclaration;
+    const events = collectCompositionProvenanceEvents(
+      [{ source: '/phase.prs', loc: CHILD_LOC }, { source: '/missing.prs' }],
+      [{ declaration }],
+      () => '/phase.prs',
+      'ops'
+    );
+
+    expect(events).toHaveLength(6);
+    for (const event of events) {
+      expect(event.source).toEqual(CHILD_LOC);
+    }
+    expect(
+      collectCompositionProvenanceEvents(
+        [{ source: '/unmatched.prs' }],
+        [{ declaration }],
+        () => '/phase.prs',
+        'ops'
+      )
+    ).toEqual([]);
   });
 
   it('returns stable path ordering and versioned JSON shape', () => {

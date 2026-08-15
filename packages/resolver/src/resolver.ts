@@ -28,6 +28,7 @@ import {
   normalizeProgram,
   collectProvenance,
   collectProvenanceEvents,
+  collectCompositionProvenanceEvents,
   collectProvenanceValueEvents,
   emptyProvenance,
   prefixProvenance,
@@ -92,6 +93,10 @@ function effectiveCompositionPath(
     return parts.slice(1).join('.');
   }
   return path;
+}
+
+function isValueRecord(value: unknown): value is Record<string, Value> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 type CompositionBlock = Program['blocks'][number] & {
@@ -973,66 +978,17 @@ export class Resolver {
       );
       if (skillsBlock?.content.type === 'ObjectContent') {
         for (const [skillName, skillValue] of Object.entries(skillsBlock.content.properties)) {
-          if (typeof skillValue !== 'object' || skillValue === null || Array.isArray(skillValue)) {
-            continue;
-          }
-          const composed = (skillValue as Record<string, Value>)['__composedFrom'];
+          if (!isValueRecord(skillValue)) continue;
+          const composed = skillValue['__composedFrom'];
           if (!Array.isArray(composed)) continue;
-          const usedInlineUses = new Set<number>();
-          for (const [index, phase] of composed.entries()) {
-            if (
-              typeof phase !== 'object' ||
-              phase === null ||
-              Array.isArray(phase) ||
-              typeof (phase as Record<string, unknown>)['source'] !== 'string'
-            ) {
-              continue;
-            }
-            const sourceFile = (phase as Record<string, unknown>)['source'] as string;
-            const matchedIndex = inlineUses.findIndex(({ declaration }, candidateIndex) => {
-              if (usedInlineUses.has(candidateIndex)) return false;
-              try {
-                return this.loader.resolveRef(declaration.path, absPath) === sourceFile;
-              } catch {
-                return false;
-              }
-            });
-            const useIndex = matchedIndex >= 0 ? matchedIndex : index;
-            usedInlineUses.add(useIndex);
-            const use = inlineUses[useIndex]?.declaration;
-            if (!use) continue;
-            const source = {
-              file: sourceFile,
-              line: 1,
-              column: 1,
-              offset: 0,
-            };
-            const chain: ProvenanceLink = {
-              operation: 'compose',
-              source: deepClone(use.loc),
-              target: source.file,
-              reference: use.path.raw,
-              ...(use.alias ? { alias: use.alias } : {}),
-            };
-            for (const property of [
-              'content',
-              'allowedTools',
-              'references',
-              'requires',
-              'inputs',
-              'outputs',
-            ]) {
-              provenanceEvents.push({
-                path: `skills.${skillName}.${property}`,
-                operation: 'compose',
-                action: 'composed',
-                source,
-                target: source.file,
-                reference: use.path.raw,
-                chain: [chain],
-              });
-            }
-          }
+          provenanceEvents.push(
+            ...collectCompositionProvenanceEvents(
+              composed,
+              inlineUses,
+              (declaration) => this.loader.resolveRef(declaration.path, absPath),
+              skillName
+            )
+          );
         }
       }
     } catch (err) {

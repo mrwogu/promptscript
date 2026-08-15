@@ -1,6 +1,7 @@
 import type {
   BlockBody,
   CanonicalBlock,
+  InlineUseDeclaration,
   ProgramInput,
   ProvenanceAction,
   ProvenanceEntry,
@@ -238,6 +239,32 @@ function collectEventValuePaths(
   }
 }
 
+function isSourceLocation(value: unknown): value is SourceLocation {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate['file'] === 'string' &&
+    typeof candidate['line'] === 'number' &&
+    typeof candidate['column'] === 'number' &&
+    (candidate['offset'] === undefined || typeof candidate['offset'] === 'number')
+  );
+}
+
+interface ComposedPhaseMetadata {
+  readonly source: string;
+  readonly loc?: SourceLocation;
+}
+
+function getComposedPhaseMetadata(value: unknown): ComposedPhaseMetadata | undefined {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
+  const candidate = value as Record<string, unknown>;
+  if (typeof candidate['source'] !== 'string') return undefined;
+  return {
+    source: candidate['source'],
+    ...(isSourceLocation(candidate['loc']) ? { loc: candidate['loc'] } : {}),
+  };
+}
+
 /**
  * Create operation events for an extension or replacement body.
  *
@@ -304,6 +331,70 @@ export function collectProvenanceEvents(
       textIndex++;
     }
   }
+  return events;
+}
+
+/**
+ * Create provenance events for composed skill properties.
+ *
+ * Composition metadata is matched to inline uses by resolved source path.
+ * Positional fallback would attribute malformed metadata to the wrong use.
+ */
+export function collectCompositionProvenanceEvents(
+  phases: readonly unknown[],
+  inlineUses: readonly { readonly declaration: InlineUseDeclaration }[],
+  resolveSource: (declaration: InlineUseDeclaration) => string,
+  skillName: string
+): ProvenanceEvent[] {
+  const events: ProvenanceEvent[] = [];
+  const usedInlineUses = new Set<number>();
+
+  for (const phase of phases) {
+    const metadata = getComposedPhaseMetadata(phase);
+    if (!metadata) continue;
+
+    const matchedIndex = inlineUses.findIndex(({ declaration }, candidateIndex) => {
+      if (usedInlineUses.has(candidateIndex)) return false;
+      try {
+        return resolveSource(declaration) === metadata.source;
+      } catch {
+        return false;
+      }
+    });
+    if (matchedIndex < 0) continue;
+
+    const use = inlineUses[matchedIndex]?.declaration;
+    if (!use) continue;
+    usedInlineUses.add(matchedIndex);
+
+    const source = cloneLocation(metadata.loc ?? use.loc);
+    const chain: ProvenanceLink = {
+      operation: 'compose',
+      source: cloneLocation(use.loc),
+      target: source.file,
+      reference: use.path.raw,
+      ...(use.alias ? { alias: use.alias } : {}),
+    };
+    for (const property of [
+      'content',
+      'allowedTools',
+      'references',
+      'requires',
+      'inputs',
+      'outputs',
+    ]) {
+      events.push({
+        path: `skills.${skillName}.${property}`,
+        operation: 'compose',
+        action: 'composed',
+        source,
+        target: source.file,
+        reference: use.path.raw,
+        chain: [chain],
+      });
+    }
+  }
+
   return events;
 }
 

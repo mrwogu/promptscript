@@ -71,7 +71,7 @@ function readValueAtPath(ast: Program, path: string): unknown {
       if (Array.isArray(value)) {
         value = value[token];
       } else if (typeof value === 'string') {
-        continue;
+        value = value[token];
       } else if (isRecord(value) && value['type'] === 'TextContent') {
         value = value['value'];
       } else {
@@ -176,7 +176,7 @@ function outputJson(
         path: requestedPath,
         entries: matches.map((match) => ({
           ...match.entry,
-          value: match.value,
+          value: formatValue(match.value),
         })),
         diagnostics,
       },

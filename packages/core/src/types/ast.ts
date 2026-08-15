@@ -688,11 +688,7 @@ export interface OverrideOperation extends CanonicalNode {
  * Ordered semantic declaration in a canonical program.
  */
 export type ProgramOperation =
-  | InheritOperation
-  | UseOperation
-  | BlockOperation
-  | ExtendOperation
-  | OverrideOperation;
+  InheritOperation | UseOperation | BlockOperation | ExtendOperation | OverrideOperation;
 
 /**
  * Immutable canonical program. Legacy collection fields are derived projections.
@@ -771,6 +767,8 @@ export interface ComposedPhase {
   name: string;
   /** Source file path */
   source: string;
+  /** Source location of the composed skill definition */
+  loc?: SourceLocation;
   /** Alias if @use ... as alias was used */
   alias?: string;
   /** Extracted inputs contract (if defined) */

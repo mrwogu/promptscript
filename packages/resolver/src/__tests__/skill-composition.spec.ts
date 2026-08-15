@@ -54,12 +54,10 @@ describe('skill composition resolver', () => {
       const contentProvenance = result.provenance.entries.find(
         (entry) => entry.path === 'skills.ops.content'
       );
-      expect(
-        contentProvenance?.history.some(
-          (step) =>
-            step.operation === 'compose' && step.chain.some((link) => link.operation === 'compose')
-        )
-      ).toBe(true);
+      const composition = contentProvenance?.history.find((step) => step.operation === 'compose');
+      expect(composition?.chain.some((link) => link.operation === 'compose')).toBe(true);
+      expect(composition?.source.file).toContain('parent.prs');
+      expect(composition?.source.line).toBeGreaterThan(1);
     });
 
     it('preserves the original content preamble from the parent skill', async () => {
@@ -227,7 +225,7 @@ describe('skill composition resolver', () => {
       expect(errorMessages.some((m) => m.includes('does-not-exist'))).toBe(true);
     });
 
-    it('ignores malformed composition metadata while collecting matching provenance', async () => {
+    it('does not fabricate provenance for unmatched composition metadata', async () => {
       const malformedUse = {
         type: 'InlineUseDeclaration',
         path: undefined,
@@ -294,8 +292,7 @@ describe('skill composition resolver', () => {
 
       expect(result).toBe(ast);
       expect(errors).toEqual([]);
-      expect(events).toHaveLength(6);
-      expect(events.every((event) => event.operation === 'compose')).toBe(true);
+      expect(events).toEqual([]);
     });
   });
 
