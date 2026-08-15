@@ -50,9 +50,11 @@ import {
   resolveNativeCommands,
   resolveNativeAgents,
   parseSkillMd,
+  getSkillFrontmatterLocations,
   skillNameFromPath,
   discoverSkillResources,
   resolveSkillReferences,
+  resolveSkillScripts,
   type NativeSkillOptions,
   type SkillResource,
 } from './skills.js';
@@ -71,6 +73,30 @@ import {
   resolveVendoredRepository,
   verifyGitRepositoryCheckout,
 } from './vendor-manifest.js';
+
+function addParsedSkillMetadata(
+  skillProps: Record<string, Value>,
+  parsed: ReturnType<typeof parseSkillMd>
+): void {
+  if (parsed.params !== undefined) skillProps['params'] = parsed.params as unknown as Value;
+  if (parsed.inputs !== undefined) skillProps['inputs'] = parsed.inputs as unknown as Value;
+  if (parsed.outputs !== undefined) skillProps['outputs'] = parsed.outputs as unknown as Value;
+  if (parsed.references !== undefined) {
+    skillProps['references'] = parsed.references as unknown as Value;
+  }
+  if (parsed.scripts !== undefined) skillProps['scripts'] = parsed.scripts as unknown as Value;
+  if (parsed.license !== undefined) skillProps['license'] = parsed.license;
+  if (parsed.compatibility !== undefined) skillProps['compatibility'] = parsed.compatibility;
+  if (parsed.metadata !== undefined) {
+    skillProps['metadata'] = parsed.metadata as unknown as Value;
+  }
+  if (parsed.allowedTools !== undefined) {
+    skillProps['allowedTools'] = parsed.allowedTools as unknown as Value;
+  }
+  if (parsed.rawFrontmatter !== undefined) {
+    skillProps['__rawFrontmatter'] = parsed.rawFrontmatter;
+  }
+}
 
 /**
  * Options for the resolver.
@@ -687,7 +713,22 @@ export class Resolver {
     }
 
     // skill or raw -> synthesize Program with @skills block
-    const parsed = parseSkillMd(source);
+    let parsed: ReturnType<typeof parseSkillMd>;
+    try {
+      parsed = parseSkillMd(source, absPath);
+    } catch (error: unknown) {
+      errors.push(
+        error instanceof ResolveError
+          ? error
+          : new ResolveError(
+              `Skill frontmatter parsing failed: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
+              { file: absPath, line: 1, column: 1 }
+            )
+      );
+      return { ast: null };
+    }
     const skillName = parsed.name ?? skillNameFromPath(absPath);
 
     if (!parsed.name) {
@@ -703,6 +744,7 @@ export class Resolver {
     if (parsed.content) {
       skillProps['content'] = makeTextContent(parsed.content, absPath);
     }
+    addParsedSkillMetadata(skillProps, parsed);
 
     // Discover resource files alongside the SKILL.md and explicit reference
     // entries. This mirrors the behaviour of resolveNativeSkills() so a skill
@@ -724,8 +766,35 @@ export class Resolver {
 
     if (parsed.references && parsed.references.length > 0) {
       try {
-        const refs = await resolveSkillReferences(parsed.references, skillDir, this.logger);
+        const frontmatterLocations = getSkillFrontmatterLocations(parsed);
+        const refs = await resolveSkillReferences(
+          parsed.references,
+          skillDir,
+          this.logger,
+          frontmatterLocations?.frontmatter,
+          frontmatterLocations?.items.get('references')
+        );
         collected.push(...refs);
+      } catch (err) {
+        if (err instanceof ResolveError) {
+          errors.push(err);
+        } else {
+          errors.push(new ResolveError(err instanceof Error ? err.message : String(err)));
+        }
+      }
+    }
+
+    if (parsed.scripts && parsed.scripts.length > 0) {
+      try {
+        const frontmatterLocations = getSkillFrontmatterLocations(parsed);
+        const scripts = await resolveSkillScripts(
+          parsed.scripts,
+          skillDir,
+          this.logger,
+          frontmatterLocations?.frontmatter,
+          frontmatterLocations?.items.get('scripts')
+        );
+        collected.push(...scripts);
       } catch (err) {
         if (err instanceof ResolveError) {
           errors.push(err);
@@ -744,6 +813,8 @@ export class Resolver {
       skillProps['resources'] = Array.from(byPath.values()).map((r) => ({
         relativePath: r.relativePath,
         content: r.content,
+        ...(r.origin ? { origin: r.origin } : {}),
+        ...(r.executable !== undefined ? { executable: r.executable } : {}),
       })) as Value[];
     }
 
@@ -1416,7 +1487,7 @@ export class Resolver {
 
         try {
           const skillContent = await readFile(skillMdPath, 'utf-8');
-          const parsed = parseSkillMd(skillContent);
+          const parsed = parseSkillMd(skillContent, skillMdPath);
           const skillName = parsed.name ?? entry.name;
 
           const skillProps: Record<string, Value> = {};
@@ -1426,16 +1497,20 @@ export class Resolver {
           if (parsed.content) {
             skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
           }
+          addParsedSkillMetadata(skillProps, parsed);
 
           properties[skillName] = skillProps;
           foundSkill = true;
           this.logger.debug(`Found skill "${skillName}" via SKILL.md in ${subDir}`);
-        } catch {
+        } catch (error: unknown) {
+          if (error instanceof ResolveError) {
+            throw error;
+          }
           // SKILL.md not found, try dirname.md fallback
           const dirnameMdPath = join(subDir, `${entry.name}.md`);
           try {
             const fallbackContent = await readFile(dirnameMdPath, 'utf-8');
-            const parsed = parseSkillMd(fallbackContent);
+            const parsed = parseSkillMd(fallbackContent, dirnameMdPath);
             const skillName = parsed.name ?? skillNameFromPath(dirnameMdPath);
 
             const skillProps: Record<string, Value> = {};
@@ -1445,13 +1520,17 @@ export class Resolver {
             if (parsed.content) {
               skillProps['content'] = makeTextContent(parsed.content, dirnameMdPath);
             }
+            addParsedSkillMetadata(skillProps, parsed);
 
             properties[skillName] = skillProps;
             foundSkill = true;
             this.logger.debug(
               `Found skill "${skillName}" via ${basename(dirnameMdPath)} in ${subDir}`
             );
-          } catch {
+          } catch (error: unknown) {
+            if (error instanceof ResolveError) {
+              throw error;
+            }
             // Neither file found, will recurse if depth allows
           }
         }
