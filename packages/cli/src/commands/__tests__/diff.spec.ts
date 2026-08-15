@@ -420,6 +420,154 @@ describe('diffCommand', () => {
       expect.stringContaining('All files are up to date')
     );
   });
+
+  it('should emit a machine-readable report without content by default', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      return value.endsWith('/.promptscript/project.prs');
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([
+        [
+          'github',
+          {
+            path: '.github/copilot-instructions.md',
+            content: '<!-- PromptScript marker -->\nnew content\n',
+            target: 'github',
+            source: '.promptscript/project.prs',
+          },
+        ],
+      ]),
+    });
+
+    await diffCommand({ format: 'json', noPager: true });
+    const json = consoleLog.mock.calls[0]?.[0] as string;
+    consoleLog.mockRestore();
+
+    const report = JSON.parse(json) as {
+      success: boolean;
+      hasChanges: boolean;
+      changes: Array<{ target: string; path: string; kind: string; content?: string }>;
+    };
+    expect(report).toMatchObject({
+      success: true,
+      hasChanges: true,
+      changes: [
+        expect.objectContaining({
+          target: 'github',
+          path: '.github/copilot-instructions.md',
+          kind: 'added',
+        }),
+      ],
+    });
+    expect(report.changes[0]?.content).toBeUndefined();
+    expect(mockSucceed).not.toHaveBeenCalled();
+    expect(mockPagerFlush).not.toHaveBeenCalled();
+    expect(process.exitCode).toBeUndefined();
+  });
+
+  it('should include canonical content when requested', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([
+        [
+          'github',
+          {
+            path: 'CLAUDE.md',
+            content: '<!-- PromptScript marker -->\ncontent\n',
+            target: 'github',
+            source: '.promptscript/project.prs',
+          },
+        ],
+      ]),
+    });
+
+    await diffCommand({ format: 'json', includeContent: true });
+    const json = consoleLog.mock.calls[0]?.[0] as string;
+    consoleLog.mockRestore();
+
+    const report = JSON.parse(json) as {
+      contentIncluded: boolean;
+      changes: Array<{ content?: string }>;
+    };
+    expect(report.contentIncluded).toBe(true);
+    expect(report.changes[0]?.content).toBe('content\n');
+  });
+
+  it('should report compilation errors as failed JSON without changes', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: false,
+      errors: [
+        {
+          name: 'ParseError',
+          code: 'PS0001',
+          message: 'Parse failure',
+        },
+      ],
+      warnings: [],
+      outputs: new Map(),
+    });
+
+    await diffCommand({ format: 'json' });
+    const json = consoleLog.mock.calls[0]?.[0] as string;
+    consoleLog.mockRestore();
+
+    const report = JSON.parse(json) as {
+      success: boolean;
+      hasChanges: boolean;
+      errors: Array<{ code: string; message: string }>;
+    };
+    expect(report).toMatchObject({
+      success: false,
+      hasChanges: false,
+      errors: [{ code: 'PS0001', message: 'Parse failure' }],
+    });
+    expect(process.exitCode).toBe(1);
+  });
 });
 
 describe('createDiffLogger', () => {

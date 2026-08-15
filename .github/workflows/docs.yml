@@ -65,6 +65,8 @@ jobs:
         run: |
           mkdir -p docs/schema
           cp schema/config.json docs/schema/config.json
+          mkdir -p docs/schema/diff
+          cp schema/diff-v1.json docs/schema/diff/v1.json
 
       - name: Setup Python
         uses: actions/setup-python@v7

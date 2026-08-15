@@ -17,6 +17,10 @@ export interface FormatterOutput {
   path: string;
   /** Formatted content */
   content: string;
+  /** Target formatter that produced this output. */
+  target?: string;
+  /** Source entry used to produce this output. */
+  source?: string;
   /** File mode (e.g. 0o755 for executable scripts) */
   mode?: number;
   /** Structured merge plan for JSON/TOML settings files */

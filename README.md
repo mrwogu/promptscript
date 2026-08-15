@@ -302,7 +302,7 @@ See exact output paths and feature support in the
 - **Scoped monorepo builds** - compile one package with `prs build <name>` or every profile with
   `prs compile --all-builds`.
 - **CI-ready output** - use `prs validate --strict --format json`, `prs compile --dry-run`, and
-  `prs diff`.
+  `prs diff --format json` for deterministic machine-readable changes.
 
 ## Adopt Without a Rewrite
 

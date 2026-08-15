@@ -134,6 +134,21 @@ function addMarkerToOutput(
   return { ...output, content: lines.join('\n') };
 }
 
+function addOutputProvenance(
+  output: FormatterOutput,
+  source: string,
+  target: string
+): FormatterOutput {
+  return {
+    ...output,
+    source,
+    target,
+    additionalFiles: output.additionalFiles?.map((additionalFile) =>
+      addOutputProvenance(additionalFile, source, target)
+    ),
+  };
+}
+
 function normalizeOutputDir(dir: string): string {
   return dir
     .replace(/\\/g, '/')
@@ -601,7 +616,11 @@ export class Compiler {
           outputPathDefinitions.set(output.path, output);
 
           // Add PromptScript marker to all outputs for overwrite detection
-          const markedOutput = addMarkerToOutput(output, sourceLabel, formatter.name);
+          const markedOutput = addOutputProvenance(
+            addMarkerToOutput(output, sourceLabel, formatter.name),
+            sourceLabel,
+            formatter.name
+          );
           const previousManagedDirectories =
             outputs.get(output.path)?.managedOutputDirectories ?? [];
           const previousManagedFiles = outputs.get(output.path)?.managedOutputFiles ?? [];
@@ -661,7 +680,11 @@ export class Compiler {
 
             outputs.set(
               additionalFile.path,
-              addMarkerToOutput(additionalFile, sourceLabel, formatter.name)
+              addOutputProvenance(
+                addMarkerToOutput(additionalFile, sourceLabel, formatter.name),
+                sourceLabel,
+                formatter.name
+              )
             );
             if (additionalFile.additionalFiles) {
               queue.push(...additionalFile.additionalFiles);
@@ -706,6 +729,8 @@ export class Compiler {
           const skillOutput: FormatterOutput = {
             path: skillPath,
             content: injectedContent,
+            source: sourceLabel,
+            target: formatter.name,
           };
           const existingOwner = outputPathOwners.get(skillPath);
           if (existingOwner) {

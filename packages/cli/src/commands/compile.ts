@@ -1,5 +1,4 @@
-import { resolve, dirname, isAbsolute, relative } from 'path';
-import { fileURLToPath } from 'url';
+import { resolve, isAbsolute, relative } from 'path';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import chokidar from 'chokidar';
@@ -47,40 +46,7 @@ import {
   planLegacyFactoryHooksMigration,
   type LegacyFactoryMigrationPlan,
 } from '../utils/legacy-factory-hooks.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-/**
- * Resolve and read the bundled PromptScript SKILL.md.
- * Uses the same dual-candidate pattern as init.ts to handle both
- * development (packages/cli/skills/...) and bundled (dist/packages/cli/skills/...) modes.
- * Returns the content string, or undefined if the file is missing.
- */
-async function loadBundledSkillContent(logger: Logger): Promise<string | undefined> {
-  const skillRelPath = 'skills/promptscript/SKILL.md';
-  const candidates = [
-    resolve(__dirname, skillRelPath), // bundled: dist/packages/cli/skills/...
-    resolve(__dirname, '..', '..', skillRelPath), // dev: packages/cli/skills/...
-  ];
-
-  for (const candidate of candidates) {
-    if (existsSync(candidate)) {
-      try {
-        const content = await readFile(candidate, 'utf-8');
-        logger.debug(
-          `Loaded bundled PromptScript skill from ${candidate} (${content.length} bytes)`
-        );
-        return content;
-      } catch {
-        continue;
-      }
-    }
-  }
-
-  logger.verbose('Warning: Could not load bundled PromptScript SKILL.md — skill injection skipped');
-  return undefined;
-}
+import { loadBundledSkillContent } from '../utils/bundled-skill.js';
 
 async function loadCompileLockfile(
   projectRoot: string,

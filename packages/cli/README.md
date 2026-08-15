@@ -339,7 +339,14 @@ Preview before writing:
 ```bash
 prs compile --dry-run
 prs diff --all
+prs diff --format json
 ```
+
+`prs diff --format json` emits a versioned report with target, path, source provenance, ownership,
+change kind, deterministic content hashes, warnings, and unsupported capability entries. Content is
+omitted by default; add `--include-content` when automation needs canonical output text. Reports
+with changes exit 0; compilation and report errors emit `success: false` and exit 1. See the
+[diff schema](https://getpromptscript.dev/schema/diff/v1.json).
 
 ## CLI Commands
 

@@ -16,6 +16,22 @@ export { compileCommand } from './commands/compile.js';
 export { validateCommand } from './commands/validate.js';
 export { pullCommand } from './commands/pull.js';
 export { diffCommand } from './commands/diff.js';
+export {
+  DIFF_SCHEMA_URL,
+  DIFF_SCHEMA_VERSION,
+  buildCompilationDiff,
+  createCompilationDiffErrorReport,
+} from './utils/diff-report.js';
+export type {
+  BuildCompilationDiffOptions,
+  CompilationDiffChange,
+  CompilationDiffReport,
+  CompilationDiffSummary,
+  DiffChangeKind,
+  DiffLocation,
+  DiffOwnership,
+  DiffWarning,
+} from './utils/diff-report.js';
 export { checkCommand } from './commands/check.js';
 export { updateCheckCommand } from './commands/update-check.js';
 export { importCommand } from './commands/import.js';
