@@ -413,6 +413,83 @@ describe('Resolver — registry marker handling', () => {
     expect(result.sources).toHaveLength(1);
   });
 
+  it('replays a successful registry preflight without cloning twice', async () => {
+    const tempDir = join(testCacheDir, 'preflight-result');
+    await fs.mkdir(tempDir, { recursive: true });
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      [
+        '@meta {',
+        '  id: "preflight-result"',
+        '  syntax: "1.4.0"',
+        '}',
+        '',
+        '@use @acme/ordered',
+      ].join('\n')
+    );
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.writeFile(
+        join(targetDir, 'ordered.prs'),
+        '@meta { id: "ordered" syntax: "1.5.0" } @identity { """ordered""" }'
+      );
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'registry-cache'),
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(result.errors).toEqual([]);
+    expect(result.ast).not.toBeNull();
+    expect(mockGit.clone).toHaveBeenCalledTimes(1);
+  });
+
+  it('replays a registry preflight error without retrying the clone', async () => {
+    const tempDir = join(testCacheDir, 'preflight-error');
+    await fs.mkdir(tempDir, { recursive: true });
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      [
+        '@meta {',
+        '  id: "preflight-error"',
+        '  syntax: "1.4.0"',
+        '}',
+        '',
+        '@use @acme/ordered',
+      ].join('\n')
+    );
+    mockGit.clone
+      .mockRejectedValueOnce(new Error('preflight clone failure'))
+      .mockImplementation(async (_url: string, targetDir: string) => {
+        await fs.writeFile(
+          join(targetDir, 'ordered.prs'),
+          '@meta { id: "ordered" syntax: "1.5.0" } @identity { """ordered""" }'
+        );
+      });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'registry-cache'),
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(result.errors.map((error) => error.message).join('\n')).toContain(
+      'preflight clone failure'
+    );
+    expect(mockGit.clone).toHaveBeenCalledTimes(1);
+  });
+
   it('prefers an exact vendored dependency over cache and network access', async () => {
     const tempDir = join(testCacheDir, 'vendor-project');
     const vendorDir = join(tempDir, '.promptscript', 'vendor');
@@ -1353,12 +1430,10 @@ describe('Resolver — registry marker handling', () => {
       throw new Error('skills block should be ObjectContent');
     }
     const skill = skillsBlock.content.properties['registry-skill-with-refs'] as
-      | Record<string, unknown>
-      | undefined;
+      Record<string, unknown> | undefined;
     expect(skill).toBeDefined();
     const resources = skill!['resources'] as
-      | Array<{ relativePath: string; content: string }>
-      | undefined;
+      Array<{ relativePath: string; content: string }> | undefined;
     expect(resources).toBeDefined();
     const paths = (resources ?? []).map((r) => r.relativePath).sort();
     expect(paths).toContain('references/checklist.md');
