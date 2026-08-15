@@ -35,6 +35,7 @@
     "@promptscript/formatters": "workspace:^",
     "@promptscript/resolver": "workspace:^",
     "@promptscript/validator": "workspace:^",
-    "chokidar": "^5.0.0"
+    "chokidar": "^5.0.0",
+    "minimatch": "^10.2.6"
   }
 }

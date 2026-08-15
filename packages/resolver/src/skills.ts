@@ -28,7 +28,7 @@ export interface SkillResource {
   relativePath: string;
   /** File content (utf-8) */
   content: string;
-  /** Absolute source path (non-serializable resolver metadata, stripped from public AST) */
+  /** Absolute source path used for dependency tracking */
   origin?: string;
   /** Whether the source file had executable mode bits set */
   executable?: boolean;
@@ -1463,7 +1463,7 @@ export async function discoverSkillResources(
         continue;
       }
 
-      resources.push({ relativePath: relPath, content });
+      resources.push({ relativePath: relPath, content, origin: fullPath });
     } catch {
       // Skip files that can't be read (permissions, I/O errors)
       logger.verbose(`Skipping unreadable resource: ${relPath}`);
@@ -1580,7 +1580,7 @@ export async function resolveSkillReferences(
       logger?.verbose(`Empty reference file: ${normalizedRef}`);
     }
 
-    resources.push({ relativePath: normalizedRef, content });
+    resources.push({ relativePath: normalizedRef, content, origin: fullPath });
   }
 
   // Deduplicate by basename - last occurrence wins (higher layer override)
@@ -2091,6 +2091,7 @@ export async function resolveNativeSkills(
           allResources.push({
             relativePath: `@shared/${shared.relativePath}`,
             content: shared.content,
+            ...(shared.origin ? { origin: shared.origin } : {}),
           });
         }
 
