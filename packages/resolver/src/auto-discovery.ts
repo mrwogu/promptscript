@@ -1,5 +1,6 @@
 import { readFile, readdir, access, lstat } from 'fs/promises';
 import { resolve, basename } from 'path';
+import { ResolveError } from '@promptscript/core';
 import type { Program, Block, TextContent, Value } from '@promptscript/core';
 import { parseSkillMd } from './skills.js';
 import { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
@@ -41,6 +42,30 @@ function parseFrontmatter(content: string): Record<string, string> {
   return fields;
 }
 
+function addParsedSkillMetadata(
+  skillProps: Record<string, Value>,
+  parsed: ReturnType<typeof parseSkillMd>
+): void {
+  if (parsed.params !== undefined) skillProps['params'] = parsed.params as unknown as Value;
+  if (parsed.inputs !== undefined) skillProps['inputs'] = parsed.inputs as unknown as Value;
+  if (parsed.outputs !== undefined) skillProps['outputs'] = parsed.outputs as unknown as Value;
+  if (parsed.references !== undefined) {
+    skillProps['references'] = parsed.references as unknown as Value;
+  }
+  if (parsed.scripts !== undefined) skillProps['scripts'] = parsed.scripts as unknown as Value;
+  if (parsed.license !== undefined) skillProps['license'] = parsed.license;
+  if (parsed.compatibility !== undefined) skillProps['compatibility'] = parsed.compatibility;
+  if (parsed.metadata !== undefined) {
+    skillProps['metadata'] = parsed.metadata as unknown as Value;
+  }
+  if (parsed.allowedTools !== undefined) {
+    skillProps['allowedTools'] = parsed.allowedTools as unknown as Value;
+  }
+  if (parsed.rawFrontmatter !== undefined) {
+    skillProps['__rawFrontmatter'] = parsed.rawFrontmatter;
+  }
+}
+
 /**
  * Discover SKILL.md files in subdirectories of the given path.
  * Returns an ObjectContent mapping skill-name -> skill properties.
@@ -70,7 +95,7 @@ async function discoverSkills(dir: string): Promise<Record<string, Value> | null
 
     try {
       const raw = await readFile(skillMdPath, 'utf-8');
-      const parsed = parseSkillMd(raw);
+      const parsed = parseSkillMd(raw, skillMdPath);
 
       const skillProps: Record<string, Value> = {};
       if (parsed.description) {
@@ -79,12 +104,13 @@ async function discoverSkills(dir: string): Promise<Record<string, Value> | null
       if (parsed.content) {
         skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
       }
-      if (parsed.rawFrontmatter) {
-        skillProps['__rawFrontmatter'] = parsed.rawFrontmatter;
-      }
+      addParsedSkillMetadata(skillProps, parsed);
 
       properties[entry.name] = skillProps;
-    } catch {
+    } catch (error: unknown) {
+      if (error instanceof ResolveError) {
+        throw error;
+      }
       // Skip unreadable skill files
     }
   }
@@ -103,7 +129,7 @@ async function discoverRootSkill(dir: string): Promise<Record<string, Value> | n
 
   try {
     const raw = await readFile(skillMdPath, 'utf-8');
-    const parsed = parseSkillMd(raw);
+    const parsed = parseSkillMd(raw, skillMdPath);
 
     const skillName = parsed.name || basename(dir);
     const skillProps: Record<string, Value> = {};
@@ -113,12 +139,13 @@ async function discoverRootSkill(dir: string): Promise<Record<string, Value> | n
     if (parsed.content) {
       skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
     }
-    if (parsed.rawFrontmatter) {
-      skillProps['__rawFrontmatter'] = parsed.rawFrontmatter;
-    }
+    addParsedSkillMetadata(skillProps, parsed);
 
     return { [skillName]: skillProps };
-  } catch {
+  } catch (error: unknown) {
+    if (error instanceof ResolveError) {
+      throw error;
+    }
     return null;
   }
 }
