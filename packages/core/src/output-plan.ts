@@ -289,8 +289,7 @@ function flattenCandidate(candidate: OutputPlanCandidate): OutputPlanFile[] {
 
 function comparePaths(left: OutputPlanFile, right: OutputPlanFile): number {
   if (left.path < right.path) return -1;
-  if (left.path > right.path) return 1;
-  return 0;
+  return Number(left.path > right.path);
 }
 
 /**

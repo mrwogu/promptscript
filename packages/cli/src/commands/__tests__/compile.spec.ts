@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Logger } from '@promptscript/core';
+import type { Logger, OutputPlan } from '@promptscript/core';
 import type { CliServices } from '../../services.js';
 
 /**
@@ -17,6 +17,7 @@ const {
   mockWriteFile,
   mockChmod,
   mockMkdir,
+  mockLstatSync,
   mockReadFile,
   mockWarn,
   mockWarning,
@@ -38,6 +39,7 @@ const {
   const mockWriteFile = vi.fn();
   const mockChmod = vi.fn();
   const mockMkdir = vi.fn();
+  const mockLstatSync = vi.fn();
   const mockReadFile = vi.fn();
   const mockWarn = vi.fn();
   const mockWarning = vi.fn();
@@ -66,6 +68,7 @@ const {
     mockWriteFile,
     mockChmod,
     mockMkdir,
+    mockLstatSync,
     mockReadFile,
     mockWarn,
     mockWarning,
@@ -157,6 +160,7 @@ vi.mock('fs', async (importOriginal) => {
   return {
     ...actual,
     existsSync: (...args: unknown[]) => mockExistsSync(...args),
+    lstatSync: (...args: unknown[]) => mockLstatSync(...args),
     readFileSync: vi.fn().mockReturnValue(''),
   };
 });
@@ -204,6 +208,27 @@ vi.mock('../../utils/managed-output-cleanup.js', async (importOriginal) => {
 
 import { compileCommand } from '../compile.js';
 
+function createTestOutputPlan(path: string): OutputPlan {
+  const file = {
+    path,
+    originalPath: path,
+    content: 'content',
+    owner: 'test',
+    role: 'primary' as const,
+  };
+  return {
+    files: [file],
+    outputs: new Map([[path, file]]),
+    owners: new Map([[path, 'test']]),
+    collisions: [],
+    managedPaths: { directories: [], files: [] },
+    resources: [],
+    injected: [],
+    managedOutputDirectories: [],
+    managedOutputFiles: [],
+  };
+}
+
 describe('compile command - createCliLogger warn path', () => {
   let mockServices: CliServices;
 
@@ -233,6 +258,10 @@ describe('compile command - createCliLogger warn path', () => {
     mockWriteFile.mockResolvedValue(undefined);
     mockChmod.mockResolvedValue(undefined);
     mockMkdir.mockResolvedValue(undefined);
+    mockLstatSync.mockImplementation((path: string) => {
+      if (path === '/') return { isSymbolicLink: () => false };
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
     mockReadFile.mockRejectedValue(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }));
     mockCleanupManagedOutputs.mockResolvedValue({ removed: [], removedDirectories: [] });
     mockRewriteHookOutputIfUnchanged.mockResolvedValue(true);
@@ -316,6 +345,150 @@ describe('compile command - createCliLogger warn path', () => {
 
     // Assert: ConsoleOutput.warn was called with the message
     expect(mockWarn).toHaveBeenCalledWith('test warning message');
+  });
+
+  it('should derive writes and cleanup from the shared output plan', async () => {
+    const outputPlan = {
+      files: [
+        {
+          path: 'planned.md',
+          originalPath: './planned.md',
+          content: 'planned content',
+          mode: 0o755,
+          merge: { format: 'json' as const, owner: 'planned', operations: [] },
+          managedOutputDirectories: ['.planned'],
+          managedOutputFiles: ['.planned/settings.json'],
+          owner: 'planned',
+          role: 'primary' as const,
+        },
+        {
+          path: 'fallback.json',
+          originalPath: 'fallback.json',
+          content: '{}',
+          mode: 0o640,
+          merge: { format: 'json' as const, owner: 'fallback', operations: [] },
+          managedOutputDirectories: ['.fallback'],
+          managedOutputFiles: ['.fallback/settings.json'],
+          owner: 'fallback',
+          role: 'resource' as const,
+          resourceOf: 'planned.md',
+        },
+      ],
+      outputs: new Map(),
+      owners: new Map(),
+      collisions: [],
+      managedPaths: {
+        directories: ['.planned', '.fallback'],
+        files: ['.planned/settings.json', '.fallback/settings.json'],
+      },
+      resources: [],
+      injected: [],
+      managedOutputDirectories: ['.planned', '.fallback'],
+      managedOutputFiles: ['.planned/settings.json', '.fallback/settings.json'],
+    } satisfies OutputPlan;
+
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        [
+          './planned.md',
+          {
+            path: './planned.md',
+            content: 'current planned content',
+            mode: 0o700,
+            merge: { format: 'json' as const, owner: 'current', operations: [] },
+            managedOutputDirectories: ['.current'],
+            managedOutputFiles: ['.current/settings.json'],
+          },
+        ],
+        ['legacy.md', { path: 'legacy.md', content: 'legacy content' }],
+      ]),
+      outputPlan,
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({}, mockServices);
+
+    expect(mockWriteFile).toHaveBeenCalledWith(
+      expect.stringContaining('/planned.md'),
+      expect.stringContaining('current planned content'),
+      'utf-8'
+    );
+    expect(mockWriteFile).toHaveBeenCalledWith(
+      expect.stringContaining('/fallback.json'),
+      '{}',
+      'utf-8'
+    );
+    expect(mockWriteFile).toHaveBeenCalledWith(
+      expect.stringContaining('/legacy.md'),
+      expect.stringContaining('legacy content'),
+      'utf-8'
+    );
+    expect(mockCleanupManagedOutputs).toHaveBeenCalledWith(
+      expect.any(Map),
+      expect.objectContaining({ outputRoot: process.cwd() })
+    );
+    const cleanupOutputs = mockCleanupManagedOutputs.mock.calls[0]?.[0] as Map<
+      string,
+      { path: string }
+    >;
+    expect(cleanupOutputs.get('planned.md')?.path).toBe('planned.md');
+    expect(cleanupOutputs.get('fallback.json')?.path).toBe('fallback.json');
+    expect(cleanupOutputs.get('legacy.md')?.path).toBe('legacy.md');
+  });
+
+  it('should reject planned outputs that traverse symlinks', async () => {
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      return (
+        value.includes('project.prs') ||
+        value.endsWith('promptscript.yaml') ||
+        value.includes('nested')
+      );
+    });
+    mockLstatSync.mockReturnValue({ isSymbolicLink: () => true });
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map(),
+      outputPlan: createTestOutputPlan('nested/output.md'),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({}, mockServices);
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith(expect.stringContaining('symbolic link'));
+  });
+
+  it('should fail when planned output symlinks cannot be checked', async () => {
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      return (
+        value.includes('project.prs') ||
+        value.endsWith('promptscript.yaml') ||
+        value.includes('nested')
+      );
+    });
+    mockLstatSync.mockImplementation(() => {
+      throw new Error('permission denied');
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map(),
+      outputPlan: createTestOutputPlan('nested/output.md'),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({}, mockServices);
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith(expect.stringContaining('cannot be checked'));
   });
 
   it('should report obsolete generated files removed after compilation', async () => {

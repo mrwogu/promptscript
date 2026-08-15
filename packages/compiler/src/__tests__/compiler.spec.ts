@@ -1068,6 +1068,27 @@ describe('Compiler', () => {
       expect(result.outputs.has('./success/output.md')).toBe(true);
       expect(result.errors).toHaveLength(1);
     });
+
+    it('should reject formatter paths that escape the project', async () => {
+      const ast = createTestProgram();
+      const invalidFormatter = createMockFormatter('invalid', '../outside.md');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [invalidFormatter],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(false);
+      expect(result.errors[0]?.message).toContain(
+        'Output planning failed: Output path must be project-relative and contained'
+      );
+      expect(result.outputPlan?.files).toEqual([]);
+    });
   });
 
   describe('compile - output path collision warning', () => {

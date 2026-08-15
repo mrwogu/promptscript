@@ -472,6 +472,31 @@ describe('BrowserCompiler', () => {
     expect(result.stats.formatTime).toBeGreaterThanOrEqual(0);
     expect(result.stats.totalTime).toBeGreaterThanOrEqual(0);
   });
+
+  it('should reject formatter paths that escape the virtual project', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': '@meta { id: "test" syntax: "1.0.0" }',
+    });
+    const formatter: Formatter = {
+      name: 'invalid',
+      outputPath: '../outside.md',
+      description: 'Invalid path formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn(() => ({ path: '../outside.md', content: '# Invalid' })),
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+      referencesMode: () => 'none',
+    };
+
+    const compiler = new BrowserCompiler({ fs, formatters: [formatter] });
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors[0]?.message).toContain(
+      'Output planning failed: Output path must be project-relative and contained'
+    );
+    expect(result.outputPlan?.files).toEqual([]);
+  });
 });
 
 describe('BrowserCompiler advanced', () => {
