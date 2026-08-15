@@ -16,6 +16,7 @@ import { DEFAULT_OUTPUT_PATHS } from './target-output-paths.js';
 import {
   createTargetCapability,
   assertValidTargetCapabilities,
+  TARGET_DELEGATES,
   TargetCapabilitiesError,
   type TargetCapability,
 } from './target-capabilities.js';
@@ -796,6 +797,20 @@ export function validateTargetDefinitionConsistency(
       !definition.features.hasCommands
     ) {
       issues.push(`${target}: slash commands are marked supported without command output`);
+    }
+  }
+
+  for (const [target, delegate] of Object.entries(TARGET_DELEGATES)) {
+    const targetDefinition = definitions[target as KnownTarget];
+    const delegateDefinition = definitions[delegate as KnownTarget];
+    if (!targetDefinition || !delegateDefinition) continue;
+
+    for (const [featureId, status] of Object.entries(delegateDefinition.featureSupport)) {
+      if (targetDefinition.featureSupport[featureId] !== status) {
+        issues.push(
+          `${target}: feature "${featureId}" differs from delegated target "${delegate}"`
+        );
+      }
     }
   }
 

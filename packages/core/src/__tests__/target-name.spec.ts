@@ -22,6 +22,7 @@ import {
   getTargetFeatureStatus,
   getTargetSectionCapability,
   resolveTargetVersion,
+  TARGET_DELEGATES,
   TargetCapabilitiesError,
   validateTargetCapabilities,
   type TargetCapability,
@@ -418,6 +419,31 @@ describe('Target catalog integrity', () => {
   it('should have complete and consistent capability metadata', () => {
     expect(validateTargetCapabilities(TARGET_DEFINITIONS)).toEqual([]);
     expect(validateTargetDefinitionConsistency()).toEqual([]);
+  });
+
+  it('should expose canonical MCP metadata for every declared MCP resource', () => {
+    for (const target of KNOWN_TARGETS) {
+      const definition = TARGET_DEFINITIONS[target];
+      const mcpResource = definition.resources.find((resource) => resource.kind === 'mcp');
+
+      if (!mcpResource) {
+        expect(definition.mcpConfigPath).toBeNull();
+        expect(definition.mcpConfigFormat).toBeNull();
+        continue;
+      }
+
+      expect(definition.mcpConfigPath, `${target} MCP path`).toBe(mcpResource.path);
+      expect(definition.mcpConfigFormat, `${target} MCP format`).toBeDefined();
+    }
+  });
+
+  it('should inherit all feature flags for delegated targets', () => {
+    for (const [target, delegate] of Object.entries(TARGET_DELEGATES)) {
+      const targetDefinition = TARGET_DEFINITIONS[target as KnownTarget];
+      const delegateDefinition = TARGET_DEFINITIONS[delegate as KnownTarget];
+
+      expect(targetDefinition.featureSupport).toEqual(delegateDefinition.featureSupport);
+    }
   });
 
   it('should resolve version aliases through the capability contract', () => {

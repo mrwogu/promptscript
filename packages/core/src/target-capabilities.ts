@@ -497,6 +497,10 @@ const FEATURE_STATUS_GROUPS: Readonly<Record<string, FeatureStatusGroups>> = {
   },
 };
 
+export const TARGET_DELEGATES: Readonly<Partial<Record<KnownTarget, KnownTarget>>> = {
+  grok: 'claude',
+};
+
 const MCP_CONFIGS: Readonly<
   Partial<Record<KnownTarget, { path: string; format: 'json' | 'toml' }>>
 > = {
@@ -516,6 +520,7 @@ const MCP_CONFIGS: Readonly<
   'qwen-code': { path: '.qwen/mcp.json', format: 'json' },
   crush: { path: '.crush/mcp.json', format: 'json' },
   continue: { path: '.continue/config.json', format: 'json' },
+  zed: { path: '.zed/settings.json', format: 'json' },
   grok: { path: '.mcp.json', format: 'json' },
 };
 
@@ -561,7 +566,7 @@ const NATIVE_RESOURCE_PATHS: Readonly<Partial<Record<KnownTarget, NativeResource
   },
 };
 
-const SKILLS_IN_MULTIFILE: ReadonlySet<KnownTarget> = new Set(['factory', 'opencode', 'gemini']);
+const SKILLS_IN_MULTIFILE: ReadonlySet<KnownTarget> = new Set(['factory', 'gemini']);
 
 const UNSUPPORTED_BLOCKS: Readonly<Partial<Record<KnownTarget, readonly string[]>>> = {
   hermes: [
@@ -689,8 +694,7 @@ const VERSION_CAPABILITIES: Readonly<Record<KnownTarget, TargetVersionData>> = {
       simple: { name: 'simple', description: 'Single OPENCODE.md file', outputPath: 'OPENCODE.md' },
       multifile: {
         name: 'multifile',
-        description:
-          'OPENCODE.md + .opencode/skills/<name>/SKILL.md + .opencode/commands/<name>.md',
+        description: 'OPENCODE.md + .opencode/commands/<name>.md (skills via full mode)',
         outputPath: 'OPENCODE.md',
       },
       full: {
@@ -770,12 +774,12 @@ const VERSION_CAPABILITIES: Readonly<Record<KnownTarget, TargetVersionData>> = {
       simple: { name: 'simple', description: 'Single AGENTS.md file', outputPath: 'AGENTS.md' },
       multifile: {
         name: 'multifile',
-        description: 'AGENTS.md + .codex/agents/<name>.toml + .agents/skills/<name>/SKILL.md',
+        description: 'AGENTS.md + .codex/agents/<name>.toml',
         outputPath: 'AGENTS.md',
       },
       full: {
         name: 'full',
-        description: 'Multifile + skills (Codex full mode)',
+        description: 'AGENTS.md + .codex/agents/<name>.toml + .agents/skills/<name>/SKILL.md',
         outputPath: 'AGENTS.md',
       },
     },
@@ -789,12 +793,12 @@ const VERSION_CAPABILITIES: Readonly<Record<KnownTarget, TargetVersionData>> = {
       },
       multifile: {
         name: 'multifile',
-        description: 'Single .continue/rules/project.md file (skills via full mode)',
+        description: '.continue/rules/project.md + .continue/config.json',
         outputPath: '.continue/rules/project.md',
       },
       full: {
         name: 'full',
-        description: '.continue/rules/project.md + .continue/skills/<name>/SKILL.md',
+        description: '.continue/rules/project.md + .continue/config.json',
         outputPath: '.continue/rules/project.md',
       },
     },
@@ -950,7 +954,7 @@ const VERSION_CAPABILITIES: Readonly<Record<KnownTarget, TargetVersionData>> = {
       simple: { name: 'simple', description: 'Single AGENTS.md file', outputPath: 'AGENTS.md' },
       multifile: {
         name: 'multifile',
-        description: 'AGENTS.md + .crush/skills/<name>/SKILL.md + .crush/mcp.json',
+        description: 'AGENTS.md + .crush/mcp.json (skills via full mode)',
         outputPath: 'AGENTS.md',
       },
       full: {
@@ -1427,6 +1431,11 @@ function featureStatus(
   featureId: string,
   seed: TargetCapabilitySeed
 ): TargetFeatureStatus {
+  const delegatedTarget = TARGET_DELEGATES[target];
+  if (delegatedTarget) {
+    return featureStatus(delegatedTarget, featureId, seed);
+  }
+
   if (
     featureId === 'markdown-output' ||
     featureId === 'code-blocks' ||
@@ -1691,6 +1700,12 @@ export function validateTargetCapabilities(
       issues.push(`${target}: MCP config format is declared without a path`);
     }
     if (
+      capability.mcpConfigPath === null &&
+      resources.some((resource) => resource.kind === 'mcp')
+    ) {
+      issues.push(`${target}: MCP resource is declared without a config path`);
+    }
+    if (
       typeof hookCapability?.configPath === 'string' &&
       !resources.some(
         (resource) => resource.kind === 'hooks' && resource.path === hookCapability.configPath
@@ -1701,6 +1716,20 @@ export function validateTargetCapabilities(
 
     if (!hookCapability) {
       issues.push(`${target}: hook capability is missing`);
+    }
+  }
+
+  for (const [target, delegate] of Object.entries(TARGET_DELEGATES)) {
+    const targetCapability = capabilities[target as KnownTarget];
+    const delegateCapability = capabilities[delegate as KnownTarget];
+    if (!targetCapability || !delegateCapability) continue;
+
+    for (const [featureId, status] of Object.entries(delegateCapability.featureSupport)) {
+      if (targetCapability.featureSupport[featureId] !== status) {
+        issues.push(
+          `${target}: feature "${featureId}" differs from delegated target "${delegate}"`
+        );
+      }
     }
   }
 

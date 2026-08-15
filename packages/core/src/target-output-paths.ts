@@ -3,7 +3,10 @@ import type { KnownTarget } from './types/config.js';
 /**
  * Default output paths for each target.
  */
-export const DEFAULT_OUTPUT_PATHS = {
+export type DefaultOutputPathMap = Readonly<Record<KnownTarget, string>> &
+  Readonly<Record<string, string>>;
+
+const DEFAULT_OUTPUT_PATH_VALUES = {
   // Original 7
   github: '.github/copilot-instructions.md',
   claude: 'CLAUDE.md',
@@ -60,3 +63,6 @@ export const DEFAULT_OUTPUT_PATHS = {
   forgecode: 'AGENTS.md',
   hermes: 'AGENTS.md',
 } as const satisfies Record<KnownTarget, string>;
+
+export const DEFAULT_OUTPUT_PATHS: typeof DEFAULT_OUTPUT_PATH_VALUES & DefaultOutputPathMap =
+  DEFAULT_OUTPUT_PATH_VALUES;
