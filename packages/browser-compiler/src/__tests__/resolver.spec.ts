@@ -297,6 +297,18 @@ describe('BrowserResolver', () => {
       expect(result.errors.length).toBeGreaterThan(0);
     });
 
+    it('should reject relative imports outside the virtual project root', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.0.0" }
+@use ../outside`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      await expect(resolver.resolve('project.prs')).rejects.toThrow(
+        'Path traversal outside project root'
+      );
+    });
+
     it('should use cache when enabled', async () => {
       const fs = new VirtualFileSystem({
         'project.prs': `@meta { id: "test" syntax: "1.0.0" }`,

@@ -406,6 +406,11 @@ export class BrowserResolver {
       const subParts = segment.split('/');
       for (const part of subParts) {
         if (part === '..') {
+          if (parts.length === 0) {
+            throw new Error(
+              `Path traversal outside project root is not allowed: ${segments.join('/')}`
+            );
+          }
           parts.pop();
         } else if (part !== '.' && part !== '') {
           parts.push(part);

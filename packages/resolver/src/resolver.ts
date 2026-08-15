@@ -1048,12 +1048,6 @@ export class Resolver {
 
     const { repoUrl, path: subPath, version } = parsed;
 
-    // Add to resolving set for circular dependency detection
-    if (context.resolving.has(marker)) {
-      this.logger.debug(`Circular dependency detected: ${marker}`);
-      throw new CircularDependencyError([...context.resolving, marker]);
-    }
-
     // Check internal AST cache
     if (this.cacheEnabled && this.cache.has(marker)) {
       this.logger.debug(`Cache hit (AST): ${marker}`);
@@ -1269,16 +1263,6 @@ export class Resolver {
 
         // Containment check for directory discovery path
         if (!isRoot) {
-          const dirRel = relative(resolve(cachePath), resolve(discoverDir));
-          if (dirRel.startsWith('..')) {
-            errors.push(
-              new ResolveError(
-                `Path traversal detected: subpath '${subPath}' escapes repository cache boundary.`
-              )
-            );
-            context.resolving.delete(marker);
-            return { ast: null, sources: [marker], errors };
-          }
           if (existsSync(discoverDir) && !(await isRealPathInside(discoverDir, cachePath))) {
             errors.push(
               new ResolveError(
