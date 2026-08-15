@@ -1,7 +1,7 @@
 import { resolve, dirname, isAbsolute, relative } from 'path';
 import { fileURLToPath } from 'url';
 import { readFile } from 'fs/promises';
-import { existsSync } from 'fs';
+import { existsSync, lstatSync } from 'fs';
 import chokidar from 'chokidar';
 import { minimatch } from 'minimatch';
 import type { CompileOptions } from '../types.js';
@@ -15,7 +15,7 @@ import type {
 } from '@promptscript/core';
 import { ErrorCode, isValidLockfile, PSError } from '@promptscript/core';
 
-import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
+import type { CompileResult, FormatterOutput, OutputPlan } from '@promptscript/compiler';
 import { loadEffectiveConfig, CONFIG_FILES } from '../config/loader.js';
 import { resolvePrettierOptions } from '../prettier/loader.js';
 import { postFormatWithPrettier } from '../prettier/post-format.js';
@@ -221,6 +221,36 @@ function resolveProjectPath(projectRoot: string, path: string): string {
   return isAbsolute(path) ? path : resolve(projectRoot, path);
 }
 
+function validateWritePathSymlinks(outputPath: string, outputRoot: string): string | undefined {
+  const root = resolve(outputRoot);
+  const candidate = resolve(root, outputPath);
+  const relativePath = relative(root, candidate);
+  if (relativePath === '' || relativePath.startsWith('..') || isAbsolute(relativePath)) return;
+
+  let current = root;
+  for (const segment of relativePath.split(/[\\/]/)) {
+    current = resolve(current, segment);
+    if (!existsSync(current)) break;
+    let stat: ReturnType<typeof lstatSync> | undefined;
+    try {
+      stat = lstatSync(current);
+    } catch (error: unknown) {
+      if (
+        error instanceof Error &&
+        'code' in error &&
+        (error as NodeJS.ErrnoException).code === 'ENOENT'
+      ) {
+        break;
+      }
+      return `Output path "${outputPath}" cannot be checked for symbolic links`;
+    }
+    if (stat?.isSymbolicLink()) {
+      return `Output path "${outputPath}" traverses a symbolic link`;
+    }
+  }
+  return undefined;
+}
+
 function resolveCompileConfigPath(
   projectRoot: string,
   options: Pick<CompileOptions, 'config' | 'cwd'>
@@ -316,6 +346,51 @@ interface WriteResult {
   created: string[];
   skipped: string[];
   unchanged: string[];
+}
+
+function getPlannedOutputs(
+  outputs: Map<string, FormatterOutput>,
+  outputPlan: OutputPlan | undefined
+): FormatterOutput[] {
+  if (!outputPlan) return [...outputs.values()];
+
+  const plannedPaths = new Set<string>();
+  const planned = outputPlan.files.map((file) => {
+    plannedPaths.add(file.originalPath);
+    plannedPaths.add(file.path);
+    const current = outputs.get(file.originalPath) ?? outputs.get(file.path);
+    return {
+      path: file.path,
+      content: current?.content ?? file.content,
+      ...(current?.mode !== undefined
+        ? { mode: current.mode }
+        : file.mode !== undefined
+          ? { mode: file.mode }
+          : {}),
+      ...(current?.merge !== undefined
+        ? { merge: current.merge }
+        : file.merge !== undefined
+          ? { merge: file.merge }
+          : {}),
+      ...(current?.managedOutputDirectories !== undefined
+        ? { managedOutputDirectories: current.managedOutputDirectories }
+        : file.managedOutputDirectories !== undefined
+          ? { managedOutputDirectories: file.managedOutputDirectories }
+          : {}),
+      ...(current?.managedOutputFiles !== undefined
+        ? { managedOutputFiles: current.managedOutputFiles }
+        : file.managedOutputFiles !== undefined
+          ? { managedOutputFiles: file.managedOutputFiles }
+          : {}),
+    };
+  });
+
+  // Legacy callers may add a migration output after compilation. Preserve it
+  // while ensuring formatter outputs always follow the shared plan.
+  for (const output of outputs.values()) {
+    if (!plannedPaths.has(output.path)) planned.push(output);
+  }
+  return planned;
 }
 
 async function prepareLegacyFactoryMigration(
@@ -437,19 +512,24 @@ async function writeOutputs(
   outputs: Map<string, FormatterOutput>,
   options: CompileOptions,
   _config: PromptScriptConfig,
-  services: CliServices
+  services: CliServices,
+  outputPlan?: OutputPlan
 ): Promise<WriteResult> {
   const result: WriteResult = { written: [], created: [], skipped: [], unchanged: [] };
   let overwriteAll = false;
   const conflicts: string[] = [];
   const targetErrors: string[] = [];
+  const plannedOutputs = getPlannedOutputs(outputs, outputPlan);
 
   // Pre-flight: a target `output` comes from the config file, so a checked-in
   // path may point anywhere the user can write. Reject the whole run before
   // writing anything rather than planting files outside the output directory.
   const outputRoot = options.output ?? process.cwd();
-  const escaping = [...outputs.values()]
-    .map((output) => validateOutputPath(output.path, outputRoot))
+  const escaping = plannedOutputs
+    .flatMap((output) => [
+      validateOutputPath(output.path, outputRoot),
+      validateWritePathSymlinks(output.path, outputRoot),
+    ])
     .filter((message): message is string => message !== undefined);
   if (escaping.length > 0) {
     throw new PSError(
@@ -464,7 +544,7 @@ async function writeOutputs(
   // below stays as a backstop against files changed after this check.
   if (!options.dryRun && !options.force && !isTTY()) {
     const preflightConflicts: string[] = [];
-    for (const output of outputs.values()) {
+    for (const output of plannedOutputs) {
       const outputPath = options.output
         ? resolve(options.output, output.path)
         : resolve(output.path);
@@ -549,7 +629,7 @@ async function writeOutputs(
     return created;
   }
 
-  for (const output of outputs.values()) {
+  for (const output of plannedOutputs) {
     const outputPath = options.output ? resolve(options.output, output.path) : resolve(output.path);
 
     // Check if file exists
@@ -995,7 +1075,13 @@ async function compileCommandWithResult(
       hasFactoryTarget && !migrateFactoryHooks
         ? await detectLegacyFactorySettingsHooks(effectiveOptions.output, true)
         : undefined;
-    const writeResult = await writeOutputs(result.outputs, effectiveOptions, config, services);
+    const writeResult = await writeOutputs(
+      result.outputs,
+      effectiveOptions,
+      config,
+      services,
+      result.outputPlan
+    );
     if (legacyMigration) {
       if (writeResult.skipped.includes(legacyMigration.hooksPath)) {
         throw new Error(
@@ -1009,7 +1095,10 @@ async function compileCommandWithResult(
         writeResult.created.includes(legacyMigration.hooksPath)
       );
     }
-    const cleanupResult = await cleanupManagedOutputs(result.outputs, {
+    const plannedOutputMap = new Map(
+      getPlannedOutputs(result.outputs, result.outputPlan).map((output) => [output.path, output])
+    );
+    const cleanupResult = await cleanupManagedOutputs(plannedOutputMap, {
       outputRoot: effectiveOptions.output,
       dryRun: options.dryRun,
     });

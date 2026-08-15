@@ -1,5 +1,5 @@
 /**
- * Structured output merge types and helpers.
+ * Structured output merge helpers.
  *
  * When a formatter produces structured output (JSON or TOML) that must be
  * merged with existing user-owned settings, the formatter attaches a
@@ -16,33 +16,8 @@
  * @module structured-output
  */
 
-/**
- * A single merge operation to apply to a structured settings file.
- */
-export interface StructuredMergeOperation {
-  /**
-   * Dotted path to the target key (e.g. 'hooks.PreToolUse').
-   * Intermediate objects are created if they do not exist.
-   */
-  path: string;
-  /**
-   * The value to set at the target path. When `undefined`, the key is
-   * removed (only if it was previously owned by PromptScript).
-   */
-  value: unknown;
-}
-
-/**
- * Plan for merging structured output into an existing settings file.
- */
-export interface StructuredMergePlan {
-  /** Target file format */
-  format: 'json' | 'toml';
-  /** Owner identifier (e.g. 'promptscript') */
-  owner: string;
-  /** Merge operations to apply */
-  operations: StructuredMergeOperation[];
-}
+export type { StructuredMergeOperation, StructuredMergePlan } from '@promptscript/core';
+import type { StructuredMergePlan } from '@promptscript/core';
 
 /**
  * Ownership marker key. Set to `true` on every object that PromptScript

@@ -37,6 +37,8 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 | **types/manifest**    | Registry manifest types                                                            |
 | **types/source**      | Source location and mapping types                                                  |
 | **types/prettier**    | Prettier configuration types                                                       |
+| **structured-output** | Shared structured merge plan types for generated settings files                    |
+| **output-plan**       | Deterministic output path normalization, collision resolution, and ownership data  |
 | **errors**            | Error hierarchy (`PSError`, `ParseError`, `ResolveError`, `ValidationError`, etc.) |
 | **utils/diagnostic**  | Diagnostic formatting utilities                                                    |
 | **utils/merge**       | Deep merge for AST nodes                                                           |
@@ -101,6 +103,21 @@ uses.
 | `getCanonicalBlocks(program)`         | Reads blocks from either AST representation                        |
 | `mergeBlockContent(base, next, rule)` | Applies a shared inheritance or import content policy              |
 | `mergeBlockCollections(...)`          | Merges one cross-layer match while retaining same-layer duplicates |
+
+### Output planning
+
+`createOutputPlan` turns formatter and adapter artifacts into a deterministic,
+filesystem-independent plan. It normalizes project-relative paths, flattens
+nested resources, records ownership and managed paths, and resolves collisions
+before a writer or browser adapter consumes the result.
+
+| Export                  | Description                                                      |
+| :---------------------- | :--------------------------------------------------------------- |
+| `OutputArtifact`        | Portable formatter output shape accepted by the planner          |
+| `OutputPlanCandidate`   | Artifact plus owner and collision role submitted to the planner  |
+| `OutputPlan`            | Normalized selected files, owners, collisions, and managed paths |
+| `createOutputPlan()`    | Builds a deterministic plan from output candidates               |
+| `normalizeOutputPath()` | Normalizes and validates project-relative output paths           |
 
 ## Usage (internal)
 

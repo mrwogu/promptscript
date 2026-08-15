@@ -8,9 +8,11 @@
  */
 
 import {
+  createOutputPlan,
   noopLogger,
   type FactoryRulesMode,
   type Logger,
+  type OutputPlan,
   type PSError,
   type OutputConvention,
   type PrettierMarkdownOptions,
@@ -122,6 +124,8 @@ export interface CompileResult {
    *  Present on results from BrowserCompiler.compile(); may be absent in
    *  manually constructed results. */
   outputOwners?: Map<string, string>;
+  /** Shared filesystem-independent output plan. */
+  outputPlan?: OutputPlan;
   /** Errors encountered during compilation */
   errors: CompileError[];
   /** Warnings from validation */
@@ -293,9 +297,13 @@ export class BrowserCompiler {
     this.logger.verbose('=== Stage 3: Format ===');
     const startFormat = Date.now();
     const outputs = new Map<string, FormatterOutput>();
-    const outputOwners = new Map<string, string>();
     const formatErrors: CompileError[] = [];
     const formatWarnings: ValidationMessage[] = [];
+    const planCandidates: Array<{
+      output: FormatterOutput;
+      owner: string;
+      role: 'primary';
+    }> = [];
 
     for (const { formatter, config } of this.loadedFormatters) {
       const formatterStart = Date.now();
@@ -321,33 +329,7 @@ export class BrowserCompiler {
           });
         }
 
-        // Detect output path collision — warn instead of silently overwriting
-        if (outputs.has(output.path)) {
-          const previousOwner = outputOwners.get(output.path) ?? 'unknown';
-          this.logger.warn(
-            `Output path collision: '${output.path}' is already owned by ` +
-              `'${previousOwner}', now overwritten by '${formatter.name}'. ` +
-              `Last formatter wins — assign a custom output path to avoid data loss.`
-          );
-        }
-        outputs.set(output.path, output);
-        outputOwners.set(output.path, formatter.name);
-
-        // Also add any additional files
-        if (output.additionalFiles) {
-          for (const additionalFile of output.additionalFiles) {
-            this.logger.verbose(`  → ${additionalFile.path} (additional)`);
-            if (outputs.has(additionalFile.path)) {
-              const prevOwner = outputOwners.get(additionalFile.path) ?? 'unknown';
-              this.logger.warn(
-                `Output path collision: '${additionalFile.path}' is already owned by ` +
-                  `'${prevOwner}', now overwritten by '${formatter.name}' (additional file).`
-              );
-            }
-            outputs.set(additionalFile.path, additionalFile);
-            outputOwners.set(additionalFile.path, formatter.name);
-          }
-        }
+        planCandidates.push({ output, owner: formatter.name, role: 'primary' });
       } catch (err) {
         formatErrors.push({
           name: 'FormatterError',
@@ -361,11 +343,51 @@ export class BrowserCompiler {
     stats.totalTime = Date.now() - startTotal;
     this.logger.verbose(`Format completed (${stats.formatTime}ms)`);
 
+    let outputPlan: OutputPlan;
+    try {
+      outputPlan = createOutputPlan(planCandidates);
+    } catch (err) {
+      outputPlan = createOutputPlan([]);
+      formatErrors.push({
+        name: 'FormatterError',
+        code: 'PS4000',
+        message: `Output planning failed: ${err instanceof Error ? err.message : String(err)}`,
+      });
+    }
+    for (const collision of outputPlan.collisions) {
+      if (collision.identical) continue;
+      this.logger.warn(
+        `Output path collision: '${collision.path}' is already owned by ` +
+          `'${collision.existingOwner}', ${collision.resolution === 'replace-existing' ? 'replaced' : 'preserved'} ` +
+          `for '${collision.incomingOwner}'.`
+      );
+    }
+
+    const outputOwners = outputPlan.owners;
+    for (const file of outputPlan.files) {
+      outputs.set(file.originalPath, {
+        path: file.originalPath,
+        content: file.content,
+        ...(file.mode !== undefined ? { mode: file.mode } : {}),
+        ...(file.merge !== undefined ? { merge: file.merge } : {}),
+        ...(file.managedOutputDirectories !== undefined
+          ? { managedOutputDirectories: file.managedOutputDirectories }
+          : {}),
+        ...(file.managedOutputFiles !== undefined
+          ? { managedOutputFiles: file.managedOutputFiles }
+          : {}),
+      });
+      if (file.role === 'resource') {
+        this.logger.verbose(`  → ${file.path} (additional)`);
+      }
+    }
+
     if (formatErrors.length > 0) {
       return {
         success: false,
         outputs,
         outputOwners,
+        outputPlan,
         errors: formatErrors,
         warnings: [...validation.warnings, ...formatWarnings],
         stats,
@@ -376,6 +398,7 @@ export class BrowserCompiler {
       success: true,
       outputs,
       outputOwners,
+      outputPlan,
       errors: [],
       warnings: [...validation.warnings, ...formatWarnings],
       stats,

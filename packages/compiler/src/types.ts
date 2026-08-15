@@ -2,6 +2,8 @@ import type {
   FactoryRulesMode,
   Logger,
   OutputConvention,
+  OutputArtifact,
+  OutputPlan,
   PrettierMarkdownOptions,
   Program,
   SourceLocation,
@@ -12,15 +14,9 @@ import type { ValidatorConfig, ValidationMessage } from '@promptscript/validator
 /**
  * Output from a formatter.
  */
-export interface FormatterOutput {
+export interface FormatterOutput extends OutputArtifact {
   /** Output file path */
   path: string;
-  /** Formatted content */
-  content: string;
-  /** File mode (e.g. 0o755 for executable scripts) */
-  mode?: number;
-  /** Structured merge plan for JSON/TOML settings files */
-  merge?: import('@promptscript/formatters').StructuredMergePlan;
   /** Target compatibility warnings produced during formatting */
   warnings?: Array<{
     code: string;
@@ -30,18 +26,6 @@ export interface FormatterOutput {
   }>;
   /** Additional files to generate (e.g., .cursor/commands/, .github/prompts/) */
   additionalFiles?: FormatterOutput[];
-  /**
-   * Relative directories exclusively managed by this output.
-   * Writers may remove obsolete PromptScript-generated files within these
-   * directories, but must preserve unmarked files and symlinks.
-   */
-  managedOutputDirectories?: string[];
-  /**
-   * Relative files exclusively managed by this output.
-   * Writers may remove an obsolete file only when it carries a PromptScript
-   * ownership marker.
-   */
-  managedOutputFiles?: string[];
 }
 
 /**
@@ -206,6 +190,12 @@ export interface CompileResult {
   success: boolean;
   /** Formatter outputs keyed by formatter name */
   outputs: Map<string, FormatterOutput>;
+  /**
+   * Shared filesystem-independent output plan.
+   *
+   * Optional for compatibility with manually constructed compile results.
+   */
+  outputPlan?: OutputPlan;
   /** Errors encountered during compilation */
   errors: CompileError[];
   /** Warnings from validation */

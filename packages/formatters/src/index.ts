@@ -18,6 +18,18 @@ export type {
   FormatterVersionMap,
   FormatOptions,
 } from './types.js';
+
+export { createOutputPlan, normalizeOutputPath, OutputPlanPathError } from '@promptscript/core';
+export type {
+  OutputArtifact,
+  OutputPlan,
+  OutputPlanCandidate,
+  OutputPlanCollision,
+  OutputPlanFile,
+  OutputPlanManagedPaths,
+  OutputPlanArtifactRole,
+  OutputPlanCollisionResolution,
+} from '@promptscript/core';
 export { formatProgram, isCanonicalFormatter } from './formatter-adapter.js';
 export type { CanonicalFormatter } from './formatter-adapter.js';
 
