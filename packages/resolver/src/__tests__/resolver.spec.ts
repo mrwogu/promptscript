@@ -225,6 +225,26 @@ describe('Resolver', () => {
       expect(result1).not.toBe(result2);
     });
 
+    it('should ignore invalidation when caching is disabled', () => {
+      resolver.invalidate([resolve(FIXTURES_DIR, 'minimal.prs')]);
+    });
+
+    it('should remove legacy cache entries without absolute dependencies', () => {
+      const cachingResolver = new Resolver({
+        registryPath: FIXTURES_DIR,
+        localPath: FIXTURES_DIR,
+        cache: true,
+      });
+      const cache = (cachingResolver as unknown as { cache: Map<string, unknown> }).cache;
+      cache.set('empty', { sources: [] });
+      cache.set('relative', { sources: ['relative.prs'] });
+
+      cachingResolver.invalidate([resolve(FIXTURES_DIR, 'minimal.prs')]);
+
+      expect(cache.has('empty')).toBe(false);
+      expect(cache.has('relative')).toBe(true);
+    });
+
     it('should track and invalidate imported file dependencies', async () => {
       const root = mkdtempSync(join(tmpdir(), 'promptscript-resolver-watch-'));
       const entryPath = join(root, 'entry.prs');

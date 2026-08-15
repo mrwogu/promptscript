@@ -1417,7 +1417,11 @@ describe('compile command - createCliLogger warn path', () => {
 
       const changeHandler = mockWatcherOn.mock.calls.find(([event]) => event === 'change')?.[1] as
         ((path: string) => void) | undefined;
+      const unlinkDirHandler = mockWatcherOn.mock.calls.find(
+        ([event]) => event === 'unlinkDir'
+      )?.[1] as ((path: string) => void) | undefined;
       expect(changeHandler).toBeDefined();
+      expect(unlinkDirHandler).toBeDefined();
       mockSpinnerStart.mockImplementationOnce(() => {
         throw 'watch rebuild failed';
       });
@@ -1426,6 +1430,9 @@ describe('compile command - createCliLogger warn path', () => {
 
       expect(mockError).toHaveBeenCalledWith('Watch compilation failed: watch rebuild failed');
       expect(process.exitCode).toBe(1);
+
+      unlinkDirHandler?.('/repo/promptscript/src');
+      await vi.runAllTimersAsync();
     } finally {
       vi.useRealTimers();
     }
