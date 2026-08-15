@@ -32,7 +32,7 @@ export const SECTION_REGISTRY: readonly SectionContract[] = [
     sourceBlocks: ['identity', 'context'],
     required: true,
     legacyHeadingFallback: true,
-    formatterAliases: ['project'],
+    formatterAliases: ['project', 'project-identity'],
   },
   {
     id: 'tech-stack',
@@ -104,7 +104,7 @@ export const SECTION_REGISTRY: readonly SectionContract[] = [
     sourceBlocks: ['standards'],
     required: false,
     legacyHeadingFallback: false,
-    formatterAliases: ['configFiles'],
+    formatterAliases: ['configFiles', 'config-files'],
   },
   {
     id: 'commands',
@@ -129,6 +129,18 @@ export const SECTION_REGISTRY: readonly SectionContract[] = [
     required: false,
     legacyHeadingFallback: false,
     formatterAliases: ['postWork'],
+  },
+  {
+    id: 'dev-commands',
+    defaultTitle: 'Development Commands',
+    description: 'Build, test, and development scripts',
+    primaryForBlocks: [],
+    primaryOwner: 'knowledge',
+    fallbackOwners: [],
+    sourceBlocks: ['knowledge'],
+    required: false,
+    legacyHeadingFallback: false,
+    formatterAliases: ['devCommands'],
   },
   {
     id: 'documentation',

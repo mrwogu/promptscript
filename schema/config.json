@@ -176,7 +176,7 @@
     },
     "registries": {
       "$ref": "#/definitions/RegistriesConfig",
-      "description": "Named registry aliases for multi-source imports. Maps alias names to Git repository URLs. Coexists with `registry` — aliases take precedence for matching paths."
+      "description": "Named registry aliases for multi-source imports. Maps alias names to Git repository URLs. Coexists with `registry` - aliases take precedence for matching paths."
     },
     "watch": {
       "type": "object",

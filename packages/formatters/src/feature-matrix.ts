@@ -10,7 +10,13 @@
  * @module feature-matrix
  */
 
-import type { KnownTarget } from '@promptscript/core';
+import {
+  KNOWN_TARGETS,
+  getTargetCapability,
+  getTargetFeatureStatus,
+  type KnownTarget,
+  type TargetFeatureStatus,
+} from '@promptscript/core';
 
 /**
  * Tool/Formatter names.
@@ -21,11 +27,7 @@ export type ToolName = KnownTarget;
 /**
  * Feature implementation status.
  */
-export type FeatureStatus =
-  | 'supported' // Tool supports, formatter implements
-  | 'not-supported' // Tool doesn't support this feature
-  | 'planned' // Tool supports, formatter doesn't implement yet
-  | 'partial'; // Partially implemented
+export type FeatureStatus = TargetFeatureStatus;
 
 /**
  * Feature specification.
@@ -39,7 +41,7 @@ export interface FeatureSpec {
   description: string;
   /** Category for grouping */
   category: FeatureCategory;
-  /** Support status per tool (only tracked tools need entries) */
+  /** Support status for each target; canonical projections include all targets */
   tools: Partial<Record<ToolName, FeatureStatus>>;
   /** How to test this feature */
   testStrategy?: string;
@@ -64,203 +66,31 @@ export type FeatureCategory =
  * This is the source of truth for what each tool supports
  * and what our formatters implement.
  */
-export const FEATURE_MATRIX: FeatureSpec[] = [
+const FEATURE_DEFINITIONS: Omit<FeatureSpec, 'tools'>[] = [
   // === Output Format ===
   {
     id: 'markdown-output',
     name: 'Markdown Output',
     description: 'Basic Markdown formatting for rules',
     category: 'output-format',
-    tools: {
-      // Tier 0
-      github: 'supported',
-      cursor: 'supported',
-      claude: 'supported',
-      antigravity: 'supported',
-      factory: 'supported',
-      opencode: 'supported',
-      gemini: 'supported',
-      // Tier 1
-      windsurf: 'supported',
-      cline: 'supported',
-      roo: 'supported',
-      codex: 'supported',
-      continue: 'supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'supported',
-      kilo: 'supported',
-      amp: 'supported',
-      trae: 'supported',
-      junie: 'supported',
-      kiro: 'supported',
-      // Tier 3
-      cortex: 'supported',
-      crush: 'supported',
-      'command-code': 'supported',
-      kode: 'supported',
-      mcpjam: 'supported',
-      'mistral-vibe': 'supported',
-      mux: 'supported',
-      openhands: 'supported',
-      pi: 'supported',
-      qoder: 'supported',
-      'qwen-code': 'supported',
-      zencoder: 'supported',
-      neovate: 'supported',
-      pochi: 'supported',
-      adal: 'supported',
-      iflow: 'supported',
-      openclaw: 'supported',
-      codebuddy: 'supported',
-    },
   },
   {
     id: 'mdc-format',
     name: 'MDC Format',
     description: 'Markdown Components format with enhanced features',
     category: 'output-format',
-    tools: {
-      // Tier 0
-      github: 'not-supported',
-      cursor: 'supported',
-      claude: 'not-supported',
-      antigravity: 'not-supported',
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'not-supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
   },
   {
     id: 'code-blocks',
     name: 'Code Blocks',
     description: 'Fenced code blocks with syntax highlighting',
     category: 'output-format',
-    tools: {
-      // Tier 0
-      github: 'supported',
-      cursor: 'supported',
-      claude: 'supported',
-      antigravity: 'supported',
-      factory: 'supported',
-      opencode: 'supported',
-      gemini: 'supported',
-      // Tier 1
-      windsurf: 'supported',
-      cline: 'supported',
-      roo: 'supported',
-      codex: 'supported',
-      continue: 'supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'supported',
-      kilo: 'supported',
-      amp: 'supported',
-      trae: 'supported',
-      junie: 'supported',
-      kiro: 'supported',
-      // Tier 3
-      cortex: 'supported',
-      crush: 'supported',
-      'command-code': 'supported',
-      kode: 'supported',
-      mcpjam: 'supported',
-      'mistral-vibe': 'supported',
-      mux: 'supported',
-      openhands: 'supported',
-      pi: 'supported',
-      qoder: 'supported',
-      'qwen-code': 'supported',
-      zencoder: 'supported',
-      neovate: 'supported',
-      pochi: 'supported',
-      adal: 'supported',
-      iflow: 'supported',
-      openclaw: 'supported',
-      codebuddy: 'supported',
-    },
   },
   {
     id: 'mermaid-diagrams',
     name: 'Mermaid Diagrams',
     description: 'Mermaid diagram rendering in code blocks',
     category: 'output-format',
-    tools: {
-      // Tier 0
-      github: 'supported',
-      cursor: 'supported',
-      claude: 'supported',
-      antigravity: 'supported',
-      factory: 'supported',
-      opencode: 'supported',
-      gemini: 'supported',
-      // Tier 1
-      windsurf: 'supported',
-      cline: 'supported',
-      roo: 'supported',
-      codex: 'not-supported',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'not-supported',
-      kilo: 'supported',
-      amp: 'supported',
-      trae: 'supported',
-      junie: 'supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'supported',
-      zencoder: 'supported',
-      neovate: 'supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
   },
 
   // === File Structure ===
@@ -269,98 +99,12 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Single File Output',
     description: 'Output to a single rules file',
     category: 'file-structure',
-    tools: {
-      // Tier 0
-      github: 'supported',
-      cursor: 'supported',
-      claude: 'supported',
-      antigravity: 'supported',
-      factory: 'supported',
-      opencode: 'supported',
-      gemini: 'supported',
-      // Tier 1
-      windsurf: 'supported',
-      cline: 'supported',
-      roo: 'supported',
-      codex: 'supported',
-      continue: 'supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'supported',
-      kilo: 'supported',
-      amp: 'supported',
-      trae: 'supported',
-      junie: 'supported',
-      kiro: 'supported',
-      // Tier 3
-      cortex: 'supported',
-      crush: 'supported',
-      'command-code': 'supported',
-      kode: 'supported',
-      mcpjam: 'supported',
-      'mistral-vibe': 'supported',
-      mux: 'supported',
-      openhands: 'supported',
-      pi: 'supported',
-      qoder: 'supported',
-      'qwen-code': 'supported',
-      zencoder: 'supported',
-      neovate: 'supported',
-      pochi: 'supported',
-      adal: 'supported',
-      iflow: 'supported',
-      openclaw: 'supported',
-      codebuddy: 'supported',
-    },
   },
   {
     id: 'multi-file-rules',
     name: 'Multiple Rule Files',
     description: 'Split rules into multiple files by concern',
     category: 'file-structure',
-    tools: {
-      // Tier 0
-      github: 'supported', // .github/instructions/*.instructions.md (multifile mode)
-      cursor: 'supported',
-      claude: 'supported', // .claude/rules/*.md (multifile mode)
-      antigravity: 'supported',
-      factory: 'supported',
-      opencode: 'supported', // .opencode/commands/, skills/, agents/
-      gemini: 'supported', // .gemini/commands/, skills/
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'planned',
-      roo: 'planned',
-      codex: 'not-supported',
-      continue: 'planned',
-      // Tier 2
-      augment: 'supported',
-      goose: 'not-supported',
-      kilo: 'supported',
-      amp: 'supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'planned',
-      // Tier 3
-      cortex: 'supported',
-      crush: 'not-supported',
-      'command-code': 'supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'supported',
-      mux: 'not-supported',
-      openhands: 'supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'supported',
-      zencoder: 'supported',
-      neovate: 'partial',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
     testStrategy: 'Check additionalFiles in FormatterOutput',
   },
   {
@@ -368,49 +112,6 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Workflow Files',
     description: 'Separate workflow/automation files',
     category: 'file-structure',
-    tools: {
-      // Tier 0
-      github: 'not-supported',
-      cursor: 'not-supported',
-      claude: 'supported', // .claude/workflows/<name>.md
-      antigravity: 'supported',
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'not-supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'not-supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
     testStrategy: 'Check for .agent/workflows/ output',
   },
   {
@@ -418,49 +119,6 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Nested Directory Structure',
     description: 'Support for nested rule directories',
     category: 'file-structure',
-    tools: {
-      // Tier 0
-      github: 'not-supported',
-      cursor: 'supported',
-      claude: 'not-supported',
-      antigravity: 'planned', // was 'supported', downgraded per antigravity-plan.md
-      factory: 'supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'supported',
-      codex: 'partial',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'not-supported',
-      kilo: 'partial',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'not-supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
   },
 
   // === Metadata ===
@@ -469,49 +127,6 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'YAML Frontmatter',
     description: 'YAML metadata block at start of file',
     category: 'metadata',
-    tools: {
-      // Tier 0
-      github: 'supported', // In .instructions.md and SKILL.md files
-      cursor: 'supported',
-      claude: 'supported', // In .claude/rules/*.md and skills
-      antigravity: 'supported',
-      factory: 'supported',
-      opencode: 'supported', // In commands, skills, agents
-      gemini: 'supported', // In skills (commands use TOML)
-      // Tier 1
-      windsurf: 'planned',
-      cline: 'planned',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'planned',
-      // Tier 2
-      augment: 'supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'supported',
-      // Tier 3
-      cortex: 'supported',
-      crush: 'not-supported',
-      'command-code': 'supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'supported',
-      mux: 'not-supported',
-      openhands: 'supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
     testStrategy: 'Check for --- delimited YAML block',
   },
   {
@@ -519,147 +134,18 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Description in Frontmatter',
     description: 'Rule description in frontmatter metadata',
     category: 'metadata',
-    tools: {
-      // Tier 0
-      github: 'not-supported',
-      cursor: 'supported',
-      claude: 'not-supported',
-      antigravity: 'supported',
-      factory: 'supported',
-      opencode: 'supported',
-      gemini: 'supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'planned',
-      // Tier 2
-      augment: 'supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'supported',
-      crush: 'not-supported',
-      'command-code': 'supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'supported',
-      mux: 'not-supported',
-      openhands: 'supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
   },
   {
     id: 'frontmatter-globs',
     name: 'Globs in Frontmatter',
     description: 'File glob patterns in frontmatter',
     category: 'metadata',
-    tools: {
-      // Tier 0
-      github: 'supported', // applyTo in .instructions.md
-      cursor: 'supported',
-      claude: 'supported', // paths in .claude/rules/*.md
-      antigravity: 'supported',
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'planned',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'planned',
-      // Tier 2
-      augment: 'not-supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
   },
   {
     id: 'activation-type',
     name: 'Activation Type',
     description: 'Control when rules are activated (always, manual, auto)',
     category: 'metadata',
-    tools: {
-      // Tier 0
-      github: 'not-supported',
-      cursor: 'supported',
-      claude: 'not-supported',
-      antigravity: 'supported',
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'planned',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'planned',
-      // Tier 2
-      augment: 'supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'partial',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
   },
 
   // === Targeting ===
@@ -668,49 +154,6 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Glob Pattern Targeting',
     description: 'Apply rules to files matching glob patterns',
     category: 'targeting',
-    tools: {
-      // Tier 0
-      github: 'supported', // applyTo in .instructions.md (multifile mode)
-      cursor: 'supported',
-      claude: 'supported', // paths in .claude/rules/*.md (multifile mode)
-      antigravity: 'supported',
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'planned',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'planned',
-      // Tier 2
-      augment: 'not-supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
     testStrategy: 'Check globs field in frontmatter',
   },
   {
@@ -718,147 +161,18 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Always Apply Rules',
     description: 'Rules that always apply regardless of context',
     category: 'targeting',
-    tools: {
-      // Tier 0
-      github: 'supported', // All rules always apply
-      cursor: 'supported',
-      claude: 'supported', // All rules always apply
-      antigravity: 'supported',
-      factory: 'supported',
-      opencode: 'supported',
-      gemini: 'supported',
-      // Tier 1
-      windsurf: 'planned',
-      cline: 'supported',
-      roo: 'supported',
-      codex: 'supported',
-      continue: 'supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'supported',
-      kilo: 'supported',
-      amp: 'supported',
-      trae: 'not-supported',
-      junie: 'supported',
-      kiro: 'supported',
-      // Tier 3
-      cortex: 'supported',
-      crush: 'supported',
-      'command-code': 'supported',
-      kode: 'supported',
-      mcpjam: 'supported',
-      'mistral-vibe': 'supported',
-      mux: 'supported',
-      openhands: 'supported',
-      pi: 'supported',
-      qoder: 'supported',
-      'qwen-code': 'supported',
-      zencoder: 'supported',
-      neovate: 'supported',
-      pochi: 'supported',
-      adal: 'supported',
-      iflow: 'supported',
-      openclaw: 'supported',
-      codebuddy: 'supported',
-    },
   },
   {
     id: 'manual-activation',
     name: 'Manual Activation',
     description: 'Rules activated manually by user',
     category: 'targeting',
-    tools: {
-      // Tier 0
-      github: 'not-supported',
-      cursor: 'partial', // was 'supported', downgraded per cursor-plan.md
-      claude: 'not-supported',
-      antigravity: 'supported',
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
   },
   {
     id: 'auto-activation',
     name: 'Auto/Model Activation',
     description: 'Rules activated automatically by AI model',
     category: 'targeting',
-    tools: {
-      // Tier 0
-      github: 'not-supported',
-      cursor: 'partial', // was 'supported', downgraded per cursor-plan.md
-      claude: 'not-supported',
-      antigravity: 'supported',
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'planned',
-      // Tier 2
-      augment: 'supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'not-supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
   },
 
   // === Content Features ===
@@ -867,98 +181,12 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Structured Examples',
     description: 'Support for @examples block with input/output pairs for few-shot prompting',
     category: 'content',
-    tools: {
-      // Tier 0
-      github: 'supported',
-      cursor: 'supported',
-      claude: 'supported',
-      antigravity: 'supported',
-      factory: 'supported',
-      opencode: 'supported',
-      gemini: 'supported',
-      // Tier 1
-      windsurf: 'supported',
-      cline: 'supported',
-      roo: 'supported',
-      codex: 'supported',
-      continue: 'supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'supported',
-      kilo: 'supported',
-      amp: 'supported',
-      trae: 'supported',
-      junie: 'supported',
-      kiro: 'supported',
-      // Tier 3
-      cortex: 'supported',
-      crush: 'supported',
-      'command-code': 'supported',
-      kode: 'supported',
-      mcpjam: 'supported',
-      'mistral-vibe': 'supported',
-      mux: 'supported',
-      openhands: 'supported',
-      pi: 'supported',
-      qoder: 'supported',
-      'qwen-code': 'supported',
-      zencoder: 'supported',
-      neovate: 'supported',
-      pochi: 'supported',
-      adal: 'supported',
-      iflow: 'supported',
-      openclaw: 'supported',
-      codebuddy: 'supported',
-    },
   },
   {
     id: 'character-limit',
     name: 'Character Limit Validation',
     description: 'Validate content against tool character limits',
     category: 'content',
-    tools: {
-      // Tier 0
-      github: 'not-supported', // character limit removed June 2026
-      cursor: 'not-supported', // No known limit
-      claude: 'not-supported', // No known limit
-      antigravity: 'supported', // 12,000 chars
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'not-supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
     testStrategy: 'Check warning for content > limit',
   },
   {
@@ -966,49 +194,6 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Content Section Splitting',
     description: 'Split large content into logical sections',
     category: 'content',
-    tools: {
-      // Tier 0
-      github: 'supported',
-      cursor: 'supported',
-      claude: 'supported',
-      antigravity: 'supported',
-      factory: 'supported',
-      opencode: 'supported',
-      gemini: 'supported',
-      // Tier 1
-      windsurf: 'supported',
-      cline: 'supported',
-      roo: 'supported',
-      codex: 'supported',
-      continue: 'planned',
-      // Tier 2
-      augment: 'supported',
-      goose: 'supported',
-      kilo: 'supported',
-      amp: 'supported',
-      trae: 'supported',
-      junie: 'not-supported',
-      kiro: 'supported',
-      // Tier 3
-      cortex: 'supported',
-      crush: 'supported',
-      'command-code': 'supported',
-      kode: 'supported',
-      mcpjam: 'supported',
-      'mistral-vibe': 'supported',
-      mux: 'supported',
-      openhands: 'supported',
-      pi: 'supported',
-      qoder: 'supported',
-      'qwen-code': 'supported',
-      zencoder: 'supported',
-      neovate: 'supported',
-      pochi: 'supported',
-      adal: 'supported',
-      iflow: 'supported',
-      openclaw: 'supported',
-      codebuddy: 'supported',
-    },
   },
 
   {
@@ -1016,49 +201,6 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Guard Dependencies',
     description: 'Support for requires field in @guards for dependency injection',
     category: 'targeting',
-    tools: {
-      // Tier 0
-      github: 'supported',
-      cursor: 'not-supported',
-      claude: 'supported',
-      antigravity: 'supported',
-      factory: 'supported',
-      opencode: 'supported',
-      gemini: 'supported',
-      // Tier 1
-      windsurf: 'supported',
-      cline: 'supported',
-      roo: 'supported',
-      codex: 'supported',
-      continue: 'supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'supported',
-      kilo: 'supported',
-      amp: 'supported',
-      trae: 'supported',
-      junie: 'supported',
-      kiro: 'supported',
-      // Tier 3
-      cortex: 'supported',
-      crush: 'supported',
-      'command-code': 'supported',
-      kode: 'supported',
-      mcpjam: 'supported',
-      'mistral-vibe': 'supported',
-      mux: 'supported',
-      openhands: 'supported',
-      pi: 'supported',
-      qoder: 'supported',
-      'qwen-code': 'supported',
-      zencoder: 'supported',
-      neovate: 'supported',
-      pochi: 'supported',
-      adal: 'supported',
-      iflow: 'supported',
-      openclaw: 'supported',
-      codebuddy: 'supported',
-    },
   },
 
   // === Advanced Features ===
@@ -1067,49 +209,6 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Context File Inclusion',
     description: 'Include other files as context (@file, @folder)',
     category: 'advanced',
-    tools: {
-      // Tier 0
-      github: 'not-supported',
-      cursor: 'supported',
-      claude: 'planned', // was 'not-supported', updated per claude-plan.md
-      antigravity: 'not-supported',
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'not-supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'not-supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
     testStrategy: 'Check for @file/@folder references',
   },
   {
@@ -1117,149 +216,18 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: '@-Mentions',
     description: 'Reference files/symbols with @ syntax',
     category: 'advanced',
-    tools: {
-      // Tier 0
-      github: 'not-supported',
-      cursor: 'planned', // was 'supported', downgraded per cursor-plan.md
-      claude: 'not-supported',
-      antigravity: 'not-supported',
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
   },
   {
     id: 'tool-integration',
     name: 'Tool Integration',
     description: 'Integration with external tools/commands',
     category: 'advanced',
-    tools: {
-      // Tier 0
-      github: 'not-supported',
-      cursor: 'partial', // Via terminal
-      claude: 'supported', // was 'not-supported', updated per claude-plan.md
-      antigravity: 'not-supported',
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'not-supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
   },
   {
     id: 'path-specific-rules',
     name: 'Path-Specific Rules',
     description: 'Rules with glob patterns targeting specific file paths',
     category: 'advanced',
-    tools: {
-      // Tier 0
-      github: 'supported', // .github/instructions/*.instructions.md with applyTo
-      cursor: 'supported', // globs in frontmatter
-      claude: 'supported', // .claude/rules/*.md with paths frontmatter
-      antigravity: 'supported',
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'planned',
-      roo: 'not-supported',
-      codex: 'partial',
-      continue: 'planned',
-      // Tier 2
-      augment: 'not-supported',
-      goose: 'not-supported',
-      kilo: 'partial',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      // Zencoder rules are emitted as a single always-applied file; there is no
-      // glob-scoped rule surface to map path-specific guards onto.
-      zencoder: 'not-supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
     testStrategy: 'Check for path-specific files with glob patterns in frontmatter',
   },
   {
@@ -1267,49 +235,6 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Prompt Files',
     description: 'Reusable prompt templates for IDE integration',
     category: 'advanced',
-    tools: {
-      // Tier 0
-      github: 'supported', // .github/prompts/*.prompt.md
-      cursor: 'not-supported',
-      claude: 'not-supported',
-      antigravity: 'not-supported',
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'not-supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'not-supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
     testStrategy: 'Check for .github/prompts/*.prompt.md files',
   },
   {
@@ -1317,49 +242,6 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Slash Commands',
     description: 'Executable slash commands invokable via / in chat',
     category: 'advanced',
-    tools: {
-      // Tier 0
-      github: 'supported', // .github/prompts/*.prompt.md (shortcut with prompt: true)
-      cursor: 'supported', // .cursor/commands/*.md (multi-line @shortcuts)
-      claude: 'supported', // .claude/skills/<name>/SKILL.md (via @skills block)
-      antigravity: 'supported', // .agent/workflows/*.md (via @shortcuts with steps)
-      factory: 'supported', // .factory/skills/<name>/SKILL.md
-      opencode: 'supported', // .opencode/commands/<name>.md
-      gemini: 'supported', // .gemini/commands/<name>.toml
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'not-supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'not-supported',
-      neovate: 'planned',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
     testStrategy:
       'Check for .cursor/commands/*.md, .github/prompts/*.prompt.md, .claude/skills/*/SKILL.md, or .agent/workflows/*.md',
     docsUrl: {
@@ -1375,49 +257,6 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Skills',
     description: 'Reusable skill definitions for AI agents',
     category: 'advanced',
-    tools: {
-      // Tier 0
-      github: 'supported', // .github/skills/<name>/SKILL.md
-      cursor: 'supported', // .agents/skills/<name>/SKILL.md (full mode)
-      claude: 'supported', // .claude/skills/<name>/SKILL.md
-      antigravity: 'not-supported',
-      factory: 'supported',
-      opencode: 'supported', // .opencode/skills/<name>/SKILL.md
-      gemini: 'supported', // .gemini/skills/<name>/skill.md
-      // Tier 1
-      windsurf: 'supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'supported',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'not-supported',
-      goose: 'not-supported',
-      kilo: 'planned',
-      amp: 'supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'supported',
-      crush: 'supported',
-      'command-code': 'supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'supported',
-      mux: 'not-supported',
-      openhands: 'supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'supported',
-      zencoder: 'not-supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
     testStrategy: 'Check for skills directory with SKILL.md files',
     docsUrl: {
       factory: 'https://docs.factory.ai/cli/configuration',
@@ -1429,49 +268,6 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     description:
       'Special instructions for AI agents (AGENTS.md, .github/agents/, or .claude/agents/)',
     category: 'advanced',
-    tools: {
-      // Tier 0
-      github: 'supported', // AGENTS.md + .github/agents/<name>.md
-      cursor: 'supported', // .cursor/agents/<name>.md (full mode)
-      claude: 'supported', // .claude/agents/<name>.md
-      antigravity: 'not-supported',
-      factory: 'supported', // .factory/droids/<name>.md
-      opencode: 'supported', // .opencode/agents/<name>.md
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'supported', // native Codex formatter emits .codex/agents/<name>.toml
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'planned',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'not-supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
     testStrategy:
       'Check for AGENTS.md, .github/agents/, .claude/agents/, or .factory/droids/ files',
     docsUrl: {
@@ -1483,49 +279,6 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Local Memory',
     description: 'Private instructions not committed to git',
     category: 'advanced',
-    tools: {
-      // Tier 0
-      github: 'not-supported',
-      cursor: 'not-supported',
-      claude: 'partial', // was 'supported', downgraded per claude-plan.md
-      antigravity: 'not-supported',
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'not-supported',
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'not-supported',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'not-supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'not-supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'partial',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
     testStrategy: 'Check for CLAUDE.local.md file',
   },
   {
@@ -1533,52 +286,22 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     name: 'Nested Memory',
     description: 'Instructions for specific subdirectories',
     category: 'advanced',
-    tools: {
-      // Tier 0
-      github: 'not-supported',
-      cursor: 'planned', // was 'supported', downgraded per cursor-plan.md
-      claude: 'planned', // was 'supported', downgraded per claude-plan.md
-      antigravity: 'planned', // was 'supported', downgraded per antigravity-plan.md
-      factory: 'not-supported',
-      opencode: 'not-supported',
-      gemini: 'planned', // nested GEMINI.md support planned
-      // Tier 1
-      windsurf: 'not-supported',
-      cline: 'not-supported',
-      roo: 'not-supported',
-      codex: 'supported',
-      continue: 'not-supported',
-      // Tier 2
-      augment: 'supported',
-      goose: 'not-supported',
-      kilo: 'not-supported',
-      amp: 'supported',
-      trae: 'not-supported',
-      junie: 'not-supported',
-      kiro: 'not-supported',
-      // Tier 3
-      cortex: 'not-supported',
-      crush: 'not-supported',
-      'command-code': 'not-supported',
-      kode: 'not-supported',
-      mcpjam: 'not-supported',
-      'mistral-vibe': 'not-supported',
-      mux: 'not-supported',
-      openhands: 'not-supported',
-      pi: 'not-supported',
-      qoder: 'not-supported',
-      'qwen-code': 'not-supported',
-      zencoder: 'not-supported',
-      neovate: 'not-supported',
-      pochi: 'not-supported',
-      adal: 'not-supported',
-      iflow: 'not-supported',
-      openclaw: 'not-supported',
-      codebuddy: 'not-supported',
-    },
     testStrategy: 'Check for nested instruction files',
   },
 ];
+
+/**
+ * Complete feature matrix projected from the canonical target contract.
+ */
+export const FEATURE_MATRIX: FeatureSpec[] = FEATURE_DEFINITIONS.map((feature) => ({
+  ...feature,
+  tools: Object.fromEntries(
+    KNOWN_TARGETS.map((target) => [
+      target,
+      getTargetFeatureStatus(getTargetCapability(target), feature.id),
+    ])
+  ) as Record<KnownTarget, FeatureStatus>,
+}));
 
 /**
  * Get all features for a specific tool.
@@ -1677,7 +400,7 @@ export function generateFeatureMatrixReport(): string {
         case 'not-supported':
           return '❌';
         default:
-          return '—';
+          return '-';
       }
     };
 

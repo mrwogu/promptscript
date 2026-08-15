@@ -26,5 +26,10 @@ export { PSLexer, tokenize } from './lexer/index.js';
 export * from './lexer/tokens.js';
 
 // Parser components
-export { PromptScriptParser, parser } from './grammar/parser.js';
-export { visitor, type EnvProvider, type VisitorDiagnostic } from './grammar/visitor.js';
+export { PromptScriptParser, createParser, parser } from './grammar/parser.js';
+export {
+  createVisitor,
+  visitor,
+  type EnvProvider,
+  type VisitorDiagnostic,
+} from './grammar/visitor.js';
