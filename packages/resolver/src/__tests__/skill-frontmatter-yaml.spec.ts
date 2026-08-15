@@ -785,6 +785,52 @@ describe('YAML skill frontmatter', () => {
     }
   });
 
+  it('counts null mapping values when enforcing the node limit', () => {
+    const yaml = Array.from({ length: 3 }, (_, groupIndex) =>
+      [
+        `group${groupIndex}:`,
+        ...Array.from({ length: 2_000 }, (_, itemIndex) => `  ? item-${groupIndex}-${itemIndex}`),
+      ].join('\n')
+    ).join('\n');
+
+    expect(() => parseSkillMd(`---\n${yaml}\n---\nBody`)).toThrow(
+      /frontmatter contains more than 10000 values/
+    );
+  });
+
+  it('reports non-Error YAML value resolution failures', () => {
+    const toJsSpy = vi.spyOn(Document.prototype, 'toJS').mockImplementation(() => {
+      throw 'conversion failed';
+    });
+
+    try {
+      expect(() => parseSkillMd('---\nname: example\n---\nBody')).toThrow(
+        'YAML value resolution failed: conversion failed'
+      );
+    } finally {
+      toJsSpy.mockRestore();
+    }
+  });
+
+  it('rejects unsupported parameter default values after YAML conversion', () => {
+    const toJsSpy = vi.spyOn(Document.prototype, 'toJS').mockReturnValue({
+      params: {
+        mode: {
+          type: 'string',
+          default: Symbol('unsupported'),
+        },
+      },
+    });
+
+    try {
+      expect(() => parseSkillMd('---\nparams: {}\n---\nBody')).toThrow(
+        /default contains an unsupported value/
+      );
+    } finally {
+      toJsSpy.mockRestore();
+    }
+  });
+
   it('rejects unsafe reference paths before file access', async () => {
     const directory = await mkdtemp(join(tmpdir(), 'skill-yaml-'));
     temporaryDirectories.push(directory);
