@@ -16,6 +16,52 @@ describe('output plan', () => {
     expect(() => normalizeOutputPath('C:/outside.md')).toThrow(OutputPlanPathError);
   });
 
+  it('rejects empty output paths and validates managed paths', () => {
+    expect(() => normalizeOutputPath('')).toThrow(OutputPlanPathError);
+    expect(() => normalizeOutputPath('.')).toThrow(OutputPlanPathError);
+
+    const plan = createOutputPlan([
+      {
+        owner: 'owner',
+        output: {
+          path: 'output.md',
+          content: 'content',
+          managedOutputDirectories: ['', '.', './nested//'],
+          managedOutputFiles: [''],
+        },
+      },
+    ]);
+
+    expect(plan.managedPaths).toEqual({
+      directories: ['.', 'nested'],
+      files: [],
+    });
+    expect(() =>
+      createOutputPlan([
+        {
+          owner: 'owner',
+          output: {
+            path: 'output.md',
+            content: 'content',
+            managedOutputDirectories: ['/outside'],
+          },
+        },
+      ])
+    ).toThrow(OutputPlanPathError);
+    expect(() =>
+      createOutputPlan([
+        {
+          owner: 'owner',
+          output: {
+            path: 'output.md',
+            content: 'content',
+            managedOutputFiles: ['../outside'],
+          },
+        },
+      ])
+    ).toThrow(OutputPlanPathError);
+  });
+
   it('flattens nested resources and keeps deterministic path order', () => {
     const candidates: OutputPlanCandidate[] = [
       {
@@ -64,6 +110,7 @@ describe('output plan', () => {
           path: 'shared.md',
           content: 'same',
           managedOutputDirectories: ['first'],
+          managedOutputFiles: ['first.json'],
         },
       },
       {
@@ -81,6 +128,7 @@ describe('output plan', () => {
           path: 'shared.md',
           content: 'same',
           managedOutputDirectories: ['second'],
+          managedOutputFiles: ['second.json'],
         },
       },
       {
@@ -97,6 +145,10 @@ describe('output plan', () => {
     expect(plan.outputs.get('shared.md')?.content).toBe('replacement');
     expect(plan.owners.get('shared.md')).toBe('third');
     expect(plan.outputs.get('shared.md')?.managedOutputDirectories).toEqual(['first', 'second']);
+    expect(plan.outputs.get('shared.md')?.managedOutputFiles).toEqual([
+      'first.json',
+      'second.json',
+    ]);
     expect(plan.collisions).toEqual([
       expect.objectContaining({
         path: 'shared.md',
@@ -118,6 +170,58 @@ describe('output plan', () => {
         resolution: 'replace-existing',
       }),
     ]);
+  });
+
+  it('compares structured merge semantics deeply', () => {
+    const merge = {
+      format: 'json' as const,
+      owner: 'promptscript',
+      operations: [{ path: 'hooks.PreToolUse', value: { command: 'check' } }],
+    };
+    const createPair = (incomingMerge: unknown): ReturnType<typeof createOutputPlan> =>
+      createOutputPlan([
+        {
+          owner: 'first',
+          output: { path: 'settings.json', content: '{}', merge },
+        },
+        {
+          owner: 'second',
+          output: {
+            path: 'settings.json',
+            content: '{}',
+            merge: incomingMerge as typeof merge,
+          },
+        },
+      ]);
+
+    expect(createPair(structuredClone(merge)).collisions[0]?.identical).toBe(true);
+    expect(createPair(undefined).collisions[0]?.identical).toBe(false);
+    expect(createPair(null).collisions[0]?.identical).toBe(false);
+    expect(createPair({ ...merge, operations: [] }).collisions[0]?.identical).toBe(false);
+    expect(
+      createPair({
+        ...merge,
+        operations: [{ path: 'hooks.PreToolUse', value: 'different' }],
+      }).collisions[0]?.identical
+    ).toBe(false);
+    expect(
+      createPair({
+        ...merge,
+        operations: [{ path: 'hooks.PreToolUse', value: { command: 'check', extra: true } }],
+      }).collisions[0]?.identical
+    ).toBe(false);
+    expect(
+      createPair({
+        ...merge,
+        operations: [{ path: 'hooks.PreToolUse', value: { different: 'check' } }],
+      }).collisions[0]?.identical
+    ).toBe(false);
+    expect(
+      createPair({
+        ...merge,
+        operations: [{ path: 'hooks.PostToolUse', value: { command: 'check' } }],
+      }).collisions[0]?.identical
+    ).toBe(false);
   });
 
   it('retains structured merge data and modes', () => {
