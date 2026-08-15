@@ -231,7 +231,7 @@ export type WatchCallback = (result: CompileResult, changedFiles: string[]) => v
  * Options for watch mode.
  */
 export interface WatchOptions {
-  /** Glob patterns to include. Defaults to all .prs files. */
+  /** Glob patterns for primary files. Resolved dependencies are watched automatically. */
   include?: string[];
   /** Glob patterns to exclude. Defaults to node_modules. */
   exclude?: string[];

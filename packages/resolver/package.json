@@ -25,9 +25,10 @@
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
   "dependencies": {
-    "@swc/helpers": "~0.5.23",
     "@promptscript/core": "workspace:^",
     "@promptscript/parser": "workspace:^",
-    "simple-git": "3.36.0"
+    "@swc/helpers": "~0.5.23",
+    "simple-git": "3.36.0",
+    "yaml": "^2.9.0"
   }
 }

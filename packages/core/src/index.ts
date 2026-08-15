@@ -43,6 +43,7 @@ export * from './section-registry.js';
 
 // Target catalog
 export * from './target-catalog.js';
+export * from './target-capabilities.js';
 
 // Hook capabilities
 export * from './hook-capabilities.js';

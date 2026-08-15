@@ -3,6 +3,7 @@ import { mkdtempSync, writeFileSync, mkdirSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { validateSkillFrontmatter, formatSkillValidationIssues } from '../skill-validation.js';
+import { parseSkillMd } from '../skills.js';
 
 function makeSkill(name: string, description: string, extra = ''): string {
   return [
@@ -31,6 +32,25 @@ describe('validateSkillFrontmatter', () => {
       const result = validateSkillFrontmatter('---\nname: foo\n# no closing delimiter');
       expect(result.valid).toBe(false);
       expect(result.issues[0]?.code).toBe('SK001');
+    });
+
+    it('accepts parser-supported leading blanks and delimiter whitespace', () => {
+      const content = [
+        '  ',
+        '',
+        '---  ',
+        'name: whitespace-safe',
+        'description: Use when checking delimiter handling.',
+        'license: MIT',
+        '---\t',
+        'Body',
+      ].join('\n');
+
+      expect(parseSkillMd(content).name).toBe('whitespace-safe');
+
+      const result = validateSkillFrontmatter(content);
+
+      expect(result.issues.find((issue) => issue.code === 'SK001')).toBeUndefined();
     });
   });
 
