@@ -558,7 +558,22 @@ export class PromptScriptParser extends CstParser {
 }
 
 /**
- * Singleton parser instance.
- * Reuse this instance to avoid repeated grammar analysis.
+ * Create an isolated parser instance for one parse request.
+ *
+ * Chevrotain stores input and diagnostics on the parser instance, so callers
+ * must not share an instance across parse requests.
  */
-export const parser = new PromptScriptParser();
+export function createParser(): PromptScriptParser {
+  return new PromptScriptParser();
+}
+
+/**
+ * Legacy parser instance kept for direct consumers of the parser API.
+ *
+ * Parse helpers use pooled instances so request state never leaks between calls.
+ *
+ * @deprecated Shared instance: Chevrotain stores input, errors, and rule stacks
+ * on the parser, so concurrent or reentrant use cross-contaminates results. Call
+ * {@link createParser} to obtain an instance scoped to one parse request.
+ */
+export const parser = createParser();

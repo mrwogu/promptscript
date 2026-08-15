@@ -13,7 +13,7 @@ description: PromptScript output format for Gemini CLI
 | **Tier**          | Custom                                 |
 | **Main output**   | `GEMINI.md`                            |
 | **Dot directory** | `.gemini/`                             |
-| **Skills**        | Yes (`.agents/skills/<name>/skill.md`) |
+| **Skills**        | Yes (`.gemini/skills/<name>/skill.md`) |
 | **Agents**        | No                                     |
 | **Commands**      | Yes (`.gemini/commands/<name>.toml`)   |
 | **Local files**   | No                                     |
@@ -29,7 +29,7 @@ description: PromptScript output format for Gemini CLI
 | ----------------- | -------------------------------- | --------------------------------------------- |
 | Main instructions | `GEMINI.md`                      | Primary rule file                             |
 | Lifecycle hooks   | `.gemini/settings.json`          | Project hooks in `multifile` and `full` modes |
-| Skills            | `.agents/skills/<name>/skill.md` | Reusable skill definitions                    |
+| Skills            | `.gemini/skills/<name>/skill.md` | Reusable skill definitions                    |
 | Commands          | `.gemini/commands/<name>.toml`   | Slash commands                                |
 
 <!-- generated:end:output-files -->

@@ -1,75 +1,22 @@
 import { describe, it, expect } from 'vitest';
-import { TARGET_DEFINITIONS } from '@promptscript/core';
+import { KNOWN_TARGETS, TARGET_DEFINITIONS } from '@promptscript/core';
 import type { KnownTarget, Program } from '@promptscript/core';
 // Import from index to trigger built-in formatter registration
 import { FormatterRegistry } from '../index.js';
 import type { Formatter, FormatterOutput } from '../types.js';
 
 /**
- * Complete inventory of expected skill paths for all known target formatters.
- * Source of truth: docs/superpowers/specs/2026-03-13-auto-inject-promptscript-skill-design.md
+ * Expected skill paths projected from the canonical target capability contract.
  */
-const EXPECTED_SKILL_PATHS: Record<string, { basePath: string | null; fileName: string | null }> = {
-  // BaseFormatter subclasses
-  claude: { basePath: '.claude/skills', fileName: 'SKILL.md' },
-  github: { basePath: '.github/skills', fileName: 'SKILL.md' },
-  cursor: { basePath: '.agents/skills', fileName: 'SKILL.md' },
-  antigravity: { basePath: null, fileName: null },
-  // MarkdownInstructionFormatter subclasses (hasSkills: false targets return null)
-  adal: { basePath: '.adal/skills', fileName: 'SKILL.md' },
-  amp: { basePath: '.agents/skills', fileName: 'SKILL.md' },
-  augment: { basePath: null, fileName: null },
-  cline: { basePath: null, fileName: null },
-  codebuddy: { basePath: '.codebuddy/skills', fileName: 'SKILL.md' },
-  codex: { basePath: '.agents/skills', fileName: 'SKILL.md' },
-  'command-code': { basePath: '.commandcode/skills', fileName: 'SKILL.md' },
-  continue: { basePath: null, fileName: null },
-  cortex: { basePath: '.cortex/skills', fileName: 'SKILL.md' },
-  crush: { basePath: '.crush/skills', fileName: 'SKILL.md' },
-  factory: { basePath: '.factory/skills', fileName: 'SKILL.md' },
-  gemini: { basePath: '.gemini/skills', fileName: 'skill.md' },
-  goose: { basePath: '.goose/skills', fileName: 'SKILL.md' },
-  iflow: { basePath: '.iflow/skills', fileName: 'SKILL.md' },
-  junie: { basePath: '.junie/skills', fileName: 'SKILL.md' },
-  kilo: { basePath: '.kilocode/skills', fileName: 'SKILL.md' },
-  kiro: { basePath: '.kiro/skills', fileName: 'SKILL.md' },
-  kode: { basePath: '.kode/skills', fileName: 'SKILL.md' },
-  mcpjam: { basePath: '.mcpjam/skills', fileName: 'SKILL.md' },
-  'mistral-vibe': { basePath: '.vibe/skills', fileName: 'SKILL.md' },
-  mux: { basePath: null, fileName: null },
-  neovate: { basePath: null, fileName: null },
-  openclaw: { basePath: '.openclaw/skills', fileName: 'SKILL.md' },
-  opencode: { basePath: '.opencode/skills', fileName: 'SKILL.md' },
-  openhands: { basePath: '.openhands/skills', fileName: 'SKILL.md' },
-  pi: { basePath: '.pi/skills', fileName: 'SKILL.md' },
-  pochi: { basePath: '.pochi/skills', fileName: 'SKILL.md' },
-  qoder: { basePath: null, fileName: null },
-  'qwen-code': { basePath: '.qwen/skills', fileName: 'SKILL.md' },
-  roo: { basePath: null, fileName: null },
-  trae: { basePath: '.trae/skills', fileName: 'SKILL.md' },
-  windsurf: { basePath: '.windsurf/skills', fileName: 'SKILL.md' },
-  zencoder: { basePath: '.zencoder/skills', fileName: 'SKILL.md' },
-  // AGENTS.md-only targets (no skill support)
-  aider: { basePath: null, fileName: null },
-  'amazon-q': { basePath: null, fileName: null },
-  warp: { basePath: null, fileName: null },
-  zed: { basePath: null, fileName: null },
-  jules: { basePath: null, fileName: null },
-  devin: { basePath: null, fileName: null },
-  grok: { basePath: '.claude/skills', fileName: 'SKILL.md' },
-  // Priority B CLI agents (AGENTS.md-only, no skills by default)
-  kimi: { basePath: null, fileName: null },
-  mimo: { basePath: null, fileName: null },
-  'deep-agents': { basePath: null, fileName: null },
-  forgecode: { basePath: null, fileName: null },
-  hermes: { basePath: null, fileName: null },
-};
+const EXPECTED_SKILL_PATHS = Object.fromEntries(
+  Object.entries(TARGET_DEFINITIONS).map(([name, definition]) => [name, definition.skillPath])
+) as Record<KnownTarget, { basePath: string | null; fileName: string | null }>;
 
 describe('Skill path inventory verification', () => {
   const registeredNames = FormatterRegistry.list();
 
-  it('should have entries for all registered formatters', () => {
-    for (const name of registeredNames) {
+  it('should have entries for all known targets', () => {
+    for (const name of KNOWN_TARGETS) {
       expect(EXPECTED_SKILL_PATHS).toHaveProperty(name);
     }
   });
