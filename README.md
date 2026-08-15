@@ -236,6 +236,9 @@ Build organization, team, and project layers with deterministic merge rules:
 - Sealed properties, reference negation, and overlay drift warnings keep extension layers safe.
 - `prs inspect <skill>` shows property and layer provenance.
 - `prs explain <path>` shows source locations and composition history for any resolved path.
+  Text and JSON paths are project-relative by default; use `--absolute-paths` to opt in to
+  absolute paths. JSON includes `version`, `path`, `entries`, and `diagnostics`. The command exits
+  nonzero for fatal resolution diagnostics or missing paths, but warning-only diagnostics succeed.
 
 Remote imports are pinned in `promptscript.lock` with commit and integrity data. Vendor mode mirrors
 resolved dependencies into `.promptscript/vendor/` for offline and air-gapped builds.

@@ -229,6 +229,71 @@ ${directive}`
     );
   });
 
+  it('records per-property strategies across multiple skill extension layers', async () => {
+    const directory = await createTestDirectory();
+    const projectPath = join(directory, 'project.prs');
+    await writeFile(
+      projectPath,
+      `@meta { id: "layers" syntax: "1.3.0" }
+@skills {
+  review: {
+    description: "Base"
+    references: ["base.md"]
+    inputs: { base: { type: "string" } }
+  }
+}
+@extend skills {
+  review: {
+    description: "First"
+    references: ["first.md"]
+    inputs: { first: { type: "string" } }
+  }
+}
+@extend skills {
+  review: {
+    description: "Second"
+    references: ["second.md"]
+    inputs: { second: { type: "string" } }
+  }
+}`
+    );
+    const resolver = new Resolver({
+      registryPath: directory,
+      localPath: directory,
+      cache: false,
+    });
+
+    const result = await resolver.resolve(projectPath);
+    const description = result.provenance.entries.find(
+      (entry) => entry.path === 'skills.review.description'
+    );
+    const references = result.provenance.entries.filter((entry) =>
+      entry.path.startsWith('skills.review.references[')
+    );
+    const input = result.provenance.entries.find((entry) => entry.path === 'skills.review.inputs');
+
+    expect(
+      description?.history
+        .filter((step) => step.operation === 'extend')
+        .map((step) => ({
+          action: step.action,
+          strategy: step.strategy,
+        }))
+    ).toEqual([
+      { action: 'replaced', strategy: 'replace' },
+      { action: 'replaced', strategy: 'replace' },
+    ]);
+    expect(
+      references
+        .flatMap((entry) => entry.history)
+        .filter((step) => step.operation === 'extend')
+        .map((step) => step.strategy)
+    ).toEqual(['append', 'append']);
+    expect(
+      input?.history.filter((step) => step.operation === 'extend').map((step) => step.strategy)
+    ).toEqual(['merge', 'merge']);
+  });
+
   it('should reject the modifier for direct skill targets', () => {
     const ast = parseOrThrow(`
       @meta { id: "skills" syntax: "1.3.0" }

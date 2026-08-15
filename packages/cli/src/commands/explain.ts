@@ -1,5 +1,5 @@
 import { existsSync } from 'fs';
-import { resolve } from 'path';
+import { relative, resolve } from 'path';
 import {
   collectProvenance,
   type Program,
@@ -115,38 +115,112 @@ function findMatches(ast: Program, trace: ProvenanceTrace, requestedPath: string
     }));
 }
 
-function formatLocation(location: SourceLocation): string {
-  return `${location.file}:${location.line}:${location.column}`;
+interface PathOutputOptions {
+  readonly projectRoot: string;
+  readonly absolutePaths: boolean;
 }
 
-function formatValue(value: unknown): string {
+function sanitizePath(path: string, options: PathOutputOptions): string {
+  if (options.absolutePaths || !path.startsWith('/')) return path;
+  const relativePath = relative(options.projectRoot, path);
+  return relativePath || '.';
+}
+
+function sanitizeText(value: string, options: PathOutputOptions): string {
+  if (options.absolutePaths) return value;
+  return value.replaceAll(options.projectRoot, '.');
+}
+
+function sanitizeReference(value: string, options: PathOutputOptions): string {
+  return value.startsWith('/') ? sanitizePath(value, options) : sanitizeText(value, options);
+}
+
+function sanitizeValue(
+  value: unknown,
+  options: PathOutputOptions,
+  seen: WeakSet<object> = new WeakSet<object>()
+): unknown {
+  if (typeof value === 'string') {
+    return value.startsWith('/') ? sanitizePath(value, options) : sanitizeText(value, options);
+  }
+  if (Array.isArray(value)) {
+    if (seen.has(value)) return value;
+    seen.add(value);
+    return value.map((item) => sanitizeValue(item, options, seen));
+  }
+  if (isRecord(value)) {
+    if (seen.has(value)) return value;
+    seen.add(value);
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, sanitizeValue(item, options, seen)])
+    );
+  }
+  return value;
+}
+
+function formatLocation(location: SourceLocation, options: PathOutputOptions): string {
+  return `${sanitizePath(location.file, options)}:${location.line}:${location.column}`;
+}
+
+function sanitizeTrace(trace: ProvenanceTrace, options: PathOutputOptions): ProvenanceTrace {
+  return {
+    ...trace,
+    entry: sanitizePath(trace.entry, options),
+    entries: trace.entries.map((entry) => ({
+      ...entry,
+      source: { ...entry.source, file: sanitizePath(entry.source.file, options) },
+      history: entry.history.map((step) => ({
+        ...step,
+        source: { ...step.source, file: sanitizePath(step.source.file, options) },
+        ...(step.target ? { target: sanitizeReference(step.target, options) } : {}),
+        ...(step.reference ? { reference: sanitizeReference(step.reference, options) } : {}),
+        chain: step.chain.map((link) => ({
+          ...link,
+          source: { ...link.source, file: sanitizePath(link.source.file, options) },
+          ...(link.target ? { target: sanitizeReference(link.target, options) } : {}),
+          ...(link.reference ? { reference: sanitizeReference(link.reference, options) } : {}),
+        })),
+        ...(step.trace ? { trace: sanitizeTrace(step.trace, options) } : {}),
+      })),
+    })),
+  };
+}
+
+function sanitizeEntry(entry: ProvenanceEntry, options: PathOutputOptions): ProvenanceEntry {
+  return sanitizeTrace({ version: 1, entry: '<entry>', entries: [entry] }, options).entries[0]!;
+}
+
+function formatValue(value: unknown, options: PathOutputOptions): string {
   if (value === undefined) return '(unavailable)';
-  if (typeof value === 'string') return value;
+  const sanitizedValue = sanitizeValue(value, options);
+  if (typeof sanitizedValue === 'string') return sanitizedValue;
   try {
-    return JSON.stringify(value, null, 2);
+    return JSON.stringify(sanitizedValue, null, 2);
   } catch {
-    return String(value);
+    return sanitizeText(String(sanitizedValue), options);
   }
 }
 
 function outputText(
   requestedPath: string,
   matches: readonly ExplainMatch[],
-  diagnostics: readonly ExplainDiagnostic[]
+  diagnostics: readonly ExplainDiagnostic[],
+  options: PathOutputOptions
 ): void {
   console.log(`\nPath: ${requestedPath}\n`);
   for (const match of matches) {
-    console.log(`${match.entry.path} (${match.entry.kind})`);
-    console.log(`  final: ${formatValue(match.value)}`);
-    console.log(`  source: ${formatLocation(match.entry.source)}`);
-    for (const step of match.entry.history) {
+    const entry = sanitizeEntry(match.entry, options);
+    console.log(`${entry.path} (${entry.kind})`);
+    console.log(`  final: ${formatValue(match.value, options)}`);
+    console.log(`  source: ${formatLocation(entry.source, options)}`);
+    for (const step of entry.history) {
       const strategy = step.strategy ? `, ${step.strategy}` : '';
-      const target = step.target ? `, target ${step.target}` : '';
+      const target = step.target ? `, target ${sanitizeReference(step.target, options)}` : '';
       console.log(
-        `  ${step.operation}/${step.action}${strategy}${target} <- ${formatLocation(step.source)}`
+        `  ${step.operation}/${step.action}${strategy}${target} <- ${formatLocation(step.source, options)}`
       );
       for (const link of step.chain) {
-        console.log(`    via ${link.operation} <- ${formatLocation(link.source)}`);
+        console.log(`    via ${link.operation} <- ${formatLocation(link.source, options)}`);
       }
     }
     console.log('');
@@ -154,12 +228,14 @@ function outputText(
   if (diagnostics.length > 0) {
     console.log('Diagnostics:');
     for (const diagnostic of diagnostics) {
-      const location = diagnostic.location ? ` (${formatLocation(diagnostic.location)})` : '';
+      const location = diagnostic.location
+        ? ` (${formatLocation(diagnostic.location, options)})`
+        : '';
       const related =
         diagnostic.relatedPaths && diagnostic.relatedPaths.length > 0
           ? ` -> ${diagnostic.relatedPaths.join(', ')}`
           : '';
-      console.log(`  ${diagnostic.message}${location}${related}`);
+      console.log(`  ${sanitizeText(diagnostic.message, options)}${location}${related}`);
     }
   }
 }
@@ -167,7 +243,8 @@ function outputText(
 function outputJson(
   requestedPath: string,
   matches: readonly ExplainMatch[],
-  diagnostics: readonly ExplainDiagnostic[]
+  diagnostics: readonly ExplainDiagnostic[],
+  options: PathOutputOptions
 ): void {
   console.log(
     JSON.stringify(
@@ -175,10 +252,21 @@ function outputJson(
         version: 1,
         path: requestedPath,
         entries: matches.map((match) => ({
-          ...match.entry,
-          value: formatValue(match.value),
+          ...sanitizeEntry(match.entry, options),
+          value: formatValue(match.value, options),
         })),
-        diagnostics,
+        diagnostics: diagnostics.map((diagnostic) => ({
+          ...diagnostic,
+          ...(diagnostic.location
+            ? {
+                location: {
+                  ...diagnostic.location,
+                  file: sanitizePath(diagnostic.location.file, options),
+                },
+              }
+            : {}),
+          message: sanitizeText(diagnostic.message, options),
+        })),
       },
       null,
       2
@@ -201,9 +289,13 @@ function sameLocation(left: SourceLocation, right: SourceLocation): boolean {
 export async function explainCommand(targetPath: string, options: ExplainOptions): Promise<void> {
   const isJson = options.format === 'json';
   const spinner = isJson ? createSpinner('').stop() : createSpinner('Resolving...').start();
+  const outputOptions: PathOutputOptions = {
+    projectRoot: resolve(options.cwd ?? process.cwd()),
+    absolutePaths: options.absolutePaths === true,
+  };
 
   try {
-    const projectRoot = options.cwd ? resolve(options.cwd) : process.cwd();
+    const projectRoot = outputOptions.projectRoot;
     const configPath = options.config
       ? resolve(projectRoot, options.config)
       : options.cwd
@@ -225,7 +317,7 @@ export async function explainCommand(targetPath: string, options: ExplainOptions
 
     if (!existsSync(entryPath)) {
       spinner.stop();
-      ConsoleOutput.error(`Entry file not found: ${entryPath}`);
+      ConsoleOutput.error(`Entry file not found: ${sanitizePath(entryPath, outputOptions)}`);
       process.exitCode = 1;
       return;
     }
@@ -234,7 +326,9 @@ export async function explainCommand(targetPath: string, options: ExplainOptions
     if (!result.ast) {
       spinner.stop();
       ConsoleOutput.error('Resolution failed');
-      for (const error of result.errors) ConsoleOutput.error(`  ${error.message}`);
+      for (const error of result.errors) {
+        ConsoleOutput.error(`  ${sanitizeText(error.message, outputOptions)}`);
+      }
       process.exitCode = 1;
       return;
     }
@@ -264,13 +358,23 @@ export async function explainCommand(targetPath: string, options: ExplainOptions
       return;
     }
 
-    if (isJson) outputJson(requestedPath, matches, diagnostics);
-    else outputText(requestedPath, matches, diagnostics);
+    if (isJson) outputJson(requestedPath, matches, diagnostics, outputOptions);
+    else outputText(requestedPath, matches, diagnostics, outputOptions);
+    if (diagnostics.some((diagnostic) => !isWarningDiagnostic(diagnostic))) {
+      process.exitCode = 1;
+    }
   } catch (error) {
     spinner.stop();
     ConsoleOutput.error(
-      `Explain failed: ${error instanceof Error ? error.message : String(error)}`
+      `Explain failed: ${sanitizeText(
+        error instanceof Error ? error.message : String(error),
+        outputOptions
+      )}`
     );
     process.exitCode = 1;
   }
+}
+
+function isWarningDiagnostic(diagnostic: ExplainDiagnostic): boolean {
+  return /\bwarn(?:ing)?\b/i.test(diagnostic.message);
 }

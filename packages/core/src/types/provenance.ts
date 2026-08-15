@@ -33,7 +33,10 @@ export interface ProvenanceStep {
   readonly strategy?: string;
   readonly target?: string;
   readonly reference?: string;
+  readonly alias?: string;
   readonly chain: readonly ProvenanceLink[];
+  /** Transitive trace carried by a composition step. */
+  readonly trace?: ProvenanceTrace;
 }
 
 /**
@@ -77,5 +80,7 @@ export interface ProvenanceEvent {
   readonly target?: string;
   readonly reference?: string;
   readonly alias?: string;
+  /** Transitive trace carried by a composition event. */
+  readonly trace?: ProvenanceTrace;
   readonly chain?: readonly ProvenanceLink[];
 }

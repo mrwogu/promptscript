@@ -186,6 +186,7 @@ program
   .option('--format <format>', 'Output format (text, json)', 'text')
   .option('-c, --config <path>', 'Path to custom config file')
   .option('--cwd <dir>', 'Working directory (project root)')
+  .option('--absolute-paths', 'Include absolute filesystem paths in output')
   .action((path, opts) => explainCommand(path, opts));
 
 program

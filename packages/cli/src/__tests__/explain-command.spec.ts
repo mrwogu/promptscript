@@ -226,6 +226,68 @@ describe('commands/explain', () => {
     expect(output).toContain('Diagnostics:');
     expect(output).toContain('Overlay warning');
     expect(output).toContain('standards.code.frameworks[0]');
+    expect(process.exitCode).toBeUndefined();
+  });
+
+  it('should relativize paths in text and JSON output by default', async () => {
+    mockResolve.mockResolvedValue(
+      makeResolvedAst({
+        'code-review': {
+          description: 'Review',
+        },
+      })
+    );
+
+    const { explainCommand } = await import('../commands/explain.js');
+    await explainCommand('skills.code-review.description', { cwd: '/project' });
+
+    const textOutput = (console.log as ReturnType<typeof vi.fn>).mock.calls
+      .map((call) => call[0])
+      .join('\n');
+    expect(textOutput).not.toContain('/project/');
+    expect(textOutput).toContain('test.prs:1:1');
+
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+    mockLoadConfig.mockResolvedValue({ registries: {} });
+    mockResolveRegistryPath.mockResolvedValue({ path: '/registry' });
+    mockExistsSync.mockReturnValue(true);
+    mockResolve.mockResolvedValue(
+      makeResolvedAst({
+        'code-review': {
+          description: 'Review',
+        },
+      })
+    );
+
+    await explainCommand('skills.code-review.description', {
+      cwd: '/project',
+      format: 'json',
+    });
+
+    const parsed = JSON.parse((console.log as ReturnType<typeof vi.fn>).mock.calls[0]![0]);
+    expect(parsed.entries[0].source.file).toBe('test.prs');
+    expect(JSON.stringify(parsed)).not.toContain('/project/');
+  });
+
+  it('should expose absolute paths only with explicit opt-in', async () => {
+    mockResolve.mockResolvedValue(
+      makeResolvedAst({
+        'code-review': {
+          description: 'Review',
+        },
+      })
+    );
+
+    const { explainCommand } = await import('../commands/explain.js');
+    await explainCommand('skills.code-review.description', {
+      cwd: '/project',
+      format: 'json',
+      absolutePaths: true,
+    });
+
+    const parsed = JSON.parse((console.log as ReturnType<typeof vi.fn>).mock.calls[0]![0]);
+    expect(parsed.entries[0].source.file).toBe('/project/test.prs');
   });
 
   it('should resolve indexed paths in JSON output', async () => {
@@ -454,6 +516,24 @@ describe('commands/explain', () => {
     mockLoadConfig.mockRejectedValue('bad config');
     await explainCommand('standards', {});
     expect(process.exitCode).toBe(1);
+  });
+
+  it('should return a nonzero status for partial fatal resolution errors', async () => {
+    mockResolve.mockResolvedValue({
+      ...makeResolvedAst({
+        'code-review': {
+          description: 'Review',
+        },
+      }),
+      errors: [{ message: 'Failed to resolve sub-skill', location: LOC }],
+    });
+
+    const { explainCommand } = await import('../commands/explain.js');
+    await explainCommand('skills.code-review.description', { format: 'json' });
+
+    expect(process.exitCode).toBe(1);
+    const parsed = JSON.parse((console.log as ReturnType<typeof vi.fn>).mock.calls[0]![0]);
+    expect(parsed.diagnostics[0].message).toBe('Failed to resolve sub-skill');
   });
 
   it('should index string values for numeric path tokens', async () => {

@@ -325,4 +325,6 @@ export interface ExplainOptions {
   config?: string;
   /** Working directory (project root) */
   cwd?: string;
+  /** Include absolute filesystem paths in output */
+  absolutePaths?: boolean;
 }

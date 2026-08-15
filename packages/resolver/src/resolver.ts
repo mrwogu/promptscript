@@ -32,9 +32,11 @@ import {
   collectProvenanceValueEvents,
   emptyProvenance,
   prefixProvenance,
+  SKILL_REPLACE_PROPERTY_NAMES,
   toLegacyBlock,
   type ProvenanceEntry,
   type ProvenanceEvent,
+  type ProvenanceEventOptions,
   type ProvenanceLink,
   type ProvenanceTrace,
   usesSequentialOperations,
@@ -54,7 +56,7 @@ import {
   filterBlocks,
   filterSkillsBlock,
 } from './imports.js';
-import { applyExtend, applyExtends } from './extensions.js';
+import { applyExtend } from './extensions.js';
 import {
   resolveNativeSkills,
   resolveNativeCommands,
@@ -70,7 +72,11 @@ import { detectContentType } from './content-detector.js';
 import { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
 import { resolveGuardRequires } from './guard-requires.js';
 import { normalizeBlockAliases } from './normalize.js';
-import { resolveSkillComposition } from './skill-composition.js';
+import {
+  resolveSkillComposition,
+  type CompositionResolutionContext,
+  type ResolvedCompositionFile,
+} from './skill-composition.js';
 import { GitRegistry } from './git-registry.js';
 import { RegistryCache } from './registry-cache.js';
 import { hashContent, isRealPathInside } from './reference-hasher.js';
@@ -97,6 +103,166 @@ function effectiveCompositionPath(
 
 function isValueRecord(value: unknown): value is Record<string, Value> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+const SKILL_REPLACE_PROPERTIES = new Set<string>(SKILL_REPLACE_PROPERTY_NAMES);
+const SKILL_APPEND_PROPERTIES = new Set(['references', 'examples', 'requires', 'scripts']);
+const SKILL_MERGE_PROPERTIES = new Set(['params', 'inputs', 'outputs']);
+
+interface SkillLayerTraceEntry {
+  readonly property: string;
+  readonly strategy: string;
+  readonly action: ProvenanceEvent['action'];
+  readonly source: string;
+}
+
+function isProvenanceAction(value: unknown): value is ProvenanceEvent['action'] {
+  return (
+    value === 'declared' ||
+    value === 'selected' ||
+    value === 'merged' ||
+    value === 'appended' ||
+    value === 'replaced' ||
+    value === 'removed' ||
+    value === 'composed'
+  );
+}
+
+function getSkillProperties(content: BlockContent): Record<string, Value> | undefined {
+  return content.type === 'ObjectContent' || content.type === 'MixedContent'
+    ? content.properties
+    : undefined;
+}
+
+function contentAtPath(content: BlockContent, path: string): BlockContent | undefined {
+  const parts = path.split('.').slice(1);
+  let value: unknown = content;
+  for (const part of parts) {
+    if (isValueRecord(value)) {
+      if (value['type'] === 'ObjectContent' || value['type'] === 'MixedContent') {
+        value = (value['properties'] as Record<string, Value> | undefined)?.[part];
+      } else {
+        value = value[part];
+      }
+    } else {
+      return undefined;
+    }
+  }
+  if (
+    isValueRecord(value) &&
+    (value['type'] === 'TextContent' ||
+      value['type'] === 'ObjectContent' ||
+      value['type'] === 'ArrayContent' ||
+      value['type'] === 'MixedContent')
+  ) {
+    return value as unknown as BlockContent;
+  }
+  if (Array.isArray(value)) {
+    return { type: 'ArrayContent', elements: value, loc: content.loc };
+  }
+  if (isValueRecord(value)) {
+    return {
+      type: 'ObjectContent',
+      properties: value,
+      loc: content.loc,
+    };
+  }
+  if (typeof value === 'string') {
+    return { type: 'TextContent', value, loc: content.loc };
+  }
+  return undefined;
+}
+
+function getSkillLayerTrace(
+  content: BlockContent,
+  targetPath: string,
+  eventPath: string,
+  sourceFile: string
+): Pick<ProvenanceEvent, 'action' | 'strategy'> | undefined {
+  const properties = getSkillProperties(content);
+  if (!properties) return undefined;
+
+  const targetParts = targetPath.split('.');
+  const eventParts = eventPath.split('.');
+  const skillName =
+    targetParts[0] === 'skills' && targetParts[1]
+      ? targetParts[1]
+      : eventParts[0] === 'skills'
+        ? eventParts[1]
+        : undefined;
+  if (!skillName) return undefined;
+
+  const skill = properties[skillName];
+  if (!isValueRecord(skill)) return undefined;
+  const propertyIndex = 2;
+  const property = eventParts[propertyIndex]?.split('[')[0];
+  if (!property) return undefined;
+
+  const layerTrace = skill['__layerTrace'];
+  if (!Array.isArray(layerTrace)) return undefined;
+  const matching = layerTrace.flatMap((entry): SkillLayerTraceEntry[] => {
+    if (!isValueRecord(entry)) return [];
+    const entryProperty = entry['property'];
+    const strategy = entry['strategy'];
+    const action = entry['action'];
+    const source = entry['source'];
+    if (
+      typeof entryProperty !== 'string' ||
+      typeof strategy !== 'string' ||
+      !isProvenanceAction(action) ||
+      typeof source !== 'string' ||
+      entryProperty !== property ||
+      source !== sourceFile
+    ) {
+      return [];
+    }
+    return [
+      {
+        property: entryProperty,
+        strategy,
+        action,
+        source,
+      },
+    ];
+  });
+  /*
+   * The trace is resolver metadata, so malformed entries are ignored instead
+   * of making provenance collection fail.
+   */
+  const latest = matching.at(-1);
+  if (!latest) return undefined;
+  return { action: latest.action, strategy: latest.strategy };
+}
+
+function skillLayerDetails(
+  content: BlockContent | undefined,
+  targetPath: string,
+  sourceFile: string
+): ProvenanceEventOptions['resolveDetails'] | undefined {
+  if (!content || !targetPath.split('.')[0] || targetPath.split('.')[0] !== 'skills') {
+    return undefined;
+  }
+  return (path: string) => {
+    const traced = getSkillLayerTrace(content, targetPath, path, sourceFile);
+    if (traced) return traced;
+    const property = path.split('.')[2]?.split('[')[0];
+    if (!property) return undefined;
+    if (SKILL_REPLACE_PROPERTIES.has(property)) {
+      return { action: 'replaced', strategy: 'replace' };
+    }
+    if (SKILL_APPEND_PROPERTIES.has(property)) {
+      return { action: 'appended', strategy: 'append' };
+    }
+    if (SKILL_MERGE_PROPERTIES.has(property)) {
+      return { action: 'merged', strategy: 'merge' };
+    }
+    return undefined;
+  };
+}
+
+function extensionStrategy(targetPath: string, hasReplacementModifier: boolean): string {
+  if (hasReplacementModifier) return 'replace';
+  return targetPath === 'skills' || targetPath.startsWith('skills.') ? 'mixed' : 'merge';
 }
 
 type CompositionBlock = Program['blocks'][number] & {
@@ -206,7 +372,10 @@ export class Resolver {
    * @returns Resolved AST with sources and errors
    * @throws CircularDependencyError if a circular dependency is detected
    */
-  async resolve(entryPath: string): Promise<ResolvedAST> {
+  async resolve(
+    entryPath: string,
+    compositionContext?: CompositionResolutionContext
+  ): Promise<ResolvedAST> {
     const absPath = this.loader.toAbsolutePath(entryPath);
 
     // Check for circular dependency
@@ -216,7 +385,7 @@ export class Resolver {
     }
 
     // Check cache
-    if (this.cacheEnabled && this.cache.has(absPath)) {
+    if (!compositionContext && this.cacheEnabled && this.cache.has(absPath)) {
       this.logger.debug(`Cache hit: ${absPath}`);
       return this.cache.get(absPath)!;
     }
@@ -225,9 +394,9 @@ export class Resolver {
     this.logger.verbose(`Parsing ${absPath}`);
 
     try {
-      const result = await this.doResolve(absPath);
+      const result = await this.doResolve(absPath, compositionContext);
 
-      if (this.cacheEnabled) {
+      if (!compositionContext && this.cacheEnabled) {
         this.logger.debug(`Cache store: ${absPath}`);
         this.cache.set(absPath, result);
       }
@@ -241,7 +410,10 @@ export class Resolver {
   /**
    * Perform the actual resolution.
    */
-  private async doResolve(absPath: string): Promise<ResolvedAST> {
+  private async doResolve(
+    absPath: string,
+    compositionContext?: CompositionResolutionContext
+  ): Promise<ResolvedAST> {
     const sources: string[] = [absPath];
     const errors: ResolveError[] = [];
     const inheritedProvenance: ProvenanceEntry[] = [];
@@ -272,7 +444,8 @@ export class Resolver {
         sources,
         errors,
         inheritedProvenance,
-        provenanceEvents
+        provenanceEvents,
+        compositionContext
       );
     } else {
       // Preserve legacy phase ordering through syntax 1.5.x.
@@ -282,7 +455,14 @@ export class Resolver {
 
     // Legacy phase order resolves inline composition after top-level imports.
     if (!sequentialOperations) {
-      ast = await this.resolveComposition(ast, absPath, sources, errors, provenanceEvents);
+      ast = await this.resolveComposition(
+        ast,
+        absPath,
+        sources,
+        errors,
+        provenanceEvents,
+        compositionContext
+      );
     }
 
     // Apply extensions
@@ -290,20 +470,44 @@ export class Resolver {
       this.logger.debug(`Applying ${ast.extends.length} extension(s)`);
     }
     if (!sequentialOperations) {
-      const extensionBlocks = ast.blocks;
+      const syntaxFeatures = getSyntaxFeatureUsages(ast);
+      let extended = ast;
       for (const extension of ast.extends) {
+        const targetPath = effectiveCompositionPath(extended.blocks, extension.targetPath);
+        const baseBlock = extended.blocks.find((block) => block.name === targetPath.split('.')[0]);
+        extended = {
+          ...extended,
+          blocks: applyExtend(extended.blocks, extension, this.logger),
+        };
+        const rootName = targetPath.split('.')[0];
+        const finalBlockContent = extended.blocks.find((block) => block.name === rootName)?.content;
+        const finalBlock = extended.blocks.find((block) => block.name === rootName);
+        const finalContent = finalBlockContent
+          ? contentAtPath(finalBlockContent, targetPath)
+          : undefined;
         provenanceEvents.push(
           ...collectProvenanceEvents(
             extension.canonicalBody,
-            effectiveCompositionPath(extensionBlocks, extension.targetPath),
+            targetPath,
             'extend',
             extension.loc,
             extension.replacements?.length ? 'replaced' : 'merged',
-            extension.replacements?.length ? 'replace' : 'merge'
+            extensionStrategy(targetPath, Boolean(extension.replacements?.length)),
+            {
+              finalContent,
+              finalBody: finalBlock?.canonicalBody,
+              baseContent: baseBlock?.content,
+              resolveDetails: skillLayerDetails(finalBlockContent, targetPath, extension.loc.file),
+            }
           )
         );
       }
-      ast = applyExtends(ast, this.logger);
+      ast = {
+        ...extended,
+        blocks: extended.blocks.filter((block) => !block.name.startsWith(IMPORT_MARKER_PREFIX)),
+        extends: [],
+        syntaxFeatures,
+      };
     }
 
     // Resolve guard requires dependencies
@@ -359,7 +563,8 @@ export class Resolver {
     sources: string[],
     errors: ResolveError[],
     inheritedProvenance: ProvenanceEntry[],
-    provenanceEvents: ProvenanceEvent[]
+    provenanceEvents: ProvenanceEvent[],
+    compositionContext?: CompositionResolutionContext
   ): Promise<Program> {
     const operations = normalizeProgram(ast).operations;
     const localBlockNames = new Set<string>();
@@ -420,7 +625,8 @@ export class Resolver {
             absPath,
             sources,
             errors,
-            provenanceEvents
+            provenanceEvents,
+            compositionContext
           );
           break;
         }
@@ -443,18 +649,42 @@ export class Resolver {
             loc: deepClone(operation.extension.loc),
           };
           try {
+            const baseBlock = result.blocks.find(
+              (block) =>
+                block.name ===
+                effectiveCompositionPath(result.blocks, extension.targetPath).split('.')[0]
+            );
             result = {
               ...result,
               blocks: applyExtend(result.blocks, extension, this.logger),
             };
+            const targetPath = effectiveCompositionPath(result.blocks, extension.targetPath);
+            const rootName = targetPath.split('.')[0];
+            const finalBlockContent = result.blocks.find(
+              (block) => block.name === rootName
+            )?.content;
+            const finalBlock = result.blocks.find((block) => block.name === rootName);
+            const finalContent = finalBlockContent
+              ? contentAtPath(finalBlockContent, targetPath)
+              : undefined;
             provenanceEvents.push(
               ...collectProvenanceEvents(
                 extension.canonicalBody,
-                effectiveCompositionPath(result.blocks, extension.targetPath),
+                targetPath,
                 'extend',
                 extension.loc,
                 extension.replacements?.length ? 'replaced' : 'merged',
-                extension.replacements?.length ? 'replace' : 'merge'
+                extensionStrategy(targetPath, Boolean(extension.replacements?.length)),
+                {
+                  finalContent,
+                  finalBody: finalBlock?.canonicalBody,
+                  baseContent: baseBlock?.content,
+                  resolveDetails: skillLayerDetails(
+                    finalBlockContent,
+                    targetPath,
+                    extension.loc.file
+                  ),
+                }
               )
             );
             result = await this.resolveComposition(
@@ -462,7 +692,8 @@ export class Resolver {
               absPath,
               sources,
               errors,
-              provenanceEvents
+              provenanceEvents,
+              compositionContext
             );
           } catch (error) {
             errors.push(
@@ -516,7 +747,8 @@ export class Resolver {
               absPath,
               sources,
               errors,
-              provenanceEvents
+              provenanceEvents,
+              compositionContext
             );
           } catch (error) {
             errors.push(
@@ -934,7 +1166,8 @@ export class Resolver {
     absPath: string,
     sources: string[],
     errors: ResolveError[],
-    provenanceEvents: ProvenanceEvent[] = []
+    provenanceEvents: ProvenanceEvent[] = [],
+    compositionContext?: CompositionResolutionContext
   ): Promise<Program> {
     try {
       const inlineUses = ast.blocks
@@ -944,6 +1177,12 @@ export class Resolver {
         );
       ast = await resolveSkillComposition(ast, {
         currentFile: absPath,
+        ...(compositionContext
+          ? {
+              resolutionStack: compositionContext.resolutionStack,
+              depth: compositionContext.depth,
+            }
+          : {}),
         resolvePath: (ref: string, fromFile: string): string => {
           // Build a PathReference from the raw string, matching how the parser does it
           const isRelative = ref.startsWith('./') || ref.startsWith('../');
@@ -959,8 +1198,11 @@ export class Resolver {
 
           return this.loader.resolveRef(pathRef, fromFile);
         },
-        resolveFile: async (subPath: string): Promise<Program> => {
-          const subResult = await this.resolve(subPath);
+        resolveFile: async (
+          subPath: string,
+          childContext?: CompositionResolutionContext
+        ): Promise<ResolvedCompositionFile> => {
+          const subResult = await this.resolve(subPath, childContext);
           if (subResult.sources.length > 0) {
             sources.push(...subResult.sources);
           }
@@ -970,7 +1212,10 @@ export class Resolver {
           if (!subResult.ast) {
             throw new ResolveError(`Failed to resolve sub-skill: ${subPath}`);
           }
-          return subResult.ast;
+          return {
+            ast: subResult.ast,
+            provenance: subResult.provenance,
+          };
         },
       });
       const skillsBlock = ast.blocks.find(

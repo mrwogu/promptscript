@@ -1,5 +1,6 @@
 import type {
   BlockBody,
+  BlockContent,
   CanonicalBlock,
   InlineUseDeclaration,
   ProgramInput,
@@ -153,7 +154,7 @@ function collectEntries(input: ProgramInput): Map<string, MutableProvenanceEntry
 }
 
 function eventStep(event: ProvenanceEvent): ProvenanceStep {
-  const { operation, action, source, strategy, target, reference, alias, chain } = event;
+  const { operation, action, source, strategy, target, reference, alias, trace, chain } = event;
   return {
     operation,
     action,
@@ -162,6 +163,7 @@ function eventStep(event: ProvenanceEvent): ProvenanceStep {
     ...(target ? { target } : {}),
     ...(reference ? { reference } : {}),
     ...(alias ? { alias } : {}),
+    ...(trace ? { trace: deepClone(trace) } : {}),
     chain: deepClone(chain ?? []),
   };
 }
@@ -194,37 +196,82 @@ function collectEventValuePaths(
   operation: ProvenanceEvent['operation'],
   action: ProvenanceEvent['action'],
   strategy: string | undefined,
-  target: string
+  target: string,
+  finalNode?: ValueNode,
+  resolveDetails?: (
+    path: string,
+    node: ValueNode
+  ) => Pick<ProvenanceEvent, 'action' | 'strategy'> | undefined,
+  baseNode?: ValueNode
 ): void {
-  const valueAction: ProvenanceEvent['action'] =
+  const defaultAction: ProvenanceEvent['action'] =
     action === 'replaced'
       ? 'replaced'
       : operation === 'extend' && (strategy === 'append' || node.type === 'ArrayValueNode')
         ? 'appended'
         : action;
+  const details = resolveDetails?.(path, node);
+  const valueAction = details?.action ?? defaultAction;
+  const valueStrategy = details?.strategy ?? strategy;
   events.push({
     path,
     operation,
     action: valueAction,
     source,
-    ...(strategy ? { strategy } : {}),
+    ...(valueStrategy ? { strategy: valueStrategy } : {}),
     target,
   });
   if (node.type === 'ArrayValueNode') {
+    const finalElements = finalNode?.type === 'ArrayValueNode' ? finalNode.elements : undefined;
+    const baseElements = baseNode?.type === 'ArrayValueNode' ? baseNode.elements : undefined;
+    const usedFinalIndexes = new Set<number>();
     node.elements.forEach((element, index) => {
+      if (
+        valueStrategy === 'append' &&
+        baseElements?.some(
+          (candidate) =>
+            JSON.stringify(valueNodeToValue(candidate.value)) ===
+            JSON.stringify(valueNodeToValue(element.value))
+        )
+      ) {
+        return;
+      }
+      const finalIndex = finalElements
+        ? finalElements.findIndex(
+            (candidate, candidateIndex) =>
+              !usedFinalIndexes.has(candidateIndex) &&
+              sourceKey(candidate.loc) === sourceKey(element.loc) &&
+              JSON.stringify(valueNodeToValue(candidate.value)) ===
+                JSON.stringify(valueNodeToValue(element.value))
+          )
+        : index;
+      if (finalIndex < 0) return;
+      usedFinalIndexes.add(finalIndex);
+      const finalElement = finalElements?.[finalIndex];
       collectEventValuePaths(
         events,
         element.value,
-        `${path}[${index}]`,
+        `${path}[${finalIndex}]`,
         element.loc,
         operation,
         valueAction,
-        strategy,
-        target
+        valueStrategy,
+        target,
+        finalElement?.value,
+        resolveDetails,
+        baseElements?.[index]?.value
       );
     });
   } else if (node.type === 'ObjectValueNode') {
     node.fields.forEach((field) => {
+      const finalField =
+        finalNode?.type === 'ObjectValueNode'
+          ? finalNode.fields.find((candidate) => candidate.name === field.name)
+          : undefined;
+      const baseField =
+        baseNode?.type === 'ObjectValueNode'
+          ? baseNode.fields.find((candidate) => candidate.name === field.name)
+          : undefined;
       collectEventValuePaths(
         events,
         field.value,
@@ -232,11 +279,93 @@ function collectEventValuePaths(
         field.loc,
         operation,
         valueAction,
-        strategy,
-        target
+        valueStrategy,
+        target,
+        finalField?.value,
+        resolveDetails,
+        baseField?.value
       );
     });
   }
+}
+
+function finalNodeForEntry(
+  body: BlockBody | undefined,
+  entry: BlockBody['entries'][number]
+): ValueNode | undefined {
+  if (!body) return undefined;
+  if (entry.type === 'FieldEntry') {
+    const match = [...body.entries]
+      .reverse()
+      .find((candidate) => candidate.type === 'FieldEntry' && candidate.name === entry.name);
+    return match?.type === 'FieldEntry' ? match.value : undefined;
+  }
+  if (entry.type === 'ListEntry') {
+    const sourceEntries = body.entries.filter(
+      (candidate): candidate is Extract<BlockBody['entries'][number], { type: 'ListEntry' }> =>
+        candidate.type === 'ListEntry'
+    );
+    const index = sourceEntries.findIndex(
+      (candidate) =>
+        JSON.stringify(valueNodeToValue(candidate.value)) ===
+        JSON.stringify(valueNodeToValue(entry.value))
+    );
+    return index >= 0 ? sourceEntries[index]?.value : undefined;
+  }
+  return undefined;
+}
+
+function finalListIndexForEntry(
+  body: BlockBody | undefined,
+  entry: Extract<BlockBody['entries'][number], { type: 'ListEntry' }>,
+  usedIndexes: Set<number>
+): number {
+  if (!body) return -1;
+  const finalEntries = body.entries.filter(
+    (candidate): candidate is Extract<BlockBody['entries'][number], { type: 'ListEntry' }> =>
+      candidate.type === 'ListEntry'
+  );
+  return finalEntries.findIndex(
+    (candidate, index) =>
+      !usedIndexes.has(index) &&
+      sourceKey(candidate.loc) === sourceKey(entry.loc) &&
+      JSON.stringify(valueNodeToValue(candidate.value)) ===
+        JSON.stringify(valueNodeToValue(entry.value))
+  );
+}
+
+function valueNodeToValue(node: ValueNode): unknown {
+  switch (node.type) {
+    case 'ArrayValueNode':
+      return node.elements.map((element) => valueNodeToValue(element.value));
+    case 'ObjectValueNode':
+      return Object.fromEntries(
+        node.fields.map((field) => [field.name, valueNodeToValue(field.value)])
+      );
+    case 'TextValueNode':
+    case 'ScalarValueNode':
+      return node.value;
+    case 'TemplateValueNode':
+      return { type: node.type, name: node.name };
+    case 'TypeExpressionValueNode':
+      return { type: node.type, expression: node.expression };
+  }
+}
+
+export interface ProvenanceEventOptions {
+  /** Final content used to map incoming values to final canonical positions. */
+  readonly finalContent?: BlockContent;
+  /** Final canonical body used to preserve source locations during mapping. */
+  readonly finalBody?: BlockBody;
+  /** Base canonical body used to suppress duplicate append events. */
+  readonly baseBody?: BlockBody;
+  /** Base content used to suppress duplicate append events. */
+  readonly baseContent?: BlockContent;
+  /** Per-path strategy override for skill-aware merges. */
+  readonly resolveDetails?: (
+    path: string,
+    node: ValueNode
+  ) => Pick<ProvenanceEvent, 'action' | 'strategy'> | undefined;
 }
 
 function isSourceLocation(value: unknown): value is SourceLocation {
@@ -253,6 +382,18 @@ function isSourceLocation(value: unknown): value is SourceLocation {
 interface ComposedPhaseMetadata {
   readonly source: string;
   readonly loc?: SourceLocation;
+  readonly definitionLoc?: SourceLocation;
+  readonly provenance?: ProvenanceTrace;
+}
+
+function isProvenanceTrace(value: unknown): value is ProvenanceTrace {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    candidate['version'] === 1 &&
+    typeof candidate['entry'] === 'string' &&
+    Array.isArray(candidate['entries'])
+  );
 }
 
 function getComposedPhaseMetadata(value: unknown): ComposedPhaseMetadata | undefined {
@@ -262,6 +403,10 @@ function getComposedPhaseMetadata(value: unknown): ComposedPhaseMetadata | undef
   return {
     source: candidate['source'],
     ...(isSourceLocation(candidate['loc']) ? { loc: candidate['loc'] } : {}),
+    ...(isSourceLocation(candidate['definitionLoc'])
+      ? { definitionLoc: candidate['definitionLoc'] }
+      : {}),
+    ...(isProvenanceTrace(candidate['provenance']) ? { provenance: candidate['provenance'] } : {}),
   };
 }
 
@@ -277,7 +422,8 @@ export function collectProvenanceEvents(
   operation: Extract<ProvenanceEvent['operation'], 'extend' | 'override'>,
   source: SourceLocation,
   action: Extract<ProvenanceEvent['action'], 'merged' | 'replaced'>,
-  strategy?: string
+  strategy?: string,
+  options: ProvenanceEventOptions = {}
 ): ProvenanceEvent[] {
   const events: ProvenanceEvent[] = [
     {
@@ -293,6 +439,12 @@ export function collectProvenanceEvents(
 
   let textIndex = 0;
   let listIndex = 0;
+  const finalBody =
+    options.finalBody ??
+    (options.finalContent ? blockContentToBody(options.finalContent) : undefined);
+  const baseBody =
+    options.baseBody ?? (options.baseContent ? blockContentToBody(options.baseContent) : undefined);
+  const usedFinalListIndexes = new Set<number>();
   for (const entry of body.entries) {
     if (entry.type === 'FieldEntry') {
       const path = `${targetPath}.${entry.name}`;
@@ -304,11 +456,20 @@ export function collectProvenanceEvents(
         operation,
         action,
         strategy,
-        targetPath
+        targetPath,
+        finalNodeForEntry(finalBody, entry),
+        options.resolveDetails,
+        finalNodeForEntry(baseBody, entry)
       );
     } else if (entry.type === 'ListEntry') {
-      const path = `${targetPath}[${listIndex}]`;
+      const finalIndex = finalListIndexForEntry(finalBody, entry, usedFinalListIndexes);
+      if (finalBody && finalIndex < 0) {
+        listIndex++;
+        continue;
+      }
+      const path = `${targetPath}[${finalBody ? finalIndex : listIndex}]`;
       listIndex++;
+      if (finalBody) usedFinalListIndexes.add(finalIndex);
       collectEventValuePaths(
         events,
         entry.value,
@@ -317,7 +478,10 @@ export function collectProvenanceEvents(
         operation,
         action,
         strategy,
-        targetPath
+        targetPath,
+        finalNodeForEntry(finalBody, entry),
+        options.resolveDetails,
+        finalNodeForEntry(baseBody, entry)
       );
     } else if (entry.type === 'TextEntry') {
       events.push({
@@ -344,7 +508,8 @@ export function collectCompositionProvenanceEvents(
   phases: readonly unknown[],
   inlineUses: readonly { readonly declaration: InlineUseDeclaration }[],
   resolveSource: (declaration: InlineUseDeclaration) => string,
-  skillName: string
+  skillName: string,
+  finalProperties?: readonly string[]
 ): ProvenanceEvent[] {
   const events: ProvenanceEvent[] = [];
   const usedInlineUses = new Set<number>();
@@ -368,21 +533,38 @@ export function collectCompositionProvenanceEvents(
     usedInlineUses.add(matchedIndex);
 
     const source = cloneLocation(metadata.loc ?? use.loc);
+    const useSource = cloneLocation(metadata.loc ?? use.loc);
     const chain: ProvenanceLink = {
       operation: 'compose',
-      source: cloneLocation(use.loc),
+      source: useSource,
       target: source.file,
       reference: use.path.raw,
       ...(use.alias ? { alias: use.alias } : {}),
     };
-    for (const property of [
-      'content',
-      'allowedTools',
-      'references',
-      'requires',
-      'inputs',
-      'outputs',
-    ]) {
+    const childLinks = metadata.provenance
+      ? metadata.provenance.entries.flatMap((entry) =>
+          entry.history.flatMap((step) => {
+            const links: ProvenanceLink[] = [];
+            if (step.operation !== 'declaration' && step.operation !== 'generated') {
+              links.push({
+                operation: step.operation,
+                source: cloneLocation(step.source),
+                ...(step.target ? { target: step.target } : {}),
+                ...(step.reference ? { reference: step.reference } : {}),
+                ...(step.alias ? { alias: step.alias } : {}),
+              });
+            }
+            links.push(...step.chain.map((link) => deepClone(link)));
+            return links;
+          })
+        )
+      : [];
+    const mergedChain = [chain, ...childLinks].filter(
+      (link, index, links) =>
+        links.findIndex((candidate) => JSON.stringify(candidate) === JSON.stringify(link)) === index
+    );
+    for (const property of ['content', 'allowedTools', 'references', 'requires']) {
+      if (finalProperties && !finalProperties.includes(property)) continue;
       events.push({
         path: `skills.${skillName}.${property}`,
         operation: 'compose',
@@ -390,7 +572,8 @@ export function collectCompositionProvenanceEvents(
         source,
         target: source.file,
         reference: use.path.raw,
-        chain: [chain],
+        trace: metadata.provenance ? deepClone(metadata.provenance) : undefined,
+        chain: mergedChain,
       });
     }
   }

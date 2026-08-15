@@ -365,6 +365,12 @@ prs diff --all
 | `prs upgrade`                                       | Upgrade `.prs` syntax versions                           |
 | `prs serve`                                         | Connect local files to the online playground             |
 
+`prs explain` emits project-relative source paths by default. Pass
+`--absolute-paths` to opt in to host filesystem paths. JSON output contains
+`version`, `path`, `entries`, and `diagnostics`. The command exits nonzero for
+missing paths, resolution failures, or fatal diagnostics; warning-only
+diagnostics keep exit status 0.
+
 See the [complete CLI reference](https://getpromptscript.dev/reference/cli/) for every option.
 
 ## Hooks and Generated-File Protection

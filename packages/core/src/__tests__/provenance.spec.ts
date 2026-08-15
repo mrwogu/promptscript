@@ -126,7 +126,9 @@ describe('provenance', () => {
       'ops'
     );
 
-    expect(events).toHaveLength(6);
+    expect(events).toHaveLength(4);
+    expect(events.map((event) => event.path)).not.toContain('skills.ops.inputs');
+    expect(events.map((event) => event.path)).not.toContain('skills.ops.outputs');
     for (const event of events) {
       expect(event.source).toEqual(CHILD_LOC);
     }
@@ -138,6 +140,46 @@ describe('provenance', () => {
         'ops'
       )
     ).toEqual([]);
+  });
+
+  it('maps incoming array events to final merged indexes', () => {
+    const extensionBody = createBlockBody(
+      [
+        {
+          type: 'FieldEntry',
+          name: 'frameworks',
+          value: createValueNode(['shared', 'new'], CHILD_LOC),
+          loc: CHILD_LOC,
+        },
+      ],
+      CHILD_LOC
+    );
+    const events = collectProvenanceEvents(
+      extensionBody,
+      'standards',
+      'extend',
+      CHILD_LOC,
+      'merged',
+      'append',
+      {
+        finalContent: {
+          type: 'ObjectContent',
+          properties: { frameworks: ['base', 'shared', 'new'] },
+          loc: CHILD_LOC,
+        },
+        baseContent: {
+          type: 'ObjectContent',
+          properties: { frameworks: ['base', 'shared'] },
+          loc: BASE_LOC,
+        },
+      }
+    );
+
+    expect(events.map((event) => event.path)).toEqual([
+      'standards',
+      'standards.frameworks',
+      'standards.frameworks[2]',
+    ]);
   });
 
   it('returns stable path ordering and versioned JSON shape', () => {
