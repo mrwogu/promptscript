@@ -43,6 +43,63 @@ describe('resolveNativeSkills', () => {
     loc: { file: 'test.prs', line: 1, column: 1, offset: 0 },
   });
 
+  it('should use the legacy universal parent fallback for a .promptscript local path', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(testDir, '.agents', 'skills', 'fallback-skill');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: fallback-skill\ndescription: Fallback skill\n---\n\nFallback body.\n'
+    );
+
+    const ast = createProgram([]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'project.prs'),
+      localPath,
+      { universalDir: '.agents' }
+    );
+
+    const skillsBlock = result.blocks.find((block) => block.name === 'skills');
+    expect(skillsBlock).toBeDefined();
+    expect(Object.keys((skillsBlock!.content as ObjectContent).properties)).toEqual([
+      'fallback-skill',
+    ]);
+  });
+
+  it('should replace an explicitly declared skill from the universal candidate', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(testDir, '.agents', 'skills', 'foo');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: foo\ndescription: Universal foo\n---\n\nUniversal foo body.\n'
+    );
+    await mkdir(localPath, { recursive: true });
+    await symlink(join(testDir, 'missing-skills'), join(localPath, 'skills'));
+
+    const ast = createProgram([
+      createSkillsBlock({
+        foo: {},
+      }),
+    ]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'project.prs'),
+      localPath,
+      { universalDir: '.agents', projectRoot: testDir }
+    );
+
+    const skillsBlock = result.blocks.find((block) => block.name === 'skills');
+    const foo = (skillsBlock!.content as ObjectContent).properties['foo'] as Record<
+      string,
+      unknown
+    >;
+    expect((foo['content'] as TextContent).value).toContain('Universal foo body.');
+  });
+
   describe('when no @skills block exists', () => {
     it('should return AST unchanged', async () => {
       const ast = createProgram([
@@ -793,6 +850,64 @@ Universal skill content.
       expect(resources[0]!.relativePath).toBe('data.csv');
     });
 
+    it('should look for the universal directory under an explicit projectRoot', async () => {
+      // localPath is the project root itself, so the universal directory is a
+      // child of it rather than a sibling of localPath
+      const projectRoot = join(testDir, 'project');
+      const agentsSkillDir = join(projectRoot, '.agents', 'skills', 'in-project-skill');
+      await mkdir(agentsSkillDir, { recursive: true });
+      await writeFile(
+        join(agentsSkillDir, 'SKILL.md'),
+        `---
+name: in-project-skill
+description: Lives inside the project
+---
+
+In-project skill content.
+`
+      );
+
+      const result = await resolveNativeSkills(
+        createProgram([]),
+        registryPath,
+        join(projectRoot, 'test.prs'),
+        projectRoot,
+        { universalDir: '.agents', projectRoot }
+      );
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const skillsContent = skillsBlock!.content as ObjectContent;
+      const skill = skillsContent.properties['in-project-skill'] as Record<string, unknown>;
+      expect((skill['content'] as TextContent).value).toContain('In-project skill content.');
+    });
+
+    it('should not discover a universal directory above the project root', async () => {
+      const projectRoot = join(testDir, 'project');
+      const outsideSkillDir = join(testDir, '.agents', 'skills', 'outside-skill');
+      await mkdir(projectRoot, { recursive: true });
+      await mkdir(outsideSkillDir, { recursive: true });
+      await writeFile(
+        join(outsideSkillDir, 'SKILL.md'),
+        `---
+name: outside-skill
+description: Lives next to the project
+---
+
+Outside skill content.
+`
+      );
+
+      const result = await resolveNativeSkills(
+        createProgram([]),
+        registryPath,
+        join(projectRoot, 'test.prs'),
+        projectRoot,
+        { universalDir: '.agents', projectRoot }
+      );
+
+      expect(result.blocks.find((b) => b.name === 'skills')).toBeUndefined();
+    });
+
     it('should ignore a SKILL.md that PromptScript generated', async () => {
       const localPath = join(testDir, '.promptscript');
       const agentsSkillDir = join(testDir, '.agents', 'skills', 'generated-skill');
@@ -801,6 +916,45 @@ Universal skill content.
 
       await writeFile(
         join(agentsSkillDir, 'SKILL.md'),
+        `---
+# promptscript-generated: 2026-07-27T16:59:01.673Z | source: project.prs | target: codex
+name: generated-skill
+description: Emitted by a previous compilation
+---
+
+Generated skill content.
+`
+      );
+
+      const ast = createProgram([
+        createSkillsBlock({
+          'generated-skill': { content: 'Authored content.' },
+        }),
+      ]);
+
+      const result = await resolveNativeSkills(
+        ast,
+        registryPath,
+        join(localPath, 'test.prs'),
+        localPath,
+        { universalDir: '.agents' }
+      );
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const skillsContent = skillsBlock!.content as ObjectContent;
+      const skill = skillsContent.properties['generated-skill'] as Record<string, unknown>;
+
+      expect(skill['content']).toBe('Authored content.');
+      expect(skill['__rawFrontmatter']).toBeUndefined();
+    });
+
+    it('should ignore an explicitly declared local SKILL.md that PromptScript generated', async () => {
+      const localPath = join(testDir, '.promptscript');
+      const localSkillDir = join(localPath, 'skills', 'generated-skill');
+      await mkdir(localSkillDir, { recursive: true });
+
+      await writeFile(
+        join(localSkillDir, 'SKILL.md'),
         `---
 # promptscript-generated: 2026-07-27T16:59:01.673Z | source: project.prs | target: codex
 name: generated-skill

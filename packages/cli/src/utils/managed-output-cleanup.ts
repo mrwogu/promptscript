@@ -85,7 +85,7 @@ process.stdout.write('removed');
 const GUARDED_REWRITE_SCRIPT = String.raw`
 const crypto = require('node:crypto');
 const fs = require('node:fs');
-const [name, directoryDev, directoryIno, fileDev, fileIno, expectedHash] =
+const [name, directoryDev, directoryIno, fileDev, fileIno, expectedHash, requestedMode] =
   process.argv.slice(1);
 const skip = () => process.stdout.write('skipped');
 if (!name || name === '.' || name === '..' || name.includes('/') || name.includes('\\')) {
@@ -129,7 +129,7 @@ try {
   const descriptor = fs.openSync(
     temporary,
     fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_NOFOLLOW,
-    file.mode & 0o777
+    requestedMode === '' ? file.mode & 0o777 : Number(requestedMode) & 0o777
   );
   temporaryCreated = true;
   try {
@@ -502,7 +502,8 @@ export async function rewriteHookOutputIfUnchanged(
   file: string,
   outputRoot: string,
   expectedContent: string,
-  content: string
+  content: string,
+  mode?: number
 ): Promise<boolean> {
   const root = resolve(outputRoot);
   const candidate = resolve(file);
@@ -524,7 +525,8 @@ export async function rewriteHookOutputIfUnchanged(
       directoryStat,
       fileStat,
       expectedContent,
-      content
+      content,
+      mode
     );
   } finally {
     await closeDirectoryGuards(guards);
@@ -588,7 +590,8 @@ async function guardedRewrite(
   directoryStat: FileIdentity,
   fileStat: FileIdentity,
   expectedContent: string,
-  content: string
+  content: string,
+  mode?: number
 ): Promise<boolean> {
   const expectedHash = createHash('sha256').update(expectedContent).digest('hex');
 
@@ -605,6 +608,7 @@ async function guardedRewrite(
         String(fileStat.dev),
         String(fileStat.ino),
         expectedHash,
+        mode === undefined ? '' : String(mode),
       ],
       {
         cwd: directory,
@@ -1099,7 +1103,7 @@ export function removePromptScriptOwnedCodexHooks(
   const lines = content.split('\n');
   const remaining: string[] = [];
   let removed = false;
-  for (let index = 0; index < lines.length; ) {
+  for (let index = 0; index < lines.length;) {
     const eventMatch = lines[index]!.match(/^\s*\[\[hooks\.([A-Za-z][A-Za-z0-9_]*)\]\]\s*$/);
     if (!eventMatch) {
       remaining.push(lines[index]!);

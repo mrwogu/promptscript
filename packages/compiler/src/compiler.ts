@@ -1,3 +1,4 @@
+import { realpathSync } from 'fs';
 import { noopLogger, type Logger, type PSError } from '@promptscript/core';
 import { FormatterRegistry, formatProgram } from '@promptscript/formatters';
 import {
@@ -8,9 +9,14 @@ import {
 } from '@promptscript/resolver';
 import { Validator, type ValidatorConfig, type ValidationMessage } from '@promptscript/validator';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'path';
+import { isDeepStrictEqual } from 'node:util';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- imported for upcoming formatter integration
 import { verifyReferenceIntegrity } from './reference-verifier.js';
-import { inferProjectRoot, validateHookScriptResources } from './hook-script-validator.js';
+import {
+  findProjectRootMarker,
+  inferProjectRoot,
+  validateHookScriptResources,
+} from './hook-script-validator.js';
 import type {
   CompilerOptions,
   CompileResult,
@@ -30,6 +36,25 @@ import type {
 interface LoadedFormatter {
   formatter: Formatter;
   config?: TargetConfig;
+}
+
+/** Maximum number of project-scoped resolvers retained by a long-lived compiler. */
+export const MAX_ENTRY_RESOLVERS = 50;
+
+function resolverCacheKey(projectRoot: string): string {
+  return realpathSync.native(projectRoot);
+}
+
+function resolveEntryPath(entryPath: string): string {
+  if (entryPath.startsWith('@')) return entryPath;
+  const fileName =
+    entryPath.endsWith('.prs') || entryPath.endsWith('.md') ? entryPath : `${entryPath}.prs`;
+  const absolutePath = isAbsolute(fileName) ? fileName : resolve(process.cwd(), fileName);
+  try {
+    return realpathSync.native(absolutePath);
+  } catch {
+    return absolutePath;
+  }
 }
 
 function normalizeRepositoryKey(value: string): string {
@@ -126,6 +151,39 @@ function shouldIncludeSkill(name: string, config?: TargetConfig): boolean {
   return true;
 }
 
+function hasIdenticalWriteSemantics(
+  existing: FormatterOutput,
+  candidate: FormatterOutput
+): boolean {
+  return (
+    existing.content === candidate.content &&
+    existing.mode === candidate.mode &&
+    isDeepStrictEqual(existing.merge, candidate.merge)
+  );
+}
+
+function mergeManagedOutputMetadata(
+  existing: FormatterOutput,
+  candidate: FormatterOutput
+): FormatterOutput {
+  const managedOutputDirectories = [
+    ...new Set([
+      ...(existing.managedOutputDirectories ?? []),
+      ...(candidate.managedOutputDirectories ?? []),
+    ]),
+  ];
+  const managedOutputFiles = [
+    ...new Set([...(existing.managedOutputFiles ?? []), ...(candidate.managedOutputFiles ?? [])]),
+  ];
+
+  return {
+    ...existing,
+    managedOutputDirectories:
+      managedOutputDirectories.length > 0 ? managedOutputDirectories : undefined,
+    managedOutputFiles: managedOutputFiles.length > 0 ? managedOutputFiles : undefined,
+  };
+}
+
 /**
  * Compiler that orchestrates the PromptScript compilation pipeline.
  *
@@ -152,6 +210,7 @@ function shouldIncludeSkill(name: string, config?: TargetConfig): boolean {
  */
 export class Compiler {
   private readonly resolver: Resolver;
+  private readonly entryResolvers = new Map<string, Resolver>();
   private readonly validator: Validator;
   private readonly loadedFormatters: LoadedFormatter[];
   private readonly logger: Logger;
@@ -163,6 +222,49 @@ export class Compiler {
     this.loadedFormatters = this.loadFormatters(options.formatters);
 
     this.logger.debug(`Compiler initialized with ${this.loadedFormatters.length} formatters`);
+  }
+
+  private hasExplicitResolverScope(): boolean {
+    return Boolean(this.options.resolver.localPath || this.options.resolver.projectRoot);
+  }
+
+  /**
+   * Get the resolver to use for an entry file.
+   *
+   * Hook script validation infers the project root from the entry path, so a
+   * resolver left on the cwd default would discover skills, commands and
+   * agents from a different directory than the one being compiled.
+   *
+   * @param entryPath - Path to the entry file
+   * @returns Resolver scoped to the entry file's project root
+   */
+  private resolverFor(entryPath: string): Resolver {
+    if (this.hasExplicitResolverScope()) {
+      return this.resolver;
+    }
+
+    const projectRoot = findProjectRootMarker(entryPath);
+    if (!projectRoot) {
+      // Keep cwd-based resolution when an entry is outside a marked project.
+      return this.resolver;
+    }
+
+    const cacheKey = resolverCacheKey(projectRoot);
+    const cached = this.entryResolvers.get(cacheKey);
+    if (cached) return cached;
+
+    const resolver = new Resolver({
+      ...this.options.resolver,
+      projectRoot: cacheKey,
+      logger: this.logger,
+    });
+    if (this.entryResolvers.size >= MAX_ENTRY_RESOLVERS) {
+      // Bound per-project caches for long-lived watch and server compilers.
+      const oldestKey = this.entryResolvers.keys().next().value;
+      if (oldestKey !== undefined) this.entryResolvers.delete(oldestKey);
+    }
+    this.entryResolvers.set(cacheKey, resolver);
+    return resolver;
   }
 
   /**
@@ -177,6 +279,10 @@ export class Compiler {
       `Targets: ${this.loadedFormatters.map((f) => f.formatter.name).join(', ')}`
     );
 
+    const resolvedEntryPath = this.hasExplicitResolverScope()
+      ? entryPath
+      : resolveEntryPath(entryPath);
+    const resolver = this.resolverFor(resolvedEntryPath);
     const startTotal = Date.now();
     const stats: CompileStats = {
       resolveTime: 0,
@@ -195,7 +301,7 @@ export class Compiler {
     let resolved: ResolvedAST;
 
     try {
-      resolved = await this.resolver.resolve(entryPath);
+      resolved = await resolver.resolve(resolvedEntryPath);
     } catch (err) {
       stats.resolveTime = Date.now() - startResolve;
       stats.totalTime = Date.now() - startTotal;
@@ -356,7 +462,7 @@ export class Compiler {
       }
 
       // Verify reference file hashes against lockfile
-      const hashErrors = await this.resolver.verifyReferenceHashes(this.options.resolver.lockfile);
+      const hashErrors = await resolver.verifyReferenceHashes(this.options.resolver.lockfile);
       for (const err of hashErrors) {
         compileErrors.push(this.toCompileError(err));
       }
@@ -411,7 +517,7 @@ export class Compiler {
       inferProjectRoot(
         this.options.resolver.localPath,
         this.options.resolver.projectRoot,
-        entryPath
+        resolvedEntryPath
       )
     );
     stats.validateTime = Date.now() - startValidate;
@@ -434,6 +540,10 @@ export class Compiler {
     const formatErrors: CompileError[] = [];
     const formatWarnings: ValidationMessage[] = [];
     const outputPathOwners = new Map<string, string>();
+    // Output as produced by the formatter, before the generated marker is added.
+    // Markers embed the target name and a timestamp, so comparing marked content
+    // would report every shared path as a conflict.
+    const outputPathDefinitions = new Map<string, FormatterOutput>();
 
     for (const { formatter, config } of this.loadedFormatters) {
       const formatterStart = Date.now();
@@ -459,38 +569,58 @@ export class Compiler {
           });
         }
 
-        // Warn if multiple formatters target the same output path
+        // Warn if multiple formatters target the same output path with different content
         const existingOwner = outputPathOwners.get(output.path);
-        if (existingOwner) {
-          formatWarnings.push({
-            ruleId: 'PS4001',
-            ruleName: 'output-path-collision',
-            severity: 'warning',
-            message: `Output path '${output.path}' is written by both '${existingOwner}' and '${formatter.name}'. The latter will overwrite the former.`,
-            suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
+        const existingDefinition = outputPathDefinitions.get(output.path);
+        const isIdenticalOutput =
+          existingOwner !== undefined &&
+          existingDefinition !== undefined &&
+          hasIdenticalWriteSemantics(existingDefinition, output);
+        if (existingOwner !== undefined) {
+          if (isIdenticalOutput) {
+            this.logger.debug(
+              `  Output path '${output.path}' already written by '${existingOwner}' with identical content. No conflict.`
+            );
+            const existingOutput = outputs.get(output.path);
+            if (existingOutput) {
+              outputs.set(output.path, mergeManagedOutputMetadata(existingOutput, output));
+            }
+          } else {
+            formatWarnings.push({
+              ruleId: 'PS4001',
+              ruleName: 'output-path-collision',
+              severity: 'warning',
+              message: `Output path '${output.path}' is written by both '${existingOwner}' and '${formatter.name}' with different content. The latter will overwrite the former.`,
+              suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
+            });
+          }
+        }
+
+        if (!isIdenticalOutput) {
+          outputPathOwners.set(output.path, formatter.name);
+          outputPathDefinitions.set(output.path, output);
+
+          // Add PromptScript marker to all outputs for overwrite detection
+          const markedOutput = addMarkerToOutput(output, sourceLabel, formatter.name);
+          const previousManagedDirectories =
+            outputs.get(output.path)?.managedOutputDirectories ?? [];
+          const previousManagedFiles = outputs.get(output.path)?.managedOutputFiles ?? [];
+          const managedOutputDirectories = [
+            ...new Set([
+              ...previousManagedDirectories,
+              ...(markedOutput.managedOutputDirectories ?? []),
+            ]),
+          ];
+          const managedOutputFiles = [
+            ...new Set([...previousManagedFiles, ...(markedOutput.managedOutputFiles ?? [])]),
+          ];
+          outputs.set(output.path, {
+            ...markedOutput,
+            managedOutputDirectories:
+              managedOutputDirectories.length > 0 ? managedOutputDirectories : undefined,
+            managedOutputFiles: managedOutputFiles.length > 0 ? managedOutputFiles : undefined,
           });
         }
-        outputPathOwners.set(output.path, formatter.name);
-
-        // Add PromptScript marker to all outputs for overwrite detection
-        const markedOutput = addMarkerToOutput(output, sourceLabel, formatter.name);
-        const previousManagedDirectories = outputs.get(output.path)?.managedOutputDirectories ?? [];
-        const previousManagedFiles = outputs.get(output.path)?.managedOutputFiles ?? [];
-        const managedOutputDirectories = [
-          ...new Set([
-            ...previousManagedDirectories,
-            ...(markedOutput.managedOutputDirectories ?? []),
-          ]),
-        ];
-        const managedOutputFiles = [
-          ...new Set([...previousManagedFiles, ...(markedOutput.managedOutputFiles ?? [])]),
-        ];
-        outputs.set(output.path, {
-          ...markedOutput,
-          managedOutputDirectories:
-            managedOutputDirectories.length > 0 ? managedOutputDirectories : undefined,
-          managedOutputFiles: managedOutputFiles.length > 0 ? managedOutputFiles : undefined,
-        });
 
         // Also add any additional files (e.g., .cursor/commands/, .github/prompts/)
         // Recursively collect nested additionalFiles (e.g., skill resource files)
@@ -503,13 +633,23 @@ export class Compiler {
             // Check for path collisions with previously written outputs
             const existingAdditionalOwner = outputPathOwners.get(additionalFile.path);
             if (existingAdditionalOwner) {
-              formatWarnings.push({
-                ruleId: 'PS4001',
-                ruleName: 'output-path-collision',
-                severity: 'warning',
-                message: `Output path '${additionalFile.path}' is written by both '${existingAdditionalOwner}' and '${formatter.name}'. The latter will overwrite the former.`,
-                suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
-              });
+              const existingAdditionalDefinition = outputPathDefinitions.get(additionalFile.path);
+              if (
+                existingAdditionalDefinition &&
+                hasIdenticalWriteSemantics(existingAdditionalDefinition, additionalFile)
+              ) {
+                this.logger.debug(
+                  `  Output path '${additionalFile.path}' already written by '${existingAdditionalOwner}' with identical content. No conflict.`
+                );
+              } else {
+                formatWarnings.push({
+                  ruleId: 'PS4001',
+                  ruleName: 'output-path-collision',
+                  severity: 'warning',
+                  message: `Output path '${additionalFile.path}' is written by both '${existingAdditionalOwner}' and '${formatter.name}' with different content or write settings. The first output will be preserved.`,
+                  suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
+                });
+              }
               // Skip writing this additional file — preserve the original owner's output
               if (additionalFile.additionalFiles) {
                 queue.push(...additionalFile.additionalFiles);
@@ -517,6 +657,7 @@ export class Compiler {
               continue;
             }
             outputPathOwners.set(additionalFile.path, formatter.name);
+            outputPathDefinitions.set(additionalFile.path, additionalFile);
 
             outputs.set(
               additionalFile.path,
@@ -539,53 +680,64 @@ export class Compiler {
     // Inject PromptScript SKILL.md into each formatter's skill directory
     if (this.options.skillContent) {
       for (const { formatter, config } of this.loadedFormatters) {
-        if (!shouldIncludeSkill('promptscript', config)) {
-          this.logger.debug(
-            `  Skipping skill injection for ${formatter.name} (promptscript not included)`
-          );
-          continue;
-        }
-
-        const skillBasePath = config?.skillBaseDir
-          ? normalizeOutputDir(config.skillBaseDir)
-          : formatter.getSkillBasePath();
-        const skillFileName = formatter.getSkillFileName();
-        if (!skillBasePath || !skillFileName) {
-          this.logger.debug(`  Skipping skill injection for ${formatter.name} (no skill support)`);
-          continue;
-        }
-
-        const skillPath = `${skillBasePath}/promptscript/${skillFileName}`;
-        const existingOwner = outputPathOwners.get(skillPath);
-        if (existingOwner) {
-          // If the same formatter already output the promptscript skill (e.g. via
-          // auto-discovered @skills block), silently skip — the content is identical.
-          // Only warn when a *different* formatter caused the collision.
-          if (existingOwner !== formatter.name) {
-            formatWarnings.push({
-              ruleId: 'PS4001',
-              ruleName: 'output-path-collision',
-              severity: 'warning',
-              message: `Output path '${skillPath}' is already written by '${existingOwner}'. Skipping auto-injected PromptScript skill for '${formatter.name}'.`,
-              suggestion: `The user-defined skill takes precedence. To use the bundled skill, remove the custom one or rename it.`,
-            });
-          } else {
+        try {
+          if (!shouldIncludeSkill('promptscript', config)) {
             this.logger.debug(
-              `  Skill path '${skillPath}' already output by '${formatter.name}' (auto-discovered). Skipping auto-injection.`
+              `  Skipping skill injection for ${formatter.name} (promptscript not included)`
             );
+            continue;
           }
-          continue;
-        }
-        outputPathOwners.set(skillPath, `${formatter.name}:promptscript-skill`);
 
-        const skillOutput: FormatterOutput = {
-          path: skillPath,
-          content: formatter.transformInjectedSkillContent
+          const skillBasePath = config?.skillBaseDir
+            ? normalizeOutputDir(config.skillBaseDir)
+            : formatter.getSkillBasePath();
+          const skillFileName = formatter.getSkillFileName();
+          if (!skillBasePath || !skillFileName) {
+            this.logger.debug(
+              `  Skipping skill injection for ${formatter.name} (no skill support)`
+            );
+            continue;
+          }
+
+          const skillPath = `${skillBasePath}/promptscript/${skillFileName}`;
+          const injectedContent = formatter.transformInjectedSkillContent
             ? formatter.transformInjectedSkillContent(this.options.skillContent)
-            : this.options.skillContent,
-        };
-        outputs.set(skillPath, addMarkerToOutput(skillOutput, sourceLabel, 'promptscript'));
-        this.logger.verbose(`  → ${skillPath} (auto-injected promptscript skill)`);
+            : this.options.skillContent;
+          const skillOutput: FormatterOutput = {
+            path: skillPath,
+            content: injectedContent,
+          };
+          const existingOwner = outputPathOwners.get(skillPath);
+          if (existingOwner) {
+            // Preserve previously written skills and warn on differing content.
+            const existingDefinition = outputPathDefinitions.get(skillPath);
+            if (existingDefinition && hasIdenticalWriteSemantics(existingDefinition, skillOutput)) {
+              this.logger.debug(
+                `  Skill path '${skillPath}' already written by '${existingOwner}' with identical content. No conflict.`
+              );
+            } else {
+              formatWarnings.push({
+                ruleId: 'PS4001',
+                ruleName: 'output-path-collision',
+                severity: 'warning',
+                message: `Output path '${skillPath}' is already written by '${existingOwner}'. Skipping auto-injected PromptScript skill for '${formatter.name}'.`,
+                suggestion: `The user-defined skill takes precedence. To use the bundled skill, remove the custom one or rename it.`,
+              });
+            }
+            continue;
+          }
+          outputPathOwners.set(skillPath, `${formatter.name}:promptscript-skill`);
+          outputPathDefinitions.set(skillPath, skillOutput);
+
+          outputs.set(skillPath, addMarkerToOutput(skillOutput, sourceLabel, 'promptscript'));
+          this.logger.verbose(`  → ${skillPath} (auto-injected promptscript skill)`);
+        } catch (err) {
+          formatErrors.push({
+            name: 'FormatterError',
+            code: 'PS4000',
+            message: `Formatter '${formatter.name}' failed: ${err instanceof Error ? err.message : String(err)}`,
+          });
+        }
       }
     }
 

@@ -1,6 +1,7 @@
 import type { TargetConfig } from '@promptscript/core';
 import { DEFAULT_OUTPUT_PATHS } from '@promptscript/core';
-import { resolve, relative, isAbsolute } from 'path';
+import * as fs from 'fs';
+import { basename, dirname, resolve, relative, isAbsolute, sep } from 'path';
 
 /**
  * Detect output path conflicts: multiple targets writing to the same file.
@@ -28,24 +29,75 @@ export function detectOutputConflicts(
 }
 
 /**
- * Validate that an output path is project-relative and does not contain traversal.
+ * Validate that an output path stays inside the directory it is written to.
  * Returns an error message if invalid, or undefined if valid.
  */
-export function validateOutputPath(outputPath: string, projectRoot?: string): string | undefined {
-  // Reject absolute paths that escape the project root
-  if (isAbsolute(outputPath) && projectRoot) {
-    const rel = relative(projectRoot, outputPath);
-    if (rel.startsWith('..') || isAbsolute(rel)) {
-      return `Output path "${outputPath}" escapes project root`;
-    }
+export function validateOutputPath(outputPath: string, outputRoot: string): string | undefined {
+  const resolved = resolveOutputPath(outputPath, outputRoot);
+  const root = resolve(outputRoot);
+  const rel = relative(root, resolved);
+
+  if (!isPathContained(rel, false)) {
+    return `Output path "${outputPath}" escapes the output directory ${outputRoot}`;
   }
 
-  // Reject path traversal patterns
-  if (outputPath.includes('..')) {
-    return `Output path "${outputPath}" contains path traversal`;
+  try {
+    // Lexical paths can cross a symlink, so compare resolved filesystem paths too.
+    const realRoot = resolveThroughExistingAncestor(root);
+    const realResolved = resolveThroughExistingAncestor(resolved);
+    if (!isPathContained(relative(realRoot, realResolved), false)) {
+      return `Output path "${outputPath}" escapes the output directory ${outputRoot}`;
+    }
+  } catch {
+    return `Output path "${outputPath}" cannot be verified inside the output directory ${outputRoot}`;
   }
 
   return undefined;
+}
+
+/**
+ * Check directory containment while allowing the directory itself.
+ */
+export function isPathInsideDir(dir: string, root: string): boolean {
+  const rel = relative(resolve(root), resolveOutputPath(dir, root));
+  return isPathContained(rel, true);
+}
+
+function isPathContained(rel: string, allowEqual: boolean): boolean {
+  return (
+    (allowEqual && rel === '') ||
+    (rel !== '' && rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))
+  );
+}
+
+function resolveThroughExistingAncestor(path: string): string {
+  const missingSegments: string[] = [];
+  let current = path;
+
+  while (true) {
+    try {
+      fs.lstatSync(current);
+      break;
+    } catch (error: unknown) {
+      if (
+        typeof error !== 'object' ||
+        error === null ||
+        !('code' in error) ||
+        error.code !== 'ENOENT'
+      ) {
+        throw error;
+      }
+    }
+
+    const parent = dirname(current);
+    if (parent === current) {
+      throw new Error(`No existing ancestor for ${path}`);
+    }
+    missingSegments.unshift(basename(current));
+    current = parent;
+  }
+
+  return resolve(fs.realpathSync.native(current), ...missingSegments);
 }
 
 /**

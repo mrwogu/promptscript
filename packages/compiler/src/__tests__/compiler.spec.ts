@@ -2,7 +2,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { CanonicalProgram, Program, SourceLocation } from '@promptscript/core';
 import type { Formatter, CompilerOptions } from '../types.js';
 import { FormatterRegistry } from '@promptscript/formatters';
-import { join } from 'node:path';
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 
 // Create mock classes before importing Compiler
 const mockResolve = vi.fn();
@@ -10,9 +12,14 @@ const mockValidate = vi.fn();
 const mockUpdateConfig = vi.fn();
 const mockVerifyReferenceHashes = vi.fn().mockResolvedValue([]);
 const mockRegistryCacheConstructor = vi.fn();
+const mockResolverConstructor = vi.fn();
 
 vi.mock('@promptscript/resolver', () => ({
   Resolver: class MockResolver {
+    constructor(options: unknown) {
+      mockResolverConstructor(options);
+    }
+
     resolve = mockResolve;
     verifyReferenceHashes = mockVerifyReferenceHashes;
   },
@@ -41,11 +48,23 @@ vi.mock('@promptscript/validator', () => ({
 }));
 
 // Import after mocks are set up
-import { Compiler, createCompiler, compile } from '../compiler.js';
+import { MAX_ENTRY_RESOLVERS, Compiler, createCompiler, compile } from '../compiler.js';
 
 afterEach(() => {
   vi.unstubAllEnvs();
 });
+
+function createMarkedWorkspace(): { root: string; entry: string } {
+  const root = mkdtempSync(join(tmpdir(), 'promptscript-compiler-'));
+  writeFileSync(join(root, 'package.json'), '{}');
+  const entry = join(root, 'entry.prs');
+  writeFileSync(entry, '@meta { id: "compiler-test" }\n');
+  return { root, entry };
+}
+
+function createSuccessfulResolverResult() {
+  return createResolveSuccess(createTestProgram());
+}
 
 /**
  * Create a minimal valid AST for testing.
@@ -174,6 +193,247 @@ describe('Compiler', () => {
 
       const compiler = createCompiler(options);
       expect(compiler).toBeInstanceOf(Compiler);
+    });
+
+    it('should preserve cwd registry lookup defaults in compile', async () => {
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      await compile('entry.prs', { formatters: [] });
+
+      expect(mockResolverConstructor).toHaveBeenCalledWith(
+        expect.objectContaining({ registryPath: process.cwd() })
+      );
+    });
+
+    it('should reuse one entry resolver for entries under one marked root', async () => {
+      const workspace = createMarkedWorkspace();
+      const secondEntry = join(workspace.root, 'second.prs');
+      writeFileSync(secondEntry, '@meta { id: "second" }\n');
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: { registryPath: '/registry' },
+          formatters: [],
+        });
+
+        await compiler.compile(workspace.entry);
+        await compiler.compile(secondEntry);
+
+        expect(mockResolverConstructor).toHaveBeenCalledTimes(2);
+      } finally {
+        rmSync(workspace.root, { recursive: true, force: true });
+      }
+    });
+
+    it('should share an entry resolver across symlinked roots', async () => {
+      const workspace = createMarkedWorkspace();
+      const linkParent = mkdtempSync(join(tmpdir(), 'promptscript-compiler-link-'));
+      const linkRoot = join(linkParent, 'linked-root');
+      symlinkSync(workspace.root, linkRoot, 'dir');
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: { registryPath: '/registry' },
+          formatters: [],
+        });
+
+        await compiler.compile(workspace.entry);
+        await compiler.compile(join(linkRoot, 'entry.prs'));
+
+        expect(mockResolverConstructor).toHaveBeenCalledTimes(2);
+        expect(mockResolverConstructor).toHaveBeenLastCalledWith(
+          expect.objectContaining({ projectRoot: realpathSync(workspace.root) })
+        );
+      } finally {
+        rmSync(workspace.root, { recursive: true, force: true });
+        rmSync(linkParent, { recursive: true, force: true });
+      }
+    });
+
+    it('should use the configured local path for entries elsewhere', async () => {
+      const workspace = createMarkedWorkspace();
+      const entry = join(tmpdir(), `promptscript-local-entry-${Date.now()}.prs`);
+      writeFileSync(entry, '@meta { id: "outside" }\n');
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: { registryPath: '/registry', localPath: workspace.root },
+          formatters: [],
+        });
+
+        await compiler.compile(entry);
+
+        expect(mockResolverConstructor).toHaveBeenCalledTimes(1);
+        expect(mockResolverConstructor).toHaveBeenCalledWith(
+          expect.objectContaining({ localPath: workspace.root })
+        );
+      } finally {
+        rmSync(workspace.root, { recursive: true, force: true });
+        rmSync(entry, { force: true });
+      }
+    });
+
+    it('should use the configured project root for entries elsewhere', async () => {
+      const workspace = createMarkedWorkspace();
+      const entry = join(tmpdir(), `promptscript-project-entry-${Date.now()}.prs`);
+      writeFileSync(entry, '@meta { id: "outside" }\n');
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: { registryPath: '/registry', projectRoot: workspace.root },
+          formatters: [],
+        });
+
+        await compiler.compile(entry);
+
+        expect(mockResolverConstructor).toHaveBeenCalledTimes(1);
+        expect(mockResolverConstructor).toHaveBeenCalledWith(
+          expect.objectContaining({ projectRoot: workspace.root })
+        );
+      } finally {
+        rmSync(workspace.root, { recursive: true, force: true });
+        rmSync(entry, { force: true });
+      }
+    });
+
+    it('should preserve an explicit native skill project root', async () => {
+      const workspace = createMarkedWorkspace();
+      const skillRoot = mkdtempSync(join(tmpdir(), 'promptscript-skill-root-'));
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: {
+            registryPath: '/registry',
+            skills: { universalDir: '.agents', projectRoot: skillRoot },
+          },
+          formatters: [],
+        });
+
+        await compiler.compile(workspace.entry);
+
+        expect(mockResolverConstructor).toHaveBeenCalledTimes(2);
+        expect(mockResolverConstructor).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            skills: expect.objectContaining({ projectRoot: skillRoot }),
+          })
+        );
+      } finally {
+        rmSync(workspace.root, { recursive: true, force: true });
+        rmSync(skillRoot, { recursive: true, force: true });
+      }
+    });
+
+    it('should resolve relative entries from cwd before applying the inferred root', async () => {
+      const workspace = createMarkedWorkspace();
+      const nestedDir = join(workspace.root, 'nested');
+      const nestedEntry = join(nestedDir, 'nested.prs');
+      const originalCwd = process.cwd();
+      mkdirSync(nestedDir, { recursive: true });
+      writeFileSync(nestedEntry, '@meta { id: "nested" }\n');
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        process.chdir(nestedDir);
+        const compiler = new Compiler({
+          resolver: { registryPath: '/registry' },
+          formatters: [],
+        });
+
+        await compiler.compile('nested.prs');
+
+        expect(mockResolve).toHaveBeenCalledWith(realpathSync(resolve(nestedDir, 'nested.prs')));
+      } finally {
+        process.chdir(originalCwd);
+        rmSync(workspace.root, { recursive: true, force: true });
+      }
+    });
+
+    it('should append the default extension before resolving a missing entry', async () => {
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [],
+      });
+
+      await compiler.compile('missing-entry');
+
+      expect(mockResolve).toHaveBeenCalledWith(resolve(process.cwd(), 'missing-entry.prs'));
+    });
+
+    it('should preserve registry aliases during entry resolution', async () => {
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [],
+      });
+
+      await compiler.compile('@vendor/project');
+
+      expect(mockResolve).toHaveBeenCalledWith('@vendor/project');
+    });
+
+    it('should verify lockfile hashes with the entry resolver', async () => {
+      const workspace = createMarkedWorkspace();
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: {
+            registryPath: '/registry',
+            lockfile: { version: 1, dependencies: {}, references: {} },
+          },
+          formatters: [],
+        });
+
+        const result = await compiler.compile(workspace.entry);
+
+        expect(result.success).toBe(true);
+        expect(mockVerifyReferenceHashes).toHaveBeenCalledOnce();
+      } finally {
+        rmSync(workspace.root, { recursive: true, force: true });
+      }
+    });
+
+    it('should evict oldest entry resolvers after reaching the bound', async () => {
+      const workspaces = Array.from({ length: MAX_ENTRY_RESOLVERS + 1 }, () =>
+        createMarkedWorkspace()
+      );
+      mockResolve.mockResolvedValue(createSuccessfulResolverResult());
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      try {
+        const compiler = new Compiler({
+          resolver: { registryPath: '/registry' },
+          formatters: [],
+        });
+
+        for (const workspace of workspaces) {
+          await compiler.compile(workspace.entry);
+        }
+
+        const cache = (compiler as unknown as { entryResolvers: Map<string, unknown> })
+          .entryResolvers;
+        expect(cache.size).toBeLessThanOrEqual(MAX_ENTRY_RESOLVERS);
+      } finally {
+        for (const workspace of workspaces) {
+          rmSync(workspace.root, { recursive: true, force: true });
+        }
+      }
     });
 
     it('should load formatter instances', () => {
@@ -884,6 +1144,251 @@ describe('Compiler', () => {
       expect(result.outputs.get('AGENTS.md')?.managedOutputFiles).toEqual(['.factory/hooks.json']);
     });
 
+    it('should not warn when formatters write identical content to one path', async () => {
+      const ast = createTestProgram();
+      const formatter1 = createMockFormatter('codex', 'AGENTS.md');
+      const formatter2 = createMockFormatter('amp', 'AGENTS.md');
+      vi.mocked(formatter1.format).mockReturnValue({
+        path: 'AGENTS.md',
+        content: '# Shared AGENTS output',
+      });
+      vi.mocked(formatter2.format).mockReturnValue({
+        path: 'AGENTS.md',
+        content: '# Shared AGENTS output',
+      });
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(false);
+      expect(result.outputs.get('AGENTS.md')?.content).toMatch(
+        /^# Shared AGENTS output\n\n<!-- PromptScript .* \| target: codex - do not edit -->$/
+      );
+      expect(result.outputs.get('AGENTS.md')?.content).not.toContain(
+        '| target: amp - do not edit -->'
+      );
+    });
+
+    it('should merge managed metadata from identical main output collisions', async () => {
+      const ast = createTestProgram();
+      const formatter1 = createMockFormatter('codex', 'AGENTS.md');
+      const formatter2 = createMockFormatter('amp', 'AGENTS.md');
+      vi.mocked(formatter1.format).mockReturnValue({
+        path: 'AGENTS.md',
+        content: '# Shared AGENTS output',
+        managedOutputDirectories: ['.codex/rules'],
+        managedOutputFiles: ['.codex/settings.json'],
+      });
+      vi.mocked(formatter2.format).mockReturnValue({
+        path: 'AGENTS.md',
+        content: '# Shared AGENTS output',
+        managedOutputDirectories: ['.amp/rules'],
+        managedOutputFiles: ['.amp/settings.json'],
+      });
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(false);
+      expect(result.outputs.get('AGENTS.md')?.managedOutputDirectories).toEqual([
+        '.codex/rules',
+        '.amp/rules',
+      ]);
+      expect(result.outputs.get('AGENTS.md')?.managedOutputFiles).toEqual([
+        '.codex/settings.json',
+        '.amp/settings.json',
+      ]);
+    });
+
+    it('should warn when identical main content has different write settings', async () => {
+      const ast = createTestProgram();
+      const formatter1 = createMockFormatter('formatter-a', 'shared.md');
+      const formatter2 = createMockFormatter('formatter-b', 'shared.md');
+      vi.mocked(formatter1.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# Shared content',
+        mode: 0o644,
+      });
+      vi.mocked(formatter2.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# Shared content',
+        mode: 0o755,
+      });
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.warnings.filter((w) => w.ruleId === 'PS4001')).toHaveLength(1);
+      expect(result.outputs.get('shared.md')?.mode).toBe(0o755);
+    });
+
+    it('should preserve the first owner for identical main output collisions', async () => {
+      const ast = createTestProgram();
+      const formatterA = createMockFormatter('formatter-a', 'shared.md');
+      const formatterB = createMockFormatter('formatter-b', 'shared.md');
+      const formatterC = createMockFormatter('formatter-c', 'shared.md');
+      vi.mocked(formatterA.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# Shared content',
+      });
+      vi.mocked(formatterB.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# Shared content',
+      });
+      vi.mocked(formatterC.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# Different content',
+      });
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatterA, formatterB, formatterC],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      const collisionWarnings = result.warnings.filter((w) => w.ruleId === 'PS4001');
+      expect(collisionWarnings).toHaveLength(1);
+      expect(collisionWarnings[0]?.message).toContain("'formatter-a'");
+      expect(collisionWarnings[0]?.message).toContain("'formatter-c'");
+    });
+
+    it('should warn when main output returns to the first content after a difference', async () => {
+      const ast = createTestProgram();
+      const formatterA = createMockFormatter('formatter-a', 'shared.md');
+      const formatterB = createMockFormatter('formatter-b', 'shared.md');
+      const formatterC = createMockFormatter('formatter-c', 'shared.md');
+      vi.mocked(formatterA.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# First content',
+      });
+      vi.mocked(formatterB.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# Different content',
+      });
+      vi.mocked(formatterC.format).mockReturnValue({
+        path: 'shared.md',
+        content: '# First content',
+      });
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatterA, formatterB, formatterC],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      const collisionWarnings = result.warnings.filter((w) => w.ruleId === 'PS4001');
+      expect(collisionWarnings).toHaveLength(2);
+      expect(collisionWarnings[0]?.message).toContain("'formatter-a'");
+      expect(collisionWarnings[0]?.message).toContain("'formatter-b'");
+      expect(collisionWarnings[1]?.message).toContain("'formatter-b'");
+      expect(collisionWarnings[1]?.message).toContain("'formatter-c'");
+    });
+
+    it('should not warn when formatters emit an identical additional file', async () => {
+      const ast = createTestProgram();
+      const sharedSkill = {
+        path: '.agents/skills/demo/SKILL.md',
+        content: '---\nname: demo\n---\n\nShared body.\n',
+      };
+      const formatter1: Formatter = {
+        ...createMockFormatter('codex', 'AGENTS.md'),
+        format: vi.fn(() => ({
+          path: 'AGENTS.md',
+          content: '# Codex',
+          additionalFiles: [sharedSkill],
+        })),
+      };
+      const formatter2: Formatter = {
+        ...createMockFormatter('cursor', '.cursor/rules/project.mdc'),
+        format: vi.fn(() => ({
+          path: '.cursor/rules/project.mdc',
+          content: '# Cursor',
+          additionalFiles: [sharedSkill],
+        })),
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(false);
+      expect(result.outputs.has('.agents/skills/demo/SKILL.md')).toBe(true);
+    });
+
+    it('should warn when identical additional content has different modes', async () => {
+      const ast = createTestProgram();
+      const formatter1: Formatter = {
+        ...createMockFormatter('formatter-a', 'a.md'),
+        format: vi.fn(() => ({
+          path: 'a.md',
+          content: '# A',
+          additionalFiles: [{ path: 'scripts/run.sh', content: 'echo test\n', mode: 0o644 }],
+        })),
+      };
+      const formatter2: Formatter = {
+        ...createMockFormatter('formatter-b', 'b.md'),
+        format: vi.fn(() => ({
+          path: 'b.md',
+          content: '# B',
+          additionalFiles: [{ path: 'scripts/run.sh', content: 'echo test\n', mode: 0o755 }],
+        })),
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      const collisionWarning = result.warnings.find((w) => w.ruleId === 'PS4001');
+      expect(collisionWarning?.message).toContain('write settings');
+      expect(collisionWarning?.message).toContain('first output will be preserved');
+      expect(result.outputs.get('scripts/run.sh')?.mode).toBe(0o644);
+    });
+
     it('should warn and skip when additional file collides with existing output (PS4001)', async () => {
       const ast = createTestProgram();
 
@@ -1181,7 +1686,7 @@ describe('Compiler', () => {
       expect(result.outputs.has('.gemini/skills/promptscript/SKILL.md')).toBe(false);
     });
 
-    it('should silently skip auto-injection when same formatter already output the skill', async () => {
+    it('should warn when same formatter already output a different skill', async () => {
       const ast = createTestProgram();
       const formatter: Formatter = {
         ...createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md'),
@@ -1205,8 +1710,41 @@ describe('Compiler', () => {
       expect(result.success).toBe(true);
       const skillOutput = result.outputs.get('.claude/skills/promptscript/SKILL.md');
       expect(skillOutput?.content).toContain('User-defined promptscript skill');
-      // Same formatter → no warning (auto-discovered skill takes precedence silently)
-      expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(false);
+      expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(true);
+    });
+
+    it('should report injected skill transform failures as formatter errors', async () => {
+      const ast = createTestProgram();
+      const formatter: Formatter = {
+        ...createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md'),
+        format: vi.fn(() => ({
+          path: 'CLAUDE.md',
+          content: '# Claude',
+          additionalFiles: [
+            {
+              path: '.claude/skills/promptscript/SKILL.md',
+              content: skillContent,
+            },
+          ],
+        })),
+        transformInjectedSkillContent: () => {
+          throw new Error('invalid injected skill');
+        },
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [formatter], skillContent });
+      const result = await compiler.compile('test.prs');
+
+      expect(result.success).toBe(false);
+      expect(result.errors).toContainEqual(
+        expect.objectContaining({
+          code: 'PS4000',
+          message: expect.stringContaining('invalid injected skill'),
+        })
+      );
     });
 
     it('should warn when different formatter already output the skill at same path', async () => {
@@ -1238,7 +1776,7 @@ describe('Compiler', () => {
       expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(true);
     });
 
-    it('should produce collision warning when two formatters share dotDir', async () => {
+    it('should not warn when two formatters share dotDir with identical content', async () => {
       const ast = createTestProgram();
       const cline = createMockFormatter('cline', '.clinerules', '.agents/skills', 'SKILL.md');
       const codex = createMockFormatter('codex', 'AGENTS.md', '.agents/skills', 'SKILL.md');
@@ -1253,7 +1791,27 @@ describe('Compiler', () => {
       const collisionWarnings = result.warnings.filter(
         (w) => w.ruleId === 'PS4001' && w.message.includes('.agents/skills/promptscript/SKILL.md')
       );
-      expect(collisionWarnings.length).toBeGreaterThanOrEqual(1);
+      expect(collisionWarnings).toEqual([]);
+    });
+
+    it('should warn when two formatters share dotDir with different content', async () => {
+      const ast = createTestProgram();
+      const cline = createMockFormatter('cline', '.clinerules', '.agents/skills', 'SKILL.md');
+      const codex: Formatter = {
+        ...createMockFormatter('codex', 'AGENTS.md', '.agents/skills', 'SKILL.md'),
+        transformInjectedSkillContent: (content: string) => `${content}\n<!-- codex flavour -->`,
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [cline, codex], skillContent });
+      const result = await compiler.compile('test.prs');
+      expect(result.success).toBe(true);
+      const collisionWarnings = result.warnings.filter(
+        (w) => w.ruleId === 'PS4001' && w.message.includes('.agents/skills/promptscript/SKILL.md')
+      );
+      expect(collisionWarnings.length).toBe(1);
     });
 
     it('should inject skill for multiple formatters with different paths', async () => {
@@ -1351,7 +1909,7 @@ describe('compile (standalone)', () => {
     const result = await compile('./test.prs');
 
     expect(result.success).toBe(true);
-    expect(mockResolve).toHaveBeenCalledWith('./test.prs');
+    expect(mockResolve).toHaveBeenCalledWith(resolve('./test.prs'));
     expect(mockValidate).toHaveBeenCalled();
   });
 
@@ -1420,7 +1978,7 @@ describe('Compiler.compileFile', () => {
     const result = await compiler.compileFile('./test.prs');
 
     expect(result.success).toBe(true);
-    expect(mockResolve).toHaveBeenCalledWith('./test.prs');
+    expect(mockResolve).toHaveBeenCalledWith(resolve('./test.prs'));
 
     vi.restoreAllMocks();
   });

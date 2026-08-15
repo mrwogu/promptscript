@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { CursorFormatter, CURSOR_VERSIONS } from '../formatters/cursor.js';
+import { CodexFormatter } from '../formatters/codex.js';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',
@@ -1420,6 +1421,192 @@ describe('CursorFormatter', () => {
       const ast = createMinimalProgram();
       const result = formatter.format(ast);
       expect(result.content).not.toContain('Examples:');
+    });
+  });
+
+  describe('full version skills', () => {
+    const skillsProgram = (properties: Record<string, Value>): Program => ({
+      type: 'Program',
+      uses: [],
+      extends: [],
+      loc: createLoc(),
+      blocks: [
+        {
+          type: 'Block',
+          name: 'skills',
+          content: { type: 'ObjectContent', properties, loc: createLoc() },
+          loc: createLoc(),
+        },
+      ],
+    });
+
+    it('should report the shared skill base path', () => {
+      expect(formatter.getSkillBasePath()).toBe('.agents/skills');
+      expect(formatter.getSkillFileName()).toBe('SKILL.md');
+    });
+
+    it('should skip skills excluded by the target skill filter', () => {
+      const ast = skillsProgram({
+        keep: { description: 'Kept skill', content: 'Body.' },
+        drop: { description: 'Dropped skill', content: 'Body.' },
+      });
+
+      const result = formatter.format(ast, {
+        version: 'full',
+        targetConfig: { includeSkills: ['keep'] },
+      });
+
+      const paths = result.additionalFiles?.map((f) => f.path) ?? [];
+      expect(paths).toContain('.agents/skills/keep/SKILL.md');
+      expect(paths).not.toContain('.agents/skills/drop/SKILL.md');
+    });
+
+    it('should exclude inline references using the target skill filter', () => {
+      const ast = skillsProgram({
+        keep: {
+          description: 'Kept skill',
+          content: 'Body.',
+          resources: [{ relativePath: 'references/keep.md', content: 'Kept reference.' }],
+        },
+        drop: {
+          description: 'Dropped skill',
+          content: 'Body.',
+          resources: [{ relativePath: 'references/drop.md', content: 'Dropped reference.' }],
+        },
+      });
+
+      const result = formatter.format(ast, {
+        version: 'modern',
+        targetConfig: { includeSkills: ['keep'] },
+      });
+
+      expect(result.content).toContain('Kept reference.');
+      expect(result.content).not.toContain('Dropped reference.');
+    });
+
+    it('should skip skills whose name is unsafe for a file path', () => {
+      const ast = skillsProgram({
+        '../escape': { description: 'Traversal attempt', content: 'Body.' },
+        safe: { description: 'Safe skill', content: 'Body.' },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const paths = result.additionalFiles?.map((f) => f.path) ?? [];
+      expect(paths).toContain('.agents/skills/safe/SKILL.md');
+      expect(paths.some((p) => p.includes('..'))).toBe(false);
+    });
+
+    it('should emit skill resource files', () => {
+      const ast = skillsProgram({
+        deploy: {
+          description: 'Deploy skill',
+          content: 'Body.',
+          resources: [{ relativePath: 'scripts/run.sh', content: '#!/bin/sh\necho hi\n' }],
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const skillFile = result.additionalFiles?.find(
+        (f) => f.path === '.agents/skills/deploy/SKILL.md'
+      );
+      expect(skillFile).toBeDefined();
+      expect(skillFile?.additionalFiles?.map((f) => f.path)).toContain(
+        '.agents/skills/deploy/scripts/run.sh'
+      );
+    });
+
+    it('should emit resource files at canonical paths without duplicates', () => {
+      const ast = skillsProgram({
+        deploy: {
+          description: 'Deploy skill',
+          content: 'Body.',
+          resources: [
+            { relativePath: 'references/./guide.md', content: 'First guide.' },
+            { relativePath: 'references/guide.md', content: 'Duplicate guide.' },
+            { relativePath: 'references/../secret.md', content: 'Unsafe.' },
+          ],
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find(
+        (f) => f.path === '.agents/skills/deploy/SKILL.md'
+      );
+      const resourceFiles = skillFile?.additionalFiles ?? [];
+
+      expect(resourceFiles).toEqual([
+        expect.objectContaining({
+          path: '.agents/skills/deploy/references/guide.md',
+          content: 'First guide.',
+        }),
+      ]);
+    });
+
+    it('should add required fields missing from raw skill frontmatter', () => {
+      const ast = skillsProgram({
+        deploy: {
+          description: 'Deploy skill',
+          content: 'Body.',
+          __rawFrontmatter: 'license: MIT',
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find(
+        (f) => f.path === '.agents/skills/deploy/SKILL.md'
+      );
+
+      expect(skillFile?.content).toContain('name: deploy');
+      expect(skillFile?.content).toContain('description: Deploy skill');
+      expect(skillFile?.content).toContain('license: MIT');
+    });
+
+    it('should skip agents whose name is unsafe for a file path', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '../escape': { description: 'Traversal attempt', content: 'Body.' },
+                reviewer: { description: 'Safe agent', content: 'Body.' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const paths = result.additionalFiles?.map((f) => f.path) ?? [];
+      expect(paths).toContain('.cursor/agents/reviewer.md');
+      expect(paths.some((p) => p.includes('..'))).toBe(false);
+    });
+
+    it('should emit the same skill file as other .agents/skills targets', () => {
+      const ast = skillsProgram({
+        review: { description: 'Code review skill', content: 'Review code.' },
+      });
+
+      const cursorSkill = formatter
+        .format(ast, { version: 'full' })
+        .additionalFiles?.find((f) => f.path === '.agents/skills/review/SKILL.md');
+      const codexSkill = new CodexFormatter()
+        .format(ast, { version: 'full' })
+        .additionalFiles?.find((f) => f.path === '.agents/skills/review/SKILL.md');
+
+      expect(cursorSkill?.content).toBeDefined();
+      expect(cursorSkill?.content).toBe(codexSkill?.content);
     });
   });
 

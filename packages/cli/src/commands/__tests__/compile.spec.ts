@@ -152,10 +152,14 @@ vi.mock('chalk', () => ({
   },
 }));
 
-vi.mock('fs', () => ({
-  existsSync: (...args: unknown[]) => mockExistsSync(...args),
-  readFileSync: vi.fn().mockReturnValue(''),
-}));
+vi.mock('fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('fs')>();
+  return {
+    ...actual,
+    existsSync: (...args: unknown[]) => mockExistsSync(...args),
+    readFileSync: vi.fn().mockReturnValue(''),
+  };
+});
 
 vi.mock('../../output/pager.js', () => ({
   isTTY: (...args: unknown[]) => mockIsTTY(...args),
@@ -179,12 +183,22 @@ vi.mock('../../utils/managed-output-cleanup.js', async (importOriginal) => {
     mergePromptScriptCodexConfig: vi.fn().mockReturnValue(undefined),
     mergePromptScriptHookOutput: vi.fn().mockReturnValue(undefined),
     removePromptScriptOwnedCodexHooks: vi.fn().mockReturnValue(undefined),
-    rewriteHookOutputIfUnchanged: (...args: unknown[]) => mockRewriteHookOutputIfUnchanged(...args),
+    rewriteHookOutputIfUnchanged: async (...args: unknown[]) => {
+      const rewritten = await mockRewriteHookOutputIfUnchanged(...args);
+      const mode = args[4];
+      if (rewritten && typeof mode === 'number') {
+        await mockChmod(String(args[0]), mode);
+      }
+      return rewritten;
+    },
     removeHookOutputIfUnchanged: (...args: unknown[]) => mockRemoveHookOutputIfUnchanged(...args),
-    createHookOutputSafely: vi.fn(async (path: string, _root: string, content: string) => {
-      await mockWriteFile(path, content, 'utf-8');
-      return true;
-    }),
+    createHookOutputSafely: vi.fn(
+      async (path: string, _root: string, content: string, mode?: number) => {
+        await mockWriteFile(path, content, 'utf-8');
+        if (mode !== undefined) await mockChmod(path, mode);
+        return true;
+      }
+    ),
   };
 });
 
@@ -934,6 +948,30 @@ describe('compile command - createCliLogger warn path', () => {
       },
     ]);
     expect(mockWriteFile).toHaveBeenCalledWith('/repo/logstrip/AGENTS.md', '# Agents\n', 'utf-8');
+    expect(mockWarning).toHaveBeenCalledWith(
+      expect.stringContaining('is outside the project root')
+    );
+  });
+
+  it('should not warn when output directory is the project root', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      registry: { path: './registry' },
+      output: { baseDir: '.' },
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([['CLAUDE.md', { path: 'CLAUDE.md', content: '# Claude\n' }]]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/repo/promptscript' }, mockServices);
+
+    expect(mockWarning).not.toHaveBeenCalledWith(
+      expect.stringContaining('is outside the project root')
+    );
   });
 
   it('should let --output override a build profile output', async () => {
@@ -1323,8 +1361,7 @@ describe('compile command - createCliLogger warn path', () => {
       expect(mockWatch).toHaveBeenCalledTimes(1);
 
       const changeHandler = mockWatcherOn.mock.calls.find(([event]) => event === 'change')?.[1] as
-        | ((path: string) => void)
-        | undefined;
+        ((path: string) => void) | undefined;
       changeHandler?.('/repo/promptscript/.promptscript/project.prs');
       await vi.runAllTimersAsync();
 
@@ -1379,8 +1416,7 @@ describe('compile command - createCliLogger warn path', () => {
       ).toBe(false);
 
       const changeHandler = mockWatcherOn.mock.calls.find(([event]) => event === 'change')?.[1] as
-        | ((path: string) => void)
-        | undefined;
+        ((path: string) => void) | undefined;
       expect(changeHandler).toBeDefined();
       mockSpinnerStart.mockImplementationOnce(() => {
         throw 'watch rebuild failed';

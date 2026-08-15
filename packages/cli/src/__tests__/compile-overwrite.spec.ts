@@ -13,6 +13,7 @@ const {
   mockExistsSync,
   mockIsTTY,
   mockCreateHookOutputSafely,
+  mockRewriteHookOutputIfUnchanged,
   mockLoadConfig,
   mockChokidarWatch,
   mockWatcherOn,
@@ -27,6 +28,7 @@ const {
   const mockExistsSync = vi.fn();
   const mockIsTTY = vi.fn();
   const mockCreateHookOutputSafely = vi.fn();
+  const mockRewriteHookOutputIfUnchanged = vi.fn();
   const mockLoadConfig = vi.fn();
   const mockWatcherOn = vi.fn().mockReturnThis();
   const mockChokidarWatch = vi.fn().mockReturnValue({
@@ -46,6 +48,7 @@ const {
     mockExistsSync,
     mockIsTTY,
     mockCreateHookOutputSafely,
+    mockRewriteHookOutputIfUnchanged,
     mockLoadConfig,
     mockChokidarWatch,
     mockWatcherOn,
@@ -122,10 +125,15 @@ vi.mock('chalk', () => ({
 }));
 
 // Mock fs.existsSync for the entry file check
-vi.mock('fs', () => ({
-  existsSync: (path: string) => (path.endsWith('promptscript.lock') ? false : mockExistsSync(path)),
-  readFileSync: vi.fn().mockReturnValue(''),
-}));
+vi.mock('fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('fs')>();
+  return {
+    ...actual,
+    existsSync: (path: string) =>
+      path.endsWith('promptscript.lock') ? false : mockExistsSync(path),
+    readFileSync: vi.fn().mockReturnValue(''),
+  };
+});
 
 // Mock pager for isTTY
 vi.mock('../output/pager.js', () => ({
@@ -137,14 +145,22 @@ vi.mock('../utils/managed-output-cleanup.js', async (importOriginal) => {
   return {
     ...actual,
     createHookOutputSafely: mockCreateHookOutputSafely.mockImplementation(
-      async (path: string, _outputRoot: string, content: string) => {
+      async (path: string, _outputRoot: string, content: string, mode?: number) => {
         await mockWriteFile(path, content, 'utf-8');
+        if (mode !== undefined) await mockChmod(path, mode);
         return true;
       }
     ),
-    rewriteHookOutputIfUnchanged: vi.fn(
-      async (path: string, _outputRoot: string, _expectedContent: string, content: string) => {
+    rewriteHookOutputIfUnchanged: mockRewriteHookOutputIfUnchanged.mockImplementation(
+      async (
+        path: string,
+        _outputRoot: string,
+        _expectedContent: string,
+        content: string,
+        mode?: number
+      ) => {
         await mockWriteFile(path, content, 'utf-8');
+        if (mode !== undefined) await mockChmod(path, mode);
         return true;
       }
     ),
@@ -241,6 +257,71 @@ describe('compile command - overwrite protection', () => {
     consoleErrorSpy.mockRestore();
   });
 
+  describe('when a target output escapes the output directory', () => {
+    it('should refuse to write anything', async () => {
+      const escaping = '../outside/CLAUDE.md';
+      const outputs = new Map([
+        ['CLAUDE.md', createMockOutput('CLAUDE.md', 'content')],
+        [escaping, createMockOutput(escaping, 'content')],
+      ]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      await compileCommand({}, mockServices);
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Refusing to write outside the output directory')
+      );
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('should refuse an absolute path outside the output directory', async () => {
+      const escaping = '/etc/promptscript-owned.md';
+      const outputs = new Map([[escaping, createMockOutput(escaping, 'content')]]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      await compileCommand({}, mockServices);
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('should refuse an escaping path during dry-run', async () => {
+      const escaping = '../outside/CLAUDE.md';
+      const outputs = new Map([[escaping, createMockOutput(escaping, 'content')]]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      await compileCommand({ dryRun: true }, mockServices);
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Refusing to write outside the output directory')
+      );
+      expect(process.exitCode).toBe(1);
+    });
+  });
+
   describe('when file does not exist', () => {
     it('should write file normally without prompting', async () => {
       const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'content')]]);
@@ -262,6 +343,12 @@ describe('compile command - overwrite protection', () => {
       await compileCommand({}, mockServices);
 
       expect(mockWriteFile).toHaveBeenCalledWith(resolve('CLAUDE.md'), 'content', 'utf-8');
+      expect(mockCreateHookOutputSafely).toHaveBeenCalledWith(
+        resolve('CLAUDE.md'),
+        process.cwd(),
+        'content',
+        undefined
+      );
       expect(mockPrompts.select).not.toHaveBeenCalled();
     });
   });
@@ -332,7 +419,98 @@ describe('compile command - overwrite protection', () => {
       await compileCommand({}, mockServices);
 
       expect(mockWriteFile).toHaveBeenCalledWith(resolve('CLAUDE.md'), 'new content', 'utf-8');
+      expect(mockRewriteHookOutputIfUnchanged).toHaveBeenCalledWith(
+        resolve('CLAUDE.md'),
+        process.cwd(),
+        expect.stringContaining(PROMPTSCRIPT_MARKER),
+        'new content',
+        undefined
+      );
       expect(mockPrompts.select).not.toHaveBeenCalled();
+    });
+
+    it('should report a guarded rewrite failure for a regular output', async () => {
+      const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'new content')]]);
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(`# Header\n${PROMPTSCRIPT_MARKER}\n\nOld content`);
+      mockRewriteHookOutputIfUnchanged.mockResolvedValueOnce(false);
+
+      await compileCommand({}, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('changed or became unsafe while PromptScript was writing it')
+      );
+    });
+
+    it('should report a guarded rewrite failure for a hook output', async () => {
+      const path = '.github/hooks/promptscript.json';
+      const outputs = new Map([[path, createMockOutput(path, '{"version":1,"hooks":{}}')]]);
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(
+        JSON.stringify({
+          version: 1,
+          hooks: {
+            preToolUse: [
+              {
+                type: 'command',
+                bash: 'echo old # promptscript-generated:owned',
+              },
+            ],
+          },
+        })
+      );
+      mockRewriteHookOutputIfUnchanged.mockResolvedValueOnce(false);
+
+      await compileCommand({}, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('changed while PromptScript was writing hooks')
+      );
+    });
+
+    it('should report a guarded mode update failure for unchanged output', async () => {
+      const outputs = new Map([
+        [
+          'script.sh',
+          {
+            ...createMockOutput('script.sh', 'same content'),
+            mode: 0o755,
+          },
+        ],
+      ]);
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue('same content');
+      mockRewriteHookOutputIfUnchanged.mockResolvedValueOnce(false);
+
+      await compileCommand({}, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('changed or became unsafe while PromptScript was updating its mode')
+      );
     });
 
     it('should overwrite a fully owned generated hook file', async () => {

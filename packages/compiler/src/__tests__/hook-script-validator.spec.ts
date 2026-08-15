@@ -1,9 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { mkdtemp, mkdir, rm, symlink, writeFile } from 'fs/promises';
+import { mkdtemp, mkdir, realpath, rm, symlink, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import type { Program, SourceLocation, Value } from '@promptscript/core';
-import { inferProjectRoot, validateHookScriptResources } from '../hook-script-validator.js';
+import {
+  findProjectRootMarker,
+  inferProjectRoot,
+  validateHookScriptResources,
+} from '../hook-script-validator.js';
 
 const loc: SourceLocation = { file: '.promptscript/project.prs', line: 1, column: 1 };
 
@@ -230,5 +234,19 @@ describe('hook script resource validation', () => {
       projectRoot
     );
     expect(inferProjectRoot('/ignored', projectRoot)).toBe(projectRoot);
+  });
+
+  it('finds markers through a symlinked entry file', async () => {
+    const linkDirectory = await mkdtemp(join(tmpdir(), 'promptscript-hook-link-'));
+    const entryPath = join(projectRoot, 'project.prs');
+    const linkedEntryPath = join(linkDirectory, 'project.prs');
+    await writeFile(entryPath, '@identity { role: "Test" }\n');
+    await symlink(entryPath, linkedEntryPath);
+
+    try {
+      expect(findProjectRootMarker(linkedEntryPath)).toBe(await realpath(projectRoot));
+    } finally {
+      await rm(linkDirectory, { recursive: true, force: true });
+    }
   });
 });

@@ -324,7 +324,8 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (this.config.hasSkills && this.config.skillsInMultifile) {
       const skills = this.extractSkills(ast, options);
       for (const skill of skills) {
-        additionalFiles.push(this.generateSkillFile(skill, options));
+        const skillFile = this.generateSkillFile(skill, options);
+        if (skillFile) additionalFiles.push(skillFile);
       }
     }
 
@@ -370,7 +371,8 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (this.config.hasSkills) {
       const skills = this.extractSkills(ast, options);
       for (const skill of skills) {
-        additionalFiles.push(this.generateSkillFile(skill, options));
+        const skillFile = this.generateSkillFile(skill, options);
+        if (skillFile) additionalFiles.push(skillFile);
       }
     }
 
@@ -551,105 +553,6 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
   // Skill Extraction & File Generation
   // ============================================================
 
-  protected extractSkills(ast: Program, options?: FormatOptions): MarkdownSkillConfig[] {
-    const skillsBlock = this.findBlock(ast, 'skills');
-    if (!skillsBlock) return [];
-
-    const skills: MarkdownSkillConfig[] = [];
-    const props = this.getProps(skillsBlock.content);
-
-    for (const [name, value] of Object.entries(props)) {
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
-        if (!this.isSafeSkillName(name)) continue;
-        if (!this.shouldIncludeSkill(name, options)) continue;
-        const obj = value as Record<string, Value>;
-        skills.push({
-          name,
-          description: obj['description'] ? this.valueToString(obj['description']) : name,
-          argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
-          content: obj['content'] ? this.valueToString(obj['content']) : '',
-          resources:
-            obj['resources'] && Array.isArray(obj['resources'])
-              ? (obj['resources'] as Array<Record<string, Value>>).map((r) => ({
-                  relativePath: r['relativePath'] as string,
-                  content: r['content'] as string,
-                  executable: typeof r['executable'] === 'boolean' ? r['executable'] : undefined,
-                }))
-              : undefined,
-          rawFrontmatter:
-            typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
-          examples: this.extractSkillExamples(obj),
-          outputDir: typeof obj['__outputDir'] === 'string' ? obj['__outputDir'] : undefined,
-        });
-      }
-    }
-
-    return skills;
-  }
-
-  protected generateSkillFile(
-    config: MarkdownSkillConfig,
-    options?: FormatOptions
-  ): FormatterOutput {
-    const lines: string[] = [];
-
-    // YAML frontmatter
-    lines.push('---');
-    if (config.rawFrontmatter) {
-      lines.push(config.rawFrontmatter);
-    } else {
-      lines.push(`name: ${config.name}`);
-      lines.push(`description: ${this.yamlString(config.description)}`);
-      if (config.argumentHint) {
-        lines.push(`argument-hint: ${this.yamlString(config.argumentHint)}`);
-      }
-    }
-    lines.push('---');
-    lines.push('');
-
-    if (config.content) {
-      const dedentedContent = this.dedent(config.content);
-      lines.push(dedentedContent);
-    }
-
-    // Append examples section if the skill has examples
-    if (config.examples && config.examples.length > 0) {
-      lines.push('');
-      lines.push('## Examples');
-      for (const example of config.examples) {
-        lines.push('');
-        lines.push(`### Example: ${example.name}`);
-        if (example.description) {
-          const safeDescription = example.description.replace(/[\r\n]+/g, ' ').trim();
-          lines.push('');
-          lines.push(safeDescription);
-        }
-        lines.push('');
-        lines.push('**Input:**');
-        lines.push('');
-        lines.push(this.renderCodeFence(this.dedent(example.input)));
-        lines.push('');
-        lines.push('**Output:**');
-        lines.push('');
-        lines.push(this.renderCodeFence(this.dedent(example.output)));
-      }
-    }
-
-    const skillDirPath = this.resolveSkillDir(
-      `${this.config.dotDir}/skills`,
-      config.name,
-      config.outputDir,
-      options
-    );
-    const resourceFiles = this.sanitizeResourceFiles(config.resources, skillDirPath);
-
-    return {
-      path: `${skillDirPath}/${this.config.skillFileName}`,
-      content: lines.join('\n') + '\n',
-      additionalFiles: resourceFiles.length > 0 ? resourceFiles : undefined,
-    };
-  }
-
   // ============================================================
   // Agent Extraction & File Generation
   // ============================================================
@@ -663,6 +566,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     for (const [name, value] of Object.entries(props)) {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
+        if (!this.isSafeAgentName(name)) continue;
         const obj = value as Record<string, Value>;
         const description = obj['description'] ? this.valueToString(obj['description']) : '';
         if (!description) continue; // description is required
@@ -698,35 +602,6 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
       path: `${this.config.dotDir}/agents/${config.name}.md`,
       content: lines.join('\n') + '\n',
     };
-  }
-
-  // ============================================================
-  // YAML Helpers
-  // ============================================================
-
-  protected yamlString(value: string): string {
-    const needsQuoting =
-      value === '' ||
-      /^[{[*&!|>'"?%@`-]/.test(value) ||
-      value.includes("'") ||
-      value.includes('"') ||
-      value.includes(': ') ||
-      value.includes(' #') ||
-      value === 'true' ||
-      value === 'false' ||
-      value === 'null' ||
-      value === 'yes' ||
-      value === 'no';
-
-    if (!needsQuoting) {
-      return value;
-    }
-
-    if (value.includes("'")) {
-      const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-      return `"${escaped}"`;
-    }
-    return `'${value}'`;
   }
 
   // ============================================================

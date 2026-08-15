@@ -127,6 +127,10 @@ class TestFormatter extends BaseFormatter {
   public testYamlQuoted(value: string): string {
     return this.yamlQuoted(value);
   }
+
+  public testYamlString(value: string): string {
+    return this.yamlString(value);
+  }
 }
 
 describe('BaseFormatter', () => {
@@ -1156,6 +1160,26 @@ describe('BaseFormatter', () => {
     it('should escape backslashes and quotes', () => {
       expect(formatter.testYamlQuoted('say "hi"')).toBe('say \\"hi\\"');
       expect(formatter.testYamlQuoted('C:\\path')).toBe('C:\\\\path');
+    });
+  });
+
+  describe('yamlString', () => {
+    it.each([
+      ['true', "'true'"],
+      ['OFF', "'OFF'"],
+      ['.inf', "'.inf'"],
+      ['.NaN', "'.NaN'"],
+      ['42', "'42'"],
+      ['2026-08-06', "'2026-08-06'"],
+      ['# heading', "'# heading'"],
+      ['key: value', "'key: value'"],
+      ['first\nsecond', '"first\\nsecond"'],
+    ])('should preserve scalar-looking text %j as a string', (value, expected) => {
+      expect(formatter.testYamlString(value)).toBe(expected);
+    });
+
+    it('should leave unambiguous text unquoted', () => {
+      expect(formatter.testYamlString('simple description')).toBe('simple description');
     });
   });
 });

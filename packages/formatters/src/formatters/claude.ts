@@ -106,11 +106,7 @@ type ClaudeAgentModel = 'sonnet' | 'opus' | 'haiku' | 'inherit';
  * Valid permission modes for Claude agents.
  */
 type ClaudeAgentPermissionMode =
-  | 'default'
-  | 'acceptEdits'
-  | 'dontAsk'
-  | 'bypassPermissions'
-  | 'plan';
+  'default' | 'acceptEdits' | 'dontAsk' | 'bypassPermissions' | 'plan';
 
 /**
  * Configuration for a Claude subagent.
@@ -301,9 +297,9 @@ export class ClaudeFormatter extends BaseFormatter {
     }
 
     // Generate skill files
-    const skills = this.extractSkills(ast, options);
+    const skills = this.extractClaudeSkills(ast, options);
     for (const skill of skills) {
-      additionalFiles.push(this.generateSkillFile(skill, options));
+      additionalFiles.push(this.generateClaudeSkillFile(skill, options));
     }
 
     // Generate agent files
@@ -598,7 +594,7 @@ export class ClaudeFormatter extends BaseFormatter {
   /**
    * Extract skill configurations from @skills block.
    */
-  private extractSkills(ast: Program, options?: FormatOptions): ClaudeSkillConfig[] {
+  private extractClaudeSkills(ast: Program, options?: FormatOptions): ClaudeSkillConfig[] {
     const skillsBlock = this.findBlock(ast, 'skills');
     if (!skillsBlock) return [];
 
@@ -646,7 +642,10 @@ export class ClaudeFormatter extends BaseFormatter {
   /**
    * Generate a .claude/skills/<name>/SKILL.md file.
    */
-  private generateSkillFile(config: ClaudeSkillConfig, options?: FormatOptions): FormatterOutput {
+  private generateClaudeSkillFile(
+    config: ClaudeSkillConfig,
+    options?: FormatOptions
+  ): FormatterOutput {
     const lines: string[] = [];
 
     // YAML frontmatter (use quotes compatible with Prettier)
@@ -809,6 +808,7 @@ export class ClaudeFormatter extends BaseFormatter {
 
     for (const [name, value] of Object.entries(props)) {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
+        if (!this.isSafeAgentName(name)) continue;
         const obj = value as Record<string, Value>;
         const agent = this.parseAgentConfig(name, obj);
         if (agent) {

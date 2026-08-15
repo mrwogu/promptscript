@@ -219,6 +219,13 @@ export class FileLoader {
   getLocalPath(): string {
     return this.localPath;
   }
+
+  /**
+   * Get the project root used as the traversal safety boundary.
+   */
+  getProjectRoot(): string {
+    return this.projectRoot;
+  }
 }
 
 /** Remove a trailing `@version` from an import path. */

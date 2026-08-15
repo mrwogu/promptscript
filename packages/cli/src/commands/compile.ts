@@ -1,6 +1,6 @@
 import { resolve, dirname, isAbsolute, relative } from 'path';
 import { fileURLToPath } from 'url';
-import { chmod, writeFile, mkdir, readFile } from 'fs/promises';
+import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import chokidar from 'chokidar';
 import { minimatch } from 'minimatch';
@@ -13,7 +13,7 @@ import type {
   BuildProfileConfig,
   Lockfile,
 } from '@promptscript/core';
-import { isValidLockfile } from '@promptscript/core';
+import { ErrorCode, isValidLockfile, PSError } from '@promptscript/core';
 
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
 import { loadEffectiveConfig, CONFIG_FILES } from '../config/loader.js';
@@ -26,7 +26,11 @@ import { type CliServices, createDefaultServices } from '../services.js';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { parse as parseYaml } from 'yaml';
 import { stripMarkers } from '../utils/markers.js';
-import { detectOutputConflicts } from '../utils/conflict-detector.js';
+import {
+  detectOutputConflicts,
+  isPathInsideDir,
+  validateOutputPath,
+} from '../utils/conflict-detector.js';
 import {
   cleanupManagedOutputs,
   createHookOutputSafely,
@@ -440,6 +444,20 @@ async function writeOutputs(
   const conflicts: string[] = [];
   const targetErrors: string[] = [];
 
+  // Pre-flight: a target `output` comes from the config file, so a checked-in
+  // path may point anywhere the user can write. Reject the whole run before
+  // writing anything rather than planting files outside the output directory.
+  const outputRoot = options.output ?? process.cwd();
+  const escaping = [...outputs.values()]
+    .map((output) => validateOutputPath(output.path, outputRoot))
+    .filter((message): message is string => message !== undefined);
+  if (escaping.length > 0) {
+    throw new PSError(
+      `Refusing to write outside the output directory:\n${escaping.map((m) => `  - ${m}`).join('\n')}`,
+      ErrorCode.INVALID_PATH
+    );
+  }
+
   // Pre-flight: in non-interactive mode without --force, detect every
   // ownership conflict before writing anything so a refused overwrite cannot
   // leave a half-written set of outputs behind. The in-loop conflict handling
@@ -487,56 +505,29 @@ async function writeOutputs(
     }
   }
 
-  /** Write a file with graceful handling for ENOTDIR/EEXIST conflicts. */
-  async function safeWrite(path: string, content: string, mode?: number): Promise<boolean> {
-    try {
-      await mkdir(dirname(path), { recursive: true });
-      await writeFile(path, content, 'utf-8');
-      if (mode !== undefined) {
-        await chmod(path, mode);
-      }
-      return true;
-    } catch (err: unknown) {
-      const nodeErr = err as NodeJS.ErrnoException;
-      if (nodeErr.code === 'ENOTDIR') {
-        const conflictPath = nodeErr.path ?? dirname(path);
-        const msg = `Cannot create directory because '${conflictPath}' already exists as a file. Remove it or disable this target.`;
-        targetErrors.push(msg);
-        ConsoleOutput.error(msg);
-        return false;
-      }
-      if (nodeErr.code === 'EISDIR') {
-        const msg = `Cannot write '${path}' because a directory exists at that path.`;
-        targetErrors.push(msg);
-        ConsoleOutput.error(msg);
-        return false;
-      }
-      throw err;
-    }
-  }
-
   async function safeOverwrite(
     output: FormatterOutput,
     outputPath: string,
     existingContent: string | undefined,
     content: string
   ): Promise<boolean> {
-    if (!isHookOutputPath(output.path)) {
-      return safeWrite(outputPath, content, output.mode);
-    }
-
     const outputRoot = options.output ? resolve(options.output) : process.cwd();
     const rewritten =
       existingContent !== undefined &&
-      (await rewriteHookOutputIfUnchanged(outputPath, outputRoot, existingContent, content));
-    if (rewritten && output.mode !== undefined) {
-      await chmod(outputPath, output.mode);
-    }
+      (await rewriteHookOutputIfUnchanged(
+        outputPath,
+        outputRoot,
+        existingContent,
+        content,
+        output.mode
+      ));
     if (!rewritten) {
       const msg =
         existingContent === undefined
           ? `Skipped '${outputPath}' because it exists but could not be read.`
-          : `Skipped '${outputPath}' because it changed while PromptScript was writing hooks.`;
+          : isHookOutputPath(output.path)
+            ? `Skipped '${outputPath}' because it changed while PromptScript was writing hooks.`
+            : `Skipped '${outputPath}' because it changed or became unsafe while PromptScript was writing it.`;
       targetErrors.push(msg);
       ConsoleOutput.error(msg);
     }
@@ -548,14 +539,10 @@ async function writeOutputs(
     outputPath: string,
     content: string
   ): Promise<boolean> {
-    if (!isHookOutputPath(output.path)) {
-      return safeWrite(outputPath, content, output.mode);
-    }
-
     const outputRoot = options.output ? resolve(options.output) : process.cwd();
     const created = await createHookOutputSafely(outputPath, outputRoot, content, output.mode);
     if (!created) {
-      const msg = `Skipped '${outputPath}' because its hook path was not safe to create.`;
+      const msg = `Skipped '${outputPath}' because its output path was not safe to create.`;
       targetErrors.push(msg);
       ConsoleOutput.error(msg);
     }
@@ -628,8 +615,20 @@ async function writeOutputs(
 
     // Nothing but the marker would change - keep the file (and its timestamp)
     if (contentMatches) {
-      if (output.mode !== undefined) {
-        await chmod(outputPath, output.mode);
+      if (output.mode !== undefined && existingContent !== undefined) {
+        const modeUpdated = await rewriteHookOutputIfUnchanged(
+          outputPath,
+          options.output ? resolve(options.output) : process.cwd(),
+          existingContent,
+          existingContent,
+          output.mode
+        );
+        if (!modeUpdated) {
+          const msg = `Skipped '${outputPath}' because it changed or became unsafe while PromptScript was updating its mode.`;
+          targetErrors.push(msg);
+          ConsoleOutput.error(msg);
+          continue;
+        }
       }
       ConsoleOutput.unchanged(outputPath);
       result.unchanged.push(outputPath);
@@ -971,6 +970,14 @@ async function compileCommandWithResult(
     }
 
     const configuredOutput = options.output ?? buildProfile?.output ?? config.output?.baseDir;
+    // Writing to a sibling directory is a supported build-profile layout, but a
+    // base directory that leaves the project comes from a checked-in file, so
+    // say where the files are going instead of doing it silently.
+    if (!options.output && configuredOutput && !isPathInsideDir(configuredOutput, projectRoot)) {
+      ConsoleOutput.warning(
+        `Configured output directory "${configuredOutput}" is outside the project root ${projectRoot}`
+      );
+    }
     const effectiveOptions = {
       ...options,
       output: resolveOutputBase(projectRoot, configuredOutput),

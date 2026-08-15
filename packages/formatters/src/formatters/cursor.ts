@@ -32,6 +32,12 @@ import { resolveSectionTitle, resolveSourceSectionTitle } from '../section-title
 export type CursorVersion = 'modern' | 'legacy' | 'multifile' | 'agents-md' | 'full';
 
 /**
+ * Cursor reads skills from the interoperable `.agents/skills` layout it shares
+ * with the other AGENTS.md ecosystem targets.
+ */
+const CURSOR_SKILL_BASE_PATH = '.agents/skills';
+
+/**
  * Cursor formatter version information.
  */
 export const CURSOR_VERSIONS = {
@@ -150,6 +156,14 @@ export class CursorFormatter extends BaseFormatter {
     return 'inline';
   }
 
+  override getSkillBasePath(): string | null {
+    return CURSOR_SKILL_BASE_PATH;
+  }
+
+  override getSkillFileName(): string | null {
+    return 'SKILL.md';
+  }
+
   format(ast: Program, options?: FormatOptions): FormatterOutput {
     // Validate convention - Cursor only supports markdown
     const convention = options?.convention ?? this.defaultConvention;
@@ -243,14 +257,16 @@ export class CursorFormatter extends BaseFormatter {
    * Finds all skills with resources in a references/ subdirectory and
    * appends them as a ## References section.
    */
-  private inlineSkillReferences(ast: Program): string {
+  private inlineSkillReferences(ast: Program, options?: FormatOptions): string {
     const skillsBlock = this.findBlock(ast, 'skills');
     if (!skillsBlock) return '';
 
     const props = this.getProps(skillsBlock.content);
     const sections: string[] = [];
+    const emittedResources = new Set<string>();
 
     for (const [skillName, value] of Object.entries(props)) {
+      if (!this.shouldIncludeSkill(skillName, options)) continue;
       if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
       const obj = value as Record<string, Value>;
       const resources = obj['resources'];
@@ -261,9 +277,14 @@ export class CursorFormatter extends BaseFormatter {
         const res = r as Record<string, Value>;
         const relativePath = res['relativePath'] ? this.valueToString(res['relativePath']) : '';
         const content = res['content'] ? this.valueToString(res['content']) : '';
-        if (!relativePath.includes('references/')) continue;
+        const normalizedPath = this.normalizeResourcePath(relativePath);
+        if (!normalizedPath || !normalizedPath.split('/').includes('references')) continue;
 
-        const fileName = relativePath.split('/').pop() ?? relativePath;
+        const resourceKey = `${skillName}:${normalizedPath}`;
+        if (emittedResources.has(resourceKey)) continue;
+        emittedResources.add(resourceKey);
+
+        const fileName = normalizedPath.split('/').pop() ?? normalizedPath;
         sections.push(`### ${fileName} (from ${skillName})\n\n${content}`);
       }
     }
@@ -287,7 +308,7 @@ export class CursorFormatter extends BaseFormatter {
     // Generate command files for multi-line shortcuts
     const commandFiles = this.generateCommandFiles(ast);
 
-    const inlineRefs = this.inlineSkillReferences(ast);
+    const inlineRefs = this.inlineSkillReferences(ast, options);
 
     return {
       path: options?.outputPath ?? CURSOR_VERSIONS.modern.outputPath,
@@ -306,7 +327,7 @@ export class CursorFormatter extends BaseFormatter {
     // No frontmatter for legacy format
     this.addCommonSections(ast, sections);
 
-    const inlineRefs = this.inlineSkillReferences(ast);
+    const inlineRefs = this.inlineSkillReferences(ast, options);
 
     return {
       path: options?.outputPath ?? CURSOR_VERSIONS.legacy.outputPath,
@@ -330,7 +351,7 @@ export class CursorFormatter extends BaseFormatter {
     // No frontmatter — plain markdown only
     this.addCommonSections(ast, sections);
 
-    const inlineRefs = this.inlineSkillReferences(ast);
+    const inlineRefs = this.inlineSkillReferences(ast, options);
 
     return {
       path: options?.outputPath ?? CURSOR_VERSIONS['agents-md'].outputPath,
@@ -367,7 +388,7 @@ export class CursorFormatter extends BaseFormatter {
     mainSections.push(this.frontmatter(ast));
     this.addCommonSections(ast, mainSections);
 
-    const inlineRefs = this.inlineSkillReferences(ast);
+    const inlineRefs = this.inlineSkillReferences(ast, options);
 
     return {
       path: options?.outputPath ?? CURSOR_VERSIONS.modern.outputPath,
@@ -385,29 +406,9 @@ export class CursorFormatter extends BaseFormatter {
     const additionalFiles = [...(result.additionalFiles ?? [])];
 
     // Generate native skill files (.agents/skills/<name>/SKILL.md)
-    const skillsBlock = this.findBlock(ast, 'skills');
-    if (skillsBlock) {
-      const props = this.getProps(skillsBlock.content);
-      for (const [skillName, value] of Object.entries(props)) {
-        if (value && typeof value === 'object' && !Array.isArray(value)) {
-          const obj = value as Record<string, Value>;
-          const description = obj['description'] ? this.valueToString(obj['description']) : '';
-          const content = obj['content'] ? this.valueToString(obj['content']) : '';
-          if (!description && !content) continue;
-
-          const skillLines: string[] = ['---'];
-          skillLines.push(`name: ${skillName}`);
-          if (description) skillLines.push(`description: "${this.yamlQuoted(description)}"`);
-          skillLines.push('---');
-          skillLines.push('');
-          if (content) skillLines.push(this.dedent(content));
-
-          additionalFiles.push({
-            path: `.agents/skills/${skillName}/SKILL.md`,
-            content: skillLines.join('\n') + '\n',
-          });
-        }
-      }
+    for (const skill of this.extractSkills(ast, options)) {
+      const skillFile = this.generateSkillFile(skill, options);
+      if (skillFile) additionalFiles.push(skillFile);
     }
 
     // Generate subagent files (.cursor/agents/<name>.md)
@@ -416,6 +417,7 @@ export class CursorFormatter extends BaseFormatter {
       const props = this.getProps(agentsBlock.content);
       for (const [agentName, value] of Object.entries(props)) {
         if (value && typeof value === 'object' && !Array.isArray(value)) {
+          if (!this.isSafeAgentName(agentName)) continue;
           const obj = value as Record<string, Value>;
           const description = obj['description'] ? this.valueToString(obj['description']) : '';
           const content = obj['content'] ? this.valueToString(obj['content']) : '';
@@ -423,7 +425,7 @@ export class CursorFormatter extends BaseFormatter {
 
           const agentLines: string[] = ['---'];
           agentLines.push(`name: ${agentName}`);
-          if (description) agentLines.push(`description: "${this.yamlQuoted(description)}"`);
+          if (description) agentLines.push(`description: ${JSON.stringify(description)}`);
           const model = obj['model'];
           if (typeof model === 'string') agentLines.push(`model: ${model}`);
 
@@ -581,9 +583,9 @@ export class CursorFormatter extends BaseFormatter {
     // Frontmatter with globs
     const fm = [
       '---',
-      `description: "${this.yamlQuoted(config.description ?? '')}"`,
+      `description: ${JSON.stringify(config.description ?? '')}`,
       `globs:`,
-      ...config.patterns.map((p) => `  - "${this.yamlQuoted(p)}"`),
+      ...config.patterns.map((p) => `  - ${JSON.stringify(p)}`),
       '---',
     ];
     sections.push(fm.join('\n'));
@@ -759,7 +761,12 @@ ${fullText}`;
    */
   private frontmatter(ast: Program): string {
     const description = this.extractProjectDescription(ast);
-    const lines = ['---', `description: "${description}"`, 'alwaysApply: true', '---'];
+    const lines = [
+      '---',
+      `description: ${JSON.stringify(description)}`,
+      'alwaysApply: true',
+      '---',
+    ];
     return lines.join('\n');
   }
 

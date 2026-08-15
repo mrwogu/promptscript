@@ -8,7 +8,7 @@
  */
 
 // Compiler
-export { Compiler, createCompiler, compile } from './compiler.js';
+export { Compiler, createCompiler, compile, MAX_ENTRY_RESOLVERS } from './compiler.js';
 
 // Types
 export type {

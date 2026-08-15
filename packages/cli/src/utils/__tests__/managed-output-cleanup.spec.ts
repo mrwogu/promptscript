@@ -594,6 +594,22 @@ command = "echo owned # promptscript-generated:owned"
     await expect(readFile(file, 'utf-8')).resolves.toBe('new');
   });
 
+  it.skipIf(process.platform === 'win32')(
+    'should apply output modes during guarded creates and rewrites',
+    async () => {
+      const project = await createTemporaryDirectory('promptscript-output-mode-');
+      const file = join(project, 'scripts', 'run.sh');
+
+      await expect(createHookOutputSafely(file, project, 'old', 0o755)).resolves.toBe(true);
+      expect((await lstat(file)).mode & 0o777).toBe(0o755);
+
+      await expect(rewriteHookOutputIfUnchanged(file, project, 'old', 'new', 0o644)).resolves.toBe(
+        true
+      );
+      expect((await lstat(file)).mode & 0o777).toBe(0o644);
+    }
+  );
+
   it('should refuse hook rewrites through a parent symlink', async () => {
     const project = await createTemporaryDirectory('promptscript-rewrite-root-');
     const outside = await createTemporaryDirectory('promptscript-rewrite-outside-');

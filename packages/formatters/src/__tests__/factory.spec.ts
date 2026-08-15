@@ -1670,7 +1670,7 @@ describe('FactoryFormatter', () => {
       expect(skill?.content).toContain('disable-model-invocation: false');
     });
 
-    it('should strip all fields when raw frontmatter has only unsupported fields', () => {
+    it('should restore required fields when raw frontmatter has only unsupported fields', () => {
       const ast: Program = {
         ...createMinimalProgram(),
         blocks: [
@@ -1697,12 +1697,11 @@ describe('FactoryFormatter', () => {
       const skill = result.additionalFiles?.[0];
       expect(skill).toBeDefined();
 
-      // All fields stripped — frontmatter should be empty between delimiters
+      // Unsupported fields are stripped and required fields are regenerated.
       expect(skill?.content).not.toContain('license: MIT');
       expect(skill?.content).not.toContain('version:');
-
-      // Frontmatter should still have delimiters
-      expect(skill?.content).toContain('---');
+      expect(skill?.content).toContain('name: unsupported-skill');
+      expect(skill?.content).toContain('description: Unsupported');
     });
 
     it('should handle deeply nested unsupported blocks', () => {
@@ -2395,6 +2394,41 @@ describe('FactoryFormatter', () => {
       const result = formatter.format(ast, { version: 'full' });
       const droids = result.additionalFiles?.filter((f) => f.path.includes('droids/'));
       expect(droids ?? []).toHaveLength(0);
+    });
+
+    it('should skip agents whose name is unsafe for a file path', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'unsafe/name': {
+                  description: 'Unsafe droid',
+                  content: 'Do not emit this droid.',
+                },
+                safe: {
+                  description: 'Safe droid',
+                  content: 'Emit this droid.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const droids = result.additionalFiles?.filter((f) => f.path.includes('droids/')) ?? [];
+
+      expect(result.content).toContain('# AGENTS.md');
+      expect(droids).toHaveLength(1);
+      expect(droids[0]?.path).toBe('.factory/droids/safe.md');
+      expect(droids[0]?.content).toContain('name: safe');
     });
 
     it('should convert dots to hyphens in droid names', () => {
