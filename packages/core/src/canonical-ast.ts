@@ -1472,7 +1472,9 @@ export function normalizeProgram(input: ProgramInput): CanonicalProgram {
       loc: deepClone(override.loc),
     });
   }
-  for (let start = 0; start < operations.length;) {
+  // Keep loop formatting aligned with main's canonical formatter output.
+  // prettier-ignore
+  for (let start = 0; start < operations.length; ) {
     let end = start + 1;
     while (
       end < operations.length &&

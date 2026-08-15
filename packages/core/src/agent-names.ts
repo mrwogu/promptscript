@@ -16,7 +16,9 @@ function withoutLocations(value: unknown): unknown {
   if (typeof value !== 'object' || value === null) return value;
 
   const result: Record<string, unknown> = {};
-  for (const [key, nested] of Object.entries(value)) {
+  for (const [key, nested] of Object.entries(value).sort(([left], [right]) =>
+    left < right ? -1 : left > right ? 1 : 0
+  )) {
     if (key !== 'loc') {
       result[key] = withoutLocations(nested);
     }
@@ -134,6 +136,7 @@ export function findAgentConflicts(
 ): AgentConflict[] {
   const targetProperties = getAgentProperties(target);
   const sourceProperties = getAgentProperties(source);
+  const targetAgentsBlock = target.blocks.find((block) => block.name === 'agents');
   const conflicts: AgentConflict[] = [];
 
   for (const name of Object.keys(sourceProperties)) {
@@ -149,7 +152,7 @@ export function findAgentConflicts(
         name,
         source: target.loc.file,
         action: 'local',
-        loc: importLocation,
+        loc: targetAgentsBlock?.loc,
       });
     }
     if (sourceProvenance.length === 0) {

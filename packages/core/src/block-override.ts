@@ -557,7 +557,7 @@ export function applyOverride(
       (!marker && Object.hasOwn(agentProperties, qualifiedName))
     ) {
       targetName = 'agents';
-      path = [qualifiedName, ...(marker ? parts.slice(3) : [])];
+      path = [qualifiedName, ...parts.slice(3)];
     }
   }
   const markerBlocks = marker ? getProperties(marker.content)?.['__blocks'] : undefined;

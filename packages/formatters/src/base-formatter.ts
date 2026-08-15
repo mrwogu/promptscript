@@ -11,6 +11,7 @@ import {
   DEFAULT_PRETTIER_OPTIONS,
   isPortablePathSegment,
   reconcileBlockBody,
+  toNativeAgentName,
   valueNodeToValue,
 } from '@promptscript/core';
 import { ConventionRenderer } from './convention-renderer.js';
@@ -976,7 +977,19 @@ export abstract class BaseFormatter implements Formatter {
    * Return the deterministic native identifier for one agent.
    */
   protected getNativeAgentName(ast: Program, name: string): string {
-    return this.getNativeAgentNameMap(ast).get(name) ?? name.replace(/\./g, '-');
+    const nameMap = this.getNativeAgentNameMap(ast);
+    const mappedName = nameMap.get(name);
+    if (mappedName !== undefined) return mappedName;
+
+    const baseName = toNativeAgentName(name);
+    const usedNames = new Set(nameMap.values());
+    let nativeName = baseName;
+    let suffix = 2;
+    while (usedNames.has(nativeName)) {
+      nativeName = `${baseName}-${suffix}`;
+      suffix += 1;
+    }
+    return nativeName;
   }
 
   /**

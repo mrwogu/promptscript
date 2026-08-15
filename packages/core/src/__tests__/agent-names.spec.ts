@@ -12,16 +12,17 @@ import {
   type Block,
   type MixedContent,
   type Program,
+  type SourceLocation,
 } from '../index.js';
 
 const LOC = { file: 'agents.prs', line: 1, column: 1, offset: 0 };
 
-function block(name: string, content: Block['content']): Block {
+function block(name: string, content: Block['content'], loc: SourceLocation = LOC): Block {
   return {
     type: 'Block',
     name,
     content,
-    loc: LOC,
+    loc,
   };
 }
 
@@ -124,13 +125,48 @@ describe('agent names', () => {
     expect(findAgentConflicts(target, source, './shared')).toEqual([]);
   });
 
-  it('records fallback provenance for conflicting definitions', () => {
+  it('ignores property order when comparing equal agent values', () => {
     const target = program([
       block('agents', {
         type: 'ObjectContent',
-        properties: { reviewer: { description: 'Local' } },
+        properties: {
+          reviewer: {
+            description: 'Review',
+            model: 'sonnet',
+          },
+        },
         loc: LOC,
       }),
+    ]);
+    const source = program([
+      block('agents', {
+        type: 'ObjectContent',
+        properties: {
+          reviewer: {
+            model: 'sonnet',
+            description: 'Review',
+          },
+        },
+        loc: LOC,
+      }),
+    ]);
+
+    expect(findAgentConflicts(target, source, './shared')).toEqual([]);
+  });
+
+  it('records fallback provenance for conflicting definitions', () => {
+    const targetAgentsLoc = { ...LOC, file: 'target.prs', line: 2 };
+    const importLoc = { ...LOC, file: 'child.prs', line: 10 };
+    const target = program([
+      block(
+        'agents',
+        {
+          type: 'ObjectContent',
+          properties: { reviewer: { description: 'Local' } },
+          loc: targetAgentsLoc,
+        },
+        targetAgentsLoc
+      ),
     ]);
     const source = program([
       block('agents', {
@@ -140,7 +176,7 @@ describe('agent names', () => {
       }),
     ]);
 
-    const conflicts = findAgentConflicts(target, source, './shared', LOC);
+    const conflicts = findAgentConflicts(target, source, './shared', importLoc);
 
     expect(conflicts).toEqual([
       {
@@ -150,12 +186,14 @@ describe('agent names', () => {
             name: 'reviewer',
             source: 'agents.prs',
             action: 'local',
+            loc: targetAgentsLoc,
           }),
           expect.objectContaining({
             name: 'reviewer',
             source: 'agents.prs',
             action: 'imported',
             importPath: './shared',
+            loc: importLoc,
           }),
         ],
       },

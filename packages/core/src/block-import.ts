@@ -71,7 +71,7 @@ function qualifyImportedAgents(
       return existing.length > 0
         ? existing.map((entry) => ({
             ...entry,
-            importPath: declaration.path.raw,
+            ...(entry.action === 'qualified' ? {} : { importPath: declaration.path.raw }),
             action: entry.action === 'qualified' ? entry.action : ('imported' as const),
           }))
         : [

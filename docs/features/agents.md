@@ -57,6 +57,9 @@ The resulting agent remains `reviewer`. If an unaliased import conflicts with a 
 imported definition, compilation stops with a diagnostic that lists every source, import path,
 namespace, and the recommended alias or rename action. Definitions are never silently overwritten.
 
+Inheritance applies the same rule: a child cannot redefine a parent agent with different content.
+Identical definitions are allowed.
+
 Qualified names are mapped consistently for native output. Dots become hyphens, so
 `frontend.reviewer` becomes `frontend-reviewer` in filenames and native identifiers. If two
 qualified names map to the same native name, a deterministic numeric suffix keeps the output

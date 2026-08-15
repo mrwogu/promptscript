@@ -384,6 +384,10 @@ describe('block override', () => {
       program([block('agents', { 'team.reviewer': { description: 'Original' } })]),
       valueOverride('agents.team.reviewer', { description: 'Direct update' })
     );
+    const directField = applyOverride(
+      program([block('agents', { 'team.reviewer': { description: 'Original' } })]),
+      valueOverride('agents.team.reviewer.description', 'Direct field update')
+    );
     const unqualified = applyOverride(
       program([block('agents', { reviewer: { description: 'Original' } })]),
       valueOverride('agents.reviewer', { description: 'Unqualified update' })
@@ -401,6 +405,9 @@ describe('block override', () => {
 
     expect(direct.blocks[0]?.content).toMatchObject({
       properties: { 'team.reviewer': { description: 'Direct update' } },
+    });
+    expect(directField.blocks[0]?.content).toMatchObject({
+      properties: { 'team.reviewer': { description: 'Direct field update' } },
     });
     expect(unqualified.blocks[0]?.content).toMatchObject({
       properties: { reviewer: { description: 'Unqualified update' } },

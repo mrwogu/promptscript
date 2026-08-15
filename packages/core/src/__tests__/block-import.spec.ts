@@ -208,6 +208,7 @@ describe('block import', () => {
       {
         name: 'reviewer',
         source: 'source.prs',
+        importPath: './nested',
         namespace: 'team',
         action: 'qualified',
         loc: LOC,
@@ -218,8 +219,38 @@ describe('block import', () => {
       expect.objectContaining({
         name: 'reviewer',
         source: 'source.prs',
-        importPath: './shared',
+        importPath: './nested',
         namespace: 'team',
+        action: 'qualified',
+      }),
+    ]);
+  });
+
+  it('preserves the original import path for transitive qualified agents', () => {
+    const source = program([block('agents', { reviewer: { description: 'Review code' } })], []);
+    source.agentProvenance = [
+      {
+        name: 'reviewer',
+        source: 'nested.prs',
+        importPath: './nested',
+        namespace: 'inner',
+        action: 'qualified',
+        loc: LOC,
+      },
+    ];
+
+    const result = resolveUseImport(
+      program([]),
+      use({ path: { ...use().path, raw: './outer' } }),
+      source
+    );
+
+    expect(result.agentProvenance).toEqual([
+      expect.objectContaining({
+        name: 'reviewer',
+        source: 'nested.prs',
+        importPath: './nested',
+        namespace: 'inner',
         action: 'qualified',
       }),
     ]);
