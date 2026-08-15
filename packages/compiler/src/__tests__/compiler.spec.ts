@@ -174,6 +174,23 @@ function createValidationSuccess() {
   };
 }
 
+function createValidationFailure() {
+  return {
+    valid: false,
+    errors: [
+      {
+        ruleId: 'PS1000',
+        ruleName: 'test-rule',
+        severity: 'error' as const,
+        message: 'Validation failed',
+      },
+    ],
+    warnings: [],
+    infos: [],
+    all: [],
+  };
+}
+
 describe('Compiler', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -2030,10 +2047,15 @@ describe('Compiler.watch', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers();
     mockWatcher = {
       on: vi.fn().mockReturnThis(),
       close: vi.fn().mockResolvedValue(undefined),
     };
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should create a file watcher', async () => {
@@ -2108,8 +2130,7 @@ describe('Compiler.watch', () => {
       changeHandler('./a.prs');
     }
 
-    // Wait for debounce
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await vi.advanceTimersByTimeAsync(10);
 
     await watcher.close();
 
@@ -2220,16 +2241,74 @@ describe('Compiler.watch', () => {
       expect(watchedPaths.some((path) => path.includes('*'))).toBe(false);
 
       changeHandler?.(nativeSkill);
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await vi.advanceTimersByTimeAsync(10);
 
       expect(mockInvalidate).toHaveBeenCalledWith([nativeSkill]);
       expect(mockResolve).toHaveBeenCalledTimes(2);
       expect(onCompile).toHaveBeenCalledOnce();
 
       changeHandler?.(lockfile);
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await vi.advanceTimersByTimeAsync(10);
 
       expect(mockClearCache).toHaveBeenCalled();
+      await watcher.close();
+    } finally {
+      rmSync(workspace.root, { recursive: true, force: true });
+      vi.restoreAllMocks();
+    }
+  });
+
+  it('should unwatch dependencies removed by a successful rebuild', async () => {
+    const workspace = createMarkedWorkspace();
+    const staleDependency = join(workspace.root, '.promptscript', 'skills', 'old', 'SKILL.md');
+    const currentDependency = join(
+      workspace.root,
+      '.promptscript',
+      'skills',
+      'current',
+      'SKILL.md'
+    );
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('test');
+    let changeHandler: ((path: string) => void) | undefined;
+    const add = vi.fn().mockResolvedValue(undefined);
+    const unwatch = vi.fn().mockResolvedValue(undefined);
+
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+    mockResolve
+      .mockResolvedValueOnce(createResolveSuccess(ast, [staleDependency]))
+      .mockResolvedValueOnce(createResolveSuccess(ast, [currentDependency]));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: vi.fn().mockImplementation(() => ({
+          on: vi.fn().mockImplementation((event: string, handler: unknown) => {
+            if (event === 'change') {
+              changeHandler = handler as (path: string) => void;
+            }
+            return mockWatcher;
+          }),
+          close: vi.fn().mockResolvedValue(undefined),
+          add,
+          unwatch,
+        })),
+      },
+    }));
+
+    try {
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry', projectRoot: workspace.root },
+        formatters: ['test'],
+      });
+
+      const watcher = await compiler.watch(workspace.entry, { debounce: 1 });
+
+      changeHandler?.(staleDependency);
+      await vi.advanceTimersByTimeAsync(1);
+
+      expect(unwatch).toHaveBeenCalledWith([staleDependency]);
+      expect(add).toHaveBeenCalledWith(expect.arrayContaining([currentDependency]));
       await watcher.close();
     } finally {
       rmSync(workspace.root, { recursive: true, force: true });
@@ -2275,9 +2354,9 @@ describe('Compiler.watch', () => {
       const watcher = await compiler.watch(workspace.entry, { debounce: 1 });
 
       changeHandler?.(nativeSkill);
-      await new Promise((resolve) => setTimeout(resolve, 25));
+      await vi.advanceTimersByTimeAsync(1);
       changeHandler?.(nativeSkill);
-      await new Promise((resolve) => setTimeout(resolve, 25));
+      await vi.advanceTimersByTimeAsync(1);
 
       expect(mockResolve).toHaveBeenCalledTimes(3);
       await watcher.close();
@@ -2285,6 +2364,295 @@ describe('Compiler.watch', () => {
       rmSync(workspace.root, { recursive: true, force: true });
       vi.restoreAllMocks();
     }
+  });
+
+  it('should retain dependencies through validation failure before replacing them', async () => {
+    const workspace = createMarkedWorkspace();
+    const previousDependency = join(
+      workspace.root,
+      '.promptscript',
+      'skills',
+      'previous',
+      'SKILL.md'
+    );
+    const candidateDependency = join(
+      workspace.root,
+      '.promptscript',
+      'skills',
+      'candidate',
+      'SKILL.md'
+    );
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('test');
+    let changeHandler: ((path: string) => void) | undefined;
+    const add = vi.fn().mockResolvedValue(undefined);
+
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+    mockResolve
+      .mockResolvedValueOnce(createResolveSuccess(ast, [previousDependency]))
+      .mockResolvedValueOnce(createResolveSuccess(ast, [candidateDependency]))
+      .mockResolvedValueOnce(createResolveSuccess(ast, [candidateDependency]));
+    mockValidate
+      .mockReturnValueOnce(createValidationSuccess())
+      .mockReturnValueOnce(createValidationFailure())
+      .mockReturnValueOnce(createValidationSuccess());
+
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: vi.fn().mockImplementation(() => ({
+          on: vi.fn().mockImplementation((event: string, handler: unknown) => {
+            if (event === 'change') {
+              changeHandler = handler as (path: string) => void;
+            }
+            return mockWatcher;
+          }),
+          close: vi.fn().mockResolvedValue(undefined),
+          add,
+        })),
+      },
+    }));
+
+    try {
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry', projectRoot: workspace.root },
+        formatters: ['test'],
+      });
+
+      const watcher = await compiler.watch(workspace.entry, { debounce: 1 });
+
+      changeHandler?.(previousDependency);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(add).toHaveBeenLastCalledWith(expect.arrayContaining([previousDependency]));
+
+      changeHandler?.(previousDependency);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(add).toHaveBeenLastCalledWith(expect.arrayContaining([candidateDependency]));
+      await watcher.close();
+    } finally {
+      rmSync(workspace.root, { recursive: true, force: true });
+      vi.restoreAllMocks();
+    }
+  });
+
+  it('should retain dependencies through formatting failure before replacing them', async () => {
+    const workspace = createMarkedWorkspace();
+    const previousDependency = join(
+      workspace.root,
+      '.promptscript',
+      'skills',
+      'previous',
+      'SKILL.md'
+    );
+    const candidateDependency = join(
+      workspace.root,
+      '.promptscript',
+      'skills',
+      'candidate',
+      'SKILL.md'
+    );
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('test');
+    let changeHandler: ((path: string) => void) | undefined;
+    const add = vi.fn().mockResolvedValue(undefined);
+    let formatCalls = 0;
+    formatter.format = vi.fn(() => {
+      formatCalls++;
+      if (formatCalls === 2) {
+        throw new Error('Formatting failed');
+      }
+      return {
+        path: './test/output.md',
+        content: '# test output',
+      };
+    });
+
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+    mockResolve
+      .mockResolvedValueOnce(createResolveSuccess(ast, [previousDependency]))
+      .mockResolvedValueOnce(createResolveSuccess(ast, [candidateDependency]))
+      .mockResolvedValueOnce(createResolveSuccess(ast, [candidateDependency]));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: vi.fn().mockImplementation(() => ({
+          on: vi.fn().mockImplementation((event: string, handler: unknown) => {
+            if (event === 'change') {
+              changeHandler = handler as (path: string) => void;
+            }
+            return mockWatcher;
+          }),
+          close: vi.fn().mockResolvedValue(undefined),
+          add,
+        })),
+      },
+    }));
+
+    try {
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry', projectRoot: workspace.root },
+        formatters: ['test'],
+      });
+
+      const watcher = await compiler.watch(workspace.entry, { debounce: 1 });
+
+      changeHandler?.(previousDependency);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(add).toHaveBeenLastCalledWith(expect.arrayContaining([previousDependency]));
+
+      changeHandler?.(previousDependency);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(add).toHaveBeenLastCalledWith(expect.arrayContaining([candidateDependency]));
+      await watcher.close();
+    } finally {
+      rmSync(workspace.root, { recursive: true, force: true });
+      vi.restoreAllMocks();
+    }
+  });
+
+  it('should invalidate dependencies through symlinked paths', async () => {
+    const workspace = createMarkedWorkspace();
+    const realDependency = join(workspace.root, 'real-resource.md');
+    const symlinkedDependency = join(workspace.root, 'linked-resource.md');
+    writeFileSync(realDependency, 'resource\n');
+    symlinkSync(realDependency, symlinkedDependency);
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('test');
+    let changeHandler: ((path: string) => void) | undefined;
+
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+    mockResolve.mockResolvedValue(createResolveSuccess(ast, [realDependency]));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: vi.fn().mockImplementation(() => ({
+          on: vi.fn().mockImplementation((event: string, handler: unknown) => {
+            if (event === 'change') {
+              changeHandler = handler as (path: string) => void;
+            }
+            return mockWatcher;
+          }),
+          close: vi.fn().mockResolvedValue(undefined),
+          add: vi.fn().mockResolvedValue(undefined),
+        })),
+      },
+    }));
+
+    try {
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry', projectRoot: workspace.root },
+        formatters: ['test'],
+      });
+
+      const watcher = await compiler.watch(workspace.entry, { debounce: 1 });
+      changeHandler?.(symlinkedDependency);
+      await vi.advanceTimersByTimeAsync(1);
+
+      expect(mockInvalidate).toHaveBeenCalledWith(
+        expect.arrayContaining([symlinkedDependency, realpathSync(realDependency)])
+      );
+      expect(mockResolve).toHaveBeenCalledTimes(2);
+      await watcher.close();
+    } finally {
+      rmSync(workspace.root, { recursive: true, force: true });
+      vi.restoreAllMocks();
+    }
+  });
+
+  it('should close the watcher and report rejected initial dependency setup', async () => {
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('test');
+    const onError = vi.fn();
+    const add = vi.fn().mockRejectedValue(new Error('permission denied'));
+    const close = vi.fn().mockResolvedValue(undefined);
+
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: vi.fn().mockReturnValue({
+          on: vi.fn().mockReturnThis(),
+          close,
+          add,
+        }),
+      },
+    }));
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: ['test'],
+    });
+
+    await expect(compiler.watch('./test.prs', { onError })).rejects.toThrow(
+      "Failed to watch dependencies for './test.prs': permission denied"
+    );
+    expect(close).toHaveBeenCalledOnce();
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.stringContaining('permission denied') })
+    );
+
+    vi.restoreAllMocks();
+  });
+
+  it('should await an in-flight rebuild when closing', async () => {
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('test');
+    const onCompile = vi.fn();
+    let changeHandler: ((path: string) => void) | undefined;
+    let releaseRebuild: (() => void) | undefined;
+    const rebuildBlocked = new Promise<void>((resolve) => {
+      releaseRebuild = resolve;
+    });
+    const add = vi.fn().mockResolvedValue(undefined);
+
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+    mockResolve
+      .mockResolvedValueOnce(createResolveSuccess(ast))
+      .mockImplementationOnce(async () => {
+        await rebuildBlocked;
+        return createResolveSuccess(ast);
+      });
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: vi.fn().mockImplementation(() => ({
+          on: vi.fn().mockImplementation((event: string, handler: unknown) => {
+            if (event === 'change') {
+              changeHandler = handler as (path: string) => void;
+            }
+            return mockWatcher;
+          }),
+          close: vi.fn().mockResolvedValue(undefined),
+          add,
+        })),
+      },
+    }));
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: ['test'],
+    });
+
+    const watcher = await compiler.watch('./test.prs', {
+      onCompile,
+      debounce: 1,
+    });
+    changeHandler?.('./test.prs');
+    await vi.advanceTimersByTimeAsync(1);
+
+    const closePromise = watcher.close();
+    await Promise.resolve();
+    expect(onCompile).not.toHaveBeenCalled();
+    releaseRebuild?.();
+    await closePromise;
+    expect(onCompile).not.toHaveBeenCalled();
+    expect(add).toHaveBeenCalledOnce();
+
+    vi.restoreAllMocks();
   });
 
   it('should match brace include patterns', async () => {
@@ -2323,7 +2691,7 @@ describe('Compiler.watch', () => {
     });
 
     changeHandler?.('./notes.md');
-    await new Promise((resolve) => setTimeout(resolve, 25));
+    await vi.advanceTimersByTimeAsync(1);
 
     expect(mockResolve).toHaveBeenCalledTimes(2);
     expect(onCompile).toHaveBeenCalledOnce();
@@ -2367,7 +2735,7 @@ describe('Compiler.watch', () => {
     });
 
     changeHandler?.('./a.prs');
-    await new Promise((resolve) => setTimeout(resolve, 25));
+    await vi.advanceTimersByTimeAsync(1);
 
     expect(mockResolve).toHaveBeenCalledTimes(2);
     expect(onCompile).toHaveBeenCalledOnce();
@@ -2460,7 +2828,7 @@ describe('Compiler.watch', () => {
     });
 
     changeHandler?.('./test.prs');
-    await new Promise((resolve) => setTimeout(resolve, 25));
+    await vi.advanceTimersByTimeAsync(1);
 
     expect(onError).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'watch dependency update failed' })
@@ -2609,22 +2977,23 @@ describe('Compiler.watch', () => {
 
     changeHandler?.('./first.prs');
     changeHandler?.('./coalesced.prs');
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await vi.advanceTimersByTimeAsync(1);
     expect(resolveCalls).toBe(2);
 
     changeHandler?.('./second.prs');
+    await vi.advanceTimersByTimeAsync(1);
     releaseRebuilds.shift()?.();
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await vi.advanceTimersByTimeAsync(0);
     expect(resolveCalls).toBe(3);
 
     changeHandler?.('./third.prs');
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await vi.advanceTimersByTimeAsync(1);
     expect(resolveCalls).toBe(3);
     releaseRebuilds.shift()?.();
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await vi.advanceTimersByTimeAsync(0);
     expect(resolveCalls).toBe(4);
     releaseRebuilds.shift()?.();
-    await new Promise((resolve) => setTimeout(resolve, 40));
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(resolveCalls).toBe(4);
     expect(onCompile).toHaveBeenCalledTimes(3);

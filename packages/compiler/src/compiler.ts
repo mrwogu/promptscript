@@ -41,6 +41,8 @@ interface LoadedFormatter {
 
 /** Maximum number of project-scoped resolvers retained by a long-lived compiler. */
 export const MAX_ENTRY_RESOLVERS = 50;
+/** Maximum number of resolved dependency sets retained by a compiler. */
+export const MAX_RESOLVED_DEPENDENCIES = 50;
 
 function resolverCacheKey(projectRoot: string): string {
   return realpathSync.native(projectRoot);
@@ -56,6 +58,13 @@ function resolveEntryPath(entryPath: string): string {
   } catch {
     return absolutePath;
   }
+}
+
+function entryWatchPath(entryPath: string): string {
+  if (entryPath.startsWith('@')) return entryPath;
+  const fileName =
+    entryPath.endsWith('.prs') || entryPath.endsWith('.md') ? entryPath : `${entryPath}.prs`;
+  return absoluteWatchPath(fileName);
 }
 
 function normalizeRepositoryKey(value: string): string {
@@ -152,8 +161,49 @@ function matchesWatchPattern(path: string, pattern: string, baseDir: string): bo
     candidate,
     candidate.endsWith('/') ? candidate : `${candidate}/`,
   ]);
-  const matcherOptions = { dot: true, nocase: process.platform === 'win32' };
+  const matcherOptions = {
+    dot: true,
+    nocase: process.platform === 'win32' || process.platform === 'darwin',
+  };
   return candidates.some((candidate) => minimatch(candidate, pattern, matcherOptions));
+}
+
+function absoluteWatchPath(path: string, baseDir: string = process.cwd()): string {
+  return isAbsolute(path) ? resolve(path) : resolve(baseDir, path);
+}
+
+function canonicalWatchPath(path: string, baseDir: string = process.cwd()): string {
+  const absolutePath = absoluteWatchPath(path, baseDir);
+  try {
+    return realpathSync.native(absolutePath);
+  } catch {
+    return absolutePath;
+  }
+}
+
+function normalizeWatchPath(path: string): string {
+  const normalizedPath = path.replace(/\\/g, '/');
+  return process.platform === 'win32' || process.platform === 'darwin'
+    ? normalizedPath.toLowerCase()
+    : normalizedPath;
+}
+
+function watchPathVariants(path: string, baseDir: string = process.cwd()): string[] {
+  const absolutePath = absoluteWatchPath(path, baseDir);
+  const canonicalPath = canonicalWatchPath(absolutePath, baseDir);
+  return [...new Set([absolutePath, canonicalPath])];
+}
+
+function watchPathKey(path: string, baseDir: string = process.cwd()): string {
+  return normalizeWatchPath(canonicalWatchPath(path, baseDir));
+}
+
+function isPathWithin(path: string, root: string): boolean {
+  const relation = relative(normalizeWatchPath(root), normalizeWatchPath(path));
+  return (
+    relation === '' ||
+    (relation !== '..' && !relation.startsWith(`..${sep}`) && !isAbsolute(relation))
+  );
 }
 
 function shouldIncludeSkill(name: string, config?: TargetConfig): boolean {
@@ -281,21 +331,33 @@ export class Compiler {
   }
 
   private dependencyKey(entryPath: string): string {
-    return entryPath.startsWith('@') ? entryPath : resolveEntryPath(entryPath);
+    return entryPath.startsWith('@') ? entryPath : watchPathKey(entryWatchPath(entryPath));
   }
 
-  private recordResolvedDependencies(entryPath: string, resolved: ResolvedAST): void {
+  private collectResolvedDependencies(entryPath: string, resolved: ResolvedAST): Set<string> {
     const dependencies = new Set<string>();
     const paths = [
-      resolveEntryPath(entryPath),
+      entryWatchPath(entryPath),
       ...(resolved.sources ?? []),
       ...(resolved.dependencies ?? []),
     ];
     for (const path of paths) {
       if (path.startsWith('@') || path.startsWith('__registry__:')) continue;
-      dependencies.add(isAbsolute(path) ? resolve(path) : resolve(process.cwd(), path));
+      dependencies.add(absoluteWatchPath(path));
     }
-    this.resolvedDependencies.set(this.dependencyKey(entryPath), dependencies);
+    return dependencies;
+  }
+
+  private commitResolvedDependencies(entryPath: string, dependencies: Set<string>): void {
+    const key = this.dependencyKey(entryPath);
+    if (
+      !this.resolvedDependencies.has(key) &&
+      this.resolvedDependencies.size >= MAX_RESOLVED_DEPENDENCIES
+    ) {
+      const oldestKey = this.resolvedDependencies.keys().next().value;
+      if (oldestKey !== undefined) this.resolvedDependencies.delete(oldestKey);
+    }
+    this.resolvedDependencies.set(key, dependencies);
   }
 
   private watchProjectRoot(entryPath: string): string {
@@ -309,7 +371,7 @@ export class Compiler {
   private watchDependencyPaths(entryPath: string): string[] {
     const key = this.dependencyKey(entryPath);
     const dependencies =
-      this.resolvedDependencies.get(key) ?? new Set<string>([resolveEntryPath(entryPath)]);
+      this.resolvedDependencies.get(key) ?? new Set<string>([entryWatchPath(entryPath)]);
     const projectRoot = this.watchProjectRoot(entryPath);
     const configPaths = [
       'promptscript.yaml',
@@ -322,16 +384,21 @@ export class Compiler {
     return [...new Set([...dependencies, ...configPaths])];
   }
 
+  private resolvedDependencyPaths(entryPath: string): string[] {
+    const key = this.dependencyKey(entryPath);
+    return [
+      ...(this.resolvedDependencies.get(key) ?? new Set<string>([entryWatchPath(entryPath)])),
+    ];
+  }
+
   private pathMatchesDependency(path: string, dependency: string): boolean {
-    const relation = relative(resolve(dependency), resolve(path));
-    return (
-      relation === '' ||
-      (relation !== '..' && !relation.startsWith(`..${sep}`) && !isAbsolute(relation))
+    return watchPathVariants(dependency).some((dependencyPath) =>
+      watchPathVariants(path).some((candidatePath) => isPathWithin(candidatePath, dependencyPath))
     );
   }
 
   private invalidateResolvers(entryPath: string, changedFiles: readonly string[]): void {
-    const normalizedChanges = changedFiles.map((path) => resolve(path));
+    const normalizedChanges = [...new Set(changedFiles.flatMap((path) => watchPathVariants(path)))];
     const configNames = new Set([
       'promptscript.yaml',
       'promptscript.yml',
@@ -341,9 +408,11 @@ export class Compiler {
     ]);
     const projectRoot = this.watchProjectRoot(entryPath);
     const configurationPaths = new Set(
-      [...configNames].map((fileName) => resolve(projectRoot, fileName))
+      [...configNames].map((fileName) => watchPathKey(resolve(projectRoot, fileName)))
     );
-    const hasConfigurationChange = normalizedChanges.some((path) => configurationPaths.has(path));
+    const hasConfigurationChange = normalizedChanges.some((path) =>
+      configurationPaths.has(watchPathKey(path))
+    );
 
     const resolvers = [this.resolver, ...this.entryResolvers.values()];
     for (const resolver of resolvers) {
@@ -384,10 +453,11 @@ export class Compiler {
     this.logger.verbose('=== Stage 1: Resolve ===');
     const startResolve = Date.now();
     let resolved: ResolvedAST;
+    let candidateDependencies: Set<string> | undefined;
 
     try {
       resolved = await resolver.resolve(resolvedEntryPath);
-      this.recordResolvedDependencies(entryPath, resolved);
+      candidateDependencies = this.collectResolvedDependencies(entryPath, resolved);
     } catch (err) {
       stats.resolveTime = Date.now() - startResolve;
       stats.totalTime = Date.now() - startTotal;
@@ -736,7 +806,7 @@ export class Compiler {
                   suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
                 });
               }
-              // Skip writing this additional file — preserve the original owner's output
+              // Skip writing this additional file - preserve the original owner's output
               if (additionalFile.additionalFiles) {
                 queue.push(...additionalFile.additionalFiles);
               }
@@ -843,6 +913,10 @@ export class Compiler {
       };
     }
 
+    if (candidateDependencies) {
+      this.commitResolvedDependencies(entryPath, candidateDependencies);
+    }
+
     return {
       success: true,
       outputs,
@@ -925,6 +999,9 @@ export class Compiler {
     let pendingChanges: string[] = [];
     let compileRunning = false;
     let compilePending = false;
+    let closed = false;
+    let pendingRebuild: Promise<void> | null = null;
+    let closePromise: Promise<void> | null = null;
 
     if (!this.resolvedDependencies.has(this.dependencyKey(entryPath))) {
       try {
@@ -952,26 +1029,105 @@ export class Compiler {
       ignoreInitial: true,
     });
 
+    const toDependencyMap = (paths: readonly string[]): Map<string, Set<string>> => {
+      const pathMap = new Map<string, Set<string>>();
+      for (const path of paths) {
+        const key = watchPathKey(path);
+        const pathsForKey = pathMap.get(key) ?? new Set<string>();
+        pathsForKey.add(path);
+        pathMap.set(key, pathsForKey);
+      }
+      return pathMap;
+    };
+    const explicitlyWatchedPaths = new Set(
+      [
+        baseDir,
+        ...[
+          'promptscript.yaml',
+          'promptscript.yml',
+          '.promptscriptrc.yaml',
+          '.promptscriptrc.yml',
+          'promptscript.lock',
+        ].map((fileName) => resolve(this.watchProjectRoot(entryPath), fileName)),
+      ].map((path) => watchPathKey(path))
+    );
+    let dynamicDependencyPaths = toDependencyMap(this.resolvedDependencyPaths(entryPath));
+
+    const notifyError = (error: unknown): void => {
+      if (closed) return;
+      options.onError?.(error instanceof Error ? error : new Error(String(error)));
+    };
+
+    const isExplicitlyWatched = (path: string): boolean => {
+      if (explicitlyWatchedPaths.has(watchPathKey(path))) return true;
+      return (
+        options.include !== undefined &&
+        includePatterns.some((pattern) => matchesWatchPattern(path, pattern, baseDir))
+      );
+    };
+
+    const syncDependencyPaths = async (): Promise<void> => {
+      const dependencyPaths = this.watchDependencyPaths(entryPath);
+      if (typeof activeWatcher.add === 'function') {
+        await activeWatcher.add(dependencyPaths);
+      }
+      if (closed) return;
+
+      const nextDependencyPaths = this.resolvedDependencyPaths(entryPath);
+      const nextDynamicDependencyPaths = toDependencyMap(nextDependencyPaths);
+      const nextDynamicPathKeys = new Set(
+        nextDependencyPaths.map((path) => normalizeWatchPath(absoluteWatchPath(path)))
+      );
+      const stalePaths = [...dynamicDependencyPaths.entries()].flatMap(([key, paths]) => {
+        const nextPaths = nextDynamicDependencyPaths.get(key);
+        return [...paths].filter(
+          (path) =>
+            !nextPaths?.has(path) &&
+            !nextDynamicPathKeys.has(normalizeWatchPath(absoluteWatchPath(path))) &&
+            !isExplicitlyWatched(path)
+        );
+      });
+      if (stalePaths.length > 0 && typeof activeWatcher.unwatch === 'function') {
+        await activeWatcher.unwatch(stalePaths);
+      }
+      if (closed) return;
+      dynamicDependencyPaths = nextDynamicDependencyPaths;
+    };
+
     const handleChange = async (changedFiles: string[]): Promise<void> => {
+      if (closed) return;
       try {
         this.invalidateResolvers(entryPath, changedFiles);
         const result = await this.compile(entryPath);
-        const dependencyPaths = this.watchDependencyPaths(entryPath);
-        if (typeof activeWatcher.add === 'function') {
-          await activeWatcher.add(dependencyPaths);
-        }
+        if (closed) return;
+        await syncDependencyPaths();
+        if (closed) return;
         options.onCompile?.(result, changedFiles);
       } catch (error) {
-        options.onError?.(error instanceof Error ? error : new Error(String(error)));
+        notifyError(error);
       }
     };
 
-    if (typeof activeWatcher.add === 'function') {
-      await activeWatcher.add(this.watchDependencyPaths(entryPath));
+    try {
+      await syncDependencyPaths();
+    } catch (error) {
+      const setupError = new Error(
+        `Failed to watch dependencies for '${entryPath}': ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      notifyError(setupError);
+      try {
+        await activeWatcher.close();
+      } catch {
+        // Preserve the actionable setup error when cleanup also fails.
+      }
+      throw setupError;
     }
 
     const scheduleRecompile = (path: string): void => {
-      const absolutePath = isAbsolute(path) ? resolve(path) : resolve(baseDir, path);
+      if (closed) return;
+      const absolutePath = absoluteWatchPath(path, baseDir);
       const matchesInclude = includePatterns.some((pattern) =>
         matchesWatchPattern(absolutePath, pattern, baseDir)
       );
@@ -991,6 +1147,7 @@ export class Compiler {
 
       debounceTimer = setTimeout(() => {
         debounceTimer = null;
+        if (closed) return;
         const files = [...pendingChanges];
         pendingChanges = [];
         if (compileRunning) {
@@ -1000,20 +1157,36 @@ export class Compiler {
         }
 
         compileRunning = true;
-        void (async (): Promise<void> => {
+        const rebuild = (async (): Promise<void> => {
           let changes = files;
-          do {
-            compilePending = false;
-            await handleChange(changes);
-            if (debounceTimer) {
-              clearTimeout(debounceTimer);
-              debounceTimer = null;
+          try {
+            do {
+              if (closed) return;
+              compilePending = false;
+              await handleChange(changes);
+              if (debounceTimer) {
+                clearTimeout(debounceTimer);
+                debounceTimer = null;
+              }
+              changes = [...pendingChanges];
+              pendingChanges = [];
+            } while (!closed && (compilePending || changes.length > 0));
+          } finally {
+            compileRunning = false;
+            if (closed) {
+              pendingChanges = [];
             }
-            changes = [...pendingChanges];
-            pendingChanges = [];
-          } while (compilePending || changes.length > 0);
-          compileRunning = false;
+          }
         })();
+        pendingRebuild = rebuild;
+        void rebuild.then(
+          () => {
+            if (pendingRebuild === rebuild) pendingRebuild = null;
+          },
+          () => {
+            if (pendingRebuild === rebuild) pendingRebuild = null;
+          }
+        );
       }, debounceMs);
     };
 
@@ -1023,16 +1196,30 @@ export class Compiler {
     activeWatcher.on('unlinkDir', scheduleRecompile);
 
     activeWatcher.on('error', (error: unknown) => {
-      options.onError?.(error instanceof Error ? error : new Error(String(error)));
+      notifyError(error);
     });
 
-    return {
-      close: async () => {
-        if (debounceTimer) {
-          clearTimeout(debounceTimer);
+    const close = (): Promise<void> => {
+      if (closePromise) return closePromise;
+      closed = true;
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+        debounceTimer = null;
+      }
+      pendingChanges = [];
+      const rebuild = pendingRebuild;
+      closePromise = (async (): Promise<void> => {
+        try {
+          await activeWatcher.close();
+        } finally {
+          if (rebuild) await rebuild;
         }
-        await activeWatcher.close();
-      },
+      })();
+      return closePromise;
+    };
+
+    return {
+      close,
     };
   }
 
