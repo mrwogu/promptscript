@@ -2513,6 +2513,14 @@
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/parser/src/functions/createParser/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/parser/src/functions/createVisitor/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/parser/src/functions/parse/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
