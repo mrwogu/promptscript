@@ -35,6 +35,14 @@ Factory function that creates a `Compiler` instance.
 
 Standalone function for one-shot compilation.
 
+### `Compiler.watch(entryPath, options)`
+
+Watch mode monitors the entry file, matching source files, resolver configuration, and all
+dependencies discovered during resolution. Successful rebuilds replace the dependency set used
+for invalidation and watching. Resolve, validation, or formatting failures retain the last
+successful dependency set, so a later fix can still trigger a rebuild through the previous
+dependencies. Closing a watcher waits for any in-flight rebuild before returning.
+
 ### Types
 
 | Type              | Description                                |
