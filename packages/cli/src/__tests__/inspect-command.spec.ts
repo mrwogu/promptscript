@@ -479,6 +479,164 @@ describe('commands/inspect', () => {
     });
   });
 
+  it('should resolve text, mixed, array, invalid, and circular values', async () => {
+    const circular: Record<string, unknown> = {};
+    circular['self'] = circular;
+    const ast = {
+      type: 'Program',
+      loc: LOC,
+      uses: [],
+      extends: [],
+      blocks: [
+        {
+          type: 'Block',
+          name: 'identity',
+          loc: LOC,
+          content: {
+            type: 'TextContent',
+            value: 'You are helpful.',
+            loc: LOC,
+          },
+        },
+        {
+          type: 'Block',
+          name: 'context',
+          loc: LOC,
+          content: {
+            type: 'MixedContent',
+            text: { type: 'TextContent', value: 'Project context.', loc: LOC },
+            properties: {
+              tooling: { editor: 'Vim' },
+            },
+            loc: LOC,
+          },
+        },
+        {
+          type: 'Block',
+          name: 'config',
+          loc: LOC,
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              nested: { value: 'nested value' },
+              circular,
+            },
+            loc: LOC,
+          },
+        },
+        {
+          type: 'Block',
+          name: 'list',
+          loc: LOC,
+          content: {
+            type: 'ArrayContent',
+            elements: ['first item'],
+            loc: LOC,
+          },
+        },
+      ],
+    };
+    const entry = (path: string, kind: 'block' | 'value' | 'text'): object => ({
+      path,
+      kind,
+      source: LOC,
+      history: [],
+    });
+    mockResolve.mockResolvedValue({
+      ast,
+      sources: ['/project/test.prs'],
+      provenance: {
+        version: 1,
+        entry: '/project/test.prs',
+        entries: [
+          entry('', 'value'),
+          entry('unknown', 'value'),
+          entry('identity', 'block'),
+          entry('identity.text', 'text'),
+          entry('identity.text[0]', 'text'),
+          entry('identity[0]', 'value'),
+          entry('identity.value[0]', 'value'),
+          entry('context', 'block'),
+          entry('context.text', 'text'),
+          entry('context.text.missing', 'value'),
+          entry('context.tooling', 'value'),
+          entry('context.tooling.editor', 'value'),
+          entry('context.tooling.editor.missing', 'value'),
+          entry('config', 'block'),
+          entry('config[0]', 'value'),
+          entry('config.missing', 'value'),
+          entry('config.nested', 'value'),
+          entry('config.nested.value', 'value'),
+          entry('config.text', 'value'),
+          entry('config.circular', 'value'),
+          entry('list.elements[0]', 'value'),
+        ],
+      },
+      errors: [],
+    });
+
+    const { explainCommand } = await import('../commands/explain.js');
+    await explainCommand('', {});
+    await explainCommand('unknown', {});
+    await explainCommand('identity', {});
+    await explainCommand('context', {});
+    await explainCommand('config', {});
+    await explainCommand('list', {});
+
+    expect(process.exitCode).toBeUndefined();
+    const output = (console.log as ReturnType<typeof vi.fn>).mock.calls
+      .map((call) => call[0])
+      .join('\n');
+    expect(output).toContain('(unavailable)');
+    expect(output).toContain('nested value');
+    expect(output).toContain('first item');
+  });
+
+  it('should resolve an explicit config and report unlocated diagnostics', async () => {
+    mockLoadConfig.mockResolvedValue({
+      input: { entry: 'custom/main.prs' },
+      registries: {},
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: '/cache/remote-registry',
+      isRemote: true,
+    });
+    mockResolve.mockResolvedValue({
+      ...makeResolvedAst({}),
+      provenance: {
+        version: 1,
+        entry: '/workspace/custom/main.prs',
+        entries: [
+          {
+            path: 'identity',
+            kind: 'block',
+            source: LOC,
+            history: [],
+          },
+        ],
+      },
+      errors: [
+        { message: 'Unlocated warning' },
+        {
+          message: 'Unrelated warning',
+          location: { file: '/other.prs', line: 4, column: 2, offset: 5 },
+        },
+      ],
+    });
+
+    const { explainCommand } = await import('../commands/explain.js');
+    await explainCommand('identity', {
+      cwd: '/workspace',
+      config: 'config/custom.yaml',
+    });
+
+    expect(mockLoadConfig).toHaveBeenCalledWith('/workspace/config/custom.yaml');
+    expect(mockResolverOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ registryPath: '/cache/remote-registry' })
+    );
+    expect(process.exitCode).toBeUndefined();
+  });
+
   it('should report missing paths and missing entry files', async () => {
     mockResolve.mockResolvedValue(
       makeResolvedAst({
@@ -520,6 +678,12 @@ describe('commands/inspect', () => {
     vi.clearAllMocks();
     process.exitCode = undefined;
     mockLoadConfig.mockRejectedValue(new Error('bad config'));
+    await explainCommand('standards', {});
+    expect(process.exitCode).toBe(1);
+
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+    mockLoadConfig.mockRejectedValue('bad config');
     await explainCommand('standards', {});
     expect(process.exitCode).toBe(1);
   });

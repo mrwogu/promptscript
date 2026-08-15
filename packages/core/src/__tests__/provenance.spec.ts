@@ -4,6 +4,7 @@ import {
   collectProvenanceValueEvents,
   createBlockBody,
   createValueNode,
+  emptyProvenance,
   normalizeProgram,
   prefixProvenance,
   toLegacyProgram,
@@ -112,6 +113,70 @@ describe('provenance', () => {
     expect(JSON.stringify(trace)).toBe(
       JSON.stringify(collectProvenance(createProgram(), { entry: 'entry.prs' }))
     );
+  });
+
+  it('handles non-container values and optional operation metadata', () => {
+    const program = createProgram();
+    const block = program.blocks[0];
+    if (block?.content.type !== 'ObjectContent') {
+      throw new Error('Expected object content');
+    }
+    block.content.properties['template'] = {
+      type: 'TemplateExpression',
+      name: 'projectName',
+      loc: BASE_LOC,
+    };
+    block.content.properties['text'] = {
+      type: 'TextContent',
+      value: 'text value',
+      loc: BASE_LOC,
+    };
+    block.content.properties['type'] = {
+      type: 'TypeExpression',
+      kind: 'string',
+      loc: BASE_LOC,
+    };
+    block.content.properties['value'] = 'base value';
+
+    const extensionBody = createBlockBody(
+      [
+        {
+          type: 'FieldEntry',
+          name: 'value',
+          value: createValueNode('value', CHILD_LOC),
+          loc: CHILD_LOC,
+        },
+        { type: 'TextEntry', text: 'text', loc: CHILD_LOC },
+      ],
+      CHILD_LOC
+    );
+    const trace = collectProvenance(program);
+    const withEvents = collectProvenance(program, {
+      events: [
+        ...collectProvenanceEvents(extensionBody, 'standards', 'extend', CHILD_LOC, 'merged').map(
+          (event) => ({
+            ...event,
+            reference: './base',
+            alias: 'base',
+          })
+        ),
+        {
+          path: 'standards',
+          operation: 'extend',
+          action: 'merged',
+          source: { file: 'no-offset.prs', line: 1, column: 1 },
+          chain: [],
+        },
+      ],
+    });
+
+    expect(trace.entry).toBe('<unknown>');
+    expect(withEvents.entries.some((entry) => entry.path === 'standards.template')).toBe(true);
+    expect(
+      withEvents.entries
+        .find((entry) => entry.path === 'standards.value')
+        ?.history.some((step) => step.reference === './base')
+    ).toBe(true);
   });
 
   it('omits resolver metadata from public paths', () => {
@@ -256,5 +321,65 @@ describe('provenance', () => {
       operation: 'use',
       reference: './base.prs',
     });
+  });
+
+  it('deduplicates inherited steps and preserves nested provenance chains', () => {
+    const base = collectProvenance(createProgram(), { entry: 'base.prs' });
+    const inherited = base.entries.map((entry) =>
+      entry.path === 'standards' ? { ...entry, source: CHILD_LOC } : entry
+    );
+    const child = collectProvenance(createProgram(), {
+      entry: 'child.prs',
+      inherited: [...inherited, ...inherited],
+    });
+    const standards = child.entries.find((entry) => entry.path === 'standards');
+
+    expect(standards?.history).toHaveLength(2);
+    expect(standards?.history.at(-1)?.action).toBe('selected');
+
+    const linked = prefixProvenance(
+      {
+        version: 1,
+        entry: 'base.prs',
+        entries: [
+          {
+            path: 'standards',
+            kind: 'block',
+            source: BASE_LOC,
+            history: [
+              {
+                operation: 'use',
+                action: 'selected',
+                source: BASE_LOC,
+                chain: [
+                  {
+                    operation: 'inherit',
+                    source: BASE_LOC,
+                    target: 'parent.prs',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        operation: 'use',
+        source: CHILD_LOC,
+        target: 'base.prs',
+        reference: './base.prs',
+        alias: 'base',
+      }
+    );
+
+    expect(linked.entries[0]?.history[1]?.chain).toHaveLength(2);
+    expect(linked.entries[0]?.history[0]).toMatchObject({ alias: 'base' });
+    expect(
+      prefixProvenance(collectProvenance(createProgram()), {
+        operation: 'use',
+        source: CHILD_LOC,
+      }).entries
+    ).not.toHaveLength(0);
+    expect(emptyProvenance()).toEqual({ version: 1, entry: '<unknown>', entries: [] });
   });
 });

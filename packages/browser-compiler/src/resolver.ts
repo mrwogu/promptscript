@@ -74,6 +74,17 @@ interface ReservedParamsResult {
   remaining: ParamArgument[];
 }
 
+type CompositionBlock = Block & {
+  content: Extract<BlockContent, { type: 'ObjectContent' | 'MixedContent' }>;
+};
+
+function isCompositionBlock(block: Block): block is CompositionBlock {
+  return (
+    block.name === 'skills' &&
+    (block.content.type === 'ObjectContent' || block.content.type === 'MixedContent')
+  );
+}
+
 /**
  * Extract reserved `only`/`exclude`/`includes`/`excludes` parameters from a
  * `@use` argument list, returning them separately from the remaining template
@@ -961,17 +972,10 @@ export class BrowserResolver {
   ): Promise<Program> {
     try {
       const inlineUses = ast.blocks
-        .filter(
-          (block) =>
-            block.name === 'skills' &&
-            (block.content.type === 'ObjectContent' || block.content.type === 'MixedContent')
-        )
-        .flatMap((block) => {
-          if (block.content.type !== 'ObjectContent' && block.content.type !== 'MixedContent') {
-            return [];
-          }
-          return block.content.inlineUses?.map((declaration) => ({ block, declaration })) ?? [];
-        });
+        .filter(isCompositionBlock)
+        .flatMap(
+          (block) => block.content.inlineUses?.map((declaration) => ({ block, declaration })) ?? []
+        );
       ast = await resolveSkillComposition(ast, {
         currentFile: absPath,
         resolvePath: (ref: string, fromFile: string): string => {

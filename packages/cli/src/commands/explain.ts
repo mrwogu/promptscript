@@ -39,7 +39,7 @@ function tokenizePath(path: string): Array<string | number> {
   let match: RegExpExecArray | null;
   while ((match = matcher.exec(path)) !== null) {
     if (match[1]) tokens.push(match[1]);
-    else if (match[2]) tokens.push(Number(match[2]));
+    else tokens.push(Number(match[2]));
   }
   return tokens;
 }

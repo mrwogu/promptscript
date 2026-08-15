@@ -3,7 +3,14 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Resolver } from '../resolver.js';
 import { resolveSkillComposition } from '../skill-composition.js';
-import type { ObjectContent, TextContent, ComposedPhase, Program } from '@promptscript/core';
+import type {
+  ComposedPhase,
+  InlineUseDeclaration,
+  ObjectContent,
+  Program,
+  ProvenanceEvent,
+  TextContent,
+} from '@promptscript/core';
 import { ResolveError, SYNTAX_FEATURES } from '@promptscript/core';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -218,6 +225,77 @@ describe('skill composition resolver', () => {
       expect(result.errors.length).toBeGreaterThan(0);
       const errorMessages = result.errors.map((e) => e.message);
       expect(errorMessages.some((m) => m.includes('does-not-exist'))).toBe(true);
+    });
+
+    it('ignores malformed composition metadata while collecting matching provenance', async () => {
+      const malformedUse = {
+        type: 'InlineUseDeclaration',
+        path: undefined,
+        loc: LOC,
+      } as unknown as InlineUseDeclaration;
+      const validUse: InlineUseDeclaration = {
+        type: 'InlineUseDeclaration',
+        path: {
+          type: 'PathReference',
+          raw: './sub',
+          segments: ['sub'],
+          isRelative: true,
+          loc: LOC,
+        },
+        loc: LOC,
+      };
+      const ast = makeProgram({
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            loc: LOC,
+            content: {
+              type: 'MixedContent',
+              properties: {},
+              inlineUses: [validUse, malformedUse],
+              loc: LOC,
+            },
+          },
+          {
+            type: 'Block',
+            name: 'skills',
+            loc: LOC,
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                plain: 'plain value',
+                broken: { __composedFrom: ['invalid phase'] },
+                missing: {
+                  __composedFrom: [{ source: 'missing.prs' }],
+                },
+              },
+              loc: LOC,
+            },
+          },
+        ],
+      });
+      const sources: string[] = [];
+      const errors: Array<Error> = [];
+      const events: ProvenanceEvent[] = [];
+      const resolveComposition = (
+        resolver as unknown as {
+          resolveComposition: (
+            value: Program,
+            path: string,
+            sourceFiles: string[],
+            resolveErrors: Array<Error>,
+            provenanceEvents: ProvenanceEvent[]
+          ) => Promise<Program>;
+        }
+      ).resolveComposition.bind(resolver);
+
+      const result = await resolveComposition(ast, '/project/parent.prs', sources, errors, events);
+
+      expect(result).toBe(ast);
+      expect(errors).toEqual([]);
+      expect(events).toHaveLength(6);
+      expect(events.every((event) => event.operation === 'compose')).toBe(true);
     });
   });
 

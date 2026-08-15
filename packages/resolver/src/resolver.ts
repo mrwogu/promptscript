@@ -5,6 +5,7 @@ import { parse } from '@promptscript/parser';
 import {
   noopLogger,
   type Logger,
+  type BlockContent,
   type CanonicalProgram,
   type ExtendBlock,
   type OverrideBlock,
@@ -91,6 +92,17 @@ function effectiveCompositionPath(
     return parts.slice(1).join('.');
   }
   return path;
+}
+
+type CompositionBlock = Program['blocks'][number] & {
+  content: Extract<BlockContent, { type: 'ObjectContent' | 'MixedContent' }>;
+};
+
+function isCompositionBlock(block: Program['blocks'][number]): block is CompositionBlock {
+  return (
+    block.name === 'skills' &&
+    (block.content.type === 'ObjectContent' || block.content.type === 'MixedContent')
+  );
 }
 
 /**
@@ -921,17 +933,10 @@ export class Resolver {
   ): Promise<Program> {
     try {
       const inlineUses = ast.blocks
-        .filter(
-          (block) =>
-            block.name === 'skills' &&
-            (block.content.type === 'ObjectContent' || block.content.type === 'MixedContent')
-        )
-        .flatMap((block) => {
-          if (block.content.type !== 'ObjectContent' && block.content.type !== 'MixedContent') {
-            return [];
-          }
-          return block.content.inlineUses?.map((declaration) => ({ block, declaration })) ?? [];
-        });
+        .filter(isCompositionBlock)
+        .flatMap(
+          (block) => block.content.inlineUses?.map((declaration) => ({ block, declaration })) ?? []
+        );
       ast = await resolveSkillComposition(ast, {
         currentFile: absPath,
         resolvePath: (ref: string, fromFile: string): string => {
@@ -1301,21 +1306,6 @@ export class Resolver {
 
         // Containment check for directory discovery path
         if (!isRoot) {
-          const dirRel = relative(resolve(cachePath), resolve(discoverDir));
-          if (dirRel.startsWith('..')) {
-            errors.push(
-              new ResolveError(
-                `Path traversal detected: subpath '${subPath}' escapes repository cache boundary.`
-              )
-            );
-            this.resolving.delete(marker);
-            return {
-              ast: null,
-              sources: [marker],
-              errors,
-              provenance: emptyProvenance(marker),
-            };
-          }
           if (existsSync(discoverDir) && !(await isRealPathInside(discoverDir, cachePath))) {
             errors.push(
               new ResolveError(

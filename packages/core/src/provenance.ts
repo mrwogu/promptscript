@@ -182,9 +182,7 @@ function selectInheritedEntry(
 }
 
 function pathSort(left: ProvenanceEntry, right: ProvenanceEntry): number {
-  if (left.path < right.path) return -1;
-  if (left.path > right.path) return 1;
-  return 0;
+  return Number(left.path > right.path) - Number(left.path < right.path);
 }
 
 function collectEventValuePaths(

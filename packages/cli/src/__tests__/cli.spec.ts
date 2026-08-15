@@ -15,6 +15,12 @@ vi.mock('../commands/validate', () => ({
   validateCommand: mockValidate,
 }));
 
+const mockExplain = vi.fn();
+
+vi.mock('../commands/explain', () => ({
+  explainCommand: mockExplain,
+}));
+
 vi.mock('../commands/pull', () => ({
   pullCommand: vi.fn(),
 }));
@@ -169,6 +175,18 @@ describe('cli', () => {
         format: 'json',
         files: ['project.prs'],
       });
+    });
+
+    it('should wire the explain action callback', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', '--help']);
+
+      const explainAction = capturedActions[5];
+      expect(explainAction).toBeDefined();
+
+      explainAction?.('standards.code', { format: 'json' });
+
+      expect(mockExplain).toHaveBeenCalledWith('standards.code', { format: 'json' });
     });
 
     it('should register pull command', async () => {
