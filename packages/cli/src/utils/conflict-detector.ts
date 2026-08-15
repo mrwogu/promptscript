@@ -1,5 +1,5 @@
 import type { TargetConfig } from '@promptscript/core';
-import { DEFAULT_OUTPUT_PATHS } from '@promptscript/core';
+import { DEFAULT_OUTPUT_PATHS, isKnownTarget } from '@promptscript/core';
 import * as fs from 'fs';
 import { basename, dirname, resolve, relative, isAbsolute, sep } from 'path';
 
@@ -13,7 +13,10 @@ export function detectOutputConflicts(
   const pathMap = new Map<string, string[]>();
 
   for (const target of targets) {
-    const outputPath = target.config?.output ?? DEFAULT_OUTPUT_PATHS[target.name] ?? target.name;
+    const defaultOutputPath = isKnownTarget(target.name)
+      ? DEFAULT_OUTPUT_PATHS[target.name]
+      : undefined;
+    const outputPath = target.config?.output ?? defaultOutputPath ?? target.name;
     const existing = pathMap.get(outputPath) ?? [];
     existing.push(target.name);
     pathMap.set(outputPath, existing);
