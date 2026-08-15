@@ -768,4 +768,34 @@ describe('YAML skill frontmatter', () => {
       /Script file not found/
     );
   });
+
+  it('converts unexpected script loader errors into resolver errors', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'skill-yaml-script-loader-error-'));
+    temporaryDirectories.push(directory);
+    await writeFile(
+      join(directory, 'skill.md'),
+      '---\nname: imported\ndescription: Use when testing scripts\nscripts: [run.sh]\n---\nBody'
+    );
+    await writeFile(join(directory, 'run.sh'), '');
+
+    const resolver = new Resolver({
+      registryPath: join(directory, 'registry'),
+      localPath: directory,
+      cache: false,
+      logger: {
+        verbose: (message) => {
+          if (message.includes('Empty script file')) {
+            throw new Error('script logger failed');
+          }
+        },
+        debug: () => {},
+        warn: () => {},
+      },
+    });
+    const result = await resolver.resolve(join(directory, 'skill.md'));
+
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ message: 'script logger failed' })
+    );
+  });
 });
