@@ -920,14 +920,39 @@ describe('Resolver — registry marker handling', () => {
     expect(result.errors.length).toBeGreaterThan(0);
   });
 
-  it('returns error for invalid registry marker', async () => {
-    // Arrange — directly test resolveRegistryImport with an invalid marker
-    // by creating a file that @uses something that will produce a bad marker.
-    // Instead, we test the parseRegistryMarker(null) path indirectly:
-    // The "invalid marker" branch is hit when parseRegistryMarker returns null.
-    // We test this via the marker helper directly.
-    const parsed = parseRegistryMarker('not-a-registry-marker');
-    expect(parsed).toBeNull();
+  it('returns an error when a registry marker payload is malformed', async () => {
+    // Arrange
+    const tempDir = join(testCacheDir, 'malformed-marker');
+    await fs.mkdir(tempDir, { recursive: true });
+    const prsFile = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      prsFile,
+      [
+        '@meta {',
+        '  id: "malformed-marker"',
+        '  syntax: "1.0.0"',
+        '}',
+        '',
+        '@use @acme/standards',
+      ].join('\n')
+    );
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: {
+        '@acme': 'https://example.com/repo\0unexpected',
+      },
+      cache: false,
+      cacheDir: join(testCacheDir, 'malformed-marker-cache'),
+    });
+
+    // Act
+    const result = await resolver.resolve(prsFile);
+
+    // Assert
+    expect(result.ast).not.toBeNull();
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.message).toContain('Invalid registry marker');
   });
 
   it('hits AST cache for repeated registry import resolution', async () => {
@@ -1353,12 +1378,10 @@ describe('Resolver — registry marker handling', () => {
       throw new Error('skills block should be ObjectContent');
     }
     const skill = skillsBlock.content.properties['registry-skill-with-refs'] as
-      | Record<string, unknown>
-      | undefined;
+      Record<string, unknown> | undefined;
     expect(skill).toBeDefined();
     const resources = skill!['resources'] as
-      | Array<{ relativePath: string; content: string }>
-      | undefined;
+      Array<{ relativePath: string; content: string }> | undefined;
     expect(resources).toBeDefined();
     const paths = (resources ?? []).map((r) => r.relativePath).sort();
     expect(paths).toContain('references/checklist.md');
