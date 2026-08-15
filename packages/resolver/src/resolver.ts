@@ -127,6 +127,22 @@ interface ParsedFile {
   readonly errors: readonly ResolveError[];
 }
 
+interface ResolutionContext {
+  readonly resolving: Set<string>;
+  readonly preflightRegistryImports: Map<string, PreflightRegistryImport>;
+  readonly operationModeCache: Map<string, boolean>;
+  readonly parsedFiles: Map<string, ParsedFile>;
+}
+
+function createResolutionContext(): ResolutionContext {
+  return {
+    resolving: new Set(),
+    preflightRegistryImports: new Map(),
+    operationModeCache: new Map(),
+    parsedFiles: new Map(),
+  };
+}
+
 /**
  * Resolver for PromptScript files with inheritance and import support.
  *
@@ -151,27 +167,19 @@ interface ParsedFile {
 export class Resolver {
   private readonly loader: FileLoader;
   private readonly cache: Map<string, ResolvedAST>;
-  private readonly resolving: Set<string>;
   private readonly cacheEnabled: boolean;
   private readonly logger: Logger;
   private readonly options: ResolverOptions;
   private readonly gitRegistry: GitRegistry;
   private readonly registryCache: RegistryCache;
-  private readonly preflightRegistryImports: Map<string, PreflightRegistryImport>;
-  private readonly operationModeCache: Map<string, boolean>;
-  private readonly parsedFiles: Map<string, ParsedFile>;
 
   constructor(options: ResolverOptions) {
     this.options = options;
     this.loader = new FileLoader(options);
     this.cache = new Map();
-    this.resolving = new Set();
     this.cacheEnabled = options.cache !== false;
     this.logger = options.logger ?? noopLogger;
     this.gitRegistry = new GitRegistry({ url: 'https://github.com/placeholder/placeholder.git' });
-    this.preflightRegistryImports = new Map();
-    this.operationModeCache = new Map();
-    this.parsedFiles = new Map();
     const defaultCacheDir = join(
       process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp',
       '.promptscript',
@@ -188,13 +196,19 @@ export class Resolver {
    * @throws CircularDependencyError if a circular dependency is detected
    */
   async resolve(entryPath: string): Promise<ResolvedAST> {
+    return this.resolveWithContext(entryPath, createResolutionContext());
+  }
+
+  private async resolveWithContext(
+    entryPath: string,
+    context: ResolutionContext
+  ): Promise<ResolvedAST> {
     const absPath = this.loader.toAbsolutePath(entryPath);
-    const isTopLevel = this.resolving.size === 0;
 
     // Check for circular dependency
-    if (this.resolving.has(absPath)) {
+    if (context.resolving.has(absPath)) {
       this.logger.debug(`Circular dependency detected: ${absPath}`);
-      throw new CircularDependencyError([...this.resolving, absPath]);
+      throw new CircularDependencyError([...context.resolving, absPath]);
     }
 
     // Check cache
@@ -203,11 +217,11 @@ export class Resolver {
       return this.cache.get(absPath)!;
     }
 
-    this.resolving.add(absPath);
+    context.resolving.add(absPath);
     this.logger.verbose(`Parsing ${absPath}`);
 
     try {
-      const result = await this.doResolve(absPath);
+      const result = await this.doResolve(absPath, context);
 
       if (this.cacheEnabled) {
         this.logger.debug(`Cache store: ${absPath}`);
@@ -216,46 +230,45 @@ export class Resolver {
 
       return result;
     } finally {
-      this.resolving.delete(absPath);
-      if (isTopLevel) {
-        this.preflightRegistryImports.clear();
-        this.operationModeCache.clear();
-        this.parsedFiles.clear();
-      }
+      context.resolving.delete(absPath);
     }
   }
 
   /**
    * Perform the actual resolution.
    */
-  private async doResolve(absPath: string): Promise<ResolvedAST> {
+  private async doResolve(absPath: string, context: ResolutionContext): Promise<ResolvedAST> {
     const sources: string[] = [absPath];
     const errors: ResolveError[] = [];
 
     // Load and parse file
-    const parseData = await this.loadAndParse(absPath, sources, errors);
+    const parseData = await this.loadAndParse(absPath, sources, errors, context);
     if (!parseData.ast) {
       return { ast: null, sources, errors };
     }
 
     let ast = parseData.ast;
-    const sequentialOperations = await this.usesSequentialOperationsAfterComposition(ast, absPath);
+    const sequentialOperations = await this.usesSequentialOperationsAfterComposition(
+      ast,
+      absPath,
+      context
+    );
     ast = normalizeBlockAliases(ast, {
       preserveDeclarationOrder: sequentialOperations,
     });
     this.logger.debug(`AST node count: ${this.countNodes(ast)}`);
 
     if (sequentialOperations) {
-      ast = await this.resolveSequentialOperations(ast, absPath, sources, errors);
+      ast = await this.resolveSequentialOperations(ast, absPath, sources, errors, context);
     } else {
       // Preserve legacy phase ordering through syntax 1.5.x.
-      ast = await this.resolveInherit(ast, absPath, sources, errors);
-      ast = await this.resolveImports(ast, absPath, sources, errors);
+      ast = await this.resolveInherit(ast, absPath, sources, errors, context);
+      ast = await this.resolveImports(ast, absPath, sources, errors, context);
     }
 
     // Legacy phase order resolves inline composition after top-level imports.
     if (!sequentialOperations) {
-      ast = await this.resolveComposition(ast, absPath, sources, errors);
+      ast = await this.resolveComposition(ast, absPath, sources, errors, context);
     }
 
     // Apply extensions
@@ -317,21 +330,23 @@ export class Resolver {
    */
   private async usesSequentialOperationsAfterComposition(
     ast: Program,
-    absPath: string
+    absPath: string,
+    context: ResolutionContext
   ): Promise<boolean> {
-    return this.inspectOperationMode(ast, absPath, new Set([absPath]));
+    return this.inspectOperationMode(ast, absPath, new Set([absPath]), context);
   }
 
   private async inspectOperationMode(
     ast: Program,
     absPath: string,
-    visited: Set<string>
+    visited: Set<string>,
+    context: ResolutionContext
   ): Promise<boolean> {
-    const cachedMode = this.operationModeCache.get(absPath);
+    const cachedMode = context.operationModeCache.get(absPath);
     if (cachedMode !== undefined) return cachedMode;
 
     if (usesSequentialOperations(ast)) {
-      this.operationModeCache.set(absPath, true);
+      context.operationModeCache.set(absPath, true);
       return true;
     }
 
@@ -339,6 +354,13 @@ export class Resolver {
       ...(ast.inherit ? [ast.inherit.path] : []),
       ...ast.uses.map((use) => use.path),
       ...ast.blocks.flatMap((block) => getInlineUses(block).map((use) => use.path)),
+      ...ast.extends.flatMap((extension) => {
+        const content = extension.content;
+        if (content.type !== 'ObjectContent' && content.type !== 'MixedContent') {
+          return [];
+        }
+        return (content.inlineUses ?? []).map((use) => use.path);
+      }),
     ];
 
     for (const reference of references) {
@@ -356,9 +378,13 @@ export class Resolver {
       try {
         if (dependencyPath.startsWith(REGISTRY_MARKER_PREFIX)) {
           const preflightErrors: ResolveError[] = [];
-          const dependency = await this.resolveRegistryImport(dependencyPath, preflightErrors);
+          const dependency = await this.resolveRegistryImport(
+            dependencyPath,
+            preflightErrors,
+            context
+          );
           dependencyAst = dependency.ast;
-          this.preflightRegistryImports.set(dependencyPath, {
+          context.preflightRegistryImports.set(dependencyPath, {
             type: 'result',
             result:
               preflightErrors.length > 0 && dependency.errors.length === 0
@@ -366,11 +392,11 @@ export class Resolver {
                 : dependency,
           });
         } else {
-          dependencyAst = (await this.loadAndParse(dependencyPath, [], [])).ast;
+          dependencyAst = (await this.loadAndParse(dependencyPath, [], [], context)).ast;
         }
       } catch (error) {
         if (dependencyPath.startsWith(REGISTRY_MARKER_PREFIX)) {
-          this.preflightRegistryImports.set(dependencyPath, { type: 'error', error });
+          context.preflightRegistryImports.set(dependencyPath, { type: 'error', error });
         }
         continue;
       }
@@ -379,15 +405,16 @@ export class Resolver {
         (await this.inspectOperationMode(
           dependencyAst,
           dependencyAst.loc.file || dependencyPath,
-          visited
+          visited,
+          context
         ))
       ) {
-        this.operationModeCache.set(absPath, true);
+        context.operationModeCache.set(absPath, true);
         return true;
       }
     }
 
-    this.operationModeCache.set(absPath, false);
+    context.operationModeCache.set(absPath, false);
     return false;
   }
 
@@ -395,7 +422,8 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    errors: ResolveError[],
+    context: ResolutionContext
   ): Promise<Program> {
     const operations = normalizeProgram(ast).operations;
     const localBlockNames = new Set<string>();
@@ -422,6 +450,7 @@ export class Resolver {
             absPath,
             sources,
             errors,
+            context,
             true
           );
           break;
@@ -433,7 +462,8 @@ export class Resolver {
             },
             absPath,
             sources,
-            errors
+            errors,
+            context
           );
           result = { ...result, uses: [] };
           break;
@@ -449,7 +479,7 @@ export class Resolver {
                 }),
           };
           localBlockNames.add(block.name);
-          result = await this.resolveComposition(result, absPath, sources, errors);
+          result = await this.resolveComposition(result, absPath, sources, errors, context);
           break;
         }
         case 'ExtendOperation': {
@@ -475,7 +505,7 @@ export class Resolver {
               ...result,
               blocks: applyExtend(result.blocks, extension, this.logger),
             };
-            result = await this.resolveComposition(result, absPath, sources, errors);
+            result = await this.resolveComposition(result, absPath, sources, errors, context);
           } catch (error) {
             errors.push(
               error instanceof ResolveError
@@ -503,7 +533,7 @@ export class Resolver {
             result = applyOverride(result, override, {
               importMarkerPrefix: IMPORT_MARKER_PREFIX,
             });
-            result = await this.resolveComposition(result, absPath, sources, errors);
+            result = await this.resolveComposition(result, absPath, sources, errors, context);
           } catch (error) {
             errors.push(
               error instanceof ResolveError
@@ -552,9 +582,10 @@ export class Resolver {
   private async loadAndParse(
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    errors: ResolveError[],
+    context: ResolutionContext
   ): Promise<{ ast: Program | null }> {
-    const cachedFile = this.parsedFiles.get(absPath);
+    const cachedFile = context.parsedFiles.get(absPath);
     if (cachedFile) {
       errors.push(...cachedFile.errors);
       return { ast: cachedFile.ast };
@@ -573,7 +604,7 @@ export class Resolver {
           if (dirResult) {
             errors.push(...dirErrors);
             if (dirResult.ast) {
-              this.parsedFiles.set(absPath, {
+              context.parsedFiles.set(absPath, {
                 ast: dirResult.ast,
                 errors: dirErrors,
               });
@@ -593,7 +624,7 @@ export class Resolver {
       const result = await this.loadAndParseMd(absPath, source, mdErrors);
       errors.push(...mdErrors);
       if (result.ast) {
-        this.parsedFiles.set(absPath, {
+        context.parsedFiles.set(absPath, {
           ast: result.ast,
           errors: mdErrors,
         });
@@ -614,7 +645,7 @@ export class Resolver {
       (err) => new ResolveError(err.message, err.location)
     );
     errors.push(...parseErrors);
-    this.parsedFiles.set(absPath, {
+    context.parsedFiles.set(absPath, {
       ast: parseResult.ast,
       errors: parseErrors,
     });
@@ -735,6 +766,7 @@ export class Resolver {
     absPath: string,
     sources: string[],
     errors: ResolveError[],
+    context: ResolutionContext,
     parentWins = false
   ): Promise<Program> {
     if (!ast.inherit) {
@@ -748,9 +780,9 @@ export class Resolver {
     try {
       let parent: ResolvedAST;
       if (parentPath.startsWith(REGISTRY_MARKER_PREFIX)) {
-        parent = await this.resolveRegistryImport(parentPath, errors);
+        parent = await this.resolveRegistryImport(parentPath, errors, context);
       } else {
-        parent = await this.resolve(parentPath);
+        parent = await this.resolveWithContext(parentPath, context);
       }
       sources.push(...parent.sources);
       errors.push(...parent.errors);
@@ -814,7 +846,8 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    errors: ResolveError[],
+    context: ResolutionContext
   ): Promise<Program> {
     let result = ast;
 
@@ -828,9 +861,9 @@ export class Resolver {
 
         if (importPath.startsWith(REGISTRY_MARKER_PREFIX)) {
           // Remote registry import — handle async Git resolution
-          imported = await this.resolveRegistryImport(importPath, errors);
+          imported = await this.resolveRegistryImport(importPath, errors, context);
         } else {
-          imported = await this.resolve(importPath);
+          imported = await this.resolveWithContext(importPath, context);
         }
 
         sources.push(...imported.sources);
@@ -930,7 +963,8 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    errors: ResolveError[],
+    context: ResolutionContext
   ): Promise<Program> {
     try {
       ast = await resolveSkillComposition(ast, {
@@ -951,7 +985,7 @@ export class Resolver {
           return this.loader.resolveRef(pathRef, fromFile);
         },
         resolveFile: async (subPath: string): Promise<Program> => {
-          const subResult = await this.resolve(subPath);
+          const subResult = await this.resolveWithContext(subPath, context);
           if (subResult.sources.length > 0) {
             sources.push(...subResult.sources);
           }
@@ -994,11 +1028,12 @@ export class Resolver {
    */
   private async resolveRegistryImport(
     marker: string,
-    errors: ResolveError[]
+    errors: ResolveError[],
+    context: ResolutionContext
   ): Promise<ResolvedAST> {
-    const preflightResult = this.preflightRegistryImports.get(marker);
+    const preflightResult = context.preflightRegistryImports.get(marker);
     if (preflightResult) {
-      this.preflightRegistryImports.delete(marker);
+      context.preflightRegistryImports.delete(marker);
       if (preflightResult.type === 'error') {
         throw preflightResult.error;
       }
@@ -1014,9 +1049,9 @@ export class Resolver {
     const { repoUrl, path: subPath, version } = parsed;
 
     // Add to resolving set for circular dependency detection
-    if (this.resolving.has(marker)) {
+    if (context.resolving.has(marker)) {
       this.logger.debug(`Circular dependency detected: ${marker}`);
-      throw new CircularDependencyError([...this.resolving, marker]);
+      throw new CircularDependencyError([...context.resolving, marker]);
     }
 
     // Check internal AST cache
@@ -1025,7 +1060,7 @@ export class Resolver {
       return this.cache.get(marker)!;
     }
 
-    this.resolving.add(marker);
+    context.resolving.add(marker);
 
     try {
       // Check lockfile for pinned commit
@@ -1182,7 +1217,7 @@ export class Resolver {
               `Path traversal detected: subpath '${subPath}' escapes repository cache boundary.`
             )
           );
-          this.resolving.delete(marker);
+          context.resolving.delete(marker);
           return { ast: null, sources: [marker], errors };
         }
         if (
@@ -1194,7 +1229,7 @@ export class Resolver {
               `Path traversal detected: subpath '${subPath}' resolves outside the repository cache boundary.`
             )
           );
-          this.resolving.delete(marker);
+          context.resolving.delete(marker);
           return { ast: null, sources: [marker], errors };
         }
       }
@@ -1241,7 +1276,7 @@ export class Resolver {
                 `Path traversal detected: subpath '${subPath}' escapes repository cache boundary.`
               )
             );
-            this.resolving.delete(marker);
+            context.resolving.delete(marker);
             return { ast: null, sources: [marker], errors };
           }
           if (existsSync(discoverDir) && !(await isRealPathInside(discoverDir, cachePath))) {
@@ -1250,7 +1285,7 @@ export class Resolver {
                 `Path traversal detected: subpath '${subPath}' resolves outside the repository cache boundary.`
               )
             );
-            this.resolving.delete(marker);
+            context.resolving.delete(marker);
             return { ast: null, sources: [marker], errors };
           }
         }
@@ -1297,7 +1332,7 @@ export class Resolver {
 
       return result;
     } finally {
-      this.resolving.delete(marker);
+      context.resolving.delete(marker);
     }
   }
 
@@ -1452,9 +1487,6 @@ export class Resolver {
    */
   clearCache(): void {
     this.cache.clear();
-    this.preflightRegistryImports.clear();
-    this.operationModeCache.clear();
-    this.parsedFiles.clear();
   }
 
   /**

@@ -83,6 +83,38 @@ describe('BrowserResolver', () => {
       expect(body?.entries[2]?.loc.line).toBe(6);
     });
 
+    it('uses ordered semantics for inline uses carried by an extension', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.4.0" }
+@skills {
+  deploy: { content: "Base deploy instructions" }
+}
+@extend skills {
+  @use ./phase
+}`,
+        'phase.prs': `@meta { id: "phase" syntax: "1.5.0" }
+@skills { phase: { content: "Phase instructions" } }`,
+      });
+      const resolver = new BrowserResolver({ fs, cache: false });
+
+      const result = await resolver.resolve('project.prs');
+      const skills = result.ast?.blocks.find((block) => block.name === 'skills');
+
+      expect(result.errors).toEqual([]);
+      expect(skills?.content).toEqual(
+        expect.objectContaining({
+          inlineUses: undefined,
+          properties: {
+            deploy: expect.objectContaining({
+              content: expect.objectContaining({
+                value: expect.stringContaining('Phase instructions'),
+              }),
+            }),
+          },
+        })
+      );
+    });
+
     it('merges extension list and inline-use side channels', async () => {
       const fs = new VirtualFileSystem({
         'project.prs': `@restrictions {

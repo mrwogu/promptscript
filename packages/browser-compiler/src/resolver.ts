@@ -497,6 +497,13 @@ export class BrowserResolver {
       ...(ast.inherit ? [ast.inherit.path] : []),
       ...ast.uses.map((use) => use.path),
       ...ast.blocks.flatMap((block) => getInlineUses(block).map((use) => use.path)),
+      ...ast.extends.flatMap((extension) => {
+        const content = extension.content;
+        if (content.type !== 'ObjectContent' && content.type !== 'MixedContent') {
+          return [];
+        }
+        return (content.inlineUses ?? []).map((use) => use.path);
+      }),
     ];
 
     for (const reference of references) {
