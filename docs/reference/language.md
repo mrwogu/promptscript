@@ -2545,6 +2545,10 @@ Resolver results expose `canonicalAst` as the primary representation and retain
 `formatCanonical()`; legacy formatters receive one detached projection through
 `toLegacyProgram()`.
 
+`ResolvedAST` now always includes `canonicalAst`: successful resolutions carry a
+`CanonicalProgram`, while failed resolutions carry `null`. Integrations that
+construct `ResolvedAST` values must provide this field.
+
 During the remaining 1.x compatibility window, integrations should migrate
 from `Program` to `CanonicalProgram`. A future major release may remove
 legacy-only entry points after the formatter and integration ecosystem has
