@@ -112,11 +112,15 @@ export interface ResolvedAST {
   errors: ResolveError[];
 }
 
-interface PreflightRegistryImport {
-  readonly type: 'result' | 'error';
-  readonly result?: ResolvedAST;
-  readonly error?: unknown;
-}
+type PreflightRegistryImport =
+  | {
+      readonly type: 'result';
+      readonly result: ResolvedAST;
+    }
+  | {
+      readonly type: 'error';
+      readonly error: unknown;
+    };
 
 /**
  * Resolver for PromptScript files with inheritance and import support.
@@ -348,7 +352,6 @@ export class Resolver {
           dependencyAst = (await this.loadAndParse(dependencyPath, [], [])).ast;
         }
       } catch (error) {
-        if (error instanceof CircularDependencyError) throw error;
         if (dependencyPath.startsWith(REGISTRY_MARKER_PREFIX)) {
           this.preflightRegistryImports.set(dependencyPath, { type: 'error', error });
         }
@@ -950,10 +953,7 @@ export class Resolver {
       if (preflightResult.type === 'error') {
         throw preflightResult.error;
       }
-      if (preflightResult.result) {
-        return preflightResult.result;
-      }
-      throw new Error(`Registry preflight produced no result for ${marker}`);
+      return preflightResult.result;
     }
 
     const parsed = parseRegistryMarker(marker);
