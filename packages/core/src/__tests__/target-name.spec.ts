@@ -10,9 +10,50 @@ import {
   TARGET_DEFINITIONS,
   getDefaultOutputPath,
   getTargetDefinition,
+  validateTargetDefinitionConsistency,
   getTargetFeatures,
   getTargetSkillPath,
+  getTargetCapability,
+  assertTargetDefinitionConsistency,
+  type TargetDefinition,
 } from '../target-catalog.js';
+import {
+  assertValidTargetCapabilities,
+  getTargetFeatureStatus,
+  getTargetSectionCapability,
+  resolveTargetVersion,
+  TARGET_DELEGATES,
+  TargetCapabilitiesError,
+  validateTargetCapabilities,
+  type TargetCapability,
+  type TargetFeatureStatus,
+} from '../target-capabilities.js';
+
+interface DelegateDrift {
+  readonly target: KnownTarget;
+  readonly delegate: KnownTarget;
+  readonly featureId: string;
+  readonly driftedStatus: TargetFeatureStatus;
+}
+
+function buildDelegateDrift(): DelegateDrift {
+  const entry = Object.entries(TARGET_DELEGATES)[0];
+  if (!entry) {
+    throw new Error('No delegated targets are registered');
+  }
+  const [target, delegate] = entry as [KnownTarget, KnownTarget];
+  const feature = Object.entries(TARGET_DEFINITIONS[delegate].featureSupport)[0];
+  if (!feature) {
+    throw new Error(`Delegate "${delegate}" declares no feature support`);
+  }
+  const [featureId, status] = feature;
+  return {
+    target,
+    delegate,
+    featureId,
+    driftedStatus: status === 'supported' ? 'not-supported' : 'supported',
+  };
+}
 
 describe('TargetName branded type', () => {
   describe('KnownTarget', () => {
@@ -400,5 +441,211 @@ describe('Target catalog integrity', () => {
   it('should have no extra entries in TARGET_DEFINITIONS beyond KNOWN_TARGETS', () => {
     const catalogKeys = Object.keys(TARGET_DEFINITIONS);
     expect(catalogKeys).toHaveLength(KNOWN_TARGETS.length);
+  });
+
+  it('should have complete and consistent capability metadata', () => {
+    expect(validateTargetCapabilities(TARGET_DEFINITIONS)).toEqual([]);
+    expect(validateTargetDefinitionConsistency()).toEqual([]);
+  });
+
+  it('should expose canonical MCP metadata for every declared MCP resource', () => {
+    for (const target of KNOWN_TARGETS) {
+      const definition = TARGET_DEFINITIONS[target];
+      const mcpResource = definition.resources.find((resource) => resource.kind === 'mcp');
+
+      if (!mcpResource) {
+        expect(definition.mcpConfigPath).toBeNull();
+        expect(definition.mcpConfigFormat).toBeNull();
+        continue;
+      }
+
+      expect(definition.mcpConfigPath, `${target} MCP path`).toBe(mcpResource.path);
+      expect(definition.mcpConfigFormat, `${target} MCP format`).toBeDefined();
+    }
+  });
+
+  it('should inherit all feature flags for delegated targets', () => {
+    for (const [target, delegate] of Object.entries(TARGET_DELEGATES)) {
+      const targetDefinition = TARGET_DEFINITIONS[target as KnownTarget];
+      const delegateDefinition = TARGET_DEFINITIONS[delegate as KnownTarget];
+
+      expect(targetDefinition.featureSupport).toEqual(delegateDefinition.featureSupport);
+    }
+  });
+
+  it('should report delegated feature drift in the definition catalog', () => {
+    const { target, delegate, featureId, driftedStatus } = buildDelegateDrift();
+    const definition = TARGET_DEFINITIONS[target];
+    const drifted: Record<KnownTarget, TargetDefinition> = {
+      ...TARGET_DEFINITIONS,
+      [target]: {
+        ...definition,
+        featureSupport: { ...definition.featureSupport, [featureId]: driftedStatus },
+      },
+    };
+
+    expect(validateTargetDefinitionConsistency(drifted)).toContain(
+      `${target}: feature "${featureId}" differs from delegated target "${delegate}"`
+    );
+  });
+
+  it('should report delegated feature drift in the capability registry', () => {
+    const { target, delegate, featureId, driftedStatus } = buildDelegateDrift();
+    const capabilities = Object.fromEntries(
+      KNOWN_TARGETS.map((name) => [name, getTargetCapability(name)])
+    ) as Record<KnownTarget, TargetCapability>;
+    const capability = capabilities[target];
+    capabilities[target] = {
+      ...capability,
+      featureSupport: { ...capability.featureSupport, [featureId]: driftedStatus },
+    };
+
+    expect(validateTargetCapabilities(capabilities)).toContain(
+      `${target}: feature "${featureId}" differs from delegated target "${delegate}"`
+    );
+  });
+
+  it('should resolve version aliases through the capability contract', () => {
+    const capability = getTargetCapability('cursor');
+
+    expect(resolveTargetVersion(capability, 'standard')).toBe('modern');
+    expect(resolveTargetVersion(capability, undefined)).toBe('modern');
+    expect(resolveTargetVersion(capability, 'unknown')).toBe('modern');
+    expect(getTargetFeatureStatus(capability, 'missing')).toBe('not-supported');
+    expect(getTargetSectionCapability(capability, 'commands')?.support).toBe('required');
+    expect(getTargetSectionCapability(capability, 'missing')).toBeUndefined();
+  });
+
+  it('should emit only required or optional section support', () => {
+    const supports = Object.values(TARGET_DEFINITIONS).flatMap((definition) =>
+      Object.values(definition.sections).map((section) => section.support)
+    );
+
+    expect(new Set(supports)).toEqual(new Set(['required', 'optional']));
+  });
+
+  it('should reject incomplete resource contracts', () => {
+    const incomplete = {
+      ...TARGET_DEFINITIONS.github,
+      resources: [],
+    };
+
+    const issues = validateTargetCapabilities({
+      ...TARGET_DEFINITIONS,
+      github: incomplete,
+    });
+
+    expect(issues).toContain('github: main output resource is missing');
+    expect(issues).toContain('github: MCP config resource is missing');
+    expect(issues).toContain('github: hook config resource is missing');
+  });
+
+  it('should report each malformed capability category', () => {
+    const malformed = {
+      ...TARGET_DEFINITIONS.github,
+      defaultVersion: 'missing',
+      versions: {},
+      versionAliases: { stale: 'missing' },
+      featureSupport: { invalid: 'invalid' },
+      sections: {},
+      resources: [
+        { kind: 'skills' as const, path: '', versions: [] },
+        { kind: 'skills' as const, path: '', versions: ['missing', 'missing'] },
+      ],
+      mcpConfigPath: '.missing/mcp.json',
+      mcpConfigFormat: 'json' as const,
+      hooks: {
+        ...TARGET_DEFINITIONS.github.hooks,
+        configPath: '.missing/hooks.json',
+      },
+    } as unknown as TargetCapability;
+    const missingHook = {
+      ...TARGET_DEFINITIONS.claude,
+      hooks: undefined,
+    } as unknown as TargetCapability;
+    const malformedMcpFormat = {
+      ...TARGET_DEFINITIONS.gemini,
+      mcpConfigPath: null,
+      mcpConfigFormat: 'json' as const,
+    };
+    const capabilities = {
+      ...TARGET_DEFINITIONS,
+      github: malformed,
+      claude: missingHook,
+      gemini: malformedMcpFormat,
+    };
+
+    const issues = validateTargetCapabilities(capabilities);
+
+    expect(issues).toContain('github: no versions are declared');
+    expect(issues).toContain('github: default version "missing" is not declared');
+    expect(issues).toContain('github: version alias "stale" points to "missing"');
+    expect(issues).toContain('github: feature "invalid" has invalid status "invalid"');
+    expect(issues).toContain('github: feature "markdown-output" is missing');
+    expect(issues).toContain('github: section "project-identity" is missing');
+    expect(issues).toContain('github: resource paths are duplicated');
+    expect(issues).toContain('github: main output resource is missing');
+    expect(issues).toContain('github: skills resource path is empty');
+    expect(issues).toContain('github: skills resource has no versions');
+    expect(issues).toContain('github: skills resource versions are duplicated');
+    expect(issues).toContain('github: skills resource uses unknown version "missing"');
+    expect(issues).toContain('github: MCP config resource is missing');
+    expect(issues).toContain('github: hook config resource is missing');
+    expect(issues).toContain('claude: hook capability is missing');
+    expect(issues).toContain('gemini: MCP config format is declared without a path');
+    expect(validateTargetCapabilities({})).toContain('github: capability entry is missing');
+    expect(() => assertValidTargetCapabilities(capabilities)).toThrow(
+      'Invalid target capability registry'
+    );
+    expect(() => assertValidTargetCapabilities(capabilities)).toThrow(TargetCapabilitiesError);
+  });
+
+  it('should report contradictory target definitions', () => {
+    const definition = TARGET_DEFINITIONS.github;
+    const brokenDefinition = {
+      ...definition,
+      name: 'claude' as KnownTarget,
+      outputPath: 'wrong.md',
+      skillPath: { basePath: '.github/skills', fileName: 'SKILL.md' },
+      features: {
+        ...definition.features,
+        hasSkills: false,
+        hasAgents: false,
+        hasCommands: false,
+        defaultVersion: 'missing',
+      },
+      versions: {},
+      featureSupport: {
+        ...definition.featureSupport,
+        skills: 'supported' as const,
+        'agent-instructions': 'supported' as const,
+        'slash-commands': 'supported' as const,
+      },
+    };
+    const definitions = {
+      ...TARGET_DEFINITIONS,
+      github: brokenDefinition,
+    };
+
+    const typedDefinitions = definitions as unknown as Readonly<
+      Record<KnownTarget, TargetDefinition>
+    >;
+    const issues = validateTargetDefinitionConsistency(typedDefinitions);
+
+    expect(issues).toContain('github: definition name is "claude"');
+    expect(issues).toContain('github: output path does not match the canonical path map');
+    expect(issues).toContain('github: skill feature flag does not match the skill path');
+    expect(issues).toContain('github: default version "missing" is not supported');
+    expect(issues).toContain('github: skills are marked supported without a skill path');
+    expect(issues).toContain(
+      'github: agent instructions are marked supported without agent output'
+    );
+    expect(issues).toContain('github: slash commands are marked supported without command output');
+    expect(() => assertTargetDefinitionConsistency(typedDefinitions)).toThrow(
+      'Inconsistent target catalog'
+    );
+    expect(() => assertTargetDefinitionConsistency(typedDefinitions)).toThrow(
+      TargetCapabilitiesError
+    );
   });
 });
