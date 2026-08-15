@@ -23,6 +23,12 @@ Composition uses two layers of rules:
 For multiple `@use` declarations, each later import becomes the new source.
 Its same-shape values win against the accumulated target.
 
+The operation mode comes from the effective composed graph. A `1.5.0` source
+or ordered operation in inherited, imported, or inline-composed content enables
+declaration order for the whole graph. Lower-version entry files still
+resolve, while PS018 reports the source requirement and recommends an upgrade.
+Graphs without ordered sources retain legacy phase ordering.
+
 ## Resolved Example
 
 ```promptscript

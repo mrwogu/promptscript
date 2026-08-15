@@ -269,6 +269,93 @@ describe('explicit override resolution', () => {
     ]);
   });
 
+  it('uses ordered semantics when an imported 1.5 source uses override', async () => {
+    const directory = await createProject(
+      `
+        @meta { id: "lower-root" syntax: "1.4.0" }
+        @use ./ordered-source
+        @standards { testing: "Local value" }
+      `,
+      {
+        'ordered-source.prs': `
+          @meta { id: "ordered-source" syntax: "1.5.0" }
+          @standards { testing: "Imported value" }
+          @override standards.testing { "Source replacement" }
+        `,
+      }
+    );
+    const resolver = new Resolver({
+      registryPath: directory,
+      localPath: directory,
+      cache: false,
+    });
+
+    const result = await resolver.resolve(join(directory, 'project.prs'));
+
+    expect(result.errors).toEqual([]);
+    expect(properties(result.ast?.blocks ?? [], 'standards')['testing']).toBe('Local value');
+    expect(result.ast?.syntaxFeatures).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          feature: SYNTAX_FEATURES.ORDERED_OPERATIONS,
+          location: expect.objectContaining({ file: join(directory, 'ordered-source.prs') }),
+        }),
+      ])
+    );
+  });
+
+  it('uses ordered semantics when an inherited 1.5 source has no explicit override', async () => {
+    const directory = await createProject(
+      `
+        @meta { id: "lower-root" syntax: "1.4.0" }
+        @standards { testing: "Local value" }
+        @inherit ./ordered-parent
+      `,
+      {
+        'ordered-parent.prs': `
+          @meta { id: "ordered-parent" syntax: "1.5.0" }
+          @standards { testing: "Inherited value" }
+        `,
+      }
+    );
+    const resolver = new Resolver({
+      registryPath: directory,
+      localPath: directory,
+      cache: false,
+    });
+
+    const result = await resolver.resolve(join(directory, 'project.prs'));
+
+    expect(result.errors).toEqual([]);
+    expect(properties(result.ast?.blocks ?? [], 'standards')['testing']).toBe('Inherited value');
+  });
+
+  it('uses ordered semantics for lower roots importing ordered declarations', async () => {
+    const directory = await createProject(
+      `
+        @meta { id: "lower-root" syntax: "1.4.0" }
+        @use ./ordered-source
+        @standards { testing: "Local value" }
+      `,
+      {
+        'ordered-source.prs': `
+          @meta { id: "ordered-source" syntax: "1.5.0" }
+          @standards { testing: "Imported value" }
+        `,
+      }
+    );
+    const resolver = new Resolver({
+      registryPath: directory,
+      localPath: directory,
+      cache: false,
+    });
+
+    const result = await resolver.resolve(join(directory, 'project.prs'));
+
+    expect(result.errors).toEqual([]);
+    expect(properties(result.ast?.blocks ?? [], 'standards')['testing']).toBe('Local value');
+  });
+
   it('requires imports to precede overrides', async () => {
     const directory = await createProject(
       `

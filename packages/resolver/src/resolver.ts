@@ -20,6 +20,7 @@ import {
   blockBodyToContent,
   consumeInlineUses,
   deepClone,
+  getInlineUses,
   getSyntaxFeatureUsages,
   INHERITANCE_MERGE_POLICY,
   interpolateAST,
@@ -111,6 +112,12 @@ export interface ResolvedAST {
   errors: ResolveError[];
 }
 
+interface PreflightRegistryImport {
+  readonly type: 'result' | 'error';
+  readonly result?: ResolvedAST;
+  readonly error?: unknown;
+}
+
 /**
  * Resolver for PromptScript files with inheritance and import support.
  *
@@ -141,6 +148,7 @@ export class Resolver {
   private readonly options: ResolverOptions;
   private readonly gitRegistry: GitRegistry;
   private readonly registryCache: RegistryCache;
+  private readonly preflightRegistryImports: Map<string, PreflightRegistryImport>;
 
   constructor(options: ResolverOptions) {
     this.options = options;
@@ -150,6 +158,7 @@ export class Resolver {
     this.cacheEnabled = options.cache !== false;
     this.logger = options.logger ?? noopLogger;
     this.gitRegistry = new GitRegistry({ url: 'https://github.com/placeholder/placeholder.git' });
+    this.preflightRegistryImports = new Map();
     const defaultCacheDir = join(
       process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp',
       '.promptscript',
@@ -167,6 +176,7 @@ export class Resolver {
    */
   async resolve(entryPath: string): Promise<ResolvedAST> {
     const absPath = this.loader.toAbsolutePath(entryPath);
+    const isTopLevel = this.resolving.size === 0;
 
     // Check for circular dependency
     if (this.resolving.has(absPath)) {
@@ -194,6 +204,9 @@ export class Resolver {
       return result;
     } finally {
       this.resolving.delete(absPath);
+      if (isTopLevel) {
+        this.preflightRegistryImports.clear();
+      }
     }
   }
 
@@ -211,7 +224,7 @@ export class Resolver {
     }
 
     let ast = parseData.ast;
-    const sequentialOperations = usesSequentialOperations(ast);
+    const sequentialOperations = await this.usesSequentialOperationsAfterComposition(ast, absPath);
     ast = normalizeBlockAliases(ast, {
       preserveDeclarationOrder: sequentialOperations,
     });
@@ -278,6 +291,82 @@ export class Resolver {
       sources: [...new Set(sources)],
       errors,
     };
+  }
+
+  /**
+   * Select operation semantics from the complete reachable source graph.
+   *
+   * A lower-version entry file can compose a source that requires ordered
+   * operations. Inspect dependencies before normalizing or resolving the
+   * entry file so imports and local declarations use the effective mode.
+   */
+  private async usesSequentialOperationsAfterComposition(
+    ast: Program,
+    absPath: string
+  ): Promise<boolean> {
+    return this.inspectOperationMode(ast, absPath, new Set([absPath]));
+  }
+
+  private async inspectOperationMode(
+    ast: Program,
+    absPath: string,
+    visited: Set<string>
+  ): Promise<boolean> {
+    if (usesSequentialOperations(ast)) return true;
+
+    const references = [
+      ...(ast.inherit ? [ast.inherit.path] : []),
+      ...ast.uses.map((use) => use.path),
+      ...ast.blocks.flatMap((block) => getInlineUses(block).map((use) => use.path)),
+    ];
+
+    for (const reference of references) {
+      let dependencyPath: string;
+      try {
+        dependencyPath = this.loader.resolveRef(reference, absPath);
+      } catch {
+        // The normal resolution pass reports invalid references.
+        continue;
+      }
+      if (visited.has(dependencyPath)) continue;
+      visited.add(dependencyPath);
+
+      let dependencyAst: Program | null;
+      try {
+        if (dependencyPath.startsWith(REGISTRY_MARKER_PREFIX)) {
+          const preflightErrors: ResolveError[] = [];
+          const dependency = await this.resolveRegistryImport(dependencyPath, preflightErrors);
+          dependencyAst = dependency.ast;
+          this.preflightRegistryImports.set(dependencyPath, {
+            type: 'result',
+            result:
+              preflightErrors.length > 0 && dependency.errors.length === 0
+                ? { ...dependency, errors: preflightErrors }
+                : dependency,
+          });
+        } else {
+          dependencyAst = (await this.loadAndParse(dependencyPath, [], [])).ast;
+        }
+      } catch (error) {
+        if (error instanceof CircularDependencyError) throw error;
+        if (dependencyPath.startsWith(REGISTRY_MARKER_PREFIX)) {
+          this.preflightRegistryImports.set(dependencyPath, { type: 'error', error });
+        }
+        continue;
+      }
+      if (
+        dependencyAst &&
+        (await this.inspectOperationMode(
+          dependencyAst,
+          dependencyAst.loc.file || dependencyPath,
+          visited
+        ))
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private async resolveSequentialOperations(
@@ -855,6 +944,18 @@ export class Resolver {
     marker: string,
     errors: ResolveError[]
   ): Promise<ResolvedAST> {
+    const preflightResult = this.preflightRegistryImports.get(marker);
+    if (preflightResult) {
+      this.preflightRegistryImports.delete(marker);
+      if (preflightResult.type === 'error') {
+        throw preflightResult.error;
+      }
+      if (preflightResult.result) {
+        return preflightResult.result;
+      }
+      throw new Error(`Registry preflight produced no result for ${marker}`);
+    }
+
     const parsed = parseRegistryMarker(marker);
     if (!parsed) {
       errors.push(new ResolveError(`Invalid registry marker: ${marker}`));
@@ -1302,6 +1403,7 @@ export class Resolver {
    */
   clearCache(): void {
     this.cache.clear();
+    this.preflightRegistryImports.clear();
   }
 
   /**

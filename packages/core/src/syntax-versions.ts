@@ -6,6 +6,7 @@ import type { Program, SourceLocation } from './types/index.js';
  */
 export const SYNTAX_FEATURES = {
   REGULAR_BLOCK_REPLACE: 'regular-block-replace',
+  ORDERED_OPERATIONS: 'ordered-operations',
   SECTION_HEADER_OVERRIDE: 'section-header-override',
   EXPLICIT_OVERRIDE: 'explicit-override',
   ENV_VAR_VALUE: 'env-var-value',
@@ -157,6 +158,7 @@ export const SYNTAX_VERSIONS: Readonly<Record<string, SyntaxVersionDef>> = {
     ],
     features: [
       SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
+      SYNTAX_FEATURES.ORDERED_OPERATIONS,
       SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE,
       SYNTAX_FEATURES.EXPLICIT_OVERRIDE,
       SYNTAX_FEATURES.ENV_VAR_VALUE,
@@ -226,13 +228,21 @@ export function getMinimumVersionForFeature(feature: SyntaxFeature): string | un
 }
 
 /**
- * Select declaration-ordered resolution for syntax 1.5.0+ or explicit override usage.
+ * Select declaration-ordered resolution for syntax 1.5.0+ or ordered features.
  */
 export function usesSequentialOperations(ast: Program): boolean {
-  if ((ast.overrides?.length ?? 0) > 0) return true;
+  if (
+    getSyntaxFeatureUsages(ast).some(
+      (usage) =>
+        usage.feature === SYNTAX_FEATURES.ORDERED_OPERATIONS ||
+        usage.feature === SYNTAX_FEATURES.EXPLICIT_OVERRIDE
+    )
+  ) {
+    return true;
+  }
 
   const syntaxVersion = ast.meta?.fields['syntax'];
-  const minimumVersion = getMinimumVersionForFeature(SYNTAX_FEATURES.EXPLICIT_OVERRIDE);
+  const minimumVersion = getMinimumVersionForFeature(SYNTAX_FEATURES.ORDERED_OPERATIONS);
   return (
     typeof syntaxVersion === 'string' &&
     isValidVersion(syntaxVersion) &&
@@ -246,6 +256,19 @@ export function usesSequentialOperations(ast: Program): boolean {
  */
 export function getSyntaxFeatureUsages(ast: Program): SyntaxFeatureUsage[] {
   const usages: SyntaxFeatureUsage[] = [...(ast.syntaxFeatures ?? [])];
+  const syntaxVersion = ast.meta?.fields['syntax'];
+  const minimumOrderedVersion = getMinimumVersionForFeature(SYNTAX_FEATURES.ORDERED_OPERATIONS);
+  if (
+    typeof syntaxVersion === 'string' &&
+    minimumOrderedVersion !== undefined &&
+    isValidVersion(syntaxVersion) &&
+    compareVersions(syntaxVersion, minimumOrderedVersion) >= 0
+  ) {
+    usages.push({
+      feature: SYNTAX_FEATURES.ORDERED_OPERATIONS,
+      location: ast.meta?.loc ?? ast.loc,
+    });
+  }
   for (const ext of ast.extends) {
     for (const modifier of ext.replacements ?? []) {
       usages.push({
