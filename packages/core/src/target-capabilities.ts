@@ -7,6 +7,7 @@
 
 import { HOOK_CAPABILITIES, type HookCapability } from './hook-capabilities.js';
 import { KNOWN_TARGETS, type KnownTarget } from './types/config.js';
+import { PSError } from './errors/base.js';
 
 export interface TargetVersionCapability {
   readonly name: string;
@@ -22,7 +23,7 @@ interface TargetVersionData {
 }
 
 export type TargetReferenceMode = 'directory' | 'inline' | 'none';
-export type TargetSectionSupport = 'required' | 'optional' | 'unsupported';
+export type TargetSectionSupport = 'required' | 'optional';
 
 export interface TargetSectionCapability {
   readonly support: TargetSectionSupport;
@@ -56,6 +57,13 @@ export interface TargetCapability {
   readonly unsupportedBlocks: readonly string[];
   readonly mcpConfigPath: string | null;
   readonly mcpConfigFormat: 'json' | 'toml' | null;
+}
+
+export class TargetCapabilitiesError extends PSError {
+  constructor(message: string) {
+    super(message, 'TARGET_CAPABILITIES_ERROR');
+    this.name = 'TargetCapabilitiesError';
+  }
 }
 
 const PARITY_SECTION_IDS = [
@@ -1403,7 +1411,7 @@ const VERSION_CAPABILITIES: Readonly<Record<KnownTarget, TargetVersionData>> = {
   },
 };
 
-interface TargetCapabilitySeed {
+export interface TargetCapabilitySeed {
   readonly outputPath: string;
   readonly skillPath: { readonly basePath: string | null; readonly fileName: string | null };
   readonly features: {
@@ -1568,6 +1576,7 @@ export function resolveTargetVersion(
   const resolved = capability.versionAliases[requested] ?? requested;
   const defaultVersion =
     capability.versionAliases[capability.defaultVersion] ?? capability.defaultVersion;
+  // Keep unknown version requests lenient: callers receive the target default.
   return capability.versions[resolved] ? resolved : defaultVersion;
 }
 
@@ -1706,6 +1715,6 @@ export function assertValidTargetCapabilities(
 ): void {
   const issues = validateTargetCapabilities(capabilities);
   if (issues.length > 0) {
-    throw new Error(`Invalid target capability registry: ${issues.join('; ')}`);
+    throw new TargetCapabilitiesError(`Invalid target capability registry: ${issues.join('; ')}`);
   }
 }

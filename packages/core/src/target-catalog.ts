@@ -16,6 +16,7 @@ import { DEFAULT_OUTPUT_PATHS } from './target-output-paths.js';
 import {
   createTargetCapability,
   assertValidTargetCapabilities,
+  TargetCapabilitiesError,
   type TargetCapability,
 } from './target-capabilities.js';
 
@@ -748,9 +749,9 @@ export const TARGET_DEFINITIONS = Object.fromEntries(
 /**
  * Capability-only view of the canonical target definitions.
  */
-export const TARGET_CAPABILITIES = Object.fromEntries(
-  KNOWN_TARGETS.map((name) => [name, TARGET_DEFINITIONS[name]])
-) as unknown as { readonly [Name in KnownTarget]: TargetCapability };
+export const TARGET_CAPABILITIES = TARGET_DEFINITIONS as {
+  readonly [Name in KnownTarget]: TargetCapability;
+};
 
 assertValidTargetCapabilities(TARGET_CAPABILITIES);
 
@@ -809,7 +810,7 @@ export function assertTargetDefinitionConsistency(
 ): void {
   const issues = validateTargetDefinitionConsistency(definitions);
   if (issues.length > 0) {
-    throw new Error(`Inconsistent target catalog: ${issues.join('; ')}`);
+    throw new TargetCapabilitiesError(`Inconsistent target catalog: ${issues.join('; ')}`);
   }
 }
 

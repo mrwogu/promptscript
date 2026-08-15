@@ -134,6 +134,7 @@ function buildFormatterRegistry(): FormatterInfo[] {
         .join(' ');
     const skillBasePath = definition.skillPath.basePath;
     const outputRoot = definition.outputPath.split('/')[0];
+    // Placeholder fallback for AGENTS.md-only targets; retained for latent generic docs paths.
     const dotDir = outputRoot.startsWith('.') ? outputRoot : `.${name}`;
     const hookMetadata = getHookMetadata(definition.name);
 

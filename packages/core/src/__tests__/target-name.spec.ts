@@ -22,6 +22,7 @@ import {
   getTargetFeatureStatus,
   getTargetSectionCapability,
   resolveTargetVersion,
+  TargetCapabilitiesError,
   validateTargetCapabilities,
   type TargetCapability,
 } from '../target-capabilities.js';
@@ -430,6 +431,14 @@ describe('Target catalog integrity', () => {
     expect(getTargetSectionCapability(capability, 'missing')).toBeUndefined();
   });
 
+  it('should emit only required or optional section support', () => {
+    const supports = Object.values(TARGET_DEFINITIONS).flatMap((definition) =>
+      Object.values(definition.sections).map((section) => section.support)
+    );
+
+    expect(new Set(supports)).toEqual(new Set(['required', 'optional']));
+  });
+
   it('should reject incomplete resource contracts', () => {
     const incomplete = {
       ...TARGET_DEFINITIONS.github,
@@ -503,6 +512,7 @@ describe('Target catalog integrity', () => {
     expect(() => assertValidTargetCapabilities(capabilities)).toThrow(
       'Invalid target capability registry'
     );
+    expect(() => assertValidTargetCapabilities(capabilities)).toThrow(TargetCapabilitiesError);
   });
 
   it('should report contradictory target definitions', () => {
@@ -548,6 +558,9 @@ describe('Target catalog integrity', () => {
     expect(issues).toContain('github: slash commands are marked supported without command output');
     expect(() => assertTargetDefinitionConsistency(typedDefinitions)).toThrow(
       'Inconsistent target catalog'
+    );
+    expect(() => assertTargetDefinitionConsistency(typedDefinitions)).toThrow(
+      TargetCapabilitiesError
     );
   });
 });
