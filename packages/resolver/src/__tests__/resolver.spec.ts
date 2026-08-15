@@ -52,6 +52,9 @@ describe('Resolver', () => {
       const result = await resolver.resolve('./minimal.prs');
 
       expect(result.ast).not.toBeNull();
+      expect(result.canonicalAst).not.toBeNull();
+      expect(Object.isFrozen(result.canonicalAst)).toBe(true);
+      expect(result.canonicalAst?.operations.length).toBeGreaterThan(0);
       expect(result.errors).toHaveLength(0);
       expect(result.sources).toHaveLength(1);
       expect(result.ast?.meta?.fields?.['id']).toBe('minimal');

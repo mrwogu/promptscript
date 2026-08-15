@@ -2,9 +2,10 @@ import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { normalizeProgram, KNOWN_TARGETS } from '@promptscript/core';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { KNOWN_TARGETS } from '@promptscript/core';
 import { GitHubFormatter } from '../formatters/github.js';
+import { formatProgram } from '../formatter-adapter.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -977,8 +978,8 @@ describe('Golden Files Tests', () => {
     it.each(versionedConfigs)(
       '$name ($version) formatter output should match golden file',
       ({ name, formatter, version, goldenFile, options }) => {
-        const ast = createCanonicalAST();
-        const result = formatter.format(ast, options);
+        const ast = normalizeProgram(createCanonicalAST());
+        const result = formatProgram(formatter, ast, options);
         const actualContent = normalizeContent(result.content);
 
         const goldenContent = readGoldenFile(goldenFile);

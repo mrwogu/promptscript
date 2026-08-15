@@ -358,6 +358,51 @@ describe('canonical AST compatibility', () => {
     });
   });
 
+  it('preserves canonical object field order over legacy projection order', () => {
+    const body = createBlockBody(
+      [
+        {
+          type: 'FieldEntry',
+          name: 'coverage',
+          value: createValueNode({ minimum: 95 }, LOC),
+          loc: LOC,
+        },
+        {
+          type: 'FieldEntry',
+          name: 'testing',
+          value: createValueNode(['Use Jest'], LOC),
+          loc: LOC,
+        },
+        {
+          type: 'FieldEntry',
+          name: 'linting',
+          value: createValueNode(['Use Biome'], LOC),
+          loc: LOC,
+        },
+      ],
+      LOC
+    );
+
+    const reconciled = reconcileBlockBody(body, {
+      type: 'ObjectContent',
+      properties: {
+        testing: ['Use Jest'],
+        linting: ['Use Biome'],
+        coverage: { minimum: 95 },
+      },
+      loc: LOC,
+    });
+
+    expect(
+      reconciled.entries
+        .filter(
+          (entry): entry is Extract<BlockEntry, { type: 'FieldEntry' }> =>
+            entry.type === 'FieldEntry'
+        )
+        .map((entry) => entry.name)
+    ).toEqual(['coverage', 'testing', 'linting']);
+  });
+
   it('uses declaration files as legacy operation source layers', () => {
     const canonical = normalizeProgram({
       type: 'Program',
@@ -1128,20 +1173,74 @@ describe('canonical AST compatibility', () => {
     if (nested.type !== 'ObjectValueNode') throw new Error('Expected nested object');
     expect(nested.fields.find((field) => field.name === 'incoming')?.loc).toEqual(incomingLoc);
     expect(composed.entries.map((entry) => entry.type)).toEqual([
+      'FieldEntry',
       'TextEntry',
       'ListEntry',
       'InlineUseEntry',
-      'FieldEntry',
     ]);
-    expect(composed.entries[0]).toMatchObject({ type: 'TextEntry', text: 'Instructions' });
-    expect(composed.entries[1]).toMatchObject({
+    expect(composed.entries[1]).toMatchObject({ type: 'TextEntry', text: 'Instructions' });
+    expect(composed.entries[2]).toMatchObject({
       type: 'ListEntry',
       value: { type: 'ScalarValueNode', value: 'keep' },
     });
-    expect(composed.entries[2]).toMatchObject({
+    expect(composed.entries[3]).toMatchObject({
       type: 'InlineUseEntry',
       declaration,
     });
+  });
+
+  it('keeps composed fields at the position the base declared them', () => {
+    const baseLoc = { ...LOC, file: 'base.prs', offset: 2 };
+    const incomingLoc = { ...LOC, file: 'incoming.prs', offset: 12 };
+    const field = (
+      name: string,
+      value: string,
+      loc: typeof baseLoc
+    ): Extract<BlockEntry, { type: 'FieldEntry' }> => ({
+      type: 'FieldEntry',
+      name,
+      value: createValueNode(value, loc),
+      loc,
+    });
+    const baseBody = createBlockBody(
+      [
+        field('testing', 'jest', baseLoc),
+        field('linting', 'eslint', baseLoc),
+        field('coverage', 'text', baseLoc),
+      ],
+      baseLoc
+    );
+    const incomingBody = createBlockBody(
+      [field('linting', 'biome', incomingLoc), field('docs', 'typedoc', incomingLoc)],
+      incomingLoc
+    );
+    const mergedContent = {
+      type: 'ObjectContent' as const,
+      properties: { testing: 'jest', linting: 'biome', coverage: 'text', docs: 'typedoc' },
+      loc: incomingLoc,
+    };
+
+    const composed = composeBlockBodies(
+      baseBody,
+      incomingBody,
+      blockBodyToContent(baseBody),
+      blockBodyToContent(incomingBody),
+      mergedContent
+    );
+
+    expect(
+      composed.entries
+        .filter(
+          (entry): entry is Extract<BlockEntry, { type: 'FieldEntry' }> =>
+            entry.type === 'FieldEntry'
+        )
+        .map((entry) => [entry.name, valueNodeToValue(entry.value)])
+    ).toEqual([
+      ['testing', 'jest'],
+      ['linting', 'biome'],
+      ['coverage', 'text'],
+      ['docs', 'typedoc'],
+    ]);
   });
 
   it('reconciles deep extension paths without losing canonical provenance', () => {

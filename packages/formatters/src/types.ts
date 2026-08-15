@@ -1,4 +1,5 @@
 import type {
+  CanonicalProgram,
   OutputConvention,
   PrettierMarkdownOptions,
   Program,
@@ -90,8 +91,16 @@ export interface Formatter {
   readonly description: string;
   /** Default convention for this formatter */
   readonly defaultConvention: string;
-  /** Transform AST to tool-specific format */
+  /** Transform AST to target format */
   format(ast: Program, options?: FormatOptions): FormatterOutput;
+  /**
+   * Optional canonical entry point.
+   *
+   * Implementations that do not provide this method are legacy formatters.
+   * The formatter adapter creates a detached compatibility projection before
+   * invoking their `format` method.
+   */
+  formatCanonical?(ast: CanonicalProgram, options?: FormatOptions): FormatterOutput;
   /** Base path for skills (e.g., '.claude/skills'), or null if no skill support */
   getSkillBasePath(): string | null;
   /** Skill file name (e.g., 'SKILL.md' or 'skill.md'), or null if no skill support */
@@ -107,6 +116,20 @@ export interface Formatter {
    * Defaults to identity when not implemented.
    */
   transformInjectedSkillContent?(content: string): string;
+}
+
+/**
+ * Explicit legacy formatter contract.
+ *
+ * Legacy formatters consume the mutable `Program` compatibility AST.
+ */
+export type LegacyFormatter = Omit<Formatter, 'formatCanonical'>;
+
+/**
+ * Formatter contract for implementations that consume the immutable AST.
+ */
+export interface CanonicalFormatter extends Formatter {
+  formatCanonical(ast: CanonicalProgram, options?: FormatOptions): FormatterOutput;
 }
 
 /**
