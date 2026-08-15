@@ -1,6 +1,6 @@
 import {
-  HOOK_CAPABILITIES,
   isKnownTarget,
+  TARGET_CAPABILITIES,
   type HookCapability,
   type Program,
 } from '@promptscript/core';
@@ -21,7 +21,7 @@ export function getTargetHookCapabilityWarnings(
   );
   if (enabledHooks.length === 0) return [];
 
-  const capability: HookCapability = HOOK_CAPABILITIES[target];
+  const capability: HookCapability = TARGET_CAPABILITIES[target].hooks;
   if (capability.status !== 'native' && capability.status !== 'compatible') {
     return [
       {
