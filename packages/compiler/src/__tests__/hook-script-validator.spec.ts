@@ -2,7 +2,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { mkdtemp, mkdir, realpath, rm, symlink, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import type { Program, SourceLocation, Value } from '@promptscript/core';
+import {
+  normalizeProgram,
+  type Program,
+  type SourceLocation,
+  type Value,
+} from '@promptscript/core';
 import {
   findProjectRootMarker,
   inferProjectRoot,
@@ -197,6 +202,22 @@ describe('hook script resource validation', () => {
       makeProgram('.promptscript/scripts/linked.mjs'),
       projectRoot
     );
+
+    expect(errors).toEqual([
+      expect.objectContaining({
+        code: 'PS1003',
+        message: expect.stringContaining('resolves outside'),
+      }),
+    ]);
+  });
+
+  it('rejects traversal in canonical hook script paths', async () => {
+    await writeFile(join(projectRoot, 'outside.mjs'), 'process.exit(0);\n');
+    const canonicalProgram = normalizeProgram(
+      makeProgram('.promptscript/scripts/../../outside.mjs')
+    );
+
+    const errors = await validateHookScriptResources(canonicalProgram, projectRoot);
 
     expect(errors).toEqual([
       expect.objectContaining({

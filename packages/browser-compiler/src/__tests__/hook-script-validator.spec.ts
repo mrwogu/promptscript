@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import type { Program, SourceLocation, Value } from '@promptscript/core';
+import {
+  normalizeProgram,
+  type Program,
+  type SourceLocation,
+  type Value,
+} from '@promptscript/core';
 import { validateBrowserHookScriptResources } from '../hook-script-validator.js';
 import { VirtualFileSystem } from '../virtual-fs.js';
 
@@ -81,6 +86,27 @@ describe('browser hook script resource validation', () => {
     ).toEqual([
       expect.objectContaining({
         name: 'ResolveError',
+        code: 'PS1003',
+        message: 'Hook "check" script resolves outside ".promptscript/scripts/": ../outside.mjs',
+      }),
+    ]);
+  });
+
+  it('rejects traversal in canonical hook script paths', () => {
+    const fs = new VirtualFileSystem({
+      'workspace/.promptscript/project.prs': '',
+      'workspace/outside.mjs': 'process.exit(0);\n',
+    });
+    const canonicalProgram = normalizeProgram(makeProgram(true, '../outside.mjs'));
+
+    const errors = validateBrowserHookScriptResources(
+      canonicalProgram,
+      fs,
+      'workspace/.promptscript/project.prs'
+    );
+
+    expect(errors).toEqual([
+      expect.objectContaining({
         code: 'PS1003',
         message: 'Hook "check" script resolves outside ".promptscript/scripts/": ../outside.mjs',
       }),
