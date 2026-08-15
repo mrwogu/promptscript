@@ -2120,20 +2120,28 @@ describe('Compiler.watch', () => {
     const ast = createTestProgram();
     const formatter = createMockFormatter('test');
     let changeHandler: ((path: string) => void) | undefined;
+    let ignoredHandler: ((path: string) => boolean) | undefined;
 
     vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
     mockResolve.mockResolvedValue(createResolveSuccess(ast));
     mockValidate.mockReturnValue(createValidationSuccess());
 
-    const watchMock = vi.fn().mockReturnValue({
-      on: vi.fn().mockImplementation((event: string, handler: (path: string) => void) => {
-        if (event === 'change') {
-          changeHandler = handler;
+    const watchMock = vi
+      .fn()
+      .mockImplementation(
+        (_paths: string[], watchOptions: { ignored?: (path: string) => boolean }) => {
+          ignoredHandler = watchOptions.ignored;
+          return {
+            on: vi.fn().mockImplementation((event: string, handler: (path: string) => void) => {
+              if (event === 'change') {
+                changeHandler = handler;
+              }
+              return mockWatcher;
+            }),
+            close: vi.fn().mockResolvedValue(undefined),
+          };
         }
-        return mockWatcher;
-      }),
-      close: vi.fn().mockResolvedValue(undefined),
-    });
+      );
     vi.doMock('chokidar', () => ({
       default: {
         watch: watchMock,
@@ -2149,6 +2157,8 @@ describe('Compiler.watch', () => {
       exclude: ['**/dist/**'],
     });
 
+    expect(ignoredHandler?.('/repo/dist/ignored.prs')).toBe(true);
+    expect(ignoredHandler?.('/repo/src/included.prs')).toBe(false);
     changeHandler?.('./dist/ignored.prs');
     await watcher.close();
 
@@ -2517,6 +2527,36 @@ describe('Compiler.watch', () => {
         errors: [expect.objectContaining({ message: 'Broken entry' })],
       }),
       []
+    );
+
+    await watcher.close();
+    vi.restoreAllMocks();
+  });
+
+  it('should report failed initial compilation through onError', async () => {
+    const onError = vi.fn();
+    const failedResult = {
+      ast: null,
+      sources: [],
+      errors: [],
+    };
+    mockResolve.mockResolvedValue(failedResult);
+
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: vi.fn().mockReturnValue(mockWatcher),
+      },
+    }));
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [],
+    });
+
+    const watcher = await compiler.watch('./test.prs', { onError });
+
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Initial compilation failed' })
     );
 
     await watcher.close();
