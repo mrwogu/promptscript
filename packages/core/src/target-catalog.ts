@@ -15,8 +15,8 @@ import { KNOWN_TARGETS, type KnownTarget } from './types/config.js';
 import { DEFAULT_OUTPUT_PATHS } from './target-output-paths.js';
 import {
   createTargetCapability,
+  assertValidTargetCapabilities,
   type TargetCapability,
-  validateTargetCapabilities,
 } from './target-capabilities.js';
 
 /**
@@ -752,19 +752,18 @@ export const TARGET_CAPABILITIES = Object.fromEntries(
   KNOWN_TARGETS.map((name) => [name, TARGET_DEFINITIONS[name]])
 ) as unknown as { readonly [Name in KnownTarget]: TargetCapability };
 
-const CAPABILITY_ISSUES = validateTargetCapabilities(TARGET_CAPABILITIES);
-if (CAPABILITY_ISSUES.length > 0) {
-  throw new Error(`Invalid target capability registry: ${CAPABILITY_ISSUES.join('; ')}`);
-}
+assertValidTargetCapabilities(TARGET_CAPABILITIES);
 
 /**
  * Return contradictions between the target catalog and its capability data.
  */
-export function validateTargetDefinitionConsistency(): string[] {
+export function validateTargetDefinitionConsistency(
+  definitions: Readonly<Record<KnownTarget, TargetDefinition>> = TARGET_DEFINITIONS
+): string[] {
   const issues: string[] = [];
 
   for (const target of KNOWN_TARGETS) {
-    const definition = TARGET_DEFINITIONS[target];
+    const definition = definitions[target];
     if (definition.name !== target) {
       issues.push(`${target}: definition name is "${definition.name}"`);
     }
@@ -802,10 +801,19 @@ export function validateTargetDefinitionConsistency(): string[] {
   return issues;
 }
 
-const TARGET_DEFINITION_ISSUES = validateTargetDefinitionConsistency();
-if (TARGET_DEFINITION_ISSUES.length > 0) {
-  throw new Error(`Inconsistent target catalog: ${TARGET_DEFINITION_ISSUES.join('; ')}`);
+/**
+ * Throw when target definitions contradict the canonical output and feature metadata.
+ */
+export function assertTargetDefinitionConsistency(
+  definitions: Readonly<Record<KnownTarget, TargetDefinition>> = TARGET_DEFINITIONS
+): void {
+  const issues = validateTargetDefinitionConsistency(definitions);
+  if (issues.length > 0) {
+    throw new Error(`Inconsistent target catalog: ${issues.join('; ')}`);
+  }
 }
+
+assertTargetDefinitionConsistency();
 
 /**
  * Get the target definition for a known target.

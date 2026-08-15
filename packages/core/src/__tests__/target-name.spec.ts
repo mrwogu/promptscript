@@ -14,8 +14,17 @@ import {
   getTargetFeatures,
   getTargetSkillPath,
   getTargetCapability,
+  assertTargetDefinitionConsistency,
+  type TargetDefinition,
 } from '../target-catalog.js';
-import { resolveTargetVersion, validateTargetCapabilities } from '../target-capabilities.js';
+import {
+  assertValidTargetCapabilities,
+  getTargetFeatureStatus,
+  getTargetSectionCapability,
+  resolveTargetVersion,
+  validateTargetCapabilities,
+  type TargetCapability,
+} from '../target-capabilities.js';
 
 describe('TargetName branded type', () => {
   describe('KnownTarget', () => {
@@ -411,7 +420,14 @@ describe('Target catalog integrity', () => {
   });
 
   it('should resolve version aliases through the capability contract', () => {
-    expect(resolveTargetVersion(getTargetCapability('cursor'), 'standard')).toBe('modern');
+    const capability = getTargetCapability('cursor');
+
+    expect(resolveTargetVersion(capability, 'standard')).toBe('modern');
+    expect(resolveTargetVersion(capability, undefined)).toBe('modern');
+    expect(resolveTargetVersion(capability, 'unknown')).toBe('modern');
+    expect(getTargetFeatureStatus(capability, 'missing')).toBe('not-supported');
+    expect(getTargetSectionCapability(capability, 'commands')?.support).toBe('required');
+    expect(getTargetSectionCapability(capability, 'missing')).toBeUndefined();
   });
 
   it('should reject incomplete resource contracts', () => {
@@ -428,5 +444,110 @@ describe('Target catalog integrity', () => {
     expect(issues).toContain('github: main output resource is missing');
     expect(issues).toContain('github: MCP config resource is missing');
     expect(issues).toContain('github: hook config resource is missing');
+  });
+
+  it('should report each malformed capability category', () => {
+    const malformed = {
+      ...TARGET_DEFINITIONS.github,
+      defaultVersion: 'missing',
+      versions: {},
+      versionAliases: { stale: 'missing' },
+      featureSupport: { invalid: 'invalid' },
+      sections: {},
+      resources: [
+        { kind: 'skills' as const, path: '', versions: [] },
+        { kind: 'skills' as const, path: '', versions: ['missing', 'missing'] },
+      ],
+      mcpConfigPath: '.missing/mcp.json',
+      mcpConfigFormat: 'json' as const,
+      hooks: {
+        ...TARGET_DEFINITIONS.github.hooks,
+        configPath: '.missing/hooks.json',
+      },
+    } as unknown as TargetCapability;
+    const missingHook = {
+      ...TARGET_DEFINITIONS.claude,
+      hooks: undefined,
+    } as unknown as TargetCapability;
+    const malformedMcpFormat = {
+      ...TARGET_DEFINITIONS.gemini,
+      mcpConfigPath: null,
+      mcpConfigFormat: 'json' as const,
+    };
+    const capabilities = {
+      ...TARGET_DEFINITIONS,
+      github: malformed,
+      claude: missingHook,
+      gemini: malformedMcpFormat,
+    };
+
+    const issues = validateTargetCapabilities(capabilities);
+
+    expect(issues).toContain('github: no versions are declared');
+    expect(issues).toContain('github: default version "missing" is not declared');
+    expect(issues).toContain('github: version alias "stale" points to "missing"');
+    expect(issues).toContain('github: feature "invalid" has invalid status "invalid"');
+    expect(issues).toContain('github: feature "markdown-output" is missing');
+    expect(issues).toContain('github: section "project-identity" is missing');
+    expect(issues).toContain('github: resource paths are duplicated');
+    expect(issues).toContain('github: main output resource is missing');
+    expect(issues).toContain('github: skills resource path is empty');
+    expect(issues).toContain('github: skills resource has no versions');
+    expect(issues).toContain('github: skills resource versions are duplicated');
+    expect(issues).toContain('github: skills resource uses unknown version "missing"');
+    expect(issues).toContain('github: MCP config resource is missing');
+    expect(issues).toContain('github: hook config resource is missing');
+    expect(issues).toContain('claude: hook capability is missing');
+    expect(issues).toContain('gemini: MCP config format is declared without a path');
+    expect(validateTargetCapabilities({})).toContain('github: capability entry is missing');
+    expect(() => assertValidTargetCapabilities(capabilities)).toThrow(
+      'Invalid target capability registry'
+    );
+  });
+
+  it('should report contradictory target definitions', () => {
+    const definition = TARGET_DEFINITIONS.github;
+    const brokenDefinition = {
+      ...definition,
+      name: 'claude' as KnownTarget,
+      outputPath: 'wrong.md',
+      skillPath: { basePath: '.github/skills', fileName: 'SKILL.md' },
+      features: {
+        ...definition.features,
+        hasSkills: false,
+        hasAgents: false,
+        hasCommands: false,
+        defaultVersion: 'missing',
+      },
+      versions: {},
+      featureSupport: {
+        ...definition.featureSupport,
+        skills: 'supported' as const,
+        'agent-instructions': 'supported' as const,
+        'slash-commands': 'supported' as const,
+      },
+    };
+    const definitions = {
+      ...TARGET_DEFINITIONS,
+      github: brokenDefinition,
+    };
+
+    const typedDefinitions = definitions as unknown as Readonly<
+      Record<KnownTarget, TargetDefinition>
+    >;
+    const issues = validateTargetDefinitionConsistency(typedDefinitions);
+
+    expect(issues).toContain('github: definition name is "claude"');
+    expect(issues).toContain('github: output path does not match the canonical path map');
+    expect(issues).toContain('github: skill feature flag does not match the skill path');
+    expect(issues).toContain('github: default version "missing" is not supported');
+    expect(issues).toContain('github: skills are marked supported without a skill path');
+    expect(issues).toContain(
+      'github: agent instructions are marked supported without agent output'
+    );
+    expect(issues).toContain('github: slash commands are marked supported without command output');
+    expect(() => assertTargetDefinitionConsistency(typedDefinitions)).toThrow(
+      'Inconsistent target catalog'
+    );
   });
 });

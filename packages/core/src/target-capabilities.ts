@@ -1697,3 +1697,15 @@ export function validateTargetCapabilities(
 
   return issues;
 }
+
+/**
+ * Throw when a capability registry contains missing or contradictory metadata.
+ */
+export function assertValidTargetCapabilities(
+  capabilities: Readonly<Partial<Record<KnownTarget, TargetCapability>>>
+): void {
+  const issues = validateTargetCapabilities(capabilities);
+  if (issues.length > 0) {
+    throw new Error(`Invalid target capability registry: ${issues.join('; ')}`);
+  }
+}
