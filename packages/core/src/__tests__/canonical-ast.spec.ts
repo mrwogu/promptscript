@@ -358,6 +358,51 @@ describe('canonical AST compatibility', () => {
     });
   });
 
+  it('preserves merged object field order from the legacy projection', () => {
+    const body = createBlockBody(
+      [
+        {
+          type: 'FieldEntry',
+          name: 'coverage',
+          value: createValueNode({ minimum: 95 }, LOC),
+          loc: LOC,
+        },
+        {
+          type: 'FieldEntry',
+          name: 'testing',
+          value: createValueNode(['Use Jest'], LOC),
+          loc: LOC,
+        },
+        {
+          type: 'FieldEntry',
+          name: 'linting',
+          value: createValueNode(['Use Biome'], LOC),
+          loc: LOC,
+        },
+      ],
+      LOC
+    );
+
+    const reconciled = reconcileBlockBody(body, {
+      type: 'ObjectContent',
+      properties: {
+        testing: ['Use Jest'],
+        linting: ['Use Biome'],
+        coverage: { minimum: 95 },
+      },
+      loc: LOC,
+    });
+
+    expect(
+      reconciled.entries
+        .filter(
+          (entry): entry is Extract<BlockEntry, { type: 'FieldEntry' }> =>
+            entry.type === 'FieldEntry'
+        )
+        .map((entry) => entry.name)
+    ).toEqual(['testing', 'linting', 'coverage']);
+  });
+
   it('uses declaration files as legacy operation source layers', () => {
     const canonical = normalizeProgram({
       type: 'Program',

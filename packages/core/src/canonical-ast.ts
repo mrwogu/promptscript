@@ -644,9 +644,23 @@ export function mergeValueNodeLocations(
         loc: fieldNode.loc,
       });
     }
+    // Keep canonical fields aligned with the merged legacy property order.
+    const fieldsByName = new Map<string, ObjectFieldNode[]>();
+    for (const field of fields) {
+      const matching = fieldsByName.get(field.name) ?? [];
+      matching.push(field);
+      fieldsByName.set(field.name, matching);
+    }
+    const orderedFields: ObjectFieldNode[] = [];
+    for (const name of Object.keys(record)) {
+      orderedFields.push(...(fieldsByName.get(name) ?? []));
+    }
+    for (const field of fields) {
+      if (!Object.hasOwn(record, field.name)) orderedFields.push(field);
+    }
     return deepFreeze<ObjectValueNode>({
       ...deepClone(precedence === 'incoming' ? incoming : base),
-      fields,
+      fields: orderedFields,
     });
   }
 
@@ -869,7 +883,7 @@ export function reconcileBlockBody(body: BlockBody, content: BlockContent): Bloc
     });
   }
 
-  return createBlockBody(entries, body.loc, {
+  return createBlockBody(reorderCanonicalFieldEntries(entries, properties), body.loc, {
     projection: content.type,
     ...(text ? { text } : {}),
   });
@@ -901,6 +915,24 @@ export function prepareBlockContentForMerge(
   delete prepared.properties['items'];
   prepared.listItems = listItems;
   return prepared;
+}
+
+function reorderCanonicalFieldEntries(
+  entries: readonly BlockEntry[],
+  properties: Record<string, Value>
+): BlockEntry[] {
+  const fieldOrder = new Map(Object.keys(properties).map((name, index) => [name, index]));
+  const orderedFields = entries
+    .filter((entry): entry is FieldEntry => entry.type === 'FieldEntry')
+    .sort(
+      (left, right) =>
+        (fieldOrder.get(left.name) ?? Number.MAX_SAFE_INTEGER) -
+        (fieldOrder.get(right.name) ?? Number.MAX_SAFE_INTEGER)
+    );
+  let fieldIndex = 0;
+  return entries.map((entry) =>
+    entry.type === 'FieldEntry' ? orderedFields[fieldIndex++]! : entry
+  );
 }
 
 export function composeBlockBodies(
@@ -1467,7 +1499,7 @@ export function normalizeProgram(input: ProgramInput): CanonicalProgram {
       loc: deepClone(override.loc),
     });
   }
-  for (let start = 0; start < operations.length; ) {
+  for (let start = 0; start < operations.length;) {
     let end = start + 1;
     while (
       end < operations.length &&

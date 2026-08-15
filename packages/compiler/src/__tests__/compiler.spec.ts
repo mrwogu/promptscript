@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { CanonicalProgram, Program, SourceLocation } from '@promptscript/core';
+import {
+  normalizeProgram,
+  type CanonicalProgram,
+  type Program,
+  type SourceLocation,
+} from '@promptscript/core';
 import type { Formatter, CompilerOptions } from '../types.js';
 import { FormatterRegistry } from '@promptscript/formatters';
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
@@ -151,6 +156,7 @@ function createFailingFormatter(name: string, error: string): Formatter {
 function createResolveSuccess(ast: Program) {
   return {
     ast,
+    canonicalAst: normalizeProgram(ast),
     sources: ['test.prs'],
     errors: [],
   };
@@ -859,6 +865,7 @@ describe('Compiler', () => {
     it('should return errors from resolver result', async () => {
       mockResolve.mockResolvedValue({
         ast: null,
+        canonicalAst: null,
         sources: ['test.prs'],
         errors: [
           {
@@ -884,6 +891,7 @@ describe('Compiler', () => {
     it('should not proceed to validation if resolve fails', async () => {
       mockResolve.mockResolvedValue({
         ast: null,
+        canonicalAst: null,
         sources: [],
         errors: [{ name: 'Error', code: 'E001', message: 'Failed' }],
       });
@@ -1019,6 +1027,46 @@ describe('Compiler', () => {
           message: expect.stringContaining('script not found'),
         }),
       ]);
+    });
+
+    it('should pass the resolved canonical AST through validation and formatting', async () => {
+      const ast = createTestProgram();
+      const canonicalAst = normalizeProgram(ast);
+      const formatCanonical = vi.fn(() => ({
+        path: './canonical/output.md',
+        content: 'canonical output',
+      }));
+      const formatter: Formatter = {
+        name: 'canonical',
+        outputPath: './canonical/output.md',
+        description: 'Canonical formatter',
+        defaultConvention: 'markdown',
+        format: vi.fn(() => ({ path: './legacy/output.md', content: 'legacy output' })),
+        formatCanonical,
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
+        referencesMode: () => 'none' as const,
+      };
+
+      mockResolve.mockResolvedValue({
+        ast,
+        canonicalAst,
+        sources: ['test.prs'],
+        errors: [],
+      });
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      expect(mockValidate).toHaveBeenCalledWith(canonicalAst);
+      expect(formatCanonical).toHaveBeenCalledWith(canonicalAst, expect.any(Object));
+      expect(formatter.format).not.toHaveBeenCalled();
     });
   });
 

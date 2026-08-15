@@ -190,10 +190,18 @@ export interface BrowserResolverOptions {
  * Result of resolving a PromptScript file.
  */
 export interface ResolvedAST {
-  /** The resolved AST, or null if resolution failed */
+  /**
+   * Immutable canonical AST used by compiler and validator stages.
+   *
+   * This is the primary resolved representation.
+   */
+  canonicalAst: CanonicalProgram | null;
+  /**
+   * Mutable compatibility projection for legacy integrations.
+   *
+   * @deprecated Use `canonicalAst` for new consumers.
+   */
   ast: Program | null;
-  /** Immutable canonical projection of the resolved AST */
-  canonicalAst?: CanonicalProgram | null;
   /** List of all source files involved in resolution */
   sources: string[];
   /** List of errors encountered during resolution */
@@ -425,7 +433,7 @@ export class BrowserResolver {
     // Load and parse file
     const parseData = this.loadAndParse(absPath, sources, errors);
     if (!parseData.ast) {
-      return { ast: null, sources, errors };
+      return { ast: null, canonicalAst: null, sources, errors };
     }
 
     let ast = parseData.ast;

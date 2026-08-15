@@ -1,4 +1,5 @@
 import type {
+  CanonicalProgram,
   FactoryRulesMode,
   Logger,
   OutputConvention,
@@ -81,6 +82,8 @@ export interface Formatter {
   readonly defaultConvention: string;
   /** Format the AST to target format */
   format(ast: Program, options?: FormatOptions): FormatterOutput;
+  /** Optional canonical entry point for migrated formatters. */
+  formatCanonical?(ast: CanonicalProgram, options?: FormatOptions): FormatterOutput;
   /** Base path for skills (e.g., '.claude/skills'), or null if no skill support */
   getSkillBasePath(): string | null;
   /** Skill file name (e.g., 'SKILL.md' or 'skill.md'), or null if no skill support */
@@ -94,6 +97,18 @@ export interface Formatter {
    * unsupported fields.
    */
   transformInjectedSkillContent?(content: string): string;
+}
+
+/**
+ * Legacy formatter contract retained for compatibility with existing targets.
+ */
+export type LegacyFormatter = Omit<Formatter, 'formatCanonical'>;
+
+/**
+ * Canonical formatter contract for immutable pipeline consumers.
+ */
+export interface CanonicalFormatter extends Formatter {
+  formatCanonical(ast: CanonicalProgram, options?: FormatOptions): FormatterOutput;
 }
 
 /**

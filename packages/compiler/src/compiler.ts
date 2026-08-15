@@ -327,10 +327,13 @@ export class Compiler {
     stats.resolveTime = Date.now() - startResolve;
     this.logger.verbose(`Resolve completed (${stats.resolveTime}ms)`);
 
+    // ResolvedAST exposes the canonical tree as the pipeline representation.
+    const canonicalAst = resolved.canonicalAst;
+
     // Check for resolve errors
-    if (resolved.errors.length > 0 || !resolved.ast) {
+    if (resolved.errors.length > 0 || !canonicalAst) {
       stats.totalTime = Date.now() - startTotal;
-      const compatibility = resolved.ast ? this.validator.validate(resolved.ast) : undefined;
+      const compatibility = canonicalAst ? this.validator.validate(canonicalAst) : undefined;
       const compatibilityErrors =
         compatibility?.errors.filter((message) => message.ruleId === 'PS018') ?? [];
       const compatibilityWarnings =
@@ -396,7 +399,7 @@ export class Compiler {
       }
       referenceRoots.sort((left, right) => resolve(right.path).length - resolve(left.path).length);
 
-      for (const block of resolved.ast.blocks) {
+      for (const block of canonicalAst.blocks) {
         if (block.name !== 'skills' || block.content.type !== 'ObjectContent') continue;
         const sourceFile = block.loc.file;
         const referenceRoot = sourceFile
@@ -495,7 +498,7 @@ export class Compiler {
     // Stage 2: Validate
     this.logger.verbose('=== Stage 2: Validate ===');
     const startValidate = Date.now();
-    const validation = this.validator.validate(resolved.ast);
+    const validation = this.validator.validate(canonicalAst);
 
     // Check for validation errors
     if (!validation.valid) {
@@ -513,7 +516,7 @@ export class Compiler {
     }
 
     const hookScriptErrors = await validateHookScriptResources(
-      resolved.ast,
+      canonicalAst,
       inferProjectRoot(
         this.options.resolver.localPath,
         this.options.resolver.projectRoot,
@@ -553,7 +556,7 @@ export class Compiler {
         const formatOptions = this.getFormatOptionsForTarget(formatter.name, config);
         this.logger.debug(`  Convention: ${formatOptions.convention ?? 'default'}`);
 
-        const output = formatProgram(formatter, resolved.ast, formatOptions);
+        const output = formatProgram(formatter, canonicalAst, formatOptions);
         const formatterTime = Date.now() - formatterStart;
 
         this.logger.verbose(`  → ${output.path} (${formatterTime}ms)`);
@@ -933,7 +936,12 @@ export class Compiler {
       }
 
       // Object with name and config (not a Formatter instance)
-      if ('name' in f && typeof f.name === 'string' && !('format' in f)) {
+      if (
+        'name' in f &&
+        typeof f.name === 'string' &&
+        !('format' in f) &&
+        !('formatCanonical' in f)
+      ) {
         const configObj = f as { name: string; config?: TargetConfig };
         return {
           formatter: this.loadFormatterByName(configObj.name),

@@ -213,6 +213,29 @@ describe('format (standalone)', () => {
     expect(mockFormatter.format).not.toHaveBeenCalled();
   });
 
+  it('should pass an existing canonical input without re-normalizing it', () => {
+    const ast = normalizeProgram(createTestProgram());
+    const formatCanonical = vi.fn((program: CanonicalProgram) => ({
+      path: './canonical-identity.md',
+      content: program.type,
+    }));
+    const mockFormatter = {
+      name: 'canonical-identity',
+      outputPath: './canonical-identity.md',
+      description: 'Canonical identity formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn(() => ({ path: './legacy.md', content: 'legacy' })),
+      formatCanonical,
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+      referencesMode: () => 'none' as const,
+    };
+
+    format(ast, { formatter: mockFormatter });
+
+    expect(formatCanonical).toHaveBeenCalledWith(ast, {});
+  });
+
   it('should accept formatter factory function', () => {
     const ast = createTestProgram();
     const mockFormatter = {

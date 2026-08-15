@@ -4,6 +4,7 @@ import type {
   BlockBody,
   BlockContent,
   BlockEntry,
+  FieldEntry,
   MixedContent,
   ObjectContent,
   TextContent,
@@ -283,6 +284,24 @@ function bodyListValues(body: BlockBody): Value[] {
     .map((entry) => valueNodeToValue(entry.value));
 }
 
+function reorderFieldEntries(
+  entries: BlockEntry[],
+  properties: Record<string, Value>
+): BlockEntry[] {
+  const fieldOrder = new Map(Object.keys(properties).map((name, index) => [name, index]));
+  const orderedFields = entries
+    .filter((entry): entry is FieldEntry => entry.type === 'FieldEntry')
+    .sort(
+      (left, right) =>
+        (fieldOrder.get(left.name) ?? Number.MAX_SAFE_INTEGER) -
+        (fieldOrder.get(right.name) ?? Number.MAX_SAFE_INTEGER)
+    );
+  let fieldIndex = 0;
+  return entries.map((entry) =>
+    entry.type === 'FieldEntry' ? orderedFields[fieldIndex++]! : entry
+  );
+}
+
 function hasStructuredContent(content: BlockContent): content is ObjectContent | MixedContent {
   return content.type === 'ObjectContent' || content.type === 'MixedContent';
 }
@@ -531,7 +550,7 @@ function mergeCanonicalBodies(
     });
   }
 
-  return createBlockBody(entries, content.loc, {
+  return createBlockBody(reorderFieldEntries(entries, properties), content.loc, {
     projection: content.type,
     ...(text ? { text } : {}),
   });

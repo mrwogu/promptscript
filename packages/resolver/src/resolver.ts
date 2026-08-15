@@ -101,10 +101,18 @@ export interface ResolverOptions extends LoaderOptions {
  * Result of resolving a PromptScript file.
  */
 export interface ResolvedAST {
-  /** The resolved AST, or null if resolution failed */
+  /**
+   * Immutable canonical AST used by compiler and validator stages.
+   *
+   * This is the primary resolved representation.
+   */
+  canonicalAst: CanonicalProgram | null;
+  /**
+   * Mutable compatibility projection for legacy integrations.
+   *
+   * @deprecated Use `canonicalAst` for new consumers.
+   */
   ast: Program | null;
-  /** Immutable canonical projection of the resolved AST */
-  canonicalAst?: CanonicalProgram | null;
   /** List of all source files involved in resolution */
   sources: string[];
   /** List of errors encountered during resolution */
@@ -207,7 +215,7 @@ export class Resolver {
     // Load and parse file
     const parseData = await this.loadAndParse(absPath, sources, errors);
     if (!parseData.ast) {
-      return { ast: null, sources, errors };
+      return { ast: null, canonicalAst: null, sources, errors };
     }
 
     let ast = parseData.ast;
@@ -858,7 +866,7 @@ export class Resolver {
     const parsed = parseRegistryMarker(marker);
     if (!parsed) {
       errors.push(new ResolveError(`Invalid registry marker: ${marker}`));
-      return { ast: null, sources: [marker], errors: [] };
+      return { ast: null, canonicalAst: null, sources: [marker], errors: [] };
     }
 
     const { repoUrl, path: subPath, version } = parsed;
@@ -1033,7 +1041,7 @@ export class Resolver {
             )
           );
           this.resolving.delete(marker);
-          return { ast: null, sources: [marker], errors };
+          return { ast: null, canonicalAst: null, sources: [marker], errors };
         }
         if (
           existsSync(resolvedFullPath) &&
@@ -1045,7 +1053,7 @@ export class Resolver {
             )
           );
           this.resolving.delete(marker);
-          return { ast: null, sources: [marker], errors };
+          return { ast: null, canonicalAst: null, sources: [marker], errors };
         }
       }
 
@@ -1092,7 +1100,7 @@ export class Resolver {
               )
             );
             this.resolving.delete(marker);
-            return { ast: null, sources: [marker], errors };
+            return { ast: null, canonicalAst: null, sources: [marker], errors };
           }
           if (existsSync(discoverDir) && !(await isRealPathInside(discoverDir, cachePath))) {
             errors.push(
@@ -1101,7 +1109,7 @@ export class Resolver {
               )
             );
             this.resolving.delete(marker);
-            return { ast: null, sources: [marker], errors };
+            return { ast: null, canonicalAst: null, sources: [marker], errors };
           }
         }
 
@@ -1137,6 +1145,7 @@ export class Resolver {
 
       const result: ResolvedAST = {
         ast: resolvedAST,
+        canonicalAst: resolvedAST ? normalizeProgram(resolvedAST) : null,
         sources: [marker],
         errors: [],
       };
