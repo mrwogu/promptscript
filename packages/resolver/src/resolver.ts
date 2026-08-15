@@ -128,10 +128,18 @@ export interface ResolverOptions extends LoaderOptions {
  * Result of resolving a PromptScript file.
  */
 export interface ResolvedAST {
-  /** The resolved AST, or null if resolution failed */
+  /**
+   * Immutable canonical AST used by compiler and validator stages.
+   *
+   * This is the primary resolved representation.
+   */
+  canonicalAst: CanonicalProgram | null;
+  /**
+   * Mutable compatibility projection for legacy integrations.
+   *
+   * @deprecated Use `canonicalAst` for new consumers.
+   */
   ast: Program | null;
-  /** Immutable canonical projection of the resolved AST */
-  canonicalAst?: CanonicalProgram | null;
   /** List of all source files involved in resolution */
   sources: string[];
   /** Files and directories read while resolving the AST */
@@ -308,7 +316,13 @@ export class Resolver {
     // Load and parse file
     const parseData = await this.loadAndParse(absPath, sources, dependencies, errors, context);
     if (!parseData.ast) {
-      return { ast: null, sources, dependencies: [...dependencies], errors };
+      return {
+        ast: null,
+        canonicalAst: null,
+        sources,
+        dependencies: [...dependencies],
+        errors,
+      };
     }
 
     let ast = parseData.ast;
@@ -1213,7 +1227,7 @@ export class Resolver {
     const parsed = parseRegistryMarker(marker);
     if (!parsed) {
       errors.push(new ResolveError(`Invalid registry marker: ${marker}`));
-      return { ast: null, sources: [marker], errors: [] };
+      return { ast: null, canonicalAst: null, sources: [marker], errors: [] };
     }
 
     const { repoUrl, path: subPath, version } = parsed;
@@ -1384,7 +1398,7 @@ export class Resolver {
             )
           );
           context.resolving.delete(marker);
-          return { ast: null, sources: [marker], errors };
+          return { ast: null, canonicalAst: null, sources: [marker], errors };
         }
         if (
           existsSync(resolvedFullPath) &&
@@ -1396,7 +1410,7 @@ export class Resolver {
             )
           );
           context.resolving.delete(marker);
-          return { ast: null, sources: [marker], errors };
+          return { ast: null, canonicalAst: null, sources: [marker], errors };
         }
       }
 
@@ -1435,17 +1449,19 @@ export class Resolver {
         // No file found — try directory import and auto-discovery
         const discoverDir = isRoot ? cachePath : join(cachePath, subPath);
 
-        // Containment check for directory discovery path
-        if (!isRoot) {
-          if (existsSync(discoverDir) && !(await isRealPathInside(discoverDir, cachePath))) {
-            errors.push(
-              new ResolveError(
-                `Path traversal detected: subpath '${subPath}' resolves outside the repository cache boundary.`
-              )
-            );
-            context.resolving.delete(marker);
-            return { ast: null, sources: [marker], errors };
-          }
+        // The lexical containment check above covers traversal before discovery.
+        if (
+          !isRoot &&
+          existsSync(discoverDir) &&
+          !(await isRealPathInside(discoverDir, cachePath))
+        ) {
+          errors.push(
+            new ResolveError(
+              `Path traversal detected: subpath '${subPath}' resolves outside the repository cache boundary.`
+            )
+          );
+          context.resolving.delete(marker);
+          return { ast: null, canonicalAst: null, sources: [marker], errors };
         }
 
         if (!isRoot && !existsSync(discoverDir)) {
@@ -1481,6 +1497,7 @@ export class Resolver {
 
       const result: ResolvedAST = {
         ast: resolvedAST,
+        canonicalAst: resolvedAST ? normalizeProgram(resolvedAST) : null,
         sources: [marker],
         dependencies: [...dependencies],
         errors: [],

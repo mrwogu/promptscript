@@ -12,6 +12,8 @@ export type {
   Formatter,
   FormatterClass,
   FormatterFactory,
+  LegacyFormatter,
+  CanonicalFormatter,
   FormatterOutput,
   FormatterWarning,
   FormatterVersionInfo,
@@ -35,8 +37,7 @@ export type {
   OutputPlanArtifactRole,
   OutputPlanCollisionResolution,
 } from '@promptscript/core';
-export { formatProgram, isCanonicalFormatter } from './formatter-adapter.js';
-export type { CanonicalFormatter } from './formatter-adapter.js';
+export { formatProgram, isCanonicalFormatter, isLegacyFormatter } from './formatter-adapter.js';
 
 // Structured output merge types and helpers
 export type { StructuredMergePlan, StructuredMergeOperation } from './structured-output.js';

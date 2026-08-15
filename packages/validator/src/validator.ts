@@ -1,7 +1,9 @@
 import {
+  isCanonicalProgram,
   noopLogger,
   normalizeProgram,
   toLegacyProgram,
+  type CanonicalProgram,
   type Logger,
   type ProgramInput,
 } from '@promptscript/core';
@@ -84,7 +86,10 @@ export class Validator {
    * @returns Validation result with all messages
    */
   validate(input: ProgramInput): ValidationResult {
-    const ast = toLegacyProgram(normalizeProgram(input), { preserveCanonicalBody: true });
+    const canonicalAst: CanonicalProgram = isCanonicalProgram(input)
+      ? input
+      : normalizeProgram(input);
+    const ast = toLegacyProgram(canonicalAst, { preserveCanonicalBody: true });
     const messages: ValidationMessage[] = [];
     const activeRules = this.rules.filter(
       (r) => !this.disabledRules.has(r.name) && !this.disabledRules.has(r.id)
@@ -114,6 +119,7 @@ export class Validator {
       // Create rule context
       const ctx: RuleContext = {
         ast,
+        canonicalAst,
         config: this.config,
         report: (msg) => {
           messages.push({

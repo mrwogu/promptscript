@@ -7,7 +7,12 @@
  * @packageDocumentation
  */
 
-import { normalizeProgram, toLegacyProgram, type ProgramInput } from '@promptscript/core';
+import {
+  isCanonicalProgram,
+  normalizeProgram,
+  toLegacyProgram,
+  type ProgramInput,
+} from '@promptscript/core';
 import type { ValidateOptions, ValidationResult } from './types.js';
 import { createValidator } from './validator.js';
 
@@ -149,9 +154,8 @@ export function validate(ast: ProgramInput, options: ValidateOptions = {}): Vali
   const { validator, ...config } = options;
 
   if (validator) {
-    return validator.validate(
-      toLegacyProgram(normalizeProgram(ast), { preserveCanonicalBody: true })
-    );
+    const canonical = isCanonicalProgram(ast) ? ast : normalizeProgram(ast);
+    return validator.validate(toLegacyProgram(canonical, { preserveCanonicalBody: true }));
   }
 
   const v = createValidator(config);

@@ -93,6 +93,19 @@ The version string is the key in `SYNTAX_VERSIONS`, not a property of `SyntaxVer
 ordered `body.entries` sequence for properties, text, list items, and inline
 uses.
 
+Pipeline stages use `CanonicalProgram` as their primary input. `Program` remains
+the mutable compatibility API and is exposed as the `LegacyProgram` alias for
+integrations that have not migrated.
+
+Compatibility timeline:
+
+1. Current 1.x releases: parser and resolver expose both representations;
+   compiler and validator use the canonical representation internally.
+2. Remaining 1.x releases: formatter and custom-rule authors can migrate to
+   canonical entry points while legacy projections remain supported.
+3. Next major release: legacy-only entry points may be removed after formatter
+   and integration migration is complete.
+
 | Export                                | Description                                                        |
 | :------------------------------------ | :----------------------------------------------------------------- |
 | `createCanonicalProgram(init)`        | Creates and deeply freezes a canonical program                     |

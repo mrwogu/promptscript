@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { normalizeProgram } from '@promptscript/core';
 import { parse, parseCanonical, parseCanonicalOrThrow, parseOrThrow } from '../index.js';
 
 describe('canonical AST', () => {
@@ -145,6 +146,32 @@ describe('canonical AST', () => {
       'FieldEntry',
     ]);
     expect(block.content.type).toBe('MixedContent');
+  });
+
+  it('preserves duplicate and numeric-looking field order through legacy normalization', () => {
+    const source = `
+      @context {
+        a: "first"
+        "10": "ten"
+        "2": "two"
+        a: "last"
+      }
+    `;
+
+    const canonical = parseCanonicalOrThrow(source, { filename: 'field-order.prs' });
+    const legacy = parseOrThrow(source, { filename: 'field-order.prs' });
+    const normalized = normalizeProgram(legacy);
+
+    expect(
+      canonical.blocks[0]!.body.entries.filter((entry) => entry.type === 'FieldEntry').map(
+        (entry) => entry.name
+      )
+    ).toEqual(['a', '10', '2', 'a']);
+    expect(
+      normalized.blocks[0]!.body.entries.filter((entry) => entry.type === 'FieldEntry').map(
+        (entry) => entry.name
+      )
+    ).toEqual(['a', '10', '2', 'a']);
   });
 
   it('retains exact locations for nested values', () => {

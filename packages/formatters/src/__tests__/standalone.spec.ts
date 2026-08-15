@@ -1,14 +1,21 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
+  createBlockBody,
+  createCanonicalBlock,
+  createCanonicalProgram,
+  createValueNode,
   deepClone,
   normalizeProgram,
+  toLegacyProgram,
   type BlockBody,
   type CanonicalProgram,
   type Program,
   type SourceLocation,
+  valueNodeToValue,
 } from '@promptscript/core';
 import {
   format,
+  formatProgram,
   getFormatter,
   registerFormatter,
   hasFormatter,
@@ -16,6 +23,7 @@ import {
   unregisterFormatter,
   FormatterRegistry,
 } from '../index.js';
+import type { Formatter } from '../types.js';
 
 /**
  * Create a minimal valid AST for testing.
@@ -211,6 +219,101 @@ describe('format (standalone)', () => {
     expect(output.content).toBe('true');
     expect(formatCanonical).toHaveBeenCalledOnce();
     expect(mockFormatter.format).not.toHaveBeenCalled();
+  });
+
+  it('preserves duplicate and numeric-looking fields through canonical formatting', () => {
+    const loc: SourceLocation = { file: 'ordered.prs', line: 1, column: 1 };
+    const block = createCanonicalBlock(
+      'context',
+      createBlockBody(
+        [
+          { type: 'FieldEntry', name: 'a', value: createValueNode('first', loc), loc },
+          { type: 'FieldEntry', name: '10', value: createValueNode('ten', loc), loc },
+          { type: 'FieldEntry', name: '2', value: createValueNode('two', loc), loc },
+          { type: 'FieldEntry', name: 'a', value: createValueNode('last', loc), loc },
+        ],
+        loc
+      ),
+      loc
+    );
+    const canonical = createCanonicalProgram({
+      operations: [
+        {
+          type: 'BlockOperation',
+          block,
+          sourceLayerId: loc.file,
+          loc,
+        },
+      ],
+      loc,
+    });
+    const legacy = toLegacyProgram(canonical, { preserveCanonicalBody: true });
+    const formatCanonical = vi.fn((program: CanonicalProgram) => ({
+      path: './ordered.md',
+      content: program.blocks[0]!.body.entries.filter((entry) => entry.type === 'FieldEntry')
+        .map((entry) => `${entry.name}:${String(valueNodeToValue(entry.value))}`)
+        .join('|'),
+    }));
+    const formatter: Formatter = {
+      name: 'ordered',
+      outputPath: './ordered.md',
+      description: 'Ordered canonical formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn(() => ({ path: './legacy.md', content: 'legacy' })),
+      formatCanonical,
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+      referencesMode: () => 'none',
+    };
+
+    const result = formatProgram(formatter, legacy);
+
+    expect(
+      canonical.blocks[0]!.body.entries.filter((entry) => entry.type === 'FieldEntry').map(
+        (entry) => entry.name
+      )
+    ).toEqual(['a', '10', '2', 'a']);
+    expect(result.content).toBe('a:first|10:ten|2:two|a:last');
+    expect(formatCanonical).toHaveBeenCalledOnce();
+  });
+
+  it('should pass an existing canonical input without re-normalizing it', () => {
+    const ast = normalizeProgram(createTestProgram());
+    const formatCanonical = vi.fn((program: CanonicalProgram) => ({
+      path: './canonical-identity.md',
+      content: program.type,
+    }));
+    const mockFormatter = {
+      name: 'canonical-identity',
+      outputPath: './canonical-identity.md',
+      description: 'Canonical identity formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn(() => ({ path: './legacy.md', content: 'legacy' })),
+      formatCanonical,
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+      referencesMode: () => 'none' as const,
+    };
+
+    format(ast, { formatter: mockFormatter });
+
+    expect(formatCanonical).toHaveBeenCalledWith(ast, {});
+  });
+
+  it('should reject a formatter without a supported AST entry point', () => {
+    const unsupportedFormatter = {
+      name: 'unsupported',
+      outputPath: './unsupported.md',
+      description: 'Unsupported formatter',
+      defaultConvention: 'markdown',
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+      referencesMode: () => 'none' as const,
+    } as unknown as Formatter;
+
+    expect(() => formatProgram(unsupportedFormatter, createTestProgram())).toThrow(
+      'Formatter does not implement a supported AST contract'
+    );
   });
 
   it('should accept formatter factory function', () => {

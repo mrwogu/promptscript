@@ -17,6 +17,8 @@ export type {
   CompileStats,
   CompileError,
   Formatter,
+  LegacyFormatter,
+  CanonicalFormatter,
   FormatterOutput,
   FormatterConstructor,
   FormatOptions,
