@@ -132,6 +132,10 @@ export * from './formatters/index.js';
 // Built-in formatter map
 export { BUILTIN_FORMATTERS } from './builtin-formatters.js';
 export {
+  isCanonicalTarget,
+  validateBuiltinFormatterCapabilities,
+} from './target-capability-consistency.js';
+export {
   extractHooks,
   generateClaudeHooks,
   generateCodexHooks,
