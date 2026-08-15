@@ -140,6 +140,16 @@ describe('parser request isolation', () => {
     expect(acquireParser()).toBe(first);
   });
 
+  it('caps the pool so a burst of parses cannot retain instances forever', () => {
+    clearParserPool();
+    const burst = Array.from({ length: 12 }, () => acquireParser());
+    for (const instance of burst) {
+      releaseParser(instance);
+    }
+
+    expect(pooledParserCount()).toBe(8);
+  });
+
   it('clears request state when an instance returns to the pool', () => {
     clearParserPool();
     const instance = acquireParser();
