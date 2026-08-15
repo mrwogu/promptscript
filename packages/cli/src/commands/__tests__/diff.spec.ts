@@ -8,6 +8,7 @@ const {
   mockResolveRegistryPath,
   mockCompile,
   mockCompilerOptions,
+  mockPrepareLegacyFactoryMigration,
   mockExistsSync,
   mockReadFile,
   mockPagerWrite,
@@ -33,6 +34,7 @@ const {
   const mockResolveRegistryPath = vi.fn();
   const mockCompile = vi.fn();
   const mockCompilerOptions = vi.fn();
+  const mockPrepareLegacyFactoryMigration = vi.fn().mockResolvedValue(undefined);
   const mockExistsSync = vi.fn();
   const mockReadFile = vi.fn();
   const mockPagerWrite = vi.fn();
@@ -50,6 +52,7 @@ const {
     mockResolveRegistryPath,
     mockCompile,
     mockCompilerOptions,
+    mockPrepareLegacyFactoryMigration,
     mockExistsSync,
     mockReadFile,
     mockPagerWrite,
@@ -83,6 +86,10 @@ vi.mock('../../config/loader.js', () => ({
 
 vi.mock('../../utils/registry-resolver.js', () => ({
   resolveRegistryPath: mockResolveRegistryPath,
+}));
+
+vi.mock('../../utils/legacy-factory-hooks.js', () => ({
+  prepareLegacyFactoryMigration: mockPrepareLegacyFactoryMigration,
 }));
 
 vi.mock('@promptscript/compiler', () => ({
@@ -184,6 +191,54 @@ describe('diffCommand', () => {
       expect.stringContaining('.github/copilot-instructions.md')
     );
     expect(mockPagerFlush).toHaveBeenCalled();
+  });
+
+  it('should reject empty target configurations', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: [{}],
+      validation: {},
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+
+    await diffCommand({ noPager: true });
+
+    expect(mockFail).toHaveBeenCalledWith('Error');
+    expect(ConsoleOutput.error).toHaveBeenCalledWith('Empty target configuration');
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should compile an explicitly requested target not present in config', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([['custom.md', { path: 'custom.md', content: 'custom output' }]]),
+    });
+
+    await diffCommand({ noPager: true, target: 'custom' });
+
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ formatters: [{ name: 'custom' }] })
+    );
+    expect(mockCompile).toHaveBeenCalledTimes(1);
   });
 
   it('should report no changes when files are up to date', async () => {
@@ -463,6 +518,33 @@ describe('diffCommand', () => {
     );
     expect(mockPagerWrite).toHaveBeenCalledWith(expect.stringContaining('/dist/planned.md'));
     expect(mockPagerWrite).not.toHaveBeenCalledWith(expect.stringContaining('unplanned.md'));
+  });
+
+  it('should prepare legacy Factory migration before finalizing Factory output', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([['.factory/hooks.json', { path: '.factory/hooks.json', content: '{}' }]]),
+    });
+
+    await diffCommand({ noPager: true });
+
+    expect(mockPrepareLegacyFactoryMigration).toHaveBeenCalledTimes(1);
+    expect(mockPrepareLegacyFactoryMigration).toHaveBeenCalledWith(expect.any(Map), process.cwd());
   });
 });
 

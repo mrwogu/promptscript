@@ -89,4 +89,37 @@ describe('finalizeOutputPlan', () => {
       '.github/instructions.md',
     ]);
   });
+
+  it('applies headers and plans nested additional files', async () => {
+    const child: FormatterOutput = {
+      path: '.github/prompts/child.md',
+      content: '<!-- PromptScript generated -->\nchild content',
+    };
+    const output: FormatterOutput = {
+      path: '.github/instructions.md',
+      content: '<!-- PromptScript generated -->\nroot content',
+      additionalFiles: [child],
+    };
+    const result = createResult();
+    result.outputs = new Map([[output.path, output]]);
+    result.outputPlan = createOutputPlan([{ owner: 'github', output }]);
+
+    const finalized = await finalizeOutputPlan(result, {
+      header: '# Header',
+      projectRoot: '/project',
+      logger: noopLogger,
+    });
+
+    expect(finalized.outputPlan.files).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: child.path,
+          content: '<!-- PromptScript generated -->\n\n# Header\nchild content',
+        }),
+      ])
+    );
+    expect(finalized.outputs.get(child.path)?.content).toBe(
+      '<!-- PromptScript generated -->\n\n# Header\nchild content'
+    );
+  });
 });
