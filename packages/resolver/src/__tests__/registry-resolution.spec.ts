@@ -1353,12 +1353,10 @@ describe('Resolver — registry marker handling', () => {
       throw new Error('skills block should be ObjectContent');
     }
     const skill = skillsBlock.content.properties['registry-skill-with-refs'] as
-      | Record<string, unknown>
-      | undefined;
+      Record<string, unknown> | undefined;
     expect(skill).toBeDefined();
     const resources = skill!['resources'] as
-      | Array<{ relativePath: string; content: string }>
-      | undefined;
+      Array<{ relativePath: string; content: string }> | undefined;
     expect(resources).toBeDefined();
     const paths = (resources ?? []).map((r) => r.relativePath).sort();
     expect(paths).toContain('references/checklist.md');
@@ -1626,6 +1624,82 @@ describe('Resolver — registry marker handling', () => {
     // checkoutCommit should have been called with the locked commit
     expect(mockGit.checkout).toHaveBeenCalledWith(lockedCommit);
     expect(result.errors.some((error) => error.message.includes('checkout failed'))).toBe(true);
+  });
+
+  it('refuses to repair a mismatched cached registry in read-only mode', async () => {
+    const tempDir = join(testCacheDir, 'project-read-only-cache-mismatch');
+    await fs.mkdir(tempDir, { recursive: true });
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(
+      prsFile,
+      '@meta { id: "read-only-cache-mismatch" syntax: "1.0.0" }\n@use @acme/standards'
+    );
+
+    const repoUrl = TEST_REGISTRIES['@acme'] as string;
+    const lockedCommit = 'a'.repeat(40);
+    const cacheDir = join(testCacheDir, 'regcache-read-only-mismatch');
+    const registryCache = new RegistryCache(cacheDir);
+    await registryCache.set(repoUrl, 'latest', 'b'.repeat(40));
+    await fs.writeFile(
+      join(registryCache.getCachePath(repoUrl, 'latest'), 'standards.prs'),
+      '@meta { id: "stale-standards" syntax: "1.0.0" }'
+    );
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir,
+      readOnly: true,
+      lockfile: {
+        version: 1,
+        dependencies: {
+          [repoUrl]: {
+            version: 'latest',
+            commit: lockedCommit,
+            integrity: 'sha256-test',
+          },
+        },
+      },
+    });
+
+    const result = await resolver.resolve(prsFile);
+
+    expect(mockGit.clone).not.toHaveBeenCalled();
+    expect(
+      result.errors.some((error) =>
+        error.message.includes('Read-only resolution cannot repair the registry cache')
+      )
+    ).toBe(true);
+  });
+
+  it('refuses to clone a missing registry in read-only mode', async () => {
+    const tempDir = join(testCacheDir, 'project-read-only-cache-miss');
+    await fs.mkdir(tempDir, { recursive: true });
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(
+      prsFile,
+      '@meta { id: "read-only-cache-miss" syntax: "1.0.0" }\n@use @acme/standards'
+    );
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-read-only-miss'),
+      readOnly: true,
+    });
+
+    const result = await resolver.resolve(prsFile);
+
+    expect(mockGit.clone).not.toHaveBeenCalled();
+    expect(
+      result.errors.some((error) =>
+        error.message.includes('Read-only resolution cannot clone remote registries')
+      )
+    ).toBe(true);
   });
 
   it('checks out the locked commit from the canonical URL on cache miss', async () => {

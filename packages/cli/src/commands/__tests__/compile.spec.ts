@@ -352,6 +352,21 @@ describe('compile command - createCliLogger warn path', () => {
     );
   });
 
+  it('should preview mixed managed hook rewrites in dry-run mode', async () => {
+    const rewrittenHook = '/mock/project/.claude/settings.json';
+    mockCleanupManagedOutputs.mockResolvedValue({
+      removed: [],
+      removedDirectories: [],
+      rewritten: [rewrittenHook],
+    });
+
+    await compileCommand({ cwd: '/mock/project', dryRun: true }, mockServices);
+
+    expect(mockDryRun).toHaveBeenCalledWith(
+      `Would rewrite mixed managed hook file: ${rewrittenHook}`
+    );
+  });
+
   it('should report managed directories pruned after compilation', async () => {
     const prunedDirectory = '/mock/project/.github/hooks';
     mockCleanupManagedOutputs.mockResolvedValue({
