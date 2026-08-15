@@ -171,6 +171,7 @@ describe('syntax feature capabilities', () => {
     expect(getFeaturesForVersion('1.4.0')).toEqual([SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE]);
     expect(getFeaturesForVersion('1.5.0')).toEqual([
       SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
+      SYNTAX_FEATURES.ORDERED_OPERATIONS,
       SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE,
       SYNTAX_FEATURES.EXPLICIT_OVERRIDE,
       SYNTAX_FEATURES.ENV_VAR_VALUE,
@@ -219,6 +220,26 @@ describe('syntax feature capabilities', () => {
     expect(getSyntaxFeatureUsages(ast)).toEqual([
       { feature: SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE, location: loc },
       { feature: SYNTAX_FEATURES.EXPLICIT_OVERRIDE, location: loc },
+    ]);
+  });
+
+  it('records declaration-order semantics at the declaring metadata location', () => {
+    const loc = { file: 'ordered.prs', line: 1, column: 1 };
+    const ast: Program = {
+      type: 'Program',
+      loc,
+      meta: {
+        type: 'MetaBlock',
+        fields: { syntax: '1.5.0' },
+        loc,
+      },
+      uses: [],
+      blocks: [],
+      extends: [],
+    };
+
+    expect(getSyntaxFeatureUsages(ast)).toEqual([
+      { feature: SYNTAX_FEATURES.ORDERED_OPERATIONS, location: loc },
     ]);
   });
 

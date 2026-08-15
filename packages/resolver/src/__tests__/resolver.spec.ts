@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
-import { CircularDependencyError } from '@promptscript/core';
+import * as parser from '@promptscript/parser';
+import { CircularDependencyError, ParseError } from '@promptscript/core';
 import { Resolver, createResolver } from '../resolver.js';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -54,6 +55,44 @@ describe('Resolver', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.sources).toHaveLength(1);
       expect(result.ast?.meta?.fields?.['id']).toBe('minimal');
+    });
+
+    it('should retain diagnostics from a recovered AST', async () => {
+      const targetPath = resolve(FIXTURES_DIR, 'minimal.prs');
+      const originalParse = parser.parse;
+      const parseSpy = vi.spyOn(parser, 'parse');
+      parseSpy.mockImplementation((source, options) => {
+        const result = originalParse(source, options);
+        if (options?.filename === targetPath && result.ast) {
+          return {
+            ast: result.ast,
+            errors: [
+              new ParseError('Recovered parser diagnostic', {
+                file: targetPath,
+                line: 1,
+                column: 1,
+              }),
+            ],
+          };
+        }
+        return result;
+      });
+
+      try {
+        const result = await resolver.resolve(targetPath);
+
+        expect(result.ast).not.toBeNull();
+        expect(result.errors).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: 'Recovered parser diagnostic',
+              location: { file: targetPath, line: 1, column: 1 },
+            }),
+          ])
+        );
+      } finally {
+        parseSpy.mockRestore();
+      }
     });
 
     it('should resolve file with inheritance', async () => {

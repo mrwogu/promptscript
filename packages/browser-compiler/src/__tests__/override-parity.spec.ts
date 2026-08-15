@@ -63,6 +63,51 @@ describe('explicit override browser parity regressions', () => {
     });
   });
 
+  it('uses ordered semantics from an imported 1.5 source for a lower root', async () => {
+    const resolver = new BrowserResolver({
+      fs: new VirtualFileSystem({
+        'project.prs': `@meta { id: "lower-root" syntax: "1.4.0" }
+@use ./ordered-source
+@standards { testing: "Local value" }
+`,
+        'ordered-source.prs': `@meta { id: "ordered-source" syntax: "1.5.0" }
+@standards { testing: "Imported value" }
+`,
+      }),
+    });
+
+    const result = await resolver.resolve('project.prs');
+    const standards = result.ast?.blocks.find((block) => block.name === 'standards');
+
+    expect(result.errors).toEqual([]);
+    expect(standards?.content).toMatchObject({
+      properties: { testing: 'Local value' },
+    });
+  });
+
+  it('uses ordered semantics from an inherited 1.5 source with override', async () => {
+    const resolver = new BrowserResolver({
+      fs: new VirtualFileSystem({
+        'project.prs': `@meta { id: "lower-root" syntax: "1.4.0" }
+@standards { testing: "Local value" }
+@inherit ./ordered-parent
+`,
+        'ordered-parent.prs': `@meta { id: "ordered-parent" syntax: "1.5.0" }
+@standards { testing: "Inherited value" }
+@override standards.testing { "Parent replacement" }
+`,
+      }),
+    });
+
+    const result = await resolver.resolve('project.prs');
+    const standards = result.ast?.blocks.find((block) => block.name === 'standards');
+
+    expect(result.errors).toEqual([]);
+    expect(standards?.content).toMatchObject({
+      properties: { testing: 'Parent replacement' },
+    });
+  });
+
   it('reports semantic errors at the override directive', async () => {
     const resolver = new BrowserResolver({
       fs: new VirtualFileSystem({
