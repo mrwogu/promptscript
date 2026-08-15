@@ -358,7 +358,7 @@ describe('canonical AST compatibility', () => {
     });
   });
 
-  it('preserves merged object field order from the legacy projection', () => {
+  it('preserves canonical object field order over legacy projection order', () => {
     const body = createBlockBody(
       [
         {
@@ -400,7 +400,7 @@ describe('canonical AST compatibility', () => {
             entry.type === 'FieldEntry'
         )
         .map((entry) => entry.name)
-    ).toEqual(['testing', 'linting', 'coverage']);
+    ).toEqual(['coverage', 'testing', 'linting']);
   });
 
   it('uses declaration files as legacy operation source layers', () => {

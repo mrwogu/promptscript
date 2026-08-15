@@ -16,7 +16,6 @@ import {
   createBlockBody,
   createValueNode,
   mergeValueNodeLocations,
-  reorderFieldEntries,
   reconcileBlockBody,
   valueNodeToValue,
 } from './canonical-ast.js';
@@ -532,7 +531,7 @@ function mergeCanonicalBodies(
     });
   }
 
-  return createBlockBody(reorderFieldEntries(entries, properties), content.loc, {
+  return createBlockBody(entries, content.loc, {
     projection: content.type,
     ...(text ? { text } : {}),
   });
