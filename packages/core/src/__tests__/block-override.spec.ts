@@ -384,6 +384,10 @@ describe('block override', () => {
       program([block('agents', { 'team.reviewer': { description: 'Original' } })]),
       valueOverride('agents.team.reviewer', { description: 'Direct update' })
     );
+    const unqualified = applyOverride(
+      program([block('agents', { reviewer: { description: 'Original' } })]),
+      valueOverride('agents.reviewer', { description: 'Unqualified update' })
+    );
     const aliased = applyOverride(
       program([
         block('__import__team', {
@@ -397,6 +401,9 @@ describe('block override', () => {
 
     expect(direct.blocks[0]?.content).toMatchObject({
       properties: { 'team.reviewer': { description: 'Direct update' } },
+    });
+    expect(unqualified.blocks[0]?.content).toMatchObject({
+      properties: { reviewer: { description: 'Unqualified update' } },
     });
     expect(aliased.blocks[1]?.content).toMatchObject({
       properties: { 'team.reviewer': { description: 'Aliased update' } },

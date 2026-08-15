@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BrowserResolver } from '../resolver.js';
+import { BrowserResolver, type ResolvedAST } from '../resolver.js';
 import { VirtualFileSystem } from '../virtual-fs.js';
 
 describe('BrowserResolver namespaced agents', () => {
@@ -50,6 +50,32 @@ describe('BrowserResolver namespaced agents', () => {
     expect(agents?.content).toMatchObject({
       properties: {
         'team.reviewer': { description: 'Updated reviewer' },
+      },
+    });
+  });
+
+  it('extends direct and aliased qualified agents', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "project" syntax: "1.5.0" }
+@use ./team as frontend
+@agents { "local.reviewer": { description: "Local reviewer" } }
+@extend agents.local.reviewer { description: "Updated local reviewer" }
+@extend frontend.agents.reviewer { description: "Updated frontend reviewer" }
+`,
+      'team.prs': `@meta { id: "team" syntax: "1.5.0" }
+@agents { reviewer: { description: "Team reviewer" } }
+`,
+    });
+    const resolver = new BrowserResolver({ fs });
+
+    const result = await resolver.resolve('project.prs');
+    const agents = result.ast?.blocks.find((block) => block.name === 'agents');
+
+    expect(result.errors).toEqual([]);
+    expect(agents?.content).toMatchObject({
+      properties: {
+        'local.reviewer': { description: 'Updated local reviewer' },
+        'frontend.reviewer': { description: 'Updated frontend reviewer' },
       },
     });
   });
@@ -130,5 +156,69 @@ describe('BrowserResolver namespaced agents', () => {
         expect.objectContaining({ name: 'planner', action: 'local' }),
       ])
     );
+  });
+
+  it('retains parent provenance when child declares no agents', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "project" syntax: "1.5.0" }
+@inherit ./parent
+`,
+      'parent.prs': `@meta { id: "parent" syntax: "1.5.0" }
+@agents { reviewer: { description: "Parent reviewer" } }
+`,
+    });
+    const resolver = new BrowserResolver({ fs });
+
+    const result = await resolver.resolve('project.prs');
+
+    expect(result.errors).toEqual([]);
+    expect(result.ast?.agentProvenance).toEqual([
+      expect.objectContaining({ name: 'reviewer', action: 'local' }),
+    ]);
+  });
+
+  it('retains child provenance when parent declares no agents', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "project" syntax: "1.5.0" }
+@inherit ./parent
+@agents { planner: { description: "Child planner" } }
+`,
+      'parent.prs': '@meta { id: "parent" syntax: "1.5.0" }',
+    });
+    const resolver = new BrowserResolver({ fs });
+
+    const result = await resolver.resolve('project.prs');
+
+    expect(result.errors).toEqual([]);
+    expect(result.ast?.agentProvenance).toEqual([
+      expect.objectContaining({ name: 'planner', action: 'local' }),
+    ]);
+  });
+
+  it('normalizes unexpected inheritance errors', async () => {
+    class ThrowingResolver extends BrowserResolver {
+      override async resolve(entryPath: string): Promise<ResolvedAST> {
+        if (entryPath === 'parent.prs') {
+          throw new Error('synthetic parent failure');
+        }
+        return super.resolve(entryPath);
+      }
+    }
+
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "project" syntax: "1.5.0" }
+@inherit ./parent
+`,
+    });
+    const resolver = new ThrowingResolver({ fs });
+
+    const result = await resolver.resolve('project.prs');
+
+    expect(result.ast).not.toBeNull();
+    expect(result.errors).toEqual([
+      expect.objectContaining({
+        message: 'Failed to resolve parent: synthetic parent failure',
+      }),
+    ]);
   });
 });

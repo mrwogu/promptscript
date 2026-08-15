@@ -140,6 +140,38 @@ describe('block import', () => {
     ]);
   });
 
+  it('qualifies mixed agents and preserves other aliased blocks', () => {
+    const source = program([
+      {
+        type: 'Block',
+        name: 'agents',
+        content: {
+          type: 'MixedContent',
+          properties: { reviewer: { description: 'Review code' } },
+          loc: LOC,
+        },
+        loc: LOC,
+      },
+      block('identity', { text: 'Agent guidance' }),
+    ]);
+
+    const result = resolveUseImport(program([]), use({ alias: 'team' }), source);
+
+    expect(result.blocks.map((entry) => entry.name)).toEqual([
+      'agents',
+      'identity',
+      '__import__team',
+      '__import__team.agents',
+      '__import__team.identity',
+    ]);
+    expect(result.blocks[0]?.content).toMatchObject({
+      type: 'MixedContent',
+      properties: {
+        'team.reviewer': { description: 'Review code' },
+      },
+    });
+  });
+
   it('preserves existing provenance for aliased and unaliased imports', () => {
     const source = program([block('agents', { reviewer: { description: 'Review code' } })], []);
     source.agentProvenance = [
@@ -165,6 +197,26 @@ describe('block import', () => {
     expect(aliased.agentProvenance).toEqual([
       expect.objectContaining({
         name: 'team.reviewer',
+        source: 'source.prs',
+        importPath: './shared',
+        namespace: 'team',
+        action: 'qualified',
+      }),
+    ]);
+
+    source.agentProvenance = [
+      {
+        name: 'reviewer',
+        source: 'source.prs',
+        namespace: 'team',
+        action: 'qualified',
+        loc: LOC,
+      },
+    ];
+    const qualified = resolveUseImport(program([]), use(), source);
+    expect(qualified.agentProvenance).toEqual([
+      expect.objectContaining({
+        name: 'reviewer',
         source: 'source.prs',
         importPath: './shared',
         namespace: 'team',

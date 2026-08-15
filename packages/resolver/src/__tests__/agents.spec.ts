@@ -245,6 +245,44 @@ You are an expert planning specialist.`
     ]);
   });
 
+  it('preserves a fully attributed AST when discovery adds no agents', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    await writeFile(
+      join(agentsDir, 'existing.md'),
+      '---\nname: existing\ndescription: Discovered existing agent\n---\nContent.'
+    );
+
+    const sourceFile = join(localPath, 'project.prs');
+    const ast: Program = {
+      ...emptyAst(sourceFile),
+      blocks: [
+        {
+          type: 'Block',
+          name: 'agents',
+          content: {
+            type: 'ObjectContent',
+            properties: { existing: { description: 'Explicit existing agent' } },
+            loc: { file: sourceFile, line: 1, column: 1 },
+          },
+          loc: { file: sourceFile, line: 1, column: 1, offset: 0 },
+        },
+      ],
+      agentProvenance: [
+        {
+          name: 'existing',
+          source: sourceFile,
+          action: 'local',
+          loc: { file: sourceFile, line: 1, column: 1, offset: 0 },
+        },
+      ],
+    };
+
+    const result = await resolveNativeAgents(ast, sourceFile, localPath);
+
+    expect(result).toBe(ast);
+  });
+
   it('should discover from universal directory', async () => {
     const universalDir = join(tempDir, '.agents', 'agents');
     await mkdir(universalDir, { recursive: true });

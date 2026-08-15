@@ -62,6 +62,11 @@ describe('agent names', () => {
         program([block('identity', { type: 'TextContent', value: 'Text', loc: LOC })])
       )
     ).toEqual({});
+    expect(
+      getAgentProperties(
+        program([block('agents', { type: 'TextContent', value: 'Text', loc: LOC })])
+      )
+    ).toEqual({});
     expect(getAgentProperties(program([block('agents', mixed)]))).toEqual(mixed.properties);
   });
 
@@ -154,6 +159,45 @@ describe('agent names', () => {
           }),
         ],
       },
+    ]);
+
+    const attributedTarget = program(
+      [
+        block('agents', {
+          type: 'ObjectContent',
+          properties: { reviewer: { description: 'Local' } },
+          loc: LOC,
+        }),
+      ],
+      [{ name: 'reviewer', source: 'project.prs', action: 'local', loc: LOC }]
+    );
+    const attributedSource = program(
+      [
+        block('agents', {
+          type: 'ObjectContent',
+          properties: { reviewer: { description: 'Imported' } },
+          loc: LOC,
+        }),
+      ],
+      [
+        {
+          name: 'reviewer',
+          source: 'shared.prs',
+          importPath: './shared',
+          action: 'imported',
+          loc: LOC,
+        },
+      ]
+    );
+
+    expect(findAgentConflicts(attributedTarget, attributedSource, './shared', LOC)).toEqual([
+      expect.objectContaining({
+        name: 'reviewer',
+        provenance: [
+          expect.objectContaining({ source: 'project.prs', action: 'local' }),
+          expect.objectContaining({ source: 'shared.prs', action: 'imported' }),
+        ],
+      }),
     ]);
   });
 
