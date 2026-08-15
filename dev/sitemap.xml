@@ -249,6 +249,10 @@
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/compiler/src/interfaces/CanonicalFormatter/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/compiler/src/interfaces/CompileError/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
@@ -294,6 +298,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/compiler/src/type-aliases/FormatterConstructor/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/compiler/src/type-aliases/LegacyFormatter/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
@@ -1285,6 +1293,10 @@
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/CanonicalProgramInput/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/ClaudeVersion/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
@@ -1334,6 +1346,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/KnownTarget/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/LegacyProgram/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
@@ -1741,6 +1757,10 @@
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/isLegacyFormatter/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/listFormatters/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
@@ -2038,6 +2058,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/type-aliases/KodeVersion/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/type-aliases/LegacyFormatter/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>

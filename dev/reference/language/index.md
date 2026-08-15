@@ -2000,3 +2000,11 @@ This complete example exercises root and nested replacement shapes:
 @override standards.config.enabled { false }
 @override standards.config.retries { 3 }
 ```
+
+### AST compatibility timeline
+
+The compiler and validator use `CanonicalProgram` as their internal contract. Resolver results expose `canonicalAst` as the primary representation and retain `ast` for legacy integrations. Formatter implementations can opt into `formatCanonical()`; legacy formatters receive one detached projection through `toLegacyProgram()`.
+
+`ResolvedAST` now always includes `canonicalAst`: successful resolutions carry a `CanonicalProgram`, while failed resolutions carry `null`. Integrations that construct `ResolvedAST` values must provide this field.
+
+During the remaining 1.x compatibility window, integrations should migrate from `Program` to `CanonicalProgram`. A future major release may remove legacy-only entry points after the formatter and integration ecosystem has migrated.
