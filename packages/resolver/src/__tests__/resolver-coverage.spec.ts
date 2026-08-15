@@ -55,6 +55,12 @@ describe('Resolver additional coverage', () => {
       expect(result.errors.length).toBeGreaterThan(0);
     });
 
+    it('should defer invalid dependency references to normal resolution', async () => {
+      await expect(resolver.resolve('./outside-reference.prs')).rejects.toThrow(
+        'Path traversal outside project root'
+      );
+    });
+
     it('should handle parse errors', async () => {
       const result = await resolver.resolve('./invalid-syntax.prs');
 

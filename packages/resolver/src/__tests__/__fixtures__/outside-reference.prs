@@ -1,0 +1,11 @@
+@meta {
+  id: "outside-reference"
+}
+
+@inherit ../outside-reference-parent
+
+@identity {
+  """
+  This file references a path outside its project root.
+  """
+}

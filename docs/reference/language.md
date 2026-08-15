@@ -2496,6 +2496,12 @@ top-level `@use`, local blocks, `@extend`, and `@override`. An `@override` used
 with an older declared syntax also uses declaration order so replacement remains
 deterministic, while PS018 requests a syntax upgrade.
 
+Resolver derives operation mode from the complete reachable composition graph.
+Inherited files, top-level imports, and inline composed skills can enable
+declaration order for a lower-version entry file. Such mixed-version graphs
+remain valid, while PS018 reports the ordered-operation requirement. Graphs
+without ordered sources retain legacy phase ordering.
+
 Use the forms according to intent:
 
 | Form        | Behavior                                                       |
