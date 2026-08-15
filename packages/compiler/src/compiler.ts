@@ -8,6 +8,7 @@ import {
   type ResolvedAST,
 } from '@promptscript/resolver';
 import { Validator, type ValidatorConfig, type ValidationMessage } from '@promptscript/validator';
+import { minimatch } from 'minimatch';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'path';
 import { isDeepStrictEqual } from 'node:util';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- imported for upcoming formatter integration
@@ -144,43 +145,15 @@ function normalizeOutputDir(dir: string): string {
     .join('/');
 }
 
-function watchPatternRegExp(pattern: string): RegExp {
-  const normalizedPattern = pattern.replace(/\\/g, '/');
-  let source = '^';
-  for (let index = 0; index < normalizedPattern.length; index++) {
-    const character = normalizedPattern[index]!;
-    if (character === '*') {
-      if (normalizedPattern[index + 1] === '*') {
-        if (normalizedPattern[index + 2] === '/') {
-          source += '(?:.*/)?';
-          index += 2;
-        } else {
-          source += '.*';
-          index++;
-        }
-      } else {
-        source += '[^/]*';
-      }
-      continue;
-    }
-    if (character === '?') {
-      source += '[^/]';
-      continue;
-    }
-    if ('.+^${}()|[]\\'.includes(character)) {
-      source += `\\${character}`;
-    } else {
-      source += character;
-    }
-  }
-  return new RegExp(`${source}$`);
-}
-
 function matchesWatchPattern(path: string, pattern: string, baseDir: string): boolean {
   const normalizedPath = path.replace(/\\/g, '/');
   const relativePath = relative(baseDir, path).replace(/\\/g, '/');
-  const matcher = watchPatternRegExp(pattern);
-  return matcher.test(relativePath) || matcher.test(normalizedPath);
+  const candidates = [relativePath, normalizedPath].flatMap((candidate) => [
+    candidate,
+    candidate.endsWith('/') ? candidate : `${candidate}/`,
+  ]);
+  const matcherOptions = { dot: true, nocase: process.platform === 'win32' };
+  return candidates.some((candidate) => minimatch(candidate, pattern, matcherOptions));
 }
 
 function shouldIncludeSkill(name: string, config?: TargetConfig): boolean {
@@ -416,10 +389,6 @@ export class Compiler {
       resolved = await resolver.resolve(resolvedEntryPath);
       this.recordResolvedDependencies(entryPath, resolved);
     } catch (err) {
-      this.resolvedDependencies.set(
-        this.dependencyKey(entryPath),
-        new Set([resolveEntryPath(entryPath)])
-      );
       stats.resolveTime = Date.now() - startResolve;
       stats.totalTime = Date.now() - startTotal;
       this.logger.verbose(`Resolve failed (${stats.resolveTime}ms)`);
@@ -952,9 +921,6 @@ export class Compiler {
     const excludePatterns = options.exclude ?? ['**/node_modules/**'];
     const debounceMs = options.debounce ?? 300;
 
-    // Build watch patterns
-    const watchPatterns = includePatterns.map((p) => resolve(baseDir, p));
-
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let pendingChanges: string[] = [];
     let compileRunning = false;
@@ -962,15 +928,26 @@ export class Compiler {
 
     if (!this.resolvedDependencies.has(this.dependencyKey(entryPath))) {
       try {
-        await this.compile(entryPath);
+        const result = await this.compile(entryPath);
+        if (!result.success) {
+          if (options.onCompile) {
+            options.onCompile(result, []);
+          } else if (options.onError) {
+            const message =
+              result.errors.map((error) => error.message).join('\n') ||
+              'Initial compilation failed';
+            options.onError(new Error(message));
+          }
+        }
       } catch (error) {
         options.onError?.(error instanceof Error ? error : new Error(String(error)));
       }
     }
 
-    const watchPaths = [...new Set([...watchPatterns, ...this.watchDependencyPaths(entryPath)])];
+    const watchPaths = [...new Set([baseDir, ...this.watchDependencyPaths(entryPath)])];
     const activeWatcher = chokidar.watch(watchPaths, {
-      ignored: excludePatterns,
+      ignored: (path) =>
+        excludePatterns.some((pattern) => matchesWatchPattern(path, pattern, baseDir)),
       persistent: true,
       ignoreInitial: true,
     });

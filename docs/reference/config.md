@@ -893,12 +893,24 @@ watch:
   clearScreen: true
 ```
 
-| Field         | Type     | Default                                       | Description         |
-| ------------- | -------- | --------------------------------------------- | ------------------- |
-| `include`     | string[] | PRS, native input, config, and lockfile paths | Patterns to watch   |
-| `exclude`     | string[] | `[]`                                          | Patterns to ignore  |
-| `debounce`    | number   | `300`                                         | Debounce delay (ms) |
-| `clearScreen` | boolean  | `true`                                        | Clear on rebuild    |
+| Field         | Type     | Default                    | Description         |
+| ------------- | -------- | -------------------------- | ------------------- |
+| `include`     | string[] | See default patterns below | Patterns to watch   |
+| `exclude`     | string[] | `[]`                       | Patterns to ignore  |
+| `debounce`    | number   | `300`                      | Debounce delay (ms) |
+| `clearScreen` | boolean  | `true`                     | Clear on rebuild    |
+
+Default include patterns:
+
+- `**/*.prs`
+- `.promptscript/**/*`
+- `.agents/**/*`
+- `registry/**/*`
+- `promptscript.yaml`
+- `promptscript.yml`
+- `.promptscriptrc.yaml`
+- `.promptscriptrc.yml`
+- `promptscript.lock`
 
 ### output
 
