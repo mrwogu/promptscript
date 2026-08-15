@@ -1,7 +1,8 @@
-import { describe, expect, it, afterEach } from 'vitest';
+import { describe, expect, it, afterEach, vi } from 'vitest';
 import { mkdtemp, mkdir, rm, symlink, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
+import { Document } from 'yaml';
 import {
   interpolateSkillContent,
   parseSkillMd,
@@ -261,7 +262,10 @@ describe('YAML skill frontmatter', () => {
     expect(result.metadata).toBeUndefined();
   });
 
-  it('reports field parser errors on the field line', () => {
+  it.each([
+    ['LF', '\n'],
+    ['CRLF', '\r\n'],
+  ])('reports field parser errors on the field line for %s input', (_name, newline) => {
     const content = [
       '---',
       'name: example',
@@ -270,7 +274,7 @@ describe('YAML skill frontmatter', () => {
       'compatibility: 42',
       '---',
       'Body',
-    ].join('\n');
+    ].join(newline);
     let error: unknown;
 
     try {
@@ -280,6 +284,10 @@ describe('YAML skill frontmatter', () => {
     }
 
     expect(error).toMatchObject({ location: { line: 5, column: 1 } });
+    expect(error).toMatchObject({
+      location: { offset: content.indexOf('compatibility') },
+    });
+    expect((error as { location?: { offset?: number } }).location?.offset).toBeGreaterThan(0);
   });
 
   it('handles null optional fields', () => {
@@ -417,10 +425,8 @@ describe('YAML skill frontmatter', () => {
     const localPath = join(directory, '.promptscript');
     const skillDirectory = join(localPath, 'skills', 'example');
     await mkdir(skillDirectory, { recursive: true });
-    await writeFile(
-      join(skillDirectory, 'SKILL.md'),
-      '---\nname: example\nreferences: [../outside.md]\n---\nBody'
-    );
+    const skillContent = '---\nname: example\nreferences: [../outside.md]\n---\nBody';
+    await writeFile(join(skillDirectory, 'SKILL.md'), skillContent);
 
     const sourceFile = join(localPath, 'project.prs');
     const ast: Program = {
@@ -438,9 +444,22 @@ describe('YAML skill frontmatter', () => {
       loc: { file: sourceFile, line: 1, column: 1 },
     };
 
-    await expect(
-      resolveNativeSkills(ast, join(directory, 'registry'), sourceFile, localPath)
-    ).rejects.toThrow(/Unsafe path in references/);
+    let error: unknown;
+    try {
+      await resolveNativeSkills(ast, join(directory, 'registry'), sourceFile, localPath);
+    } catch (caught: unknown) {
+      error = caught;
+    }
+
+    expect(error).toMatchObject({
+      location: {
+        file: join(skillDirectory, 'SKILL.md'),
+        line: 3,
+        offset: skillContent.indexOf('../outside.md'),
+      },
+    });
+    expect((error as { location?: { column?: number } }).location?.column).toBeGreaterThan(0);
+    expect(error).toMatchObject({ message: expect.stringMatching(/Unsafe path in references/) });
   });
 
   it('propagates parsed metadata through native auto-discovery', async () => {
@@ -732,6 +751,38 @@ describe('YAML skill frontmatter', () => {
     expect(() => parseSkillMd(`---\n${yaml}\n---\nBody`, '/tmp/skills/limited/SKILL.md')).toThrow(
       expected
     );
+  });
+
+  it.each([
+    [
+      'node count',
+      Array.from(
+        { length: 6 },
+        (_, index) => `list${index}: [${Array.from({ length: 2000 }, () => 'x').join(', ')}]`
+      ).join('\n'),
+      /frontmatter contains more than 10000 values/,
+    ],
+    [
+      'nesting depth',
+      `${Array.from({ length: 34 }, (_, index) => `${'  '.repeat(index)}level${index}:`).join('\n')}\n${'  '.repeat(34)}value`,
+      /frontmatter nesting exceeds 32 levels/,
+    ],
+    [
+      'collection size',
+      `items: [${Array.from({ length: 2001 }, () => 'x').join(', ')}]`,
+      /frontmatter sequence exceeds 2000 items/,
+    ],
+  ])('rejects %s before converting YAML values', (_caseName, yaml, expected) => {
+    const toJsSpy = vi.spyOn(Document.prototype, 'toJS');
+
+    try {
+      expect(() => parseSkillMd(`---\n${yaml}\n---\nBody`, '/tmp/skills/limited/SKILL.md')).toThrow(
+        expected
+      );
+      expect(toJsSpy).not.toHaveBeenCalled();
+    } finally {
+      toJsSpy.mockRestore();
+    }
   });
 
   it('rejects unsafe reference paths before file access', async () => {

@@ -1,6 +1,6 @@
 import { basename, dirname, join } from 'path';
 import { existsSync } from 'fs';
-import { parseSkillMd, type ParsedSkillMd } from './skills.js';
+import { extractSkillFrontmatter, parseSkillMd, type ParsedSkillMd } from './skills.js';
 
 /**
  * Severity of a skill validation issue.
@@ -63,7 +63,7 @@ export function validateSkillFrontmatter(
   const issues: SkillValidationIssue[] = [];
 
   // Hard requirement: a frontmatter block must exist.
-  if (!hasFrontmatterDelimiters(rawContent)) {
+  if (extractSkillFrontmatter(rawContent, options.filePath) === null) {
     issues.push({
       severity: 'error',
       code: 'SK001',
@@ -305,20 +305,6 @@ function validateAllowedTools(
       });
     }
   }
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function hasFrontmatterDelimiters(content: string): boolean {
-  const lines = content.split('\n');
-  const firstLine = (lines[0] ?? '').replace(/^\uFEFF/, '').replace(/\r$/, '');
-  if (firstLine !== '---') return false;
-  for (let i = 1; i < lines.length; i++) {
-    if ((lines[i] ?? '').replace(/\r$/, '') === '---') return true;
-  }
-  return false;
 }
 
 /**

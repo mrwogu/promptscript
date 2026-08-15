@@ -70,6 +70,18 @@ Frontmatter is parsed as constrained YAML. Malformed YAML, aliases, anchors, exp
 oversized values are rejected with a source location. Unknown fields remain available through
 frontmatter pass-through when a formatter supports them.
 
+### Frontmatter limits
+
+To bound parsing and conversion work, SKILL.md frontmatter is limited to:
+
+- 256 KiB document size
+- 10,000 YAML nodes
+- 32 nesting levels
+- 2,000 entries per mapping or items per sequence
+- 64 KiB per string value
+
+Documents exceeding any limit are rejected before YAML values are converted.
+
 ## Declaring References
 
 Use `references` in SKILL.md frontmatter to attach files to the skill's context:

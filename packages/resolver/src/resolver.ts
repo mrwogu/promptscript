@@ -49,6 +49,7 @@ import {
   resolveNativeCommands,
   resolveNativeAgents,
   parseSkillMd,
+  getSkillFrontmatterLocations,
   skillNameFromPath,
   discoverSkillResources,
   resolveSkillReferences,
@@ -593,7 +594,14 @@ export class Resolver {
 
     if (parsed.references && parsed.references.length > 0) {
       try {
-        const refs = await resolveSkillReferences(parsed.references, skillDir, this.logger);
+        const frontmatterLocations = getSkillFrontmatterLocations(parsed);
+        const refs = await resolveSkillReferences(
+          parsed.references,
+          skillDir,
+          this.logger,
+          frontmatterLocations?.frontmatter,
+          frontmatterLocations?.items.get('references')
+        );
         collected.push(...refs);
       } catch (err) {
         if (err instanceof ResolveError) {
@@ -606,7 +614,14 @@ export class Resolver {
 
     if (parsed.scripts && parsed.scripts.length > 0) {
       try {
-        const scripts = await resolveSkillScripts(parsed.scripts, skillDir, this.logger);
+        const frontmatterLocations = getSkillFrontmatterLocations(parsed);
+        const scripts = await resolveSkillScripts(
+          parsed.scripts,
+          skillDir,
+          this.logger,
+          frontmatterLocations?.frontmatter,
+          frontmatterLocations?.items.get('scripts')
+        );
         collected.push(...scripts);
       } catch (err) {
         if (err instanceof ResolveError) {
