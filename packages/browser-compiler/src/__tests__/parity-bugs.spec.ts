@@ -495,6 +495,13 @@ describe('Issue 4: colliding formatter output paths', () => {
     // A warning should have been logged about the collision
     const collisionWarn = warnCalls.find((m) => m.includes('OUTPUT.md') && m.includes('collision'));
     expect(collisionWarn).toBeDefined();
+    expect(result.warnings).toEqual([
+      expect.objectContaining({
+        ruleId: 'PS4001',
+        ruleName: 'output-path-collision',
+        message: expect.stringContaining('OUTPUT.md'),
+      }),
+    ]);
   });
 
   it('should track which formatter owns each path in the result', async () => {

@@ -67,7 +67,12 @@ export {
 
 // Re-export formatters for convenience
 export type { FormatterName } from '@promptscript/formatters';
-export { createOutputPlan, normalizeOutputPath, OutputPlanPathError } from '@promptscript/core';
+export {
+  createOutputPlan,
+  normalizeOutputCollisionKey,
+  normalizeOutputPath,
+  OutputPlanPathError,
+} from '@promptscript/core';
 export type {
   OutputArtifact,
   OutputPlan,

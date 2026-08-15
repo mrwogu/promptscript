@@ -1182,8 +1182,8 @@ describe('Compiler', () => {
       expect(collisionWarning?.message).toContain('AGENTS.md');
       expect(collisionWarning?.message).toContain('codex');
       expect(collisionWarning?.message).toContain('amp');
-      expect(result.outputs.get('AGENTS.md')?.managedOutputDirectories).toBeUndefined();
-      expect(result.outputs.get('AGENTS.md')?.managedOutputFiles).toBeUndefined();
+      expect(result.outputs.get('AGENTS.md')?.managedOutputDirectories).toEqual(['.factory/rules']);
+      expect(result.outputs.get('AGENTS.md')?.managedOutputFiles).toEqual(['.factory/hooks.json']);
     });
 
     it('should not warn when formatters write identical content to one path', async () => {

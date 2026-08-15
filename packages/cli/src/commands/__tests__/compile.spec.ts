@@ -421,9 +421,9 @@ describe('compile command - createCliLogger warn path', () => {
       '{}',
       'utf-8'
     );
-    expect(mockWriteFile).toHaveBeenCalledWith(
+    expect(mockWriteFile).not.toHaveBeenCalledWith(
       expect.stringContaining('/legacy.md'),
-      expect.stringContaining('legacy content'),
+      expect.anything(),
       'utf-8'
     );
     expect(mockCleanupManagedOutputs).toHaveBeenCalledWith(
@@ -436,7 +436,7 @@ describe('compile command - createCliLogger warn path', () => {
     >;
     expect(cleanupOutputs.get('planned.md')?.path).toBe('planned.md');
     expect(cleanupOutputs.get('fallback.json')?.path).toBe('fallback.json');
-    expect(cleanupOutputs.get('legacy.md')?.path).toBe('legacy.md');
+    expect(cleanupOutputs.has('legacy.md')).toBe(false);
   });
 
   it('should reject planned outputs that traverse symlinks', async () => {

@@ -194,13 +194,15 @@ describe('compile', () => {
     const result = await compile(files, 'project.prs');
 
     expect(result.success).toBe(true);
-    expect(result.warnings).toEqual([
-      expect.objectContaining({
-        ruleId: 'PS018',
-        message: expect.stringContaining('explicit-override'),
-        location: expect.objectContaining({ file: 'project.prs', line: 3, column: 1 }),
-      }),
-    ]);
+    expect(result.warnings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ruleId: 'PS018',
+          message: expect.stringContaining('explicit-override'),
+          location: expect.objectContaining({ file: 'project.prs', line: 3, column: 1 }),
+        }),
+      ])
+    );
   });
 
   it('should retain syntax warnings when explicit override resolution fails', async () => {

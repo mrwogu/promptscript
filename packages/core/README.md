@@ -111,13 +111,37 @@ filesystem-independent plan. It normalizes project-relative paths, flattens
 nested resources, records ownership and managed paths, and resolves collisions
 before a writer or browser adapter consumes the result.
 
-| Export                  | Description                                                      |
-| :---------------------- | :--------------------------------------------------------------- |
-| `OutputArtifact`        | Portable formatter output shape accepted by the planner          |
-| `OutputPlanCandidate`   | Artifact plus owner and collision role submitted to the planner  |
-| `OutputPlan`            | Normalized selected files, owners, collisions, and managed paths |
-| `createOutputPlan()`    | Builds a deterministic plan from output candidates               |
-| `normalizeOutputPath()` | Normalizes and validates project-relative output paths           |
+| Export                          | Description                                                      |
+| :------------------------------ | :--------------------------------------------------------------- |
+| `OutputArtifact`                | Portable formatter output shape accepted by the planner          |
+| `OutputPlanCandidate`           | Artifact plus owner and collision role submitted to the planner  |
+| `OutputPlan`                    | Normalized selected files, owners, collisions, and managed paths |
+| `createOutputPlan()`            | Builds a deterministic plan from output candidates               |
+| `normalizeOutputCollisionKey()` | Builds the stable filesystem collision key                       |
+| `normalizeOutputPath()`         | Normalizes and validates project-relative output paths           |
+
+An `OutputPlan` contains:
+
+- `files`: sorted selected files. Each file retains its normalized display path,
+  original formatter path, owner, role, content, and managed cleanup metadata.
+- `outputs` and `owners`: deterministic maps keyed by each selected file path.
+- `resources` and `injected`: selected nested resources and auto-injected files.
+- `collisions`: every collision in candidate traversal order, including the
+  existing owner, incoming owner, write-semantic equality, and resolution.
+- `managedPaths`, `managedOutputDirectories`, and `managedOutputFiles`: the
+  cleanup ownership union carried by selected candidates.
+
+Collision keys normalize separators and redundant relative path segments, apply
+Unicode NFC normalization, and case-fold with a fixed locale. The conservative
+case-folding models case-insensitive project filesystems even when planning on
+a case-sensitive host. It keeps Node and browser plans reproducible and avoids
+two outputs that cannot coexist after checkout on macOS or Windows. Display and
+write paths retain their original case.
+
+`createOutputPlan` is the decision boundary. Real compilation writes, dry-run
+previews, and diffs must consume the same final plan after all output
+transformations, including headers, formatting, migrations, and injected
+resources. Consumers must not recompute paths from raw formatter outputs.
 
 ## Usage (internal)
 

@@ -154,6 +154,18 @@ export function normalizeOutputPath(path: string): string {
   return segments.join('/');
 }
 
+/**
+ * Return the stable key used to detect files that cannot coexist on common
+ * project filesystems.
+ *
+ * Collision keys use NFC normalization and locale-independent case folding
+ * for every host. Keeping the plan conservative on case-sensitive hosts makes
+ * Node and browser consumers produce the same plan before a filesystem exists.
+ */
+export function normalizeOutputCollisionKey(path: string): string {
+  return normalizeOutputPath(path).normalize('NFC').toLocaleLowerCase('en-US');
+}
+
 function normalizeManagedPath(path: string): string | undefined {
   if (typeof path !== 'string' || path.length === 0) return undefined;
   const normalized = path.replaceAll('\\', '/');
@@ -305,15 +317,16 @@ export function createOutputPlan(candidates: readonly OutputPlanCandidate[]): Ou
 
   for (const candidate of candidates) {
     for (const file of flattenCandidate(candidate)) {
-      const existing = selected.get(file.path);
+      const collisionKey = normalizeOutputCollisionKey(file.path);
+      const existing = selected.get(collisionKey);
       if (!existing) {
-        selected.set(file.path, file);
+        selected.set(collisionKey, file);
         continue;
       }
 
       const identical = hasIdenticalWriteSemantics(existing, file);
       if (identical) {
-        selected.set(file.path, mergeManagedMetadata(existing, file));
+        selected.set(collisionKey, mergeManagedMetadata(existing, file));
         collisions.push({
           path: file.path,
           existingOwner: existing.owner,
@@ -327,8 +340,9 @@ export function createOutputPlan(candidates: readonly OutputPlanCandidate[]): Ou
 
       const replace = file.role === 'primary';
       if (replace) {
-        // Replacing output owns cleanup metadata; retaining loser paths expands cleanup scope.
-        selected.set(file.path, file);
+        // Cleanup ownership survives replacement so stale files from the loser
+        // remain eligible for managed cleanup.
+        selected.set(collisionKey, mergeManagedMetadata(file, existing));
       }
       collisions.push({
         path: file.path,

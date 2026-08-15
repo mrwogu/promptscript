@@ -19,7 +19,12 @@ export type {
   FormatOptions,
 } from './types.js';
 
-export { createOutputPlan, normalizeOutputPath, OutputPlanPathError } from '@promptscript/core';
+export {
+  createOutputPlan,
+  normalizeOutputCollisionKey,
+  normalizeOutputPath,
+  OutputPlanPathError,
+} from '@promptscript/core';
 export type {
   OutputArtifact,
   OutputPlan,

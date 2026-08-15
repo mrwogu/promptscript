@@ -141,6 +141,7 @@ vi.mock('chalk', () => {
 
 import { diffCommand, createDiffLogger } from '../diff.js';
 import { ConsoleOutput } from '../../output/console.js';
+import { createOutputPlan } from '@promptscript/core';
 
 describe('diffCommand', () => {
   beforeEach(() => {
@@ -419,6 +420,49 @@ describe('diffCommand', () => {
     expect(mockPagerWrite).toHaveBeenCalledWith(
       expect.stringContaining('All files are up to date')
     );
+  });
+
+  it('should compare only final planned outputs under the configured base directory', async () => {
+    const outputPlan = createOutputPlan([
+      {
+        owner: 'github',
+        output: { path: 'planned.md', content: 'planned content' },
+      },
+    ]);
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github', { disabled: { enabled: false } }],
+      validation: {},
+      output: { baseDir: 'dist' },
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      if (value.endsWith('/.promptscript/project.prs')) return true;
+      return false;
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([
+        ['planned.md', { path: 'planned.md', content: 'planned content' }],
+        ['unplanned.md', { path: 'unplanned.md', content: 'must not compare' }],
+      ]),
+      outputPlan,
+    });
+
+    await diffCommand({ noPager: true });
+
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ formatters: [{ name: 'github' }] })
+    );
+    expect(mockPagerWrite).toHaveBeenCalledWith(expect.stringContaining('/dist/planned.md'));
+    expect(mockPagerWrite).not.toHaveBeenCalledWith(expect.stringContaining('unplanned.md'));
   });
 });
 
