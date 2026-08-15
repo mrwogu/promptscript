@@ -53,11 +53,16 @@ the legacy parse functions.
 
 ### Parser & Visitor
 
-| Export               | Description                 |
-| :------------------- | :-------------------------- |
-| `PromptScriptParser` | Chevrotain parser class     |
-| `parser`             | Singleton parser instance   |
-| `visitor`            | CST-to-AST visitor instance |
+| Export               | Description                                  |
+| :------------------- | :------------------------------------------- |
+| `PromptScriptParser` | Chevrotain parser class                      |
+| `createParser`       | Create an isolated parser instance           |
+| `parser`             | Legacy parser instance for direct consumers  |
+| `createVisitor`      | Create an isolated CST-to-AST visitor        |
+| `visitor`            | Legacy visitor instance for direct consumers |
+
+Parse helpers create parser and visitor instances per request. The legacy
+`parser` and `visitor` exports remain available for direct consumers.
 
 ### Types
 

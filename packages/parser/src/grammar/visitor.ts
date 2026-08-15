@@ -1356,6 +1356,18 @@ function splitOnce(value: string, separator: string): [string, string?] {
 }
 
 /**
- * Singleton visitor instance.
+ * Create an isolated visitor instance for one parse request.
+ *
+ * The visitor stores interpolation settings, environment providers,
+ * diagnostics, and transformation caches on the instance.
  */
-export const visitor = new PromptScriptVisitor();
+export function createVisitor(): PromptScriptVisitor {
+  return new PromptScriptVisitor();
+}
+
+/**
+ * Legacy visitor instance kept for direct consumers of the parser API.
+ *
+ * Parse helpers use createVisitor() so request state never leaks between calls.
+ */
+export const visitor = createVisitor();

@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { PSLexer } from './lexer/lexer.js';
-import { parser } from './grammar/parser.js';
-import { visitor, type EnvProvider } from './grammar/visitor.js';
+import { createParser } from './grammar/parser.js';
+import { createVisitor, type EnvProvider } from './grammar/visitor.js';
 import type { CanonicalProgram, Program } from '@promptscript/core';
 import { ParseError, toLegacyProgram } from '@promptscript/core';
 
@@ -123,10 +123,11 @@ export function parseCanonical(source: string, options: ParseOptions = {}): Cano
   }
 
   // Parsing phase
-  parser.input = lexResult.tokens;
-  const cst = parser.program();
+  const requestParser = createParser();
+  requestParser.input = lexResult.tokens;
+  const cst = requestParser.program();
 
-  for (const err of parser.errors) {
+  for (const err of requestParser.errors) {
     errors.push(
       new ParseError(err.message, {
         file: filename,
@@ -144,15 +145,16 @@ export function parseCanonical(source: string, options: ParseOptions = {}): Cano
   // AST transformation phase
   try {
     // Configure visitor with interpolation setting
-    visitor.setInterpolateEnv(interpolateEnv);
+    const requestVisitor = createVisitor();
+    requestVisitor.setInterpolateEnv(interpolateEnv);
     if (envProvider) {
-      visitor.setEnvProvider(envProvider);
+      requestVisitor.setEnvProvider(envProvider);
     } else {
-      visitor.resetEnvProvider();
+      requestVisitor.resetEnvProvider();
     }
-    visitor.resetDiagnostics();
-    const ast = visitor.visit(cst, filename) as CanonicalProgram;
-    for (const diagnostic of visitor.takeDiagnostics()) {
+    requestVisitor.resetDiagnostics();
+    const ast = requestVisitor.visit(cst, filename) as CanonicalProgram;
+    for (const diagnostic of requestVisitor.takeDiagnostics()) {
       errors.push(new ParseError(diagnostic.message, diagnostic.loc));
     }
     if (errors.length > 0 && !isRecoveryMode) {
