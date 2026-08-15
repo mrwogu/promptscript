@@ -47,14 +47,33 @@ description: Security-focused code review
 Instructions here...
 ```
 
-| Property      | Type     | Default  | Description                                                                                                      |
-| ------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-| `name`        | string   | required | Skill identifier (matches directory name)                                                                        |
-| `description` | string   | required | What the skill does                                                                                              |
-| `params`      | object   | -        | Parameter definitions for `{{variable}}` templates                                                               |
-| `references`  | string[] | -        | File paths to attach to the skill's context (see below)                                                          |
-| `inputs`      | object   | -        | Runtime input contract (see [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md))  |
-| `outputs`     | object   | -        | Runtime output contract (see [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md)) |
+| Property        | Type     | Default  | Description                                                                                                      |
+| --------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `name`          | string   | required | Skill identifier (matches directory name)                                                                        |
+| `description`   | string   | required | What the skill does                                                                                              |
+| `license`       | string   | -        | License for the skill                                                                                            |
+| `compatibility` | string   | -        | Runtime requirements or compatible tools                                                                         |
+| `metadata`      | object   | -        | Additional string metadata                                                                                       |
+| `allowed-tools` | string[] | -        | Tools the skill may use                                                                                          |
+| `params`        | object   | -        | Parameter definitions for `{{variable}}` templates                                                               |
+| `references`    | string[] | -        | File paths to attach to the skill's context (see below)                                                          |
+| `scripts`       | string[] | -        | Executable helper paths to attach to the skill                                                                   |
+| `inputs`        | object   | -        | Runtime input contract (see [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md))  |
+| `outputs`       | object   | -        | Runtime output contract (see [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md)) |
+
+Frontmatter is parsed as constrained YAML. Malformed YAML, aliases, anchors, explicit tags, and oversized values are rejected with a source location. Unknown fields remain available through frontmatter pass-through when a formatter supports them.
+
+### Frontmatter limits
+
+To bound parsing and conversion work, SKILL.md frontmatter is limited to:
+
+- 256 KiB document size
+- 10,000 YAML nodes
+- 32 nesting levels
+- 2,000 entries per mapping or items per sequence
+- 64 KiB per string value
+
+Documents exceeding any limit are rejected before YAML values are converted.
 
 ## Declaring References
 
@@ -90,9 +109,9 @@ You can also declare references in your `.prs` file using the `references` prope
 
 The validator checks that referenced files use allowed extensions (PS025) and don't contain sensitive content (PS026).
 
-## Behavior Properties (in .prs only)
+## Behavior Properties (in .prs)
 
-Properties like `userInvocable`, `disableModelInvocation`, `context`, `agent`, and `allowedTools` control how AI agents handle the skill. These are set in your `.prs` file, not in SKILL.md frontmatter:
+Properties like `userInvocable`, `disableModelInvocation`, `context`, and `agent` control how AI agents handle the skill. These are set in your `.prs` file. `allowedTools` can be set in `.prs`; native `SKILL.md` files use the Agent Skills `allowed-tools` frontmatter field:
 
 ```
 @skills {

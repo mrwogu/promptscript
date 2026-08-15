@@ -2977,6 +2977,10 @@
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/extractSkillFrontmatter/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/filterBlocks/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
@@ -3002,6 +3006,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/getOriginalBlockName/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/getSkillFrontmatterLocations/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
@@ -3250,6 +3258,14 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/SkillFilterOptions/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/SkillFrontmatterBlock/</loc>
+         <lastmod>2026-08-15</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/SkillFrontmatterLocations/</loc>
          <lastmod>2026-08-15</lastmod>
     </url>
     <url>
