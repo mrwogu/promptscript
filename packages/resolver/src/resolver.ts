@@ -1090,27 +1090,19 @@ export class Resolver {
         // No file found — try directory import and auto-discovery
         const discoverDir = isRoot ? cachePath : join(cachePath, subPath);
 
-        // Containment check for directory discovery path
-        if (!isRoot) {
-          const dirRel = relative(resolve(cachePath), resolve(discoverDir));
-          if (dirRel.startsWith('..')) {
-            errors.push(
-              new ResolveError(
-                `Path traversal detected: subpath '${subPath}' escapes repository cache boundary.`
-              )
-            );
-            this.resolving.delete(marker);
-            return { ast: null, canonicalAst: null, sources: [marker], errors };
-          }
-          if (existsSync(discoverDir) && !(await isRealPathInside(discoverDir, cachePath))) {
-            errors.push(
-              new ResolveError(
-                `Path traversal detected: subpath '${subPath}' resolves outside the repository cache boundary.`
-              )
-            );
-            this.resolving.delete(marker);
-            return { ast: null, canonicalAst: null, sources: [marker], errors };
-          }
+        // The lexical containment check above covers traversal before discovery.
+        if (
+          !isRoot &&
+          existsSync(discoverDir) &&
+          !(await isRealPathInside(discoverDir, cachePath))
+        ) {
+          errors.push(
+            new ResolveError(
+              `Path traversal detected: subpath '${subPath}' resolves outside the repository cache boundary.`
+            )
+          );
+          this.resolving.delete(marker);
+          return { ast: null, canonicalAst: null, sources: [marker], errors };
         }
 
         if (!isRoot && !existsSync(discoverDir)) {

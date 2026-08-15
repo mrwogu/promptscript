@@ -9,6 +9,7 @@ import {
 } from '@promptscript/core';
 import {
   format,
+  formatProgram,
   getFormatter,
   registerFormatter,
   hasFormatter,
@@ -16,6 +17,7 @@ import {
   unregisterFormatter,
   FormatterRegistry,
 } from '../index.js';
+import type { Formatter } from '../types.js';
 
 /**
  * Create a minimal valid AST for testing.
@@ -234,6 +236,22 @@ describe('format (standalone)', () => {
     format(ast, { formatter: mockFormatter });
 
     expect(formatCanonical).toHaveBeenCalledWith(ast, {});
+  });
+
+  it('should reject a formatter without a supported AST entry point', () => {
+    const unsupportedFormatter = {
+      name: 'unsupported',
+      outputPath: './unsupported.md',
+      description: 'Unsupported formatter',
+      defaultConvention: 'markdown',
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+      referencesMode: () => 'none' as const,
+    } as unknown as Formatter;
+
+    expect(() => formatProgram(unsupportedFormatter, createTestProgram())).toThrow(
+      'Formatter does not implement a supported AST contract'
+    );
   });
 
   it('should accept formatter factory function', () => {
