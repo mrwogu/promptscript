@@ -309,6 +309,39 @@ function projectMergedContent(body: BlockBody, mergedContent: BlockContent): Blo
   return projected;
 }
 
+/**
+ * Interleaves base and incoming entries so a field declared by both layers stays
+ * at the position the base gave it, matching the legacy object projection where
+ * merging assigns into existing keys instead of re-inserting them.
+ */
+function orderMergedEntries(
+  baseEntries: readonly BlockEntry[],
+  incomingEntries: readonly BlockEntry[]
+): Array<{ entry: BlockEntry; layer: 'base' | 'incoming' }> {
+  const incomingFieldNames = new Set(
+    incomingEntries.filter((entry) => entry.type === 'FieldEntry').map((entry) => entry.name)
+  );
+  const ordered: Array<{ entry: BlockEntry; layer: 'base' | 'incoming' }> = [];
+  const consumed = new Set<number>();
+  const placed = new Set<string>();
+  for (const entry of baseEntries) {
+    ordered.push({ entry, layer: 'base' });
+    if (entry.type !== 'FieldEntry' || !incomingFieldNames.has(entry.name)) continue;
+    if (placed.has(entry.name)) continue;
+    placed.add(entry.name);
+    for (const [index, candidate] of incomingEntries.entries()) {
+      if (candidate.type !== 'FieldEntry' || candidate.name !== entry.name) continue;
+      consumed.add(index);
+      ordered.push({ entry: candidate, layer: 'incoming' });
+    }
+  }
+  for (const [index, entry] of incomingEntries.entries()) {
+    if (consumed.has(index)) continue;
+    ordered.push({ entry, layer: 'incoming' });
+  }
+  return ordered;
+}
+
 function mergeCanonicalBodies(
   base: BlockBody | undefined,
   incoming: BlockBody | undefined,
@@ -331,10 +364,7 @@ function mergeCanonicalBodies(
   const selectedBasePresentation = new Set(presentation.base);
   const selectedIncomingPresentation = new Set(presentation.incoming);
 
-  const taggedEntries = [
-    ...baseBody.entries.map((entry) => ({ entry, layer: 'base' as const })),
-    ...incomingBody.entries.map((entry) => ({ entry, layer: 'incoming' as const })),
-  ];
+  const taggedEntries = orderMergedEntries(baseBody.entries, incomingBody.entries);
   const baseProperties = bodyProperties(baseBody);
   const incomingProperties = bodyProperties(incomingBody);
   const baseListValues = bodyListValues(baseBody);
