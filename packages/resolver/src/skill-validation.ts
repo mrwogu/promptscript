@@ -1,6 +1,6 @@
 import { basename, dirname, join } from 'path';
 import { existsSync } from 'fs';
-import { parseSkillMd, type ParsedSkillMd } from './skills.js';
+import { extractSkillFrontmatter, parseSkillMd, type ParsedSkillMd } from './skills.js';
 
 /**
  * Severity of a skill validation issue.
@@ -63,7 +63,7 @@ export function validateSkillFrontmatter(
   const issues: SkillValidationIssue[] = [];
 
   // Hard requirement: a frontmatter block must exist.
-  if (!hasFrontmatterDelimiters(rawContent)) {
+  if (extractSkillFrontmatter(rawContent, options.filePath) === null) {
     issues.push({
       severity: 'error',
       code: 'SK001',
@@ -72,15 +72,25 @@ export function validateSkillFrontmatter(
     return { valid: false, issues };
   }
 
-  const parsed = parseSkillMd(rawContent);
+  let parsed: ParsedSkillMd;
+  try {
+    parsed = parseSkillMd(rawContent, options.filePath);
+  } catch (error: unknown) {
+    issues.push({
+      severity: 'error',
+      code: 'SK000',
+      message: error instanceof Error ? error.message : String(error),
+    });
+    return { valid: false, issues };
+  }
 
   validateName(parsed, options, issues);
   validateDescription(parsed, issues);
-  validateCompatibility(parsed.rawFrontmatter, issues);
-  validateLicense(parsed.rawFrontmatter, issues);
+  validateCompatibility(parsed.compatibility, issues);
+  validateLicense(parsed.license, issues);
   validateBody(parsed.content, issues);
   validateReferences(parsed.references, options.filePath, issues);
-  validateAllowedTools(parsed.rawFrontmatter, issues);
+  validateAllowedTools(parsed.allowedTools, issues);
 
   const hasErrors = issues.some((i) => i.severity === 'error');
   return { valid: !hasErrors, issues };
@@ -157,13 +167,7 @@ function validateName(
 }
 
 function validateDescription(parsed: ParsedSkillMd, issues: SkillValidationIssue[]): void {
-  // Re-extract from raw frontmatter so `description: ""` reads as empty
-  // (parseSkillMd's regex requires ≥1 char inside quotes and falls back to
-  // capturing the literal `""`).
-  const fromRaw = parsed.rawFrontmatter
-    ? extractScalarField(parsed.rawFrontmatter, 'description')
-    : undefined;
-  const description = fromRaw !== undefined ? fromRaw : parsed.description;
+  const description = parsed.description;
 
   if (!description || description.trim().length < MIN_DESC_LEN) {
     issues.push({
@@ -203,24 +207,22 @@ function validateDescription(parsed: ParsedSkillMd, issues: SkillValidationIssue
 }
 
 function validateCompatibility(
-  rawFrontmatter: string | undefined,
+  compatibility: string | undefined,
   issues: SkillValidationIssue[]
 ): void {
-  if (!rawFrontmatter) return;
-  const value = extractScalarField(rawFrontmatter, 'compatibility');
-  if (value === undefined) return;
-  if (value.length > MAX_COMPATIBILITY_LEN) {
+  if (compatibility === undefined) return;
+  if (compatibility.length > MAX_COMPATIBILITY_LEN) {
     issues.push({
       severity: 'error',
       code: 'SK020',
       field: 'compatibility',
-      message: `\`compatibility\` must be at most ${MAX_COMPATIBILITY_LEN} characters (got ${value.length}).`,
+      message: `\`compatibility\` must be at most ${MAX_COMPATIBILITY_LEN} characters (got ${compatibility.length}).`,
     });
   }
 }
 
-function validateLicense(rawFrontmatter: string | undefined, issues: SkillValidationIssue[]): void {
-  if (!rawFrontmatter) {
+function validateLicense(license: string | undefined, issues: SkillValidationIssue[]): void {
+  if (license === undefined || license.length === 0) {
     issues.push({
       severity: 'warning',
       code: 'SK030',
@@ -229,16 +231,6 @@ function validateLicense(rawFrontmatter: string | undefined, issues: SkillValida
         '`license` is missing. Enterprises typically require an explicit license declaration before adopting a third-party skill.',
     });
     return;
-  }
-  const value = extractScalarField(rawFrontmatter, 'license');
-  if (value === undefined || value.length === 0) {
-    issues.push({
-      severity: 'warning',
-      code: 'SK030',
-      field: 'license',
-      message:
-        '`license` is missing. Enterprises typically require an explicit license declaration before adopting a third-party skill.',
-    });
   }
 }
 
@@ -263,7 +255,7 @@ function validateReferences(
   const skillDir = dirname(filePath);
   for (const ref of references) {
     // Reject paths that escape the skill directory.
-    if (ref.startsWith('/') || ref.startsWith('..')) {
+    if (isUnsafeReferencePath(ref)) {
       issues.push({
         severity: 'error',
         code: 'SK050',
@@ -272,7 +264,7 @@ function validateReferences(
       });
       continue;
     }
-    const target = join(skillDir, ref);
+    const target = join(skillDir, ref.replace(/\\/g, '/'));
     if (!existsSync(target)) {
       issues.push({
         severity: 'error',
@@ -284,18 +276,26 @@ function validateReferences(
   }
 }
 
+function isUnsafeReferencePath(ref: string): boolean {
+  const portable = ref.replace(/\\/g, '/');
+  return (
+    portable.length === 0 ||
+    portable.includes('\0') ||
+    portable.startsWith('/') ||
+    /^[A-Za-z]:/.test(portable) ||
+    portable.split('/').some((segment) => segment === '..')
+  );
+}
+
 function validateAllowedTools(
-  rawFrontmatter: string | undefined,
+  allowedTools: string[] | undefined,
   issues: SkillValidationIssue[]
 ): void {
-  if (!rawFrontmatter) return;
-  const value = extractScalarField(rawFrontmatter, 'allowed-tools');
-  if (value === undefined) return;
+  if (allowedTools === undefined) return;
   // The field is space-separated tool entries. Each entry should look like
   // `Tool` or `Tool(scope:pattern)`. We only warn — the spec marks the field
   // experimental and individual agents may extend the grammar.
-  const tokens = value.split(/\s+/).filter((t) => t.length > 0);
-  for (const token of tokens) {
+  for (const token of allowedTools) {
     if (!/^[A-Za-z][A-Za-z0-9_-]*(\([^)]*\))?$/.test(token)) {
       issues.push({
         severity: 'warning',
@@ -305,46 +305,6 @@ function validateAllowedTools(
       });
     }
   }
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function hasFrontmatterDelimiters(content: string): boolean {
-  const lines = content.split('\n');
-  let first = -1;
-  for (let i = 0; i < lines.length; i++) {
-    if ((lines[i] ?? '').trim() === '---') {
-      first = i;
-      break;
-    }
-  }
-  if (first === -1) return false;
-  for (let i = first + 1; i < lines.length; i++) {
-    if ((lines[i] ?? '').trim() === '---') return true;
-  }
-  return false;
-}
-
-/**
- * Read a top-level scalar field from raw frontmatter text.
- * Returns `undefined` when the field is absent. Strips surrounding quotes.
- */
-function extractScalarField(rawFrontmatter: string, field: string): string | undefined {
-  const lines = rawFrontmatter.split('\n');
-  const pattern = new RegExp(`^${escapeRegex(field)}:\\s*(?:"([^"]*)"|'([^']*)'|(.*))\\s*$`);
-  for (const line of lines) {
-    const match = line.match(pattern);
-    if (match) {
-      return (match[1] ?? match[2] ?? match[3] ?? '').trim();
-    }
-  }
-  return undefined;
-}
-
-function escapeRegex(input: string): string {
-  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**

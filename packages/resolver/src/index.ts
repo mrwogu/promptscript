@@ -132,10 +132,17 @@ export {
   resolveNativeSkills,
   resolveNativeCommands,
   parseSkillMd,
+  extractSkillFrontmatter,
+  getSkillFrontmatterLocations,
   skillNameFromPath,
   interpolateSkillContent,
 } from './skills.js';
-export type { NativeSkillOptions, ParsedSkillMd } from './skills.js';
+export type {
+  NativeSkillOptions,
+  ParsedSkillMd,
+  SkillFrontmatterBlock,
+  SkillFrontmatterLocations,
+} from './skills.js';
 
 // Skill frontmatter validation (Agent Skills spec compliance)
 export { validateSkillFrontmatter, formatSkillValidationIssues } from './skill-validation.js';
