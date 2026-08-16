@@ -340,7 +340,7 @@ export async function discoverNativeContent(dir: string, logger?: Logger): Promi
   for (const wrapped of wrappedSkillResults) {
     if (wrapped) {
       for (const [key, value] of Object.entries(wrapped)) {
-        if (!(key in mergedSkills)) {
+        if (!Object.hasOwn(mergedSkills, key)) {
           mergedSkills[key] = value;
         }
       }

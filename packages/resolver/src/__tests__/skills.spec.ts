@@ -68,6 +68,27 @@ describe('resolveNativeSkills', () => {
     ]);
   });
 
+  it('should auto-discover a skill named constructor', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'constructor');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: constructor\ndescription: Prototype name\n---\n\nBody.\n'
+    );
+
+    const result = await resolveNativeSkills(
+      createProgram([]),
+      registryPath,
+      join(localPath, 'project.prs'),
+      localPath
+    );
+
+    const skillsBlock = result.blocks.find((block) => block.name === 'skills');
+    const properties = (skillsBlock!.content as ObjectContent).properties;
+    expect(Object.hasOwn(properties, 'constructor')).toBe(true);
+  });
+
   it('should replace an explicitly declared skill from the universal candidate', async () => {
     const localPath = join(testDir, '.promptscript');
     const skillDir = join(testDir, '.agents', 'skills', 'foo');

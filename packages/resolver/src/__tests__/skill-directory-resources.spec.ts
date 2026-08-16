@@ -91,6 +91,173 @@ describe('directory imports carry skill resources', () => {
     ]);
   });
 
+  it('resolves a local import of a directory that is itself the skill', async () => {
+    const projectDir = await createTempDir('prs-local-root-skill-');
+    await writeSkillDirectory(join(projectDir, 'skills', 'ui-ux'), 'ui-ux');
+    await writeFile(
+      join(projectDir, 'main.prs'),
+      [
+        '@meta { id: "local-root-skill" syntax: "1.0.0" }',
+        '',
+        '@use ./skills/ui-ux',
+        '',
+        '@identity { """test""" }',
+      ].join('\n')
+    );
+
+    const resolver = new Resolver({
+      registryPath: projectDir,
+      projectRoot: projectDir,
+      cache: false,
+    });
+    const result = await resolver.resolve(join(projectDir, 'main.prs'));
+
+    expect(result.errors).toEqual([]);
+    expect(relativePaths(skillResources(result.ast, 'ui-ux'))).toEqual([
+      'data/colors.csv',
+      'references/rules.md',
+      'scripts/search.py',
+    ]);
+  });
+
+  it('keeps both the root skill and nested skills when a directory holds both', async () => {
+    const projectDir = await createTempDir('prs-root-and-nested-');
+    const bundleDir = join(projectDir, 'bundle');
+    await writeSkillDirectory(bundleDir, 'bundle-root');
+    await writeSkillDirectory(join(bundleDir, 'nested', 'extra'), 'extra');
+    await writeFile(
+      join(projectDir, 'main.prs'),
+      [
+        '@meta { id: "root-and-nested" syntax: "1.0.0" }',
+        '',
+        '@use ./bundle',
+        '',
+        '@identity { """test""" }',
+      ].join('\n')
+    );
+
+    const resolver = new Resolver({
+      registryPath: projectDir,
+      projectRoot: projectDir,
+      cache: false,
+    });
+    const result = await resolver.resolve(join(projectDir, 'main.prs'));
+
+    expect(result.errors).toEqual([]);
+    const skillsBlock = result.ast?.blocks.find((block) => block.name === 'skills');
+    const properties = (skillsBlock?.content as ObjectContent | undefined)?.properties ?? {};
+    expect(Object.keys(properties).sort()).toEqual(['bundle-root', 'extra']);
+    expect(relativePaths(skillResources(result.ast, 'extra'))).toEqual([
+      'data/colors.csv',
+      'references/rules.md',
+      'scripts/search.py',
+    ]);
+  });
+
+  it('keeps a prototype-named SKILL.md skill', async () => {
+    const projectDir = await createTempDir('prs-prototype-skill-');
+    await writeSkillDirectory(join(projectDir, 'bundle', 'constructor'), 'constructor');
+    await writeFile(
+      join(projectDir, 'main.prs'),
+      [
+        '@meta { id: "prototype-skill" syntax: "1.0.0" }',
+        '',
+        '@use ./bundle',
+        '',
+        '@identity { """test""" }',
+      ].join('\n')
+    );
+
+    const resolver = new Resolver({
+      registryPath: projectDir,
+      projectRoot: projectDir,
+      cache: false,
+    });
+    const result = await resolver.resolve(join(projectDir, 'main.prs'));
+
+    expect(result.errors).toEqual([]);
+    const skillsBlock = result.ast?.blocks.find((block) => block.name === 'skills');
+    const properties = (skillsBlock?.content as ObjectContent | undefined)?.properties ?? {};
+    expect(Object.hasOwn(properties, 'constructor')).toBe(true);
+  });
+
+  it('keeps a prototype-named dirname markdown skill', async () => {
+    const projectDir = await createTempDir('prs-prototype-fallback-');
+    const skillDir = join(projectDir, 'bundle', 'constructor');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'constructor.md'),
+      ['---', 'name: constructor', 'description: d', '---', '', 'Body'].join('\n')
+    );
+    await writeFile(
+      join(projectDir, 'main.prs'),
+      [
+        '@meta { id: "prototype-fallback" syntax: "1.0.0" }',
+        '',
+        '@use ./bundle',
+        '',
+        '@identity { """test""" }',
+      ].join('\n')
+    );
+
+    const resolver = new Resolver({
+      registryPath: projectDir,
+      projectRoot: projectDir,
+      cache: false,
+    });
+    const result = await resolver.resolve(join(projectDir, 'main.prs'));
+
+    expect(result.errors).toEqual([]);
+    const skillsBlock = result.ast?.blocks.find((block) => block.name === 'skills');
+    const properties = (skillsBlock?.content as ObjectContent | undefined)?.properties ?? {};
+    expect(Object.hasOwn(properties, 'constructor')).toBe(true);
+  });
+
+  it('ignores resource errors from a shadowed nested skill', async () => {
+    const projectDir = await createTempDir('prs-shadowed-skill-');
+    const bundleDir = join(projectDir, 'bundle');
+    const nestedDir = join(bundleDir, 'nested');
+    await mkdir(nestedDir, { recursive: true });
+    await writeFile(
+      join(bundleDir, 'SKILL.md'),
+      ['---', 'name: winner', 'description: root', '---', '', 'Root'].join('\n')
+    );
+    await writeFile(
+      join(nestedDir, 'SKILL.md'),
+      [
+        '---',
+        'name: winner',
+        'description: nested',
+        'references: [missing.md]',
+        '---',
+        '',
+        'Nested',
+      ].join('\n')
+    );
+    await writeFile(
+      join(projectDir, 'main.prs'),
+      [
+        '@meta { id: "shadowed-skill" syntax: "1.0.0" }',
+        '',
+        '@use ./bundle',
+        '',
+        '@identity { """test""" }',
+      ].join('\n')
+    );
+
+    const resolver = new Resolver({
+      registryPath: projectDir,
+      projectRoot: projectDir,
+      cache: false,
+    });
+    const result = await resolver.resolve(join(projectDir, 'main.prs'));
+
+    expect(result.errors).toEqual([]);
+    const skillsBlock = result.ast?.blocks.find((block) => block.name === 'skills');
+    const properties = (skillsBlock?.content as ObjectContent | undefined)?.properties ?? {};
+    expect(Object.keys(properties)).toEqual(['winner']);
+  });
+
   it('keeps resources when the imported directory is itself the skill', async () => {
     const skillDir = await createTempDir('prs-root-skill-');
     await writeSkillDirectory(skillDir, 'ui-ux');
@@ -115,6 +282,17 @@ describe('directory imports carry skill resources', () => {
       'references/rules.md',
       'scripts/search.py',
     ]);
+  });
+
+  it('keeps a prototype-named skill under a skills/ wrapper directory', async () => {
+    const repoDir = await createTempDir('prs-wrapper-prototype-skill-');
+    await writeSkillDirectory(join(repoDir, 'skills', 'constructor'), 'constructor');
+
+    const ast = await discoverNativeContent(repoDir);
+
+    const skillsBlock = ast?.blocks.find((block) => block.name === 'skills');
+    const properties = (skillsBlock?.content as ObjectContent | undefined)?.properties ?? {};
+    expect(Object.hasOwn(properties, 'constructor')).toBe(true);
   });
 
   it('reports a missing frontmatter reference from a discovered skill directory', async () => {

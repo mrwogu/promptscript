@@ -1942,7 +1942,7 @@ export async function resolveNativeSkills(
       const discovered = await discoverSkillDirs(dir);
       for (const [skillName, skillDir] of discovered) {
         // Only add if not already declared in @skills block
-        if (!(skillName in updatedProperties)) {
+        if (!Object.hasOwn(updatedProperties, skillName)) {
           logger.verbose(`Auto-discovered skill: ${skillName} (from ${skillDir})`);
           updatedProperties[skillName] = {};
           hasUpdates = true;

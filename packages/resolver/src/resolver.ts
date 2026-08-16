@@ -1973,6 +1973,10 @@ export class Resolver {
   /**
    * Scan a directory for skill files using BFS up to depth 3.
    *
+   * The directory may be the skill itself — `@use ./skills/my-tool` pointing at
+   * a directory whose own root holds SKILL.md — so that entry is picked up
+   * first and wins any name clash with a deeper one.
+   *
    * For each subdirectory:
    * - Skip if symlink
    * - Check for SKILL.md first
@@ -1981,6 +1985,7 @@ export class Resolver {
    * - If a skill is found, do not recurse deeper into that subdirectory
    *
    * @param dir - Absolute path to the directory to scan
+   * @param errors - Accumulator for resource resolution errors
    * @returns Accumulated skill properties keyed by skill name
    */
   private async scanDirectoryForSkills(
@@ -1988,6 +1993,11 @@ export class Resolver {
     errors: ResolveError[]
   ): Promise<Record<string, Value>> {
     const properties: Record<string, Value> = {};
+    const rootSkill = await this.readRootSkill(dir, errors);
+    if (rootSkill) {
+      properties[rootSkill[0]] = rootSkill[1];
+    }
+
     const queue: Array<{ path: string; depth: number }> = [{ path: dir, depth: 0 }];
 
     while (queue.length > 0) {
@@ -2021,14 +2031,19 @@ export class Resolver {
 
         try {
           const skillContent = await readFile(skillMdPath, 'utf-8');
+          const skillErrors: ResolveError[] = [];
           const [skillName, skillProps] = await this.buildSkillFromMd(
             skillMdPath,
             skillContent,
             entry.name,
-            errors
+            skillErrors
           );
 
-          properties[skillName] = skillProps;
+          // Shallower skills win: the first entry found for a name is kept.
+          if (!Object.hasOwn(properties, skillName)) {
+            properties[skillName] = skillProps;
+            errors.push(...skillErrors);
+          }
           foundSkill = true;
           this.logger.debug(`Found skill "${skillName}" via SKILL.md in ${subDir}`);
         } catch (error: unknown) {
@@ -2039,14 +2054,18 @@ export class Resolver {
           const dirnameMdPath = join(subDir, `${entry.name}.md`);
           try {
             const fallbackContent = await readFile(dirnameMdPath, 'utf-8');
+            const skillErrors: ResolveError[] = [];
             const [skillName, skillProps] = await this.buildSkillFromMd(
               dirnameMdPath,
               fallbackContent,
               skillNameFromPath(dirnameMdPath),
-              errors
+              skillErrors
             );
 
-            properties[skillName] = skillProps;
+            if (!Object.hasOwn(properties, skillName)) {
+              properties[skillName] = skillProps;
+              errors.push(...skillErrors);
+            }
             foundSkill = true;
             this.logger.debug(
               `Found skill "${skillName}" via ${basename(dirnameMdPath)} in ${subDir}`
@@ -2067,6 +2086,35 @@ export class Resolver {
     }
 
     return properties;
+  }
+
+  /**
+   * Read a SKILL.md sitting at the root of an imported directory.
+   *
+   * A skill directory is a valid import target on its own, so `@use ./my-skill`
+   * resolves the skill the directory holds rather than treating the directory
+   * as a container of other skills.
+   *
+   * @param dir - Absolute path to the imported directory
+   * @param errors - Accumulator for resource resolution errors
+   * @returns The skill name and properties, or null when the directory holds no SKILL.md
+   */
+  private async readRootSkill(
+    dir: string,
+    errors: ResolveError[]
+  ): Promise<[string, Record<string, Value>] | null> {
+    const skillMdPath = join(dir, 'SKILL.md');
+
+    let source: string;
+    try {
+      source = await readFile(skillMdPath, 'utf-8');
+    } catch {
+      return null;
+    }
+
+    const skill = await this.buildSkillFromMd(skillMdPath, source, basename(dir), errors);
+    this.logger.debug(`Found skill "${skill[0]}" via SKILL.md in ${dir}`);
+    return skill;
   }
 
   /**
