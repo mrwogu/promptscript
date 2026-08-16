@@ -9,6 +9,7 @@ import {
   type ParsedSkillMd,
   type SkillResource,
 } from './skills.js';
+import { limitSkillResources } from './skill-resource-limits.js';
 
 /**
  * Resource files that belong to a SKILL.md, plus any problems found while
@@ -47,7 +48,7 @@ export async function collectSkillResources(
   const errors: ResolveError[] = [];
 
   try {
-    collected.push(...(await discoverSkillResources(skillDir, logger)));
+    collected.push(...(await discoverSkillResources(skillDir, logger, [skillMdPath])));
   } catch (err) {
     logger?.verbose(
       `Failed to discover skill resources in ${skillDir}: ${
@@ -96,7 +97,15 @@ export async function collectSkillResources(
     byPath.set(resource.relativePath, resource);
   }
 
-  return { resources: [...byPath.values()], errors };
+  const location = frontmatterLocations?.frontmatter ?? {
+    file: skillMdPath,
+    line: 1,
+    column: 1,
+  };
+  const limited = limitSkillResources([...byPath.values()], location);
+  errors.push(...limited.errors);
+
+  return { resources: limited.resources, errors };
 }
 
 /**

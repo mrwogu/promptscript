@@ -2031,16 +2031,18 @@ export class Resolver {
 
         try {
           const skillContent = await readFile(skillMdPath, 'utf-8');
+          const skillErrors: ResolveError[] = [];
           const [skillName, skillProps] = await this.buildSkillFromMd(
             skillMdPath,
             skillContent,
             entry.name,
-            errors
+            skillErrors
           );
 
           // Shallower skills win: the first entry found for a name is kept.
-          if (!(skillName in properties)) {
+          if (!Object.hasOwn(properties, skillName)) {
             properties[skillName] = skillProps;
+            errors.push(...skillErrors);
           }
           foundSkill = true;
           this.logger.debug(`Found skill "${skillName}" via SKILL.md in ${subDir}`);
@@ -2052,15 +2054,17 @@ export class Resolver {
           const dirnameMdPath = join(subDir, `${entry.name}.md`);
           try {
             const fallbackContent = await readFile(dirnameMdPath, 'utf-8');
+            const skillErrors: ResolveError[] = [];
             const [skillName, skillProps] = await this.buildSkillFromMd(
               dirnameMdPath,
               fallbackContent,
               skillNameFromPath(dirnameMdPath),
-              errors
+              skillErrors
             );
 
-            if (!(skillName in properties)) {
+            if (!Object.hasOwn(properties, skillName)) {
               properties[skillName] = skillProps;
+              errors.push(...skillErrors);
             }
             foundSkill = true;
             this.logger.debug(
