@@ -360,22 +360,19 @@ export class BrowserCompiler {
     for (const collision of outputPlan.collisions) {
       if (collision.identical) continue;
       const preservesExisting = collision.resolution === 'preserve-existing';
-      const skippedInjectedSkill = collision.incomingRole === 'injected' && preservesExisting;
+      // Every browser candidate is a formatter primary: this compiler never
+      // injects the bundled skill, so no collision can carry that role.
       formatWarnings.push({
         ruleId: 'PS4001',
         ruleName: 'output-path-collision',
         severity: 'warning',
-        message: skippedInjectedSkill
-          ? `Output path '${collision.path}' is already written by '${collision.existingOwner}'. ` +
-            `Skipping auto-injected PromptScript skill for '${collision.incomingOwner}'.`
-          : `Output path '${collision.path}' is written by both '${collision.existingOwner}' and ` +
-            `'${collision.incomingOwner}' with different content or write settings. ` +
-            (preservesExisting
-              ? 'The first output will be preserved.'
-              : 'The latter will overwrite the former.'),
-        suggestion: skippedInjectedSkill
-          ? 'The user-defined skill takes precedence. To use the bundled skill, remove the custom one or rename it.'
-          : 'Configure distinct output paths for these formatters, or disable one of them.',
+        message:
+          `Output path '${collision.path}' is written by both '${collision.existingOwner}' and ` +
+          `'${collision.incomingOwner}' with different content or write settings. ` +
+          (preservesExisting
+            ? 'The first output will be preserved.'
+            : 'The latter will overwrite the former.'),
+        suggestion: 'Configure distinct output paths for these formatters, or disable one of them.',
       });
       this.logger.warn(
         `Output path collision: '${collision.path}' is already owned by ` +

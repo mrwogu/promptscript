@@ -146,6 +146,7 @@ vi.mock('chalk', () => {
   };
 });
 
+import { resolve } from 'path';
 import { diffCommand, createDiffLogger } from '../diff.js';
 import { ConsoleOutput } from '../../output/console.js';
 import { createOutputPlan } from '@promptscript/core';
@@ -374,6 +375,37 @@ describe('diffCommand', () => {
       })
     );
     expect(mockCompile).toHaveBeenCalledTimes(1);
+  });
+
+  it('should honour a configured entry file and disabled universal skills', async () => {
+    const entryPath = resolve(process.cwd(), 'custom/entry.prs');
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      universalDir: false,
+      input: { entry: 'custom/entry.prs' },
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) => String(path) === entryPath);
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map(),
+    });
+
+    await diffCommand({ noPager: true });
+
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resolver: expect.objectContaining({ skills: undefined }),
+      })
+    );
+    expect(mockCompile).toHaveBeenCalledWith(entryPath);
   });
 
   it('should fail when entry file is not found', async () => {

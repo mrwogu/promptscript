@@ -14,7 +14,7 @@ import type {
 } from '@promptscript/core';
 import { ErrorCode, isValidLockfile, PSError } from '@promptscript/core';
 
-import type { CompileResult, FormatterOutput, OutputPlan } from '@promptscript/compiler';
+import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
 import { loadEffectiveConfig, CONFIG_FILES } from '../config/loader.js';
 import { resolvePrettierOptions } from '../prettier/loader.js';
 import { createSpinner, ConsoleOutput, isVerbose, isDebug } from '../output/console.js';
@@ -286,43 +286,6 @@ interface WriteResult {
   unchanged: string[];
 }
 
-function getPlannedOutputs(
-  outputs: Map<string, FormatterOutput>,
-  outputPlan: OutputPlan | undefined
-): FormatterOutput[] {
-  if (!outputPlan) return [...outputs.values()];
-
-  const planned = outputPlan.files.map((file) => {
-    const current = outputs.get(file.path);
-    return {
-      path: file.path,
-      content: current?.content ?? file.content,
-      ...(current?.mode !== undefined
-        ? { mode: current.mode }
-        : file.mode !== undefined
-          ? { mode: file.mode }
-          : {}),
-      ...(current?.merge !== undefined
-        ? { merge: current.merge }
-        : file.merge !== undefined
-          ? { merge: file.merge }
-          : {}),
-      ...(current?.managedOutputDirectories !== undefined
-        ? { managedOutputDirectories: current.managedOutputDirectories }
-        : file.managedOutputDirectories !== undefined
-          ? { managedOutputDirectories: file.managedOutputDirectories }
-          : {}),
-      ...(current?.managedOutputFiles !== undefined
-        ? { managedOutputFiles: current.managedOutputFiles }
-        : file.managedOutputFiles !== undefined
-          ? { managedOutputFiles: file.managedOutputFiles }
-          : {}),
-    };
-  });
-
-  return planned;
-}
-
 async function finishLegacyFactoryMigration(
   plan: LegacyFactoryMigrationPlan,
   outputRoot: string,
@@ -415,14 +378,15 @@ async function writeOutputs(
   outputs: Map<string, FormatterOutput>,
   options: CompileOptions,
   _config: PromptScriptConfig,
-  services: CliServices,
-  outputPlan?: OutputPlan
+  services: CliServices
 ): Promise<WriteResult> {
   const result: WriteResult = { written: [], created: [], skipped: [], unchanged: [] };
   let overwriteAll = false;
   const conflicts: string[] = [];
   const targetErrors: string[] = [];
-  const plannedOutputs = getPlannedOutputs(outputs, outputPlan);
+  // `outputs` is produced from the finalized plan, so it already carries every
+  // planned path and its write settings.
+  const plannedOutputs = [...outputs.values()];
 
   // Pre-flight: a target `output` comes from the config file, so a checked-in
   // path may point anywhere the user can write. Reject the whole run before
@@ -982,13 +946,7 @@ async function compileCommandWithResult(
       logger,
       additionalOutputPaths: legacyMigration ? ['.factory/hooks.json'] : [],
     });
-    const writeResult = await writeOutputs(
-      finalized.outputs,
-      effectiveOptions,
-      config,
-      services,
-      finalized.outputPlan
-    );
+    const writeResult = await writeOutputs(finalized.outputs, effectiveOptions, config, services);
     if (legacyMigration) {
       if (writeResult.skipped.includes(legacyMigration.hooksPath)) {
         throw new Error(
