@@ -130,10 +130,14 @@ export interface PullOptions {
 export interface DiffOptions {
   /** Specific target to diff */
   target?: string;
+  /** Output format */
+  format?: 'text' | 'json';
   /** Show diff for all targets at once */
   all?: boolean;
   /** Show full diff without truncation */
   full?: boolean;
+  /** Include canonical output content in JSON reports */
+  includeContent?: boolean;
   /** Disable pager (like git --no-pager) */
   noPager?: boolean;
   /** Force colored output */

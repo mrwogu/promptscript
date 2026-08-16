@@ -1,0 +1,29 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/diff/v1.json",
+  "version": 1,
+  "contentIncluded": false,
+  "success": true,
+  "hasChanges": true,
+  "changes": [
+    {
+      "target": "github",
+      "path": ".github/copilot-instructions.md",
+      "source": ".promptscript/project.prs",
+      "kind": "changed",
+      "ownership": "promptscript",
+      "contentHash": "sha256-0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "unsupported": [],
+  "warnings": [],
+  "errors": [],
+  "summary": {
+    "total": 1,
+    "added": 0,
+    "changed": 1,
+    "removed": 0,
+    "unsupported": 0,
+    "userOwned": 0,
+    "unchanged": 0
+  }
+}

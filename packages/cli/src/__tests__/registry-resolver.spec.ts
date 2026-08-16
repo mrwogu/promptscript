@@ -708,6 +708,55 @@ describe('utils/registry-resolver', () => {
       expect(mockGitRegistry.fetch).toHaveBeenCalledWith('registry-manifest.yaml');
     });
 
+    it('fails read-only resolution without touching cache or network', async () => {
+      mockCacheManager.isValid.mockResolvedValue(false);
+      const config: PromptScriptConfig = {
+        id: 'test',
+        syntax: '1.0.0',
+        targets: ['github'],
+        registry: {
+          git: { url: 'https://github.com/org/registry.git' },
+        },
+      };
+
+      await expect(resolveRegistryPath(config, { readOnly: true })).rejects.toThrow(
+        'Diff mode is read-only'
+      );
+      expect(mockGitRegistry.fetch).not.toHaveBeenCalled();
+      expect(mockCacheManager.remove).not.toHaveBeenCalled();
+      expect(mockCacheManager.touch).not.toHaveBeenCalled();
+    });
+
+    it('fails read-only resolution instead of repairing a mismatched cache', async () => {
+      mockCacheManager.isValid.mockResolvedValue(true);
+      mockVerifyGitRepository.mockRejectedValue(new Error('Invalid cached checkout'));
+      const config: PromptScriptConfig = {
+        id: 'test',
+        syntax: '1.0.0',
+        targets: ['github'],
+        registry: {
+          git: { url: 'https://github.com/org/registry.git' },
+        },
+      };
+      const lockfile = {
+        version: 1 as const,
+        dependencies: {
+          'https://github.com/org/registry.git': {
+            version: 'main',
+            commit: 'a'.repeat(40),
+            integrity: 'sha256-test',
+          },
+        },
+      };
+
+      await expect(resolveRegistryPath(config, { lockfile, readOnly: true })).rejects.toThrow(
+        'cannot repair registry caches'
+      );
+      expect(mockGitRegistry.fetch).not.toHaveBeenCalled();
+      expect(mockCacheManager.remove).not.toHaveBeenCalled();
+      expect(mockCacheManager.touch).not.toHaveBeenCalled();
+    });
+
     it('should append subpath for git registry', async () => {
       mockCacheManager.isValid.mockResolvedValue(true);
       mockCacheManager.getCachePath.mockReturnValue('/cache/git/registry');

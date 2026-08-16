@@ -2,7 +2,7 @@
  * Registry resolver utility for CLI commands.
  *
  * Handles resolving registry configuration to a local path that the compiler can use.
- * For git registries, this ensures the repository is cloned/updated in the cache.
+ * For git registries, this can require an existing cache or vendor checkout.
  */
 
 import { homedir } from 'os';
@@ -41,6 +41,8 @@ export interface ResolvedRegistry {
 export interface ResolveRegistryOptions {
   vendorDir?: string;
   lockfile?: Lockfile;
+  /** Refuse cache repair, network access, and all registry writes. */
+  readOnly?: boolean;
 }
 
 async function resolveRegistrySubPath(
@@ -158,8 +160,21 @@ export async function resolveRegistryPath(
           repositoryPath: cachePath,
         };
       } catch {
+        if (options.readOnly) {
+          throw new Error(
+            `Cached Git registry does not match locked commit ${lockedRepository[1].commit}: ${cachePath}. ` +
+              'Diff mode is read-only and cannot repair registry caches. Run `prs vendor sync` or `prs compile` first.'
+          );
+        }
         await cacheManager.remove(normalizedUrl, ref);
       }
+    }
+
+    if (options.readOnly) {
+      throw new Error(
+        `Git registry is not available in the existing cache: ${gitConfig.url} (${ref}). ` +
+          'Diff mode is read-only and cannot clone or update registries. Run `prs vendor sync` or `prs compile` first.'
+      );
     }
 
     // Need to clone/update - use GitRegistry
