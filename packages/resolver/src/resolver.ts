@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { lstat, readdir, readFile } from 'fs/promises';
-import { basename, dirname, join, relative, resolve } from 'path';
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'path';
 import { parse } from '@promptscript/parser';
 import {
   noopLogger,
@@ -20,6 +20,7 @@ import {
   blockBodyToContent,
   consumeInlineUses,
   deepClone,
+  getInlineUses,
   getSyntaxFeatureUsages,
   INHERITANCE_MERGE_POLICY,
   interpolateAST,
@@ -49,9 +50,11 @@ import {
   resolveNativeCommands,
   resolveNativeAgents,
   parseSkillMd,
+  getSkillFrontmatterLocations,
   skillNameFromPath,
   discoverSkillResources,
   resolveSkillReferences,
+  resolveSkillScripts,
   type NativeSkillOptions,
   type SkillResource,
 } from './skills.js';
@@ -70,6 +73,30 @@ import {
   resolveVendoredRepository,
   verifyGitRepositoryCheckout,
 } from './vendor-manifest.js';
+
+function addParsedSkillMetadata(
+  skillProps: Record<string, Value>,
+  parsed: ReturnType<typeof parseSkillMd>
+): void {
+  if (parsed.params !== undefined) skillProps['params'] = parsed.params as unknown as Value;
+  if (parsed.inputs !== undefined) skillProps['inputs'] = parsed.inputs as unknown as Value;
+  if (parsed.outputs !== undefined) skillProps['outputs'] = parsed.outputs as unknown as Value;
+  if (parsed.references !== undefined) {
+    skillProps['references'] = parsed.references as unknown as Value;
+  }
+  if (parsed.scripts !== undefined) skillProps['scripts'] = parsed.scripts as unknown as Value;
+  if (parsed.license !== undefined) skillProps['license'] = parsed.license;
+  if (parsed.compatibility !== undefined) skillProps['compatibility'] = parsed.compatibility;
+  if (parsed.metadata !== undefined) {
+    skillProps['metadata'] = parsed.metadata as unknown as Value;
+  }
+  if (parsed.allowedTools !== undefined) {
+    skillProps['allowedTools'] = parsed.allowedTools as unknown as Value;
+  }
+  if (parsed.rawFrontmatter !== undefined) {
+    skillProps['__rawFrontmatter'] = parsed.rawFrontmatter;
+  }
+}
 
 /**
  * Options for the resolver.
@@ -103,14 +130,90 @@ export interface ResolverOptions extends LoaderOptions {
  * Result of resolving a PromptScript file.
  */
 export interface ResolvedAST {
-  /** The resolved AST, or null if resolution failed */
+  /**
+   * Immutable canonical AST used by compiler and validator stages.
+   *
+   * This is the primary resolved representation.
+   */
+  canonicalAst: CanonicalProgram | null;
+  /**
+   * Mutable compatibility projection for legacy integrations.
+   *
+   * @deprecated Use `canonicalAst` for new consumers.
+   */
   ast: Program | null;
-  /** Immutable canonical projection of the resolved AST */
-  canonicalAst?: CanonicalProgram | null;
   /** List of all source files involved in resolution */
   sources: string[];
+  /** Files and directories read while resolving the AST */
+  dependencies?: string[];
   /** List of errors encountered during resolution */
   errors: ResolveError[];
+}
+
+type PreflightRegistryImport =
+  | {
+      readonly type: 'result';
+      readonly result: ResolvedAST;
+    }
+  | {
+      readonly type: 'error';
+      readonly error: unknown;
+    };
+
+interface ParsedFile {
+  readonly ast: Program;
+  readonly errors: readonly ResolveError[];
+}
+
+interface ResolutionContext {
+  readonly resolving: Set<string>;
+  readonly preflightRegistryImports: Map<string, PreflightRegistryImport>;
+  readonly operationModeCache: Map<string, boolean>;
+  readonly parsedFiles: Map<string, ParsedFile>;
+}
+
+function createResolutionContext(): ResolutionContext {
+  return {
+    resolving: new Set(),
+    preflightRegistryImports: new Map(),
+    operationModeCache: new Map(),
+    parsedFiles: new Map(),
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function collectDependencyPaths(value: unknown, dependencies: Set<string>): void {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectDependencyPaths(item, dependencies);
+    }
+    return;
+  }
+
+  if (!isRecord(value)) return;
+
+  const loc = value['loc'];
+  if (isRecord(loc) && typeof loc['file'] === 'string') {
+    const file = loc['file'];
+    if (isAbsolute(file)) dependencies.add(file);
+  }
+
+  if (typeof value['origin'] === 'string' && isAbsolute(value['origin'])) {
+    dependencies.add(value['origin']);
+  }
+
+  for (const child of Object.values(value)) {
+    collectDependencyPaths(child, dependencies);
+  }
+}
+
+function addDependencyPaths(dependencies: Set<string>, paths: readonly string[]): void {
+  for (const path of paths) {
+    dependencies.add(path);
+  }
 }
 
 /**
@@ -137,7 +240,6 @@ export interface ResolvedAST {
 export class Resolver {
   private readonly loader: FileLoader;
   private readonly cache: Map<string, ResolvedAST>;
-  private readonly resolving: Set<string>;
   private readonly cacheEnabled: boolean;
   private readonly logger: Logger;
   private readonly options: ResolverOptions;
@@ -148,7 +250,6 @@ export class Resolver {
     this.options = options;
     this.loader = new FileLoader(options);
     this.cache = new Map();
-    this.resolving = new Set();
     this.cacheEnabled = options.cache !== false;
     this.logger = options.logger ?? noopLogger;
     this.gitRegistry = new GitRegistry({ url: 'https://github.com/placeholder/placeholder.git' });
@@ -168,12 +269,19 @@ export class Resolver {
    * @throws CircularDependencyError if a circular dependency is detected
    */
   async resolve(entryPath: string): Promise<ResolvedAST> {
+    return this.resolveWithContext(entryPath, createResolutionContext());
+  }
+
+  private async resolveWithContext(
+    entryPath: string,
+    context: ResolutionContext
+  ): Promise<ResolvedAST> {
     const absPath = this.loader.toAbsolutePath(entryPath);
 
     // Check for circular dependency
-    if (this.resolving.has(absPath)) {
+    if (context.resolving.has(absPath)) {
       this.logger.debug(`Circular dependency detected: ${absPath}`);
-      throw new CircularDependencyError([...this.resolving, absPath]);
+      throw new CircularDependencyError([...context.resolving, absPath]);
     }
 
     // Check cache
@@ -182,11 +290,11 @@ export class Resolver {
       return this.cache.get(absPath)!;
     }
 
-    this.resolving.add(absPath);
+    context.resolving.add(absPath);
     this.logger.verbose(`Parsing ${absPath}`);
 
     try {
-      const result = await this.doResolve(absPath);
+      const result = await this.doResolve(absPath, context);
 
       if (this.cacheEnabled) {
         this.logger.debug(`Cache store: ${absPath}`);
@@ -195,41 +303,59 @@ export class Resolver {
 
       return result;
     } finally {
-      this.resolving.delete(absPath);
+      context.resolving.delete(absPath);
     }
   }
 
   /**
    * Perform the actual resolution.
    */
-  private async doResolve(absPath: string): Promise<ResolvedAST> {
+  private async doResolve(absPath: string, context: ResolutionContext): Promise<ResolvedAST> {
     const sources: string[] = [absPath];
+    const dependencies = new Set<string>([absPath]);
     const errors: ResolveError[] = [];
 
     // Load and parse file
-    const parseData = await this.loadAndParse(absPath, sources, errors);
+    const parseData = await this.loadAndParse(absPath, sources, dependencies, errors, context);
     if (!parseData.ast) {
-      return { ast: null, sources, errors };
+      return {
+        ast: null,
+        canonicalAst: null,
+        sources,
+        dependencies: [...dependencies],
+        errors,
+      };
     }
 
     let ast = parseData.ast;
-    const sequentialOperations = usesSequentialOperations(ast);
+    const sequentialOperations = await this.usesSequentialOperationsAfterComposition(
+      ast,
+      absPath,
+      context
+    );
     ast = normalizeBlockAliases(ast, {
       preserveDeclarationOrder: sequentialOperations,
     });
     this.logger.debug(`AST node count: ${this.countNodes(ast)}`);
 
     if (sequentialOperations) {
-      ast = await this.resolveSequentialOperations(ast, absPath, sources, errors);
+      ast = await this.resolveSequentialOperations(
+        ast,
+        absPath,
+        sources,
+        dependencies,
+        errors,
+        context
+      );
     } else {
       // Preserve legacy phase ordering through syntax 1.5.x.
-      ast = await this.resolveInherit(ast, absPath, sources, errors);
-      ast = await this.resolveImports(ast, absPath, sources, errors);
+      ast = await this.resolveInherit(ast, absPath, sources, dependencies, errors, context);
+      ast = await this.resolveImports(ast, absPath, sources, dependencies, errors, context);
     }
 
     // Legacy phase order resolves inline composition after top-level imports.
     if (!sequentialOperations) {
-      ast = await this.resolveComposition(ast, absPath, sources, errors);
+      ast = await this.resolveComposition(ast, absPath, sources, dependencies, errors, context);
     }
 
     // Apply extensions
@@ -273,20 +399,137 @@ export class Resolver {
     // Auto-discover agent files from local and universal directories
     ast = await resolveNativeAgents(ast, absPath, this.loader.getLocalPath(), discoveryOptions);
 
+    const localDiscoveryPath = this.loader.getLocalPath();
+    for (const directory of ['skills', 'commands', 'agents', 'shared'] as const) {
+      dependencies.add(resolve(localDiscoveryPath, directory));
+    }
+    dependencies.add(resolve(this.loader.getRegistryPath(), '@skills'));
+    dependencies.add(resolve(this.loader.getProjectRoot(), '.promptscript', 'scripts'));
+    if (discoveryOptions.universalDir) {
+      for (const directory of ['skills', 'commands', 'agents'] as const) {
+        dependencies.add(
+          resolve(this.loader.getProjectRoot(), discoveryOptions.universalDir, directory)
+        );
+      }
+    }
+
+    collectDependencyPaths(ast, dependencies);
     this.logger.debug(`Resolved ${sources.length} source file(s)`);
     return {
       ast,
       canonicalAst: normalizeProgram(ast),
       sources: [...new Set(sources)],
+      dependencies: [...dependencies],
       errors,
     };
+  }
+
+  /**
+   * Select operation semantics from the complete reachable source graph.
+   *
+   * A lower-version entry file can compose a source that requires ordered
+   * operations. Inspect dependencies before normalizing or resolving the
+   * entry file so imports and local declarations use the effective mode.
+   */
+  private async usesSequentialOperationsAfterComposition(
+    ast: Program,
+    absPath: string,
+    context: ResolutionContext
+  ): Promise<boolean> {
+    return this.inspectOperationMode(ast, absPath, new Set([absPath]), context);
+  }
+
+  private async inspectOperationMode(
+    ast: Program,
+    absPath: string,
+    visited: Set<string>,
+    context: ResolutionContext
+  ): Promise<boolean> {
+    const cachedMode = context.operationModeCache.get(absPath);
+    if (cachedMode !== undefined) return cachedMode;
+
+    if (usesSequentialOperations(ast)) {
+      context.operationModeCache.set(absPath, true);
+      return true;
+    }
+
+    const references = [
+      ...(ast.inherit ? [ast.inherit.path] : []),
+      ...ast.uses.map((use) => use.path),
+      ...ast.blocks.flatMap((block) => getInlineUses(block).map((use) => use.path)),
+      ...ast.extends.flatMap((extension) => {
+        const content = extension.content;
+        if (content.type !== 'ObjectContent' && content.type !== 'MixedContent') {
+          return [];
+        }
+        return (content.inlineUses ?? []).map((use) => use.path);
+      }),
+    ];
+
+    for (const reference of references) {
+      let dependencyPath: string;
+      try {
+        dependencyPath = this.loader.resolveRef(reference, absPath);
+      } catch {
+        // The normal resolution pass reports invalid references.
+        continue;
+      }
+      if (visited.has(dependencyPath)) continue;
+      visited.add(dependencyPath);
+
+      let dependencyAst: Program | null;
+      try {
+        if (dependencyPath.startsWith(REGISTRY_MARKER_PREFIX)) {
+          const preflightErrors: ResolveError[] = [];
+          const dependency = await this.resolveRegistryImport(
+            dependencyPath,
+            preflightErrors,
+            context
+          );
+          dependencyAst = dependency.ast;
+          context.preflightRegistryImports.set(dependencyPath, {
+            type: 'result',
+            result:
+              preflightErrors.length > 0 && dependency.errors.length === 0
+                ? { ...dependency, errors: preflightErrors }
+                : dependency,
+          });
+        } else {
+          // Mode inspection runs before resolution, so watch dependencies are
+          // recorded by the real resolve pass rather than this probe.
+          dependencyAst = (await this.loadAndParse(dependencyPath, [], new Set(), [], context)).ast;
+        }
+      } catch (error) {
+        if (dependencyPath.startsWith(REGISTRY_MARKER_PREFIX)) {
+          context.preflightRegistryImports.set(dependencyPath, { type: 'error', error });
+        }
+        continue;
+      }
+      if (
+        dependencyAst &&
+        (await this.inspectOperationMode(
+          dependencyAst,
+          dependencyAst.loc.file || dependencyPath,
+          visited,
+          context
+        ))
+      ) {
+        context.operationModeCache.set(absPath, true);
+        return true;
+      }
+    }
+
+    context.operationModeCache.set(absPath, false);
+    return false;
   }
 
   private async resolveSequentialOperations(
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    dependencies: Set<string>,
+    errors: ResolveError[],
+    context: ResolutionContext
   ): Promise<Program> {
     const operations = normalizeProgram(ast).operations;
     const localBlockNames = new Set<string>();
@@ -312,7 +555,9 @@ export class Resolver {
             },
             absPath,
             sources,
+            dependencies,
             errors,
+            context,
             true
           );
           break;
@@ -324,7 +569,9 @@ export class Resolver {
             },
             absPath,
             sources,
-            errors
+            dependencies,
+            errors,
+            context
           );
           result = { ...result, uses: [] };
           break;
@@ -340,7 +587,14 @@ export class Resolver {
                 }),
           };
           localBlockNames.add(block.name);
-          result = await this.resolveComposition(result, absPath, sources, errors);
+          result = await this.resolveComposition(
+            result,
+            absPath,
+            sources,
+            dependencies,
+            errors,
+            context
+          );
           break;
         }
         case 'ExtendOperation': {
@@ -366,7 +620,14 @@ export class Resolver {
               ...result,
               blocks: applyExtend(result.blocks, extension, this.logger),
             };
-            result = await this.resolveComposition(result, absPath, sources, errors);
+            result = await this.resolveComposition(
+              result,
+              absPath,
+              sources,
+              dependencies,
+              errors,
+              context
+            );
           } catch (error) {
             errors.push(
               error instanceof ResolveError
@@ -394,7 +655,14 @@ export class Resolver {
             result = applyOverride(result, override, {
               importMarkerPrefix: IMPORT_MARKER_PREFIX,
             });
-            result = await this.resolveComposition(result, absPath, sources, errors);
+            result = await this.resolveComposition(
+              result,
+              absPath,
+              sources,
+              dependencies,
+              errors,
+              context
+            );
           } catch (error) {
             errors.push(
               error instanceof ResolveError
@@ -443,8 +711,16 @@ export class Resolver {
   private async loadAndParse(
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    dependencies: Set<string>,
+    errors: ResolveError[],
+    context: ResolutionContext
   ): Promise<{ ast: Program | null }> {
+    const cachedFile = context.parsedFiles.get(absPath);
+    if (cachedFile) {
+      errors.push(...cachedFile.errors);
+      return { ast: cachedFile.ast };
+    }
+
     let source: string;
     try {
       source = await this.loader.load(absPath);
@@ -453,8 +729,23 @@ export class Resolver {
         // Directory fallback: if path looks like .prs was appended, try as directory
         if (absPath.endsWith('.prs')) {
           const possibleDir = absPath.slice(0, -4); // strip .prs
-          const dirResult = await this.tryDirectoryScan(possibleDir, sources, errors);
-          if (dirResult) return dirResult;
+          const dirErrors: ResolveError[] = [];
+          const dirResult = await this.tryDirectoryScan(
+            possibleDir,
+            sources,
+            dependencies,
+            dirErrors
+          );
+          if (dirResult) {
+            errors.push(...dirErrors);
+            if (dirResult.ast) {
+              context.parsedFiles.set(absPath, {
+                ast: dirResult.ast,
+                errors: dirErrors,
+              });
+            }
+            return dirResult;
+          }
         }
         errors.push(new ResolveError(err.message));
         return { ast: null };
@@ -464,7 +755,16 @@ export class Resolver {
 
     // Route .md files through content detection
     if (absPath.endsWith('.md')) {
-      return await this.loadAndParseMd(absPath, source, errors);
+      const mdErrors: ResolveError[] = [];
+      const result = await this.loadAndParseMd(absPath, source, mdErrors);
+      errors.push(...mdErrors);
+      if (result.ast) {
+        context.parsedFiles.set(absPath, {
+          ast: result.ast,
+          errors: mdErrors,
+        });
+      }
+      return result;
     }
 
     const parseResult = parse(source, { filename: absPath });
@@ -476,9 +776,14 @@ export class Resolver {
       return { ast: null };
     }
 
-    for (const err of parseResult.errors) {
-      errors.push(new ResolveError(err.message, err.location));
-    }
+    const parseErrors = parseResult.errors.map(
+      (err) => new ResolveError(err.message, err.location)
+    );
+    errors.push(...parseErrors);
+    context.parsedFiles.set(absPath, {
+      ast: parseResult.ast,
+      errors: parseErrors,
+    });
 
     return { ast: parseResult.ast };
   }
@@ -517,7 +822,22 @@ export class Resolver {
     }
 
     // skill or raw -> synthesize Program with @skills block
-    const parsed = parseSkillMd(source);
+    let parsed: ReturnType<typeof parseSkillMd>;
+    try {
+      parsed = parseSkillMd(source, absPath);
+    } catch (error: unknown) {
+      errors.push(
+        error instanceof ResolveError
+          ? error
+          : new ResolveError(
+              `Skill frontmatter parsing failed: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
+              { file: absPath, line: 1, column: 1 }
+            )
+      );
+      return { ast: null };
+    }
     const skillName = parsed.name ?? skillNameFromPath(absPath);
 
     if (!parsed.name) {
@@ -533,6 +853,7 @@ export class Resolver {
     if (parsed.content) {
       skillProps['content'] = makeTextContent(parsed.content, absPath);
     }
+    addParsedSkillMetadata(skillProps, parsed);
 
     // Discover resource files alongside the SKILL.md and explicit reference
     // entries. This mirrors the behaviour of resolveNativeSkills() so a skill
@@ -554,13 +875,35 @@ export class Resolver {
 
     if (parsed.references && parsed.references.length > 0) {
       try {
+        const frontmatterLocations = getSkillFrontmatterLocations(parsed);
         const refs = await resolveSkillReferences(
           parsed.references,
           skillDir,
           this.logger,
-          absPath
+          frontmatterLocations?.frontmatter,
+          frontmatterLocations?.items.get('references')
         );
         collected.push(...refs);
+      } catch (err) {
+        if (err instanceof ResolveError) {
+          errors.push(err);
+        } else {
+          errors.push(new ResolveError(err instanceof Error ? err.message : String(err)));
+        }
+      }
+    }
+
+    if (parsed.scripts && parsed.scripts.length > 0) {
+      try {
+        const frontmatterLocations = getSkillFrontmatterLocations(parsed);
+        const scripts = await resolveSkillScripts(
+          parsed.scripts,
+          skillDir,
+          this.logger,
+          frontmatterLocations?.frontmatter,
+          frontmatterLocations?.items.get('scripts')
+        );
+        collected.push(...scripts);
       } catch (err) {
         if (err instanceof ResolveError) {
           errors.push(err);
@@ -579,6 +922,8 @@ export class Resolver {
       skillProps['resources'] = Array.from(byPath.values()).map((r) => ({
         relativePath: r.relativePath,
         content: r.content,
+        ...(r.origin ? { origin: r.origin } : {}),
+        ...(r.executable !== undefined ? { executable: r.executable } : {}),
       })) as Value[];
     }
 
@@ -600,7 +945,9 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
+    dependencies: Set<string>,
     errors: ResolveError[],
+    context: ResolutionContext,
     parentWins = false
   ): Promise<Program> {
     if (!ast.inherit) {
@@ -614,11 +961,12 @@ export class Resolver {
     try {
       let parent: ResolvedAST;
       if (parentPath.startsWith(REGISTRY_MARKER_PREFIX)) {
-        parent = await this.resolveRegistryImport(parentPath, errors);
+        parent = await this.resolveRegistryImport(parentPath, errors, context);
       } else {
-        parent = await this.resolve(parentPath);
+        parent = await this.resolveWithContext(parentPath, context);
       }
       sources.push(...parent.sources);
+      addDependencyPaths(dependencies, parent.dependencies ?? []);
       errors.push(...parent.errors);
 
       if (parent.ast) {
@@ -680,7 +1028,9 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    dependencies: Set<string>,
+    errors: ResolveError[],
+    context: ResolutionContext
   ): Promise<Program> {
     let result = ast;
 
@@ -694,12 +1044,13 @@ export class Resolver {
 
         if (importPath.startsWith(REGISTRY_MARKER_PREFIX)) {
           // Remote registry import — handle async Git resolution
-          imported = await this.resolveRegistryImport(importPath, errors);
+          imported = await this.resolveRegistryImport(importPath, errors, context);
         } else {
-          imported = await this.resolve(importPath);
+          imported = await this.resolveWithContext(importPath, context);
         }
 
         sources.push(...imported.sources);
+        addDependencyPaths(dependencies, imported.dependencies ?? []);
         errors.push(...imported.errors);
 
         if (imported.ast) {
@@ -796,7 +1147,9 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    dependencies: Set<string>,
+    errors: ResolveError[],
+    context: ResolutionContext
   ): Promise<Program> {
     try {
       ast = await resolveSkillComposition(ast, {
@@ -817,10 +1170,11 @@ export class Resolver {
           return this.loader.resolveRef(pathRef, fromFile);
         },
         resolveFile: async (subPath: string): Promise<Program> => {
-          const subResult = await this.resolve(subPath);
+          const subResult = await this.resolveWithContext(subPath, context);
           if (subResult.sources.length > 0) {
             sources.push(...subResult.sources);
           }
+          addDependencyPaths(dependencies, subResult.dependencies ?? []);
           if (subResult.errors.length > 0) {
             errors.push(...subResult.errors);
           }
@@ -860,21 +1214,26 @@ export class Resolver {
    */
   private async resolveRegistryImport(
     marker: string,
-    errors: ResolveError[]
+    errors: ResolveError[],
+    context: ResolutionContext
   ): Promise<ResolvedAST> {
+    const preflightResult = context.preflightRegistryImports.get(marker);
+    if (preflightResult) {
+      context.preflightRegistryImports.delete(marker);
+      if (preflightResult.type === 'error') {
+        throw preflightResult.error;
+      }
+      return preflightResult.result;
+    }
+
     const parsed = parseRegistryMarker(marker);
     if (!parsed) {
       errors.push(new ResolveError(`Invalid registry marker: ${marker}`));
-      return { ast: null, sources: [marker], errors: [] };
+      return { ast: null, canonicalAst: null, sources: [marker], errors: [] };
     }
 
     const { repoUrl, path: subPath, version } = parsed;
-
-    // Add to resolving set for circular dependency detection
-    if (this.resolving.has(marker)) {
-      this.logger.debug(`Circular dependency detected: ${marker}`);
-      throw new CircularDependencyError([...this.resolving, marker]);
-    }
+    const dependencies = new Set<string>();
 
     // Check internal AST cache
     if (this.cacheEnabled && this.cache.has(marker)) {
@@ -882,7 +1241,7 @@ export class Resolver {
       return this.cache.get(marker)!;
     }
 
-    this.resolving.add(marker);
+    context.resolving.add(marker);
 
     try {
       // Check lockfile for pinned commit
@@ -1026,6 +1385,7 @@ export class Resolver {
           );
         }
       }
+      dependencies.add(cachePath);
 
       // Resolve the file path within the cached repo. An empty sub-path means
       // the import targets the repository root (e.g. `@use github.com/foo/bar`)
@@ -1051,8 +1411,8 @@ export class Resolver {
               `Path traversal detected: subpath '${subPath}' escapes repository cache boundary.`
             )
           );
-          this.resolving.delete(marker);
-          return { ast: null, sources: [marker], errors };
+          context.resolving.delete(marker);
+          return { ast: null, canonicalAst: null, sources: [marker], errors };
         }
         if (
           existsSync(resolvedFullPath) &&
@@ -1063,8 +1423,8 @@ export class Resolver {
               `Path traversal detected: subpath '${subPath}' resolves outside the repository cache boundary.`
             )
           );
-          this.resolving.delete(marker);
-          return { ast: null, sources: [marker], errors };
+          context.resolving.delete(marker);
+          return { ast: null, canonicalAst: null, sources: [marker], errors };
         }
       }
 
@@ -1073,12 +1433,14 @@ export class Resolver {
       if (!isRoot && existsSync(resolvedFullPath) && isMdPath) {
         // Found a .md file — route through content detection
         this.logger.debug(`Found .md file: ${resolvedFullPath}`);
+        dependencies.add(resolvedFullPath);
         const source = await readFile(resolvedFullPath, 'utf-8');
         const mdResult = await this.loadAndParseMd(resolvedFullPath, source, errors);
         resolvedAST = mdResult.ast;
       } else if (!isRoot && existsSync(resolvedFullPath)) {
         // Found a .prs file — parse it
         this.logger.debug(`Found .prs file: ${resolvedFullPath}`);
+        dependencies.add(resolvedFullPath);
         const source = await this.loader.load(resolvedFullPath);
         const parseResult = parse(source, { filename: resolvedFullPath });
 
@@ -1101,27 +1463,19 @@ export class Resolver {
         // No file found — try directory import and auto-discovery
         const discoverDir = isRoot ? cachePath : join(cachePath, subPath);
 
-        // Containment check for directory discovery path
-        if (!isRoot) {
-          const dirRel = relative(resolve(cachePath), resolve(discoverDir));
-          if (dirRel.startsWith('..')) {
-            errors.push(
-              new ResolveError(
-                `Path traversal detected: subpath '${subPath}' escapes repository cache boundary.`
-              )
-            );
-            this.resolving.delete(marker);
-            return { ast: null, sources: [marker], errors };
-          }
-          if (existsSync(discoverDir) && !(await isRealPathInside(discoverDir, cachePath))) {
-            errors.push(
-              new ResolveError(
-                `Path traversal detected: subpath '${subPath}' resolves outside the repository cache boundary.`
-              )
-            );
-            this.resolving.delete(marker);
-            return { ast: null, sources: [marker], errors };
-          }
+        // The lexical containment check above covers traversal before discovery.
+        if (
+          !isRoot &&
+          existsSync(discoverDir) &&
+          !(await isRealPathInside(discoverDir, cachePath))
+        ) {
+          errors.push(
+            new ResolveError(
+              `Path traversal detected: subpath '${subPath}' resolves outside the repository cache boundary.`
+            )
+          );
+          context.resolving.delete(marker);
+          return { ast: null, canonicalAst: null, sources: [marker], errors };
         }
 
         if (!isRoot && !existsSync(discoverDir)) {
@@ -1135,7 +1489,8 @@ export class Resolver {
             `No .prs found, trying directory scan and auto-discovery: ${discoverDir}`
           );
 
-          const dirResult = await this.tryDirectoryScan(discoverDir, [marker], []);
+          dependencies.add(discoverDir);
+          const dirResult = await this.tryDirectoryScan(discoverDir, [marker], dependencies, []);
           if (dirResult?.ast) {
             resolvedAST = dirResult.ast;
           } else {
@@ -1156,9 +1511,15 @@ export class Resolver {
 
       const result: ResolvedAST = {
         ast: resolvedAST,
+        canonicalAst: resolvedAST ? normalizeProgram(resolvedAST) : null,
         sources: [marker],
+        dependencies: [...dependencies],
         errors: [],
       };
+      if (resolvedAST) {
+        collectDependencyPaths(resolvedAST, dependencies);
+        result.dependencies = [...dependencies];
+      }
 
       if (this.cacheEnabled) {
         this.cache.set(marker, result);
@@ -1166,7 +1527,7 @@ export class Resolver {
 
       return result;
     } finally {
-      this.resolving.delete(marker);
+      context.resolving.delete(marker);
     }
   }
 
@@ -1184,8 +1545,10 @@ export class Resolver {
   private async tryDirectoryScan(
     dirPath: string,
     sources: string[],
+    dependencies: Set<string>,
     errors: ResolveError[]
   ): Promise<{ ast: Program | null } | null> {
+    dependencies.add(dirPath);
     let stat;
     try {
       stat = await lstat(dirPath);
@@ -1266,7 +1629,7 @@ export class Resolver {
 
         try {
           const skillContent = await readFile(skillMdPath, 'utf-8');
-          const parsed = parseSkillMd(skillContent);
+          const parsed = parseSkillMd(skillContent, skillMdPath);
           const skillName = parsed.name ?? entry.name;
 
           const skillProps: Record<string, Value> = {};
@@ -1276,16 +1639,20 @@ export class Resolver {
           if (parsed.content) {
             skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
           }
+          addParsedSkillMetadata(skillProps, parsed);
 
           properties[skillName] = skillProps;
           foundSkill = true;
           this.logger.debug(`Found skill "${skillName}" via SKILL.md in ${subDir}`);
-        } catch {
+        } catch (error: unknown) {
+          if (error instanceof ResolveError) {
+            throw error;
+          }
           // SKILL.md not found, try dirname.md fallback
           const dirnameMdPath = join(subDir, `${entry.name}.md`);
           try {
             const fallbackContent = await readFile(dirnameMdPath, 'utf-8');
-            const parsed = parseSkillMd(fallbackContent);
+            const parsed = parseSkillMd(fallbackContent, dirnameMdPath);
             const skillName = parsed.name ?? skillNameFromPath(dirnameMdPath);
 
             const skillProps: Record<string, Value> = {};
@@ -1295,13 +1662,17 @@ export class Resolver {
             if (parsed.content) {
               skillProps['content'] = makeTextContent(parsed.content, dirnameMdPath);
             }
+            addParsedSkillMetadata(skillProps, parsed);
 
             properties[skillName] = skillProps;
             foundSkill = true;
             this.logger.debug(
               `Found skill "${skillName}" via ${basename(dirnameMdPath)} in ${subDir}`
             );
-          } catch {
+          } catch (error: unknown) {
+            if (error instanceof ResolveError) {
+              throw error;
+            }
             // Neither file found, will recurse if depth allows
           }
         }
@@ -1321,6 +1692,39 @@ export class Resolver {
    */
   clearCache(): void {
     this.cache.clear();
+  }
+
+  /**
+   * Invalidate cached resolutions affected by changed files.
+   *
+   * @param changedPaths - Files or directories that changed
+   */
+  invalidate(changedPaths: readonly string[]): void {
+    if (!this.cacheEnabled || changedPaths.length === 0) return;
+
+    const normalizedChanges = changedPaths.map((path) =>
+      isAbsolute(path) ? resolve(path) : resolve(this.loader.getProjectRoot(), path)
+    );
+    for (const [cacheKey, result] of this.cache) {
+      const dependencies = result.dependencies ?? result.sources;
+      if (dependencies.length === 0) {
+        this.cache.delete(cacheKey);
+        continue;
+      }
+
+      const affected = dependencies.some((dependency) => {
+        if (!isAbsolute(dependency)) return false;
+        const normalizedDependency = resolve(dependency);
+        return normalizedChanges.some((changedPath) => {
+          const relation = relative(normalizedDependency, changedPath);
+          return (
+            relation === '' ||
+            (relation !== '..' && !relation.startsWith(`..${sep}`) && !isAbsolute(relation))
+          );
+        });
+      });
+      if (affected) this.cache.delete(cacheKey);
+    }
   }
 
   /**

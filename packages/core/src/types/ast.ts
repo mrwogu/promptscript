@@ -122,6 +122,15 @@ export interface Program extends BaseNode {
   syntaxFeatures?: SyntaxFeatureUsage[];
 }
 
+/**
+ * Mutable compatibility AST used by legacy integrations.
+ *
+ * New pipeline stages should use {@link CanonicalProgram}. This alias makes
+ * the compatibility boundary explicit without renaming the long-standing
+ * `Program` API.
+ */
+export type LegacyProgram = Program;
+
 // ============================================================
 // Declarations
 // ============================================================
@@ -688,11 +697,7 @@ export interface OverrideOperation extends CanonicalNode {
  * Ordered semantic declaration in a canonical program.
  */
 export type ProgramOperation =
-  | InheritOperation
-  | UseOperation
-  | BlockOperation
-  | ExtendOperation
-  | OverrideOperation;
+  InheritOperation | UseOperation | BlockOperation | ExtendOperation | OverrideOperation;
 
 /**
  * Immutable canonical program. Legacy collection fields are derived projections.
@@ -713,6 +718,11 @@ export interface CanonicalProgram extends CanonicalNode {
  * Public input accepted during the legacy-to-canonical transition.
  */
 export type ProgramInput = Program | CanonicalProgram;
+
+/**
+ * Canonical input accepted by new pipeline stages.
+ */
+export type CanonicalProgramInput = CanonicalProgram;
 
 /**
  * Public block input accepted during the legacy-to-canonical transition.

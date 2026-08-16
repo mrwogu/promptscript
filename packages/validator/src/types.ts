@@ -1,4 +1,5 @@
 import type {
+  CanonicalProgram,
   Logger,
   Program,
   SourceLocation,
@@ -51,6 +52,13 @@ export interface ValidationResult {
 export interface RuleContext {
   /** The AST being validated */
   ast: Program;
+  /**
+   * Immutable canonical AST for rules that need ordered entries or provenance.
+   *
+   * The legacy `ast` field remains during the compatibility window so existing
+   * custom rules can migrate independently.
+   */
+  canonicalAst?: CanonicalProgram;
   /** Validator configuration */
   config: ValidatorConfig;
   /** Report a validation issue */

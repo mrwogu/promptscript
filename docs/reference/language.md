@@ -2496,6 +2496,12 @@ top-level `@use`, local blocks, `@extend`, and `@override`. An `@override` used
 with an older declared syntax also uses declaration order so replacement remains
 deterministic, while PS018 requests a syntax upgrade.
 
+Resolver derives operation mode from the complete reachable composition graph.
+Inherited files, top-level imports, and inline composed skills can enable
+declaration order for a lower-version entry file. Such mixed-version graphs
+remain valid, while PS018 reports the ordered-operation requirement. Graphs
+without ordered sources retain legacy phase ordering.
+
 Use the forms according to intent:
 
 | Form        | Behavior                                                       |
@@ -2536,3 +2542,20 @@ This complete example exercises root and nested replacement shapes:
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
+
+### AST compatibility timeline
+
+The compiler and validator use `CanonicalProgram` as their internal contract.
+Resolver results expose `canonicalAst` as the primary representation and retain
+`ast` for legacy integrations. Formatter implementations can opt into
+`formatCanonical()`; legacy formatters receive one detached projection through
+`toLegacyProgram()`.
+
+`ResolvedAST` now always includes `canonicalAst`: successful resolutions carry a
+`CanonicalProgram`, while failed resolutions carry `null`. Integrations that
+construct `ResolvedAST` values must provide this field.
+
+During the remaining 1.x compatibility window, integrations should migrate
+from `Program` to `CanonicalProgram`. A future major release may remove
+legacy-only entry points after the formatter and integration ecosystem has
+migrated.

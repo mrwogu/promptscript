@@ -35,21 +35,37 @@ Factory function that creates a `Compiler` instance.
 
 Standalone function for one-shot compilation.
 
+### `Compiler.watch(entryPath, options)`
+
+Watch mode monitors the entry file, matching source files, resolver configuration, and all
+dependencies discovered during resolution. Successful rebuilds replace the dependency set used
+for invalidation and watching. Resolve, validation, or formatting failures retain the last
+successful dependency set, so a later fix can still trigger a rebuild through the previous
+dependencies. Closing a watcher waits for any in-flight rebuild before returning.
+
 ### Types
 
-| Type              | Description                               |
-| :---------------- | :---------------------------------------- |
-| `CompileOptions`  | Options for the `compile()` function      |
-| `CompilerOptions` | Options for the `Compiler` constructor    |
-| `CompileResult`   | Result of a compilation run               |
-| `CompileStats`    | Statistics (files written, skipped, etc.) |
-| `CompileError`    | Compilation error details                 |
-| `Formatter`       | Formatter interface                       |
-| `FormatterOutput` | Output from a formatter                   |
-| `FormatOptions`   | Options passed to formatters              |
-| `TargetConfig`    | Per-target configuration                  |
-| `WatchCallback`   | Callback for watch mode events            |
-| `WatchOptions`    | Watch mode configuration                  |
+| Type                 | Description                                             |
+| :------------------- | :------------------------------------------------------ |
+| `CompileOptions`     | Options for the `compile()` function                    |
+| `CompilerOptions`    | Options for the `Compiler` constructor                  |
+| `CompileResult`      | Result of a compilation run                             |
+| `OutputPlan`         | Normalized, collision-resolved output plan              |
+| `CompileStats`       | Statistics (files written, skipped, etc.)               |
+| `CompileError`       | Compilation error details                               |
+| `Formatter`          | Formatter interface                                     |
+| `CanonicalFormatter` | Formatter consuming immutable canonical AST input       |
+| `LegacyFormatter`    | Compatibility formatter consuming mutable Program input |
+| `FormatterOutput`    | Output from a formatter                                 |
+| `FormatOptions`      | Options passed to formatters                            |
+| `TargetConfig`       | Per-target configuration                                |
+| `WatchCallback`      | Callback for watch mode events                          |
+| `WatchOptions`       | Watch mode configuration                                |
+
+The compiler resolves once to `ResolvedAST.canonicalAst`, then passes that
+immutable `CanonicalProgram` through validation and formatting. Legacy formatters
+remain supported through one detached compatibility projection at the formatter
+boundary.
 
 ## Usage (internal)
 

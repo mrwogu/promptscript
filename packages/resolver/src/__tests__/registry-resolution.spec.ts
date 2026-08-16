@@ -413,6 +413,83 @@ describe('Resolver — registry marker handling', () => {
     expect(result.sources).toHaveLength(1);
   });
 
+  it('replays a successful registry preflight without cloning twice', async () => {
+    const tempDir = join(testCacheDir, 'preflight-result');
+    await fs.mkdir(tempDir, { recursive: true });
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      [
+        '@meta {',
+        '  id: "preflight-result"',
+        '  syntax: "1.4.0"',
+        '}',
+        '',
+        '@use @acme/ordered',
+      ].join('\n')
+    );
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.writeFile(
+        join(targetDir, 'ordered.prs'),
+        '@meta { id: "ordered" syntax: "1.5.0" } @identity { """ordered""" }'
+      );
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'registry-cache'),
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(result.errors).toEqual([]);
+    expect(result.ast).not.toBeNull();
+    expect(mockGit.clone).toHaveBeenCalledTimes(1);
+  });
+
+  it('replays a registry preflight error without retrying the clone', async () => {
+    const tempDir = join(testCacheDir, 'preflight-error');
+    await fs.mkdir(tempDir, { recursive: true });
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      [
+        '@meta {',
+        '  id: "preflight-error"',
+        '  syntax: "1.4.0"',
+        '}',
+        '',
+        '@use @acme/ordered',
+      ].join('\n')
+    );
+    mockGit.clone
+      .mockRejectedValueOnce(new Error('preflight clone failure'))
+      .mockImplementation(async (_url: string, targetDir: string) => {
+        await fs.writeFile(
+          join(targetDir, 'ordered.prs'),
+          '@meta { id: "ordered" syntax: "1.5.0" } @identity { """ordered""" }'
+        );
+      });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'registry-cache'),
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(result.errors.map((error) => error.message).join('\n')).toContain(
+      'preflight clone failure'
+    );
+    expect(mockGit.clone).toHaveBeenCalledTimes(1);
+  });
+
   it('prefers an exact vendored dependency over cache and network access', async () => {
     const tempDir = join(testCacheDir, 'vendor-project');
     const vendorDir = join(tempDir, '.promptscript', 'vendor');
@@ -920,14 +997,39 @@ describe('Resolver — registry marker handling', () => {
     expect(result.errors.length).toBeGreaterThan(0);
   });
 
-  it('returns error for invalid registry marker', async () => {
-    // Arrange — directly test resolveRegistryImport with an invalid marker
-    // by creating a file that @uses something that will produce a bad marker.
-    // Instead, we test the parseRegistryMarker(null) path indirectly:
-    // The "invalid marker" branch is hit when parseRegistryMarker returns null.
-    // We test this via the marker helper directly.
-    const parsed = parseRegistryMarker('not-a-registry-marker');
-    expect(parsed).toBeNull();
+  it('returns an error when a registry marker payload is malformed', async () => {
+    // Arrange
+    const tempDir = join(testCacheDir, 'malformed-marker');
+    await fs.mkdir(tempDir, { recursive: true });
+    const prsFile = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      prsFile,
+      [
+        '@meta {',
+        '  id: "malformed-marker"',
+        '  syntax: "1.0.0"',
+        '}',
+        '',
+        '@use @acme/standards',
+      ].join('\n')
+    );
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: {
+        '@acme': 'https://example.com/repo\0unexpected',
+      },
+      cache: false,
+      cacheDir: join(testCacheDir, 'malformed-marker-cache'),
+    });
+
+    // Act
+    const result = await resolver.resolve(prsFile);
+
+    // Assert
+    expect(result.ast).not.toBeNull();
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.message).toContain('Invalid registry marker');
   });
 
   it('hits AST cache for repeated registry import resolution', async () => {
@@ -979,16 +1081,20 @@ describe('Resolver — registry marker handling', () => {
       cacheDir: join(testCacheDir, 'regcache-hit'),
     });
 
-    // Act — resolve twice; second call should hit AST cache
-    const result1 = await resolver.resolve(prsFile);
-    expect(result1.ast).not.toBeNull();
+    // A second entry file bypasses the per-file resolve cache, so the shared
+    // registry import is looked up again and must come from the marker cache.
+    const secondFile = join(tempDir, 'second.prs');
+    await fs.writeFile(secondFile, prsContent.replace('test-cache-hit', 'test-cache-hit-second'));
 
-    // Clear the file-level resolve cache so doResolve runs again,
-    // but the registry marker cache inside resolveRegistryImport should still be populated
-    // We can't easily clear just the top-level cache, but the test for cache: true
-    // above already covers the cacheEnabled store path. This test confirms the full flow.
-    const result2 = await resolver.resolve(prsFile);
+    // Act
+    const result1 = await resolver.resolve(prsFile);
+    const result2 = await resolver.resolve(secondFile);
+
+    // Assert
+    expect(result1.ast).not.toBeNull();
     expect(result2.ast).not.toBeNull();
+    expect(mockGit.clone).toHaveBeenCalledTimes(1);
+    expect(result2.sources.some((source) => source.includes('standards'))).toBe(true);
   });
 
   it('resolves @inherit from a registry marker path', async () => {

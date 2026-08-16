@@ -17,6 +17,7 @@ import {
   createCanonicalBlock,
   createValueNode,
   toLegacyBlock,
+  valueNodeToValue,
 } from '../canonical-ast.js';
 
 const LOC = { file: 'merge.prs', line: 1, column: 1, offset: 0 };
@@ -788,16 +789,70 @@ describe('block merge policies', () => {
     });
     const entries = result[0]!.canonicalBody!.entries;
 
-    expect(entries.map((entry) => entry.type)).toEqual(['TextEntry', 'FieldEntry', 'TextEntry']);
-    expect(entries[1]!.loc).toEqual(incomingLoc);
-    expect(entries[1]!.type).toBe('FieldEntry');
-    if (entries[1]!.type !== 'FieldEntry') {
+    expect(entries.map((entry) => entry.type)).toEqual(['FieldEntry', 'TextEntry', 'TextEntry']);
+    expect(entries[0]!.loc).toEqual(incomingLoc);
+    expect(entries[0]!.type).toBe('FieldEntry');
+    if (entries[0]!.type !== 'FieldEntry') {
       throw new Error('Expected field entry');
     }
-    expect(entries[1]!.value.loc).toEqual(incomingLoc);
+    expect(entries[0]!.value.loc).toEqual(incomingLoc);
     expect(blockBodyToContent(result[0]!.canonicalBody!)).toMatchObject({
       text: { value: 'Base text\n\nIncoming text' },
     });
+  });
+
+  it('keeps overridden fields at the position the base declared them', () => {
+    const baseLoc = { ...LOC, file: 'base.prs', offset: 1 };
+    const incomingLoc = { ...LOC, file: 'incoming.prs', offset: 20 };
+    const canonicalBlock = (
+      loc: typeof baseLoc,
+      fields: ReadonlyArray<readonly [string, string]>
+    ) =>
+      toLegacyBlock(
+        createCanonicalBlock(
+          'standards',
+          createBlockBody(
+            fields.map(([name, value]) => ({
+              type: 'FieldEntry' as const,
+              name,
+              value: createValueNode(value, loc),
+              loc,
+            })),
+            loc
+          ),
+          loc
+        ),
+        { preserveCanonicalBody: true }
+      );
+    const base = canonicalBlock(baseLoc, [
+      ['testing', 'jest'],
+      ['linting', 'eslint'],
+      ['coverage', 'text'],
+    ]);
+    const incoming = canonicalBlock(incomingLoc, [
+      ['linting', 'biome'],
+      ['docs', 'typedoc'],
+    ]);
+
+    const result = mergeBlockCollections([base], [incoming], {
+      content: INHERITANCE_MERGE_POLICY,
+      outputOrder: 'base',
+    });
+    const entries = result[0]!.canonicalBody!.entries;
+
+    expect(
+      entries
+        .filter((entry) => entry.type === 'FieldEntry')
+        .map((entry) => [entry.name, valueNodeToValue(entry.value)])
+    ).toEqual([
+      ['testing', 'jest'],
+      ['linting', 'biome'],
+      ['coverage', 'text'],
+      ['docs', 'typedoc'],
+    ]);
+    expect(
+      Object.keys((result[0]!.content as { properties: Record<string, unknown> }).properties)
+    ).toEqual(['testing', 'linting', 'coverage', 'docs']);
   });
 
   it('synthesizes missing canonical bodies from their source layers', () => {

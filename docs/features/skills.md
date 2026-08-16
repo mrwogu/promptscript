@@ -50,6 +50,11 @@ Portable skills can use a complete directory:
 ---
 name: security-review
 description: Review code for application security risks
+license: MIT
+compatibility: Requires shell access
+metadata:
+  owner: security
+allowed-tools: 'Read Grep Bash'
 references:
   - references/threat-model.md
 scripts:
@@ -71,21 +76,23 @@ and executable file modes remain platform and operating-system specific.
 
 ## Skill Capabilities
 
-| Capability               | Purpose                            |
-| ------------------------ | ---------------------------------- |
-| `description`            | Discovery and invocation guidance  |
-| `content`                | Main skill instructions            |
-| `allowedTools`           | Tool permissions                   |
-| `userInvocable`          | Manual user invocation             |
-| `disableModelInvocation` | Prevent automatic model invocation |
-| `context`                | Inherit or fork execution context  |
-| `agent`                  | Select agent type                  |
-| `requires`               | Declare skill dependencies         |
-| `references`             | Bundle supporting documents        |
-| `scripts`                | Bundle executable helpers          |
-| `inputs` and `outputs`   | Define typed skill contracts       |
-| `params`                 | Parameterize reusable skills       |
-| `examples`               | Attach focused examples            |
+| Capability                       | Purpose                            |
+| -------------------------------- | ---------------------------------- |
+| `description`                    | Discovery and invocation guidance  |
+| `license` and `compatibility`    | Native skill metadata              |
+| `metadata`                       | Additional native skill metadata   |
+| `content`                        | Main skill instructions            |
+| `allowedTools` / `allowed-tools` | Tool permissions                   |
+| `userInvocable`                  | Manual user invocation             |
+| `disableModelInvocation`         | Prevent automatic model invocation |
+| `context`                        | Inherit or fork execution context  |
+| `agent`                          | Select agent type                  |
+| `requires`                       | Declare skill dependencies         |
+| `references`                     | Bundle supporting documents        |
+| `scripts`                        | Bundle executable helpers          |
+| `inputs` and `outputs`           | Define typed skill contracts       |
+| `params`                         | Parameterize reusable skills       |
+| `examples`                       | Attach focused examples            |
 
 ## Universal and Native Paths
 

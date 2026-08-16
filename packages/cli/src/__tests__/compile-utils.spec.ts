@@ -210,6 +210,17 @@ describe('detectOutputConflicts', () => {
     expect(conflicts.size).toBe(1);
     expect(conflicts.get('CLAUDE.md')).toEqual(['claude', 'opencode']);
   });
+
+  it('should use the custom target name when no default output exists', () => {
+    const targets = [
+      { name: 'custom-target' },
+      { name: 'other-custom-target', config: { output: 'custom-target' } },
+    ];
+
+    const conflicts = detectOutputConflicts(targets);
+
+    expect(conflicts.get('custom-target')).toEqual(['custom-target', 'other-custom-target']);
+  });
 });
 
 describe('validateOutputPath', () => {

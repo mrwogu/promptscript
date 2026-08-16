@@ -1,5 +1,6 @@
 import { readFile, readdir, access, lstat, realpath } from 'fs/promises';
-import { basename, resolve, dirname, relative, normalize, isAbsolute, sep } from 'path';
+import { basename, resolve, dirname, relative, isAbsolute, sep } from 'path';
+import { isAlias, isCollection, isNode, isPair, isSeq, parseDocument } from 'yaml';
 import {
   isGeneratedByPromptScript,
   ResolveError,
@@ -16,6 +17,7 @@ import type {
   ParamDefinition,
   ParamType,
   SkillContractField,
+  SourceLocation,
 } from '@promptscript/core';
 
 /**
@@ -26,7 +28,7 @@ export interface SkillResource {
   relativePath: string;
   /** File content (utf-8) */
   content: string;
-  /** Absolute source path (non-serializable resolver metadata, stripped from public AST) */
+  /** Absolute source path used for dependency tracking */
   origin?: string;
   /** Whether the source file had executable mode bits set */
   executable?: boolean;
@@ -45,94 +47,129 @@ export interface ParsedSkillMd {
   references?: string[];
   scripts?: string[];
   license?: string;
+  compatibility?: string;
+  metadata?: Record<string, string>;
+  allowedTools?: string[];
   rawFrontmatter?: string;
 }
 
-function resourceLocation(
-  basePath: string,
-  sourceFile: string | undefined
-): {
-  file: string;
-  line: number;
-  column: number;
-} {
-  return {
-    file: sourceFile ?? resolve(basePath, 'SKILL.md'),
-    line: 1,
-    column: 1,
-  };
+interface ParsedSkillFrontmatter {
+  name?: string;
+  description?: string;
+  params?: ParamDefinition[];
+  inputs?: Record<string, SkillContractField>;
+  outputs?: Record<string, SkillContractField>;
+  references?: string[];
+  scripts?: string[];
+  license?: string;
+  compatibility?: string;
+  metadata?: Record<string, string>;
+  allowedTools?: string[];
 }
+
+interface ParsedYamlFrontmatter {
+  fields: Record<string, unknown>;
+  fieldLocations: ReadonlyMap<string, SourceLocation>;
+  fieldItemLocations: ReadonlyMap<string, readonly SourceLocation[]>;
+}
+
+const MAX_FRONTMATTER_BYTES = 256 * 1024;
+const MAX_FRONTMATTER_NODES = 10_000;
+const MAX_FRONTMATTER_DEPTH = 32;
+const MAX_FRONTMATTER_COLLECTION_ITEMS = 2_000;
+const MAX_FRONTMATTER_STRING_LENGTH = 64 * 1024;
+
+/**
+ * A parsed SKILL.md frontmatter block with source offsets preserved.
+ */
+export interface SkillFrontmatterBlock {
+  raw: string;
+  body: string;
+  location: SourceLocation;
+  yamlLocation: SourceLocation;
+}
+
+/**
+ * Source locations for fields declared in a SKILL.md frontmatter block.
+ */
+export interface SkillFrontmatterLocations {
+  frontmatter: SourceLocation;
+  fields: ReadonlyMap<string, SourceLocation>;
+  items: ReadonlyMap<string, readonly SourceLocation[]>;
+}
+
+const parsedSkillFrontmatterLocations = new WeakMap<ParsedSkillMd, SkillFrontmatterLocations>();
+
+/**
+ * Return source locations captured while parsing a SKILL.md frontmatter block.
+ */
+export function getSkillFrontmatterLocations(
+  parsed: ParsedSkillMd
+): SkillFrontmatterLocations | undefined {
+  return parsedSkillFrontmatterLocations.get(parsed);
+}
+
+const YAML_FRONTMATTER_OPTIONS = {
+  version: '1.2' as const,
+  schema: 'core' as const,
+  strict: true,
+  stringKeys: true,
+  uniqueKeys: true,
+  merge: false,
+  resolveKnownTags: false,
+};
 
 /**
  * Parse a SKILL.md file extracting frontmatter and content.
  *
  * @param content - Raw SKILL.md file content
+ * @param sourceFile - Optional source path used in resolver diagnostics
  * @returns Parsed skill metadata and content
  */
-export function parseSkillMd(content: string): ParsedSkillMd {
-  const lines = content.split('\n');
-  let inFrontmatter = false;
-  let frontmatterStart = -1;
-  let frontmatterEnd = -1;
+export function parseSkillMd(content: string, sourceFile = '<skill>'): ParsedSkillMd {
+  const frontmatter = extractSkillFrontmatter(content, sourceFile);
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]?.trim() ?? '';
-    if (line === '---') {
-      if (!inFrontmatter) {
-        inFrontmatter = true;
-        frontmatterStart = i;
-      } else {
-        frontmatterEnd = i;
-        break;
-      }
-    }
-  }
-
-  let name: string | undefined;
-  let description: string | undefined;
-  let params: ParamDefinition[] | undefined;
-  let inputs: Record<string, SkillContractField> | undefined;
-  let outputs: Record<string, SkillContractField> | undefined;
-  let references: string[] | undefined;
-  let scripts: string[] | undefined;
-  let license: string | undefined;
-  let rawFrontmatter: string | undefined;
-  let bodyContent: string;
-
-  if (frontmatterStart >= 0 && frontmatterEnd > frontmatterStart) {
+  if (frontmatter !== null) {
     // A SKILL.md that PromptScript generated carries a marker line in its
     // frontmatter. Drop it so re-ingesting the file does not carry a stale
     // marker (and its timestamp) into the next compilation output.
-    const frontmatterLines = stripFrontmatterMarkerLines(
-      lines.slice(frontmatterStart + 1, frontmatterEnd).join('\n')
-    ).split('\n');
-    const parsed = parseFrontmatterFields(frontmatterLines);
-    name = parsed.name;
-    description = parsed.description;
-    params = parsed.params;
-    inputs = parsed.inputs;
-    outputs = parsed.outputs;
-    references = parsed.references;
-    scripts = parsed.scripts;
-    license = parsed.license;
-    rawFrontmatter = frontmatterLines.join('\n');
+    const rawFrontmatter = stripFrontmatterMarkerLines(frontmatter.raw);
+    const yamlFrontmatter = parseYamlFrontmatter(frontmatter, sourceFile);
+    const parsed = parseFrontmatterFields(
+      yamlFrontmatter.fields,
+      sourceFile,
+      frontmatter.location,
+      yamlFrontmatter.fieldLocations,
+      yamlFrontmatter.fieldItemLocations
+    );
 
-    bodyContent = stripLeadingHtmlMarker(lines.slice(frontmatterEnd + 1).join('\n')).trim();
-  } else {
-    bodyContent = stripLeadingHtmlMarker(content).trim();
+    const bodyContent = stripLeadingHtmlMarker(frontmatter.body).trim();
+
+    const result: ParsedSkillMd = {
+      name: parsed.name,
+      description: parsed.description,
+      content: bodyContent,
+      params: parsed.params,
+      inputs: parsed.inputs,
+      outputs: parsed.outputs,
+      references: parsed.references,
+      scripts: parsed.scripts,
+      license: parsed.license,
+      compatibility: parsed.compatibility,
+      metadata: parsed.metadata,
+      allowedTools: parsed.allowedTools,
+      rawFrontmatter,
+    };
+    parsedSkillFrontmatterLocations.set(result, {
+      frontmatter: frontmatter.location,
+      fields: yamlFrontmatter.fieldLocations,
+      items: yamlFrontmatter.fieldItemLocations,
+    });
+    return result;
   }
 
   return {
-    name,
-    description,
-    content: bodyContent,
-    params,
-    inputs,
-    outputs,
-    references,
-    scripts,
-    license,
-    rawFrontmatter,
+    content: stripLeadingHtmlMarker(content).trim(),
   };
 }
 
@@ -146,278 +183,842 @@ export function skillNameFromPath(filePath: string): string {
   return basename(filePath, '.md');
 }
 
-/**
- * Parse frontmatter fields including nested params blocks.
- */
-function parseFrontmatterFields(lines: string[]): {
-  name?: string;
-  description?: string;
-  params?: ParamDefinition[];
-  inputs?: Record<string, SkillContractField>;
-  outputs?: Record<string, SkillContractField>;
-  references?: string[];
-  scripts?: string[];
-  license?: string;
-} {
-  let name: string | undefined;
-  let description: string | undefined;
-  let params: ParamDefinition[] | undefined;
-  let inputs: Record<string, SkillContractField> | undefined;
-  let outputs: Record<string, SkillContractField> | undefined;
-  let references: string[] | undefined;
-  let scripts: string[] | undefined;
-  let license: string | undefined;
-
-  let i = 0;
-  while (i < lines.length) {
-    const line = lines[i] ?? '';
-
-    const nameMatch = line.match(/^name:\s*(?:"([^"]+)"|'([^']+)'|(.+))\s*$/);
-    if (nameMatch) {
-      name = (nameMatch[1] ?? nameMatch[2] ?? nameMatch[3])?.trim();
-      i++;
-      continue;
-    }
-
-    const descMatch = line.match(/^description:\s*(?:"([^"]+)"|'([^']+)'|(.+))\s*$/);
-    if (descMatch) {
-      description = (descMatch[1] ?? descMatch[2] ?? descMatch[3])?.trim();
-      i++;
-      continue;
-    }
-
-    if (line.match(/^params:\s*$/)) {
-      i++;
-      const result = parseParamsBlock(lines, i);
-      params = result.params;
-      i = result.nextIndex;
-      continue;
-    }
-
-    if (line.match(/^inputs:\s*$/)) {
-      i++;
-      const result = parseContractFieldsBlock(lines, i);
-      inputs = result.fields;
-      i = result.nextIndex;
-      continue;
-    }
-
-    if (line.match(/^outputs:\s*$/)) {
-      i++;
-      const result = parseContractFieldsBlock(lines, i);
-      outputs = result.fields;
-      i = result.nextIndex;
-      continue;
-    }
-
-    if (line.match(/^references:\s*$/)) {
-      i++;
-      references = [];
-      while (i < lines.length) {
-        const itemLine = lines[i] ?? '';
-        const itemMatch = itemLine.match(/^ {2}-\s+(.+)$/);
-        if (!itemMatch) break;
-        references.push(itemMatch[1]!.trim());
-        i++;
-      }
-      continue;
-    }
-
-    if (line.match(/^scripts:\s*$/)) {
-      i++;
-      scripts = [];
-      while (i < lines.length) {
-        const itemLine = lines[i] ?? '';
-        const itemMatch = itemLine.match(/^ {2}-\s+(.+)$/);
-        if (!itemMatch) break;
-        scripts.push(itemMatch[1]!.trim());
-        i++;
-      }
-      continue;
-    }
-
-    const licenseMatch = line.match(/^license:\s*(?:"([^"]+)"|'([^']+)'|(.+))\s*$/);
-    if (licenseMatch) {
-      license = (licenseMatch[1] ?? licenseMatch[2] ?? licenseMatch[3])?.trim();
-      i++;
-      continue;
-    }
-
-    i++;
+function findFrontmatterStart(lines: string[]): number {
+  let index = 0;
+  while (index < lines.length && (lines[index] ?? '').trim() === '') {
+    index++;
   }
-
-  return { name, description, params, inputs, outputs, references, scripts, license };
+  return isFrontmatterDelimiter(lines[index], true) ? index : -1;
 }
 
 /**
- * Parse a params block from YAML frontmatter lines.
+ * Extract a SKILL.md frontmatter block using the same delimiter rules as the
+ * parser and validator.
  */
-function parseParamsBlock(
-  lines: string[],
-  startIndex: number
-): { params: ParamDefinition[]; nextIndex: number } {
+export function extractSkillFrontmatter(
+  content: string,
+  sourceFile = '<skill>'
+): SkillFrontmatterBlock | null {
+  const lines = content.split('\n');
+  const frontmatterStart = findFrontmatterStart(lines);
+  if (frontmatterStart < 0) return null;
+
+  let frontmatterEnd = -1;
+  for (let i = frontmatterStart + 1; i < lines.length; i++) {
+    if (isFrontmatterDelimiter(lines[i])) {
+      frontmatterEnd = i;
+      break;
+    }
+  }
+  if (frontmatterEnd <= frontmatterStart) return null;
+
+  const lineStarts = getLineStartOffsets(content);
+  const openingLineStart = lineStarts[frontmatterStart] ?? 0;
+  const openingLine = lines[frontmatterStart] ?? '';
+  const openingDelimiterOffset =
+    frontmatterStart === 0 && openingLine.startsWith('\uFEFF')
+      ? openingLineStart + 1
+      : openingLineStart;
+  const yamlOffset = lineStarts[frontmatterStart + 1] ?? content.length;
+  const closingOffset = lineStarts[frontmatterEnd] ?? content.length;
+  const bodyOffset = lineStarts[frontmatterEnd + 1] ?? content.length;
+  const yamlEnd = removeLineEndingBefore(content, closingOffset, yamlOffset);
+
+  return {
+    raw: content.slice(yamlOffset, yamlEnd),
+    body: content.slice(bodyOffset),
+    location: locationAtOffset(content, openingDelimiterOffset, sourceFile),
+    yamlLocation: locationAtOffset(content, yamlOffset, sourceFile),
+  };
+}
+
+function removeLineEndingBefore(content: string, offset: number, minimum: number): number {
+  let end = offset;
+  if (end > minimum && content[end - 1] === '\n') end--;
+  if (end > minimum && content[end - 1] === '\r') end--;
+  return end;
+}
+
+function getLineStartOffsets(content: string): number[] {
+  const lineStarts = [0];
+  for (let index = 0; index < content.length; index++) {
+    if (content[index] === '\n') lineStarts.push(index + 1);
+  }
+  return lineStarts;
+}
+
+function locationAtOffset(content: string, offset: number, sourceFile: string): SourceLocation {
+  const boundedOffset = Math.max(0, Math.min(offset, content.length));
+  const prefix = content.slice(0, boundedOffset);
+  const lineBreaks = prefix.match(/\n/g)?.length ?? 0;
+  const lastLineBreak = prefix.lastIndexOf('\n');
+  const column = lastLineBreak < 0 ? boundedOffset + 1 : boundedOffset - lastLineBreak;
+
+  return {
+    file: sourceFile,
+    line: lineBreaks + 1,
+    column,
+    offset: boundedOffset,
+  };
+}
+
+function isFrontmatterDelimiter(line: string | undefined, allowBom = false): boolean {
+  if (line === undefined) return false;
+  const withoutCarriageReturn = line.endsWith('\r') ? line.slice(0, -1) : line;
+  const candidate =
+    allowBom && withoutCarriageReturn.startsWith('\uFEFF')
+      ? withoutCarriageReturn.slice(1)
+      : withoutCarriageReturn;
+  return candidate.trimEnd() === '---';
+}
+
+function parseYamlFrontmatter(
+  frontmatter: SkillFrontmatterBlock,
+  sourceFile: string
+): ParsedYamlFrontmatter {
+  if (Buffer.byteLength(frontmatter.raw, 'utf8') > MAX_FRONTMATTER_BYTES) {
+    throw frontmatterError(
+      `frontmatter exceeds ${MAX_FRONTMATTER_BYTES} bytes`,
+      sourceFile,
+      frontmatter.location
+    );
+  }
+
+  const document = parseDocument(frontmatter.raw, YAML_FRONTMATTER_OPTIONS);
+  if (document.errors.length > 0) {
+    const error = document.errors[0]!;
+    throw frontmatterError(
+      `YAML parse error: ${error.message}`,
+      sourceFile,
+      getYamlLocation(frontmatter, sourceFile, error.pos[0])
+    );
+  }
+  if (document.warnings.length > 0) {
+    const warning = document.warnings[0]!;
+    throw frontmatterError(
+      `YAML warning is not supported: ${warning.message}`,
+      sourceFile,
+      getYamlLocation(frontmatter, sourceFile, warning.pos[0])
+    );
+  }
+
+  rejectUnsafeYamlNodes(document.contents, sourceFile, frontmatter);
+  enforceFrontmatterLimits(document.contents, sourceFile, frontmatter);
+  const { fields: fieldLocations, items: fieldItemLocations } = getTopLevelFieldLocations(
+    document.contents,
+    sourceFile,
+    frontmatter
+  );
+
+  let value: unknown;
+  try {
+    value = document.toJS({ maxAliasCount: 0 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw frontmatterError(
+      `YAML value resolution failed: ${message}`,
+      sourceFile,
+      frontmatter.location
+    );
+  }
+
+  if (document.contents === null) {
+    return { fields: {}, fieldLocations, fieldItemLocations };
+  }
+  if (!isRecord(value)) {
+    throw frontmatterError(
+      'top-level frontmatter value must be a YAML mapping',
+      sourceFile,
+      frontmatter.location
+    );
+  }
+
+  return { fields: value, fieldLocations, fieldItemLocations };
+}
+
+function getYamlLocation(
+  frontmatter: SkillFrontmatterBlock,
+  sourceFile: string,
+  offset: number
+): SourceLocation {
+  const source = frontmatter.raw;
+  const boundedOffset = Math.max(0, Math.min(offset, source.length));
+  const prefix = source.slice(0, boundedOffset);
+  const lineBreaks = prefix.match(/\n/g)?.length ?? 0;
+  const lastLineBreak = prefix.lastIndexOf('\n');
+  const column =
+    lastLineBreak < 0
+      ? frontmatter.yamlLocation.column + boundedOffset
+      : boundedOffset - lastLineBreak;
+
+  return {
+    file: sourceFile,
+    line: frontmatter.yamlLocation.line + lineBreaks,
+    column,
+    offset: (frontmatter.yamlLocation.offset ?? 0) + boundedOffset,
+  };
+}
+
+function getTopLevelFieldLocations(
+  node: unknown,
+  sourceFile: string,
+  frontmatter: SkillFrontmatterBlock
+): {
+  fields: ReadonlyMap<string, SourceLocation>;
+  items: ReadonlyMap<string, readonly SourceLocation[]>;
+} {
+  const fieldLocations = new Map<string, SourceLocation>();
+  const fieldItemLocations = new Map<string, readonly SourceLocation[]>();
+  if (!isCollection(node)) return { fields: fieldLocations, items: fieldItemLocations };
+
+  for (const item of node.items) {
+    if (!isPair(item)) continue;
+    const key = getScalarString(item.key);
+    if (key === undefined) continue;
+
+    const keyLocation = getNodeLocation(item.key, sourceFile, frontmatter);
+    fieldLocations.set(key, keyLocation);
+    if (isCollection(item.value)) {
+      fieldItemLocations.set(
+        key,
+        item.value.items.map((value) => getNodeLocation(value, sourceFile, frontmatter))
+      );
+    }
+  }
+
+  return { fields: fieldLocations, items: fieldItemLocations };
+}
+
+function getScalarString(node: unknown): string | undefined {
+  if (!isNode(node) || !('value' in node)) return undefined;
+  const value = node.value;
+  return typeof value === 'string' ? value : undefined;
+}
+
+function getNodeLocation(
+  node: unknown,
+  sourceFile: string,
+  frontmatter: SkillFrontmatterBlock
+): SourceLocation {
+  if (!isNode(node) || !('range' in node)) return frontmatter.location;
+  const range = node.range;
+  if (!Array.isArray(range) || typeof range[0] !== 'number') return frontmatter.location;
+  return getYamlLocation(frontmatter, sourceFile, range[0]);
+}
+
+function rejectUnsafeYamlNodes(
+  node: unknown,
+  sourceFile: string,
+  frontmatter: SkillFrontmatterBlock
+): void {
+  if (!isNode(node)) return;
+
+  if (isAlias(node)) {
+    throw frontmatterError(
+      'YAML aliases are not allowed',
+      sourceFile,
+      getNodeLocation(node, sourceFile, frontmatter)
+    );
+  }
+  if (node.tag !== undefined) {
+    throw frontmatterError(
+      'explicit YAML tags are not allowed',
+      sourceFile,
+      getNodeLocation(node, sourceFile, frontmatter)
+    );
+  }
+  if ('anchor' in node && node.anchor !== undefined) {
+    throw frontmatterError(
+      'YAML anchors are not allowed',
+      sourceFile,
+      getNodeLocation(node, sourceFile, frontmatter)
+    );
+  }
+
+  if (!isCollection(node)) return;
+  for (const item of node.items) {
+    if (isPair(item)) {
+      rejectUnsafeYamlNodes(item.key, sourceFile, frontmatter);
+      rejectUnsafeYamlNodes(item.value, sourceFile, frontmatter);
+    } else {
+      rejectUnsafeYamlNodes(item, sourceFile, frontmatter);
+    }
+  }
+}
+
+function enforceFrontmatterLimits(
+  value: unknown,
+  sourceFile: string,
+  frontmatter: SkillFrontmatterBlock,
+  depth = 0,
+  state: { nodes: number } = { nodes: 0 }
+): void {
+  if (value === null) {
+    state.nodes++;
+    if (state.nodes > MAX_FRONTMATTER_NODES) {
+      throw frontmatterError(
+        `frontmatter contains more than ${MAX_FRONTMATTER_NODES} values`,
+        sourceFile,
+        frontmatter.location
+      );
+    }
+    return;
+  }
+  if (!isNode(value)) return;
+
+  const location = getNodeLocation(value, sourceFile, frontmatter);
+  state.nodes++;
+  if (state.nodes > MAX_FRONTMATTER_NODES) {
+    throw frontmatterError(
+      `frontmatter contains more than ${MAX_FRONTMATTER_NODES} values`,
+      sourceFile,
+      location
+    );
+  }
+  if (depth > MAX_FRONTMATTER_DEPTH) {
+    throw frontmatterError(
+      `frontmatter nesting exceeds ${MAX_FRONTMATTER_DEPTH} levels`,
+      sourceFile,
+      location
+    );
+  }
+
+  if ('value' in value && typeof value.value === 'string') {
+    if (value.value.length > MAX_FRONTMATTER_STRING_LENGTH) {
+      throw frontmatterError(
+        `frontmatter string exceeds ${MAX_FRONTMATTER_STRING_LENGTH} characters`,
+        sourceFile,
+        location
+      );
+    }
+    return;
+  }
+
+  if (!isCollection(value)) return;
+  if (value.items.length > MAX_FRONTMATTER_COLLECTION_ITEMS) {
+    const collectionName = isSeq(value) ? 'sequence' : 'mapping';
+    throw frontmatterError(
+      `frontmatter ${collectionName} exceeds ${MAX_FRONTMATTER_COLLECTION_ITEMS} ${
+        isSeq(value) ? 'items' : 'entries'
+      }`,
+      sourceFile,
+      location
+    );
+  }
+
+  for (const item of value.items) {
+    if (isPair(item)) {
+      enforceFrontmatterLimits(item.key, sourceFile, frontmatter, depth + 1, state);
+      enforceFrontmatterLimits(item.value, sourceFile, frontmatter, depth + 1, state);
+    } else {
+      enforceFrontmatterLimits(item, sourceFile, frontmatter, depth + 1, state);
+    }
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function createSafeRecord<T>(): Record<string, T> {
+  return Object.create(null) as Record<string, T>;
+}
+
+function frontmatterError(
+  message: string,
+  sourceFile: string,
+  location: SourceLocation
+): ResolveError {
+  return new ResolveError(`Invalid YAML frontmatter: ${message}`, {
+    ...location,
+    file: sourceFile,
+  });
+}
+
+/**
+ * Parse supported frontmatter fields.
+ *
+ * Unknown fields are intentionally ignored after structural YAML validation.
+ * They remain available through rawFrontmatter so formatter-specific metadata
+ * can round-trip without making the resolver depend on every extension.
+ */
+function parseFrontmatterFields(
+  fields: Record<string, unknown>,
+  sourceFile: string,
+  fallbackLocation: SourceLocation,
+  fieldLocations: ReadonlyMap<string, SourceLocation>,
+  fieldItemLocations: ReadonlyMap<string, readonly SourceLocation[]>
+): ParsedSkillFrontmatter {
+  const name = readOptionalString(
+    fields,
+    'name',
+    sourceFile,
+    getFieldLocation('name', fieldLocations, fallbackLocation)
+  );
+  const description = readOptionalString(
+    fields,
+    'description',
+    sourceFile,
+    getFieldLocation('description', fieldLocations, fallbackLocation)
+  );
+  const license = readOptionalString(
+    fields,
+    'license',
+    sourceFile,
+    getFieldLocation('license', fieldLocations, fallbackLocation)
+  );
+  const compatibility = readCompatibilityField(
+    fields,
+    sourceFile,
+    getFieldLocation('compatibility', fieldLocations, fallbackLocation)
+  );
+  const params = parseParamsField(
+    fields,
+    sourceFile,
+    getFieldLocation('params', fieldLocations, fallbackLocation)
+  );
+  const inputs = parseContractFieldsField(
+    fields,
+    'inputs',
+    sourceFile,
+    getFieldLocation('inputs', fieldLocations, fallbackLocation)
+  );
+  const outputs = parseContractFieldsField(
+    fields,
+    'outputs',
+    sourceFile,
+    getFieldLocation('outputs', fieldLocations, fallbackLocation)
+  );
+  const references = parsePathField(
+    fields,
+    'references',
+    sourceFile,
+    getFieldLocation('references', fieldLocations, fallbackLocation),
+    fieldItemLocations.get('references')
+  );
+  const scripts = parsePathField(
+    fields,
+    'scripts',
+    sourceFile,
+    getFieldLocation('scripts', fieldLocations, fallbackLocation),
+    fieldItemLocations.get('scripts')
+  );
+  const metadata = parseMetadataField(
+    fields,
+    sourceFile,
+    getFieldLocation('metadata', fieldLocations, fallbackLocation)
+  );
+  const allowedTools = parseAllowedToolsField(
+    fields,
+    sourceFile,
+    getFieldLocation('allowed-tools', fieldLocations, fallbackLocation)
+  );
+
+  return {
+    name,
+    description,
+    params,
+    inputs,
+    outputs,
+    references,
+    scripts,
+    license,
+    compatibility,
+    metadata,
+    allowedTools,
+  };
+}
+
+function getFieldLocation(
+  field: string,
+  fieldLocations: ReadonlyMap<string, SourceLocation>,
+  fallbackLocation: SourceLocation
+): SourceLocation {
+  return fieldLocations.get(field) ?? fallbackLocation;
+}
+
+function readOptionalString(
+  fields: Record<string, unknown>,
+  field: string,
+  sourceFile: string,
+  location: SourceLocation
+): string | undefined {
+  if (!Object.hasOwn(fields, field)) return undefined;
+  const value = fields[field];
+  if (typeof value !== 'string') {
+    throw frontmatterError(`field "${field}" must be a string`, sourceFile, location);
+  }
+  return value;
+}
+
+function readCompatibilityField(
+  fields: Record<string, unknown>,
+  sourceFile: string,
+  location: SourceLocation
+): string | undefined {
+  if (!Object.hasOwn(fields, 'compatibility')) return undefined;
+  const value = fields['compatibility'];
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
+    return value.join(', ');
+  }
+  throw frontmatterError(
+    'field "compatibility" must be a string or a sequence of strings',
+    sourceFile,
+    location
+  );
+}
+
+function parsePathField(
+  fields: Record<string, unknown>,
+  field: 'references' | 'scripts',
+  sourceFile: string,
+  location: SourceLocation,
+  itemLocations: readonly SourceLocation[] = []
+): string[] | undefined {
+  if (!Object.hasOwn(fields, field)) return undefined;
+  const value = fields[field];
+  if (value === null) return [];
+  if (!Array.isArray(value)) {
+    throw frontmatterError(
+      `field "${field}" must be a sequence of relative paths`,
+      sourceFile,
+      location
+    );
+  }
+
+  return value.map((item, index) => {
+    if (typeof item !== 'string') {
+      throw frontmatterError(
+        `field "${field}" item ${index + 1} must be a string`,
+        sourceFile,
+        itemLocations[index] ?? location
+      );
+    }
+    const normalized = normalizeSafeRelativePath(item);
+    return normalized ?? item;
+  });
+}
+
+function parseParamsField(
+  fields: Record<string, unknown>,
+  sourceFile: string,
+  location: SourceLocation
+): ParamDefinition[] | undefined {
+  if (!Object.hasOwn(fields, 'params')) return undefined;
+  const value = fields['params'];
+  if (value === null) return [];
+  if (!isRecord(value)) {
+    throw frontmatterError(
+      'field "params" must be a mapping of parameter names',
+      sourceFile,
+      location
+    );
+  }
+
   const params: ParamDefinition[] = [];
-  let i = startIndex;
-
-  while (i < lines.length) {
-    const line = lines[i] ?? '';
-
-    // A param name line is indented with 2 spaces and ends with ':'
-    const paramNameMatch = line.match(/^ {2}(\w+):\s*$/);
-    if (!paramNameMatch) break;
-
-    const paramName = paramNameMatch[1]!;
-    i++;
-
-    let paramType: ParamType = { kind: 'string' };
-    let defaultValue: Value | undefined;
-
-    // Read param properties (indented with 4+ spaces)
-    while (i < lines.length) {
-      const propLine = lines[i] ?? '';
-      if (!propLine.match(/^ {4}/)) break;
-      const trimmed = propLine.trim();
-
-      const typeMatch = trimmed.match(/^type:\s*(.+)$/);
-      if (typeMatch) {
-        paramType = parseParamType(typeMatch[1]!.trim());
-        i++;
-        continue;
-      }
-
-      const defaultMatch = trimmed.match(/^default:\s*(.+)$/);
-      if (defaultMatch) {
-        defaultValue = parseDefaultValue(defaultMatch[1]!.trim(), paramType);
-        i++;
-        continue;
-      }
-
-      const optionsMatch = trimmed.match(/^options:\s*\[(.+)\]$/);
-      if (optionsMatch && paramType.kind === 'enum') {
-        paramType = {
-          kind: 'enum',
-          options: optionsMatch[1]!.split(',').map((o) => o.trim()),
-        };
-        i++;
-        continue;
-      }
-
-      i++;
+  for (const [name, definition] of Object.entries(value)) {
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
+      throw frontmatterError(
+        `parameter name "${name}" must be a valid identifier`,
+        sourceFile,
+        location
+      );
+    }
+    if (!isRecord(definition)) {
+      throw frontmatterError(`parameter "${name}" must be a mapping`, sourceFile, location);
     }
 
-    const hasDefault = defaultValue !== undefined;
+    const paramType = parseTypedFieldType(definition, `parameter "${name}"`, sourceFile, location);
+    const hasDefault = Object.hasOwn(definition, 'default');
+    const defaultValue = hasDefault
+      ? parseTypedDefault(
+          definition['default'],
+          paramType,
+          `parameter "${name}"`,
+          sourceFile,
+          location
+        )
+      : undefined;
+
+    let resolvedType = paramType;
+    if (paramType.kind === 'enum' && Object.hasOwn(definition, 'options')) {
+      resolvedType = {
+        kind: 'enum',
+        options: readStringSequence(
+          definition['options'],
+          `parameter "${name}" options`,
+          sourceFile,
+          location
+        ),
+      };
+    }
+
     params.push({
       type: 'ParamDefinition',
-      name: paramName,
-      paramType,
+      name,
+      paramType: resolvedType,
       optional: hasDefault,
-      defaultValue,
-      loc: { file: '<skill>', line: 1, column: 1, offset: 0 },
+      ...(hasDefault ? { defaultValue } : {}),
+      loc: location,
     });
   }
 
-  return { params, nextIndex: i };
+  return params;
 }
 
-function parseParamType(typeStr: string): ParamType {
-  switch (typeStr) {
-    case 'string':
-      return { kind: 'string' };
-    case 'number':
-      return { kind: 'number' };
-    case 'boolean':
-      return { kind: 'boolean' };
-    case 'enum':
-      return { kind: 'enum', options: [] };
-    default:
-      return { kind: 'string' };
+function parseContractFieldsField(
+  fields: Record<string, unknown>,
+  fieldName: 'inputs' | 'outputs',
+  sourceFile: string,
+  location: SourceLocation
+): Record<string, SkillContractField> | undefined {
+  if (!Object.hasOwn(fields, fieldName)) return undefined;
+  const value = fields[fieldName];
+  if (value === null) return createSafeRecord<SkillContractField>();
+  if (!isRecord(value)) {
+    throw frontmatterError(
+      `field "${fieldName}" must be a mapping of fields`,
+      sourceFile,
+      location
+    );
   }
-}
 
-function parseDefaultValue(valueStr: string, paramType: ParamType): Value {
-  switch (paramType.kind) {
-    case 'boolean':
-      return valueStr === 'true';
-    case 'number':
-      return Number(valueStr);
-    default:
-      return valueStr;
-  }
-}
-
-/**
- * Parse a contract fields block (inputs or outputs) from YAML frontmatter.
- */
-function parseContractFieldsBlock(
-  lines: string[],
-  startIndex: number
-): { fields: Record<string, SkillContractField>; nextIndex: number } {
-  const fields: Record<string, SkillContractField> = {};
-  let i = startIndex;
-
-  while (i < lines.length) {
-    const line = lines[i] ?? '';
-
-    // A field name line is indented with 2 spaces and ends with ':'
-    const fieldNameMatch = line.match(/^ {2}(\w+):\s*$/);
-    if (!fieldNameMatch) break;
-
-    const fieldName = fieldNameMatch[1]!;
-    i++;
-
-    let description = '';
-    let type: 'string' | 'number' | 'boolean' | 'enum' = 'string';
-    let options: string[] | undefined;
-    let defaultValue: Value | undefined;
-
-    // Read field properties (indented with 4+ spaces)
-    while (i < lines.length) {
-      const propLine = lines[i] ?? '';
-      if (!propLine.match(/^ {4}/)) break;
-      const trimmed = propLine.trim();
-
-      const descMatch = trimmed.match(/^description:\s*(?:"([^"]+)"|'([^']+)'|(.+))$/);
-      if (descMatch) {
-        description = (descMatch[1] ?? descMatch[2] ?? descMatch[3] ?? '').trim();
-        i++;
-        continue;
-      }
-
-      const typeMatch = trimmed.match(/^type:\s*(.+)$/);
-      if (typeMatch) {
-        const typeStr = typeMatch[1]!.trim();
-        if (['string', 'number', 'boolean', 'enum'].includes(typeStr)) {
-          type = typeStr as 'string' | 'number' | 'boolean' | 'enum';
-        }
-        i++;
-        continue;
-      }
-
-      const optionsMatch = trimmed.match(/^options:\s*\[(.+)\]$/);
-      if (optionsMatch) {
-        options = optionsMatch[1]!.split(',').map((o) => o.trim());
-        i++;
-        continue;
-      }
-
-      const defaultMatch = trimmed.match(/^default:\s*(.+)$/);
-      if (defaultMatch) {
-        const pt = parseParamType(type);
-        defaultValue = parseDefaultValue(defaultMatch[1]!.trim(), pt);
-        i++;
-        continue;
-      }
-
-      i++;
+  const result = createSafeRecord<SkillContractField>();
+  for (const [name, definition] of Object.entries(value)) {
+    if (!isRecord(definition)) {
+      throw frontmatterError(
+        `${fieldName} field "${name}" must be a mapping`,
+        sourceFile,
+        location
+      );
     }
 
-    const field: SkillContractField = { description, type };
-    if (options) field.options = options;
-    if (defaultValue !== undefined) field.default = defaultValue;
-    fields[fieldName] = field;
+    const type = parseContractType(
+      definition,
+      `${fieldName} field "${name}"`,
+      sourceFile,
+      location
+    );
+    const description =
+      readOptionalStringFromRecord(
+        definition,
+        'description',
+        `${fieldName} field "${name}"`,
+        sourceFile,
+        location
+      ) ?? '';
+    const contract: SkillContractField = { description, type };
+
+    if (Object.hasOwn(definition, 'options')) {
+      contract.options = readStringSequence(
+        definition['options'],
+        `${fieldName} field "${name}" options`,
+        sourceFile,
+        location
+      );
+    }
+    if (Object.hasOwn(definition, 'default')) {
+      contract.default = parseTypedDefault(
+        definition['default'],
+        type,
+        `${fieldName} field "${name}"`,
+        sourceFile,
+        location
+      );
+    }
+    result[name] = contract;
   }
 
-  return { fields, nextIndex: i };
+  return result;
+}
+
+function parseTypedFieldType(
+  definition: Record<string, unknown>,
+  context: string,
+  sourceFile: string,
+  location: SourceLocation
+): ParamType {
+  if (!Object.hasOwn(definition, 'type')) {
+    return { kind: 'string' };
+  }
+  const value = definition['type'];
+  if (typeof value !== 'string' || !['string', 'number', 'boolean', 'enum'].includes(value)) {
+    throw frontmatterError(
+      `${context} type must be string, number, boolean, or enum`,
+      sourceFile,
+      location
+    );
+  }
+  if (value === 'enum') return { kind: 'enum', options: [] };
+  return { kind: value as 'string' | 'number' | 'boolean' };
+}
+
+function parseContractType(
+  definition: Record<string, unknown>,
+  context: string,
+  sourceFile: string,
+  location: SourceLocation
+): SkillContractField['type'] {
+  if (!Object.hasOwn(definition, 'type')) return 'string';
+  const value = definition['type'];
+  if (typeof value !== 'string' || !['string', 'number', 'boolean', 'enum'].includes(value)) {
+    throw frontmatterError(
+      `${context} type must be string, number, boolean, or enum`,
+      sourceFile,
+      location
+    );
+  }
+  return value as SkillContractField['type'];
+}
+
+function parseTypedDefault(
+  value: unknown,
+  type: ParamType | SkillContractField['type'],
+  context: string,
+  sourceFile: string,
+  location: SourceLocation
+): Value {
+  const kind = typeof type === 'string' ? type : type.kind;
+  if (value === null) return null;
+
+  switch (kind) {
+    case 'string':
+      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+        return String(value);
+      }
+      return toPromptValue(value, context, sourceFile, location);
+    case 'number': {
+      const numberValue =
+        typeof value === 'number'
+          ? value
+          : typeof value === 'string' && value.trim().length > 0
+            ? Number(value)
+            : NaN;
+      if (!Number.isFinite(numberValue)) {
+        throw frontmatterError(`${context} default must be a finite number`, sourceFile, location);
+      }
+      return numberValue;
+    }
+    case 'boolean':
+      if (typeof value === 'boolean') return value;
+      if (value === 'true') return true;
+      if (value === 'false') return false;
+      throw frontmatterError(`${context} default must be a boolean`, sourceFile, location);
+    case 'enum':
+      if (typeof value !== 'string') {
+        throw frontmatterError(`${context} default must be a string`, sourceFile, location);
+      }
+      return value;
+  }
+}
+
+function toPromptValue(
+  value: unknown,
+  context: string,
+  sourceFile: string,
+  location: SourceLocation
+): Value {
+  if (
+    value === null ||
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean'
+  ) {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => toPromptValue(item, context, sourceFile, location));
+  }
+  if (isRecord(value)) {
+    const result = createSafeRecord<Value>();
+    for (const [key, item] of Object.entries(value)) {
+      result[key] = toPromptValue(item, context, sourceFile, location);
+    }
+    return result;
+  }
+  throw frontmatterError(`${context} default contains an unsupported value`, sourceFile, location);
+}
+
+function readStringSequence(
+  value: unknown,
+  context: string,
+  sourceFile: string,
+  location: SourceLocation
+): string[] {
+  if (!Array.isArray(value) || value.some((item) => typeof item !== 'string')) {
+    throw frontmatterError(`${context} must be a sequence of strings`, sourceFile, location);
+  }
+  return value.map((item) => item as string);
+}
+
+function readOptionalStringFromRecord(
+  record: Record<string, unknown>,
+  field: string,
+  context: string,
+  sourceFile: string,
+  location: SourceLocation
+): string | undefined {
+  if (!Object.hasOwn(record, field)) return undefined;
+  const value = record[field];
+  if (typeof value !== 'string') {
+    throw frontmatterError(`${context} ${field} must be a string`, sourceFile, location);
+  }
+  return value;
+}
+
+function parseMetadataField(
+  fields: Record<string, unknown>,
+  sourceFile: string,
+  location: SourceLocation
+): Record<string, string> | undefined {
+  if (!Object.hasOwn(fields, 'metadata')) return undefined;
+  const value = fields['metadata'];
+  if (!isRecord(value)) {
+    throw frontmatterError('field "metadata" must be a mapping', sourceFile, location);
+  }
+
+  const metadata = createSafeRecord<string>();
+  for (const [key, item] of Object.entries(value)) {
+    if (typeof item !== 'string') {
+      throw frontmatterError(`metadata value "${key}" must be a string`, sourceFile, location);
+    }
+    metadata[key] = item;
+  }
+  return metadata;
+}
+
+function parseAllowedToolsField(
+  fields: Record<string, unknown>,
+  sourceFile: string,
+  location: SourceLocation
+): string[] | undefined {
+  if (!Object.hasOwn(fields, 'allowed-tools')) return undefined;
+  const value = fields['allowed-tools'];
+  if (value === null) return [];
+  if (typeof value === 'string') {
+    return value.split(/\s+/).filter((item) => item.length > 0);
+  }
+  return readStringSequence(value, 'field "allowed-tools"', sourceFile, location);
+}
+
+function normalizeSafeRelativePath(value: string): string | undefined {
+  if (value.length === 0 || value.includes('\0')) return undefined;
+  const portable = value.replace(/\\/g, '/');
+  if (portable.startsWith('/') || /^[A-Za-z]:/.test(portable)) return undefined;
+
+  const segments = portable.split('/');
+  const normalized: string[] = [];
+  for (const segment of segments) {
+    if (segment === '' || segment === '.') continue;
+    if (segment === '..') return undefined;
+    normalized.push(segment);
+  }
+  return normalized.length > 0 ? normalized.join('/') : undefined;
+}
+
+function isSafeRelativePath(relPath: string): boolean {
+  return normalizeSafeRelativePath(relPath) !== undefined;
 }
 
 /**
@@ -457,7 +1058,7 @@ export function interpolateSkillContent(
   return content.replace(/\{\{(\w+)\}\}/g, (_match, varName: string) => {
     const value = bound.get(varName);
     if (value === undefined) {
-      return _match; // Leave unresolved vars as-is
+      return _match;
     }
     if (typeof value === 'string') return value;
     if (typeof value === 'number' || typeof value === 'boolean') return String(value);
@@ -485,6 +1086,9 @@ const SKILL_RESERVED_KEYS = new Set([
   'references',
   'scripts',
   'license',
+  'compatibility',
+  'metadata',
+  'allowed-tools',
 ]);
 
 function extractSkillArgs(skillObj: Record<string, Value>): Record<string, Value> {
@@ -744,17 +1348,6 @@ const MAX_TOTAL_RESOURCE_SIZE = 10_485_760; // 10 MB
 const MAX_RESOURCE_COUNT = 100;
 
 /**
- * Check if a relative path is safe (no path traversal, not absolute).
- */
-function isSafeRelativePath(relPath: string): boolean {
-  const normalized = normalize(relPath);
-  if (isAbsolute(normalized)) return false;
-  // Check for traversal using both forward and back slashes (cross-platform)
-  const segments = normalized.split(sep);
-  return !segments.some((s) => s === '..');
-}
-
-/**
  * Check if a skill name is safe (no path traversal characters).
  */
 function isSafeSkillName(name: string): boolean {
@@ -847,7 +1440,7 @@ export async function discoverSkillResources(
       // Verify the resolved real path is still within the skill directory
       // This catches files inside symlinked directories
       const realFullPath = await realpath(fullPath);
-      if (!realFullPath.startsWith(realSkillDir + '/')) {
+      if (!isInside(realSkillDir, realFullPath) || realFullPath === realSkillDir) {
         logger.verbose(`Skipping resource outside skill directory: ${relPath}`);
         continue;
       }
@@ -870,7 +1463,7 @@ export async function discoverSkillResources(
         continue;
       }
 
-      resources.push({ relativePath: relPath, content });
+      resources.push({ relativePath: relPath, content, origin: fullPath });
     } catch {
       // Skip files that can't be read (permissions, I/O errors)
       logger.verbose(`Skipping unreadable resource: ${relPath}`);
@@ -878,6 +1471,19 @@ export async function discoverSkillResources(
   }
 
   return resources;
+}
+
+function getResourceFallbackLocation(
+  basePath: string,
+  frontmatterLocation: SourceLocation | undefined
+): SourceLocation {
+  return (
+    frontmatterLocation ?? {
+      file: resolve(basePath, 'SKILL.md'),
+      line: 1,
+      column: 1,
+    }
+  );
 }
 
 /**
@@ -889,33 +1495,67 @@ export async function discoverSkillResources(
  * @param references - Relative paths listed in the SKILL.md frontmatter
  * @param basePath - Absolute path to the skill directory (anchor for relative paths)
  * @param logger - Optional logger for warnings
- * @param sourceFile - Absolute path to the SKILL.md declaring the references
+ * @param frontmatterLocation - Frontmatter block location for diagnostics
+ * @param itemLocations - Locations of individual reference entries
  * @returns Array of loaded SkillResource objects
  */
 export async function resolveSkillReferences(
   references: string[],
   basePath: string,
   logger?: Logger,
-  sourceFile?: string
+  frontmatterLocation?: SourceLocation,
+  itemLocations: readonly SourceLocation[] = []
 ): Promise<SkillResource[]> {
   const resources: SkillResource[] = [];
   let totalSize = 0;
+  const fallbackLocation = getResourceFallbackLocation(basePath, frontmatterLocation);
 
-  for (const ref of references) {
-    if (!isSafeRelativePath(ref)) {
-      throw new ResolveError(`Unsafe path in references: ${ref} — path traversal not allowed`, {
-        ...resourceLocation(basePath, sourceFile),
+  for (const [index, ref] of references.entries()) {
+    const resourceLocation = itemLocations[index] ?? fallbackLocation;
+    const normalizedRef = normalizeSafeRelativePath(ref);
+    if (!normalizedRef) {
+      throw new ResolveError(`Unsafe path in references: ${ref} - path traversal not allowed`, {
+        ...resourceLocation,
       });
     }
 
-    const fullPath = resolve(basePath, ref);
+    const fullPath = resolve(basePath, normalizedRef);
+
+    let referenceStat;
+    try {
+      referenceStat = await lstat(fullPath);
+    } catch {
+      throw new ResolveError(`Reference file not found: ${normalizedRef}`, {
+        ...resourceLocation,
+      });
+    }
+    if (referenceStat.isSymbolicLink()) {
+      throw new ResolveError(`Unsafe symbolic link in references: ${normalizedRef}`, {
+        ...resourceLocation,
+      });
+    }
+
+    let realBasePath: string;
+    let realFullPath: string;
+    try {
+      [realBasePath, realFullPath] = await Promise.all([realpath(basePath), realpath(fullPath)]);
+    } catch {
+      throw new ResolveError(`Reference file not found: ${normalizedRef}`, {
+        ...resourceLocation,
+      });
+    }
+    if (!isInside(realBasePath, realFullPath) || realBasePath === realFullPath) {
+      throw new ResolveError(`Reference path escapes skill directory: ${normalizedRef}`, {
+        ...resourceLocation,
+      });
+    }
 
     let content: string;
     try {
       content = await readFile(fullPath, 'utf-8');
     } catch {
-      throw new ResolveError(`Reference file not found: ${ref}`, {
-        ...resourceLocation(basePath, sourceFile),
+      throw new ResolveError(`Reference file not found: ${normalizedRef}`, {
+        ...resourceLocation,
       });
     }
 
@@ -923,8 +1563,8 @@ export async function resolveSkillReferences(
 
     if (size > MAX_RESOURCE_SIZE) {
       throw new ResolveError(
-        `Reference file exceeds ${MAX_RESOURCE_SIZE / 1_048_576}MB limit: ${ref}`,
-        resourceLocation(basePath, sourceFile)
+        `Reference file exceeds ${MAX_RESOURCE_SIZE / 1_048_576}MB limit: ${normalizedRef}`,
+        resourceLocation
       );
     }
 
@@ -932,18 +1572,18 @@ export async function resolveSkillReferences(
     if (totalSize > MAX_TOTAL_RESOURCE_SIZE) {
       throw new ResolveError(
         `Total reference size exceeds ${MAX_TOTAL_RESOURCE_SIZE / 1_048_576}MB limit for skill`,
-        resourceLocation(basePath, sourceFile)
+        resourceLocation
       );
     }
 
     if (size === 0) {
-      logger?.verbose(`Empty reference file: ${ref}`);
+      logger?.verbose(`Empty reference file: ${normalizedRef}`);
     }
 
-    resources.push({ relativePath: ref, content });
+    resources.push({ relativePath: normalizedRef, content, origin: fullPath });
   }
 
-  // Deduplicate by basename — last occurrence wins (higher layer override)
+  // Deduplicate by basename - last occurrence wins (higher layer override)
   const byBasename = new Map<string, number>();
   for (let i = 0; i < resources.length; i++) {
     const bname = resources[i]!.relativePath.split('/').pop() ?? resources[i]!.relativePath;
@@ -960,7 +1600,7 @@ export async function resolveSkillReferences(
   if (deduplicated.length > MAX_RESOURCE_COUNT) {
     throw new ResolveError(
       `Too many reference files (${deduplicated.length}, max ${MAX_RESOURCE_COUNT})`,
-      resourceLocation(basePath, sourceFile)
+      fallbackLocation
     );
   }
 
@@ -977,18 +1617,21 @@ export async function resolveSkillReferences(
  * @param scripts - Relative paths listed in the SKILL.md frontmatter
  * @param basePath - Absolute path to the skill directory
  * @param logger - Optional logger for warnings
- * @param sourceFile - Absolute path to the SKILL.md declaring the scripts
+ * @param frontmatterLocation - Frontmatter block location for diagnostics
+ * @param itemLocations - Locations of individual script entries
  * @returns Array of loaded SkillResource objects with origin and executable metadata
  */
 export async function resolveSkillScripts(
   scripts: string[],
   basePath: string,
   logger?: Logger,
-  sourceFile?: string
+  frontmatterLocation?: SourceLocation,
+  itemLocations: readonly SourceLocation[] = []
 ): Promise<SkillResource[]> {
+  const fallbackLocation = getResourceFallbackLocation(basePath, frontmatterLocation);
   if (scripts.length > MAX_RESOURCE_COUNT) {
     throw new ResolveError(`Too many script files (${scripts.length}, max ${MAX_RESOURCE_COUNT})`, {
-      ...resourceLocation(basePath, sourceFile),
+      ...fallbackLocation,
     });
   }
 
@@ -996,34 +1639,64 @@ export async function resolveSkillScripts(
   let totalSize = 0;
   const seenBasenames = new Set<string>();
 
-  for (const scriptPath of scripts) {
-    if (!isSafeRelativePath(scriptPath)) {
-      throw new ResolveError(`Unsafe path in scripts: ${scriptPath} — path traversal not allowed`, {
-        ...resourceLocation(basePath, sourceFile),
+  for (const [index, scriptPath] of scripts.entries()) {
+    const resourceLocation = itemLocations[index] ?? fallbackLocation;
+    const normalizedScriptPath = normalizeSafeRelativePath(scriptPath);
+    if (!normalizedScriptPath) {
+      throw new ResolveError(`Unsafe path in scripts: ${scriptPath} - path traversal not allowed`, {
+        ...resourceLocation,
       });
     }
 
-    const fullPath = resolve(basePath, scriptPath);
-    const basenameStr = basename(scriptPath);
+    const fullPath = resolve(basePath, normalizedScriptPath);
+    const basenameStr = basename(normalizedScriptPath);
 
     // Reject duplicate basenames
     if (seenBasenames.has(basenameStr)) {
       throw new ResolveError(`Duplicate script basename: ${basenameStr}`, {
-        ...resourceLocation(basePath, sourceFile),
+        ...resourceLocation,
       });
     }
     seenBasenames.add(basenameStr);
+
+    let stat;
+    try {
+      stat = await lstat(fullPath);
+    } catch {
+      throw new ResolveError(`Script file not found: ${normalizedScriptPath}`, {
+        ...resourceLocation,
+      });
+    }
+    if (stat.isSymbolicLink()) {
+      throw new ResolveError(`Unsafe symbolic link in scripts: ${normalizedScriptPath}`, {
+        ...resourceLocation,
+      });
+    }
+
+    let realBasePath: string;
+    let realFullPath: string;
+    try {
+      [realBasePath, realFullPath] = await Promise.all([realpath(basePath), realpath(fullPath)]);
+    } catch {
+      throw new ResolveError(`Script file not found: ${normalizedScriptPath}`, {
+        ...resourceLocation,
+      });
+    }
+    if (!isInside(realBasePath, realFullPath) || realBasePath === realFullPath) {
+      throw new ResolveError(`Script path escapes skill directory: ${normalizedScriptPath}`, {
+        ...resourceLocation,
+      });
+    }
 
     let content: string;
     try {
       content = await readFile(fullPath, 'utf-8');
     } catch {
-      throw new ResolveError(`Script file not found: ${scriptPath}`, {
-        ...resourceLocation(basePath, sourceFile),
+      throw new ResolveError(`Script file not found: ${normalizedScriptPath}`, {
+        ...resourceLocation,
       });
     }
 
-    const stat = await lstat(fullPath);
     // Check executable mode bits (any of user/group/other execute)
     const executable = Boolean(stat.mode & 0o111);
 
@@ -1031,8 +1704,8 @@ export async function resolveSkillScripts(
 
     if (size > MAX_RESOURCE_SIZE) {
       throw new ResolveError(
-        `Script file exceeds ${MAX_RESOURCE_SIZE / 1_048_576}MB limit: ${scriptPath}`,
-        resourceLocation(basePath, sourceFile)
+        `Script file exceeds ${MAX_RESOURCE_SIZE / 1_048_576}MB limit: ${normalizedScriptPath}`,
+        resourceLocation
       );
     }
 
@@ -1040,7 +1713,7 @@ export async function resolveSkillScripts(
     if (totalSize > MAX_TOTAL_RESOURCE_SIZE) {
       throw new ResolveError(
         `Total script size exceeds ${MAX_TOTAL_RESOURCE_SIZE / 1_048_576}MB limit for skill`,
-        resourceLocation(basePath, sourceFile)
+        resourceLocation
       );
     }
 
@@ -1345,7 +2018,8 @@ export async function resolveNativeSkills(
           continue;
         }
 
-        const parsed = parseSkillMd(rawContent);
+        const parsed = parseSkillMd(rawContent, skillMdPath);
+        const frontmatterLocations = getSkillFrontmatterLocations(parsed);
 
         // Update skill with native content
         const updatedSkill: Record<string, Value> = { ...skillObj };
@@ -1373,12 +2047,37 @@ export async function resolveNativeSkills(
             : parsed.description;
         }
 
-        if (parsed.rawFrontmatter) {
+        if (parsed.params !== undefined && !Object.hasOwn(skillObj, 'params')) {
+          updatedSkill['params'] = parsed.params as unknown as Value;
+        }
+        if (parsed.inputs !== undefined && !Object.hasOwn(skillObj, 'inputs')) {
+          updatedSkill['inputs'] = parsed.inputs as unknown as Value;
+        }
+        if (parsed.outputs !== undefined && !Object.hasOwn(skillObj, 'outputs')) {
+          updatedSkill['outputs'] = parsed.outputs as unknown as Value;
+        }
+        if (parsed.references !== undefined) {
+          updatedSkill['references'] = parsed.references as unknown as Value;
+        }
+        if (parsed.scripts !== undefined) {
+          updatedSkill['scripts'] = parsed.scripts as unknown as Value;
+        }
+        if (parsed.compatibility !== undefined && !Object.hasOwn(skillObj, 'compatibility')) {
+          updatedSkill['compatibility'] = parsed.compatibility;
+        }
+        if (parsed.metadata !== undefined && !Object.hasOwn(skillObj, 'metadata')) {
+          updatedSkill['metadata'] = parsed.metadata as unknown as Value;
+        }
+        if (parsed.allowedTools !== undefined && !Object.hasOwn(skillObj, 'allowedTools')) {
+          updatedSkill['allowedTools'] = parsed.allowedTools as unknown as Value;
+        }
+
+        if (parsed.rawFrontmatter !== undefined) {
           updatedSkill['__rawFrontmatter'] = parsed.rawFrontmatter;
         }
 
         // Set license from SKILL.md frontmatter if present
-        if (parsed.license && !skillObj['license']) {
+        if (parsed.license !== undefined && !skillObj['license']) {
           updatedSkill['license'] = parsed.license;
         }
 
@@ -1392,6 +2091,7 @@ export async function resolveNativeSkills(
           allResources.push({
             relativePath: `@shared/${shared.relativePath}`,
             content: shared.content,
+            ...(shared.origin ? { origin: shared.origin } : {}),
           });
         }
 
@@ -1412,7 +2112,8 @@ export async function resolveNativeSkills(
             skillRefs,
             skillDir,
             logger,
-            skillMdPath
+            frontmatterLocations?.frontmatter,
+            frontmatterLocations?.items.get('references')
           );
           const existingResources = (updatedSkill['resources'] as Value[] | undefined) ?? [];
           updatedSkill['resources'] = [
@@ -1433,7 +2134,8 @@ export async function resolveNativeSkills(
             skillScripts,
             skillDir,
             logger,
-            skillMdPath
+            frontmatterLocations?.frontmatter,
+            frontmatterLocations?.items.get('scripts')
           );
           const existingResources = (updatedSkill['resources'] as Value[] | undefined) ?? [];
           updatedSkill['resources'] = [
@@ -1465,7 +2167,10 @@ export async function resolveNativeSkills(
 
         updatedProperties[skillName] = updatedSkill;
         hasUpdates = true;
-      } catch {
+      } catch (error: unknown) {
+        if (error instanceof ResolveError) {
+          throw error;
+        }
         // Failed to read skill file, keep original
         logger.verbose(`Failed to read skill file: ${skillMdPath}`);
       }

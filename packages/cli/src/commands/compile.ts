@@ -1,6 +1,6 @@
 import { resolve, isAbsolute, relative } from 'path';
 import { readFile } from 'fs/promises';
-import { existsSync } from 'fs';
+import { existsSync, lstatSync } from 'fs';
 import chokidar from 'chokidar';
 import { minimatch } from 'minimatch';
 import type { CompileOptions } from '../types.js';
@@ -17,7 +17,6 @@ import { ErrorCode, isValidLockfile, PSError } from '@promptscript/core';
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
 import { loadEffectiveConfig, CONFIG_FILES } from '../config/loader.js';
 import { resolvePrettierOptions } from '../prettier/loader.js';
-import { postFormatWithPrettier } from '../prettier/post-format.js';
 import { createSpinner, ConsoleOutput, isVerbose, isDebug } from '../output/console.js';
 import { Compiler } from '@promptscript/compiler';
 import { isTTY } from '../output/pager.js';
@@ -43,11 +42,12 @@ import {
 } from '../utils/managed-output-cleanup.js';
 import {
   detectLegacyFactorySettingsHooks,
-  planLegacyFactoryHooksMigration,
+  prepareLegacyFactoryMigration,
   type LegacyFactoryMigrationPlan,
 } from '../utils/legacy-factory-hooks.js';
 import { loadBundledSkillContent } from '../utils/bundled-skill.js';
-import { applyConfiguredHeader, isPromptScriptOwnedOutput } from '../utils/output-ownership.js';
+import { isPromptScriptOwnedOutput } from '../utils/output-ownership.js';
+import { finalizeOutputPlan } from '../utils/output-plan.js';
 
 async function loadCompileLockfile(
   projectRoot: string,
@@ -151,6 +151,35 @@ function resolveProjectPath(projectRoot: string, path: string): string {
   return isAbsolute(path) ? path : resolve(projectRoot, path);
 }
 
+function validateWritePathSymlinks(outputPath: string, outputRoot: string): string | undefined {
+  const root = resolve(outputRoot);
+  const candidate = resolve(root, outputPath);
+  const relativePath = relative(root, candidate);
+  if (relativePath === '' || relativePath.startsWith('..') || isAbsolute(relativePath)) return;
+
+  let current = root;
+  for (const segment of relativePath.split(/[\\/]/)) {
+    current = resolve(current, segment);
+    let stat: ReturnType<typeof lstatSync> | undefined;
+    try {
+      stat = lstatSync(current);
+    } catch (error: unknown) {
+      if (
+        error instanceof Error &&
+        'code' in error &&
+        (error as NodeJS.ErrnoException).code === 'ENOENT'
+      ) {
+        break;
+      }
+      return `Output path "${outputPath}" cannot be checked for symbolic links`;
+    }
+    if (stat?.isSymbolicLink()) {
+      return `Output path "${outputPath}" traverses a symbolic link`;
+    }
+  }
+  return undefined;
+}
+
 function resolveCompileConfigPath(
   projectRoot: string,
   options: Pick<CompileOptions, 'config' | 'cwd'>
@@ -229,33 +258,6 @@ interface WriteResult {
   created: string[];
   skipped: string[];
   unchanged: string[];
-}
-
-async function prepareLegacyFactoryMigration(
-  outputs: Map<string, FormatterOutput>,
-  outputRoot: string
-): Promise<LegacyFactoryMigrationPlan | undefined> {
-  const factoryOutput = outputs.get('.factory/hooks.json');
-  const plan = await planLegacyFactoryHooksMigration(outputRoot, factoryOutput?.content);
-  if (!plan) return undefined;
-  if (plan.migration.ambiguous.length > 0) {
-    throw new Error(
-      `Cannot migrate legacy Factory hooks safely. Review these entries in ${plan.settingsPath}: ` +
-        plan.migration.ambiguous.join(', ')
-    );
-  }
-  if (!plan.migration.changed) return undefined;
-
-  const content = JSON.stringify(plan.migration.canonical, null, 2) + '\n';
-  if (factoryOutput) {
-    factoryOutput.content = content;
-  } else {
-    outputs.set('.factory/hooks.json', {
-      path: '.factory/hooks.json',
-      content,
-    });
-  }
-  return plan;
 }
 
 async function finishLegacyFactoryMigration(
@@ -356,13 +358,19 @@ async function writeOutputs(
   let overwriteAll = false;
   const conflicts: string[] = [];
   const targetErrors: string[] = [];
+  // `outputs` is produced from the finalized plan, so it already carries every
+  // planned path and its write settings.
+  const plannedOutputs = [...outputs.values()];
 
   // Pre-flight: a target `output` comes from the config file, so a checked-in
   // path may point anywhere the user can write. Reject the whole run before
   // writing anything rather than planting files outside the output directory.
   const outputRoot = options.output ?? process.cwd();
-  const escaping = [...outputs.values()]
-    .map((output) => validateOutputPath(output.path, outputRoot))
+  const escaping = plannedOutputs
+    .flatMap((output) => [
+      validateOutputPath(output.path, outputRoot),
+      validateWritePathSymlinks(output.path, outputRoot),
+    ])
     .filter((message): message is string => message !== undefined);
   if (escaping.length > 0) {
     throw new PSError(
@@ -377,7 +385,7 @@ async function writeOutputs(
   // below stays as a backstop against files changed after this check.
   if (!options.dryRun && !options.force && !isTTY()) {
     const preflightConflicts: string[] = [];
-    for (const output of outputs.values()) {
+    for (const output of plannedOutputs) {
       const outputPath = options.output
         ? resolve(options.output, output.path)
         : resolve(output.path);
@@ -462,7 +470,7 @@ async function writeOutputs(
     return created;
   }
 
-  for (const output of outputs.values()) {
+  for (const output of plannedOutputs) {
     const outputPath = options.output ? resolve(options.output, output.path) : resolve(output.path);
 
     // Check if file exists
@@ -896,8 +904,6 @@ async function compileCommandWithResult(
       output: resolveOutputBase(projectRoot, configuredOutput),
       force: options.force ?? config.output?.overwrite,
     };
-    applyConfiguredHeader(result.outputs, config.output?.header);
-    await postFormatWithPrettier(result.outputs, projectRoot, logger);
     const hasFactoryTarget = targets.some((target) => target.name === 'factory');
     const migrateFactoryHooks = options.migrateFactoryHooks !== false;
     const legacyMigration =
@@ -908,7 +914,13 @@ async function compileCommandWithResult(
       hasFactoryTarget && !migrateFactoryHooks
         ? await detectLegacyFactorySettingsHooks(effectiveOptions.output, true)
         : undefined;
-    const writeResult = await writeOutputs(result.outputs, effectiveOptions, config, services);
+    const finalized = await finalizeOutputPlan(result, {
+      header: config.output?.header,
+      projectRoot,
+      logger,
+      additionalOutputPaths: legacyMigration ? ['.factory/hooks.json'] : [],
+    });
+    const writeResult = await writeOutputs(finalized.outputs, effectiveOptions, config, services);
     if (legacyMigration) {
       if (writeResult.skipped.includes(legacyMigration.hooksPath)) {
         throw new Error(
@@ -922,7 +934,8 @@ async function compileCommandWithResult(
         writeResult.created.includes(legacyMigration.hooksPath)
       );
     }
-    const cleanupResult = await cleanupManagedOutputs(result.outputs, {
+    const plannedOutputMap = new Map(finalized.outputs);
+    const cleanupResult = await cleanupManagedOutputs(plannedOutputMap, {
       outputRoot: effectiveOptions.output,
       dryRun: options.dryRun,
     });
@@ -1013,7 +1026,17 @@ interface WatchEvent {
   path: string;
 }
 
-const DEFAULT_WATCH_INCLUDE = ['**/*.prs'];
+const DEFAULT_WATCH_INCLUDE = [
+  '**/*.prs',
+  '.promptscript/**/*',
+  '.agents/**/*',
+  'registry/**/*',
+  'promptscript.yaml',
+  'promptscript.yml',
+  '.promptscriptrc.yaml',
+  '.promptscriptrc.yml',
+  'promptscript.lock',
+];
 const DEFAULT_WATCH_EXCLUDE = ['**/node_modules/**', '**/.git/**', '.promptscript/vendor/**'];
 
 function watchForChanges(
@@ -1103,6 +1126,7 @@ function watchForChanges(
   watcher.on('change', (filename) => scheduleCompilation({ action: 'changed', path: filename }));
   watcher.on('add', (filename) => scheduleCompilation({ action: 'added', path: filename }));
   watcher.on('unlink', (filename) => scheduleCompilation({ action: 'removed', path: filename }));
+  watcher.on('unlinkDir', (filename) => scheduleCompilation({ action: 'removed', path: filename }));
 
   watcher.on('error', (error: unknown) => {
     const errorMessage = error instanceof Error ? error.message : String(error);

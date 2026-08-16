@@ -19,6 +19,7 @@ import {
   applyOverride,
   blockBodyToContent,
   consumeInlineUses,
+  getInlineUses,
   isTextContent,
   INHERITANCE_MERGE_POLICY,
   mergeBlockCollections,
@@ -190,10 +191,18 @@ export interface BrowserResolverOptions {
  * Result of resolving a PromptScript file.
  */
 export interface ResolvedAST {
-  /** The resolved AST, or null if resolution failed */
+  /**
+   * Immutable canonical AST used by compiler and validator stages.
+   *
+   * This is the primary resolved representation.
+   */
+  canonicalAst: CanonicalProgram | null;
+  /**
+   * Mutable compatibility projection for legacy integrations.
+   *
+   * @deprecated Use `canonicalAst` for new consumers.
+   */
   ast: Program | null;
-  /** Immutable canonical projection of the resolved AST */
-  canonicalAst?: CanonicalProgram | null;
   /** List of all source files involved in resolution */
   sources: string[];
   /** List of errors encountered during resolution */
@@ -405,6 +414,11 @@ export class BrowserResolver {
       const subParts = segment.split('/');
       for (const part of subParts) {
         if (part === '..') {
+          if (parts.length === 0) {
+            throw new Error(
+              `Path traversal outside project root is not allowed: ${segments.join('/')}`
+            );
+          }
           parts.pop();
         } else if (part !== '.' && part !== '') {
           parts.push(part);
@@ -425,11 +439,11 @@ export class BrowserResolver {
     // Load and parse file
     const parseData = this.loadAndParse(absPath, sources, errors);
     if (!parseData.ast) {
-      return { ast: null, sources, errors };
+      return { ast: null, canonicalAst: null, sources, errors };
     }
 
     let ast = parseData.ast;
-    const sequentialOperations = usesSequentialOperations(ast);
+    const sequentialOperations = this.usesSequentialOperationsAfterComposition(ast, absPath);
     ast = normalizeBlockAliases(ast, {
       preserveDeclarationOrder: sequentialOperations,
     });
@@ -476,6 +490,60 @@ export class BrowserResolver {
       sources: [...new Set(sources)],
       errors,
     };
+  }
+
+  /**
+   * Select operation semantics from the complete reachable source graph.
+   *
+   * A lower-version entry file can compose a source that requires ordered
+   * operations. Inspect dependencies before normalizing or resolving the
+   * entry file so imports and local declarations use the effective mode.
+   */
+  private usesSequentialOperationsAfterComposition(ast: Program, absPath: string): boolean {
+    return this.inspectOperationMode(ast, absPath, new Set([absPath]));
+  }
+
+  private inspectOperationMode(ast: Program, absPath: string, visited: Set<string>): boolean {
+    if (usesSequentialOperations(ast)) return true;
+
+    const references = [
+      ...(ast.inherit ? [ast.inherit.path] : []),
+      ...ast.uses.map((use) => use.path),
+      ...ast.blocks.flatMap((block) => getInlineUses(block).map((use) => use.path)),
+      ...ast.extends.flatMap((extension) => {
+        const content = extension.content;
+        if (content.type !== 'ObjectContent' && content.type !== 'MixedContent') {
+          return [];
+        }
+        return (content.inlineUses ?? []).map((use) => use.path);
+      }),
+    ];
+
+    for (const reference of references) {
+      let dependencyPath: string;
+      try {
+        dependencyPath = this.resolveRef(reference, absPath);
+      } catch {
+        // The normal resolution pass reports invalid references.
+        continue;
+      }
+      if (visited.has(dependencyPath)) continue;
+      visited.add(dependencyPath);
+
+      const dependency = this.loadAndParse(dependencyPath, [], []);
+      if (
+        dependency.ast &&
+        this.inspectOperationMode(
+          dependency.ast,
+          dependency.ast.loc.file || dependencyPath,
+          visited
+        )
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private async resolveSequentialOperations(

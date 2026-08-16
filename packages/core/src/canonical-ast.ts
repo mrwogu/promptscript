@@ -644,9 +644,23 @@ export function mergeValueNodeLocations(
         loc: fieldNode.loc,
       });
     }
+    // Keep canonical fields aligned with the merged legacy property order.
+    const fieldsByName = new Map<string, ObjectFieldNode[]>();
+    for (const field of fields) {
+      const matching = fieldsByName.get(field.name) ?? [];
+      matching.push(field);
+      fieldsByName.set(field.name, matching);
+    }
+    const orderedFields: ObjectFieldNode[] = [];
+    for (const name of Object.keys(record)) {
+      orderedFields.push(...(fieldsByName.get(name) ?? []));
+    }
+    for (const field of fields) {
+      if (!Object.hasOwn(record, field.name)) orderedFields.push(field);
+    }
     return deepFreeze<ObjectValueNode>({
       ...deepClone(precedence === 'incoming' ? incoming : base),
-      fields,
+      fields: orderedFields,
     });
   }
 
@@ -936,11 +950,6 @@ export function composeBlockBodies(
   );
   const selectedBasePresentation = new Set(presentation.base);
   const selectedIncomingPresentation = new Set(presentation.incoming);
-  const baseEntries = base.entries.filter(
-    (entry) =>
-      (entry.type !== 'PresentationEntry' || selectedBasePresentation.has(entry)) &&
-      (entry.type !== 'FieldEntry' || !incomingFieldNames.has(entry.name))
-  );
   const lastIncomingIndexes = new Map<string, number>();
   for (const [index, entry] of incoming.entries.entries()) {
     if (entry.type === 'FieldEntry') lastIncomingIndexes.set(entry.name, index);
@@ -950,27 +959,52 @@ export function composeBlockBodies(
     .filter(
       ({ entry }) => entry.type !== 'PresentationEntry' || selectedIncomingPresentation.has(entry)
     )
-    .map(({ entry, index }) => {
-      const baseField = entry.type === 'FieldEntry' ? baseFields.get(entry.name) : undefined;
-      const mergedValue = entry.type === 'FieldEntry' ? mergedProperties[entry.name] : undefined;
-      return baseField &&
+    .map(({ entry, index }) => ({
+      name: entry.type === 'FieldEntry' ? entry.name : undefined,
+      entry:
         entry.type === 'FieldEntry' &&
         lastIncomingIndexes.get(entry.name) === index &&
-        mergedValue !== undefined
-        ? {
-            ...deepClone(entry),
-            value: mergeValueNodeLocations(
-              baseField.value,
-              entry.value,
-              mergedValue,
-              'incoming',
-              entry.value
-            ),
-          }
-        : deepClone(entry);
-    });
+        baseFields.has(entry.name) &&
+        mergedProperties[entry.name] !== undefined
+          ? ({
+              ...deepClone(entry),
+              value: mergeValueNodeLocations(
+                baseFields.get(entry.name)!.value,
+                entry.value,
+                mergedProperties[entry.name]!,
+                'incoming',
+                entry.value
+              ),
+            } satisfies FieldEntry)
+          : deepClone(entry),
+    }));
+
+  // A field the base already declares keeps the base position, so composition
+  // never reorders the block: only genuinely new entries append.
+  const consumedIncoming = new Set<number>();
+  const composed: BlockEntry[] = [];
+  const replacedNames = new Set<string>();
+  for (const entry of base.entries) {
+    if (entry.type === 'PresentationEntry' && !selectedBasePresentation.has(entry)) continue;
+    if (entry.type === 'FieldEntry' && incomingFieldNames.has(entry.name)) {
+      if (replacedNames.has(entry.name)) continue;
+      replacedNames.add(entry.name);
+      for (const [index, candidate] of incomingEntries.entries()) {
+        if (candidate.name !== entry.name) continue;
+        consumedIncoming.add(index);
+        composed.push(candidate.entry);
+      }
+      continue;
+    }
+    composed.push(deepClone(entry));
+  }
+  for (const [index, candidate] of incomingEntries.entries()) {
+    if (consumedIncoming.has(index)) continue;
+    composed.push(candidate.entry);
+  }
+
   return reconcileBlockBody(
-    createBlockBody([...baseEntries.map(deepClone), ...incomingEntries], mergedContent.loc, {
+    createBlockBody(composed, mergedContent.loc, {
       projection: mergedContent.type,
       ...(text ? { text } : {}),
     }),
@@ -1467,7 +1501,7 @@ export function normalizeProgram(input: ProgramInput): CanonicalProgram {
       loc: deepClone(override.loc),
     });
   }
-  for (let start = 0; start < operations.length; ) {
+  for (let start = 0; start < operations.length;) {
     let end = start + 1;
     while (
       end < operations.length &&

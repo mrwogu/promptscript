@@ -16,11 +16,11 @@ import { createPager, Pager } from '../output/pager.js';
 import { Compiler } from '@promptscript/compiler';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { stripMarkers } from '../utils/markers.js';
-import { postFormatWithPrettier } from '../prettier/post-format.js';
 import { resolvePrettierOptions } from '../prettier/loader.js';
 import { buildCompilationDiff, createCompilationDiffErrorReport } from '../utils/diff-report.js';
 import { loadBundledSkillContent } from '../utils/bundled-skill.js';
-import { applyConfiguredHeader } from '../utils/output-ownership.js';
+import { prepareLegacyFactoryMigration } from '../utils/legacy-factory-hooks.js';
+import { finalizeOutputPlan } from '../utils/output-plan.js';
 import chalk from 'chalk';
 import { parse as parseYaml } from 'yaml';
 
@@ -132,7 +132,6 @@ function printNewFilePreview(content: string, showFull: boolean, pager: Pager): 
  * Compare a single output file with existing content.
  */
 async function compareOutput(
-  _name: string,
   output: FormatterOutput,
   outputRoot: string,
   showFull: boolean,
@@ -203,6 +202,7 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
 
     if (!isJsonFormat) spinner.text = 'Compiling...';
 
+    // --all is the default behavior when no target is specified
     const parsedTargets = parseTargets(config.targets);
     const targets = options.target
       ? [parsedTargets.find((target) => target.name === options.target) ?? { name: options.target }]
@@ -211,6 +211,7 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     const prettierOptions = await resolvePrettierOptions(config, projectRoot);
     const skillContent =
       config.includePromptScriptSkill === false ? undefined : await loadBundledSkillContent(logger);
+    const outputRoot = resolve(projectRoot, config.output?.baseDir ?? '.');
 
     const compiler = new Compiler({
       resolver: {
@@ -225,8 +226,8 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
             : undefined,
         lockfile,
         registries: config.registries,
-        skills: resolveUniversalDir(config.universalDir),
         skillTargets: config.skillTargets,
+        skills: resolveUniversalDir(config.universalDir),
       },
       validator: config.validation,
       formatters: targets,
@@ -291,21 +292,26 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       return;
     }
 
-    const outputRoot = resolve(projectRoot, config.output?.baseDir ?? '.');
-    applyConfiguredHeader(result.outputs, config.output?.header);
-    const postFormatWarnings =
-      (await postFormatWithPrettier(result.outputs, projectRoot, createDiffLogger(isJsonFormat))) ??
-      [];
+    const hasFactoryTarget = targets.some((target) => target.name === 'factory');
+    if (hasFactoryTarget) {
+      await prepareLegacyFactoryMigration(result.outputs, outputRoot);
+    }
+    const finalized = await finalizeOutputPlan(result, {
+      header: config.output?.header,
+      projectRoot,
+      logger,
+      additionalOutputPaths: hasFactoryTarget ? ['.factory/hooks.json'] : [],
+    });
 
     if (isJsonFormat) {
       const report = await buildCompilationDiff({
         projectRoot,
         outputRoot,
         entryPath,
-        outputs: result.outputs,
+        outputs: finalized.outputs,
         warnings: [
           ...result.warnings,
-          ...postFormatWarnings.map((message) => ({
+          ...finalized.warnings.map((message) => ({
             ruleId: 'PRETTIER',
             ruleName: 'prettier-post-format',
             severity: 'warning' as const,
@@ -325,8 +331,9 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     const usePager = options.noPager !== true;
     const pager = createPager(usePager);
 
-    for (const [name, output] of result.outputs) {
-      const hasChanges = await compareOutput(name, output, outputRoot, showFull, pager);
+    // Compare outputs with existing files
+    for (const output of finalized.outputs.values()) {
+      const hasChanges = await compareOutput(output, outputRoot, showFull, pager);
       if (hasChanges) {
         hasDiff = true;
       }

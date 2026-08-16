@@ -2744,7 +2744,7 @@ description: A skill with extras
 allowed-tools: ["Read", "Grep"]
 argument-hint: <path>
 compatibility: claude-3-5
-metadata: some-value
+metadata: { source: some-value }
 ---
 
 Body content here.
@@ -2755,7 +2755,7 @@ Body content here.
       expect(result.rawFrontmatter).toContain('allowed-tools: ["Read", "Grep"]');
       expect(result.rawFrontmatter).toContain('argument-hint: <path>');
       expect(result.rawFrontmatter).toContain('compatibility: claude-3-5');
-      expect(result.rawFrontmatter).toContain('metadata: some-value');
+      expect(result.rawFrontmatter).toContain('metadata: { source: some-value }');
     });
 
     it('should capture rawFrontmatter for empty frontmatter block', () => {

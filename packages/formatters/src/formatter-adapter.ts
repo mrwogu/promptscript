@@ -1,26 +1,27 @@
 import {
   deepClone,
+  isCanonicalProgram,
   normalizeProgram,
   toLegacyProgram,
-  type CanonicalProgram,
   type ProgramInput,
 } from '@promptscript/core';
-import type { Formatter, FormatterOutput, FormatOptions } from './types.js';
+import type {
+  CanonicalFormatter,
+  Formatter,
+  FormatterOutput,
+  FormatOptions,
+  LegacyFormatter,
+} from './types.js';
 
-/**
- * Optional formatter capability for consuming the immutable canonical AST.
- */
-export interface CanonicalFormatter {
-  formatCanonical(ast: CanonicalProgram, options?: FormatOptions): FormatterOutput;
-}
-
-export function isCanonicalFormatter(
-  formatter: Formatter
-): formatter is Formatter & CanonicalFormatter {
+export function isCanonicalFormatter(formatter: Formatter): formatter is CanonicalFormatter {
   return (
     'formatCanonical' in formatter &&
     typeof (formatter as Partial<CanonicalFormatter>).formatCanonical === 'function'
   );
+}
+
+export function isLegacyFormatter(formatter: Formatter): formatter is LegacyFormatter {
+  return 'format' in formatter && typeof formatter.format === 'function';
 }
 
 /**
@@ -31,12 +32,20 @@ export function formatProgram(
   ast: ProgramInput,
   options?: FormatOptions
 ): FormatterOutput {
-  if (!isCanonicalFormatter(formatter) && ast.type === 'Program') {
-    return formatter.format(deepClone(ast), options);
-  }
-  const canonical = normalizeProgram(ast);
   if (isCanonicalFormatter(formatter)) {
+    const canonical = isCanonicalProgram(ast) ? ast : normalizeProgram(ast);
     return formatter.formatCanonical(canonical, options);
   }
+  if (!isLegacyFormatter(formatter)) {
+    throw new Error('Formatter does not implement a supported AST contract');
+  }
+  if (ast.type === 'Program') {
+    return formatter.format(deepClone(ast), options);
+  }
+  const canonical = ast;
+  /**
+   * Explicit compatibility boundary for unmigrated formatters. The projection
+   * is detached so legacy formatters cannot mutate the canonical pipeline.
+   */
   return formatter.format(toLegacyProgram(canonical, { preserveCanonicalBody: true }), options);
 }

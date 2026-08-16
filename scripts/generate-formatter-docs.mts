@@ -1,19 +1,22 @@
 /**
  * Generate formatter documentation sections from source code metadata.
  *
- * Reads formatter source files to extract metadata (output paths, dot dirs,
- * feature flags) and reads FEATURE_MATRIX from feature-matrix.ts for feature
- * data. Writes generated sections into doc files using
+ * Reads canonical target capabilities for output paths, feature flags,
+ * skill paths, and hooks. Writes generated sections into doc files using
  * <!-- generated:start --> / <!-- generated:end --> markers.
  *
  * Usage: pnpm docs:formatters [--check]
  */
 
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { FEATURE_MATRIX, type ToolName } from '@promptscript/formatters';
-import { HOOK_CAPABILITIES, TARGET_DEFINITIONS } from '@promptscript/core';
+import {
+  TARGET_CAPABILITIES,
+  TARGET_DEFINITIONS,
+  type TargetResourceCapability,
+} from '@promptscript/core';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -31,6 +34,7 @@ interface FormatterInfo {
   tier: 'custom' | 'tier-1' | 'tier-2' | 'tier-3';
   outputPath: string;
   dotDir: string;
+  skillBasePath: string | null;
   hasSkills: boolean;
   hasAgents: boolean;
   hasCommands: boolean;
@@ -39,6 +43,7 @@ interface FormatterInfo {
   hasDedicatedPage: boolean;
   hookConfigPath: string | null;
   hookVersions: readonly string[];
+  resources: readonly TargetResourceCapability[];
 }
 
 // ---------------------------------------------------------------------------
@@ -49,29 +54,6 @@ interface FormatterInfo {
  * Extract formatter config from a createSimpleMarkdownFormatter() call.
  * Returns null for custom formatters that don't use the factory.
  */
-function parseSimpleFormatter(source: string): Partial<FormatterInfo> | null {
-  const nameMatch = source.match(/name:\s*'([^']+)'/);
-  const outputPathMatch = source.match(/outputPath:\s*'([^']+)'/);
-  const dotDirMatch = source.match(/dotDir:\s*'([^']+)'/);
-  const hasAgentsMatch = source.match(/hasAgents:\s*(true|false)/);
-  const hasCommandsMatch = source.match(/hasCommands:\s*(true|false)/);
-  const hasSkillsMatch = source.match(/hasSkills:\s*(true|false)/);
-  const skillFileNameMatch = source.match(/skillFileName:\s*'([^']+)'/);
-
-  if (!nameMatch || !outputPathMatch || !dotDirMatch) return null;
-
-  return {
-    name: nameMatch[1],
-    outputPath: outputPathMatch[1],
-    dotDir: dotDirMatch[1],
-    hasAgents: hasAgentsMatch?.[1] === 'true',
-    hasCommands: hasCommandsMatch?.[1] === 'true',
-    hasSkills: hasSkillsMatch ? hasSkillsMatch[1] !== 'false' : true, // default true
-    skillFileName: skillFileNameMatch?.[1] ?? 'SKILL.md',
-    hasLocal: false,
-  };
-}
-
 /**
  * Determine tier from index.ts comments (// Tier 1, // Tier 2, // Tier 3).
  * Extracts formatter names from the `from './xxx.js'` import paths which
@@ -118,73 +100,6 @@ const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
   hermes: 'Hermes Agent',
 };
 
-/** Custom formatters with dedicated pages and hand-written overrides. */
-const CUSTOM_OVERRIDES: Record<string, Partial<FormatterInfo>> = {
-  claude: {
-    outputPath: 'CLAUDE.md',
-    dotDir: '.claude',
-    hasSkills: true,
-    hasAgents: true,
-    hasCommands: true,
-    hasLocal: true,
-    skillFileName: 'SKILL.md',
-  },
-  github: {
-    outputPath: '.github/copilot-instructions.md',
-    dotDir: '.github',
-    hasSkills: true,
-    hasAgents: true,
-    hasCommands: true,
-    hasLocal: false,
-    skillFileName: 'SKILL.md',
-  },
-  cursor: {
-    outputPath: '.cursor/rules/project.mdc',
-    dotDir: '.cursor',
-    hasSkills: true,
-    hasAgents: true,
-    hasCommands: true,
-    hasLocal: false,
-    skillFileName: 'SKILL.md',
-  },
-  antigravity: {
-    outputPath: '.agent/rules/project.md',
-    dotDir: '.agent',
-    hasSkills: false,
-    hasAgents: false,
-    hasCommands: true,
-    hasLocal: false,
-    skillFileName: 'SKILL.md',
-  },
-  factory: {
-    outputPath: 'AGENTS.md',
-    dotDir: '.factory',
-    hasSkills: true,
-    hasAgents: true,
-    hasCommands: true,
-    hasLocal: false,
-    skillFileName: 'SKILL.md',
-  },
-  gemini: {
-    outputPath: 'GEMINI.md',
-    dotDir: '.gemini',
-    hasSkills: true,
-    hasAgents: false,
-    hasCommands: true,
-    hasLocal: false,
-    skillFileName: 'skill.md',
-  },
-  opencode: {
-    outputPath: 'OPENCODE.md',
-    dotDir: '.opencode',
-    hasSkills: true,
-    hasAgents: true,
-    hasCommands: true,
-    hasLocal: false,
-    skillFileName: 'SKILL.md',
-  },
-};
-
 const DEDICATED_PAGES = new Set([
   'claude',
   'github',
@@ -196,7 +111,7 @@ const DEDICATED_PAGES = new Set([
 ]);
 
 function getHookMetadata(name: string): Pick<FormatterInfo, 'hookConfigPath' | 'hookVersions'> {
-  const capability = HOOK_CAPABILITIES[name as keyof typeof HOOK_CAPABILITIES];
+  const capability = TARGET_CAPABILITIES[name as keyof typeof TARGET_CAPABILITIES]?.hooks;
   return {
     hookConfigPath: capability?.configPath ?? null,
     hookVersions: capability?.nativeVersions ?? [],
@@ -204,58 +119,13 @@ function getHookMetadata(name: string): Pick<FormatterInfo, 'hookConfigPath' | '
 }
 
 /**
- * Build the full FORMATTERS array by scanning source files.
+ * Build the full formatter registry from canonical target metadata.
  */
 function buildFormatterRegistry(): FormatterInfo[] {
   const indexSource = readFileSync(join(FORMATTERS_SRC, 'index.ts'), 'utf-8');
   const tiers = parseTiersFromIndex(indexSource);
-  const formatters: FormatterInfo[] = [];
-
-  // Get all .ts formatter files (excluding index, .d.ts)
-  const files = readdirSync(FORMATTERS_SRC).filter(
-    (f) => f.endsWith('.ts') && !f.endsWith('.d.ts') && f !== 'index.ts'
-  );
-
-  for (const file of files) {
-    const source = readFileSync(join(FORMATTERS_SRC, file), 'utf-8');
-    const parsed = parseSimpleFormatter(source);
-    const name = file.replace('.ts', '');
-
-    // For custom formatters, use overrides; for simple formatters, use parsed data
-    const override = CUSTOM_OVERRIDES[name];
-    const info = override ?? parsed;
-    if (!info) continue; // Skip if neither override nor parseable
-
-    const hookMetadata = getHookMetadata(name);
-    const displayName =
-      DISPLAY_NAME_OVERRIDES[name] ??
-      name
-        .split('-')
-        .map((w) => w[0].toUpperCase() + w.slice(1))
-        .join(' ');
-
-    formatters.push({
-      name,
-      displayName,
-      tier: tiers[name] ?? 'custom',
-      outputPath: info.outputPath ?? '',
-      dotDir: info.dotDir ?? '',
-      hasSkills: info.hasSkills ?? true,
-      hasAgents: info.hasAgents ?? false,
-      hasCommands: info.hasCommands ?? false,
-      hasLocal: info.hasLocal ?? false,
-      skillFileName: info.skillFileName ?? 'SKILL.md',
-      hasDedicatedPage: DEDICATED_PAGES.has(name),
-      ...hookMetadata,
-    });
-  }
-
-  // Add targets that use shared formatter factories and therefore do not expose
-  // parseable metadata directly in their thin source modules.
-  const registeredNames = new Set(formatters.map((formatter) => formatter.name));
-  for (const definition of Object.values(TARGET_DEFINITIONS)) {
-    if (registeredNames.has(definition.name)) continue;
-
+  const formatters = Object.values(TARGET_DEFINITIONS).map((definition): FormatterInfo => {
+    const name = definition.name;
     const displayName =
       DISPLAY_NAME_OVERRIDES[definition.name] ??
       definition.name
@@ -263,26 +133,28 @@ function buildFormatterRegistry(): FormatterInfo[] {
         .map((word) => word[0].toUpperCase() + word.slice(1))
         .join(' ');
     const skillBasePath = definition.skillPath.basePath;
-    const dotDir = skillBasePath?.endsWith('/skills')
-      ? skillBasePath.slice(0, -'/skills'.length)
-      : (skillBasePath ?? '');
+    const outputRoot = definition.outputPath.split('/')[0];
+    // Placeholder fallback for AGENTS.md-only targets; retained for latent generic docs paths.
+    const dotDir = outputRoot.startsWith('.') ? outputRoot : `.${name}`;
     const hookMetadata = getHookMetadata(definition.name);
 
-    formatters.push({
+    return {
       name: definition.name,
       displayName,
       tier: tiers[definition.name] ?? 'tier-3',
       outputPath: definition.outputPath,
       dotDir,
+      skillBasePath,
       hasSkills: definition.features.hasSkills,
       hasAgents: definition.features.hasAgents,
       hasCommands: definition.features.hasCommands,
-      hasLocal: false,
+      hasLocal: definition.name === 'claude',
       skillFileName: definition.skillPath.fileName ?? 'SKILL.md',
       hasDedicatedPage: DEDICATED_PAGES.has(definition.name),
+      resources: definition.resources,
       ...hookMetadata,
-    });
-  }
+    };
+  });
 
   // Sort: custom first, then tier-1, tier-2, tier-3; alphabetical within each tier
   const tierOrder = { custom: 0, 'tier-1': 1, 'tier-2': 2, 'tier-3': 3 };
@@ -345,7 +217,7 @@ function validateAgainstFeatureMatrix(formatters: FormatterInfo[]): void {
     );
   }
   if (missingFromMatrix.length > 0) {
-    // Not a warning — tier 2/3 formatters may not have feature matrix entries yet
+    // Not a warning - tier 2/3 formatters may not have feature matrix entries yet
     console.log(
       `Note: These formatters have no feature-matrix entries: ${missingFromMatrix.join(', ')}`
     );
@@ -408,20 +280,21 @@ function tierLabel(tier: FormatterInfo['tier']): string {
 }
 
 function skillPath(f: FormatterInfo): string {
-  const basePath = f.name === 'cursor' || f.name === 'gemini' ? '.agents' : f.dotDir;
-  return `${basePath}/skills/<name>/${f.skillFileName}`;
+  return `${f.skillBasePath ?? `${f.dotDir}/skills`}/<name>/${f.skillFileName}`;
 }
 
 function agentPath(f: FormatterInfo): string {
-  const directory = f.name === 'factory' ? 'droids' : 'agents';
-  return `${f.dotDir}/${directory}/<name>.md`;
+  return (
+    f.resources.find((resource) => resource.kind === 'agents')?.path ??
+    `${f.dotDir}/agents/<name>.md`
+  );
 }
 
 function commandPath(f: FormatterInfo): string {
-  if (f.name === 'github') return '.github/prompts/<name>.prompt.md';
-  if (f.name === 'antigravity') return '.agent/workflows/<name>.md';
-  const extension = f.name === 'gemini' ? 'toml' : 'md';
-  return `${f.dotDir}/commands/<name>.${extension}`;
+  return (
+    f.resources.find((resource) => resource.kind === 'commands')?.path ??
+    `${f.dotDir}/commands/<name>.md`
+  );
 }
 
 function generateFormatterTable(formatters: FormatterInfo[]): string {
@@ -466,28 +339,18 @@ function generateOutputFiles(f: FormatterInfo): string {
     lines.push(
       `| Always-on rules | \`.factory/rules/**/*.md\` | Split rule files when \`rulesMode: split\` |`
     );
-    lines.push(
-      `| Lifecycle hooks | \`.factory/hooks.json\` | Project hooks in multifile and full modes |`
-    );
   }
 
-  if (f.name === 'github') {
-    lines.push(
-      `| Lifecycle hooks | \`.github/hooks/promptscript.json\` | Copilot CLI and cloud agent hooks in multifile and full modes |`
-    );
-  }
-
-  if (
-    f.hookConfigPath &&
-    f.hookVersions.length > 0 &&
-    f.name !== 'factory' &&
-    f.name !== 'github'
-  ) {
+  if (f.hookConfigPath && f.hookVersions.length > 0) {
     const modeLabel =
       f.hookVersions.length === 1
         ? `\`${f.hookVersions[0]}\` mode`
         : `${f.hookVersions.map((version) => `\`${version}\``).join(' and ')} modes`;
-    lines.push(`| Lifecycle hooks | \`${f.hookConfigPath}\` | Project hooks in ${modeLabel} |`);
+    const purpose =
+      f.name === 'github'
+        ? `Copilot CLI and cloud agent hooks in ${modeLabel}`
+        : `Project hooks in ${modeLabel}`;
+    lines.push(`| Lifecycle hooks | \`${f.hookConfigPath}\` | ${purpose} |`);
   }
 
   if (f.hasLocal) {
@@ -603,7 +466,7 @@ function main(): void {
   for (const f of dedicatedFormatters) {
     const pagePath = join(DOCS_DIR, `${f.name}.md`);
     if (!existsSync(pagePath)) {
-      console.warn(`  Skipping ${f.name}.md — file does not exist`);
+      console.warn(`  Skipping ${f.name}.md - file does not exist`);
       continue;
     }
 

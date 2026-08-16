@@ -1,8 +1,12 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { CircularDependencyError } from '@promptscript/core';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import * as parser from '@promptscript/parser';
+import { CircularDependencyError, ParseError } from '@promptscript/core';
 import { Resolver, createResolver } from '../resolver.js';
+import { join } from 'path';
+import { tmpdir } from 'os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -48,9 +52,50 @@ describe('Resolver', () => {
       const result = await resolver.resolve('./minimal.prs');
 
       expect(result.ast).not.toBeNull();
+      expect(result.canonicalAst).not.toBeNull();
+      expect(Object.isFrozen(result.canonicalAst)).toBe(true);
+      expect(result.canonicalAst?.operations.length).toBeGreaterThan(0);
       expect(result.errors).toHaveLength(0);
       expect(result.sources).toHaveLength(1);
       expect(result.ast?.meta?.fields?.['id']).toBe('minimal');
+    });
+
+    it('should retain diagnostics from a recovered AST', async () => {
+      const targetPath = resolve(FIXTURES_DIR, 'minimal.prs');
+      const originalParse = parser.parse;
+      const parseSpy = vi.spyOn(parser, 'parse');
+      parseSpy.mockImplementation((source, options) => {
+        const result = originalParse(source, options);
+        if (options?.filename === targetPath && result.ast) {
+          return {
+            ast: result.ast,
+            errors: [
+              new ParseError('Recovered parser diagnostic', {
+                file: targetPath,
+                line: 1,
+                column: 1,
+              }),
+            ],
+          };
+        }
+        return result;
+      });
+
+      try {
+        const result = await resolver.resolve(targetPath);
+
+        expect(result.ast).not.toBeNull();
+        expect(result.errors).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: 'Recovered parser diagnostic',
+              location: { file: targetPath, line: 1, column: 1 },
+            }),
+          ])
+        );
+      } finally {
+        parseSpy.mockRestore();
+      }
     });
 
     it('should resolve file with inheritance', async () => {
@@ -220,6 +265,100 @@ describe('Resolver', () => {
       const result2 = await cachingResolver.resolve('./minimal.prs');
 
       expect(result1).not.toBe(result2);
+    });
+
+    it('should ignore invalidation when caching is disabled', () => {
+      resolver.invalidate([resolve(FIXTURES_DIR, 'minimal.prs')]);
+    });
+
+    it('should remove legacy cache entries without absolute dependencies', () => {
+      const cachingResolver = new Resolver({
+        registryPath: FIXTURES_DIR,
+        localPath: FIXTURES_DIR,
+        cache: true,
+      });
+      const cache = (cachingResolver as unknown as { cache: Map<string, unknown> }).cache;
+      cache.set('empty', { sources: [] });
+      cache.set('relative', { sources: ['relative.prs'] });
+
+      cachingResolver.invalidate([resolve(FIXTURES_DIR, 'minimal.prs')]);
+
+      expect(cache.has('empty')).toBe(false);
+      expect(cache.has('relative')).toBe(true);
+    });
+
+    it('should track and invalidate imported file dependencies', async () => {
+      const root = mkdtempSync(join(tmpdir(), 'promptscript-resolver-watch-'));
+      const entryPath = join(root, 'entry.prs');
+      const importedPath = join(root, 'imported.prs');
+      writeFileSync(entryPath, '@meta {\n  id: "entry"\n  syntax: "1.0.0"\n}\n\n@use ./imported\n');
+      writeFileSync(importedPath, '@identity {\n  """\n  Initial imported content.\n  """\n}\n');
+
+      try {
+        const cachingResolver = new Resolver({
+          registryPath: root,
+          localPath: root,
+          projectRoot: root,
+          cache: true,
+        });
+
+        const first = await cachingResolver.resolve(entryPath);
+        expect(first.dependencies).toEqual(expect.arrayContaining([entryPath, importedPath]));
+
+        writeFileSync(importedPath, '@identity {\n  """\n  Updated imported content.\n  """\n}\n');
+        cachingResolver.invalidate([importedPath]);
+
+        const second = await cachingResolver.resolve(entryPath);
+        expect(second).not.toBe(first);
+        const identity = second.ast?.blocks.find((block) => block.name === 'identity');
+        expect(identity?.content.type === 'TextContent' && identity.content.value).toContain(
+          'Updated imported content'
+        );
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    });
+
+    it('should invalidate native skill resource dependencies', async () => {
+      const root = mkdtempSync(join(tmpdir(), 'promptscript-resolver-skill-watch-'));
+      const entryPath = join(root, 'entry.prs');
+      const skillDir = join(root, 'skills', 'review');
+      const skillPath = join(skillDir, 'SKILL.md');
+      const resourcePath = join(skillDir, 'checklist.md');
+      writeFileSync(entryPath, '@skills {\n  review: {}\n}\n');
+      mkdirSync(skillDir, { recursive: true });
+      writeFileSync(skillPath, '---\nname: review\n---\n\nReview instructions.\n');
+      writeFileSync(resourcePath, 'Initial checklist.\n');
+
+      try {
+        const cachingResolver = new Resolver({
+          registryPath: root,
+          localPath: root,
+          projectRoot: root,
+          cache: true,
+        });
+
+        const first = await cachingResolver.resolve(entryPath);
+        expect(first.dependencies).toEqual(expect.arrayContaining([skillPath, resourcePath]));
+
+        writeFileSync(resourcePath, 'Updated checklist.\n');
+        cachingResolver.invalidate([resourcePath]);
+
+        const second = await cachingResolver.resolve(entryPath);
+        expect(second).not.toBe(first);
+        const skillsBlock = second.ast?.blocks.find((block) => block.name === 'skills');
+        if (!skillsBlock || skillsBlock.content.type !== 'ObjectContent') {
+          throw new Error('Expected resolved skills block');
+        }
+        const review = skillsBlock.content.properties['review'] as Record<string, unknown>;
+        const resources = review['resources'] as
+          Array<{ relativePath: string; content: string }> | undefined;
+        expect(
+          resources?.find((resource) => resource.relativePath === 'checklist.md')?.content
+        ).toBe('Updated checklist.\n');
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
     });
   });
 

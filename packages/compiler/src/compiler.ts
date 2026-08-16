@@ -1,5 +1,12 @@
 import { realpathSync } from 'fs';
-import { noopLogger, type Logger, type PSError } from '@promptscript/core';
+import {
+  createOutputPlan,
+  noopLogger,
+  type Logger,
+  type OutputPlanCandidate,
+  type OutputPlan,
+  type PSError,
+} from '@promptscript/core';
 import { FormatterRegistry, formatProgram } from '@promptscript/formatters';
 import {
   getVendorRepositoryRelativePath,
@@ -8,8 +15,8 @@ import {
   type ResolvedAST,
 } from '@promptscript/resolver';
 import { Validator, type ValidatorConfig, type ValidationMessage } from '@promptscript/validator';
+import { minimatch } from 'minimatch';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'path';
-import { isDeepStrictEqual } from 'node:util';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- imported for upcoming formatter integration
 import { verifyReferenceIntegrity } from './reference-verifier.js';
 import {
@@ -40,6 +47,8 @@ interface LoadedFormatter {
 
 /** Maximum number of project-scoped resolvers retained by a long-lived compiler. */
 export const MAX_ENTRY_RESOLVERS = 50;
+/** Maximum number of resolved dependency sets retained by a compiler. */
+export const MAX_RESOLVED_DEPENDENCIES = 50;
 
 function resolverCacheKey(projectRoot: string): string {
   return realpathSync.native(projectRoot);
@@ -55,6 +64,13 @@ function resolveEntryPath(entryPath: string): string {
   } catch {
     return absolutePath;
   }
+}
+
+function entryWatchPath(entryPath: string): string {
+  if (entryPath.startsWith('@')) return entryPath;
+  const fileName =
+    entryPath.endsWith('.prs') || entryPath.endsWith('.md') ? entryPath : `${entryPath}.prs`;
+  return absoluteWatchPath(fileName);
 }
 
 function normalizeRepositoryKey(value: string): string {
@@ -134,21 +150,6 @@ function addMarkerToOutput(
   return { ...output, content: lines.join('\n') };
 }
 
-function addOutputProvenance(
-  output: FormatterOutput,
-  source: string,
-  target: string
-): FormatterOutput {
-  return {
-    ...output,
-    source,
-    target,
-    additionalFiles: output.additionalFiles?.map((additionalFile) =>
-      addOutputProvenance(additionalFile, source, target)
-    ),
-  };
-}
-
 function normalizeOutputDir(dir: string): string {
   return dir
     .replace(/\\/g, '/')
@@ -159,44 +160,63 @@ function normalizeOutputDir(dir: string): string {
     .join('/');
 }
 
+function matchesWatchPattern(path: string, pattern: string, baseDir: string): boolean {
+  const normalizedPath = path.replace(/\\/g, '/');
+  const relativePath = relative(baseDir, path).replace(/\\/g, '/');
+  const candidates = [relativePath, normalizedPath].flatMap((candidate) => [
+    candidate,
+    candidate.endsWith('/') ? candidate : `${candidate}/`,
+  ]);
+  const matcherOptions = {
+    dot: true,
+    nocase: process.platform === 'win32' || process.platform === 'darwin',
+  };
+  return candidates.some((candidate) => minimatch(candidate, pattern, matcherOptions));
+}
+
+function absoluteWatchPath(path: string, baseDir: string = process.cwd()): string {
+  return isAbsolute(path) ? resolve(path) : resolve(baseDir, path);
+}
+
+function canonicalWatchPath(path: string, baseDir: string = process.cwd()): string {
+  const absolutePath = absoluteWatchPath(path, baseDir);
+  try {
+    return realpathSync.native(absolutePath);
+  } catch {
+    return absolutePath;
+  }
+}
+
+function normalizeWatchPath(path: string): string {
+  const normalizedPath = path.replace(/\\/g, '/');
+  return process.platform === 'win32' || process.platform === 'darwin'
+    ? normalizedPath.toLowerCase()
+    : normalizedPath;
+}
+
+function watchPathVariants(path: string, baseDir: string = process.cwd()): string[] {
+  const absolutePath = absoluteWatchPath(path, baseDir);
+  const canonicalPath = canonicalWatchPath(absolutePath, baseDir);
+  return [...new Set([absolutePath, canonicalPath])];
+}
+
+function watchPathKey(path: string, baseDir: string = process.cwd()): string {
+  return normalizeWatchPath(canonicalWatchPath(path, baseDir));
+}
+
+function isPathWithin(path: string, root: string): boolean {
+  const relation = relative(normalizeWatchPath(root), normalizeWatchPath(path));
+  return (
+    relation === '' ||
+    (relation !== '..' && !relation.startsWith(`..${sep}`) && !isAbsolute(relation))
+  );
+}
+
 function shouldIncludeSkill(name: string, config?: TargetConfig): boolean {
   const includeSkills = config?.includeSkills;
   if (includeSkills === false) return false;
   if (Array.isArray(includeSkills)) return includeSkills.includes(name);
   return true;
-}
-
-function hasIdenticalWriteSemantics(
-  existing: FormatterOutput,
-  candidate: FormatterOutput
-): boolean {
-  return (
-    existing.content === candidate.content &&
-    existing.mode === candidate.mode &&
-    isDeepStrictEqual(existing.merge, candidate.merge)
-  );
-}
-
-function mergeManagedOutputMetadata(
-  existing: FormatterOutput,
-  candidate: FormatterOutput
-): FormatterOutput {
-  const managedOutputDirectories = [
-    ...new Set([
-      ...(existing.managedOutputDirectories ?? []),
-      ...(candidate.managedOutputDirectories ?? []),
-    ]),
-  ];
-  const managedOutputFiles = [
-    ...new Set([...(existing.managedOutputFiles ?? []), ...(candidate.managedOutputFiles ?? [])]),
-  ];
-
-  return {
-    ...existing,
-    managedOutputDirectories:
-      managedOutputDirectories.length > 0 ? managedOutputDirectories : undefined,
-    managedOutputFiles: managedOutputFiles.length > 0 ? managedOutputFiles : undefined,
-  };
 }
 
 /**
@@ -229,6 +249,7 @@ export class Compiler {
   private readonly validator: Validator;
   private readonly loadedFormatters: LoadedFormatter[];
   private readonly logger: Logger;
+  private readonly resolvedDependencies = new Map<string, Set<string>>();
 
   constructor(private readonly options: CompilerOptions) {
     this.logger = options.logger ?? noopLogger;
@@ -282,6 +303,97 @@ export class Compiler {
     return resolver;
   }
 
+  private dependencyKey(entryPath: string): string {
+    return entryPath.startsWith('@') ? entryPath : watchPathKey(entryWatchPath(entryPath));
+  }
+
+  private collectResolvedDependencies(entryPath: string, resolved: ResolvedAST): Set<string> {
+    const dependencies = new Set<string>();
+    const paths = [
+      entryWatchPath(entryPath),
+      ...(resolved.sources ?? []),
+      ...(resolved.dependencies ?? []),
+    ];
+    for (const path of paths) {
+      if (path.startsWith('@') || path.startsWith('__registry__:')) continue;
+      dependencies.add(absoluteWatchPath(path));
+    }
+    return dependencies;
+  }
+
+  private commitResolvedDependencies(entryPath: string, dependencies: Set<string>): void {
+    const key = this.dependencyKey(entryPath);
+    if (
+      !this.resolvedDependencies.has(key) &&
+      this.resolvedDependencies.size >= MAX_RESOLVED_DEPENDENCIES
+    ) {
+      const oldestKey = this.resolvedDependencies.keys().next().value;
+      if (oldestKey !== undefined) this.resolvedDependencies.delete(oldestKey);
+    }
+    this.resolvedDependencies.set(key, dependencies);
+  }
+
+  private watchProjectRoot(entryPath: string): string {
+    return resolve(
+      this.options.resolver.projectRoot ??
+        findProjectRootMarker(entryPath) ??
+        dirname(resolve(entryPath))
+    );
+  }
+
+  private watchDependencyPaths(entryPath: string): string[] {
+    const key = this.dependencyKey(entryPath);
+    const dependencies =
+      this.resolvedDependencies.get(key) ?? new Set<string>([entryWatchPath(entryPath)]);
+    const projectRoot = this.watchProjectRoot(entryPath);
+    const configPaths = [
+      'promptscript.yaml',
+      'promptscript.yml',
+      '.promptscriptrc.yaml',
+      '.promptscriptrc.yml',
+      'promptscript.lock',
+    ].map((fileName) => resolve(projectRoot, fileName));
+
+    return [...new Set([...dependencies, ...configPaths])];
+  }
+
+  private resolvedDependencyPaths(entryPath: string): string[] {
+    const key = this.dependencyKey(entryPath);
+    return [
+      ...(this.resolvedDependencies.get(key) ?? new Set<string>([entryWatchPath(entryPath)])),
+    ];
+  }
+
+  private pathMatchesDependency(path: string, dependency: string): boolean {
+    return watchPathVariants(dependency).some((dependencyPath) =>
+      watchPathVariants(path).some((candidatePath) => isPathWithin(candidatePath, dependencyPath))
+    );
+  }
+
+  private invalidateResolvers(entryPath: string, changedFiles: readonly string[]): void {
+    const normalizedChanges = [...new Set(changedFiles.flatMap((path) => watchPathVariants(path)))];
+    const configNames = new Set([
+      'promptscript.yaml',
+      'promptscript.yml',
+      '.promptscriptrc.yaml',
+      '.promptscriptrc.yml',
+      'promptscript.lock',
+    ]);
+    const projectRoot = this.watchProjectRoot(entryPath);
+    const configurationPaths = new Set(
+      [...configNames].map((fileName) => watchPathKey(resolve(projectRoot, fileName)))
+    );
+    const hasConfigurationChange = normalizedChanges.some((path) =>
+      configurationPaths.has(watchPathKey(path))
+    );
+
+    const resolvers = [this.resolver, ...this.entryResolvers.values()];
+    for (const resolver of resolvers) {
+      resolver.invalidate(normalizedChanges);
+      if (hasConfigurationChange) resolver.clearCache();
+    }
+  }
+
   /**
    * Compile a PromptScript file through the full pipeline.
    *
@@ -314,9 +426,11 @@ export class Compiler {
     this.logger.verbose('=== Stage 1: Resolve ===');
     const startResolve = Date.now();
     let resolved: ResolvedAST;
+    let candidateDependencies: Set<string> | undefined;
 
     try {
       resolved = await resolver.resolve(resolvedEntryPath);
+      candidateDependencies = this.collectResolvedDependencies(entryPath, resolved);
     } catch (err) {
       stats.resolveTime = Date.now() - startResolve;
       stats.totalTime = Date.now() - startTotal;
@@ -342,10 +456,13 @@ export class Compiler {
     stats.resolveTime = Date.now() - startResolve;
     this.logger.verbose(`Resolve completed (${stats.resolveTime}ms)`);
 
+    // ResolvedAST exposes the canonical tree as the pipeline representation.
+    const canonicalAst = resolved.canonicalAst;
+
     // Check for resolve errors
-    if (resolved.errors.length > 0 || !resolved.ast) {
+    if (resolved.errors.length > 0 || !canonicalAst) {
       stats.totalTime = Date.now() - startTotal;
-      const compatibility = resolved.ast ? this.validator.validate(resolved.ast) : undefined;
+      const compatibility = canonicalAst ? this.validator.validate(canonicalAst) : undefined;
       const compatibilityErrors =
         compatibility?.errors.filter((message) => message.ruleId === 'PS018') ?? [];
       const compatibilityWarnings =
@@ -411,7 +528,7 @@ export class Compiler {
       }
       referenceRoots.sort((left, right) => resolve(right.path).length - resolve(left.path).length);
 
-      for (const block of resolved.ast.blocks) {
+      for (const block of canonicalAst.blocks) {
         if (block.name !== 'skills' || block.content.type !== 'ObjectContent') continue;
         const sourceFile = block.loc.file;
         const referenceRoot = sourceFile
@@ -510,7 +627,7 @@ export class Compiler {
     // Stage 2: Validate
     this.logger.verbose('=== Stage 2: Validate ===');
     const startValidate = Date.now();
-    const validation = this.validator.validate(resolved.ast);
+    const validation = this.validator.validate(canonicalAst);
 
     // Check for validation errors
     if (!validation.valid) {
@@ -528,7 +645,7 @@ export class Compiler {
     }
 
     const hookScriptErrors = await validateHookScriptResources(
-      resolved.ast,
+      canonicalAst,
       inferProjectRoot(
         this.options.resolver.localPath,
         this.options.resolver.projectRoot,
@@ -554,11 +671,7 @@ export class Compiler {
     const outputs = new Map<string, FormatterOutput>();
     const formatErrors: CompileError[] = [];
     const formatWarnings: ValidationMessage[] = [];
-    const outputPathOwners = new Map<string, string>();
-    // Output as produced by the formatter, before the generated marker is added.
-    // Markers embed the target name and a timestamp, so comparing marked content
-    // would report every shared path as a conflict.
-    const outputPathDefinitions = new Map<string, FormatterOutput>();
+    const planCandidates: OutputPlanCandidate[] = [];
 
     for (const { formatter, config } of this.loadedFormatters) {
       const formatterStart = Date.now();
@@ -568,7 +681,7 @@ export class Compiler {
         const formatOptions = this.getFormatOptionsForTarget(formatter.name, config);
         this.logger.debug(`  Convention: ${formatOptions.convention ?? 'default'}`);
 
-        const output = formatProgram(formatter, resolved.ast, formatOptions);
+        const output = formatProgram(formatter, canonicalAst, formatOptions);
         const formatterTime = Date.now() - formatterStart;
 
         this.logger.verbose(`  → ${output.path} (${formatterTime}ms)`);
@@ -584,113 +697,7 @@ export class Compiler {
           });
         }
 
-        // Warn if multiple formatters target the same output path with different content
-        const existingOwner = outputPathOwners.get(output.path);
-        const existingDefinition = outputPathDefinitions.get(output.path);
-        const isIdenticalOutput =
-          existingOwner !== undefined &&
-          existingDefinition !== undefined &&
-          hasIdenticalWriteSemantics(existingDefinition, output);
-        if (existingOwner !== undefined) {
-          if (isIdenticalOutput) {
-            this.logger.debug(
-              `  Output path '${output.path}' already written by '${existingOwner}' with identical content. No conflict.`
-            );
-            const existingOutput = outputs.get(output.path);
-            if (existingOutput) {
-              outputs.set(output.path, mergeManagedOutputMetadata(existingOutput, output));
-            }
-          } else {
-            formatWarnings.push({
-              ruleId: 'PS4001',
-              ruleName: 'output-path-collision',
-              severity: 'warning',
-              message: `Output path '${output.path}' is written by both '${existingOwner}' and '${formatter.name}' with different content. The latter will overwrite the former.`,
-              suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
-            });
-          }
-        }
-
-        if (!isIdenticalOutput) {
-          outputPathOwners.set(output.path, formatter.name);
-          outputPathDefinitions.set(output.path, output);
-
-          // Add PromptScript marker to all outputs for overwrite detection
-          const markedOutput = addOutputProvenance(
-            addMarkerToOutput(output, sourceLabel, formatter.name),
-            sourceLabel,
-            formatter.name
-          );
-          const previousManagedDirectories =
-            outputs.get(output.path)?.managedOutputDirectories ?? [];
-          const previousManagedFiles = outputs.get(output.path)?.managedOutputFiles ?? [];
-          const managedOutputDirectories = [
-            ...new Set([
-              ...previousManagedDirectories,
-              ...(markedOutput.managedOutputDirectories ?? []),
-            ]),
-          ];
-          const managedOutputFiles = [
-            ...new Set([...previousManagedFiles, ...(markedOutput.managedOutputFiles ?? [])]),
-          ];
-          outputs.set(output.path, {
-            ...markedOutput,
-            managedOutputDirectories:
-              managedOutputDirectories.length > 0 ? managedOutputDirectories : undefined,
-            managedOutputFiles: managedOutputFiles.length > 0 ? managedOutputFiles : undefined,
-          });
-        }
-
-        // Also add any additional files (e.g., .cursor/commands/, .github/prompts/)
-        // Recursively collect nested additionalFiles (e.g., skill resource files)
-        if (output.additionalFiles) {
-          const queue = [...output.additionalFiles];
-          while (queue.length > 0) {
-            const additionalFile = queue.shift()!;
-            this.logger.verbose(`  → ${additionalFile.path} (additional)`);
-
-            // Check for path collisions with previously written outputs
-            const existingAdditionalOwner = outputPathOwners.get(additionalFile.path);
-            if (existingAdditionalOwner) {
-              const existingAdditionalDefinition = outputPathDefinitions.get(additionalFile.path);
-              if (
-                existingAdditionalDefinition &&
-                hasIdenticalWriteSemantics(existingAdditionalDefinition, additionalFile)
-              ) {
-                this.logger.debug(
-                  `  Output path '${additionalFile.path}' already written by '${existingAdditionalOwner}' with identical content. No conflict.`
-                );
-              } else {
-                formatWarnings.push({
-                  ruleId: 'PS4001',
-                  ruleName: 'output-path-collision',
-                  severity: 'warning',
-                  message: `Output path '${additionalFile.path}' is written by both '${existingAdditionalOwner}' and '${formatter.name}' with different content or write settings. The first output will be preserved.`,
-                  suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
-                });
-              }
-              // Skip writing this additional file — preserve the original owner's output
-              if (additionalFile.additionalFiles) {
-                queue.push(...additionalFile.additionalFiles);
-              }
-              continue;
-            }
-            outputPathOwners.set(additionalFile.path, formatter.name);
-            outputPathDefinitions.set(additionalFile.path, additionalFile);
-
-            outputs.set(
-              additionalFile.path,
-              addOutputProvenance(
-                addMarkerToOutput(additionalFile, sourceLabel, formatter.name),
-                sourceLabel,
-                formatter.name
-              )
-            );
-            if (additionalFile.additionalFiles) {
-              queue.push(...additionalFile.additionalFiles);
-            }
-          }
-        }
+        planCandidates.push({ output, owner: formatter.name, role: 'primary' });
       } catch (err) {
         formatErrors.push({
           name: 'FormatterError',
@@ -732,30 +739,7 @@ export class Compiler {
             source: sourceLabel,
             target: formatter.name,
           };
-          const existingOwner = outputPathOwners.get(skillPath);
-          if (existingOwner) {
-            // Preserve previously written skills and warn on differing content.
-            const existingDefinition = outputPathDefinitions.get(skillPath);
-            if (existingDefinition && hasIdenticalWriteSemantics(existingDefinition, skillOutput)) {
-              this.logger.debug(
-                `  Skill path '${skillPath}' already written by '${existingOwner}' with identical content. No conflict.`
-              );
-            } else {
-              formatWarnings.push({
-                ruleId: 'PS4001',
-                ruleName: 'output-path-collision',
-                severity: 'warning',
-                message: `Output path '${skillPath}' is already written by '${existingOwner}'. Skipping auto-injected PromptScript skill for '${formatter.name}'.`,
-                suggestion: `The user-defined skill takes precedence. To use the bundled skill, remove the custom one or rename it.`,
-              });
-            }
-            continue;
-          }
-          outputPathOwners.set(skillPath, `${formatter.name}:promptscript-skill`);
-          outputPathDefinitions.set(skillPath, skillOutput);
-
-          outputs.set(skillPath, addMarkerToOutput(skillOutput, sourceLabel, 'promptscript'));
-          this.logger.verbose(`  → ${skillPath} (auto-injected promptscript skill)`);
+          planCandidates.push({ output: skillOutput, owner: formatter.name, role: 'injected' });
         } catch (err) {
           formatErrors.push({
             name: 'FormatterError',
@@ -764,6 +748,99 @@ export class Compiler {
           });
         }
       }
+    }
+
+    let outputPlan: OutputPlan;
+    try {
+      outputPlan = createOutputPlan(planCandidates);
+      for (const collision of outputPlan.collisions) {
+        if (collision.identical) {
+          this.logger.debug(
+            `  Output path '${collision.path}' already written by '${collision.existingOwner}' with identical content. No conflict.`
+          );
+          continue;
+        }
+
+        const preservesExisting = collision.resolution === 'preserve-existing';
+        const skippedInjectedSkill = collision.incomingRole === 'injected' && preservesExisting;
+        formatWarnings.push({
+          ruleId: 'PS4001',
+          ruleName: 'output-path-collision',
+          severity: 'warning',
+          message: skippedInjectedSkill
+            ? `Output path '${collision.path}' is already written by '${collision.existingOwner}'. ` +
+              `Skipping auto-injected PromptScript skill for '${collision.incomingOwner}'.`
+            : `Output path '${collision.path}' is written by both '${collision.existingOwner}' and ` +
+              `'${collision.incomingOwner}' with different content or write settings. ` +
+              (preservesExisting
+                ? 'The first output will be preserved.'
+                : 'The latter will overwrite the former.'),
+          suggestion: skippedInjectedSkill
+            ? 'The user-defined skill takes precedence. To use the bundled skill, remove the custom one or rename it.'
+            : 'Configure distinct output paths for these formatters, or disable one of them.',
+        });
+      }
+
+      for (const file of outputPlan.injected) {
+        this.logger.verbose(`  → ${file.path} (auto-injected promptscript skill)`);
+      }
+
+      const markedFiles = outputPlan.files.map((file) => {
+        const target = file.role === 'injected' ? 'promptscript' : file.owner;
+        const marked = addMarkerToOutput(
+          {
+            path: file.path,
+            content: file.content,
+            ...(file.mode !== undefined ? { mode: file.mode } : {}),
+            ...(file.merge !== undefined ? { merge: file.merge } : {}),
+            ...(file.managedOutputDirectories !== undefined
+              ? { managedOutputDirectories: file.managedOutputDirectories }
+              : {}),
+            ...(file.managedOutputFiles !== undefined
+              ? { managedOutputFiles: file.managedOutputFiles }
+              : {}),
+          },
+          sourceLabel,
+          target
+        );
+        return { ...file, content: marked.content };
+      });
+      const markedOutputs = new Map(markedFiles.map((file) => [file.path, file]));
+      outputPlan = {
+        ...outputPlan,
+        files: markedFiles,
+        outputs: markedOutputs,
+        resources: markedFiles.filter((file) => file.role === 'resource'),
+        injected: markedFiles.filter((file) => file.role === 'injected'),
+      };
+
+      for (const file of markedFiles) {
+        const output: FormatterOutput = {
+          path: file.path,
+          content: file.content,
+          source: sourceLabel,
+          target: file.role === 'injected' ? 'promptscript' : file.owner,
+          ...(file.mode !== undefined ? { mode: file.mode } : {}),
+          ...(file.merge !== undefined ? { merge: file.merge } : {}),
+          ...(file.managedOutputDirectories !== undefined
+            ? { managedOutputDirectories: file.managedOutputDirectories }
+            : {}),
+          ...(file.managedOutputFiles !== undefined
+            ? { managedOutputFiles: file.managedOutputFiles }
+            : {}),
+        };
+        outputs.set(file.path, output);
+        if (file.role === 'resource') {
+          this.logger.verbose(`  → ${file.path} (additional)`);
+        }
+      }
+    } catch (err) {
+      formatErrors.push({
+        name: 'FormatterError',
+        code: 'PS4000',
+        message: `Output planning failed: ${err instanceof Error ? err.message : String(err)}`,
+      });
+      outputPlan = createOutputPlan([]);
     }
 
     stats.formatTime = Date.now() - startFormat;
@@ -776,15 +853,21 @@ export class Compiler {
       return {
         success: false,
         outputs,
+        outputPlan,
         errors: formatErrors,
         warnings: allWarnings,
         stats,
       };
     }
 
+    if (candidateDependencies) {
+      this.commitResolvedDependencies(entryPath, candidateDependencies);
+    }
+
     return {
       success: true,
       outputs,
+      outputPlan,
       errors: [],
       warnings: allWarnings,
       stats,
@@ -860,28 +943,150 @@ export class Compiler {
     const excludePatterns = options.exclude ?? ['**/node_modules/**'];
     const debounceMs = options.debounce ?? 300;
 
-    // Build watch patterns
-    const watchPatterns = includePatterns.map((p) => resolve(baseDir, p));
-
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let pendingChanges: string[] = [];
+    let compileRunning = false;
+    let compilePending = false;
+    let closed = false;
+    let pendingRebuild: Promise<void> | null = null;
+    let closePromise: Promise<void> | null = null;
 
-    const handleChange = async (changedFiles: string[]): Promise<void> => {
+    if (!this.resolvedDependencies.has(this.dependencyKey(entryPath))) {
       try {
         const result = await this.compile(entryPath);
-        options.onCompile?.(result, changedFiles);
+        if (!result.success) {
+          if (options.onCompile) {
+            options.onCompile(result, []);
+          } else if (options.onError) {
+            const message =
+              result.errors.map((error) => error.message).join('\n') ||
+              'Initial compilation failed';
+            options.onError(new Error(message));
+          }
+        }
       } catch (error) {
         options.onError?.(error instanceof Error ? error : new Error(String(error)));
       }
-    };
+    }
 
-    const watcher = chokidar.watch(watchPatterns, {
-      ignored: excludePatterns,
+    const watchPaths = [...new Set([baseDir, ...this.watchDependencyPaths(entryPath)])];
+    const activeWatcher = chokidar.watch(watchPaths, {
+      ignored: (path) =>
+        excludePatterns.some((pattern) => matchesWatchPattern(path, pattern, baseDir)),
       persistent: true,
       ignoreInitial: true,
     });
 
+    const toDependencyMap = (paths: readonly string[]): Map<string, Set<string>> => {
+      const pathMap = new Map<string, Set<string>>();
+      for (const path of paths) {
+        const key = watchPathKey(path);
+        const pathsForKey = pathMap.get(key) ?? new Set<string>();
+        pathsForKey.add(path);
+        pathMap.set(key, pathsForKey);
+      }
+      return pathMap;
+    };
+    const explicitlyWatchedPaths = new Set(
+      [
+        baseDir,
+        ...[
+          'promptscript.yaml',
+          'promptscript.yml',
+          '.promptscriptrc.yaml',
+          '.promptscriptrc.yml',
+          'promptscript.lock',
+        ].map((fileName) => resolve(this.watchProjectRoot(entryPath), fileName)),
+      ].map((path) => watchPathKey(path))
+    );
+    let dynamicDependencyPaths = toDependencyMap(this.resolvedDependencyPaths(entryPath));
+
+    const notifyError = (error: unknown): void => {
+      if (closed) return;
+      options.onError?.(error instanceof Error ? error : new Error(String(error)));
+    };
+
+    const isExplicitlyWatched = (path: string): boolean => {
+      if (explicitlyWatchedPaths.has(watchPathKey(path))) return true;
+      return (
+        options.include !== undefined &&
+        includePatterns.some((pattern) => matchesWatchPattern(path, pattern, baseDir))
+      );
+    };
+
+    const syncDependencyPaths = async (): Promise<void> => {
+      const dependencyPaths = this.watchDependencyPaths(entryPath);
+      if (typeof activeWatcher.add === 'function') {
+        await activeWatcher.add(dependencyPaths);
+      }
+      if (closed) return;
+
+      const nextDependencyPaths = this.resolvedDependencyPaths(entryPath);
+      const nextDynamicDependencyPaths = toDependencyMap(nextDependencyPaths);
+      const nextDynamicPathKeys = new Set(
+        nextDependencyPaths.map((path) => normalizeWatchPath(absoluteWatchPath(path)))
+      );
+      const stalePaths = [...dynamicDependencyPaths.entries()].flatMap(([key, paths]) => {
+        const nextPaths = nextDynamicDependencyPaths.get(key);
+        return [...paths].filter(
+          (path) =>
+            !nextPaths?.has(path) &&
+            !nextDynamicPathKeys.has(normalizeWatchPath(absoluteWatchPath(path))) &&
+            !isExplicitlyWatched(path)
+        );
+      });
+      if (stalePaths.length > 0 && typeof activeWatcher.unwatch === 'function') {
+        await activeWatcher.unwatch(stalePaths);
+      }
+      if (closed) return;
+      dynamicDependencyPaths = nextDynamicDependencyPaths;
+    };
+
+    const handleChange = async (changedFiles: string[]): Promise<void> => {
+      if (closed) return;
+      try {
+        this.invalidateResolvers(entryPath, changedFiles);
+        const result = await this.compile(entryPath);
+        if (closed) return;
+        await syncDependencyPaths();
+        if (closed) return;
+        options.onCompile?.(result, changedFiles);
+      } catch (error) {
+        notifyError(error);
+      }
+    };
+
+    try {
+      await syncDependencyPaths();
+    } catch (error) {
+      const setupError = new Error(
+        `Failed to watch dependencies for '${entryPath}': ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      notifyError(setupError);
+      try {
+        await activeWatcher.close();
+      } catch {
+        // Preserve the actionable setup error when cleanup also fails.
+      }
+      throw setupError;
+    }
+
     const scheduleRecompile = (path: string): void => {
+      if (closed) return;
+      const absolutePath = absoluteWatchPath(path, baseDir);
+      const matchesInclude = includePatterns.some((pattern) =>
+        matchesWatchPattern(absolutePath, pattern, baseDir)
+      );
+      const matchesExclude = excludePatterns.some((pattern) =>
+        matchesWatchPattern(absolutePath, pattern, baseDir)
+      );
+      const matchesDependency = this.watchDependencyPaths(entryPath).some((dependency) =>
+        this.pathMatchesDependency(absolutePath, dependency)
+      );
+      if (matchesExclude || (!matchesInclude && !matchesDependency)) return;
+
       pendingChanges.push(path);
 
       if (debounceTimer) {
@@ -889,26 +1094,80 @@ export class Compiler {
       }
 
       debounceTimer = setTimeout(() => {
+        debounceTimer = null;
+        if (closed) return;
         const files = [...pendingChanges];
         pendingChanges = [];
-        handleChange(files);
+        if (compileRunning) {
+          compilePending = true;
+          pendingChanges.push(...files);
+          return;
+        }
+
+        compileRunning = true;
+        const rebuild = (async (): Promise<void> => {
+          let changes = files;
+          try {
+            do {
+              if (closed) return;
+              compilePending = false;
+              await handleChange(changes);
+              if (debounceTimer) {
+                clearTimeout(debounceTimer);
+                debounceTimer = null;
+              }
+              changes = [...pendingChanges];
+              pendingChanges = [];
+            } while (!closed && (compilePending || changes.length > 0));
+          } finally {
+            compileRunning = false;
+            if (closed) {
+              pendingChanges = [];
+            }
+          }
+        })();
+        pendingRebuild = rebuild;
+        void rebuild.then(
+          () => {
+            if (pendingRebuild === rebuild) pendingRebuild = null;
+          },
+          () => {
+            if (pendingRebuild === rebuild) pendingRebuild = null;
+          }
+        );
       }, debounceMs);
     };
 
-    watcher.on('change', scheduleRecompile);
-    watcher.on('add', scheduleRecompile);
+    activeWatcher.on('change', scheduleRecompile);
+    activeWatcher.on('add', scheduleRecompile);
+    activeWatcher.on('unlink', scheduleRecompile);
+    activeWatcher.on('unlinkDir', scheduleRecompile);
 
-    watcher.on('error', (error: unknown) => {
-      options.onError?.(error instanceof Error ? error : new Error(String(error)));
+    activeWatcher.on('error', (error: unknown) => {
+      notifyError(error);
     });
 
-    return {
-      close: async () => {
-        if (debounceTimer) {
-          clearTimeout(debounceTimer);
+    const close = (): Promise<void> => {
+      if (closePromise) return closePromise;
+      closed = true;
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+        debounceTimer = null;
+      }
+      pendingChanges = [];
+      const rebuild = pendingRebuild;
+      closePromise = (async (): Promise<void> => {
+        try {
+          await activeWatcher.close();
+        } finally {
+          if (rebuild) await rebuild;
         }
-        await watcher.close();
-      },
+      })();
+      return closePromise;
+    };
+
+    return {
+      close,
     };
   }
 
@@ -958,7 +1217,12 @@ export class Compiler {
       }
 
       // Object with name and config (not a Formatter instance)
-      if ('name' in f && typeof f.name === 'string' && !('format' in f)) {
+      if (
+        'name' in f &&
+        typeof f.name === 'string' &&
+        !('format' in f) &&
+        !('formatCanonical' in f)
+      ) {
         const configObj = f as { name: string; config?: TargetConfig };
         return {
           formatter: this.loadFormatterByName(configObj.name),

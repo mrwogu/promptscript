@@ -37,6 +37,8 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 | **types/manifest**    | Registry manifest types                                                            |
 | **types/source**      | Source location and mapping types                                                  |
 | **types/prettier**    | Prettier configuration types                                                       |
+| **structured-output** | Shared structured merge plan types for generated settings files                    |
+| **output-plan**       | Deterministic output path normalization, collision resolution, and ownership data  |
 | **errors**            | Error hierarchy (`PSError`, `ParseError`, `ResolveError`, `ValidationError`, etc.) |
 | **utils/diagnostic**  | Diagnostic formatting utilities                                                    |
 | **utils/merge**       | Deep merge for AST nodes                                                           |
@@ -91,6 +93,19 @@ The version string is the key in `SYNTAX_VERSIONS`, not a property of `SyntaxVer
 ordered `body.entries` sequence for properties, text, list items, and inline
 uses.
 
+Pipeline stages use `CanonicalProgram` as their primary input. `Program` remains
+the mutable compatibility API and is exposed as the `LegacyProgram` alias for
+integrations that have not migrated.
+
+Compatibility timeline:
+
+1. Current 1.x releases: parser and resolver expose both representations;
+   compiler and validator use the canonical representation internally.
+2. Remaining 1.x releases: formatter and custom-rule authors can migrate to
+   canonical entry points while legacy projections remain supported.
+3. Next major release: legacy-only entry points may be removed after formatter
+   and integration migration is complete.
+
 | Export                                | Description                                                        |
 | :------------------------------------ | :----------------------------------------------------------------- |
 | `createCanonicalProgram(init)`        | Creates and deeply freezes a canonical program                     |
@@ -101,6 +116,45 @@ uses.
 | `getCanonicalBlocks(program)`         | Reads blocks from either AST representation                        |
 | `mergeBlockContent(base, next, rule)` | Applies a shared inheritance or import content policy              |
 | `mergeBlockCollections(...)`          | Merges one cross-layer match while retaining same-layer duplicates |
+
+### Output planning
+
+`createOutputPlan` turns formatter and adapter artifacts into a deterministic,
+filesystem-independent plan. It normalizes project-relative paths, flattens
+nested resources, records ownership and managed paths, and resolves collisions
+before a writer or browser adapter consumes the result.
+
+| Export                          | Description                                                      |
+| :------------------------------ | :--------------------------------------------------------------- |
+| `OutputArtifact`                | Portable formatter output shape accepted by the planner          |
+| `OutputPlanCandidate`           | Artifact plus owner and collision role submitted to the planner  |
+| `OutputPlan`                    | Normalized selected files, owners, collisions, and managed paths |
+| `createOutputPlan()`            | Builds a deterministic plan from output candidates               |
+| `normalizeOutputCollisionKey()` | Builds the stable filesystem collision key                       |
+| `normalizeOutputPath()`         | Normalizes and validates project-relative output paths           |
+
+An `OutputPlan` contains:
+
+- `files`: sorted selected files. Each file retains its normalized display path,
+  original formatter path, owner, role, content, and managed cleanup metadata.
+- `outputs` and `owners`: deterministic maps keyed by each selected file path.
+- `resources` and `injected`: selected nested resources and auto-injected files.
+- `collisions`: every collision in candidate traversal order, including the
+  existing owner, incoming owner, write-semantic equality, and resolution.
+- `managedPaths`, `managedOutputDirectories`, and `managedOutputFiles`: the
+  cleanup ownership union carried by selected candidates.
+
+Collision keys normalize separators and redundant relative path segments, apply
+Unicode NFC normalization, and case-fold with a fixed locale. The conservative
+case-folding models case-insensitive project filesystems even when planning on
+a case-sensitive host. It keeps Node and browser plans reproducible and avoids
+two outputs that cannot coexist after checkout on macOS or Windows. Display and
+write paths retain their original case.
+
+`createOutputPlan` is the decision boundary. Real compilation writes, dry-run
+previews, and diffs must consume the same final plan after all output
+transformations, including headers, formatting, migrations, and injected
+resources. Consumers must not recompute paths from raw formatter outputs.
 
 ## Usage (internal)
 

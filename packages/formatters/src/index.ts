@@ -12,14 +12,32 @@ export type {
   Formatter,
   FormatterClass,
   FormatterFactory,
+  LegacyFormatter,
+  CanonicalFormatter,
   FormatterOutput,
   FormatterWarning,
   FormatterVersionInfo,
   FormatterVersionMap,
   FormatOptions,
 } from './types.js';
-export { formatProgram, isCanonicalFormatter } from './formatter-adapter.js';
-export type { CanonicalFormatter } from './formatter-adapter.js';
+
+export {
+  createOutputPlan,
+  normalizeOutputCollisionKey,
+  normalizeOutputPath,
+  OutputPlanPathError,
+} from '@promptscript/core';
+export type {
+  OutputArtifact,
+  OutputPlan,
+  OutputPlanCandidate,
+  OutputPlanCollision,
+  OutputPlanFile,
+  OutputPlanManagedPaths,
+  OutputPlanArtifactRole,
+  OutputPlanCollisionResolution,
+} from '@promptscript/core';
+export { formatProgram, isCanonicalFormatter, isLegacyFormatter } from './formatter-adapter.js';
 
 // Structured output merge types and helpers
 export type { StructuredMergePlan, StructuredMergeOperation } from './structured-output.js';
@@ -131,6 +149,10 @@ export * from './formatters/index.js';
 
 // Built-in formatter map
 export { BUILTIN_FORMATTERS } from './builtin-formatters.js';
+export {
+  isCanonicalTarget,
+  validateBuiltinFormatterCapabilities,
+} from './target-capability-consistency.js';
 export {
   extractHooks,
   generateClaudeHooks,

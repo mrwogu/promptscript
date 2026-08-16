@@ -42,9 +42,14 @@ export * from './section-registry.js';
 
 // Target catalog
 export * from './target-catalog.js';
+export * from './target-capabilities.js';
 
 // Hook capabilities
 export * from './hook-capabilities.js';
 
 // Git timeout classification
 export * from './git-timeout.js';
+
+// Shared output planning
+export * from './structured-output.js';
+export * from './output-plan.js';

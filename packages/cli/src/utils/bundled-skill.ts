@@ -1,21 +1,20 @@
-import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { existsSync } from 'fs';
+import { readFile } from 'fs/promises';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 import type { Logger } from '@promptscript/core';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /**
- * Resolve and read the bundled PromptScript SKILL.md.
- *
- * The two candidates support both source execution and the bundled CLI layout.
+ * Resolve the bundled PromptScript skill in development and bundled layouts.
  */
 export async function loadBundledSkillContent(logger: Logger): Promise<string | undefined> {
   const skillRelPath = 'skills/promptscript/SKILL.md';
   const candidates = [
     resolve(__dirname, skillRelPath),
+    resolve(__dirname, '..', skillRelPath),
     resolve(__dirname, '..', '..', skillRelPath),
   ];
 
