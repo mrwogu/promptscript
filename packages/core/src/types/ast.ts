@@ -123,6 +123,15 @@ export interface Program extends BaseNode {
   syntaxFeatures?: SyntaxFeatureUsage[];
 }
 
+/**
+ * Mutable compatibility AST used by legacy integrations.
+ *
+ * New pipeline stages should use {@link CanonicalProgram}. This alias makes
+ * the compatibility boundary explicit without renaming the long-standing
+ * `Program` API.
+ */
+export type LegacyProgram = Program;
+
 // ============================================================
 // Declarations
 // ============================================================
@@ -710,6 +719,11 @@ export interface CanonicalProgram extends CanonicalNode {
  * Public input accepted during the legacy-to-canonical transition.
  */
 export type ProgramInput = Program | CanonicalProgram;
+
+/**
+ * Canonical input accepted by new pipeline stages.
+ */
+export type CanonicalProgramInput = CanonicalProgram;
 
 /**
  * Public block input accepted during the legacy-to-canonical transition.

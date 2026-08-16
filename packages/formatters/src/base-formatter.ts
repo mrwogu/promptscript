@@ -2,6 +2,7 @@ import { posix } from 'path';
 import type {
   Block,
   BlockContent,
+  CanonicalProgram,
   PrettierMarkdownOptions,
   Program,
   Value,
@@ -10,6 +11,7 @@ import {
   DEFAULT_PRETTIER_OPTIONS,
   isPortablePathSegment,
   reconcileBlockBody,
+  toLegacyProgram,
   valueNodeToValue,
 } from '@promptscript/core';
 import { ConventionRenderer } from './convention-renderer.js';
@@ -26,6 +28,16 @@ export abstract class BaseFormatter implements Formatter {
   abstract readonly description: string;
   abstract readonly defaultConvention: string;
   abstract format(ast: Program, options?: FormatOptions): FormatterOutput;
+
+  /**
+   * Canonical entry point for legacy implementations.
+   *
+   * Subclasses can override this method to consume ordered canonical entries
+   * directly. Until then, keep the compatibility projection isolated here.
+   */
+  formatCanonical(ast: CanonicalProgram, options?: FormatOptions): FormatterOutput {
+    return this.format(toLegacyProgram(ast, { preserveCanonicalBody: true }), options);
+  }
 
   /**
    * Shared standards extractor for consistent extraction across all formatters.

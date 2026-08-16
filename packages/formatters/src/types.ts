@@ -1,10 +1,11 @@
 import type {
+  CanonicalProgram,
   OutputConvention,
+  OutputArtifact,
   PrettierMarkdownOptions,
   Program,
   SourceLocation,
 } from '@promptscript/core';
-import type { StructuredMergePlan } from './structured-output.js';
 
 export interface FormatterWarning {
   /** Stable warning code */
@@ -20,31 +21,13 @@ export interface FormatterWarning {
 /**
  * Output from a formatter.
  */
-export interface FormatterOutput {
+export interface FormatterOutput extends OutputArtifact {
   /** Output file path (relative to project root) */
   path: string;
-  /** Formatted content */
-  content: string;
-  /** File mode (e.g. 0o755 for executable scripts) */
-  mode?: number;
-  /** Structured merge plan for JSON/TOML settings files */
-  merge?: StructuredMergePlan;
   /** Target compatibility warnings produced during formatting */
   warnings?: FormatterWarning[];
   /** Additional files to generate (e.g., workflows) */
   additionalFiles?: FormatterOutput[];
-  /**
-   * Relative directories exclusively managed by this output.
-   * Writers may remove obsolete PromptScript-generated files within these
-   * directories, but must preserve unmarked files and symlinks.
-   */
-  managedOutputDirectories?: string[];
-  /**
-   * Relative files exclusively managed by this output.
-   * Writers may remove an obsolete file only when it carries a PromptScript
-   * ownership marker.
-   */
-  managedOutputFiles?: string[];
 }
 
 /**
@@ -90,8 +73,16 @@ export interface Formatter {
   readonly description: string;
   /** Default convention for this formatter */
   readonly defaultConvention: string;
-  /** Transform AST to tool-specific format */
+  /** Transform AST to target format */
   format(ast: Program, options?: FormatOptions): FormatterOutput;
+  /**
+   * Optional canonical entry point.
+   *
+   * Implementations that do not provide this method are legacy formatters.
+   * The formatter adapter creates a detached compatibility projection before
+   * invoking their `format` method.
+   */
+  formatCanonical?(ast: CanonicalProgram, options?: FormatOptions): FormatterOutput;
   /** Base path for skills (e.g., '.claude/skills'), or null if no skill support */
   getSkillBasePath(): string | null;
   /** Skill file name (e.g., 'SKILL.md' or 'skill.md'), or null if no skill support */
@@ -107,6 +98,20 @@ export interface Formatter {
    * Defaults to identity when not implemented.
    */
   transformInjectedSkillContent?(content: string): string;
+}
+
+/**
+ * Explicit legacy formatter contract.
+ *
+ * Legacy formatters consume the mutable `Program` compatibility AST.
+ */
+export type LegacyFormatter = Omit<Formatter, 'formatCanonical'>;
+
+/**
+ * Formatter contract for implementations that consume the immutable AST.
+ */
+export interface CanonicalFormatter extends Formatter {
+  formatCanonical(ast: CanonicalProgram, options?: FormatOptions): FormatterOutput;
 }
 
 /**

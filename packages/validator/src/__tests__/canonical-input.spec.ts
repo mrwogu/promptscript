@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createBlockBody, normalizeProgram, type Program } from '@promptscript/core';
-import { validate } from '../index.js';
+import { createValidator, validate } from '../index.js';
 
 describe('canonical validator input', () => {
   it('validates canonical programs through a detached compatibility boundary', () => {
@@ -131,5 +131,30 @@ describe('canonical validator input', () => {
     const result = validate(ast);
 
     expect(result.all.filter((message) => message.ruleId === 'PS038')).toEqual([]);
+  });
+
+  it('exposes the canonical input to validation rules without rebuilding it', () => {
+    const loc = { file: 'canonical.prs', line: 1, column: 1, offset: 0 };
+    const ast = normalizeProgram({
+      type: 'Program',
+      uses: [],
+      blocks: [],
+      extends: [],
+      loc,
+    });
+    const canonicalRule = {
+      id: 'canonical-input',
+      name: 'canonical-input',
+      description: 'Checks canonical validator input',
+      defaultSeverity: 'info' as const,
+      validate: vi.fn((ctx: { canonicalAst?: typeof ast }) => {
+        expect(ctx.canonicalAst).toBe(ast);
+      }),
+    };
+
+    const validator = createValidator({ customRules: [canonicalRule] });
+    validator.validate(ast);
+
+    expect(canonicalRule.validate).toHaveBeenCalledOnce();
   });
 });
