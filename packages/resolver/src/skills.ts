@@ -20,6 +20,12 @@ import type {
   SkillContractField,
   SourceLocation,
 } from '@promptscript/core';
+import {
+  limitSkillResources,
+  MAX_RESOURCE_COUNT,
+  MAX_RESOURCE_SIZE,
+  MAX_TOTAL_RESOURCE_SIZE,
+} from './skill-resource-limits.js';
 
 /**
  * A resource file discovered alongside a skill's SKILL.md.
@@ -1339,15 +1345,6 @@ async function loadSkillIgnore(skillDir: string): Promise<SkillIgnoreRules | nul
   }
 }
 
-/** Maximum size (in bytes) for a single resource file. */
-const MAX_RESOURCE_SIZE = 1_048_576; // 1 MB
-
-/** Maximum total size (in bytes) for all resource files in a skill. */
-const MAX_TOTAL_RESOURCE_SIZE = 10_485_760; // 10 MB
-
-/** Maximum number of resource files per skill. */
-const MAX_RESOURCE_COUNT = 100;
-
 /**
  * Check if a skill name is safe (no path traversal characters).
  */
@@ -1370,11 +1367,13 @@ const noopLogger: Logger = {
  *
  * @param skillDir - Absolute path to the skill directory
  * @param logger - Optional logger for reporting skipped files
+ * @param excludedPaths - Absolute paths to skip before applying aggregate limits
  * @returns Array of resource files with relative paths and content
  */
 export async function discoverSkillResources(
   skillDir: string,
-  logger: Logger = noopLogger
+  logger: Logger = noopLogger,
+  excludedPaths: readonly string[] = []
 ): Promise<SkillResource[]> {
   // Load .skillignore rules if present
   const ignoreRules = await loadSkillIgnore(skillDir);
@@ -1385,6 +1384,7 @@ export async function discoverSkillResources(
 
   // Resolve the real path of the skill directory to compare against
   const realSkillDir = await realpath(skillDir);
+  const excludedResourcePaths = new Set(excludedPaths.map((path) => resolve(path)));
 
   for (const entry of entries) {
     // Enforce aggregate count limit
@@ -1405,6 +1405,7 @@ export async function discoverSkillResources(
     if (SKIP_FILES.has(entry.name)) continue;
 
     const fullPath = resolve(entry.parentPath, entry.name);
+    if (excludedResourcePaths.has(fullPath)) continue;
     const relPath = relative(skillDir, fullPath);
 
     // Use forward slashes for consistent pattern matching
@@ -1941,7 +1942,7 @@ export async function resolveNativeSkills(
       const discovered = await discoverSkillDirs(dir);
       for (const [skillName, skillDir] of discovered) {
         // Only add if not already declared in @skills block
-        if (!(skillName in updatedProperties)) {
+        if (!Object.hasOwn(updatedProperties, skillName)) {
           logger.verbose(`Auto-discovered skill: ${skillName} (from ${skillDir})`);
           updatedProperties[skillName] = {};
           hasUpdates = true;
@@ -2084,26 +2085,35 @@ export async function resolveNativeSkills(
 
         // Discover resource files alongside SKILL.md
         const skillDir = dirname(skillMdPath);
-        const resources = await discoverSkillResources(skillDir, logger);
+        const resources = await discoverSkillResources(skillDir, logger, [skillMdPath]);
 
-        // Merge skill-specific resources with shared resources
-        const allResources: SkillResource[] = [...resources];
+        // Merge existing, skill-specific, and shared resources.
+        const allResources: SkillResource[] = [];
+        const existingResources = updatedSkill['resources'];
+        if (Array.isArray(existingResources)) {
+          for (const value of existingResources) {
+            if (typeof value !== 'object' || value === null || Array.isArray(value)) continue;
+            const resource = value as Record<string, Value>;
+            const relativePath = resource['relativePath'];
+            const content = resource['content'];
+            if (typeof relativePath !== 'string' || typeof content !== 'string') continue;
+            const origin = resource['origin'];
+            const executable = resource['executable'];
+            allResources.push({
+              relativePath,
+              content,
+              ...(typeof origin === 'string' ? { origin } : {}),
+              ...(typeof executable === 'boolean' ? { executable } : {}),
+            });
+          }
+        }
+        allResources.push(...resources);
         for (const shared of sharedResources) {
           allResources.push({
             relativePath: `@shared/${shared.relativePath}`,
             content: shared.content,
             ...(shared.origin ? { origin: shared.origin } : {}),
           });
-        }
-
-        if (allResources.length > 0) {
-          const resourceValues: Value[] = allResources.map((r) => ({
-            relativePath: r.relativePath,
-            content: r.content,
-            ...(r.origin ? { origin: r.origin } : {}),
-            ...(r.executable !== undefined ? { executable: r.executable } : {}),
-          }));
-          updatedSkill['resources'] = resourceValues;
         }
 
         // Load reference files listed in the SKILL.md frontmatter
@@ -2116,16 +2126,7 @@ export async function resolveNativeSkills(
             frontmatterLocations?.frontmatter,
             frontmatterLocations?.items.get('references')
           );
-          const existingResources = (updatedSkill['resources'] as Value[] | undefined) ?? [];
-          updatedSkill['resources'] = [
-            ...existingResources,
-            ...refResources.map((r) => ({
-              relativePath: r.relativePath,
-              content: r.content,
-              ...(r.origin ? { origin: r.origin } : {}),
-              ...(r.executable !== undefined ? { executable: r.executable } : {}),
-            })),
-          ];
+          allResources.push(...refResources);
         }
 
         // Load script files listed in the SKILL.md frontmatter
@@ -2138,32 +2139,28 @@ export async function resolveNativeSkills(
             frontmatterLocations?.frontmatter,
             frontmatterLocations?.items.get('scripts')
           );
-          const existingResources = (updatedSkill['resources'] as Value[] | undefined) ?? [];
-          updatedSkill['resources'] = [
-            ...existingResources,
-            ...scriptResources.map((r) => ({
-              relativePath: r.relativePath,
-              content: r.content,
-              ...(r.origin ? { origin: r.origin } : {}),
-              ...(r.executable !== undefined ? { executable: r.executable } : {}),
-            })),
-          ];
+          allResources.push(...scriptResources);
         }
 
-        const mergedResources = updatedSkill['resources'];
-        if (Array.isArray(mergedResources)) {
-          const resourcesByPath = new Map<string, Value>();
-          for (const resource of mergedResources) {
-            if (typeof resource !== 'object' || resource === null || Array.isArray(resource)) {
-              continue;
-            }
-            const resourceRecord = resource as Record<string, Value>;
-            const relativePath = resourceRecord['relativePath'];
-            if (typeof relativePath === 'string') {
-              resourcesByPath.set(relativePath, resourceRecord);
-            }
+        if (allResources.length > 0) {
+          const resourcesByPath = new Map<string, SkillResource>();
+          for (const resource of allResources) {
+            resourcesByPath.set(resource.relativePath, resource);
           }
-          updatedSkill['resources'] = [...resourcesByPath.values()];
+          const limited = limitSkillResources([...resourcesByPath.values()], {
+            ...(frontmatterLocations?.frontmatter ?? {
+              file: skillMdPath,
+              line: 1,
+              column: 1,
+            }),
+          });
+          if (limited.errors[0]) throw limited.errors[0];
+          updatedSkill['resources'] = limited.resources.map((resource) => ({
+            relativePath: resource.relativePath,
+            content: resource.content,
+            ...(resource.origin ? { origin: resource.origin } : {}),
+            ...(resource.executable !== undefined ? { executable: resource.executable } : {}),
+          }));
         }
 
         updatedProperties[skillName] = updatedSkill;

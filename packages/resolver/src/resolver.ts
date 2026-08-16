@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { lstat, readdir, readFile } from 'fs/promises';
-import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'path';
+import { basename, isAbsolute, join, relative, resolve, sep } from 'path';
 import { parse } from '@promptscript/parser';
 import {
   noopLogger,
@@ -65,14 +65,10 @@ import {
   resolveNativeCommands,
   resolveNativeAgents,
   parseSkillMd,
-  getSkillFrontmatterLocations,
   skillNameFromPath,
-  discoverSkillResources,
-  resolveSkillReferences,
-  resolveSkillScripts,
   type NativeSkillOptions,
-  type SkillResource,
 } from './skills.js';
+import { collectSkillResources, toSkillResourceValues } from './skill-resources.js';
 import { detectContentType } from './content-detector.js';
 import { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
 import { resolveGuardRequires } from './guard-requires.js';
@@ -1213,72 +1209,11 @@ export class Resolver {
     // entries. This mirrors the behaviour of resolveNativeSkills() so a skill
     // pulled in via a registry import carries the same resources as a locally
     // discovered one.
-    const skillDir = dirname(absPath);
-    const collected: SkillResource[] = [];
+    const collected = await collectSkillResources(absPath, parsed, this.logger);
+    errors.push(...collected.errors);
 
-    try {
-      const discovered = await discoverSkillResources(skillDir, this.logger);
-      collected.push(...discovered);
-    } catch (err) {
-      this.logger.verbose(
-        `Failed to discover skill resources in ${skillDir}: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    }
-
-    if (parsed.references && parsed.references.length > 0) {
-      try {
-        const frontmatterLocations = getSkillFrontmatterLocations(parsed);
-        const refs = await resolveSkillReferences(
-          parsed.references,
-          skillDir,
-          this.logger,
-          frontmatterLocations?.frontmatter,
-          frontmatterLocations?.items.get('references')
-        );
-        collected.push(...refs);
-      } catch (err) {
-        if (err instanceof ResolveError) {
-          errors.push(err);
-        } else {
-          errors.push(new ResolveError(err instanceof Error ? err.message : String(err)));
-        }
-      }
-    }
-
-    if (parsed.scripts && parsed.scripts.length > 0) {
-      try {
-        const frontmatterLocations = getSkillFrontmatterLocations(parsed);
-        const scripts = await resolveSkillScripts(
-          parsed.scripts,
-          skillDir,
-          this.logger,
-          frontmatterLocations?.frontmatter,
-          frontmatterLocations?.items.get('scripts')
-        );
-        collected.push(...scripts);
-      } catch (err) {
-        if (err instanceof ResolveError) {
-          errors.push(err);
-        } else {
-          errors.push(new ResolveError(err instanceof Error ? err.message : String(err)));
-        }
-      }
-    }
-
-    if (collected.length > 0) {
-      // Deduplicate by relativePath: explicit references override discovered ones.
-      const byPath = new Map<string, SkillResource>();
-      for (const resource of collected) {
-        byPath.set(resource.relativePath, resource);
-      }
-      skillProps['resources'] = Array.from(byPath.values()).map((r) => ({
-        relativePath: r.relativePath,
-        content: r.content,
-        ...(r.origin ? { origin: r.origin } : {}),
-        ...(r.executable !== undefined ? { executable: r.executable } : {}),
-      })) as Value[];
+    if (collected.resources.length > 0) {
+      skillProps['resources'] = toSkillResourceValues(collected.resources);
     }
 
     const program: Program = {
@@ -1932,11 +1867,20 @@ export class Resolver {
           );
 
           dependencies.add(discoverDir);
-          const dirResult = await this.tryDirectoryScan(discoverDir, [marker], dependencies, []);
+          // Scan errors only matter when the scan produced skills: an empty
+          // directory scan is the normal path into auto-discovery below.
+          const scanErrors: ResolveError[] = [];
+          const dirResult = await this.tryDirectoryScan(
+            discoverDir,
+            [marker],
+            dependencies,
+            scanErrors
+          );
           if (dirResult?.ast) {
             resolvedAST = dirResult.ast;
+            errors.push(...scanErrors);
           } else {
-            resolvedAST = await discoverNativeContent(discoverDir);
+            resolvedAST = await discoverNativeContent(discoverDir, this.logger);
 
             if (!resolvedAST) {
               const where = isRoot ? '<repository root>' : `'${subPath}'`;
@@ -2006,7 +1950,7 @@ export class Resolver {
     }
 
     this.logger.verbose(`Directory import detected: ${dirPath}`);
-    const properties = await this.scanDirectoryForSkills(dirPath);
+    const properties = await this.scanDirectoryForSkills(dirPath, errors);
 
     if (Object.keys(properties).length === 0) {
       errors.push(new ResolveError(`No skills found in directory: ${dirPath}`));
@@ -2029,6 +1973,10 @@ export class Resolver {
   /**
    * Scan a directory for skill files using BFS up to depth 3.
    *
+   * The directory may be the skill itself — `@use ./skills/my-tool` pointing at
+   * a directory whose own root holds SKILL.md — so that entry is picked up
+   * first and wins any name clash with a deeper one.
+   *
    * For each subdirectory:
    * - Skip if symlink
    * - Check for SKILL.md first
@@ -2037,10 +1985,19 @@ export class Resolver {
    * - If a skill is found, do not recurse deeper into that subdirectory
    *
    * @param dir - Absolute path to the directory to scan
+   * @param errors - Accumulator for resource resolution errors
    * @returns Accumulated skill properties keyed by skill name
    */
-  private async scanDirectoryForSkills(dir: string): Promise<Record<string, Value>> {
+  private async scanDirectoryForSkills(
+    dir: string,
+    errors: ResolveError[]
+  ): Promise<Record<string, Value>> {
     const properties: Record<string, Value> = {};
+    const rootSkill = await this.readRootSkill(dir, errors);
+    if (rootSkill) {
+      properties[rootSkill[0]] = rootSkill[1];
+    }
+
     const queue: Array<{ path: string; depth: number }> = [{ path: dir, depth: 0 }];
 
     while (queue.length > 0) {
@@ -2074,19 +2031,19 @@ export class Resolver {
 
         try {
           const skillContent = await readFile(skillMdPath, 'utf-8');
-          const parsed = parseSkillMd(skillContent, skillMdPath);
-          const skillName = parsed.name ?? entry.name;
+          const skillErrors: ResolveError[] = [];
+          const [skillName, skillProps] = await this.buildSkillFromMd(
+            skillMdPath,
+            skillContent,
+            entry.name,
+            skillErrors
+          );
 
-          const skillProps: Record<string, Value> = {};
-          if (parsed.description) {
-            skillProps['description'] = parsed.description;
+          // Shallower skills win: the first entry found for a name is kept.
+          if (!Object.hasOwn(properties, skillName)) {
+            properties[skillName] = skillProps;
+            errors.push(...skillErrors);
           }
-          if (parsed.content) {
-            skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
-          }
-          addParsedSkillMetadata(skillProps, parsed);
-
-          properties[skillName] = skillProps;
           foundSkill = true;
           this.logger.debug(`Found skill "${skillName}" via SKILL.md in ${subDir}`);
         } catch (error: unknown) {
@@ -2097,19 +2054,18 @@ export class Resolver {
           const dirnameMdPath = join(subDir, `${entry.name}.md`);
           try {
             const fallbackContent = await readFile(dirnameMdPath, 'utf-8');
-            const parsed = parseSkillMd(fallbackContent, dirnameMdPath);
-            const skillName = parsed.name ?? skillNameFromPath(dirnameMdPath);
+            const skillErrors: ResolveError[] = [];
+            const [skillName, skillProps] = await this.buildSkillFromMd(
+              dirnameMdPath,
+              fallbackContent,
+              skillNameFromPath(dirnameMdPath),
+              skillErrors
+            );
 
-            const skillProps: Record<string, Value> = {};
-            if (parsed.description) {
-              skillProps['description'] = parsed.description;
+            if (!Object.hasOwn(properties, skillName)) {
+              properties[skillName] = skillProps;
+              errors.push(...skillErrors);
             }
-            if (parsed.content) {
-              skillProps['content'] = makeTextContent(parsed.content, dirnameMdPath);
-            }
-            addParsedSkillMetadata(skillProps, parsed);
-
-            properties[skillName] = skillProps;
             foundSkill = true;
             this.logger.debug(
               `Found skill "${skillName}" via ${basename(dirnameMdPath)} in ${subDir}`
@@ -2130,6 +2086,75 @@ export class Resolver {
     }
 
     return properties;
+  }
+
+  /**
+   * Read a SKILL.md sitting at the root of an imported directory.
+   *
+   * A skill directory is a valid import target on its own, so `@use ./my-skill`
+   * resolves the skill the directory holds rather than treating the directory
+   * as a container of other skills.
+   *
+   * @param dir - Absolute path to the imported directory
+   * @param errors - Accumulator for resource resolution errors
+   * @returns The skill name and properties, or null when the directory holds no SKILL.md
+   */
+  private async readRootSkill(
+    dir: string,
+    errors: ResolveError[]
+  ): Promise<[string, Record<string, Value>] | null> {
+    const skillMdPath = join(dir, 'SKILL.md');
+
+    let source: string;
+    try {
+      source = await readFile(skillMdPath, 'utf-8');
+    } catch {
+      return null;
+    }
+
+    const skill = await this.buildSkillFromMd(skillMdPath, source, basename(dir), errors);
+    this.logger.debug(`Found skill "${skill[0]}" via SKILL.md in ${dir}`);
+    return skill;
+  }
+
+  /**
+   * Build a skill definition from a SKILL.md file found during a directory scan.
+   *
+   * Carries the same payload as a locally discovered skill: metadata from the
+   * frontmatter plus every resource file that travels with the skill directory,
+   * so `references/`, `scripts/` and data files survive a directory import.
+   *
+   * @param skillMdPath - Absolute path to the skill markdown file
+   * @param source - Raw markdown content
+   * @param fallbackName - Skill name used when the frontmatter declares none
+   * @param errors - Accumulator for resource resolution errors
+   * @returns The skill name and its synthesized properties
+   */
+  private async buildSkillFromMd(
+    skillMdPath: string,
+    source: string,
+    fallbackName: string,
+    errors: ResolveError[]
+  ): Promise<[string, Record<string, Value>]> {
+    const parsed = parseSkillMd(source, skillMdPath);
+    const skillName = parsed.name ?? fallbackName;
+
+    const skillProps: Record<string, Value> = {};
+    if (parsed.description) {
+      skillProps['description'] = parsed.description;
+    }
+    if (parsed.content) {
+      skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
+    }
+    addParsedSkillMetadata(skillProps, parsed);
+
+    const collected = await collectSkillResources(skillMdPath, parsed, this.logger);
+    errors.push(...collected.errors);
+    if (collected.resources.length > 0) {
+      skillProps['resources'] = toSkillResourceValues(collected.resources);
+    }
+
+    return [skillName, skillProps];
   }
 
   /**

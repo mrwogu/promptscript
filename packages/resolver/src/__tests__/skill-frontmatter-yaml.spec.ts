@@ -485,6 +485,8 @@ describe('YAML skill frontmatter', () => {
         'Body',
       ].join('\n')
     );
+    await writeFile(join(directory, 'guide.md'), 'Guide body');
+    await writeFile(join(directory, 'run.sh'), 'echo hi');
 
     const result = await discoverNativeContent(directory);
     const skills = result?.blocks.find((block) => block.name === 'skills')
@@ -500,6 +502,12 @@ describe('YAML skill frontmatter', () => {
     expect(skill['compatibility']).toBe('shell');
     expect(skill['metadata']).toEqual({ owner: 'tests' });
     expect(skill['allowedTools']).toEqual(['Read', 'Bash']);
+    expect(skill['resources']).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ relativePath: 'guide.md', content: 'Guide body' }),
+        expect.objectContaining({ relativePath: 'scripts/run.sh', content: 'echo hi' }),
+      ])
+    );
   });
 
   it('reports malformed frontmatter from native auto-discovery', async () => {
