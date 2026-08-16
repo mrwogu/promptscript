@@ -22,6 +22,7 @@ import {
 } from './canonical-ast.js';
 import { ResolveError } from './errors/index.js';
 import { deepClone } from './utils/index.js';
+import { resolveAgentTargetPath } from './agent-names.js';
 
 export const SKILL_REPLACE_PROPERTY_NAMES = [
   'content',
@@ -536,8 +537,27 @@ export function applyOverride(
   const parts = override.targetPath.split('.');
   const root = parts[0]!;
   const marker = ast.blocks.find((block) => block.name === `${markerPrefix}${root}`);
-  const targetName = marker && parts.length > 1 ? parts[1]! : root;
-  const path = marker && parts.length > 1 ? parts.slice(2) : parts.slice(1);
+  let targetName = marker && parts.length > 1 ? parts[1]! : root;
+  let path = marker && parts.length > 1 ? parts.slice(2) : parts.slice(1);
+  const agents = ast.blocks.find((block) => block.name === 'agents');
+  const agentProperties =
+    agents?.content.type === 'ObjectContent' || agents?.content.type === 'MixedContent'
+      ? agents.content.properties
+      : undefined;
+  if (agentProperties) {
+    const agentsIndex = marker ? 1 : parts[0] === 'agents' ? 0 : -1;
+    const namespace = marker ? root : '';
+    const agentPath =
+      agentsIndex >= 0
+        ? resolveAgentTargetPath(parts, agentsIndex, namespace, agentProperties)
+        : !marker
+          ? resolveAgentTargetPath(parts, -1, '', agentProperties)
+          : undefined;
+    if (agentPath) {
+      targetName = 'agents';
+      path = agentPath;
+    }
+  }
   const markerBlocks = marker ? getProperties(marker.content)?.['__blocks'] : undefined;
   if (marker && Array.isArray(markerBlocks) && !markerBlocks.some((name) => name === targetName)) {
     throw new ResolveError(

@@ -563,6 +563,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     const agents: MarkdownAgentConfig[] = [];
     const props = this.getProps(agentsBlock.content);
+    const nativeNames = this.getNativeAgentNameMap(ast);
 
     for (const [name, value] of Object.entries(props)) {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
@@ -572,7 +573,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
         if (!description) continue; // description is required
 
         agents.push({
-          name,
+          name: nativeNames.get(name) ?? name,
           description,
           content: obj['content'] ? this.valueToString(obj['content']) : '',
         });

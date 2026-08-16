@@ -20,6 +20,7 @@ import {
   prepareBlockContentForMerge,
   reconcileBlockBodyAtPath,
   SKILL_REPLACE_PROPERTY_NAMES,
+  resolveAgentTargetPath,
 } from '@promptscript/core';
 import { IMPORT_MARKER_PREFIX, getOriginalBlockName } from './imports.js';
 
@@ -155,7 +156,7 @@ export function applyExtends(ast: Program, logger?: Logger): Program {
  */
 export function applyExtend(blocks: Block[], ext: ExtendBlock, logger?: Logger): Block[] {
   const pathParts = ext.targetPath.split('.');
-  const rootName = pathParts[0];
+  const rootName = pathParts[0] ?? '';
 
   // Check if it's an import reference (alias.block)
   let targetName = rootName;
@@ -171,6 +172,22 @@ export function applyExtend(blocks: Block[], ext: ExtendBlock, logger?: Logger):
   if (importMarker && pathParts.length > 1) {
     targetName = pathParts[1] ?? rootName;
     deepPath = pathParts.slice(2);
+  }
+
+  const agentsBlock = blocks.find((block) => block.name === 'agents');
+  const agentProperties =
+    agentsBlock?.content.type === 'ObjectContent' || agentsBlock?.content.type === 'MixedContent'
+      ? agentsBlock.content.properties
+      : undefined;
+  const agentsIndex = importMarker ? 1 : pathParts[0] === 'agents' ? 0 : -1;
+  const namespace = importMarker ? rootName : '';
+  const agentPath =
+    agentProperties && (targetName === 'agents' || !importMarker)
+      ? resolveAgentTargetPath(pathParts, agentsIndex, namespace, agentProperties)
+      : undefined;
+  if (agentPath) {
+    targetName = 'agents';
+    deepPath = agentPath;
   }
 
   const resolvedBlockName = targetName ? (getOriginalBlockName(targetName) ?? targetName) : '';

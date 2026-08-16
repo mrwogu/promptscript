@@ -1,5 +1,7 @@
 import type { SourceLocation } from '../types/source.js';
 import { PSError, ErrorCode } from './base.js';
+import type { AgentConflict } from '../agent-names.js';
+import type { AgentProvenance } from '../types/ast.js';
 
 /**
  * Error during resolution phase.
@@ -60,6 +62,51 @@ export class CircularGuardRequiresError extends ResolveError {
     );
     this.name = 'CircularGuardRequiresError';
     this.chain = chain;
+  }
+}
+
+/**
+ * Conflicting agent definitions detected during composition.
+ */
+export class AgentConflictError extends ResolveError {
+  /** First conflicting agent name */
+  readonly agentName: string;
+  /** Provenance for the first conflicting name */
+  readonly provenance: AgentProvenance[];
+  /** All conflicting names and their provenance */
+  readonly conflicts: AgentConflict[];
+
+  constructor(conflicts: AgentConflict[], location?: SourceLocation) {
+    const names = conflicts.map((conflict) => conflict.name);
+    const details = conflicts
+      .map((conflict) => {
+        const sources = conflict.provenance.map((entry) => {
+          const importLabel = entry.importPath ? ` via @use ${entry.importPath}` : '';
+          const namespaceLabel = entry.namespace ? ` (namespace: ${entry.namespace})` : '';
+          return `${entry.source}${importLabel}${namespaceLabel}`;
+        });
+        return `  ${conflict.name}: ${sources.join('; ')}`;
+      })
+      .join('\n');
+    super(
+      `Conflicting agent name(s): ${names.join(', ')}.\n${details}\n` +
+        'Use a unique @use alias or rename the agent definitions to resolve the conflict.',
+      location,
+      ErrorCode.AGENT_NAME_CONFLICT
+    );
+    this.name = 'AgentConflictError';
+    this.conflicts = conflicts;
+    this.agentName = conflicts[0]?.name ?? '';
+    this.provenance = conflicts[0]?.provenance ?? [];
+  }
+
+  override toJSON(): Record<string, unknown> {
+    return {
+      ...super.toJSON(),
+      agentName: this.agentName,
+      provenance: this.provenance,
+      conflicts: this.conflicts,
+    };
   }
 }
 

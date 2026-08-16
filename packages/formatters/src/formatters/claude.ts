@@ -600,6 +600,7 @@ export class ClaudeFormatter extends BaseFormatter {
 
     const skills: ClaudeSkillConfig[] = [];
     const props = this.getProps(skillsBlock.content);
+    const nativeNames = this.getNativeAgentNameMap(ast);
 
     for (const [name, value] of Object.entries(props)) {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
@@ -611,7 +612,10 @@ export class ClaudeFormatter extends BaseFormatter {
           description: obj['description'] ? this.valueToString(obj['description']) : name,
           context:
             obj['context'] === 'fork' || obj['context'] === 'inherit' ? obj['context'] : undefined,
-          agent: obj['agent'] ? this.valueToString(obj['agent']) : undefined,
+          agent: obj['agent']
+            ? (nativeNames.get(this.valueToString(obj['agent'])) ??
+              this.valueToString(obj['agent']).replace(/\./g, '-'))
+            : undefined,
           allowedTools:
             obj['allowedTools'] && Array.isArray(obj['allowedTools'])
               ? obj['allowedTools'].map((t) => this.valueToString(t))
@@ -805,12 +809,13 @@ export class ClaudeFormatter extends BaseFormatter {
 
     const agents: ClaudeAgentConfig[] = [];
     const props = this.getProps(agentsBlock.content);
+    const nativeNames = this.getNativeAgentNameMap(ast);
 
     for (const [name, value] of Object.entries(props)) {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         if (!this.isSafeAgentName(name)) continue;
         const obj = value as Record<string, Value>;
-        const agent = this.parseAgentConfig(name, obj);
+        const agent = this.parseAgentConfig(nativeNames.get(name) ?? name, obj);
         if (agent) {
           agents.push(agent);
         }

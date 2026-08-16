@@ -391,6 +391,19 @@ Custom subagent definitions. Compiles to `.claude/agents/` for Claude Code,
 }
 ```
 
+Imported agent definitions are qualified by an aliased `@use`:
+
+```
+@use ./frontend-team as frontend
+@use ./backend-team as backend
+```
+
+If both imports define `reviewer`, the resolved names are `frontend.reviewer` and
+`backend.reviewer`. Unique unaliased imports keep their original names. Conflicting unaliased
+definitions stop compilation with source and import diagnostics instead of silently overwriting
+one another. Native targets map dots to hyphens, so `frontend.reviewer` becomes
+`frontend-reviewer`.
+
 Supports mixed models per agent: `specModel` sets a different model for
 Specification/planning mode (GitHub, Factory), `specReasoningEffort` sets reasoning
 effort for the spec model (Factory only, values: "low", "medium", "high").
@@ -1088,6 +1101,7 @@ sections without changing filenames, frontmatter, XML tags, or structured keys:
 - **PS019 (`unknown-block-name`)**: warns when a block name is not a known PromptScript type, with fuzzy-match suggestions for typos.
 - **PS037 (`valid-section-headers`)**: rejects invalid titles, unknown or unowned section keys, duplicate overrides, and nested extension overrides.
 - **PS038 (`valid-block-shape`)**: rejects unsupported built-in block shapes and warns about formatter-sensitive legacy shapes or multiline shortcut scalars.
+- **PS039 (`agent-namespaces`)**: validates qualified agent name segments and checks them against recorded import provenance.
 - **PS021 (`use-block-filter`)**: errors when `only` and `exclude` are both specified in `@use` parameters.
 - **PS025 (`valid-skill-references`)**: errors when a `references` entry points to a file with a disallowed extension or a path that cannot be resolved.
 - **PS026 (`safe-reference-content`)**: warns when a referenced file contains potentially sensitive content (e.g., secrets, credentials).

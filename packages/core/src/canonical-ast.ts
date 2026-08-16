@@ -2,6 +2,7 @@ import type {
   ArrayContent,
   ArrayElementNode,
   ArrayValueNode,
+  AgentProvenance,
   Block,
   BlockBody,
   BlockContent,
@@ -55,6 +56,7 @@ export interface BlockBodyOptions {
 export interface CanonicalProgramOptions {
   readonly meta?: DeepReadonly<MetaBlock>;
   readonly operations: readonly ProgramOperation[];
+  readonly agentProvenance?: readonly DeepReadonly<AgentProvenance>[];
   readonly syntaxFeatures?: readonly DeepReadonly<SyntaxFeatureUsage>[];
   readonly loc: SourceLocation;
 }
@@ -1403,6 +1405,7 @@ export function createCanonicalProgram(options: CanonicalProgramOptions): Canoni
     ...program,
     ...(options.meta ? { meta: deepClone(options.meta) } : {}),
     ...(inherit ? { inherit } : {}),
+    ...(options.agentProvenance ? { agentProvenance: deepClone(options.agentProvenance) } : {}),
     ...(options.syntaxFeatures ? { syntaxFeatures: deepClone(options.syntaxFeatures) } : {}),
   });
 }
@@ -1414,6 +1417,7 @@ export function updateCanonicalProgramOperations(
   return createCanonicalProgram({
     ...(program.meta ? { meta: program.meta } : {}),
     operations,
+    ...(program.agentProvenance ? { agentProvenance: program.agentProvenance } : {}),
     ...(program.syntaxFeatures ? { syntaxFeatures: program.syntaxFeatures } : {}),
     loc: program.loc,
   });
@@ -1455,6 +1459,7 @@ export function normalizeProgram(input: ProgramInput): CanonicalProgram {
     return createCanonicalProgram({
       ...(input.meta ? { meta: input.meta } : {}),
       operations: input.operations,
+      ...(input.agentProvenance ? { agentProvenance: input.agentProvenance } : {}),
       ...(input.syntaxFeatures ? { syntaxFeatures: input.syntaxFeatures } : {}),
       loc: input.loc,
     });
@@ -1501,7 +1506,9 @@ export function normalizeProgram(input: ProgramInput): CanonicalProgram {
       loc: deepClone(override.loc),
     });
   }
-  for (let start = 0; start < operations.length;) {
+  // Keep loop formatting aligned with main's canonical formatter output.
+  // prettier-ignore
+  for (let start = 0; start < operations.length; ) {
     let end = start + 1;
     while (
       end < operations.length &&
@@ -1517,6 +1524,7 @@ export function normalizeProgram(input: ProgramInput): CanonicalProgram {
   return createCanonicalProgram({
     meta: input.meta,
     operations,
+    ...(input.agentProvenance ? { agentProvenance: input.agentProvenance } : {}),
     syntaxFeatures: input.syntaxFeatures,
     loc: input.loc,
   });
@@ -1579,6 +1587,11 @@ export function toLegacyProgram(
   if (program.syntaxFeatures) {
     legacy.syntaxFeatures = program.syntaxFeatures.map(
       (usage) => deepClone(usage) as SyntaxFeatureUsage
+    );
+  }
+  if (program.agentProvenance) {
+    legacy.agentProvenance = program.agentProvenance.map(
+      (entry) => deepClone(entry) as AgentProvenance
     );
   }
   return legacy;

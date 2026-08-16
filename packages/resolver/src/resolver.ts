@@ -21,6 +21,8 @@ import {
   blockBodyToContent,
   consumeInlineUses,
   deepClone,
+  AgentConflictError,
+  ensureAgentProvenance,
   getInlineUses,
   getSyntaxFeatureUsages,
   INHERITANCE_MERGE_POLICY,
@@ -551,6 +553,7 @@ export class Resolver {
     ast = normalizeBlockAliases(ast, {
       preserveDeclarationOrder: sequentialOperations,
     });
+    ast = ensureAgentProvenance(ast, absPath);
     this.logger.debug(`AST node count: ${this.countNodes(ast)}`);
 
     if (sequentialOperations) {
@@ -1371,6 +1374,10 @@ export class Resolver {
       if (err instanceof CircularDependencyError) {
         throw err;
       }
+      if (err instanceof AgentConflictError) {
+        errors.push(err);
+        return ast;
+      }
       errors.push(
         new ResolveError(
           `Failed to resolve parent: ${err instanceof Error ? err.message : String(err)}`
@@ -1498,6 +1505,10 @@ export class Resolver {
       } catch (err) {
         if (err instanceof CircularDependencyError) {
           throw err;
+        }
+        if (err instanceof AgentConflictError) {
+          errors.push(err);
+          continue;
         }
         errors.push(
           new ResolveError(

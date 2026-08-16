@@ -1,4 +1,6 @@
 import type {
+  AgentConflict,
+  AgentProvenance,
   CanonicalProgram,
   FactoryRulesMode,
   Logger,
@@ -183,6 +185,12 @@ export interface CompileError {
     line?: number;
     column?: number;
   };
+  /** Agent provenance when resolution reports a name conflict */
+  provenance?: AgentProvenance[];
+  /** All agent conflicts included in the diagnostic */
+  conflicts?: AgentConflict[];
+  /** First agent name included in the diagnostic */
+  agentName?: string;
   /** Format error for display */
   format?: () => string;
 }

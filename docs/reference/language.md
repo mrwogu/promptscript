@@ -49,10 +49,35 @@ A PromptScript file (`.prs`) consists of:
 @knowledge { ... }
 @examples { ... }
 @local { ... }
-
 @extend path { ... }    # Block modifications
 @override path { ... }  # Atomic replacement of an existing target
 ```
+
+Aliased imports qualify imported agents so repeated local names remain distinct:
+
+```promptscript
+@use ./frontend-team as frontend
+@use ./backend-team as backend
+```
+
+An imported `reviewer` becomes `frontend.reviewer` or `backend.reviewer`. Unique unaliased names
+remain unchanged. Conflicting unaliased definitions produce a source-aware diagnostic instead of
+silently overwriting an agent. Native output maps dots to hyphens, for example
+`frontend.reviewer` becomes `frontend-reviewer`.
+
+Namespaces can be nested through aliased imports:
+
+```promptscript
+# team.prs
+@use ./inner-team as inner
+
+# project.prs
+@use ./team as frontend
+```
+
+The inner team's `reviewer` resolves to `frontend.inner.reviewer`. Agent references are rewritten
+with the same qualified name, including `agent` fields and `handoffs` entries, so references do not
+retain the source-local `reviewer` name.
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAwsxIlOWOLzhYM1LLwDuEXL24AdVmoACIqb2C8KB3gF9eps+eW8ASjACOAVwjUYAE0S8AsjCkvsGTRCsODDUirwamEoW5nwA8mhYEGwYUO4AkkEhihisjDCa9nAw4ZE4vMgY4ikQlQC6ZnEJSawp6WTMMnBqAS6iigCeuvqGJtF8guyivABGUMyMANZdrBosk4SyegYUxpqSOb7ULuJbI5rOkqGMiWwnwztGezgdWIz2YkPbuyuY1KR3X0eKwA5vZpMdPmcVnAFtAoACoRoMMDRAiHpo5B0FmA5nI0d8NM9mEtIeiViRGGgAMohABuIXxQIiUHswMCjM0C1YzDksBcKNJBKIpHI8EFTLmjBS4u6KyIHFYLl4pXFMV4ACFJQteCRmC4IJApTdWMsNMx6dRQr1ldgyqcHqY+ABBLBCCCMXjOcgYPIidi8ZhgXg5XhECCSQLA3hSagorAgIy1Biiaj9fDCsiUGj0EAWuDNfAARgTQA" target="_blank" rel="noopener noreferrer">

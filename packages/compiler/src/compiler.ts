@@ -1,5 +1,6 @@
 import { realpathSync } from 'fs';
 import {
+  AgentConflictError,
   createOutputPlan,
   noopLogger,
   type Logger,
@@ -1268,6 +1269,7 @@ export class Compiler {
    */
   private toCompileError(err: Error | PSError): CompileError {
     const psError = err as PSError;
+    const agentConflict = err instanceof AgentConflictError ? err : undefined;
 
     return {
       name: err.name,
@@ -1281,6 +1283,13 @@ export class Compiler {
           }
         : undefined,
       format: psError.format ? () => psError.format() : undefined,
+      ...(agentConflict
+        ? {
+            agentName: agentConflict.agentName,
+            provenance: agentConflict.provenance,
+            conflicts: agentConflict.conflicts,
+          }
+        : {}),
     };
   }
 

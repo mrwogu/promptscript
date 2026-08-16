@@ -33,6 +33,7 @@ import { policyCompliance } from './policy-compliance.js';
 import { referenceIntegrity } from './reference-integrity.js';
 import { validSkillResources } from './valid-skill-resources.js';
 import { validAgentConfig } from './valid-agent-config.js';
+import { agentNamespaces } from './agent-namespaces.js';
 import { validHooks } from './valid-hooks.js';
 import { validMcpServers } from './valid-mcp-servers.js';
 import { validPlugins } from './valid-plugins.js';
@@ -102,6 +103,7 @@ export { policyCompliance } from './policy-compliance.js';
 export { referenceIntegrity } from './reference-integrity.js';
 export { validSkillResources } from './valid-skill-resources.js';
 export { validAgentConfig } from './valid-agent-config.js';
+export { agentNamespaces } from './agent-namespaces.js';
 export { validHooks } from './valid-hooks.js';
 export { validMcpServers } from './valid-mcp-servers.js';
 export { validPlugins } from './valid-plugins.js';
@@ -177,6 +179,8 @@ export const allRules: ValidationRule[] = [
   validSectionHeaders,
   // Canonical built-in block shapes (PS038)
   validBlockShape,
+  // Valid agent namespaces (PS039)
+  agentNamespaces,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,

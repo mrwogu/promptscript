@@ -146,6 +146,25 @@ describe('block override', () => {
     });
   });
 
+  it('replaces a property on a multi-segment namespaced agent', () => {
+    const ast = program([
+      block('agents', {
+        'outer.inner.reviewer': { description: 'Original reviewer' },
+      }),
+    ]);
+
+    const result = applyOverride(
+      ast,
+      valueOverride('agents.outer.inner.reviewer.description', 'Updated reviewer')
+    );
+
+    expect(result.blocks[0]?.content).toMatchObject({
+      properties: {
+        'outer.inner.reviewer': { description: 'Updated reviewer' },
+      },
+    });
+  });
+
   it('converts standalone block bodies for nested replacements', () => {
     const nested = (
       entries: Parameters<typeof createBlockBody>[0],
@@ -376,6 +395,44 @@ describe('block override', () => {
 
     expect(result.blocks[1]?.content).toMatchObject({
       properties: { testing: ['New'] },
+    });
+  });
+
+  it('resolves direct and aliased qualified agent paths', () => {
+    const direct = applyOverride(
+      program([block('agents', { 'team.reviewer': { description: 'Original' } })]),
+      valueOverride('agents.team.reviewer', { description: 'Direct update' })
+    );
+    const directField = applyOverride(
+      program([block('agents', { 'team.reviewer': { description: 'Original' } })]),
+      valueOverride('agents.team.reviewer.description', 'Direct field update')
+    );
+    const unqualified = applyOverride(
+      program([block('agents', { reviewer: { description: 'Original' } })]),
+      valueOverride('agents.reviewer', { description: 'Unqualified update' })
+    );
+    const aliased = applyOverride(
+      program([
+        block('__import__team', {
+          __source: './team.prs',
+          __blocks: ['agents'],
+        }),
+        block('agents', { 'team.reviewer': { description: 'Original' } }),
+      ]),
+      valueOverride('team.agents.reviewer.description', 'Aliased update')
+    );
+
+    expect(direct.blocks[0]?.content).toMatchObject({
+      properties: { 'team.reviewer': { description: 'Direct update' } },
+    });
+    expect(directField.blocks[0]?.content).toMatchObject({
+      properties: { 'team.reviewer': { description: 'Direct field update' } },
+    });
+    expect(unqualified.blocks[0]?.content).toMatchObject({
+      properties: { reviewer: { description: 'Unqualified update' } },
+    });
+    expect(aliased.blocks[1]?.content).toMatchObject({
+      properties: { 'team.reviewer': { description: 'Aliased update' } },
     });
   });
 

@@ -1975,6 +1975,64 @@ describe('GitHubFormatter', () => {
       expect(promptFile?.content).toContain("prompt: 'Monitor the CI pipeline'");
     });
 
+    it('maps namespaced prompt handoffs to emitted agent filenames', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'frontend.reviewer': {
+                  description: 'Review frontend changes',
+                  content: 'Review the frontend changes.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                review: {
+                  prompt: true,
+                  description: 'Review frontend',
+                  handoffs: [
+                    {
+                      label: 'Delegate review',
+                      agent: 'frontend.reviewer',
+                      prompt: 'Review frontend changes',
+                    },
+                  ],
+                  content: 'Review the frontend changes.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const promptFile = result.additionalFiles?.find(
+        (file) => file.path === '.github/prompts/review.prompt.md'
+      );
+      const agentFile = result.additionalFiles?.find(
+        (file) => file.path === '.github/agents/frontend-reviewer.md'
+      );
+
+      expect(promptFile).toBeDefined();
+      expect(agentFile).toBeDefined();
+      expect(promptFile?.content).toContain('agent: frontend-reviewer');
+    });
+
     it('should render handoff with send: true', () => {
       const ast: Program = {
         ...createMinimalProgram(),

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  AgentConflictError,
+  createNativeAgentNameMap,
   resolveUseImport,
   type Block,
   type Program,
@@ -114,6 +116,205 @@ describe('block import', () => {
     expect(() =>
       resolveUseImport(target, use(), program([block('skills', { review: { content: 'Local' } })]))
     ).not.toThrow();
+  });
+
+  it('qualifies imported agents under an alias and records provenance', () => {
+    const source = program([block('agents', { reviewer: { description: 'Review code' } })]);
+
+    const result = resolveUseImport(program([]), use({ alias: 'team' }), source);
+    const agents = result.blocks.find((entry) => entry.name === 'agents');
+
+    expect(agents?.content).toMatchObject({
+      properties: {
+        'team.reviewer': { description: 'Review code' },
+      },
+    });
+    expect(result.agentProvenance).toEqual([
+      expect.objectContaining({
+        name: 'team.reviewer',
+        source: 'import.prs',
+        importPath: './shared',
+        namespace: 'team',
+        action: 'qualified',
+      }),
+    ]);
+  });
+
+  it('qualifies nested agent references under an alias', () => {
+    const source = program([
+      block('agents', {
+        reviewer: {
+          description: 'Review code',
+          agent: 'planner',
+          handoffs: [{ label: 'Plan work', agent: 'planner' }],
+        },
+        planner: { description: 'Plan work' },
+      }),
+    ]);
+
+    const result = resolveUseImport(program([]), use({ alias: 'team' }), source);
+    const agents = result.blocks.find((entry) => entry.name === 'agents');
+
+    expect(agents?.content).toMatchObject({
+      properties: {
+        'team.reviewer': {
+          agent: 'team.planner',
+          handoffs: [{ agent: 'team.planner' }],
+        },
+        'team.planner': { description: 'Plan work' },
+      },
+    });
+  });
+
+  it('qualifies mixed agents and preserves other aliased blocks', () => {
+    const source = program([
+      {
+        type: 'Block',
+        name: 'agents',
+        content: {
+          type: 'MixedContent',
+          properties: { reviewer: { description: 'Review code' } },
+          loc: LOC,
+        },
+        loc: LOC,
+      },
+      block('identity', { text: 'Agent guidance' }),
+    ]);
+
+    const result = resolveUseImport(program([]), use({ alias: 'team' }), source);
+
+    expect(result.blocks.map((entry) => entry.name)).toEqual([
+      'agents',
+      'identity',
+      '__import__team',
+      '__import__team.agents',
+      '__import__team.identity',
+    ]);
+    expect(result.blocks[0]?.content).toMatchObject({
+      type: 'MixedContent',
+      properties: {
+        'team.reviewer': { description: 'Review code' },
+      },
+    });
+  });
+
+  it('preserves existing provenance for aliased and unaliased imports', () => {
+    const source = program([block('agents', { reviewer: { description: 'Review code' } })], []);
+    source.agentProvenance = [
+      {
+        name: 'reviewer',
+        source: 'source.prs',
+        action: 'native',
+        loc: LOC,
+      },
+    ];
+
+    const unaliased = resolveUseImport(program([]), use(), source);
+    expect(unaliased.agentProvenance).toEqual([
+      expect.objectContaining({
+        name: 'reviewer',
+        source: 'source.prs',
+        importPath: './shared',
+        action: 'imported',
+      }),
+    ]);
+
+    const aliased = resolveUseImport(program([]), use({ alias: 'team' }), source);
+    expect(aliased.agentProvenance).toEqual([
+      expect.objectContaining({
+        name: 'team.reviewer',
+        source: 'source.prs',
+        importPath: './shared',
+        namespace: 'team',
+        action: 'qualified',
+      }),
+    ]);
+
+    source.agentProvenance = [
+      {
+        name: 'reviewer',
+        source: 'source.prs',
+        importPath: './nested',
+        namespace: 'team',
+        action: 'qualified',
+        loc: LOC,
+      },
+    ];
+    const qualified = resolveUseImport(program([]), use(), source);
+    expect(qualified.agentProvenance).toEqual([
+      expect.objectContaining({
+        name: 'reviewer',
+        source: 'source.prs',
+        importPath: './nested',
+        namespace: 'team',
+        action: 'qualified',
+      }),
+    ]);
+  });
+
+  it('preserves the original import path for transitive qualified agents', () => {
+    const source = program([block('agents', { reviewer: { description: 'Review code' } })], []);
+    source.agentProvenance = [
+      {
+        name: 'reviewer',
+        source: 'nested.prs',
+        importPath: './nested',
+        namespace: 'inner',
+        action: 'qualified',
+        loc: LOC,
+      },
+    ];
+
+    const result = resolveUseImport(
+      program([]),
+      use({ path: { ...use().path, raw: './outer' } }),
+      source
+    );
+
+    expect(result.agentProvenance).toEqual([
+      expect.objectContaining({
+        name: 'reviewer',
+        source: 'nested.prs',
+        importPath: './nested',
+        namespace: 'inner',
+        action: 'qualified',
+      }),
+    ]);
+  });
+
+  it('reports all provenance when an agent import conflicts', () => {
+    const target = program([block('agents', { reviewer: { description: 'Local review' } })]);
+    const source = program([block('agents', { reviewer: { description: 'Imported review' } })]);
+
+    expect(() => resolveUseImport(target, use(), source)).toThrow(AgentConflictError);
+    try {
+      resolveUseImport(target, use(), source);
+      throw new Error('Expected agent conflict');
+    } catch (error) {
+      expect(error).toBeInstanceOf(AgentConflictError);
+      const conflict = error as AgentConflictError;
+      expect(conflict.message).toContain('reviewer');
+      expect(conflict.message).toContain('./shared');
+      expect(conflict.message).toContain('Use a unique @use alias');
+      expect(conflict.provenance).toHaveLength(2);
+    }
+  });
+
+  it('keeps unique unaliased agents and maps native collisions deterministically', () => {
+    const source = program([block('agents', { reviewer: { description: 'Review code' } })]);
+    const result = resolveUseImport(program([]), use(), source);
+
+    expect(result.blocks.find((entry) => entry.name === 'agents')?.content).toMatchObject({
+      properties: { reviewer: { description: 'Review code' } },
+    });
+    expect(result.agentProvenance).toEqual([
+      expect.objectContaining({ name: 'reviewer', action: 'imported' }),
+    ]);
+
+    expect([...createNativeAgentNameMap(['team.reviewer', 'team-reviewer'])]).toEqual([
+      ['team-reviewer', 'team-reviewer'],
+      ['team.reviewer', 'team-reviewer-2'],
+    ]);
   });
 
   it('does not treat object prototype names as existing skills', () => {

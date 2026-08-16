@@ -1098,7 +1098,7 @@ describe('FactoryFormatter', () => {
       const result = formatter.format(ast, { version: 'multifile' });
 
       const cmdFile = result.additionalFiles?.find((f) => f.path.includes('commands/review'));
-      expect(cmdFile?.content).toContain('agent: reviewer.expert');
+      expect(cmdFile?.content).toContain('agent: reviewer-expert');
     });
 
     it('should include handoffs in frontmatter', () => {
@@ -1141,7 +1141,7 @@ describe('FactoryFormatter', () => {
       const cmdFile = result.additionalFiles?.find((f) => f.path.includes('commands/create-spec'));
       expect(cmdFile?.content).toContain('handoffs:');
       expect(cmdFile?.content).toContain('label: Build Plan');
-      expect(cmdFile?.content).toContain('agent: speckit.plan');
+      expect(cmdFile?.content).toContain('agent: speckit-plan');
       expect(cmdFile?.content).toContain('prompt: Create a plan for the spec');
       expect(cmdFile?.content).toContain('label: Clarify');
       expect(cmdFile?.content).toContain('send: true');

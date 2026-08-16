@@ -131,6 +131,10 @@ class TestFormatter extends BaseFormatter {
   public testYamlString(value: string): string {
     return this.yamlString(value);
   }
+
+  public testGetNativeAgentName(ast: Program, name: string): string {
+    return this.getNativeAgentName(ast, name);
+  }
 }
 
 describe('BaseFormatter', () => {
@@ -193,6 +197,31 @@ describe('BaseFormatter', () => {
 
       const result = formatter.testFindBlock(ast, '__internal');
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('native agent names', () => {
+    it('suffixes fallback names that collide with mapped agents', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: { 'a-b': { description: 'Literal name' } },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        extends: [],
+        loc: createLoc(),
+      };
+
+      expect(formatter.testGetNativeAgentName(ast, 'a.b')).toBe('a-b-2');
     });
   });
 

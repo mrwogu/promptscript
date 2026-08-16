@@ -72,6 +72,13 @@ You are an expert planning specialist.`
     expect((planner['content'] as TextContent).value).toContain(
       'You are an expert planning specialist.'
     );
+    expect(result.agentProvenance).toEqual([
+      expect.objectContaining({
+        name: 'planner',
+        source: join(agentsDir, 'planner.md'),
+        action: 'native',
+      }),
+    ]);
   });
 
   it('should discover multiple agents', async () => {
@@ -150,6 +157,130 @@ You are an expert planning specialist.`
     const props = (agentsBlock!.content as ObjectContent).properties;
     const planner = props['planner'] as Record<string, unknown>;
     expect(planner['description']).toBe('Explicit planner from .prs');
+    expect(result.agentProvenance).toEqual([
+      expect.objectContaining({
+        name: 'planner',
+        source: sourceFile,
+        action: 'local',
+      }),
+    ]);
+  });
+
+  it('records provenance for mixed agent blocks and discovered agents', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    await writeFile(
+      join(agentsDir, 'new-agent.md'),
+      '---\nname: new-agent\ndescription: Discovered agent\n---\nNew content.'
+    );
+
+    const sourceFile = join(localPath, 'project.prs');
+    const ast: Program = {
+      ...emptyAst(sourceFile),
+      blocks: [
+        {
+          type: 'Block',
+          name: 'agents',
+          content: {
+            type: 'MixedContent',
+            text: {
+              type: 'TextContent',
+              value: 'Agent guidance',
+              loc: { file: sourceFile, line: 1, column: 1 },
+            },
+            properties: {
+              existing: { description: 'Already defined' },
+            },
+            loc: { file: sourceFile, line: 1, column: 1 },
+          },
+          loc: { file: sourceFile, line: 1, column: 1, offset: 0 },
+        },
+      ],
+    };
+
+    const result = await resolveNativeAgents(ast, sourceFile, localPath);
+    const agents = result.blocks.find((candidate) => candidate.name === 'agents');
+
+    expect(agents?.content).toMatchObject({
+      type: 'MixedContent',
+      text: { value: 'Agent guidance' },
+      properties: {
+        existing: { description: 'Already defined' },
+        'new-agent': { description: 'Discovered agent' },
+      },
+    });
+    expect(result.agentProvenance).toEqual([
+      expect.objectContaining({ name: 'existing', source: sourceFile, action: 'local' }),
+      expect.objectContaining({
+        name: 'new-agent',
+        source: join(agentsDir, 'new-agent.md'),
+        action: 'native',
+      }),
+    ]);
+  });
+
+  it('adds fallback provenance when only explicit agents exist', async () => {
+    const sourceFile = join(localPath, 'project.prs');
+    const ast: Program = {
+      ...emptyAst(sourceFile),
+      blocks: [
+        {
+          type: 'Block',
+          name: 'agents',
+          content: {
+            type: 'ObjectContent',
+            properties: { existing: { description: 'Already defined' } },
+            loc: { file: sourceFile, line: 1, column: 1 },
+          },
+          loc: { file: sourceFile, line: 1, column: 1, offset: 0 },
+        },
+      ],
+    };
+
+    const result = await resolveNativeAgents(ast, sourceFile, localPath);
+
+    expect(result).not.toBe(ast);
+    expect(result.agentProvenance).toEqual([
+      expect.objectContaining({ name: 'existing', source: sourceFile, action: 'local' }),
+    ]);
+  });
+
+  it('preserves a fully attributed AST when discovery adds no agents', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    await writeFile(
+      join(agentsDir, 'existing.md'),
+      '---\nname: existing\ndescription: Discovered existing agent\n---\nContent.'
+    );
+
+    const sourceFile = join(localPath, 'project.prs');
+    const ast: Program = {
+      ...emptyAst(sourceFile),
+      blocks: [
+        {
+          type: 'Block',
+          name: 'agents',
+          content: {
+            type: 'ObjectContent',
+            properties: { existing: { description: 'Explicit existing agent' } },
+            loc: { file: sourceFile, line: 1, column: 1 },
+          },
+          loc: { file: sourceFile, line: 1, column: 1, offset: 0 },
+        },
+      ],
+      agentProvenance: [
+        {
+          name: 'existing',
+          source: sourceFile,
+          action: 'local',
+          loc: { file: sourceFile, line: 1, column: 1, offset: 0 },
+        },
+      ],
+    };
+
+    const result = await resolveNativeAgents(ast, sourceFile, localPath);
+
+    expect(result).toBe(ast);
   });
 
   it('should discover from universal directory', async () => {

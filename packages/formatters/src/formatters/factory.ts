@@ -374,12 +374,17 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
 
         // Generate command file if it has prompt: true or multiline content
         if (obj['prompt'] === true || obj['content']) {
-          const handoffs = this.extractHandoffs(obj['handoffs']);
+          const handoffs = this.extractHandoffs(obj['handoffs']).map((handoff) => ({
+            ...handoff,
+            agent: this.getNativeAgentName(ast, handoff.agent),
+          }));
           commands.push({
             name: commandName,
             description: obj['description'] ? this.valueToString(obj['description']) : name,
             content: obj['content'] ? this.valueToString(obj['content']) : '',
-            agent: obj['agent'] ? this.valueToString(obj['agent']) : undefined,
+            agent: obj['agent']
+              ? this.getNativeAgentName(ast, this.valueToString(obj['agent']))
+              : undefined,
             handoffs: handoffs.length > 0 ? handoffs : undefined,
             tools:
               obj['tools'] && Array.isArray(obj['tools'])
@@ -576,7 +581,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
         if (!description) continue; // description is required
 
         droids.push({
-          name: name.replace(/\./g, '-'),
+          name: this.getNativeAgentName(ast, name),
           description,
           content: obj['content'] ? this.valueToString(obj['content']) : '',
           model: obj['model'] ? this.valueToString(obj['model']) : undefined,

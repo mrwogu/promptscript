@@ -3,6 +3,14 @@ import { ResolveError } from './errors/index.js';
 import { IMPORT_MERGE_POLICY, mergeBlockCollections } from './block-merge.js';
 import { getSyntaxFeatureUsages } from './syntax-versions.js';
 import { deepClone } from './utils/index.js';
+import {
+  findAgentConflicts,
+  getAgentProperties,
+  getAgentProvenanceEntries,
+  qualifyAgentProperties,
+} from './agent-names.js';
+import type { AgentProvenance } from './types/ast.js';
+import { AgentConflictError } from './errors/resolve.js';
 
 export const IMPORT_MARKER_PREFIX = '__import__';
 
@@ -52,6 +60,74 @@ function assertNoDuplicateSkills(
   }
 }
 
+function qualifyImportedAgents(
+  source: Program,
+  declaration: UseDeclaration
+): { program: Program; provenance: AgentProvenance[] } {
+  if (!declaration.alias) {
+    const properties = getAgentProperties(source);
+    const provenance = Object.keys(properties).flatMap((name) => {
+      const existing = getAgentProvenanceEntries(source, name);
+      return existing.length > 0
+        ? existing.map((entry) => ({
+            ...entry,
+            ...(entry.action === 'qualified' ? {} : { importPath: declaration.path.raw }),
+            action: entry.action === 'qualified' ? entry.action : ('imported' as const),
+          }))
+        : [
+            {
+              name,
+              source: source.loc.file,
+              importPath: declaration.path.raw,
+              action: 'imported' as const,
+              loc: declaration.loc,
+            },
+          ];
+    });
+    return {
+      program: provenance.length > 0 ? { ...source, agentProvenance: provenance } : source,
+      provenance,
+    };
+  }
+
+  const agentsBlock = source.blocks.find((block) => block.name === 'agents');
+  if (
+    !agentsBlock ||
+    (agentsBlock.content.type !== 'ObjectContent' && agentsBlock.content.type !== 'MixedContent')
+  ) {
+    return { program: source, provenance: source.agentProvenance ?? [] };
+  }
+
+  const qualified = qualifyAgentProperties(
+    agentsBlock.content,
+    declaration.alias,
+    source,
+    declaration.path.raw,
+    declaration.loc
+  );
+  const blocks = source.blocks.map((block) =>
+    block === agentsBlock
+      ? {
+          ...block,
+          content: qualified.content,
+        }
+      : block
+  );
+  return {
+    program: {
+      ...source,
+      blocks,
+      agentProvenance: [
+        ...(source.agentProvenance ?? []).filter(
+          (entry) => !Object.hasOwn(getAgentProperties(source), entry.name)
+        ),
+        ...qualified.provenance,
+      ],
+    },
+    provenance: qualified.provenance,
+  };
+}
+
 function createAliasBlocks(declaration: UseDeclaration, source: Program): Block[] {
   if (!declaration.alias) return [];
 
@@ -89,15 +165,34 @@ export function resolveUseImport(
   const source = declaration.outputDir
     ? withSkillOutputDirectory(imported, declaration.outputDir)
     : imported;
+  const qualified = qualifyImportedAgents(source, declaration);
+  const conflicts = findAgentConflicts(
+    target,
+    qualified.program,
+    declaration.path.raw,
+    declaration.loc
+  );
+  if (conflicts.length > 0) {
+    throw new AgentConflictError(conflicts, declaration.loc);
+  }
   assertNoDuplicateSkills(target, source, declaration);
 
-  const blocks = mergeBlockCollections(source.blocks, target.blocks, {
+  const blocks = mergeBlockCollections(qualified.program.blocks, target.blocks, {
     content: IMPORT_MERGE_POLICY,
     outputOrder: 'incoming',
   });
+  const targetAgents = target.agentProvenance ?? [];
+  const importedAgents = qualified.program.agentProvenance ?? [];
   return {
     ...target,
     blocks: [...blocks, ...createAliasBlocks(declaration, source)],
-    syntaxFeatures: [...getSyntaxFeatureUsages(target), ...getSyntaxFeatureUsages(source)],
+    agentProvenance:
+      targetAgents.length > 0 || importedAgents.length > 0
+        ? [...targetAgents, ...importedAgents]
+        : undefined,
+    syntaxFeatures: [
+      ...getSyntaxFeatureUsages(target),
+      ...getSyntaxFeatureUsages(qualified.program),
+    ],
   };
 }

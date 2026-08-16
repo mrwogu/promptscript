@@ -82,6 +82,35 @@ describe('applyExtends', () => {
       expect(content.value).toBe('original\n\nextended');
     });
 
+    it('should extend a multi-segment namespaced agent', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'agents',
+            createObjectContent({
+              'outer.inner.reviewer': { description: 'Original reviewer' },
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'agents.outer.inner.reviewer',
+            createObjectContent({ description: 'Updated reviewer' })
+          ),
+        ],
+      });
+
+      const result = applyExtends(ast);
+      const agents = result.blocks[0]?.content;
+
+      expect(agents).toMatchObject({
+        type: 'ObjectContent',
+        properties: {
+          'outer.inner.reviewer': { description: 'Updated reviewer' },
+        },
+      });
+    });
+
     it('preserves ordered canonical entries from direct extensions', () => {
       const ast = parseOrThrow(
         `@context {
@@ -269,6 +298,48 @@ describe('applyExtends', () => {
   });
 
   describe('deep path extension', () => {
+    it('extends qualified agents through direct and aliased paths', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'agents',
+            createObjectContent({
+              'team.reviewer': { description: 'Original' },
+            })
+          ),
+          createBlock(
+            `${IMPORT_MARKER_PREFIX}team`,
+            createObjectContent({
+              __source: './team.prs',
+              __blocks: ['agents'],
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'agents.team.reviewer',
+            createObjectContent({ description: 'Direct update' })
+          ),
+          createExtendBlock(
+            'team.agents.reviewer',
+            createObjectContent({ description: 'Aliased update' })
+          ),
+        ],
+      });
+
+      const result = applyExtends(ast);
+      const agents = result.blocks.find((block) => block.name === 'agents');
+
+      expect(agents?.content).toMatchObject({
+        properties: {
+          'team.reviewer': { description: 'Aliased update' },
+        },
+      });
+      expect(result.blocks.some((block) => block.name === `${IMPORT_MARKER_PREFIX}team`)).toBe(
+        false
+      );
+    });
+
     it('preserves nested canonical locations from deep extensions', () => {
       const ast = parseOrThrow(
         `@standards {
