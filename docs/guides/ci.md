@@ -44,6 +44,7 @@ flowchart LR
 | `prs compile --dry-run`      | Preview without writing       | 0=success, 1=error                           |
 | `prs check`                  | Check config and dependencies | 0=healthy, 1=issues                          |
 | `prs diff --all`             | Show uncommitted changes      | Always 0                                     |
+| `prs diff --format json`     | Machine-readable diff report  | 0=report produced, 1=error                   |
 
 ## GitHub Actions
 
@@ -127,6 +128,32 @@ jobs:
           fi
           echo "✅ All compiled files are in sync"
 ```
+
+### Drift Check Without Writing Files
+
+`prs diff --format json` reports the same drift without touching the working tree, which suits
+required checks on protected branches and jobs that post their findings elsewhere:
+
+```yaml
+- name: Check for drift
+  run: |
+    prs diff --all --format json > diff.json
+    if [ "$(jq -r '.success' diff.json)" != "true" ]; then
+      jq -r '.errors[].message' diff.json
+      exit 1
+    fi
+    if [ "$(jq -r '.hasChanges' diff.json)" = "true" ]; then
+      echo "::error::Compiled files are out of sync with source."
+      jq -r '.changes[] | "\(.kind) \(.path) (\(.target))"' diff.json
+      exit 1
+    fi
+```
+
+The command exits 0 for any valid report, including one with changes, so the job decides what counts
+as a failure. Reports follow the versioned
+[diff schema](https://getpromptscript.dev/schema/diff/v1.json): `changes[]` carries target, output
+path, change kind, ownership, and a `sha256-<hex>` content hash, `unsupported[]` repeats entries
+that the target cannot represent, and `--include-content` adds the generated content itself.
 
 ### With Private Registry
 

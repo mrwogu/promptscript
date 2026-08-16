@@ -23,6 +23,11 @@ Composition uses two layers of rules:
 For multiple `@use` declarations, each later import becomes the new source.
 Its same-shape values win against the accumulated target.
 
+A field keeps the position of its first declaration. Later operations change its
+value, not its place, and fields that a later layer introduces are appended in
+declaration order. Resolved output therefore stays stable when an inherited or
+imported field is redefined.
+
 The operation mode comes from the effective composed graph. A `1.5.0` source
 or ordered operation in inherited, imported, inline-composed, or
 extension-carried content enables declaration order for the whole graph.
