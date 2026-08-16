@@ -3,7 +3,9 @@ import {
   SYNTAX_FEATURES,
   type Block,
   type ExtendBlock,
+  type InlineUseDeclaration,
   type Program,
+  type ProvenanceEvent,
   type Value,
 } from '@promptscript/core';
 import { BrowserResolver } from '../resolver.js';
@@ -400,6 +402,126 @@ describe('BrowserResolver', () => {
       expect(result.sources).toContain('base.prs');
     });
 
+    it('exposes provenance for inherited and extended values', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@extend standards {
+  code: { style: "portable" }
+}`,
+        'base.prs': `@meta { id: "base" syntax: "1.0.0" }
+@standards {
+  code: { style: "strict" }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const entry = result.provenance.entries.find(
+        (candidate) => candidate.path === 'standards.code.style'
+      );
+
+      expect(result.errors).toEqual([]);
+      expect(entry?.history).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ operation: 'inherit' }),
+          expect.objectContaining({ operation: 'extend', action: 'merged' }),
+        ])
+      );
+    });
+
+    it('does not fabricate provenance for unmatched composition metadata', async () => {
+      const loc = { file: 'project.prs', line: 1, column: 1, offset: 0 };
+      const malformedUse = {
+        type: 'InlineUseDeclaration',
+        path: undefined,
+        loc,
+      } as unknown as InlineUseDeclaration;
+      const validUse: InlineUseDeclaration = {
+        type: 'InlineUseDeclaration',
+        path: {
+          type: 'PathReference',
+          raw: './sub',
+          segments: ['sub'],
+          isRelative: true,
+          loc,
+        },
+        loc,
+      };
+      const secondValidUse: InlineUseDeclaration = {
+        ...validUse,
+        path: {
+          ...validUse.path,
+          raw: './second',
+          segments: ['second'],
+        },
+      };
+      const ast: Program = {
+        type: 'Program',
+        loc,
+        uses: [],
+        extends: [],
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            loc,
+            content: {
+              type: 'MixedContent',
+              properties: {},
+              inlineUses: [validUse, malformedUse, secondValidUse],
+              loc,
+            },
+          },
+          {
+            type: 'Block',
+            name: 'skills',
+            loc,
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                plain: 'plain value',
+                broken: { __composedFrom: ['invalid phase'] },
+                missing: {
+                  __composedFrom: [{ source: 'missing.prs' }, { source: 'second.prs' }],
+                },
+              },
+              loc,
+            },
+          },
+        ],
+      };
+      const resolver = new BrowserResolver({ fs: new VirtualFileSystem({}) });
+      const sources: string[] = [];
+      const errors: Array<Error> = [];
+      const events: ProvenanceEvent[] = [];
+      const resolveComposition = (
+        resolver as unknown as {
+          resolveComposition: (
+            value: Program,
+            path: string,
+            sourceFiles: string[],
+            resolveErrors: Array<Error>,
+            provenanceEvents: ProvenanceEvent[]
+          ) => Promise<Program>;
+        }
+      ).resolveComposition.bind(resolver);
+
+      const result = await resolveComposition(ast, 'project.prs', sources, errors, events);
+
+      expect(result).toBe(ast);
+      expect(errors).toEqual([]);
+      // inputs and outputs live only in composition metadata, never in the
+      // final skill value, so they must not receive compose provenance
+      expect(events.map((event) => event.path)).toEqual([
+        'skills.missing.content',
+        'skills.missing.allowedTools',
+        'skills.missing.references',
+        'skills.missing.requires',
+      ]);
+      expect(events.every((event) => event.reference === './second')).toBe(true);
+    });
+
     it('should resolve @inherit from nested directory', async () => {
       const fs = new VirtualFileSystem({
         'sub/project.prs': `@meta { id: "child" syntax: "1.0.0" }
@@ -573,6 +695,28 @@ describe('BrowserResolver', () => {
       expect(result.ast).not.toBeNull();
       const standardsBlock = result.ast?.blocks.find((b) => b.name === 'standards');
       expect(standardsBlock).toBeDefined();
+    });
+
+    it('does not record provenance for a failed extension', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@skills {
+  ops: {
+    description: "Base"
+    sealed: ["description"]
+  }
+}
+@extend skills.ops { description: "Overlay" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const entry = result.provenance.entries.find(
+        (candidate) => candidate.path === 'skills.ops.description'
+      );
+
+      expect(result.errors).toHaveLength(1);
+      expect(entry?.history.some((step) => step.operation === 'extend')).toBe(false);
     });
 
     it('should replace marked inherited values and merge unmarked values', async () => {
@@ -3350,6 +3494,33 @@ describe('BrowserResolver', () => {
     });
   });
 
+  describe('sequential block operations', () => {
+    it('appends repeated local blocks in source order', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "repeated-blocks" syntax: "1.5.0" }
+@standards { first: "one" }
+@standards { second: "two" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const standards = result.ast?.blocks.filter((block) => block.name === 'standards') ?? [];
+
+      expect(result.errors).toEqual([]);
+      expect(standards).toHaveLength(2);
+      expect(standards[0]?.content).toMatchObject({
+        type: 'ObjectContent',
+        properties: {
+          first: 'one',
+        },
+      });
+      expect(standards[1]?.content).toMatchObject({
+        type: 'ObjectContent',
+        properties: { second: 'two' },
+      });
+    });
+  });
+
   describe('mergeExtendValue TextContent concatenation', () => {
     it('should concatenate TextContent property values via dot-path extend', async () => {
       // Covers resolver.ts line 1221: isTextContent(existing) && extContent.type === 'TextContent'
@@ -3415,6 +3586,27 @@ describe('BrowserResolver', () => {
   });
 
   describe('explicit override resolution', () => {
+    it('records provenance for whole-block replacements', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "override-block" syntax: "1.5.0" }
+@standards { testing: ["Use Jest"] }
+@override standards {
+  testing: ["Use Vitest"]
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const testing = result.provenance.entries.find(
+        (entry) => entry.path === 'standards.testing[0]'
+      );
+
+      expect(result.errors).toEqual([]);
+      expect(testing?.history).toEqual(
+        expect.arrayContaining([expect.objectContaining({ operation: 'override' })])
+      );
+    });
+
     it('applies ordered replacements and later extensions', async () => {
       const fs = new VirtualFileSystem({
         'project.prs': `@meta { id: "override" syntax: "1.5.0" }

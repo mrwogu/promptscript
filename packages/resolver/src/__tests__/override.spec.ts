@@ -70,6 +70,44 @@ describe('explicit override resolution', () => {
     expect(result.ast?.extends).toEqual([]);
   });
 
+  it('records replace strategy for each property in a multi-layer override chain', async () => {
+    const directory = await createProject(`
+      @meta { id: "override-provenance" syntax: "1.5.0" }
+      @skills {
+        review: {
+          description: "Base"
+          content: "Base instructions"
+          references: ["base.md"]
+          inputs: { base: { type: "string" } }
+        }
+      }
+      @override skills.review.content { "First instructions" }
+      @override skills.review.references { ["first.md"] }
+      @override skills.review.inputs { { first: { type: "string" } } }
+      @override skills.review.description { "Final review" }
+    `);
+    const resolver = new Resolver({
+      registryPath: directory,
+      localPath: directory,
+      cache: false,
+    });
+
+    const result = await resolver.resolve(join(directory, 'project.prs'));
+    const overriddenEntries = result.provenance.entries.filter((entry) =>
+      entry.path.startsWith('skills.review.')
+    );
+
+    expect(
+      overriddenEntries
+        .flatMap((entry) => entry.history)
+        .filter((step) => step.operation === 'override')
+        .every((step) => step.action === 'replaced' && step.strategy === 'replace')
+    ).toBe(true);
+    expect(
+      overriddenEntries.some((entry) => entry.history.some((step) => step.operation === 'override'))
+    ).toBe(true);
+  });
+
   it('replaces inherited and aliased imported targets', async () => {
     const directory = await createProject(
       `

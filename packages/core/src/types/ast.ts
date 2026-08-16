@@ -1,5 +1,6 @@
 import type { SourceLocation } from './source.js';
 import type { SyntaxFeatureUsage } from '../syntax-versions.js';
+import type { ProvenanceTrace } from './provenance.js';
 
 // ============================================================
 // Base Types
@@ -802,8 +803,14 @@ export interface ComposedPhase {
   name: string;
   /** Source file path */
   source: string;
+  /** Source location of the parent `@use` declaration. */
+  loc?: SourceLocation;
+  /** Source location of the composed child skill definition. */
+  definitionLoc?: SourceLocation;
   /** Alias if @use ... as alias was used */
   alias?: string;
+  /** Provenance trace resolved from the child skill. */
+  provenance?: ProvenanceTrace;
   /** Extracted inputs contract (if defined) */
   inputs?: Record<string, SkillContractField>;
   /** Extracted outputs contract (if defined) */

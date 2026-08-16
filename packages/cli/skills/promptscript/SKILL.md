@@ -1149,6 +1149,7 @@ prs import CLAUDE.md        # Import existing AI instructions
 prs import CLAUDE.md --dry-run # Preview import conversion
 prs inspect <skill>         # Show skill composition provenance
 prs inspect <skill> --layers # Show layer-level breakdown
+prs explain <path>          # Explain source and composition provenance
 prs hooks install           # Install auto-compilation hooks for AI tools
 prs hooks install claude    # Install hooks for a specific tool
 prs hooks uninstall         # Remove installed auto-compilation hooks

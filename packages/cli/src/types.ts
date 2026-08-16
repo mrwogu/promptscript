@@ -318,3 +318,17 @@ export interface InspectOptions {
   /** Working directory (project root) */
   cwd?: string;
 }
+
+/**
+ * Options for the explain command.
+ */
+export interface ExplainOptions {
+  /** Output format */
+  format?: 'text' | 'json';
+  /** Path to custom config file */
+  config?: string;
+  /** Working directory (project root) */
+  cwd?: string;
+  /** Include absolute filesystem paths in output */
+  absolutePaths?: boolean;
+}

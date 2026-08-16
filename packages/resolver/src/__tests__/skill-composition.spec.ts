@@ -1,9 +1,18 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { mkdtemp, rm, writeFile } from 'fs/promises';
+import { tmpdir } from 'os';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Resolver } from '../resolver.js';
 import { resolveSkillComposition } from '../skill-composition.js';
-import type { ObjectContent, TextContent, ComposedPhase, Program } from '@promptscript/core';
+import type {
+  ComposedPhase,
+  InlineUseDeclaration,
+  ObjectContent,
+  Program,
+  ProvenanceEvent,
+  TextContent,
+} from '@promptscript/core';
 import { ResolveError, SYNTAX_FEATURES } from '@promptscript/core';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,6 +52,14 @@ describe('skill composition resolver', () => {
       expect(text).toContain('## Phase 1: health-scan');
       expect(text).toContain('## Phase 2: triage');
       expect(text).toContain('## Phase 3: autofix');
+
+      const contentProvenance = result.provenance.entries.find(
+        (entry) => entry.path === 'skills.ops.content'
+      );
+      const composition = contentProvenance?.history.find((step) => step.operation === 'compose');
+      expect(composition?.chain.some((link) => link.operation === 'compose')).toBe(true);
+      expect(composition?.source.file).toContain('parent.prs');
+      expect(composition?.source.line).toBeGreaterThan(1);
     });
 
     it('preserves the original content preamble from the parent skill', async () => {
@@ -55,6 +72,98 @@ describe('skill composition resolver', () => {
 
       expect(flatContent.value).toContain('You are a production triage orchestrator.');
     });
+
+    it('reconciles composed fields into canonical AST and provenance', async () => {
+      const result = await resolver.resolve(resolve(FIXTURES_DIR, 'parent.prs'));
+      const canonical = JSON.stringify(result.canonicalAst);
+
+      expect(canonical).toContain('## Phase 1: health-scan');
+      expect(
+        result.provenance.entries.some((entry) => entry.path === 'skills.ops.allowedTools')
+      ).toBe(true);
+    });
+
+    it('keeps provenance ordering deterministic across repeated resolutions', async () => {
+      const first = await resolver.resolve(resolve(FIXTURES_DIR, 'parent.prs'));
+      const second = await resolver.resolve(resolve(FIXTURES_DIR, 'parent.prs'));
+
+      expect(JSON.stringify(first.provenance)).toBe(JSON.stringify(second.provenance));
+    });
+  });
+
+  it('carries transitive child provenance through nested composition', async () => {
+    const directory = await mkdtemp(resolve(tmpdir(), 'prs-composition-trace-'));
+    try {
+      await writeFile(
+        resolve(directory, 'middle-base.prs'),
+        `@meta { id: "middle-base" syntax: "1.1.0" }
+@skills { middle: { content: "Base phase" } }`
+      );
+      await writeFile(
+        resolve(directory, 'middle.prs'),
+        `@meta { id: "middle" syntax: "1.1.0" }
+@inherit ./middle-base
+@skills { middle: { content: "Middle phase" } }`
+      );
+      const parentPath = resolve(directory, 'parent.prs');
+      await writeFile(
+        parentPath,
+        `@meta { id: "parent" syntax: "1.1.0" }
+@skills {
+  parent: { content: "Parent phase" }
+  @use ./middle
+}`
+      );
+
+      const nestedResolver = new Resolver({
+        registryPath: directory,
+        localPath: directory,
+        cache: false,
+      });
+      const result = await nestedResolver.resolve(parentPath);
+      const composition = result.provenance.entries
+        .find((entry) => entry.path === 'skills.parent.content')
+        ?.history.find((step) => step.operation === 'compose');
+
+      expect(composition?.chain.some((link) => link.operation === 'inherit')).toBe(true);
+      expect(
+        composition?.trace?.entries.some((entry) => entry.path === 'skills.middle.content')
+      ).toBe(true);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('detects cycles across nested composition levels', async () => {
+    const directory = await mkdtemp(resolve(tmpdir(), 'prs-composition-cycle-'));
+    try {
+      await writeFile(
+        resolve(directory, 'parent.prs'),
+        `@meta { id: "parent" syntax: "1.1.0" }
+@skills { parent: { content: "Parent" } @use ./middle }`
+      );
+      await writeFile(
+        resolve(directory, 'middle.prs'),
+        `@meta { id: "middle" syntax: "1.1.0" }
+@skills { middle: { content: "Middle" } @use ./grandchild }`
+      );
+      await writeFile(
+        resolve(directory, 'grandchild.prs'),
+        `@meta { id: "grandchild" syntax: "1.1.0" }
+@skills { grandchild: { content: "Grandchild" } @use ./parent }`
+      );
+
+      const nestedResolver = new Resolver({
+        registryPath: directory,
+        localPath: directory,
+        cache: false,
+      });
+      const result = await nestedResolver.resolve(resolve(directory, 'parent.prs'));
+
+      expect(result.errors.some((error) => /circular/i.test(error.message))).toBe(true);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
   });
 
   describe('allowedTools union', () => {
@@ -161,6 +270,8 @@ describe('skill composition resolver', () => {
 
       expect(composedFrom[0]!.name).toBe('health-scan');
       expect(composedFrom[0]!.source).toContain('health-scan.prs');
+      expect(composedFrom[0]!.loc?.file).toContain('parent.prs');
+      expect(composedFrom[0]!.definitionLoc?.file).toContain('health-scan.prs');
     });
 
     it('second entry has name "triage"', async () => {
@@ -208,6 +319,76 @@ describe('skill composition resolver', () => {
       expect(result.errors.length).toBeGreaterThan(0);
       const errorMessages = result.errors.map((e) => e.message);
       expect(errorMessages.some((m) => m.includes('does-not-exist'))).toBe(true);
+    });
+
+    it('does not fabricate provenance for unmatched composition metadata', async () => {
+      const malformedUse = {
+        type: 'InlineUseDeclaration',
+        path: undefined,
+        loc: LOC,
+      } as unknown as InlineUseDeclaration;
+      const validUse: InlineUseDeclaration = {
+        type: 'InlineUseDeclaration',
+        path: {
+          type: 'PathReference',
+          raw: './sub',
+          segments: ['sub'],
+          isRelative: true,
+          loc: LOC,
+        },
+        loc: LOC,
+      };
+      const ast = makeProgram({
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            loc: LOC,
+            content: {
+              type: 'MixedContent',
+              properties: {},
+              inlineUses: [validUse, malformedUse],
+              loc: LOC,
+            },
+          },
+          {
+            type: 'Block',
+            name: 'skills',
+            loc: LOC,
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                plain: 'plain value',
+                broken: { __composedFrom: ['invalid phase'] },
+                missing: {
+                  __composedFrom: [{ source: 'missing.prs' }],
+                },
+              },
+              loc: LOC,
+            },
+          },
+        ],
+      });
+      const sources: string[] = [];
+      const errors: Array<Error> = [];
+      const events: ProvenanceEvent[] = [];
+      const resolveComposition = (
+        resolver as unknown as {
+          resolveComposition: (
+            value: Program,
+            path: string,
+            sourceFiles: string[],
+            resolveErrors: Array<Error>,
+            provenanceEvents: ProvenanceEvent[]
+          ) => Promise<Program>;
+        }
+      ).resolveComposition.bind(resolver);
+
+      const result = await resolveComposition(ast, '/project/parent.prs', sources, errors, events);
+
+      expect(result).toBe(ast);
+      expect(errors).toEqual([]);
+      expect(events).toEqual([]);
     });
   });
 
@@ -405,6 +586,25 @@ describe('resolveSkillComposition — edge cases', () => {
         })
       ).rejects.toThrow(/[Cc]ircular/);
     });
+  });
+
+  it('passes composition stack and depth to nested file resolution', async () => {
+    const ast = makeSkillsProgram('ops');
+    const resolveFile = vi.fn(
+      async (_path: string, context?: { resolutionStack: Set<string>; depth: number }) => {
+        expect(context?.resolutionStack.has('/project/parent.prs')).toBe(true);
+        expect(context?.depth).toBe(1);
+        return makeSubSkillProgram('sub');
+      }
+    );
+
+    await resolveSkillComposition(ast, {
+      currentFile: '/project/parent.prs',
+      resolvePath: () => '/project/sub.prs',
+      resolveFile,
+    });
+
+    expect(resolveFile).toHaveBeenCalledOnce();
   });
 
   describe('path resolution failure', () => {
