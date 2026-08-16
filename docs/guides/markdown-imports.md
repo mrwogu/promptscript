@@ -52,6 +52,14 @@ Import an entire skill directory (containing a `SKILL.md`):
 
 When the path resolves to a directory, PromptScript automatically loads `SKILL.md` from inside it and discovers any sibling resource files (see [Resource files](#resource-files) below).
 
+A directory may also group several skills, each in its own subdirectory — every one of them is imported:
+
+```
+@use ./skills                    # imports skills/lint/SKILL.md, skills/review/SKILL.md, ...
+```
+
+A `SKILL.md` at the imported directory's own root wins over a skill of the same name found deeper down.
+
 ## Content detection
 
 When PromptScript loads a `.md` file, it determines how to treat its content:
