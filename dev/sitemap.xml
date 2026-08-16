@@ -485,6 +485,22 @@
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/collectCompositionProvenanceEvents/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/collectProvenance/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/collectProvenanceEvents/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/collectProvenanceValueEvents/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/compareVersions/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
@@ -550,6 +566,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/deepMerge/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/emptyProvenance/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
@@ -822,6 +842,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/parseVersion/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/prefixProvenance/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
@@ -1193,6 +1217,30 @@
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/ProvenanceEntry/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/ProvenanceEvent/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/ProvenanceEventOptions/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/ProvenanceLink/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/ProvenanceStep/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/ProvenanceTrace/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/RegistryAliasEntry/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
@@ -1498,6 +1546,14 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/ProgramOperation/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/ProvenanceAction/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/ProvenanceOperation/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>

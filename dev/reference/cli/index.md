@@ -417,6 +417,57 @@ prs inspect code-review --layers
 prs inspect code-review --format json
 ```
 
+### prs explain
+
+Explain source and composition provenance for any resolved block, field, nested value, list entry, or text fragment.
+
+```bash
+prs explain <path> [options]
+```
+
+**Arguments:**
+
+| Argument | Description                                          |
+| -------- | ---------------------------------------------------- |
+| `<path>` | Resolved path such as `standards.code.frameworks[0]` |
+
+**Options:**
+
+| Option                | Description                       |
+| --------------------- | --------------------------------- |
+| `--format <format>`   | Output format (text, json)        |
+| `-c, --config <path>` | Path to custom config file        |
+| `--cwd <dir>`         | Set the project working directory |
+| `--absolute-paths`    | Include absolute filesystem paths |
+
+```bash
+prs explain standards.code.frameworks[0]
+prs explain identity.text[0] --format json
+```
+
+Text and JSON output use paths relative to the project root by default. Use `--absolute-paths` only when consumers require host filesystem paths.
+
+JSON output has this shape:
+
+```json
+{
+  "version": 1,
+  "path": "standards.code.frameworks[0]",
+  "entries": [
+    {
+      "path": "standards.code.frameworks[0]",
+      "kind": "list",
+      "source": { "file": ".promptscript/project.prs", "line": 4, "column": 3 },
+      "history": [],
+      "value": "React"
+    }
+  ],
+  "diagnostics": []
+}
+```
+
+`prs explain` exits with status 0 when the path resolves and diagnostics are warnings only. It exits nonzero for a missing path, configuration failure, resolution failure, or any fatal partial-resolution diagnostic.
+
 ______________________________________________________________________
 
 ### prs diff
