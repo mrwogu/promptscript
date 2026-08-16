@@ -20,6 +20,23 @@ export type {
   FormatterVersionMap,
   FormatOptions,
 } from './types.js';
+
+export {
+  createOutputPlan,
+  normalizeOutputCollisionKey,
+  normalizeOutputPath,
+  OutputPlanPathError,
+} from '@promptscript/core';
+export type {
+  OutputArtifact,
+  OutputPlan,
+  OutputPlanCandidate,
+  OutputPlanCollision,
+  OutputPlanFile,
+  OutputPlanManagedPaths,
+  OutputPlanArtifactRole,
+  OutputPlanCollisionResolution,
+} from '@promptscript/core';
 export { formatProgram, isCanonicalFormatter, isLegacyFormatter } from './formatter-adapter.js';
 
 // Structured output merge types and helpers

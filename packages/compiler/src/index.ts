@@ -28,5 +28,22 @@ export type {
   Watcher,
 } from './types.js';
 
+export {
+  createOutputPlan,
+  normalizeOutputCollisionKey,
+  normalizeOutputPath,
+  OutputPlanPathError,
+} from '@promptscript/core';
+export type {
+  OutputArtifact,
+  OutputPlan,
+  OutputPlanCandidate,
+  OutputPlanCollision,
+  OutputPlanFile,
+  OutputPlanManagedPaths,
+  OutputPlanArtifactRole,
+  OutputPlanCollisionResolution,
+} from '@promptscript/core';
+
 // Export CompileOptions type
 export type { CompileOptions } from './compiler.js';

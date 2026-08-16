@@ -1,11 +1,11 @@
 import type {
   CanonicalProgram,
   OutputConvention,
+  OutputArtifact,
   PrettierMarkdownOptions,
   Program,
   SourceLocation,
 } from '@promptscript/core';
-import type { StructuredMergePlan } from './structured-output.js';
 
 export interface FormatterWarning {
   /** Stable warning code */
@@ -21,31 +21,13 @@ export interface FormatterWarning {
 /**
  * Output from a formatter.
  */
-export interface FormatterOutput {
+export interface FormatterOutput extends OutputArtifact {
   /** Output file path (relative to project root) */
   path: string;
-  /** Formatted content */
-  content: string;
-  /** File mode (e.g. 0o755 for executable scripts) */
-  mode?: number;
-  /** Structured merge plan for JSON/TOML settings files */
-  merge?: StructuredMergePlan;
   /** Target compatibility warnings produced during formatting */
   warnings?: FormatterWarning[];
   /** Additional files to generate (e.g., workflows) */
   additionalFiles?: FormatterOutput[];
-  /**
-   * Relative directories exclusively managed by this output.
-   * Writers may remove obsolete PromptScript-generated files within these
-   * directories, but must preserve unmarked files and symlinks.
-   */
-  managedOutputDirectories?: string[];
-  /**
-   * Relative files exclusively managed by this output.
-   * Writers may remove an obsolete file only when it carries a PromptScript
-   * ownership marker.
-   */
-  managedOutputFiles?: string[];
 }
 
 /**

@@ -6,7 +6,6 @@ import {
   isValidLockfile,
   type Lockfile,
   type Logger,
-  type PromptScriptConfig,
   type TargetEntry,
   type TargetConfig,
 } from '@promptscript/core';
@@ -17,7 +16,10 @@ import { createPager, Pager } from '../output/pager.js';
 import { Compiler } from '@promptscript/compiler';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { stripMarkers } from '../utils/markers.js';
-import { postFormatWithPrettier } from '../prettier/post-format.js';
+import { resolvePrettierOptions } from '../prettier/loader.js';
+import { loadBundledSkillContent } from '../utils/bundled-skill.js';
+import { prepareLegacyFactoryMigration } from '../utils/legacy-factory-hooks.js';
+import { finalizeOutputPlan } from '../utils/output-plan.js';
 import chalk from 'chalk';
 import { parse as parseYaml } from 'yaml';
 
@@ -61,18 +63,20 @@ export function createDiffLogger(): Logger {
  * Parse target entries into compiler format.
  */
 function parseTargets(targets: TargetEntry[]): { name: string; config?: TargetConfig }[] {
-  return targets.map((entry) => {
-    if (typeof entry === 'string') {
-      return { name: entry };
-    }
-    // Object format: { github: { convention: 'xml' } }
-    const entries = Object.entries(entry);
-    if (entries.length === 0) {
-      throw new Error('Empty target configuration');
-    }
-    const [name, config] = entries[0] as [string, TargetConfig | undefined];
-    return { name, config };
-  });
+  return targets
+    .map((entry) => {
+      if (typeof entry === 'string') {
+        return { name: entry };
+      }
+      // Object format: { github: { convention: 'xml' } }
+      const entries = Object.entries(entry);
+      if (entries.length === 0) {
+        throw new Error('Empty target configuration');
+      }
+      const [name, config] = entries[0] as [string, TargetConfig | undefined];
+      return { name, config };
+    })
+    .filter((target) => target.config?.enabled !== false);
 }
 
 async function loadDiffLockfile(): Promise<Lockfile | undefined> {
@@ -108,13 +112,12 @@ function printNewFilePreview(content: string, showFull: boolean, pager: Pager): 
  * Compare a single output file with existing content.
  */
 async function compareOutput(
-  _name: string,
   output: FormatterOutput,
-  _config: PromptScriptConfig,
+  outputRoot: string,
   showFull: boolean,
   pager: Pager
 ): Promise<boolean> {
-  const outputPath = resolve(output.path);
+  const outputPath = resolve(outputRoot, output.path);
   const newContent = output.content;
 
   if (!existsSync(outputPath)) {
@@ -168,12 +171,23 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     spinner.text = 'Compiling...';
 
     // --all is the default behavior when no target is specified
-    const targets = options.target ? [{ name: options.target }] : parseTargets(config.targets);
+    const parsedTargets = parseTargets(config.targets);
+    const targets = options.target
+      ? [parsedTargets.find((target) => target.name === options.target) ?? { name: options.target }]
+      : parsedTargets;
+    const prettierOptions = await resolvePrettierOptions(config, process.cwd());
+    const logger = createDiffLogger();
+    const skillContent =
+      config.includePromptScriptSkill === false ? undefined : await loadBundledSkillContent(logger);
+    const outputRoot = config.output?.baseDir
+      ? resolve(process.cwd(), config.output.baseDir)
+      : process.cwd();
 
     const compiler = new Compiler({
       resolver: {
         registryPath: registry.path,
-        localPath: './.promptscript',
+        localPath: resolve(process.cwd(), '.promptscript'),
+        projectRoot: process.cwd(),
         vendorDir,
         referenceRoots:
           registry.repositoryUrl && registry.repositoryPath
@@ -181,13 +195,26 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
             : undefined,
         lockfile,
         registries: config.registries,
+        skillTargets: config.skillTargets,
+        skills:
+          config.universalDir === false
+            ? undefined
+            : {
+                universalDir:
+                  typeof config.universalDir === 'string' ? config.universalDir : '.agents',
+              },
       },
       validator: config.validation,
       formatters: targets,
       customConventions: config.customConventions,
+      prettier: prettierOptions,
+      logger,
+      skillContent,
     });
 
-    const entryPath = resolve('./.promptscript/project.prs');
+    const entryPath = config.input?.entry
+      ? resolve(process.cwd(), config.input.entry)
+      : resolve(process.cwd(), '.promptscript/project.prs');
 
     if (!existsSync(entryPath)) {
       spinner.fail('Entry file not found');
@@ -211,12 +238,16 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       return;
     }
 
-    // Apply the same Prettier post-format pass as compile.ts so diff compares
-    // against the canonical form that compile --force actually writes to disk.
-    // Without this, Prettier-normalised markdown (list-continuation indent,
-    // YAML frontmatter quote style, etc.) on disk would always mismatch the
-    // raw formatter output, producing permanent false drift. See issue #307.
-    await postFormatWithPrettier(result.outputs, process.cwd(), createDiffLogger());
+    const hasFactoryTarget = targets.some((target) => target.name === 'factory');
+    if (hasFactoryTarget) {
+      await prepareLegacyFactoryMigration(result.outputs, outputRoot);
+    }
+    const finalized = await finalizeOutputPlan(result, {
+      header: config.output?.header,
+      projectRoot: process.cwd(),
+      logger,
+      additionalOutputPaths: hasFactoryTarget ? ['.factory/hooks.json'] : [],
+    });
 
     spinner.succeed('Diff computed');
     ConsoleOutput.newline();
@@ -227,8 +258,8 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     const pager = createPager(usePager);
 
     // Compare outputs with existing files
-    for (const [name, output] of result.outputs) {
-      const hasChanges = await compareOutput(name, output, config, showFull, pager);
+    for (const output of finalized.outputs.values()) {
+      const hasChanges = await compareOutput(output, outputRoot, showFull, pager);
       if (hasChanges) {
         hasDiff = true;
       }

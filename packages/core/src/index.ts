@@ -49,3 +49,7 @@ export * from './hook-capabilities.js';
 
 // Git timeout classification
 export * from './git-timeout.js';
+
+// Shared output planning
+export * from './structured-output.js';
+export * from './output-plan.js';

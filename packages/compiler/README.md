@@ -50,6 +50,7 @@ dependencies. Closing a watcher waits for any in-flight rebuild before returning
 | `CompileOptions`     | Options for the `compile()` function                    |
 | `CompilerOptions`    | Options for the `Compiler` constructor                  |
 | `CompileResult`      | Result of a compilation run                             |
+| `OutputPlan`         | Normalized, collision-resolved output plan              |
 | `CompileStats`       | Statistics (files written, skipped, etc.)               |
 | `CompileError`       | Compilation error details                               |
 | `Formatter`          | Formatter interface                                     |

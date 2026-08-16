@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { isPromptScriptHookCommand } from '../hooks/tool-configs/claude.js';
+import type { FormatterOutput } from '@promptscript/compiler';
 
 export interface LegacyFactoryMigrationResult {
   canonical: Record<string, unknown>;
@@ -20,6 +21,33 @@ export interface LegacyFactoryMigrationPlan {
   hooksPath: string;
   expectedSettingsContent: string;
   migration: LegacyFactoryMigrationResult;
+}
+
+export async function prepareLegacyFactoryMigration(
+  outputs: Map<string, FormatterOutput>,
+  outputRoot: string
+): Promise<LegacyFactoryMigrationPlan | undefined> {
+  const factoryOutput = outputs.get('.factory/hooks.json');
+  const plan = await planLegacyFactoryHooksMigration(outputRoot, factoryOutput?.content);
+  if (!plan) return undefined;
+  if (plan.migration.ambiguous.length > 0) {
+    throw new Error(
+      `Cannot migrate legacy Factory hooks safely. Review these entries in ${plan.settingsPath}: ` +
+        plan.migration.ambiguous.join(', ')
+    );
+  }
+  if (!plan.migration.changed) return undefined;
+
+  const content = JSON.stringify(plan.migration.canonical, null, 2) + '\n';
+  if (factoryOutput) {
+    factoryOutput.content = content;
+  } else {
+    outputs.set('.factory/hooks.json', {
+      path: '.factory/hooks.json',
+      content,
+    });
+  }
+  return plan;
 }
 
 const LEGACY_EVENT_NAMES: Readonly<Record<string, string>> = {

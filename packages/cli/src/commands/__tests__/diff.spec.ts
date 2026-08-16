@@ -8,6 +8,7 @@ const {
   mockResolveRegistryPath,
   mockCompile,
   mockCompilerOptions,
+  mockPrepareLegacyFactoryMigration,
   mockExistsSync,
   mockReadFile,
   mockPagerWrite,
@@ -33,6 +34,7 @@ const {
   const mockResolveRegistryPath = vi.fn();
   const mockCompile = vi.fn();
   const mockCompilerOptions = vi.fn();
+  const mockPrepareLegacyFactoryMigration = vi.fn().mockResolvedValue(undefined);
   const mockExistsSync = vi.fn();
   const mockReadFile = vi.fn();
   const mockPagerWrite = vi.fn();
@@ -50,6 +52,7 @@ const {
     mockResolveRegistryPath,
     mockCompile,
     mockCompilerOptions,
+    mockPrepareLegacyFactoryMigration,
     mockExistsSync,
     mockReadFile,
     mockPagerWrite,
@@ -83,6 +86,10 @@ vi.mock('../../config/loader.js', () => ({
 
 vi.mock('../../utils/registry-resolver.js', () => ({
   resolveRegistryPath: mockResolveRegistryPath,
+}));
+
+vi.mock('../../utils/legacy-factory-hooks.js', () => ({
+  prepareLegacyFactoryMigration: mockPrepareLegacyFactoryMigration,
 }));
 
 vi.mock('@promptscript/compiler', () => ({
@@ -139,8 +146,10 @@ vi.mock('chalk', () => {
   };
 });
 
+import { resolve } from 'path';
 import { diffCommand, createDiffLogger } from '../diff.js';
 import { ConsoleOutput } from '../../output/console.js';
+import { createOutputPlan } from '@promptscript/core';
 
 describe('diffCommand', () => {
   beforeEach(() => {
@@ -183,6 +192,54 @@ describe('diffCommand', () => {
       expect.stringContaining('.github/copilot-instructions.md')
     );
     expect(mockPagerFlush).toHaveBeenCalled();
+  });
+
+  it('should reject empty target configurations', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: [{}],
+      validation: {},
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+
+    await diffCommand({ noPager: true });
+
+    expect(mockFail).toHaveBeenCalledWith('Error');
+    expect(ConsoleOutput.error).toHaveBeenCalledWith('Empty target configuration');
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should compile an explicitly requested target not present in config', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([['custom.md', { path: 'custom.md', content: 'custom output' }]]),
+    });
+
+    await diffCommand({ noPager: true, target: 'custom' });
+
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ formatters: [{ name: 'custom' }] })
+    );
+    expect(mockCompile).toHaveBeenCalledTimes(1);
   });
 
   it('should report no changes when files are up to date', async () => {
@@ -320,6 +377,37 @@ describe('diffCommand', () => {
     expect(mockCompile).toHaveBeenCalledTimes(1);
   });
 
+  it('should honour a configured entry file and disabled universal skills', async () => {
+    const entryPath = resolve(process.cwd(), 'custom/entry.prs');
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      universalDir: false,
+      input: { entry: 'custom/entry.prs' },
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) => String(path) === entryPath);
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map(),
+    });
+
+    await diffCommand({ noPager: true });
+
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resolver: expect.objectContaining({ skills: undefined }),
+      })
+    );
+    expect(mockCompile).toHaveBeenCalledWith(entryPath);
+  });
+
   it('should fail when entry file is not found', async () => {
     // Arrange
     mockLoadConfig.mockResolvedValue({
@@ -419,6 +507,76 @@ describe('diffCommand', () => {
     expect(mockPagerWrite).toHaveBeenCalledWith(
       expect.stringContaining('All files are up to date')
     );
+  });
+
+  it('should compare only final planned outputs under the configured base directory', async () => {
+    const outputPlan = createOutputPlan([
+      {
+        owner: 'github',
+        output: { path: 'planned.md', content: 'planned content' },
+      },
+    ]);
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github', { disabled: { enabled: false } }],
+      validation: {},
+      output: { baseDir: 'dist' },
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      if (value.endsWith('/.promptscript/project.prs')) return true;
+      return false;
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([
+        ['planned.md', { path: 'planned.md', content: 'planned content' }],
+        ['unplanned.md', { path: 'unplanned.md', content: 'must not compare' }],
+      ]),
+      outputPlan,
+    });
+
+    await diffCommand({ noPager: true });
+
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ formatters: [{ name: 'github' }] })
+    );
+    expect(mockPagerWrite).toHaveBeenCalledWith(expect.stringContaining('/dist/planned.md'));
+    expect(mockPagerWrite).not.toHaveBeenCalledWith(expect.stringContaining('unplanned.md'));
+  });
+
+  it('should prepare legacy Factory migration before finalizing Factory output', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([['.factory/hooks.json', { path: '.factory/hooks.json', content: '{}' }]]),
+    });
+
+    await diffCommand({ noPager: true });
+
+    expect(mockPrepareLegacyFactoryMigration).toHaveBeenCalledTimes(1);
+    expect(mockPrepareLegacyFactoryMigration).toHaveBeenCalledWith(expect.any(Map), process.cwd());
   });
 });
 
