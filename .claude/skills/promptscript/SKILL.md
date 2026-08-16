@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-08-05T11:01:45.244Z | source: .promptscript/project.prs | target: claude
+# promptscript-generated: 2026-08-16T08:50:28.851Z | source: .promptscript/project.prs | target: claude
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -293,6 +293,10 @@ Review the code using {{language}} conventions following {{standard}}.
 The `references` field in SKILL.md frontmatter lists files to attach to the skill's context.
 Paths are relative to the SKILL.md file.
 
+Imported SKILL.md frontmatter is bounded: 256 KiB per document, 10,000 YAML nodes, 32 nesting
+levels, 2,000 entries per mapping or sequence, and 64 KiB per string value. Documents over any
+limit are rejected before their YAML values are converted.
+
 Pass values in `@skills` block:
 
 ```
@@ -391,6 +395,19 @@ Custom subagent definitions. Compiles to `.claude/agents/` for Claude Code,
   }
 }
 ```
+
+Imported agent definitions are qualified by an aliased `@use`:
+
+```
+@use ./frontend-team as frontend
+@use ./backend-team as backend
+```
+
+If both imports define `reviewer`, the resolved names are `frontend.reviewer` and
+`backend.reviewer`. Unique unaliased imports keep their original names. Conflicting unaliased
+definitions stop compilation with source and import diagnostics instead of silently overwriting
+one another. Native targets map dots to hyphens, so `frontend.reviewer` becomes
+`frontend-reviewer`.
 
 Supports mixed models per agent: `specModel` sets a different model for
 Specification/planning mode (GitHub, Factory), `specReasoningEffort` sets reasoning
@@ -1093,6 +1110,7 @@ sections without changing filenames, frontmatter, XML tags, or structured keys:
 - **PS019 (`unknown-block-name`)**: warns when a block name is not a known PromptScript type, with fuzzy-match suggestions for typos.
 - **PS037 (`valid-section-headers`)**: rejects invalid titles, unknown or unowned section keys, duplicate overrides, and nested extension overrides.
 - **PS038 (`valid-block-shape`)**: rejects unsupported built-in block shapes and warns about formatter-sensitive legacy shapes or multiline shortcut scalars.
+- **PS039 (`agent-namespaces`)**: validates qualified agent name segments and checks them against recorded import provenance.
 - **PS021 (`use-block-filter`)**: errors when `only` and `exclude` are both specified in `@use` parameters.
 - **PS025 (`valid-skill-references`)**: errors when a `references` entry points to a file with a disallowed extension or a path that cannot be resolved.
 - **PS026 (`safe-reference-content`)**: warns when a referenced file contains potentially sensitive content (e.g., secrets, credentials).
@@ -1140,6 +1158,8 @@ prs import CLAUDE.md        # Import existing AI instructions
 prs import CLAUDE.md --dry-run # Preview import conversion
 prs inspect <skill>         # Show skill composition provenance
 prs inspect <skill> --layers # Show layer-level breakdown
+prs explain <path>          # Explain source and composition provenance
+prs explain <path> --format json # Machine-readable provenance history
 prs hooks install           # Install auto-compilation hooks for AI tools
 prs hooks install claude    # Install hooks for a specific tool
 prs hooks uninstall         # Remove installed auto-compilation hooks
@@ -1152,6 +1172,8 @@ prs skills list             # List all imported skills
 prs skills update           # Re-resolve markdown-imported skills (re-validates + re-hashes)
 prs pull                    # Update registry
 prs diff --target claude    # Show compilation diff
+prs diff --all --format json # Machine-readable diff report for CI
+prs diff --format json --include-content # Include generated content in the report
 prs lock                    # Generate/update promptscript.lock
 prs lock --dry-run          # Preview lockfile changes
 prs update                  # Re-resolve all remote imports to latest
@@ -1186,8 +1208,14 @@ writes when no candidates are detected.
 | Roo Code    | .roorules                       | -------------------------------------------------- |
 | Codex       | AGENTS.md                       | .agents/skills/\*/SKILL.md                         |
 | Continue    | .continue/rules/project.md      | -------------------------------------------------- |
-| Hermes      | AGENTS.md                       | -                                                  |
+| Hermes      | AGENTS.md                       | -------------------------------------------------- |
 | + 36 more   |                                 | See full list in documentation                     |
+
+Targets that share an output path (for example Factory, Codex, and every AGENTS.md target) are
+reconciled in one output plan before anything is written. Identical content merges silently;
+differing content reports `PS4001`, where a formatter output replaces an earlier one and a
+resource or the auto-injected PromptScript skill keeps the file already planned. Paths are compared
+case-insensitively and NFC-normalized on every platform.
 
 ### Formatter Documentation
 
