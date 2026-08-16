@@ -21,6 +21,7 @@ import { updateCommand } from './commands/update.js';
 import { vendorSyncCommand, vendorCheckCommand } from './commands/vendor.js';
 import { resolveCommand } from './commands/resolve-cmd.js';
 import { inspectCommand } from './commands/inspect.js';
+import { explainCommand } from './commands/explain.js';
 import { setContext, LogLevel, ConsoleOutput } from './output/console.js';
 import { checkForUpdates, printUpdateNotification } from './utils/version-check.js';
 import { importCommand } from './commands/import.js';
@@ -178,6 +179,15 @@ program
   .option('-c, --config <path>', 'Path to custom config file')
   .option('--cwd <dir>', 'Working directory (project root)')
   .action((skillName, opts) => inspectCommand(skillName, opts));
+
+program
+  .command('explain <path>')
+  .description('Explain source and composition provenance for a resolved path')
+  .option('--format <format>', 'Output format (text, json)', 'text')
+  .option('-c, --config <path>', 'Path to custom config file')
+  .option('--cwd <dir>', 'Working directory (project root)')
+  .option('--absolute-paths', 'Include absolute filesystem paths in output')
+  .action((path, opts) => explainCommand(path, opts));
 
 program
   .command('pull')

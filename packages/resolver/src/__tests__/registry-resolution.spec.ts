@@ -8,14 +8,14 @@ import { join, resolve, dirname } from 'path';
 import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
 import { promisify } from 'util';
-import type { PathReference, RegistriesConfig } from '@promptscript/core';
+import { ResolveError, type PathReference, type RegistriesConfig } from '@promptscript/core';
 import {
   FileLoader,
   REGISTRY_MARKER_PREFIX,
   parseRegistryMarker,
   buildRegistryMarker,
 } from '../loader.js';
-import { Resolver } from '../resolver.js';
+import { Resolver, type ResolvedAST } from '../resolver.js';
 import { RegistryCache } from '../registry-cache.js';
 import {
   VENDOR_GIT_DIR,
@@ -997,6 +997,37 @@ describe('Resolver — registry marker handling', () => {
     expect(result.errors.length).toBeGreaterThan(0);
   });
 
+  it('returns error for invalid registry marker', async () => {
+    // Arrange - verify the invalid marker branch directly.
+    const parsed = parseRegistryMarker('not-a-registry-marker');
+    expect(parsed).toBeNull();
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: FIXTURES_DIR,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-invalid-marker'),
+    });
+    const errors: ResolveError[] = [];
+    const resolveRegistryImport = (
+      resolver as unknown as {
+        resolveRegistryImport: (
+          marker: string,
+          resolveErrors: ResolveError[],
+          context: unknown
+        ) => Promise<ResolvedAST>;
+      }
+    ).resolveRegistryImport.bind(resolver);
+
+    const result = await resolveRegistryImport('not-a-registry-marker', errors, {
+      preflightRegistryImports: new Map(),
+    });
+
+    expect(result.ast).toBeNull();
+    expect(result.sources).toEqual(['not-a-registry-marker']);
+    expect(errors[0]?.message).toContain('Invalid registry marker');
+  });
+
   it('returns an error when a registry marker payload is malformed', async () => {
     // Arrange
     const tempDir = join(testCacheDir, 'malformed-marker');
@@ -1553,6 +1584,35 @@ describe('Resolver — registry marker handling', () => {
     const traversalErrors = result.errors.filter((e) => e.message.includes('traversal'));
     expect(traversalErrors.length).toBeGreaterThan(0);
     expect(traversalErrors[0]!.message).toContain('Path traversal detected');
+  });
+
+  it('returns an empty result for direct registry directory traversal', async () => {
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: FIXTURES_DIR,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-direct-traversal'),
+    });
+    const marker = buildRegistryMarker('https://github.com/acme/repo', '../outside', '');
+    const errors: ResolveError[] = [];
+    const resolveRegistryImport = (
+      resolver as unknown as {
+        resolveRegistryImport: (
+          registryMarker: string,
+          resolveErrors: ResolveError[],
+          context: unknown
+        ) => Promise<ResolvedAST>;
+      }
+    ).resolveRegistryImport.bind(resolver);
+
+    const result = await resolveRegistryImport(marker, errors, {
+      resolving: new Set<string>(),
+      preflightRegistryImports: new Map(),
+    });
+
+    expect(result.ast).toBeNull();
+    expect(errors.some((error) => error.message.includes('traversal'))).toBe(true);
+    expect(result.provenance.entries).toEqual([]);
   });
 
   it('rejects a registry file symlink that escapes the cache', async () => {

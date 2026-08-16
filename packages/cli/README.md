@@ -363,6 +363,7 @@ requires Git registries to already exist in vendor mode or a valid local cache.
 | `prs validate --fix`                                | Upgrade outdated syntax declarations when possible       |
 | `prs diff --all`                                    | Preview compiled output differences                      |
 | `prs inspect <skill>`                               | Show skill layers and property provenance                |
+| `prs explain <path>`                                | Show source and composition provenance                   |
 | `prs hooks install [tool]`                          | Integrate supported AI tools and protect generated files |
 | `prs skills <add\|remove\|list\|update>`            | Manage remote Markdown skills                            |
 | `prs registry <init\|validate\|publish\|list\|add>` | Manage registries and aliases                            |
@@ -372,6 +373,12 @@ requires Git registries to already exist in vendor mode or a valid local cache.
 | `prs import <file>` / `prs migrate`                 | Adopt existing instruction files                         |
 | `prs upgrade`                                       | Upgrade `.prs` syntax versions                           |
 | `prs serve`                                         | Connect local files to the online playground             |
+
+`prs explain` emits project-relative source paths by default. Pass
+`--absolute-paths` to opt in to host filesystem paths. JSON output contains
+`version`, `path`, `entries`, and `diagnostics`. The command exits nonzero for
+missing paths, resolution failures, or fatal diagnostics; warning-only
+diagnostics keep exit status 0.
 
 See the [complete CLI reference](https://getpromptscript.dev/reference/cli/) for every option.
 

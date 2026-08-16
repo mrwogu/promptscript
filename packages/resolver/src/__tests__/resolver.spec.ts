@@ -127,6 +127,33 @@ describe('Resolver', () => {
       // Context should come from child only
       const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
       expect(contextBlock).toBeDefined();
+
+      const inheritedIdentity = result.provenance.entries.find(
+        (entry) => entry.path === 'identity.text[0]'
+      );
+      expect(
+        inheritedIdentity?.history.some(
+          (step) => step.operation === 'inherit' && step.chain[0]?.operation === 'inherit'
+        )
+      ).toBe(true);
+    });
+
+    it('should expose provenance for inherited fields and extension operations', async () => {
+      const result = await resolver.resolve('./with-extends.prs');
+
+      expect(result.provenance.version).toBe(1);
+      expect(result.provenance.entry).toContain('with-extends.prs');
+      expect(result.provenance.entries.some((entry) => entry.path === 'identity')).toBe(true);
+      const frameworkEntry = result.provenance.entries.find(
+        (entry) => entry.path === 'standards.code.frameworks[1]'
+      );
+      expect(frameworkEntry?.source.file).toContain('with-extends.prs');
+      expect(
+        frameworkEntry?.history.some(
+          (step) =>
+            step.operation === 'extend' && (step.action === 'merged' || step.action === 'appended')
+        )
+      ).toBe(true);
     });
 
     it('should resolve multi-level inheritance (3+ levels)', async () => {
@@ -175,6 +202,15 @@ describe('Resolver', () => {
       // Import markers should be removed after resolution
       const hasImportMarker = result.ast?.blocks.some((b) => b.name.startsWith('__import__'));
       expect(hasImportMarker).toBe(false);
+
+      const importedGuard = result.provenance.entries.find(
+        (entry) => entry.path === 'guards.security.level'
+      );
+      expect(
+        importedGuard?.history.some(
+          (step) => step.operation === 'use' && step.chain[0]?.operation === 'use'
+        )
+      ).toBe(true);
     });
 
     it('should resolve file with @extend', async () => {
@@ -380,6 +416,31 @@ describe('Resolver', () => {
           (e) => e.message.includes('File not found') || e.message.includes('resolve')
         )
       ).toBe(true);
+    });
+
+    it('should report registry inheritance failures', async () => {
+      const directory = mkdtempSync(join(tmpdir(), 'promptscript-resolver-registry-inherit-'));
+      const entryPath = join(directory, 'entry.prs');
+      writeFileSync(
+        entryPath,
+        '@inherit github.com/org/repo/standards\n@identity { """Local identity""" }\n'
+      );
+
+      try {
+        const registryResolver = new Resolver({
+          registryPath: directory,
+          localPath: directory,
+          cache: false,
+          lockfile: { version: 1, dependencies: {} },
+        });
+        const result = await registryResolver.resolve(entryPath);
+
+        expect(
+          result.errors.some((error) => error.message.includes('Failed to resolve parent'))
+        ).toBe(true);
+      } finally {
+        rmSync(directory, { recursive: true, force: true });
+      }
     });
 
     it('should handle missing import file', async () => {

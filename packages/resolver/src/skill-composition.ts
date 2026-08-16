@@ -8,9 +8,18 @@ import type {
   InlineUseDeclaration,
   ComposedPhase,
   SkillContractField,
+  ProvenanceTrace,
+  SourceLocation,
   SyntaxFeatureUsage,
 } from '@promptscript/core';
-import { deepClone, getSyntaxFeatureUsages, isTextContent, ResolveError } from '@promptscript/core';
+import {
+  blockContentToBody,
+  deepClone,
+  getSyntaxFeatureUsages,
+  isTextContent,
+  reconcileBlockBody,
+  ResolveError,
+} from '@promptscript/core';
 
 // ── Configuration constants ────────────────────────────────────────
 
@@ -30,7 +39,10 @@ const COMPOSABLE_CONTEXT_BLOCKS = new Set(['knowledge', 'restrictions', 'standar
  */
 export interface CompositionOptions {
   /** Resolve a sub-skill file through the full resolver pipeline. */
-  resolveFile: (absPath: string) => Promise<Program>;
+  resolveFile: (
+    absPath: string,
+    context?: CompositionResolutionContext
+  ) => Promise<Program | ResolvedCompositionFile>;
   /** Resolve a path reference string to an absolute path. */
   resolvePath: (ref: string, fromFile: string) => string;
   /** Absolute path of the file being resolved (for cycle detection). */
@@ -39,6 +51,26 @@ export interface CompositionOptions {
   resolutionStack?: Set<string>;
   /** Current nesting depth (0-based). */
   depth?: number;
+}
+
+/**
+ * Resolution state passed into nested composition loads.
+ */
+export interface CompositionResolutionContext {
+  /** Files already being traversed by composition. */
+  readonly resolutionStack: Set<string>;
+  /** Current composition depth. */
+  readonly depth: number;
+}
+
+/**
+ * Result returned by a resolver that can provide child provenance.
+ */
+export interface ResolvedCompositionFile {
+  /** Resolved child AST. */
+  readonly ast: Program;
+  /** Provenance collected while resolving the child. */
+  readonly provenance?: ProvenanceTrace;
 }
 
 // ── Main entry point ───────────────────────────────────────────────
@@ -103,6 +135,10 @@ export async function resolveSkillComposition(
     updatedBlocks[idx] = {
       ...skillsBlock,
       content: resolvedComposition.content,
+      canonicalBody: reconcileBlockBody(
+        skillsBlock.canonicalBody ?? blockContentToBody(skillsBlock.content),
+        resolvedComposition.content
+      ),
     };
     syntaxFeatures.push(...resolvedComposition.syntaxFeatures);
   }
@@ -189,6 +225,10 @@ interface ResolvedPhase {
   name: string;
   /** Absolute source path */
   source: string;
+  /** Source location of the parent @use declaration */
+  loc: SourceLocation;
+  /** Source location of the composed skill definition */
+  definitionLoc?: SourceLocation;
   /** Alias if specified */
   alias?: string;
   /** Skill description */
@@ -209,6 +249,8 @@ interface ResolvedPhase {
   contextBlocks: ExtractedContext[];
   /** Versioned syntax used by the resolved sub-skill */
   syntaxFeatures: SyntaxFeatureUsage[];
+  /** Provenance collected while resolving the sub-skill */
+  provenance?: ProvenanceTrace;
 }
 
 /**
@@ -263,10 +305,21 @@ async function resolveInlineUse(
   // Resolve the sub-skill through the full pipeline
   const childStack = new Set(resolutionStack);
   childStack.add(options.currentFile);
+  const childContext: CompositionResolutionContext = {
+    resolutionStack: childStack,
+    depth: depth + 1,
+  };
 
   let subAst: Program;
+  let childProvenance: ProvenanceTrace | undefined;
   try {
-    subAst = await options.resolveFile(absPath);
+    const resolvedFile = await options.resolveFile(absPath, childContext);
+    if (isResolvedCompositionFile(resolvedFile)) {
+      subAst = resolvedFile.ast;
+      childProvenance = resolvedFile.provenance;
+    } else {
+      subAst = resolvedFile;
+    }
   } catch (err) {
     throw new ResolveError(
       `Failed to resolve sub-skill '${inlineUse.path.raw}': ${err instanceof Error ? err.message : String(err)}`,
@@ -287,6 +340,8 @@ async function resolveInlineUse(
     phaseNumber,
     name: phaseName,
     source: absPath,
+    loc: inlineUse.loc,
+    ...(skillDef.definitionLoc ? { definitionLoc: skillDef.definitionLoc } : {}),
     alias: inlineUse.alias,
     description: skillDef.description,
     skillContent: skillDef.content,
@@ -297,7 +352,21 @@ async function resolveInlineUse(
     outputs: skillDef.outputs,
     contextBlocks,
     syntaxFeatures: getSyntaxFeatureUsages(subAst),
+    ...(childProvenance ? { provenance: childProvenance } : {}),
   };
+}
+
+function isResolvedCompositionFile(
+  value: Program | ResolvedCompositionFile
+): value is ResolvedCompositionFile {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'ast' in value &&
+    typeof value.ast === 'object' &&
+    value.ast !== null &&
+    value.ast.type === 'Program'
+  );
 }
 
 /**
@@ -305,6 +374,7 @@ async function resolveInlineUse(
  */
 interface ExtractedSkillDef {
   name: string;
+  definitionLoc?: SourceLocation;
   description?: string;
   content?: string;
   allowedTools: string[];
@@ -352,9 +422,15 @@ function extractSkillDefinition(ast: Program, absPath: string): ExtractedSkillDe
   }
 
   const skillObj = props[matchName];
+  const definitionLoc = skillsBlock.canonicalBody
+    ? [...skillsBlock.canonicalBody.entries]
+        .reverse()
+        .find((entry) => entry.type === 'FieldEntry' && entry.name === matchName)?.loc
+    : skillsBlock.loc;
   if (!isSkillObject(skillObj)) {
     return {
       name: matchName,
+      definitionLoc,
       allowedTools: [],
       references: [],
       requires: [],
@@ -365,6 +441,7 @@ function extractSkillDefinition(ast: Program, absPath: string): ExtractedSkillDe
 
   return {
     name: matchName,
+    definitionLoc,
     description: typeof obj['description'] === 'string' ? obj['description'] : undefined,
     content: extractTextValue(obj['content']),
     allowedTools: extractStringArray(obj['allowedTools']),
@@ -488,6 +565,8 @@ function composeIntoSkill(
     const composedPhase: ComposedPhase = {
       name: phase.name,
       source: phase.source,
+      loc: phase.loc,
+      ...(phase.definitionLoc ? { definitionLoc: phase.definitionLoc } : {}),
       composedBlocks,
     };
 
@@ -501,6 +580,10 @@ function composeIntoSkill(
 
     if (phase.outputs) {
       composedPhase.outputs = convertToContractFields(phase.outputs);
+    }
+
+    if (phase.provenance) {
+      composedPhase.provenance = phase.provenance;
     }
 
     composedPhases.push(composedPhase);

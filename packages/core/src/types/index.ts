@@ -6,5 +6,6 @@ export * from './lockfile.js';
 export * from './manifest.js';
 export * from './policy.js';
 export * from './prettier.js';
+export * from './provenance.js';
 export * from './registries.js';
 export * from './source.js';
