@@ -219,7 +219,7 @@ function isOwnedOutput(path: string, content: string): boolean {
  * still being safely updated by `prs compile`. Diff must compare that merged
  * candidate, not the formatter's generated fragment.
  */
-function getPlannedContent(
+export function getPlannedContent(
   output: FormatterOutput,
   existingContent: string | undefined
 ): { content: string; safelyWritable: boolean } {
