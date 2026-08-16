@@ -1,11 +1,12 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { mkdtemp, mkdir, rm, writeFile } from 'fs/promises';
-import { join } from 'path';
+import { basename, join } from 'path';
 import { tmpdir } from 'os';
 import type { ObjectContent, Program, Value } from '@promptscript/core';
 import { Resolver } from '../resolver.js';
 import { discoverNativeContent } from '../auto-discovery.js';
 import { collectSkillResources, toSkillResourceValues } from '../skill-resources.js';
+import { MAX_RESOURCE_COUNT, MAX_RESOURCE_SIZE } from '../skill-resource-limits.js';
 import { parseSkillMd } from '../skills.js';
 
 const temporaryDirectories: string[] = [];
@@ -178,6 +179,98 @@ describe('collectSkillResources', () => {
     expect(collected.errors.map((error) => error.message)).toEqual([
       'Reference file not found: missing.md',
       'Script file not found: missing.sh',
+    ]);
+  });
+
+  it('excludes a dirname markdown skill source from its resources', async () => {
+    const skillDir = await createTempDir('prs-collect-fallback-');
+    const skillMdPath = join(skillDir, 'fallback.md');
+    const source = ['---', 'name: fallback', 'description: d', '---', '', 'Body'].join('\n');
+    await writeFile(skillMdPath, source);
+    await writeFile(join(skillDir, 'data.txt'), 'data');
+
+    const collected = await collectSkillResources(skillMdPath, parseSkillMd(source, skillMdPath));
+
+    expect(collected.errors).toEqual([]);
+    expect(collected.resources.map((resource) => resource.relativePath)).toEqual(['data.txt']);
+  });
+
+  it('excludes a dirname markdown source before applying the count limit', async () => {
+    const skillDir = await createTempDir('prs-collect-source-limit-');
+    const skillMdPath = join(skillDir, `${basename(skillDir)}.md`);
+    const source = ['---', 'name: fallback', 'description: d', '---', '', 'Body'].join('\n');
+    await writeFile(skillMdPath, source);
+    await Promise.all(
+      Array.from({ length: MAX_RESOURCE_COUNT }, (_, index) =>
+        writeFile(join(skillDir, `resource-${String(index).padStart(3, '0')}.txt`), 'x')
+      )
+    );
+
+    const collected = await collectSkillResources(skillMdPath, parseSkillMd(source, skillMdPath));
+
+    expect(collected.errors).toEqual([]);
+    expect(collected.resources).toHaveLength(MAX_RESOURCE_COUNT);
+    expect(collected.resources.some((resource) => resource.origin === skillMdPath)).toBe(false);
+  });
+
+  it('enforces the resource count limit after merging explicit entries', async () => {
+    const skillDir = await createTempDir('prs-collect-count-limit-');
+    await mkdir(join(skillDir, 'data'));
+    await mkdir(join(skillDir, 'tests'));
+    await Promise.all(
+      Array.from({ length: MAX_RESOURCE_COUNT }, (_, index) =>
+        writeFile(join(skillDir, 'data', `${String(index).padStart(3, '0')}.txt`), 'x')
+      )
+    );
+    await writeFile(join(skillDir, 'tests', 'explicit.md'), 'explicit');
+    const skillMdPath = join(skillDir, 'SKILL.md');
+    const source = [
+      '---',
+      'name: limited',
+      'description: d',
+      'references: [tests/explicit.md]',
+      '---',
+      '',
+      'Body',
+    ].join('\n');
+    await writeFile(skillMdPath, source);
+
+    const collected = await collectSkillResources(skillMdPath, parseSkillMd(source, skillMdPath));
+
+    expect(collected.resources).toHaveLength(MAX_RESOURCE_COUNT);
+    expect(collected.errors.map((error) => error.message)).toEqual([
+      `Too many skill resource files (${MAX_RESOURCE_COUNT + 1}, max ${MAX_RESOURCE_COUNT})`,
+    ]);
+  });
+
+  it('enforces the total size limit after merging explicit entries', async () => {
+    const skillDir = await createTempDir('prs-collect-size-limit-');
+    await mkdir(join(skillDir, 'data'));
+    await mkdir(join(skillDir, 'tests'));
+    const chunk = 'x'.repeat(MAX_RESOURCE_SIZE);
+    await Promise.all(
+      Array.from({ length: 10 }, (_, index) =>
+        writeFile(join(skillDir, 'data', `${index}.txt`), chunk)
+      )
+    );
+    await writeFile(join(skillDir, 'tests', 'explicit.md'), 'x');
+    const skillMdPath = join(skillDir, 'SKILL.md');
+    const source = [
+      '---',
+      'name: limited',
+      'description: d',
+      'references: [tests/explicit.md]',
+      '---',
+      '',
+      'Body',
+    ].join('\n');
+    await writeFile(skillMdPath, source);
+
+    const collected = await collectSkillResources(skillMdPath, parseSkillMd(source, skillMdPath));
+
+    expect(collected.resources).toHaveLength(10);
+    expect(collected.errors.map((error) => error.message)).toEqual([
+      'Total skill resource size exceeds 10MB limit',
     ]);
   });
 

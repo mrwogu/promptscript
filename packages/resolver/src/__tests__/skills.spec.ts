@@ -764,6 +764,106 @@ Native resource content.
         executable: true,
       });
     });
+
+    it('should preserve existing resources when merging native references', async () => {
+      const skillDir = join(registryPath, '@skills', 'merged-resources');
+      await mkdir(join(skillDir, 'references'), { recursive: true });
+      await writeFile(join(skillDir, 'references', 'extra.md'), 'extra');
+      await writeFile(join(skillDir, '.skillignore'), 'references/extra.md\n');
+      await writeFile(
+        join(skillDir, 'SKILL.md'),
+        [
+          '---',
+          'name: merged-resources',
+          'description: Merged resources',
+          'references: [references/extra.md]',
+          '---',
+          '',
+          'Body',
+        ].join('\n')
+      );
+      const ast = createProgram([
+        createSkillsBlock({
+          'merged-resources': {
+            resources: [{ relativePath: 'declared.txt', content: 'declared' }],
+          },
+        }),
+      ]);
+
+      const result = await resolveNativeSkills(ast, registryPath, join(testDir, 'test.prs'));
+
+      const skillsBlock = result.blocks.find((block) => block.name === 'skills');
+      const skill = (skillsBlock!.content as ObjectContent).properties[
+        'merged-resources'
+      ] as Record<string, unknown>;
+      const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+      expect(resources).toEqual([
+        { relativePath: 'declared.txt', content: 'declared' },
+        expect.objectContaining({
+          relativePath: 'references/extra.md',
+          content: 'extra',
+        }),
+      ]);
+    });
+
+    it('should reject an oversized existing resource during native merging', async () => {
+      const skillDir = join(registryPath, '@skills', 'oversized-existing');
+      await mkdir(skillDir, { recursive: true });
+      await writeFile(
+        join(skillDir, 'SKILL.md'),
+        '---\nname: oversized-existing\ndescription: Oversized existing\n---\n\nBody.\n'
+      );
+      const ast = createProgram([
+        createSkillsBlock({
+          'oversized-existing': {
+            resources: [
+              {
+                relativePath: 'oversized.txt',
+                content: 'x'.repeat(1_048_577),
+              },
+            ],
+          },
+        }),
+      ]);
+
+      const result = resolveNativeSkills(ast, registryPath, join(testDir, 'test.prs'));
+
+      await expect(result).rejects.toThrow('Skill resource file exceeds 1MB limit: oversized.txt');
+    });
+
+    it('should enforce the resource count limit after merging native references', async () => {
+      const skillDir = join(registryPath, '@skills', 'limited-resources');
+      await mkdir(join(skillDir, 'data'), { recursive: true });
+      await mkdir(join(skillDir, 'references'), { recursive: true });
+      await Promise.all(
+        Array.from({ length: 100 }, (_, index) =>
+          writeFile(join(skillDir, 'data', `${String(index).padStart(3, '0')}.txt`), 'x')
+        )
+      );
+      await writeFile(join(skillDir, 'references', 'extra.md'), 'extra');
+      await writeFile(join(skillDir, '.skillignore'), 'references/extra.md\n');
+      await writeFile(
+        join(skillDir, 'SKILL.md'),
+        [
+          '---',
+          'name: limited-resources',
+          'description: Limited resources',
+          'references: [references/extra.md]',
+          '---',
+          '',
+          'Body',
+        ].join('\n')
+      );
+      const ast = createProgram([
+        createSkillsBlock({
+          'limited-resources': {},
+        }),
+      ]);
+
+      const result = resolveNativeSkills(ast, registryPath, join(testDir, 'test.prs'));
+
+      await expect(result).rejects.toThrow('Too many skill resource files (101, max 100)');
+    });
   });
 
   describe('universal .agents/skills/ directory', () => {
