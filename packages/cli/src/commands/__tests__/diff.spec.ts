@@ -281,6 +281,167 @@ describe('diffCommand', () => {
     );
   });
 
+  it('should report no changes when existing hook settings include user configuration', async () => {
+    const generatedHook = {
+      type: 'command',
+      command: 'prs compile --hook # promptscript-generated:abc123',
+    };
+    const generatedContent =
+      JSON.stringify({ hooks: { PreToolUse: [generatedHook] } }, null, 2) + '\n';
+    const existingContent =
+      JSON.stringify(
+        {
+          permissions: { allow: ['Read'] },
+          hooks: { PreToolUse: [{ type: 'command', command: 'user command' }, generatedHook] },
+        },
+        null,
+        2
+      ) + '\n';
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([['claude', { path: '.claude/settings.json', content: generatedContent }]]),
+    });
+    mockReadFile.mockResolvedValue(existingContent);
+
+    await diffCommand({ noPager: true });
+
+    expect(mockPagerWrite).toHaveBeenCalledWith(
+      expect.stringContaining('.claude/settings.json (no changes)')
+    );
+    expect(mockPagerWrite).toHaveBeenCalledWith(
+      expect.stringContaining('All files are up to date')
+    );
+    expect(mockPagerWrite).not.toHaveBeenCalledWith(
+      expect.stringContaining('.claude/settings.json (modified)')
+    );
+  });
+
+  it('should preview changed hooks after merging user settings', async () => {
+    const generatedContent =
+      JSON.stringify(
+        {
+          hooks: {
+            PreToolUse: [
+              {
+                matcher: 'Edit|Write',
+                hooks: [
+                  {
+                    type: 'command',
+                    command: '/new/prs hook pre-edit # promptscript-generated:new',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        null,
+        2
+      ) + '\n';
+    const existingContent =
+      JSON.stringify(
+        {
+          permissions: { allow: ['Read'] },
+          hooks: {
+            PreToolUse: [
+              {
+                matcher: 'Bash',
+                hooks: [{ type: 'command', command: 'echo user' }],
+              },
+              {
+                matcher: 'Edit|Write',
+                hooks: [
+                  {
+                    type: 'command',
+                    command: '/old/prs hook pre-edit # promptscript-generated:old',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        null,
+        2
+      ) + '\n';
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([['claude', { path: '.claude/settings.json', content: generatedContent }]]),
+    });
+    mockReadFile.mockResolvedValue(existingContent);
+
+    await diffCommand({ noPager: true, full: true });
+
+    expect(mockPagerWrite).toHaveBeenCalledWith(
+      expect.stringContaining('.claude/settings.json (modified)')
+    );
+    expect(mockPagerWrite).toHaveBeenCalledWith(expect.stringContaining('/new/prs hook pre-edit'));
+    expect(mockPagerWrite).not.toHaveBeenCalledWith(expect.stringContaining('echo user'));
+    expect(mockPagerWrite).not.toHaveBeenCalledWith(expect.stringContaining('"permissions"'));
+  });
+
+  it('should preview a merged Codex config without removing user settings', async () => {
+    const existingContent = `max_threads = 4
+
+model = "gpt-5"
+
+[[hooks.PreToolUse]]
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "echo old # promptscript-generated:owned"
+`;
+    mockLoadConfig.mockResolvedValue({
+      targets: ['codex'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([['codex', { path: '.codex/config.toml', content: 'max_threads = 8\n' }]]),
+    });
+    mockReadFile.mockResolvedValue(existingContent);
+
+    await diffCommand({ noPager: true, full: true });
+
+    expect(mockPagerWrite).toHaveBeenCalledWith(
+      expect.stringContaining('.codex/config.toml (modified)')
+    );
+    expect(mockPagerWrite).toHaveBeenCalledWith(expect.stringContaining('max_threads = 8'));
+    expect(mockPagerWrite).not.toHaveBeenCalledWith(expect.stringContaining('model = "gpt-5"'));
+  });
+
   it('should read a valid lockfile and configure complete repository roots', async () => {
     mockLoadConfig.mockResolvedValue({
       targets: ['github'],

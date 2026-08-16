@@ -17,7 +17,11 @@ import { Compiler } from '@promptscript/compiler';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { stripMarkers } from '../utils/markers.js';
 import { resolvePrettierOptions } from '../prettier/loader.js';
-import { buildCompilationDiff, createCompilationDiffErrorReport } from '../utils/diff-report.js';
+import {
+  buildCompilationDiff,
+  createCompilationDiffErrorReport,
+  getPlannedContent,
+} from '../utils/diff-report.js';
 import { loadBundledSkillContent } from '../utils/bundled-skill.js';
 import { prepareLegacyFactoryMigration } from '../utils/legacy-factory-hooks.js';
 import { finalizeOutputPlan } from '../utils/output-plan.js';
@@ -152,7 +156,8 @@ async function compareOutput(
   // File exists - compare content (strip markers to ignore timestamp-only changes)
   const existingContent = await readFile(outputPath, 'utf-8');
   const existingStripped = stripMarkers(existingContent);
-  const newStripped = stripMarkers(newContent);
+  const plannedContent = getPlannedContent(output, existingContent).content;
+  const newStripped = stripMarkers(plannedContent);
 
   if (existingStripped === newStripped) {
     pager.write(chalk.gray(`  ${outputPath} (no changes)`));
