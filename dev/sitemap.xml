@@ -3165,6 +3165,10 @@
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/collectSkillResources/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/createCompositeRegistry/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
@@ -3361,6 +3365,10 @@
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/toSkillResourceValues/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/validateAlias/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
@@ -3398,6 +3406,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/CacheMetadata/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/CollectedSkillResources/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
