@@ -1750,9 +1750,14 @@ describe('resolveSkillScripts', () => {
   });
 
   it('should reject missing script files', async () => {
-    await expect(resolveSkillScripts(['missing.sh'], testDir)).rejects.toThrow(
-      'Script file not found: missing.sh'
-    );
+    await expect(resolveSkillScripts(['missing.sh'], testDir)).rejects.toMatchObject({
+      message: 'Script file not found: missing.sh',
+      location: {
+        file: join(testDir, 'SKILL.md'),
+        line: 1,
+        column: 1,
+      },
+    });
   });
 
   it('should reject too many script files', async () => {

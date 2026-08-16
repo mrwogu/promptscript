@@ -220,6 +220,7 @@ describe('cleanupManagedOutputs', () => {
 
     await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
       removed: [],
+      rewritten: [file],
       removedDirectories: [],
     });
     await expect(readFile(file, 'utf-8').then((value) => JSON.parse(value))).resolves.toEqual({
@@ -539,6 +540,7 @@ matcher = "Edit"
     ).toBe('max_threads = 8\nmax_depth = 2\n\nmodel = "gpt-5"\n\n[features]\nhooks = true\n');
     expect(mergePromptScriptCodexConfig('max_threads = 4\n', '')).toBeUndefined();
     expect(mergePromptScriptCodexConfig('max_threads = 4\n', 'model = "gpt-5"\n')).toBeUndefined();
+    expect(mergePromptScriptCodexConfig('max_threads = 4\n', 'max_threads =')).toBeUndefined();
   });
 
   it('should reject Codex groups with malformed string assignments', () => {
