@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.18.0](https://github.com/mrwogu/promptscript/compare/v1.17.1...v1.18.0) (2026-08-16)
+
+
+### Features
+
+* **cli:** add machine-readable compilation diff ([8bca9bf](https://github.com/mrwogu/promptscript/commit/8bca9bf1c96bf209761540216040f7ddc6845bff)), closes [#421](https://github.com/mrwogu/promptscript/issues/421)
+* **formatters:** add Hermes Agent target support ([303b017](https://github.com/mrwogu/promptscript/commit/303b01794b00a08749dcec535c0c3355cb5d15ee))
+* **playground:** surface compiler warnings ([4f8a823](https://github.com/mrwogu/promptscript/commit/4f8a8236386ab7458e6c43b14efcee9c96a68712))
+* **resolver,core,cli:** trace composition provenance ([2a4bb90](https://github.com/mrwogu/promptscript/commit/2a4bb902b14aa7c121c75e2f37bdae2bedda424c)), closes [#418](https://github.com/mrwogu/promptscript/issues/418)
+
+
+### Bug Fixes
+
+* **cli,resolver:** harden race and timeout handling ([de6bf3c](https://github.com/mrwogu/promptscript/commit/de6bf3cf93ddc88b9d8ce1399323a9e504480e53))
+* **cli,resolver:** harden skill transactions ([e1234ae](https://github.com/mrwogu/promptscript/commit/e1234ae4cff27757ce9b99a186e79c3f233b8fb8))
+* **cli:** aggregate managed skill integrity ([505d37f](https://github.com/mrwogu/promptscript/commit/505d37fa8a1e4e24c2090416ff28e1967a20631d))
+* **cli:** align text diff with merged outputs ([#437](https://github.com/mrwogu/promptscript/issues/437)) ([a2b55e1](https://github.com/mrwogu/promptscript/commit/a2b55e129cb329177fda9e99b2b5656936e10f7f))
+* **cli:** bound all skills Git operations ([f54be23](https://github.com/mrwogu/promptscript/commit/f54be23d2accabd25abf814b08d09d3db9dbdb3c))
+* **cli:** canonicalize aggregate integrity hashes ([e1fd1bb](https://github.com/mrwogu/promptscript/commit/e1fd1bbdeac2135380d25f9329450c047f293eb5))
+* **cli:** expire stale skills add locks by age ([b63ff45](https://github.com/mrwogu/promptscript/commit/b63ff45511527434f9321dcb04fc1c16c09ae610))
+* **cli:** guard skills add transaction writes ([dd0b0e8](https://github.com/mrwogu/promptscript/commit/dd0b0e8335263bb73c7578da4258f766259061d0))
+* **cli:** make skills add writes atomic ([7481a01](https://github.com/mrwogu/promptscript/commit/7481a016fb28196414abe442181acb82ff1381fa))
+* **cli:** prevent skills add validation hangs ([abdebbe](https://github.com/mrwogu/promptscript/commit/abdebbe6f194b40b5beaa6d458b01d4f09eb8856))
+* **cli:** reset integrity after final skill removal ([65be22d](https://github.com/mrwogu/promptscript/commit/65be22d797919c19854e20f484a9ef2faa9054db))
+* **cli:** use node crypto import for skill hashes ([0dffd4f](https://github.com/mrwogu/promptscript/commit/0dffd4f81a8c1a10b656e46f4d93972d5d38b510))
+* **compiler,cli,resolver,formatters:** harden compilation boundaries ([f4cd9f9](https://github.com/mrwogu/promptscript/commit/f4cd9f9f4ad1f212fe995b47357754a7353fdfed))
+* **compiler:** track watch dependencies across rebuilds ([54204cb](https://github.com/mrwogu/promptscript/commit/54204cbdd185eb4a96af85967fd29cbc9f90bf92)), closes [#414](https://github.com/mrwogu/promptscript/issues/414)
+* **core,formatters:** map namespaced agents in nested fields ([37ecc31](https://github.com/mrwogu/promptscript/commit/37ecc31bde9214acef1796633b362333da7e505d)), closes [#420](https://github.com/mrwogu/promptscript/issues/420)
+* **formatters:** harden Hermes target integration ([02704a1](https://github.com/mrwogu/promptscript/commit/02704a1661e31b14b9fef5dcafc4650a92868549))
+* **formatters:** harden Hermes unsupported block warnings ([f8d4c13](https://github.com/mrwogu/promptscript/commit/f8d4c13d34fa38d951a573ca5dc92ca8af2863ef))
+* **parser:** isolate parser state per parse call ([6949bed](https://github.com/mrwogu/promptscript/commit/6949bed0b64d3c3c7f467f8fcc7c7050c65501e7)), closes [#412](https://github.com/mrwogu/promptscript/issues/412)
+* **resolver:** classify Git timeouts before auth ([19eae08](https://github.com/mrwogu/promptscript/commit/19eae0821075e9bf4332f0479e46847dea49fe93))
+* **resolver:** derive operation mode from composed programs ([874d017](https://github.com/mrwogu/promptscript/commit/874d017d5d7df8ec702c9c7a763a0ee1ab0d0518)), closes [#415](https://github.com/mrwogu/promptscript/issues/415)
+* **resolver:** import a directory that is itself a skill ([#436](https://github.com/mrwogu/promptscript/issues/436)) ([500b854](https://github.com/mrwogu/promptscript/commit/500b85418cd292b0e1e9f2e55f0fd3ad8c15071f))
+* **resolver:** keep skill resources on directory imports ([#435](https://github.com/mrwogu/promptscript/issues/435)) ([69ae39d](https://github.com/mrwogu/promptscript/commit/69ae39d75deb28e357fc360c7b81f8199498806c))
+* **resolver:** scope local discovery to project root ([2b361d8](https://github.com/mrwogu/promptscript/commit/2b361d8220a595d2aa3d49aa5580ead38205a7f0))
+* **validator:** harden PS011 context parsing ([c5b213a](https://github.com/mrwogu/promptscript/commit/c5b213a9d6bd197bc1c82cfae6312c8db30cd1fc)), closes [#399](https://github.com/mrwogu/promptscript/issues/399)
+* **validator:** harden PS011 Markdown boundaries ([8437ab1](https://github.com/mrwogu/promptscript/commit/8437ab14497a21eca92b843b964c40f6da344c82))
+* **validator:** optimize PS011 list checks ([cfd6dac](https://github.com/mrwogu/promptscript/commit/cfd6dac5f8a56fe77bb54dbd2770f2d5435b415c))
+* **validator:** preserve PS011 Markdown line boundaries ([7639a94](https://github.com/mrwogu/promptscript/commit/7639a94b7a26fd6b4d99e72930364da70aae600e))
+* **validator:** scope PS011 exemptions to defensive lists ([13d93b6](https://github.com/mrwogu/promptscript/commit/13d93b68fc48bc7ff962fabb9c313112343442c6))
+
 ## [1.17.1](https://github.com/mrwogu/promptscript/compare/v1.17.0...v1.17.1) (2026-08-12)
 
 
