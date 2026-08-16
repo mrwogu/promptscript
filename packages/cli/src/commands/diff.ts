@@ -1,6 +1,6 @@
-import { resolve } from 'path';
-import { readFile } from 'fs/promises';
-import { existsSync } from 'fs';
+import { resolve } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import type { DiffOptions } from '../types.js';
 import {
   isValidLockfile,
@@ -17,6 +17,7 @@ import { Compiler } from '@promptscript/compiler';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { stripMarkers } from '../utils/markers.js';
 import { resolvePrettierOptions } from '../prettier/loader.js';
+import { buildCompilationDiff, createCompilationDiffErrorReport } from '../utils/diff-report.js';
 import { loadBundledSkillContent } from '../utils/bundled-skill.js';
 import { prepareLegacyFactoryMigration } from '../utils/legacy-factory-hooks.js';
 import { finalizeOutputPlan } from '../utils/output-plan.js';
@@ -41,20 +42,28 @@ function configureColors(options: DiffOptions): void {
  * Mirrors createCliLogger in compile.ts so diff and compile report Prettier
  * post-format warnings consistently.
  */
-export function createDiffLogger(): Logger {
+export function createDiffLogger(machineReadable = false): Logger {
   return {
     verbose: (message: string) => {
-      if (isVerbose() || isDebug()) {
+      if (machineReadable && (isVerbose() || isDebug())) {
+        console.error(message);
+      } else if (isVerbose() || isDebug()) {
         ConsoleOutput.verbose(message);
       }
     },
     debug: (message: string) => {
-      if (isDebug()) {
+      if (machineReadable && isDebug()) {
+        console.error(message);
+      } else if (isDebug()) {
         ConsoleOutput.debug(message);
       }
     },
     warn: (message: string) => {
-      ConsoleOutput.warn(message);
+      if (machineReadable) {
+        console.error(message);
+      } else {
+        ConsoleOutput.warn(message);
+      }
     },
   };
 }
@@ -79,8 +88,19 @@ function parseTargets(targets: TargetEntry[]): { name: string; config?: TargetCo
     .filter((target) => target.config?.enabled !== false);
 }
 
-async function loadDiffLockfile(): Promise<Lockfile | undefined> {
-  const lockfilePath = resolve('promptscript.lock');
+/**
+ * Resolve universalDir config to NativeSkillOptions.
+ */
+function resolveUniversalDir(
+  universalDir: string | boolean | undefined
+): { universalDir: string } | undefined {
+  if (universalDir === false) return undefined;
+  if (typeof universalDir === 'string') return { universalDir };
+  return { universalDir: '.agents' };
+}
+
+async function loadDiffLockfile(projectRoot: string): Promise<Lockfile | undefined> {
+  const lockfilePath = resolve(projectRoot, 'promptscript.lock');
   if (!existsSync(lockfilePath)) {
     return undefined;
   }
@@ -154,41 +174,52 @@ async function compareOutput(
  * Show diff between current output files and what would be generated.
  */
 export async function diffCommand(options: DiffOptions): Promise<void> {
-  // Configure colors first
   configureColors(options);
 
-  const spinner = createSpinner('Loading configuration...').start();
+  if (options.format !== undefined && options.format !== 'text' && options.format !== 'json') {
+    ConsoleOutput.error(`Invalid output format: ${options.format}. Expected text or json.`);
+    process.exitCode = 1;
+    return;
+  }
+
+  const isJsonFormat = options.format === 'json';
+  const projectRoot = process.cwd();
+  const spinner = isJsonFormat
+    ? createSpinner('').stop()
+    : createSpinner('Loading configuration...').start();
 
   try {
     const config = await loadConfig();
-    const lockfile = await loadDiffLockfile();
-    const vendorDir = resolve('.promptscript/vendor');
+    const lockfile = await loadDiffLockfile(projectRoot);
+    const vendorDir = resolve(projectRoot, '.promptscript/vendor');
 
-    // Resolve registry path (handles git registries)
-    spinner.text = 'Resolving registry...';
-    const registry = await resolveRegistryPath(config, { vendorDir, lockfile });
+    if (!isJsonFormat) spinner.text = 'Resolving registry...';
+    const registry = await resolveRegistryPath(config, {
+      vendorDir,
+      lockfile,
+      readOnly: true,
+    });
 
-    spinner.text = 'Compiling...';
+    if (!isJsonFormat) spinner.text = 'Compiling...';
 
     // --all is the default behavior when no target is specified
     const parsedTargets = parseTargets(config.targets);
     const targets = options.target
       ? [parsedTargets.find((target) => target.name === options.target) ?? { name: options.target }]
       : parsedTargets;
-    const prettierOptions = await resolvePrettierOptions(config, process.cwd());
-    const logger = createDiffLogger();
+    const logger = createDiffLogger(isJsonFormat);
+    const prettierOptions = await resolvePrettierOptions(config, projectRoot);
     const skillContent =
       config.includePromptScriptSkill === false ? undefined : await loadBundledSkillContent(logger);
-    const outputRoot = config.output?.baseDir
-      ? resolve(process.cwd(), config.output.baseDir)
-      : process.cwd();
+    const outputRoot = resolve(projectRoot, config.output?.baseDir ?? '.');
 
     const compiler = new Compiler({
       resolver: {
         registryPath: registry.path,
-        localPath: resolve(process.cwd(), '.promptscript'),
-        projectRoot: process.cwd(),
+        localPath: resolve(projectRoot, '.promptscript'),
+        projectRoot,
         vendorDir,
+        readOnly: true,
         referenceRoots:
           registry.repositoryUrl && registry.repositoryPath
             ? { [registry.repositoryUrl]: [registry.repositoryPath] }
@@ -196,13 +227,7 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
         lockfile,
         registries: config.registries,
         skillTargets: config.skillTargets,
-        skills:
-          config.universalDir === false
-            ? undefined
-            : {
-                universalDir:
-                  typeof config.universalDir === 'string' ? config.universalDir : '.agents',
-              },
+        skills: resolveUniversalDir(config.universalDir),
       },
       validator: config.validation,
       formatters: targets,
@@ -212,14 +237,28 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       skillContent,
     });
 
-    const entryPath = config.input?.entry
-      ? resolve(process.cwd(), config.input.entry)
-      : resolve(process.cwd(), '.promptscript/project.prs');
+    const entryPath = resolve(projectRoot, config.input?.entry ?? './.promptscript/project.prs');
 
     if (!existsSync(entryPath)) {
-      spinner.fail('Entry file not found');
-      ConsoleOutput.error(`File not found: ${entryPath}`);
-      ConsoleOutput.muted('Run: prs init');
+      const message = `File not found: ${entryPath}`;
+      if (isJsonFormat) {
+        console.log(
+          JSON.stringify(
+            createCompilationDiffErrorReport(
+              [{ name: 'EntryError', code: 'DIFF0002', message }],
+              [],
+              projectRoot,
+              options.includeContent
+            ),
+            null,
+            2
+          )
+        );
+      } else {
+        spinner.fail('Entry file not found');
+        ConsoleOutput.error(message);
+        ConsoleOutput.muted('Run: prs init');
+      }
       process.exitCode = 1;
       return;
     }
@@ -227,11 +266,26 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     const result = await compiler.compile(entryPath);
 
     if (!result.success) {
-      spinner.fail('Compilation failed');
-      ConsoleOutput.newline();
+      if (isJsonFormat) {
+        console.log(
+          JSON.stringify(
+            createCompilationDiffErrorReport(
+              result.errors,
+              result.warnings,
+              projectRoot,
+              options.includeContent
+            ),
+            null,
+            2
+          )
+        );
+      } else {
+        spinner.fail('Compilation failed');
+        ConsoleOutput.newline();
 
-      for (const err of result.errors) {
-        ConsoleOutput.error(err.message);
+        for (const err of result.errors) {
+          ConsoleOutput.error(err.message);
+        }
       }
 
       process.exitCode = 1;
@@ -244,14 +298,34 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     }
     const finalized = await finalizeOutputPlan(result, {
       header: config.output?.header,
-      projectRoot: process.cwd(),
+      projectRoot,
       logger,
       additionalOutputPaths: hasFactoryTarget ? ['.factory/hooks.json'] : [],
     });
 
+    if (isJsonFormat) {
+      const report = await buildCompilationDiff({
+        projectRoot,
+        outputRoot,
+        entryPath,
+        outputs: finalized.outputs,
+        warnings: [
+          ...result.warnings,
+          ...finalized.warnings.map((message) => ({
+            ruleId: 'PRETTIER',
+            ruleName: 'prettier-post-format',
+            severity: 'warning' as const,
+            message,
+          })),
+        ],
+        includeContent: options.includeContent,
+      });
+      console.log(JSON.stringify(report, null, 2));
+      return;
+    }
+
     spinner.succeed('Diff computed');
     ConsoleOutput.newline();
-
     let hasDiff = false;
     const showFull = options.full ?? false;
     const usePager = options.noPager !== true;
@@ -273,8 +347,24 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     // Flush output through pager
     await pager.flush();
   } catch (error) {
-    spinner.fail('Error');
-    ConsoleOutput.error(error instanceof Error ? error.message : String(error));
+    const message = error instanceof Error ? error.message : String(error);
+    if (isJsonFormat) {
+      console.log(
+        JSON.stringify(
+          createCompilationDiffErrorReport(
+            [{ name: 'DiffError', code: 'DIFF0000', message }],
+            [],
+            projectRoot,
+            options.includeContent
+          ),
+          null,
+          2
+        )
+      );
+    } else {
+      spinner.fail('Error');
+      ConsoleOutput.error(message);
+    }
     process.exitCode = 1;
   }
 }

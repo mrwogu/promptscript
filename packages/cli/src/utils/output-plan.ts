@@ -52,10 +52,12 @@ function applyHeaderToOutput(output: FormatterOutput, header: string): void {
   }
 }
 
-function outputFromPlanFile(file: OutputPlanFile): FormatterOutput {
+function outputFromPlanFile(file: OutputPlanFile, provenance?: FormatterOutput): FormatterOutput {
   return {
     path: file.path,
     content: file.content,
+    ...(provenance?.target !== undefined ? { target: provenance.target } : {}),
+    ...(provenance?.source !== undefined ? { source: provenance.source } : {}),
     ...(file.mode !== undefined ? { mode: file.mode } : {}),
     ...(file.merge !== undefined ? { merge: file.merge } : {}),
     ...(file.managedOutputDirectories !== undefined
@@ -74,6 +76,8 @@ function mergeOutputWithPlan(
   return {
     path: file.path,
     content: output?.content ?? file.content,
+    ...(output?.target !== undefined ? { target: output.target } : {}),
+    ...(output?.source !== undefined ? { source: output.source } : {}),
     ...(output?.mode !== undefined
       ? { mode: output.mode }
       : file.mode !== undefined
@@ -158,9 +162,17 @@ export async function finalizeOutputPlan(
     logger: Logger;
     additionalOutputPaths?: readonly string[];
   }
-): Promise<{ outputs: Map<string, FormatterOutput>; outputPlan: OutputPlan }> {
+): Promise<{
+  outputs: Map<string, FormatterOutput>;
+  outputPlan: OutputPlan;
+  warnings: string[];
+}> {
   applyConfiguredHeader(result.outputs, options.header);
-  await postFormatWithPrettier(result.outputs, options.projectRoot, options.logger);
+  const warnings = await postFormatWithPrettier(
+    result.outputs,
+    options.projectRoot,
+    options.logger
+  );
 
   const flattenedOutputs = flattenOutputMap(result.outputs);
   const outputPlan = createOutputPlan(
@@ -169,7 +181,7 @@ export async function finalizeOutputPlan(
   const priorCollisions = result.outputPlan?.collisions ?? [];
   const finalOutputs = new Map<string, FormatterOutput>();
   for (const file of outputPlan.files) {
-    finalOutputs.set(file.path, outputFromPlanFile(file));
+    finalOutputs.set(file.path, outputFromPlanFile(file, flattenedOutputs.get(file.path)));
   }
 
   return {
@@ -178,5 +190,6 @@ export async function finalizeOutputPlan(
       ...outputPlan,
       collisions: [...priorCollisions, ...outputPlan.collisions],
     },
+    warnings,
   };
 }

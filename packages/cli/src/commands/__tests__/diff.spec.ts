@@ -114,19 +114,26 @@ vi.mock('../../output/pager.js', () => ({
   })),
 }));
 
-const { mockPostFormatWithPrettier, mockPostFormatTransform } = vi.hoisted(() => {
-  // postFormatWithPrettier mutates outputs in place. The default transform is
-  // a no-op so existing tests are unaffected; tests that exercise the
-  // post-format parity fix set mockPostFormatTransform.apply to true.
-  const mockPostFormatTransform = { apply: false };
-  const mockPostFormatWithPrettier = vi.fn(async (outputs: Map<string, { content: string }>) => {
-    if (!mockPostFormatTransform.apply) return;
-    for (const output of outputs.values()) {
-      output.content = `prettier-normalised\n${output.content}`;
-    }
-  });
-  return { mockPostFormatWithPrettier, mockPostFormatTransform };
-});
+const { mockPostFormatWithPrettier, mockPostFormatTransform, mockPostFormatWarnings } = vi.hoisted(
+  () => {
+    // postFormatWithPrettier mutates outputs in place. The default transform is
+    // a no-op so existing tests are unaffected; tests that exercise the
+    // post-format parity fix set mockPostFormatTransform.apply to true.
+    const mockPostFormatTransform = { apply: false };
+    const mockPostFormatWarnings: string[] = [];
+    const mockPostFormatWithPrettier = vi.fn(
+      async (outputs: Map<string, { content: string }>): Promise<string[]> => {
+        if (mockPostFormatTransform.apply) {
+          for (const output of outputs.values()) {
+            output.content = `prettier-normalised\n${output.content}`;
+          }
+        }
+        return [...mockPostFormatWarnings];
+      }
+    );
+    return { mockPostFormatWithPrettier, mockPostFormatTransform, mockPostFormatWarnings };
+  }
+);
 
 vi.mock('../../prettier/post-format.js', () => ({
   postFormatWithPrettier: mockPostFormatWithPrettier,
@@ -157,6 +164,7 @@ describe('diffCommand', () => {
     process.exitCode = undefined;
     mockSpinner.text = '';
     mockPostFormatTransform.apply = false;
+    mockPostFormatWarnings.length = 0;
     mockIsVerbose.mockReturnValue(false);
     mockIsDebug.mockReturnValue(false);
   });
@@ -471,6 +479,15 @@ describe('diffCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('should reject an unsupported report format', async () => {
+    await diffCommand({ format: 'yaml' as unknown as 'text' | 'json' });
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      'Invalid output format: yaml. Expected text or json.'
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should apply Prettier post-format before comparing (issue #307 drift fix)', async () => {
     // Arrange: disk content matches what compile writes AFTER prettier post-format.
     // Without the post-format call, diff would compare raw formatter output
@@ -578,6 +595,366 @@ describe('diffCommand', () => {
     expect(mockPrepareLegacyFactoryMigration).toHaveBeenCalledTimes(1);
     expect(mockPrepareLegacyFactoryMigration).toHaveBeenCalledWith(expect.any(Map), process.cwd());
   });
+
+  it('should emit a JSON error when the entry file is missing', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockReturnValue(false);
+
+    await diffCommand({ format: 'json' });
+    const json = consoleLog.mock.calls[0]?.[0] as string;
+    consoleLog.mockRestore();
+
+    const report = JSON.parse(json) as {
+      success: boolean;
+      errors: Array<{ code: string; message: string }>;
+    };
+    expect(report).toMatchObject({
+      success: false,
+      errors: [{ code: 'DIFF0002', message: expect.stringContaining('File not found') }],
+    });
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should preserve configured headers and target filtering in JSON mode', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const markedOutput = {
+      path: 'CLAUDE.md',
+      content: '---\ntitle: Project\n---\n<!-- PromptScript marker -->\ncontent\n',
+      target: 'github',
+      source: '.promptscript/project.prs',
+    };
+    const plainOutput = {
+      path: 'plain.md',
+      content: 'plain\n',
+      target: 'github',
+      source: '.promptscript/project.prs',
+    };
+    mockLoadConfig.mockResolvedValue({
+      targets: [{ github: {} }, { claude: { enabled: false } }],
+      validation: {},
+      includePromptScriptSkill: false,
+      output: { baseDir: 'generated', header: 'Generated header' },
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([
+        ['marked', markedOutput],
+        ['plain', plainOutput],
+      ]),
+    });
+
+    await diffCommand({ format: 'json' });
+    consoleLog.mockRestore();
+
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ formatters: [{ name: 'github', config: {} }] })
+    );
+    expect(markedOutput.content).toContain('---\n\nGenerated header\n');
+    expect(plainOutput.content).toBe('plain\n');
+  });
+
+  it('should preserve configured target and skill options for an explicit target', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockResolvedValue({
+      targets: [
+        {
+          github: {
+            version: '2.0',
+            convention: 'xml',
+            output: 'custom/copilot.md',
+            skillBaseDir: '.github/skills',
+            includeSkills: ['review'],
+          },
+        },
+        { claude: { enabled: false } },
+      ],
+      validation: {},
+      includePromptScriptSkill: false,
+      universalDir: '.workspace',
+      skillTargets: { 'github.com/acme/registry': '.github/skills' },
+      registries: { acme: { url: 'https://github.com/acme/registry.git' } },
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map(),
+    });
+
+    await diffCommand({ format: 'json', target: 'github' });
+    consoleLog.mockRestore();
+
+    expect(mockResolveRegistryPath).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ readOnly: true })
+    );
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        formatters: [
+          {
+            name: 'github',
+            config: {
+              version: '2.0',
+              convention: 'xml',
+              output: 'custom/copilot.md',
+              skillBaseDir: '.github/skills',
+              includeSkills: ['review'],
+            },
+          },
+        ],
+        resolver: expect.objectContaining({
+          readOnly: true,
+          skills: { universalDir: '.workspace' },
+          skillTargets: { 'github.com/acme/registry': '.github/skills' },
+          registries: { acme: { url: 'https://github.com/acme/registry.git' } },
+        }),
+      })
+    );
+  });
+
+  it('should emit JSON errors for unexpected machine-readable failures', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockRejectedValue(new Error('Config load failure'));
+
+    await diffCommand({ format: 'json' });
+    const json = consoleLog.mock.calls[0]?.[0] as string;
+    consoleLog.mockRestore();
+
+    const report = JSON.parse(json) as {
+      success: boolean;
+      errors: Array<{ code: string; message: string }>;
+    };
+    expect(report).toMatchObject({
+      success: false,
+      errors: [{ code: 'DIFF0000', message: 'Config load failure' }],
+    });
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should include Prettier post-format warnings in JSON reports', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([
+        [
+          'github',
+          {
+            path: 'README.md',
+            content: '<!-- PromptScript marker -->\ncontent\n',
+            target: 'github',
+            source: '.promptscript/project.prs',
+          },
+        ],
+      ]),
+    });
+    mockPostFormatWarnings.push('Prettier rejected README.md: invalid markdown');
+
+    await diffCommand({ format: 'json' });
+    const json = consoleLog.mock.calls[0]?.[0] as string;
+    consoleLog.mockRestore();
+
+    const report = JSON.parse(json) as {
+      warnings: Array<{ code: string; message: string }>;
+    };
+    expect(report.warnings).toEqual([
+      {
+        code: 'PRETTIER',
+        message: 'Prettier rejected README.md: invalid markdown',
+      },
+    ]);
+  });
+
+  it('should emit a machine-readable report without content by default', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      return value.endsWith('/.promptscript/project.prs');
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([
+        [
+          'github',
+          {
+            path: '.github/copilot-instructions.md',
+            content: '<!-- PromptScript marker -->\nnew content\n',
+            target: 'github',
+            source: '.promptscript/project.prs',
+          },
+        ],
+      ]),
+    });
+
+    await diffCommand({ format: 'json', noPager: true });
+    const json = consoleLog.mock.calls[0]?.[0] as string;
+    consoleLog.mockRestore();
+
+    const report = JSON.parse(json) as {
+      success: boolean;
+      hasChanges: boolean;
+      changes: Array<{ target: string; path: string; kind: string; content?: string }>;
+    };
+    expect(report).toMatchObject({
+      success: true,
+      hasChanges: true,
+      changes: [
+        expect.objectContaining({
+          target: 'github',
+          path: '.github/copilot-instructions.md',
+          kind: 'added',
+        }),
+      ],
+    });
+    expect(report.changes[0]?.content).toBeUndefined();
+    expect(mockSucceed).not.toHaveBeenCalled();
+    expect(mockPagerFlush).not.toHaveBeenCalled();
+    expect(process.exitCode).toBeUndefined();
+  });
+
+  it('should include canonical content when requested', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([
+        [
+          'github',
+          {
+            path: 'CLAUDE.md',
+            content: '<!-- PromptScript marker -->\ncontent\n',
+            target: 'github',
+            source: '.promptscript/project.prs',
+          },
+        ],
+      ]),
+    });
+
+    await diffCommand({ format: 'json', includeContent: true });
+    const json = consoleLog.mock.calls[0]?.[0] as string;
+    consoleLog.mockRestore();
+
+    const report = JSON.parse(json) as {
+      contentIncluded: boolean;
+      changes: Array<{ content?: string }>;
+    };
+    expect(report.contentIncluded).toBe(true);
+    expect(report.changes[0]?.content).toBe('content\n');
+  });
+
+  it('should report compilation errors as failed JSON without changes', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/project.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: false,
+      errors: [
+        {
+          name: 'ParseError',
+          code: 'PS0001',
+          message: 'Parse failure',
+        },
+      ],
+      warnings: [],
+      outputs: new Map(),
+    });
+
+    await diffCommand({ format: 'json' });
+    const json = consoleLog.mock.calls[0]?.[0] as string;
+    consoleLog.mockRestore();
+
+    const report = JSON.parse(json) as {
+      success: boolean;
+      hasChanges: boolean;
+      errors: Array<{ code: string; message: string }>;
+    };
+    expect(report).toMatchObject({
+      success: false,
+      hasChanges: false,
+      errors: [{ code: 'PS0001', message: 'Parse failure' }],
+    });
+    expect(process.exitCode).toBe(1);
+  });
 });
 
 describe('createDiffLogger', () => {
@@ -625,5 +1002,24 @@ describe('createDiffLogger', () => {
     const logger = createDiffLogger();
     logger.warn('post-format warning');
     expect(mockConsoleWarn).toHaveBeenCalledWith('post-format warning');
+  });
+
+  it('writes machine-readable diagnostics to stderr', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    mockIsVerbose.mockReturnValue(true);
+    mockIsDebug.mockReturnValue(true);
+    const logger = createDiffLogger(true);
+
+    logger.verbose('verbose diagnostic');
+    logger.debug('debug diagnostic');
+    logger.warn('warning diagnostic');
+
+    expect(consoleError).toHaveBeenNthCalledWith(1, 'verbose diagnostic');
+    expect(consoleError).toHaveBeenNthCalledWith(2, 'debug diagnostic');
+    expect(consoleError).toHaveBeenNthCalledWith(3, 'warning diagnostic');
+    expect(mockConsoleVerbose).not.toHaveBeenCalled();
+    expect(mockConsoleDebug).not.toHaveBeenCalled();
+    expect(mockConsoleWarn).not.toHaveBeenCalled();
+    consoleError.mockRestore();
   });
 });

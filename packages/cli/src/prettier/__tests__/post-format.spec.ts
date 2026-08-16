@@ -98,11 +98,12 @@ describe('postFormatWithPrettier', () => {
       ['a', { path: 'BROKEN.md', content: 'orig' }],
     ]);
 
-    await postFormatWithPrettier(outputs, '/proj', logger);
+    const warnings = await postFormatWithPrettier(outputs, '/proj', logger);
 
     expect(outputs.get('a')!.content).toBe('orig');
     expect(verbose.some((m) => m.includes('Prettier rejected BROKEN.md'))).toBe(true);
     expect(verbose.some((m) => m.includes('boom from prettier'))).toBe(true);
+    expect(warnings).toEqual(['Prettier rejected BROKEN.md: boom from prettier']);
   });
 
   it('logs and continues when Prettier config resolution fails', async () => {

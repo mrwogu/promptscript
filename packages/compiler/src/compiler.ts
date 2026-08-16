@@ -737,6 +737,8 @@ export class Compiler {
           const skillOutput: FormatterOutput = {
             path: skillPath,
             content: injectedContent,
+            source: sourceLabel,
+            target: formatter.name,
           };
           planCandidates.push({ output: skillOutput, owner: formatter.name, role: 'injected' });
         } catch (err) {
@@ -817,6 +819,8 @@ export class Compiler {
         const output: FormatterOutput = {
           path: file.path,
           content: file.content,
+          source: sourceLabel,
+          target: file.role === 'injected' ? 'promptscript' : file.owner,
           ...(file.mode !== undefined ? { mode: file.mode } : {}),
           ...(file.merge !== undefined ? { merge: file.merge } : {}),
           ...(file.managedOutputDirectories !== undefined

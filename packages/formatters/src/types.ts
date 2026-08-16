@@ -24,6 +24,10 @@ export interface FormatterWarning {
 export interface FormatterOutput extends OutputArtifact {
   /** Output file path (relative to project root) */
   path: string;
+  /** Target formatter that produced this output. */
+  target?: string;
+  /** Source entry used to produce this output. */
+  source?: string;
   /** Target compatibility warnings produced during formatting */
   warnings?: FormatterWarning[];
   /** Additional files to generate (e.g., workflows) */
