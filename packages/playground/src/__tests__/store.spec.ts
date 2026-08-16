@@ -9,6 +9,8 @@ import {
   selectOutputForFormatter,
   selectErrors,
   selectHasErrors,
+  selectWarnings,
+  selectHasWarnings,
   DEFAULT_FILE,
   type PlaygroundConfig,
 } from '../store';
@@ -767,6 +769,34 @@ describe('PlaygroundStore', () => {
 
     it('selectHasErrors should return false when no compile result', () => {
       expect(selectHasErrors(usePlaygroundStore.getState())).toBe(false);
+    });
+
+    it('selectWarnings should return warnings array', () => {
+      const { setCompileResult } = usePlaygroundStore.getState();
+      setCompileResult({
+        success: true,
+        outputs: new Map(),
+        errors: [],
+        warnings: [
+          {
+            ruleId: 'PS4001',
+            ruleName: 'output-path-collision',
+            severity: 'warning',
+            message: 'Test warning',
+          },
+        ],
+        stats: { resolveTime: 0, validateTime: 0, formatTime: 0, totalTime: 0 },
+      });
+
+      const warnings = selectWarnings(usePlaygroundStore.getState());
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0].ruleId).toBe('PS4001');
+      expect(selectHasWarnings(usePlaygroundStore.getState())).toBe(true);
+    });
+
+    it('selectWarnings should return empty array when no compile result', () => {
+      expect(selectWarnings(usePlaygroundStore.getState())).toEqual([]);
+      expect(selectHasWarnings(usePlaygroundStore.getState())).toBe(false);
     });
   });
 

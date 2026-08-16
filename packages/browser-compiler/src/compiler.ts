@@ -99,6 +99,11 @@ export interface CompileError {
 }
 
 /**
+ * Compilation warning reported by validation or by a formatter.
+ */
+export type CompileWarning = ValidationMessage;
+
+/**
  * Statistics about the compilation process.
  */
 export interface CompileStats {

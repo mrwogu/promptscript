@@ -21,6 +21,7 @@ export function Header() {
 
   const hasErrors = compileResult && !compileResult.success;
   const stats = compileResult?.stats;
+  const warningCount = compileResult?.warnings.length ?? 0;
 
   const onShare = async () => {
     const success = await handleShare();
@@ -62,6 +63,11 @@ export function Header() {
               <span className="text-green-400">Compiled in {stats?.totalTime}ms</span>
             </>
           ) : null}
+          {!isCompiling && warningCount > 0 && (
+            <span className="text-yellow-400">
+              {warningCount} warning{warningCount === 1 ? '' : 's'}
+            </span>
+          )}
         </div>
 
         {/* Config button */}

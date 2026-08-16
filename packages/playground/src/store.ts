@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { CompileResult, CompileError } from '@promptscript/browser-compiler';
+import type { CompileResult, CompileError, CompileWarning } from '@promptscript/browser-compiler';
 import type { FormatterOutput } from '@promptscript/formatters';
 import type { KnownTarget } from '@promptscript/core';
 import { TARGET_DEFINITIONS } from '@promptscript/core';
@@ -581,6 +581,12 @@ export const selectErrors = (state: PlaygroundState): CompileError[] =>
 
 export const selectHasErrors = (state: PlaygroundState): boolean =>
   (state.compileResult?.errors?.length ?? 0) > 0;
+
+export const selectWarnings = (state: PlaygroundState): CompileWarning[] =>
+  state.compileResult?.warnings ?? [];
+
+export const selectHasWarnings = (state: PlaygroundState): boolean =>
+  (state.compileResult?.warnings?.length ?? 0) > 0;
 
 export const selectEnabledTargets = (state: PlaygroundState): FormatterName[] =>
   (Object.entries(state.config.targets) as [FormatterName, TargetSettings][])
