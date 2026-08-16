@@ -1,7 +1,12 @@
 import { lstat, realpath } from 'fs/promises';
 import { realpathSync, statSync } from 'fs';
 import { dirname, isAbsolute, relative, resolve, sep } from 'path';
-import type { Program } from '@promptscript/core';
+import {
+  isCanonicalBlock,
+  toLegacyBlock,
+  type CanonicalProgram,
+  type Program,
+} from '@promptscript/core';
 import { extractHooks, getEnabledHookScriptResources } from '@promptscript/formatters';
 import type { CompileError } from './types.js';
 
@@ -77,11 +82,14 @@ export function inferProjectRoot(
 }
 
 export async function validateHookScriptResources(
-  ast: Program,
+  ast: Program | CanonicalProgram,
   projectRoot: string
 ): Promise<CompileError[]> {
   const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
   if (!hooksBlock) return [];
+  const legacyHooksBlock = isCanonicalBlock(hooksBlock)
+    ? toLegacyBlock(hooksBlock, { preserveCanonicalBody: true })
+    : hooksBlock;
 
   const errors: CompileError[] = [];
   const scriptsRoot = resolve(projectRoot, '.promptscript', 'scripts');
@@ -98,7 +106,7 @@ export async function validateHookScriptResources(
     realScriptsRoot = scriptsRoot;
   }
 
-  for (const hook of extractHooks(hooksBlock)) {
+  for (const hook of extractHooks(legacyHooksBlock)) {
     for (const script of getEnabledHookScriptResources(hook)) {
       const scriptPath = resolve(projectRoot, script.path);
 

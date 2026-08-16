@@ -67,6 +67,22 @@ export {
 
 // Re-export formatters for convenience
 export type { FormatterName } from '@promptscript/formatters';
+export {
+  createOutputPlan,
+  normalizeOutputCollisionKey,
+  normalizeOutputPath,
+  OutputPlanPathError,
+} from '@promptscript/core';
+export type {
+  OutputArtifact,
+  OutputPlan,
+  OutputPlanCandidate,
+  OutputPlanCollision,
+  OutputPlanFile,
+  OutputPlanManagedPaths,
+  OutputPlanArtifactRole,
+  OutputPlanCollisionResolution,
+} from '@promptscript/core';
 
 import { VirtualFileSystem } from './virtual-fs.js';
 import { BrowserCompiler, type CompileResult, type BrowserCompilerOptions } from './compiler.js';

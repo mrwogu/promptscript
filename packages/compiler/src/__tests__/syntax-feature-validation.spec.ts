@@ -190,6 +190,42 @@ describe('syntax feature validation after resolution', () => {
     );
   });
 
+  it('should report ordered-operation usage inherited from another file', async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'promptscript-syntax-feature-'));
+    directories.push(directory);
+    writeFileSync(
+      join(directory, 'base.prs'),
+      `@meta { id: "base" syntax: "1.5.0" }
+@standards { testing: ["Use Jest"] }
+`
+    );
+    const entryPath = join(directory, 'project.prs');
+    writeFileSync(
+      entryPath,
+      `@meta { id: "project" syntax: "1.4.0" }
+@inherit ./base
+`
+    );
+    const compiler = new Compiler({
+      resolver: { registryPath: directory, projectRoot: directory },
+      formatters: [],
+    });
+
+    const result = await compiler.compile(entryPath);
+
+    expect(result.errors).toEqual([]);
+    expect(result.success).toBe(true);
+    expect(result.warnings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ruleId: 'PS018',
+          message: expect.stringContaining('ordered-operations'),
+          location: expect.objectContaining({ file: join(directory, 'base.prs') }),
+        }),
+      ])
+    );
+  });
+
   it('should report replacement usage from an inline composed skill', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'promptscript-syntax-feature-'));
     directories.push(directory);

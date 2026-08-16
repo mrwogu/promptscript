@@ -125,12 +125,21 @@ Formatter (interface)
 
 ### Key Types
 
-| Type              | Description                                                            |
-| :---------------- | :--------------------------------------------------------------------- |
-| `Formatter`       | Interface every formatter implements (`format()`, `outputPath`, etc.). |
-| `FormatterOutput` | Return value of `format()` — contains rendered content and metadata.   |
-| `FormatterName`   | String union of all recognised formatter names.                        |
-| `FormatOptions`   | Options accepted by formatting functions.                              |
+| Type                 | Description                                                                |
+| :------------------- | :------------------------------------------------------------------------- |
+| `Formatter`          | Common formatter metadata plus legacy and optional canonical entry points. |
+| `LegacyFormatter`    | Compatibility formatter consuming mutable `Program` input.                 |
+| `CanonicalFormatter` | Formatter consuming immutable `CanonicalProgram` input.                    |
+| `FormatterOutput`    | Return value of `format()` - contains rendered content and metadata.       |
+| `FormatterName`      | String union of all recognised formatter names.                            |
+| `FormatOptions`      | Options accepted by formatting functions.                                  |
+
+`formatProgram()` passes canonical input directly to `formatCanonical()` when
+implemented. Legacy formatters receive one detached `toLegacyProgram()`
+projection with `canonicalBody` preserved, so mutation cannot affect the
+compiler pipeline. `BaseFormatter.formatCanonical()` provides that compatibility
+implementation for existing formatter classes; new formatters should consume
+canonical entries directly when their output contract needs source order.
 
 ## Status
 

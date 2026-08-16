@@ -277,7 +277,7 @@ describe('compile command - overwrite protection', () => {
 
       expect(mockWriteFile).not.toHaveBeenCalled();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Refusing to write outside the output directory')
+        expect.stringContaining('Output path must be project-relative and contained')
       );
       expect(process.exitCode).toBe(1);
     });
@@ -316,7 +316,7 @@ describe('compile command - overwrite protection', () => {
 
       expect(mockWriteFile).not.toHaveBeenCalled();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Refusing to write outside the output directory')
+        expect.stringContaining('Output path must be project-relative and contained')
       );
       expect(process.exitCode).toBe(1);
     });
