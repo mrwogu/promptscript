@@ -144,6 +144,10 @@ export type {
   SkillFrontmatterLocations,
 } from './skills.js';
 
+// Skill resource collection
+export { collectSkillResources, toSkillResourceValues } from './skill-resources.js';
+export type { CollectedSkillResources } from './skill-resources.js';
+
 // Skill frontmatter validation (Agent Skills spec compliance)
 export { validateSkillFrontmatter, formatSkillValidationIssues } from './skill-validation.js';
 export type {
