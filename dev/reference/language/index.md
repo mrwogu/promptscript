@@ -43,10 +43,30 @@ A PromptScript file (`.prs`) consists of:
 @knowledge { ... }
 @examples { ... }
 @local { ... }
-
 @extend path { ... }    # Block modifications
 @override path { ... }  # Atomic replacement of an existing target
 ```
+
+Aliased imports qualify imported agents so repeated local names remain distinct:
+
+```
+@use ./frontend-team as frontend
+@use ./backend-team as backend
+```
+
+An imported `reviewer` becomes `frontend.reviewer` or `backend.reviewer`. Unique unaliased names remain unchanged. Conflicting unaliased definitions produce a source-aware diagnostic instead of silently overwriting an agent. Native output maps dots to hyphens, for example `frontend.reviewer` becomes `frontend-reviewer`.
+
+Namespaces can be nested through aliased imports:
+
+```
+# team.prs
+@use ./inner-team as inner
+
+# project.prs
+@use ./team as frontend
+```
+
+The inner team's `reviewer` resolves to `frontend.inner.reviewer`. Agent references are rewritten with the same qualified name, including `agent` fields and `handoffs` entries, so references do not retain the source-local `reviewer` name.
 
 Syntax `1.5.0` resolves top-level declarations in source order. Put `@meta` first, then imports, local blocks, and modifications in the order they should apply. See [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md). Contextual `@header` entries live inside supported owner blocks, not at the top level.
 

@@ -365,6 +365,10 @@
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/AgentConflictError/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/CircularDependencyError/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
@@ -541,6 +545,10 @@
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/createNativeAgentNameMap/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/createOutputPlan/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
@@ -573,6 +581,14 @@
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/ensureAgentProvenance/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/findAgentConflicts/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/findClosestMatch/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
@@ -590,6 +606,18 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/formatVersion/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getAgentProperties/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getAgentProvenance/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getAgentProvenanceEntries/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
@@ -857,6 +885,14 @@
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/qualifyAgentName/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/qualifyAgentProperties/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/reconcileBlockBody/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
@@ -866,6 +902,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/reconcileValueNode/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/resolveAgentTargetPath/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
@@ -905,6 +945,10 @@
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/toNativeAgentName/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/updateCanonicalBlockBody/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
@@ -926,6 +970,14 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/valueNodeToValue/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/AgentConflict/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/AgentProvenance/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
