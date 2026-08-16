@@ -62,6 +62,21 @@ describe('ExampleGallery — gallery examples compile', () => {
     expect(output).toContain('Require integration tests');
   });
 
+  it('qualifies imported agents with their import alias', async () => {
+    const example = EXAMPLES.find((candidate) => candidate.id === 'namespaced-agents');
+    expect(example).toBeDefined();
+    const files = Object.fromEntries(example!.files.map((file) => [file.path, file.content]));
+
+    const result = await compile(files, example!.files[0]!.path, {
+      formatters: [{ name: 'claude', config: { version: 'full' } }],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.has('.claude/agents/frontend-reviewer.md')).toBe(true);
+    expect(result.outputs.has('.claude/agents/backend-reviewer.md')).toBe(true);
+    expect(result.outputs.has('.claude/agents/reviewer.md')).toBe(false);
+  });
+
   it('renders contextual section headers in generated output', async () => {
     const example = EXAMPLES.find((candidate) => candidate.id === 'custom-section-headers');
     expect(example).toBeDefined();

@@ -4,8 +4,10 @@ import {
   usePlaygroundStore,
   selectOutputsForFormatter,
   selectEnabledTargets,
+  selectWarnings,
   type FormatterName,
 } from '../store';
+import type { CompileWarning } from '@promptscript/browser-compiler';
 
 const FORMATTERS: { name: FormatterName; label: string; icon: string }[] = [
   { name: 'github', label: 'GitHub', icon: '🐙' },
@@ -129,6 +131,42 @@ function OutputFileTree({
   );
 }
 
+function WarningPanel({ warnings }: { warnings: CompileWarning[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const label = `${warnings.length} warning${warnings.length === 1 ? '' : 's'}`;
+
+  return (
+    <div className="border-b border-ps-border bg-ps-bg">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+        className="w-full px-3 py-1.5 text-xs flex items-center gap-2 text-yellow-400 hover:bg-ps-surface/50 cursor-pointer"
+      >
+        <span aria-hidden="true">⚠</span>
+        <span>{label}</span>
+        <span className="text-gray-500 ml-auto">{expanded ? 'Hide' : 'Show'}</span>
+      </button>
+      {expanded && (
+        <ul className="px-3 pb-2 space-y-1.5 max-h-40 overflow-auto">
+          {warnings.map((warning, index) => (
+            <li key={`${warning.ruleId}-${index}`} className="text-xs text-gray-300">
+              <div>
+                {warning.location?.file && (
+                  <span className="text-gray-500">
+                    {warning.location.file}:{warning.location.line}:{warning.location.column}{' '}
+                  </span>
+                )}
+                <span className="text-yellow-400">[{warning.ruleId}]</span> {warning.message}
+              </div>
+              {warning.suggestion && <div className="text-gray-500 pl-4">{warning.suggestion}</div>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 type OutputViewMode = 'tree' | 'tabs';
 
 export function OutputPanel() {
@@ -137,6 +175,7 @@ export function OutputPanel() {
   const compileResult = usePlaygroundStore((s) => s.compileResult);
   const isCompiling = usePlaygroundStore((s) => s.isCompiling);
   const enabledTargets = usePlaygroundStore(useShallow(selectEnabledTargets));
+  const warnings = usePlaygroundStore(useShallow(selectWarnings));
   const [outputViewMode, setOutputViewMode] = useState<OutputViewMode>('tree');
 
   const outputs = usePlaygroundStore(
@@ -189,6 +228,8 @@ export function OutputPanel() {
           }
         )}
       </div>
+
+      {!isCompiling && warnings.length > 0 && <WarningPanel warnings={warnings} />}
 
       {/* Output content */}
       <div className="flex-1 flex flex-col overflow-hidden bg-ps-surface">

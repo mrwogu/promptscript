@@ -53,6 +53,7 @@ export {
   type CompileError,
   type CompileResult,
   type CompileStats,
+  type CompileWarning,
   type TargetConfig,
 } from './compiler.js';
 
