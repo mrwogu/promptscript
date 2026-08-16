@@ -101,6 +101,10 @@
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/buildCompilationDiff/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/checkCommand/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
@@ -110,6 +114,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/compileCommand/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/createCompilationDiffErrorReport/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
@@ -189,6 +197,10 @@
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/interfaces/BuildCompilationDiffOptions/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/interfaces/CLIContext/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
@@ -197,11 +209,31 @@
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/interfaces/CompilationDiffChange/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/interfaces/CompilationDiffReport/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/interfaces/CompilationDiffSummary/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/interfaces/CompileOptions/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/interfaces/DiffLocation/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/interfaces/DiffOptions/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/interfaces/DiffWarning/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
@@ -225,11 +257,27 @@
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/type-aliases/DiffChangeKind/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/type-aliases/DiffOwnership/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/variables/CONFIG_FILES/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/variables/ConsoleOutput/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/variables/DIFF_SCHEMA_URL/</loc>
+         <lastmod>2026-08-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/variables/DIFF_SCHEMA_VERSION/</loc>
          <lastmod>2026-08-16</lastmod>
     </url>
     <url>

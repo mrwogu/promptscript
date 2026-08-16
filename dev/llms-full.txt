@@ -5727,8 +5727,10 @@ prs diff [options]
 | Option                  | Description                       |
 | ----------------------- | --------------------------------- |
 | `-t, --target <target>` | Show diff for specific target     |
+| `--format <format>`     | Output format (`text`, `json`)    |
 | `-a, --all`             | Show diff for all targets         |
 | `--full`                | Show full diff without truncation |
+| `--include-content`     | Include canonical content in JSON |
 | `--no-pager`            | Disable pager output              |
 | `--color`               | Force colored output              |
 | `--no-color`            | Disable colored output            |
@@ -5741,7 +5743,17 @@ prs diff --all
 
 # Show diff for specific target
 prs diff --target github
+
+# Emit a machine-readable report with hashes
+prs diff --format json
+
+# Include canonical generated content in the report
+prs diff --format json --include-content
 ```
+
+JSON reports use the versioned [diff schema](https://getpromptscript.dev/schema/diff/v1.json). Content is omitted by default; each output change includes a deterministic `sha256-<hex>` hash after generation markers are removed. Change entries include target, output path, source provenance, change kind, ownership, and target compatibility warnings. `unsupported` repeats unsupported entries from `changes` for direct automation. `success: false` with `errors` means compilation or report generation failed; `success: true` with `hasChanges: true` is a valid diff report. The command exits 1 for errors and 0 for valid reports, including reports with changes.
+
+Generated output paths are compared under the configured `output.baseDir`. The JSON report uses the same formatter output, configured header, and Prettier post-format pass as `prs compile`; `prs diff` uses the complete configured target for `--target`, including version, convention, output path, and skill settings. It never writes generated files, registry checkouts, cache metadata, lockfiles, or temporary files. Git registries must already be available through vendor mode or a valid local cache; otherwise diff fails with an actionable error instead of fetching them.
 
 ______________________________________________________________________
 
