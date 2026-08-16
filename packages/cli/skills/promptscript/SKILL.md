@@ -292,6 +292,10 @@ Review the code using {{language}} conventions following {{standard}}.
 The `references` field in SKILL.md frontmatter lists files to attach to the skill's context.
 Paths are relative to the SKILL.md file.
 
+Imported SKILL.md frontmatter is bounded: 256 KiB per document, 10,000 YAML nodes, 32 nesting
+levels, 2,000 entries per mapping or sequence, and 64 KiB per string value. Documents over any
+limit are rejected before their YAML values are converted.
+
 Pass values in `@skills` block:
 
 ```
@@ -1150,6 +1154,7 @@ prs import CLAUDE.md --dry-run # Preview import conversion
 prs inspect <skill>         # Show skill composition provenance
 prs inspect <skill> --layers # Show layer-level breakdown
 prs explain <path>          # Explain source and composition provenance
+prs explain <path> --format json # Machine-readable provenance history
 prs hooks install           # Install auto-compilation hooks for AI tools
 prs hooks install claude    # Install hooks for a specific tool
 prs hooks uninstall         # Remove installed auto-compilation hooks
@@ -1162,6 +1167,8 @@ prs skills list             # List all imported skills
 prs skills update           # Re-resolve markdown-imported skills (re-validates + re-hashes)
 prs pull                    # Update registry
 prs diff --target claude    # Show compilation diff
+prs diff --all --format json # Machine-readable diff report for CI
+prs diff --format json --include-content # Include generated content in the report
 prs lock                    # Generate/update promptscript.lock
 prs lock --dry-run          # Preview lockfile changes
 prs update                  # Re-resolve all remote imports to latest
@@ -1198,6 +1205,12 @@ writes when no candidates are detected.
 | Continue    | .continue/rules/project.md      | -                                                  |
 | Hermes      | AGENTS.md                       | -                                                  |
 | + 36 more   |                                 | See full list in documentation                     |
+
+Targets that share an output path (for example Factory, Codex, and every AGENTS.md target) are
+reconciled in one output plan before anything is written. Identical content merges silently;
+differing content reports `PS4001`, where a formatter output replaces an earlier one and a
+resource or the auto-injected PromptScript skill keeps the file already planned. Paths are compared
+case-insensitively and NFC-normalized on every platform.
 
 ### Formatter Documentation
 
