@@ -1145,6 +1145,77 @@ export const EXAMPLES: Example[] = [
     ],
   },
   {
+    id: 'namespaced-agents',
+    name: 'Namespaced Agents',
+    description: 'Two teams contribute a reviewer without overwriting each other',
+    complexity: 'advanced',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "namespaced-agents"
+  syntax: "1.5.0"
+}
+
+@identity {
+  """
+  You coordinate the frontend and backend review teams.
+  Each team keeps its own reviewer agent.
+  """
+}
+
+# An alias qualifies every agent the fragment defines.
+# Both files declare "reviewer" and neither one is lost.
+@use ./frontend-team as frontend
+@use ./backend-team as backend
+
+@shortcuts {
+  "/review-ui": "Ask frontend.reviewer for a component review"
+  "/review-api": "Ask backend.reviewer for an endpoint review"
+}
+`,
+      },
+      {
+        path: 'frontend-team.prs',
+        content: `@meta {
+  id: "frontend-team"
+  syntax: "1.5.0"
+}
+
+@agents {
+  reviewer: {
+    description: "Review React components and accessibility"
+    tools: ["Read", "Grep", "Glob"]
+    content: """
+    Review component structure, state handling, and accessibility.
+    Flag re-render risks and missing keyboard support.
+    """
+  }
+}
+`,
+      },
+      {
+        path: 'backend-team.prs',
+        content: `@meta {
+  id: "backend-team"
+  syntax: "1.5.0"
+}
+
+@agents {
+  reviewer: {
+    description: "Review API endpoints and data access"
+    tools: ["Read", "Grep", "Bash"]
+    content: """
+    Review request validation, error handling, and query cost.
+    Flag missing authorization checks.
+    """
+  }
+}
+`,
+      },
+    ],
+  },
+  {
     id: 'agent-platform',
     name: 'Complete Agent Platform',
     description: 'Skills, agents, MCP servers, hooks, workflows, and plugins in one source',
