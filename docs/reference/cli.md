@@ -272,6 +272,12 @@ prs compile [options]
 
 Paths passed through `--config`, `--registry`, and `--output` are resolved relative to `--cwd` (or the current project directory). Watch mode honors the configured `watch.include`, `watch.exclude`, `watch.debounce`, and `watch.clearScreen` settings. Added, changed, and removed matching files all trigger compilation, and rebuilds are serialized.
 
+Watch mode also tracks resolved dependencies - imported files, local skills, and the loaded
+configuration - even when they sit outside `watch.include`. The dependency set is refreshed after
+every rebuild: newly resolved files start being watched, and files that are no longer dependencies
+stop being watched unless `watch.include` covers them explicitly. Removing an `@use` therefore stops
+rebuilds triggered by the dropped file, and adding one starts them without a restart.
+
 The `output.overwrite` setting provides the configuration equivalent of `--force`. A configured `output.header` is added to generated Markdown after PromptScript metadata (and after YAML frontmatter when present) so generated-file detection and frontmatter remain valid.
 
 In non-interactive mode without `--force`, `prs compile` preflights every
@@ -281,6 +287,20 @@ partially updated. Interactive mode processes outputs in order and prompts on
 conflicts, so accepted earlier writes can remain when a later path is skipped.
 Use `--dry-run` to inspect the full plan. Use `--force` or
 `output.overwrite: true` only after reviewing every conflicting path.
+
+Before anything is written, every enabled target contributes its files to a single output plan, so
+two targets that resolve to the same path are reconciled once instead of racing on disk:
+
+- Identical content and write settings are merged silently and reported only under `--debug`.
+- Differing content reports `PS4001`. A formatter output replaces an earlier one; a resource or the
+  auto-injected PromptScript skill preserves the file that is already planned, so a hand-written
+  skill always wins over the bundled one.
+- Paths are compared case-insensitively and Unicode-normalized (NFC) on every platform, so
+  `.agents/skills/Review/SKILL.md` and `.agents/skills/review/SKILL.md` collide on Linux too, and
+  the plan stays identical across macOS, Windows, and Linux.
+
+`--strict` is a separate and earlier check: it fails the run when two configured targets declare the
+same main output path, before any compilation happens.
 
 When compiling the Factory target and `.factory/hooks.json` is absent,
 `prs compile` migrates unambiguous hooks from `.factory/settings.json` before
@@ -500,19 +520,49 @@ JSON output has this shape:
 ```json
 {
   "version": 1,
-  "path": "standards.code.frameworks[0]",
+  "path": "standards.code.frameworks[1]",
   "entries": [
     {
-      "path": "standards.code.frameworks[0]",
+      "path": "standards.code.frameworks[1]",
       "kind": "list",
-      "source": { "file": ".promptscript/project.prs", "line": 4, "column": 3 },
-      "history": [],
-      "value": "React"
+      "source": { "file": ".promptscript/project.prs", "line": 15, "column": 18 },
+      "history": [
+        {
+          "operation": "declaration",
+          "action": "selected",
+          "source": { "file": ".promptscript/project.prs", "line": 15, "column": 18 },
+          "chain": []
+        },
+        {
+          "operation": "extend",
+          "action": "appended",
+          "source": { "file": ".promptscript/project.prs", "line": 15, "column": 18 },
+          "strategy": "merge",
+          "target": "standards",
+          "chain": []
+        }
+      ],
+      "value": "Vue"
     }
   ],
   "diagnostics": []
 }
 ```
+
+Each entry reports `kind` as `block`, `field`, `value`, `list`, `text`, or `inline-use`, and
+`history` lists the operations that produced the final value in application order:
+
+| Field       | Description                                                                                 |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| `operation` | `declaration`, `inherit`, `use`, `extend`, `override`, `compose`, or `generated`            |
+| `action`    | `declared`, `selected`, `merged`, `appended`, `replaced`, `removed`, or `composed`          |
+| `source`    | Location of the statement that performed the operation                                      |
+| `strategy`  | Merge strategy applied to this value, such as `merge`, `append`, or `replace`               |
+| `target`    | Resolved target of the operation, such as the extended block or the imported file           |
+| `reference` | Reference as written in the source, such as `./context` or `@company/platform`              |
+| `alias`     | Namespace alias from `@use <reference> as <alias>`                                          |
+| `chain`     | Import links traversed to reach the source, outermost first                                 |
+| `trace`     | Nested provenance of a composed value, such as a skill body pulled in by a composition step |
 
 `prs explain` exits with status 0 when the path resolves and diagnostics are
 warnings only. It exits nonzero for a missing path, configuration failure,

@@ -9,7 +9,7 @@ meta:
   - property: og:title
     content: PromptScript - Define Once, Compile Everywhere
   - property: og:description
-    content: One validated source for your complete AI agent platform. Native output for 48 coding agents.
+    content: One validated source for your complete AI agent platform. Native output for 49 coding agents.
   - property: og:type
     content: website
   - name: twitter:card
@@ -87,7 +87,7 @@ hide:
 <span>Cursor</span>
 <code>.cursor/rules/project.mdc</code>
 </div>
-<div class="home-output-more">+ 44 targets</div>
+<div class="home-output-more">+ 45 targets</div>
 </div>
 </section>
 <div class="home-platforms" aria-label="Supported platforms">
