@@ -1,8 +1,9 @@
 import { readFile, readdir, access, lstat } from 'fs/promises';
 import { resolve, basename } from 'path';
 import { ResolveError } from '@promptscript/core';
-import type { Program, Block, TextContent, Value } from '@promptscript/core';
+import type { Logger, Program, Block, TextContent, Value } from '@promptscript/core';
 import { parseSkillMd } from './skills.js';
+import { collectSkillResources, toSkillResourceValues } from './skill-resources.js';
 import { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
 
 /** Context file names to look for when synthesizing a @context block. */
@@ -69,10 +70,44 @@ function addParsedSkillMetadata(
 }
 
 /**
+ * Build the skill properties for a discovered SKILL.md, including every
+ * resource file that travels with the skill directory.
+ *
+ * Resource errors from `references:` / `scripts:` frontmatter entries are
+ * thrown, matching how a locally resolved skill reports them.
+ */
+async function buildDiscoveredSkill(
+  skillMdPath: string,
+  logger: Logger | undefined
+): Promise<{ name?: string; props: Record<string, Value> }> {
+  const raw = await readFile(skillMdPath, 'utf-8');
+  const parsed = parseSkillMd(raw, skillMdPath);
+
+  const skillProps: Record<string, Value> = {};
+  if (parsed.description) {
+    skillProps['description'] = parsed.description;
+  }
+  if (parsed.content) {
+    skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
+  }
+  addParsedSkillMetadata(skillProps, parsed);
+
+  const collected = await collectSkillResources(skillMdPath, parsed, logger);
+  if (collected.errors.length > 0) {
+    throw collected.errors[0];
+  }
+  if (collected.resources.length > 0) {
+    skillProps['resources'] = toSkillResourceValues(collected.resources);
+  }
+
+  return { ...(parsed.name ? { name: parsed.name } : {}), props: skillProps };
+}
+
+/**
  * Discover SKILL.md files in subdirectories of the given path.
  * Returns an ObjectContent mapping skill-name -> skill properties.
  */
-async function discoverSkills(dir: string): Promise<Record<string, Value> | null> {
+async function discoverSkills(dir: string, logger?: Logger): Promise<Record<string, Value> | null> {
   let entries;
   try {
     entries = await readdir(dir, { withFileTypes: true });
@@ -96,19 +131,7 @@ async function discoverSkills(dir: string): Promise<Record<string, Value> | null
     }
 
     try {
-      const raw = await readFile(skillMdPath, 'utf-8');
-      const parsed = parseSkillMd(raw, skillMdPath);
-
-      const skillProps: Record<string, Value> = {};
-      if (parsed.description) {
-        skillProps['description'] = parsed.description;
-      }
-      if (parsed.content) {
-        skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
-      }
-      addParsedSkillMetadata(skillProps, parsed);
-
-      properties[entry.name] = skillProps;
+      properties[entry.name] = (await buildDiscoveredSkill(skillMdPath, logger)).props;
     } catch (error: unknown) {
       if (error instanceof ResolveError) {
         throw error;
@@ -125,25 +148,16 @@ async function discoverSkills(dir: string): Promise<Record<string, Value> | null
  * parse it and return a single skill entry keyed by the skill's frontmatter
  * `name` field (falling back to the directory basename).
  */
-async function discoverRootSkill(dir: string): Promise<Record<string, Value> | null> {
+async function discoverRootSkill(
+  dir: string,
+  logger?: Logger
+): Promise<Record<string, Value> | null> {
   const skillMdPath = resolve(dir, 'SKILL.md');
   if (!(await fileExists(skillMdPath))) return null;
 
   try {
-    const raw = await readFile(skillMdPath, 'utf-8');
-    const parsed = parseSkillMd(raw, skillMdPath);
-
-    const skillName = parsed.name || basename(dir);
-    const skillProps: Record<string, Value> = {};
-    if (parsed.description) {
-      skillProps['description'] = parsed.description;
-    }
-    if (parsed.content) {
-      skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
-    }
-    addParsedSkillMetadata(skillProps, parsed);
-
-    return { [skillName]: skillProps };
+    const skill = await buildDiscoveredSkill(skillMdPath, logger);
+    return { [skill.name || basename(dir)]: skill.props };
   } catch (error: unknown) {
     if (error instanceof ResolveError) {
       throw error;
@@ -280,6 +294,7 @@ async function discoverContext(dir: string): Promise<TextContent | null> {
  * - CLAUDE.md, .clinerules, .cursorrules -> synthesizes `@context` block
  *
  * @param dir - Absolute path to the directory to scan
+ * @param logger - Optional logger for reporting skipped resource files
  * @returns A synthesized Program AST, or null if nothing was found or directory doesn't exist
  */
 /**
@@ -299,17 +314,17 @@ async function safeIsDirectory(dir: string): Promise<boolean> {
   }
 }
 
-export async function discoverNativeContent(dir: string): Promise<Program | null> {
+export async function discoverNativeContent(dir: string, logger?: Logger): Promise<Program | null> {
   // Check the directory exists
   if (!(await safeIsDirectory(dir))) return null;
 
   const blocks: Block[] = [];
 
   // Check if directory itself is a skill (root-level SKILL.md)
-  const rootSkill = await discoverRootSkill(dir);
+  const rootSkill = await discoverRootSkill(dir, logger);
 
   // Discover skills in subdirectories
-  const subSkills = await discoverSkills(dir);
+  const subSkills = await discoverSkills(dir, logger);
 
   // Also walk known wrapper directories (`skills/`) so registry imports against
   // a repository root pick up the standard `skills/<name>/SKILL.md` layout.
@@ -317,7 +332,7 @@ export async function discoverNativeContent(dir: string): Promise<Program | null
     SKILL_WRAPPER_DIRS.map(async (name) => {
       const candidate = resolve(dir, name);
       if (!(await safeIsDirectory(candidate))) return null;
-      return discoverSkills(candidate);
+      return discoverSkills(candidate, logger);
     })
   );
 

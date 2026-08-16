@@ -143,7 +143,9 @@ gitnexus/
     └── query.py      # discovered automatically
 ```
 
-All discovered files are copied to every compilation target alongside the skill, just as if the directory were in `.promptscript/skills/`.
+All discovered files are copied to every compilation target alongside the skill, just as if the directory were in `.promptscript/skills/`. This holds for every shape a directory import can take: the imported directory may be the skill itself (`SKILL.md` at its root), may contain skill subdirectories, or may nest them under `skills/`.
+
+Files listed in the `references:` and `scripts:` frontmatter arrays are loaded as well, and a missing entry is reported as a compilation error. The same [security limits](local-skills.md#resource-files) as local skills apply — test directories, build output and system files are skipped.
 
 ## Examples
 

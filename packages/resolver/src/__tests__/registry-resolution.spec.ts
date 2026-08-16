@@ -1500,6 +1500,69 @@ describe('Resolver — registry marker handling', () => {
     expect(paths).toContain('data.txt');
   });
 
+  it('loads resource files for a registry skill imported by directory path', async () => {
+    const tempDir = join(testCacheDir, 'project-dir-resources');
+    await fs.mkdir(tempDir, { recursive: true });
+
+    const prsContent = [
+      '@meta {',
+      '  id: "test-dir-resources"',
+      '  syntax: "1.0.0"',
+      '}',
+      '',
+      '@use github.com/foo/bar/.claude/skills/ui-ux',
+      '',
+      '@identity { """test""" }',
+    ].join('\n');
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, prsContent);
+
+    // A published skill directory: SKILL.md plus the reference docs, scripts
+    // and data files its instructions point at.
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      const skillDir = join(targetDir, '.claude', 'skills', 'ui-ux');
+      await fs.mkdir(join(skillDir, 'references'), { recursive: true });
+      await fs.mkdir(join(skillDir, 'scripts'), { recursive: true });
+      await fs.mkdir(join(skillDir, 'data'), { recursive: true });
+      await fs.writeFile(
+        join(skillDir, 'SKILL.md'),
+        [
+          '---',
+          'name: ui-ux',
+          'description: Design guidance',
+          '---',
+          'Read references/rules.md.',
+        ].join('\n')
+      );
+      await fs.writeFile(join(skillDir, 'references', 'rules.md'), '# Rules');
+      await fs.writeFile(join(skillDir, 'scripts', 'search.py'), 'print("search")');
+      await fs.writeFile(join(skillDir, 'data', 'colors.csv'), 'name,hex\nred,#f00');
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-dir-resources'),
+    });
+
+    const result = await resolver.resolve(prsFile);
+
+    expect(result.errors).toEqual([]);
+    const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+    if (skillsBlock?.content.type !== 'ObjectContent') {
+      throw new Error('skills block should be ObjectContent');
+    }
+    const skill = skillsBlock.content.properties['ui-ux'] as Record<string, unknown> | undefined;
+    const resources = skill?.['resources'] as
+      Array<{ relativePath: string; content: string }> | undefined;
+    expect((resources ?? []).map((r) => r.relativePath).sort()).toEqual([
+      'data/colors.csv',
+      'references/rules.md',
+      'scripts/search.py',
+    ]);
+  });
+
   it('detects path traversal in registry subpath (resolved file path)', async () => {
     // Covers resolver.ts lines 762-769: path traversal detection for resolvedFullPath
     const tempDir = join(testCacheDir, 'project-traversal-file');
