@@ -1035,5 +1035,54 @@
       "additionalProperties": false,
       "description": "Registry-allowlist policy: restricts which registries can provide extensions."
     }
-  }
+  },
+  "allOf": [
+    {
+      "anyOf": [
+        {
+          "required": [
+            "targets"
+          ],
+          "properties": {
+            "targets": {
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "required": [
+            "builds"
+          ],
+          "properties": {
+            "builds": {
+              "minProperties": 1,
+              "additionalProperties": {
+                "required": [
+                  "targets"
+                ],
+                "properties": {
+                  "targets": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": {
+        "builds": {
+          "additionalProperties": {
+            "properties": {
+              "targets": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }
