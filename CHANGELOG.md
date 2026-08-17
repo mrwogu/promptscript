@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.18.1](https://github.com/mrwogu/promptscript/compare/v1.18.0...v1.18.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* **cli:** explain why compile resolved zero targets ([3187d7a](https://github.com/mrwogu/promptscript/commit/3187d7aad1a3b4380d0040afc09cd0f70fe2af60))
+* **cli:** handle builds-only compile ([c2587e8](https://github.com/mrwogu/promptscript/commit/c2587e89a401300a71e20c222feba4deb57b7dfc))
+* **cli:** handle builds-only configs in diff and check ([ddff98b](https://github.com/mrwogu/promptscript/commit/ddff98baec865d0bb9ce5e38d6fc3bf8a4dd2257))
+* **cli:** harden builds-only workflows ([2b85f71](https://github.com/mrwogu/promptscript/commit/2b85f71c924cbd6d4546d03b3efb85eb485b5280)), closes [#440](https://github.com/mrwogu/promptscript/issues/440)
+* **core:** make config targets optional for builds-only setups ([38cc4c0](https://github.com/mrwogu/promptscript/commit/38cc4c056e39e6eb86747d6269d364e2e984c207))
+
 ## [1.18.0](https://github.com/mrwogu/promptscript/compare/v1.17.1...v1.18.0) (2026-08-16)
 
 
