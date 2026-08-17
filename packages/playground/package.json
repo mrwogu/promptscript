@@ -14,13 +14,13 @@
     "@promptscript/browser-compiler": "workspace:^",
     "@promptscript/core": "workspace:^",
     "@promptscript/formatters": "workspace:^",
-    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.0.0",
     "lz-string": "^1.5.0",
     "monaco-editor": "^0.56.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "zustand": "^5.0.14"
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
