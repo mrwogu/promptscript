@@ -251,7 +251,7 @@
       "items": {
         "$ref": "#/definitions/TargetEntry"
       },
-      "description": "Output targets.\n\nCan be simple names or objects with configuration:",
+      "description": "Output targets.\n\nOptional only when every target lives in a named build profile: such builds-only projects compile through `--build <name>` or `--all-builds`.\n\nCan be simple names or objects with configuration:",
       "example": "targets:\n  - github\n  - claude:\n      convention: markdown\n      output: custom/CLAUDE.md"
     },
     "customConventions": {
@@ -313,8 +313,7 @@
   },
   "required": [
     "id",
-    "syntax",
-    "targets"
+    "syntax"
   ],
   "additionalProperties": false,
   "definitions": {

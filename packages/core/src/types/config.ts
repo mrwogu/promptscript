@@ -365,6 +365,9 @@ export interface PromptScriptConfig {
   /**
    * Output targets.
    *
+   * Optional only when every target lives in a named build profile: such
+   * builds-only projects compile through `--build <name>` or `--all-builds`.
+   *
    * Can be simple names or objects with configuration:
    * @example
    * targets:
@@ -373,7 +376,7 @@ export interface PromptScriptConfig {
    *       convention: markdown
    *       output: custom/CLAUDE.md
    */
-  targets: TargetEntry[];
+  targets?: TargetEntry[];
 
   /**
    * Custom convention definitions.
