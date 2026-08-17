@@ -303,8 +303,8 @@ See exact output paths and feature support in the
 - **Reproducible builds** - lockfile hashes, version pins, vendor mode, and strict validation.
 - **Safe automation** - lifecycle hook commands use arrays, while generated-file protection keeps
   agents pointed at `.prs` source.
-- **Scoped monorepo builds** - compile one package with `prs build <name>` or every profile with
-  `prs compile --all-builds`.
+- **Scoped monorepo builds** - compile one package with `prs build <name>`, inspect it with
+  `prs diff --build <name>`, or compile every profile with `prs compile --all-builds`.
 - **CI-ready output** - use `prs validate --strict --format json`, `prs compile --dry-run`, and
   `prs diff --format json` for deterministic machine-readable changes without generated-file
   writes.

@@ -38,6 +38,41 @@ async function main(): Promise<void> {
 
   const generator = createGenerator(config);
   const schema = generator.createSchema(config.type);
+  const targetSourceConstraint = {
+    anyOf: [
+      {
+        required: ['targets'],
+        properties: {
+          targets: { minItems: 1 },
+        },
+      },
+      {
+        required: ['builds'],
+        properties: {
+          builds: {
+            minProperties: 1,
+            additionalProperties: {
+              required: ['targets'],
+              properties: {
+                targets: { minItems: 1 },
+              },
+            },
+          },
+        },
+      },
+    ],
+  };
+  const explicitProfileTargetsConstraint = {
+    properties: {
+      builds: {
+        additionalProperties: {
+          properties: {
+            targets: { minItems: 1 },
+          },
+        },
+      },
+    },
+  };
 
   // Add schema metadata
   const enrichedSchema = {
@@ -46,6 +81,7 @@ async function main(): Promise<void> {
     title: 'PromptScript Configuration',
     description: 'Configuration schema for promptscript.yaml files',
     ...schema,
+    allOf: [...(schema.allOf ?? []), targetSourceConstraint, explicitProfileTargetsConstraint],
   };
 
   // Ensure output directory exists

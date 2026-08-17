@@ -101,5 +101,10 @@ describe('types', () => {
       const options: DiffOptions = { target: 'claude' };
       expect(options.target).toBe('claude');
     });
+
+    it('should allow build option', () => {
+      const options: DiffOptions = { build: 'docs' };
+      expect(options.build).toBe('docs');
+    });
   });
 });

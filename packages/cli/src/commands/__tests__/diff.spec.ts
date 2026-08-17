@@ -221,6 +221,21 @@ describe('diffCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('should reject a scalar target list without a TypeError', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: 'claude',
+      validation: {},
+    });
+
+    await diffCommand({ noPager: true });
+
+    expect(mockFail).toHaveBeenCalledWith('Error');
+    expect(ConsoleOutput.error).toHaveBeenCalledWith('Compilation targets must be an array');
+    expect(mockResolveRegistryPath).not.toHaveBeenCalled();
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should fail cleanly when only named build profiles define targets', async () => {
     mockLoadConfig.mockResolvedValue({
       builds: { docs: { targets: ['claude'] } },
@@ -236,8 +251,93 @@ describe('diffCommand', () => {
 
     expect(mockFail).toHaveBeenCalledWith('No compilation targets');
     expect(ConsoleOutput.error).toHaveBeenCalledWith(
-      'No compilation targets configured in config.targets. prs diff reads only top-level targets - pass --target <name> or add targets to promptscript.yaml (build profiles found: docs).'
+      'No compilation targets configured in config.targets. Run prs diff --build <name> (available: docs) or add targets to promptscript.yaml.'
     );
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should apply a named build profile entry, output, and targets', async () => {
+    mockLoadConfig.mockResolvedValue({
+      builds: {
+        docs: {
+          entry: '.promptscript/docs.prs',
+          output: 'build/docs',
+          targets: [{ claude: { version: 'full' } }],
+        },
+      },
+      validation: {},
+      includePromptScriptSkill: false,
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path: string) =>
+      String(path).endsWith('/.promptscript/docs.prs')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([['CLAUDE.md', { path: 'CLAUDE.md', content: 'profile output' }]]),
+    });
+
+    await diffCommand({ build: 'docs', noPager: true });
+
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        formatters: [{ name: 'claude', config: { version: 'full' } }],
+      })
+    );
+    expect(mockCompile).toHaveBeenCalledWith(resolve(process.cwd(), '.promptscript/docs.prs'));
+    expect(mockExistsSync).toHaveBeenCalledWith(resolve(process.cwd(), 'build/docs/CLAUDE.md'));
+  });
+
+  it('should reject an unknown build profile', async () => {
+    mockLoadConfig.mockResolvedValue({
+      builds: { docs: { targets: ['claude'] } },
+      validation: {},
+    });
+
+    await diffCommand({ build: 'missing', noPager: true });
+
+    expect(mockFail).toHaveBeenCalledWith('Error');
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      'Unknown build profile: missing. Available build profiles: docs.'
+    );
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should reject inherited object properties as build profiles', async () => {
+    mockLoadConfig.mockResolvedValue({
+      builds: { docs: { targets: ['claude'] } },
+      validation: {},
+    });
+
+    await diffCommand({ build: 'constructor', noPager: true });
+
+    expect(mockFail).toHaveBeenCalledWith('Error');
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      'Unknown build profile: constructor. Available build profiles: docs.'
+    );
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it.each([null, 'invalid', []])('should reject malformed build profile %j', async (profile) => {
+    mockLoadConfig.mockResolvedValue({
+      builds: { docs: profile },
+      targets: ['claude'],
+      validation: {},
+    });
+
+    await diffCommand({ build: 'docs', noPager: true });
+
+    expect(mockFail).toHaveBeenCalledWith('Error');
+    expect(ConsoleOutput.error).toHaveBeenCalledWith('Build profile "docs" must be an object');
     expect(mockCompile).not.toHaveBeenCalled();
     expect(process.exitCode).toBe(1);
   });

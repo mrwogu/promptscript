@@ -9,7 +9,6 @@ import type {
   PromptScriptConfig,
   TargetEntry,
   TargetConfig,
-  BuildProfileConfig,
   Lockfile,
 } from '@promptscript/core';
 import { ErrorCode, isValidLockfile, PSError } from '@promptscript/core';
@@ -48,6 +47,8 @@ import {
 import { loadBundledSkillContent } from '../utils/bundled-skill.js';
 import { isPromptScriptOwnedOutput } from '../utils/output-ownership.js';
 import { finalizeOutputPlan } from '../utils/output-plan.js';
+import { getBuildProfile, getBuildProfiles } from '../utils/build-profile.js';
+import { parseTargetEntries } from '../utils/target-config.js';
 
 async function loadCompileLockfile(
   projectRoot: string,
@@ -104,29 +105,6 @@ function createCliLogger(): Logger {
   };
 }
 
-/**
- * Parse target entries into compiler format.
- * Filters out targets with enabled: false.
- */
-function parseTargets(
-  targets: TargetEntry[] | undefined
-): { name: string; config?: TargetConfig }[] {
-  return (targets ?? [])
-    .map((entry) => {
-      if (typeof entry === 'string') {
-        return { name: entry };
-      }
-      // Object format: { github: { convention: 'xml' } }
-      const entries = Object.entries(entry);
-      if (entries.length === 0) {
-        throw new Error('Empty target configuration');
-      }
-      const [name, config] = entries[0] as [string, TargetConfig | undefined];
-      return { name, config };
-    })
-    .filter((target) => target.config?.enabled !== false);
-}
-
 interface EmptyTargetsContext {
   /** Profile passed via --build, also set for each profile of --all-builds */
   buildName: string | undefined;
@@ -164,23 +142,6 @@ function describeEmptyTargets(context: EmptyTargetsContext): string {
   }
 
   return 'No compilation targets configured. Add a "targets" list to promptscript.yaml or run: prs init';
-}
-
-function getBuildProfile(
-  config: PromptScriptConfig,
-  buildName: string | undefined
-): BuildProfileConfig | undefined {
-  if (!buildName) return undefined;
-
-  const profile = config.builds?.[buildName];
-  if (!profile) {
-    const available = Object.keys(config.builds ?? {});
-    const suffix =
-      available.length > 0 ? ` Available build profiles: ${available.join(', ')}.` : '';
-    throw new Error(`Unknown build profile: ${buildName}.${suffix}`);
-  }
-
-  return profile;
 }
 
 function resolveOutputBase(projectRoot: string, output: string | undefined): string {
@@ -710,7 +671,7 @@ async function compileAllBuilds(options: CompileOptions, services: CliServices):
   const configPath = resolveCompileConfigPath(projectRoot, options);
   const config = await loadEffectiveConfig(configPath);
 
-  const buildNames = Object.keys(config.builds ?? {});
+  const buildNames = Object.keys(getBuildProfiles(config));
   if (buildNames.length === 0) {
     ConsoleOutput.warning('No named build profiles found in config.builds');
     return true;
@@ -814,7 +775,7 @@ async function compileCommandWithResult(
     // --format is an alias for --target
     const selectedTarget = options.target ?? options.format;
     const targetEntries = buildProfile?.targets ?? config.targets;
-    const parsedTargets = parseTargets(targetEntries);
+    const parsedTargets = parseTargetEntries(targetEntries);
     let targets: { name: string; config?: TargetConfig }[];
     if (selectedTarget) {
       // Find the matching target entry to preserve configured options

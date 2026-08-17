@@ -137,6 +137,140 @@ describe('migrateCommand', () => {
     expect(mockGetSkillWrites).not.toHaveBeenCalled();
   });
 
+  it('accepts builds-only config during static migration', async () => {
+    mockFs.readFile.mockImplementation(async (path: string) => {
+      if (path === 'promptscript.yaml') {
+        return [
+          'id: preserved',
+          'syntax: "1.4.0"',
+          'builds:',
+          '  docs:',
+          '    targets:',
+          '      - claude',
+          '',
+        ].join('\n');
+      }
+      if (path === '.promptscript/project.prs') {
+        return '@meta { id: "preserved" syntax: "1.4.0" }\n';
+      }
+      return '# Existing instructions';
+    });
+
+    await migrateCommand({ static: true }, services);
+
+    expect(process.exitCode).toBeUndefined();
+    expect(mockImportMultipleFiles).toHaveBeenCalled();
+    expect(mockFs.writeFile).not.toHaveBeenCalledWith(
+      'promptscript.yaml',
+      expect.anything(),
+      'utf-8'
+    );
+  });
+
+  it('updates every effective build profile entry during static migration', async () => {
+    mockFs.existsSync.mockImplementation((path: string) =>
+      ['promptscript.yaml', 'docs/project.prs', 'apps/api/project.prs', 'CLAUDE.md'].includes(path)
+    );
+    mockFs.readFile.mockImplementation(async (path: string) => {
+      if (path === 'promptscript.yaml') {
+        return [
+          'id: preserved',
+          'syntax: "1.4.0"',
+          'builds:',
+          '  docs:',
+          '    entry: docs/project.prs',
+          '    targets:',
+          '      - claude',
+          '  api:',
+          '    entry: apps/api/project.prs',
+          '    targets:',
+          '      - github',
+          '',
+        ].join('\n');
+      }
+      if (path === 'docs/project.prs' || path === 'apps/api/project.prs') {
+        return '@meta { id: "preserved" syntax: "1.4.0" }\n';
+      }
+      return '# Existing instructions';
+    });
+
+    await migrateCommand({ static: true }, services);
+
+    expect(process.exitCode).toBeUndefined();
+    expect(mockFs.writeFile).toHaveBeenCalledWith(
+      'docs/project.prs',
+      expect.stringContaining('@use ../.promptscript/migrated/project'),
+      'utf-8'
+    );
+    expect(mockFs.writeFile).toHaveBeenCalledWith(
+      'apps/api/project.prs',
+      expect.stringContaining('@use ../../.promptscript/migrated/project'),
+      'utf-8'
+    );
+    expect(mockFs.writeFile).not.toHaveBeenCalledWith(
+      '.promptscript/project.prs',
+      expect.anything(),
+      'utf-8'
+    );
+  });
+
+  it('prefixes migration imports for a root-level entry', async () => {
+    mockFs.existsSync.mockImplementation((path: string) =>
+      ['promptscript.yaml', 'project.prs', 'CLAUDE.md'].includes(path)
+    );
+    mockFs.readFile.mockImplementation(async (path: string) => {
+      if (path === 'promptscript.yaml') {
+        return [
+          'id: preserved',
+          'syntax: "1.4.0"',
+          'targets:',
+          '  - claude',
+          'input:',
+          '  entry: project.prs',
+          '',
+        ].join('\n');
+      }
+      if (path === 'project.prs') {
+        return '@meta { id: "preserved" syntax: "1.4.0" }\n';
+      }
+      return '# Existing instructions';
+    });
+
+    await migrateCommand({ static: true }, services);
+
+    expect(mockFs.writeFile).toHaveBeenCalledWith(
+      'project.prs',
+      expect.stringContaining('@use ./.promptscript/migrated/project'),
+      'utf-8'
+    );
+  });
+
+  it('accepts empty top-level targets when profiles define targets', async () => {
+    mockFs.readFile.mockImplementation(async (path: string) => {
+      if (path === 'promptscript.yaml') {
+        return [
+          'id: preserved',
+          'syntax: "1.4.0"',
+          'targets: []',
+          'builds:',
+          '  docs:',
+          '    targets:',
+          '      - claude',
+          '',
+        ].join('\n');
+      }
+      if (path === '.promptscript/project.prs') {
+        return '@meta { id: "preserved" syntax: "1.4.0" }\n';
+      }
+      return '# Existing instructions';
+    });
+
+    await migrateCommand({ static: true }, services);
+
+    expect(process.exitCode).toBeUndefined();
+    expect(mockImportMultipleFiles).toHaveBeenCalled();
+  });
+
   it('creates a stable entry shell when the configured entry is missing', async () => {
     mockFs.existsSync.mockImplementation((path: string) =>
       ['promptscript.yaml', 'CLAUDE.md'].includes(path)
@@ -525,5 +659,84 @@ describe('migrateCommand', () => {
     await migrateCommand({ llm: true }, services);
 
     expect(mockGetSkillWrites).toHaveBeenCalledWith(['claude']);
+  });
+
+  it('uses enabled build profile targets for LLM skill writes', async () => {
+    mockFs.readFile.mockImplementation(async (path: string) => {
+      if (path === 'promptscript.yaml') {
+        return [
+          'id: preserved',
+          'syntax: "1.4.0"',
+          'builds:',
+          '  docs:',
+          '    targets:',
+          '      - claude:',
+          '          enabled: true',
+          '      - cursor:',
+          '          enabled: false',
+          '',
+        ].join('\n');
+      }
+      return '# Existing instructions';
+    });
+
+    await migrateCommand({ llm: true }, services);
+
+    expect(mockGetSkillWrites).toHaveBeenCalledWith(['claude']);
+  });
+
+  it('lists every effective build profile entry in the LLM prompt', async () => {
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    mockFs.readFile.mockImplementation(async (path: string) => {
+      if (path === 'promptscript.yaml') {
+        return [
+          'id: preserved',
+          'syntax: "1.4.0"',
+          'builds:',
+          '  docs:',
+          '    entry: docs/project.prs',
+          '    targets:',
+          '      - claude',
+          '  api:',
+          '    entry: apps/api/project.prs',
+          '    targets:',
+          '      - github',
+          '',
+        ].join('\n');
+      }
+      return '# Existing instructions';
+    });
+
+    await migrateCommand({ llm: true }, services);
+
+    expect(mockFs.writeFile).toHaveBeenCalledWith(
+      '.promptscript/migration-prompt.md',
+      expect.stringMatching(/- docs\/project\.prs[\s\S]*- apps\/api\/project\.prs/),
+      'utf-8'
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it('rejects malformed profile targets even with valid top-level targets', async () => {
+    mockFs.readFile.mockImplementation(async (path: string) => {
+      if (path === 'promptscript.yaml') {
+        return [
+          'id: preserved',
+          'syntax: "1.4.0"',
+          'targets:',
+          '  - claude',
+          'builds:',
+          '  docs:',
+          '    targets: []',
+          '',
+        ].join('\n');
+      }
+      return '# Existing instructions';
+    });
+
+    await migrateCommand({ static: true }, services);
+
+    expect(process.exitCode).toBe(1);
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
   });
 });

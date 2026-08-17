@@ -332,9 +332,9 @@ This creates:
 Your existing AI instruction files remain untouched.
 
 When `promptscript.yaml` already exists, static migration preserves it byte-for-byte, writes
-imported modules under `.promptscript/migrated/`, and adds one idempotent `@use` to the configured
-entry file. No candidates means no writes. Run `prs migrate --static --dry-run` to preview every
-path first.
+imported modules under `.promptscript/migrated/`, and adds one idempotent `@use` to every effective
+top-level or build-profile entry. No candidates means no writes. Run
+`prs migrate --static --dry-run` to preview every path first.
 
 For AI-assisted migration, generate a migration prompt and install the PromptScript skill:
 

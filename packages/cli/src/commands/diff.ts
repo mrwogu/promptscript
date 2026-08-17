@@ -2,13 +2,7 @@ import { resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import type { DiffOptions } from '../types.js';
-import {
-  isValidLockfile,
-  type Lockfile,
-  type Logger,
-  type TargetEntry,
-  type TargetConfig,
-} from '@promptscript/core';
+import { isValidLockfile, type Lockfile, type Logger } from '@promptscript/core';
 import type { FormatterOutput } from '@promptscript/compiler';
 import { loadConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput, isVerbose, isDebug } from '../output/console.js';
@@ -25,6 +19,8 @@ import {
 import { loadBundledSkillContent } from '../utils/bundled-skill.js';
 import { prepareLegacyFactoryMigration } from '../utils/legacy-factory-hooks.js';
 import { finalizeOutputPlan } from '../utils/output-plan.js';
+import { getBuildProfile } from '../utils/build-profile.js';
+import { parseTargetEntries } from '../utils/target-config.js';
 import chalk from 'chalk';
 import { parse as parseYaml } from 'yaml';
 
@@ -70,28 +66,6 @@ export function createDiffLogger(machineReadable = false): Logger {
       }
     },
   };
-}
-
-/**
- * Parse target entries into compiler format.
- */
-function parseTargets(
-  targets: TargetEntry[] | undefined
-): { name: string; config?: TargetConfig }[] {
-  return (targets ?? [])
-    .map((entry) => {
-      if (typeof entry === 'string') {
-        return { name: entry };
-      }
-      // Object format: { github: { convention: 'xml' } }
-      const entries = Object.entries(entry);
-      if (entries.length === 0) {
-        throw new Error('Empty target configuration');
-      }
-      const [name, config] = entries[0] as [string, TargetConfig | undefined];
-      return { name, config };
-    })
-    .filter((target) => target.config?.enabled !== false);
 }
 
 /**
@@ -197,32 +171,30 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
 
   try {
     const config = await loadConfig();
-    const lockfile = await loadDiffLockfile(projectRoot);
-    const vendorDir = resolve(projectRoot, '.promptscript/vendor');
-
-    if (!isJsonFormat) spinner.text = 'Resolving registry...';
-    const registry = await resolveRegistryPath(config, {
-      vendorDir,
-      lockfile,
-      readOnly: true,
-    });
-
-    if (!isJsonFormat) spinner.text = 'Compiling...';
+    const buildProfile = getBuildProfile(config, options.build);
 
     // --all is the default behavior when no target is specified
-    const parsedTargets = parseTargets(config.targets);
+    const targetEntries = buildProfile?.targets ?? config.targets;
+    const parsedTargets = parseTargetEntries(targetEntries);
     const targets = options.target
       ? [parsedTargets.find((target) => target.name === options.target) ?? { name: options.target }]
       : parsedTargets;
 
     if (targets.length === 0) {
-      // Named build profiles are compile-only, so a builds-only project has
-      // nothing for diff to compare unless a target is passed explicitly.
       const availableBuilds = Object.keys(config.builds ?? {});
-      const message =
-        availableBuilds.length > 0
-          ? `No compilation targets configured in config.targets. prs diff reads only top-level targets - pass --target <name> or add targets to promptscript.yaml (build profiles found: ${availableBuilds.join(', ')}).`
-          : 'No compilation targets configured. Add a "targets" list to promptscript.yaml or run: prs init';
+      let message: string;
+      if (options.build) {
+        const location =
+          buildProfile?.targets !== undefined
+            ? `config.builds.${options.build}.targets`
+            : 'config.targets';
+        message = `No compilation targets configured for build profile "${options.build}". Add an enabled target to ${location}.`;
+      } else if (availableBuilds.length > 0) {
+        message = `No compilation targets configured in config.targets. Run prs diff --build <name> (available: ${availableBuilds.join(', ')}) or add targets to promptscript.yaml.`;
+      } else {
+        message =
+          'No compilation targets configured. Add a "targets" list to promptscript.yaml or run: prs init';
+      }
       if (isJsonFormat) {
         console.log(
           JSON.stringify(
@@ -243,11 +215,24 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       process.exitCode = 1;
       return;
     }
+
+    const lockfile = await loadDiffLockfile(projectRoot);
+    const vendorDir = resolve(projectRoot, '.promptscript/vendor');
+
+    if (!isJsonFormat) spinner.text = 'Resolving registry...';
+    const registry = await resolveRegistryPath(config, {
+      vendorDir,
+      lockfile,
+      readOnly: true,
+    });
+
+    if (!isJsonFormat) spinner.text = 'Compiling...';
+
     const logger = createDiffLogger(isJsonFormat);
     const prettierOptions = await resolvePrettierOptions(config, projectRoot);
     const skillContent =
       config.includePromptScriptSkill === false ? undefined : await loadBundledSkillContent(logger);
-    const outputRoot = resolve(projectRoot, config.output?.baseDir ?? '.');
+    const outputRoot = resolve(projectRoot, buildProfile?.output ?? config.output?.baseDir ?? '.');
 
     const compiler = new Compiler({
       resolver: {
@@ -273,7 +258,10 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       skillContent,
     });
 
-    const entryPath = resolve(projectRoot, config.input?.entry ?? './.promptscript/project.prs');
+    const entryPath = resolve(
+      projectRoot,
+      buildProfile?.entry ?? config.input?.entry ?? './.promptscript/project.prs'
+    );
 
     if (!existsSync(entryPath)) {
       const message = `File not found: ${entryPath}`;
@@ -293,7 +281,9 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       } else {
         spinner.fail('Entry file not found');
         ConsoleOutput.error(message);
-        ConsoleOutput.muted('Run: prs init');
+        ConsoleOutput.muted(
+          options.build ? `Check config.builds.${options.build}.entry` : 'Run: prs init'
+        );
       }
       process.exitCode = 1;
       return;

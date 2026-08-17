@@ -128,6 +128,8 @@ export interface PullOptions {
  * Options for the diff command.
  */
 export interface DiffOptions {
+  /** Named build profile from config.builds */
+  build?: string;
   /** Specific target to diff */
   target?: string;
   /** Output format */

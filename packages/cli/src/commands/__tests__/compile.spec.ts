@@ -1163,6 +1163,18 @@ describe('compile command - createCliLogger warn path', () => {
       );
     });
 
+    it('should reject a scalar target list without a TypeError', async () => {
+      mockLoadConfig.mockResolvedValue({
+        targets: 'claude',
+      });
+
+      await compileCommand({}, mockServices);
+
+      expect(mockCompile).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+      expect(mockError).toHaveBeenCalledWith('Compilation targets must be an array');
+    });
+
     it('should report top-level targets that are all disabled', async () => {
       mockLoadConfig.mockResolvedValue({
         targets: [{ claude: { enabled: false } }],
@@ -1541,6 +1553,19 @@ describe('compile command - createCliLogger warn path', () => {
 
     expect(mockCompile).not.toHaveBeenCalled();
     expect(mockWarning).toHaveBeenCalledWith('No named build profiles found in config.builds');
+  });
+
+  it('should reject malformed build collections with --all-builds', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      builds: 'invalid',
+    });
+
+    await compileCommand({ allBuilds: true, cwd: '/repo/promptscript' }, mockServices);
+
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith('config.builds must be an object');
+    expect(process.exitCode).toBe(1);
   });
 
   it('should resolve all builds without cwd or config options', async () => {

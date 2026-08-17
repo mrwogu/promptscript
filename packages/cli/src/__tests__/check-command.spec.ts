@@ -254,6 +254,70 @@ describe('commands/check', () => {
       logSpy.mockRestore();
     });
 
+    it('should check and resolve every effective build profile entry', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        builds: {
+          docs: { entry: './docs.prs', targets: ['claude'] },
+          api: { entry: './api.prs', targets: ['github'] },
+        },
+      });
+      mockExistsSync.mockImplementation(
+        (path: string) => path.endsWith('docs.prs') || path.endsWith('api.prs')
+      );
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBeUndefined();
+      expect(mockCompile).toHaveBeenCalledTimes(2);
+      expect(mockCompile).toHaveBeenCalledWith(expect.stringMatching(/docs\.prs$/));
+      expect(mockCompile).toHaveBeenCalledWith(expect.stringMatching(/api\.prs$/));
+      expect(mockCompile).not.toHaveBeenCalledWith(expect.stringMatching(/project\.prs$/));
+    });
+
+    it('should fail when an effective build profile entry is missing', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        builds: {
+          docs: { entry: './docs.prs', targets: ['claude'] },
+          api: { entry: './missing.prs', targets: ['github'] },
+        },
+      });
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('docs.prs'));
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBe(1);
+      expect(mockCompile).toHaveBeenCalledOnce();
+      expect(mockCompile).toHaveBeenCalledWith(expect.stringMatching(/docs\.prs$/));
+    });
+
+    it('should fail when a build profile entry is not a string', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        builds: {
+          docs: { entry: 42, targets: ['claude'] },
+        },
+      });
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('project.prs'));
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBe(1);
+    });
+
     it('should fail when a build profile configures an unknown target', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({
@@ -261,6 +325,44 @@ describe('commands/check', () => {
         syntax: '1.0.0',
         input: { entry: './project.prs' },
         builds: { docs: { targets: ['not-a-target'] } },
+      });
+      mockExistsSync.mockReturnValue(true);
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('should fail when one build profile inherits missing top-level targets', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        builds: {
+          docs: { targets: ['claude'] },
+          broken: {},
+        },
+      });
+      mockExistsSync.mockReturnValue(true);
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('should fail when a build profile has no enabled targets', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        targets: ['github'],
+        builds: {
+          docs: { targets: [{ claude: { enabled: false } }] },
+        },
       });
       mockExistsSync.mockReturnValue(true);
 
@@ -365,6 +467,22 @@ describe('commands/check', () => {
       expect(process.exitCode).toBe(1);
     });
 
+    it('should fail when targets is not an array', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        targets: 'github',
+      });
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('project.prs'));
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBe(1);
+    });
+
     it.each([
       ['non-object', 42],
       ['null', null],
@@ -399,6 +517,38 @@ describe('commands/check', () => {
       await checkCommand({} as CheckOptions);
 
       expect(process.exitCode).toBe(1);
+    });
+
+    it('should fail when a target configuration is not an object', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        targets: [{ github: [] }],
+      });
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('project.prs'));
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('should accept multiple targets configured in one object', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        targets: [{ github: {}, claude: {} }],
+      });
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('project.prs'));
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBeUndefined();
     });
 
     it('should handle inherit configuration', async () => {

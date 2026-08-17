@@ -203,6 +203,7 @@ program
 program
   .command('diff')
   .description('Show diff for compiled output')
+  .option('-b, --build <name>', 'Named build profile from config.builds')
   .option('-t, --target <target>', 'Specific target')
   .option('--format <format>', 'Output format (text, json)', 'text')
   .option('-a, --all', 'Show diff for all targets at once')
