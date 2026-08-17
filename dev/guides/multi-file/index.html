@@ -44,8 +44,8 @@
 </span><span id=__span-0-10><a id=__codelineno-0-10 name=__codelineno-0-10 href=#__codelineno-0-10></a>    └── deploy.prs        # Deployment skill
 </span></code></pre></div> <p><strong>Main entry file:</strong></p> <div class=highlight><pre><span></span><code><span class=c1># .promptscript/project.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;my-project&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"my-project"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=kn>@inherit</span><span class=w> </span><span class=s>@company/frontend</span>
@@ -57,62 +57,62 @@
 <span class=kn>@use</span><span class=w> </span><span class=s>./fragments/code-style</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are a senior developer on the Customer Portal team.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Customer Portal&quot;</span>
-<span class=w>  </span><span class=na>repository</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;github.com/company/customer-portal&quot;</span>
+<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>"Customer Portal"</span>
+<span class=w>  </span><span class=na>repository</span><span class=p>:</span><span class=w> </span><span class=s2>"github.com/company/customer-portal"</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1UgSATwC0shUsuHeca+wyFzlgIwUADAHOrAC+6up8GhCsODDiWLwaLGQYrNZSYILsnCZGfAAU1DAA5hBwWNTWvLa8JmUYAEawuWDM1LzkGNbFggCurCYAlBG8AJJkbQlFcGhscBAN0BBYVZkYxdrsapq9cDD8GdTrmyJSe4y98dbqGrv7FIfHnKcc5dHFN3cHaxvPcFImZgXE7YCBsT57b5HX5bKQsEwwWzlaywcKaUzPZZVAysIzOEDBIwATWYvV4GCK5NcnDB7QRADcYFBmGg4rw2LxcPsAMK7LBCNkABUmGCgnJgpAoLnxwTCrBuLGyhASOKMDkUWG8IF55QF7WF1F0UEJvCKs3m-MqWtKuF6DQoyThQkwaThfL19hFxoJoRAIQAugxnpV8ERSOQYCoQAxGbQwax8D4-UA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p><strong>Security fragment:</strong></p> <div class=highlight><pre><span></span><code><span class=c1># .promptscript/fragments/security.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;security-fragment&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"security-fragment"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never expose API keys or secrets in code&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never commit credentials to version control&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Always validate and sanitize user input&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never disable security features&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Use parameterized queries for database access&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never expose API keys or secrets in code"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never commit credentials to version control"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Always validate and sanitize user input"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never disable security features"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Use parameterized queries for database access"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>security</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Authentication required&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Use RBAC for authorization&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Input validation required&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Output encoding required&quot;</span>
+<span class=w>    </span><span class=s2>"Authentication required"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Use RBAC for authorization"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Input validation required"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Output encoding required"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6MNQwBzEpxFS4MRgFdxWAJ4C4AHVYABJVgy9gR3rwgATRLwMg1m7ToC0shUvbPrvHA67BiEjs4AjBQADDH+rAC+RkbG1PBY4oxYEGxwlgEeTiAAcjAAbjDUvERozGq8AIIACgCSvADWMDp5zFWuaSK2rLwsdjDxNoXOpRVVLCQkEFgjaWPsEBhQeVjMvLNwOcMs7IJQE7xTIA1QAO4Y3Xub9tgwvBisdoHvSxAAXq8aNRVCCsNAaLDnS4zSq8OwQOAYABGsEC6i0Sx0vDAMGwWngkKKAFV6pg5GZKn8YJ8AI4aCnwLG9WHYJEYeoYRiMeCGEBGJKsFJwcwfDDUOx5KzDVFuDGOZABGzOBrgnDKCCMbCHXhpWkQVbOOgKon1ABKACEGgBhRlVDAq3p-TVsA1G5wtUHgx5QZ7ZNjamC6-UgQ1SxUgADy4LBy04oxB8n9gap5wAunyQAkUwxlNQdPgiKRyDB9MGQPtDvgIhmgA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p><strong>Testing fragment:</strong></p> <div class=highlight><pre><span></span><code><span class=c1># .promptscript/fragments/testing.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;testing-fragment&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.5.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"testing-fragment"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.5.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>testing</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Use vitest as test framework&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Maintain 80% code coverage&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Write unit, integration, and e2e tests&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Use MSW for API mocking&quot;</span>
+<span class=w>    </span><span class=s2>"Use vitest as test framework"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Maintain 80% code coverage"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Write unit, integration, and e2e tests"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Use MSW for API mocking"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Write project tests&quot;</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=s2>"/test"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Write project tests"</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>"""</span>
 <span class=sd>      Use Vitest, Testing Library for DOM behavior, and MSW for API mocking.</span>
-<span class=sd>    &quot;&quot;&quot;</span>
+<span class=sd>    """</span>
 <span class=w>  </span><span class=p>}</span>
-<span class=w>  </span><span class=s2>&quot;/coverage&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Check test coverage&quot;</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Report coverage gaps and recommend missing behavioral tests.&quot;</span>
+<span class=w>  </span><span class=s2>"/coverage"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Check test coverage"</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Report coverage gaps and recommend missing behavioral tests."</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6MNQwBzEpxFSOcLBFbyBcADqsAAkqwZewfb14QAJol66QajVoC0shUvYOLvOAE92DEI7BwBGCgA2CgAGb1YAX319A3UMVmsMams4Mx8nTXk7ZB9LBwBVOBheADcIJ14MHPr3JQB3ZmoAawc6EvsQAFkMTRNNXgAOaIBSXhZrKpZqmDl5GB6+hwB1cQ5eAFdWOrordhh5OQ02Y7TrXhgAJiqnPRBe1ktSkAqqgYBlTd4YA6vAAggAFACSvBIzEYnQKcUsAF19IlWMk4DgOlhGHsRLl3v1VPAsA47OZCZZ5qJxJIIGwQiBtnUqjRmAArGCMLC8Z6Ij4sU7sRneEB9SzfXgANRZ6mOABUSQVeAAZCAAIzk1D8gOBABEAPIDXjqmA4DC1DrXdK8P4AoHUUGQ6Gw+FaCgbMVenxoz5SRbLBRrJAEj68aliCSXViMgDCOC5nV5JNmzCWK2DfUFHGF-QASjA0NjU+mg7x5Bg0DkbrxqFyhJ5biQIHA4MrTebLXIoMn1HAPWLCWj4iB4kiGMptfgiKRyDAdK8QOm22x8KFR0A" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=pattern-2-feature-based-split>Pattern 2: Feature-Based Split<a class=headerlink href=#pattern-2-feature-based-split title="Permanent link">&para;</a></h3> <p>For large projects, split by feature area:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a>.promptscript/
@@ -127,37 +127,37 @@
 </span><span id=__span-1-10><a id=__codelineno-1-10 name=__codelineno-1-10 href=#__codelineno-1-10></a>    └── database.prs      # Database patterns
 </span></code></pre></div> <p><strong>Auth feature:</strong></p> <div class=highlight><pre><span></span><code><span class=c1># .promptscript/features/auth.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;auth-feature&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"auth-feature"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  ## Authentication Module</span>
 
 <span class=sd>  - OAuth 2.0 with PKCE</span>
 <span class=sd>  - JWT tokens with refresh rotation</span>
 <span class=sd>  - SSO via SAML 2.0</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>auth</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Store tokens in httpOnly cookies&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Session timeout: 3600 seconds&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Enable refresh token rotation&quot;</span>
+<span class=w>    </span><span class=s2>"Store tokens in httpOnly cookies"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Session timeout: 3600 seconds"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Enable refresh token rotation"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>knowledge</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  ## Auth API Endpoints</span>
 
 <span class=sd>  - POST /auth/login - User login</span>
 <span class=sd>  - POST /auth/logout - User logout</span>
 <span class=sd>  - POST /auth/refresh - Refresh token</span>
 <span class=sd>  - GET /auth/me - Current user info</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6MDGwBXavCkZ5uAXAA6rAAIkYWDL2DbevCABNEvTSFW4AtLIVLbp3nACe7DIWu2ARgoABhC3VgBfbW0dFnYiLGN3NxBws24+AEE1HE4sCEZsCDZeAFlmC3lYaNYzB14AeWzcXgAmEN4AdwgWgAUAaQBhAFF3eoApAHUAFV4sZgBrTjgunpxeJTAlOHXBQ3y2Md4AZWOG3gA3CCNjzNKAGTaw2ptUt+0o1hi4Q1YLDGoFhWJhe9hw1mQ7jMtmO8yUc0Wy3MtRwWCwaAarCgnl4LEWEHgtjoUNex3gcGKtXy+mYamsAGYAGzBYIeGBxIFEkm2YasDAAI1gGxgW3g63mS1qeyKh1SLwAuh8ajoFqxmJ1YBYAOYwJIvFJpXgZXjNdaZXoASV4vIsaGYEHYWi+L3qvQax1mKhyUigzC1Dt49QAqnAYNReL7-c66rw3R7eF7cD6-bTEsHQ+HI6mjnHPWCpJttut6gAlEVFhGSo4AcWGee9+kDvEGiiU7F48gzyLAzGS7zlERAEXlDDy1E8+CIpHIMA0IAYFzDFLY+ACQ6AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=pattern-3-environment-based-split>Pattern 3: Environment-Based Split<a class=headerlink href=#pattern-3-environment-based-split title="Permanent link">&para;</a></h3> <p>Different configurations for different environments:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-2-1><a id=__codelineno-2-1 name=__codelineno-2-1 href=#__codelineno-2-1></a>.promptscript/
 </span><span id=__span-2-2><a id=__codelineno-2-2 name=__codelineno-2-2 href=#__codelineno-2-2></a>├── project.prs           # Main entry
@@ -169,29 +169,29 @@
 </span><span id=__span-2-8><a id=__codelineno-2-8 name=__codelineno-2-8 href=#__codelineno-2-8></a>    └── ...               # Shared fragments
 </span></code></pre></div> <p><strong>Development environment:</strong></p> <div class=highlight><pre><span></span><code><span class=c1># .promptscript/environments/development.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;dev-environment&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"dev-environment"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>context</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>environment</span><span class=p>:</span><span class=w> </span>development
 
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  ## Development Environment</span>
 
 <span class=sd>  - Hot reloading enabled</span>
 <span class=sd>  - Debug logging on</span>
 <span class=sd>  - Mock services available</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>local</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  Local development setup:</span>
 <span class=sd>  - API: http://localhost:8080</span>
 <span class=sd>  - Database: local PostgreSQL</span>
 <span class=sd>  - Redis: local instance</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6TgDcIg1iU4ipAExiyYUZmmXsBcADqsAAsqwZewE714Q1iXkZAbZAWjkK2+rC9u8cACe7BiETi4AjBQADLH+rAC+JiamLOxEWNYBXoq+Tm7aur4prHb+IAl23HwAIppFeiq8AKKs8nkqpXbuvAASzFnURRhqEKwA5rycGABGsGoBvfWzAK5TOhMT41NsS7wAssyMANaBMNTyjPC8GLIY0HOwARUJyaypOowYUNllzpVAQEADLHH68Qo6Jrsc5YVZoRD7ACCAAUAJJOHBYLAIqRSL4-HDMOBYRAADhiFP2tWwcwwcBgTgJvxRxKwE2GAGUAIrA-YAJRgYzgTLBv3GJIwrGuLyBlSSIESAF0GCpqEF8ERSOQYIYQAwtLQIGx8JFFUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=using-use-for-composition>Using <a class="magiclink magiclink-github magiclink-mention" href=https://github.com/use title="GitHub User: use">@use</a> for Composition<a class=headerlink href=#using-use-for-composition title="Permanent link">&para;</a></h2> <p>The <code>@use</code> directive imports and merges content from other files - like CSS imports or mixins.</p> <h3 id=basic-import>Basic Import<a class=headerlink href=#basic-import title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># Import fragment - blocks are merged into your file</span>
 <span class=kn>@use</span><span class=w> </span><span class=s>./fragments/security</span>
@@ -203,14 +203,14 @@
 <span class=kn>@use</span><span class=w> </span><span class=s>@core/guards/security</span><span class=w> </span><span class=kn>as</span><span class=w> </span>sec
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAkmWbUsvMNQwBzEp1EBaXgCMozRgGs4vDNRi8Z1STAAmvCO2a8AnswCu1MdBgAdVgAEbcXRQD04qTPY4b09GOwgsSxcXPkE0YVFxZhJeHUkIOCxqSNY+d09eVxYyDFZLYKwSo20jII4Ms0leXj4AClT0zMteBSN0jGVjMWFecgxLSWpbViMASmiBIRFeAHdwnC0oCAxNBTBh1yIOaa1GRng4ebzdQuEYb0kbaqCQsIitTRCm1vaMrO7eXpwfqwEx7eyjcaTGzTGYgAC+AF0GLIsvgiKRyDAqLQQAwAG4wWgQNj4ACM8KAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=how-use-merges-content>How <a class="magiclink magiclink-github magiclink-mention" href=https://github.com/use title="GitHub User: use">@use</a> Merges Content<a class=headerlink href=#how-use-merges-content title="Permanent link">&para;</a></h3> <p>When you <code>@use</code> a file, all blocks from the source are merged into your file:</p> <table> <thead> <tr> <th>Content Type</th> <th>Merge Behavior</th> </tr> </thead> <tbody> <tr> <td>Text content</td> <td>Concatenated (source + target), identical content deduplicated</td> </tr> <tr> <td>Object content</td> <td>Deep merged (imported source wins same-shape key conflicts)</td> </tr> <tr> <td>Array content</td> <td>Unique concatenation (preserves order, dedupes)</td> </tr> <tr> <td>Mixed content</td> <td>Text concatenated, properties deep merged</td> </tr> </tbody> </table> <p>When block shapes conflict, existing target body wins. Under syntax <code>1.5.0</code>, later local blocks and modification operations apply after an earlier import.</p> <p><strong>Example:</strong></p> <div class=highlight><pre><span></span><code><span class=c1># security.prs</span>
 <span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never expose API keys&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never expose API keys"</span>
 <span class=p>}</span>
 
 <span class=c1># project.prs</span>
 <span class=kn>@use</span><span class=w> </span><span class=s>./security</span>
 
 <span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Follow OWASP guidelines&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Follow OWASP guidelines"</span>
 <span class=p>}</span>
 
 <span class=c1># Result: @restrictions contains both items</span>
@@ -220,9 +220,9 @@
 <span class=kn>@extend</span><span class=w> </span><span class=s>ts.standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>testing</span><span class=p>:</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=nl>coverage</span><span class=p>:</span><span class=w> </span><span class=m>95</span><span class=w> </span><span class=p>}</span>
 <span class=p>}</span>
-</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgFc4MAS2owA9FgCeaeI2oQ0WXhji8sG3nwAUEgOYQ4WajN4BaXgBNjGAEaxrvMM2q9yGGQerNBrawBKAB1WPgBRQg4A3jh5RghIRl4IMjcOZ0dmRgBrOFD+ImjnLQoTDACMamsNYFDeTXgsCFYDRF5gXhYANxhqDAMYdoBOAFZeAF9QiZAJgF0GTlMZfCJSchgqWhAGXtoINnwARlmgA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>Without alias, blocks are simply merged. With alias, you get both:</p> <ul> <li>Blocks merged into your file</li> <li>Prefixed blocks available for <code>@extend</code> access</li> </ul> <h3 id=import-order-matters>Import Order Matters<a class=headerlink href=#import-order-matters title="Permanent link">&para;</a></h3> <p>Imports are processed in order. For same-name object fields, each later imported source wins:</p> <div class=highlight><pre><span></span><code><span class=kn>@use</span><span class=w> </span><span class=s>./fragments/base</span><span class=w>         </span><span class=c1># @shortcuts has /test -&gt; &quot;Run unit tests&quot;</span>
-<span class=kn>@use</span><span class=w> </span><span class=s>./fragments/advanced</span><span class=w>     </span><span class=c1># @shortcuts has /test -&gt; &quot;Run full suite&quot;</span>
-<span class=c1># Result: /test -&gt; &quot;Run full suite&quot;</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgFc4MAS2owA9FgCeaeI2oQ0WXhji8sG3nwAUEgOYQ4WajN4BaXgBNjGAEaxrvMM2q9yGGQerNBrawBKAB1WPgBRQg4A3jh5RghIRl4IMjcOZ0dmRgBrOFD+ImjnLQoTDACMamsNYFDeTXgsCFYDRF5gXhYANxhqDAMYdoBOAFZeAF9QiZAJgF0GTlMZfCJSchgqWhAGXtoINnwARlmgA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>Without alias, blocks are simply merged. With alias, you get both:</p> <ul> <li>Blocks merged into your file</li> <li>Prefixed blocks available for <code>@extend</code> access</li> </ul> <h3 id=import-order-matters>Import Order Matters<a class=headerlink href=#import-order-matters title="Permanent link">&para;</a></h3> <p>Imports are processed in order. For same-name object fields, each later imported source wins:</p> <div class=highlight><pre><span></span><code><span class=kn>@use</span><span class=w> </span><span class=s>./fragments/base</span><span class=w>         </span><span class=c1># @shortcuts has /test -&gt; "Run unit tests"</span>
+<span class=kn>@use</span><span class=w> </span><span class=s>./fragments/advanced</span><span class=w>     </span><span class=c1># @shortcuts has /test -&gt; "Run full suite"</span>
+<span class=c1># Result: /test -&gt; "Run full suite"</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9GGoYA5iU5Y4IgEYYBg1WrUBiQdzg5m1LI15zBOZYJEc4WQQFoAfIIA6IAEq9WgjxBtW5Lp1Y+FVFxKRl2eQwAEwA3DFZGGGj1QS0dPQMjEzM4Cz87Rxd3TzBeKChBOF4fGADWLVd4cqxEfPgbB2c3D0EyiqqajhcQAF8AXQZZagBPfCJSchgqWhAGWJhaCDZ8AEYxoA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>For object properties, later imports override:</p> <div class=highlight><pre><span></span><code><span class=kn>@use</span><span class=w> </span><span class=s>./base</span><span class=w>     </span><span class=c1># @standards.coverage = 80</span>
 <span class=kn>@use</span><span class=w> </span><span class=s>./strict</span><span class=w>   </span><span class=c1># @standards.coverage = 95</span>
 <span class=c1># Result: coverage = 95 (later imported source wins)</span>
@@ -285,8 +285,8 @@
 </span><span id=__span-3-11><a id=__codelineno-3-11 name=__codelineno-3-11 href=#__codelineno-3-11></a>│       └── base.prs
 </span><span id=__span-3-12><a id=__codelineno-3-12 name=__codelineno-3-12 href=#__codelineno-3-12></a>└── promptscript.yaml
 </span></code></pre></div> <h3 id=main-entry-projectprs>Main Entry (project.prs)<a class=headerlink href=#main-entry-projectprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;my-project&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"my-project"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=c1># Inherit team base configuration</span>
@@ -299,17 +299,17 @@
 <span class=kn>@use</span><span class=w> </span><span class=s>./fragments/documentation</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are a senior full-stack developer working on My Project.</span>
 <span class=sd>  You follow team conventions and project-specific patterns.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;My Project&quot;</span>
-<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Platform&quot;</span>
+<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>"My Project"</span>
+<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>"Platform"</span>
 
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  A microservices-based platform for data processing.</span>
 
 <span class=sd>  Tech Stack:</span>
@@ -317,20 +317,20 @@
 <span class=sd>  - Frontend: React, TypeScript, Vite</span>
 <span class=sd>  - Database: PostgreSQL, Redis</span>
 <span class=sd>  - Infrastructure: Kubernetes, AWS</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/start&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Initialize development environment&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/deploy&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Deploy to staging environment&quot;</span>
+<span class=w>  </span><span class=s2>"/start"</span><span class=p>:</span><span class=w> </span><span class=s2>"Initialize development environment"</span>
+<span class=w>  </span><span class=s2>"/deploy"</span><span class=p>:</span><span class=w> </span><span class=s2>"Deploy to staging environment"</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWIDEggJKscMahCyCOpQQAjDDgYQRZWSABzAFdqbAg2Z0FuCA8vHxT-EgB6YNCJFwAKahgoiDgsakVBZUEpCoxA2ClBMGZqQXIMRSjqZhjWKQBKZNcyDt81TW02+Ki+djgxbhiCihywecWsOBzQxjifRRW1sI2tjAXOXZyOSrSo0-XN7Zu9jDQIZUqMIYxqFJlqxVi9LtcljkpMxDjsEklWCtpDdjsI9HIQLpMeJBABNAaCAFhIShViJTpgGJQKA-ASMADW9RgADcYFBmGgvIIAO4demPQRsQQAWRqAAV+jMsBR0fiYm1mNTmNy-DAAhFWexEqw4IShl1JVosD9OYwIJBGF1sBxqDqZTisbYHIiQREOIRfKIcdMjaYQKLBBKNEbbBJsn6xVBsO1qCRbOjHdiJABBQQkCCMfqhajMjPwZT5GCtbpYGMkBWdKTYIRqRjwOCPe3ogAqWhwggAynT6Yh0XUAEIYBmcGSCAByzCkMAo6jgdEEzcUnI7mYgaCw87H8CwACkO33BAAxfrsEeyABKau088Xy9X6-nADUfDADwARauF2Ri5iVPowDsAEUABl50vBpgQkOp3EuSpqBibQ4hgWQAGkYkCLxWH4eB52TAB1fcHUxYixGdFY4BwSZDl2NEiP2ARqB0JAMXcHwIAwKAIAALzCKdWXZNAdkEThcxPHZQwxKEYHIZgTmY+Q32k9kaiwZhBF+cpWCiYTWFEthxOxOwQDsABdBgbmqfAiFIchpxoegQFZWhtXwMxjKAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=configuration-promptscriptyaml>Configuration (promptscript.yaml)<a class=headerlink href=#configuration-promptscriptyaml title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-4-1><a id=__codelineno-4-1 name=__codelineno-4-1 href=#__codelineno-4-1></a><span class=nt>id</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">my-project</span>
-</span><span id=__span-4-2><a id=__codelineno-4-2 name=__codelineno-4-2 href=#__codelineno-4-2></a><span class=nt>syntax</span><span class=p>:</span><span class=w> </span><span class=s>&#39;1.4.0&#39;</span>
+</span><span id=__span-4-2><a id=__codelineno-4-2 name=__codelineno-4-2 href=#__codelineno-4-2></a><span class=nt>syntax</span><span class=p>:</span><span class=w> </span><span class=s>'1.4.0'</span>
 </span><span id=__span-4-3><a id=__codelineno-4-3 name=__codelineno-4-3 href=#__codelineno-4-3></a>
 </span><span id=__span-4-4><a id=__codelineno-4-4 name=__codelineno-4-4 href=#__codelineno-4-4></a><span class=nt>input</span><span class=p>:</span>
 </span><span id=__span-4-5><a id=__codelineno-4-5 name=__codelineno-4-5 href=#__codelineno-4-5></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.promptscript/project.prs</span>
 </span><span id=__span-4-6><a id=__codelineno-4-6 name=__codelineno-4-6 href=#__codelineno-4-6></a><span class=w>  </span><span class=nt>include</span><span class=p>:</span>
-</span><span id=__span-4-7><a id=__codelineno-4-7 name=__codelineno-4-7 href=#__codelineno-4-7></a><span class=w>    </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;.promptscript/**/*.prs&#39;</span>
+</span><span id=__span-4-7><a id=__codelineno-4-7 name=__codelineno-4-7 href=#__codelineno-4-7></a><span class=w>    </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>'.promptscript/**/*.prs'</span>
 </span><span id=__span-4-8><a id=__codelineno-4-8 name=__codelineno-4-8 href=#__codelineno-4-8></a>
 </span><span id=__span-4-9><a id=__codelineno-4-9 name=__codelineno-4-9 href=#__codelineno-4-9></a><span class=nt>registry</span><span class=p>:</span>
 </span><span id=__span-4-10><a id=__codelineno-4-10 name=__codelineno-4-10 href=#__codelineno-4-10></a><span class=w>  </span><span class=nt>path</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">./registry</span>

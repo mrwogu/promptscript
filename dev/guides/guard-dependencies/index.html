@@ -22,108 +22,108 @@
     A --&gt; B
     A --&gt; C
     C --&gt; B</code></pre> <p>When <code>api-controllers</code> is resolved, the compiler automatically includes <code>api-validation</code> and <code>api-security</code>. Because <code>api-security</code> also requires <code>api-validation</code>, the final resolved set is deduplicated: each guard appears only once.</p> <h2 id=basic-syntax>Basic Syntax<a class=headerlink href=#basic-syntax title="Permanent link">&para;</a></h2> <p>Add a <code>requires</code> array to any named guard entry:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;my-project&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.2.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"my-project"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.2.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>guards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;api-controllers&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;**/*.controller.ts&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;api-validation&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;api-security&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=s2>"api-controllers"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"**/*.controller.ts"</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"api-validation"</span><span class=p>,</span><span class=w> </span><span class=s2>"api-security"</span><span class=p>]</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>"""</span>
 <span class=sd>      Controller coding standards:</span>
 <span class=sd>      - Use dependency injection for all services</span>
 <span class=sd>      - Return typed response objects</span>
-<span class=sd>    &quot;&quot;&quot;</span>
+<span class=sd>    """</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span><span class=s2>&quot;api-validation&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;**/*.validator.ts&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=s2>"api-validation"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"**/*.validator.ts"</span><span class=p>]</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>"""</span>
 <span class=sd>      Validation rules:</span>
 <span class=sd>      - Use class-validator decorators</span>
 <span class=sd>      - Always return typed validation results</span>
-<span class=sd>    &quot;&quot;&quot;</span>
+<span class=sd>    """</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span><span class=s2>&quot;api-security&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;**/*.guard.ts&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;api-validation&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=s2>"api-security"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"**/*.guard.ts"</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"api-validation"</span><span class=p>]</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>"""</span>
 <span class=sd>      Security guard rules:</span>
 <span class=sd>      - Validate JWT tokens before processing</span>
 <span class=sd>      - Log all unauthorized access attempts</span>
-<span class=sd>    &quot;&quot;&quot;</span>
+<span class=sd>    """</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <p>The <code>requires</code> values must be names of other guards defined in the same (or inherited) <code>@guards</code> block.</p> <h2 id=transitive-dependencies>Transitive Dependencies<a class=headerlink href=#transitive-dependencies title="Permanent link">&para;</a></h2> <p>Dependencies are resolved transitively. If guard A requires B, and B requires C, then A automatically gets both B and C injected — no need to explicitly list C in A's requires.</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>guards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;feature-a&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;apps/feature-a/**/*.ts&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;shared-logging&quot;</span><span class=p>]</span><span class=w>         </span><span class=c1># Gets: shared-logging + base-config</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Feature A rules.&quot;</span>
+<span class=w>  </span><span class=s2>"feature-a"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"apps/feature-a/**/*.ts"</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"shared-logging"</span><span class=p>]</span><span class=w>         </span><span class=c1># Gets: shared-logging + base-config</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Feature A rules."</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span><span class=s2>&quot;shared-logging&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;base-config&quot;</span><span class=p>]</span><span class=w>            </span><span class=c1># Gets: base-config</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Always use structured JSON logging.&quot;</span>
+<span class=w>  </span><span class=s2>"shared-logging"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"base-config"</span><span class=p>]</span><span class=w>            </span><span class=c1># Gets: base-config</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Always use structured JSON logging."</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span><span class=s2>&quot;base-config&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Follow project-wide coding standards.&quot;</span>
+<span class=w>  </span><span class=s2>"base-config"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Follow project-wide coding standards."</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <p>Resolving <code>feature-a</code> produces: <code>feature-a</code> + <code>shared-logging</code> + <code>base-config</code>.</p> <h2 id=guards-as-context-libraries>Guards as Context Libraries<a class=headerlink href=#guards-as-context-libraries title="Permanent link">&para;</a></h2> <p>A guard without an <code>applyTo</code> field is never directly applied to any files — it exists only to be pulled in via <code>requires</code>. This pattern is useful for shared context that multiple guards need:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>guards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;typescript-rules&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;**/*.ts&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;shared-conventions&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=s2>"typescript-rules"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"**/*.ts"</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"shared-conventions"</span><span class=p>]</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>"""</span>
 <span class=sd>      TypeScript-specific rules:</span>
 <span class=sd>      - No implicit any types</span>
 <span class=sd>      - Prefer interfaces over type aliases</span>
-<span class=sd>    &quot;&quot;&quot;</span>
+<span class=sd>    """</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span><span class=s2>&quot;react-rules&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;**/*.tsx&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;shared-conventions&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=s2>"react-rules"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"**/*.tsx"</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"shared-conventions"</span><span class=p>]</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>"""</span>
 <span class=sd>      React-specific rules:</span>
 <span class=sd>      - Use functional components with hooks</span>
 <span class=sd>      - Apply OnPush change detection</span>
-<span class=sd>    &quot;&quot;&quot;</span>
+<span class=sd>    """</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span><span class=s2>&quot;shared-conventions&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=s2>"shared-conventions"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=c1># No applyTo — used only via requires</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>"""</span>
 <span class=sd>      Shared project conventions:</span>
 <span class=sd>      - Use kebab-case for file names</span>
 <span class=sd>      - Prefer named exports</span>
-<span class=sd>    &quot;&quot;&quot;</span>
+<span class=sd>    """</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <p><code>shared-conventions</code> is a pure context library: it will never be applied on its own, but its content is injected into both <code>typescript-rules</code> and <code>react-rules</code> whenever they apply.</p> <h2 id=depth-limit>Depth Limit<a class=headerlink href=#depth-limit title="Permanent link">&para;</a></h2> <p>Dependency resolution stops at a maximum depth to prevent runaway chains. The default depth is <strong>3</strong>.</p> <p>If your dependency chain exceeds the default, configure a higher limit in <code>promptscript.config.yaml</code>:</p> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-0-1><a id=__codelineno-0-1 name=__codelineno-0-1 href=#__codelineno-0-1></a><span class=nt>validation</span><span class=p>:</span>
 </span><span id=__span-0-2><a id=__codelineno-0-2 name=__codelineno-0-2 href=#__codelineno-0-2></a><span class=w>  </span><span class=nt>guardRequiresDepth</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-</span></code></pre></div> <p>This sets the maximum depth to 5 levels of transitive dependencies.</p> <h2 id=cycle-detection>Cycle Detection<a class=headerlink href=#cycle-detection title="Permanent link">&para;</a></h2> <p>Circular dependencies are detected at compile time and produce an error:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a>Error PS022: Circular guard dependency detected: &quot;a&quot; → &quot;b&quot; → &quot;a&quot;
+</span></code></pre></div> <p>This sets the maximum depth to 5 levels of transitive dependencies.</p> <h2 id=cycle-detection>Cycle Detection<a class=headerlink href=#cycle-detection title="Permanent link">&para;</a></h2> <p>Circular dependencies are detected at compile time and produce an error:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a>Error PS022: Circular guard dependency detected: "a" → "b" → "a"
 </span></code></pre></div> <p>To fix a cycle, reorganize the guards so that shared content lives in a dependency-free guard and both cyclic guards require it:</p> <div class=highlight><pre><span></span><code><span class=c1># Before (cycle):</span>
 <span class=c1># a requires b, b requires a  ← error</span>
 
 <span class=c1># After (fixed):</span>
 <span class=p>@</span><span class=kd>guards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;shared&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Shared rules.&quot;</span>
+<span class=w>  </span><span class=s2>"shared"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Shared rules."</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span><span class=s2>&quot;a&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;...&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;shared&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Rules for a.&quot;</span>
+<span class=w>  </span><span class=s2>"a"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"..."</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"shared"</span><span class=p>]</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Rules for a."</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span><span class=s2>&quot;b&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;...&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;shared&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Rules for b.&quot;</span>
+<span class=w>  </span><span class=s2>"b"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=nl>applyTo</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"..."</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"shared"</span><span class=p>]</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Rules for b."</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <h2 id=validation>Validation<a class=headerlink href=#validation title="Permanent link">&para;</a></h2> <p>The validator enforces guard dependency rules:</p> <table> <thead> <tr> <th>Rule</th> <th>Code</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td>PS022</td> <td>error</td> <td>Circular guard dependency detected</td> </tr> <tr> <td>PS024</td> <td>error</td> <td><code>requires</code> references a guard name that does not exist</td> </tr> </tbody> </table> <p>Run validation to check your guards:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-2-1><a id=__codelineno-2-1 name=__codelineno-2-1 href=#__codelineno-2-1></a>prs<span class=w> </span>validate

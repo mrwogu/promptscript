@@ -237,6 +237,8 @@ prs compile [options]
 
 `--all-builds` and `--build` are mutually exclusive. `--all-builds` compiles every named profile in `config.builds` in sorted key order, reports failures per profile, and uses one watcher for the full build set when combined with `--watch`.
 
+Compilation fails with exit code 1 when the run resolves zero targets: `config.targets` is missing or empty, the selected build profile lists no targets, or every matching target is `enabled: false`. The error names the config key to change and, for builds-only projects, lists the profiles that can be compiled with `--build` or `--all-builds`.
+
 Paths passed through `--config`, `--registry`, and `--output` are resolved relative to `--cwd` (or the current project directory). Watch mode honors the configured `watch.include`, `watch.exclude`, `watch.debounce`, and `watch.clearScreen` settings. Added, changed, and removed matching files all trigger compilation, and rebuilds are serialized.
 
 Watch mode also tracks resolved dependencies - imported files, local skills, and the loaded configuration - even when they sit outside `watch.include`. The dependency set is refreshed after every rebuild: newly resolved files start being watched, and files that are no longer dependencies stop being watched unless `watch.include` covers them explicitly. Removing an `@use` therefore stops rebuilds triggered by the dropped file, and adding one starts them without a restart.

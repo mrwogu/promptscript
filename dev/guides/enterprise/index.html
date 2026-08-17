@@ -45,7 +45,7 @@
 
     fe --&gt; p1
     be --&gt; p2
-    mobile --&gt; p3</code></pre> <h2 id=central-registry-setup>Central Registry Setup<a class=headerlink href=#central-registry-setup title="Permanent link">&para;</a></h2> <h3 id=create-your-registry>Create Your Registry<a class=headerlink href=#create-your-registry title="Permanent link">&para;</a></h3> <p>Use the CLI to scaffold your company registry:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-0-1><a id=__codelineno-0-1 name=__codelineno-0-1 href=#__codelineno-0-1></a>prs<span class=w> </span>registry<span class=w> </span>init<span class=w> </span>company-registry<span class=w> </span>--name<span class=w> </span><span class=s2>&quot;ACME Registry&quot;</span><span class=w> </span>--namespaces<span class=w> </span>@org<span class=w> </span>@teams<span class=w> </span>@fragments<span class=w> </span>@templates
+    mobile --&gt; p3</code></pre> <h2 id=central-registry-setup>Central Registry Setup<a class=headerlink href=#central-registry-setup title="Permanent link">&para;</a></h2> <h3 id=create-your-registry>Create Your Registry<a class=headerlink href=#create-your-registry title="Permanent link">&para;</a></h3> <p>Use the CLI to scaffold your company registry:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-0-1><a id=__codelineno-0-1 name=__codelineno-0-1 href=#__codelineno-0-1></a>prs<span class=w> </span>registry<span class=w> </span>init<span class=w> </span>company-registry<span class=w> </span>--name<span class=w> </span><span class=s2>"ACME Registry"</span><span class=w> </span>--namespaces<span class=w> </span>@org<span class=w> </span>@teams<span class=w> </span>@fragments<span class=w> </span>@templates
 </span></code></pre></div> <h3 id=repository-structure>Repository Structure<a class=headerlink href=#repository-structure title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a>promptscript-registry/
 </span><span id=__span-1-2><a id=__codelineno-1-2 name=__codelineno-1-2 href=#__codelineno-1-2></a>├── README.md
 </span><span id=__span-1-3><a id=__codelineno-1-3 name=__codelineno-1-3 href=#__codelineno-1-3></a>├── CHANGELOG.md
@@ -68,13 +68,13 @@
 </span><span id=__span-1-20><a id=__codelineno-1-20 name=__codelineno-1-20 href=#__codelineno-1-20></a>    └── library.prs
 </span></code></pre></div> <h3 id=organization-base-configuration>Organization Base Configuration<a class=headerlink href=#organization-base-configuration title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># @org/base.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@org/base&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
-<span class=w>  </span><span class=nl>org</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;ACME Corporation&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@org/base"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
+<span class=w>  </span><span class=nl>org</span><span class=p>:</span><span class=w> </span><span class=s2>"ACME Corporation"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are an AI assistant at ACME Corporation.</span>
 
 <span class=sd>  Core values:</span>
@@ -82,87 +82,87 @@
 <span class=sd>  - Security first</span>
 <span class=sd>  - User-centric design</span>
 <span class=sd>  - Collaborative development</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Code review required&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Documentation required&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Testing required&quot;</span>
+<span class=w>    </span><span class=s2>"Code review required"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Documentation required"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Testing required"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>git</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Use conventional commits format&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Branch naming: feature|bugfix|hotfix/TICKET-description&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Pull request required&quot;</span>
+<span class=w>    </span><span class=s2>"Use conventional commits format"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Branch naming: feature|bugfix|hotfix/TICKET-description"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Pull request required"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never commit secrets or credentials&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never bypass security reviews&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Always follow data protection policies&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never use deprecated dependencies with known vulnerabilities&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never commit secrets or credentials"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never bypass security reviews"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Always follow data protection policies"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never use deprecated dependencies with known vulnerabilities"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/security&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review code for security vulnerabilities&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/docs&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Generate or update documentation&quot;</span>
+<span class=w>  </span><span class=s2>"/security"</span><span class=p>:</span><span class=w> </span><span class=s2>"Review code for security vulnerabilities"</span>
+<span class=w>  </span><span class=s2>"/docs"</span><span class=p>:</span><span class=w> </span><span class=s2>"Generate or update documentation"</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAs2oBzAPQAjDHBhVaAHVb8SMLBl7AFvXhAAmiXnJCCREqTEObecAJ7sMhfYYCMFAAxuLrLUOGOQAQQBhAFkAUV5AoTQhbAg2TwBfBQV+XU4sCCxrdUsLEE8tAE1mAFdeDGoYcq9-AElyuDgIOFV2cqxeILCIqJiMtgpkrx7K3gA3DCgS+ERLAFpeAEUSyczs5jGYais0GBgded4AZRhGEuo13khaLEOAVWlqOcZ0i8ZeHXgIYVZDyKgoBhxH0IJsPjBNlBmGhlOxcvkEQokr9FC0MKwdBUdHAcsMWJ99MhLFpDJFPrxKmMIDAAO4UmAARxKEEqBxAdGJBhAABFmGdYap+l5KkyWftDBzhiSQAAVeAZVjCemi1kFXgAXSGWmEmUJnMMDyqLFYm3YcVYk14LBIJEyOLAQhI2Al+pAACFqOjGDheBbbYr9GAYNhzjAAD7iErCSCEMM4ZhYGOiGW1QIAaVCMrmnzgjAuaCFLqlXIACiUAcrpi1K2K2ZZNaxkSlKi03kKcRphgtDAA5CFbK3MG2ZKynSpYHFCK2s9IQSZwNXdkB9zbbcTWTCNUdnC5ZelU2kL-Jdrn+KA0jDWe3MAHMOmY1S8GgJ05Cp83iCMalHw69-vbEppHBGhTmwfZgM4T5WC-eBeBpTIfQAa1YO8vDGctWC2IFoEyb9EiGfg4HjagsDOCdcWlURpB3NZDD8AAlCFqTpfEqgdbZqPOS50KgTDPXEHCMngNVDFEHQ+SPPwAHFOCwjheCnEo0AfKpxP5dJYniY8EhABJ1QYV5rHwIhSHIGQaHoEBVyaNh8CcXSgA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=security-configuration>Security Configuration<a class=headerlink href=#security-configuration title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># @org/security.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@org/security&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@org/security"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  Apply ACME security standards to all code.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>security</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;MFA required&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Session timeout: 3600 seconds&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;RBAC with least privilege principle&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Encrypt with AES-256&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Mask PII in logs&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Weekly vulnerability scanning&quot;</span>
+<span class=w>    </span><span class=s2>"MFA required"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Session timeout: 3600 seconds"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"RBAC with least privilege principle"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Encrypt with AES-256"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Mask PII in logs"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Weekly vulnerability scanning"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never store passwords in plain text&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never log sensitive data&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never disable security features&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never use eval() or similar unsafe functions&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Always validate and sanitize user input&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Always use parameterized queries&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never store passwords in plain text"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never log sensitive data"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never disable security features"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never use eval() or similar unsafe functions"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Always validate and sanitize user input"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Always use parameterized queries"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>knowledge</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  ## Security Resources</span>
 
 <span class=sd>  - Security guidelines: https://wiki.acme.com/security</span>
 <span class=sd>  - Vulnerability reporting: security@acme.com</span>
 <span class=sd>  - Security review checklist: https://wiki.acme.com/security-checklist</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAs2oBzAPRwYjAK7UIWAJ5VaAHVb8SMLBl7BVvXhAAmiXspCCR4yTLnyze3nHnsMhE2YCMFAAw-7rAF9VVX4jTixbHQd7EH99AEE0cnleeIBhAFkAUUdrWQVHLVZDDGpDOF4sZl4MKCheFkMYCmjYttUg1hC4IpKyit1WfQlpfPkTZAd9MwyAMXjeahgARykIJcMzOinTEABleDgINkqIDWYpLBMAZgA2b29clmK4LZ2zACUAIXTeAHc5DheLAMD1eDQIAA3aAwYQwcGyViMCDkGBvIb6XZZJHUeRoLD-QGpLJ7AC0ACYAKy3dGY3YZUEAa14AAUAJJsgxDKDMYSvEDbDHTEAAdRgMEZUBSkKkUFYMGoGAARtBInBGBhWKwIKxhHFeABdDrBNRLHqyRgRNgDByk3YAORgkIVhSE8MwcDgfyE5S54KgGB1lSIWH1drMjud1GBvNyrCOEWdvBKWjDDqdLsMEDgytgTxsBTAMGwMngaYjGejUgkvCdtQAFABKXhCRxnaClXhSeMYIu8MDdy3HePlkDxKB-DDyCqQ2pGbDwzWGRyauQQABe8OrLp1aEuo-Hk+nXZrmEVGg4sk3y9WCogZdigRN-EZrGYf1ghjhUQxMX13D4A5RkiD54AuahGDLLoMTtICCxSYQ1iaKAdXgEwcCwLA0DgRBRFEAFGQgCgMEYDQKBYEgrGAhRbV4AA1WV5UVFUUIKJY0CECJdRMEZ4P4EiyIo2i4LGRYnXvP4GhwSRJWzK5eAwrCcLwgiiIE5oKKo+DSUYaTGFknpWj-QIQACA0GHCXF8CIUhUSUegQCjI42HwDxTKAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=team-configuration>Team Configuration<a class=headerlink href=#team-configuration title="Permanent link">&para;</a></h2> <h3 id=frontend-team>Frontend Team<a class=headerlink href=#frontend-team title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># @teams/frontend.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@teams/frontend&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
-<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Frontend&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@teams/frontend"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
+<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>"Frontend"</span>
 <span class=p>}</span>
 
 <span class=kn>@inherit</span><span class=w> </span><span class=s>@org/base</span>
 <span class=kn>@use</span><span class=w> </span><span class=s>@org/security</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are a frontend development expert.</span>
 
 <span class=sd>  Expertise:</span>
@@ -170,11 +170,11 @@
 <span class=sd>  - Modern CSS and design systems</span>
 <span class=sd>  - Performance optimization</span>
 <span class=sd>  - Accessibility (WCAG 2.1 AA)</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  ## Tech Stack</span>
 
 <span class=sd>  - Framework: React 18+</span>
@@ -189,45 +189,45 @@
 <span class=sd>  - Component-driven development</span>
 <span class=sd>  - Feature-based folder structure</span>
 <span class=sd>  - Shared design system (@acme/ui)</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Use hooks, composition, and render props patterns&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Functional components only&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;TypeScript interfaces for props&quot;</span>
+<span class=w>    </span><span class=s2>"Use hooks, composition, and render props patterns"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Functional components only"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"TypeScript interfaces for props"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>accessibility</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;WCAG 2.1 AA compliance&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Accessibility testing required&quot;</span>
+<span class=w>    </span><span class=s2>"WCAG 2.1 AA compliance"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Accessibility testing required"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>performance</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Monitor bundle size&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Track Core Web Vitals&quot;</span>
+<span class=w>    </span><span class=s2>"Monitor bundle size"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Track Core Web Vitals"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/component&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Create a React component&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/hook&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Create a custom hook&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Write tests with Vitest&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/a11y&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review accessibility&quot;</span>
+<span class=w>  </span><span class=s2>"/component"</span><span class=p>:</span><span class=w> </span><span class=s2>"Create a React component"</span>
+<span class=w>  </span><span class=s2>"/hook"</span><span class=p>:</span><span class=w> </span><span class=s2>"Create a custom hook"</span>
+<span class=w>  </span><span class=s2>"/test"</span><span class=p>:</span><span class=w> </span><span class=s2>"Write tests with Vitest"</span>
+<span class=w>  </span><span class=s2>"/a11y"</span><span class=p>:</span><span class=w> </span><span class=s2>"Review accessibility"</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAh1JwA9GGpsOrACZVaAHVb8SMLBl7BFvXhGmJe8kIJjCxE9p2mGtvOAE92GQvsMBGCgAZP11tqEkXEAAxcykrEEUAX0VFPn4IVhwYaggsAWZqAHMRACMMOBhtPgAKahhMiDgsajteAFpeaUqMHNhpXjAM3nIMO0yJAFcZAEpYgQGC9KyRAsYBlKxa3hKyiqqa+sbm1ph2zupuqF7+5iHpUaVdTixU2s1fAwinmwBNU94MMo+O0MtGmAAbjAoMw0Cp2LwiGhklgKDEHgBRQjQ6g3AqIGwNABKJkYaQwMl4ABU7NCAMqMFJoLCY3gAWWY0mSvgAwmSyR9CUy4BBMr57FUYCQ4LSAArJfYkAmMQqgm4kCAAL2wEDYtIAgowZXAeTloLdeMUAOos9UAcV4ACYKK5eOr1RdtNZnqxoqxFPwWBZCGl7k7nhEHtw+ESYIwcLwyWpGABreHaBohUgwADuGRj+hxGDxvFcAA4ANS0gAyBMyAwwmRg+hJ5MpEGpvAArEWHg0AEIDaB6XgANVSMFpUbsUASmRrGGgKYS0jZZNpoaqY-0-Y4VV4BeJ8BurEyvGLEBy1E+diHag4mdxaQAigNkrVNwAtCZqGTx5Z8dXUcMDvHzQfum2vAsswZBsNcdTSCkQK+EyQIgmC1y0kEJhYP+dR5AUezMFATIHOsAx-mUQ44J8uz-DyfK2HYgokIa-DZioIhdo6jzOlE8L8FUBLSJ80hwBoNgsEy+jIDY-oAKqTDgzDMDGcB0LwLBgTyNxsIpPG8GUMjJN0EhoAJmBYBw1CsCKIB0OJjxBEMeKqqwGBQEpoFoOB7ACWwUCnhZVmGLWMAUlSaQJCZYDZvAHRdDQoLmTYAC677Ztqur6osom+SAJrmlaNp2uqzlkKO0qDj5Dz+pqyWHqltRrjue5lAAjl2ZThPF74opKxXpWVjwMqwqRdDkZywLYSolZZPV+cesbARkhRGjAOR9qkjmxQ8CWupxcAyaicxYAJfqPCIymuawSFII8LJlNghTqFmOYnW5NKBv6IgyXJhiBFdqG3UpL6gbw71xi9R21Z9jxGgshS1QJ064MtYMg4YIgYK4rjeYEOIAhAqYfFq8ApaOiw+JEICRHFDDXDU+BEKQ5AwHI9AgECtD2fgrhk0AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=backend-team>Backend Team<a class=headerlink href=#backend-team title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># @teams/backend.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@teams/backend&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
-<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Backend&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@teams/backend"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
+<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>"Backend"</span>
 <span class=p>}</span>
 
 <span class=kn>@inherit</span><span class=w> </span><span class=s>@org/base</span>
 <span class=kn>@use</span><span class=w> </span><span class=s>@org/security</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are a backend development expert.</span>
 
 <span class=sd>  Expertise:</span>
@@ -235,11 +235,11 @@
 <span class=sd>  - RESTful and GraphQL APIs</span>
 <span class=sd>  - Database design and optimization</span>
 <span class=sd>  - Microservices architecture</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  ## Tech Stack</span>
 
 <span class=sd>  - Runtime: Node.js 20+</span>
@@ -254,42 +254,42 @@
 <span class=sd>  - Clean architecture</span>
 <span class=sd>  - Domain-driven design</span>
 <span class=sd>  - Event-driven microservices</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>api</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;URL path versioning (/v1, /v2)&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Document with OpenAPI 3.0&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;JWT + OAuth2 authentication&quot;</span>
+<span class=w>    </span><span class=s2>"URL path versioning (/v1, /v2)"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Document with OpenAPI 3.0"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"JWT + OAuth2 authentication"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>database</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Use migrations for schema changes&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Review all indexes&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Query optimization required&quot;</span>
+<span class=w>    </span><span class=s2>"Use migrations for schema changes"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Review all indexes"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Query optimization required"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/api&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Design API endpoint&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/schema&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Design database schema&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Write tests with Jest&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/migrate&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Create database migration&quot;</span>
+<span class=w>  </span><span class=s2>"/api"</span><span class=p>:</span><span class=w> </span><span class=s2>"Design API endpoint"</span>
+<span class=w>  </span><span class=s2>"/schema"</span><span class=p>:</span><span class=w> </span><span class=s2>"Design database schema"</span>
+<span class=w>  </span><span class=s2>"/test"</span><span class=p>:</span><span class=w> </span><span class=s2>"Write tests with Jest"</span>
+<span class=w>  </span><span class=s2>"/migrate"</span><span class=p>:</span><span class=w> </span><span class=s2>"Create database migration"</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAh1JwA9ACMMjANacAJlVoAdVvxIwsGXsGW9eEWYl6KQgmMPGSZrWcZ284AT3YZCh4wEYKABm+3WuoRI3EAAhSzk-AF9lZT5+CFYcGGoILAFmagBzCzgYXT4ACmoYTIg4LGoHXgBaXlkyjDFYWV4wDN5yDAdM6mYAV2sASliBPtz0rJFcxj6UrCreQuLS8sqauoammBa26g6oLp7+oeV42U4sVKrtfyMQW3vbgE1+3gxit94JaTk6mAA3GBQZhoNTsXhENDJLAUGK3ACihCh1EuuUQdlqADlmOcKAArOBvay8AAqDihAGVGCk0FgMbwAErwikksB9KBEloAcWoGDQOAAigAZXgAQQACgBJOD0gAi2EaGHG5zgEEy-gwxJBlxIEAAXtgIGx6QBZCDU5i5aj-c3wN7URg4VIwRhYWYwOwPKJw-gsdhENI3XRex75Pgkl04XgUjTSOG6WoMgY6mCGbG4gm8ABMXgA1PShZrMn0MJlU6TyTAqTS0gBWfO3WoAMV5agA7hkpGn4FgAFIUuUKiRo3jiy1YHpV4W8XOM7ZlekAeQZJsM4pScBIGHpEfKCUyhl7Pfjiz4oodTo4rvdJ9qAGFYJr7Y7ndfinLmFuEtVZClAf4VTVVh6Xhf8sB-P9OF4XULStG1GHgT17mQ5RomAlRyk1WR3lkQkgzeNAIEMZA7GDEAAFUGRFTBcF4QFaCNVh914AoRH+dw6F4Nis2GEA6FIu5ZWYGYwTSNtUijRcoVYCVJV4ABmXw+IE4xewAdRJGdeEXUU+lwLM3j0pJ2HNQ1jVDXgAF0T2wjRh3LEjbjI8jxl1HozNYQldnsR0YC3XhHSLRDlKcu4GQBCAYDbN4oA5BJzkIYL+NC4wBT6ZIqm1CBdQNS42F4YoAEc+ggYobAs6zWDQ044BwDIsBmLA8KQkQ+QgYxglleAgLFKUIWsNBmASOkLOMKZfK3DrBO69U6iHJU8jgCbt1GkARA4copuMNS5jyDamt4cTaKPTbVpENzeQ4LaQDvYpsDyWzFVctVLsYqIQEiSyGAuSp8CIUhyBgBR6BAejVTYfB3A+oA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=project-integration>Project Integration<a class=headerlink href=#project-integration title="Permanent link">&para;</a></h2> <h3 id=project-configuration>Project Configuration<a class=headerlink href=#project-configuration title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># .promptscript/project.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;customer-portal&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"customer-portal"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=kn>@inherit</span><span class=w> </span><span class=s>@teams/frontend</span>
 
 <span class=p>@</span><span class=kd>context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Customer Portal&quot;</span>
-<span class=w>  </span><span class=na>repository</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;github.com/acme/customer-portal&quot;</span>
+<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>"Customer Portal"</span>
+<span class=w>  </span><span class=na>repository</span><span class=p>:</span><span class=w> </span><span class=s2>"github.com/acme/customer-portal"</span>
 
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  ## Project Overview</span>
 
 <span class=sd>  Self-service portal for ACME customers.</span>
@@ -305,11 +305,11 @@
 <span class=sd>  - Auth: Okta SSO</span>
 <span class=sd>  - Payments: Stripe</span>
 <span class=sd>  - Analytics: Mixpanel</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>knowledge</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  ## API Endpoints</span>
 
 <span class=sd>  Base URL: https://api.acme.com/v1</span>
@@ -324,11 +324,11 @@
 <span class=sd>  - Button, Input, Select</span>
 <span class=sd>  - Card, Modal, Drawer</span>
 <span class=sd>  - DataTable, Pagination</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1VMArnCxCY1ALRpm1XVEuHecAJ7sMhOaWAIwUAAzhnqwAvurqfBoQrDgOEFi8GhykcFJgguycJkZ8ABTUMADmELbUPryOvCbVGABGsEVgrrzkGD4VglasJgCU6hosBYTpBqxGsgpKQSAAwjZ22tS8AAqu7lFG5S5waa4+S1W4Vi0ULCRSGIzaUoxr9k4ubhgeIHGzFj8ArzcPhbQQLdIAeQAbg4oRAYAB3X5GADKMCgYEccFhEEYMG6uy+vE6mwAgssALIAUV4L1sbzgFGRvAAYjBsFZynBEF4GqTGCxBukSBhWBgKjBtOxebwIdQTA5eDhqnZajKUVY0B90lhcQBrHRqP4NABC0CgSQqxlYJJFurYzOBvAA0jA6gBJAr9bAQNhGmWkqy4cwQvW6XgolEQmVbXpSkTmFFYcRoGABsVQHy6xjc3gUiCETCsdFeTyAmK-DR61jMBHtCX6UuAn5-J2krbu3hUoYuJIiZkmjDY3gAVQASgAZcw4LBYNDcqT3NAQCgPbQ3IRSKHBZkNADiVIAKrxnq8NjlEKZ6rw9zpaWeHDKD8epK4FbRrxOVbw3w4jUYGi2CEURfbMDREa9lnKbB8TgTVtV4MCdEdPgABF4AgCpZhRHxbElZkR2HDQ1xgKQrAgWkhBcYt2G5GUTSDOxWDoXhPTQIMWLRWAlBlZYMHlFiKWYEwvhY1DqAwBFH2NXhUOwDBD1aWAWNjKoxXtVgmzLdRohAaIAF0GE4ZMfHwIhSHIGAVBABgYVoX1WHwYI9KAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-config-file>Project Config File<a class=headerlink href=#project-config-file title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-2-1><a id=__codelineno-2-1 name=__codelineno-2-1 href=#__codelineno-2-1></a><span class=c1># promptscript.yaml</span>
 </span><span id=__span-2-2><a id=__codelineno-2-2 name=__codelineno-2-2 href=#__codelineno-2-2></a><span class=nt>id</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">enterprise-project</span>
-</span><span id=__span-2-3><a id=__codelineno-2-3 name=__codelineno-2-3 href=#__codelineno-2-3></a><span class=nt>syntax</span><span class=p>:</span><span class=w> </span><span class=s>&#39;1.4.0&#39;</span>
+</span><span id=__span-2-3><a id=__codelineno-2-3 name=__codelineno-2-3 href=#__codelineno-2-3></a><span class=nt>syntax</span><span class=p>:</span><span class=w> </span><span class=s>'1.4.0'</span>
 </span><span id=__span-2-4><a id=__codelineno-2-4 name=__codelineno-2-4 href=#__codelineno-2-4></a>
 </span><span id=__span-2-5><a id=__codelineno-2-5 name=__codelineno-2-5 href=#__codelineno-2-5></a><span class=nt>input</span><span class=p>:</span>
 </span><span id=__span-2-6><a id=__codelineno-2-6 name=__codelineno-2-6 href=#__codelineno-2-6></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.promptscript/project.prs</span>
@@ -363,7 +363,7 @@ Or pin individual imports in your `.prs` files:
 ```
 @inherit @teams/frontend@2.0.0
 ```
-</code></pre></div> <h2 id=developer-configuration>Developer Configuration<a class=headerlink href=#developer-configuration title="Permanent link">&para;</a></h2> <h3 id=user-level-config>User-Level Config<a class=headerlink href=#user-level-config title="Permanent link">&para;</a></h3> <p>Each developer can set their default registry in <code>~/.promptscript/config.yaml</code>:</p> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a><span class=nt>version</span><span class=p>:</span><span class=w> </span><span class=s>&#39;1&#39;</span>
+</code></pre></div> <h2 id=developer-configuration>Developer Configuration<a class=headerlink href=#developer-configuration title="Permanent link">&para;</a></h2> <h3 id=user-level-config>User-Level Config<a class=headerlink href=#user-level-config title="Permanent link">&para;</a></h3> <p>Each developer can set their default registry in <code>~/.promptscript/config.yaml</code>:</p> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a><span class=nt>version</span><span class=p>:</span><span class=w> </span><span class=s>'1'</span>
 </span><span id=__span-5-2><a id=__codelineno-5-2 name=__codelineno-5-2 href=#__codelineno-5-2></a><span class=nt>registry</span><span class=p>:</span>
 </span><span id=__span-5-3><a id=__codelineno-5-3 name=__codelineno-5-3 href=#__codelineno-5-3></a><span class=w>  </span><span class=nt>git</span><span class=p>:</span>
 </span><span id=__span-5-4><a id=__codelineno-5-4 name=__codelineno-5-4 href=#__codelineno-5-4></a><span class=w>    </span><span class=nt>url</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/acme/promptscript-registry.git</span>
@@ -384,12 +384,12 @@ Or pin individual imports in your `.prs` files:
 </span><span id=__span-7-4><a id=__codelineno-7-4 name=__codelineno-7-4 href=#__codelineno-7-4></a><span class=nt>on</span><span class=p>:</span>
 </span><span id=__span-7-5><a id=__codelineno-7-5 name=__codelineno-7-5 href=#__codelineno-7-5></a><span class=w>  </span><span class=nt>push</span><span class=p>:</span>
 </span><span id=__span-7-6><a id=__codelineno-7-6 name=__codelineno-7-6 href=#__codelineno-7-6></a><span class=w>    </span><span class=nt>paths</span><span class=p>:</span>
-</span><span id=__span-7-7><a id=__codelineno-7-7 name=__codelineno-7-7 href=#__codelineno-7-7></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;.promptscript/**&#39;</span>
-</span><span id=__span-7-8><a id=__codelineno-7-8 name=__codelineno-7-8 href=#__codelineno-7-8></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript.yaml&#39;</span>
+</span><span id=__span-7-7><a id=__codelineno-7-7 name=__codelineno-7-7 href=#__codelineno-7-7></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>'.promptscript/**'</span>
+</span><span id=__span-7-8><a id=__codelineno-7-8 name=__codelineno-7-8 href=#__codelineno-7-8></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>'promptscript.yaml'</span>
 </span><span id=__span-7-9><a id=__codelineno-7-9 name=__codelineno-7-9 href=#__codelineno-7-9></a><span class=w>  </span><span class=nt>pull_request</span><span class=p>:</span>
 </span><span id=__span-7-10><a id=__codelineno-7-10 name=__codelineno-7-10 href=#__codelineno-7-10></a><span class=w>    </span><span class=nt>paths</span><span class=p>:</span>
-</span><span id=__span-7-11><a id=__codelineno-7-11 name=__codelineno-7-11 href=#__codelineno-7-11></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;.promptscript/**&#39;</span>
-</span><span id=__span-7-12><a id=__codelineno-7-12 name=__codelineno-7-12 href=#__codelineno-7-12></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript.yaml&#39;</span>
+</span><span id=__span-7-11><a id=__codelineno-7-11 name=__codelineno-7-11 href=#__codelineno-7-11></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>'.promptscript/**'</span>
+</span><span id=__span-7-12><a id=__codelineno-7-12 name=__codelineno-7-12 href=#__codelineno-7-12></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>'promptscript.yaml'</span>
 </span><span id=__span-7-13><a id=__codelineno-7-13 name=__codelineno-7-13 href=#__codelineno-7-13></a>
 </span><span id=__span-7-14><a id=__codelineno-7-14 name=__codelineno-7-14 href=#__codelineno-7-14></a><span class=nt>jobs</span><span class=p>:</span>
 </span><span id=__span-7-15><a id=__codelineno-7-15 name=__codelineno-7-15 href=#__codelineno-7-15></a><span class=w>  </span><span class=nt>validate</span><span class=p>:</span>
@@ -399,7 +399,7 @@ Or pin individual imports in your `.prs` files:
 </span><span id=__span-7-19><a id=__codelineno-7-19 name=__codelineno-7-19 href=#__codelineno-7-19></a>
 </span><span id=__span-7-20><a id=__codelineno-7-20 name=__codelineno-7-20 href=#__codelineno-7-20></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-node@v4</span>
 </span><span id=__span-7-21><a id=__codelineno-7-21 name=__codelineno-7-21 href=#__codelineno-7-21></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
-</span><span id=__span-7-22><a id=__codelineno-7-22 name=__codelineno-7-22 href=#__codelineno-7-22></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>&#39;20&#39;</span>
+</span><span id=__span-7-22><a id=__codelineno-7-22 name=__codelineno-7-22 href=#__codelineno-7-22></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>'20'</span>
 </span><span id=__span-7-23><a id=__codelineno-7-23 name=__codelineno-7-23 href=#__codelineno-7-23></a>
 </span><span id=__span-7-24><a id=__codelineno-7-24 name=__codelineno-7-24 href=#__codelineno-7-24></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Install PromptScript</span>
 </span><span id=__span-7-25><a id=__codelineno-7-25 name=__codelineno-7-25 href=#__codelineno-7-25></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g @promptscript/cli</span>
@@ -413,7 +413,7 @@ Or pin individual imports in your `.prs` files:
 </span><span id=__span-7-33><a id=__codelineno-7-33 name=__codelineno-7-33 href=#__codelineno-7-33></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="p p-Indicator">|</span>
 </span><span id=__span-7-34><a id=__codelineno-7-34 name=__codelineno-7-34 href=#__codelineno-7-34></a><span class=w>          </span><span class=no>prs compile</span>
 </span><span id=__span-7-35><a id=__codelineno-7-35 name=__codelineno-7-35 href=#__codelineno-7-35></a><span class=w>          </span><span class=no>git diff --exit-code || {</span>
-</span><span id=__span-7-36><a id=__codelineno-7-36 name=__codelineno-7-36 href=#__codelineno-7-36></a><span class=w>            </span><span class=no>echo &quot;::error::Compiled files are out of date. Run &#39;prs compile&#39; and commit.&quot;</span>
+</span><span id=__span-7-36><a id=__codelineno-7-36 name=__codelineno-7-36 href=#__codelineno-7-36></a><span class=w>            </span><span class=no>echo "::error::Compiled files are out of date. Run 'prs compile' and commit."</span>
 </span><span id=__span-7-37><a id=__codelineno-7-37 name=__codelineno-7-37 href=#__codelineno-7-37></a><span class=w>            </span><span class=no>exit 1</span>
 </span><span id=__span-7-38><a id=__codelineno-7-38 name=__codelineno-7-38 href=#__codelineno-7-38></a><span class=w>          </span><span class=no>}</span>
 </span><span id=__span-7-39><a id=__codelineno-7-39 name=__codelineno-7-39 href=#__codelineno-7-39></a><span class=w>        </span><span class=nt>env</span><span class=p>:</span>
@@ -434,7 +434,7 @@ Or pin individual imports in your `.prs` files:
 </span><span id=__span-8-14><a id=__codelineno-8-14 name=__codelineno-8-14 href=#__codelineno-8-14></a>
 </span><span id=__span-8-15><a id=__codelineno-8-15 name=__codelineno-8-15 href=#__codelineno-8-15></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-node@v4</span>
 </span><span id=__span-8-16><a id=__codelineno-8-16 name=__codelineno-8-16 href=#__codelineno-8-16></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
-</span><span id=__span-8-17><a id=__codelineno-8-17 name=__codelineno-8-17 href=#__codelineno-8-17></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>&#39;20&#39;</span>
+</span><span id=__span-8-17><a id=__codelineno-8-17 name=__codelineno-8-17 href=#__codelineno-8-17></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>'20'</span>
 </span><span id=__span-8-18><a id=__codelineno-8-18 name=__codelineno-8-18 href=#__codelineno-8-18></a>
 </span><span id=__span-8-19><a id=__codelineno-8-19 name=__codelineno-8-19 href=#__codelineno-8-19></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Install PromptScript</span>
 </span><span id=__span-8-20><a id=__codelineno-8-20 name=__codelineno-8-20 href=#__codelineno-8-20></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g @promptscript/cli</span>
@@ -442,7 +442,7 @@ Or pin individual imports in your `.prs` files:
 </span><span id=__span-8-22><a id=__codelineno-8-22 name=__codelineno-8-22 href=#__codelineno-8-22></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Validate registry</span>
 </span><span id=__span-8-23><a id=__codelineno-8-23 name=__codelineno-8-23 href=#__codelineno-8-23></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">prs registry validate --strict</span>
 </span></code></pre></div> <h2 id=governance>Governance<a class=headerlink href=#governance title="Permanent link">&para;</a></h2> <h3 id=versioning-strategy>Versioning Strategy<a class=headerlink href=#versioning-strategy title="Permanent link">&para;</a></h3> <p>Follow semantic versioning for registry files using Git tags:</p> <ul> <li><strong>Major</strong> (v1.0.0 → v2.0.0): Breaking changes to block structure</li> <li><strong>Minor</strong> (v1.0.0 → v1.1.0): New features, non-breaking additions</li> <li><strong>Patch</strong> (v1.0.0 → v1.0.1): Bug fixes, documentation updates</li> </ul> <p>Create releases with Git tags:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-9-1><a id=__codelineno-9-1 name=__codelineno-9-1 href=#__codelineno-9-1></a><span class=c1># Create release tag</span>
-</span><span id=__span-9-2><a id=__codelineno-9-2 name=__codelineno-9-2 href=#__codelineno-9-2></a>git<span class=w> </span>tag<span class=w> </span>-a<span class=w> </span>v1.0.0<span class=w> </span>-m<span class=w> </span><span class=s2>&quot;Release v1.0.0&quot;</span>
+</span><span id=__span-9-2><a id=__codelineno-9-2 name=__codelineno-9-2 href=#__codelineno-9-2></a>git<span class=w> </span>tag<span class=w> </span>-a<span class=w> </span>v1.0.0<span class=w> </span>-m<span class=w> </span><span class=s2>"Release v1.0.0"</span>
 </span><span id=__span-9-3><a id=__codelineno-9-3 name=__codelineno-9-3 href=#__codelineno-9-3></a>git<span class=w> </span>push<span class=w> </span>origin<span class=w> </span>v1.0.0
 </span><span id=__span-9-4><a id=__codelineno-9-4 name=__codelineno-9-4 href=#__codelineno-9-4></a>
 </span><span id=__span-9-5><a id=__codelineno-9-5 name=__codelineno-9-5 href=#__codelineno-9-5></a><span class=c1># Projects can then pin to this version</span>
@@ -451,11 +451,11 @@ Or pin individual imports in your `.prs` files:
 </span><span id=__span-9-8><a id=__codelineno-9-8 name=__codelineno-9-8 href=#__codelineno-9-8></a><span class=c1># Or in .prs files:</span>
 </span><span id=__span-9-9><a id=__codelineno-9-9 name=__codelineno-9-9 href=#__codelineno-9-9></a><span class=c1>#   @inherit @org/base@1.0.0</span>
 </span></code></pre></div> <h3 id=change-management>Change Management<a class=headerlink href=#change-management title="Permanent link">&para;</a></h3> <ol> <li><strong>Propose changes</strong> via pull request to registry</li> <li><strong>Review</strong> by relevant stakeholders</li> <li><strong>Test</strong> with sample projects</li> <li><strong>Communicate</strong> changes to teams</li> <li><strong>Deprecate</strong> old versions with migration path</li> </ol> <h3 id=access-control>Access Control<a class=headerlink href=#access-control title="Permanent link">&para;</a></h3> <table> <thead> <tr> <th>Role</th> <th>Permissions</th> </tr> </thead> <tbody> <tr> <td>Admin</td> <td>Full registry access</td> </tr> <tr> <td>Team Lead</td> <td>Team namespace write</td> </tr> <tr> <td>Developer</td> <td>Read-only, PR creation</td> </tr> </tbody> </table> <h2 id=rollout-strategy>Rollout Strategy<a class=headerlink href=#rollout-strategy title="Permanent link">&para;</a></h2> <h3 id=phase-1-pilot-2-4-weeks>Phase 1: Pilot (2-4 weeks)<a class=headerlink href=#phase-1-pilot-2-4-weeks title="Permanent link">&para;</a></h3> <ol> <li>Select 2-3 pilot teams</li> <li>Set up central registry</li> <li>Migrate existing instructions</li> <li>Gather feedback</li> </ol> <p>Advance when all pilot repositories pass <code>prs validate --strict</code>, generated output drift is zero, at least 95% of pilot CI runs pass for five business days, and every reported P0 or P1 migration issue is closed.</p> <h3 id=phase-2-team-rollout-4-8-weeks>Phase 2: Team Rollout (4-8 weeks)<a class=headerlink href=#phase-2-team-rollout-4-8-weeks title="Permanent link">&para;</a></h3> <ol> <li>Create team configurations</li> <li>Onboard remaining teams</li> <li>Establish governance</li> <li>Train developers</li> </ol> <p>Advance when every onboarded team has an owner and rollback contact, at least 90% of in-scope repositories compile from committed sources in CI, and no open P0 or P1 incident is attributable to generated instructions.</p> <h3 id=phase-3-organization-wide-ongoing>Phase 3: Organization-Wide (Ongoing)<a class=headerlink href=#phase-3-organization-wide-ongoing title="Permanent link">&para;</a></h3> <ol> <li>Mandate for new projects</li> <li>Migration support for existing</li> <li>Continuous improvement</li> <li>Regular reviews</li> </ol> <p>Review monthly: validation pass rate, output-drift rate, mean time to resolve PromptScript incidents, unsupported target warnings, repository adoption, and rollback exercises. Pause new onboarding when a P0 remains open or the rolling seven-day validation pass rate drops below 95%.</p> <h2 id=version-support-policy>Version Support Policy<a class=headerlink href=#version-support-policy title="Permanent link">&para;</a></h2> <h3 id=supported-nodejs-versions>Supported Node.js Versions<a class=headerlink href=#supported-nodejs-versions title="Permanent link">&para;</a></h3> <p>PromptScript supports the following Node.js versions:</p> <table> <thead> <tr> <th>Node.js Version</th> <th>Support Status</th> </tr> </thead> <tbody> <tr> <td>20.x</td> <td><img alt=✅ class=twemoji src=https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg title=:white_check_mark:> Full support</td> </tr> <tr> <td>22.x (LTS)</td> <td><img alt=✅ class=twemoji src=https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg title=:white_check_mark:> Full support</td> </tr> <tr> <td>24.x</td> <td><img alt=✅ class=twemoji src=https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg title=:white_check_mark:> Full support</td> </tr> <tr> <td>25.x (Current)</td> <td><img alt=✅ class=twemoji src=https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg title=:white_check_mark:> Full support</td> </tr> <tr> <td>&lt; 20</td> <td><img alt=❌ class=twemoji src=https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg title=:x:> Not supported</td> </tr> </tbody> </table> <p>We follow Node.js's <a href=https://nodejs.org/en/about/releases/ >release schedule</a> and support active LTS and current versions.</p> <h3 id=promptscript-version-support>PromptScript Version Support<a class=headerlink href=#promptscript-version-support title="Permanent link">&para;</a></h3> <table> <thead> <tr> <th>Version</th> <th>Status</th> <th>Support Window</th> </tr> </thead> <tbody> <tr> <td>1.x</td> <td>Active</td> <td>Until 2.0 release + 6 months</td> </tr> </tbody> </table> <p><strong>Support includes:</strong></p> <ul> <li>Security patches</li> <li>Bug fixes</li> <li>Documentation updates</li> <li>Compatibility with new Node.js LTS versions</li> </ul> <h3 id=breaking-changes-policy>Breaking Changes Policy<a class=headerlink href=#breaking-changes-policy title="Permanent link">&para;</a></h3> <p>We follow <a href=https://semver.org/ >Semantic Versioning</a>:</p> <ul> <li><strong>Major versions</strong> (1.x → 2.x): May contain breaking changes</li> <li><strong>Minor versions</strong> (1.0 → 1.1): New features, backwards compatible</li> <li><strong>Patch versions</strong> (1.0.0 → 1.0.1): Bug fixes only</li> </ul> <p><strong>Breaking changes will:</strong></p> <ol> <li>Be announced at least 4 weeks in advance</li> <li>Include migration guides in release notes</li> <li>Provide deprecation warnings in the previous minor version</li> <li>Be documented in CHANGELOG.md</li> </ol> <h3 id=deprecation-process>Deprecation Process<a class=headerlink href=#deprecation-process title="Permanent link">&para;</a></h3> <ol> <li>Feature marked as deprecated with console warning</li> <li>Documented in release notes with migration path</li> <li>Deprecated for at least one minor version</li> <li>Removed in next major version</li> </ol> <h3 id=security-updates>Security Updates<a class=headerlink href=#security-updates title="Permanent link">&para;</a></h3> <p>Security vulnerabilities are handled according to our <a href=https://github.com/mrwogu/promptscript/blob/main/SECURITY.md>Security Policy</a>:</p> <ul> <li><strong>Critical</strong>: Fix within 7 days</li> <li><strong>High</strong>: Fix within 14 days</li> <li><strong>Medium</strong>: Fix within 30 days</li> <li><strong>Low</strong>: Fix in next scheduled release</li> </ul> <h2 id=enterprise-registry-resolver>Enterprise Registry Resolver<a class=headerlink href=#enterprise-registry-resolver title="Permanent link">&para;</a></h2> <h3 id=system-level-configuration>System-Level Configuration<a class=headerlink href=#system-level-configuration title="Permanent link">&para;</a></h3> <p>IT or platform teams can provision organization-wide registry aliases before developers touch the tool. Place a config file at <code>/etc/promptscript/config.yaml</code> on all developer machines (via MDM, Ansible, or similar provisioning):</p> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-10-1><a id=__codelineno-10-1 name=__codelineno-10-1 href=#__codelineno-10-1></a><span class=c1># /etc/promptscript/config.yaml - provisioned by IT</span>
-</span><span id=__span-10-2><a id=__codelineno-10-2 name=__codelineno-10-2 href=#__codelineno-10-2></a><span class=nt>version</span><span class=p>:</span><span class=w> </span><span class=s>&#39;1&#39;</span>
+</span><span id=__span-10-2><a id=__codelineno-10-2 name=__codelineno-10-2 href=#__codelineno-10-2></a><span class=nt>version</span><span class=p>:</span><span class=w> </span><span class=s>'1'</span>
 </span><span id=__span-10-3><a id=__codelineno-10-3 name=__codelineno-10-3 href=#__codelineno-10-3></a>
 </span><span id=__span-10-4><a id=__codelineno-10-4 name=__codelineno-10-4 href=#__codelineno-10-4></a><span class=nt>registries</span><span class=p>:</span>
-</span><span id=__span-10-5><a id=__codelineno-10-5 name=__codelineno-10-5 href=#__codelineno-10-5></a><span class=w>  </span><span class=s>&#39;@company&#39;</span><span class="p p-Indicator">:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">github.com/acme/promptscript-base</span>
-</span><span id=__span-10-6><a id=__codelineno-10-6 name=__codelineno-10-6 href=#__codelineno-10-6></a><span class=w>  </span><span class=s>&#39;@security&#39;</span><span class="p p-Indicator">:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">github.com/acme/security-standards</span>
+</span><span id=__span-10-5><a id=__codelineno-10-5 name=__codelineno-10-5 href=#__codelineno-10-5></a><span class=w>  </span><span class=s>'@company'</span><span class="p p-Indicator">:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">github.com/acme/promptscript-base</span>
+</span><span id=__span-10-6><a id=__codelineno-10-6 name=__codelineno-10-6 href=#__codelineno-10-6></a><span class=w>  </span><span class=s>'@security'</span><span class="p p-Indicator">:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">github.com/acme/security-standards</span>
 </span><span id=__span-10-7><a id=__codelineno-10-7 name=__codelineno-10-7 href=#__codelineno-10-7></a>
 </span><span id=__span-10-8><a id=__codelineno-10-8 name=__codelineno-10-8 href=#__codelineno-10-8></a><span class=nt>registry</span><span class=p>:</span>
 </span><span id=__span-10-9><a id=__codelineno-10-9 name=__codelineno-10-9 href=#__codelineno-10-9></a><span class=w>  </span><span class=nt>git</span><span class=p>:</span>
@@ -465,14 +465,14 @@ Or pin individual imports in your `.prs` files:
 </span><span id=__span-10-13><a id=__codelineno-10-13 name=__codelineno-10-13 href=#__codelineno-10-13></a><span class=w>      </span><span class=nt>tokenEnvVar</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">GITHUB_TOKEN</span>
 </span></code></pre></div> <p>Developers run <code>prs init</code> and the <code>@company</code> alias resolves automatically - no manual configuration required.</p> <h3 id=three-level-config-precedence>Three-Level Config Precedence<a class=headerlink href=#three-level-config-precedence title="Permanent link">&para;</a></h3> <p>Aliases merge from three levels, highest priority first:</p> <table> <thead> <tr> <th>Priority</th> <th>Location</th> <th>Who Controls It</th> </tr> </thead> <tbody> <tr> <td>Highest</td> <td><code>promptscript.yaml</code> (project)</td> <td>Project team</td> </tr> <tr> <td>Middle</td> <td><code>~/.promptscript/config.yaml</code> (user)</td> <td>Developer</td> </tr> <tr> <td>Lowest</td> <td><code>/etc/promptscript/config.yaml</code> (system)</td> <td>IT / Platform</td> </tr> </tbody> </table> <p>This model lets IT enforce company defaults while teams retain flexibility to override specific aliases per project.</p> <h3 id=private-git-registries-with-sso>Private Git Registries with SSO<a class=headerlink href=#private-git-registries-with-sso title="Permanent link">&para;</a></h3> <p>For enterprises using GitHub Enterprise Server, GitLab Self-Managed, or Azure DevOps:</p> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-11-1><a id=__codelineno-11-1 name=__codelineno-11-1 href=#__codelineno-11-1></a><span class=c1># promptscript.yaml</span>
 </span><span id=__span-11-2><a id=__codelineno-11-2 name=__codelineno-11-2 href=#__codelineno-11-2></a><span class=nt>registries</span><span class=p>:</span>
-</span><span id=__span-11-3><a id=__codelineno-11-3 name=__codelineno-11-3 href=#__codelineno-11-3></a><span class=w>  </span><span class=s>&#39;@company&#39;</span><span class="p p-Indicator">:</span>
+</span><span id=__span-11-3><a id=__codelineno-11-3 name=__codelineno-11-3 href=#__codelineno-11-3></a><span class=w>  </span><span class=s>'@company'</span><span class="p p-Indicator">:</span>
 </span><span id=__span-11-4><a id=__codelineno-11-4 name=__codelineno-11-4 href=#__codelineno-11-4></a><span class=w>    </span><span class=nt>url</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">github.your-company.com/acme/promptscript-base</span>
 </span></code></pre></div> <p>Registry aliases do not carry credentials. For SSO-gated repositories, configure authentication under <code>registry.git.auth</code> for the default registry, or expose the host credential through the Git credential helper. Store service account tokens or deploy keys in a secrets manager.</p> <h3 id=vendor-mode-for-air-gapped-environments>Vendor Mode for Air-Gapped Environments<a class=headerlink href=#vendor-mode-for-air-gapped-environments title="Permanent link">&para;</a></h3> <p>In environments with no outbound internet access, use vendor mode to pre-download all dependencies and commit them to the repository:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-12-1><a id=__codelineno-12-1 name=__codelineno-12-1 href=#__codelineno-12-1></a><span class=c1># Run this once outside the air-gapped network</span>
 </span><span id=__span-12-2><a id=__codelineno-12-2 name=__codelineno-12-2 href=#__codelineno-12-2></a>prs<span class=w> </span>vendor<span class=w> </span>sync
 </span><span id=__span-12-3><a id=__codelineno-12-3 name=__codelineno-12-3 href=#__codelineno-12-3></a>
 </span><span id=__span-12-4><a id=__codelineno-12-4 name=__codelineno-12-4 href=#__codelineno-12-4></a><span class=c1># Commit vendor directory</span>
 </span><span id=__span-12-5><a id=__codelineno-12-5 name=__codelineno-12-5 href=#__codelineno-12-5></a>git<span class=w> </span>add<span class=w> </span>.promptscript/vendor<span class=w> </span>promptscript.lock
-</span><span id=__span-12-6><a id=__codelineno-12-6 name=__codelineno-12-6 href=#__codelineno-12-6></a>git<span class=w> </span>commit<span class=w> </span>-m<span class=w> </span><span class=s2>&quot;chore: vendor PromptScript dependencies&quot;</span>
+</span><span id=__span-12-6><a id=__codelineno-12-6 name=__codelineno-12-6 href=#__codelineno-12-6></a>git<span class=w> </span>commit<span class=w> </span>-m<span class=w> </span><span class=s2>"chore: vendor PromptScript dependencies"</span>
 </span></code></pre></div> <p>In air-gapped CI:</p> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-13-1><a id=__codelineno-13-1 name=__codelineno-13-1 href=#__codelineno-13-1></a><span class=c1># No network access required</span>
 </span><span id=__span-13-2><a id=__codelineno-13-2 name=__codelineno-13-2 href=#__codelineno-13-2></a><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Validate</span>
 </span><span id=__span-13-3><a id=__codelineno-13-3 name=__codelineno-13-3 href=#__codelineno-13-3></a><span class=w>  </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">prs vendor check &amp;&amp; prs validate --strict</span>

@@ -42,102 +42,102 @@
 }</pre> </div> </div> </div> </div> </div> <p><strong>Key features:</strong></p> <ul> <li><strong>Auto-detection</strong> - Recognizes package.json, tsconfig, frameworks, and test runners</li> <li><strong>Registry integration</strong> - Browse and inherit from your organization's published standards</li> <li><strong>Multi-target setup</strong> - Select which AI tools you want to generate output for</li> <li><strong>Pre-configured</strong> - Generates ready-to-compile configuration based on your stack</li> </ul> <h2 id=quick-start-from-zero-to-promptops>Quick Start: From Zero to PromptOps<a class=headerlink href=#quick-start-from-zero-to-promptops title="Permanent link">&para;</a></h2> <h3 id=1-initialize-your-repository>1. Initialize Your Repository<a class=headerlink href=#1-initialize-your-repository title="Permanent link">&para;</a></h3> <p>Run the init command at the root of your project (where <code>package.json</code> or equivalent resides). PromptScript will auto-detect your tech stack (TypeScript, Python, etc.) to generate relevant initial prompts.</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-4-1><a id=__codelineno-4-1 name=__codelineno-4-1 href=#__codelineno-4-1></a>prs<span class=w> </span>init
 </span></code></pre></div> <p>This creates the scaffolding for your AI infrastructure:</p> <ul> <li><code>promptscript.yaml</code> - <strong>Compiler Configuration</strong> (minimal, comment-free YAML)</li> <li><code>.promptscript/project.prs</code> - <strong>Source of Truth</strong> (your rules, identity, and skills)</li> </ul> <p>Detected AI tools are preselected. If none are detected, choose targets interactively. For non-interactive setup, pass targets explicitly:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a>prs<span class=w> </span>init<span class=w> </span>--yes<span class=w> </span>--targets<span class=w> </span>claude<span class=w> </span>factory
 </span></code></pre></div> <p>PromptScript does not infer Copilot from <code>.github/workflows</code> and does not assign <code>AGENTS.md</code> to a specific tool.</p> <h3 id=2-define-your-policy>2. Define Your Policy<a class=headerlink href=#2-define-your-policy title="Permanent link">&para;</a></h3> <p>Open <code>.promptscript/project.prs</code> and customize:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;my-project&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.5.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"my-project"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.5.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are working on a React application.</span>
 <span class=sd>  Tech stack: TypeScript, React 18, Vite</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Use functional programming style&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Prefer hooks and composition patterns&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Write tests for all code&quot;</span>
+<span class=w>    </span><span class=s2>"Use functional programming style"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Prefer hooks and composition patterns"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Write tests for all code"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=c1># Simple string → documentation only</span>
-<span class=w>  </span><span class=s2>&quot;/review&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review code for quality and best practices&quot;</span>
+<span class=w>  </span><span class=s2>"/review"</span><span class=p>:</span><span class=w> </span><span class=s2>"Review code for quality and best practices"</span>
 
 <span class=w>  </span><span class=c1># Object with prompt: true → generates prompt files</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=s2>"/test"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>prompt</span><span class=p>:</span><span class=w> </span><span class=kc>true</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Write unit tests&quot;</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Write unit tests"</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>"""</span>
 <span class=sd>      Write unit tests using:</span>
 <span class=sd>      - Vitest as the test runner</span>
 <span class=sd>      - Testing Library for components</span>
 <span class=sd>      - AAA pattern (Arrange, Act, Assert)</span>
-<span class=sd>    &quot;&quot;&quot;</span>
+<span class=sd>    """</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span><span class=s2>&quot;/refactor&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=s2>"/refactor"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>prompt</span><span class=p>:</span><span class=w> </span><span class=kc>true</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Suggest refactoring improvements&quot;</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Suggest refactoring improvements"</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>"""</span>
 <span class=sd>      Analyze the code and suggest refactoring improvements for better maintainability.</span>
 <span class=sd>      Preserve behavior and explain each recommended change.</span>
-<span class=sd>    &quot;&quot;&quot;</span>
+<span class=sd>    """</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoA2CgAZdrAL5ix3aZywQsi4Xrkhd-uKCAJrMAK6CGNQwggDuzNQA1hCsAOaCbJGCAEowGNqRaOQQjNgQbBS+ACpaOIJwAoyJslWKaDAAyozUEGhYdDl5BWYAHAMAap4wvgH2TqwuDRisUlFScD5BLFIwssi+EvIAqnAxYGGs2uWsGFCCaqnUpCQp6Q2KsPJ0B34ACtFgGDUQQ4ZjMRIbZZSQQsMjMOCea73bAcaisOBfH7yADqPQ4gg4DQ2YASkSgd2200CEgAumJ5otQdQsIwwlgNqIggBiQQdCBkWD1LA9NKCQBJhIIpMxWXwjB5MmwoIoZiAAPTRABuEBgsXkphAuS1OphzB2ghJwIAjmFbp5vFDBAAjeBYe5PK6MeD2Xw8gDyjs0BVinjqajIWFkwrCMQlqU4QOw8DdzHD5ugXqC8lVhJ0SE2EgkYb6keo0Z+Ozg3V68tY+txU0EF08BJdGOpBZY7Hc+tmQQLgnr+KbrpzGzCCLSiB+EmUgkmOciG1wMQXpdYrCB08Es5qDVeggAMhBHU9qN4LSa4Rv2Bi+wXZwBBJ-IrCo8QACgf1CeaRgAwf2j-nApzMgAlFi-iQb4DKZmqAL5FgCR6vmBZFhGBKltMd4VlWfTXPqHRhKkcYNII8HaAk+78moGowLK7L2P2nYcOwPZQXeEgPjcSoAF4rjgMSUpEKz1ERJGuuRiEiuk1HUMwtH0cSpLOq+QKCCQGApAIKQYI60B2pUHGCP88BArRTowDgGBaqSDpEOQmniEMdTRLCso7NCjBWb+hn9rM7bzA4IAODSDDuGe+BEKQ5AwFQtAgAwtG0Nc+BmMFQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=3-define-agent-capabilities>3. Define Agent Capabilities<a class=headerlink href=#3-define-agent-capabilities title="Permanent link">&para;</a></h3> <p>Add reusable skills, specialist agents, tool integrations, and automation to the same source:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>code-review</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review code changes before merge&quot;</span>
-<span class=w>    </span><span class=nl>allowedTools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Grep&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Bash&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review correctness, security, tests, and maintainability.&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Review code changes before merge"</span>
+<span class=w>    </span><span class=nl>allowedTools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"Read"</span><span class=p>,</span><span class=w> </span><span class=s2>"Grep"</span><span class=p>,</span><span class=w> </span><span class=s2>"Bash"</span><span class=p>]</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Review correctness, security, tests, and maintainability."</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>mcpServers</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>issue-tracker</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>transport</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;stdio&quot;</span>
-<span class=w>    </span><span class=nl>command</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;node&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;./tools/issues.mjs&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>transport</span><span class=p>:</span><span class=w> </span><span class=s2>"stdio"</span>
+<span class=w>    </span><span class=nl>command</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"node"</span><span class=p>,</span><span class=w> </span><span class=s2>"./tools/issues.mjs"</span><span class=p>]</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>agents</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>reviewer</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review pull requests&quot;</span>
-<span class=w>    </span><span class=nl>skills</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;code-review&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=nl>mcpServers</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;issue-tracker&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review the current diff against active requirements.&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Review pull requests"</span>
+<span class=w>    </span><span class=nl>skills</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"code-review"</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>mcpServers</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"issue-tracker"</span><span class=p>]</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Review the current diff against active requirements."</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>hooks</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>validate-types</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>event</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;post-tool-use&quot;</span>
-<span class=w>    </span><span class=nl>matcher</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Edit|Write&quot;</span>
-<span class=w>    </span><span class=nl>command</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;pnpm&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;run&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;typecheck&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>event</span><span class=p>:</span><span class=w> </span><span class=s2>"post-tool-use"</span>
+<span class=w>    </span><span class=nl>matcher</span><span class=p>:</span><span class=w> </span><span class=s2>"Edit|Write"</span>
+<span class=w>    </span><span class=nl>command</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"pnpm"</span><span class=p>,</span><span class=w> </span><span class=s2>"run"</span><span class=p>,</span><span class=w> </span><span class=s2>"typecheck"</span><span class=p>]</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>workflows</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>release</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Prepare a validated release&quot;</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Run project quality gates and prepare release metadata.&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Prepare a validated release"</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Run project quality gates and prepare release metadata."</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpcuI2oQ0WCGy1iQAJRVr105nOk4MrAObxhAIxhhmS4RIYag9LHV0MKChmdRgZABVmZiEtZEsbDBlLOmFLAHElNGzckAAhDDgcSwBdcKkWdk4sC2tbDQdqJUYsVng4HLgYRgBXIywATxyOOCx+4VcZQIwIdmXWDC9oCAmKMMlhAF8JI9YJbhJGNABlYOVgkXF9iDg4YYUsagxGPmCtR91hB9XHA0P5miUZjIzHsASwSCQFqlLKxHDBipYKAB6LBJISY56veAUEgAKzgNXCJxOZwwHnYD3CSlUGl+2n2enghmMpnMJRszPsaGGUWESgAjm8ZuSQHVhPxBHAkUxUYo2uoKezApcbtQ7rQlQS3vIgd9ghrYWwOOwWvy7ICcDBpKMlOxhFCwGB5m41jN5t0IHdRTAJRAlEF6bsZfsqRIzjgknwGftlJEIDJsO9xmh4H9ZSomi1QTNjbj5MNBjDdAisIwHdQWgBRKFYAA+AHUxmioxb4YjhGkQGhWGgSOiQNRhqcQDlLBNs7WhnxzYdjrHWNx1P4+GBouok1IlLAKjBc5r9FyTGZWC0AAqFDABDDCFNQNMZxaHmDHyv1S0FvmTsINDMCSQxYMIEqphMwjetM8ysIsNAwJgASfsegQwFgmTYBgkaUscIAHNUDBNNQ4z4EQpDkDAVC0NOIB6nAV74AAjIRQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>PromptScript compiles each capability where the configured target supports it. See <a href=../features/ >Agent Platform</a> and the <a href=../testing/feature-coverage/ >feature coverage matrix</a> for target-specific support.</p> <h3 id=4-compile-to-native-formats>4. Compile to Native Formats<a class=headerlink href=#4-compile-to-native-formats title="Permanent link">&para;</a></h3> <p>Transform your universal <code>.prs</code> definition into platform-specific optimization formats.</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-6-1><a id=__codelineno-6-1 name=__codelineno-6-1 href=#__codelineno-6-1></a>prs<span class=w> </span>compile
 </span></code></pre></div> <p>Generated paths depend on the targets selected during <code>prs init</code> or declared in <code>promptscript.yaml</code>. When GitHub, Claude, and Cursor are configured, their default primary outputs are:</p> <ul> <li><code>.github/copilot-instructions.md</code> (for GitHub Copilot)</li> <li><code>CLAUDE.md</code> (for Claude Code)</li> <li><code>.cursor/rules/project.mdc</code> (for Cursor)</li> </ul> <h4 id=bundled-promptscript-skill>Bundled PromptScript Skill<a class=headerlink href=#bundled-promptscript-skill title="Permanent link">&para;</a></h4> <p>When you compile, PromptScript automatically includes a language skill for targets whose formatter exposes a bundled-skill output path. This skill teaches supported AI coding agents how to read, write, and troubleshoot <code>.prs</code> files.</p> <p>To disable this behavior, add to <code>promptscript.yaml</code>:</p> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-7-1><a id=__codelineno-7-1 name=__codelineno-7-1 href=#__codelineno-7-1></a><span class=nt>includePromptScriptSkill</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </span></code></pre></div> <h3 id=5-commit-to-git>5. Commit to Git<a class=headerlink href=#5-commit-to-git title="Permanent link">&para;</a></h3> <p>Commit your configuration and the generated files. Your AI context is now version-controlled infrastructure.</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-8-1><a id=__codelineno-8-1 name=__codelineno-8-1 href=#__codelineno-8-1></a>git<span class=w> </span>add<span class=w> </span>.
-</span><span id=__span-8-2><a id=__codelineno-8-2 name=__codelineno-8-2 href=#__codelineno-8-2></a>git<span class=w> </span>commit<span class=w> </span>-m<span class=w> </span><span class=s2>&quot;chore: initialize promptscript infrastructure&quot;</span>
+</span><span id=__span-8-2><a id=__codelineno-8-2 name=__codelineno-8-2 href=#__codelineno-8-2></a>git<span class=w> </span>commit<span class=w> </span>-m<span class=w> </span><span class=s2>"chore: initialize promptscript infrastructure"</span>
 </span></code></pre></div> <h2 id=quick-start-migrating-existing-projects>Quick Start: Migrating Existing Projects<a class=headerlink href=#quick-start-migrating-existing-projects title="Permanent link">&para;</a></h2> <p>Already have <code>CLAUDE.md</code>, <code>.cursorrules</code>, or <code>copilot-instructions.md</code>? Use AI-assisted migration to convert your existing instructions to PromptScript.</p> <!-- prettier-ignore --> <div class=init-demo id=migrate-demo> <div class=init-demo__wrapper> <div class=init-demo__terminal> <div class=init-demo__header> <span class="init-demo__dot init-demo__dot--red"></span> <span class="init-demo__dot init-demo__dot--yellow"></span> <span class="init-demo__dot init-demo__dot--green"></span> <span class=init-demo__title>Terminal</span> <button class=init-demo__replay title="Replay animation">↻ Replay</button> </div> <div class=init-demo__output></div> </div> </div> </div> <p><strong>Key features:</strong></p> <ul> <li><strong>Auto-discovery</strong> - Finds supported root and scoped AI instruction files</li> <li><strong>Skill installation</strong> - AI-assisted mode installs the PromptScript skill for enabled targets</li> <li><strong>Non-destructive</strong> - Preserves source instructions and existing <code>promptscript.yaml</code></li> </ul> <h3 id=1-start-migration>1. Start Migration<a class=headerlink href=#1-start-migration title="Permanent link">&para;</a></h3> <p>Run deterministic static migration:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-9-1><a id=__codelineno-9-1 name=__codelineno-9-1 href=#__codelineno-9-1></a>prs<span class=w> </span>migrate<span class=w> </span>--static
 </span></code></pre></div> <p>This creates:</p> <ul> <li><code>promptscript.yaml</code> - Compiler configuration</li> <li><code>.promptscript/*.prs</code> - Deterministically imported instruction files</li> <li><code>.promptscript/project.prs</code> - Entry point that composes imported files</li> <li><code>.promptscript/skills/promptscript/SKILL.md</code> - Canonical PromptScript language skill</li> <li>Native copies of the <code>promptscript</code> skill for targets that support skills</li> </ul> <p>Your existing AI instruction files remain untouched.</p> <p>When <code>promptscript.yaml</code> already exists, static migration preserves it byte-for-byte, writes imported modules under <code>.promptscript/migrated/</code>, and adds one idempotent <code>@use</code> to the configured entry file. No candidates means no writes. Run <code>prs migrate --static --dry-run</code> to preview every path first.</p> <p>For AI-assisted migration, generate a migration prompt and install the PromptScript skill:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-10-1><a id=__codelineno-10-1 name=__codelineno-10-1 href=#__codelineno-10-1></a>prs<span class=w> </span>migrate<span class=w> </span>--llm
 </span></code></pre></div> <p>AI-assisted migration writes <code>.promptscript/migration-prompt.md</code> without changing existing PromptScript sources. In non-interactive mode, the prompt is also emitted to stdout.</p> <h3 id=2-invoke-the-migration-skill>2. Invoke the Migration Skill<a class=headerlink href=#2-invoke-the-migration-skill title="Permanent link">&para;</a></h3> <p>Use your AI assistant to migrate existing content. The migration skill analyzes your files and generates proper PromptScript.</p> <div class="tabbed-set tabbed-alternate" data-tabs=2:4><input checked=checked id=__tabbed_2_1 name=__tabbed_2 type=radio><input id=__tabbed_2_2 name=__tabbed_2 type=radio><input id=__tabbed_2_3 name=__tabbed_2 type=radio><input id=__tabbed_2_4 name=__tabbed_2 type=radio><div class=tabbed-labels><label for=__tabbed_2_1>Claude Code</label><label for=__tabbed_2_2>GitHub Copilot</label><label for=__tabbed_2_3>Cursor</label><label for=__tabbed_2_4>Antigravity</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-bash highlight"><pre><span></span><code><span id=__span-11-1><a id=__codelineno-11-1 name=__codelineno-11-1 href=#__codelineno-11-1></a><span class=c1># Use the PromptScript skill</span>
 </span><span id=__span-11-2><a id=__codelineno-11-2 name=__codelineno-11-2 href=#__codelineno-11-2></a>/promptscript
 </span><span id=__span-11-3><a id=__codelineno-11-3 name=__codelineno-11-3 href=#__codelineno-11-3></a>
 </span><span id=__span-11-4><a id=__codelineno-11-4 name=__codelineno-11-4 href=#__codelineno-11-4></a><span class=c1># Or describe what you want</span>
-</span><span id=__span-11-5><a id=__codelineno-11-5 name=__codelineno-11-5 href=#__codelineno-11-5></a><span class=s2>&quot;Migrate my existing CLAUDE.md to PromptScript&quot;</span>
+</span><span id=__span-11-5><a id=__codelineno-11-5 name=__codelineno-11-5 href=#__codelineno-11-5></a><span class=s2>"Migrate my existing CLAUDE.md to PromptScript"</span>
 </span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-12-1><a id=__codelineno-12-1 name=__codelineno-12-1 href=#__codelineno-12-1></a>@workspace Use the promptscript skill to migrate my existing instructions
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-bash highlight"><pre><span></span><code><span id=__span-13-1><a id=__codelineno-13-1 name=__codelineno-13-1 href=#__codelineno-13-1></a><span class=s2>&quot;Use the PromptScript skill to migrate my existing instructions&quot;</span>
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-14-1><a id=__codelineno-14-1 name=__codelineno-14-1 href=#__codelineno-14-1></a>&quot;Migrate my existing AI instructions to PromptScript&quot;
+</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-bash highlight"><pre><span></span><code><span id=__span-13-1><a id=__codelineno-13-1 name=__codelineno-13-1 href=#__codelineno-13-1></a><span class=s2>"Use the PromptScript skill to migrate my existing instructions"</span>
+</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-14-1><a id=__codelineno-14-1 name=__codelineno-14-1 href=#__codelineno-14-1></a>"Migrate my existing AI instructions to PromptScript"
 </span></code></pre></div> </div> </div> </div> <h3 id=3-what-the-ai-will-do>3. What the AI Will Do<a class=headerlink href=#3-what-the-ai-will-do title="Permanent link">&para;</a></h3> <p>The migration skill guides the AI through a structured process:</p> <ol> <li><strong>Discover</strong> - Find all existing instruction files:</li> <li><code>CLAUDE.md</code>, <code>CLAUDE.local.md</code></li> <li><code>.cursorrules</code>, <code>.cursor/rules/*.mdc</code></li> <li><code>.github/copilot-instructions.md</code></li> <li> <p><code>AGENTS.md</code></p> </li> <li> <p><strong>Analyze</strong> - Read and classify content by type:</p> </li> <li>"You are..." → <code>@identity</code></li> <li>Tech stack info → <code>@context</code></li> <li>"Always/Should..." → <code>@standards</code></li> <li>"Never/Don't..." → <code>@restrictions</code></li> <li> <p><code>/commands</code> → <code>@shortcuts</code></p> </li> <li> <p><strong>Generate</strong> - Create properly structured <code>.prs</code> files</p> </li> <li> <p><strong>Validate</strong> - Run <code>prs validate</code> to check syntax</p> </li> </ol> <h3 id=4-review-and-refine>4. Review and Refine<a class=headerlink href=#4-review-and-refine title="Permanent link">&para;</a></h3> <p>After migration, review the generated <code>.promptscript/project.prs</code>:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-15-1><a id=__codelineno-15-1 name=__codelineno-15-1 href=#__codelineno-15-1></a><span class=c1># Record a recoverable baseline before replacing existing instructions.</span>
 </span><span id=__span-15-2><a id=__codelineno-15-2 name=__codelineno-15-2 href=#__codelineno-15-2></a>git<span class=w> </span>status<span class=w> </span>--short
 </span><span id=__span-15-3><a id=__codelineno-15-3 name=__codelineno-15-3 href=#__codelineno-15-3></a>prs<span class=w> </span>validate<span class=w> </span>--strict
@@ -159,36 +159,36 @@
 </span><span id=__span-17-11><a id=__codelineno-17-11 name=__codelineno-17-11 href=#__codelineno-17-11></a><span class=k>-</span><span class=w> </span>Write type hints for all functions
 </span><span id=__span-17-12><a id=__codelineno-17-12 name=__codelineno-17-12 href=#__codelineno-17-12></a><span class=k>-</span><span class=w> </span>Use async/await for I/O
 </span><span id=__span-17-13><a id=__codelineno-17-13 name=__codelineno-17-13 href=#__codelineno-17-13></a>
-</span><span id=__span-17-14><a id=__codelineno-17-14 name=__codelineno-17-14 href=#__codelineno-17-14></a><span class=gu>## Don&#39;ts</span>
+</span><span id=__span-17-14><a id=__codelineno-17-14 name=__codelineno-17-14 href=#__codelineno-17-14></a><span class=gu>## Don'ts</span>
 </span><span id=__span-17-15><a id=__codelineno-17-15 name=__codelineno-17-15 href=#__codelineno-17-15></a>
-</span><span id=__span-17-16><a id=__codelineno-17-16 name=__codelineno-17-16 href=#__codelineno-17-16></a><span class=k>-</span><span class=w> </span>Don&#39;t commit .env files
+</span><span id=__span-17-16><a id=__codelineno-17-16 name=__codelineno-17-16 href=#__codelineno-17-16></a><span class=k>-</span><span class=w> </span>Don't commit .env files
 </span></code></pre></div> <p><strong>After</strong> (.promptscript/project.prs):</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;api-service&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.5.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"api-service"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.5.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are a Python developer working on a FastAPI service.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>context</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>languages</span><span class=p>:</span><span class=w> </span><span class=p>[</span>python<span class=p>]</span>
-<span class=w>  </span><span class=nl>runtime</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Python 3.11&quot;</span>
+<span class=w>  </span><span class=nl>runtime</span><span class=p>:</span><span class=w> </span><span class=s2>"Python 3.11"</span>
 <span class=w>  </span><span class=nl>frameworks</span><span class=p>:</span><span class=w> </span><span class=p>[</span>fastapi<span class=p>]</span>
-<span class=w>  </span><span class=nl>database</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;PostgreSQL&quot;</span>
+<span class=w>  </span><span class=nl>database</span><span class=p>:</span><span class=w> </span><span class=s2>"PostgreSQL"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Write type hints for all functions&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Use async/await for I/O operations&quot;</span>
+<span class=w>    </span><span class=s2>"Write type hints for all functions"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Use async/await for I/O operations"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Don&#39;t commit .env files&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Don't commit .env files"</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMaCAFo4MagDcIjGPLES4AT3YZCs+QEYKANgoAGPawC+Ysd2mcsELIeH65IHqB4oIAmswAroIY1DDRggAKhrhsglIwGjBQzGjqggDuzNQA1hCsAOaCqUIAYhhwWACCCQCSgmqa2jAU-kGOLqxuLOxEWH4hUBgVERjl8LLIaMk4bAC6-tQR7BB85iBJKeIAzBQWFo4SYNSkMIUlcAtg9QJK6yFS2BgARvUwewnMBrlWIAZQAigAZfquVjcBpTD7UKRwcYSFjpBb+CTyADq1G8cR8uUEODKWBRYCK0SgUEEYC2jC8bDg8joWICAFU1NEjKxGAB6DD5DDeOlUlr8gDyVVy1yZrBZwQkbwGbliDXxjIgzNRgmUAQAImwAORjFgkEiiiicDR06DwfogJyrBieaiGfBEUjkbo0eggTK0bWsfAWJ1AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>For detailed migration guidance, see:</p> <ul> <li><a href=../guides/migration/ >Migration Guide</a> - Complete manual migration reference</li> <li><a href=../guides/ai-migration-best-practices/ >AI Migration Best Practices</a> - Guidelines for AI-assisted migration</li> </ul> <h2 id=project-structure>Project Structure<a class=headerlink href=#project-structure title="Permanent link">&para;</a></h2> <p>After initialization, your project will have:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-18-1><a id=__codelineno-18-1 name=__codelineno-18-1 href=#__codelineno-18-1></a>your-project/
 </span><span id=__span-18-2><a id=__codelineno-18-2 name=__codelineno-18-2 href=#__codelineno-18-2></a>├── .promptscript/
@@ -207,7 +207,7 @@
 </span><span id=__span-18-15><a id=__codelineno-18-15 name=__codelineno-18-15 href=#__codelineno-18-15></a>│       └── refactor.md
 </span><span id=__span-18-16><a id=__codelineno-18-16 name=__codelineno-18-16 href=#__codelineno-18-16></a>└── .agent/rules/project.md            # Generated
 </span></code></pre></div> <h2 id=configuration>Configuration<a class=headerlink href=#configuration title="Permanent link">&para;</a></h2> <p>The <code>promptscript.yaml</code> file controls compilation:</p> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-19-1><a id=__codelineno-19-1 name=__codelineno-19-1 href=#__codelineno-19-1></a><span class=nt>id</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">my-project</span>
-</span><span id=__span-19-2><a id=__codelineno-19-2 name=__codelineno-19-2 href=#__codelineno-19-2></a><span class=nt>syntax</span><span class=p>:</span><span class=w> </span><span class=s>&quot;1.5.0&quot;</span>
+</span><span id=__span-19-2><a id=__codelineno-19-2 name=__codelineno-19-2 href=#__codelineno-19-2></a><span class=nt>syntax</span><span class=p>:</span><span class=w> </span><span class=s>"1.5.0"</span>
 </span><span id=__span-19-3><a id=__codelineno-19-3 name=__codelineno-19-3 href=#__codelineno-19-3></a>
 </span><span id=__span-19-4><a id=__codelineno-19-4 name=__codelineno-19-4 href=#__codelineno-19-4></a><span class=c1># Input settings</span>
 </span><span id=__span-19-5><a id=__codelineno-19-5 name=__codelineno-19-5 href=#__codelineno-19-5></a><span class=nt>input</span><span class=p>:</span>
