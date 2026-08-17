@@ -1133,33 +1133,115 @@ describe('compile command - createCliLogger warn path', () => {
     );
   });
 
-  it('should fail cleanly when only named build profiles define targets', async () => {
-    mockLoadConfig.mockResolvedValue({
-      builds: {
-        docs: { targets: ['claude'] },
-      },
+  describe('empty target resolution', () => {
+    it('should point at named build profiles when only they define targets', async () => {
+      mockLoadConfig.mockResolvedValue({
+        builds: {
+          docs: { targets: ['claude'] },
+        },
+      });
+
+      await compileCommand({}, mockServices);
+
+      expect(mockCompile).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+      expect(mockSpinner.fail).toHaveBeenCalledWith('No compilation targets');
+      expect(mockError).toHaveBeenCalledWith(
+        'No compilation targets configured in config.targets. Compile a named build profile with --build <name> (available: docs) or use --all-builds.'
+      );
     });
 
-    await compileCommand({}, mockServices);
+    it('should point at prs init when nothing configures targets', async () => {
+      mockLoadConfig.mockResolvedValue({});
 
-    expect(mockCompile).not.toHaveBeenCalled();
-    expect(process.exitCode).toBe(1);
-    expect(mockError).toHaveBeenCalledWith(
-      'No enabled compilation targets configured. Available build profiles: docs. Select a build profile with --build <name> or use --all-builds.'
-    );
-    expect(mockError).not.toHaveBeenCalledWith(expect.stringContaining('Cannot read properties'));
-  });
+      await compileCommand({}, mockServices);
 
-  it('should fail cleanly when no targets or named build profiles are configured', async () => {
-    mockLoadConfig.mockResolvedValue({});
+      expect(mockCompile).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+      expect(mockError).toHaveBeenCalledWith(
+        'No compilation targets configured. Add a "targets" list to promptscript.yaml or run: prs init'
+      );
+    });
 
-    await compileCommand({}, mockServices);
+    it('should report top-level targets that are all disabled', async () => {
+      mockLoadConfig.mockResolvedValue({
+        targets: [{ claude: { enabled: false } }],
+      });
 
-    expect(mockCompile).not.toHaveBeenCalled();
-    expect(process.exitCode).toBe(1);
-    expect(mockError).toHaveBeenCalledWith(
-      'No enabled compilation targets configured. Select a build profile with --build <name> or use --all-builds.'
-    );
+      await compileCommand({}, mockServices);
+
+      expect(mockCompile).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+      expect(mockError).toHaveBeenCalledWith(
+        'All compilation targets are disabled. promptscript.yaml lists only targets with "enabled: false" - enable at least one in config.targets.'
+      );
+    });
+
+    it('should report build profile targets that are all disabled', async () => {
+      mockLoadConfig.mockResolvedValue({
+        builds: {
+          docs: { targets: [{ claude: { enabled: false } }] },
+        },
+      });
+
+      await compileCommand({ build: 'docs' }, mockServices);
+
+      expect(mockCompile).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+      expect(mockError).toHaveBeenCalledWith(
+        'All compilation targets are disabled. Build profile "docs" lists only targets with "enabled: false" - enable at least one in config.builds.docs.targets.'
+      );
+    });
+
+    it('should report a build profile with an empty target list', async () => {
+      mockLoadConfig.mockResolvedValue({
+        targets: ['claude'],
+        builds: {
+          docs: { targets: [] },
+        },
+      });
+
+      await compileCommand({ build: 'docs' }, mockServices);
+
+      expect(mockCompile).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+      expect(mockError).toHaveBeenCalledWith(
+        'Build profile "docs" lists no compilation targets. Add them to config.builds.docs.targets.'
+      );
+    });
+
+    it('should report a build profile that inherits empty top-level targets', async () => {
+      mockLoadConfig.mockResolvedValue({
+        builds: {
+          docs: { entry: '.promptscript/docs.prs' },
+        },
+      });
+
+      await compileCommand({ build: 'docs' }, mockServices);
+
+      expect(mockCompile).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+      expect(mockError).toHaveBeenCalledWith(
+        'Build profile "docs" inherits targets from config.targets, which is empty. Add targets to config.builds.docs.targets or config.targets.'
+      );
+    });
+
+    it('should report the failing profile during --all-builds', async () => {
+      mockLoadConfig.mockResolvedValue({
+        builds: {
+          docs: { targets: [{ claude: { enabled: false } }] },
+        },
+      });
+
+      await compileCommand({ allBuilds: true }, mockServices);
+
+      expect(mockCompile).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+      expect(mockError).toHaveBeenCalledWith(
+        'All compilation targets are disabled. Build profile "docs" lists only targets with "enabled: false" - enable at least one in config.builds.docs.targets.'
+      );
+      expect(mockError).toHaveBeenCalledWith('Build profile "docs" failed');
+    });
   });
 
   it('should not warn when output directory is the project root', async () => {

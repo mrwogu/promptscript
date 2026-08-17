@@ -127,6 +127,45 @@ function parseTargets(
     .filter((target) => target.config?.enabled !== false);
 }
 
+interface EmptyTargetsContext {
+  /** Profile passed via --build, also set for each profile of --all-builds */
+  buildName: string | undefined;
+  /** True when the entries came from the profile instead of the top-level list */
+  fromBuildProfile: boolean;
+  /** Entries before the enabled filter, used to separate "disabled" from "absent" */
+  entries: TargetEntry[] | undefined;
+  availableBuilds: string[];
+}
+
+/**
+ * Describe why a compile run resolved zero targets.
+ * The hint names the config key that has to change, so a run that already
+ * passed --build or --all-builds is never told to pass it again.
+ */
+function describeEmptyTargets(context: EmptyTargetsContext): string {
+  const { buildName, fromBuildProfile, entries, availableBuilds } = context;
+  const location =
+    fromBuildProfile && buildName ? `config.builds.${buildName}.targets` : 'config.targets';
+
+  if (entries && entries.length > 0) {
+    const source =
+      fromBuildProfile && buildName ? `Build profile "${buildName}"` : 'promptscript.yaml';
+    return `All compilation targets are disabled. ${source} lists only targets with "enabled: false" - enable at least one in ${location}.`;
+  }
+
+  if (buildName) {
+    return fromBuildProfile
+      ? `Build profile "${buildName}" lists no compilation targets. Add them to ${location}.`
+      : `Build profile "${buildName}" inherits targets from config.targets, which is empty. Add targets to config.builds.${buildName}.targets or config.targets.`;
+  }
+
+  if (availableBuilds.length > 0) {
+    return `No compilation targets configured in config.targets. Compile a named build profile with --build <name> (available: ${availableBuilds.join(', ')}) or use --all-builds.`;
+  }
+
+  return 'No compilation targets configured. Add a "targets" list to promptscript.yaml or run: prs init';
+}
+
 function getBuildProfile(
   config: PromptScriptConfig,
   buildName: string | undefined
@@ -787,14 +826,17 @@ async function compileCommandWithResult(
     }
 
     if (targets.length === 0) {
-      const availableBuilds = Object.keys(config.builds ?? {});
-      const buildHint =
-        availableBuilds.length > 0
-          ? ` Available build profiles: ${availableBuilds.join(', ')}.`
-          : '';
-      throw new Error(
-        `No enabled compilation targets configured.${buildHint} Select a build profile with --build <name> or use --all-builds.`
+      spinner.fail('No compilation targets');
+      ConsoleOutput.error(
+        describeEmptyTargets({
+          buildName: options.build,
+          fromBuildProfile: buildProfile?.targets !== undefined,
+          entries: targetEntries,
+          availableBuilds: Object.keys(config.builds ?? {}),
+        })
       );
+      process.exitCode = 1;
+      return false;
     }
 
     // Detect output path conflicts before doing any work
