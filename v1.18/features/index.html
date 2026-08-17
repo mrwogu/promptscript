@@ -23,69 +23,69 @@
   Compile --&gt; Agents["Agents and tools"]
   Compile --&gt; Integrations["MCP and plugins"]
   Compile --&gt; Automation["Hooks and workflows"]</code></pre> <table> <thead> <tr> <th>Platform capability</th> <th>PromptScript source</th> <th>Result</th> </tr> </thead> <tbody> <tr> <td>Instructions and policy</td> <td><code>@identity</code>, <code>@context</code>, <code>@standards</code>, <code>@restrictions</code>, <code>@guards</code></td> <td>Native instruction and scoped rule files</td> </tr> <tr> <td>Reusable capabilities</td> <td><code>@skills</code></td> <td>Native skills, bundled resources, scripts, and contracts</td> </tr> <tr> <td>Delegated specialists</td> <td><code>@agents</code></td> <td>Native subagent or custom-agent definitions</td> </tr> <tr> <td>User commands</td> <td><code>@shortcuts</code></td> <td>Native prompts, commands, or documented shortcuts</td> </tr> <tr> <td>Tool integrations</td> <td><code>@mcpServers</code></td> <td>Target-native MCP server configuration</td> </tr> <tr> <td>Capability bundles</td> <td><code>@plugins</code></td> <td>Target-native plugin manifests where supported</td> </tr> <tr> <td>Lifecycle automation</td> <td><code>@hooks</code></td> <td>Target-native hook configuration</td> </tr> <tr> <td>Repeatable procedures</td> <td><code>@workflows</code></td> <td>Native workflow files where supported</td> </tr> <tr> <td>Multi-package delivery</td> <td><code>builds</code> in <code>promptscript.yaml</code></td> <td>Scoped output for packages and applications</td> </tr> </tbody> </table> <h2 id=complete-platform-definition>Complete Platform Definition<a class=headerlink href=#complete-platform-definition title="Permanent link">&para;</a></h2> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;checkout-service&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.4.0&quot;</span>
-<span class=w>  </span><span class=nl>tags</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;payments&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;typescript&quot;</span><span class=p>]</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"checkout-service"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.4.0"</span>
+<span class=w>  </span><span class=nl>tags</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"payments"</span><span class=p>,</span><span class=w> </span><span class=s2>"typescript"</span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are working on a payment service.</span>
 <span class=sd>  Preserve transaction integrity and auditability.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Use strict TypeScript&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Write tests for business rules&quot;</span><span class=p>]</span>
+<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"Use strict TypeScript"</span><span class=p>,</span><span class=w> </span><span class=s2>"Write tests for business rules"</span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>security-review</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review payment changes for security risks&quot;</span>
-<span class=w>    </span><span class=nl>allowedTools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Grep&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Bash&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Inspect authentication, authorization, secrets, and payment data handling.&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Review payment changes for security risks"</span>
+<span class=w>    </span><span class=nl>allowedTools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"Read"</span><span class=p>,</span><span class=w> </span><span class=s2>"Grep"</span><span class=p>,</span><span class=w> </span><span class=s2>"Bash"</span><span class=p>]</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Inspect authentication, authorization, secrets, and payment data handling."</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>mcpServers</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>issue-tracker</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>transport</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;stdio&quot;</span>
-<span class=w>    </span><span class=nl>command</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;node&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;./tools/issues.mjs&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>transport</span><span class=p>:</span><span class=w> </span><span class=s2>"stdio"</span>
+<span class=w>    </span><span class=nl>command</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"node"</span><span class=p>,</span><span class=w> </span><span class=s2>"./tools/issues.mjs"</span><span class=p>]</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>agents</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>reviewer</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review changes before merge&quot;</span>
-<span class=w>    </span><span class=na>tools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Grep&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Glob&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Bash&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=nl>skills</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;security-review&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=nl>mcpServers</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;issue-tracker&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review changed code, tests, and operational impact.&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Review changes before merge"</span>
+<span class=w>    </span><span class=na>tools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"Read"</span><span class=p>,</span><span class=w> </span><span class=s2>"Grep"</span><span class=p>,</span><span class=w> </span><span class=s2>"Glob"</span><span class=p>,</span><span class=w> </span><span class=s2>"Bash"</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>skills</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"security-review"</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>mcpServers</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"issue-tracker"</span><span class=p>]</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Review changed code, tests, and operational impact."</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>hooks</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>validate-changes</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>event</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;post-tool-use&quot;</span>
-<span class=w>    </span><span class=nl>matcher</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Edit|Write&quot;</span>
-<span class=w>    </span><span class=nl>command</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;pnpm&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;run&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;typecheck&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>event</span><span class=p>:</span><span class=w> </span><span class=s2>"post-tool-use"</span>
+<span class=w>    </span><span class=nl>matcher</span><span class=p>:</span><span class=w> </span><span class=s2>"Edit|Write"</span>
+<span class=w>    </span><span class=nl>command</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"pnpm"</span><span class=p>,</span><span class=w> </span><span class=s2>"run"</span><span class=p>,</span><span class=w> </span><span class=s2>"typecheck"</span><span class=p>]</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>workflows</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>release</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Validate and prepare a release&quot;</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Run quality gates, summarize changes, and prepare release metadata.&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Validate and prepare a release"</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Run quality gates, summarize changes, and prepare release metadata."</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>plugins</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>payment-engineering</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Payment engineering capability bundle&quot;</span>
-<span class=w>    </span><span class=na>version</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
-<span class=w>    </span><span class=nl>skills</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;security-review&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=nl>hooks</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;validate-changes&quot;</span><span class=p>]</span>
-<span class=w>    </span><span class=nl>mcpServers</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;issue-tracker&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Payment engineering capability bundle"</span>
+<span class=w>    </span><span class=na>version</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
+<span class=w>    </span><span class=nl>skills</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"security-review"</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>hooks</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"validate-changes"</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>mcpServers</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"issue-tracker"</span><span class=p>]</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <p>Target support varies because each AI platform exposes a different native contract. PromptScript preserves one source model while formatters map supported capabilities to target-native output. Use the <a href=target-platforms/ >target platform matrix</a> to choose versions and capabilities.</p> <h2 id=explore-features>Explore Features<a class=headerlink href=#explore-features title="Permanent link">&para;</a></h2> <ul> <li><a href=agents/ >Agents</a> - specialized subagents, models, tools, skills, and MCP access</li> <li><a href=skills/ >Skills and Resources</a> - portable capability packages with references and scripts</li> <li><a href=integrations/ >MCP and Plugins</a> - tool servers and reusable capability bundles</li> <li><a href=automation/ >Hooks and Workflows</a> - lifecycle automation and repeatable procedures</li> <li><a href=target-platforms/ >Target Platforms</a> - 49 built-in targets and output families</li> </ul> <h2 id=compile-one-or-many-projects>Compile One or Many Projects<a class=headerlink href=#compile-one-or-many-projects title="Permanent link">&para;</a></h2> <p>Compile configured targets:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-0-1><a id=__codelineno-0-1 name=__codelineno-0-1 href=#__codelineno-0-1></a>prs<span class=w> </span>compile

@@ -20,8 +20,8 @@
     B --&gt; D["project-web&lt;br/&gt;Web application"]
     B --&gt; E["project-mobile&lt;br/&gt;Mobile app"]
     C --&gt; F["project-api&lt;br/&gt;API service"]</code></pre> <h2 id=basic-inheritance>Basic Inheritance<a class=headerlink href=#basic-inheritance title="Permanent link">&para;</a></h2> <p>Use <code>@inherit</code> to extend another PromptScript file:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;my-project&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"my-project"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=kn>@inherit</span><span class=w> </span><span class=s>@company/frontend-team</span>
@@ -39,27 +39,27 @@
 </span><span id=__span-0-12><a id=__codelineno-0-12 name=__codelineno-0-12 href=#__codelineno-0-12></a>    └── logging.prs        # Logging standards
 </span></code></pre></div> <h2 id=merge-behavior>Merge Behavior<a class=headerlink href=#merge-behavior title="Permanent link">&para;</a></h2> <p>Different blocks merge differently during inheritance:</p> <h3 id=text-blocks-concatenate>Text Blocks (Concatenate)<a class=headerlink href=#text-blocks-concatenate title="Permanent link">&para;</a></h3> <p><code>@identity</code>, <code>@knowledge</code>, and text content in other blocks concatenate:</p> <div class="tabbed-set tabbed-alternate" data-tabs=1:1><input checked=checked id=__tabbed_1_1 name=__tabbed_1 type=radio><div class=tabbed-labels><label for=__tabbed_1_1>Parent File</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=c1># parent.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;parent&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"parent"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are a helpful assistant.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 </code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEm1Tliq0AOqwACJGFgy9g43rwgATRL1EgBQzYt5wAnuwyF1mgIwUADNd2sAvuPETVQiFgPy9ukHaUBNZgBXXgxBUN4cGCg0MCCoULg4CDhZdgpvXyzxexB7AF0GIWoDfCJSchgRehAANxhaCDZ8czygA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=2:1><input checked=checked id=__tabbed_2_1 name=__tabbed_2 type=radio><div class=tabbed-labels><label for=__tabbed_2_1>Child File</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=c1># child.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;child&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"child"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=kn>@inherit</span><span class=w> </span><span class=s>./parent</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You specialize in React development.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 </code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOaABMqtADqsAAiRhYMvYBN68IQxLzFNBUIZqW84AT3YZC6zQEYKABht7WAXwkTJEVjhjUIWXhQD0mNScWM5SqsHehgr6eiD2ygCazACuBmgwjBAYUBAAXjAqrLwASjAYjD5CMABuMFDMaDLsFDFxbRIOIA4AugzB1Ib4RKTkMKL0ILW0EGz4Fl1AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=3:1><input checked=checked id=__tabbed_3_1 name=__tabbed_3 type=radio><div class=tabbed-labels><label for=__tabbed_3_1>Merged Output</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a><span class=gu>## Identity</span>
 </span><span id=__span-1-2><a id=__codelineno-1-2 name=__codelineno-1-2 href=#__codelineno-1-2></a>
@@ -68,23 +68,23 @@
 </span><span id=__span-1-5><a id=__codelineno-1-5 name=__codelineno-1-5 href=#__codelineno-1-5></a>You specialize in React development.
 </span></code></pre></div> </div> </div> </div> <h3 id=objects-deep-merge>Objects (Deep Merge)<a class=headerlink href=#objects-deep-merge title="Permanent link">&para;</a></h3> <p><code>@standards</code> and object properties deep merge:</p> <div class="tabbed-set tabbed-alternate" data-tabs=4:1><input checked=checked id=__tabbed_4_1 name=__tabbed_4 type=radio><div class=tabbed-labels><label for=__tabbed_4_1>Parent File</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=c1># parent.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;parent&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"parent"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Follow clean code principles&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Testing required&quot;</span><span class=p>]</span>
+<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"Follow clean code principles"</span><span class=p>,</span><span class=w> </span><span class=s2>"Testing required"</span><span class=p>]</span>
 <span class=p>}</span>
 </code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEm1Tliq0AOqwACJGFgy9g43rwgATRL1EgBQzYt5wAnuwyF1mgIwUADNd2sAvuPES4s1iozUVceXpYqYdWRNADFmKChmAHdeRlgMVljmAP5qCFZGCHJ4TToNEAAVeCx0gHNeQQBHAFcIQRVNAF1xexB7RoYhagN8IlJskXoQADcYWgg2fHM2oA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=5:1><input checked=checked id=__tabbed_5_1 name=__tabbed_5 type=radio><div class=tabbed-labels><label for=__tabbed_5_1>Child File</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=c1># child.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;child&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"child"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=kn>@inherit</span><span class=w> </span><span class=s>./parent</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Use React framework&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;80% test coverage required&quot;</span><span class=p>]</span>
+<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"Use React framework"</span><span class=p>,</span><span class=w> </span><span class=s2>"80% test coverage required"</span><span class=p>]</span>
 <span class=p>}</span>
 </code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOaABMqtADqsAAiRhYMvYBN68IQxLzFNBUIZqW84AT3YZC6zQEYKABht7WAXwkTJEVjhjUIWXhQD0mNScWM5ScHKsQhjUQnAK+ixCMOrImgCqcDC8AEowGIw+YNSkMADuzNQA1pp0GiAAHNYApLwc4fzMAG6eGADmWUEAjgCuEEG6IAC6Eg4gDpMMwdSG+ESk5DCi9CDdtBBs+BZzQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=6:1><input checked=checked id=__tabbed_6_1 name=__tabbed_6 type=radio><div class=tabbed-labels><label for=__tabbed_6_1>Merged Output</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-2-1><a id=__codelineno-2-1 name=__codelineno-2-1 href=#__codelineno-2-1></a><span class=nt>code</span><span class=p>:</span>
 </span><span id=__span-2-2><a id=__codelineno-2-2 name=__codelineno-2-2 href=#__codelineno-2-2></a><span class=w>  </span><span class=c1># Arrays are concatenated (parent first, then child)</span>
@@ -94,23 +94,23 @@
 </span><span id=__span-2-6><a id=__codelineno-2-6 name=__codelineno-2-6 href=#__codelineno-2-6></a><span class=w>  </span><span class="p p-Indicator">-</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">80% test coverage required</span>
 </span></code></pre></div> </div> </div> </div> <h3 id=arrays-concatenate>Arrays (Concatenate)<a class=headerlink href=#arrays-concatenate title="Permanent link">&para;</a></h3> <p><code>@restrictions</code> and array values concatenate:</p> <div class="tabbed-set tabbed-alternate" data-tabs=7:1><input checked=checked id=__tabbed_7_1 name=__tabbed_7 type=radio><div class=tabbed-labels><label for=__tabbed_7_1>Parent File</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=c1># parent.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;parent&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"parent"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never expose secrets&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never expose secrets"</span>
 <span class=p>}</span>
 </code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEm1Tliq0AOqwACJGFgy9g43rwgATRL1EgBQzYt5wAnuwyF1mgIwUADNd2sAvuPETBcLNQiMsENnHl6AWg0QADkYADcYal4iNGY4GH0YRkEsODt7EHsAXQYhagN8IlJyGBF6EEjaH1Z8cyygA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=8:1><input checked=checked id=__tabbed_8_1 name=__tabbed_8 type=radio><div class=tabbed-labels><label for=__tabbed_8_1>Child File</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=c1># child.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;child&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"child"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=kn>@inherit</span><span class=w> </span><span class=s>./parent</span>
 
 <span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Always use TypeScript&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Always use TypeScript"</span>
 <span class=p>}</span>
 </code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOaABMqtADqsAAiRhYMvYBN68IQxLzFNBUIZqW84AT3YZC6zQEYKABht7WAXwkTJEVjhjUIWXhQD0mNScWM5SQXBYXoxYEGxwCvoAtBogAIJQAO4YhvEArnAwvAAqhmgwAMqMXmghIBIOIA4AugzB1Ib4RKTkMKL0IABunnCxrPgWjUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=9:1><input checked=checked id=__tabbed_9_1 name=__tabbed_9 type=radio><div class=tabbed-labels><label for=__tabbed_9_1>Merged Output</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-3-1><a id=__codelineno-3-1 name=__codelineno-3-1 href=#__codelineno-3-1></a><span class=gu>## Restrictions</span>
 </span><span id=__span-3-2><a id=__codelineno-3-2 name=__codelineno-3-2 href=#__codelineno-3-2></a>
@@ -118,25 +118,25 @@
 </span><span id=__span-3-4><a id=__codelineno-3-4 name=__codelineno-3-4 href=#__codelineno-3-4></a><span class=k>-</span><span class=w> </span>Always use TypeScript
 </span></code></pre></div> </div> </div> </div> <h3 id=shortcuts-override>Shortcuts (Override)<a class=headerlink href=#shortcuts-override title="Permanent link">&para;</a></h3> <p><code>@shortcuts</code> entries override by key:</p> <div class="tabbed-set tabbed-alternate" data-tabs=10:1><input checked=checked id=__tabbed_10_1 name=__tabbed_10 type=radio><div class=tabbed-labels><label for=__tabbed_10_1>Parent File</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=c1># parent.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;parent&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"parent"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Write unit tests&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/docs&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Generate documentation&quot;</span>
+<span class=w>  </span><span class=s2>"/test"</span><span class=p>:</span><span class=w> </span><span class=s2>"Write unit tests"</span>
+<span class=w>  </span><span class=s2>"/docs"</span><span class=p>:</span><span class=w> </span><span class=s2>"Generate documentation"</span>
 <span class=p>}</span>
 </code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEm1Tliq0AOqwACJGFgy9g43rwgATRL1EgBQzYt5wAnuwyF1mgIwUADNd2sAvuPES4OZtSyMArljjy9mgD0HHBYmmYgAOrUEBy8XqyxvCG+dkpBKsyMcOEaIADinDDU2DC8md7SxlgQbHb2IPYAugxC1Ab4RKTkMCL0IABuxXC1rPjmjUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=11:1><input checked=checked id=__tabbed_11_1 name=__tabbed_11 type=radio><div class=tabbed-labels><label for=__tabbed_11_1>Child File</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=c1># child.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;child&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"child"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=kn>@inherit</span><span class=w> </span><span class=s>./parent</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Write tests with Vitest&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/lint&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Run ESLint&quot;</span>
+<span class=w>  </span><span class=s2>"/test"</span><span class=p>:</span><span class=w> </span><span class=s2>"Write tests with Vitest"</span>
+<span class=w>  </span><span class=s2>"/lint"</span><span class=p>:</span><span class=w> </span><span class=s2>"Run ESLint"</span>
 <span class=p>}</span>
 </code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOaABMqtADqsAAiRhYMvYBN68IQxLzFNBUIZqW84AT3YZC6zQEYKABht7WAXwkTJEVjhjUIWXhQD0mNScWM5ScDjM1FiMAK5YcAr6mn4ccCFIGiAA6l4cvKnxvADu3ji8AGre8OlJIH5QbunmIABKMay8AKIAygAyjfYOIA4AugzB1Ib4RKTkMKL0IABunnAQbPgWw0A" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=12:1><input checked=checked id=__tabbed_12_1 name=__tabbed_12 type=radio><div class=tabbed-labels><label for=__tabbed_12_1>Merged Output</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-4-1><a id=__codelineno-4-1 name=__codelineno-4-1 href=#__codelineno-4-1></a><span class=gu>## Shortcuts</span>
 </span><span id=__span-4-2><a id=__codelineno-4-2 name=__codelineno-4-2 href=#__codelineno-4-2></a>
@@ -149,9 +149,9 @@
 
 <span class=c1># Add to identity</span>
 <span class=kn>@extend</span><span class=w> </span><span class=s>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  Additional identity context.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9ACMMcGL158AFNRgBzCHCzVZvALS8AJgYyLYF3mGbVe5DLN3VmAV1YWAlAA6rHwAghb2WMy8EBacWOKyQfxEHL7RsewJvMBB6gEg+YWs6mFW8WwYUOlxWSzsKRS5vIUFBawAviDtALoMccb4RKTkMFS0IAwAbqJwEGz4AIxdQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=extending-nested-paths>Extending Nested Paths<a class=headerlink href=#extending-nested-paths title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=kn>@inherit</span><span class=w> </span><span class=s>@company/base</span>
 
@@ -163,24 +163,24 @@
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9ACMMcGL158AFNRgBzCHCzVZvALS8AJgYyLYF3mGbVe5DLN3VmAV1YWAlAA6rHwAssxWYCas8Bz2htRejFheOkH8RBy+vIYyFhjUFnAULBYwFByGQrq8wEHqMABMMIi8OgCOXhA6FnW8LABuohi6zbwAnAAMQQC+INMAugycRrL4RKTkZTT0IIO0EGz4AIxzQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=multiple-extensions>Multiple Extensions<a class=headerlink href=#multiple-extensions title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=kn>@inherit</span><span class=w> </span><span class=s>@company/base</span>
 
 <span class=kn>@extend</span><span class=w> </span><span class=s>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are a frontend expert.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=kn>@extend</span><span class=w> </span><span class=s>standards.code</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>framework</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;react&quot;</span>
+<span class=w>  </span><span class=nl>framework</span><span class=p>:</span><span class=w> </span><span class=s2>"react"</span>
 <span class=p>}</span>
 
 <span class=kn>@extend</span><span class=w> </span><span class=s>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Use functional components only&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Use functional components only"</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9ACMMcGL158AFNRgBzCHCzVZvALS8AJgYyLYF3mGbVe5DLN3VmAV1YWAlAA6rPxEHL68EBacWOImwEHqASBJKazqAJrevBg62Q6e7Jz2RGiiWBQJvCnJyawAvkFBIYRh9oYyFjkWcBQsUbzxafmkMADuTgDWiFUgOhiMWKkNrE2hRbw6hmILEGxwA5XmSQCqqg4+O2wYULxSaGzR+2xQsksgdQC6DNHG+ESk5BgVFoIAYADdRHBdqx8ABGd5AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=skill-specific-extend-semantics>Skill-Specific Extend Semantics<a class=headerlink href=#skill-specific-extend-semantics title="Permanent link">&para;</a></h3> <p>When <code>@extend</code> targets a skill definition, individual skill properties follow dedicated merge strategies rather than the generic block merge rules:</p> <table> <thead> <tr> <th>Strategy</th> <th>Properties</th> </tr> </thead> <tbody> <tr> <td><strong>Replace</strong></td> <td><code>content</code>, <code>description</code>, <code>trigger</code>, <code>userInvocable</code>, <code>allowedTools</code>, <code>disableModelInvocation</code>, <code>context</code>, <code>agent</code>, <code>license</code></td> </tr> <tr> <td><strong>Append</strong></td> <td><code>references</code>, <code>examples</code>, <code>requires</code></td> </tr> <tr> <td><strong>Shallow merge</strong></td> <td><code>params</code>, <code>inputs</code>, <code>outputs</code></td> </tr> </tbody> </table> <p>Example — overlay content and add a reference file without replacing the base skill's references:</p> <div class=highlight><pre><span></span><code><span class=kn>@use</span><span class=w> </span><span class=s>@company/skills</span><span class=w> </span><span class=kn>as</span><span class=w> </span>skills
 
 <span class=kn>@extend</span><span class=w> </span><span class=s>skills.code-review</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>"""</span>
 <span class=sd>  Enhanced review with stricter security checks.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=w>  </span><span class=nl>references</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=p>.</span>/extra-context.md
 <span class=w>  </span><span class=p>]</span>
@@ -189,26 +189,26 @@
 
 <span class=kn>@extend</span><span class=w> </span><span class=s>skills.code-review</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>references</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;!references/deprecated-patterns.md&quot;</span>
-<span class=w>    </span><span class=s2>&quot;references/new-patterns.md&quot;</span>
+<span class=w>    </span><span class=s2>"!references/deprecated-patterns.md"</span>
+<span class=w>    </span><span class=s2>"references/new-patterns.md"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=w>  </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;!legacy-tool&quot;</span>
-<span class=w>    </span><span class=s2>&quot;modern-tool&quot;</span>
+<span class=w>    </span><span class=s2>"!legacy-tool"</span>
+<span class=w>    </span><span class=s2>"modern-tool"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgFc4MASzIZWATwD0cANbQocXhhUKlK3nwAU1GAHMIcLNSm8AtLwAmxjACNY13mGbVe5DFIPVmg1tYAlAA6rPxEHAG8GlDKFCzWMBb6AG4QMADuvMChvLz6YDD6rIzwiLzIuXm8wSAAhAVFnKVwMok0MIzYMNYWmFgc1KxwFCTWtVV5tY3FLTKsmX3Yg8Oj4yBVALpV+gCOghD6cOWVrNU19bAGGIxSFljMzFATZ9W1JMyJQ-ePzxuv21YAF8QEDNgxOKYpPgiKRyDAqLQQAwUkU4BA2PgAIygoA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>Negation uses normalized path matching — <code>"!./references/foo.md"</code> matches <code>"references/foo.md"</code>. If a negation doesn't match any base entry, a warning is logged during compilation.</p> <p>Negation applies to append-strategy properties only (<code>references</code>, <code>requires</code>). The <code>!</code> prefix is only meaningful in <code>@extend</code> blocks — using it in a base skill definition triggers a validator warning (PS028).</p> <h4 id=sealed-properties>Sealed Properties<a class=headerlink href=#sealed-properties title="Permanent link">&para;</a></h4> <p>The <code>sealed</code> property prevents higher layers from replacing specified skill properties:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>code-review</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>"""</span>
 <span class=sd>      Critical review workflow.</span>
-<span class=sd>    &quot;&quot;&quot;</span>
-<span class=w>    </span><span class=nl>sealed</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;content&quot;</span><span class=p>]</span>
+<span class=sd>    """</span>
+<span class=w>    </span><span class=nl>sealed</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"content"</span><span class=p>]</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
-</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpLdpyxaxIE2cm6pAYWoQsERhijClqjcPXNqfMFGbqKHV0zU1MLKTgYJxgZLWQTfQ52EwBdIIBfCXSQdJSGQ2oAT3wiUnIYKloQBmUYWgg2fABGHKA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>If an <code>@extend</code> block attempts to override a sealed property, compilation fails:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a>ResolveError: Cannot override sealed property &#39;content&#39; on skill (sealed by base definition)
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpLdpyxaxIE2cm6pAYWoQsERhijClqjcPXNqfMFGbqKHV0zU1MLKTgYJxgZLWQTfQ52EwBdIIBfCXSQdJSGQ2oAT3wiUnIYKloQBmUYWgg2fABGHKA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>If an <code>@extend</code> block attempts to override a sealed property, compilation fails:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a>ResolveError: Cannot override sealed property 'content' on skill (sealed by base definition)
 </span></code></pre></div> <p>Use <code>sealed: true</code> to seal all replace-strategy properties at once. Only the base skill author can set <code>sealed</code> — overlays cannot add or remove it. Append-strategy properties (<code>references</code>, <code>requires</code>) remain extendable even when <code>sealed: true</code> is set.</p> <h2 id=composition-with-use>Composition with <a class="magiclink magiclink-github magiclink-mention" href=https://github.com/use title="GitHub User: use">@use</a><a class=headerlink href=#composition-with-use title="Permanent link">&para;</a></h2> <p>Use <code>@use</code> to import and merge fragments (like mixins):</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;my-project&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"my-project"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=kn>@inherit</span><span class=w> </span><span class=s>@company/frontend</span>
@@ -226,89 +226,89 @@
 <span class=kn>@use</span><span class=w> </span><span class=s>@core/security</span>
 <span class=kn>@use</span><span class=w> </span><span class=s>@core/quality</span>
 <span class=kn>@use</span><span class=w> </span><span class=s>@fragments/testing</span>
-</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAKjghxeNZgCsYjLLwASAQQDKvXPBi9GGTACNoELBHgAdVnwACAVzjqzLajAD01xher6Anr158AFPYDmwljUngC0vAAmwhjasBG8YMzUolAY7v7UzBasEQCUJuZWNnaOAI4WGFAeXr4BQSG84VFwMXEJSSlpGVk5+aa8ltYDYNQY-iScWHAOHHAGrP41vH4wgXMNTdGxMPGJyeRdmdl5IAC+ALoMkyH4RKTkMFS0IAwAbjC0EGz4AIxnQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=merge-precedence>Merge Precedence<a class=headerlink href=#merge-precedence title="Permanent link">&para;</a></h3> <p>PromptScript 1.6 applies declarations in source order. Import merge policy and later operations are separate decisions:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;service&quot;</span><span class=w> </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.5.0&quot;</span><span class=w> </span><span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAKjghxeNZgCsYjLLwASAQQDKvXPBi9GGTACNoELBHgAdVnwACAVzjqzLajAD01xher6Anr158AFPYDmwljUngC0vAAmwhjasBG8YMzUolAY7v7UzBasEQCUJuZWNnaOAI4WGFAeXr4BQSG84VFwMXEJSSlpGVk5+aa8ltYDYNQY-iScWHAOHHAGrP41vH4wgXMNTdGxMPGJyeRdmdl5IAC+ALoMkyH4RKTkMFS0IAwAbjC0EGz4AIxnQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=merge-precedence>Merge Precedence<a class=headerlink href=#merge-precedence title="Permanent link">&para;</a></h3> <p>PromptScript 1.6 applies declarations in source order. Import merge policy and later operations are separate decisions:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"service"</span><span class=w> </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.5.0"</span><span class=w> </span><span class=p>}</span>
 
 <span class=kn>@inherit</span><span class=w> </span><span class=s>@stacks/typescript-lib</span>
 <span class=kn>@use</span><span class=w> </span><span class=s>@core/security</span>
 <span class=kn>@use</span><span class=w> </span><span class=s>@core/quality</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>deployment</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Require approval&quot;</span><span class=p>]</span>
+<span class=w>  </span><span class=nl>deployment</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"Require approval"</span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=kn>@override</span><span class=w> </span><span class=s>standards.testing</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>[</span><span class=s2>&quot;Use Vitest&quot;</span><span class=p>]</span>
+<span class=w>  </span><span class=p>[</span><span class=s2>"Use Vitest"</span><span class=p>]</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBjUAbhEYwZguAE92GQpJkBGCgDYKABjUBfKa2sBiQdwisc8iFgdwBjANZwA9FgaaPCM1BBoWAC0UBAARoKC9gAU1DAA5hCe1BqCkYJimRixsGKCYMzUguQYGmnUzACurGIAlHYODXIOLKl+cowNYYEJyakZWTl5BXBFJWUVVVA1dY3Nbaz23J0w3RUwfgCODRgxw4mCKemZWNm5+YXFMKXlldW19U2t1tyeGM0Y1DEcGE1gSYhg5GYGj47EkyBkACUYEcIKlBBg0DRmAoTjIALrWKw2VjcbHyMLg9QCf6AuAUDieJxpEGsBLwkAAVS6ADU3PAsPjCSALHiGJwbhp8ERSOQYFRaCAGAp5HAIGx8PphUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>Use <a href=../../reference/language/composition/ >Composition and Precedence</a> as the normative source for conflict rules, declaration order, and resolved examples. This guide focuses on designing inheritance hierarchies rather than restating that matrix.</p> <h3 id=fragment-files>Fragment Files<a class=headerlink href=#fragment-files title="Permanent link">&para;</a></h3> <p>Create reusable fragments:</p> <div class=highlight><pre><span></span><code><span class=c1># @fragments/testing.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@fragments/testing&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.5.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@fragments/testing"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.5.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>testing</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Use vitest as test framework&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Maintain 80% code coverage&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Write unit and integration tests&quot;</span><span class=p>]</span>
+<span class=w>  </span><span class=nl>testing</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"Use vitest as test framework"</span><span class=p>,</span><span class=w> </span><span class=s2>"Maintain 80% code coverage"</span><span class=p>,</span><span class=w> </span><span class=s2>"Write unit and integration tests"</span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Write comprehensive tests&quot;</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Write unit and integration tests for the current change.&quot;</span>
+<span class=w>  </span><span class=s2>"/test"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Write comprehensive tests"</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Write unit and integration tests for the current change."</span>
 <span class=w>  </span><span class=p>}</span>
-<span class=w>  </span><span class=s2>&quot;/coverage&quot;</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Check test coverage&quot;</span>
-<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Run coverage and report untested behavior.&quot;</span>
+<span class=w>  </span><span class=s2>"/coverage"</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Check test coverage"</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>"Run coverage and report untested behavior."</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAmGoYA5iU5Y4Aeg5wsEViKq0AOq37isGXsDW9eEACaJeKkIOFiJ02fMVm9vOAE92GQibMBGCgDYKAAwOrAC+amr8chishhjUhnA6jrYKIibIZgCqcDC8AG4QtrwYiUVCpDAA7szUANZmdKYgALIYCloKvAAcAQCkvCyGuSx5MJYwDU0A6tSFuQCurIXFMQbsMCLC8my8tnBmALpqYawRcDg1WIzzkkms+mYy8FhmJrr3+rxDcIyzaNusTwgGZzAbMMjUGA4ThwCCjXbPfYgRz6FjrdhAkEcXiLZbRQxrDibbAQHZ7XhgGq7aEDebUSHsAY4aIiGAUYL6E4PEBSEZjUQTJB3T5feC-CD-UmApoAYWhjFqCLkYNG4w5nzRHAxTQASosVfzWSsCZC0Jcces5DACQAjKEYAo1dnIj4nEIgEIHBgSajOfBEUjkNk0eggVWwtj4LweoA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>When imported with <code>@use @fragments/testing</code>, these blocks are merged directly into your file.</p> <h2 id=best-practices>Best Practices<a class=headerlink href=#best-practices title="Permanent link">&para;</a></h2> <h3 id=1-keep-base-configurations-minimal>1. Keep Base Configurations Minimal<a class=headerlink href=#1-keep-base-configurations-minimal title="Permanent link">&para;</a></h3> <p>Organization base should include only universal standards:</p> <div class=highlight><pre><span></span><code><span class=c1># @company/base.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@company/base&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@company/base"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are an AI assistant at ACME Corp.</span>
 <span class=sd>  Follow company guidelines and best practices.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never expose credentials&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Follow data protection policies&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never expose credentials"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Follow data protection policies"</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAizIZWATwD0AIwxwYVWgB1W-EjCwZewJb14QAJol4KQg5sLFSZMY9t5xR7DIUPGAjBQAMnm6wC+SpX59TiwILFFNWxsQHx0ATWYAV14MahgU1l4AQQBJFLg4CDh1dhSsbIBhAFkAUV4K5mo0ClsAMWYoKGYAd14hTDFeAHNE4KgIVngMvV5JeHKaDEZQxngWzKMYraV-VkC04uoIZYg2OEiNgFpNgDkYADcYal4iNGZZPrS9EIgMKDhYrxrsZ2p0erw9NgNDRmBwTmxeG9xowIPAfL4QL4ALoMELUUT4IikchyGj0ECPWinVj4VyYoA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=2-use-team-configurations-for-specialization>2. Use Team Configurations for Specialization<a class=headerlink href=#2-use-team-configurations-for-specialization title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># @company/frontend.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@company/frontend&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@company/frontend"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=kn>@inherit</span><span class=w> </span><span class=s>@company/base</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You specialize in frontend development.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  Tech stack: React, TypeScript, Vite</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAizIZWATwD0Yamw6sAJlVoAdVvxIwsGXsBW9eEOYl5KQg5sLGTp7TnJO7ecUewyEjJgIwUADD-usAXxUVPn4IVhwYaggsASFMSwAjDDgYPT4ACmoYAHMIOCxqUV4AWl45fIxE2DleMGZqXnIMURzpAFd5AEoVMLlOLBjinVY9exB-PQBNZnbHNBhGCAwoCAAvNPC661la-oA3GChmNHV2Cgdx-yDWXpYbQliRsYnXhwAVRZxHTUYAayMACUYBhGFg6Lx3qIFgBlRjRNDg3gANRiMEubwmgRAAQAugwBkV8ERSOQYIp6CBDrQIGx8B4cUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=3-project-configurations-for-specifics>3. Project Configurations for Specifics<a class=headerlink href=#3-project-configurations-for-specifics title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># project.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;checkout-app&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"checkout-app"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=kn>@inherit</span><span class=w> </span><span class=s>@company/frontend</span>
 
 <span class=p>@</span><span class=kd>context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Checkout Application&quot;</span>
+<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>"Checkout Application"</span>
 
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  E-commerce checkout flow with Stripe integration.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCUxwiA1swCuWALQY0aHSt5wAnuwyEtOgIwUADJ+usAvlKk+aQhWPWoILF5pFjIMVjsAejBqNg5WdVU+AApqGABzCDgsajteU151QowAI1gMsGZqfigMOzyUo3SASilo1KJI5VZVAWFRFxAAYT1GQxNeAEFLKAhGbAg2HxtrEB9VAFFTGLlqRhheRhm5yLAoZgB3XnuInF4AZWKINHOQjnb1tgUba7EFSXwgXwAXQYnGKdnwRFI5Bg4noIAAbjBaBtWPhXBCgA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=4-version-your-registry>4. Version Your Registry<a class=headerlink href=#4-version-your-registry title="Permanent link">&para;</a></h3> <p>Use semantic versioning for registry files:</p> <div class=highlight><pre><span></span><code><span class=kn>@inherit</span><span class=w> </span><span class=s>@company/frontend@1.0.0</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9GGpsOrACb8AjBQAMu3rz4AKajADmEOFmqzeAWl5rLGAEaw1vMM2q9yGWWbKAK7qAJQgAL4Augyc1rL4RKTkMFS0IAwAbqJwEGz4mpFAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=5-document-inheritance-chains>5. Document Inheritance Chains<a class=headerlink href=#5-document-inheritance-chains title="Permanent link">&para;</a></h3> <p>Include comments explaining the hierarchy:</p> <div class=highlight><pre><span></span><code><span class=c1># Inheritance chain:</span>
@@ -329,7 +329,7 @@
 <span class=kn>@use</span><span class=w> </span><span class=s>@core/compliance</span>
 
 <span class=kn>@extend</span><span class=w> </span><span class=s>standards.security</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>additionalRules</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;CSP headers&quot;</span><span class=p>]</span>
+<span class=w>  </span><span class=nl>additionalRules</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"CSP headers"</span><span class=p>]</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAqnBi84ODNRgATETEYBXahCwBPOr2YA3GNUWThHUgFo4aWREiMAOqz4ABCKxzalvWyzIZWygPRhqbDlZpXj4ACgkAcwg4LGplXkNeSWiMACNYaTBmal5yDGUI-zkggEprOzkhVxYJbyF5RRVeEN5wmCiYuISklPSpXiycvIKi0vLXSuE3bJhvd3IIT0ZhFraO2PjE5Lg0jIHs3Kh8wuZiyTLWWyJA6RjPSXFJOAp6hSV44GtmjElkrAg2BgoAAlOSwOCIXjISwgADCAGUAAq8Jw-bRwGEAXWsAF8QDjMQxOBt8ERSOQYFRaCAGFpaADWPgAIz4oA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=environment-specific-extensions>Environment-Specific Extensions<a class=headerlink href=#environment-specific-extensions title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=kn>@inherit</span><span class=w> </span><span class=s>@company/frontend</span>
 
@@ -338,18 +338,18 @@
 <span class=p>}</span>
 
 <span class=kn>@extend</span><span class=w> </span><span class=s>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;No console.log statements&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;No debug code&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"No console.log statements"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"No debug code"</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9GGpsOrACa9efABTUYAcwhws1WbwC0vNUYwAjWBrDNqvchln7lAV3UBKADqs-CzsRBLAgZqcAG4QyqwknFiIrspqXoxYEGyBAL6BgfxhnBp6xmKZ2axwvBGsmpb+IAByzLwhcMyUUMz6vMbYMInscE2RFrxNrVYwtl59LGowY6y5ILkAugxJpvhEpOQwVLQgDNGicFX4AIzrQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=parameterized-inheritance-templates>Parameterized Inheritance (Templates)<a class=headerlink href=#parameterized-inheritance-templates title="Permanent link">&para;</a></h2> <p>PromptScript supports parameterized inheritance, allowing you to create reusable templates with configurable values. This is similar to generics in programming languages or Handlebars-like templates.</p> <h3 id=defining-parameters>Defining Parameters<a class=headerlink href=#defining-parameters title="Permanent link">&para;</a></h3> <p>Define parameters in the <code>@meta</code> block using the <code>params</code> field:</p> <div class=highlight><pre><span></span><code><span class=c1># @stacks/typescript-lib.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@stacks/typescript-lib&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@stacks/typescript-lib"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=w>  </span><span class=nl>params</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=nl>projectName</span><span class=p>:</span><span class=w> </span><span class=kt>string</span>
-<span class=w>    </span><span class=nl>runtime</span><span class=p>:</span><span class=w> </span><span class=kt>string</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=s2>&quot;node18&quot;</span>
+<span class=w>    </span><span class=nl>runtime</span><span class=p>:</span><span class=w> </span><span class=kt>string</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=s2>"node18"</span>
 <span class=w>    </span><span class=nl>strict</span><span class=o>?</span><span class=p>:</span><span class=w> </span><span class=kt>boolean</span>
-<span class=w>    </span><span class=nl>testFramework</span><span class=p>:</span><span class=w> </span><span class=kt>enum</span><span class=p>(</span><span class=s2>&quot;vitest&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;jest&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;mocha&quot;</span><span class=p>)</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=s2>&quot;vitest&quot;</span>
+<span class=w>    </span><span class=nl>testFramework</span><span class=p>:</span><span class=w> </span><span class=kt>enum</span><span class=p>(</span><span class=s2>"vitest"</span><span class=p>,</span><span class=w> </span><span class=s2>"jest"</span><span class=p>,</span><span class=w> </span><span class=s2>"mocha"</span><span class=p>)</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=s2>"vitest"</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
@@ -359,30 +359,30 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>testing</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Use </span><span class=p>{{</span><span class=nv>testFramework</span><span class=p>}}</span><span class=s2> for all tests&quot;</span><span class=p>]</span>
+<span class=w>  </span><span class=nl>testing</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"Use </span><span class=p>{{</span><span class=nv>testFramework</span><span class=p>}}</span><span class=s2> for all tests"</span><span class=p>]</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAnCwZGAazgB6LAE808RtQhosAWigQARlVoAdVvxIxhvYHt68IAE0S8dIQcLGSZcuAqWr1Gu2d5xp7BiENnYAjBQADJE+rOaY1KRwNqax5rw0zABWMIxYAHKkMDZCiqwA5r7m1ACu7BCGxVilZbwAvLYgrMyWMKEAHDFpfk0QuQD8NhrMzLAYrJW8HEIAYgmGAO7M1KI2nNUkABR2AG4QS1h2dB3ZQpcdJMyMOBh2AJRtHafng7wAvnr-eb6DLZXImXysQrJYAgnL5Qq-QFVWpYepFEzAGp1QyIgF6PQOOaWDDUSxwcGpc4Qco2ZB2ACqcBgGPOq0Km22iN4YC2vAwUCgi3gWDgdgAugCQL8xQxOE1pPgiKRyDBtPQQMcYLQIGx8KEpUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=parameter-types>Parameter Types<a class=headerlink href=#parameter-types title="Permanent link">&para;</a></h3> <table> <thead> <tr> <th>Type</th> <th>Syntax</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td><code>string</code></td> <td><code>name: string</code></td> <td>Text value</td> </tr> <tr> <td><code>number</code></td> <td><code>count: number</code></td> <td>Numeric value</td> </tr> <tr> <td><code>boolean</code></td> <td><code>enabled: boolean</code></td> <td>True or false</td> </tr> <tr> <td><code>enum</code></td> <td><code>mode: enum("a", "b")</code></td> <td>One of specified values</td> </tr> </tbody> </table> <h3 id=parameter-modifiers>Parameter Modifiers<a class=headerlink href=#parameter-modifiers title="Permanent link">&para;</a></h3> <table> <thead> <tr> <th>Modifier</th> <th>Syntax</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td>Required</td> <td><code>name: string</code></td> <td>Must be provided</td> </tr> <tr> <td>Optional</td> <td><code>name?: string</code></td> <td>Can be omitted (value is undefined)</td> </tr> <tr> <td>Default</td> <td><code>name: string = "value"</code></td> <td>Uses default if not provided</td> </tr> </tbody> </table> <h3 id=passing-parameters>Passing Parameters<a class=headerlink href=#passing-parameters title="Permanent link">&para;</a></h3> <p>Pass parameters when using <code>@inherit</code> or <code>@use</code>:</p> <div class=highlight><pre><span></span><code><span class=c1># project.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;my-app&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"my-app"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
-<span class=kn>@inherit</span><span class=w> </span><span class=s>@stacks/typescript-lib</span><span class=p>(</span>projectName<span class=p>:</span><span class=w> </span><span class=s2>&quot;my-app&quot;</span><span class=p>,</span><span class=w> </span>runtime<span class=p>:</span><span class=w> </span><span class=s2>&quot;node20&quot;</span><span class=p>)</span>
-</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCSBIBPALQY0aHSt5w97DIS06AjBQAMzs6wC+UqdIiscMaggsXmk4BUYAazgAeiw9NHhGQLQsAygIACMACgFhUQA5Uhg7XUNjUxA6XmoAV3YIORLWZnUYACYnHQBKEHcAXQZOLGo9fCJSchhxehAANwC4CDZ8e16gA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>Or with <code>@use</code>:</p> <div class=highlight><pre><span></span><code><span class=kn>@use</span><span class=w> </span><span class=s>./fragments/testing</span><span class=p>(</span>framework<span class=p>:</span><span class=w> </span><span class=s2>&quot;vitest&quot;</span><span class=p>,</span><span class=w> </span>coverage<span class=p>:</span><span class=w> </span><span class=m>90</span><span class=p>)</span>
+<span class=kn>@inherit</span><span class=w> </span><span class=s>@stacks/typescript-lib</span><span class=p>(</span>projectName<span class=p>:</span><span class=w> </span><span class=s2>"my-app"</span><span class=p>,</span><span class=w> </span>runtime<span class=p>:</span><span class=w> </span><span class=s2>"node20"</span><span class=p>)</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCSBIBPALQY0aHSt5w97DIS06AjBQAMzs6wC+UqdIiscMaggsXmk4BUYAazgAeiw9NHhGQLQsAygIACMACgFhUQA5Uhg7XUNjUxA6XmoAV3YIORLWZnUYACYnHQBKEHcAXQZOLGo9fCJSchhxehAANwC4CDZ8e16gA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>Or with <code>@use</code>:</p> <div class=highlight><pre><span></span><code><span class=kn>@use</span><span class=w> </span><span class=s>./fragments/testing</span><span class=p>(</span>framework<span class=p>:</span><span class=w> </span><span class=s2>"vitest"</span><span class=p>,</span><span class=w> </span>coverage<span class=p>:</span><span class=w> </span><span class=m>90</span><span class=p>)</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9GGoYA5iU5Y4IjnCwRWkgBTjSMAO7NqAa0SCAOiABuERVlN1BLMzAmSYRgJwAGAJQgAvgF0GWWoAT3wiUnIYKloQBgdaCDZ8AEZfIA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=template-variables>Template Variables<a class=headerlink href=#template-variables title="Permanent link">&para;</a></h3> <p>Use <code>{{variable}}</code> syntax to reference parameters in content:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;template&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"template"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=w>  </span><span class=nl>params</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=nl>projectName</span><span class=p>:</span><span class=w> </span><span class=kt>string</span>
-<span class=w>    </span><span class=na>author</span><span class=p>:</span><span class=w> </span><span class=kt>string</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=s2>&quot;Team&quot;</span>
+<span class=w>    </span><span class=na>author</span><span class=p>:</span><span class=w> </span><span class=kt>string</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=s2>"Team"</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are working on </span><span class=p>{{</span><span class=nv>projectName</span><span class=p>}}</span><span class=sd>.</span>
 <span class=sd>  This project is maintained by </span><span class=p>{{</span><span class=nv>author</span><span class=p>}}</span><span class=sd>.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=nt>project</span><span class=w> </span><span class=p>{</span>
@@ -391,8 +391,8 @@
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgOZKNhjyxEuAE92GQrPkBGCgAYTa8YMzVScWaIsSazAFYxGWAHKkYsuFmoQrADm6hKCGACuuMzUvv6BQYIAvHIgACowpOYSAL5ieaxi3NKcWBBYmsKhaiDZggCazBHh1DCCAO4xANYJgmzCwE6u7l58OTkUoWk4EHCW1C5uWJJzJBiBAoEwUoIARpXAwJHR1OOTFjXmBUVDS1UWrN52gwvDnt7joWsb66wwsQNjjgYp9WDkQDkALoMUrUTT4IikcgwKi0EAMABu-zgEDY+AMEKAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=complete-example>Complete Example<a class=headerlink href=#complete-example title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=13:1><input checked=checked id=__tabbed_13_1 name=__tabbed_13 type=radio><div class=tabbed-labels><label for=__tabbed_13_1>Template (Parent)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=c1># @stacks/react-app.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@stacks/react-app&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@stacks/react-app"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=w>  </span><span class=nl>params</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=nl>projectName</span><span class=p>:</span><span class=w> </span><span class=kt>string</span>
 <span class=w>    </span><span class=nl>port</span><span class=p>:</span><span class=w> </span><span class=kt>number</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=m>3000</span>
@@ -401,32 +401,32 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are a React developer working on </span><span class=p>{{</span><span class=nv>projectName</span><span class=p>}}</span><span class=sd>.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>context</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=p>{{</span><span class=nv>projectName</span><span class=p>}}</span>
-<span class=w>  </span><span class=nl>devServer</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;http://localhost:</span><span class=p>{{</span><span class=nv>port</span><span class=p>}}</span><span class=s2>&quot;</span>
+<span class=w>  </span><span class=nl>devServer</span><span class=p>:</span><span class=w> </span><span class=s2>"http://localhost:</span><span class=p>{{</span><span class=nv>port</span><span class=p>}}</span><span class=s2>"</span>
 <span class=w>  </span><span class=nl>strictMode</span><span class=p>:</span><span class=w> </span><span class=p>{{</span><span class=nv>strict</span><span class=p>}}</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;TypeScript strict mode enabled&quot;</span><span class=p>]</span>
+<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"TypeScript strict mode enabled"</span><span class=p>]</span>
 <span class=p>}</span>
 </code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAnCwZGAazgB6ajBFYAtBjRoqtADqt+JGMN7B1vXhAAmiXqpCDhYydNkKl5-bzgBPdhkKnzARgoAGf0dWA0xqUjhTPWCDXhpmACsYRiwAOVIYUyFqCFYAcycQ5mosU1YAVxIAIxhqXgBeXgBmPxaC5yxs5NNK5mZYDGCGjrKYJwBfdQnWdX5jTiwILBddJ0cQIIMATWYy3gxpPd4AJRlk3iMYADcYKGY0Gt4AdyLRHNzeNl1gOMTktK0xmMKKt1qDJuoZix2EQsCtoj8kiUvgi-ulAU4LpcAMo1a7ULwgHBYLBoRASCS3RgYKA4ZhCRDAb5FLDo9bRLIQZIAWWYF0iwA5yXRrCmMyEAyM+yMcDhBhYfN4yHMABUXPcsYxsmhYYLYSReTBeJwMJVYEZzABdSYgMYWhjzagufBEUjkGAqeggPFwCBsfDeG1AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=14:1><input checked=checked id=__tabbed_14_1 name=__tabbed_14 type=radio><div class=tabbed-labels><label for=__tabbed_14_1>Project (Child)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=c1># project.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;checkout-app&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"checkout-app"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
-<span class=kn>@inherit</span><span class=w> </span><span class=s>@stacks/react-app</span><span class=p>(</span>projectName<span class=p>:</span><span class=w> </span><span class=s2>&quot;Checkout App&quot;</span><span class=p>,</span><span class=w> </span>port<span class=p>:</span><span class=w> </span><span class=m>8080</span><span class=p>)</span>
+<span class=kn>@inherit</span><span class=w> </span><span class=s>@stacks/react-app</span><span class=p>(</span>projectName<span class=p>:</span><span class=w> </span><span class=s2>"Checkout App"</span><span class=p>,</span><span class=w> </span>port<span class=p>:</span><span class=w> </span><span class=m>8080</span><span class=p>)</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You specialize in e-commerce checkout flows.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 </code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCUxwiA1swCuWALQY0aHSt5wAnuwyEtOgIwUADJ+usAvlKlpCFY9aggsXmk4BUZ9OAB6ahgMUXNLAAoBYVEAOVIYFxAAYT1Y4wiAQUsdOn5maiwtAA4PFoBKAJkNTixwuyUbaxAfVQBNY1s0EQgMKAgALxg1Vl4YUxYSOWpGJcZSwxNeMChmAHc4CkHh66lfEF8AXQYe6jt8IlJyGHF6EAA3GC0CBsfCue5AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=15:1><input checked=checked id=__tabbed_15_1 name=__tabbed_15 type=radio><div class=tabbed-labels><label for=__tabbed_15_1>Resolved Output</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-6-1><a id=__codelineno-6-1 name=__codelineno-6-1 href=#__codelineno-6-1></a><span class=gu>## Identity</span>
 </span><span id=__span-6-2><a id=__codelineno-6-2 name=__codelineno-6-2 href=#__codelineno-6-2></a>
@@ -451,14 +451,14 @@
 </span><span id=__span-7-5><a id=__codelineno-7-5 name=__codelineno-7-5 href=#__codelineno-7-5></a>  # Template variable - resolved during inheritance
 </span><span id=__span-7-6><a id=__codelineno-7-6 name=__codelineno-7-6 href=#__codelineno-7-6></a>  project: {{projectName}}
 </span><span id=__span-7-7><a id=__codelineno-7-7 name=__codelineno-7-7 href=#__codelineno-7-7></a>}
-</span></code></pre></div> <h3 id=validation-errors>Validation Errors<a class=headerlink href=#validation-errors title="Permanent link">&para;</a></h3> <p>PromptScript validates parameters at compile time:</p> <p><strong>Missing required parameter:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-8-1><a id=__codelineno-8-1 name=__codelineno-8-1 href=#__codelineno-8-1></a>Error: Missing required parameter &#39;projectName&#39; for template &#39;@stacks/react-app&#39;
-</span></code></pre></div> <p><strong>Unknown parameter:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-9-1><a id=__codelineno-9-1 name=__codelineno-9-1 href=#__codelineno-9-1></a>Error: Unknown parameter &#39;unknownParam&#39; for template &#39;@stacks/react-app&#39;.
+</span></code></pre></div> <h3 id=validation-errors>Validation Errors<a class=headerlink href=#validation-errors title="Permanent link">&para;</a></h3> <p>PromptScript validates parameters at compile time:</p> <p><strong>Missing required parameter:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-8-1><a id=__codelineno-8-1 name=__codelineno-8-1 href=#__codelineno-8-1></a>Error: Missing required parameter 'projectName' for template '@stacks/react-app'
+</span></code></pre></div> <p><strong>Unknown parameter:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-9-1><a id=__codelineno-9-1 name=__codelineno-9-1 href=#__codelineno-9-1></a>Error: Unknown parameter 'unknownParam' for template '@stacks/react-app'.
 </span><span id=__span-9-2><a id=__codelineno-9-2 name=__codelineno-9-2 href=#__codelineno-9-2></a>Available parameters: projectName, port, strict
-</span></code></pre></div> <p><strong>Type mismatch:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-10-1><a id=__codelineno-10-1 name=__codelineno-10-1 href=#__codelineno-10-1></a>Error: Type mismatch for parameter &#39;port&#39;: expected number, got string
-</span></code></pre></div> <p><strong>Invalid enum value:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-11-1><a id=__codelineno-11-1 name=__codelineno-11-1 href=#__codelineno-11-1></a>Error: Type mismatch for parameter &#39;mode&#39;: expected enum(&quot;dev&quot;, &quot;prod&quot;), got &quot;staging&quot;
+</span></code></pre></div> <p><strong>Type mismatch:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-10-1><a id=__codelineno-10-1 name=__codelineno-10-1 href=#__codelineno-10-1></a>Error: Type mismatch for parameter 'port': expected number, got string
+</span></code></pre></div> <p><strong>Invalid enum value:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-11-1><a id=__codelineno-11-1 name=__codelineno-11-1 href=#__codelineno-11-1></a>Error: Type mismatch for parameter 'mode': expected enum("dev", "prod"), got "staging"
 </span></code></pre></div> <h3 id=best-practices_1>Best Practices<a class=headerlink href=#best-practices_1 title="Permanent link">&para;</a></h3> <ol> <li><strong>Use descriptive parameter names</strong> - <code>projectName</code> instead of <code>name</code></li> <li><strong>Provide sensible defaults</strong> - Reduce required parameters</li> <li><strong>Document parameters</strong> - Add comments explaining each parameter</li> <li><strong>Validate with enums</strong> - Use enums for constrained choices</li> <li><strong>Keep templates focused</strong> - One purpose per template</li> </ol> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@stacks/api-service&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@stacks/api-service"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=w>  </span><span class=nl>params</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=c1># Name of the API service</span>
 <span class=w>    </span><span class=nl>serviceName</span><span class=p>:</span><span class=w> </span><span class=kt>string</span>
@@ -467,7 +467,7 @@
 <span class=w>    </span><span class=nl>port</span><span class=p>:</span><span class=w> </span><span class=kt>number</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=m>3000</span>
 
 <span class=w>    </span><span class=c1># Environment mode</span>
-<span class=w>    </span><span class=nl>mode</span><span class=p>:</span><span class=w> </span><span class=kt>enum</span><span class=p>(</span><span class=s2>&quot;development&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;staging&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;production&quot;</span><span class=p>)</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=s2>&quot;development&quot;</span>
+<span class=w>    </span><span class=nl>mode</span><span class=p>:</span><span class=w> </span><span class=kt>enum</span><span class=p>(</span><span class=s2>"development"</span><span class=p>,</span><span class=w> </span><span class=s2>"staging"</span><span class=p>,</span><span class=w> </span><span class=s2>"production"</span><span class=p>)</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=s2>"development"</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhucAYwDWcAPQY0EALRwY1AG4RGMeWIlwAnuwyFZ8gIwUADK-PjBmaqTizRnhIAxIIAcqQwgsxggriRAIIACgCSgvpGJmaBaQbGpuF8skrUEKwA5mIWEoIhABIAKvWJXszUWIJgrbE4kel5kQAUUjBgGACuUFiyAMwucwCUVRJorVOCrGMkAEYGggC8grNzldkhAKKsxtRsfOyCJMzDS-ePMLKcmwPyw4YwUMxoW5YeR0OQgJQYMqlCogUHyGiPMaMLAQNjyeb7ME-P4AoEeCQAXzEBJABIAugxOFhqFZ8ERSOQYFRaLCQL9aKjWPhHKSgA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=debugging-inheritance>Debugging Inheritance<a class=headerlink href=#debugging-inheritance title="Permanent link">&para;</a></h2> <h3 id=view-resolved-configuration>View Resolved Configuration<a class=headerlink href=#view-resolved-configuration title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-12-1><a id=__codelineno-12-1 name=__codelineno-12-1 href=#__codelineno-12-1></a>prs<span class=w> </span>compile<span class=w> </span>--dry-run<span class=w> </span>--verbose
@@ -475,14 +475,14 @@
 </span></code></pre></div> <h3 id=common-issues>Common Issues<a class=headerlink href=#common-issues title="Permanent link">&para;</a></h3> <p><strong>Circular inheritance detected:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-14-1><a id=__codelineno-14-1 name=__codelineno-14-1 href=#__codelineno-14-1></a>Error: Circular inheritance: a → b → a
 </span></code></pre></div> <p>Ensure no circular references in your inheritance chain.</p> <p><strong>Parent not found:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-15-1><a id=__codelineno-15-1 name=__codelineno-15-1 href=#__codelineno-15-1></a>Error: Cannot resolve @company/unknown
 </span></code></pre></div> <p>Check registry configuration and file paths.</p> <p><strong>Version mismatch:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-16-1><a id=__codelineno-16-1 name=__codelineno-16-1 href=#__codelineno-16-1></a>Warning: Requested @company/base@2.0.0, found 1.5.0
-</span></code></pre></div> <p>Update version constraints or registry.</p> <h2 id=replacing-complete-values>Replacing Complete Values<a class=headerlink href=#replacing-complete-values title="Permanent link">&para;</a></h2> <p>Use <code>@extend</code> when inherited content should be merged. Use <code>@override</code> with syntax <code>1.5.0</code> when the complete existing value should be replaced:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-17-1><a id=__codelineno-17-1 name=__codelineno-17-1 href=#__codelineno-17-1></a>@meta { id: &quot;project&quot; syntax: &quot;1.5.0&quot; }
+</span></code></pre></div> <p>Update version constraints or registry.</p> <h2 id=replacing-complete-values>Replacing Complete Values<a class=headerlink href=#replacing-complete-values title="Permanent link">&para;</a></h2> <p>Use <code>@extend</code> when inherited content should be merged. Use <code>@override</code> with syntax <code>1.5.0</code> when the complete existing value should be replaced:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-17-1><a id=__codelineno-17-1 name=__codelineno-17-1 href=#__codelineno-17-1></a>@meta { id: "project" syntax: "1.5.0" }
 </span><span id=__span-17-2><a id=__codelineno-17-2 name=__codelineno-17-2 href=#__codelineno-17-2></a>@inherit @company/base
 </span><span id=__span-17-3><a id=__codelineno-17-3 name=__codelineno-17-3 href=#__codelineno-17-3></a>
 </span><span id=__span-17-4><a id=__codelineno-17-4 name=__codelineno-17-4 href=#__codelineno-17-4></a>@override standards.testing {
-</span><span id=__span-17-5><a id=__codelineno-17-5 name=__codelineno-17-5 href=#__codelineno-17-5></a>  [&quot;Use Vitest&quot;]
+</span><span id=__span-17-5><a id=__codelineno-17-5 name=__codelineno-17-5 href=#__codelineno-17-5></a>  ["Use Vitest"]
 </span><span id=__span-17-6><a id=__codelineno-17-6 name=__codelineno-17-6 href=#__codelineno-17-6></a>}
 </span><span id=__span-17-7><a id=__codelineno-17-7 name=__codelineno-17-7 href=#__codelineno-17-7></a>
 </span><span id=__span-17-8><a id=__codelineno-17-8 name=__codelineno-17-8 href=#__codelineno-17-8></a>@extend standards {
-</span><span id=__span-17-9><a id=__codelineno-17-9 name=__codelineno-17-9 href=#__codelineno-17-9></a>  testing: [&quot;Require coverage&quot;]
+</span><span id=__span-17-9><a id=__codelineno-17-9 name=__codelineno-17-9 href=#__codelineno-17-9></a>  testing: ["Require coverage"]
 </span><span id=__span-17-10><a id=__codelineno-17-10 name=__codelineno-17-10 href=#__codelineno-17-10></a>}
 </span></code></pre></div> <p>The target must exist after preceding declarations are applied. Replacement is atomic, and later declarations operate on the replacement. <code>field!</code> remains supported for replacing one direct regular field inside <code>@extend</code>, but new code should use <code>@override</code> when complete replacement is the intended operation. Sealed skill properties cannot be replaced or removed.</p> </article> </div> <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script> <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script> </div> <button type=button class="md-top md-icon" data-md-component=top hidden> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg> Back to top </button> </main> <footer class=md-footer> <nav class="md-footer__inner md-grid" aria-label=Footer> <a href=../shared-resources/ class="md-footer__link md-footer__link--prev" aria-label="Previous: Shared Resources"> <div class="md-footer__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg> </div> <div class=md-footer__title> <span class=md-footer__direction> Previous </span> <div class=md-ellipsis> Shared Resources </div> </div> </a> <a href=../multi-file/ class="md-footer__link md-footer__link--next" aria-label="Next: Multi-File Organization"> <div class=md-footer__title> <span class=md-footer__direction> Next </span> <div class=md-ellipsis> Multi-File Organization </div> </div> <div class="md-footer__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg> </div> </a> </nav> <div class="md-footer-meta md-typeset"> <div class="md-footer-meta__inner md-grid"> <div class=md-copyright> <div class=md-copyright__highlight> Copyright &copy; 2026 PromptScript Contributors </div> Made with <a href=https://squidfunk.github.io/mkdocs-material/ target=_blank rel=noopener> Material for MkDocs </a> </div> <div class=md-social> <a href=https://github.com/mrwogu/promptscript target=_blank rel=noopener title=github.com class=md-social__link> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 512 512"><!-- Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg> </a> <a href=https://www.npmjs.com/org/promptscript target=_blank rel=noopener title=www.npmjs.com class=md-social__link> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 576 512"><!-- Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M288 288h-32v-64h32zm288-128v192H288v32H160v-32H0V160zm-416 32H32v128h64v-96h32v96h32zm160 0H192v160h64v-32h64zm224 0H352v128h64v-96h32v96h32v-96h32v96h32z"/></svg> </a> </div> </div> </div> </footer> </div> <div class=md-dialog data-md-component=dialog> <div class="md-dialog__inner md-typeset"></div> </div> <div class=md-progress data-md-component=progress role=progressbar></div> <script id=__config type=application/json>{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link", "content.tooltips", "header.autohide", "announce.dismiss"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script> <script src=../../assets/javascripts/bundle.d7400e89.min.js></script> <script src=../../assets/javascripts/init-demo.js></script> </body> </html>

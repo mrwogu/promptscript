@@ -26,7 +26,7 @@
 </span><span id=__span-1-7><a id=__codelineno-1-7 name=__codelineno-1-7 href=#__codelineno-1-7></a>Explain what the skill should do, step by step.
 </span></code></pre></div> <p>Reference it in your <code>.prs</code> file:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>my-skill</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Short description of what this skill does&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Short description of what this skill does"</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <p>That's it. Run <code>prs compile</code> and the skill is available in all your AI agents.</p> <h2 id=skillmd-frontmatter>SKILL.md Frontmatter<a class=headerlink href=#skillmd-frontmatter title="Permanent link">&para;</a></h2> <p>The YAML frontmatter defines the skill's identity and content:</p> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-2-1><a id=__codelineno-2-1 name=__codelineno-2-1 href=#__codelineno-2-1></a>---
@@ -46,7 +46,7 @@
 </span><span id=__span-3-9><a id=__codelineno-3-9 name=__codelineno-3-9 href=#__codelineno-3-9></a>Review the architecture using the attached context files.
 </span></code></pre></div> <p>Formatters emit referenced files alongside <code>SKILL.md</code> in the output directory. Allowed types: <code>.md</code>, <code>.json</code>, <code>.yaml</code>, <code>.yml</code>, <code>.txt</code>, <code>.csv</code>. Paths are relative to the <code>SKILL.md</code> file.</p> <p>You can also declare references in your <code>.prs</code> file using the <code>references</code> property on a skill definition:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>architecture-review</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review architecture decisions&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Review architecture decisions"</span>
 <span class=w>    </span><span class=nl>references</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>      </span><span class=p>.</span>/references/architecture.md
 <span class=w>      </span><span class=p>.</span>/references/modules.md
@@ -55,11 +55,11 @@
 <span class=p>}</span>
 </code></pre></div> <p>The validator checks that referenced files use allowed extensions (PS025) and don't contain sensitive content (PS026).</p> <h2 id=behavior-properties-in-prs>Behavior Properties (in .prs)<a class=headerlink href=#behavior-properties-in-prs title="Permanent link">&para;</a></h2> <p>Properties like <code>userInvocable</code>, <code>disableModelInvocation</code>, <code>context</code>, and <code>agent</code> control how AI agents handle the skill. These are set in your <code>.prs</code> file. <code>allowedTools</code> can be set in <code>.prs</code>; native <code>SKILL.md</code> files use the Agent Skills <code>allowed-tools</code> frontmatter field:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>code-review</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Security-focused code review&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Security-focused code review"</span>
 <span class=w>    </span><span class=nl>userInvocable</span><span class=p>:</span><span class=w> </span><span class=kc>true</span>
-<span class=w>    </span><span class=nl>context</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;fork&quot;</span>
-<span class=w>    </span><span class=nl>agent</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;general-purpose&quot;</span>
-<span class=w>    </span><span class=nl>allowedTools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Grep&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Bash&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>context</span><span class=p>:</span><span class=w> </span><span class=s2>"fork"</span>
+<span class=w>    </span><span class=nl>agent</span><span class=p>:</span><span class=w> </span><span class=s2>"general-purpose"</span>
+<span class=w>    </span><span class=nl>allowedTools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"Read"</span><span class=p>,</span><span class=w> </span><span class=s2>"Grep"</span><span class=p>,</span><span class=w> </span><span class=s2>"Bash"</span><span class=p>]</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <table> <thead> <tr> <th>Property</th> <th>Type</th> <th>Default</th> <th>Supported by</th> </tr> </thead> <tbody> <tr> <td><code>userInvocable</code></td> <td>boolean</td> <td><code>false</code></td> <td>Claude, Factory</td> </tr> <tr> <td><code>disableModelInvocation</code></td> <td>boolean</td> <td><code>false</code></td> <td>Claude, GitHub, Factory</td> </tr> <tr> <td><code>context</code></td> <td>string</td> <td>-</td> <td>Claude (<code>"fork"</code> or <code>"inherit"</code>)</td> </tr> <tr> <td><code>agent</code></td> <td>string</td> <td>-</td> <td>Claude</td> </tr> <tr> <td><code>allowedTools</code></td> <td>string[]</td> <td>-</td> <td>Claude, Factory</td> </tr> </tbody> </table> <h2 id=writing-good-instructions>Writing Good Instructions<a class=headerlink href=#writing-good-instructions title="Permanent link">&para;</a></h2> <h3 id=be-specific-about-what-and-how>Be specific about what and how<a class=headerlink href=#be-specific-about-what-and-how title="Permanent link">&para;</a></h3> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-4-1><a id=__codelineno-4-1 name=__codelineno-4-1 href=#__codelineno-4-1></a>---
@@ -87,9 +87,9 @@
 </span><span id=__span-4-23><a id=__codelineno-4-23 name=__codelineno-4-23 href=#__codelineno-4-23></a>
 </span><span id=__span-4-24><a id=__codelineno-4-24 name=__codelineno-4-24 href=#__codelineno-4-24></a><span class=gu>## What NOT to Do</span>
 </span><span id=__span-4-25><a id=__codelineno-4-25 name=__codelineno-4-25 href=#__codelineno-4-25></a>
-</span><span id=__span-4-26><a id=__codelineno-4-26 name=__codelineno-4-26 href=#__codelineno-4-26></a><span class=k>-</span><span class=w> </span>Don&#39;t modify code without explicit approval
-</span><span id=__span-4-27><a id=__codelineno-4-27 name=__codelineno-4-27 href=#__codelineno-4-27></a><span class=k>-</span><span class=w> </span>Don&#39;t skip files based on extension
-</span><span id=__span-4-28><a id=__codelineno-4-28 name=__codelineno-4-28 href=#__codelineno-4-28></a><span class=k>-</span><span class=w> </span>Don&#39;t report false positives for framework-handled concerns
+</span><span id=__span-4-26><a id=__codelineno-4-26 name=__codelineno-4-26 href=#__codelineno-4-26></a><span class=k>-</span><span class=w> </span>Don't modify code without explicit approval
+</span><span id=__span-4-27><a id=__codelineno-4-27 name=__codelineno-4-27 href=#__codelineno-4-27></a><span class=k>-</span><span class=w> </span>Don't skip files based on extension
+</span><span id=__span-4-28><a id=__codelineno-4-28 name=__codelineno-4-28 href=#__codelineno-4-28></a><span class=k>-</span><span class=w> </span>Don't report false positives for framework-handled concerns
 </span></code></pre></div> <h3 id=use-structured-sections>Use structured sections<a class=headerlink href=#use-structured-sections title="Permanent link">&para;</a></h3> <p>Skills work best when they have clear sections that tell the AI exactly what to do:</p> <ul> <li><strong>What to check / What to do</strong> - the task itself</li> <li><strong>Output format</strong> - expected structure of the response</li> <li><strong>Constraints</strong> - boundaries and restrictions</li> <li><strong>Examples</strong> - concrete input/output pairs</li> </ul> <h2 id=adding-resource-files>Adding Resource Files<a class=headerlink href=#adding-resource-files title="Permanent link">&para;</a></h2> <p>Place files alongside <code>SKILL.md</code> to include data, scripts, or templates:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a>.promptscript/skills/ui-design/
 </span><span id=__span-5-2><a id=__codelineno-5-2 name=__codelineno-5-2 href=#__codelineno-5-2></a>├── SKILL.md
 </span><span id=__span-5-3><a id=__codelineno-5-3 name=__codelineno-5-3 href=#__codelineno-5-3></a>├── data/
@@ -106,7 +106,7 @@
 </span></code></pre></div> <p>Reference resource files in your instructions using the target path. For example, in your <code>SKILL.md</code>:</p> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-7-1><a id=__codelineno-7-1 name=__codelineno-7-1 href=#__codelineno-7-1></a><span class=c1># SKILL.md frontmatter</span>
 </span><span id=__span-7-2><a id=__codelineno-7-2 name=__codelineno-7-2 href=#__codelineno-7-2></a><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">ui-design</span>
 </span><span id=__span-7-3><a id=__codelineno-7-3 name=__codelineno-7-3 href=#__codelineno-7-3></a><span class=nt>description</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">UI design with searchable databases</span>
-</span></code></pre></div> <p>Then in the body, reference the script with the compilation target path:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-8-1><a id=__codelineno-8-1 name=__codelineno-8-1 href=#__codelineno-8-1></a>python3 .claude/skills/ui-design/scripts/search.py &quot;query&quot;
+</span></code></pre></div> <p>Then in the body, reference the script with the compilation target path:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-8-1><a id=__codelineno-8-1 name=__codelineno-8-1 href=#__codelineno-8-1></a>python3 .claude/skills/ui-design/scripts/search.py "query"
 </span></code></pre></div> <p>And list available data files:</p> <ul> <li><code>data/colors.csv</code> - Color palettes and accessibility info</li> <li><code>data/typography.csv</code> - Font pairings and sizing scales</li> </ul> <h3 id=resource-file-limits>Resource file limits<a class=headerlink href=#resource-file-limits title="Permanent link">&para;</a></h3> <ul> <li>Maximum 1 MB per file</li> <li>Maximum 10 MB total per skill</li> <li>Maximum 100 files per skill</li> <li>Binary files (containing null bytes) and symlinks are excluded</li> <li>Path traversal attempts (<code>../</code>) are rejected</li> <li>Auto-skipped files: <code>.env</code>, lock files (<code>pnpm-lock.yaml</code>, <code>yarn.lock</code>, <code>package-lock.json</code>), config files (<code>package.json</code>, <code>tsconfig.json</code>, <code>Dockerfile</code>), ESLint/Prettier configs, and more (45+ patterns)</li> <li>Auto-skipped directories: <code>node_modules</code>, <code>.git</code>, <code>dist</code>, <code>build</code>, <code>coverage</code>, <code>test</code>, <code>__tests__</code>, and more (16+ patterns)</li> </ul> <h3 id=skillignore>.skillignore<a class=headerlink href=#skillignore title="Permanent link">&para;</a></h3> <p>Add a <code>.skillignore</code> file to any skill directory for custom exclusion rules (gitignore syntax):</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-9-1><a id=__codelineno-9-1 name=__codelineno-9-1 href=#__codelineno-9-1></a># .promptscript/skills/my-skill/.skillignore
 </span><span id=__span-9-2><a id=__codelineno-9-2 name=__codelineno-9-2 href=#__codelineno-9-2></a>*.log
 </span><span id=__span-9-3><a id=__codelineno-9-3 name=__codelineno-9-3 href=#__codelineno-9-3></a>tmp/
@@ -131,8 +131,8 @@
 </span><span id=__span-10-18><a id=__codelineno-10-18 name=__codelineno-10-18 href=#__codelineno-10-18></a>Target {{coverage}}% code coverage.
 </span></code></pre></div> <p>Pass values in the <code>.prs</code> file:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>test-generator</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>language</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;python&quot;</span>
-<span class=w>    </span><span class=nl>framework</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;pytest&quot;</span>
+<span class=w>    </span><span class=nl>language</span><span class=p>:</span><span class=w> </span><span class=s2>"python"</span>
+<span class=w>    </span><span class=nl>framework</span><span class=p>:</span><span class=w> </span><span class=s2>"pytest"</span>
 <span class=w>    </span><span class=nl>coverage</span><span class=p>:</span><span class=w> </span><span class=m>90</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
@@ -161,12 +161,12 @@
 </span><span id=__span-11-23><a id=__codelineno-11-23 name=__codelineno-11-23 href=#__codelineno-11-23></a>Report findings with at least {{severity}} severity.
 </span></code></pre></div> <p>See <a href=../skill-contracts/ >Skill Contracts</a> for the full reference.</p> <h2 id=skill-dependencies>Skill Dependencies<a class=headerlink href=#skill-dependencies title="Permanent link">&para;</a></h2> <p>Declare that one skill requires another:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>lint-check</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Run linting&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Run linting"</span>
 <span class=w>  </span><span class=p>}</span>
 
 <span class=w>  </span><span class=nl>full-review</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Complete code review&quot;</span>
-<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;lint-check&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Complete code review"</span>
+<span class=w>    </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"lint-check"</span><span class=p>]</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <p>PromptScript validates that required skills exist and have no circular dependencies.</p> <h2 id=testing-your-skill>Testing Your Skill<a class=headerlink href=#testing-your-skill title="Permanent link">&para;</a></h2> <h3 id=1-compile-and-inspect-output>1. Compile and inspect output<a class=headerlink href=#1-compile-and-inspect-output title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-12-1><a id=__codelineno-12-1 name=__codelineno-12-1 href=#__codelineno-12-1></a>prs<span class=w> </span>compile
@@ -198,7 +198,7 @@
 </span><span id=__span-20-12><a id=__codelineno-20-12 name=__codelineno-20-12 href=#__codelineno-20-12></a><span class=k>5.</span> Explain why, not what
 </span></code></pre></div> <p>Reference in <code>.prs</code> with behavior properties:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>commit</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Create well-structured git commits&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Create well-structured git commits"</span>
 <span class=w>    </span><span class=nl>userInvocable</span><span class=p>:</span><span class=w> </span><span class=kc>true</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
@@ -221,9 +221,9 @@
 </span><span id=__span-22-14><a id=__codelineno-22-14 name=__codelineno-22-14 href=#__codelineno-22-14></a>Summarize findings at the end.
 </span></code></pre></div> <p>Reference in <code>.prs</code> with behavior properties:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>review</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Code review with checklist&quot;</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>"Code review with checklist"</span>
 <span class=w>    </span><span class=nl>userInvocable</span><span class=p>:</span><span class=w> </span><span class=kc>true</span>
-<span class=w>    </span><span class=nl>allowedTools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Grep&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>allowedTools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>"Read"</span><span class=p>,</span><span class=w> </span><span class=s2>"Grep"</span><span class=p>]</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 </code></pre></div> <h3 id=data-driven-skill-with-scripts>Data-driven skill with scripts<a class=headerlink href=#data-driven-skill-with-scripts title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-23-1><a id=__codelineno-23-1 name=__codelineno-23-1 href=#__codelineno-23-1></a>.promptscript/skills/stack-advisor/
@@ -239,7 +239,7 @@
 </span></code></pre></div> <p>The body references the script and data files:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-25-1><a id=__codelineno-25-1 name=__codelineno-25-1 href=#__codelineno-25-1></a>## Available Tools
 </span><span id=__span-25-2><a id=__codelineno-25-2 name=__codelineno-25-2 href=#__codelineno-25-2></a>
 </span><span id=__span-25-3><a id=__codelineno-25-3 name=__codelineno-25-3 href=#__codelineno-25-3></a>Run comparisons:
-</span><span id=__span-25-4><a id=__codelineno-25-4 name=__codelineno-25-4 href=#__codelineno-25-4></a>python3 .claude/skills/stack-advisor/scripts/compare.py &quot;react&quot; &quot;vue&quot;
+</span><span id=__span-25-4><a id=__codelineno-25-4 name=__codelineno-25-4 href=#__codelineno-25-4></a>python3 .claude/skills/stack-advisor/scripts/compare.py "react" "vue"
 </span><span id=__span-25-5><a id=__codelineno-25-5 name=__codelineno-25-5 href=#__codelineno-25-5></a>
 </span><span id=__span-25-6><a id=__codelineno-25-6 name=__codelineno-25-6 href=#__codelineno-25-6></a>## Data Sources
 </span><span id=__span-25-7><a id=__codelineno-25-7 name=__codelineno-25-7 href=#__codelineno-25-7></a>- data/frameworks.csv - Framework comparison matrix

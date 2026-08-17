@@ -78,13 +78,13 @@
 </span><span id=__span-0-25><a id=__codelineno-0-25 name=__codelineno-0-25 href=#__codelineno-0-25></a>    ├── documentation.prs
 </span><span id=__span-0-26><a id=__codelineno-0-26 name=__codelineno-0-26 href=#__codelineno-0-26></a>    └── ci-cd.prs
 </span></code></pre></div> <h3 id=acmebaseprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/acme/base.prs title="GitHub Repository: acme/base.prs">acme/base.prs</a><a class=headerlink href=#acmebaseprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@acme/base&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
-<span class=w>  </span><span class=nl>org</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;ACME Corporation&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@acme/base"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
+<span class=w>  </span><span class=nl>org</span><span class=p>:</span><span class=w> </span><span class=s2>"ACME Corporation"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are an AI coding assistant at ACME Corporation.</span>
 
 <span class=sd>  ## Core Values</span>
@@ -98,105 +98,105 @@
 
 <span class=sd>  Follow ACME Engineering Standards v3.0</span>
 <span class=sd>  (https://wiki.acme.com/engineering-standards)</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Code review required with minimum 2 approvers&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Document all public APIs&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Add inline comments for complex logic&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Write tests for all code (80% coverage)&quot;</span>
+<span class=w>    </span><span class=s2>"Code review required with minimum 2 approvers"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Document all public APIs"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Add inline comments for complex logic"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Write tests for all code (80% coverage)"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>git</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Use conventional commits format&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Branch naming: type/TICKET-description&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Signed commits required&quot;</span>
+<span class=w>    </span><span class=s2>"Use conventional commits format"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Branch naming: type/TICKET-description"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Signed commits required"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>deployment</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Environments: dev, staging, prod&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Production requires team-lead and security approval&quot;</span>
+<span class=w>    </span><span class=s2>"Environments: dev, staging, prod"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Production requires team-lead and security approval"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never commit secrets, credentials, or API keys&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never bypass code review for production changes&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never deploy without passing CI/CD&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never ignore security scanner findings&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never use deprecated dependencies with known CVEs&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never store PII in logs&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never commit secrets, credentials, or API keys"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never bypass code review for production changes"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never deploy without passing CI/CD"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never ignore security scanner findings"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never use deprecated dependencies with known CVEs"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never store PII in logs"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/standards&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review against ACME standards&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/security&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Security review&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/perf&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Performance review&quot;</span>
+<span class=w>  </span><span class=s2>"/standards"</span><span class=p>:</span><span class=w> </span><span class=s2>"Review against ACME standards"</span>
+<span class=w>  </span><span class=s2>"/security"</span><span class=p>:</span><span class=w> </span><span class=s2>"Security review"</span>
+<span class=w>  </span><span class=s2>"/perf"</span><span class=p>:</span><span class=w> </span><span class=s2>"Performance review"</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0AIwxwY8sRLgBPdhkKz5ARgoAGKzvGDm1AOamQAQQDCAWQCig9w7QHbAg2WwBfMTFuaU4sCCx9YV05EB1UuwBNZgBXQQxqGDzxVwBJQRYpCFZHPLg4CDgBdjysQQ8fPwCguLYKSLsAYgHOgsEANQwobPh+iQBaQQAqRYBFbMn4xIAxCFosZdkAdWp4wppmKWzGHtY5gowpRIrtOwXlgGUYRmyThLaoADuGH0cAOgk+31+iQaglYzFazDQN0myTeiwAqlpqIItsxvqDFrJ-Kx6lIYNjcIVOFJBNksailosACowUiCAAKUGB5LBx1O5QuhXhOHJcHKGHEJAwVQEVVmgiG4KaUnyUjg8txUCgzABbS8vm81SqMHJVRq72VqrFADcAMw2OwAChwWCwaDgiBUKgBEAA1hAKEo+BQWCQVJxHMbTdU5o0JSrqGqAJTJNLhfrcOOsBNqpJ2Z6yZDJCTyfxkwQFa0QGC6goAR2yuxgNJ9uEEJCqEBI2RIggATHk0OdraL5HRiykACJ4nuxPJawRobJqKAQRhtdkldUgcd2EtuKQ0qqr1iFUN8dhisAOAVkWCEQTayOMMcT+R8jiCDiNK83yZQAVy0dAAOSwAFIBRHagMEcGAU3SCQAF15UjLBCzfEBMTPNgR3YEJWEmW8OywX9qClLBXz3FIACFoNYRgcFhUgzVkBI0BgFQmRKdwAGlvCZOYyTgRgTiRfDKIkfd3ggRxTxpc94jFetGwKKRbCQ+UyXIZh9AvNDBCLKj5ENKtqDYPSPUEMlrToQQ40japbPONSdww9kzMua58IrGAGybMUOFIOZYAeIoaS0SFNkHYcUQQwRkNYCJWCiApGhOLy2DFURXhSAA5GAoKI+I7K+AoSNskTm1iCBJjgWyb1cTdBF9GAQXUwQFnkfLCrUfRMDqQDCkratdWvbFnKuG5yhwCVYO3BkuoK8krJgbTElbHAclafr6mqPwShUdxJ3azqQG65aZLhUYIp+KLhIlU9sUgbMzXmnLFsKulCi0gpGGwZsVvY7NOEYasxQ25q4QBcR3DGbw3vmPKluxRoHEKTcyiqR9mEcN6kqiOBNuoLBvhIvN9xULMc23FwACUCpGvJHGlElWnaXwqatdr5Epr5boSeQXAhfnEmGmtuZAFR2OoMBBZSdlyTGqV6KGhnxfSMIQDCRCGFiah9HwIhSHIGAqFoHcQCg+o2HwMwtaAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=acmesecurityprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/acme/security.prs title="GitHub Repository: acme/security.prs">acme/security.prs</a><a class=headerlink href=#acmesecurityprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@acme/security&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@acme/security"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.0.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  Apply ACME security standards to all code.</span>
-<span class=sd>  Security is everyone&#39;s responsibility.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  Security is everyone's responsibility.</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>authentication</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Use OAuth 2.0 / OIDC&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;MFA required (TOTP or WebAuthn)&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Session timeout: 3600 seconds&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Enable refresh token rotation&quot;</span>
+<span class=w>    </span><span class=s2>"Use OAuth 2.0 / OIDC"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"MFA required (TOTP or WebAuthn)"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Session timeout: 3600 seconds"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Enable refresh token rotation"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>authorization</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;RBAC with ABAC extensions&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Apply least privilege principle&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Audit logging required&quot;</span>
+<span class=w>    </span><span class=s2>"RBAC with ABAC extensions"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Apply least privilege principle"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Audit logging required"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>dataProtection</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Encrypt at rest with AES-256&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Encrypt in transit with TLS 1.3&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Mask PII in all outputs&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Follow data classification for retention&quot;</span>
+<span class=w>    </span><span class=s2>"Encrypt at rest with AES-256"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Encrypt in transit with TLS 1.3"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Mask PII in all outputs"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Follow data classification for retention"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>dependencies</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Daily vulnerability scanning&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Critical vulnerabilities block deployment&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;High vulnerabilities: fix within 7 days&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Medium vulnerabilities: fix within 30 days&quot;</span>
+<span class=w>    </span><span class=s2>"Daily vulnerability scanning"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Critical vulnerabilities block deployment"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"High vulnerabilities: fix within 7 days"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Medium vulnerabilities: fix within 30 days"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>secrets</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Store in HashiCorp Vault&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Rotate every 90 days&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Never store secrets in code&quot;</span>
+<span class=w>    </span><span class=s2>"Store in HashiCorp Vault"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Rotate every 90 days"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Never store secrets in code"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never store passwords in plain text&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never log sensitive data (passwords, tokens, PII)&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never use MD5 or SHA1 for security purposes&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never disable TLS certificate verification&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never use eval() or similar unsafe functions&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never trust user input without validation&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never expose stack traces in production&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Always use parameterized queries (no SQL concatenation)&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Always validate and sanitize file uploads&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Always implement rate limiting for APIs&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never store passwords in plain text"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never log sensitive data (passwords, tokens, PII)"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never use MD5 or SHA1 for security purposes"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never disable TLS certificate verification"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never use eval() or similar unsafe functions"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never trust user input without validation"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never expose stack traces in production"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Always use parameterized queries (no SQL concatenation)"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Always validate and sanitize file uploads"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Always implement rate limiting for APIs"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>knowledge</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  ## Security Resources</span>
 
 <span class=sd>  - Security Guidelines: https://wiki.acme.com/security</span>
@@ -209,60 +209,60 @@
 <span class=sd>  - Security Team: security@acme.com</span>
 <span class=sd>  - Incident Hotline: +1-800-SEC-ACME</span>
 <span class=sd>  - Slack: #security-help</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/threat-model&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Help create a threat model&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/vuln-check&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Check for common vulnerabilities&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/secure-code&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review code for security issues&quot;</span>
+<span class=w>  </span><span class=s2>"/threat-model"</span><span class=p>:</span><span class=w> </span><span class=s2>"Help create a threat model"</span>
+<span class=w>  </span><span class=s2>"/vuln-check"</span><span class=p>:</span><span class=w> </span><span class=s2>"Check for common vulnerabilities"</span>
+<span class=w>  </span><span class=s2>"/secure-code"</span><span class=p>:</span><span class=w> </span><span class=s2>"Review code for security issues"</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0cGIwCu1CFgCe8sRLh72GQrPkBGCgAY7h1gF8xY7tM5Zde4UbkhDAPFBAEE0ch8QgGEAWQBRQXUtHX1EgVYpDGopOEEsZkEMKChBFikYCj8AZQ1tb0lcmAA3GGo9NhgAclzqeDQ2OAgAI2hvSuDAxxdWNzh0zOzc0WCMTVxPCEZsCDZZZD8JeQBVdUEAeRC1nEEAJjtBFXOASQARKPk6A-8YgDEQwV6AEdNBBelJBAAKAAqZyhAAVBMxqIIAOowIaXXCsACUHy+8hqcEGbDyED4zDWsgAzAA2Wy2RIaNg5PHBQ4gOKsDBDWAAmBgXpwa75ADWnABzAEXjYjgkAF1XCsrkiIAAvba7QT7Nn+ABKACFooIAO66a4hQ1RQREDisYl21kSdlhCKCWAYOaCGgQJrQGAAcxgXp0rEYEHIMEdTvklykujdzH9-ogrH9fOBoJgUllggVM2CmQEcOoko00tYe3xHNDbTQWEK9cF9dNuFCcSqAFobgBWGlR9mcxi1+spvLUDB2+Mt65QgAyVUENip-e+HpFgjhTyeknERRKFKwaDWcBX8h+zGKzGNgkLQkYUA9g0gW3LgjASL5tvLObzfnKaE4cpQwgeBKx1eQXgwaAfCaTQoFYVpuVGVI4C2VhWBTf1TxAKIUk2IpBFg+DEJGKBdBA3IeWYRh13-KBmD0Ph2GwgAJCB-WuIiEPHUjyNAt8IEIE0zVHAB2G8MD0E8QE+cCQBiLMIE0EhCLg7ikLIrx+MgITp1HKkGUyKSf0VYwNF6LA4DAp1-CqfJeh3QQWI9HAICiJE0EEAA1VYoCwbDdUlbAg2aVofAATkMyTpNkmz5AAOVC5E5iRIMkgs3JRzKSMgnlMRpjcJsdEYcslj8Dt-ESlpkvsoNMCJY0kRyRzyCg8QOEIfzcsECqEqShM03UScvBaCSBEheq4EaxY6DyZgxTtWbNyeXFut6kAqtaQRNFOGIXm7RFkSqFiQisN8PySOpUiPah+nUaTysq-q4zgbleTnBdGFaLxn2CwjWggX7vzWp7qu205miKCFsUOxIyWgLJtrtDAwCDMBNFDUqc3WzbkSwagdvrHatpTI9mzNA9CKKaQNRmEG+rBog7rSgQaLHJR4BakspE0Eqdjpx6YygY1ovBuqslIfgAdVLNBGBAHOYhVgCiqABFWdSjYF9OFp1bBZAEJhdFppqcLIMJ3BV6MK8GWBN5TRyGYDAWXpg2jakyQyFgJjGz+siSHI1NzuREJNwe5xFW4EVleNWApEDXwJgCZO-AAYlTwQamSepdXgClqC+k98wkCqs6unwAHEQXKMiEKswQcCwQ8rJUFRTRFCAKCUPgKBYEg1FqFIDGCCqnmAoD61zuB+jtGBZEb5vEFb9vO+7io+5UFMwwnjtBRn9RHrLofBChccU0w+em7QFuVHdahWC75R1+YfvLqHx79U0NN9Qpdg9EvxerccBKDFCWBCvcX4qDXqZQQ6dBDuTMCVIuh9B71ChDAUgsg37eEUE-CBJBHpj23p4Jykpa5z0EAAaisB2AAHPSDsVQ4hRA7NEeIh8Hw0VkKnbB+gOw4BgFANAfhJhBAKqwbgQokRYC0JZRO7IVC4F6NgDsJBmA13kJYEALFBGeSHBgjghQ8g4GUfWNRGjuryBUFxDsjABE0U0f4KI9j1zvmRH3NR4guIkWQhRHMVi34wFseonKWjc6+hgNebKwdGTZ1SBAIkmh4BTBAE4OUDBPBtHwEQUgEYqC0BkiAaq9p8BWFSUAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=acmecomplianceprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/acme/compliance.prs title="GitHub Repository: acme/compliance.prs">acme/compliance.prs</a><a class=headerlink href=#acmecomplianceprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@acme/compliance&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.2.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@acme/compliance"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.2.0"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  Ensure code meets ACME compliance requirements.</span>
 <span class=sd>  We are SOC 2 Type II and GDPR compliant.</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>soc2</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Logging required with 1 year retention&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Tamper-proof audit logs&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Access control documented and reviewed quarterly&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Change management: documented, approved, tested&quot;</span>
+<span class=w>    </span><span class=s2>"Logging required with 1 year retention"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Tamper-proof audit logs"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Access control documented and reviewed quarterly"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Change management: documented, approved, tested"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>gdpr</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Apply data minimization&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Enforce purpose limitation&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Consent management required&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Support right to erasure&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Enable data portability&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Breach notification within 72 hours&quot;</span>
+<span class=w>    </span><span class=s2>"Apply data minimization"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Enforce purpose limitation"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Consent management required"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Support right to erasure"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Enable data portability"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Breach notification within 72 hours"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>pci</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Applies to payment services only&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Never store full PAN&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Encryption required&quot;</span>
+<span class=w>    </span><span class=s2>"Applies to payment services only"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Never store full PAN"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Encryption required"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never process data beyond stated purpose&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never retain data longer than necessary&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Always document data processing activities&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Always provide data subject rights mechanisms&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never transfer data to non-approved regions&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never process data beyond stated purpose"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never retain data longer than necessary"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Always document data processing activities"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Always provide data subject rights mechanisms"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never transfer data to non-approved regions"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>knowledge</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  ## Compliance Resources</span>
 
 <span class=sd>  - Compliance Portal: https://compliance.acme.com</span>
@@ -281,12 +281,12 @@
 <span class=sd>  - EU: GDPR compliance required</span>
 <span class=sd>  - California: CCPA compliance required</span>
 <span class=sd>  - Healthcare: HIPAA where applicable</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0LMlAgZWjGPLES4AT3YZCs+QEYKAJgoAGfawC+Ysd2mcsELEeEG5EH0g8UEAUVY4AFdqGEEWKTi+fjhBAEEAYQBZMPjmDS0dONiARyiIWL52OAoAgHU4jFjBAGUAeQzBG0EAFSM0OIBJQcFtKUEAcQARAAUAJTyC7Sxa0OCnV1Z3OAFWKSapVNFQuGZGG1lkAIl5ABlmAHMHiFYHwVLy2PGAdx8cQUsgiMMCa734XggbHkdGugR6pAG1AAtDRmMwwKMolIfIIoI84NDYfI0oxdHBUix2NRmFBBFIzlEqhxxmMwQA3CAwb4wcZlJocahQIyE0I3EAZHDaB5JbQYaVM2T0xiMrw8uijNCotlqwQcHY8pwSAC6blCDykNEuRJAaU1Qrp2CEJBeEGdAC9sJCtiAYaLAhEwMxqLpBGgYmhmHA4ppnQJvFCfdaMmwo+xBCRZfKvGCyhUDYm-fIWlFNUGsO8IA8cOWsMxBDBqBhorERRIxREMAAjWAOgShstd6A+YUFtuBABCsSU-1YzG8kEYnrYgl+uBeggA7N0cMwYgSQsbTRI0IwIFbCza7ZzUrXQxgjEzBFHqByyYI2ELW235AA5GDa6gn1rZowCiKBaRmNIfy-dsdGofp43ED48ykQ1BBNFxTW4WIdmoCBGEQo4AiRQI-wA0NqTJVJ9j7TsYCMNhxh2bAeVDcNIz0A9BBI39-wbMEBHXGihDxV5+NwbRBFYGAqKaEdiMCNIoG+e9qIZR9hIos54DgF43iUbwOW8eA0J4m1lNUrSOUSXshGiTsACsZPLPCqywVI+EYSVWAgOASH3BTePIrBG0iMB+M029Z1YJEME1altXGWJnhTDYsIAa1nb5YCkaV-DWIJCoCABiYrBGTJYikEOZ4F3YMTK2UISIq8hChDGYBygWRqywNA4EQFQ1HyVrtF0CglD4Ch1AUqZHXKqAm10hcl1YbqsF6-rBt+dKIHG5QYCm-IVGEpFGAW8kIGWxCFJmPC2SUPwOs0RgjDWjaBpUCaDvUFQaAge6XqPQRSsEWa+wyc6lvwlagZIgAqOGZiibt8IR2QsiadL+D09MWLwjAoDgdUwxRxg6TOAkmsEBHBnYBtWAJtHBFpgUGdpdQSCiHzF0I9VoqRVNdMMvQqYR5NWEgRJ2C0KAmfHKJdOk8lbPVZUdnyfiXkDBSEZq3D8OZJmZmGdVIAZnQZZV+IvghAnKZKsqapStnqpgXNKi8e2qbCABVWRpnmRYRqq5CvgUjICcuoMfIwWQMgySCg80Ubijdz4DSpgAJEEoFwRdYlkTPBkgtIVxwBtGivRduxFsV1hcEBnCNBgvHg-AiARSgaHoEAAN0th8EsRugA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=frontendbaseprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/frontend/base.prs title="GitHub Repository: frontend/base.prs">frontend/base.prs</a><a class=headerlink href=#frontendbaseprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@frontend/base&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.5.0&quot;</span>
-<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Frontend Platform&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"@frontend/base"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.5.0"</span>
+<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>"Frontend Platform"</span>
 <span class=p>}</span>
 
 <span class=c1># In a multi-file setup, you would inherit and use:</span>
@@ -295,7 +295,7 @@
 <span class=kn>@use</span><span class=w> </span><span class=s>@acme/compliance</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  You are a frontend developer at ACME.</span>
 
 <span class=sd>  ## Expertise</span>
@@ -305,11 +305,11 @@
 <span class=sd>  - Web performance optimization</span>
 <span class=sd>  - Accessibility (WCAG 2.1 AA)</span>
 <span class=sd>  - Design systems</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  ## Frontend Platform Stack</span>
 
 <span class=sd>  - **Framework**: React 18</span>
@@ -332,87 +332,87 @@
 <span class=sd>  - Design System: https://design.acme.com</span>
 <span class=sd>  - Component Library: https://ui.acme.com</span>
 <span class=sd>  - Frontend Wiki: https://wiki.acme.com/frontend</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Use React 18+ framework&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;TypeScript in strict mode&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Functional components with hooks and composition&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;React Query for server state, Zustand for client&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;TailwindCSS with @acme/design-tokens&quot;</span>
+<span class=w>    </span><span class=s2>"Use React 18+ framework"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"TypeScript in strict mode"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Functional components with hooks and composition"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"React Query for server state, Zustand for client"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"TailwindCSS with @acme/design-tokens"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>performance</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Initial bundle &lt; 200KB gzipped&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Per-route code splitting&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;LCP &lt; 2.5s, FID &lt; 100ms, CLS &lt; 0.1&quot;</span>
+<span class=w>    </span><span class=s2>"Initial bundle &lt; 200KB gzipped"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Per-route code splitting"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"LCP &lt; 2.5s, FID &lt; 100ms, CLS &lt; 0.1"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>accessibility</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;WCAG 2.1 AA compliance&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Automated testing with axe-core&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Manual testing required for new features&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Support keyboard navigation and screen readers&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Ensure color contrast and focus management&quot;</span>
+<span class=w>    </span><span class=s2>"WCAG 2.1 AA compliance"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Automated testing with axe-core"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Manual testing required for new features"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Support keyboard navigation and screen readers"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Ensure color contrast and focus management"</span>
 <span class=w>  </span><span class=p>]</span>
 
 <span class=w>  </span><span class=nl>testing</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Unit tests with Vitest (80% coverage)&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;Integration tests with Testing Library&quot;</span><span class=p>,</span>
-<span class=w>    </span><span class=s2>&quot;E2E tests with Playwright for happy paths&quot;</span>
+<span class=w>    </span><span class=s2>"Unit tests with Vitest (80% coverage)"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"Integration tests with Testing Library"</span><span class=p>,</span>
+<span class=w>    </span><span class=s2>"E2E tests with Playwright for happy paths"</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never use class components&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never use any type without documentation&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never ignore accessibility requirements&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never skip loading/error states&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never hardcode URLs or config values&quot;</span>
-<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>&quot;Never use inline styles (use Tailwind)&quot;</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never use class components"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never use any type without documentation"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never ignore accessibility requirements"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never skip loading/error states"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never hardcode URLs or config values"</span>
+<span class=w>  </span><span class=p>-</span><span class=w> </span><span class=s2>"Never use inline styles (use Tailwind)"</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/component&quot;</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=s2>"/component"</span><span class=p>:</span><span class=w> </span><span class=sd>"""</span>
 <span class=sd>    Create a new React component with:</span>
 <span class=sd>    - TypeScript interface for props</span>
 <span class=sd>    - Unit tests</span>
 <span class=sd>    - Storybook story</span>
 <span class=sd>    - Accessibility considerations</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 
-<span class=w>  </span><span class=s2>&quot;/hook&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Create a custom React hook with tests&quot;</span>
+<span class=w>  </span><span class=s2>"/hook"</span><span class=p>:</span><span class=w> </span><span class=s2>"Create a custom React hook with tests"</span>
 
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=s2>"/test"</span><span class=p>:</span><span class=w> </span><span class=sd>"""</span>
 <span class=sd>    Write tests using:</span>
 <span class=sd>    - Vitest for unit tests</span>
 <span class=sd>    - Testing Library for integration</span>
 <span class=sd>    - Proper mocking patterns</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 
-<span class=w>  </span><span class=s2>&quot;/a11y&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review for accessibility issues&quot;</span>
+<span class=w>  </span><span class=s2>"/a11y"</span><span class=p>:</span><span class=w> </span><span class=s2>"Review for accessibility issues"</span>
 
-<span class=w>  </span><span class=s2>&quot;/perf&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review for performance issues&quot;</span>
+<span class=w>  </span><span class=s2>"/perf"</span><span class=p>:</span><span class=w> </span><span class=s2>"Review for performance issues"</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuYamw6spAegBGGODHliJcAJ7sMhWfICMFAGwUADPvGCOpCyABiy9pymCAClDYYMzUJE4AvmJiAMSCAJLiQiQArlBYEAC0kLCCulgpaHSCRswpggDuZVB+EKw4MNQQWIIYaoIpuoixgtx1DU0t3BiMfFo6MBJxABTUMADmEHBY1EaCmYJSSxiasH4h1ILkGEbzyilqAJQ93J2Tw6Mw6rqMKYNrgjNzi8ur65vbXYwfahI5BU7nK43O69EZjFhkKAQNqMSafQSzBZLFZrDZbOA7PaCA5gk5nMpQ1h9KScDJYNaiZz6EBOCQATTKrTmrWJ3lUfhpADcYFBmGhGq0WgBBADCAFkAKIUaLOGJxBWEcXUDK6FUSDZy5g06jiABSGEFGAAyowmmgsOoACpGcU2u1YAz-ABKMBGLRgLGMyxg4WcGwA6jBNEdGgcSCjJmKMiQIAAvbAQNiejZSxiouBwCCaaDNNbTcMyqUAcUEACYKJZBFKpdcw4IACLwCDzcRBjgkOCe5mRFXcFg+QgtRkSYcs1VxLwqXwBIJYOOCK0CRgAaz1-wAVPuvKQYFVqNvD7IfX7BJYABzZwSHgAybXmKQw8xgl8Eztdtoge1BAAVkfQ8ACEUmgKQfwANWaSZQLbQ9NyMJFWHmH9HQwaAKjqKQZStK1BAAalhR51BpQse0yLBmG3ThB2Q-dN2wb99yvX1GBaABFFJGjWMiAC1OgENQwP3R14AyDC4IQ5ZSN-aS6nmQRnyLagMD+MjAhOComnmHAPWYmVmDINhaTgH8HjGKCMTgHAtOBTYux7PIjGDEhW09NUm2oRgcAQ7i3j0VhHw8X0CjmTJtF0EEaglX4UmCuZHzlCBbWYbI+V8OBiVBIJqC-Vo0DQJj9UEQ0pDSSYwGBRoMzYfLDgcrSVMfKV-HiQRGCRWlBC-VgGoyJqlDMwQAHlxVYTr4j3XyAGkYDWH04DKfz4D3DZO2o8QrQ8-tZCMrAysQdRKNc1gKDhGAKARR9TPMob2DUjStKMI6sBOuAzvUKDrseO6zPCnL2nDCBtwgT7vt+vDIYBvggZIdQxp8cSmRZTGxCiMKqWWNopC0qQ8unHqjRgWRkE9GcQAAVV0QRr24287zIpQTzPXcQDoam5BAP8YDdQCWjqPIVgyloSHJ+QeecGmPAubjM1YDAoDJp7LMqZocEEHBmHovKCfVtBmELEawu53n5CZ3j+L+EldGoYUWoEDhihE-H2hJXqIFpGWrf5nCoDwtRCOIvDcHIsYqO7VhaPoxjWUEABdPctTjBNKYDxJmmRNXNAuKRcgAHjrex7AW8CBtTQDxSkf25b5-xGkyc4ODJmk8nIZoZPmBuJBp58ZX8QRS-rYC4GKDx4nbUfb3LgdihlZ9iNL+wGyT1PcYkEZ80LYskXpLPG-kCtqzrBsmylY2kQTfuB-kKUUjo+MOD8DhlhUrXI7MGBMhYVKlsT4gDlG0D8asP690EHMAAjlBOYIJDhDQqMSSKIVBxAIHnzK0hQTbakEAxIwmhmBE0ECrQU3ZGpJHaHAW0MBODQN9MaDBsssHyAVKwOAIUyaikOOOFYOgWhGxCK8PK8YVZfj4OwTee5IEqWPmwumrBmguGknlCOOt4KQIxHeewABSMmztPwwGuJgh+IBEgcDOFQ1Ryx1HayUp-DCr1NCaVWPfGmCpawKlsVgexkddJGH0t2IyzVdYYFKmsTAuAMGei3jjMQ3A5i-AlsrEmj55AADkYDOw6AzXqOg8oIhNs9PxScNhZJyRKGEbQ1j0nFN-PWz9NjMFeFI12ytyl82ybk2OoRJi73gPvEs9JGFwIgHMdpsS2yVNyXASGaBBCigwFsDC6hGjKBdmxaZFVZkSkctQKQLBO60y9M+PKoJxyQFUpaKA-Edn-D2YcGEdR0KTGWGheAGIYTYVwvhUx2NRwOVCFgV4fjhBDhAOoYpFlpFID5sORuMo5hsR5MgxmXEWgwtKY07ojcNgCyFkBOoHBqBgBGLVUENAxTlQHhsWmyiWiQNpRVTcoQiH623GLdlvMcx5iGUWEZaxxyFmNFQ2ls49zyHUHrei8h3DIsigMnqolxo211pyxpvjpmQvUJA+VCKsaN3DIMSYzK8nyN5YILR0kwkXBUcyq1UknGqXUq496YSSULE0ubK1-hlBakEFLHcX9omks4ZCxFuqMCWEsEYA11scm+xQSSQZBZBWHzWEsLhm05y6vTgmkAPoKGnjCenUI4jUSSALPcyIIAIjJwYLSVY+AiCkHILdGg9AQDO0LGwfAlh61AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=project-configuration>Project Configuration<a class=headerlink href=#project-configuration title="Permanent link">&para;</a></h2> <h3 id=example-project>Example Project<a class=headerlink href=#example-project title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># checkout-app/promptscript/project.prs</span>
 <span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;checkout-app&quot;</span>
-<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.5.0&quot;</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>"checkout-app"</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>"1.5.0"</span>
 <span class=p>}</span>
 
 <span class=c1># In a multi-file setup, you would inherit from frontend base:</span>
 <span class=kn>@inherit</span><span class=w> </span><span class=s>@frontend/base</span>
 
 <span class=p>@</span><span class=kd>context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Checkout Application&quot;</span>
-<span class=w>  </span><span class=na>repository</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;github.com/acme/checkout-app&quot;</span>
-<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Commerce&quot;</span>
-<span class=w>  </span><span class=nl>productOwner</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Jane Smith&quot;</span>
-<span class=w>  </span><span class=nl>techLead</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;John Doe&quot;</span>
+<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>"Checkout Application"</span>
+<span class=w>  </span><span class=na>repository</span><span class=p>:</span><span class=w> </span><span class=s2>"github.com/acme/checkout-app"</span>
+<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>"Commerce"</span>
+<span class=w>  </span><span class=nl>productOwner</span><span class=p>:</span><span class=w> </span><span class=s2>"Jane Smith"</span>
+<span class=w>  </span><span class=nl>techLead</span><span class=p>:</span><span class=w> </span><span class=s2>"John Doe"</span>
 
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  ## Overview</span>
 
 <span class=sd>  Multi-step checkout flow for ACME e-commerce platform.</span>
@@ -430,19 +430,19 @@
 <span class=sd>  - Micro-frontend (Module Federation)</span>
 <span class=sd>  - Shared shell: @acme/commerce-shell</span>
 <span class=sd>  - Feature flags: LaunchDarkly</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=kn>@extend</span><span class=w> </span><span class=s>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>payment</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nl>provider</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Stripe&quot;</span>
+<span class=w>    </span><span class=nl>provider</span><span class=p>:</span><span class=w> </span><span class=s2>"Stripe"</span>
 <span class=w>    </span><span class=nl>pciCompliance</span><span class=p>:</span><span class=w> </span><span class=kc>true</span>
 <span class=w>    </span><span class=nl>neverStoreCardData</span><span class=p>:</span><span class=w> </span><span class=kc>true</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>knowledge</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=sd>"""</span>
 <span class=sd>  ## API Endpoints</span>
 
 <span class=sd>  ### Cart Service (cart.acme.com)</span>
@@ -468,18 +468,18 @@
 <span class=sd>  - SHIPPING_UNAVAILABLE: Cannot ship to address</span>
 <span class=sd>  - PAYMENT_DECLINED: Payment failed</span>
 <span class=sd>  - INVENTORY_ERROR: Item out of stock</span>
-<span class=sd>  &quot;&quot;&quot;</span>
+<span class=sd>  """</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/checkout-flow&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Help with checkout flow implementation&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/payment&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Help with Stripe payment integration&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/shipping&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Help with shipping calculation&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/cart&quot;</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Help with cart management&quot;</span>
+<span class=w>  </span><span class=s2>"/checkout-flow"</span><span class=p>:</span><span class=w> </span><span class=s2>"Help with checkout flow implementation"</span>
+<span class=w>  </span><span class=s2>"/payment"</span><span class=p>:</span><span class=w> </span><span class=s2>"Help with Stripe payment integration"</span>
+<span class=w>  </span><span class=s2>"/shipping"</span><span class=p>:</span><span class=w> </span><span class=s2>"Help with shipping calculation"</span>
+<span class=w>  </span><span class=s2>"/cart"</span><span class=p>:</span><span class=w> </span><span class=s2>"Help with cart management"</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOGIwDWzAK5YAtBjRoA9DWZkscRtQhosC6swBWQrFVoAdVgAESMLBl7BTvXhAAmiXsaaCR4qTLTv7vHAAnuwYhK7uAIwUAGwUAAz+rAC+pqZ8AJKsvDYkYlBYEJKQsIFWYmh0vEHivADu4lBOjqyC6li8YDoknTrsnM0ARhhwMIjpvGYQrTDtk11sHKxOcsOjDnwAFNQwAOYQcFjUQbySvE4HGIOwzWDM1LzkGEG7OmLLAJSmZiz9hB12bKPHT6RhYCIgADCnlEEl4AEFZFAIIxsBA2EkHDs0Mw4BAsPcghD9rgxIMKCwSHIMIxLHIBEJYT5ZJjeBxSBDIUpLNRGDBWYonGIwQB5OqsWYQgBSGAlvAAyiR8ThWRwBAAZGAYFxuEBS5g4bIAEWY-JAaSB-nN5qB3D4IoAbrMHRAYHULQ4ALL5QqSQ4wND8GHeTpQZh1Tr3BGQz0AUV4MEklJ5fMeUGwd2oJAoAQAErKnLA4PwMNQOjsXW6qnAcBo0NNdlVMEFLOwqgX+GxIFm0Wwc6wAnbeABpGAnLIcV691hwD2nXgABWerfBCqOGhgvFjsBXs6BZ3ltdkDdch40sdY+zl8IXGQCZwAKmFXPCHRh09QMPeEax30FCowcCnnsK68AA1LwnoQIQmASlAc5DvCvK1mqWBiDsc5nFBajMMUfRLM0myeswQqlAAYjATizNOXz7gqOClpRgSCFAUCuGYNJ0smsx8n6LHwXRFHYOhm5gOmuxAbw6oYO8AhGqWwhQEEARWkkqQDuYRAEYE1jLKWTjFoCDjNiurhGQ4wLMC6VHUBC8rrmgZoBMZjAQFyZDIrKfKuEcYj8kCDgSk61D2fcMCQvp8nWD51B+QE6nqd8wisOGNy7Ju5mqTaGx8DeGRbssOLTCoCFDhFZYKs6KKbpsqJlhQnEwBSSi0Q4ZwAOKxg+vD0qWHQdVY-DoTs7AlmW34LgAqt1vVlnI+IwCQcByIgzjzpNaBONgm4LSQ35GrG6pdfGs1aLty2rc0ZwAEqLVZO0cHtGk5Xw0KMiG8pVamtXBhIDW0k1lKtfOC4ivKM0Ml4EhyIcfXzlk+IQO+EAAF6bpDTITdNPUY94K3ODDR71pe86fR0NZ1g2WMQ79WiXQoy6cP1i46HycDFiZTMTWDNPvdD9OUuQVibmc7lCxwvD3DZpW8EJaE7LL4l7t+uMSNISKJs2L4a4uzwtJOn6FBidGq1IRA0PAkkihKSbIiIQZ81gKu09IYDdiQL5uxAWadNMXlU89vBDrG1A6A8XJUcrdGQvC10PgA+rGnoLg+ACarjlR0DHFiljiPXubUKrmGQLreABy7Xx5NZfwgAavCGTqvCABCR0Z7KKXk0ebLMDkThODs7MTfCqdxmXCcHZC6oZGXsZGq4S4tkznQYNAlHfjPtexuPIrXanifXddu+uBkj2S3CzBgDpzAiCp1pqRaZg1vcWCMBIhl3-SLtieG7gQrmMAoCBjqMqB2UMOg-wjBADyi0mbTlZO4BmS92B-11AAoB9RQH2XUI5R4jNRrFT2IbdEA5sq6kJpTS8qD3DoOAaAimx4SaoigG-dMRtSGfzqk7JAaDAF0NwGNDoJBZQYHSiuNSIBkgAF0GBM2OPgIgpAhZGHoCAYKeI2D4EiJIoAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-config>Project Config<a class=headerlink href=#project-config title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a><span class=c1># checkout-app/promptscript.yaml</span>
 </span><span id=__span-1-2><a id=__codelineno-1-2 name=__codelineno-1-2 href=#__codelineno-1-2></a><span class=nt>id</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">checkout-app</span>
-</span><span id=__span-1-3><a id=__codelineno-1-3 name=__codelineno-1-3 href=#__codelineno-1-3></a><span class=nt>syntax</span><span class=p>:</span><span class=w> </span><span class=s>&#39;1.4.0&#39;</span>
+</span><span id=__span-1-3><a id=__codelineno-1-3 name=__codelineno-1-3 href=#__codelineno-1-3></a><span class=nt>syntax</span><span class=p>:</span><span class=w> </span><span class=s>'1.4.0'</span>
 </span><span id=__span-1-4><a id=__codelineno-1-4 name=__codelineno-1-4 href=#__codelineno-1-4></a>
 </span><span id=__span-1-5><a id=__codelineno-1-5 name=__codelineno-1-5 href=#__codelineno-1-5></a><span class=nt>input</span><span class=p>:</span>
 </span><span id=__span-1-6><a id=__codelineno-1-6 name=__codelineno-1-6 href=#__codelineno-1-6></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.promptscript/project.prs</span>
@@ -553,16 +553,16 @@
 </span><span id=__span-4-14><a id=__codelineno-4-14 name=__codelineno-4-14 href=#__codelineno-4-14></a>
 </span><span id=__span-4-15><a id=__codelineno-4-15 name=__codelineno-4-15 href=#__codelineno-4-15></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-node@v4</span>
 </span><span id=__span-4-16><a id=__codelineno-4-16 name=__codelineno-4-16 href=#__codelineno-4-16></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
-</span><span id=__span-4-17><a id=__codelineno-4-17 name=__codelineno-4-17 href=#__codelineno-4-17></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>&#39;20&#39;</span>
+</span><span id=__span-4-17><a id=__codelineno-4-17 name=__codelineno-4-17 href=#__codelineno-4-17></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>'20'</span>
 </span><span id=__span-4-18><a id=__codelineno-4-18 name=__codelineno-4-18 href=#__codelineno-4-18></a>
 </span><span id=__span-4-19><a id=__codelineno-4-19 name=__codelineno-4-19 href=#__codelineno-4-19></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Install PromptScript</span>
 </span><span id=__span-4-20><a id=__codelineno-4-20 name=__codelineno-4-20 href=#__codelineno-4-20></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g @promptscript/cli</span>
 </span><span id=__span-4-21><a id=__codelineno-4-21 name=__codelineno-4-21 href=#__codelineno-4-21></a>
 </span><span id=__span-4-22><a id=__codelineno-4-22 name=__codelineno-4-22 href=#__codelineno-4-22></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Validate all files</span>
 </span><span id=__span-4-23><a id=__codelineno-4-23 name=__codelineno-4-23 href=#__codelineno-4-23></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="p p-Indicator">|</span>
-</span><span id=__span-4-24><a id=__codelineno-4-24 name=__codelineno-4-24 href=#__codelineno-4-24></a><span class=w>          </span><span class=no>for file in $(find . -name &quot;*.prs&quot;); do</span>
-</span><span id=__span-4-25><a id=__codelineno-4-25 name=__codelineno-4-25 href=#__codelineno-4-25></a><span class=w>            </span><span class=no>echo &quot;Validating $file...&quot;</span>
-</span><span id=__span-4-26><a id=__codelineno-4-26 name=__codelineno-4-26 href=#__codelineno-4-26></a><span class=w>            </span><span class=no>prs validate &quot;$file&quot; --strict</span>
+</span><span id=__span-4-24><a id=__codelineno-4-24 name=__codelineno-4-24 href=#__codelineno-4-24></a><span class=w>          </span><span class=no>for file in $(find . -name "*.prs"); do</span>
+</span><span id=__span-4-25><a id=__codelineno-4-25 name=__codelineno-4-25 href=#__codelineno-4-25></a><span class=w>            </span><span class=no>echo "Validating $file..."</span>
+</span><span id=__span-4-26><a id=__codelineno-4-26 name=__codelineno-4-26 href=#__codelineno-4-26></a><span class=w>            </span><span class=no>prs validate "$file" --strict</span>
 </span><span id=__span-4-27><a id=__codelineno-4-27 name=__codelineno-4-27 href=#__codelineno-4-27></a><span class=w>          </span><span class=no>done</span>
 </span><span id=__span-4-28><a id=__codelineno-4-28 name=__codelineno-4-28 href=#__codelineno-4-28></a>
 </span><span id=__span-4-29><a id=__codelineno-4-29 name=__codelineno-4-29 href=#__codelineno-4-29></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Check for circular dependencies</span>
@@ -596,12 +596,12 @@
 </span><span id=__span-5-4><a id=__codelineno-5-4 name=__codelineno-5-4 href=#__codelineno-5-4></a><span class=nt>on</span><span class=p>:</span>
 </span><span id=__span-5-5><a id=__codelineno-5-5 name=__codelineno-5-5 href=#__codelineno-5-5></a><span class=w>  </span><span class=nt>push</span><span class=p>:</span>
 </span><span id=__span-5-6><a id=__codelineno-5-6 name=__codelineno-5-6 href=#__codelineno-5-6></a><span class=w>    </span><span class=nt>paths</span><span class=p>:</span>
-</span><span id=__span-5-7><a id=__codelineno-5-7 name=__codelineno-5-7 href=#__codelineno-5-7></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript/**&#39;</span>
-</span><span id=__span-5-8><a id=__codelineno-5-8 name=__codelineno-5-8 href=#__codelineno-5-8></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript.yaml&#39;</span>
+</span><span id=__span-5-7><a id=__codelineno-5-7 name=__codelineno-5-7 href=#__codelineno-5-7></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>'promptscript/**'</span>
+</span><span id=__span-5-8><a id=__codelineno-5-8 name=__codelineno-5-8 href=#__codelineno-5-8></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>'promptscript.yaml'</span>
 </span><span id=__span-5-9><a id=__codelineno-5-9 name=__codelineno-5-9 href=#__codelineno-5-9></a><span class=w>  </span><span class=nt>pull_request</span><span class=p>:</span>
 </span><span id=__span-5-10><a id=__codelineno-5-10 name=__codelineno-5-10 href=#__codelineno-5-10></a><span class=w>    </span><span class=nt>paths</span><span class=p>:</span>
-</span><span id=__span-5-11><a id=__codelineno-5-11 name=__codelineno-5-11 href=#__codelineno-5-11></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript/**&#39;</span>
-</span><span id=__span-5-12><a id=__codelineno-5-12 name=__codelineno-5-12 href=#__codelineno-5-12></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript.yaml&#39;</span>
+</span><span id=__span-5-11><a id=__codelineno-5-11 name=__codelineno-5-11 href=#__codelineno-5-11></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>'promptscript/**'</span>
+</span><span id=__span-5-12><a id=__codelineno-5-12 name=__codelineno-5-12 href=#__codelineno-5-12></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>'promptscript.yaml'</span>
 </span><span id=__span-5-13><a id=__codelineno-5-13 name=__codelineno-5-13 href=#__codelineno-5-13></a>
 </span><span id=__span-5-14><a id=__codelineno-5-14 name=__codelineno-5-14 href=#__codelineno-5-14></a><span class=nt>jobs</span><span class=p>:</span>
 </span><span id=__span-5-15><a id=__codelineno-5-15 name=__codelineno-5-15 href=#__codelineno-5-15></a><span class=w>  </span><span class=nt>validate</span><span class=p>:</span>
@@ -611,7 +611,7 @@
 </span><span id=__span-5-19><a id=__codelineno-5-19 name=__codelineno-5-19 href=#__codelineno-5-19></a>
 </span><span id=__span-5-20><a id=__codelineno-5-20 name=__codelineno-5-20 href=#__codelineno-5-20></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-node@v4</span>
 </span><span id=__span-5-21><a id=__codelineno-5-21 name=__codelineno-5-21 href=#__codelineno-5-21></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
-</span><span id=__span-5-22><a id=__codelineno-5-22 name=__codelineno-5-22 href=#__codelineno-5-22></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>&#39;20&#39;</span>
+</span><span id=__span-5-22><a id=__codelineno-5-22 name=__codelineno-5-22 href=#__codelineno-5-22></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>'20'</span>
 </span><span id=__span-5-23><a id=__codelineno-5-23 name=__codelineno-5-23 href=#__codelineno-5-23></a>
 </span><span id=__span-5-24><a id=__codelineno-5-24 name=__codelineno-5-24 href=#__codelineno-5-24></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Install PromptScript</span>
 </span><span id=__span-5-25><a id=__codelineno-5-25 name=__codelineno-5-25 href=#__codelineno-5-25></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g @promptscript/cli</span>
@@ -625,8 +625,8 @@
 </span><span id=__span-5-33><a id=__codelineno-5-33 name=__codelineno-5-33 href=#__codelineno-5-33></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="p p-Indicator">|</span>
 </span><span id=__span-5-34><a id=__codelineno-5-34 name=__codelineno-5-34 href=#__codelineno-5-34></a><span class=w>          </span><span class=no>prs compile</span>
 </span><span id=__span-5-35><a id=__codelineno-5-35 name=__codelineno-5-35 href=#__codelineno-5-35></a><span class=w>          </span><span class=no>if ! git diff --exit-code; then</span>
-</span><span id=__span-5-36><a id=__codelineno-5-36 name=__codelineno-5-36 href=#__codelineno-5-36></a><span class=w>            </span><span class=no>echo &quot;::error::Generated files are out of date&quot;</span>
-</span><span id=__span-5-37><a id=__codelineno-5-37 name=__codelineno-5-37 href=#__codelineno-5-37></a><span class=w>            </span><span class=no>echo &quot;Run &#39;prs compile&#39; and commit the changes&quot;</span>
+</span><span id=__span-5-36><a id=__codelineno-5-36 name=__codelineno-5-36 href=#__codelineno-5-36></a><span class=w>            </span><span class=no>echo "::error::Generated files are out of date"</span>
+</span><span id=__span-5-37><a id=__codelineno-5-37 name=__codelineno-5-37 href=#__codelineno-5-37></a><span class=w>            </span><span class=no>echo "Run 'prs compile' and commit the changes"</span>
 </span><span id=__span-5-38><a id=__codelineno-5-38 name=__codelineno-5-38 href=#__codelineno-5-38></a><span class=w>            </span><span class=no>exit 1</span>
 </span><span id=__span-5-39><a id=__codelineno-5-39 name=__codelineno-5-39 href=#__codelineno-5-39></a><span class=w>          </span><span class=no>fi</span>
 </span><span id=__span-5-40><a id=__codelineno-5-40 name=__codelineno-5-40 href=#__codelineno-5-40></a><span class=w>        </span><span class=nt>env</span><span class=p>:</span>

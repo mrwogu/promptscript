@@ -168,7 +168,7 @@ For an initialized project:
 
 - `promptscript.yaml` remains byte-for-byte unchanged.
 - Static output is written under `.promptscript/migrated/`.
-- Existing entry file gains one idempotent `@use` for the migrated project.
+- Every effective top-level or build-profile entry gains one idempotent `@use` for the migrated project.
 - AI-assisted mode writes `.promptscript/migration-prompt.md` and installs the PromptScript skill.
 - Existing instruction files remain unchanged.
 - No hooks are installed.
@@ -236,6 +236,8 @@ prs compile [options]
 | `--debug`                    | Show debug information (includes verbose)               |
 
 `--all-builds` and `--build` are mutually exclusive. `--all-builds` compiles every named profile in `config.builds` in sorted key order, reports failures per profile, and uses one watcher for the full build set when combined with `--watch`.
+
+Compilation fails with exit code 1 when the run resolves zero targets: `config.targets` is missing or empty, the selected build profile lists no targets, or every matching target is `enabled: false`. The error names the config key to change and, for builds-only projects, lists the profiles that can be compiled with `--build` or `--all-builds`.
 
 Paths passed through `--config`, `--registry`, and `--output` are resolved relative to `--cwd` (or the current project directory). Watch mode honors the configured `watch.include`, `watch.exclude`, `watch.debounce`, and `watch.clearScreen` settings. Added, changed, and removed matching files all trigger compilation, and rebuilds are serialized.
 
@@ -521,6 +523,7 @@ prs diff [options]
 
 | Option                  | Description                       |
 | ----------------------- | --------------------------------- |
+| `-b, --build <name>`    | Show diff for named build profile |
 | `-t, --target <target>` | Show diff for specific target     |
 | `--format <format>`     | Output format (`text`, `json`)    |
 | `-a, --all`             | Show diff for all targets         |
@@ -539,6 +542,9 @@ prs diff --all
 # Show diff for specific target
 prs diff --target github
 
+# Show diff for a named build profile
+prs diff --build docs
+
 # Emit a machine-readable report with hashes
 prs diff --format json
 
@@ -548,7 +554,7 @@ prs diff --format json --include-content
 
 JSON reports use the versioned [diff schema](https://getpromptscript.dev/schema/diff/v1.json). Content is omitted by default; each output change includes a deterministic `sha256-<hex>` hash after generation markers are removed. Change entries include target, output path, source provenance, change kind, ownership, and target compatibility warnings. `unsupported` repeats unsupported entries from `changes` for direct automation. `success: false` with `errors` means compilation or report generation failed; `success: true` with `hasChanges: true` is a valid diff report. The command exits 1 for errors and 0 for valid reports, including reports with changes.
 
-Generated output paths are compared under the configured `output.baseDir`. The JSON report uses the same formatter output, configured header, and Prettier post-format pass as `prs compile`; `prs diff` uses the complete configured target for `--target`, including version, convention, output path, and skill settings. It never writes generated files, registry checkouts, cache metadata, lockfiles, or temporary files. Git registries must already be available through vendor mode or a valid local cache; otherwise diff fails with an actionable error instead of fetching them.
+Generated output paths use `builds.<name>.output` for `--build`, with `output.baseDir` as the fallback. The JSON report uses the same formatter output, configured header, and Prettier post-format pass as `prs compile`; `prs diff` uses the complete configured target for `--target`, including version, convention, output path, and skill settings. It never writes generated files, registry checkouts, cache metadata, lockfiles, or temporary files. Git registries must already be available through vendor mode or a valid local cache; otherwise diff fails with an actionable error instead of fetching them.
 
 ______________________________________________________________________
 
@@ -604,7 +610,7 @@ ______________________________________________________________________
 
 ### prs check
 
-Check the effective configuration, entry file, lockfile, registry, imports, inheritance, and PromptScript validation without generating output. Configuration and validation warnings do not fail the command, while health-check errors exit with status 1.
+Check the effective configuration, every top-level or build-profile entry file, lockfile, registry, imports, inheritance, and PromptScript validation without generating output. Configuration and validation warnings do not fail the command, while health-check errors exit with status 1.
 
 ```bash
 prs check [options]
