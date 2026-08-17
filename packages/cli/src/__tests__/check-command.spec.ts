@@ -234,6 +234,42 @@ describe('commands/check', () => {
       expect(process.exitCode === 0 || process.exitCode === undefined).toBe(true);
     });
 
+    it('should accept targets defined only in named build profiles', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        builds: { docs: { targets: ['claude'] } },
+      });
+      mockExistsSync.mockReturnValue(true);
+      const logSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      const output = logSpy.mock.calls.map((call) => String(call[0])).join('\n');
+      expect(output).toContain('1 target(s) configured in build profiles');
+      expect(output).not.toContain('No targets configured');
+      logSpy.mockRestore();
+    });
+
+    it('should fail when a build profile configures an unknown target', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        builds: { docs: { targets: ['not-a-target'] } },
+      });
+      mockExistsSync.mockReturnValue(true);
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBe(1);
+    });
+
     it('should handle registry path configuration', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({

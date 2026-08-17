@@ -221,6 +221,53 @@ describe('diffCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('should fail cleanly when only named build profiles define targets', async () => {
+    mockLoadConfig.mockResolvedValue({
+      builds: { docs: { targets: ['claude'] } },
+      validation: {},
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+
+    await diffCommand({ noPager: true });
+
+    expect(mockFail).toHaveBeenCalledWith('No compilation targets');
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      'No compilation targets configured in config.targets. prs diff reads only top-level targets - pass --target <name> or add targets to promptscript.yaml (build profiles found: docs).'
+    );
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should emit a machine-readable error when no targets are configured', async () => {
+    mockLoadConfig.mockResolvedValue({ validation: {} });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await diffCommand({ format: 'json' });
+
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+    const report: unknown = JSON.parse(String(logSpy.mock.calls[0]?.[0]));
+    expect(report).toMatchObject({
+      errors: [
+        {
+          code: 'DIFF0003',
+          message:
+            'No compilation targets configured. Add a "targets" list to promptscript.yaml or run: prs init',
+        },
+      ],
+    });
+    logSpy.mockRestore();
+  });
+
   it('should compile an explicitly requested target not present in config', async () => {
     mockLoadConfig.mockResolvedValue({
       targets: ['github'],

@@ -179,7 +179,13 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
     }
 
     // Check 7: Targets configured
-    if (!config.targets || config.targets.length === 0) {
+    // Builds-only projects keep every target inside config.builds, so the
+    // top-level list being empty is not by itself a misconfiguration.
+    const buildTargets = Object.values(config.builds ?? {}).flatMap(
+      (profile) => profile.targets ?? []
+    );
+    const rootTargets = config.targets ?? [];
+    if (rootTargets.length === 0 && buildTargets.length === 0) {
       results.push({
         name: 'Targets',
         status: 'warning',
@@ -187,13 +193,17 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
       });
       hasWarnings = true;
     } else {
-      const targetNames = config.targets.flatMap((target) => {
-        if (typeof target === 'string') return [target];
-        if (typeof target !== 'object' || target === null || Array.isArray(target)) {
-          return ['<invalid>'];
-        }
-        return Object.keys(target);
-      });
+      const targetNames = [
+        ...new Set(
+          [...rootTargets, ...buildTargets].flatMap((target) => {
+            if (typeof target === 'string') return [target];
+            if (typeof target !== 'object' || target === null || Array.isArray(target)) {
+              return ['<invalid>'];
+            }
+            return Object.keys(target);
+          })
+        ),
+      ];
       const invalidTargets = targetNames.filter((target) => !isKnownTarget(target));
       if (invalidTargets.length > 0 || targetNames.length === 0) {
         results.push({
@@ -209,7 +219,10 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
         results.push({
           name: 'Targets',
           status: 'ok',
-          message: `${targetNames.length} target(s) configured`,
+          message:
+            rootTargets.length === 0
+              ? `${targetNames.length} target(s) configured in build profiles`
+              : `${targetNames.length} target(s) configured`,
         });
       }
     }

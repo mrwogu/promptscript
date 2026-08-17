@@ -225,7 +225,7 @@ function selectRequestedCandidates(
 async function readProjectConfig(
   configPath: string,
   services: CliServices
-): Promise<PromptScriptConfig> {
+): Promise<PromptScriptConfig & { targets: TargetEntry[] }> {
   const content = interpolateEnvVars(await services.fs.readFile(configPath, 'utf-8'));
   const config = parseYaml(content) as PromptScriptConfig | null;
   if (
@@ -248,7 +248,7 @@ async function readProjectConfig(
   ) {
     throw new Error(`${configPath} must contain id, syntax, and targets before migration`);
   }
-  return config;
+  return config as PromptScriptConfig & { targets: TargetEntry[] };
 }
 
 function extractTargetNames(targets: TargetEntry[]): AIToolTarget[] {
