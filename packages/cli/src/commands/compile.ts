@@ -108,8 +108,10 @@ function createCliLogger(): Logger {
  * Parse target entries into compiler format.
  * Filters out targets with enabled: false.
  */
-function parseTargets(targets: TargetEntry[]): { name: string; config?: TargetConfig }[] {
-  return targets
+function parseTargets(
+  targets: TargetEntry[] | undefined
+): { name: string; config?: TargetConfig }[] {
+  return (targets ?? [])
     .map((entry) => {
       if (typeof entry === 'string') {
         return { name: entry };
@@ -782,6 +784,17 @@ async function compileCommandWithResult(
       targets = matched ? [matched] : [{ name: selectedTarget }];
     } else {
       targets = parsedTargets;
+    }
+
+    if (targets.length === 0) {
+      const availableBuilds = Object.keys(config.builds ?? {});
+      const buildHint =
+        availableBuilds.length > 0
+          ? ` Available build profiles: ${availableBuilds.join(', ')}.`
+          : '';
+      throw new Error(
+        `No enabled compilation targets configured.${buildHint} Select a build profile with --build <name> or use --all-builds.`
+      );
     }
 
     // Detect output path conflicts before doing any work
