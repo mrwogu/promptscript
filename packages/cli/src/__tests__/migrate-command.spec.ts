@@ -456,6 +456,86 @@ describe('migrateCommand', () => {
     expect(mockFs.writeFile).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['missing target source', 'id: preserved\nsyntax: "1.4.0"\n'],
+    ['scalar target list', 'id: preserved\nsyntax: "1.4.0"\ntargets: claude\n'],
+    ['primitive target entry', 'id: preserved\nsyntax: "1.4.0"\ntargets:\n  - 42\n'],
+    ['empty target object', 'id: preserved\nsyntax: "1.4.0"\ntargets:\n  - {}\n'],
+    ['array build collection', 'id: preserved\nsyntax: "1.4.0"\nbuilds: []\n'],
+    ['scalar build profile', 'id: preserved\nsyntax: "1.4.0"\nbuilds:\n  docs: invalid\n'],
+    [
+      'profile without targets',
+      'id: preserved\nsyntax: "1.4.0"\nbuilds:\n  docs:\n    entry: docs.prs\n',
+    ],
+    [
+      'profile with empty targets',
+      'id: preserved\nsyntax: "1.4.0"\nbuilds:\n  docs:\n    targets: []\n',
+    ],
+  ])('rejects malformed target source: %s', async (_case, configContent) => {
+    mockFs.readFile.mockImplementation(async (path: string) => {
+      if (path === 'promptscript.yaml') {
+        return configContent;
+      }
+      return '# Existing instructions';
+    });
+
+    await migrateCommand({ static: true }, services);
+
+    expect(process.exitCode).toBe(1);
+    expect(mockImportMultipleFiles).not.toHaveBeenCalled();
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['input collection', 'id: preserved\nsyntax: "1.4.0"\ntargets:\n  - claude\ninput: []\n'],
+    [
+      'empty input entry',
+      'id: preserved\nsyntax: "1.4.0"\ntargets:\n  - claude\ninput:\n  entry: ""\n',
+    ],
+    [
+      'non-string profile entry',
+      'id: preserved\nsyntax: "1.4.0"\nbuilds:\n  docs:\n    entry: 42\n    targets:\n      - claude\n',
+    ],
+  ])('rejects malformed entry configuration: %s', async (_case, configContent) => {
+    mockFs.readFile.mockImplementation(async (path: string) => {
+      if (path === 'promptscript.yaml') {
+        return configContent;
+      }
+      return '# Existing instructions';
+    });
+
+    await migrateCommand({ static: true }, services);
+
+    expect(process.exitCode).toBe(1);
+    expect(mockImportMultipleFiles).not.toHaveBeenCalled();
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+  });
+
+  it('accepts profiles that inherit valid top-level targets', async () => {
+    mockFs.readFile.mockImplementation(async (path: string) => {
+      if (path === 'promptscript.yaml') {
+        return [
+          'id: preserved',
+          'syntax: "1.4.0"',
+          'targets:',
+          '  - claude',
+          'builds:',
+          '  docs: {}',
+          '',
+        ].join('\n');
+      }
+      if (path === '.promptscript/project.prs') {
+        return '@meta { id: "preserved" syntax: "1.4.0" }\n';
+      }
+      return '# Existing instructions';
+    });
+
+    await migrateCommand({ static: true }, services);
+
+    expect(process.exitCode).toBeUndefined();
+    expect(mockImportMultipleFiles).toHaveBeenCalled();
+  });
+
   it('rejects an entry inside the reserved migration output directory', async () => {
     mockFs.readFile.mockImplementation(async (path: string) => {
       if (path === 'promptscript.yaml') {

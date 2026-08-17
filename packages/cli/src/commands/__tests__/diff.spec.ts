@@ -257,6 +257,27 @@ describe('diffCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it.each([
+    [
+      'profile targets',
+      { builds: { docs: { targets: [] } }, validation: {} },
+      'config.builds.docs.targets',
+    ],
+    ['inherited targets', { targets: [], builds: { docs: {} }, validation: {} }, 'config.targets'],
+  ])('should identify empty %s for a selected build', async (_case, config, expectedLocation) => {
+    mockLoadConfig.mockResolvedValue(config);
+
+    await diffCommand({ build: 'docs', noPager: true });
+
+    expect(mockFail).toHaveBeenCalledWith('No compilation targets');
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      `No compilation targets configured for build profile "docs". Add an enabled target to ${expectedLocation}.`
+    );
+    expect(mockResolveRegistryPath).not.toHaveBeenCalled();
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should apply a named build profile entry, output, and targets', async () => {
     mockLoadConfig.mockResolvedValue({
       builds: {
