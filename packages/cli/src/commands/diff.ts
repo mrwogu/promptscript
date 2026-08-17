@@ -75,8 +75,10 @@ export function createDiffLogger(machineReadable = false): Logger {
 /**
  * Parse target entries into compiler format.
  */
-function parseTargets(targets: TargetEntry[]): { name: string; config?: TargetConfig }[] {
-  return targets
+function parseTargets(
+  targets: TargetEntry[] | undefined
+): { name: string; config?: TargetConfig }[] {
+  return (targets ?? [])
     .map((entry) => {
       if (typeof entry === 'string') {
         return { name: entry };
@@ -212,6 +214,35 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     const targets = options.target
       ? [parsedTargets.find((target) => target.name === options.target) ?? { name: options.target }]
       : parsedTargets;
+
+    if (targets.length === 0) {
+      // Named build profiles are compile-only, so a builds-only project has
+      // nothing for diff to compare unless a target is passed explicitly.
+      const availableBuilds = Object.keys(config.builds ?? {});
+      const message =
+        availableBuilds.length > 0
+          ? `No compilation targets configured in config.targets. prs diff reads only top-level targets - pass --target <name> or add targets to promptscript.yaml (build profiles found: ${availableBuilds.join(', ')}).`
+          : 'No compilation targets configured. Add a "targets" list to promptscript.yaml or run: prs init';
+      if (isJsonFormat) {
+        console.log(
+          JSON.stringify(
+            createCompilationDiffErrorReport(
+              [{ name: 'TargetError', code: 'DIFF0003', message }],
+              [],
+              projectRoot,
+              options.includeContent
+            ),
+            null,
+            2
+          )
+        );
+      } else {
+        spinner.fail('No compilation targets');
+        ConsoleOutput.error(message);
+      }
+      process.exitCode = 1;
+      return;
+    }
     const logger = createDiffLogger(isJsonFormat);
     const prettierOptions = await resolvePrettierOptions(config, projectRoot);
     const skillContent =
