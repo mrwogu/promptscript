@@ -193,7 +193,7 @@ includePromptScriptSkill: true # default: true
 | -------------------------- | ----------------------- | -------- | ----------------------------------------------- |
 | `id`                       | string                  | Yes      | Project identifier                              |
 | `syntax`                   | string                  | Yes      | PromptScript syntax version                     |
-| `targets`                  | `TargetEntry[]`         | Yes      | Output targets and target-specific options      |
+| `targets`                  | `TargetEntry[]`         | Yes\*    | Output targets and target-specific options      |
 | `description`              | string                  | No       | Project description                             |
 | `telemetry`                | boolean                 | No       | Enable anonymous aggregate usage telemetry      |
 | `extends`                  | string                  | No       | Base configuration file to merge                |
@@ -212,8 +212,14 @@ includePromptScriptSkill: true # default: true
 | `validation`               | object                  | No       | Guard and validation rule settings              |
 | `policies`                 | array                   | No       | Extension compliance policies                   |
 
-`id`, `syntax`, and `targets` are required even when `input.entry` uses its default. See the
-[Policy Engine guide](../guides/policy-engine.md) for `policies` syntax.
+`id` and `syntax` are required even when `input.entry` uses its default.
+
+\* `targets` is required unless every target is declared inside a named [build
+profile](#builds). Such builds-only projects compile with `prs compile --build <name>` or
+`prs compile --all-builds`; a bare `prs compile` fails with the list of available profiles because
+there is no default target list to use.
+
+See the [Policy Engine guide](../guides/policy-engine.md) for `policies` syntax.
 
 ### telemetry
 
@@ -829,6 +835,11 @@ prs build logstrip-factory
 # Compile all named build profiles in deterministic order
 prs compile --all-builds
 ```
+
+A profile without its own `targets` key falls back to the top-level `targets` list. When a project
+keeps every target inside profiles and omits top-level `targets`, a bare `prs compile` fails and
+lists the available profiles instead of compiling nothing. `prs diff` reads only top-level `targets`,
+so builds-only projects need `prs diff --target <name>`.
 
 **Nested AGENTS.md via Build Profiles:**
 
