@@ -6,7 +6,7 @@ export interface MigrationPromptInput {
 
 export interface MigrationPromptOptions {
   outputDirectory?: string;
-  existingEntry?: string;
+  existingEntries?: string[];
 }
 
 export function generateMigrationPrompt(
@@ -15,9 +15,11 @@ export function generateMigrationPrompt(
 ): string {
   const fileList = candidates.map((c) => `- ${c.path} (${c.sizeHuman}, ${c.toolName})`).join('\n');
   const outputDirectory = options.outputDirectory ?? '.promptscript';
-  const existingProjectInstructions = options.existingEntry
-    ? `\nDo not modify promptscript.yaml or the original instruction files. Add one @use directive to ${options.existingEntry} that composes the migrated project.\n`
-    : '';
+  const existingEntries = options.existingEntries ?? [];
+  const existingProjectInstructions =
+    existingEntries.length > 0
+      ? `\nDo not modify promptscript.yaml or the original instruction files. Add one @use directive to each configured entry file that composes the migrated project:\n${existingEntries.map((entry) => `- ${entry}`).join('\n')}\n`
+      : '';
 
   return `Migrate my existing AI instructions to PromptScript.
 

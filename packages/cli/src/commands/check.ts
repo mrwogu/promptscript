@@ -12,7 +12,9 @@ import {
 import type { CheckOptions } from '../types.js';
 import { findConfigFile, loadEffectiveConfig, CONFIG_FILES } from '../config/loader.js';
 import { createSpinner, ConsoleOutput, isVerbose } from '../output/console.js';
+import { getEffectiveEntryPaths } from '../utils/build-profile.js';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
+import { isTargetConfig } from '../utils/target-config.js';
 
 /**
  * Check result for a single item.
@@ -23,11 +25,65 @@ interface CheckResult {
   message?: string;
 }
 
+interface TargetEntryAnalysis {
+  names: string[];
+  errors: string[];
+}
+
+function isTargetDisabled(config: unknown): boolean {
+  return (
+    config !== null &&
+    typeof config === 'object' &&
+    !Array.isArray(config) &&
+    (config as { enabled?: unknown }).enabled === false
+  );
+}
+
+function analyzeTargetEntries(entries: readonly unknown[]): TargetEntryAnalysis {
+  const names = new Set<string>();
+  const errors: string[] = [];
+
+  for (const entry of entries) {
+    if (typeof entry === 'string') {
+      if (isKnownTarget(entry)) {
+        names.add(entry);
+      } else {
+        errors.push(`unknown target "${entry}"`);
+      }
+      continue;
+    }
+
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      errors.push('target entries must be names or configuration objects');
+      continue;
+    }
+
+    const configuredTargets = Object.entries(entry);
+    if (configuredTargets.length === 0) {
+      errors.push('target entries must not be empty');
+      continue;
+    }
+
+    for (const [name, targetConfig] of configuredTargets) {
+      if (!isKnownTarget(name)) {
+        errors.push(`unknown target "${name}"`);
+      }
+      if (!isTargetConfig(targetConfig)) {
+        errors.push(`target "${name}" configuration must be an object`);
+      } else if (isKnownTarget(name) && !isTargetDisabled(targetConfig)) {
+        names.add(name);
+      }
+    }
+  }
+
+  return { names: [...names], errors };
+}
+
 /**
  * Check configuration and dependencies health.
  * Verifies:
  * - Config file exists and is valid
- * - Entry file exists
+ * - Effective entry files exist
  * - Registry and lockfile are usable
  * - PromptScript syntax, imports, and inheritance resolve
  */
@@ -135,21 +191,73 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
       });
     }
 
-    // Check 5: Entry file exists
-    const entryPath = resolve(config.input?.entry ?? '.promptscript/project.prs');
-    if (existsSync(entryPath)) {
+    // Check 5: Effective entry files exist
+    const entryIssues: string[] = [];
+    const inputValue: unknown = config.input;
+    if (
+      inputValue !== undefined &&
+      (inputValue === null || typeof inputValue !== 'object' || Array.isArray(inputValue))
+    ) {
+      entryIssues.push('config.input must be an object');
+    } else if (inputValue && typeof inputValue === 'object') {
+      const configuredEntry = (inputValue as { entry?: unknown }).entry;
+      if (
+        configuredEntry !== undefined &&
+        (typeof configuredEntry !== 'string' || configuredEntry.trim().length === 0)
+      ) {
+        entryIssues.push('config.input.entry must be a non-empty string');
+      }
+    }
+
+    const entryBuildsValue: unknown = config.builds;
+    if (
+      entryBuildsValue &&
+      typeof entryBuildsValue === 'object' &&
+      !Array.isArray(entryBuildsValue)
+    ) {
+      for (const [buildName, profile] of Object.entries(
+        entryBuildsValue as Record<string, unknown>
+      )) {
+        if (!profile || typeof profile !== 'object' || Array.isArray(profile)) continue;
+        const configuredEntry = (profile as { entry?: unknown }).entry;
+        if (
+          configuredEntry !== undefined &&
+          (typeof configuredEntry !== 'string' || configuredEntry.trim().length === 0)
+        ) {
+          entryIssues.push(`config.builds.${buildName}.entry must be a non-empty string`);
+        }
+      }
+    }
+    if (entryIssues.length > 0) {
       results.push({
-        name: 'Entry file',
-        status: 'ok',
-        message: config.input?.entry ?? '.promptscript/project.prs',
-      });
-    } else {
-      results.push({
-        name: 'Entry file',
+        name: 'Entry configuration',
         status: 'error',
-        message: `Entry file not found: ${entryPath}`,
+        message: entryIssues.join('; '),
       });
       hasErrors = true;
+    }
+
+    const effectiveEntries = getEffectiveEntryPaths(config);
+    for (const entry of effectiveEntries) {
+      const entryPath = resolve(entry);
+      const name =
+        entry === (config.input?.entry ?? '.promptscript/project.prs')
+          ? 'Entry file'
+          : `Entry file (${entry})`;
+      if (existsSync(entryPath)) {
+        results.push({
+          name,
+          status: 'ok',
+          message: entry,
+        });
+      } else {
+        results.push({
+          name,
+          status: 'error',
+          message: `Entry file not found: ${entryPath}`,
+        });
+        hasErrors = true;
+      }
     }
 
     // Check 6: Local registry path (if configured)
@@ -179,13 +287,76 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
     }
 
     // Check 7: Targets configured
-    // Builds-only projects keep every target inside config.builds, so the
-    // top-level list being empty is not by itself a misconfiguration.
-    const buildTargets = Object.values(config.builds ?? {}).flatMap(
-      (profile) => profile.targets ?? []
-    );
-    const rootTargets = config.targets ?? [];
-    if (rootTargets.length === 0 && buildTargets.length === 0) {
+    const targetIssues: string[] = [];
+    const targetNames = new Set<string>();
+    const rootTargetValue: unknown = config.targets;
+    const rootTargets: readonly unknown[] = Array.isArray(rootTargetValue) ? rootTargetValue : [];
+    const buildsValue: unknown = config.builds;
+    const builds =
+      buildsValue !== undefined &&
+      buildsValue !== null &&
+      typeof buildsValue === 'object' &&
+      !Array.isArray(buildsValue)
+        ? Object.entries(buildsValue as Record<string, unknown>)
+        : [];
+
+    const appendTargetAnalysis = (location: string, entries: readonly unknown[]): void => {
+      const analysis = analyzeTargetEntries(entries);
+      for (const name of analysis.names) {
+        targetNames.add(name);
+      }
+      targetIssues.push(...analysis.errors.map((error) => `${location}: ${error}`));
+      if (entries.length > 0 && analysis.names.length === 0 && analysis.errors.length === 0) {
+        targetIssues.push(`${location}: no enabled targets`);
+      }
+    };
+
+    if (rootTargetValue !== undefined && !Array.isArray(rootTargetValue)) {
+      targetIssues.push('config.targets must be an array');
+    } else if (rootTargets.length > 0) {
+      appendTargetAnalysis('config.targets', rootTargets);
+    }
+    if (
+      buildsValue !== undefined &&
+      (buildsValue === null || typeof buildsValue !== 'object' || Array.isArray(buildsValue))
+    ) {
+      targetIssues.push('config.builds must be an object');
+    }
+
+    for (const [buildName, profile] of builds) {
+      if (!profile || typeof profile !== 'object' || Array.isArray(profile)) {
+        targetIssues.push(`config.builds.${buildName} must be an object`);
+        continue;
+      }
+
+      const profileTargetValue: unknown = (profile as { targets?: unknown }).targets;
+      if (profileTargetValue === undefined) {
+        if (rootTargets.length === 0) {
+          targetIssues.push(
+            `config.builds.${buildName}.targets is missing and config.targets is empty`
+          );
+        }
+        continue;
+      }
+      if (!Array.isArray(profileTargetValue)) {
+        targetIssues.push(`config.builds.${buildName}.targets must be an array`);
+        continue;
+      }
+      if (profileTargetValue.length === 0) {
+        targetIssues.push(`config.builds.${buildName}.targets is empty`);
+        continue;
+      }
+      appendTargetAnalysis(`config.builds.${buildName}.targets`, profileTargetValue);
+    }
+
+    if (targetIssues.length > 0) {
+      results.push({
+        name: 'Targets',
+        status: 'error',
+        message: targetIssues.join('; '),
+      });
+      hasErrors = true;
+    } else if (rootTargets.length === 0 && builds.length === 0) {
       results.push({
         name: 'Targets',
         status: 'warning',
@@ -193,42 +364,19 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
       });
       hasWarnings = true;
     } else {
-      const targetNames = [
-        ...new Set(
-          [...rootTargets, ...buildTargets].flatMap((target) => {
-            if (typeof target === 'string') return [target];
-            if (typeof target !== 'object' || target === null || Array.isArray(target)) {
-              return ['<invalid>'];
-            }
-            return Object.keys(target);
-          })
-        ),
-      ];
-      const invalidTargets = targetNames.filter((target) => !isKnownTarget(target));
-      if (invalidTargets.length > 0 || targetNames.length === 0) {
-        results.push({
-          name: 'Targets',
-          status: 'error',
-          message:
-            invalidTargets.length > 0
-              ? `Unknown target(s): ${invalidTargets.join(', ')}`
-              : 'Target entries must not be empty',
-        });
-        hasErrors = true;
-      } else {
-        results.push({
-          name: 'Targets',
-          status: 'ok',
-          message:
-            rootTargets.length === 0
-              ? `${targetNames.length} target(s) configured in build profiles`
-              : `${targetNames.length} target(s) configured`,
-        });
-      }
+      results.push({
+        name: 'Targets',
+        status: 'ok',
+        message:
+          rootTargets.length === 0
+            ? `${targetNames.size} target(s) configured in build profiles`
+            : `${targetNames.size} target(s) configured`,
+      });
     }
 
     // Check 8: Lockfile, registry, imports, inheritance, and validation
-    if (existsSync(entryPath)) {
+    const existingEntries = effectiveEntries.filter((entry) => existsSync(resolve(entry)));
+    if (existingEntries.length > 0) {
       try {
         const lockfilePath = resolve('promptscript.lock');
         let lockfile: Lockfile | undefined;
@@ -267,28 +415,44 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
           },
           formatters: [],
         });
-        const result = await compiler.compile(entryPath);
 
-        if (result.errors.length > 0) {
-          results.push({
-            name: 'Project resolution',
-            status: 'error',
-            message: result.errors.map((error) => error.message).join('; '),
-          });
-          hasErrors = true;
-        } else if (result.warnings.length > 0) {
-          results.push({
-            name: 'Project resolution',
-            status: 'warning',
-            message: `${result.warnings.length} validation warning(s)`,
-          });
-          hasWarnings = true;
-        } else {
-          results.push({
-            name: 'Project resolution',
-            status: 'ok',
-            message: 'Syntax, imports, and inheritance are valid',
-          });
+        for (const entry of existingEntries) {
+          const name =
+            entry === (config.input?.entry ?? '.promptscript/project.prs')
+              ? 'Project resolution'
+              : `Project resolution (${entry})`;
+          try {
+            const result = await compiler.compile(resolve(entry));
+
+            if (result.errors.length > 0) {
+              results.push({
+                name,
+                status: 'error',
+                message: result.errors.map((error) => error.message).join('; '),
+              });
+              hasErrors = true;
+            } else if (result.warnings.length > 0) {
+              results.push({
+                name,
+                status: 'warning',
+                message: `${result.warnings.length} validation warning(s)`,
+              });
+              hasWarnings = true;
+            } else {
+              results.push({
+                name,
+                status: 'ok',
+                message: 'Syntax, imports, and inheritance are valid',
+              });
+            }
+          } catch (error) {
+            results.push({
+              name,
+              status: 'error',
+              message: error instanceof Error ? error.message : 'Unknown resolution error',
+            });
+            hasErrors = true;
+          }
         }
       } catch (error) {
         results.push({

@@ -25,6 +25,8 @@ import {
 } from '../utils/write-plan.js';
 import { getSkillWrites, initCommand, selectMigrationStrategy } from './init.js';
 import { CONFIG_FILES, interpolateEnvVars } from '../config/loader.js';
+import { getEffectiveEntryPaths } from '../utils/build-profile.js';
+import { isTargetConfig } from '../utils/target-config.js';
 
 export async function migrateCommand(
   options: MigrateOptions,
@@ -74,12 +76,14 @@ async function runMigrateCommand(options: MigrateOptions, services: CliServices)
     if (options.targets) {
       throw new Error('--targets can only be used when migration initializes a project');
     }
-    const targets = extractTargetNames(config.targets);
     const strategy = options.llm
       ? 'llm'
       : options.static
         ? 'static'
         : await selectMigrationStrategy(services);
+    const entryPaths = getMigrationEntryPaths(config);
+    const targets =
+      strategy === 'llm' ? extractTargetNames(getConfiguredTargetEntries(config)) : [];
 
     let selectedCandidates = candidates;
     if (strategy === 'static' && !options.static && !options.files) {
@@ -100,12 +104,8 @@ async function runMigrateCommand(options: MigrateOptions, services: CliServices)
 
     const writes =
       strategy === 'static'
-        ? await createStaticMigrationWrites(selectedCandidates, config, services)
-        : createLlmMigrationWrites(
-            selectedCandidates,
-            targets,
-            validateProjectPath(config.input?.entry ?? '.promptscript/project.prs')
-          );
+        ? await createStaticMigrationWrites(selectedCandidates, config, entryPaths, services)
+        : createLlmMigrationWrites(selectedCandidates, targets, entryPaths);
 
     if (!isGitRepo(services)) {
       ConsoleOutput.warn('Not a git repository. Changes are not version-controlled.');
@@ -138,11 +138,11 @@ async function runMigrateCommand(options: MigrateOptions, services: CliServices)
     const spinner = createSpinner(
       options.dryRun ? 'Planning migration...' : 'Applying migration...'
     ).start();
-    const entryPath = validateProjectPath(config.input?.entry ?? '.promptscript/project.prs');
+    const overwritableEntries = new Set(entryPaths);
     const result = await executeWritePlan(writes, services, {
       dryRun: options.dryRun,
       force: options.force === true || shouldBackup,
-      canOverwrite: (path) => strategy === 'static' && path === entryPath,
+      canOverwrite: (path) => strategy === 'static' && overwritableEntries.has(path),
     });
 
     if (options.dryRun) {
@@ -225,7 +225,7 @@ function selectRequestedCandidates(
 async function readProjectConfig(
   configPath: string,
   services: CliServices
-): Promise<PromptScriptConfig & { targets: TargetEntry[] }> {
+): Promise<PromptScriptConfig> {
   const content = interpolateEnvVars(await services.fs.readFile(configPath, 'utf-8'));
   const config = parseYaml(content) as PromptScriptConfig | null;
   if (
@@ -235,20 +235,113 @@ async function readProjectConfig(
     config.id.trim().length === 0 ||
     typeof config.syntax !== 'string' ||
     config.syntax.trim().length === 0 ||
-    !Array.isArray(config.targets) ||
-    config.targets.length === 0 ||
-    !config.targets.every(
-      (target) =>
-        (typeof target === 'string' && target.length > 0) ||
-        (target !== null &&
-          typeof target === 'object' &&
-          !Array.isArray(target) &&
-          Object.keys(target).length > 0)
-    )
+    !hasValidTargetSource(config)
   ) {
-    throw new Error(`${configPath} must contain id, syntax, and targets before migration`);
+    throw new Error(
+      `${configPath} must contain id, syntax, and either non-empty targets or build profiles with non-empty targets before migration`
+    );
   }
-  return config as PromptScriptConfig & { targets: TargetEntry[] };
+  return config;
+}
+
+function isValidTargetEntry(target: unknown): target is TargetEntry {
+  if (typeof target === 'string') {
+    return target.trim().length > 0;
+  }
+  if (target === null || typeof target !== 'object' || Array.isArray(target)) {
+    return false;
+  }
+
+  const entries = Object.entries(target);
+  if (entries.length === 0) {
+    return false;
+  }
+  return entries.every(
+    ([name, targetConfig]) => name.trim().length > 0 && isTargetConfig(targetConfig)
+  );
+}
+
+function isValidTargetList(targets: unknown): targets is TargetEntry[] {
+  return Array.isArray(targets) && targets.length > 0 && targets.every(isValidTargetEntry);
+}
+
+function hasValidTargetSource(config: PromptScriptConfig): boolean {
+  const rootTargets: unknown = config.targets;
+  const hasRootTargets = isValidTargetList(rootTargets);
+  if (
+    rootTargets !== undefined &&
+    (!Array.isArray(rootTargets) || (rootTargets.length > 0 && !hasRootTargets))
+  ) {
+    return false;
+  }
+
+  const builds: unknown = config.builds;
+  if (builds === undefined) {
+    return hasRootTargets;
+  }
+  if (builds === null || typeof builds !== 'object' || Array.isArray(builds)) {
+    return false;
+  }
+
+  const profiles = Object.values(builds as Record<string, unknown>);
+  let hasProfileTargets = false;
+  for (const profile of profiles) {
+    if (!profile || typeof profile !== 'object' || Array.isArray(profile)) {
+      return false;
+    }
+    const targets = (profile as { targets?: unknown }).targets;
+    if (targets === undefined) {
+      if (!hasRootTargets) {
+        return false;
+      }
+      continue;
+    }
+    if (!isValidTargetList(targets)) {
+      return false;
+    }
+    hasProfileTargets = true;
+  }
+  return hasRootTargets || hasProfileTargets;
+}
+
+function getConfiguredTargetEntries(config: PromptScriptConfig): TargetEntry[] {
+  const entries: TargetEntry[] = Array.isArray(config.targets) ? [...config.targets] : [];
+  for (const profile of Object.values(config.builds ?? {})) {
+    if (profile && typeof profile === 'object' && Array.isArray(profile.targets)) {
+      entries.push(...profile.targets);
+    }
+  }
+  return entries;
+}
+
+function getMigrationEntryPaths(config: PromptScriptConfig): string[] {
+  const input: unknown = config.input;
+  if (
+    input !== undefined &&
+    (input === null || typeof input !== 'object' || Array.isArray(input))
+  ) {
+    throw new Error('config.input must be an object');
+  }
+  const configuredEntry =
+    input && typeof input === 'object' ? (input as { entry?: unknown }).entry : undefined;
+  if (
+    configuredEntry !== undefined &&
+    (typeof configuredEntry !== 'string' || configuredEntry.trim().length === 0)
+  ) {
+    throw new Error('config.input.entry must be a non-empty string');
+  }
+
+  for (const [buildName, profile] of Object.entries(config.builds ?? {})) {
+    const profileEntry: unknown = profile.entry;
+    if (
+      profileEntry !== undefined &&
+      (typeof profileEntry !== 'string' || profileEntry.trim().length === 0)
+    ) {
+      throw new Error(`config.builds.${buildName}.entry must be a non-empty string`);
+    }
+  }
+
+  return getEffectiveEntryPaths(config).map(validateProjectPath);
 }
 
 function extractTargetNames(targets: TargetEntry[]): AIToolTarget[] {
@@ -270,6 +363,7 @@ function extractTargetNames(targets: TargetEntry[]): AIToolTarget[] {
 async function createStaticMigrationWrites(
   candidates: MigrationCandidate[],
   config: PromptScriptConfig,
+  entryPaths: string[],
   services: CliServices
 ): Promise<PlannedWrite[]> {
   const result = await importMultipleFiles(
@@ -288,9 +382,8 @@ async function createStaticMigrationWrites(
     throw new Error(`Not all selected instruction files could be imported.${details}`);
   }
 
-  const entryPath = validateProjectPath(config.input?.entry ?? '.promptscript/project.prs');
-  if (entryPath.startsWith('.promptscript/migrated/')) {
-    throw new Error('Project entry cannot be inside the reserved migration output directory');
+  if (entryPaths.some((entryPath) => entryPath.startsWith('.promptscript/migrated/'))) {
+    throw new Error('Project entries cannot be inside the reserved migration output directory');
   }
   const writes: PlannedWrite[] = [];
   let importedProject: string | undefined;
@@ -315,31 +408,34 @@ async function createStaticMigrationWrites(
 
   const migratedProjectPath = '.promptscript/migrated/project.prs';
   writes.push({ path: migratedProjectPath, content: markMigrationOutput(importedProject) });
-  const useLine = `@use ${toUsePath(entryPath, migratedProjectPath)}`;
 
-  if (services.fs.existsSync(entryPath)) {
-    const existing = await services.fs.readFile(entryPath, 'utf-8');
-    const hasUseLine = existing.split(/\r?\n/).some((line) => line.trim() === useLine);
-    if (!hasUseLine) {
+  for (const entryPath of entryPaths) {
+    const useLine = `@use ${toUsePath(entryPath, migratedProjectPath)}`;
+    if (services.fs.existsSync(entryPath)) {
+      const existing = await services.fs.readFile(entryPath, 'utf-8');
+      const hasUseLine = existing.split(/\r?\n/).some((line) => line.trim() === useLine);
+      if (hasUseLine) {
+        continue;
+      }
       writes.push({
         path: entryPath,
         content: `${existing.trimEnd()}\n\n${useLine}\n`,
       });
+    } else {
+      writes.push({
+        path: entryPath,
+        content: [
+          '# promptscript-generated: migration',
+          '@meta {',
+          `  id: ${JSON.stringify(config.id)}`,
+          `  syntax: ${JSON.stringify(config.syntax)}`,
+          '}',
+          '',
+          useLine,
+          '',
+        ].join('\n'),
+      });
     }
-  } else {
-    writes.push({
-      path: entryPath,
-      content: [
-        '# promptscript-generated: migration',
-        '@meta {',
-        `  id: ${JSON.stringify(config.id)}`,
-        `  syntax: ${JSON.stringify(config.syntax)}`,
-        '}',
-        '',
-        useLine,
-        '',
-      ].join('\n'),
-    });
   }
 
   return deduplicateWrites(writes);
@@ -348,7 +444,7 @@ async function createStaticMigrationWrites(
 function createLlmMigrationWrites(
   candidates: MigrationCandidate[],
   targets: AIToolTarget[],
-  entryPath: string
+  entryPaths: string[]
 ): PlannedWrite[] {
   const prompt = generateMigrationPrompt(
     candidates.map((candidate) => ({
@@ -358,7 +454,7 @@ function createLlmMigrationWrites(
     })),
     {
       outputDirectory: '.promptscript/migrated',
-      existingEntry: entryPath,
+      existingEntries: entryPaths,
     }
   );
 
@@ -378,7 +474,7 @@ function markMigrationOutput(content: string): string {
 function toUsePath(entryPath: string, targetPath: string): string {
   const withoutExtension = targetPath.replace(/\.prs$/, '');
   const path = relative(dirname(entryPath), withoutExtension).replace(/\\/g, '/');
-  return path.startsWith('.') ? path : `./${path}`;
+  return path.startsWith('./') || path.startsWith('../') ? path : `./${path}`;
 }
 
 function validateProjectPath(path: string): string {

@@ -838,8 +838,8 @@ prs compile --all-builds
 
 A profile without its own `targets` key falls back to the top-level `targets` list. When a project
 keeps every target inside profiles and omits top-level `targets`, a bare `prs compile` fails and
-lists the available profiles instead of compiling nothing. `prs diff` reads only top-level `targets`,
-so builds-only projects need `prs diff --target <name>`.
+lists the available profiles instead of compiling nothing. Inspect profile output with
+`prs diff --build <name>`.
 
 **Nested AGENTS.md via Build Profiles:**
 

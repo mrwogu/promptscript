@@ -1,36 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
-import type { TargetEntry, TargetConfig } from '@promptscript/core';
+import type { TargetEntry } from '@promptscript/core';
 import { resolve } from 'path';
 import { existsSync } from 'fs';
-
-/**
- * Parse target entries into compiler format.
- * Filters out targets with enabled: false.
- *
- * Note: This is a copy of the function from compile.ts for testing purposes.
- * The actual function is private to the module.
- */
-function parseTargets(targets: TargetEntry[]): { name: string; config?: TargetConfig }[] {
-  return targets
-    .map((entry) => {
-      if (typeof entry === 'string') {
-        return { name: entry };
-      }
-      // Object format: { github: { convention: 'xml' } }
-      const entries = Object.entries(entry);
-      if (entries.length === 0) {
-        throw new Error('Empty target configuration');
-      }
-      const [name, config] = entries[0] as [string, TargetConfig | undefined];
-      return { name, config };
-    })
-    .filter((target) => target.config?.enabled !== false);
-}
+import { parseTargetEntries } from '../utils/target-config.js';
 
 describe('parseTargets', () => {
   it('should parse string targets', () => {
     const targets: TargetEntry[] = ['github', 'claude'];
-    const result = parseTargets(targets);
+    const result = parseTargetEntries(targets);
     expect(result).toEqual([{ name: 'github' }, { name: 'claude' }]);
   });
 
@@ -39,7 +16,7 @@ describe('parseTargets', () => {
       { github: { convention: 'xml' } },
       { claude: { output: 'custom/CLAUDE.md' } },
     ];
-    const result = parseTargets(targets);
+    const result = parseTargetEntries(targets);
     expect(result).toEqual([
       { name: 'github', config: { convention: 'xml' } },
       { name: 'claude', config: { output: 'custom/CLAUDE.md' } },
@@ -52,7 +29,7 @@ describe('parseTargets', () => {
       { claude: { enabled: false } },
       { cursor: { convention: 'markdown' } },
     ];
-    const result = parseTargets(targets);
+    const result = parseTargetEntries(targets);
     expect(result).toEqual([
       { name: 'github', config: { enabled: true } },
       { name: 'cursor', config: { convention: 'markdown' } },
@@ -61,7 +38,7 @@ describe('parseTargets', () => {
 
   it('should include targets with enabled: true', () => {
     const targets: TargetEntry[] = [{ github: { enabled: true, convention: 'xml' } }];
-    const result = parseTargets(targets);
+    const result = parseTargetEntries(targets);
     expect(result).toEqual([{ name: 'github', config: { enabled: true, convention: 'xml' } }]);
   });
 
@@ -71,7 +48,7 @@ describe('parseTargets', () => {
       { claude: { output: 'CLAUDE.md' } },
       { cursor: { enabled: false } },
     ];
-    const result = parseTargets(targets);
+    const result = parseTargetEntries(targets);
     expect(result).toEqual([
       { name: 'github' },
       { name: 'claude', config: { output: 'CLAUDE.md' } },
@@ -80,7 +57,34 @@ describe('parseTargets', () => {
 
   it('should throw on empty target configuration', () => {
     const targets: TargetEntry[] = [{}];
-    expect(() => parseTargets(targets)).toThrow('Empty target configuration');
+    expect(() => parseTargetEntries(targets)).toThrow('Empty target configuration');
+  });
+
+  it('should throw on a malformed target configuration', () => {
+    const targets = [{ github: [] }] as unknown as TargetEntry[];
+
+    expect(() => parseTargetEntries(targets)).toThrow(
+      'Target "github" configuration must be an object'
+    );
+  });
+
+  it('should throw when targets is not an array', () => {
+    expect(() => parseTargetEntries('github')).toThrow('Compilation targets must be an array');
+  });
+
+  it.each([null, '', 42, []])('should throw on malformed target entry %j', (entry) => {
+    expect(() => parseTargetEntries([entry])).toThrow(
+      'Target entries must be non-empty names or configuration objects'
+    );
+  });
+
+  it('should parse every target from a multi-target object', () => {
+    const targets = [{ github: {}, claude: {} }] as unknown as TargetEntry[];
+
+    expect(parseTargetEntries(targets)).toEqual([
+      { name: 'github', config: {} },
+      { name: 'claude', config: {} },
+    ]);
   });
 
   it('should handle mixed string and object targets', () => {
@@ -90,7 +94,7 @@ describe('parseTargets', () => {
       'cursor',
       { antigravity: { enabled: true } },
     ];
-    const result = parseTargets(targets);
+    const result = parseTargetEntries(targets);
     expect(result).toEqual([
       { name: 'github' },
       { name: 'cursor' },
