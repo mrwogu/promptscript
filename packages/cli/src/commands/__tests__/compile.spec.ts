@@ -1150,6 +1150,18 @@ describe('compile command - createCliLogger warn path', () => {
     expect(mockError).not.toHaveBeenCalledWith(expect.stringContaining('Cannot read properties'));
   });
 
+  it('should fail cleanly when no targets or named build profiles are configured', async () => {
+    mockLoadConfig.mockResolvedValue({});
+
+    await compileCommand({}, mockServices);
+
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+    expect(mockError).toHaveBeenCalledWith(
+      'No enabled compilation targets configured. Select a build profile with --build <name> or use --all-builds.'
+    );
+  });
+
   it('should not warn when output directory is the project root', async () => {
     mockLoadConfig.mockResolvedValue({
       targets: ['claude'],
