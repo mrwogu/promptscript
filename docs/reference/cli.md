@@ -153,6 +153,11 @@ If no Prettier configuration is found:
 - Native skill copies for explicitly selected targets that support skills
 - Hook settings for selected targets, unless `--no-hooks` or `--dry-run` is used
 
+When interactive `prs init` uses AI-assisted migration, it copies the migration prompt to the
+clipboard and shows the next steps: start the AI agent, paste the prompt, let it migrate the
+instructions, review the generated files, then validate and compile. If clipboard copying fails,
+the prompt is printed in the terminal for manual copying.
+
 Initialization performs conflict checks before writing. User-owned files are not overwritten
 unless `--force` or `--backup` explicitly authorizes replacement. Writes use temporary files and
 rollback completed writes after failures.
