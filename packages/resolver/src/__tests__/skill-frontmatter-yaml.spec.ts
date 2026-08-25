@@ -462,6 +462,35 @@ describe('YAML skill frontmatter', () => {
     expect(error).toMatchObject({ message: expect.stringMatching(/Unsafe path in references/) });
   });
 
+  it('reports metadata value errors at the offending YAML scalar', () => {
+    const content = [
+      '---',
+      'name: example',
+      'description: Example skill',
+      'metadata:',
+      '  version: 16',
+      '---',
+      'Body',
+    ].join('\n');
+
+    expect(() => parseSkillMd(content, '/tmp/skills/example/SKILL.md')).toThrow(
+      /quote scalar values/
+    );
+
+    try {
+      parseSkillMd(content, '/tmp/skills/example/SKILL.md');
+    } catch (error: unknown) {
+      expect(error).toMatchObject({
+        location: {
+          file: '/tmp/skills/example/SKILL.md',
+          line: 5,
+          column: 12,
+          offset: content.indexOf('16'),
+        },
+      });
+    }
+  });
+
   it('propagates parsed metadata through native auto-discovery', async () => {
     const directory = await mkdtemp(join(tmpdir(), 'skill-yaml-discovery-'));
     temporaryDirectories.push(directory);
