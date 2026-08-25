@@ -5,6 +5,10 @@ description: Create custom skills for PromptScript - from simple instructions to
 
 # Building Skills
 
+`metadata` values must be YAML strings. Quote numeric and boolean values, for example
+`version: "16"` instead of `version: 16`. Invalid values produce a diagnostic with the
+`SKILL.md` path and line.
+
 Skills are reusable units of AI instructions. Each skill is a directory with a `SKILL.md` file and optional resource files. PromptScript compiles them to all your AI coding agents.
 
 ## Minimal Skill
