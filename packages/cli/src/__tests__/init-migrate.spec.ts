@@ -354,6 +354,22 @@ describe('init migration flow', () => {
       );
       // Should attempt clipboard copy
       expect(mockCopyToClipboard).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Migration prompt copied to clipboard!')
+      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('1. Start your AI agent in this project')
+      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('2. Paste the migration prompt - it is already in your clipboard')
+      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('3. Let the agent migrate your instructions')
+      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('4. Review the generated files, then run: prs validate --strict')
+      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('5. Run: prs compile'));
     });
 
     it('should use _forceMigrate and _forceLlm for LLM mode', async () => {
@@ -404,6 +420,9 @@ describe('init migration flow', () => {
       // Should print prompt to console since clipboard failed
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('Migrate my existing AI instructions')
+      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('2. Copy the migration prompt from the terminal output')
       );
     });
   });

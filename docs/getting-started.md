@@ -344,6 +344,10 @@ prs migrate --llm
 
 AI-assisted migration writes `.promptscript/migration-prompt.md` without changing existing
 PromptScript sources. In non-interactive mode, the prompt is also emitted to stdout.
+When AI-assisted migration is selected during `prs init`, the prompt is copied to the clipboard.
+Start the AI agent in the project, paste the prompt, let it migrate the instructions, then review
+the generated files and run `prs validate --strict` followed by `prs compile`. If copying fails,
+copy the prompt from the terminal output instead.
 
 ### 2. Invoke the Migration Skill
 
