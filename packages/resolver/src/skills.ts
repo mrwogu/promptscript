@@ -78,6 +78,7 @@ interface ParsedYamlFrontmatter {
   fields: Record<string, unknown>;
   fieldLocations: ReadonlyMap<string, SourceLocation>;
   fieldItemLocations: ReadonlyMap<string, readonly SourceLocation[]>;
+  fieldValueLocations: ReadonlyMap<string, ReadonlyMap<string, SourceLocation>>;
 }
 
 const MAX_FRONTMATTER_BYTES = 256 * 1024;
@@ -147,7 +148,8 @@ export function parseSkillMd(content: string, sourceFile = '<skill>'): ParsedSki
       sourceFile,
       frontmatter.location,
       yamlFrontmatter.fieldLocations,
-      yamlFrontmatter.fieldItemLocations
+      yamlFrontmatter.fieldItemLocations,
+      yamlFrontmatter.fieldValueLocations
     );
 
     const bodyContent = stripLeadingHtmlMarker(frontmatter.body).trim();
@@ -311,11 +313,11 @@ function parseYamlFrontmatter(
 
   rejectUnsafeYamlNodes(document.contents, sourceFile, frontmatter);
   enforceFrontmatterLimits(document.contents, sourceFile, frontmatter);
-  const { fields: fieldLocations, items: fieldItemLocations } = getTopLevelFieldLocations(
-    document.contents,
-    sourceFile,
-    frontmatter
-  );
+  const {
+    fields: fieldLocations,
+    items: fieldItemLocations,
+    values: fieldValueLocations,
+  } = getTopLevelFieldLocations(document.contents, sourceFile, frontmatter);
 
   let value: unknown;
   try {
@@ -330,7 +332,7 @@ function parseYamlFrontmatter(
   }
 
   if (document.contents === null) {
-    return { fields: {}, fieldLocations, fieldItemLocations };
+    return { fields: {}, fieldLocations, fieldItemLocations, fieldValueLocations };
   }
   if (!isRecord(value)) {
     throw frontmatterError(
@@ -340,7 +342,7 @@ function parseYamlFrontmatter(
     );
   }
 
-  return { fields: value, fieldLocations, fieldItemLocations };
+  return { fields: value, fieldLocations, fieldItemLocations, fieldValueLocations };
 }
 
 function getYamlLocation(
@@ -373,10 +375,14 @@ function getTopLevelFieldLocations(
 ): {
   fields: ReadonlyMap<string, SourceLocation>;
   items: ReadonlyMap<string, readonly SourceLocation[]>;
+  values: ReadonlyMap<string, ReadonlyMap<string, SourceLocation>>;
 } {
   const fieldLocations = new Map<string, SourceLocation>();
   const fieldItemLocations = new Map<string, readonly SourceLocation[]>();
-  if (!isCollection(node)) return { fields: fieldLocations, items: fieldItemLocations };
+  const fieldValueLocations = new Map<string, ReadonlyMap<string, SourceLocation>>();
+  if (!isCollection(node)) {
+    return { fields: fieldLocations, items: fieldItemLocations, values: fieldValueLocations };
+  }
 
   for (const item of node.items) {
     if (!isPair(item)) continue;
@@ -390,10 +396,21 @@ function getTopLevelFieldLocations(
         key,
         item.value.items.map((value) => getNodeLocation(value, sourceFile, frontmatter))
       );
+      const valueLocations = new Map<string, SourceLocation>();
+      for (const nestedItem of item.value.items) {
+        if (!isPair(nestedItem)) continue;
+        const nestedKey = getScalarString(nestedItem.key);
+        if (nestedKey === undefined) continue;
+        valueLocations.set(
+          nestedKey,
+          getNodeLocation(nestedItem.value ?? nestedItem.key, sourceFile, frontmatter)
+        );
+      }
+      fieldValueLocations.set(key, valueLocations);
     }
   }
 
-  return { fields: fieldLocations, items: fieldItemLocations };
+  return { fields: fieldLocations, items: fieldItemLocations, values: fieldValueLocations };
 }
 
 function getScalarString(node: unknown): string | undefined {
@@ -554,7 +571,8 @@ function parseFrontmatterFields(
   sourceFile: string,
   fallbackLocation: SourceLocation,
   fieldLocations: ReadonlyMap<string, SourceLocation>,
-  fieldItemLocations: ReadonlyMap<string, readonly SourceLocation[]>
+  fieldItemLocations: ReadonlyMap<string, readonly SourceLocation[]>,
+  fieldValueLocations: ReadonlyMap<string, ReadonlyMap<string, SourceLocation>>
 ): ParsedSkillFrontmatter {
   const name = readOptionalString(
     fields,
@@ -613,7 +631,8 @@ function parseFrontmatterFields(
   const metadata = parseMetadataField(
     fields,
     sourceFile,
-    getFieldLocation('metadata', fieldLocations, fallbackLocation)
+    getFieldLocation('metadata', fieldLocations, fallbackLocation),
+    fieldValueLocations.get('metadata')
   );
   const allowedTools = parseAllowedToolsField(
     fields,
@@ -977,7 +996,8 @@ function readOptionalStringFromRecord(
 function parseMetadataField(
   fields: Record<string, unknown>,
   sourceFile: string,
-  location: SourceLocation
+  location: SourceLocation,
+  valueLocations: ReadonlyMap<string, SourceLocation> | undefined
 ): Record<string, string> | undefined {
   if (!Object.hasOwn(fields, 'metadata')) return undefined;
   const value = fields['metadata'];
@@ -988,7 +1008,11 @@ function parseMetadataField(
   const metadata = createSafeRecord<string>();
   for (const [key, item] of Object.entries(value)) {
     if (typeof item !== 'string') {
-      throw frontmatterError(`metadata value "${key}" must be a string`, sourceFile, location);
+      throw frontmatterError(
+        `metadata value "${key}" must be a string; quote scalar values (for example, 16 as "16")`,
+        sourceFile,
+        valueLocations?.get(key) ?? location
+      );
     }
     metadata[key] = item;
   }

@@ -1315,7 +1315,8 @@ export class Resolver {
       }
       errors.push(
         new ResolveError(
-          `Failed to resolve parent: ${err instanceof Error ? err.message : String(err)}`
+          `Failed to resolve parent: ${err instanceof Error ? err.message : String(err)}`,
+          err instanceof ResolveError ? err.location : undefined
         )
       );
     }
@@ -1447,7 +1448,8 @@ export class Resolver {
         }
         errors.push(
           new ResolveError(
-            `Failed to resolve import: ${err instanceof Error ? err.message : String(err)}`
+            `Failed to resolve import: ${err instanceof Error ? err.message : String(err)}`,
+            err instanceof ResolveError ? err.location : undefined
           )
         );
       }

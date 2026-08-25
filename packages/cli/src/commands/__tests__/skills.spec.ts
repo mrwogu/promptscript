@@ -3877,6 +3877,38 @@ describe('skillsUpdateCommand frontmatter re-validation', () => {
     );
   });
 
+  it('reports parser diagnostics with the remote skill path', async () => {
+    arrangeLock();
+    mockValidateSkillFrontmatter.mockReturnValue({
+      valid: false,
+      issues: [
+        {
+          severity: 'error',
+          code: 'SK000',
+          message: 'invalid metadata',
+          location: {
+            file: '/tmp/prs-skill-validate-xyz/skills/foo/SKILL.md',
+            line: 5,
+            column: 12,
+          },
+        },
+      ],
+    });
+    mockFormatSkillValidationIssues.mockReturnValue('✗ SK000: invalid metadata');
+
+    await skillsUpdateCommand(undefined, {});
+
+    expect(mockFormatSkillValidationIssues).toHaveBeenCalledWith([
+      expect.objectContaining({
+        location: {
+          file: 'github.com/org/repo/skills/foo/SKILL.md',
+          line: 5,
+          column: 12,
+        },
+      }),
+    ]);
+  });
+
   it('updates shared-repository skills atomically', async () => {
     const lockContent = JSON.stringify({
       version: 1,

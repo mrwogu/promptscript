@@ -254,6 +254,11 @@ function extractSkillFilePath(source: string): string {
   return subPath.toLowerCase().endsWith('.md') ? subPath : `${subPath}/SKILL.md`;
 }
 
+function getRemoteSkillDiagnosticPath(source: string): string {
+  const sourcePath = parseSkillSource(source).path.replace(/^https?:\/\//i, '');
+  return sourcePath.toLowerCase().endsWith('.md') ? sourcePath : `${sourcePath}/SKILL.md`;
+}
+
 /**
  * Derive the on-disk skill folder name from a source path. Skills are written
  * to `<format-dir>/skills/<name>/SKILL.md` where `<name>` is the basename of
@@ -377,7 +382,11 @@ async function fetchAndValidateRemoteSkill(
       filePath,
       existingNames: options.existingNames,
     });
-    return { content, integrity, valid: result.valid, issues: result.issues };
+    const diagnosticPath = getRemoteSkillDiagnosticPath(source);
+    const issues = result.issues.map((issue) =>
+      issue.location ? { ...issue, location: { ...issue.location, file: diagnosticPath } } : issue
+    );
+    return { content, integrity, valid: result.valid, issues };
   } finally {
     await rm(tmp, { recursive: true, force: true }).catch(() => {
       // best-effort cleanup
