@@ -15,7 +15,7 @@
     "@promptscript/core": "workspace:^",
     "@promptscript/formatters": "workspace:^",
     "@testing-library/jest-dom": "^7.0.1",
-    "@testing-library/react": "^16.0.0",
+    "@testing-library/react": "^16.3.3",
     "lz-string": "^1.5.0",
     "monaco-editor": "^0.56.0",
     "react": "^19.2.8",
