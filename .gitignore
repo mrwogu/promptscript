@@ -67,6 +67,7 @@ temp/
 /typings
 .claude/plans
 .claude/*.local.*
+.worktrees/
 
 # Claude-mem context files (subdirectory CLAUDE.md, not root)
 **/CLAUDE.md

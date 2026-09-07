@@ -1,5 +1,7 @@
 import { basename, dirname, join } from 'path';
 import { existsSync } from 'fs';
+import { ResolveError } from '@promptscript/core';
+import type { SourceLocation } from '@promptscript/core';
 import { extractSkillFrontmatter, parseSkillMd, type ParsedSkillMd } from './skills.js';
 
 /**
@@ -19,6 +21,8 @@ export interface SkillValidationIssue {
   message: string;
   /** Frontmatter field the issue relates to (when applicable) */
   field?: string;
+  /** Source location for parser and frontmatter diagnostics, when available */
+  location?: SourceLocation;
 }
 
 /**
@@ -76,11 +80,15 @@ export function validateSkillFrontmatter(
   try {
     parsed = parseSkillMd(rawContent, options.filePath);
   } catch (error: unknown) {
-    issues.push({
+    const issue: SkillValidationIssue = {
       severity: 'error',
       code: 'SK000',
       message: error instanceof Error ? error.message : String(error),
-    });
+    };
+    if (error instanceof ResolveError && error.location) {
+      issue.location = error.location;
+    }
+    issues.push(issue);
     return { valid: false, issues };
   }
 
@@ -316,7 +324,10 @@ export function formatSkillValidationIssues(issues: readonly SkillValidationIssu
     .map((i) => {
       const tag = i.severity === 'error' ? '✗' : '⚠';
       const field = i.field ? ` [${i.field}]` : '';
-      return `  ${tag} ${i.code}${field}: ${i.message}`;
+      const location = i.location
+        ? ` (at ${i.location.file}:${i.location.line}:${i.location.column})`
+        : '';
+      return `  ${tag} ${i.code}${field}: ${i.message}${location}`;
     })
     .join('\n');
 }

@@ -334,6 +334,33 @@ describe('validateSkillFrontmatter', () => {
       expect(result.valid).toBe(false);
     });
   });
+
+  it('preserves frontmatter parser locations in SK000 issues', () => {
+    const filePath = '/tmp/skills/example/SKILL.md';
+    const content = [
+      '---',
+      'name: example',
+      'description: Example skill',
+      'metadata:',
+      '  version: 16',
+      '---',
+      'Body',
+    ].join('\n');
+
+    const result = validateSkillFrontmatter(content, { filePath });
+
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({
+        code: 'SK000',
+        location: {
+          file: filePath,
+          line: 5,
+          column: 12,
+          offset: content.indexOf('16'),
+        },
+      })
+    );
+  });
 });
 
 describe('formatSkillValidationIssues', () => {
@@ -351,5 +378,18 @@ describe('formatSkillValidationIssues', () => {
       { severity: 'error', code: 'SK001', message: 'no frontmatter' },
     ]);
     expect(formatted).toBe('  ✗ SK001: no frontmatter');
+  });
+
+  it('formats source locations when provided', () => {
+    const formatted = formatSkillValidationIssues([
+      {
+        severity: 'error',
+        code: 'SK000',
+        message: 'invalid metadata',
+        location: { file: 'github.com/org/repo/SKILL.md', line: 27, column: 12 },
+      },
+    ]);
+
+    expect(formatted).toContain('at github.com/org/repo/SKILL.md:27:12');
   });
 });

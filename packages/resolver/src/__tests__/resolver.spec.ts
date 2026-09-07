@@ -454,5 +454,47 @@ describe('Resolver', () => {
         )
       ).toBe(true);
     });
+
+    it('should preserve imported skill frontmatter locations', async () => {
+      const directory = mkdtempSync(join(tmpdir(), 'promptscript-resolver-frontmatter-'));
+      const entryPath = join(directory, 'project.prs');
+      const skillDirectory = join(directory, 'remote-skill');
+      const skillPath = join(skillDirectory, 'SKILL.md');
+      const skillContent = [
+        '---',
+        'name: remote-skill',
+        'description: Use when testing imported metadata.',
+        'metadata:',
+        '  version: 16',
+        '---',
+        'Body',
+      ].join('\n');
+      mkdirSync(skillDirectory, { recursive: true });
+      writeFileSync(entryPath, '@use ./remote-skill\n');
+      writeFileSync(skillPath, skillContent);
+
+      try {
+        const localResolver = new Resolver({
+          registryPath: directory,
+          localPath: directory,
+          cache: false,
+        });
+        const result = await localResolver.resolve(entryPath);
+
+        expect(result.errors).toContainEqual(
+          expect.objectContaining({
+            message: expect.stringContaining('Failed to resolve import'),
+            location: {
+              file: skillPath,
+              line: 5,
+              column: 12,
+              offset: skillContent.indexOf('16'),
+            },
+          })
+        );
+      } finally {
+        rmSync(directory, { recursive: true, force: true });
+      }
+    });
   });
 });
