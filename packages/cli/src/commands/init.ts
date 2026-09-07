@@ -234,6 +234,7 @@ async function runInitCommand(options: InitOptions, services: CliServices): Prom
     }
 
     let migrationPrompt: string | undefined;
+    let migrationPromptCopied = false;
     if (migrationMode === 'llm') {
       migrationPrompt = prepareLlmMigration(aiToolsDetection.migrationCandidates, options);
       writes.push({ path: '.promptscript/migration-prompt.md', content: migrationPrompt });
@@ -281,7 +282,7 @@ async function runInitCommand(options: InitOptions, services: CliServices): Prom
     }
 
     if (migrationPrompt) {
-      deliverMigrationPrompt(migrationPrompt);
+      migrationPromptCopied = deliverMigrationPrompt(migrationPrompt);
     }
 
     // Install auto-compile hooks for the selected targets unless --no-hooks.
@@ -362,13 +363,17 @@ async function runInitCommand(options: InitOptions, services: CliServices): Prom
     ConsoleOutput.stats('Next steps:');
 
     if (migrationMode === 'llm') {
-      ConsoleOutput.muted('1. Use the migration skill in your AI tool:');
-      const skillInvocations = getSkillInvocationHints(config.targets);
-      for (const hint of skillInvocations) {
-        ConsoleOutput.muted(`   ${hint}`);
+      ConsoleOutput.info('1. Start your AI agent in this project');
+      if (migrationPromptCopied) {
+        ConsoleOutput.info('2. Paste the migration prompt - it is already in your clipboard');
+      } else {
+        ConsoleOutput.info(
+          '2. Copy the migration prompt from the terminal output and paste it into your agent'
+        );
       }
-      ConsoleOutput.muted('2. Review generated .promptscript/project.prs');
-      ConsoleOutput.muted('3. Run: prs compile');
+      ConsoleOutput.info('3. Let the agent migrate your instructions');
+      ConsoleOutput.info('4. Review the generated files, then run: prs validate --strict');
+      ConsoleOutput.info('5. Run: prs compile');
     } else if (migrationMode === 'static') {
       ConsoleOutput.muted('1. Review imported .promptscript/ files');
       ConsoleOutput.muted('2. Run: prs validate --strict');
@@ -549,7 +554,7 @@ function prepareLlmMigration(candidates: MigrationCandidate[], options: InitOpti
   );
 }
 
-function deliverMigrationPrompt(prompt: string): void {
+function deliverMigrationPrompt(prompt: string): boolean {
   const copied = copyToClipboard(prompt);
   if (copied) {
     ConsoleOutput.success('Migration prompt copied to clipboard!');
@@ -557,6 +562,7 @@ function deliverMigrationPrompt(prompt: string): void {
     console.log(prompt);
   }
   ConsoleOutput.info('Saved to .promptscript/migration-prompt.md');
+  return copied;
 }
 
 export function getSkillWrites(targets: AIToolTarget[]): PlannedWrite[] {
@@ -1015,23 +1021,6 @@ function getTargetSkillDir(
 
   const dir = `${basePath}/${skillName}`;
   return { dir, path: `${dir}/${fileName}` };
-}
-
-/**
- * Get skill invocation hints for the selected targets.
- * Only shows tools that support skills (SKILL.md discovery).
- */
-function getSkillInvocationHints(targets: AIToolTarget[]): string[] {
-  const hints: string[] = [];
-
-  for (const target of targets) {
-    const formatter = FormatterRegistry.get(target);
-    if (formatter && formatter.getSkillBasePath()) {
-      hints.push(`${formatter.description}: /promptscript`);
-    }
-  }
-
-  return hints;
 }
 
 /**
