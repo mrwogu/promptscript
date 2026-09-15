@@ -531,6 +531,9 @@
             },
             "hermes": {
               "$ref": "#/definitions/TargetConfig"
+            },
+            "gitlab-duo": {
+              "$ref": "#/definitions/TargetConfig"
             }
           },
           "additionalProperties": {
@@ -602,7 +605,8 @@
         "mimo",
         "deep-agents",
         "forgecode",
-        "hermes"
+        "hermes",
+        "gitlab-duo"
       ],
       "description": "Known built-in output targets. These are the targets with first-class formatter support."
     },

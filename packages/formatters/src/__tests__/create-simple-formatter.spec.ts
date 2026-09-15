@@ -139,6 +139,20 @@ describe('createSimpleMarkdownFormatter', () => {
       expect(new Formatter().getSkillBasePath()).toBe('.myagent/skills');
     });
 
+    it('should override skill base path with skillsDir', () => {
+      const { Formatter, VERSIONS } = createSimpleMarkdownFormatter({
+        name: 'my-agent',
+        outputPath: 'AGENTS.md',
+        description: 'My Agent rules',
+        mainFileHeader: '# Rules',
+        dotDir: '.myagent',
+        skillsDir: 'skills',
+      });
+
+      expect(new Formatter().getSkillBasePath()).toBe('skills');
+      expect(VERSIONS.full.description).toContain('skills/<name>/SKILL.md');
+    });
+
     it('should set skill file name to SKILL.md by default', () => {
       const { Formatter } = createSimpleMarkdownFormatter({
         name: 'my-agent',

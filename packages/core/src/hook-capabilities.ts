@@ -299,6 +299,7 @@ export const HOOK_CAPABILITIES = {
   'deep-agents': UNSUPPORTED_CAPABILITY,
   forgecode: UNSUPPORTED_CAPABILITY,
   hermes: UNSUPPORTED_CAPABILITY,
+  'gitlab-duo': UNSUPPORTED_CAPABILITY,
 } as const satisfies Record<KnownTarget, HookCapability>;
 
 export const VSCODE_HOOK_CAPABILITY: HookCapability = {

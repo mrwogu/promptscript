@@ -184,6 +184,7 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
 | Deep Agents                   | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | Devin                         | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | ForgeCode                     | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| GitLab Duo                    | Tier 3 | `AGENTS.md`                       | Yes    | No     | No    | No       |
 | Grok                          | Tier 3 | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
 | Hermes Agent                  | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | iFlow                         | Tier 3 | `.iflow/rules/project.md`         | Yes    | No     | No    | No       |

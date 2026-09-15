@@ -118,6 +118,8 @@ export interface MarkdownFormatterConfig {
   hasSkills: boolean;
   /** Whether skills are included in multifile mode (default: false, only in full) */
   skillsInMultifile?: boolean;
+  /** Skill directory override (default: `<dotDir>/skills`) */
+  skillsDir?: string;
   /** Custom section header names */
   sectionNames?: Partial<Record<SectionNameKey, string>>;
   /** Transform function for restriction items */
@@ -168,7 +170,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
   override getSkillBasePath(): string | null {
     if (!this.config.hasSkills) return null;
-    return `${this.config.dotDir}/skills`;
+    return this.config.skillsDir ?? `${this.config.dotDir}/skills`;
   }
 
   override getSkillFileName(): string | null {

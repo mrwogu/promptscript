@@ -573,6 +573,20 @@ const TARGET_DEFINITION_BASE = {
       hasCommands: false,
     },
   },
+  // GitLab Duo (Agent Platform)
+  'gitlab-duo': {
+    name: 'gitlab-duo',
+    outputPath: DEFAULT_OUTPUT_PATHS['gitlab-duo'],
+    family: 'simple',
+    skillPath: { basePath: 'skills', fileName: 'SKILL.md' },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'full',
+      hasSkills: true,
+      hasAgents: false,
+      hasCommands: false,
+    },
+  },
   // AGENTS.md-only targets
   aider: {
     name: 'aider',

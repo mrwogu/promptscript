@@ -55,6 +55,7 @@ import { MimoFormatter } from '../formatters/mimo.js';
 import { DeepAgentsFormatter } from '../formatters/deep-agents.js';
 import { ForgecodeFormatter } from '../formatters/forgecode.js';
 import { HermesFormatter } from '../formatters/hermes.js';
+import { GitlabDuoFormatter } from '../formatters/gitlab-duo.js';
 import type { Formatter } from '../types.js';
 import {
   PARITY_MATRIX,
@@ -351,6 +352,7 @@ describe('Parity Matrix Tests', () => {
     formatters.set('deep-agents', new DeepAgentsFormatter());
     formatters.set('forgecode', new ForgecodeFormatter());
     formatters.set('hermes', new HermesFormatter());
+    formatters.set('gitlab-duo', new GitlabDuoFormatter());
   });
 
   afterEach(() => {
@@ -580,6 +582,7 @@ describe('Parity Matrix Tests', () => {
         'iflow',
         'openclaw',
         'codebuddy',
+        'gitlab-duo',
       ];
 
       for (const name of markdownFormatters) {
@@ -917,6 +920,7 @@ No technology mentioned here at all.
         'iflow',
         'openclaw',
         'codebuddy',
+        'gitlab-duo',
       ];
 
       for (const name of tier3) {
@@ -962,6 +966,7 @@ No technology mentioned here at all.
         'iflow',
         'openclaw',
         'codebuddy',
+        'gitlab-duo',
       ];
 
       for (const name of tier123) {

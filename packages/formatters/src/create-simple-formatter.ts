@@ -44,6 +44,8 @@ export interface SimpleFormatterOptions {
   hasSkills?: boolean;
   /** Skill file name (default: 'SKILL.md') */
   skillFileName?: string;
+  /** Skill directory override (default: `<dotDir>/skills`) */
+  skillsDir?: string;
   /** MCP config file path. If set, @mcpServers block is emitted to this path. */
   mcpConfigPath?: string;
   /** MCP config format (default: 'json') */
@@ -76,13 +78,14 @@ function buildVersions(
   hasAgents: boolean,
   hasCommands: boolean,
   skillFileName: string,
-  mcpConfigPath?: string
+  mcpConfigPath?: string,
+  skillsDir?: string
 ): SimpleFormatterVersions {
   // Determine whether the outputPath looks like a file inside a dotDir
   // (e.g. '.windsurf/rules/project.md') or a standalone file (e.g. 'AGENTS.md').
   const isNested = outputPath.startsWith(dotDir + '/');
   const simpleDesc = `Single ${outputPath} file`;
-  const skillPath = `${dotDir}/skills/<name>/${skillFileName}`;
+  const skillPath = `${skillsDir ?? `${dotDir}/skills`}/<name>/${skillFileName}`;
   const commandPath = `${dotDir}/commands/<name>.md`;
   const agentPath = `${dotDir}/agents/<name>.md`;
 
@@ -158,6 +161,7 @@ export function createSimpleMarkdownFormatter(opts: SimpleFormatterOptions): Sim
     mcpConfigPath,
     mcpConfigFormat,
     unsupportedBlocks,
+    skillsDir,
   } = opts;
 
   const versions = buildVersions(
@@ -167,7 +171,8 @@ export function createSimpleMarkdownFormatter(opts: SimpleFormatterOptions): Sim
     hasAgents,
     hasCommands,
     skillFileName,
-    mcpConfigPath
+    mcpConfigPath,
+    skillsDir
   );
 
   // Create a named class so `formatter.constructor.name` is meaningful.
@@ -184,6 +189,7 @@ export function createSimpleMarkdownFormatter(opts: SimpleFormatterOptions): Sim
         hasAgents,
         hasCommands,
         hasSkills,
+        ...(skillsDir ? { skillsDir } : {}),
         ...(mcpConfigPath ? { mcpConfigPath } : {}),
         ...(mcpConfigFormat ? { mcpConfigFormat } : {}),
         ...(unsupportedBlocks ? { unsupportedBlocks } : {}),

@@ -70,6 +70,7 @@ import { MimoFormatter } from './formatters/mimo.js';
 import { DeepAgentsFormatter } from './formatters/deep-agents.js';
 import { ForgecodeFormatter } from './formatters/forgecode.js';
 import { HermesFormatter } from './formatters/hermes.js';
+import { GitlabDuoFormatter } from './formatters/gitlab-duo.js';
 
 /**
  * Exhaustive map of built-in target names to their formatter classes.
@@ -132,4 +133,6 @@ export const BUILTIN_FORMATTERS = {
   'deep-agents': DeepAgentsFormatter,
   forgecode: ForgecodeFormatter,
   hermes: HermesFormatter,
+  // GitLab Duo (Agent Platform)
+  'gitlab-duo': GitlabDuoFormatter,
 } as const satisfies Record<KnownTarget, FormatterClass>;

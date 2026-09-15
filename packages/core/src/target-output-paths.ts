@@ -62,6 +62,8 @@ const DEFAULT_OUTPUT_PATH_VALUES = {
   'deep-agents': 'AGENTS.md',
   forgecode: 'AGENTS.md',
   hermes: 'AGENTS.md',
+  // GitLab Duo (Agent Platform)
+  'gitlab-duo': 'AGENTS.md',
 } as const satisfies Record<KnownTarget, string>;
 
 export const DEFAULT_OUTPUT_PATHS: typeof DEFAULT_OUTPUT_PATH_VALUES & DefaultOutputPathMap =

@@ -74,6 +74,7 @@ Targets using platform-specific instruction paths with shared rendering:
 - iFlow
 - OpenClaw
 - CodeBuddy
+- GitLab Duo
 
 ## Configure Targets
 

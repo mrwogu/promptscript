@@ -566,6 +566,7 @@ describe('FormatterRegistry', () => {
         'openclaw',
         'codebuddy',
         'hermes',
+        'gitlab-duo',
       ];
 
       // Assert

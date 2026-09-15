@@ -112,6 +112,8 @@ describe('TargetName branded type', () => {
         'deep-agents',
         'forgecode',
         'hermes',
+        // GitLab Duo (Agent Platform)
+        'gitlab-duo',
       ];
 
       // Assert

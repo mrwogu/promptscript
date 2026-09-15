@@ -98,6 +98,7 @@ const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
   iflow: 'iFlow',
   forgecode: 'ForgeCode',
   hermes: 'Hermes Agent',
+  'gitlab-duo': 'GitLab Duo',
 };
 
 const DEDICATED_PAGES = new Set([

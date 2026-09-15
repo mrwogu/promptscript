@@ -105,3 +105,7 @@ export { ForgecodeFormatter, FORGECODE_VERSIONS } from './forgecode.js';
 export type { ForgecodeVersion } from './forgecode.js';
 export { HermesFormatter, HERMES_VERSIONS } from './hermes.js';
 export type { HermesVersion } from './hermes.js';
+
+// GitLab Duo (Agent Platform)
+export { GitlabDuoFormatter, GITLAB_DUO_VERSIONS } from './gitlab-duo.js';
+export type { GitlabDuoVersion } from './gitlab-duo.js';

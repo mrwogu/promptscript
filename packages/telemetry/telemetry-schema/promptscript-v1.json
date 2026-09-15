@@ -78,7 +78,8 @@
     "mimo",
     "deep-agents",
     "forgecode",
-    "hermes"
+    "hermes",
+    "gitlab-duo"
   ],
   "limits": {
     "maxEvents": 25,

@@ -488,6 +488,7 @@ platform families and [Supported Formatters](formatters/index.md) for the full c
 | `iflow`        | `.iflow/rules/project.md`         | `markdown`         | simple / multifile / full                      |
 | `openclaw`     | `INSTRUCTIONS.md`                 | `markdown`         | simple / multifile / full                      |
 | `codebuddy`    | `.codebuddy/rules/project.md`     | `markdown`         | simple / multifile / full                      |
+| `gitlab-duo`   | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `aider`        | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `amazon-q`     | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `warp`         | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
