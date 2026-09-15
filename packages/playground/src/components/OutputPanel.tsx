@@ -48,6 +48,7 @@ const FORMATTERS: { name: FormatterName; label: string; icon: string }[] = [
   { name: 'openclaw', label: 'OpenClaw', icon: '🦀' },
   { name: 'codebuddy', label: 'CodeBuddy', icon: '👥' },
   { name: 'hermes', label: 'Hermes Agent', icon: 'H' },
+  { name: 'gitlab-duo', label: 'GitLab Duo', icon: '🦊' },
 ];
 
 function CopyButton({ content }: { content: string }) {

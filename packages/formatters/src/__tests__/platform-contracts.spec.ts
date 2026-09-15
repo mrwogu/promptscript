@@ -101,6 +101,7 @@ describe('Platform contract fixture integrity', () => {
       'priority-b/deep-agents',
       'priority-b/forgecode',
       'priority-b/hermes',
+      'gitlab-duo',
     ];
     for (const dir of expectedDirs) {
       const indexPath = join(FIXTURES_DIR, dir, 'INDEX.md');

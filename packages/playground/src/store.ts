@@ -490,6 +490,7 @@ export const selectOutputsForFormatter = (
     'deep-agents': [/^AGENTS\.md$/],
     forgecode: [/^AGENTS\.md$/],
     hermes: [/^AGENTS\.md$/],
+    'gitlab-duo': [/^AGENTS\.md$/, /^skills\/.*\.md$/],
   };
 
   const patterns = formatterPatterns[formatter];
@@ -551,6 +552,7 @@ export const selectOutputsForFormatter = (
     'deep-agents': 'AGENTS.md',
     forgecode: 'AGENTS.md',
     hermes: 'AGENTS.md',
+    'gitlab-duo': 'AGENTS.md',
   };
 
   const mainPattern = mainFilePatterns[formatter];

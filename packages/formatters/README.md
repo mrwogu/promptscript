@@ -2,7 +2,7 @@
 
 > **Internal package** - Part of the [PromptScript](https://github.com/mrwogu/promptscript) monorepo.
 
-Output formatters for 49 AI coding targets.
+Output formatters for 50 AI coding targets.
 
 ## Supported Formatters
 
@@ -63,6 +63,7 @@ Output formatters for 49 AI coding targets.
 | iFlow        | `.iflow/rules/project.md`       |
 | OpenClaw     | `INSTRUCTIONS.md`               |
 | CodeBuddy    | `.codebuddy/rules/project.md`   |
+| GitLab Duo   | `AGENTS.md`                     |
 
 **AGENTS.md targets:**
 
@@ -94,7 +95,7 @@ Formatter (interface)
         |
         +-- MarkdownInstructionFormatter (abstract)
         |     |
-        |     +-- 41 shared markdown target formatters (Windsurf, Cline, ...)
+        |     +-- 42 shared markdown target formatters (Windsurf, Cline, ...)
         |
         +-- GitHubFormatter, ClaudeFormatter, CursorFormatter, ...
 ```

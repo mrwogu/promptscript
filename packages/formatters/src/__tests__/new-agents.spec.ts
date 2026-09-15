@@ -39,6 +39,7 @@ import { AdalFormatter, ADAL_VERSIONS } from '../formatters/adal.js';
 import { IflowFormatter, IFLOW_VERSIONS } from '../formatters/iflow.js';
 import { OpenClawFormatter, OPENCLAW_VERSIONS } from '../formatters/openclaw.js';
 import { CodeBuddyFormatter, CODEBUDDY_VERSIONS } from '../formatters/codebuddy.js';
+import { GitlabDuoFormatter, GITLAB_DUO_VERSIONS } from '../formatters/gitlab-duo.js';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',
@@ -374,6 +375,15 @@ const NEW_FORMATTERS = [
     description: 'CodeBuddy rules (Markdown)',
     mainHeader: '# Project Rules',
     dotDir: '.codebuddy',
+  },
+  {
+    name: 'gitlab-duo',
+    Formatter: GitlabDuoFormatter,
+    VERSIONS: GITLAB_DUO_VERSIONS,
+    outputPath: 'AGENTS.md',
+    description: 'GitLab Duo instructions (Markdown)',
+    mainHeader: '# AGENTS.md',
+    dotDir: '.gitlab-duo',
   },
 ];
 

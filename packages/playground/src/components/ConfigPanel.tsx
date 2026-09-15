@@ -212,6 +212,11 @@ const TARGET_INFO: Record<
   },
   forgecode: { label: 'ForgeCode', versions: ['simple', 'multifile', 'full'], supportsXml: false },
   hermes: { label: 'Hermes Agent', versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  'gitlab-duo': {
+    label: 'GitLab Duo',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
 };
 
 const POPULAR_TARGETS: FormatterName[] = [

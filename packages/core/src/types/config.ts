@@ -516,7 +516,9 @@ export type KnownTarget =
   | 'mimo'
   | 'deep-agents'
   | 'forgecode'
-  | 'hermes';
+  | 'hermes'
+  // GitLab Duo (Agent Platform)
+  | 'gitlab-duo';
 
 /**
  * Branded type for custom (user-registered) target names.
@@ -596,6 +598,8 @@ export const KNOWN_TARGETS: readonly KnownTarget[] = [
   'deep-agents',
   'forgecode',
   'hermes',
+  // GitLab Duo (Agent Platform)
+  'gitlab-duo',
 ] as const;
 
 /**

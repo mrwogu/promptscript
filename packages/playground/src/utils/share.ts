@@ -87,6 +87,7 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
     'deep-agents': { enabled: false, version: 'simple' },
     forgecode: { enabled: false, version: 'simple' },
     hermes: { enabled: false, version: 'simple' },
+    'gitlab-duo': { enabled: false, version: 'full' },
   },
   formatting: {
     tabWidth: 2,

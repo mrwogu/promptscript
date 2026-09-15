@@ -1413,6 +1413,21 @@ const VERSION_CAPABILITIES: Readonly<Record<KnownTarget, TargetVersionData>> = {
       full: { name: 'full', description: 'Single AGENTS.md file', outputPath: 'AGENTS.md' },
     },
   },
+  'gitlab-duo': {
+    versions: {
+      simple: { name: 'simple', description: 'Single AGENTS.md file', outputPath: 'AGENTS.md' },
+      multifile: {
+        name: 'multifile',
+        description: 'Single AGENTS.md file (skills via full mode)',
+        outputPath: 'AGENTS.md',
+      },
+      full: {
+        name: 'full',
+        description: 'Multifile + skills/<name>/SKILL.md',
+        outputPath: 'AGENTS.md',
+      },
+    },
+  },
 };
 
 export interface TargetCapabilitySeed {

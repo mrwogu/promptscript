@@ -55,6 +55,7 @@ import { MimoFormatter } from '../formatters/mimo.js';
 import { DeepAgentsFormatter } from '../formatters/deep-agents.js';
 import { ForgecodeFormatter } from '../formatters/forgecode.js';
 import { HermesFormatter } from '../formatters/hermes.js';
+import { GitlabDuoFormatter } from '../formatters/gitlab-duo.js';
 import {
   extractSectionsFromOutput,
   normalizeSectionName,
@@ -291,6 +292,7 @@ function buildAllFormatters(): Formatter[] {
     new DeepAgentsFormatter(),
     new ForgecodeFormatter(),
     new HermesFormatter(),
+    new GitlabDuoFormatter(),
   ];
 }
 
@@ -508,6 +510,7 @@ describe('Formatter Parity Tests', () => {
       ['iflow'],
       ['openclaw'],
       ['codebuddy'],
+      ['gitlab-duo'],
     ])('%s formatter should produce identity content', (formatterName) => {
       const ast = createComprehensiveAST();
       const formatter = formatters.find((f) => f.name === formatterName)!;
@@ -560,6 +563,7 @@ describe('Formatter Parity Tests', () => {
       ['iflow'],
       ['openclaw'],
       ['codebuddy'],
+      ['gitlab-duo'],
     ])('%s formatter should produce restrictions content', (formatterName) => {
       const ast = createComprehensiveAST();
       const formatter = formatters.find((f) => f.name === formatterName)!;

@@ -63,6 +63,7 @@ import { MimoFormatter } from '../formatters/mimo.js';
 import { DeepAgentsFormatter } from '../formatters/deep-agents.js';
 import { ForgecodeFormatter } from '../formatters/forgecode.js';
 import { HermesFormatter } from '../formatters/hermes.js';
+import { GitlabDuoFormatter } from '../formatters/gitlab-duo.js';
 import type { Formatter, FormatOptions } from '../types.js';
 
 /**
@@ -935,6 +936,14 @@ describe('Golden Files Tests', () => {
       extension: 'md',
       options: { version: 'simple' },
     },
+    {
+      name: 'gitlab-duo',
+      formatter: new GitlabDuoFormatter(),
+      version: 'simple',
+      goldenFile: 'gitlab-duo/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
   ];
 
   // Legacy configs for backward compatibility tests (Tier 0 only)
@@ -1519,6 +1528,7 @@ describe('Golden Files Tests', () => {
         new DeepAgentsFormatter(),
         new ForgecodeFormatter(),
         new HermesFormatter(),
+        new GitlabDuoFormatter(),
       ];
 
       expect(allFormatters.length).toBe(KNOWN_TARGETS.length);
