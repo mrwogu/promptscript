@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-08-16T08:50:28.851Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-09-16T18:27:53.967Z | source: .promptscript/project.prs | target: factory
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -9,7 +9,7 @@ description: >-
   promptscript.yaml, resolving compilation errors, understanding inheritance
   (@inherit), composition (@use, @extend, @override), contextual @header
   metadata, or migrating AI instructions
-  to PromptScript. Also use when asked about the 49 built-in compilation
+  to PromptScript. Also use when asked about the 50 built-in compilation
   targets, including GitHub Copilot, Claude Code, Cursor, Antigravity,
   Factory AI, and AGENTS.md-based platforms.
 user-invocable: true
@@ -1159,7 +1159,7 @@ writes when no candidates are detected.
 
 ## Output Targets
 
-49 supported targets. Key examples:
+50 supported targets. Key examples:
 
 | Target      | Main File                       | Skills                                             |
 | ----------- | ------------------------------- | -------------------------------------------------- |
@@ -1188,10 +1188,10 @@ case-insensitively and NFC-normalized on every platform.
 
 For detailed information about each formatter's output paths, supported features, quirks, and example outputs:
 
-- **Full formatter reference:** `docs/reference/formatters/` (7 dedicated pages + index of all 49)
+- **Full formatter reference:** `docs/reference/formatters/` (7 dedicated pages + index of all 50)
 - **llms-full.txt:** Available at the docs site root - contains all documentation in a single file for LLM consumption
 - **Dedicated pages exist for:** Claude Code, GitHub Copilot, Cursor, Antigravity, Factory AI, Gemini CLI, OpenCode
-- **All 49 formatters indexed at:** `docs/reference/formatters/index.md` with output paths, tier, and feature flags
+- **All 50 formatters indexed at:** `docs/reference/formatters/index.md` with output paths, tier, and feature flags
 
 ### Auto-Compilation Hooks
 
