@@ -304,6 +304,7 @@ registry:
 | `git.fallbackUrl`      | string  | -         | Fallback URL (tried on auth failure) |
 | `git.ref`              | string  | `main`    | Branch, tag, or commit               |
 | `git.path`             | string  | -         | Subdirectory within the repo         |
+| `git.timeout`          | number  | `60000`   | Git operation timeout (ms)           |
 | `git.auth.type`        | string  | -         | Auth type: `token` or `ssh`          |
 | `git.auth.token`       | string  | -         | Personal access token (direct)       |
 | `git.auth.tokenEnvVar` | string  | -         | Env var containing the token         |
@@ -370,6 +371,7 @@ registries:
 | `url`           | string | Bare Git host path (extended form)             |
 | `fallbackUrl`   | string | Fallback Git URL (tried on auth failure)       |
 | `root`          | string | Base path within the repository                |
+| `timeout`       | number | Git operation timeout in ms (default 60000)    |
 
 #### Three-Level Merge
 
