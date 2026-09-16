@@ -58,3 +58,6 @@ export * from './git-timeout.js';
 // Shared output planning
 export * from './structured-output.js';
 export * from './output-plan.js';
+
+// Output resource classification
+export * from './output-resources.js';

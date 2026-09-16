@@ -225,6 +225,13 @@
         "overwrite": {
           "type": "boolean",
           "description": "Whether to overwrite existing files without warning"
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Compile only selected resource kinds (agents, skills, commands, mcp, hooks, plugins, main). A global install can emit agent and skill directories without unrelated root instruction files."
         }
       },
       "additionalProperties": false,

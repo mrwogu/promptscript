@@ -39,6 +39,13 @@ import {
 
 const program = new Command();
 
+/**
+ * Collect comma-separated --resources values into one list.
+ */
+function collectResourceKinds(value: string, previous: string[]): string[] {
+  return [...previous, ...value.split(',').map((item) => item.trim())].filter(Boolean);
+}
+
 program
   .name('prs')
   .description('PromptScript CLI - Standardize AI instructions')
@@ -128,6 +135,12 @@ program
   .option('-a, --all', 'All configured targets')
   .option('-w, --watch', 'Watch mode')
   .option('-o, --output <dir>', 'Output directory')
+  .option(
+    '--resources <items>',
+    'Compile only these resources (agents, skills, commands, mcp, hooks, plugins, main)',
+    collectResourceKinds,
+    [] as string[]
+  )
   .option('--dry-run', 'Preview changes')
   .option(
     '--no-migrate-factory-hooks',
@@ -148,6 +161,12 @@ program
   .option('-f, --format <format>', 'Output format (alias for --target)')
   .option('-w, --watch', 'Watch mode')
   .option('-o, --output <dir>', 'Output directory')
+  .option(
+    '--resources <items>',
+    'Compile only these resources (agents, skills, commands, mcp, hooks, plugins, main)',
+    collectResourceKinds,
+    [] as string[]
+  )
   .option('--dry-run', 'Preview changes')
   .option(
     '--no-migrate-factory-hooks',

@@ -331,6 +331,12 @@ export interface PromptScriptConfig {
     header?: string;
     /** Whether to overwrite existing files without warning */
     overwrite?: boolean;
+    /**
+     * Compile only selected resource kinds (agents, skills, commands, mcp,
+     * hooks, plugins, main). A global install can emit agent and skill
+     * directories without unrelated root instruction files.
+     */
+    resources?: string[];
   };
 
   /**
