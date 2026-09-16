@@ -1,4 +1,5 @@
 import type { ValidationRule } from '../types.js';
+import { isExternalLocation } from '../external-content.js';
 import type { Value } from '@promptscript/core';
 
 /** PRS block directives that should NOT appear in reference files */
@@ -47,11 +48,23 @@ export const safeReferenceContent: ValidationRule = {
         // Only check reference files (not all resources)
         if (!relPath.startsWith('references/') && !relPath.includes('/references/')) continue;
 
+        // Point at the file the content came from. Resources carry the
+        // absolute source path; without it fall back to the skills block loc.
+        const origin = res['origin'];
+        const location =
+          typeof origin === 'string'
+            ? { file: origin, line: 1, column: 1, offset: 0 }
+            : skillsBlock.loc;
+
+        // Imported reference files (registry cache / vendored skills) are not
+        // something the importing project can fix, so skip them by default.
+        if (isExternalLocation(location, ctx.config)) continue;
+
         const match = content.match(DIRECTIVE_PATTERN);
         if (match) {
           ctx.report({
             message: `Reference file "${relPath}" in skill "${skillName}" contains PRS directive '${match[1]}' — references should contain data, not instructions`,
-            location: skillsBlock.loc,
+            location,
             suggestion:
               'Remove PRS directives from reference files. References are data files, not PromptScript source.',
           });
