@@ -695,11 +695,10 @@ describe('skillsAddCommand', () => {
       false,
       'git@github.com:org/repo.git',
       undefined,
-      { timeout: 60_000 }
+      { timeout: undefined }
     );
     expect(mockCreateGitRegistry).toHaveBeenCalledWith({
       url: 'git@github.com:org/repo.git',
-      timeout: 60_000,
     });
   });
 
@@ -1228,7 +1227,7 @@ describe('skillsAddCommand', () => {
       false,
       undefined,
       undefined,
-      { timeout: 60_000 }
+      { timeout: undefined }
     );
   });
 
@@ -1254,7 +1253,7 @@ describe('skillsAddCommand', () => {
       false,
       undefined,
       undefined,
-      { timeout: 60_000 }
+      { timeout: undefined }
     );
   });
 
@@ -1291,7 +1290,7 @@ describe('skillsAddCommand', () => {
       false,
       undefined,
       undefined,
-      { timeout: 60_000 }
+      { timeout: undefined }
     );
     const lockWriteCall = mockWriteFile.mock.calls.find((call) =>
       String(call[0]).endsWith('promptscript.lock')
@@ -1334,7 +1333,7 @@ describe('skillsAddCommand', () => {
       false,
       undefined,
       undefined,
-      { timeout: 60_000 }
+      { timeout: undefined }
     );
     const lockWriteCall = mockWriteFile.mock.calls.find((call) =>
       String(call[0]).endsWith('promptscript.lock')
@@ -2476,7 +2475,7 @@ describe('skillsUpdateCommand', () => {
       true,
       undefined,
       undefined,
-      { timeout: 60_000 }
+      { timeout: undefined }
     );
   });
 
@@ -2683,7 +2682,6 @@ describe('skillsAddCommand frontmatter validation', () => {
 
     expect(mockCreateGitRegistry).toHaveBeenCalledWith({
       url: 'https://github.com/org/repo',
-      timeout: 60_000,
     });
     expect(mockCloneAtTag).toHaveBeenCalled();
     expect(mockSucceed).toHaveBeenCalledWith('Skill added');
@@ -3303,7 +3301,9 @@ describe('skillsAddCommand frontmatter validation', () => {
     expect(mockCloneAtTag).toHaveBeenCalledWith(
       'https://github.com/org/repo',
       'v1.2.3',
-      '/tmp/prs-skill-validate-xyz'
+      '/tmp/prs-skill-validate-xyz',
+      undefined,
+      'skills'
     );
     expect(mockCheckoutCommit).toHaveBeenCalledWith(
       '/tmp/prs-skill-validate-xyz',
@@ -3429,7 +3429,9 @@ describe('skillsAddCommand frontmatter validation', () => {
     expect(mockCloneAtTag).toHaveBeenCalledWith(
       'https://github.com/org/repo',
       undefined,
-      '/tmp/prs-skill-validate-xyz'
+      '/tmp/prs-skill-validate-xyz',
+      undefined,
+      'skills'
     );
     expect(mockCheckoutCommit).toHaveBeenCalledWith('/tmp/prs-skill-validate-xyz', commit);
   });

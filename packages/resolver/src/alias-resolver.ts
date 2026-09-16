@@ -236,3 +236,34 @@ export function findFallbackUrl(repoUrl: string, registries: RegistriesConfig): 
   }
   return undefined;
 }
+
+/**
+ * Find the extended registry entry for a given repository URL.
+ *
+ * Used when only the expanded `repoUrl` is available (from a registry marker)
+ * and the per-entry settings (e.g. `timeout`) are still needed.
+ *
+ * @param repoUrl - The primary repository URL to look up
+ * @param registries - Registry alias configuration to search
+ * @returns The extended entry if found, or undefined (simple string entries
+ *   and URL mismatches both return undefined)
+ *
+ * @example
+ * ```typescript
+ * findRegistryEntry('https://gitlab.com/company/monorepo.git', {
+ *   '@internal': { url: 'https://gitlab.com/company/monorepo.git', timeout: 600000 },
+ * });
+ * // { url: 'https://gitlab.com/company/monorepo.git', timeout: 600000 }
+ * ```
+ */
+export function findRegistryEntry(
+  repoUrl: string,
+  registries: RegistriesConfig
+): RegistryAliasEntry | undefined {
+  for (const entry of Object.values(registries)) {
+    if (typeof entry !== 'string' && entry.url === repoUrl) {
+      return entry;
+    }
+  }
+  return undefined;
+}

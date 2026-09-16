@@ -125,6 +125,8 @@ async function createRegistry(
       ref: gitRef ?? gitConfig.ref,
       path: gitConfig.path,
       auth: gitConfig.auth,
+      timeout: gitConfig.timeout,
+      fallbackUrl: gitConfig.fallbackUrl,
       cache: {
         enabled: !options.refresh && (config.registry.cache?.enabled ?? true),
         ttl: config.registry.cache?.ttl,

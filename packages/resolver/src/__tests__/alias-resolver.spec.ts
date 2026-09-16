@@ -4,6 +4,7 @@ import {
   validateAlias,
   validateRegistriesConfig,
   findFallbackUrl,
+  findRegistryEntry,
 } from '../alias-resolver.js';
 import { UnknownAliasError } from '@promptscript/core';
 
@@ -362,6 +363,65 @@ describe('alias-resolver', () => {
       };
 
       expect(findFallbackUrl('https://github.com/other/repo.git', registries)).toBeUndefined();
+    });
+  });
+
+  describe('findRegistryEntry', () => {
+    it('should find the extended entry for a matching repo URL', () => {
+      const registries = {
+        '@internal': {
+          url: 'https://gitlab.internal.com/company/monorepo.git',
+          root: 'packages/promptscript',
+          timeout: 600000,
+        },
+      };
+
+      expect(
+        findRegistryEntry('https://gitlab.internal.com/company/monorepo.git', registries)
+      ).toEqual({
+        url: 'https://gitlab.internal.com/company/monorepo.git',
+        root: 'packages/promptscript',
+        timeout: 600000,
+      });
+    });
+
+    it('should return undefined for string-only entries', () => {
+      const registries = {
+        '@acme': 'https://github.com/acme/standards.git',
+      };
+
+      expect(
+        findRegistryEntry('https://github.com/acme/standards.git', registries)
+      ).toBeUndefined();
+    });
+
+    it('should return undefined when repo URL is not found', () => {
+      const registries = {
+        '@internal': {
+          url: 'https://gitlab.internal.com/company/monorepo.git',
+          timeout: 600000,
+        },
+      };
+
+      expect(
+        findRegistryEntry('https://gitlab.internal.com/other/monorepo.git', registries)
+      ).toBeUndefined();
+    });
+
+    it('should keep searching after non-matching entries', () => {
+      const registries = {
+        '@first': {
+          url: 'https://github.com/acme/first.git',
+        },
+        '@second': {
+          url: 'https://github.com/acme/second.git',
+          timeout: 300000,
+        },
+      };
+
+      expect(findRegistryEntry('https://github.com/acme/second.git', registries)?.timeout).toBe(
+        300000
+      );
     });
   });
 });

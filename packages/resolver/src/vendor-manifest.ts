@@ -204,7 +204,8 @@ export async function verifyGitRepositoryCheckout(
   directory: string,
   gitDirectoryName: string,
   expectedCommit: string,
-  allowedUntrackedFiles: ReadonlySet<string> = new Set()
+  allowedUntrackedFiles: ReadonlySet<string> = new Set(),
+  options: { allowPartial?: boolean } = {}
 ): Promise<void> {
   const gitDir = join(directory, gitDirectoryName);
   async function rejectMetadataSymlinks(currentDirectory: string): Promise<void> {
@@ -248,11 +249,14 @@ export async function verifyGitRepositoryCheckout(
     'Vendor Git config'
   );
   const localConfig = localConfigContent.toString('utf-8');
+  // Partial clones (promisor remotes) are rejected for vendored repositories,
+  // which must stay self-contained. Registry caches may use partial clones
+  // (see issue #455), so `allowPartial` relaxes only the partial-clone checks.
   if (
     /^[ \t]*\[(?:include|includeif)\b/im.test(localConfig) ||
-    /\bpromisor\s*=\s*true\b/i.test(localConfig) ||
-    /\bpartialclone/i.test(localConfig) ||
-    /\bworktreeconfig\s*=\s*true\b/i.test(localConfig)
+    /\bworktreeconfig\s*=\s*true\b/i.test(localConfig) ||
+    (!options.allowPartial &&
+      (/\bpromisor\s*=\s*true\b/i.test(localConfig) || /\bpartialclone/i.test(localConfig)))
   ) {
     throw new Error(`External or partial Git object sources are not allowed: ${gitDir}`);
   }
@@ -437,7 +441,7 @@ export async function verifyGitRepositoryCheckout(
   await collectFiles(directory, '');
 
   if (
-    worktreeFileCount !== trackedFiles.size ||
+    (!options.allowPartial && worktreeFileCount !== trackedFiles.size) ||
     regularFiles.some((path) => !trackedFiles.has(path))
   ) {
     throw new Error(`Vendored repository contents do not match commit ${expectedCommit}`);

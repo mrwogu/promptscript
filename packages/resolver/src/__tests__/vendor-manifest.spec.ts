@@ -796,6 +796,41 @@ fi
     );
   });
 
+  it('accepts partial clone metadata for registry caches with allowPartial', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config'),
+      '\n[remote "origin"]\n\tpromisor = true\n\tpartialclonefilter = blob:none\n',
+      { flag: 'a' }
+    );
+
+    await expect(
+      verifyGitRepositoryCheckout(repositoryDir, VENDOR_GIT_DIR, commit, new Set(), {
+        allowPartial: true,
+      })
+    ).resolves.toBeUndefined();
+  });
+
+  it('accepts sparse checkouts missing tracked files with allowPartial', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    await writeFile(join(repositoryDir, 'extra.prs'), '@meta { id: "extra" }');
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await rm(join(repositoryDir, 'extra.prs'));
+
+    await expect(
+      verifyGitRepositoryCheckout(repositoryDir, VENDOR_GIT_DIR, commit)
+    ).rejects.toThrow('contents do not match');
+
+    await expect(
+      verifyGitRepositoryCheckout(repositoryDir, VENDOR_GIT_DIR, commit, new Set(), {
+        allowPartial: true,
+      })
+    ).resolves.toBeUndefined();
+  });
+
   it('rejects worktree-specific Git configuration', async () => {
     const repositoryDir = await createTempDirectory();
     await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');

@@ -1783,6 +1783,58 @@ describe('Resolver — registry marker handling', () => {
     expect(mockGit.clone).toHaveBeenCalledOnce();
   });
 
+  it('widens a sparse cached checkout when the import path is outside the cone', async () => {
+    const tempDir = join(testCacheDir, 'sparse-widen');
+    const repoUrl = 'https://github.com/org/repo';
+    const cacheDir = join(testCacheDir, 'sparse-widen-registry');
+    const registryCache = new RegistryCache(cacheDir);
+    const cachePath = registryCache.getCachePath(repoUrl, 'latest');
+
+    // Real Git metadata so the locked-commit verification passes.
+    await fs.mkdir(cachePath, { recursive: true });
+    await fs.writeFile(
+      join(cachePath, 'standards.prs'),
+      '@meta { id: "sparse-cache" syntax: "1.0.0" }'
+    );
+    const lockedCommit = await initializeCacheGitRepository(cachePath);
+    await registryCache.set(repoUrl, 'latest', lockedCommit);
+
+    // The cache pretends to be a sparse checkout (core.sparseCheckout=true)
+    // and the import targets a path its cone does not cover.
+    mockGit.raw.mockResolvedValueOnce('true');
+
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.mkdir(tempDir, { recursive: true });
+    await fs.writeFile(
+      entryPath,
+      '@meta { id: "sparse-widen-project" syntax: "1.0.0" }\n@use github.com/org/repo/skills/other'
+    );
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      cache: false,
+      cacheDir,
+      lockfile: {
+        version: 1,
+        dependencies: {
+          [repoUrl]: {
+            version: 'latest',
+            commit: lockedCommit,
+            integrity: 'sha256-test',
+          },
+        },
+      },
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    // The sparse cone was widened with the import's directory and sub-path.
+    expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'add', 'skills', 'skills/other']);
+    expect(mockGit.clone).not.toHaveBeenCalled();
+    // The path still does not exist after widening, so the import errors out.
+    expect(result.errors.some((error) => error.message.includes('skills/other'))).toBe(true);
+  });
+
   it('reports checkout failure when a cached commit mismatches the lock', async () => {
     // Covers resolver.ts lines 695-713: lockfile commit verification on cache hit
     const tempDir = join(testCacheDir, 'project-lock-mismatch');

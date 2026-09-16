@@ -18,6 +18,19 @@ export interface RegistryAliasEntry {
   fallbackUrl?: string;
   /** Base path within the repository */
   root?: string;
+  /**
+   * Maximum wall-clock time in milliseconds for each Git operation
+   * (clone, fetch, ls-remote) against this repository.
+   * Defaults to 60000; can also be raised globally via PROMPTSCRIPT_GIT_TIMEOUT.
+   *
+   * @example
+   * registries:
+   *   '@internal':
+   *     url: 'git@gitlab.internal.com:company/monorepo'
+   *     root: 'packages/promptscript'
+   *     timeout: 600000
+   */
+  timeout?: number;
 }
 
 /**

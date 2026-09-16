@@ -266,6 +266,32 @@ describe('lockCommand', () => {
     });
   });
 
+  it('should pass a per-entry timeout to dependency resolution', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: {
+        '@company': { url: 'github.com/company/base', timeout: 600000 },
+      },
+    });
+    mockExistsSync.mockReturnValue(false);
+    mockCollectRemoteImports.mockResolvedValueOnce([
+      { repoUrl: 'github.com/company/base', path: 'skills/foo', version: '^1.2.0' },
+    ]);
+    mockResolveVersion.mockResolvedValueOnce('v1.2.3');
+
+    await lockCommand({});
+
+    expect(mockCreateRegistryOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ timeout: 600000 })
+    );
+    expect(mockValidateRemoteAccess).toHaveBeenCalledWith(
+      'https://github.com/company/base.git',
+      'v1.2.3',
+      { timeout: 600000 }
+    );
+  });
+
   it('should preserve a malformed existing lockfile', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({

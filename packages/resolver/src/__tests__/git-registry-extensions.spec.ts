@@ -6,7 +6,14 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { existsSync, promises as fs } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { GitRegistry, GitRefNotFoundError, GitCloneError, GitAuthError } from '../git-registry.js';
+import {
+  GitRegistry,
+  GitRefNotFoundError,
+  GitCloneError,
+  GitAuthError,
+  GIT_TIMEOUT_ENV_VAR,
+} from '../git-registry.js';
+import { simpleGit } from 'simple-git';
 import { RegistryCache } from '../registry-cache.js';
 
 // ---------------------------------------------------------------------------
@@ -193,6 +200,224 @@ describe('GitRegistry — extended methods', () => {
       expect(error).toBeInstanceOf(GitCloneError);
       expect(error).not.toBeInstanceOf(GitAuthError);
       expect(mockGit.clone).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // cloneAtTag — sparse cone (issue #455)
+  // -------------------------------------------------------------------------
+
+  describe('cloneAtTag() — sparse cone', () => {
+    it('clones with partial-clone flags and sets the sparse cone', async () => {
+      // Arrange
+      const targetDir = join(testCacheDir, 'sparse-cone-target');
+
+      // Act
+      await registry.cloneAtTag(
+        'https://github.com/org/repo.git',
+        'v1.2.3',
+        targetDir,
+        undefined,
+        'skills'
+      );
+
+      // Assert
+      expect(mockGit.clone).toHaveBeenCalledWith('https://github.com/org/repo.git', targetDir, [
+        '--depth=1',
+        '--branch=v1.2.3',
+        '--single-branch',
+        '--filter=blob:none',
+        '--sparse',
+      ]);
+      expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'set', 'skills']);
+    });
+
+    it('keeps plain shallow flags when no sparse cone is given', async () => {
+      const targetDir = join(testCacheDir, 'plain-cone-target');
+
+      await registry.cloneAtTag(
+        'https://github.com/org/repo.git',
+        undefined,
+        targetDir,
+        undefined,
+        undefined
+      );
+
+      expect(mockGit.clone).toHaveBeenCalledWith('https://github.com/org/repo.git', targetDir, [
+        '--depth=1',
+      ]);
+      expect(mockGit.raw).not.toHaveBeenCalledWith(
+        expect.arrayContaining(['sparse-checkout', 'set'])
+      );
+    });
+
+    it('falls back to a plain clone when the server rejects partial clones', async () => {
+      const targetDir = join(testCacheDir, 'unsupported-filter-target');
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('fatal: filtering not recognized by server'))
+        .mockResolvedValueOnce(undefined);
+
+      await registry.cloneAtTag(
+        'https://github.com/org/repo.git',
+        undefined,
+        targetDir,
+        undefined,
+        'skills'
+      );
+
+      expect(mockGit.clone).toHaveBeenCalledTimes(2);
+      expect(mockGit.clone).toHaveBeenLastCalledWith('https://github.com/org/repo.git', targetDir, [
+        '--depth=1',
+      ]);
+      expect(mockGit.raw).not.toHaveBeenCalledWith(
+        expect.arrayContaining(['sparse-checkout', 'set'])
+      );
+    });
+
+    it('propagates unrelated clone errors from a sparse clone', async () => {
+      const targetDir = join(testCacheDir, 'sparse-error-target');
+      mockGit.clone.mockRejectedValueOnce(new Error('fatal: Authentication failed'));
+
+      await expect(
+        registry.cloneAtTag(
+          'https://github.com/org/repo.git',
+          undefined,
+          targetDir,
+          undefined,
+          'skills'
+        )
+      ).rejects.toThrow('Authentication failed for');
+      expect(mockGit.clone).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // sparse checkout helpers
+  // -------------------------------------------------------------------------
+
+  describe('sparse checkout helpers', () => {
+    it('detects sparse checkouts via core.sparseCheckout', async () => {
+      mockGit.raw.mockResolvedValueOnce('true');
+      await expect(registry.isSparseCheckout(testCacheDir)).resolves.toBe(true);
+      expect(mockGit.raw).toHaveBeenCalledWith(['config', 'core.sparseCheckout']);
+
+      mockGit.raw.mockResolvedValueOnce('false\n');
+      await expect(registry.isSparseCheckout(testCacheDir)).resolves.toBe(false);
+    });
+
+    it('treats a missing core.sparseCheckout as non-sparse', async () => {
+      mockGit.raw.mockRejectedValueOnce(new Error('exit code 1'));
+      await expect(registry.isSparseCheckout(testCacheDir)).resolves.toBe(false);
+    });
+
+    it('adds sparse paths', async () => {
+      await registry.addSparsePaths(testCacheDir, ['skills', 'docs']);
+      expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'add', 'skills', 'docs']);
+    });
+
+    it('skips empty and root paths when adding sparse paths', async () => {
+      await registry.addSparsePaths(testCacheDir, ['', '.']);
+      expect(mockGit.raw).not.toHaveBeenCalledWith(
+        expect.arrayContaining(['sparse-checkout', 'add'])
+      );
+    });
+
+    it('emulates add with list + set when add is unsupported', async () => {
+      mockGit.raw
+        .mockRejectedValueOnce(new Error("unknown subcommand: `add'"))
+        .mockResolvedValueOnce('existing/dir\n')
+        .mockResolvedValueOnce('');
+
+      await registry.addSparsePaths(testCacheDir, ['skills']);
+
+      expect(mockGit.raw).toHaveBeenCalledWith([
+        'sparse-checkout',
+        'set',
+        'existing/dir',
+        'skills',
+      ]);
+    });
+
+    it('disables sparse checkout on demand', async () => {
+      await registry.disableSparseCheckout(testCacheDir);
+      expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'disable']);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // PROMPTSCRIPT_GIT_TIMEOUT (issue #455)
+  // -------------------------------------------------------------------------
+
+  describe('PROMPTSCRIPT_GIT_TIMEOUT', () => {
+    afterEach(() => {
+      delete process.env[GIT_TIMEOUT_ENV_VAR];
+    });
+
+    it('overrides the default timeout', async () => {
+      process.env[GIT_TIMEOUT_ENV_VAR] = '12345';
+      const envRegistry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+      });
+      const targetDir = join(testCacheDir, 'env-timeout-target');
+
+      await envRegistry.cloneAtTag('https://github.com/org/repo.git', undefined, targetDir);
+
+      expect(simpleGit).toHaveBeenCalledWith({
+        timeout: { block: 12_345, stdErr: false, stdOut: false },
+      });
+    });
+
+    it('loses to an explicit option timeout', async () => {
+      process.env[GIT_TIMEOUT_ENV_VAR] = '12345';
+      const explicitRegistry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+        timeout: 999,
+      });
+      const targetDir = join(testCacheDir, 'env-timeout-explicit-target');
+
+      await explicitRegistry.cloneAtTag('https://github.com/org/repo.git', undefined, targetDir);
+
+      expect(simpleGit).toHaveBeenCalledWith({
+        timeout: { block: 999, stdErr: false, stdOut: false },
+      });
+    });
+
+    it('ignores invalid values', async () => {
+      process.env[GIT_TIMEOUT_ENV_VAR] = 'not-a-number';
+      const envRegistry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+      });
+      const targetDir = join(testCacheDir, 'env-timeout-invalid-target');
+
+      await envRegistry.cloneAtTag('https://github.com/org/repo.git', undefined, targetDir);
+
+      expect(simpleGit).toHaveBeenCalledWith({
+        timeout: { block: 60_000, stdErr: false, stdOut: false },
+      });
+    });
+
+    it('names the timeout knobs in timeout error messages', async () => {
+      const slowRegistry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+        timeout: 25,
+      });
+      mockGit.clone.mockRejectedValueOnce(new Error('git clone timed out after 25ms'));
+      const targetDir = join(testCacheDir, 'timeout-hint-target');
+
+      let caught: Error | undefined;
+      try {
+        await slowRegistry.cloneAtTag('https://github.com/org/repo.git', undefined, targetDir);
+      } catch (error) {
+        caught = error instanceof Error ? error : new Error(String(error));
+      }
+
+      expect(caught).toBeInstanceOf(GitCloneError);
+      expect(caught?.message).toContain(GIT_TIMEOUT_ENV_VAR);
+      expect(caught?.message).toContain("'timeout'");
     });
   });
 
