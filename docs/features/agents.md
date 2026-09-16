@@ -103,18 +103,67 @@ that contains `agent: "reviewer"` or a handoff entry targeting `"reviewer"` poin
 Validators check supported enum values and forbidden fields before formatters generate output.
 Target-specific fields are emitted only where the native agent format supports them.
 
+## Field Support Matrix
+
+Every canonical `@agents` field has an explicit status per native target. The
+matrix is machine-readable in `@promptscript/core`
+(`agent-capabilities.ts`) and drives the compiler diagnostics, so the table
+below cannot drift from what formatters actually emit:
+
+- **emitted** - written to the native agent file under the same name
+- **transformed** - written under a target-native name or representation
+- **not supported** - the native agent format cannot represent it
+
+| Field                 | GitHub      | Claude  | Cursor  | Factory | Codex       | OpenCode | Augment | Amp     | Grok    |
+| --------------------- | ----------- | ------- | ------- | ------- | ----------- | -------- | ------- | ------- | ------- |
+| `description`         | emitted     | emitted | emitted | emitted | emitted     | emitted  | emitted | emitted | emitted |
+| `content`             | emitted     | emitted | emitted | emitted | transformed | emitted  | emitted | emitted | emitted |
+| `tools`               | transformed | emitted | -       | emitted | -           | -        | -       | -       | emitted |
+| `model`               | transformed | emitted | emitted | emitted | emitted     | -        | -       | -       | emitted |
+| `reasoningEffort`     | -           | -       | -       | emitted | transformed | -        | -       | -       | -       |
+| `specModel`           | transformed | -       | -       | emitted | -           | -        | -       | -       | -       |
+| `specReasoningEffort` | -           | -       | -       | emitted | -           | -        | -       | -       | -       |
+| `disallowedTools`     | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
+| `permissionMode`      | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
+| `skills`              | -           | emitted | -       | -       | transformed | -        | -       | -       | emitted |
+| `mcpServers`          | transformed | emitted | emitted | emitted | transformed | -        | -       | -       | emitted |
+| `sandboxMode`         | -           | -       | -       | -       | transformed | -        | -       | -       | -       |
+| `nicknameCandidates`  | -           | -       | -       | -       | transformed | -        | -       | -       | -       |
+| `handoffs`            | emitted     | -       | -       | -       | -           | -        | -       | -       | -       |
+| `maxTurns`            | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
+| `memory`              | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
+| `background`          | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
+| `isolation`           | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
+
+GitHub transformation examples: `tools` maps PromptScript and Claude Code tool
+names to Copilot aliases (`Grep` and `Glob` both become `search`), and `model`
+maps common Claude and OpenAI aliases (`sonnet` becomes `Claude Sonnet 4.5`).
+Codex transformation examples: `content` becomes `developer_instructions`,
+`reasoningEffort` becomes `model_reasoning_effort`, and `skills` becomes the
+`skills.config` array.
+
+Every other target has no native agent output: the whole `@agents` block is
+omitted and reported with a `PS4003` warning instead of being dropped
+silently. The same diagnostic fires per field when a native target cannot
+represent authored data (for example `tools` on Cursor, or `skills` on
+GitHub), naming the agent, the field, the target, and which targets do
+support the field.
+
 ## Native Output
 
 Targets with native agent systems receive dedicated files. Common examples:
 
-| Target         | Native output                |
-| -------------- | ---------------------------- |
-| Claude Code    | `.claude/agents/<name>.md`   |
-| GitHub Copilot | `.github/agents/<name>.md`   |
-| Cursor         | `.cursor/agents/<name>.md`   |
-| Factory AI     | `.factory/droids/<name>.md`  |
-| Codex          | `.codex/agents/<name>.toml`  |
-| OpenCode       | `.opencode/agents/<name>.md` |
+| Target         | Native output                                                  |
+| -------------- | -------------------------------------------------------------- |
+| Claude Code    | `.claude/agents/<name>.md`                                     |
+| GitHub Copilot | `.github/agents/<name>.md`                                     |
+| Cursor         | `.cursor/agents/<name>.md`                                     |
+| Factory AI     | `.factory/droids/<name>.md`                                    |
+| Codex          | `.codex/agents/<name>.toml`                                    |
+| OpenCode       | `.opencode/agents/<name>.md`                                   |
+| Augment        | `.augment/agents/<name>.md`                                    |
+| Amp            | `.agents/agents/<name>.md`                                     |
+| Grok Build     | `.claude/agents/<name>.md` (delegated to the Claude formatter) |
 
 Targets without a native agent contract still receive project instructions through their primary
 output. Check [Target Platforms](target-platforms.md) before depending on target-specific fields.
@@ -187,6 +236,32 @@ targets:
   - codex:
       version: full
 ```
+
+Codex also emits agent TOML files in `multifile` mode. Compiling a version
+that cannot emit agents reports `PS4003` for the whole block instead of
+dropping it silently.
+
+## Global Installs
+
+`output.baseDir` (or `prs compile --output`) can point at a global root such
+as `${HOME}`. To install only generated resources without unrelated root
+instruction files, select resource kinds:
+
+```bash
+prs compile --output "$HOME" --resources agents,skills
+```
+
+Valid kinds are `agents`, `skills`, `commands`, `mcp`, `hooks`, `plugins`,
+and `main`. Without `main`, root instruction files such as `CLAUDE.md` or
+`AGENTS.md` are omitted, so a global compile produces only directories like
+`.claude/skills/`, `.claude/agents/`, or `.factory/droids/`. The same
+selection can be pinned in config with `output.resources`.
+
+Global output is guarded: compiling into the home directory without a
+resource selection prints a warning first, and protected personal override
+files (`~/.factory/AGENTS.md` today) are refused outright. Resource-only runs
+skip managed cleanup so unselected files are never treated as obsolete and
+deleted; run a full compile to prune stale generated files.
 
 ## Design Guidelines
 

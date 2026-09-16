@@ -81,7 +81,8 @@ description: PromptScript output format for Claude Code
 - `CLAUDE.md` is gitignored by many project templates - you may need to `git add -f CLAUDE.md`
 - `CLAUDE.local.md` is intentionally not committed to git (private developer overrides)
 - Skills support frontmatter fields: `name`, `description`, plus newer fields like `model`, `allowedTools`, `disallowedTools`, `permissionMode`, `specModel`, `specReasoningEffort`
-- Agent files support: `name`, `description`, `model`, `allowedTools`, `disallowedTools`, `permissionMode`, `specModel`, `specReasoningEffort`, `skills`
+- Agent files support: `description`, `content`, `tools`, `disallowedTools`, `model`, `permissionMode`, `skills`, `maxTurns`, `memory`, `mcpServers`, `background`, `isolation`. Fields other targets own (`reasoningEffort`, `specModel`, `specReasoningEffort`, `sandboxMode`, `nicknameCandidates`, `handoffs`) are reported with `PS4003` and omitted
+- Agent-level lifecycle hooks are not part of `@agents`; define them through `@hooks`
 - The `@local` block content goes to `CLAUDE.local.md` with an import statement added to the main `CLAUDE.md`
 
 ## Example Output
