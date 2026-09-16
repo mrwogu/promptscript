@@ -263,6 +263,7 @@ prs compile [options]
 | `-a, --all`                  | Compile to all configured targets                       |
 | `-w, --watch`                | Watch mode for continuous compilation                   |
 | `-o, --output <dir>`         | Override output directory                               |
+| `--resources <items>`        | Compile only selected resources (see below)             |
 | `--dry-run`                  | Preview changes without writing                         |
 | `--no-migrate-factory-hooks` | Warn instead of migrating legacy Factory settings hooks |
 | `--registry <path>`          | Override the configured registry path                   |
@@ -320,6 +321,17 @@ file changes without writing. `--no-migrate-factory-hooks` keeps the legacy
 file unchanged and reports `PS4002` instead. Unknown events, malformed entries,
 and mixed ownership abort migration without a partial write.
 
+`--resources <items>` compiles only the named resource kinds: `agents`,
+`skills`, `commands`, `mcp`, `hooks`, `plugins`, and `main`. Multiple kinds are
+comma-separated and the flag overrides `output.resources` in the config. A
+selection without `main` omits root instruction files (and rule, workflow, and
+local-memory outputs), so a global install can generate only
+`.claude/agents/`, `.factory/droids/`, or skill directories. Resource-only
+runs skip managed cleanup, because cleanup would classify every unselected
+file as obsolete; run a full compile to prune stale generated files. Writing
+into the home directory without a resource selection prints a warning, and
+protected personal files such as `~/.factory/AGENTS.md` are refused outright.
+
 **Examples:**
 
 ```bash
@@ -343,6 +355,9 @@ prs compile --watch
 
 # Preview changes
 prs compile --dry-run
+
+# Install only agents and skills into a global output root
+prs compile --output "$HOME" --resources agents,skills
 
 # Compile a named build profile
 prs compile --build logstrip-factory
@@ -409,8 +424,8 @@ prs build logstrip-factory
 ```
 
 The command accepts the applicable compile options from `prs compile`, including
-`--target`, `--format`, `--output`, `--dry-run`, `--config`, `--force`,
-`--strict`, `--ignore-hashes`, `--registry`, `--watch`, and `--cwd`.
+`--target`, `--format`, `--output`, `--resources`, `--dry-run`, `--config`,
+`--force`, `--strict`, `--ignore-hashes`, `--registry`, `--watch`, and `--cwd`.
 
 ---
 

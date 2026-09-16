@@ -1159,12 +1159,25 @@ Define specialized AI agents for target platforms with native agent support:
 | `mcpServers`          | string[] | No       | Named top-level MCP servers available to the agent                             |
 | `sandboxMode`         | string   | No       | Target-native sandbox policy                                                   |
 | `nicknameCandidates`  | string[] | No       | Candidate display names for spawned agents                                     |
+| `handoffs`            | array    | No       | Delegation entries (`label`, `agent`, `prompt`, `send`; GitHub only)           |
+| `maxTurns`            | number   | No       | Maximum agentic turns before stopping (Claude only)                            |
+| `memory`              | string   | No       | Memory scope: `user`, `project`, `local` (Claude only)                         |
+| `background`          | boolean  | No       | Run the agent as a background process (Claude only)                            |
+| `isolation`           | string   | No       | Isolation mode: `worktree` (Claude only)                                       |
+
+Every canonical field has an explicit per-target status in the
+[Field Support Matrix](../features/agents.md#field-support-matrix). A field a
+target cannot represent is reported with a `PS4003` compatibility warning
+(agent, field, target, and supporting targets) and omitted, never dropped
+silently.
 
 Agents output by platform:
 
 **GitHub Output** (`.github/agents/code-reviewer.md`, version: full)
 
-Supports: `name`, `description`, `tools`, `model`, `specModel`. Tool and model names are automatically mapped to GitHub Copilot's format:
+Supports `description`, `content`, `handoffs`, and `mcpServers` (inlined from
+the referenced `@mcpServers` entries), plus `tools`, `model`, and `specModel`
+under mapping:
 
 - Tools: `Read` → `read`, `Grep`/`Glob` → `search`, `Bash` → `execute`
 - Models: `sonnet` → `Claude Sonnet 4.5`, `opus` → `Claude Opus 4.5`, `haiku` → `Claude Haiku 4.5`
@@ -1199,7 +1212,10 @@ Review checklist:
 
 **Claude Output** (`.claude/agents/code-reviewer.md`, version: full)
 
-Supports all properties including `disallowedTools`, `permissionMode`, `skills`:
+Supports `tools`, `disallowedTools`, `model`, `permissionMode`, `skills`,
+`maxTurns`, `memory`, `mcpServers`, `background`, and `isolation`
+(`reasoningEffort`, `specModel`, `sandboxMode`, `nicknameCandidates`, and
+`handoffs` are reported with `PS4003` and omitted):
 
 <!-- output:claude for="agents-example" file="agents/code-reviewer.md" -->
 

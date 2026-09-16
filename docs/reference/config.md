@@ -941,13 +941,23 @@ output:
   baseDir: '.'
   header: Managed by the platform team.
   overwrite: false
+  resources:
+    - agents
+    - skills
 ```
 
-| Field       | Type    | Default | Description                                                          |
-| ----------- | ------- | ------- | -------------------------------------------------------------------- |
-| `baseDir`   | string  | `.`     | Base directory for generated output                                  |
-| `header`    | string  | -       | Header added to Markdown after PromptScript metadata and frontmatter |
-| `overwrite` | boolean | `false` | Overwrite conflicting user files without prompting, like `--force`   |
+| Field       | Type     | Default | Description                                                                                                                           |
+| ----------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `baseDir`   | string   | `.`     | Base directory for generated output                                                                                                   |
+| `header`    | string   | -       | Header added to Markdown after PromptScript metadata and frontmatter                                                                  |
+| `overwrite` | boolean  | `false` | Overwrite conflicting user files without prompting, like `--force`                                                                    |
+| `resources` | string[] | -       | Compile only these resource kinds (`agents`, `skills`, `commands`, `mcp`, `hooks`, `plugins`, `main`); `prs compile --resources` wins |
+
+`resources` selects what a compile emits. A selection without `main` omits
+root instruction files, so `baseDir: '${HOME}'` with `resources: [agents,
+skills]` installs only generated agent and skill directories into the global
+root. Protected personal files such as `~/.factory/AGENTS.md` are never
+written, and resource-only runs skip managed cleanup.
 
 ### formatting
 

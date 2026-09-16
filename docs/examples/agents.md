@@ -252,7 +252,9 @@ With `version: full`, agents are generated as separate files:
         | `sonnet-4` | `Claude Sonnet 4` |
         | `inherit` | *(omitted)* |
 
-        Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` are ignored for GitHub output.
+        Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` cannot be
+        represented in GitHub output: each one is reported with a `PS4003` compatibility warning
+        and omitted.
 
 === "Claude Code"
 
@@ -351,14 +353,23 @@ targets:
 
 ## Platform Comparison
 
-| Target         | Native agent output          | Notable capabilities                                   |
-| -------------- | ---------------------------- | ------------------------------------------------------ |
-| GitHub Copilot | `.github/agents/<name>.md`   | Tools, model mapping, specification model              |
-| Claude Code    | `.claude/agents/<name>.md`   | Tools, deny lists, permissions, skills, MCP references |
-| Cursor         | `.cursor/agents/<name>.md`   | Model, tools, MCP references                           |
-| Factory AI     | `.factory/droids/<name>.md`  | Models, reasoning effort, tools, MCP references        |
-| Codex          | `.codex/agents/<name>.toml`  | Reasoning effort, sandbox, nicknames, skills           |
-| OpenCode       | `.opencode/agents/<name>.md` | Models, tools, permissions                             |
+| Target         | Native agent output          | Notable capabilities                                                 |
+| -------------- | ---------------------------- | -------------------------------------------------------------------- |
+| GitHub Copilot | `.github/agents/<name>.md`   | Tools and model mapping, specification model, handoffs, inline MCP   |
+| Claude Code    | `.claude/agents/<name>.md`   | Tools, deny lists, permissions, skills, max turns, memory, MCP names |
+| Cursor         | `.cursor/agents/<name>.md`   | Name, description, model, MCP references (no tools)                  |
+| Factory AI     | `.factory/droids/<name>.md`  | Models, reasoning effort, spec models, tools, MCP references         |
+| Codex          | `.codex/agents/<name>.toml`  | Reasoning effort, sandbox, nicknames, skills config, MCP tables      |
+| OpenCode       | `.opencode/agents/<name>.md` | Description and content (automatic `mode: subagent`)                 |
+| Augment        | `.augment/agents/<name>.md`  | Description and content                                              |
+| Amp            | `.agents/agents/<name>.md`   | Description and content                                              |
+| Grok Build     | `.claude/agents/<name>.md`   | Full Claude contract through delegation                              |
+
+Fields a target cannot represent are reported with `PS4003` compatibility
+warnings (agent name, field, target, and the targets that do support the
+field) instead of being dropped silently. See the
+[Field Support Matrix](../features/agents.md#field-support-matrix) for the
+authoritative per-target statuses.
 
 Project lifecycle hooks are defined separately through `@hooks`. Agents can reference shared
 capabilities from `@skills` and `@mcpServers`.
