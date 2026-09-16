@@ -422,6 +422,15 @@ export interface PromptScriptConfig {
      * Must be >= 1. Values <= 0 are clamped to 1 by the resolver.
      */
     guardRequiresDepth?: number;
+    /**
+     * Scan imported (registry cache / vendored) content with heuristic
+     * validation rules. Heuristic rules skip imported content by default
+     * because a project cannot fix findings in someone else's skill.
+     * Concrete security findings (decoded payloads, suspicious URLs) always
+     * scan imported content.
+     * @default false
+     */
+    scanExternalContent?: boolean;
   };
 
   /** Extension compliance policies */
