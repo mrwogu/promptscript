@@ -22,8 +22,8 @@ export interface SimpleFormatterVersions {
 /**
  * Options for creating a simple markdown formatter via the factory.
  *
- * These five parameters are the only things that vary across the
- * 31 tier-1/2/3 formatters that have no method overrides.
+ * These options are the only things that vary across the
+ * tier-1/2/3 formatters that have no method overrides.
  */
 export interface SimpleFormatterOptions {
   /** Formatter identifier (e.g. 'windsurf', 'kode') */
@@ -42,6 +42,8 @@ export interface SimpleFormatterOptions {
   hasCommands?: boolean;
   /** Whether this formatter supports skills (default: true) */
   hasSkills?: boolean;
+  /** Whether multifile mode emits skill files (default: false, skills stay full-mode-only) */
+  skillsInMultifile?: boolean;
   /** Skill file name (default: 'SKILL.md') */
   skillFileName?: string;
   /** Skill directory override (default: `<dotDir>/skills`) */
@@ -69,44 +71,70 @@ export interface SimpleFormatterResult {
 }
 
 /**
- * Build version descriptions from the output path and dot directory.
+ * Resolved factory inputs that drive version descriptions.
  */
-function buildVersions(
-  outputPath: string,
-  dotDir: string,
-  hasSkills: boolean,
-  hasAgents: boolean,
-  hasCommands: boolean,
-  skillFileName: string,
-  mcpConfigPath?: string,
-  skillsDir?: string
-): SimpleFormatterVersions {
+interface VersionInputs {
+  /** Default output file path (e.g. 'AGENTS.md') */
+  readonly outputPath: string;
+  /** Dot directory for skills/commands/agents (e.g. '.agents') */
+  readonly dotDir: string;
+  /** Whether the formatter supports skills */
+  readonly hasSkills: boolean;
+  /** Whether the formatter supports agents */
+  readonly hasAgents: boolean;
+  /** Whether the formatter supports commands */
+  readonly hasCommands: boolean;
+  /** Whether multifile mode emits skill files */
+  readonly skillsInMultifile: boolean;
+  /** Skill file name (e.g. 'SKILL.md') */
+  readonly skillFileName: string;
+  /** MCP config file path, if emitted */
+  readonly mcpConfigPath?: string;
+  /** Skill directory override, if any */
+  readonly skillsDir?: string;
+}
+
+/**
+ * Build version descriptions from the output path and dot directory.
+ *
+ * Descriptions must mirror what `MarkdownInstructionFormatter` actually
+ * emits: skill files appear in multifile output only when
+ * `skillsInMultifile` is enabled, otherwise they are full-mode-only.
+ */
+function buildVersions(inputs: VersionInputs): SimpleFormatterVersions {
+  const { outputPath, dotDir, hasSkills, hasAgents, hasCommands } = inputs;
+  const { skillFileName, skillsInMultifile, mcpConfigPath, skillsDir } = inputs;
+
   // Determine whether the outputPath looks like a file inside a dotDir
   // (e.g. '.windsurf/rules/project.md') or a standalone file (e.g. 'AGENTS.md').
   const isNested = outputPath.startsWith(dotDir + '/');
   const simpleDesc = `Single ${outputPath} file`;
-  const skillPath = `${skillsDir ?? `${dotDir}/skills`}/<name>/${skillFileName}`;
+  const defaultSkillsDir = `${dotDir}/skills`;
+  const resolvedSkillsDir = skillsDir ?? defaultSkillsDir;
+  const skillPath = `${resolvedSkillsDir}/<name>/${skillFileName}`;
   const commandPath = `${dotDir}/commands/<name>.md`;
   const agentPath = `${dotDir}/agents/<name>.md`;
+
+  // Skills not advertised for multifile remain reachable via full mode.
+  const skillsFullModeOnly = hasSkills && !skillsInMultifile;
 
   const describeAdditionalFiles = (
     version: 'multifile' | 'full',
     paths: readonly string[],
-    skillsInFullMode: boolean
+    fullModeSkillsOnly: boolean
   ): string => {
-    if (paths.length === 0 && skillsInFullMode) {
+    if (paths.length === 0 && fullModeSkillsOnly) {
       return `Single ${outputPath} file (skills via full mode)`;
     }
     if (paths.length === 0) return `Single ${outputPath} file`;
 
     const prefix = !isNested && version === 'full' && hasSkills ? 'Multifile' : outputPath;
-    const suffix = skillsInFullMode ? ' (skills via full mode)' : '';
+    const suffix = fullModeSkillsOnly ? ' (skills via full mode)' : '';
     return `${prefix} + ${paths.join(' + ')}${suffix}`;
   };
 
   const multifilePaths: string[] = [];
-  const skillsInFullMode = hasSkills && isNested;
-  if (hasSkills && !skillsInFullMode) multifilePaths.push(skillPath);
+  if (hasSkills && skillsInMultifile) multifilePaths.push(skillPath);
   if (hasCommands) multifilePaths.push(commandPath);
   if (mcpConfigPath) multifilePaths.push(mcpConfigPath);
 
@@ -116,7 +144,7 @@ function buildVersions(
   if (hasAgents) fullPaths.push(agentPath);
   if (mcpConfigPath) fullPaths.push(mcpConfigPath);
 
-  const multifileDesc = describeAdditionalFiles('multifile', multifilePaths, skillsInFullMode);
+  const multifileDesc = describeAdditionalFiles('multifile', multifilePaths, skillsFullModeOnly);
   const fullDesc = describeAdditionalFiles('full', fullPaths, false);
 
   return {
@@ -157,6 +185,7 @@ export function createSimpleMarkdownFormatter(opts: SimpleFormatterOptions): Sim
     hasAgents = false,
     hasCommands = false,
     hasSkills = true,
+    skillsInMultifile = false,
     skillFileName = 'SKILL.md',
     mcpConfigPath,
     mcpConfigFormat,
@@ -164,16 +193,17 @@ export function createSimpleMarkdownFormatter(opts: SimpleFormatterOptions): Sim
     skillsDir,
   } = opts;
 
-  const versions = buildVersions(
+  const versions = buildVersions({
     outputPath,
     dotDir,
     hasSkills,
     hasAgents,
     hasCommands,
+    skillsInMultifile,
     skillFileName,
-    mcpConfigPath,
-    skillsDir
-  );
+    ...(mcpConfigPath ? { mcpConfigPath } : {}),
+    ...(skillsDir ? { skillsDir } : {}),
+  });
 
   // Create a named class so `formatter.constructor.name` is meaningful.
   class SimpleFormatter extends MarkdownInstructionFormatter {
@@ -189,6 +219,7 @@ export function createSimpleMarkdownFormatter(opts: SimpleFormatterOptions): Sim
         hasAgents,
         hasCommands,
         hasSkills,
+        skillsInMultifile,
         ...(skillsDir ? { skillsDir } : {}),
         ...(mcpConfigPath ? { mcpConfigPath } : {}),
         ...(mcpConfigFormat ? { mcpConfigFormat } : {}),

@@ -28,7 +28,7 @@ describe('GitLab Duo formatter', () => {
     });
     expect(GITLAB_DUO_VERSIONS.multifile).toEqual({
       name: 'multifile',
-      description: 'AGENTS.md + skills/<name>/SKILL.md',
+      description: 'Single AGENTS.md file (skills via full mode)',
       outputPath: 'AGENTS.md',
     });
     expect(GITLAB_DUO_VERSIONS.full).toEqual({
