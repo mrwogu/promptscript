@@ -6,6 +6,7 @@ import { normalizeProgram, KNOWN_TARGETS } from '@promptscript/core';
 import type { Program, SourceLocation } from '@promptscript/core';
 import { GitHubFormatter } from '../formatters/github.js';
 import { formatProgram } from '../formatter-adapter.js';
+import { BUILTIN_FORMATTERS } from '../builtin-formatters.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -49,19 +50,7 @@ import { AdalFormatter } from '../formatters/adal.js';
 import { IflowFormatter } from '../formatters/iflow.js';
 import { OpenClawFormatter } from '../formatters/openclaw.js';
 import { CodeBuddyFormatter } from '../formatters/codebuddy.js';
-// AGENTS.md-only targets
-import { AiderFormatter } from '../formatters/aider.js';
-import { AmazonQFormatter } from '../formatters/amazon-q.js';
-import { WarpFormatter } from '../formatters/warp.js';
-import { ZedFormatter } from '../formatters/zed.js';
-import { JulesFormatter } from '../formatters/jules.js';
-import { DevinFormatter } from '../formatters/devin.js';
 // Grok Build
-import { GrokFormatter } from '../formatters/grok.js';
-import { KimiFormatter } from '../formatters/kimi.js';
-import { MimoFormatter } from '../formatters/mimo.js';
-import { DeepAgentsFormatter } from '../formatters/deep-agents.js';
-import { ForgecodeFormatter } from '../formatters/forgecode.js';
 import { HermesFormatter } from '../formatters/hermes.js';
 import { GitlabDuoFormatter } from '../formatters/gitlab-duo.js';
 import type { Formatter, FormatOptions } from '../types.js';
@@ -1475,63 +1464,7 @@ describe('Golden Files Tests', () => {
     it('all known targets should produce output with a valid path', () => {
       const ast = createCanonicalAST();
 
-      const allFormatters = [
-        new GitHubFormatter(),
-        new ClaudeFormatter(),
-        new CursorFormatter(),
-        new AntigravityFormatter(),
-        new FactoryFormatter(),
-        new OpenCodeFormatter(),
-        new GeminiFormatter(),
-        new WindsurfFormatter(),
-        new ClineFormatter(),
-        new RooFormatter(),
-        new CodexFormatter(),
-        new ContinueFormatter(),
-        new AugmentFormatter(),
-        new GooseFormatter(),
-        new KiloFormatter(),
-        new AmpFormatter(),
-        new TraeFormatter(),
-        new JunieFormatter(),
-        new KiroFormatter(),
-        new CortexFormatter(),
-        new CrushFormatter(),
-        new CommandCodeFormatter(),
-        new KodeFormatter(),
-        new McpjamFormatter(),
-        new MistralVibeFormatter(),
-        new MuxFormatter(),
-        new OpenHandsFormatter(),
-        new PiFormatter(),
-        new QoderFormatter(),
-        new QwenCodeFormatter(),
-        new ZencoderFormatter(),
-        new NeovateFormatter(),
-        new PochiFormatter(),
-        new AdalFormatter(),
-        new IflowFormatter(),
-        new OpenClawFormatter(),
-        new CodeBuddyFormatter(),
-        // AGENTS.md-only targets
-        new AiderFormatter(),
-        new AmazonQFormatter(),
-        new WarpFormatter(),
-        new ZedFormatter(),
-        new JulesFormatter(),
-        new DevinFormatter(),
-        // Grok Build
-        new GrokFormatter(),
-        // Priority B CLI agents
-        new KimiFormatter(),
-        new MimoFormatter(),
-        new DeepAgentsFormatter(),
-        new ForgecodeFormatter(),
-        new HermesFormatter(),
-        new GitlabDuoFormatter(),
-      ];
-
-      expect(allFormatters.length).toBe(KNOWN_TARGETS.length);
+      const allFormatters = KNOWN_TARGETS.map((target) => new BUILTIN_FORMATTERS[target]());
 
       for (const formatter of allFormatters) {
         const result = formatter.format(ast);

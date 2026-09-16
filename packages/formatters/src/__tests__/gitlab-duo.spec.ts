@@ -1,31 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { Program, SourceLocation } from '@promptscript/core';
 import { GITLAB_DUO_VERSIONS, GitlabDuoFormatter } from '../formatters/gitlab-duo.js';
+import { createAstBuilders } from './ast-builders.js';
 
-const createLoc = (line: number): SourceLocation => ({
-  file: 'gitlab-duo.prs',
-  line,
-  column: 1,
-});
-
-function createBlock(name: string, content: Program['blocks'][number]['content'], line: number) {
-  return {
-    type: 'Block' as const,
-    name,
-    content,
-    loc: createLoc(line),
-  };
-}
-
-function createProgram(blocks: Program['blocks']): Program {
-  return {
-    type: 'Program',
-    blocks,
-    uses: [],
-    extends: [],
-    loc: createLoc(1),
-  };
-}
+const { createLoc, createBlock, createProgram } = createAstBuilders('gitlab-duo.prs');
 
 describe('GitLab Duo formatter', () => {
   it('emits a single AGENTS.md file for simple and multifile versions', () => {

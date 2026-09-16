@@ -500,62 +500,20 @@ export const selectOutputsForFormatter = (
     }
   }
 
-  // Sort: main file first, then alphabetically
-  const mainFilePatterns: Record<FormatterName, string> = {
-    claude: 'CLAUDE.md',
-    github: 'copilot-instructions.md',
+  // Sort: main file first, then alphabetically.
+  // The main file is the file name of the target's default output path,
+  // except where the Playground convention differs.
+  const mainFileOverrides: Partial<Record<FormatterName, string>> = {
     cursor: 'instructions.mdc',
-    antigravity: 'project.md',
-    factory: 'AGENTS.md',
-    opencode: 'OPENCODE.md',
-    gemini: 'GEMINI.md',
-    windsurf: 'project.md',
-    cline: '.clinerules',
-    roo: '.roorules',
-    codex: 'AGENTS.md',
-    continue: 'project.md',
-    augment: 'project.md',
     goose: 'project.md',
-    kilo: 'project.md',
-    amp: 'AGENTS.md',
     trae: 'project.md',
     junie: 'project.md',
-    kiro: 'project.md',
-    cortex: 'project.md',
     crush: 'project.md',
-    'command-code': 'project.md',
-    kode: 'project.md',
-    mcpjam: 'project.md',
-    'mistral-vibe': 'project.md',
-    mux: 'project.md',
-    openhands: 'project.md',
-    pi: 'project.md',
-    qoder: 'project.md',
-    'qwen-code': 'project.md',
-    zencoder: 'project.md',
-    neovate: 'project.md',
-    pochi: 'project.md',
-    adal: 'project.md',
-    iflow: 'project.md',
-    openclaw: 'INSTRUCTIONS.md',
-    codebuddy: 'project.md',
-    // AGENTS.md-only targets
-    aider: 'AGENTS.md',
-    'amazon-q': 'AGENTS.md',
-    warp: 'AGENTS.md',
-    zed: 'AGENTS.md',
-    jules: 'AGENTS.md',
-    devin: 'AGENTS.md',
-    grok: 'AGENTS.md',
-    kimi: 'AGENTS.md',
-    mimo: 'AGENTS.md',
-    'deep-agents': 'AGENTS.md',
-    forgecode: 'AGENTS.md',
-    hermes: 'AGENTS.md',
-    'gitlab-duo': 'AGENTS.md',
   };
+  const baseName = (path: string): string => path.slice(path.lastIndexOf('/') + 1);
 
-  const mainPattern = mainFilePatterns[formatter];
+  const mainPattern =
+    mainFileOverrides[formatter] ?? baseName(TARGET_DEFINITIONS[formatter].outputPath);
   results.sort((a, b) => {
     const aIsMain = a.path.endsWith(mainPattern);
     const bIsMain = b.path.endsWith(mainPattern);
