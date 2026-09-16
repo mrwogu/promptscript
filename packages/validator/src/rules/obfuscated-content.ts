@@ -1,4 +1,5 @@
 import type { ValidationRule } from '../types.js';
+import { isExternalLocation } from '../external-content.js';
 import { walkText } from '../walker.js';
 
 /**
@@ -313,6 +314,35 @@ function isLikelyTechnicalContent(match: string): boolean {
 }
 
 /**
+ * One-letter codes for nucleotides (plus N for ambiguous bases).
+ */
+const NUCLEOTIDE_CHARS = new Set('ACGTUN');
+
+/**
+ * One-letter codes for amino acids, including ambiguity codes
+ * (B, X, Z, J), selenocysteine (U), and pyrrolysine (O).
+ */
+const AMINO_ACID_CHARS = new Set('ACDEFGHIKLMNPQRSTVWYBXZJOU');
+
+/**
+ * Check if a candidate Base64 match is a biological sequence.
+ *
+ * Long uppercase runs over the nucleotide or amino-acid alphabet are protein
+ * or DNA data, not Base64 in practice. Reference files shipped with
+ * scientific skills regularly carry such sequences.
+ */
+function isLikelyBioSequence(match: string): boolean {
+  let nucleotide = true;
+  let aminoAcid = true;
+  for (const char of match) {
+    if (!NUCLEOTIDE_CHARS.has(char)) nucleotide = false;
+    if (!AMINO_ACID_CHARS.has(char)) aminoAcid = false;
+    if (!nucleotide && !aminoAcid) return false;
+  }
+  return nucleotide || aminoAcid;
+}
+
+/**
  * Check if a potential Base64 string is likely legitimate.
  */
 function isLikelyLegitimateBase64(text: string, match: string): boolean {
@@ -325,6 +355,7 @@ function isLikelyLegitimateBase64(text: string, match: string): boolean {
   if (precedingText.includes('data:text/')) return true;
 
   if (isLikelyTechnicalContent(match)) return true;
+  if (isLikelyBioSequence(match)) return true;
 
   return false;
 }
@@ -597,14 +628,25 @@ export const obfuscatedContent: ValidationRule = {
           });
         }
 
-        // Also flag suspicious encoding patterns even if no malicious content detected
-        const hasLongBase64 = (text.match(BASE64_PATTERN) || []).some(
+        // Also flag suspicious encoding patterns even if no malicious content detected.
+        // Skipped for imported (registry cache / vendored) content: a project
+        // cannot fix a heuristic hit in someone else's skill, and --strict
+        // would turn it into a hard failure.
+        if (isExternalLocation(loc, ctx.config)) {
+          return;
+        }
+
+        const longBase64Match = (text.match(BASE64_PATTERN) || []).find(
           (m) => m.length >= MIN_ENCODED_LENGTH * 2 && !isLikelyLegitimateBase64(text, m)
         );
 
-        if (hasLongBase64 && encodedMatches.length === 0) {
+        if (longBase64Match && encodedMatches.length === 0) {
+          const snippet =
+            longBase64Match.length > 20
+              ? `${longBase64Match.substring(0, 20)}...`
+              : longBase64Match;
           ctx.report({
-            message: 'Long Base64-encoded content detected that may hide payloads',
+            message: `Long Base64-encoded content detected that may hide payloads (starts with "${snippet}")`,
             location: loc,
             suggestion:
               'If this is intentional, consider using plain text or documenting the purpose',

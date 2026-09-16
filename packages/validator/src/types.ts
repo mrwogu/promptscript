@@ -111,6 +111,17 @@ export interface ValidatorConfig {
   registryReferencePaths?: Map<string, Map<string, string>>;
   /** Skip reference integrity checks */
   ignoreHashes?: boolean;
+  /**
+   * Absolute path roots holding imported (registry cache, vendored) content.
+   * Heuristic content rules skip text located under these roots by default.
+   */
+  externalRoots?: string[];
+  /**
+   * Scan imported content under externalRoots with heuristic rules anyway.
+   * Concrete security findings (decoded payloads, suspicious URLs) always scan.
+   * @default false
+   */
+  scanExternalContent?: boolean;
 }
 
 /**
