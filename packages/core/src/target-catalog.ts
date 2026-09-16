@@ -578,7 +578,8 @@ const TARGET_DEFINITION_BASE = {
     name: 'gitlab-duo',
     outputPath: DEFAULT_OUTPUT_PATHS['gitlab-duo'],
     family: 'simple',
-    skillPath: { basePath: 'skills', fileName: 'SKILL.md' },
+    // Duo reads Agent Skills from a repository-root `skills/` directory,
+    // so the dot-directory skill layout does not apply to this target.
     features: {
       defaultEnabled: false,
       defaultVersion: 'full',
@@ -586,6 +587,7 @@ const TARGET_DEFINITION_BASE = {
       hasAgents: false,
       hasCommands: false,
     },
+    skillPath: { basePath: 'skills', fileName: 'SKILL.md' },
   },
   // AGENTS.md-only targets
   aider: {
