@@ -396,21 +396,31 @@ function getTopLevelFieldLocations(
         key,
         item.value.items.map((value) => getNodeLocation(value, sourceFile, frontmatter))
       );
-      const valueLocations = new Map<string, SourceLocation>();
-      for (const nestedItem of item.value.items) {
-        if (!isPair(nestedItem)) continue;
-        const nestedKey = getScalarString(nestedItem.key);
-        if (nestedKey === undefined) continue;
-        valueLocations.set(
-          nestedKey,
-          getNodeLocation(nestedItem.value ?? nestedItem.key, sourceFile, frontmatter)
-        );
-      }
-      fieldValueLocations.set(key, valueLocations);
+      fieldValueLocations.set(key, getNestedFieldLocations(item.value, sourceFile, frontmatter));
     }
   }
 
   return { fields: fieldLocations, items: fieldItemLocations, values: fieldValueLocations };
+}
+
+/**
+ * Map the scalar keys of a nested YAML mapping to their value locations.
+ */
+function getNestedFieldLocations(
+  collection: unknown,
+  sourceFile: string,
+  frontmatter: SkillFrontmatterBlock
+): ReadonlyMap<string, SourceLocation> {
+  const valueLocations = new Map<string, SourceLocation>();
+  if (!isCollection(collection)) return valueLocations;
+
+  for (const item of collection.items) {
+    if (!isPair(item)) continue;
+    const key = getScalarString(item.key);
+    if (key === undefined) continue;
+    valueLocations.set(key, getNodeLocation(item.value ?? item.key, sourceFile, frontmatter));
+  }
+  return valueLocations;
 }
 
 function getScalarString(node: unknown): string | undefined {
