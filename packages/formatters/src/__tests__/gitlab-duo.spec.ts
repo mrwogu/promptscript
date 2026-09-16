@@ -38,7 +38,11 @@ describe('GitLab Duo formatter', () => {
     });
   });
 
-  it('emits skills at the repository-root skills directory in full mode', () => {
+  it.each([
+    [undefined, 'skills/audit/SKILL.md'],
+    ['skills/marketing/audit', 'skills/marketing/audit/SKILL.md'],
+    ['../..', 'skills/audit/SKILL.md'],
+  ] as const)('emits a full-mode skill for output directory %s', (outputDir, expectedPath) => {
     const formatter = new GitlabDuoFormatter();
     const ast = createProgram([
       createBlock(
@@ -46,9 +50,10 @@ describe('GitLab Duo formatter', () => {
         {
           type: 'ObjectContent',
           properties: {
-            deploy: {
-              description: 'Deployment safety checks',
-              content: 'Verify the rollout before announcing it.',
+            audit: {
+              description: 'Marketing audit',
+              content: 'Audit the marketing setup.',
+              ...(outputDir ? { __outputDir: outputDir } : {}),
             },
           },
           loc: createLoc(2),
@@ -58,69 +63,13 @@ describe('GitLab Duo formatter', () => {
     ]);
 
     const output = formatter.format(ast, { version: 'full' });
+    const skillFile = output.additionalFiles?.find((file) => file.path.endsWith('SKILL.md'));
 
     expect(output.path).toBe('AGENTS.md');
-    const skillFile = output.additionalFiles?.find(
-      (file) => file.path === 'skills/deploy/SKILL.md'
-    );
-    expect(skillFile, 'full mode should emit skills/deploy/SKILL.md').toBeDefined();
-    expect(skillFile?.content).toContain('name: deploy');
-    expect(skillFile?.content).toContain('description: Deployment safety checks');
-    expect(skillFile?.content).toContain('Verify the rollout before announcing it.');
-  });
-
-  it('preserves imported skill directories below repository-root skills', () => {
-    const formatter = new GitlabDuoFormatter();
-    const ast = createProgram([
-      createBlock(
-        'skills',
-        {
-          type: 'ObjectContent',
-          properties: {
-            audit: {
-              description: 'Marketing audit',
-              content: 'Audit the marketing setup.',
-              __outputDir: 'skills/marketing/audit',
-            },
-          },
-          loc: createLoc(2),
-        },
-        2
-      ),
-    ]);
-
-    const output = formatter.format(ast, { version: 'full' });
-
-    expect(output.additionalFiles?.find((file) => file.path.endsWith('SKILL.md'))?.path).toBe(
-      'skills/marketing/audit/SKILL.md'
-    );
-  });
-
-  it('falls back to the named skill directory when import path normalizes empty', () => {
-    const formatter = new GitlabDuoFormatter();
-    const ast = createProgram([
-      createBlock(
-        'skills',
-        {
-          type: 'ObjectContent',
-          properties: {
-            audit: {
-              description: 'Marketing audit',
-              content: 'Audit the marketing setup.',
-              __outputDir: '../..',
-            },
-          },
-          loc: createLoc(2),
-        },
-        2
-      ),
-    ]);
-
-    const output = formatter.format(ast, { version: 'full' });
-
-    expect(output.additionalFiles?.find((file) => file.path.endsWith('SKILL.md'))?.path).toBe(
-      'skills/audit/SKILL.md'
-    );
+    expect(skillFile?.path).toBe(expectedPath);
+    expect(skillFile?.content).toContain('name: audit');
+    expect(skillFile?.content).toContain('description: Marketing audit');
+    expect(skillFile?.content).toContain('Audit the marketing setup.');
   });
 
   it('reports the Duo skill path and file name', () => {
