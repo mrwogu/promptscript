@@ -4,7 +4,7 @@ import { ResolveError } from '@promptscript/core';
 import type { Logger, Program, Block, TextContent, Value } from '@promptscript/core';
 import { parseSkillMd } from './skills.js';
 import { collectSkillResources, toSkillResourceValues } from './skill-resources.js';
-import { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
+import { makeBlock, makeObjectContent, makeTextContent } from './ast-factory.js';
 
 /** Context file names to look for when synthesizing a @context block. */
 const CONTEXT_FILES = ['CLAUDE.md', '.clinerules', '.cursorrules'] as const;
@@ -347,7 +347,7 @@ export async function discoverNativeContent(dir: string, logger?: Logger): Promi
     }
   }
   if (Object.keys(mergedSkills).length > 0) {
-    blocks.push(makeBlock('skills', makeObjectContent(mergedSkills)));
+    blocks.push(makeBlock('skills', makeObjectContent(mergedSkills, dir), dir));
   }
 
   // Discover agents (root + agents/ wrapper)
@@ -362,7 +362,7 @@ export async function discoverNativeContent(dir: string, logger?: Logger): Promi
   }
   const mergedAgents = { ...wrappedAgents, ...rootAgents };
   if (Object.keys(mergedAgents).length > 0) {
-    blocks.push(makeBlock('agents', makeObjectContent(mergedAgents)));
+    blocks.push(makeBlock('agents', makeObjectContent(mergedAgents, dir), dir));
   }
 
   // Discover commands -> @shortcuts (root + commands/ wrapper)
@@ -377,13 +377,13 @@ export async function discoverNativeContent(dir: string, logger?: Logger): Promi
   }
   const mergedCommands = { ...wrappedCommands, ...rootCommands };
   if (Object.keys(mergedCommands).length > 0) {
-    blocks.push(makeBlock('shortcuts', makeObjectContent(mergedCommands)));
+    blocks.push(makeBlock('shortcuts', makeObjectContent(mergedCommands, dir), dir));
   }
 
   // Discover context
   const contextContent = await discoverContext(dir);
   if (contextContent) {
-    blocks.push(makeBlock('context', contextContent));
+    blocks.push(makeBlock('context', contextContent, contextContent.loc.file));
   }
 
   if (blocks.length === 0) {
@@ -395,7 +395,7 @@ export async function discoverNativeContent(dir: string, logger?: Logger): Promi
     blocks,
     uses: [],
     extends: [],
-    loc: VIRTUAL_LOC,
+    loc: { file: dir, line: 1, column: 1, offset: 0 },
   };
 
   return program;
