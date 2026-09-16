@@ -325,11 +325,16 @@ const skills = program.command('skills').description('Manage PromptScript skills
 
 skills
   .command('add <source>')
-  .description('Add a remote skill to the project')
+  .description('Add a remote or local skill to the project')
   .option('-f, --file <file>', 'Target .prs file to modify')
   .option('--dry-run', 'Preview changes without writing')
   .option('--skip-validation', 'Skip SKILL.md frontmatter validation (not recommended)')
   .option('--strict', 'Treat validation warnings as errors')
+  .option(
+    '--copy',
+    'Local sources: copy into .promptscript/skills/ instead of referencing in place'
+  )
+  .option('--force', 'Local sources: replace an existing skill with the same name')
   .action((source, opts) => skillsAddCommand(source, opts));
 
 skills

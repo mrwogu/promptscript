@@ -9,10 +9,13 @@ import {
   open,
   lstat,
   stat,
+  cp,
+  mkdir,
 } from 'fs/promises';
-import { resolve, join, basename, dirname } from 'path';
+import { resolve, join, basename, dirname, relative, isAbsolute, sep } from 'path';
 import { existsSync } from 'fs';
-import { tmpdir } from 'os';
+import { tmpdir, homedir } from 'os';
+import type { Ora } from 'ora';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import { parse } from '@promptscript/parser';
 import type { SkillsAddOptions, SkillsRemoveOptions, SkillsUpdateOptions } from '../types.js';
@@ -42,6 +45,61 @@ import {
  * Rejects local paths starting with `./` or `../`.
  */
 const REMOTE_SOURCE_PATTERN = /^[a-zA-Z0-9][\w.-]*\.[a-zA-Z]{2,}\/.+/;
+
+/**
+ * Directory where `prs skills add --copy` installs local skills, matching the
+ * resolver's local auto-discovery path.
+ */
+const MANAGED_SKILLS_DIR = join('.promptscript', 'skills');
+
+/**
+ * Valid `@use` relative path, mirroring the parser's RelativePath token.
+ * Paths containing spaces, `@`, or other characters outside this set cannot
+ * be referenced in a `.prs` file at all.
+ */
+const USE_PATH_PATTERN = /^\.{1,2}\/[a-zA-Z0-9_/.-]+$/;
+
+/**
+ * Expand a leading `~` to the user's home directory.
+ */
+export function expandHomePath(input: string): string {
+  if (input === '~') return homedir();
+  if (input.startsWith('~/') || input.startsWith('~\\')) {
+    return join(homedir(), input.slice(2));
+  }
+  return input;
+}
+
+/**
+ * Decide whether a skill source refers to a local path rather than a remote
+ * repository. Explicit local prefixes win, a remote-looking pattern wins over
+ * a coincidentally same-named local directory, and anything else that exists
+ * on disk is treated as local so bare relative paths work.
+ */
+export function isLocalSkillSource(source: string): boolean {
+  const trimmed = source.trim();
+  if (trimmed.length === 0) return false;
+  if (trimmed.startsWith('~')) {
+    return trimmed === '~' || trimmed.slice(1, 2) === '/' || trimmed.slice(1, 2) === '\\';
+  }
+  if (trimmed.startsWith('/') || trimmed.startsWith('\\')) return true;
+  if (/^[a-zA-Z]:[\\/]/.test(trimmed)) return true;
+  if (trimmed.startsWith('./') || trimmed.startsWith('.\\')) return true;
+  if (trimmed.startsWith('../') || trimmed.startsWith('..\\')) return true;
+  if (REMOTE_SOURCE_PATTERN.test(trimmed)) return false;
+  return existsSync(resolve(process.cwd(), expandHomePath(trimmed)));
+}
+
+/**
+ * Compute the `@use` path for a skill directory, relative to the directory
+ * holding the entry `.prs` file. Always starts with `./` or `../` so the
+ * parser classifies it as a relative path and the resolver resolves it
+ * against the entry file (not the project root).
+ */
+export function toUsePath(entryDir: string, skillDir: string): string {
+  const rel = relative(entryDir, skillDir).split(sep).join('/');
+  return rel.startsWith('..') ? rel : `./${rel}`;
+}
 
 interface ParsedSkillSource {
   path: string;
@@ -973,12 +1031,266 @@ async function rollbackSkillsAdd(state: SkillsAddRollbackState): Promise<Error |
 }
 
 /**
- * Add a remote skill to the project.
+ * Collect names that already occupy a skill slot in this project:
+ * lockfile markdown-sourced skills, directories under `.promptscript/skills/`,
+ * and local `@use` references in the entry file. Entries pointing at
+ * `skillDir` itself are skipped - re-referencing the same directory is not a
+ * collision.
+ */
+async function collectLocalExistingNames(
+  lockfile: Lockfile,
+  lines: readonly string[],
+  skillDir: string,
+  entryDir: string
+): Promise<Set<string>> {
+  const names = new Set(collectExistingSkillNames(lockfile));
+
+  const managedRoot = resolve(process.cwd(), MANAGED_SKILLS_DIR);
+  if (existsSync(managedRoot)) {
+    const entries = await readdir(managedRoot, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      if (resolve(managedRoot, entry.name) === resolve(skillDir)) continue;
+      names.add(entry.name);
+    }
+  }
+
+  for (const line of lines) {
+    const usePath = extractUsePath(line);
+    if (!usePath || !(usePath.startsWith('./') || usePath.startsWith('../'))) continue;
+    const absUsePath = resolve(entryDir, usePath);
+    const dir = usePath.endsWith('.md') ? dirname(absUsePath) : absUsePath;
+    if (dir === resolve(skillDir)) continue;
+    names.add(basename(dir));
+  }
+
+  return names;
+}
+
+/**
+ * Add a skill from a local directory (or a SKILL.md file inside one).
  *
- * 1. Validates source is a remote path
- * 2. Resolves target .prs file
- * 3. Inserts `@use <source>` directive
- * 4. Updates promptscript.lock with `source: 'md'` entry
+ * Validates the SKILL.md frontmatter with the same rules as the remote flow,
+ * then inserts a `@use <relative-path>` directive into the entry `.prs` file.
+ * With `--copy` the directory is installed into `.promptscript/skills/<name>`
+ * instead of being referenced where it lies. Local skills are not recorded in
+ * `promptscript.lock`: there is no commit to pin and compile only requires
+ * lock entries for remote imports.
+ */
+async function addLocalSkill(
+  rawSource: string,
+  options: SkillsAddOptions,
+  spinner: Ora
+): Promise<void> {
+  let transactionLock: SkillsAddLockHandle | undefined;
+
+  try {
+    const expanded = expandHomePath(rawSource.trim());
+    const parsed = parseSkillSource(expanded);
+    if (parsed.version !== 'latest') {
+      spinner.fail('Versioned local paths are not supported');
+      ConsoleOutput.error('Local skills are referenced in place, so there is no version to pin.');
+      process.exitCode = 1;
+      return;
+    }
+
+    const absSource = resolve(process.cwd(), expanded);
+    if (!existsSync(absSource)) {
+      spinner.fail(`Path not found: ${expanded}`);
+      process.exitCode = 1;
+      return;
+    }
+
+    const details = await lstat(absSource);
+    if (details.isSymbolicLink()) {
+      spinner.fail('Symbolic-linked skill directories are not supported');
+      ConsoleOutput.error(
+        'The resolver skips symlinked directories at compile time. Use --copy to install the skill files.'
+      );
+      process.exitCode = 1;
+      return;
+    }
+
+    let skillDir: string;
+    let skillMdPath: string;
+    if (details.isFile()) {
+      if (!absSource.toLowerCase().endsWith('.md')) {
+        spinner.fail(`Not a SKILL.md: ${expanded}`);
+        ConsoleOutput.error('A local file source must be a SKILL.md, or the directory holding it.');
+        process.exitCode = 1;
+        return;
+      }
+      skillMdPath = absSource;
+      skillDir = dirname(absSource);
+    } else if (details.isDirectory()) {
+      skillMdPath = join(absSource, 'SKILL.md');
+      if (!existsSync(skillMdPath)) {
+        spinner.fail(`No SKILL.md found in: ${expanded}`);
+        ConsoleOutput.error('A skill directory must contain a SKILL.md file.');
+        process.exitCode = 1;
+        return;
+      }
+      skillDir = absSource;
+    } else {
+      spinner.fail(`Unsupported file type: ${expanded}`);
+      process.exitCode = 1;
+      return;
+    }
+
+    const skillName = basename(skillDir);
+
+    if (!options.dryRun) {
+      transactionLock = await acquireSkillsAddLock();
+    }
+
+    spinner.text = 'Resolving entry file...';
+    const entryFile = await resolveEntryFile(options.file);
+    const content = await readFile(entryFile, 'utf-8');
+    const lines = content.split('\n');
+
+    const entryDir = dirname(entryFile);
+    const managedDir = resolve(process.cwd(), MANAGED_SKILLS_DIR, skillName);
+    const sourceIsManaged = resolve(skillDir) === resolve(managedDir);
+    const willCopy = options.copy === true && !sourceIsManaged;
+
+    let usePath: string;
+    if (willCopy) {
+      usePath = toUsePath(entryDir, managedDir);
+    } else {
+      // In-place references must stay inside the project root: the resolver's
+      // loader rejects relative imports that escape it (path traversal guard).
+      const relToRoot = relative(process.cwd(), skillDir);
+      if (relToRoot.startsWith('..') || isAbsolute(relToRoot)) {
+        spinner.fail('Skill is outside the project root');
+        ConsoleOutput.error(
+          `"${expanded}" cannot be referenced in place because it lies outside the project root. Use --copy to install it into ${MANAGED_SKILLS_DIR}/.`
+        );
+        process.exitCode = 1;
+        return;
+      }
+      usePath = toUsePath(entryDir, skillDir);
+    }
+
+    if (!USE_PATH_PATTERN.test(usePath)) {
+      spinner.fail(`Cannot reference this path in a .prs file: ${usePath}`);
+      ConsoleOutput.error(
+        '@use paths allow only letters, digits, underscores, hyphens, dots and slashes. Use --copy to install the skill under .promptscript/skills/, or rename the folder.'
+      );
+      process.exitCode = 1;
+      return;
+    }
+
+    const alreadyImported = lines.some((line) => extractUsePath(line) === usePath);
+    if (alreadyImported) {
+      spinner.warn(`Skill already imported: ${usePath}`);
+      return;
+    }
+
+    const lockfile = await loadLockfile();
+    const existingNames = await collectLocalExistingNames(lockfile, lines, skillDir, entryDir);
+    if (willCopy && existingNames.has(skillName) && options.force !== true) {
+      spinner.fail(`Skill "${skillName}" already exists in this project`);
+      ConsoleOutput.error('Use --force to replace it.');
+      process.exitCode = 1;
+      return;
+    }
+    if (options.force === true) {
+      existingNames.delete(skillName);
+    }
+
+    spinner.text = options.skipValidation ? 'Reading SKILL.md...' : 'Validating SKILL.md...';
+    const skillContent = await readFile(skillMdPath, 'utf-8');
+    if (!options.skipValidation) {
+      const result = validateSkillFrontmatter(skillContent, {
+        filePath: skillMdPath,
+        existingNames,
+      });
+      const hasWarnings = result.issues.some((issue) => issue.severity === 'warning');
+      if (!result.valid || (options.strict && hasWarnings)) {
+        spinner.fail('SKILL.md failed validation');
+        ConsoleOutput.error(usePath);
+        printValidationIssues(result.issues);
+        process.exitCode = 1;
+        return;
+      }
+      if (hasWarnings) {
+        spinner.warn('SKILL.md has validation warnings');
+        printValidationIssues(result.issues);
+        spinner.start('Adding skill...');
+      }
+    }
+
+    const insertionPoint = findInsertionPoint(lines);
+    const newLine = `@use ${usePath}`;
+    lines.splice(insertionPoint, 0, newLine);
+    const updatedContent = lines.join('\n');
+
+    if (options.dryRun) {
+      spinner.succeed('Dry run — no files modified');
+      ConsoleOutput.newline();
+      ConsoleOutput.dryRun(`Would add to ${entryFile}:`);
+      ConsoleOutput.dryRun(`  ${newLine}`);
+      if (willCopy) {
+        ConsoleOutput.dryRun(`Would copy ${skillDir} → ${managedDir}`);
+      }
+      ConsoleOutput.dryRun('No lockfile entry (local skills are not pinned)');
+      return;
+    }
+
+    let copiedDir: string | undefined;
+    if (willCopy) {
+      spinner.text = 'Copying skill...';
+      await mkdir(dirname(managedDir), { recursive: true });
+      if (existsSync(managedDir)) {
+        // Reaching here means --force was given (the non-force refusal ran earlier).
+        await rm(managedDir, { recursive: true, force: true });
+      }
+      await cp(skillDir, managedDir, { recursive: true, dereference: true });
+      copiedDir = managedDir;
+    }
+
+    try {
+      await assertFileUnchanged(entryFile, content);
+      await writeFileAtomically(entryFile, updatedContent);
+    } catch (error) {
+      // The copy is part of the same user-visible transaction as the .prs edit.
+      if (copiedDir) {
+        await rm(copiedDir, { recursive: true, force: true }).catch(() => {
+          // Best-effort cleanup must not hide the write error.
+        });
+      }
+      throw error;
+    }
+
+    spinner.succeed('Skill added');
+    ConsoleOutput.newline();
+    ConsoleOutput.success(`${newLine}  →  ${entryFile}`);
+    if (willCopy) {
+      ConsoleOutput.muted(`Copied into ${MANAGED_SKILLS_DIR}/${skillName}`);
+    }
+    ConsoleOutput.muted('Local skill - not recorded in the lockfile');
+  } catch (error) {
+    spinner.fail('Failed to add skill');
+    ConsoleOutput.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  } finally {
+    if (transactionLock) {
+      await releaseSkillsAddLock(transactionLock);
+    }
+  }
+}
+
+/**
+ * Add a skill to the project.
+ *
+ * Remote sources (the default): validates the remote path, resolves the
+ * version, inserts `@use <source>`, and records the pin in
+ * `promptscript.lock`.
+ *
+ * Local sources (paths starting with `./`, `../`, `~`, or an absolute path,
+ * plus bare names that exist on disk): delegates to `addLocalSkill`, which
+ * validates the on-disk SKILL.md and references it in place or copies it
+ * into `.promptscript/skills/` with `--copy`.
  */
 export async function skillsAddCommand(
   rawSource: string,
@@ -997,6 +1309,12 @@ export async function skillsAddCommand(
         'Use https:// or git@host:owner/repo. Cleartext git transport is rejected to prevent man-in-the-middle attacks.'
       );
       process.exitCode = 1;
+      return;
+    }
+
+    // Local paths have their own flow: no clone, no lockfile entry.
+    if (isLocalSkillSource(rawSource)) {
+      await addLocalSkill(rawSource, options, spinner);
       return;
     }
 

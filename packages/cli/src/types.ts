@@ -285,6 +285,10 @@ export interface SkillsAddOptions {
   skipValidation?: boolean;
   /** Treat validation warnings as errors */
   strict?: boolean;
+  /** Local sources: copy the skill into .promptscript/skills/ instead of referencing it in place */
+  copy?: boolean;
+  /** Local sources: replace an existing skill with the same name */
+  force?: boolean;
 }
 
 /**
