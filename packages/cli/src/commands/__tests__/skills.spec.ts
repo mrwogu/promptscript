@@ -4114,6 +4114,46 @@ function findPrsWrite(fileName: string): string | undefined {
   return prsWriteCall ? (prsWriteCall[1] as string) : undefined;
 }
 
+/** Make the mocked validator report a single soft warning. */
+function arrangeValidationWarnings(): void {
+  mockValidateSkillFrontmatter.mockReturnValue({
+    valid: true,
+    issues: [{ severity: 'warning', code: 'SK050', message: 'soft' }],
+  });
+}
+
+/**
+ * Arrange a `.promptscript/skills/` scan on top of arrangeLocalSkillSource:
+ * the managed root exists and holds the given directories (plus optional
+ * non-skill files).
+ */
+function arrangeManagedScan(
+  skillDir: string,
+  entryFile: string,
+  installedDirs: readonly string[],
+  installedFiles: readonly string[] = []
+): void {
+  const managedRoot = resolve('.promptscript/skills');
+  const knownPaths = new Set(
+    [...installedDirs, ...installedFiles].map((name) => join(managedRoot, name))
+  );
+  mockExistsSync.mockImplementation((p: string) => {
+    if (p === skillDir || p === join(skillDir, 'SKILL.md') || p === entryFile) return true;
+    if (p === managedRoot || p === resolve('.promptscript')) return true;
+    return knownPaths.has(p);
+  });
+  mockReaddir.mockImplementation((_p: unknown, opts?: { withFileTypes?: boolean }) =>
+    Promise.resolve(
+      opts?.withFileTypes
+        ? [
+            ...installedDirs.map((name) => ({ name, isDirectory: () => true })),
+            ...installedFiles.map((name) => ({ name, isDirectory: () => false })),
+          ]
+        : ['project.prs']
+    )
+  );
+}
+
 describe('expandHomePath', () => {
   it('expands bare ~ to the home directory', () => {
     expect(expandHomePath('~')).toBe('/home/testuser');
@@ -4247,19 +4287,8 @@ describe('skillsAddCommand local sources', () => {
   it('refuses --copy when the skill name already exists, unless --force', async () => {
     const skillDir = resolve('vendor/my-skill');
     const entryFile = resolve('.promptscript/project.prs');
-    const managedRoot = resolve('.promptscript/skills');
     arrangeLocalSkillSource(skillDir, entryFile);
-    mockExistsSync.mockImplementation((p: string) => {
-      if (p === skillDir || p === join(skillDir, 'SKILL.md') || p === entryFile) return true;
-      if (p === managedRoot || p === resolve('.promptscript')) return true;
-      if (p === resolve('.promptscript/skills/my-skill')) return true;
-      return false;
-    });
-    mockReaddir.mockImplementation((_p: unknown, opts?: { withFileTypes?: boolean }) =>
-      Promise.resolve(
-        opts?.withFileTypes ? [{ name: 'my-skill', isDirectory: () => true }] : ['project.prs']
-      )
-    );
+    arrangeManagedScan(skillDir, entryFile, ['my-skill']);
 
     await skillsAddCommand('./vendor/my-skill', { copy: true });
 
@@ -4389,13 +4418,8 @@ describe('skillsAddCommand local sources', () => {
   });
 
   it('treats validation warnings as errors under --strict', async () => {
-    const skillDir = resolve('vendor/my-skill');
-    const entryFile = resolve('entry.prs');
-    arrangeLocalSkillSource(skillDir, entryFile);
-    mockValidateSkillFrontmatter.mockReturnValue({
-      valid: true,
-      issues: [{ severity: 'warning', code: 'SK050', message: 'soft' }],
-    });
+    arrangeLocalSkillSource(resolve('vendor/my-skill'), resolve('entry.prs'));
+    arrangeValidationWarnings();
 
     await skillsAddCommand('./vendor/my-skill', { file: 'entry.prs', strict: true });
 
@@ -4405,13 +4429,8 @@ describe('skillsAddCommand local sources', () => {
   });
 
   it('proceeds on warnings without --strict', async () => {
-    const skillDir = resolve('vendor/my-skill');
-    const entryFile = resolve('entry.prs');
-    arrangeLocalSkillSource(skillDir, entryFile);
-    mockValidateSkillFrontmatter.mockReturnValue({
-      valid: true,
-      issues: [{ severity: 'warning', code: 'SK050', message: 'soft' }],
-    });
+    arrangeLocalSkillSource(resolve('vendor/my-skill'), resolve('entry.prs'));
+    arrangeValidationWarnings();
 
     await skillsAddCommand('./vendor/my-skill', { file: 'entry.prs' });
 
@@ -4488,18 +4507,8 @@ describe('skillsAddCommand local sources', () => {
   it('references an already-managed skill without copying it again', async () => {
     const skillDir = resolve('.promptscript/skills/my-skill');
     const entryFile = resolve('.promptscript/project.prs');
-    const managedRoot = resolve('.promptscript/skills');
     arrangeLocalSkillSource(skillDir, entryFile);
-    mockExistsSync.mockImplementation((p: string) => {
-      if (p === skillDir || p === join(skillDir, 'SKILL.md') || p === entryFile) return true;
-      if (p === managedRoot || p === resolve('.promptscript')) return true;
-      return false;
-    });
-    mockReaddir.mockImplementation((_p: unknown, opts?: { withFileTypes?: boolean }) =>
-      Promise.resolve(
-        opts?.withFileTypes ? [{ name: 'my-skill', isDirectory: () => true }] : ['project.prs']
-      )
-    );
+    arrangeManagedScan(skillDir, entryFile, ['my-skill']);
 
     await skillsAddCommand('./.promptscript/skills/my-skill', { copy: true });
 
@@ -4511,23 +4520,8 @@ describe('skillsAddCommand local sources', () => {
   it('skips non-directory entries when scanning installed skill names', async () => {
     const skillDir = resolve('vendor/other-skill');
     const entryFile = resolve('.promptscript/project.prs');
-    const managedRoot = resolve('.promptscript/skills');
     arrangeLocalSkillSource(skillDir, entryFile);
-    mockExistsSync.mockImplementation((p: string) => {
-      if (p === skillDir || p === join(skillDir, 'SKILL.md') || p === entryFile) return true;
-      if (p === managedRoot || p === resolve('.promptscript')) return true;
-      return false;
-    });
-    mockReaddir.mockImplementation((_p: unknown, opts?: { withFileTypes?: boolean }) =>
-      Promise.resolve(
-        opts?.withFileTypes
-          ? [
-              { name: 'README.md', isDirectory: () => false },
-              { name: 'my-skill', isDirectory: () => true },
-            ]
-          : ['project.prs']
-      )
-    );
+    arrangeManagedScan(skillDir, entryFile, ['my-skill'], ['README.md']);
 
     await skillsAddCommand('./vendor/other-skill', { copy: true });
 
