@@ -70,7 +70,7 @@ import {
 } from './skills.js';
 import { collectSkillResources, toSkillResourceValues } from './skill-resources.js';
 import { detectContentType } from './content-detector.js';
-import { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
+import { makeBlock, makeObjectContent, makeTextContent } from './ast-factory.js';
 import { resolveGuardRequires } from './guard-requires.js';
 import { normalizeBlockAliases } from './normalize.js';
 import {
@@ -1279,10 +1279,12 @@ export class Resolver {
 
     const program: Program = {
       type: 'Program',
-      blocks: [makeBlock('skills', makeObjectContent({ [skillName]: skillProps }))],
+      blocks: [
+        makeBlock('skills', makeObjectContent({ [skillName]: skillProps }, absPath), absPath),
+      ],
       uses: [],
       extends: [],
-      loc: VIRTUAL_LOC,
+      loc: { file: absPath, line: 1, column: 1, offset: 0 },
     };
 
     return { ast: program };
@@ -2049,10 +2051,10 @@ export class Resolver {
 
     const program: Program = {
       type: 'Program',
-      blocks: [makeBlock('skills', makeObjectContent(properties))],
+      blocks: [makeBlock('skills', makeObjectContent(properties, dirPath), dirPath)],
       uses: [],
       extends: [],
-      loc: VIRTUAL_LOC,
+      loc: { file: dirPath, line: 1, column: 1, offset: 0 },
     };
 
     return { ast: program };
