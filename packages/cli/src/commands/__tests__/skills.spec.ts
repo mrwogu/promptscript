@@ -3909,6 +3909,36 @@ describe('skillsUpdateCommand frontmatter re-validation', () => {
     ]);
   });
 
+  it('rewrites tmp clone paths in issue messages to remote paths', async () => {
+    arrangeLock();
+    mockValidateSkillFrontmatter.mockReturnValue({
+      valid: false,
+      issues: [
+        {
+          severity: 'error',
+          code: 'SK051',
+          field: 'references',
+          message:
+            'Reference "refs/x.md" listed in frontmatter does not exist (looked for /tmp/prs-skill-validate-xyz/skills/foo/refs/x.md).',
+        },
+      ],
+    });
+    mockFormatSkillValidationIssues.mockReturnValue('✗ SK051');
+
+    await skillsUpdateCommand(undefined, {});
+
+    expect(mockFormatSkillValidationIssues).toHaveBeenCalledWith([
+      expect.objectContaining({
+        message: expect.stringContaining('(looked for github.com/org/repo/skills/foo/refs/x.md).'),
+      }),
+    ]);
+    expect(mockFormatSkillValidationIssues).toHaveBeenCalledWith([
+      expect.objectContaining({
+        message: expect.not.stringContaining('prs-skill-validate'),
+      }),
+    ]);
+  });
+
   it('updates shared-repository skills atomically', async () => {
     const lockContent = JSON.stringify({
       version: 1,

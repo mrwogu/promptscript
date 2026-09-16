@@ -383,9 +383,16 @@ async function fetchAndValidateRemoteSkill(
       existingNames: options.existingNames,
     });
     const diagnosticPath = getRemoteSkillDiagnosticPath(source);
-    const issues = result.issues.map((issue) =>
-      issue.location ? { ...issue, location: { ...issue.location, file: diagnosticPath } } : issue
-    );
+    const remoteSkillDir = dirname(diagnosticPath);
+    // Issues without a location (e.g. SK051 for a missing reference) embed the
+    // tmp clone path in the message text, so rewrite it to the remote path.
+    const issues = result.issues.map((issue) => {
+      const message = issue.message.replaceAll(dirname(filePath), remoteSkillDir);
+      if (issue.location) {
+        return { ...issue, message, location: { ...issue.location, file: diagnosticPath } };
+      }
+      return { ...issue, message };
+    });
     return { content, integrity, valid: result.valid, issues };
   } finally {
     await rm(tmp, { recursive: true, force: true }).catch(() => {
