@@ -329,7 +329,7 @@ export class BrowserCompiler {
         for (const warning of output.warnings ?? []) {
           formatWarnings.push({
             ruleId: warning.code,
-            ruleName: 'target-hook-compatibility',
+            ruleName: warning.ruleName ?? 'target-hook-compatibility',
             severity: 'warning',
             message: warning.message,
             ...(warning.suggestion ? { suggestion: warning.suggestion } : {}),

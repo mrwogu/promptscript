@@ -10,6 +10,7 @@ import {
   getHookCompatibilityWarnings,
 } from '../hook-adapters.js';
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
+import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -317,12 +318,13 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
 
     // For simple mode, just emit AGENTS.md
     if (version === 'simple') {
-      const output = appendTargetHookCapabilityWarnings(
+      let output = appendTargetHookCapabilityWarnings(
         this.formatSimple(ast, options),
         ast,
         this.name,
         version
       );
+      output = appendAgentCapabilityWarnings(output, ast, this.name, version);
       return {
         ...output,
         managedOutputFiles: [

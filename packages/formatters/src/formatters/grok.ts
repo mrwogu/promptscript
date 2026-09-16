@@ -5,6 +5,7 @@ import type { FormatOptions, FormatterOutput, FormatterVersionMap } from '../typ
 import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
 import { extractHooks, generateGrokHooks, getHookCompatibilityWarnings } from '../hook-adapters.js';
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
+import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
 
 /**
  * Supported Grok Build output format versions.
@@ -87,6 +88,7 @@ export class GrokFormatter extends BaseFormatter {
     }
 
     output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
+    output = appendAgentCapabilityWarnings(output, ast, this.name, version);
     return {
       ...output,
       managedOutputFiles: [

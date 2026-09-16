@@ -10,6 +10,8 @@ import type {
 export interface FormatterWarning {
   /** Stable warning code */
   code: string;
+  /** Rule name reported to compile consumers (defaults per code family) */
+  ruleName?: string;
   /** Actionable compatibility message */
   message: string;
   /** Optional remediation */

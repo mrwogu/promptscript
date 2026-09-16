@@ -114,7 +114,11 @@ describe('Agent platform integration', () => {
     expect(result.errors).toEqual([]);
     expect(result.warnings.map((warning) => warning.message)).toEqual([
       'Hook "validate-types" uses statusMessage, which cursor cannot represent and will omit.',
+      'Agent "reviewer": field "tools" is not supported by target "cursor" and will be omitted.',
+      'Agent "reviewer": field "skills" is not supported by target "cursor" and will be omitted.',
+      'Agent "reviewer": field "skills" is not supported by target "factory" and will be omitted.',
       'Hook "validate-types" uses statusMessage, which factory cannot represent and will omit.',
+      'Target "github" version "multifile" cannot emit @agents and will omit it.',
       'Hook "validate-types" uses statusMessage, which github cannot represent and will omit.',
     ]);
     expect(requireOutput(result, 'CLAUDE.md')).toContain('platform engineering assistant');

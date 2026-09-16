@@ -7,6 +7,7 @@ import {
   appendTargetHookCapabilityWarnings,
   getTargetHookCapabilityWarnings,
 } from './hook-capability-warnings.js';
+import { appendAgentCapabilityWarnings } from './agent-capability-warnings.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -205,7 +206,13 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
         ? { ...output, warnings: [...(output.warnings ?? []), ...unsupportedWarnings] }
         : output;
 
-    return appendTargetHookCapabilityWarnings(warnedOutput, ast, this.name, version);
+    // Targets whose unsupported-block diagnostics already report @agents
+    // must not get a second block-level omission warning.
+    const agentOutput = appendAgentCapabilityWarnings(warnedOutput, ast, this.name, version, {
+      blockWarningHandled: (this.config.unsupportedBlocks ?? []).includes('agents'),
+    });
+
+    return appendTargetHookCapabilityWarnings(agentOutput, ast, this.name, version);
   }
 
   protected hasEnabledHooks(ast: Program): boolean {

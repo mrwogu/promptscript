@@ -8,6 +8,7 @@ import {
   getHookCompatibilityWarnings,
 } from '../hook-adapters.js';
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
+import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -134,8 +135,6 @@ interface ClaudeAgentConfig {
   memory?: 'user' | 'project' | 'local';
   /** MCP server names this agent has access to */
   mcpServers?: string[];
-  /** Lifecycle hooks for the agent */
-  hooks?: Record<string, unknown>;
   /** Whether the agent runs as a background process */
   background?: boolean;
   /** Isolation mode for the agent */
@@ -202,6 +201,7 @@ export class ClaudeFormatter extends BaseFormatter {
     }
 
     output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
+    output = appendAgentCapabilityWarnings(output, ast, this.name, version);
     output = {
       ...output,
       managedOutputFiles: [
