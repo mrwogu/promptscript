@@ -1,61 +1,7 @@
 import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
 import { KNOWN_TARGETS } from '@promptscript/core';
-import { GitHubFormatter } from '../formatters/github.js';
-import { ClaudeFormatter } from '../formatters/claude.js';
-import { CursorFormatter } from '../formatters/cursor.js';
-import { AntigravityFormatter } from '../formatters/antigravity.js';
-import { FactoryFormatter } from '../formatters/factory.js';
-import { OpenCodeFormatter } from '../formatters/opencode.js';
-import { GeminiFormatter } from '../formatters/gemini.js';
-// Tier 1
-import { WindsurfFormatter } from '../formatters/windsurf.js';
-import { ClineFormatter } from '../formatters/cline.js';
-import { RooFormatter } from '../formatters/roo.js';
-import { CodexFormatter } from '../formatters/codex.js';
-import { ContinueFormatter } from '../formatters/continue.js';
-// Tier 2
-import { AugmentFormatter } from '../formatters/augment.js';
-import { GooseFormatter } from '../formatters/goose.js';
-import { KiloFormatter } from '../formatters/kilo.js';
-import { AmpFormatter } from '../formatters/amp.js';
-import { TraeFormatter } from '../formatters/trae.js';
-import { JunieFormatter } from '../formatters/junie.js';
-import { KiroFormatter } from '../formatters/kiro.js';
-// Tier 3
-import { CortexFormatter } from '../formatters/cortex.js';
-import { CrushFormatter } from '../formatters/crush.js';
-import { CommandCodeFormatter } from '../formatters/command-code.js';
-import { KodeFormatter } from '../formatters/kode.js';
-import { McpjamFormatter } from '../formatters/mcpjam.js';
-import { MistralVibeFormatter } from '../formatters/mistral-vibe.js';
-import { MuxFormatter } from '../formatters/mux.js';
-import { OpenHandsFormatter } from '../formatters/openhands.js';
-import { PiFormatter } from '../formatters/pi.js';
-import { QoderFormatter } from '../formatters/qoder.js';
-import { QwenCodeFormatter } from '../formatters/qwen-code.js';
-import { ZencoderFormatter } from '../formatters/zencoder.js';
-import { NeovateFormatter } from '../formatters/neovate.js';
-import { PochiFormatter } from '../formatters/pochi.js';
-import { AdalFormatter } from '../formatters/adal.js';
-import { IflowFormatter } from '../formatters/iflow.js';
-import { OpenClawFormatter } from '../formatters/openclaw.js';
-import { CodeBuddyFormatter } from '../formatters/codebuddy.js';
-// AGENTS.md-only targets
-import { AiderFormatter } from '../formatters/aider.js';
-import { AmazonQFormatter } from '../formatters/amazon-q.js';
-import { WarpFormatter } from '../formatters/warp.js';
-import { ZedFormatter } from '../formatters/zed.js';
-import { JulesFormatter } from '../formatters/jules.js';
-import { DevinFormatter } from '../formatters/devin.js';
-// Grok Build
-import { GrokFormatter } from '../formatters/grok.js';
-import { KimiFormatter } from '../formatters/kimi.js';
-import { MimoFormatter } from '../formatters/mimo.js';
-import { DeepAgentsFormatter } from '../formatters/deep-agents.js';
-import { ForgecodeFormatter } from '../formatters/forgecode.js';
-import { HermesFormatter } from '../formatters/hermes.js';
-import { GitlabDuoFormatter } from '../formatters/gitlab-duo.js';
+import { BUILTIN_FORMATTERS } from '../builtin-formatters.js';
 import type { Formatter } from '../types.js';
 import {
   PARITY_MATRIX,
@@ -296,63 +242,9 @@ describe('Parity Matrix Tests', () => {
     vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
 
     formatters.clear();
-    // Tier 0
-    formatters.set('github', new GitHubFormatter());
-    formatters.set('claude', new ClaudeFormatter());
-    formatters.set('cursor', new CursorFormatter());
-    formatters.set('antigravity', new AntigravityFormatter());
-    formatters.set('factory', new FactoryFormatter());
-    formatters.set('opencode', new OpenCodeFormatter());
-    formatters.set('gemini', new GeminiFormatter());
-    // Tier 1
-    formatters.set('windsurf', new WindsurfFormatter());
-    formatters.set('cline', new ClineFormatter());
-    formatters.set('roo', new RooFormatter());
-    formatters.set('codex', new CodexFormatter());
-    formatters.set('continue', new ContinueFormatter());
-    // Tier 2
-    formatters.set('augment', new AugmentFormatter());
-    formatters.set('goose', new GooseFormatter());
-    formatters.set('kilo', new KiloFormatter());
-    formatters.set('amp', new AmpFormatter());
-    formatters.set('trae', new TraeFormatter());
-    formatters.set('junie', new JunieFormatter());
-    formatters.set('kiro', new KiroFormatter());
-    // Tier 3
-    formatters.set('cortex', new CortexFormatter());
-    formatters.set('crush', new CrushFormatter());
-    formatters.set('command-code', new CommandCodeFormatter());
-    formatters.set('kode', new KodeFormatter());
-    formatters.set('mcpjam', new McpjamFormatter());
-    formatters.set('mistral-vibe', new MistralVibeFormatter());
-    formatters.set('mux', new MuxFormatter());
-    formatters.set('openhands', new OpenHandsFormatter());
-    formatters.set('pi', new PiFormatter());
-    formatters.set('qoder', new QoderFormatter());
-    formatters.set('qwen-code', new QwenCodeFormatter());
-    formatters.set('zencoder', new ZencoderFormatter());
-    formatters.set('neovate', new NeovateFormatter());
-    formatters.set('pochi', new PochiFormatter());
-    formatters.set('adal', new AdalFormatter());
-    formatters.set('iflow', new IflowFormatter());
-    formatters.set('openclaw', new OpenClawFormatter());
-    formatters.set('codebuddy', new CodeBuddyFormatter());
-    // AGENTS.md-only targets
-    formatters.set('aider', new AiderFormatter());
-    formatters.set('amazon-q', new AmazonQFormatter());
-    formatters.set('warp', new WarpFormatter());
-    formatters.set('zed', new ZedFormatter());
-    formatters.set('jules', new JulesFormatter());
-    formatters.set('devin', new DevinFormatter());
-    // Grok Build
-    formatters.set('grok', new GrokFormatter());
-    // Priority B CLI agents
-    formatters.set('kimi', new KimiFormatter());
-    formatters.set('mimo', new MimoFormatter());
-    formatters.set('deep-agents', new DeepAgentsFormatter());
-    formatters.set('forgecode', new ForgecodeFormatter());
-    formatters.set('hermes', new HermesFormatter());
-    formatters.set('gitlab-duo', new GitlabDuoFormatter());
+    for (const target of KNOWN_TARGETS) {
+      formatters.set(target, new BUILTIN_FORMATTERS[target]());
+    }
   });
 
   afterEach(() => {

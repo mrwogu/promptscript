@@ -57,67 +57,18 @@ function buildDelegateDrift(): DelegateDrift {
 
 describe('TargetName branded type', () => {
   describe('KnownTarget', () => {
-    it('should accept all known target literals', () => {
-      // Arrange & Act
-      const targets: KnownTarget[] = [
-        'github',
-        'claude',
-        'cursor',
-        'antigravity',
-        'factory',
-        'opencode',
-        'gemini',
-        'windsurf',
-        'cline',
-        'roo',
-        'codex',
-        'continue',
-        'augment',
-        'goose',
-        'kilo',
-        'amp',
-        'trae',
-        'junie',
-        'kiro',
-        'cortex',
-        'crush',
-        'command-code',
-        'kode',
-        'mcpjam',
-        'mistral-vibe',
-        'mux',
-        'openhands',
-        'pi',
-        'qoder',
-        'qwen-code',
-        'zencoder',
-        'neovate',
-        'pochi',
-        'adal',
-        'iflow',
-        'openclaw',
-        'codebuddy',
-        // AGENTS.md-only targets
-        'aider',
-        'amazon-q',
-        'warp',
-        'zed',
-        'jules',
-        'devin',
-        // Grok Build
-        'grok',
-        // Priority B CLI agents
-        'kimi',
-        'mimo',
-        'deep-agents',
-        'forgecode',
-        'hermes',
-        // GitLab Duo (Agent Platform)
-        'gitlab-duo',
-      ];
+    it('should keep KNOWN_TARGETS in sync with the KnownTarget union', () => {
+      // Arrange
+      // Compile-time exhaustiveness: the assignment fails to compile when a
+      // KnownTarget union member is missing from the runtime KNOWN_TARGETS array.
+      type MissingFromRuntime = Exclude<KnownTarget, (typeof KNOWN_TARGETS)[number]>;
+      const runtimeCoversUnion: MissingFromRuntime extends never ? true : never = true;
 
       // Assert
-      expect(targets).toHaveLength(KNOWN_TARGETS.length);
+      expect(runtimeCoversUnion).toBe(true);
+      for (const target of KNOWN_TARGETS) {
+        expect(isKnownTarget(target)).toBe(true);
+      }
     });
 
     it('should be assignable to TargetName', () => {

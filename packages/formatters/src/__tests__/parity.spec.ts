@@ -1,67 +1,15 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { KNOWN_TARGETS } from '@promptscript/core';
+import { KNOWN_TARGETS, TARGET_DEFINITIONS } from '@promptscript/core';
 import { GitHubFormatter } from '../formatters/github.js';
-import { ClaudeFormatter } from '../formatters/claude.js';
 import { CursorFormatter } from '../formatters/cursor.js';
-import { AntigravityFormatter } from '../formatters/antigravity.js';
-import { FactoryFormatter } from '../formatters/factory.js';
-import { OpenCodeFormatter } from '../formatters/opencode.js';
-import { GeminiFormatter } from '../formatters/gemini.js';
-// Tier 1
-import { WindsurfFormatter } from '../formatters/windsurf.js';
-import { ClineFormatter } from '../formatters/cline.js';
-import { RooFormatter } from '../formatters/roo.js';
-import { CodexFormatter } from '../formatters/codex.js';
-import { ContinueFormatter } from '../formatters/continue.js';
-// Tier 2
-import { AugmentFormatter } from '../formatters/augment.js';
-import { GooseFormatter } from '../formatters/goose.js';
-import { KiloFormatter } from '../formatters/kilo.js';
-import { AmpFormatter } from '../formatters/amp.js';
-import { TraeFormatter } from '../formatters/trae.js';
-import { JunieFormatter } from '../formatters/junie.js';
-import { KiroFormatter } from '../formatters/kiro.js';
-// Tier 3
-import { CortexFormatter } from '../formatters/cortex.js';
-import { CrushFormatter } from '../formatters/crush.js';
-import { CommandCodeFormatter } from '../formatters/command-code.js';
-import { KodeFormatter } from '../formatters/kode.js';
-import { McpjamFormatter } from '../formatters/mcpjam.js';
-import { MistralVibeFormatter } from '../formatters/mistral-vibe.js';
-import { MuxFormatter } from '../formatters/mux.js';
-import { OpenHandsFormatter } from '../formatters/openhands.js';
-import { PiFormatter } from '../formatters/pi.js';
-import { QoderFormatter } from '../formatters/qoder.js';
-import { QwenCodeFormatter } from '../formatters/qwen-code.js';
-import { ZencoderFormatter } from '../formatters/zencoder.js';
-import { NeovateFormatter } from '../formatters/neovate.js';
-import { PochiFormatter } from '../formatters/pochi.js';
-import { AdalFormatter } from '../formatters/adal.js';
-import { IflowFormatter } from '../formatters/iflow.js';
-import { OpenClawFormatter } from '../formatters/openclaw.js';
-import { CodeBuddyFormatter } from '../formatters/codebuddy.js';
-// AGENTS.md-only targets
-import { AiderFormatter } from '../formatters/aider.js';
-import { AmazonQFormatter } from '../formatters/amazon-q.js';
-import { WarpFormatter } from '../formatters/warp.js';
-import { ZedFormatter } from '../formatters/zed.js';
-import { JulesFormatter } from '../formatters/jules.js';
-import { DevinFormatter } from '../formatters/devin.js';
-// Grok Build
-import { GrokFormatter } from '../formatters/grok.js';
-import { KimiFormatter } from '../formatters/kimi.js';
-import { MimoFormatter } from '../formatters/mimo.js';
-import { DeepAgentsFormatter } from '../formatters/deep-agents.js';
-import { ForgecodeFormatter } from '../formatters/forgecode.js';
-import { HermesFormatter } from '../formatters/hermes.js';
-import { GitlabDuoFormatter } from '../formatters/gitlab-duo.js';
+import { BUILTIN_FORMATTERS } from '../builtin-formatters.js';
 import {
   extractSectionsFromOutput,
   normalizeSectionName,
   KNOWN_SECTIONS,
 } from '../section-registry.js';
-import type { Formatter } from '../types.js';
+import type { Formatter, FormatterOutput } from '../types.js';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',
@@ -232,68 +180,19 @@ pnpm lint
 }
 
 /**
+ * Markdown-rendering targets: base and simple families project the full project
+ * instructions, while agents-md-only targets emit the AGENTS.md contract
+ * unchanged, so content parity checks cover the rendering families only.
+ */
+const CONTENT_PARITY_TARGETS = KNOWN_TARGETS.filter(
+  (target) => TARGET_DEFINITIONS[target].family !== 'agents-md-only'
+);
+
+/**
  * Build the full list of all known target formatters.
  */
 function buildAllFormatters(): Formatter[] {
-  return [
-    // Tier 0 — original formatters
-    new GitHubFormatter(),
-    new ClaudeFormatter(),
-    new CursorFormatter(),
-    new AntigravityFormatter(),
-    new FactoryFormatter(),
-    new OpenCodeFormatter(),
-    new GeminiFormatter(),
-    // Tier 1
-    new WindsurfFormatter(),
-    new ClineFormatter(),
-    new RooFormatter(),
-    new CodexFormatter(),
-    new ContinueFormatter(),
-    // Tier 2
-    new AugmentFormatter(),
-    new GooseFormatter(),
-    new KiloFormatter(),
-    new AmpFormatter(),
-    new TraeFormatter(),
-    new JunieFormatter(),
-    new KiroFormatter(),
-    // Tier 3
-    new CortexFormatter(),
-    new CrushFormatter(),
-    new CommandCodeFormatter(),
-    new KodeFormatter(),
-    new McpjamFormatter(),
-    new MistralVibeFormatter(),
-    new MuxFormatter(),
-    new OpenHandsFormatter(),
-    new PiFormatter(),
-    new QoderFormatter(),
-    new QwenCodeFormatter(),
-    new ZencoderFormatter(),
-    new NeovateFormatter(),
-    new PochiFormatter(),
-    new AdalFormatter(),
-    new IflowFormatter(),
-    new OpenClawFormatter(),
-    new CodeBuddyFormatter(),
-    // AGENTS.md-only targets
-    new AiderFormatter(),
-    new AmazonQFormatter(),
-    new WarpFormatter(),
-    new ZedFormatter(),
-    new JulesFormatter(),
-    new DevinFormatter(),
-    // Grok Build
-    new GrokFormatter(),
-    // Priority B CLI agents
-    new KimiFormatter(),
-    new MimoFormatter(),
-    new DeepAgentsFormatter(),
-    new ForgecodeFormatter(),
-    new HermesFormatter(),
-    new GitlabDuoFormatter(),
-  ];
+  return KNOWN_TARGETS.map((target) => new BUILTIN_FORMATTERS[target]());
 }
 
 describe('Formatter Parity Tests', () => {
@@ -472,112 +371,39 @@ describe('Formatter Parity Tests', () => {
   });
 
   describe('Required Sections per Formatter', () => {
-    it.each([
-      ['github'],
-      ['claude'],
-      ['cursor'],
-      ['antigravity'],
-      ['factory'],
-      ['opencode'],
-      ['gemini'],
-      ['windsurf'],
-      ['cline'],
-      ['roo'],
-      ['codex'],
-      ['continue'],
-      ['augment'],
-      ['goose'],
-      ['kilo'],
-      ['amp'],
-      ['trae'],
-      ['junie'],
-      ['kiro'],
-      ['cortex'],
-      ['crush'],
-      ['command-code'],
-      ['kode'],
-      ['mcpjam'],
-      ['mistral-vibe'],
-      ['mux'],
-      ['openhands'],
-      ['pi'],
-      ['qoder'],
-      ['qwen-code'],
-      ['zencoder'],
-      ['neovate'],
-      ['pochi'],
-      ['adal'],
-      ['iflow'],
-      ['openclaw'],
-      ['codebuddy'],
-      ['gitlab-duo'],
-    ])('%s formatter should produce identity content', (formatterName) => {
-      const ast = createComprehensiveAST();
+    /** Formats the comprehensive AST with a formatter from the shared parity list. */
+    function formatComprehensive(formatterName: string): FormatterOutput {
       const formatter = formatters.find((f) => f.name === formatterName)!;
       expect(formatter, `Formatter ${formatterName} should exist`).toBeDefined();
+      return formatter.format(createComprehensiveAST());
+    }
 
-      const result = formatter.format(ast);
-      const hasIdentity =
-        result.content.includes('You are') ||
-        result.content.includes('developer') ||
-        result.content.includes('expert');
+    it.each(CONTENT_PARITY_TARGETS)(
+      '%s formatter should produce identity content',
+      (formatterName) => {
+        const result = formatComprehensive(formatterName);
+        const hasIdentity =
+          result.content.includes('You are') ||
+          result.content.includes('developer') ||
+          result.content.includes('expert');
 
-      expect(hasIdentity, `${formatterName} should include identity content`).toBe(true);
-    });
+        expect(hasIdentity, `${formatterName} should include identity content`).toBe(true);
+      }
+    );
 
-    it.each([
-      ['github'],
-      ['claude'],
-      ['cursor'],
-      ['antigravity'],
-      ['factory'],
-      ['opencode'],
-      ['gemini'],
-      ['windsurf'],
-      ['cline'],
-      ['roo'],
-      ['codex'],
-      ['continue'],
-      ['augment'],
-      ['goose'],
-      ['kilo'],
-      ['amp'],
-      ['trae'],
-      ['junie'],
-      ['kiro'],
-      ['cortex'],
-      ['crush'],
-      ['command-code'],
-      ['kode'],
-      ['mcpjam'],
-      ['mistral-vibe'],
-      ['mux'],
-      ['openhands'],
-      ['pi'],
-      ['qoder'],
-      ['qwen-code'],
-      ['zencoder'],
-      ['neovate'],
-      ['pochi'],
-      ['adal'],
-      ['iflow'],
-      ['openclaw'],
-      ['codebuddy'],
-      ['gitlab-duo'],
-    ])('%s formatter should produce restrictions content', (formatterName) => {
-      const ast = createComprehensiveAST();
-      const formatter = formatters.find((f) => f.name === formatterName)!;
-      expect(formatter, `Formatter ${formatterName} should exist`).toBeDefined();
+    it.each(CONTENT_PARITY_TARGETS)(
+      '%s formatter should produce restrictions content',
+      (formatterName) => {
+        const result = formatComprehensive(formatterName);
+        const hasRestrictions =
+          result.content.includes("Don't") ||
+          result.content.includes('Never') ||
+          result.content.includes('never') ||
+          result.content.includes('avoid');
 
-      const result = formatter.format(ast);
-      const hasRestrictions =
-        result.content.includes("Don't") ||
-        result.content.includes('Never') ||
-        result.content.includes('never') ||
-        result.content.includes('avoid');
-
-      expect(hasRestrictions, `${formatterName} should include restrictions`).toBe(true);
-    });
+        expect(hasRestrictions, `${formatterName} should include restrictions`).toBe(true);
+      }
+    );
   });
 
   describe('Section Parity Report', () => {

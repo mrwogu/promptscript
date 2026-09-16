@@ -1,31 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { Program, SourceLocation } from '@promptscript/core';
 import { HERMES_VERSIONS, HermesFormatter } from '../formatters/hermes.js';
+import { createAstBuilders } from './ast-builders.js';
 
-const createLoc = (line: number): SourceLocation => ({
-  file: 'hermes.prs',
-  line,
-  column: 1,
-});
-
-function createBlock(name: string, content: Program['blocks'][number]['content'], line: number) {
-  return {
-    type: 'Block' as const,
-    name,
-    content,
-    loc: createLoc(line),
-  };
-}
-
-function createProgram(blocks: Program['blocks']): Program {
-  return {
-    type: 'Program',
-    blocks,
-    uses: [],
-    extends: [],
-    loc: createLoc(1),
-  };
-}
+const { createLoc, createBlock, createProgram } = createAstBuilders('hermes.prs');
 
 describe('Hermes formatter', () => {
   it('uses one AGENTS.md output for every version alias', () => {
