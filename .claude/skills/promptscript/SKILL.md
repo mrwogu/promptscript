@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-09-16T18:27:53.967Z | source: .promptscript/project.prs | target: claude
+# promptscript-generated: 2026-09-16T18:51:31.056Z | source: .promptscript/project.prs | target: claude
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -1209,7 +1209,7 @@ writes when no candidates are detected.
 | Codex       | AGENTS.md                       | .agents/skills/\*/SKILL.md                         |
 | Continue    | .continue/rules/project.md      | -------------------------------------------------- |
 | Hermes      | AGENTS.md                       | -------------------------------------------------- |
-| + 36 more   |                                 | See full list in documentation                     |
+| + 37 more   |                                 | See full list in documentation                     |
 
 Targets that share an output path (for example Factory, Codex, and every AGENTS.md target) are
 reconciled in one output plan before anything is written. Identical content merges silently;
