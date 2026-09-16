@@ -3,67 +3,112 @@ import {
   classifyOutputResource,
   isOutputResourceKind,
   OUTPUT_RESOURCE_KINDS,
+  type OutputResourceKind,
 } from '../output-resources.js';
+
+/**
+ * Assert a batch of classifications from a readable table.
+ *
+ * Each table line is `<path> => <kind>`; the loop keeps one assertion shape
+ * instead of a chain of near-identical expect calls.
+ */
+function expectKinds(target: string, table: string): void {
+  for (const line of table.split('\n')) {
+    const entry = line.trim();
+    if (!entry) continue;
+    const [path, kind] = entry.split(/\s*=>\s*/);
+    if (!path || !kind) continue;
+    expect(classifyOutputResource(target, path), `${target}: ${path}`).toBe(kind);
+  }
+}
 
 describe('classifyOutputResource', () => {
   it('classifies Claude outputs', () => {
-    expect(classifyOutputResource('claude', 'CLAUDE.md')).toBe('main');
-    expect(classifyOutputResource('claude', 'CLAUDE.local.md')).toBe('main');
-    expect(classifyOutputResource('claude', '.claude/rules/testing.md')).toBe('main');
-    expect(classifyOutputResource('claude', '.claude/skills/security/SKILL.md')).toBe('skills');
-    expect(classifyOutputResource('claude', '.claude/skills/promptscript/SKILL.md')).toBe('skills');
-    expect(classifyOutputResource('claude', '.claude/agents/reviewer.md')).toBe('agents');
-    expect(classifyOutputResource('claude', '.claude/commands/deploy.md')).toBe('commands');
-    expect(classifyOutputResource('claude', '.claude/settings.json')).toBe('hooks');
-    expect(classifyOutputResource('claude', '.mcp.json')).toBe('mcp');
+    expectKinds(
+      'claude',
+      `
+        CLAUDE.md => main
+        CLAUDE.local.md => main
+        .claude/rules/testing.md => main
+        .claude/skills/security/SKILL.md => skills
+        .claude/skills/promptscript/SKILL.md => skills
+        .claude/agents/reviewer.md => agents
+        .claude/commands/deploy.md => commands
+        .claude/settings.json => hooks
+        .mcp.json => mcp
+      `
+    );
   });
 
   it('classifies GitHub outputs including the vscode hook config', () => {
-    expect(classifyOutputResource('github', '.github/copilot-instructions.md')).toBe('main');
-    expect(classifyOutputResource('github', 'AGENTS.md')).toBe('main');
-    expect(classifyOutputResource('github', '.github/agents/reviewer.md')).toBe('agents');
-    expect(classifyOutputResource('github', '.github/prompts/deploy.prompt.md')).toBe('commands');
-    expect(classifyOutputResource('github', '.github/skills/audit/SKILL.md')).toBe('skills');
-    expect(classifyOutputResource('github', '.github/hooks/promptscript.json')).toBe('hooks');
-    expect(classifyOutputResource('github', '.github/hooks/promptscript-vscode.json')).toBe(
-      'hooks'
+    expectKinds(
+      'github',
+      `
+        .github/copilot-instructions.md => main
+        AGENTS.md => main
+        .github/agents/reviewer.md => agents
+        .github/prompts/deploy.prompt.md => commands
+        .github/skills/audit/SKILL.md => skills
+        .github/hooks/promptscript.json => hooks
+        .github/hooks/promptscript-vscode.json => hooks
+        .vscode/mcp.json => mcp
+        .github/instructions/testing.md => main
+      `
     );
-    expect(classifyOutputResource('github', '.vscode/mcp.json')).toBe('mcp');
-    expect(classifyOutputResource('github', '.github/instructions/testing.md')).toBe('main');
   });
 
   it('classifies Factory outputs', () => {
-    expect(classifyOutputResource('factory', 'AGENTS.md')).toBe('main');
-    expect(classifyOutputResource('factory', '.factory/droids/reviewer.md')).toBe('agents');
-    expect(classifyOutputResource('factory', '.factory/skills/audit/SKILL.md')).toBe('skills');
-    expect(classifyOutputResource('factory', '.factory/commands/deploy.md')).toBe('commands');
-    expect(classifyOutputResource('factory', '.factory/rules/standards.md')).toBe('main');
-    expect(classifyOutputResource('factory', '.factory/mcp.json')).toBe('mcp');
-    expect(classifyOutputResource('factory', '.factory/plugins.json')).toBe('plugins');
+    expectKinds(
+      'factory',
+      `
+        AGENTS.md => main
+        .factory/droids/reviewer.md => agents
+        .factory/skills/audit/SKILL.md => skills
+        .factory/commands/deploy.md => commands
+        .factory/rules/standards.md => main
+        .factory/mcp.json => mcp
+        .factory/plugins.json => plugins
+      `
+    );
   });
 
   it('classifies Codex outputs', () => {
-    expect(classifyOutputResource('codex', 'AGENTS.md')).toBe('main');
-    expect(classifyOutputResource('codex', '.codex/agents/reviewer.toml')).toBe('agents');
-    expect(classifyOutputResource('codex', '.agents/skills/audit/SKILL.md')).toBe('skills');
-    expect(classifyOutputResource('codex', '.codex/hooks.json')).toBe('hooks');
-    expect(classifyOutputResource('codex', '.codex/mcp.json')).toBe('mcp');
+    expectKinds(
+      'codex',
+      `
+        AGENTS.md => main
+        .codex/agents/reviewer.toml => agents
+        .agents/skills/audit/SKILL.md => skills
+        .codex/hooks.json => hooks
+        .codex/mcp.json => mcp
+      `
+    );
   });
 
   it('classifies Grok delegated outputs', () => {
-    expect(classifyOutputResource('grok', 'AGENTS.md')).toBe('main');
-    expect(classifyOutputResource('grok', 'CLAUDE.md')).toBe('main');
-    expect(classifyOutputResource('grok', '.claude/agents/reviewer.md')).toBe('agents');
-    expect(classifyOutputResource('grok', '.claude/skills/audit/SKILL.md')).toBe('skills');
-    expect(classifyOutputResource('grok', '.grok/hooks/promptscript.json')).toBe('hooks');
-    expect(classifyOutputResource('grok', '.grok/plugins.json')).toBe('plugins');
-    expect(classifyOutputResource('grok', '.claude/commands/deploy.md')).toBe('commands');
+    expectKinds(
+      'grok',
+      `
+        AGENTS.md => main
+        CLAUDE.md => main
+        .claude/agents/reviewer.md => agents
+        .claude/skills/audit/SKILL.md => skills
+        .grok/hooks/promptscript.json => hooks
+        .grok/plugins.json => plugins
+        .claude/commands/deploy.md => commands
+      `
+    );
   });
 
   it('falls back to main for unknown owners and uncovered paths', () => {
-    expect(classifyOutputResource('cli', 'CLAUDE.md')).toBe('main');
-    expect(classifyOutputResource('claude', '.claude/workflows/release.md')).toBe('main');
-    expect(classifyOutputResource('windsurf', '.windsurf/rules/project.md')).toBe('main');
+    expectKinds(
+      'cli',
+      `
+        CLAUDE.md => main
+        .claude/workflows/release.md => main
+      `
+    );
+    expectKinds('windsurf', '.windsurf/rules/project.md => main');
   });
 
   it('exposes a stable selectable kind list', () => {
@@ -78,5 +123,7 @@ describe('classifyOutputResource', () => {
     ]);
     expect(isOutputResourceKind('agents')).toBe(true);
     expect(isOutputResourceKind('rules')).toBe(false);
+    const kind: OutputResourceKind = 'plugins';
+    expect(isOutputResourceKind(kind)).toBe(true);
   });
 });

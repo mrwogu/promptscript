@@ -3,22 +3,36 @@ import {
   CANONICAL_AGENT_FIELDS,
   getAgentFieldStatus,
   getAgentFieldSupport,
+  listAgentFieldSupportTargets,
   listNativeAgentTargets,
   listUnsupportedAgentFields,
   validateAgentFieldMatrix,
+  type AgentFieldStatus,
+  type CanonicalAgentField,
 } from '../agent-capabilities.js';
-import { KNOWN_TARGETS, type KnownTarget } from '../types/config.js';
+import type { KnownTarget } from '../types/config.js';
+
+/**
+ * Assert a complete per-target contract from a readable table.
+ *
+ * Each table line is `<field> <status>`; every canonical field missing from
+ * the table must be not-supported, so one table pins the whole contract.
+ */
+function expectContract(target: KnownTarget, table: string): void {
+  const declared = new Map<string, AgentFieldStatus>();
+  for (const line of table.split('\n')) {
+    const [field, status] = line.trim().split(/\s+/);
+    if (!field || !status) continue;
+    declared.set(field, status as AgentFieldStatus);
+  }
+
+  const support = getAgentFieldSupport(target);
+  for (const field of CANONICAL_AGENT_FIELDS) {
+    expect(support[field], `${target}.${field}`).toBe(declared.get(field) ?? 'not-supported');
+  }
+}
 
 describe('agent field capability matrix', () => {
-  it('covers every canonical field for every native agent target', () => {
-    for (const target of listNativeAgentTargets()) {
-      const support = getAgentFieldSupport(target);
-      for (const field of CANONICAL_AGENT_FIELDS) {
-        expect(support[field], `${target}.${field}`).toBeDefined();
-      }
-    }
-  });
-
   it('matches the catalog native agent target list', () => {
     expect(listNativeAgentTargets().sort()).toEqual(
       [
@@ -35,79 +49,101 @@ describe('agent field capability matrix', () => {
     );
   });
 
-  it('reports not-supported for targets without native agent output', () => {
-    const support = getAgentFieldSupport('windsurf' as KnownTarget);
-    for (const field of CANONICAL_AGENT_FIELDS) {
-      expect(support[field]).toBe('not-supported');
+  it('covers every canonical field for every native agent target', () => {
+    for (const target of listNativeAgentTargets()) {
+      const support = getAgentFieldSupport(target);
+      for (const field of CANONICAL_AGENT_FIELDS) {
+        expect(support[field], `${target}.${field}`).toBeDefined();
+      }
     }
   });
 
-  it('describes the Claude contract', () => {
-    const support = getAgentFieldSupport('claude');
-    expect(support['description']).toBe('emitted');
-    expect(support['content']).toBe('emitted');
-    expect(support['tools']).toBe('emitted');
-    expect(support['disallowedTools']).toBe('emitted');
-    expect(support['permissionMode']).toBe('emitted');
-    expect(support['skills']).toBe('emitted');
-    expect(support['maxTurns']).toBe('emitted');
-    expect(support['memory']).toBe('emitted');
-    expect(support['mcpServers']).toBe('emitted');
-    expect(support['background']).toBe('emitted');
-    expect(support['isolation']).toBe('emitted');
-    expect(support['reasoningEffort']).toBe('not-supported');
-    expect(support['sandboxMode']).toBe('not-supported');
-    expect(support['nicknameCandidates']).toBe('not-supported');
-    expect(support['handoffs']).toBe('not-supported');
+  it('matches the Claude contract', () => {
+    expectContract(
+      'claude',
+      `
+        description emitted
+        content emitted
+        tools emitted
+        disallowedTools emitted
+        model emitted
+        permissionMode emitted
+        skills emitted
+        maxTurns emitted
+        memory emitted
+        mcpServers emitted
+        background emitted
+        isolation emitted
+      `
+    );
   });
 
-  it('describes the GitHub transformed contract', () => {
-    const support = getAgentFieldSupport('github');
-    expect(support['tools']).toBe('transformed');
-    expect(support['model']).toBe('transformed');
-    expect(support['specModel']).toBe('transformed');
-    expect(support['handoffs']).toBe('emitted');
-    expect(support['permissionMode']).toBe('not-supported');
-    expect(support['disallowedTools']).toBe('not-supported');
+  it('matches the GitHub contract', () => {
+    expectContract(
+      'github',
+      `
+        description emitted
+        content emitted
+        tools transformed
+        model transformed
+        specModel transformed
+        handoffs emitted
+        mcpServers transformed
+      `
+    );
   });
 
-  it('describes the Cursor contract without tools', () => {
-    const support = getAgentFieldSupport('cursor');
-    expect(support['description']).toBe('emitted');
-    expect(support['content']).toBe('emitted');
-    expect(support['model']).toBe('emitted');
-    expect(support['mcpServers']).toBe('emitted');
-    expect(support['tools']).toBe('not-supported');
-    expect(support['permissionMode']).toBe('not-supported');
+  it('matches the Cursor contract', () => {
+    expectContract(
+      'cursor',
+      `
+        description emitted
+        content emitted
+        model emitted
+        mcpServers emitted
+      `
+    );
   });
 
-  it('describes the Factory contract', () => {
-    const support = getAgentFieldSupport('factory');
-    expect(support['reasoningEffort']).toBe('emitted');
-    expect(support['specModel']).toBe('emitted');
-    expect(support['specReasoningEffort']).toBe('emitted');
-    expect(support['tools']).toBe('emitted');
-    expect(support['sandboxMode']).toBe('not-supported');
+  it('matches the Factory contract', () => {
+    expectContract(
+      'factory',
+      `
+        description emitted
+        content emitted
+        model emitted
+        reasoningEffort emitted
+        specModel emitted
+        specReasoningEffort emitted
+        tools emitted
+        mcpServers emitted
+      `
+    );
   });
 
-  it('describes the Codex transformed contract', () => {
-    const support = getAgentFieldSupport('codex');
-    expect(support['content']).toBe('transformed');
-    expect(support['reasoningEffort']).toBe('transformed');
-    expect(support['sandboxMode']).toBe('transformed');
-    expect(support['nicknameCandidates']).toBe('transformed');
-    expect(support['skills']).toBe('transformed');
-    expect(support['permissionMode']).toBe('not-supported');
+  it('matches the Codex contract', () => {
+    expectContract(
+      'codex',
+      `
+        description emitted
+        content transformed
+        model emitted
+        reasoningEffort transformed
+        sandboxMode transformed
+        nicknameCandidates transformed
+        skills transformed
+        mcpServers transformed
+      `
+    );
   });
 
-  it('describes the shared Markdown agent contract', () => {
+  it('matches the shared Markdown agent contract', () => {
+    const table = `
+      description emitted
+      content emitted
+    `;
     for (const target of ['opencode', 'augment', 'amp'] as const) {
-      const support = getAgentFieldSupport(target);
-      expect(support['description']).toBe('emitted');
-      expect(support['content']).toBe('emitted');
-      expect(support['model']).toBe('not-supported');
-      expect(support['tools']).toBe('not-supported');
-      expect(support['permissionMode']).toBe('not-supported');
+      expectContract(target, table);
     }
   });
 
@@ -117,30 +153,46 @@ describe('agent field capability matrix', () => {
     }
   });
 
+  it('reports not-supported for targets without native agent output', () => {
+    const support = getAgentFieldSupport('windsurf');
+    for (const field of CANONICAL_AGENT_FIELDS) {
+      expect(support[field]).toBe('not-supported');
+    }
+  });
+
   it('lists unsupported canonical fields for a target', () => {
-    const unsupported = listUnsupportedAgentFields('cursor', [
-      'description',
-      'content',
-      'tools',
-      'permissionMode',
-      'sandboxMode',
-    ]);
-    expect(unsupported).toEqual(['tools', 'permissionMode', 'sandboxMode']);
+    expect(
+      listUnsupportedAgentFields('cursor', [
+        'description',
+        'content',
+        'tools',
+        'permissionMode',
+        'sandboxMode',
+      ])
+    ).toEqual(['tools', 'permissionMode', 'sandboxMode']);
   });
 
   it('ignores non-canonical fields when listing unsupported fields', () => {
     expect(listUnsupportedAgentFields('claude', ['hooks', 'customField'])).toEqual([]);
   });
 
+  it('lists the targets supporting one field', () => {
+    const sandbox = listAgentFieldSupportTargets('sandboxMode');
+    expect(sandbox.emitted).toEqual([]);
+    expect(sandbox.transformed).toEqual(['codex']);
+
+    const tools = listAgentFieldSupportTargets('tools');
+    expect(tools.emitted).toEqual(['claude', 'grok', 'factory']);
+    expect(tools.transformed).toEqual(['github']);
+  });
+
   it('passes matrix consistency validation', () => {
     expect(validateAgentFieldMatrix()).toEqual([]);
   });
 
-  it('keeps every native agent target inside the matrix groups', () => {
-    // Every native target must emit description so the matrix describes it.
+  it('emits description on every native agent target', () => {
     for (const target of listNativeAgentTargets()) {
-      expect(getAgentFieldStatus(target, 'description')).toBe('emitted');
+      expect(getAgentFieldStatus(target, 'description' as CanonicalAgentField)).toBe('emitted');
     }
-    void KNOWN_TARGETS;
   });
 });
