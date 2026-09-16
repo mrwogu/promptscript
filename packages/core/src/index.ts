@@ -46,6 +46,9 @@ export * from './section-registry.js';
 export * from './target-catalog.js';
 export * from './target-capabilities.js';
 
+// Agent field capability matrix
+export * from './agent-capabilities.js';
+
 // Hook capabilities
 export * from './hook-capabilities.js';
 
