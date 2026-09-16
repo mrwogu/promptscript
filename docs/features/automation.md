@@ -286,7 +286,7 @@ silently incomplete Windows command.
 
 ### Hook Capability Matrix
 
-All 49 built-in targets have an explicit lifecycle-hook classification. `All`
+All 50 built-in targets have an explicit lifecycle-hook classification. `All`
 means all eight portable events; `watch` means `prs compile --watch`.
 
 | Target         | Status       | Config path                       | Portable events                                  | Command format                 | Timeout       | Project root               | Fallback                  |

@@ -1,11 +1,11 @@
 ---
 title: Supported Formatters
-description: All 49 AI agent targets supported by PromptScript
+description: All 50 AI agent targets supported by PromptScript
 ---
 
 # Supported Formatters
 
-<p class="formatter-page__subtitle">PromptScript compiles one agent platform definition to native files for <strong>49 AI coding agent targets</strong>.</p>
+<p class="formatter-page__subtitle">PromptScript compiles one agent platform definition to native files for <strong>50 AI coding agent targets</strong>.</p>
 
 <div class="formatter-tiers">
   <div class="formatter-tier-badge formatter-tier-badge--custom">
@@ -17,7 +17,7 @@ description: All 49 AI agent targets supported by PromptScript
     <span class="formatter-tier-badge__label">AGENTS.md</span>
   </div>
   <div class="formatter-tier-badge formatter-tier-badge--t2">
-    <span class="formatter-tier-badge__count">29</span>
+    <span class="formatter-tier-badge__count">30</span>
     <span class="formatter-tier-badge__label">Markdown</span>
   </div>
 </div>
@@ -261,3 +261,19 @@ Hermes output mapping:
 
 PromptScript does not invent `.hermes.md` or unverified native Hermes
 directories and files.
+
+### GitLab Duo
+
+GitLab Duo uses the root `AGENTS.md` instruction contract (GA in GitLab 18.8)
+and reads Agent Skills from `skills/<name>/SKILL.md` at the repository root
+(GitLab 18.10+). The GitLab UI surfaces the instructions from GitLab 18.11.
+See the official
+[AGENTS.md documentation](https://docs.gitlab.com/user/duo_agent_platform/customize/agents_md/).
+
+GitLab Duo output mapping:
+
+- Main output: `AGENTS.md`
+- `simple` and `multifile`: single `AGENTS.md` file
+- `full`: `AGENTS.md` plus `skills/<name>/SKILL.md` for each skill
+- Unsupported: agents, commands, workflows, prompts, scoped rules, local files, hooks, MCP servers, and plugins
+- Unsupported blocks are omitted with non-fatal `PS4002` warnings carrying source locations

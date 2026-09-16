@@ -445,7 +445,7 @@ targets:
 
 **Available Targets:**
 
-PromptScript ships 49 built-in targets. See [Target Platforms](../features/target-platforms.md) for
+PromptScript ships 50 built-in targets. See [Target Platforms](../features/target-platforms.md) for
 platform families and [Supported Formatters](formatters/index.md) for the full capability matrix.
 
 | Target         | Default Output                    | Default Convention | Supported Versions                             |
