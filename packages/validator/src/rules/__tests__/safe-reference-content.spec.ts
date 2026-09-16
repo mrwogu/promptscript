@@ -5,6 +5,9 @@ import type { ValidatorConfig } from '../../types.js';
 
 const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
 
+/** Registry cache root used as an external content root. */
+const EXTERNAL_ROOT = '/home/user/.promptscript/cache';
+
 function makeSkillsBlock(skills: Record<string, unknown>): Block {
   return {
     type: 'Block',
@@ -16,6 +19,24 @@ function makeSkillsBlock(skills: Record<string, unknown>): Block {
 
 function makeAst(blocks: Block[]): Program {
   return { type: 'Program', loc, blocks, extends: [], uses: [] };
+}
+
+/** AST with one skill holding a reference file that contains a PRS directive. */
+function makeAstWithReference(resource: { origin?: string } = {}): Program {
+  return makeAst([
+    makeSkillsBlock({
+      expert: {
+        description: 'Expert',
+        resources: [
+          {
+            relativePath: 'references/bad.md',
+            content: '@identity {\n  "evil"\n}',
+            ...(resource.origin ? { origin: resource.origin } : {}),
+          },
+        ],
+      },
+    }),
+  ]);
 }
 
 function validate(
@@ -169,104 +190,39 @@ describe('PS026: safe-reference-content', () => {
   });
 
   it('should report the origin file when the resource carries one', () => {
-    const ast = makeAst([
-      makeSkillsBlock({
-        expert: {
-          description: 'Expert',
-          resources: [
-            {
-              relativePath: 'references/bad.md',
-              content: '@identity {\n  "evil"\n}',
-              origin: '/cache/repo/skills/expert/references/bad.md',
-            },
-          ],
-        },
-      }),
-    ]);
-    const msgs = validate(ast);
+    const msgs = validate(makeAstWithReference({ origin: '/cache/repo/references/bad.md' }));
     expect(msgs).toHaveLength(1);
-    expect(msgs[0]!.location?.file).toBe('/cache/repo/skills/expert/references/bad.md');
+    expect(msgs[0]!.location?.file).toBe('/cache/repo/references/bad.md');
   });
 
   it('should fall back to the skills block loc without an origin', () => {
-    const ast = makeAst([
-      makeSkillsBlock({
-        expert: {
-          description: 'Expert',
-          resources: [{ relativePath: 'references/bad.md', content: '@identity {\n"evil"\n}' }],
-        },
-      }),
-    ]);
-    const msgs = validate(ast);
+    const msgs = validate(makeAstWithReference());
     expect(msgs).toHaveLength(1);
     expect(msgs[0]!.location?.file).toBe('test.prs');
   });
 
   it('should skip reference files imported from registry cache by default', () => {
-    const ast = makeAst([
-      makeSkillsBlock({
-        expert: {
-          description: 'Expert',
-          resources: [
-            {
-              relativePath: 'references/bad.md',
-              content: '@identity {\n  "evil"\n}',
-              origin: '/home/user/.promptscript/cache/repo/skills/expert/references/bad.md',
-            },
-          ],
-        },
-      }),
-    ]);
-    const config: ValidatorConfig = {
-      externalRoots: ['/home/user/.promptscript/cache'],
-    };
-    expect(validate(ast, config)).toHaveLength(0);
+    const config: ValidatorConfig = { externalRoots: [EXTERNAL_ROOT] };
+    expect(
+      validate(makeAstWithReference({ origin: `${EXTERNAL_ROOT}/references/bad.md` }), config)
+    ).toHaveLength(0);
   });
 
   it('should scan imported reference files when scanExternalContent is set', () => {
-    const ast = makeAst([
-      makeSkillsBlock({
-        expert: {
-          description: 'Expert',
-          resources: [
-            {
-              relativePath: 'references/bad.md',
-              content: '@identity {\n  "evil"\n}',
-              origin: '/home/user/.promptscript/cache/repo/skills/expert/references/bad.md',
-            },
-          ],
-        },
-      }),
-    ]);
-    const config: ValidatorConfig = {
-      externalRoots: ['/home/user/.promptscript/cache'],
-      scanExternalContent: true,
-    };
-    const msgs = validate(ast, config);
+    const origin = `${EXTERNAL_ROOT}/references/bad.md`;
+    const config: ValidatorConfig = { externalRoots: [EXTERNAL_ROOT], scanExternalContent: true };
+    const msgs = validate(makeAstWithReference({ origin }), config);
     expect(msgs).toHaveLength(1);
-    expect(msgs[0]!.location?.file).toBe(
-      '/home/user/.promptscript/cache/repo/skills/expert/references/bad.md'
-    );
+    expect(msgs[0]!.location?.file).toBe(origin);
   });
 
   it('should not treat paths outside externalRoots as imported', () => {
-    const ast = makeAst([
-      makeSkillsBlock({
-        expert: {
-          description: 'Expert',
-          resources: [
-            {
-              relativePath: 'references/bad.md',
-              content: '@identity {\n  "evil"\n}',
-              origin: '/home/user/.promptscript/cache-other/references/bad.md',
-            },
-          ],
-        },
-      }),
-    ]);
-    const config: ValidatorConfig = {
-      externalRoots: ['/home/user/.promptscript/cache'],
-    };
-    expect(validate(ast, config)).toHaveLength(1);
+    const config: ValidatorConfig = { externalRoots: [EXTERNAL_ROOT] };
+    expect(
+      validate(
+        makeAstWithReference({ origin: '/home/user/.promptscript/cache-other/bad.md' }),
+        config
+      )
+    ).toHaveLength(1);
   });
 });
