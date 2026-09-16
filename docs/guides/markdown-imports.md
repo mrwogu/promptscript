@@ -80,6 +80,12 @@ PromptScript v1.8 adds a `prs skills` subcommand for managing markdown-imported 
 prs skills add github.com/anthropics/skills/commit@1.0.0
 # Adds the import to your .prs file and updates promptscript.lock
 
+prs skills add ./vendor/my-skill
+# Local directory: validated and referenced in place, no lockfile entry
+
+prs skills add ~/Downloads/skills/my-skill --copy
+# Local directory: copied into .promptscript/skills/ and referenced there
+
 prs skills remove commit
 # Removes the @use line and lock entry for the skill
 
@@ -94,6 +100,7 @@ prs skills update
 Both `prs skills add` and `prs skills update` resolve the requested tag, branch, commit, or semver range to an exact commit. They clone that resolved ref, recompute the real `sha256` integrity hash, and validate the SKILL.md frontmatter against the [Agent Skills spec](https://agentskills.io/specification) before touching `promptscript.lock`. Every Git operation, including semver lookup, `ls-remote`, commit probes, cloning, and checkout, has a 60-second hard timeout with actionable failure output. Use `--strict` to treat warnings as errors (useful in CI) or `--skip-validation` to skip only frontmatter checks. Remote access, cloning, commit pinning, file checks, and integrity hashing still run. Plain `http://` sources are rejected to prevent MITM.
 When a skill is added with a `git@` source, its canonical repository entry also stores `gitUrl` so later updates continue using SSH.
 `prs skills add` writes the `.prs` file and lockfile as one user-visible transaction. If the second write fails, both files are restored when the lockfile still contains the command's update. A lockfile changed concurrently is left untouched, and the rollback conflict is reported explicitly.
+Local sources skip the clone and the lockfile: the on-disk SKILL.md is validated with the same rules, a `@use` line is inserted, and no pin is recorded because there is no commit to pin.
 
 For a repository owner entry with `source: md` and a `skills` list, `integrity` is an
 aggregate SRI hash. PromptScript hashes a canonical JSON array containing each

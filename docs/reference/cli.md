@@ -1067,7 +1067,7 @@ Manage markdown-imported skills. See the [Markdown Imports guide](../guides/mark
 
 #### prs skills add
 
-Add a remote skill to the project. Inserts a `@use` directive into the entry `.prs` file and updates `promptscript.lock`.
+Add a remote or local skill to the project. Inserts a `@use` directive into the entry `.prs` file. Remote sources are also pinned in `promptscript.lock`; local sources are not (there is no commit to pin).
 
 ```bash
 prs skills add <source> [options]
@@ -1075,9 +1075,9 @@ prs skills add <source> [options]
 
 **Arguments:**
 
-| Argument   | Description                                                           |
-| ---------- | --------------------------------------------------------------------- |
-| `<source>` | Remote skill path (e.g., `github.com/anthropics/skills/commit@1.0.0`) |
+| Argument   | Description                                                                                     |
+| ---------- | ----------------------------------------------------------------------------------------------- |
+| `<source>` | Remote skill path (e.g., `github.com/anthropics/skills/commit@1.0.0`) or local path (see below) |
 
 **Options:**
 
@@ -1087,10 +1087,21 @@ prs skills add <source> [options]
 | `--dry-run`         | Preview changes without writing                                                             |
 | `--skip-validation` | Skip SKILL.md frontmatter validation (not recommended; useful when the upstream is in flux) |
 | `--strict`          | Treat validation warnings as errors                                                         |
+| `--copy`            | Local sources: copy into `.promptscript/skills/` instead of referencing in place            |
+| `--force`           | Local sources: replace an already-installed skill with the same name                        |
+
+**Local sources:**
+
+A source is treated as local when it starts with `./`, `../`, `~`, or an absolute path, or when a bare relative path exists on disk. The source may be a skill directory (containing `SKILL.md`) or a `SKILL.md` file itself.
+
+- The SKILL.md frontmatter is validated with the same rules as remote skills.
+- Without `--copy`, the skill is referenced where it lies and nothing is moved. The source must be inside the project root (relative `@use` imports cannot escape it), and the computed path must only use characters the language allows. Sources outside the root or with characters like spaces must use `--copy`.
+- With `--copy`, the directory is copied into `.promptscript/skills/<name>/` (following symlinks) and referenced there. Use `--force` to replace an existing skill with the same name.
+- Local skills get no `promptscript.lock` entry: there is no commit to pin, and compile only requires lock entries for remote imports.
 
 **Validation:**
 
-Before writing project files, `prs skills add` clones the target ref into a temporary directory, recomputes a real `sha256` integrity hash, and runs the [Agent Skills spec](https://agentskills.io/specification) validator against the SKILL.md frontmatter. Every Git operation, including semver lookup, `ls-remote`, commit probes, cloning, and checkout, has a 60-second hard timeout. A timeout fails with the repository URL and network troubleshooting guidance.
+Before writing project files, `prs skills add` clones the target ref into a temporary directory, recomputes a real `sha256` integrity hash, and runs the [Agent Skills spec](https://agentskills.io/specification) validator against the SKILL.md frontmatter. Every Git operation, including semver lookup, `ls-remote`, commit probes, cloning, and checkout, has a 60-second hard timeout. A timeout fails with the repository URL and network troubleshooting guidance. Local sources skip the clone: the on-disk SKILL.md is validated directly.
 
 - `name` present, ≤64 chars, matches `^[a-z0-9]+(-[a-z0-9]+)*$`, and equals the parent directory basename
 - `name` does not collide with another already-installed skill
@@ -1130,12 +1141,21 @@ prs skills add github.com/anthropics/skills/commit@1.0.0 --strict
 
 # Bypass validation (use sparingly)
 prs skills add github.com/anthropics/skills/commit@1.0.0 --skip-validation
+
+# Add a local skill directory, referencing it where it lies
+prs skills add ./vendor/my-skill
+
+# Install a local skill (e.g. a CI artifact) into .promptscript/skills/
+prs skills add ~/Downloads/skills/my-skill --copy
+
+# Replace an already-installed skill with the same name
+prs skills add ~/Downloads/skills/my-skill --copy --force
 ```
 
 #### prs skills remove
 
 Remove a skill from the project. Removes the matching `@use` line and its lock entry.
-Partial names must match exactly one imported skill.
+Partial names must match exactly one imported skill. For a local skill installed with `--copy`, the directory under `.promptscript/skills/` is left in place - delete it manually if the skill is no longer needed.
 
 ```bash
 prs skills remove <name> [options]

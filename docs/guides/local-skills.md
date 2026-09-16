@@ -59,6 +59,27 @@ mkdir -p .promptscript/skills
 
 You can add skills from multiple sources:
 
+=== "prs CLI"
+
+    Add a local skill directory (or a `SKILL.md` file) without any manual
+    `.prs` editing. The SKILL.md is validated and a `@use` line is inserted
+    for you:
+
+    ```bash
+    # Reference the skill where it lies (must stay inside the project root)
+    prs skills add ./vendor/my-skill
+
+    # Install into .promptscript/skills/ instead (e.g. a downloaded artifact)
+    prs skills add ~/Downloads/skills/my-skill --copy
+
+    # Replace an already-installed skill with the same name
+    prs skills add ~/Downloads/skills/my-skill --copy --force
+    ```
+
+    Local skills are not recorded in `promptscript.lock` - there is no commit
+    to pin. See [`prs skills add`](../reference/cli.md#prs-skills-add) for the
+    full rules.
+
 === "npx skills (Skills.sh)"
 
     The [`skills`](https://www.npmjs.com/package/skills) CLI from the Agent Skills ecosystem

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { join, resolve, dirname } from 'path';
 
 const {
   mockSucceed,
@@ -18,6 +19,9 @@ const {
   mockOpen,
   mockLstat,
   mockStat,
+  mockCp,
+  mockMkdir,
+  mockHomedir,
   mockLockFile,
   mockValidateRemoteAccess,
   mockValidateSkillFrontmatter,
@@ -65,6 +69,9 @@ const {
   const mockStat = vi
     .fn()
     .mockRejectedValue(Object.assign(new Error('not found'), { code: 'ENOENT' }));
+  const mockCp = vi.fn().mockResolvedValue(undefined);
+  const mockMkdir = vi.fn().mockResolvedValue(undefined);
+  const mockHomedir = vi.fn().mockReturnValue('/home/testuser');
   const mockValidateRemoteAccess = vi.fn().mockResolvedValue({
     accessible: true,
     headCommit: 'abc1234567890123456789012345678901234567890'.slice(0, 40),
@@ -126,6 +133,9 @@ const {
     mockOpen,
     mockLstat,
     mockStat,
+    mockCp,
+    mockMkdir,
+    mockHomedir,
     mockLockFile,
   };
 });
@@ -173,6 +183,13 @@ vi.mock('fs/promises', () => ({
   open: mockOpen,
   lstat: mockLstat,
   stat: mockStat,
+  cp: mockCp,
+  mkdir: mockMkdir,
+}));
+
+vi.mock('os', () => ({
+  tmpdir: () => '/tmp',
+  homedir: mockHomedir,
 }));
 
 vi.mock('yaml', () => ({
@@ -206,6 +223,9 @@ import {
   skillsListCommand,
   skillsUpdateCommand,
   normalizeSkillSource,
+  expandHomePath,
+  isLocalSkillSource,
+  toUsePath,
 } from '../skills.js';
 
 beforeEach(() => {
@@ -593,10 +613,10 @@ describe('skillsAddCommand', () => {
     mockWriteFile.mockResolvedValue(undefined);
   });
 
-  it('should reject local paths starting with ./', async () => {
+  it('should fail when a ./ local path does not exist on disk', async () => {
     await skillsAddCommand('./local.md', {});
 
-    expect(mockFail).toHaveBeenCalledWith(expect.stringContaining('Local paths are not supported'));
+    expect(mockFail).toHaveBeenCalledWith('Path not found: ./local.md');
     expect(process.exitCode).toBe(1);
   });
 
@@ -683,10 +703,10 @@ describe('skillsAddCommand', () => {
     });
   });
 
-  it('should reject local paths starting with ../', async () => {
+  it('should fail when a ../ local path does not exist on disk', async () => {
     await skillsAddCommand('../sibling.md', {});
 
-    expect(mockFail).toHaveBeenCalledWith(expect.stringContaining('Local paths are not supported'));
+    expect(mockFail).toHaveBeenCalledWith('Path not found: ../sibling.md');
     expect(process.exitCode).toBe(1);
   });
 
@@ -4033,5 +4053,458 @@ describe('skillsUpdateCommand frontmatter re-validation', () => {
     expect(mockMkdtemp).toHaveBeenCalled();
     expect(mockCreateGitRegistry).toHaveBeenCalled();
     expect(mockValidateSkillFrontmatter).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Local skill sources
+// ---------------------------------------------------------------------------
+
+const SKILL_MD =
+  '---\nname: my-skill\ndescription: Test skill used when coverage needs one\n---\n\nBody.';
+
+/**
+ * Arrange fs mocks for a local skill directory plus an entry file.
+ * `skillDir` and `entryFile` must be absolute paths.
+ */
+function arrangeLocalSkillSource(
+  skillDir: string,
+  entryFile: string,
+  entryContent: string = SAMPLE_PRS
+): void {
+  const skillMd = join(skillDir, 'SKILL.md');
+  mockExistsSync.mockImplementation((p: string) => {
+    if (p === skillDir || p === skillMd || p === entryFile || p === dirname(entryFile)) {
+      return true;
+    }
+    return false;
+  });
+  mockLstat.mockImplementation((p: string) => {
+    if (p === skillDir) {
+      return Promise.resolve({
+        isSymbolicLink: () => false,
+        isFile: () => false,
+        isDirectory: () => true,
+      });
+    }
+    if (p === skillMd) {
+      return Promise.resolve({
+        isSymbolicLink: () => false,
+        isFile: () => true,
+        isDirectory: () => false,
+      });
+    }
+    return Promise.reject(Object.assign(new Error('not found'), { code: 'ENOENT' }));
+  });
+  mockReadFile.mockImplementation((p: string) => {
+    if (p === skillMd) return Promise.resolve(SKILL_MD);
+    if (p === entryFile) return Promise.resolve(entryContent);
+    return Promise.reject(Object.assign(new Error('not found'), { code: 'ENOENT' }));
+  });
+  mockReaddir.mockImplementation((_p: unknown, opts?: { withFileTypes?: boolean }) =>
+    Promise.resolve(opts?.withFileTypes ? [] : ['project.prs'])
+  );
+}
+
+function findPrsWrite(fileName: string): string | undefined {
+  const writeCalls = mockWriteFile.mock.calls as unknown[][];
+  const prsWriteCall = writeCalls.find(
+    (call) => typeof call[0] === 'string' && (call[0] as string).endsWith(fileName)
+  );
+  return prsWriteCall ? (prsWriteCall[1] as string) : undefined;
+}
+
+describe('expandHomePath', () => {
+  it('expands bare ~ to the home directory', () => {
+    expect(expandHomePath('~')).toBe('/home/testuser');
+  });
+
+  it('expands ~/ prefix', () => {
+    expect(expandHomePath('~/Downloads/skills/my-skill')).toBe(
+      '/home/testuser/Downloads/skills/my-skill'
+    );
+  });
+
+  it('leaves ~user and plain paths untouched', () => {
+    expect(expandHomePath('~other/skills')).toBe('~other/skills');
+    expect(expandHomePath('./vendor/my-skill')).toBe('./vendor/my-skill');
+  });
+});
+
+describe('isLocalSkillSource', () => {
+  it('treats explicit local prefixes as local', () => {
+    expect(isLocalSkillSource('./vendor/my-skill')).toBe(true);
+    expect(isLocalSkillSource('../sibling/my-skill')).toBe(true);
+    expect(isLocalSkillSource('/tmp/artifact/skills/my-skill')).toBe(true);
+    expect(isLocalSkillSource('~/Downloads/skills/my-skill')).toBe(true);
+    expect(isLocalSkillSource('~')).toBe(true);
+    expect(isLocalSkillSource('C:\\skills\\my-skill')).toBe(true);
+    expect(isLocalSkillSource('C:/skills/my-skill')).toBe(true);
+  });
+
+  it('treats remote-shaped sources as remote regardless of disk state', () => {
+    mockExistsSync.mockReturnValue(true);
+    expect(isLocalSkillSource('github.com/owner/repo/SKILL.md')).toBe(false);
+  });
+
+  it('falls back to disk existence for bare relative paths', () => {
+    mockExistsSync.mockReturnValue(true);
+    expect(isLocalSkillSource('vendor/my-skill')).toBe(true);
+    mockExistsSync.mockReturnValue(false);
+    expect(isLocalSkillSource('vendor/my-skill')).toBe(false);
+  });
+
+  it('rejects ~user forms and empty input', () => {
+    expect(isLocalSkillSource('~otheruser/skills')).toBe(false);
+    expect(isLocalSkillSource('')).toBe(false);
+    expect(isLocalSkillSource('   ')).toBe(false);
+  });
+});
+
+describe('toUsePath', () => {
+  it('prefixes nested paths with ./', () => {
+    expect(toUsePath('/project/.promptscript', '/project/.promptscript/skills/my-skill')).toBe(
+      './skills/my-skill'
+    );
+  });
+
+  it('keeps ../ form for sibling directories', () => {
+    expect(toUsePath('/project/.promptscript', '/project/vendor/my-skill')).toBe(
+      '../vendor/my-skill'
+    );
+  });
+});
+
+describe('skillsAddCommand local sources', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+    mockWriteFile.mockReset();
+    mockWriteFile.mockResolvedValue(undefined);
+    mockHomedir.mockReturnValue('/home/testuser');
+  });
+
+  it('references a local directory in place without touching the lockfile', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('entry.prs');
+    arrangeLocalSkillSource(skillDir, entryFile);
+
+    await skillsAddCommand('./vendor/my-skill', { file: 'entry.prs' });
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    expect(findPrsWrite('entry.prs')).toContain('@use ./vendor/my-skill');
+    expect(mockCp).not.toHaveBeenCalled();
+    expect(mockMkdir).not.toHaveBeenCalled();
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    expect(
+      writeCalls.find((call) => String(call[0]).endsWith('promptscript.lock'))
+    ).toBeUndefined();
+  });
+
+  it('accepts a SKILL.md file and references its directory', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('entry.prs');
+    arrangeLocalSkillSource(skillDir, entryFile);
+
+    await skillsAddCommand('./vendor/my-skill/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    const written = findPrsWrite('entry.prs');
+    expect(written).toContain('@use ./vendor/my-skill');
+    expect(written).not.toContain('@use ./vendor/my-skill/SKILL.md');
+  });
+
+  it('uses a ../ path when the entry lives in .promptscript/', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('.promptscript/project.prs');
+    arrangeLocalSkillSource(skillDir, entryFile);
+
+    await skillsAddCommand('./vendor/my-skill', {});
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    expect(findPrsWrite('project.prs')).toContain('@use ../vendor/my-skill');
+  });
+
+  it('copies into .promptscript/skills with --copy', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('.promptscript/project.prs');
+    const managedDir = resolve('.promptscript/skills/my-skill');
+    arrangeLocalSkillSource(skillDir, entryFile);
+
+    await skillsAddCommand('./vendor/my-skill', { copy: true });
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    expect(mockMkdir).toHaveBeenCalledWith(resolve('.promptscript/skills'), {
+      recursive: true,
+    });
+    expect(mockCp).toHaveBeenCalledWith(skillDir, managedDir, {
+      recursive: true,
+      dereference: true,
+    });
+    expect(findPrsWrite('project.prs')).toContain('@use ./skills/my-skill');
+  });
+
+  it('refuses --copy when the skill name already exists, unless --force', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('.promptscript/project.prs');
+    const managedRoot = resolve('.promptscript/skills');
+    arrangeLocalSkillSource(skillDir, entryFile);
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === skillDir || p === join(skillDir, 'SKILL.md') || p === entryFile) return true;
+      if (p === managedRoot || p === resolve('.promptscript')) return true;
+      if (p === resolve('.promptscript/skills/my-skill')) return true;
+      return false;
+    });
+    mockReaddir.mockImplementation((_p: unknown, opts?: { withFileTypes?: boolean }) =>
+      Promise.resolve(
+        opts?.withFileTypes ? [{ name: 'my-skill', isDirectory: () => true }] : ['project.prs']
+      )
+    );
+
+    await skillsAddCommand('./vendor/my-skill', { copy: true });
+
+    expect(mockFail).toHaveBeenCalledWith('Skill "my-skill" already exists in this project');
+    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('--force'));
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockCp).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+
+    // --force replaces the existing copy
+    await skillsAddCommand('./vendor/my-skill', { copy: true, force: true });
+
+    expect(mockRm).toHaveBeenCalledWith(resolve('.promptscript/skills/my-skill'), {
+      recursive: true,
+      force: true,
+    });
+    expect(mockCp).toHaveBeenCalled();
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('refuses in-place references outside the project root and points at --copy', async () => {
+    const skillDir = '/tmp/prs-outside-root/my-skill';
+    const entryFile = resolve('entry.prs');
+    arrangeLocalSkillSource(skillDir, entryFile);
+
+    await skillsAddCommand('/tmp/prs-outside-root/my-skill', { file: 'entry.prs' });
+
+    expect(mockFail).toHaveBeenCalledWith('Skill is outside the project root');
+    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('--copy'));
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('expands ~ and references in place when home is inside the project', async () => {
+    const home = resolve('home-user');
+    mockHomedir.mockReturnValue(home);
+    const skillDir = join(home, 'skills', 'my-skill');
+    const entryFile = resolve('entry.prs');
+    arrangeLocalSkillSource(skillDir, entryFile);
+
+    await skillsAddCommand('~/skills/my-skill', { file: 'entry.prs' });
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    expect(findPrsWrite('entry.prs')).toContain('@use ./home-user/skills/my-skill');
+  });
+
+  it('rejects version suffixes on local paths', async () => {
+    await skillsAddCommand('./vendor/my-skill@1.0.0', {});
+
+    expect(mockFail).toHaveBeenCalledWith('Versioned local paths are not supported');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('fails when the directory has no SKILL.md', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('entry.prs');
+    arrangeLocalSkillSource(skillDir, entryFile);
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === skillDir || p === entryFile || p === dirname(entryFile)) return true;
+      return false;
+    });
+
+    await skillsAddCommand('./vendor/my-skill', { file: 'entry.prs' });
+
+    expect(mockFail).toHaveBeenCalledWith('No SKILL.md found in: ./vendor/my-skill');
+    expect(process.exitCode).toBe(1);
+    expect(mockWriteFile).not.toHaveBeenCalled();
+  });
+
+  it('fails for non-markdown local files', async () => {
+    const skillDir = resolve('vendor');
+    const entryFile = resolve('entry.prs');
+    arrangeLocalSkillSource(join(skillDir, 'my-skill'), entryFile);
+    const filePath = resolve('vendor/skill.txt');
+    mockExistsSync.mockImplementation((p: string) => p === filePath || p === entryFile);
+    mockLstat.mockImplementation((p: string) => {
+      if (p === filePath) {
+        return Promise.resolve({
+          isSymbolicLink: () => false,
+          isFile: () => true,
+          isDirectory: () => false,
+        });
+      }
+      return Promise.reject(Object.assign(new Error('not found'), { code: 'ENOENT' }));
+    });
+
+    await skillsAddCommand('./vendor/skill.txt', { file: 'entry.prs' });
+
+    expect(mockFail).toHaveBeenCalledWith('Not a SKILL.md: ./vendor/skill.txt');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('rejects symlinked skill directories', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockLstat.mockImplementation(() =>
+      Promise.resolve({
+        isSymbolicLink: () => true,
+        isFile: () => false,
+        isDirectory: () => false,
+      })
+    );
+
+    await skillsAddCommand('./vendor/my-skill', {});
+
+    expect(mockFail).toHaveBeenCalledWith('Symbolic-linked skill directories are not supported');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('validates frontmatter with the resolver validator before writing', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('entry.prs');
+    arrangeLocalSkillSource(skillDir, entryFile);
+    mockValidateSkillFrontmatter.mockReturnValue({
+      valid: false,
+      issues: [{ severity: 'error', code: 'SK002', message: 'name is required' }],
+    });
+
+    await skillsAddCommand('./vendor/my-skill', { file: 'entry.prs' });
+
+    expect(mockValidateSkillFrontmatter).toHaveBeenCalledWith(
+      SKILL_MD,
+      expect.objectContaining({ filePath: join(skillDir, 'SKILL.md') })
+    );
+    expect(mockFail).toHaveBeenCalledWith('SKILL.md failed validation');
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('treats validation warnings as errors under --strict', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('entry.prs');
+    arrangeLocalSkillSource(skillDir, entryFile);
+    mockValidateSkillFrontmatter.mockReturnValue({
+      valid: true,
+      issues: [{ severity: 'warning', code: 'SK050', message: 'soft' }],
+    });
+
+    await skillsAddCommand('./vendor/my-skill', { file: 'entry.prs', strict: true });
+
+    expect(mockFail).toHaveBeenCalledWith('SKILL.md failed validation');
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('proceeds on warnings without --strict', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('entry.prs');
+    arrangeLocalSkillSource(skillDir, entryFile);
+    mockValidateSkillFrontmatter.mockReturnValue({
+      valid: true,
+      issues: [{ severity: 'warning', code: 'SK050', message: 'soft' }],
+    });
+
+    await skillsAddCommand('./vendor/my-skill', { file: 'entry.prs' });
+
+    expect(mockWarn).toHaveBeenCalledWith('SKILL.md has validation warnings');
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('skips validation entirely with --skip-validation', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('entry.prs');
+    arrangeLocalSkillSource(skillDir, entryFile);
+
+    await skillsAddCommand('./vendor/my-skill', { file: 'entry.prs', skipValidation: true });
+
+    expect(mockValidateSkillFrontmatter).not.toHaveBeenCalled();
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('warns and writes nothing when the same use path is already imported', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('entry.prs');
+    const entryContent = '@use ./vendor/my-skill\n\n@identity {\n  role: "dev"\n}\n';
+    arrangeLocalSkillSource(skillDir, entryFile, entryContent);
+
+    await skillsAddCommand('./vendor/my-skill', { file: 'entry.prs' });
+
+    expect(mockWarn).toHaveBeenCalledWith('Skill already imported: ./vendor/my-skill');
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBeUndefined();
+  });
+
+  it('refuses use paths with characters the language does not allow', async () => {
+    const skillDir = resolve('my dir/my-skill');
+    const entryFile = resolve('entry.prs');
+    arrangeLocalSkillSource(skillDir, entryFile);
+
+    await skillsAddCommand('./my dir/my-skill', { file: 'entry.prs' });
+
+    expect(mockFail).toHaveBeenCalledWith(
+      'Cannot reference this path in a .prs file: ./my dir/my-skill'
+    );
+    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('--copy'));
+    expect(process.exitCode).toBe(1);
+    expect(mockWriteFile).not.toHaveBeenCalled();
+  });
+
+  it('dry-run writes nothing', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('.promptscript/project.prs');
+    arrangeLocalSkillSource(skillDir, entryFile);
+
+    await skillsAddCommand('./vendor/my-skill', { dryRun: true, copy: true });
+
+    expect(mockSucceed).toHaveBeenCalledWith('Dry run — no files modified');
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockCp).not.toHaveBeenCalled();
+    expect(mockMkdir).not.toHaveBeenCalled();
+  });
+
+  it('acquires the transaction lock for local adds too', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('entry.prs');
+    arrangeLocalSkillSource(skillDir, entryFile);
+
+    await skillsAddCommand('./vendor/my-skill', { file: 'entry.prs' });
+
+    expect(mockOpen).toHaveBeenCalledWith(
+      expect.stringContaining('.promptscript-skills-add.lock'),
+      'wx',
+      0o600
+    );
+  });
+
+  it('references an already-managed skill without copying it again', async () => {
+    const skillDir = resolve('.promptscript/skills/my-skill');
+    const entryFile = resolve('.promptscript/project.prs');
+    const managedRoot = resolve('.promptscript/skills');
+    arrangeLocalSkillSource(skillDir, entryFile);
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === skillDir || p === join(skillDir, 'SKILL.md') || p === entryFile) return true;
+      if (p === managedRoot || p === resolve('.promptscript')) return true;
+      return false;
+    });
+    mockReaddir.mockImplementation((_p: unknown, opts?: { withFileTypes?: boolean }) =>
+      Promise.resolve(
+        opts?.withFileTypes ? [{ name: 'my-skill', isDirectory: () => true }] : ['project.prs']
+      )
+    );
+
+    await skillsAddCommand('./.promptscript/skills/my-skill', { copy: true });
+
+    expect(mockCp).not.toHaveBeenCalled();
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    expect(findPrsWrite('project.prs')).toContain('@use ./skills/my-skill');
   });
 });
