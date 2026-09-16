@@ -326,6 +326,52 @@ describe('createSimpleMarkdownFormatter', () => {
       expect(skillFiles).toBeDefined();
       expect(skillFiles!.length).toBeGreaterThan(0);
     });
+
+    it('should gate multifile skill emission on skillsInMultifile', () => {
+      const buildAst = (): Program => ({
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-skill': {
+                  description: 'A skill',
+                  content: 'Skill content',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      });
+
+      const withSkills = new (createSimpleMarkdownFormatter({
+        name: 'test',
+        outputPath: 'AGENTS.md',
+        description: 'Test',
+        mainFileHeader: '# AGENTS.md',
+        dotDir: '.test',
+        skillsInMultifile: true,
+      }).Formatter)();
+      const emitted = withSkills.format(buildAst(), { version: 'multifile' });
+      expect(emitted.additionalFiles?.some((f) => f.path.includes('skills/'))).toBe(true);
+
+      const withoutSkills = new (createSimpleMarkdownFormatter({
+        name: 'test',
+        outputPath: 'AGENTS.md',
+        description: 'Test',
+        mainFileHeader: '# AGENTS.md',
+        dotDir: '.test',
+      }).Formatter)();
+      const skipped = withoutSkills.format(buildAst(), { version: 'multifile' });
+      expect(skipped.additionalFiles?.filter((f) => f.path.includes('skills/')) ?? []).toHaveLength(
+        0
+      );
+    });
   });
 
   describe('getSupportedVersions static method', () => {
@@ -400,7 +446,22 @@ describe('createSimpleMarkdownFormatter', () => {
       });
 
       expect(VERSIONS.simple.description).toContain('AGENTS.md');
+      expect(VERSIONS.multifile.description).toBe('Single AGENTS.md file (skills via full mode)');
+      expect(VERSIONS.full.description).toContain('.agents/skills/<name>/SKILL.md');
+    });
+
+    it('should advertise multifile skills only when skillsInMultifile is true', () => {
+      const { VERSIONS } = createSimpleMarkdownFormatter({
+        name: 'test',
+        outputPath: 'AGENTS.md',
+        description: 'Test',
+        mainFileHeader: '# AGENTS.md',
+        dotDir: '.agents',
+        skillsInMultifile: true,
+      });
+
       expect(VERSIONS.multifile.description).toContain('.agents/skills/<name>/SKILL.md');
+      expect(VERSIONS.multifile.description).not.toContain('skills via full mode');
       expect(VERSIONS.full.description).toContain('.agents/skills/<name>/SKILL.md');
     });
 
