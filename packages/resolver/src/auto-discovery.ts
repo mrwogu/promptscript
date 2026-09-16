@@ -4,7 +4,7 @@ import { ResolveError } from '@promptscript/core';
 import type { Logger, Program, Block, TextContent, Value } from '@promptscript/core';
 import { parseSkillMd } from './skills.js';
 import { collectSkillResources, toSkillResourceValues } from './skill-resources.js';
-import { makeBlock, makeObjectContent, makeTextContent } from './ast-factory.js';
+import { fileLoc, makeBlock, makeObjectContent, makeTextContent } from './ast-factory.js';
 
 /** Context file names to look for when synthesizing a @context block. */
 const CONTEXT_FILES = ['CLAUDE.md', '.clinerules', '.cursorrules'] as const;
@@ -395,7 +395,7 @@ export async function discoverNativeContent(dir: string, logger?: Logger): Promi
     blocks,
     uses: [],
     extends: [],
-    loc: { file: dir, line: 1, column: 1, offset: 0 },
+    loc: fileLoc(dir),
   };
 
   return program;

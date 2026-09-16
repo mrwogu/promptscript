@@ -18,7 +18,7 @@ export const VIRTUAL_LOC: SourceLocation = {
 /**
  * Build a location pointing at the start of a real source file.
  */
-function fileLoc(file: string): SourceLocation {
+export function fileLoc(file: string): SourceLocation {
   return { file, line: 1, column: 1, offset: 0 };
 }
 

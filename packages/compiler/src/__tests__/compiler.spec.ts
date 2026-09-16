@@ -3819,6 +3819,7 @@ describe('Stage 1.5: Reference Integrity', () => {
     vi.stubEnv('HOME', '/home/testuser');
     vi.stubEnv('USERPROFILE', undefined);
     mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+    // No lockfile: external roots must be passed regardless of Stage 1.5.
     const compiler = createTestCompiler({
       resolver: {
         registryPath: '/registry',
@@ -3838,25 +3839,6 @@ describe('Stage 1.5: Reference Integrity', () => {
     expect(roots).toContain(join('/home/testuser', '.promptscript', 'cache'));
     expect(roots).toContain('/project/.promptscript/vendor');
     expect(roots).toContain('/custom/repo-root');
-  });
-
-  it('should pass external roots even without a lockfile', async () => {
-    vi.stubEnv('HOME', '/home/testuser');
-    vi.stubEnv('USERPROFILE', undefined);
-    mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
-    const compiler = createTestCompiler({
-      resolver: { registryPath: '/registry' },
-      formatters: [],
-    });
-
-    await compiler.compile('./test.prs');
-
-    const externalCall = mockUpdateConfig.mock.calls.find(
-      (c) => c[0] && 'externalRoots' in (c[0] as Record<string, unknown>)
-    );
-    expect(externalCall).toBeDefined();
-    const roots = (externalCall![0] as Record<string, unknown>)['externalRoots'] as string[];
-    expect(roots).toContain(join('/home/testuser', '.promptscript', 'cache'));
   });
 
   it('should collect registry references from skills blocks and pass to validator', async () => {

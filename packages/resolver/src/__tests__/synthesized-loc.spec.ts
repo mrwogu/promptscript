@@ -10,6 +10,27 @@ import { VIRTUAL_LOC } from '../ast-factory.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+/** Write a SKILL.md with frontmatter inside a skill directory. */
+async function writeSkillMd(skillDir: string, name: string): Promise<string> {
+  await mkdir(skillDir, { recursive: true });
+  const skillMd = resolvePath(skillDir, 'SKILL.md');
+  await writeFile(
+    skillMd,
+    ['---', `name: ${name}`, `description: ${name} skill`, '---', '', `${name} body.`].join('\n')
+  );
+  return skillMd;
+}
+
+/** Write an entry .prs importing the given ref. */
+async function writeEntry(root: string, id: string, ref: string): Promise<string> {
+  const entry = resolvePath(root, 'main.prs');
+  await writeFile(
+    entry,
+    ['@meta {', `  id: "${id}"`, '  syntax: "1.0.0"', '}', '', `@use ${ref}`].join('\n')
+  );
+  return entry;
+}
+
 /**
  * Synthesized skill nodes must carry the source file they were inlined from.
  * `<synthesized>` is a dead end for validation findings: rules that report on
@@ -17,16 +38,9 @@ const __dirname = dirname(__filename);
  */
 describe('synthesized node provenance', () => {
   it('should stamp the SKILL.md path on nodes synthesized from a .md import', async () => {
-    const root = await mkdtemp(resolvePath(tmpdir(), 'prs-loc-md-'));
-    const skillMd = resolvePath(root, 'my-skill.md');
-    await writeFile(
-      skillMd,
-      ['---', 'name: my-skill', 'description: My skill', '---', '', 'Body content.'].join('\n')
-    );
-    await writeFile(
-      resolvePath(root, 'main.prs'),
-      ['@meta {', '  id: "loc-md"', '  syntax: "1.0.0"', '}', '', '@use ./my-skill.md'].join('\n')
-    );
+    const root = await mkdtemp(resolvePath(tmpdir(), 'prs-loc-'));
+    const skillFile = await writeSkillMd(resolvePath(root, 'my-skill'), 'my-skill');
+    const entry = await writeEntry(root, 'loc-md', './my-skill/SKILL.md');
 
     const resolver = new Resolver({
       registryPath: resolvePath(__dirname, '__fixtures__', 'md-imports'),
@@ -34,36 +48,25 @@ describe('synthesized node provenance', () => {
       cache: false,
     });
 
-    const result = await resolver.resolve(resolvePath(root, 'main.prs'));
+    const result = await resolver.resolve(entry);
     expect(result.errors).toEqual([]);
 
     const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
     expect(skillsBlock).toBeDefined();
-    expect(skillsBlock?.loc.file).toBe(skillMd);
+    expect(skillsBlock?.loc.file).toBe(skillFile);
     expect(skillsBlock?.loc.file).not.toBe(VIRTUAL_LOC.file);
 
     if (skillsBlock?.content.type === 'ObjectContent') {
-      expect(skillsBlock.content.loc.file).toBe(skillMd);
+      expect(skillsBlock.content.loc.file).toBe(skillFile);
     }
   });
 
   it('should stamp the directory path on nodes synthesized from a directory import', async () => {
-    const root = await mkdtemp(resolvePath(tmpdir(), 'prs-loc-dir-'));
+    const root = await mkdtemp(resolvePath(tmpdir(), 'prs-loc-'));
     const skillsDir = resolvePath(root, 'skills');
-    await mkdir(resolvePath(skillsDir, 'alpha'), { recursive: true });
-    await writeFile(
-      resolvePath(skillsDir, 'alpha', 'SKILL.md'),
-      ['---', 'name: alpha', 'description: Alpha skill', '---', '', 'Alpha body.'].join('\n')
-    );
-    await mkdir(resolvePath(skillsDir, 'beta'), { recursive: true });
-    await writeFile(
-      resolvePath(skillsDir, 'beta', 'SKILL.md'),
-      ['---', 'name: beta', 'description: Beta skill', '---', '', 'Beta body.'].join('\n')
-    );
-    await writeFile(
-      resolvePath(root, 'main.prs'),
-      ['@meta {', '  id: "loc-dir"', '  syntax: "1.0.0"', '}', '', '@use ./skills'].join('\n')
-    );
+    await writeSkillMd(resolvePath(skillsDir, 'alpha'), 'alpha');
+    await writeSkillMd(resolvePath(skillsDir, 'beta'), 'beta');
+    const entry = await writeEntry(root, 'loc-dir', './skills');
 
     const resolver = new Resolver({
       registryPath: resolvePath(__dirname, '__fixtures__', 'md-imports'),
@@ -71,7 +74,7 @@ describe('synthesized node provenance', () => {
       cache: false,
     });
 
-    const result = await resolver.resolve(resolvePath(root, 'main.prs'));
+    const result = await resolver.resolve(entry);
     expect(result.errors).toEqual([]);
 
     const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
@@ -85,23 +88,19 @@ describe('synthesized node provenance', () => {
   });
 
   it('should stamp the scanned directory on nodes from auto-discovery', async () => {
-    const root = await mkdtemp(resolvePath(tmpdir(), 'prs-loc-disc-'));
-    const skillsDir = resolvePath(root, 'agents-dir', 'skills');
-    await mkdir(resolvePath(skillsDir, 'gamma'), { recursive: true });
-    await writeFile(
-      resolvePath(skillsDir, 'gamma', 'SKILL.md'),
-      ['---', 'name: gamma', 'description: Gamma skill', '---', '', 'Gamma body.'].join('\n')
-    );
+    const root = await mkdtemp(resolvePath(tmpdir(), 'prs-loc-'));
+    const scanDir = resolvePath(root, 'agents-dir');
+    await writeSkillMd(resolvePath(scanDir, 'skills', 'gamma'), 'gamma');
 
-    const program = await discoverNativeContent(resolvePath(root, 'agents-dir'));
+    const program = await discoverNativeContent(scanDir);
     expect(program).not.toBeNull();
 
     const skillsBlock = program?.blocks.find((b) => b.name === 'skills');
     expect(skillsBlock).toBeDefined();
-    expect(skillsBlock?.loc.file).toBe(resolvePath(root, 'agents-dir'));
+    expect(skillsBlock?.loc.file).toBe(scanDir);
 
     if (skillsBlock?.content.type === 'ObjectContent') {
-      expect(skillsBlock.content.loc.file).toBe(resolvePath(root, 'agents-dir'));
+      expect(skillsBlock.content.loc.file).toBe(scanDir);
     }
   });
 });
