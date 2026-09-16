@@ -475,7 +475,7 @@ export const selectOutputsForFormatter = (
     pochi: [/^\.pochi\/rules\/.*\.md$/, /^\.pochi\/skills\/.*\.md$/],
     adal: [/^\.adal\/rules\/.*\.md$/, /^\.adal\/skills\/.*\.md$/],
     iflow: [/^\.iflow\/rules\/.*\.md$/, /^\.iflow\/skills\/.*\.md$/],
-    openclaw: [/^INSTRUCTIONS\.md$/, /^skills\/.*\.md$/],
+    openclaw: [/^INSTRUCTIONS\.md$/, /^\.openclaw\/skills\/.*\.md$/],
     codebuddy: [/^\.codebuddy\/rules\/.*\.md$/, /^\.codebuddy\/skills\/.*\.md$/],
     // AGENTS.md-only targets
     aider: [/^AGENTS\.md$/],
@@ -494,16 +494,21 @@ export const selectOutputsForFormatter = (
   };
 
   const patterns = formatterPatterns[formatter];
+  // Output paths like AGENTS.md or skills/*.md can be claimed by several
+  // targets; outputOwners records the formatter that actually emitted each
+  // file, so a tab never shows content produced by another formatter.
+  const owners = state.compileResult.outputOwners;
   for (const [path, output] of outputMap) {
-    if (patterns.some((pattern) => pattern.test(path))) {
-      results.push(output);
-    }
+    if (!patterns.some((pattern) => pattern.test(path))) continue;
+    const owner = owners?.get(path);
+    if (owner !== undefined && owner !== formatter) continue;
+    results.push(output);
   }
 
   // Sort: main file first, then alphabetically.
   // The main file is the file name of the target's default output path,
   // except where the Playground convention differs.
-  const mainFileOverrides: Partial<Record<FormatterName, string>> = {
+  const mainFileOverrides: Partial<Record<KnownTarget, string>> = {
     cursor: 'instructions.mdc',
     goose: 'project.md',
     trae: 'project.md',

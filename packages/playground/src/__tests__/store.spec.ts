@@ -491,6 +491,40 @@ describe('PlaygroundStore', () => {
       expect(outputs).toEqual([]);
     });
 
+    it('selectOutputsForFormatter should keep only outputs owned by the formatter', () => {
+      const { setCompileResult } = usePlaygroundStore.getState();
+      setCompileResult({
+        success: true,
+        outputs: new Map([
+          ['AGENTS.md', { path: 'AGENTS.md', content: 'factory main' }],
+          [
+            '.factory/skills/review/SKILL.md',
+            { path: '.factory/skills/review/SKILL.md', content: 'factory skill' },
+          ],
+          ['skills/audit/SKILL.md', { path: 'skills/audit/SKILL.md', content: 'duo skill' }],
+        ]),
+        outputOwners: new Map([
+          ['AGENTS.md', 'factory'],
+          ['.factory/skills/review/SKILL.md', 'factory'],
+          ['skills/audit/SKILL.md', 'gitlab-duo'],
+        ]),
+        errors: [],
+        warnings: [],
+        stats: { resolveTime: 0, validateTime: 0, formatTime: 0, totalTime: 0 },
+      });
+
+      // GitLab Duo owns no AGENTS.md here, so the tab must not borrow the
+      // Factory one even though the path pattern also matches.
+      const duoOutputs = selectOutputsForFormatter(usePlaygroundStore.getState(), 'gitlab-duo');
+      expect(duoOutputs.map((output) => output.path)).toEqual(['skills/audit/SKILL.md']);
+
+      const factoryOutputs = selectOutputsForFormatter(usePlaygroundStore.getState(), 'factory');
+      expect(factoryOutputs.map((output) => output.path)).toEqual([
+        'AGENTS.md',
+        '.factory/skills/review/SKILL.md',
+      ]);
+    });
+
     it('selectOutputsForFormatter should match Claude output files', () => {
       const { setCompileResult } = usePlaygroundStore.getState();
       const outputMap = new Map([
