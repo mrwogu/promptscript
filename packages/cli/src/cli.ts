@@ -46,6 +46,11 @@ function collectResourceKinds(value: string, previous: string[]): string[] {
   return [...previous, ...value.split(',').map((item) => item.trim())].filter(Boolean);
 }
 
+// Shared by compile and build so the flag cannot drift between them.
+const RESOURCES_FLAG = '--resources <items>';
+const RESOURCES_DESCRIPTION =
+  'Compile only these resources (agents, skills, commands, mcp, hooks, plugins, main)';
+
 program
   .name('prs')
   .description('PromptScript CLI - Standardize AI instructions')
@@ -135,12 +140,7 @@ program
   .option('-a, --all', 'All configured targets')
   .option('-w, --watch', 'Watch mode')
   .option('-o, --output <dir>', 'Output directory')
-  .option(
-    '--resources <items>',
-    'Compile only these resources (agents, skills, commands, mcp, hooks, plugins, main)',
-    collectResourceKinds,
-    [] as string[]
-  )
+  .option(RESOURCES_FLAG, RESOURCES_DESCRIPTION, collectResourceKinds, [] as string[])
   .option('--dry-run', 'Preview changes')
   .option(
     '--no-migrate-factory-hooks',
@@ -161,12 +161,7 @@ program
   .option('-f, --format <format>', 'Output format (alias for --target)')
   .option('-w, --watch', 'Watch mode')
   .option('-o, --output <dir>', 'Output directory')
-  .option(
-    '--resources <items>',
-    'Compile only these resources (agents, skills, commands, mcp, hooks, plugins, main)',
-    collectResourceKinds,
-    [] as string[]
-  )
+  .option(RESOURCES_FLAG, RESOURCES_DESCRIPTION, collectResourceKinds, [] as string[])
   .option('--dry-run', 'Preview changes')
   .option(
     '--no-migrate-factory-hooks',
