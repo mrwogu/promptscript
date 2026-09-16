@@ -3815,6 +3815,50 @@ describe('Stage 1.5: Reference Integrity', () => {
     );
   });
 
+  it('should pass external roots (cache, vendor, reference roots) to the validator', async () => {
+    vi.stubEnv('HOME', '/home/testuser');
+    vi.stubEnv('USERPROFILE', undefined);
+    mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        vendorDir: '/project/.promptscript/vendor',
+        referenceRoots: { 'github.com/org/repo': ['/custom/repo-root'] },
+      },
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    const externalCall = mockUpdateConfig.mock.calls.find(
+      (c) => c[0] && 'externalRoots' in (c[0] as Record<string, unknown>)
+    );
+    expect(externalCall).toBeDefined();
+    const roots = (externalCall![0] as Record<string, unknown>)['externalRoots'] as string[];
+    expect(roots).toContain(join('/home/testuser', '.promptscript', 'cache'));
+    expect(roots).toContain('/project/.promptscript/vendor');
+    expect(roots).toContain('/custom/repo-root');
+  });
+
+  it('should pass external roots even without a lockfile', async () => {
+    vi.stubEnv('HOME', '/home/testuser');
+    vi.stubEnv('USERPROFILE', undefined);
+    mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+    const compiler = createTestCompiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    const externalCall = mockUpdateConfig.mock.calls.find(
+      (c) => c[0] && 'externalRoots' in (c[0] as Record<string, unknown>)
+    );
+    expect(externalCall).toBeDefined();
+    const roots = (externalCall![0] as Record<string, unknown>)['externalRoots'] as string[];
+    expect(roots).toContain(join('/home/testuser', '.promptscript', 'cache'));
+  });
+
   it('should collect registry references from skills blocks and pass to validator', async () => {
     const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
     const ast = createTestProgram({

@@ -483,14 +483,28 @@ export class Compiler {
 
     // Stage 1.5: Reference Integrity
     const compileErrors: CompileError[] = [];
+
+    // Tell the validator which paths hold imported (registry cache / vendored)
+    // content so heuristic rules can skip it by default. Concrete security
+    // findings still scan imported content.
+    const externalRoots: string[] = [];
+    const cacheDir =
+      this.options.resolver.cacheDir ??
+      join(process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp', '.promptscript', 'cache');
+    externalRoots.push(cacheDir);
+    if (this.options.resolver.vendorDir) {
+      externalRoots.push(this.options.resolver.vendorDir);
+    }
+    for (const roots of Object.values(this.options.resolver.referenceRoots ?? {})) {
+      externalRoots.push(...roots);
+    }
+    this.validator.updateConfig({ externalRoots });
+
     if (!this.options.ignoreHashes && this.options.resolver.lockfile) {
       this.logger.verbose('=== Stage 1.5: Reference Integrity ===');
       // Collect registry reference paths for the validator
       const registryReferences = new Set<string>();
       const registryReferencePaths = new Map<string, Map<string, string>>();
-      const cacheDir =
-        this.options.resolver.cacheDir ??
-        join(process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp', '.promptscript', 'cache');
       const registryCache = new RegistryCache(cacheDir);
       const referenceRoots: Array<{ repoUrl: string; version: string; path: string }> = [];
       for (const [repoUrl, dependency] of Object.entries(
