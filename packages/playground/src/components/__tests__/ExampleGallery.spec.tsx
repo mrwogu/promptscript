@@ -105,7 +105,15 @@ describe('ExampleGallery — gallery examples compile', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.warnings).toEqual([]);
+    // GitHub agent files cannot carry the authored `skills` list; the
+    // compile surfaces that loss instead of dropping it silently.
+    expect(result.warnings).toEqual([
+      expect.objectContaining({
+        ruleId: 'PS4003',
+        message:
+          'Agent "payment-reviewer": field "skills" is not supported by target "github" and will be omitted.',
+      }),
+    ]);
     const github = result.outputs.get('.github/copilot-instructions.md')?.content;
     expect(github).toContain('Minimum 95% coverage for payment flows');
     expect(github).not.toContain('Minimum 80% coverage');

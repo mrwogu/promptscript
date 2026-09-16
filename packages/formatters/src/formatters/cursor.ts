@@ -9,6 +9,7 @@ import {
   getHookCompatibilityWarnings,
 } from '../hook-adapters.js';
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
+import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -217,6 +218,7 @@ export class CursorFormatter extends BaseFormatter {
     }
 
     output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
+    output = appendAgentCapabilityWarnings(output, ast, this.name, version);
     return {
       ...output,
       managedOutputFiles: [

@@ -136,6 +136,22 @@ export function getAgentFieldSupport(
 }
 
 /**
+ * Targets that support one canonical field, grouped by status.
+ */
+export interface AgentFieldTargetSupport {
+  readonly emitted: readonly KnownTarget[];
+  readonly transformed: readonly KnownTarget[];
+}
+
+/**
+ * List native targets that can represent one canonical agent field.
+ */
+export function listAgentFieldSupportTargets(field: CanonicalAgentField): AgentFieldTargetSupport {
+  const groups = AGENT_FIELD_STATUS_GROUPS[field];
+  return { emitted: groups.emitted ?? [], transformed: groups.transformed ?? [] };
+}
+
+/**
  * List canonical fields a target cannot represent.
  *
  * Non-canonical authored fields are always unsupported; callers detect them

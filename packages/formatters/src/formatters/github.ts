@@ -17,6 +17,7 @@ import {
   getHookCompatibilityWarnings,
 } from '../hook-adapters.js';
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
+import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
 import { resolveSectionTitle, resolveSourceSectionTitle } from '../section-title-resolver.js';
 
 /**
@@ -253,6 +254,7 @@ export class GitHubFormatter extends BaseFormatter {
       output = this.formatSimple(ast, options);
     }
     output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
+    output = appendAgentCapabilityWarnings(output, ast, this.name, version);
 
     const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
     const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
