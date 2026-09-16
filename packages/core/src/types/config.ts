@@ -540,8 +540,12 @@ export type TargetName = KnownTarget | CustomTarget;
 /**
  * Runtime array of all known target names.
  * Useful for validation and iteration.
+ *
+ * The `as const` keeps the literal element types so
+ * `(typeof KNOWN_TARGETS)[number]` stays a literal union and
+ * exhaustiveness checks against `KnownTarget` can catch omissions.
  */
-export const KNOWN_TARGETS: readonly KnownTarget[] = [
+export const KNOWN_TARGETS = [
   // Original 7
   'github',
   'claude',
@@ -600,7 +604,7 @@ export const KNOWN_TARGETS: readonly KnownTarget[] = [
   'hermes',
   // GitLab Duo (Agent Platform)
   'gitlab-duo',
-] as const;
+] as const satisfies readonly KnownTarget[];
 
 /**
  * Type guard to check if a target name is a known built-in target.
