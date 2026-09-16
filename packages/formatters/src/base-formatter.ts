@@ -761,9 +761,13 @@ export abstract class BaseFormatter implements Formatter {
     }
 
     const normalizedOutputDir = this.normalizeOutputDir(outputDir);
+    if (!normalizedOutputDir) {
+      return `${skillBasePath}/${skillName}`;
+    }
+
     if (!configuredBaseDir) {
-      const targetRoot = defaultSkillBasePath.replace(/\/skills$/, '');
-      return `${targetRoot}/${normalizedOutputDir}`;
+      const targetRoot = defaultSkillBasePath.replace(/(?:^|\/)skills$/, '');
+      return targetRoot ? `${targetRoot}/${normalizedOutputDir}` : normalizedOutputDir;
     }
 
     const outputSegments = normalizedOutputDir.split('/').filter((segment) => segment.length > 0);

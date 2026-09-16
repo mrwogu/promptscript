@@ -69,6 +69,60 @@ describe('GitLab Duo formatter', () => {
     expect(skillFile?.content).toContain('Verify the rollout before announcing it.');
   });
 
+  it('preserves imported skill directories below repository-root skills', () => {
+    const formatter = new GitlabDuoFormatter();
+    const ast = createProgram([
+      createBlock(
+        'skills',
+        {
+          type: 'ObjectContent',
+          properties: {
+            audit: {
+              description: 'Marketing audit',
+              content: 'Audit the marketing setup.',
+              __outputDir: 'skills/marketing/audit',
+            },
+          },
+          loc: createLoc(2),
+        },
+        2
+      ),
+    ]);
+
+    const output = formatter.format(ast, { version: 'full' });
+
+    expect(output.additionalFiles?.find((file) => file.path.endsWith('SKILL.md'))?.path).toBe(
+      'skills/marketing/audit/SKILL.md'
+    );
+  });
+
+  it('falls back to the named skill directory when import path normalizes empty', () => {
+    const formatter = new GitlabDuoFormatter();
+    const ast = createProgram([
+      createBlock(
+        'skills',
+        {
+          type: 'ObjectContent',
+          properties: {
+            audit: {
+              description: 'Marketing audit',
+              content: 'Audit the marketing setup.',
+              __outputDir: '../..',
+            },
+          },
+          loc: createLoc(2),
+        },
+        2
+      ),
+    ]);
+
+    const output = formatter.format(ast, { version: 'full' });
+
+    expect(output.additionalFiles?.find((file) => file.path.endsWith('SKILL.md'))?.path).toBe(
+      'skills/audit/SKILL.md'
+    );
+  });
+
   it('reports the Duo skill path and file name', () => {
     const formatter = new GitlabDuoFormatter();
 
