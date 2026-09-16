@@ -28,13 +28,51 @@ const TAGS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 /** Default maximum wall-clock time for a Git operation. */
 export const DEFAULT_GIT_TIMEOUT_MS = 60_000;
 
+/**
+ * Environment variable that overrides the default Git operation timeout.
+ * Useful when a registry clone needs more than the default 60 seconds
+ * (e.g. large monorepo registries). See issue #455.
+ */
+export const GIT_TIMEOUT_ENV_VAR = 'PROMPTSCRIPT_GIT_TIMEOUT';
+
 /** Semver tag pattern: optional "v" prefix followed by major.minor.patch */
 const SEMVER_TAG_RE = /^v?\d+\.\d+\.\d+/;
 
+/** Read a positive finite timeout (ms) from PROMPTSCRIPT_GIT_TIMEOUT. */
+function envGitTimeout(): number | undefined {
+  const raw = process.env[GIT_TIMEOUT_ENV_VAR];
+  if (raw === undefined || raw.trim() === '') {
+    return undefined;
+  }
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
 function normalizeGitTimeout(timeout: number | undefined): number {
-  return timeout !== undefined && Number.isFinite(timeout) && timeout > 0
-    ? timeout
-    : DEFAULT_GIT_TIMEOUT_MS;
+  if (timeout !== undefined && Number.isFinite(timeout) && timeout > 0) {
+    return timeout;
+  }
+  const fromEnv = envGitTimeout();
+  if (fromEnv !== undefined) {
+    return fromEnv;
+  }
+  return DEFAULT_GIT_TIMEOUT_MS;
+}
+
+/**
+ * Detect clone failures caused by partial-clone or sparse flags that the
+ * server or the local Git version does not support. These are safe to retry
+ * with a plain shallow clone.
+ */
+function isPartialCloneUnsupported(error: Error): boolean {
+  const message = error.message.toLowerCase();
+  return (
+    message.includes('filtering not recognized') ||
+    message.includes('does not support filtering') ||
+    message.includes('invalid filter') ||
+    message.includes('filter is not supported') ||
+    /unknown (option|switch)[`' ]*sparse/.test(message)
+  );
 }
 
 /**
@@ -365,12 +403,17 @@ export class GitRegistry implements Registry {
    * @param tag - Git tag to check out, or undefined for the default branch
    * @param targetDir - Directory to clone into
    * @param fallbackRepoUrl - Optional fallback URL to try on auth failure
+   * @param sparsePath - Optional subdirectory to limit the checkout to.
+   *   Uses `--filter=blob:none --sparse` + `sparse-checkout` so only the
+   *   blobs for that subdirectory are fetched. Falls back to a plain
+   *   shallow clone when the server does not support partial clones.
    */
   async cloneAtTag(
     repoUrl: string,
     tag: string | undefined,
     targetDir: string,
-    fallbackRepoUrl?: string
+    fallbackRepoUrl?: string,
+    sparsePath?: string
   ): Promise<void> {
     if (existsSync(targetDir)) {
       await fs.rm(targetDir, { recursive: true, force: true });
@@ -378,10 +421,9 @@ export class GitRegistry implements Registry {
     await fs.mkdir(targetDir, { recursive: true });
 
     const git = this.createGit();
-    const cloneOptions = tag ? ['--depth=1', `--branch=${tag}`, '--single-branch'] : ['--depth=1'];
     const cloneUrl = this.auth ? this.transportUrl : repoUrl;
     try {
-      await git.clone(cloneUrl, targetDir, cloneOptions);
+      await this.performClone(git, cloneUrl, targetDir, tag, sparsePath);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       if (isGitTimeoutError(error)) {
@@ -393,7 +435,7 @@ export class GitRegistry implements Registry {
       if (this.isAccessError(error)) {
         if (fallbackRepoUrl) {
           try {
-            await git.clone(fallbackRepoUrl, targetDir, cloneOptions);
+            await this.performClone(git, fallbackRepoUrl, targetDir, tag, sparsePath);
             return;
           } catch (fallbackErr) {
             const fbError =
@@ -422,6 +464,110 @@ export class GitRegistry implements Registry {
         repoUrl,
         error
       );
+    }
+  }
+
+  /**
+   * Clone shallow, optionally partial (`--filter=blob:none --sparse`) with a
+   * sparse-checkout cone of `sparsePath`. Retries without the partial-clone
+   * flags when the server or local Git does not support them.
+   */
+  private async performClone(
+    git: SimpleGit,
+    url: string,
+    targetDir: string,
+    tag: string | undefined,
+    sparsePath: string | undefined
+  ): Promise<void> {
+    const tagOptions = tag ? ['--branch=' + tag, '--single-branch'] : [];
+    const baseOptions = ['--depth=1', ...tagOptions];
+
+    if (!sparsePath) {
+      await git.clone(url, targetDir, baseOptions);
+      return;
+    }
+
+    try {
+      await git.clone(url, targetDir, [...baseOptions, '--filter=blob:none', '--sparse']);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (!isPartialCloneUnsupported(error)) {
+        throw error;
+      }
+      // Server or Git version lacks partial clone support; retry plain.
+      if (existsSync(targetDir)) {
+        await fs.rm(targetDir, { recursive: true, force: true });
+      }
+      await fs.mkdir(targetDir, { recursive: true });
+      await git.clone(url, targetDir, baseOptions);
+      return;
+    }
+
+    const repoGit = this.createGit(targetDir);
+    await repoGit.raw(['sparse-checkout', 'set', sparsePath]);
+  }
+
+  /**
+   * Check whether the checkout at `targetDir` uses sparse-checkout.
+   */
+  async isSparseCheckout(targetDir: string): Promise<boolean> {
+    const git = this.createGit(targetDir);
+    try {
+      const out = await git.raw(['config', 'core.sparseCheckout']);
+      return out.trim() === 'true';
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Disable sparse-checkout, materializing the full working tree.
+   * Used when a root-level import needs the whole repository but the
+   * cached clone is partial.
+   */
+  async disableSparseCheckout(targetDir: string): Promise<void> {
+    const git = this.createGit(targetDir);
+    try {
+      await git.raw(['sparse-checkout', 'disable']);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (isGitTimeoutError(error)) {
+        throw createGitTimeoutError(this.url, this.timeout, error);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Add paths to an existing sparse checkout so their blobs are fetched
+   * on demand. Used when a cached partial clone needs a subdirectory that
+   * the original cone did not cover.
+   */
+  async addSparsePaths(targetDir: string, paths: readonly string[]): Promise<void> {
+    const extra = paths.filter((p) => p.length > 0 && p !== '.');
+    if (extra.length === 0) {
+      return;
+    }
+    const git = this.createGit(targetDir);
+    try {
+      await git.raw(['sparse-checkout', 'add', ...extra]);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      // Git < 2.26 has no `add` subcommand; emulate it with list + set.
+      try {
+        const listed = await git.raw(['sparse-checkout', 'list']);
+        const current = listed
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean);
+        await git.raw(['sparse-checkout', 'set', ...new Set([...current, ...extra])]);
+      } catch (setErr) {
+        const setError = setErr instanceof Error ? setErr : new Error(String(setErr));
+        if (isGitTimeoutError(setError)) {
+          throw createGitTimeoutError(this.url, this.timeout, setError);
+        }
+        throw error;
+      }
     }
   }
 
@@ -1162,7 +1308,9 @@ function createGitTimeoutError(url: string, timeout: number, cause: Error): GitC
     return cause;
   }
   return new GitCloneError(
-    `Git operation timed out after ${timeout}ms while contacting ${url}`,
+    `Git operation timed out after ${timeout}ms while contacting ${url}. ` +
+      `Raise the limit with the 'timeout' field on the registry entry ` +
+      `or the ${GIT_TIMEOUT_ENV_VAR} environment variable.`,
     url,
     cause
   );

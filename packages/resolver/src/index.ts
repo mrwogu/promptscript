@@ -48,6 +48,7 @@ export {
   GitAuthError,
   GitRefNotFoundError,
   DEFAULT_GIT_TIMEOUT_MS,
+  GIT_TIMEOUT_ENV_VAR,
   type GitRegistryOptions,
   type GitAuthOptions,
   type RemoteValidation,
@@ -171,6 +172,7 @@ export {
 export {
   expandAlias,
   findFallbackUrl,
+  findRegistryEntry,
   validateAlias,
   validateRegistriesConfig,
   type ExpandedAlias,

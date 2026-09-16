@@ -31,6 +31,7 @@ interface RequestedDependency {
   versions: Set<string>;
   fallbackUrl?: string;
   auth?: GitAuthOptions;
+  timeout?: number;
 }
 
 export interface RemoteDependencyOptions {
@@ -117,6 +118,9 @@ export async function lockCommand(options: LockOptions): Promise<void> {
         versions: new Set([defaultGitRegistry.ref ?? 'main']),
         ...(defaultGitRegistry.fallbackUrl ? { fallbackUrl: defaultGitRegistry.fallbackUrl } : {}),
         ...(defaultGitRegistry.auth ? { auth: defaultGitRegistry.auth } : {}),
+        ...(defaultGitRegistry.timeout !== undefined
+          ? { timeout: defaultGitRegistry.timeout }
+          : {}),
       });
     }
 
@@ -128,6 +132,9 @@ export async function lockCommand(options: LockOptions): Promise<void> {
       requested.versions.add('latest');
       if (typeof entry !== 'string' && entry.fallbackUrl) {
         requested.fallbackUrl = entry.fallbackUrl;
+      }
+      if (typeof entry !== 'string' && entry.timeout !== undefined) {
+        requested.timeout = entry.timeout;
       }
       requestedDependencies.set(repoUrl, requested);
     }
@@ -158,7 +165,8 @@ export async function lockCommand(options: LockOptions): Promise<void> {
         previous,
         options.update === true && matchingRepos.includes(repoUrl),
         requested.fallbackUrl,
-        requested.auth
+        requested.auth,
+        { timeout: requested.timeout }
       );
       if (previous?.skills?.length && previous.commit !== resolved.commit) {
         throw new Error(

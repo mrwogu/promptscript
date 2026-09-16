@@ -82,7 +82,7 @@ import { GitRegistry } from './git-registry.js';
 import { RegistryCache } from './registry-cache.js';
 import { hashContent, isRealPathInside } from './reference-hasher.js';
 import { discoverNativeContent } from './auto-discovery.js';
-import { findFallbackUrl } from './alias-resolver.js';
+import { findFallbackUrl, findRegistryEntry } from './alias-resolver.js';
 import {
   loadVendorManifest,
   resolveVendoredRepository,
@@ -445,7 +445,8 @@ export class Resolver {
   private readonly cacheEnabled: boolean;
   private readonly logger: Logger;
   private readonly options: ResolverOptions;
-  private readonly gitRegistry: GitRegistry;
+  /** Lazy per-repository Git registries (carry per-entry timeout settings). */
+  private readonly gitRegistries = new Map<string, GitRegistry>();
   private readonly registryCache: RegistryCache;
 
   constructor(options: ResolverOptions) {
@@ -454,13 +455,36 @@ export class Resolver {
     this.cache = new Map();
     this.cacheEnabled = options.cache !== false;
     this.logger = options.logger ?? noopLogger;
-    this.gitRegistry = new GitRegistry({ url: 'https://github.com/placeholder/placeholder.git' });
     const defaultCacheDir = join(
       process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp',
       '.promptscript',
       'cache'
     );
     this.registryCache = new RegistryCache(options.cacheDir ?? defaultCacheDir);
+  }
+
+  /**
+   * Get (or lazily create) the Git registry for a repository URL.
+   *
+   * Per-repository instances carry the `timeout` from the matching
+   * registries config entry, so large monorepo registries can raise the
+   * clone timeout per entry (see issue #455). Falls back to
+   * PROMPTSCRIPT_GIT_TIMEOUT / the 60s default inside GitRegistry.
+   */
+  private getGitRegistry(repoUrl: string): GitRegistry {
+    const cached = this.gitRegistries.get(repoUrl);
+    if (cached) {
+      return cached;
+    }
+    const entry = this.options.registries
+      ? findRegistryEntry(repoUrl, this.options.registries)
+      : undefined;
+    const registry = new GitRegistry({
+      url: repoUrl,
+      ...(entry?.timeout !== undefined ? { timeout: entry.timeout } : {}),
+    });
+    this.gitRegistries.set(repoUrl, registry);
+    return registry;
   }
 
   /**
@@ -1641,6 +1665,13 @@ export class Resolver {
           ? requestedRef
           : undefined;
 
+      // Sparse-checkout cone: the parent directory of the import path. Cloning
+      // with --filter=blob:none --sparse limits the initial fetch to the blobs
+      // of this directory, which turns minutes-long monorepo clones into
+      // seconds (see issue #455). Root-level imports keep the full clone.
+      const subPathLastSlash = subPath.lastIndexOf('/');
+      const sparseCone = subPathLastSlash > 0 ? subPath.slice(0, subPathLastSlash) : undefined;
+
       let cachePath: string;
       let vendoredPath: string | null = null;
       const vendorManifest = this.options.vendorDir
@@ -1676,7 +1707,8 @@ export class Resolver {
               cachePath,
               '.git',
               lockedCommit,
-              new Set(['.prs-registry-meta.json'])
+              new Set(['.prs-registry-meta.json']),
+              { allowPartial: true }
             );
             cacheMatchesLock = true;
           } catch {
@@ -1692,20 +1724,22 @@ export class Resolver {
             this.logger.verbose(
               `Registry cache does not match locked commit for ${repoUrl}. Re-cloning.`
             );
+            const gitRegistry = this.getGitRegistry(repoUrl);
             const cloneRepoUrl = repoUrl;
             const fallbackRepoUrl =
               lockEntry?.gitUrl ??
               (this.options.registries
                 ? findFallbackUrl(repoUrl, this.options.registries)
                 : undefined);
-            await this.gitRegistry.cloneAtTag(cloneRepoUrl, tag, cachePath, fallbackRepoUrl);
-            await this.gitRegistry.checkoutCommit(cachePath, lockedCommit);
+            await gitRegistry.cloneAtTag(cloneRepoUrl, tag, cachePath, fallbackRepoUrl, sparseCone);
+            await gitRegistry.checkoutCommit(cachePath, lockedCommit);
             await this.registryCache.set(repoUrl, effectiveVersion, lockedCommit);
             await verifyGitRepositoryCheckout(
               cachePath,
               '.git',
               lockedCommit,
-              new Set(['.prs-registry-meta.json'])
+              new Set(['.prs-registry-meta.json']),
+              { allowPartial: true }
             );
           }
         }
@@ -1720,18 +1754,19 @@ export class Resolver {
         cachePath = this.registryCache.getCachePath(repoUrl, effectiveVersion);
 
         // Look up fallback URL from registries config (for HTTPS→SSH auth retry)
+        const gitRegistry = this.getGitRegistry(repoUrl);
         const cloneRepoUrl = repoUrl;
         const fallbackRepoUrl =
           lockEntry?.gitUrl ??
           (this.options.registries ? findFallbackUrl(repoUrl, this.options.registries) : undefined);
 
-        // Clone using GitRegistry
-        await this.gitRegistry.cloneAtTag(cloneRepoUrl, tag, cachePath, fallbackRepoUrl);
+        // Clone using GitRegistry (partial sparse clone when a cone is known)
+        await gitRegistry.cloneAtTag(cloneRepoUrl, tag, cachePath, fallbackRepoUrl, sparseCone);
 
         // If lockfile pins a specific commit, checkout that exact commit
         if (lockedCommit) {
           this.logger.verbose(`Checking out locked commit: ${lockedCommit}`);
-          await this.gitRegistry.checkoutCommit(cachePath, lockedCommit);
+          await gitRegistry.checkoutCommit(cachePath, lockedCommit);
         }
 
         // Record in RegistryCache
@@ -1742,7 +1777,8 @@ export class Resolver {
             cachePath,
             '.git',
             lockedCommit,
-            new Set(['.prs-registry-meta.json'])
+            new Set(['.prs-registry-meta.json']),
+            { allowPartial: true }
           );
         }
       }
@@ -1798,6 +1834,35 @@ export class Resolver {
             errors,
             provenance: emptyProvenance(marker),
           };
+        }
+      }
+
+      // A cached partial clone only materializes its sparse cone. When this
+      // import needs a path outside that cone (e.g. a second import from the
+      // same repository), widen the cone so the missing blobs are fetched.
+      // Root imports need the full tree, so disable sparse mode entirely.
+      if (
+        !this.options.readOnly &&
+        existsSync(cachePath) &&
+        existsSync(join(cachePath, '.git')) &&
+        !vendoredPath
+      ) {
+        const gitRegistry = this.getGitRegistry(repoUrl);
+        if (await gitRegistry.isSparseCheckout(cachePath)) {
+          const fileMissing = !isRoot && !existsSync(resolvedFullPath);
+          const dirMissing = !isRoot && !existsSync(join(cachePath, subPath));
+          if (isRoot) {
+            this.logger.verbose(`Materializing full checkout for root import: ${repoUrl}`);
+            await gitRegistry.disableSparseCheckout(cachePath);
+          } else if (fileMissing || dirMissing) {
+            this.logger.verbose(`Widening sparse checkout for ${repoUrl}: ${subPath}`);
+            const paths = new Set<string>();
+            if (sparseCone) {
+              paths.add(sparseCone);
+            }
+            paths.add(subPath);
+            await gitRegistry.addSparsePaths(cachePath, [...paths]);
+          }
         }
       }
 

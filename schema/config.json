@@ -91,6 +91,10 @@
               ],
               "example": "registry/"
             },
+            "timeout": {
+              "type": "number",
+              "description": "Maximum wall-clock time in milliseconds for each Git operation. Defaults to 60000; can also be raised globally via PROMPTSCRIPT_GIT_TIMEOUT."
+            },
             "auth": {
               "type": "object",
               "properties": {
@@ -347,6 +351,11 @@
         "root": {
           "type": "string",
           "description": "Base path within the repository"
+        },
+        "timeout": {
+          "type": "number",
+          "description": "Maximum wall-clock time in milliseconds for each Git operation (clone, fetch, ls-remote) against this repository. Defaults to 60000; can also be raised globally via PROMPTSCRIPT_GIT_TIMEOUT.",
+          "example": "registries:\n  '@internal':\n    url: 'git@gitlab.internal.com:company/monorepo'\n    root: 'packages/promptscript'\n    timeout: 600000"
         }
       },
       "required": [

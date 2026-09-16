@@ -256,6 +256,11 @@ export interface PromptScriptConfig {
        * @example 'registry/'
        */
       path?: string;
+      /**
+       * Maximum wall-clock time in milliseconds for each Git operation.
+       * Defaults to 60000; can also be raised globally via PROMPTSCRIPT_GIT_TIMEOUT.
+       */
+      timeout?: number;
       /** Authentication options for private repositories */
       auth?: {
         /**
@@ -437,6 +442,7 @@ export interface UserConfig {
       fallbackUrl?: string;
       ref?: string;
       path?: string;
+      timeout?: number;
       auth?: {
         type: 'token' | 'ssh';
         tokenEnvVar?: string;

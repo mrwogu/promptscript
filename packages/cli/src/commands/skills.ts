@@ -35,7 +35,6 @@ import {
   hashContent,
   createGitRegistry,
   normalizeGitUrl,
-  DEFAULT_GIT_TIMEOUT_MS,
   type SkillValidationIssue,
 } from '@promptscript/resolver';
 
@@ -133,7 +132,7 @@ function resolveSkillDependency(
   existing: LockfileDependency | undefined,
   forceUpdate: boolean,
   gitUrl: string | undefined,
-  timeout = DEFAULT_GIT_TIMEOUT_MS
+  timeout: number | undefined = undefined
 ): Promise<LockfileDependency> {
   return gitUrl
     ? resolveRemoteDependency(
@@ -389,16 +388,19 @@ async function fetchAndValidateRemoteSkill(
   try {
     const gitRegistry = createGitRegistry({
       url: repoUrl,
-      timeout: DEFAULT_GIT_TIMEOUT_MS,
     });
     const cloneRef =
       options.version === 'latest' || /^[0-9a-f]{40}$/i.test(options.version)
         ? undefined
         : options.version;
-    await gitRegistry.cloneAtTag(repoUrl, cloneRef, cloneDir);
+    // Partial sparse clone limited to the skill's directory - avoids pulling
+    // the whole repository for one skill in a monorepo (see issue #455).
+    const subPath = extractSubPath(source);
+    const coneIndex = subPath.lastIndexOf('/');
+    const sparseCone = coneIndex > 0 ? subPath.slice(0, coneIndex) : undefined;
+    await gitRegistry.cloneAtTag(repoUrl, cloneRef, cloneDir, undefined, sparseCone);
     await gitRegistry.checkoutCommit(cloneDir, options.commit);
 
-    const subPath = extractSubPath(source);
     if (!subPath.toLowerCase().endsWith('.md') && existsSync(join(cloneDir, `${subPath}.prs`))) {
       return {
         content: '',

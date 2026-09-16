@@ -186,6 +186,7 @@ export async function resolveRegistryPath(
       ref,
       path: gitConfig.path,
       auth: gitConfig.auth,
+      timeout: gitConfig.timeout,
       cache: {
         enabled: config.registry.cache?.enabled ?? true,
         ttl: config.registry.cache?.ttl,
