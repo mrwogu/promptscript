@@ -87,7 +87,7 @@ hide:
 <span>Cursor</span>
 <code>.cursor/rules/project.mdc</code>
 </div>
-<div class="home-output-more">+ 45 targets</div>
+<div class="home-output-more">+ 46 targets</div>
 </div>
 </section>
 <div class="home-platforms" aria-label="Supported platforms">
@@ -99,7 +99,7 @@ hide:
 <span>Factory AI</span>
 <span>Gemini CLI</span>
 <span>OpenCode</span>
-<a href="reference/formatters/">and 41 more</a>
+<a href="reference/formatters/">and 43 more</a>
 </div>
 <section class="home-section home-section--capabilities">
 <div class="home-section__intro">
