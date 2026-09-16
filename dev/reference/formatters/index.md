@@ -1,12 +1,12 @@
 # Supported Formatters
 
-PromptScript compiles one agent platform definition to native files for **49 AI coding agent targets**.
+PromptScript compiles one agent platform definition to native files for **50 AI coding agent targets**.
 
 9 Rich native
 
 11 AGENTS.md
 
-29 Markdown
+30 Markdown
 
 PromptScript treats instructions, skills, agents, commands, MCP servers, hooks, workflows, and plugins as platform capabilities. See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for the platform-family model.
 
@@ -85,6 +85,7 @@ Skills Agents Commands\](https://getpromptscript.dev/dev/features/target-platfor
 | Deep Agents                                                                              | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | Devin                                                                                    | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | ForgeCode                                                                                | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| GitLab Duo                                                                               | Tier 3 | `AGENTS.md`                       | Yes    | No     | No    | No       |
 | Grok                                                                                     | Tier 3 | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
 | Hermes Agent                                                                             | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | iFlow                                                                                    | Tier 3 | `.iflow/rules/project.md`         | Yes    | No     | No    | No       |
@@ -152,3 +153,15 @@ Hermes output mapping:
 - Unsupported blocks are omitted with non-fatal `PS4002` warnings carrying source locations
 
 PromptScript does not invent `.hermes.md` or unverified native Hermes directories and files.
+
+### GitLab Duo
+
+GitLab Duo uses the root `AGENTS.md` instruction contract (GA in GitLab 18.8) and reads Agent Skills from `skills/<name>/SKILL.md` at the repository root (GitLab 18.10+). The GitLab UI surfaces the instructions from GitLab 18.11. See the official [AGENTS.md documentation](https://docs.gitlab.com/user/duo_agent_platform/customize/agents_md/).
+
+GitLab Duo output mapping:
+
+- Main output: `AGENTS.md`
+- `simple` and `multifile`: single `AGENTS.md` file
+- `full`: `AGENTS.md` plus `skills/<name>/SKILL.md` for each skill
+- Unsupported: agents, commands, workflows, prompts, scoped rules, local files, hooks, MCP servers, and plugins
+- Unsupported blocks are omitted with non-fatal `PS4002` warnings carrying source locations

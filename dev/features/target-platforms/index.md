@@ -1,6 +1,6 @@
 # Target Platforms
 
-PromptScript includes 49 built-in output targets. All targets receive project instructions. Rich formatters additionally emit native skills, agents, commands, MCP configuration, hooks, workflows, or plugin manifests when their platform supports those concepts.
+PromptScript includes 50 built-in output targets. All targets receive project instructions. Rich formatters additionally emit native skills, agents, commands, MCP configuration, hooks, workflows, or plugin manifests when their platform supports those concepts.
 
 ## Platform Families
 
@@ -67,6 +67,7 @@ Targets using platform-specific instruction paths with shared rendering:
 - iFlow
 - OpenClaw
 - CodeBuddy
+- GitLab Duo
 
 ## Configure Targets
 
@@ -181,7 +182,7 @@ Portable PromptScript source does not force every platform into one schema. Inst
 1. Unsupported target-specific behavior reports an actionable compatibility warning.
 1. Main instruction output remains available across all targets.
 
-Lifecycle hooks have an exhaustive 49-target capability registry. Native project hooks are currently emitted for Claude, Codex, Cursor, Factory, Gemini, GitHub, Grok, and Windsurf. Plugin-only, custom-agent-scoped, unsupported, and incompatible output modes report `PS4002` rather than silently omitting enabled hooks. See the [hook capability matrix](https://getpromptscript.dev/dev/features/automation/#hook-capability-matrix).
+Lifecycle hooks have an exhaustive 50-target capability registry. Native project hooks are currently emitted for Claude, Codex, Cursor, Factory, Gemini, GitHub, Grok, and Windsurf. Plugin-only, custom-agent-scoped, unsupported, and incompatible output modes report `PS4002` rather than silently omitting enabled hooks. See the [hook capability matrix](https://getpromptscript.dev/dev/features/automation/#hook-capability-matrix).
 
 Review generated output and compatibility warnings when adopting a new target or target version.
 
@@ -199,6 +200,19 @@ Hermes Agent discovers project-local `AGENTS.md` files as workspace instructions
 | Hooks, MCP servers, plugins              | None          | No verified project-local native contract; `PS4002` compatibility warnings include source locations                                                                |
 
 PromptScript does not create `.hermes.md`, native skill directories, agent files, command files, workflow files, prompt files, hook files, MCP configuration, or plugin manifests. Unsupported blocks are omitted with actionable non-fatal compatibility warnings. Move required guidance into supported `AGENTS.md` instruction blocks.
+
+### GitLab Duo
+
+GitLab Duo reads the root `AGENTS.md` file (GA in GitLab 18.8) and Agent Skills from `skills/<name>/SKILL.md` at the repository root (GitLab 18.10+). The GitLab UI surfaces the instructions from GitLab 18.11. See the official [AGENTS.md documentation](https://docs.gitlab.com/user/duo_agent_platform/customize/agents_md/).
+
+| PromptScript capability                  | GitLab Duo output | Contract                                                                                            |
+| ---------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------- |
+| Supported instruction blocks             | `AGENTS.md`       | Shared markdown rendering into the single root file                                                 |
+| `simple` and `multifile`                 | `AGENTS.md`       | Single file; skills stay full-mode-only                                                             |
+| `full`                                   | `AGENTS.md`       | Plus `skills/<name>/SKILL.md` for each skill                                                        |
+| Agents, commands, workflows, and prompts | None              | No verified project-local native contract                                                           |
+| Scoped rules (`@guards`) and local files | None              | No verified project-local native contract                                                           |
+| Hooks, MCP servers, plugins              | None              | No verified project-local native contract; `PS4002` compatibility warnings include source locations |
 
 ## Related Documentation
 

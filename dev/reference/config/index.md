@@ -434,7 +434,7 @@ targets:
 
 **Available Targets:**
 
-PromptScript ships 49 built-in targets. See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for platform families and [Supported Formatters](https://getpromptscript.dev/dev/reference/formatters/index.md) for the full capability matrix.
+PromptScript ships 50 built-in targets. See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for platform families and [Supported Formatters](https://getpromptscript.dev/dev/reference/formatters/index.md) for the full capability matrix.
 
 | Target         | Default Output                    | Default Convention | Supported Versions                             |
 | -------------- | --------------------------------- | ------------------ | ---------------------------------------------- |
@@ -476,6 +476,7 @@ PromptScript ships 49 built-in targets. See [Target Platforms](https://getprompt
 | `iflow`        | `.iflow/rules/project.md`         | `markdown`         | simple / multifile / full                      |
 | `openclaw`     | `INSTRUCTIONS.md`                 | `markdown`         | simple / multifile / full                      |
 | `codebuddy`    | `.codebuddy/rules/project.md`     | `markdown`         | simple / multifile / full                      |
+| `gitlab-duo`   | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `aider`        | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `amazon-q`     | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `warp`         | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |

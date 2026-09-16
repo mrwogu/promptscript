@@ -215,7 +215,7 @@ On Windows, GitHub, Codex, and Windsurf emit PowerShell-safe commands. The `pyth
 
 ### Hook Capability Matrix
 
-All 49 built-in targets have an explicit lifecycle-hook classification. `All` means all eight portable events; `watch` means `prs compile --watch`.
+All 50 built-in targets have an explicit lifecycle-hook classification. `All` means all eight portable events; `watch` means `prs compile --watch`.
 
 | Target         | Status       | Config path                       | Portable events                                  | Command format                 | Timeout       | Project root               | Fallback                  |
 | -------------- | ------------ | --------------------------------- | ------------------------------------------------ | ------------------------------ | ------------- | -------------------------- | ------------------------- |
@@ -256,6 +256,7 @@ All 49 built-in targets have an explicit lifecycle-hook classification. `All` me
 | `iflow`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `openclaw`     | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `codebuddy`    | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `gitlab-duo`   | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `aider`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `amazon-q`     | Agent-scoped | Custom agent file                 | Custom-agent events                              | Agent hook object              | target-native | Agent workspace            | Custom agent or watch     |
 | `warp`         | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |

@@ -310,7 +310,7 @@ Instead of running `prs compile --watch` in a terminal, you can let your AI tool
 | `gemini`      | `GEMINI.md`                       | Gemini CLI         |
 | `factory`     | `AGENTS.md`                       | Factory AI         |
 
-See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for all 49 built-in targets.
+See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for all 50 built-in targets.
 
 ### prs build
 
