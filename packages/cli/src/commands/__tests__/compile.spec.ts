@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { homedir } from 'os';
 import type { Logger, OutputPlan } from '@promptscript/core';
 import type { CliServices } from '../../services.js';
 
@@ -220,6 +221,31 @@ function createTestOutputPlan(path: string): OutputPlan {
     files: [file],
     outputs: new Map([[path, file]]),
     owners: new Map([[path, 'test']]),
+    collisions: [],
+    managedPaths: { directories: [], files: [] },
+    resources: [],
+    injected: [],
+    managedOutputDirectories: [],
+    managedOutputFiles: [],
+  };
+}
+
+/**
+ * Build a plan whose files carry the formatter that owns them, so the
+ * resource filter classifies paths against the right target catalog entry.
+ */
+function createOwnedPlan(entries: readonly { path: string; owner: string }[]): OutputPlan {
+  const files = entries.map((entry) => ({
+    path: entry.path,
+    originalPath: entry.path,
+    content: 'content',
+    owner: entry.owner,
+    role: 'primary' as const,
+  }));
+  return {
+    files,
+    outputs: new Map(files.map((file) => [file.path, file])),
+    owners: new Map(files.map((file) => [file.path, file.owner])),
     collisions: [],
     managedPaths: { directories: [], files: [] },
     resources: [],
@@ -555,6 +581,134 @@ describe('compile command - createCliLogger warn path', () => {
 
     expect(mockDryRun).toHaveBeenCalledWith(
       `Would remove empty managed directory: ${prunedDirectory}`
+    );
+  });
+
+  it('writes only selected resources and skips managed cleanup', async () => {
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        ['CLAUDE.md', { path: 'CLAUDE.md', content: 'main instructions' }],
+        ['.claude/agents/reviewer.md', { path: '.claude/agents/reviewer.md', content: 'agent' }],
+        [
+          '.claude/skills/audit/SKILL.md',
+          { path: '.claude/skills/audit/SKILL.md', content: 'skill' },
+        ],
+        ['.claude/settings.json', { path: '.claude/settings.json', content: '{}' }],
+      ]),
+      outputPlan: createOwnedPlan([
+        { path: 'CLAUDE.md', owner: 'claude' },
+        { path: '.claude/agents/reviewer.md', owner: 'claude' },
+        { path: '.claude/skills/audit/SKILL.md', owner: 'claude' },
+        { path: '.claude/settings.json', owner: 'claude' },
+      ]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/mock/project', resources: ['agents', 'skills'] }, mockServices);
+
+    const writtenPaths = mockWriteFile.mock.calls.map(([path]) => String(path));
+    expect(writtenPaths.some((path) => path.endsWith('CLAUDE.md'))).toBe(false);
+    expect(writtenPaths.some((path) => path.endsWith('.claude/settings.json'))).toBe(false);
+    expect(writtenPaths.some((path) => path.endsWith('.claude/agents/reviewer.md'))).toBe(true);
+    expect(writtenPaths.some((path) => path.endsWith('.claude/skills/audit/SKILL.md'))).toBe(true);
+    expect(mockCleanupManagedOutputs).not.toHaveBeenCalled();
+    expect(mockMuted).toHaveBeenCalledWith('Skipped managed cleanup for resource-only compile');
+  });
+
+  it('keeps main instruction files when main is selected', async () => {
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        ['CLAUDE.md', { path: 'CLAUDE.md', content: 'main instructions' }],
+        ['.claude/agents/reviewer.md', { path: '.claude/agents/reviewer.md', content: 'agent' }],
+      ]),
+      outputPlan: createOwnedPlan([
+        { path: 'CLAUDE.md', owner: 'claude' },
+        { path: '.claude/agents/reviewer.md', owner: 'claude' },
+      ]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/mock/project', resources: ['main'] }, mockServices);
+
+    const writtenPaths = mockWriteFile.mock.calls.map(([path]) => String(path));
+    expect(writtenPaths.some((path) => path.endsWith('CLAUDE.md'))).toBe(true);
+    expect(writtenPaths.some((path) => path.endsWith('.claude/agents/reviewer.md'))).toBe(false);
+  });
+
+  it('honors output.resources from the config file', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      registry: { path: './registry' },
+      output: { resources: ['skills'] },
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        ['CLAUDE.md', { path: 'CLAUDE.md', content: 'main instructions' }],
+        [
+          '.claude/skills/audit/SKILL.md',
+          { path: '.claude/skills/audit/SKILL.md', content: 'skill' },
+        ],
+      ]),
+      outputPlan: createOwnedPlan([
+        { path: 'CLAUDE.md', owner: 'claude' },
+        { path: '.claude/skills/audit/SKILL.md', owner: 'claude' },
+      ]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    const writtenPaths = mockWriteFile.mock.calls.map(([path]) => String(path));
+    expect(writtenPaths.some((path) => path.endsWith('CLAUDE.md'))).toBe(false);
+    expect(writtenPaths.some((path) => path.endsWith('.claude/skills/audit/SKILL.md'))).toBe(true);
+  });
+
+  it('rejects unknown resource kinds before compiling', async () => {
+    await compileCommand({ cwd: '/mock/project', resources: ['rules'] }, mockServices);
+
+    expect(mockError).toHaveBeenCalledWith(
+      expect.stringContaining('Unknown resource kind(s): rules')
+    );
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('refuses to write protected personal override files', async () => {
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        ['.factory/AGENTS.md', { path: '.factory/AGENTS.md', content: 'override' }],
+      ]),
+      outputPlan: createOwnedPlan([{ path: '.factory/AGENTS.md', owner: 'factory' }]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/mock/project', output: homedir() }, mockServices);
+
+    expect(mockSpinner.fail).toHaveBeenCalledWith('Error');
+    expect(mockError).toHaveBeenCalledWith(
+      expect.stringContaining('Refusing to write protected personal file(s)')
+    );
+    expect(mockError).toHaveBeenCalledWith(expect.stringContaining('~/.factory/AGENTS.md'));
+    expect(mockWriteFile).not.toHaveBeenCalled();
+  });
+
+  it('warns when the home directory is the output root without a resource selection', async () => {
+    await compileCommand({ cwd: '/mock/project', output: homedir() }, mockServices);
+
+    expect(mockWarning).toHaveBeenCalledWith(
+      expect.stringContaining('Output directory is your home directory')
     );
   });
 

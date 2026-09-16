@@ -1,4 +1,5 @@
 import { resolve, isAbsolute, relative } from 'path';
+import { homedir } from 'os';
 import { readFile } from 'fs/promises';
 import { existsSync, lstatSync } from 'fs';
 import chokidar from 'chokidar';
@@ -47,6 +48,8 @@ import {
 import { loadBundledSkillContent } from '../utils/bundled-skill.js';
 import { isPromptScriptOwnedOutput } from '../utils/output-ownership.js';
 import { finalizeOutputPlan } from '../utils/output-plan.js';
+import { filterOutputsByResources, parseResourceSelection } from '../utils/resource-filter.js';
+import { describeProtectedUserFile } from '../utils/global-output-safety.js';
 import { getBuildProfile, getBuildProfiles } from '../utils/build-profile.js';
 import { parseTargetEntries } from '../utils/target-config.js';
 
@@ -377,6 +380,19 @@ async function writeOutputs(
   if (escaping.length > 0) {
     throw new PSError(
       `Refusing to write outside the output directory:\n${escaping.map((m) => `  - ${m}`).join('\n')}`,
+      ErrorCode.INVALID_PATH
+    );
+  }
+
+  // Pre-flight: user-level personal files are never compiler output. A
+  // global output root (for example --output "$HOME") must not clobber the
+  // personal overrides the target tools document as user-owned.
+  const protectedHits = plannedOutputs
+    .map((output) => describeProtectedUserFile(resolve(outputRoot, output.path)))
+    .filter((hit): hit is NonNullable<typeof hit> => hit !== undefined);
+  if (protectedHits.length > 0) {
+    throw new PSError(
+      `Refusing to write protected personal file(s):\n${protectedHits.map((hit) => `  - ${hit.displayPath} (${hit.reason})`).join('\n')}\n\nPersonal override files are never compiler output. Use --resources to install generated agent and skill directories only.`,
       ErrorCode.INVALID_PATH
     );
   }
@@ -786,6 +802,20 @@ async function compileCommandWithResult(
       targets = parsedTargets;
     }
 
+    // Resolve the resource selection early so an invalid kind fails before
+    // any compilation work. The CLI flag wins over config.output.resources.
+    const resourceSelection = parseResourceSelection(options.resources ?? config.output?.resources);
+    if (resourceSelection.invalid.length > 0) {
+      spinner.fail('Invalid resource selection');
+      ConsoleOutput.error(
+        `Unknown resource kind(s): ${resourceSelection.invalid.join(', ')}. ` +
+          'Valid kinds: agents, skills, commands, mcp, hooks, plugins, main.'
+      );
+      process.exitCode = 1;
+      return false;
+    }
+    const resourceKinds = new Set(resourceSelection.kinds);
+
     if (targets.length === 0) {
       spinner.fail('No compilation targets');
       ConsoleOutput.error(
@@ -920,8 +950,17 @@ async function compileCommandWithResult(
       output: resolveOutputBase(projectRoot, configuredOutput),
       force: options.force ?? config.output?.overwrite,
     };
+    // A home output root without a resource selection writes root
+    // instruction files into the user's home; say so before it happens.
+    if (resourceKinds.size === 0 && effectiveOptions.output === homedir()) {
+      ConsoleOutput.warning(
+        `Output directory is your home directory; root instruction files (for example CLAUDE.md, AGENTS.md) will be written there. Use --resources to install only generated agent and skill directories.`
+      );
+    }
     const hasFactoryTarget = targets.some((target) => target.name === 'factory');
-    const migrateFactoryHooks = options.migrateFactoryHooks !== false;
+    // Resource-only runs skip legacy hook migration: the migration rewrites
+    // .factory/settings.json as a side effect of a full compile.
+    const migrateFactoryHooks = options.migrateFactoryHooks !== false && resourceKinds.size === 0;
     const legacyMigration =
       hasFactoryTarget && migrateFactoryHooks
         ? await prepareLegacyFactoryMigration(result.outputs, effectiveOptions.output)
@@ -936,7 +975,19 @@ async function compileCommandWithResult(
       logger,
       additionalOutputPaths: legacyMigration ? ['.factory/hooks.json'] : [],
     });
-    const writeResult = await writeOutputs(finalized.outputs, effectiveOptions, config, services);
+    let effectiveOutputs = finalized.outputs;
+    if (resourceKinds.size > 0) {
+      const filtered = filterOutputsByResources(
+        finalized.outputPlan,
+        finalized.outputs,
+        resourceKinds
+      );
+      effectiveOutputs = filtered.outputs;
+      ConsoleOutput.info(
+        `Resource-only compile: kept ${filtered.kept} file(s), omitted ${filtered.dropped}`
+      );
+    }
+    const writeResult = await writeOutputs(effectiveOutputs, effectiveOptions, config, services);
     if (legacyMigration) {
       if (writeResult.skipped.includes(legacyMigration.hooksPath)) {
         throw new Error(
@@ -950,30 +1001,40 @@ async function compileCommandWithResult(
         writeResult.created.includes(legacyMigration.hooksPath)
       );
     }
-    const plannedOutputMap = new Map(finalized.outputs);
-    const cleanupResult = await cleanupManagedOutputs(plannedOutputMap, {
-      outputRoot: effectiveOptions.output,
-      dryRun: options.dryRun,
-    });
-    for (const removedPath of cleanupResult.removed) {
+    if (resourceKinds.size > 0) {
+      // Managed cleanup compares the disk against the full plan; a filtered
+      // plan would classify unselected files as obsolete and delete them.
       if (options.dryRun) {
-        ConsoleOutput.dryRun(`Would remove obsolete generated file: ${removedPath}`);
+        ConsoleOutput.dryRun('Would skip managed cleanup for resource-only compile');
       } else {
-        ConsoleOutput.muted(`Removed obsolete generated file: ${removedPath}`);
+        ConsoleOutput.muted('Skipped managed cleanup for resource-only compile');
       }
-    }
-    for (const removedDirectory of cleanupResult.removedDirectories) {
-      if (options.dryRun) {
-        ConsoleOutput.dryRun(`Would remove empty managed directory: ${removedDirectory}`);
-      } else {
-        ConsoleOutput.muted(`Removed empty managed directory: ${removedDirectory}`);
+    } else {
+      const plannedOutputMap = new Map(finalized.outputs);
+      const cleanupResult = await cleanupManagedOutputs(plannedOutputMap, {
+        outputRoot: effectiveOptions.output,
+        dryRun: options.dryRun,
+      });
+      for (const removedPath of cleanupResult.removed) {
+        if (options.dryRun) {
+          ConsoleOutput.dryRun(`Would remove obsolete generated file: ${removedPath}`);
+        } else {
+          ConsoleOutput.muted(`Removed obsolete generated file: ${removedPath}`);
+        }
       }
-    }
-    for (const rewrittenPath of cleanupResult.rewritten ?? []) {
-      if (options.dryRun) {
-        ConsoleOutput.dryRun(`Would rewrite mixed managed hook file: ${rewrittenPath}`);
-      } else {
-        ConsoleOutput.muted(`Rewrote mixed managed hook file: ${rewrittenPath}`);
+      for (const removedDirectory of cleanupResult.removedDirectories) {
+        if (options.dryRun) {
+          ConsoleOutput.dryRun(`Would remove empty managed directory: ${removedDirectory}`);
+        } else {
+          ConsoleOutput.muted(`Removed empty managed directory: ${removedDirectory}`);
+        }
+      }
+      for (const rewrittenPath of cleanupResult.rewritten ?? []) {
+        if (options.dryRun) {
+          ConsoleOutput.dryRun(`Would rewrite mixed managed hook file: ${rewrittenPath}`);
+        } else {
+          ConsoleOutput.muted(`Rewrote mixed managed hook file: ${rewrittenPath}`);
+        }
       }
     }
     // Report success only after every output and cleanup step completed, so a

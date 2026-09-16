@@ -70,6 +70,12 @@ export interface CompileOptions {
   watch?: boolean;
   /** Output directory */
   output?: string;
+  /**
+   * Compile only selected resource kinds (agents, skills, commands, mcp,
+   * hooks, plugins, main). Omits unselected resources and, without `main`,
+   * all root instruction files.
+   */
+  resources?: string[];
   /** Preview changes without writing files */
   dryRun?: boolean;
   /** Migrate unambiguous legacy Factory settings hooks during compilation */
