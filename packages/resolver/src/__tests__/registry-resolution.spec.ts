@@ -160,6 +160,14 @@ function makeLockedSparseResolver(
   });
 }
 
+/** Write a project.prs into `dir` and return its path. */
+async function writeProject(dir: string, prs: string): Promise<string> {
+  const projectFile = join(dir, 'project.prs');
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(projectFile, prs);
+  return projectFile;
+}
+
 // ---------------------------------------------------------------------------
 // Tests: loader marker functions
 // ---------------------------------------------------------------------------
@@ -1830,25 +1838,18 @@ describe('Resolver — registry marker handling', () => {
     const repoUrl = 'https://github.com/org/repo';
     const cacheDir = join(testCacheDir, 'sparse-cone-registry');
     const { commit } = await seedSparseCache(cacheDir, repoUrl, 'sparse-cone');
-    const writeProject = async (dir: string, prs: string): Promise<string> => {
-      const projectFile = join(dir, 'project.prs');
-      await fs.mkdir(dir, { recursive: true });
-      await fs.writeFile(projectFile, prs);
-      return projectFile;
-    };
 
     // A subpath import outside the cone widens it in place.
     const widenDir = join(testCacheDir, 'sparse-widen');
     mockGit.raw.mockResolvedValueOnce('true');
-    const widenProject = await writeProject(
-      widenDir,
-      '@meta { id: "sparse-widen" syntax: "1.0.0" }\n@use github.com/org/repo/skills/other'
-    );
     const widened = await makeLockedSparseResolver(cacheDir, repoUrl, commit, widenDir).resolve(
-      widenProject
+      await writeProject(
+        widenDir,
+        '@meta { id: "sparse-widen" syntax: "1.0.0" }\n@use github.com/org/repo/skills/other'
+      )
     );
 
-    expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'add', 'skills', 'skills/other']);
+    expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'add', 'skills']);
     expect(mockGit.clone).not.toHaveBeenCalled();
     // The widened cone still lacks the file, so the import errors out.
     expect(widened.errors.some((error) => error.message.includes('skills/other'))).toBe(true);
@@ -1856,13 +1857,36 @@ describe('Resolver — registry marker handling', () => {
     // A root import needs the whole tree, so sparse mode is disabled.
     const rootDir = join(testCacheDir, 'sparse-root');
     mockGit.raw.mockResolvedValueOnce('true');
-    const rootProject = await writeProject(
-      rootDir,
-      '@meta { id: "sparse-root" syntax: "1.0.0" }\n@use github.com/org/repo'
+    await makeLockedSparseResolver(cacheDir, repoUrl, commit, rootDir).resolve(
+      await writeProject(
+        rootDir,
+        '@meta { id: "sparse-root" syntax: "1.0.0" }\n@use github.com/org/repo'
+      )
     );
-    await makeLockedSparseResolver(cacheDir, repoUrl, commit, rootDir).resolve(rootProject);
 
     expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'disable']);
+  });
+
+  it('adds a single-segment directory import to a sparse cached cone', async () => {
+    const repoUrl = 'https://github.com/org/repo';
+    const cacheDir = join(testCacheDir, 'sparse-segment-registry');
+    const { commit, cachePath } = await seedSparseCache(cacheDir, repoUrl, 'sparse-segment');
+    const segmentDir = join(testCacheDir, 'sparse-segment');
+    mockGit.raw.mockResolvedValueOnce('true');
+
+    const resolved = await makeLockedSparseResolver(cacheDir, repoUrl, commit, segmentDir).resolve(
+      await writeProject(
+        segmentDir,
+        '@meta { id: "sparse-segment" syntax: "1.0.0" }\n@use github.com/org/repo/standards'
+      )
+    );
+
+    // `standards` has no parent directory, so the segment itself is the cone.
+    expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'add', 'standards']);
+    expect(mockGit.clone).not.toHaveBeenCalled();
+    // standards.prs sits at the cache root, already materialized by cone mode.
+    expect(resolved.errors).toEqual([]);
+    expect(existsSync(join(cachePath, 'standards.prs'))).toBe(true);
   });
 
   it('reports checkout failure when a cached commit mismatches the lock', async () => {

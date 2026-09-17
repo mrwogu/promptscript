@@ -71,7 +71,7 @@ function isPartialCloneUnsupported(error: Error): boolean {
     message.includes('does not support filtering') ||
     message.includes('invalid filter') ||
     message.includes('filter is not supported') ||
-    /unknown (option|switch)[`' ]*sparse/.test(message)
+    /unknown (option|switch)[`' ]*(sparse|filter)/.test(message)
   );
 }
 

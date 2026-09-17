@@ -393,11 +393,14 @@ async function fetchAndValidateRemoteSkill(
       options.version === 'latest' || /^[0-9a-f]{40}$/i.test(options.version)
         ? undefined
         : options.version;
-    // Partial sparse clone limited to the skill's directory - avoids pulling
-    // the whole repository for one skill in a monorepo (see issue #455).
+    // Partial sparse clone limited to the skill's own directory - avoids
+    // pulling the whole repository for one skill in a monorepo (see issue
+    // #455). Directory sources use the sub-path itself as the cone; explicit
+    // .md sources use the file's parent directory.
     const subPath = extractSubPath(source);
-    const coneIndex = subPath.lastIndexOf('/');
-    const sparseCone = coneIndex > 0 ? subPath.slice(0, coneIndex) : undefined;
+    const isMdSource = subPath.toLowerCase().endsWith('.md');
+    const coneCandidate = isMdSource ? subPath.slice(0, subPath.lastIndexOf('/')) : subPath;
+    const sparseCone = coneCandidate.length > 0 ? coneCandidate : undefined;
     await gitRegistry.cloneAtTag(repoUrl, cloneRef, cloneDir, undefined, sparseCone);
     await gitRegistry.checkoutCommit(cloneDir, options.commit);
 
