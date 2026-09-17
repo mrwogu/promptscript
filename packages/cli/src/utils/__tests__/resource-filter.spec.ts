@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { OutputPlan, OutputPlanFile } from '@promptscript/core';
 import type { FormatterOutput } from '@promptscript/compiler';
-import { filterOutputsByResources, parseResourceSelection } from '../resource-filter.js';
+import {
+  collectResourceKinds,
+  filterOutputsByResources,
+  parseResourceSelection,
+} from '../resource-filter.js';
 
 function createPlanFile(path: string, owner: string, content = 'content'): OutputPlanFile {
   return { path, originalPath: path, content, owner, role: 'primary' };
@@ -47,6 +51,23 @@ describe('parseResourceSelection', () => {
 
   it('accepts main as a selectable kind', () => {
     expect(parseResourceSelection(['main'])).toEqual({ kinds: ['main'], invalid: [] });
+  });
+});
+
+describe('collectResourceKinds', () => {
+  it('splits and trims one comma-separated flag value', () => {
+    expect(collectResourceKinds(' agents , skills ', [])).toEqual(['agents', 'skills']);
+  });
+
+  it('accumulates repeated flag occurrences', () => {
+    expect(collectResourceKinds('skills', collectResourceKinds('agents', []))).toEqual([
+      'agents',
+      'skills',
+    ]);
+  });
+
+  it('drops empty segments from messy values', () => {
+    expect(collectResourceKinds(' agents ,, ', ['main'])).toEqual(['main', 'agents']);
   });
 });
 
@@ -121,12 +142,20 @@ describe('filterOutputsByResources', () => {
       owner: 'claude',
       role: 'resource',
       mode: 0o755,
+      merge: { format: 'json', owner: 'claude', operations: [{ path: 'x', value: 1 }] },
+      managedOutputDirectories: ['.claude/agents'],
       managedOutputFiles: ['.claude/agents/reviewer.md'],
     };
     const result = filterOutputsByResources(createPlan([file]), new Map(), new Set(['agents']));
 
     const reviewer = result.outputs.get('.claude/agents/reviewer.md');
     expect(reviewer?.mode).toBe(0o755);
+    expect(reviewer?.merge).toEqual({
+      format: 'json',
+      owner: 'claude',
+      operations: [{ path: 'x', value: 1 }],
+    });
+    expect(reviewer?.managedOutputDirectories).toEqual(['.claude/agents']);
     expect(reviewer?.managedOutputFiles).toEqual(['.claude/agents/reviewer.md']);
   });
 });
