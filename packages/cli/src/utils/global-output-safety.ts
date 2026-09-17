@@ -1,5 +1,5 @@
-import { homedir } from 'os';
-import { resolve } from 'path';
+import { homedir } from 'node:os';
+import { resolve } from 'node:path';
 
 /**
  * User-level files the compiler must never write.
