@@ -516,15 +516,19 @@ export class GitRegistry implements Registry {
    * cached clone is partial.
    */
   async disableSparseCheckout(targetDir: string): Promise<void> {
-    const git = this.createGit(targetDir);
     try {
-      await git.raw(['sparse-checkout', 'disable']);
+      await this.createGit(targetDir).raw(['sparse-checkout', 'disable']);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      if (isGitTimeoutError(error)) {
-        throw createGitTimeoutError(this.url, this.timeout, error);
-      }
-      throw error;
+      this.throwIfGitTimeout(err);
+      throw err instanceof Error ? err : new Error(String(err));
+    }
+  }
+
+  /** Convert a raw Git error into a GitCloneError when it is a timeout. */
+  private throwIfGitTimeout(err: unknown): void {
+    const error = err instanceof Error ? err : new Error(String(err));
+    if (isGitTimeoutError(error)) {
+      throw createGitTimeoutError(this.url, this.timeout, error);
     }
   }
 
@@ -541,8 +545,8 @@ export class GitRegistry implements Registry {
     const git = this.createGit(targetDir);
     try {
       await git.raw(['sparse-checkout', 'add', ...extra]);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
+    } catch (addError) {
+      const original = addError instanceof Error ? addError : new Error(String(addError));
       // Git < 2.26 has no `add` subcommand; emulate it with list + set.
       try {
         const listed = await git.raw(['sparse-checkout', 'list']);
@@ -552,11 +556,8 @@ export class GitRegistry implements Registry {
           .filter(Boolean);
         await git.raw(['sparse-checkout', 'set', ...new Set([...current, ...extra])]);
       } catch (setErr) {
-        const setError = setErr instanceof Error ? setErr : new Error(String(setErr));
-        if (isGitTimeoutError(setError)) {
-          throw createGitTimeoutError(this.url, this.timeout, setError);
-        }
-        throw error;
+        this.throwIfGitTimeout(setErr);
+        throw original;
       }
     }
   }
