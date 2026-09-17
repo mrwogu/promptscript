@@ -57,12 +57,25 @@ function matchResourcePath(resourcePath: string, normalizedPath: string): number
 }
 
 /**
+ * Normalize a configured base directory for prefix comparison.
+ */
+function normalizeBaseDir(dir: string): string {
+  return dir.replaceAll('\\', '/').replace(/^\/+/, '').replace(/\/+$/, '');
+}
+
+/**
  * Classify a planned output path by the target's catalog resources.
  *
  * Unknown owners and paths no resource covers classify as `main`, so a
- * resource-only run never keeps files the selection did not name.
+ * resource-only run never keeps files the selection did not name. A
+ * configured `skillBaseDir` relocates skill outputs off the catalog default
+ * path, so it classifies unmatched paths under it as `skills`.
  */
-export function classifyOutputResource(target: string, path: string): OutputResourceKind {
+export function classifyOutputResource(
+  target: string,
+  path: string,
+  skillBaseDir?: string
+): OutputResourceKind {
   if (!isKnownTarget(target)) return 'main';
 
   const normalizedPath = path.replaceAll('\\', '/');
@@ -97,5 +110,11 @@ export function classifyOutputResource(target: string, path: string): OutputReso
     }
   }
 
-  return best?.kind ?? 'main';
+  if (best) return best.kind;
+
+  const baseDir = skillBaseDir ? normalizeBaseDir(skillBaseDir) : '';
+  if (baseDir && (normalizedPath === baseDir || normalizedPath.startsWith(`${baseDir}/`))) {
+    return 'skills';
+  }
+  return 'main';
 }
