@@ -807,7 +807,11 @@ async function compileCommandWithResult(
 
     // Resolve the resource selection early so an invalid kind fails before
     // any compilation work. The CLI flag wins over config.output.resources.
-    const resourceSelection = parseResourceSelection(options.resources ?? config.output?.resources);
+    // The CLI registers --resources with an empty-array default, so an empty
+    // list means the flag was absent and the configured value applies.
+    const cliResources =
+      options.resources && options.resources.length > 0 ? options.resources : undefined;
+    const resourceSelection = parseResourceSelection(cliResources ?? config.output?.resources);
     if (resourceSelection.invalid.length > 0) {
       spinner.fail('Invalid resource selection');
       ConsoleOutput.error(
@@ -980,10 +984,19 @@ async function compileCommandWithResult(
     });
     let effectiveOutputs = finalized.outputs;
     if (resourceKinds.size > 0) {
+      // A configured skillBaseDir relocates skill outputs off the catalog
+      // default path, so classification needs the per-target base directory.
+      const skillBaseDirs = new Map<string, string>();
+      for (const target of targets) {
+        if (target.config?.skillBaseDir) {
+          skillBaseDirs.set(target.name, target.config.skillBaseDir);
+        }
+      }
       const filtered = filterOutputsByResources(
         finalized.outputPlan,
         finalized.outputs,
-        resourceKinds
+        resourceKinds,
+        skillBaseDirs
       );
       effectiveOutputs = filtered.outputs;
       ConsoleOutput.info(

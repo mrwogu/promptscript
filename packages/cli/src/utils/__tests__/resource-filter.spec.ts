@@ -134,6 +134,32 @@ describe('filterOutputsByResources', () => {
     expect(reviewer?.content).toBe('from plan');
   });
 
+  it('keeps relocated skill outputs via the configured skillBaseDir', () => {
+    const skillFile = createPlanFile(
+      'plugins/logstrip/.factory/skills/review/SKILL.md',
+      'factory',
+      'skill'
+    );
+    const outputs = new Map<string, FormatterOutput>([
+      [skillFile.path, { path: skillFile.path, content: 'skill' }],
+    ]);
+
+    const withBaseDir = filterOutputsByResources(
+      createPlan([skillFile]),
+      outputs,
+      new Set(['skills']),
+      new Map([['factory', 'plugins/logstrip/.factory/skills']])
+    );
+    expect(withBaseDir.outputs.has(skillFile.path)).toBe(true);
+
+    const withoutBaseDir = filterOutputsByResources(
+      createPlan([skillFile]),
+      outputs,
+      new Set(['skills'])
+    );
+    expect(withoutBaseDir.outputs.has(skillFile.path)).toBe(false);
+  });
+
   it('preserves write settings from the plan on the fallback path', () => {
     const file: OutputPlanFile = {
       path: '.claude/agents/reviewer.md',
