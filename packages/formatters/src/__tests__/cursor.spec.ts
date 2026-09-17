@@ -1820,6 +1820,51 @@ describe('CursorFormatter', () => {
       }
     );
 
+    it('should also report @agents loss on the hooks omission path', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                worker: {
+                  description: 'Worker agent',
+                  content: 'Do work',
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-hook': {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'hello'],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'modern' });
+      const codes = (result.warnings ?? []).map((warning) => warning.code);
+      expect(codes).toContain('PS4003');
+      expect(codes).toContain('PS4002');
+    });
+
     it('should not warn when all hooks are disabled in non-full mode', () => {
       const ast: Program = {
         type: 'Program',

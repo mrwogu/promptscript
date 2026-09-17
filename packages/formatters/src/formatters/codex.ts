@@ -15,6 +15,7 @@ import {
   findMcpServersBlock,
   extractMcpServers,
   serializeMcpServersToJsonString,
+  type McpServerDefinition,
 } from '../mcp-helpers.js';
 import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
 
@@ -91,6 +92,18 @@ function serializeTomlValue(value: unknown, indent = ''): string {
 }
 
 /**
+ * TOML config entries for one resolved MCP server definition.
+ */
+function mcpServerTomlConfig(server: McpServerDefinition): Record<string, unknown> {
+  const config: Record<string, unknown> = {};
+  if (server.command) config['command'] = server.command;
+  if (server.url) config['url'] = server.url;
+  if (server.headers) config['headers'] = server.headers;
+  if (server.env) config['env'] = server.env;
+  return config;
+}
+
+/**
  * Serialize an agent configuration to Codex TOML format.
  *
  * Maps portable PRS fields to Codex agent TOML fields:
@@ -100,8 +113,16 @@ function serializeTomlValue(value: unknown, indent = ''): string {
  * - nicknameCandidates -> nickname_candidates
  * - mcpServers -> mcp_servers
  * - skills -> skills.config
+ *
+ * `mcpServers` accepts an inline object of server configs or the canonical
+ * array of server names; names resolve against the top-level @mcpServers
+ * block through `resolvedMcpServers`.
  */
-function serializeAgentToml(agentName: string, agent: Record<string, Value>): string {
+function serializeAgentToml(
+  agentName: string,
+  agent: Record<string, Value>,
+  resolvedMcpServers?: ReadonlyMap<string, Record<string, unknown>>
+): string {
   const lines: string[] = [];
 
   // Required fields
@@ -152,24 +173,36 @@ function serializeAgentToml(agentName: string, agent: Record<string, Value>): st
     lines.push(`nickname_candidates = [${escaped.join(', ')}]`);
   }
 
-  // mcp_servers from mcpServers
+  // mcp_servers from mcpServers: inline object configs, or canonical name
+  // arrays resolved against the top-level @mcpServers block.
   const mcpServers = agent['mcpServers'];
+  const serverTables: string[] = [];
   if (mcpServers !== null && typeof mcpServers === 'object' && !Array.isArray(mcpServers)) {
     const servers = mcpServers as Record<string, unknown>;
-    const serverEntries = Object.entries(servers);
-    if (serverEntries.length > 0) {
-      lines.push('');
-      lines.push('[mcp_servers]');
-      for (const [serverName, serverConfig] of serverEntries) {
-        if (serverConfig !== null && typeof serverConfig === 'object') {
-          lines.push(`[mcp_servers.${serverName}]`);
-          const config = serverConfig as Record<string, unknown>;
-          for (const [key, val] of Object.entries(config)) {
-            lines.push(`${key} = ${serializeTomlValue(val)}`);
-          }
+    for (const [serverName, serverConfig] of Object.entries(servers)) {
+      if (serverConfig !== null && typeof serverConfig === 'object') {
+        serverTables.push(`[mcp_servers.${serverName}]`);
+        const config = serverConfig as Record<string, unknown>;
+        for (const [key, val] of Object.entries(config)) {
+          serverTables.push(`${key} = ${serializeTomlValue(val)}`);
         }
       }
     }
+  } else if (Array.isArray(mcpServers)) {
+    for (const serverName of mcpServers) {
+      if (typeof serverName !== 'string') continue;
+      const config = resolvedMcpServers?.get(serverName);
+      if (!config) continue;
+      serverTables.push(`[mcp_servers.${serverName}]`);
+      for (const [key, val] of Object.entries(config)) {
+        serverTables.push(`${key} = ${serializeTomlValue(val)}`);
+      }
+    }
+  }
+  if (serverTables.length > 0) {
+    lines.push('');
+    lines.push('[mcp_servers]');
+    lines.push(...serverTables);
   }
 
   // skills.config from skills
@@ -393,18 +426,20 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
       if (!managedDirs.includes('.codex')) managedDirs.push('.codex');
     }
 
-    // Generate .codex/mcp.json from top-level @mcpServers block
+    // Generate .codex/mcp.json from top-level @mcpServers block; agent name
+    // arrays resolve against the same definitions.
     const mcpServersBlock = findMcpServersBlock(ast);
-    if (mcpServersBlock) {
-      const servers = extractMcpServers(mcpServersBlock);
-      if (servers.length > 0) {
-        extraFiles.push({
-          path: '.codex/mcp.json',
-          content: serializeMcpServersToJsonString(servers),
-        });
-        managedDirs.push('.codex');
-      }
+    const definedMcpServers = mcpServersBlock ? extractMcpServers(mcpServersBlock) : [];
+    if (definedMcpServers.length > 0) {
+      extraFiles.push({
+        path: '.codex/mcp.json',
+        content: serializeMcpServersToJsonString(definedMcpServers),
+      });
+      managedDirs.push('.codex');
     }
+    const resolvedMcpServers = new Map(
+      definedMcpServers.map((server) => [server.name, mcpServerTomlConfig(server)])
+    );
 
     // Generate .codex/plugins.json from @plugins block
     const pluginsBlock = findPluginsBlock(ast);
@@ -429,7 +464,7 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
         if (!isValidAgentName(agentName)) continue;
         const agent = agentValue as Record<string, Value>;
         const nativeAgentName = nativeNames.get(agentName) ?? agentName;
-        const toml = serializeAgentToml(nativeAgentName, agent);
+        const toml = serializeAgentToml(nativeAgentName, agent, resolvedMcpServers);
         extraFiles.push({
           path: `.codex/agents/${nativeAgentName}.toml`,
           content: toml,
