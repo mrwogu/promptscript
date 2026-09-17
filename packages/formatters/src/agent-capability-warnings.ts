@@ -167,7 +167,9 @@ export function getAgentCapabilityWarnings(
   const agentsResource = TARGET_CAPABILITIES[target].resources.find(
     (resource) => resource.kind === 'agents'
   );
-  if (!agentsResource || !agentsResource.versions.includes(version)) {
+  // Undefined resource (no native agents) and a version outside the
+  // resource's emission list both report the whole block.
+  if (!agentsResource?.versions.includes(version)) {
     return describeBlockOmission(agentsResource, target, version, agentsBlock.location, options);
   }
 
