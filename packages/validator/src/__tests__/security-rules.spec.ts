@@ -1904,6 +1904,21 @@ describe('obfuscated-content rule (PS012)', () => {
       expect(messages.length).toBeGreaterThan(0);
       expect(messages.some((m) => m.message.includes('Long Base64'))).toBe(true);
     });
+
+    it('should still flag uppercase-only runs without biological context', () => {
+      // Every letter is an amino-acid one-letter code, but nothing marks this
+      // as protein data, so it must not be exempt from the heuristic.
+      const uppercaseRun = 'ZMXNCBVQLSKDJFHGPWOE'.repeat(3);
+      const { ctx, messages } = createRuleContext(
+        createTestProgram({
+          blocks: [createTextBlock('@skills', `Encoded: ${uppercaseRun}`)],
+        })
+      );
+
+      obfuscatedContent.validate(ctx);
+
+      expect(messages.some((m) => m.message.includes('Long Base64'))).toBe(true);
+    });
   });
 
   describe('snippet in heuristic message', () => {

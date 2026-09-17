@@ -325,21 +325,33 @@ const NUCLEOTIDE_CHARS = new Set('ACGTUN');
 const AMINO_ACID_CHARS = new Set('ACDEFGHIKLMNPQRSTVWYBXZJOU');
 
 /**
+ * Biological-sequence context markers. Amino-acid one-letter codes cover
+ * every uppercase letter, so a run of them only reads as protein data
+ * when the surrounding text says so.
+ */
+const BIO_CONTEXT_PATTERN =
+  /\b(?:protein|peptide|amino[-\s]?acid|residue|sequence|nucleotide|genome|transcript|fasta|uniprot)\b/i;
+
+/**
+ * Check whether every character of a match belongs to an alphabet.
+ */
+function isOverAlphabet(match: string, alphabet: Set<string>): boolean {
+  for (const char of match) {
+    if (!alphabet.has(char)) return false;
+  }
+  return match.length > 0;
+}
+
+/**
  * Check if a candidate Base64 match is a biological sequence.
  *
- * Long uppercase runs over the nucleotide or amino-acid alphabet are protein
- * or DNA data, not Base64 in practice. Reference files shipped with
- * scientific skills regularly carry such sequences.
+ * Nucleotide runs are unambiguous and exempt unconditionally. Amino-acid
+ * runs need explicit biological context, otherwise every uppercase-only
+ * Base64-alphabet run would be exempt.
  */
-function isLikelyBioSequence(match: string): boolean {
-  let nucleotide = true;
-  let aminoAcid = true;
-  for (const char of match) {
-    if (!NUCLEOTIDE_CHARS.has(char)) nucleotide = false;
-    if (!AMINO_ACID_CHARS.has(char)) aminoAcid = false;
-    if (!nucleotide && !aminoAcid) return false;
-  }
-  return nucleotide || aminoAcid;
+function isLikelyBioSequence(text: string, match: string): boolean {
+  if (isOverAlphabet(match, NUCLEOTIDE_CHARS)) return true;
+  return isOverAlphabet(match, AMINO_ACID_CHARS) && BIO_CONTEXT_PATTERN.test(text);
 }
 
 /**
@@ -355,7 +367,7 @@ function isLikelyLegitimateBase64(text: string, match: string): boolean {
   if (precedingText.includes('data:text/')) return true;
 
   if (isLikelyTechnicalContent(match)) return true;
-  if (isLikelyBioSequence(match)) return true;
+  if (isLikelyBioSequence(text, match)) return true;
 
   return false;
 }

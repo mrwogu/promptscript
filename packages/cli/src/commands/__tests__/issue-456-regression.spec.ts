@@ -38,7 +38,7 @@ describe('issue #456: PS012 on imported skills with protein data', () => {
         '',
         '# AlphaFold Database',
         '',
-        'Retrieval workflow:',
+        'Protein sequence (residues):',
         'MKTAYIAKQRQISFVKSHFSRQLEKALTIQNAKGGGIFVDSKDKDAGKTKKVGGYGMKTAYIAKQRQISFVKSHFSRQ',
         '',
         'Nucleotide batch ids:',
