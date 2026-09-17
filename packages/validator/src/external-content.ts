@@ -1,4 +1,4 @@
-import { isAbsolute, relative, sep } from 'path';
+import { isAbsolute, relative, sep } from 'node:path';
 import type { SourceLocation } from '@promptscript/core';
 import type { ValidatorConfig } from './types.js';
 
