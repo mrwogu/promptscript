@@ -114,6 +114,10 @@ validation:
   rules:
     empty-block: warning
 
+  # Scan imported (registry cache / vendored) content with
+  # heuristic rules. Off by default.
+  scanExternalContent: false
+
 # ====================
 # Watch Configuration
 # ====================
@@ -868,13 +872,15 @@ validation:
   guardRequiresDepth: 3
   rules:
     empty-block: warning
+  scanExternalContent: false
 ```
 
-| Field                | Type     | Default | Description                               |
-| -------------------- | -------- | ------- | ----------------------------------------- |
-| `requiredGuards`     | string[] | `[]`    | Guards every resolved project must define |
-| `rules`              | object   | `{}`    | Rule severity overrides                   |
-| `guardRequiresDepth` | number   | `3`     | Maximum guard dependency recursion depth  |
+| Field                 | Type     | Default | Description                                                                                                                                                                                                                                                        |
+| --------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `requiredGuards`      | string[] | `[]`    | Guards every resolved project must define                                                                                                                                                                                                                          |
+| `rules`               | object   | `{}`    | Rule severity overrides                                                                                                                                                                                                                                            |
+| `guardRequiresDepth`  | number   | `3`     | Maximum guard dependency recursion depth                                                                                                                                                                                                                           |
+| `scanExternalContent` | boolean  | `false` | Scan imported (registry cache / vendored) content with heuristic rules. Heuristic findings in third-party skills are skipped by default because the importing project cannot fix them; concrete security findings (decoded payloads, suspicious URLs) always scan. |
 
 ### watch
 
