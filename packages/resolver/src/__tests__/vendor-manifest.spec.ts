@@ -811,6 +811,9 @@ fi
         allowPartial: true,
       })
     ).resolves.toBeUndefined();
+    await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+      'partial Git object sources'
+    );
   });
 
   it('accepts sparse checkouts missing tracked files with allowPartial', async () => {
@@ -823,7 +826,6 @@ fi
     await expect(
       verifyGitRepositoryCheckout(repositoryDir, VENDOR_GIT_DIR, commit)
     ).rejects.toThrow('contents do not match');
-
     await expect(
       verifyGitRepositoryCheckout(repositoryDir, VENDOR_GIT_DIR, commit, new Set(), {
         allowPartial: true,

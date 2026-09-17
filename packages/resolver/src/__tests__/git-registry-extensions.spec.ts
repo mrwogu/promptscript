@@ -750,6 +750,26 @@ describe('GitRegistry — extended methods', () => {
   // -------------------------------------------------------------------------
 
   describe('cloneAtTag() — fallbackUrl', () => {
+    /** Assert a two-step clone failure: primary fails, fallback fails too. */
+    async function expectFallbackFailure(
+      primaryError: string,
+      fallbackError: string,
+      message: string
+    ): Promise<void> {
+      mockGit.clone
+        .mockRejectedValueOnce(new Error(primaryError))
+        .mockRejectedValueOnce(new Error(fallbackError));
+
+      await expect(
+        registry.cloneAtTag(
+          'https://github.com/org/repo.git',
+          'v1.0.0',
+          join(testCacheDir, 'fb-failure'),
+          'git@github.com:org/repo.git'
+        )
+      ).rejects.toThrow(message);
+    }
+
     it('retries with fallback URL when a private primary hides access as not found', async () => {
       mockGit.clone
         .mockRejectedValueOnce(new Error('Repository not found'))
@@ -865,37 +885,9 @@ describe('GitRegistry — extended methods', () => {
     });
 
     it('throws GitCloneError when fallback fails with non-auth error', async () => {
-      // Arrange — primary auth error, fallback non-auth error
-      mockGit.clone
-        .mockRejectedValueOnce(new Error('Authentication failed'))
-        .mockRejectedValueOnce(new Error('Network timeout'));
-
-      // Act / Assert
-      await expect(
-        registry.cloneAtTag(
-          'https://github.com/org/repo.git',
-          'v1.0.0',
-          join(testCacheDir, 'fb5'),
-          'git@github.com:org/repo.git'
-        )
-      ).rejects.toThrow(GitCloneError);
-    });
-
-    it('throws GitCloneError when the fallback fails without auth or timeout', async () => {
-      // Arrange — primary auth error, fallback neither auth nor timeout
-      mockGit.clone
-        .mockRejectedValueOnce(new Error('Authentication failed'))
-        .mockRejectedValueOnce(new Error('connection reset by peer'));
-
-      // Act / Assert
-      await expect(
-        registry.cloneAtTag(
-          'https://github.com/org/repo.git',
-          'v1.0.0',
-          join(testCacheDir, 'fb5-plain'),
-          'git@github.com:org/repo.git'
-        )
-      ).rejects.toThrow(
+      await expectFallbackFailure(
+        'Authentication failed',
+        'connection reset by peer',
         'Failed to clone git@github.com:org/repo.git at v1.0.0: connection reset by peer'
       );
     });

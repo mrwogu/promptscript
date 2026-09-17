@@ -488,6 +488,43 @@ export class Resolver {
   }
 
   /**
+   * Clone a registry repository into its cache path. Uses the per-entry
+   * Git registry (so the configured timeout applies) and the fallback URL
+   * from the lockfile or the registries config.
+   */
+  private async cloneRegistryIntoCache(
+    repoUrl: string,
+    cachePath: string,
+    tag: string | undefined,
+    sparseCone: string | undefined,
+    lockEntry: Lockfile['dependencies'][string] | undefined
+  ): Promise<GitRegistry> {
+    const gitRegistry = this.getGitRegistry(repoUrl);
+    const fallbackRepoUrl =
+      lockEntry?.gitUrl ??
+      (this.options.registries ? findFallbackUrl(repoUrl, this.options.registries) : undefined);
+    await gitRegistry.cloneAtTag(repoUrl, tag, cachePath, fallbackRepoUrl, sparseCone);
+    return gitRegistry;
+  }
+
+  /**
+   * Verify that a cached registry checkout matches a locked commit.
+   * Cache clones may be partial (sparse cones), so partial-clone metadata
+   * and missing out-of-cone files are allowed.
+   */
+  private async verifyCacheCommit(cachePath: string, commit: string): Promise<void> {
+    await verifyGitRepositoryCheckout(
+      cachePath,
+      '.git',
+      commit,
+      new Set(['.prs-registry-meta.json']),
+      {
+        allowPartial: true,
+      }
+    );
+  }
+
+  /**
    * Resolve a PromptScript file and all its dependencies.
    *
    * @param entryPath - Path to the entry file
@@ -1703,13 +1740,7 @@ export class Resolver {
         if (lockedCommit) {
           let cacheMatchesLock = false;
           try {
-            await verifyGitRepositoryCheckout(
-              cachePath,
-              '.git',
-              lockedCommit,
-              new Set(['.prs-registry-meta.json']),
-              { allowPartial: true }
-            );
+            await this.verifyCacheCommit(cachePath, lockedCommit);
             cacheMatchesLock = true;
           } catch {
             cacheMatchesLock = false;
@@ -1724,23 +1755,16 @@ export class Resolver {
             this.logger.verbose(
               `Registry cache does not match locked commit for ${repoUrl}. Re-cloning.`
             );
-            const gitRegistry = this.getGitRegistry(repoUrl);
-            const cloneRepoUrl = repoUrl;
-            const fallbackRepoUrl =
-              lockEntry?.gitUrl ??
-              (this.options.registries
-                ? findFallbackUrl(repoUrl, this.options.registries)
-                : undefined);
-            await gitRegistry.cloneAtTag(cloneRepoUrl, tag, cachePath, fallbackRepoUrl, sparseCone);
+            const gitRegistry = await this.cloneRegistryIntoCache(
+              repoUrl,
+              cachePath,
+              tag,
+              sparseCone,
+              lockEntry
+            );
             await gitRegistry.checkoutCommit(cachePath, lockedCommit);
             await this.registryCache.set(repoUrl, effectiveVersion, lockedCommit);
-            await verifyGitRepositoryCheckout(
-              cachePath,
-              '.git',
-              lockedCommit,
-              new Set(['.prs-registry-meta.json']),
-              { allowPartial: true }
-            );
+            await this.verifyCacheCommit(cachePath, lockedCommit);
           }
         }
       } else {
@@ -1753,15 +1777,14 @@ export class Resolver {
         this.logger.verbose(`Registry cache miss, cloning: ${repoUrl}@${tag ?? 'default'}`);
         cachePath = this.registryCache.getCachePath(repoUrl, effectiveVersion);
 
-        // Look up fallback URL from registries config (for HTTPS→SSH auth retry)
-        const gitRegistry = this.getGitRegistry(repoUrl);
-        const cloneRepoUrl = repoUrl;
-        const fallbackRepoUrl =
-          lockEntry?.gitUrl ??
-          (this.options.registries ? findFallbackUrl(repoUrl, this.options.registries) : undefined);
-
         // Clone using GitRegistry (partial sparse clone when a cone is known)
-        await gitRegistry.cloneAtTag(cloneRepoUrl, tag, cachePath, fallbackRepoUrl, sparseCone);
+        const gitRegistry = await this.cloneRegistryIntoCache(
+          repoUrl,
+          cachePath,
+          tag,
+          sparseCone,
+          lockEntry
+        );
 
         // If lockfile pins a specific commit, checkout that exact commit
         if (lockedCommit) {
@@ -1773,13 +1796,7 @@ export class Resolver {
         const commitHash = lockedCommit ?? lockEntry?.commit ?? 'unknown';
         await this.registryCache.set(repoUrl, effectiveVersion, commitHash);
         if (lockedCommit) {
-          await verifyGitRepositoryCheckout(
-            cachePath,
-            '.git',
-            lockedCommit,
-            new Set(['.prs-registry-meta.json']),
-            { allowPartial: true }
-          );
+          await this.verifyCacheCommit(cachePath, lockedCommit);
         }
       }
       dependencies.add(cachePath);
