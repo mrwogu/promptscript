@@ -104,6 +104,62 @@ function mcpServerTomlConfig(server: McpServerDefinition): Record<string, unknow
 }
 
 /**
+ * developer_instructions lines from the portable content field.
+ */
+function agentInstructionsLines(content: Value | undefined): string[] {
+  if (
+    content !== null &&
+    typeof content === 'object' &&
+    (content as { type?: string }).type === 'TextContent'
+  ) {
+    const textContent = (content as { value?: string }).value ?? '';
+    return [`developer_instructions = ${serializeTomlValue(textContent)}`];
+  }
+  if (typeof content === 'string') {
+    return [`developer_instructions = ${serializeTomlValue(content)}`];
+  }
+  return [];
+}
+
+/**
+ * TOML table lines for one MCP server config.
+ */
+function mcpServerTableLines(serverName: string, config: Record<string, unknown>): string[] {
+  return [
+    `[mcp_servers.${serverName}]`,
+    ...Object.entries(config).map(([key, val]) => `${key} = ${serializeTomlValue(val)}`),
+  ];
+}
+
+/**
+ * mcp_servers section lines from the mcpServers field.
+ *
+ * Accepts an inline object of server configs or the canonical array of
+ * server names; names resolve against the top-level @mcpServers block
+ * through `resolvedMcpServers`, and names without a definition are omitted.
+ */
+function agentMcpServerLines(
+  mcpServers: Value | undefined,
+  resolvedMcpServers?: ReadonlyMap<string, Record<string, unknown>>
+): string[] {
+  if (mcpServers !== null && typeof mcpServers === 'object' && !Array.isArray(mcpServers)) {
+    const servers = mcpServers as Record<string, unknown>;
+    return Object.entries(servers)
+      .filter(([, config]) => config !== null && typeof config === 'object')
+      .flatMap(([name, config]) => mcpServerTableLines(name, config as Record<string, unknown>));
+  }
+  if (Array.isArray(mcpServers)) {
+    return mcpServers
+      .filter((serverName): serverName is string => typeof serverName === 'string')
+      .flatMap((serverName) => {
+        const config = resolvedMcpServers?.get(serverName);
+        return config ? mcpServerTableLines(serverName, config) : [];
+      });
+  }
+  return [];
+}
+
+/**
  * Serialize an agent configuration to Codex TOML format.
  *
  * Maps portable PRS fields to Codex agent TOML fields:
@@ -113,10 +169,6 @@ function mcpServerTomlConfig(server: McpServerDefinition): Record<string, unknow
  * - nicknameCandidates -> nickname_candidates
  * - mcpServers -> mcp_servers
  * - skills -> skills.config
- *
- * `mcpServers` accepts an inline object of server configs or the canonical
- * array of server names; names resolve against the top-level @mcpServers
- * block through `resolvedMcpServers`.
  */
 function serializeAgentToml(
   agentName: string,
@@ -134,17 +186,7 @@ function serializeAgentToml(
   }
 
   // developer_instructions from content (per architecture decision: content is sole source)
-  const content = agent['content'];
-  if (
-    content !== null &&
-    typeof content === 'object' &&
-    (content as { type?: string }).type === 'TextContent'
-  ) {
-    const textContent = (content as { value?: string }).value ?? '';
-    lines.push(`developer_instructions = ${serializeTomlValue(textContent)}`);
-  } else if (typeof content === 'string') {
-    lines.push(`developer_instructions = ${serializeTomlValue(content)}`);
-  }
+  lines.push(...agentInstructionsLines(agent['content']));
 
   // model from agent config (optional)
   const model = agent['model'];
@@ -173,36 +215,11 @@ function serializeAgentToml(
     lines.push(`nickname_candidates = [${escaped.join(', ')}]`);
   }
 
-  // mcp_servers from mcpServers: inline object configs, or canonical name
-  // arrays resolved against the top-level @mcpServers block.
-  const mcpServers = agent['mcpServers'];
-  const serverTables: string[] = [];
-  if (mcpServers !== null && typeof mcpServers === 'object' && !Array.isArray(mcpServers)) {
-    const servers = mcpServers as Record<string, unknown>;
-    for (const [serverName, serverConfig] of Object.entries(servers)) {
-      if (serverConfig !== null && typeof serverConfig === 'object') {
-        serverTables.push(`[mcp_servers.${serverName}]`);
-        const config = serverConfig as Record<string, unknown>;
-        for (const [key, val] of Object.entries(config)) {
-          serverTables.push(`${key} = ${serializeTomlValue(val)}`);
-        }
-      }
-    }
-  } else if (Array.isArray(mcpServers)) {
-    for (const serverName of mcpServers) {
-      if (typeof serverName !== 'string') continue;
-      const config = resolvedMcpServers?.get(serverName);
-      if (!config) continue;
-      serverTables.push(`[mcp_servers.${serverName}]`);
-      for (const [key, val] of Object.entries(config)) {
-        serverTables.push(`${key} = ${serializeTomlValue(val)}`);
-      }
-    }
-  }
+  // mcp_servers from mcpServers: inline configs or names resolved against
+  // the top-level @mcpServers block.
+  const serverTables = agentMcpServerLines(agent['mcpServers'], resolvedMcpServers);
   if (serverTables.length > 0) {
-    lines.push('');
-    lines.push('[mcp_servers]');
-    lines.push(...serverTables);
+    lines.push('', '[mcp_servers]', ...serverTables);
   }
 
   // skills.config from skills
@@ -211,9 +228,7 @@ function serializeAgentToml(
     const skillNames = skills
       .filter((s): s is string => typeof s === 'string')
       .map((s) => `"${escapeTomlString(s)}"`);
-    lines.push('');
-    lines.push('[skills]');
-    lines.push(`config = [${skillNames.join(', ')}]`);
+    lines.push('', '[skills]', `config = [${skillNames.join(', ')}]`);
   }
 
   return lines.join('\n') + '\n';

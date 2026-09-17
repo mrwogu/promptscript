@@ -7,7 +7,8 @@
  */
 
 import { TARGET_CAPABILITIES } from './target-catalog.js';
-import { isKnownTarget } from './types/config.js';
+import { type TargetResourceCapability } from './target-capabilities.js';
+import { isKnownTarget, type KnownTarget } from './types/config.js';
 
 /**
  * Resource kinds a compile run can select.
@@ -60,7 +61,54 @@ function matchResourcePath(resourcePath: string, normalizedPath: string): number
  * Normalize a configured base directory for prefix comparison.
  */
 function normalizeBaseDir(dir: string): string {
-  return dir.replaceAll('\\', '/').replace(/^\/+/, '').replace(/\/+$/, '');
+  return dir.replaceAll('\\', '/').split('/').filter(Boolean).join('/');
+}
+
+/**
+ * Specificity of a hooks-config sibling file in the same '<dir>/hooks'
+ * directory (for example GitHub's vscode hook config next to
+ * promptscript.json), or 0 when the path is not a sibling.
+ */
+function hooksSiblingSpecificity(
+  resource: TargetResourceCapability,
+  normalizedPath: string
+): number {
+  const directory = resource.path.slice(0, resource.path.lastIndexOf('/'));
+  if (!directory.endsWith('/hooks')) return 0;
+  if (!normalizedPath.startsWith(`${directory}/`)) return 0;
+  if (normalizedPath.slice(directory.length + 1).includes('/')) return 0;
+  return directory.length + 2;
+}
+
+/**
+ * Most specific catalog resource kind covering the path, or undefined.
+ */
+function matchCatalogResource(
+  target: KnownTarget,
+  normalizedPath: string
+): OutputResourceKind | undefined {
+  let best: ResourceMatch | undefined;
+
+  for (const resource of TARGET_CAPABILITIES[target].resources) {
+    let next: ResourceMatch | undefined;
+    if (resource.kind === 'main') {
+      if (resource.path === normalizedPath) {
+        next = { kind: 'main', specificity: resource.path.length + 2 };
+      }
+    } else {
+      const specificity =
+        matchResourcePath(resource.path, normalizedPath) ||
+        (resource.kind === 'hooks' ? hooksSiblingSpecificity(resource, normalizedPath) : 0);
+      if (specificity > 0) {
+        next = { kind: resource.kind, specificity };
+      }
+    }
+    if (next) {
+      best = keepBestMatch(best, next);
+    }
+  }
+
+  return best?.kind;
 }
 
 /**
@@ -76,41 +124,11 @@ export function classifyOutputResource(
   path: string,
   skillBaseDir?: string
 ): OutputResourceKind {
-  if (!isKnownTarget(target)) return 'main';
-
   const normalizedPath = path.replaceAll('\\', '/');
-  let best: ResourceMatch | undefined;
-
-  for (const resource of TARGET_CAPABILITIES[target].resources) {
-    if (resource.kind === 'main') {
-      if (resource.path === normalizedPath) {
-        best = keepBestMatch(best, { kind: 'main', specificity: resource.path.length + 2 });
-      }
-      continue;
-    }
-
-    const specificity = matchResourcePath(resource.path, normalizedPath);
-    if (specificity > 0) {
-      best = keepBestMatch(best, { kind: resource.kind, specificity });
-      continue;
-    }
-
-    // Hook configs that live in a dedicated '<dir>/hooks' directory manage
-    // sibling files in that directory (for example GitHub's vscode hook
-    // config next to promptscript.json).
-    if (resource.kind === 'hooks') {
-      const directory = resource.path.slice(0, resource.path.lastIndexOf('/'));
-      if (
-        directory.endsWith('/hooks') &&
-        normalizedPath.startsWith(`${directory}/`) &&
-        !normalizedPath.slice(directory.length + 1).includes('/')
-      ) {
-        best = keepBestMatch(best, { kind: 'hooks', specificity: directory.length + 2 });
-      }
-    }
-  }
-
-  if (best) return best.kind;
+  const catalogKind = isKnownTarget(target)
+    ? matchCatalogResource(target, normalizedPath)
+    : undefined;
+  if (catalogKind) return catalogKind;
 
   const baseDir = skillBaseDir ? normalizeBaseDir(skillBaseDir) : '';
   if (baseDir && (normalizedPath === baseDir || normalizedPath.startsWith(`${baseDir}/`))) {
