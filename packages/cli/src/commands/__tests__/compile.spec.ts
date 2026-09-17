@@ -641,7 +641,10 @@ describe('compile command - createCliLogger warn path', () => {
     expect(writtenPaths.some((path) => path.endsWith('.claude/agents/reviewer.md'))).toBe(false);
   });
 
-  it('honors output.resources from the config file', async () => {
+  it.each([
+    ['without the flag', undefined],
+    ['with the empty CLI default', []],
+  ])('honors output.resources from the config file %s', async (_label, resources) => {
     mockLoadConfig.mockResolvedValue({
       targets: ['claude'],
       registry: { path: './registry' },
@@ -665,7 +668,7 @@ describe('compile command - createCliLogger warn path', () => {
       errors: [],
     });
 
-    await compileCommand({ cwd: '/mock/project' }, mockServices);
+    await compileCommand({ cwd: '/mock/project', resources }, mockServices);
 
     const writtenPaths = mockWriteFile.mock.calls.map(([path]) => String(path));
     expect(writtenPaths.some((path) => path.endsWith('CLAUDE.md'))).toBe(false);

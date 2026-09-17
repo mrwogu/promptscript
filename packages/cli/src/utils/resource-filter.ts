@@ -53,17 +53,22 @@ export interface ResourceFilteredOutputs {
  * Keep only plan files whose catalog resource kind is selected.
  *
  * Unmatched paths classify as `main`, so a selection without `main` also
- * drops root instruction files, rule files, and workflows.
+ * drops root instruction files, rule files, and workflows. A configured
+ * `skillBaseDir` (per target owner) relocates skill outputs off the catalog
+ * default path and classifies them as `skills`.
  */
 export function filterOutputsByResources(
   plan: OutputPlan,
   outputs: Map<string, FormatterOutput>,
-  kinds: ReadonlySet<OutputResourceKind>
+  kinds: ReadonlySet<OutputResourceKind>,
+  skillBaseDirs?: ReadonlyMap<string, string>
 ): ResourceFilteredOutputs {
   const filtered = new Map<string, FormatterOutput>();
 
   for (const file of plan.files) {
-    if (!kinds.has(classifyOutputResource(file.owner, file.path))) continue;
+    if (!kinds.has(classifyOutputResource(file.owner, file.path, skillBaseDirs?.get(file.owner)))) {
+      continue;
+    }
     const existing = outputs.get(file.path);
     filtered.set(
       file.path,
