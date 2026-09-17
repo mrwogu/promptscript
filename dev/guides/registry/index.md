@@ -163,6 +163,35 @@ registry:
 prs pull --refresh  # Force re-clone the registry
 ```
 
+### Large Repositories and Timeouts
+
+Every Git operation (clone, fetch, ls-remote) has a 60-second timeout by default. Two knobs raise it when a registry lives in a big repository:
+
+```yaml
+# Per registry entry (registries aliases)
+registries:
+  '@internal':
+    url: https://gitlab.internal.com/company/monorepo.git
+    root: skills
+    timeout: 600000 # 10 minutes, in milliseconds
+
+# Or for the single git registry
+registry:
+  git:
+    url: https://gitlab.internal.com/company/monorepo.git
+    timeout: 600000
+```
+
+Globally, without touching config:
+
+```bash
+export PROMPTSCRIPT_GIT_TIMEOUT=600000
+```
+
+Timeout errors name both knobs in their message.
+
+Registry imports also use partial sparse clones (`--depth 1 --filter=blob:none --sparse` plus `sparse-checkout`), which materialize a reduced sparse subset around the imported directory. A 73 MB monorepo where a full clone times out usually resolves in about a second. If the server does not support partial clones, PromptScript falls back to a plain shallow clone automatically.
+
 ## Version Pinning
 
 Pin to a specific version for stability:

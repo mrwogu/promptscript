@@ -6639,15 +6639,16 @@ See the [Configuration Reference](https://getpromptscript.dev/dev/reference/conf
 
 ## Environment Variables
 
-| Variable                        | Description                           |
-| ------------------------------- | ------------------------------------- |
-| `PROMPTSCRIPT_CONFIG`           | Path to config file                   |
-| `PROMPTSCRIPT_REGISTRY`         | Registry path or URL                  |
-| `PROMPTSCRIPT_REGISTRY_GIT_URL` | Git registry URL (HTTPS or SSH)       |
-| `PROMPTSCRIPT_REGISTRY_GIT_REF` | Git ref (branch, tag, or commit)      |
-| `PROMPTSCRIPT_VERBOSE`          | Enable verbose output (`1` or `true`) |
-| `PROMPTSCRIPT_DEBUG`            | Enable debug output (`1` or `true`)   |
-| `NO_COLOR`                      | Disable colored output                |
+| Variable                        | Description                                 |
+| ------------------------------- | ------------------------------------------- |
+| `PROMPTSCRIPT_CONFIG`           | Path to config file                         |
+| `PROMPTSCRIPT_REGISTRY`         | Registry path or URL                        |
+| `PROMPTSCRIPT_REGISTRY_GIT_URL` | Git registry URL (HTTPS or SSH)             |
+| `PROMPTSCRIPT_REGISTRY_GIT_REF` | Git ref (branch, tag, or commit)            |
+| `PROMPTSCRIPT_GIT_TIMEOUT`      | Git operation timeout in ms (default 60000) |
+| `PROMPTSCRIPT_VERBOSE`          | Enable verbose output (`1` or `true`)       |
+| `PROMPTSCRIPT_DEBUG`            | Enable debug output (`1` or `true`)         |
+| `NO_COLOR`                      | Disable colored output                      |
 
 ## Exit Codes
 
@@ -7264,6 +7265,7 @@ registry:
 | `git.fallbackUrl`      | string  | -         | Fallback URL (tried on auth failure) |
 | `git.ref`              | string  | `main`    | Branch, tag, or commit               |
 | `git.path`             | string  | -         | Subdirectory within the repo         |
+| `git.timeout`          | number  | `60000`   | Git operation timeout (ms)           |
 | `git.auth.type`        | string  | -         | Auth type: `token` or `ssh`          |
 | `git.auth.token`       | string  | -         | Personal access token (direct)       |
 | `git.auth.tokenEnvVar` | string  | -         | Env var containing the token         |
@@ -7332,6 +7334,7 @@ registries:
 | `url`           | string | Bare Git host path (extended form)             |
 | `fallbackUrl`   | string | Fallback Git URL (tried on auth failure)       |
 | `root`          | string | Base path within the repository                |
+| `timeout`       | number | Git operation timeout in ms (default 60000)    |
 
 #### Three-Level Merge
 
@@ -11989,6 +11992,35 @@ registry:
 ```bash
 prs pull --refresh  # Force re-clone the registry
 ```
+
+### Large Repositories and Timeouts
+
+Every Git operation (clone, fetch, ls-remote) has a 60-second timeout by default. Two knobs raise it when a registry lives in a big repository:
+
+```yaml
+# Per registry entry (registries aliases)
+registries:
+  '@internal':
+    url: https://gitlab.internal.com/company/monorepo.git
+    root: skills
+    timeout: 600000 # 10 minutes, in milliseconds
+
+# Or for the single git registry
+registry:
+  git:
+    url: https://gitlab.internal.com/company/monorepo.git
+    timeout: 600000
+```
+
+Globally, without touching config:
+
+```bash
+export PROMPTSCRIPT_GIT_TIMEOUT=600000
+```
+
+Timeout errors name both knobs in their message.
+
+Registry imports also use partial sparse clones (`--depth 1 --filter=blob:none --sparse` plus `sparse-checkout`), which materialize a reduced sparse subset around the imported directory. A 73 MB monorepo where a full clone times out usually resolves in about a second. If the server does not support partial clones, PromptScript falls back to a plain shallow clone automatically.
 
 ## Version Pinning
 
