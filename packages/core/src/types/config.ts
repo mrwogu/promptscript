@@ -2,6 +2,7 @@ import type { ConventionName, OutputConvention } from './convention.js';
 import type { PolicyDefinition } from './policy.js';
 import type { PrettierMarkdownOptions } from './prettier.js';
 import type { RegistriesConfig } from './registries.js';
+import type { OutputResourceKind } from '../output-resources.js';
 
 /**
  * Formatting configuration for output files.
@@ -336,7 +337,7 @@ export interface PromptScriptConfig {
      * hooks, plugins, main). A global install can emit agent and skill
      * directories without unrelated root instruction files.
      */
-    resources?: string[];
+    resources?: OutputResourceKind[];
   };
 
   /**
