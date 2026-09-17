@@ -221,10 +221,10 @@ export PROMPTSCRIPT_GIT_TIMEOUT=600000
 Timeout errors name both knobs in their message.
 
 Registry imports also use partial sparse clones (`--depth 1 --filter=blob:none
---sparse` plus `sparse-checkout`), so only the blobs of the imported directory
-are fetched. A 73 MB monorepo where a full clone times out usually resolves in
-about a second. If the server does not support partial clones, PromptScript
-falls back to a plain shallow clone automatically.
+--sparse` plus `sparse-checkout`), which materialize a reduced sparse subset
+around the imported directory. A 73 MB monorepo where a full clone times out
+usually resolves in about a second. If the server does not support partial
+clones, PromptScript falls back to a plain shallow clone automatically.
 
 ## Version Pinning
 

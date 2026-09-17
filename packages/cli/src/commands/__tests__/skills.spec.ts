@@ -3303,7 +3303,7 @@ describe('skillsAddCommand frontmatter validation', () => {
       'v1.2.3',
       '/tmp/prs-skill-validate-xyz',
       undefined,
-      'skills'
+      'skills/foo'
     );
     expect(mockCheckoutCommit).toHaveBeenCalledWith(
       '/tmp/prs-skill-validate-xyz',
@@ -3431,7 +3431,7 @@ describe('skillsAddCommand frontmatter validation', () => {
       undefined,
       '/tmp/prs-skill-validate-xyz',
       undefined,
-      'skills'
+      'skills/foo'
     );
     expect(mockCheckoutCommit).toHaveBeenCalledWith('/tmp/prs-skill-validate-xyz', commit);
   });

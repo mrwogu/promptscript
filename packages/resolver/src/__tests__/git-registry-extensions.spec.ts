@@ -274,6 +274,26 @@ describe('GitRegistry — extended methods', () => {
       );
     });
 
+    it('falls back to a plain clone when the local Git lacks --filter', async () => {
+      const targetDir = join(testCacheDir, 'unknown-filter-target');
+      mockGit.clone
+        .mockRejectedValueOnce(new Error("error: unknown option `filter=blob:none'"))
+        .mockResolvedValueOnce(undefined);
+
+      await registry.cloneAtTag(
+        'https://github.com/org/repo.git',
+        undefined,
+        targetDir,
+        undefined,
+        'skills'
+      );
+
+      expect(mockGit.clone).toHaveBeenCalledTimes(2);
+      expect(mockGit.clone).toHaveBeenLastCalledWith('https://github.com/org/repo.git', targetDir, [
+        '--depth=1',
+      ]);
+    });
+
     it('propagates unrelated clone errors from a sparse clone', async () => {
       const targetDir = join(testCacheDir, 'sparse-error-target');
       mockGit.clone.mockRejectedValueOnce(new Error('fatal: Authentication failed'));

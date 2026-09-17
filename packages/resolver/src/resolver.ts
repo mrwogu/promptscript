@@ -1876,8 +1876,12 @@ export class Resolver {
             const paths = new Set<string>();
             if (sparseCone) {
               paths.add(sparseCone);
+            } else if (!isMdPath && !subPath.endsWith('.prs')) {
+              // Cone mode accepts directories only. A single-segment
+              // directory import is a directory itself; root-level files are
+              // always materialized by cone mode and need no extra path.
+              paths.add(subPath);
             }
-            paths.add(subPath);
             await gitRegistry.addSparsePaths(cachePath, [...paths]);
           }
         }

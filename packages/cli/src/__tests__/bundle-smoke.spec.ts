@@ -26,8 +26,9 @@ describe('bundle smoke tests', () => {
     return existsSync(join(distRoot, 'node_modules'));
   };
 
-  // The dependency install below allows itself 60s (execFileSync timeout),
-  // so the hook must not trip vitest's 10s default hookTimeout first.
+  // The dependency install below allows itself 60s (execFileSync timeout).
+  // The hook timeout sits above it so an install that nearly hits its own
+  // limit still leaves time for the hook to finish.
   beforeAll(() => {
     if (!isBundleBuilt()) {
       return;
@@ -41,7 +42,7 @@ describe('bundle smoke tests', () => {
         timeout: 60000,
       });
     }
-  }, 60_000);
+  }, 120_000);
 
   describe('version detection', () => {
     it('should report correct version from bundled package', () => {
