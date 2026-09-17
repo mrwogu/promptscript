@@ -1212,10 +1212,11 @@ Review checklist:
 
 **Claude Output** (`.claude/agents/code-reviewer.md`, version: full)
 
-Supports `tools`, `disallowedTools`, `model`, `permissionMode`, `skills`,
-`maxTurns`, `memory`, `mcpServers`, `background`, and `isolation`
-(`reasoningEffort`, `specModel`, `sandboxMode`, `nicknameCandidates`, and
-`handoffs` are reported with `PS4003` and omitted):
+Supports `description`, `content`, `tools`, `disallowedTools`, `model`,
+`permissionMode`, `skills`, `maxTurns`, `memory`, `mcpServers`, `background`,
+and `isolation` (`reasoningEffort`, `specModel`, `specReasoningEffort`,
+`sandboxMode`, `nicknameCandidates`, and `handoffs` are reported with
+`PS4003` and omitted):
 
 <!-- output:claude for="agents-example" file="agents/code-reviewer.md" -->
 
