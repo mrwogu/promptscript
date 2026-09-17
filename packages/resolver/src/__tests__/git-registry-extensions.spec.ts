@@ -251,11 +251,12 @@ describe('GitRegistry — extended methods', () => {
       );
     });
 
-    it('falls back to a plain clone when the server rejects partial clones', async () => {
+    it.each([
+      ['the server rejects partial clones', 'fatal: filtering not recognized by server'],
+      ['the local Git lacks --filter', "error: unknown option `filter=blob:none'"],
+    ])('falls back to a plain clone when %s', async (_reason, failure) => {
       const targetDir = join(testCacheDir, 'unsupported-filter-target');
-      mockGit.clone
-        .mockRejectedValueOnce(new Error('fatal: filtering not recognized by server'))
-        .mockResolvedValueOnce(undefined);
+      mockGit.clone.mockRejectedValueOnce(new Error(failure)).mockResolvedValueOnce(undefined);
 
       await registry.cloneAtTag(
         'https://github.com/org/repo.git',
@@ -272,26 +273,6 @@ describe('GitRegistry — extended methods', () => {
       expect(mockGit.raw).not.toHaveBeenCalledWith(
         expect.arrayContaining(['sparse-checkout', 'set'])
       );
-    });
-
-    it('falls back to a plain clone when the local Git lacks --filter', async () => {
-      const targetDir = join(testCacheDir, 'unknown-filter-target');
-      mockGit.clone
-        .mockRejectedValueOnce(new Error("error: unknown option `filter=blob:none'"))
-        .mockResolvedValueOnce(undefined);
-
-      await registry.cloneAtTag(
-        'https://github.com/org/repo.git',
-        undefined,
-        targetDir,
-        undefined,
-        'skills'
-      );
-
-      expect(mockGit.clone).toHaveBeenCalledTimes(2);
-      expect(mockGit.clone).toHaveBeenLastCalledWith('https://github.com/org/repo.git', targetDir, [
-        '--depth=1',
-      ]);
     });
 
     it('propagates unrelated clone errors from a sparse clone', async () => {
