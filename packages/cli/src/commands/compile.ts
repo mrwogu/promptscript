@@ -1,7 +1,7 @@
-import { resolve, isAbsolute, relative } from 'path';
-import { homedir } from 'os';
-import { readFile } from 'fs/promises';
-import { existsSync, lstatSync } from 'fs';
+import { resolve, isAbsolute, relative } from 'node:path';
+import { homedir } from 'node:os';
+import { readFile } from 'node:fs/promises';
+import { existsSync, lstatSync } from 'node:fs';
 import chokidar from 'chokidar';
 import { minimatch } from 'minimatch';
 import type { CompileOptions } from '../types.js';
@@ -391,8 +391,11 @@ async function writeOutputs(
     .map((output) => describeProtectedUserFile(resolve(outputRoot, output.path)))
     .filter((hit): hit is NonNullable<typeof hit> => hit !== undefined);
   if (protectedHits.length > 0) {
+    const protectedList = protectedHits
+      .map((hit) => `  - ${hit.displayPath} (${hit.reason})`)
+      .join('\n');
     throw new PSError(
-      `Refusing to write protected personal file(s):\n${protectedHits.map((hit) => `  - ${hit.displayPath} (${hit.reason})`).join('\n')}\n\nPersonal override files are never compiler output. Use --resources to install generated agent and skill directories only.`,
+      `Refusing to write protected personal file(s):\n${protectedList}\n\nPersonal override files are never compiler output. Use --resources to install generated agent and skill directories only.`,
       ErrorCode.INVALID_PATH
     );
   }

@@ -24,8 +24,8 @@ export function parseResourceSelection(values: readonly string[] | undefined): {
     if (!item) continue;
     if (isOutputResourceKind(item)) {
       if (!kinds.includes(item)) kinds.push(item);
-    } else {
-      if (!invalid.includes(item)) invalid.push(item);
+    } else if (!invalid.includes(item)) {
+      invalid.push(item);
     }
   }
   return { kinds, invalid };
