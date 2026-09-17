@@ -111,6 +111,28 @@ describe('classifyOutputResource', () => {
     expectKinds('windsurf', '.windsurf/rules/project.md => main');
   });
 
+  it('treats only direct children of a hooks directory as hooks', () => {
+    expectKinds(
+      'github',
+      `
+        .github/hooks/promptscript.json => hooks
+        .github/hooks/promptscript-vscode.json => hooks
+        .github/hooks/scripts/tool.sh => main
+      `
+    );
+  });
+
+  it('normalizes windows separators before matching', () => {
+    expectKinds(
+      'claude',
+      `
+        .claude\\agents\\reviewer.md => agents
+        .claude\\skills\\audit\\SKILL.md => skills
+        CLAUDE.md => main
+      `
+    );
+  });
+
   it('exposes a stable selectable kind list', () => {
     expect(OUTPUT_RESOURCE_KINDS).toEqual([
       'agents',
