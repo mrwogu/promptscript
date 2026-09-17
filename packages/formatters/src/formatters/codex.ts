@@ -122,11 +122,24 @@ function agentInstructionsLines(content: Value | undefined): string[] {
 }
 
 /**
+ * TOML table header for one MCP server name.
+ *
+ * Bare TOML keys allow alphanumerics, hyphens, and underscores; any other
+ * character (a dot in "team.fs", a space) must be quoted or the header
+ * turns into nested table segments instead of the literal key.
+ */
+function mcpServerTomlTableHeader(serverName: string): string {
+  return /^[A-Za-z0-9_-]+$/.test(serverName)
+    ? `[mcp_servers.${serverName}]`
+    : `[mcp_servers."${escapeTomlString(serverName)}"]`;
+}
+
+/**
  * TOML table lines for one MCP server config.
  */
 function mcpServerTableLines(serverName: string, config: Record<string, unknown>): string[] {
   return [
-    `[mcp_servers.${serverName}]`,
+    mcpServerTomlTableHeader(serverName),
     ...Object.entries(config).map(([key, val]) => `${key} = ${serializeTomlValue(val)}`),
   ];
 }

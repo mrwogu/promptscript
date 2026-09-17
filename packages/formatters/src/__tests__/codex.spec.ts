@@ -570,6 +570,52 @@ describe('CodexFormatter', () => {
       expect(agentToml!.content).not.toContain('mcp_servers.ghost');
     });
 
+    it('should quote mcp server names with dots in TOML table headers', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'mcpServers',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'team.fs': { command: ['node', 'fs.mjs'] },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                worker: {
+                  description: 'Worker agent',
+                  content: 'Do work',
+                  mcpServers: ['team.fs'],
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      const agentToml = (result.additionalFiles ?? []).find(
+        (f) => f.path === '.codex/agents/worker.toml'
+      );
+      expect(agentToml).toBeDefined();
+      // Unquoted, "team.fs" would parse as nested tables mcp_servers.team.fs.
+      expect(agentToml!.content).toContain('[mcp_servers."team.fs"]');
+    });
+
     it('should handle agent with skills array', () => {
       const program: Program = {
         type: 'Program',
