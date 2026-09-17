@@ -342,6 +342,42 @@ describe('GitRegistry — extended methods', () => {
       await registry.disableSparseCheckout(testCacheDir);
       expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'disable']);
     });
+
+    it('wraps disable-sparse timeouts in GitCloneError', async () => {
+      mockGit.raw.mockRejectedValueOnce(new Error('git raw timed out'));
+
+      await expect(registry.disableSparseCheckout(testCacheDir)).rejects.toThrow(
+        'Git operation timed out after 60000ms'
+      );
+    });
+
+    it('rethrows non-timeout disable-sparse errors as-is', async () => {
+      mockGit.raw.mockRejectedValueOnce(new Error('not a git repository'));
+
+      await expect(registry.disableSparseCheckout(testCacheDir)).rejects.toThrow(
+        'not a git repository'
+      );
+    });
+
+    it('rethrows the original error when the add fallback also fails', async () => {
+      mockGit.raw
+        .mockRejectedValueOnce(new Error("unknown subcommand: `add'"))
+        .mockRejectedValueOnce(new Error('not a sparse checkout'));
+
+      await expect(registry.addSparsePaths(testCacheDir, ['skills'])).rejects.toThrow(
+        "unknown subcommand: `add'"
+      );
+    });
+
+    it('wraps fallback-set timeouts in GitCloneError', async () => {
+      mockGit.raw
+        .mockRejectedValueOnce(new Error("unknown subcommand: `add'"))
+        .mockRejectedValueOnce(new Error('git raw timed out'));
+
+      await expect(registry.addSparsePaths(testCacheDir, ['skills'])).rejects.toThrow(
+        'Git operation timed out after 60000ms'
+      );
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -843,6 +879,25 @@ describe('GitRegistry — extended methods', () => {
           'git@github.com:org/repo.git'
         )
       ).rejects.toThrow(GitCloneError);
+    });
+
+    it('throws GitCloneError when the fallback fails without auth or timeout', async () => {
+      // Arrange — primary auth error, fallback neither auth nor timeout
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockRejectedValueOnce(new Error('connection reset by peer'));
+
+      // Act / Assert
+      await expect(
+        registry.cloneAtTag(
+          'https://github.com/org/repo.git',
+          'v1.0.0',
+          join(testCacheDir, 'fb5-plain'),
+          'git@github.com:org/repo.git'
+        )
+      ).rejects.toThrow(
+        'Failed to clone git@github.com:org/repo.git at v1.0.0: connection reset by peer'
+      );
     });
 
     it('reports timeout when the fallback clone stalls', async () => {
