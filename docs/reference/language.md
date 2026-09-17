@@ -1144,26 +1144,26 @@ Define specialized AI agents for target platforms with native agent support:
 </a>
 <!-- playground-link-end -->
 
-| Property              | Type     | Required | Description                                                                    |
-| --------------------- | -------- | -------- | ------------------------------------------------------------------------------ |
-| `description`         | string   | Yes      | When the agent should be invoked                                               |
-| `content`             | string   | No       | Additional system prompt for the subagent                                      |
-| `tools`               | string[] | No       | Allowed tools (inherits all if omitted)                                        |
-| `model`               | string   | No       | AI model to use (platform-specific values)                                     |
-| `reasoningEffort`     | string   | No       | Target-native reasoning level                                                  |
-| `specModel`           | string   | No       | Model for Specification/planning mode (GitHub, Factory only)                   |
-| `specReasoningEffort` | string   | No       | Reasoning effort for spec mode: `low`, `medium`, `high` (Factory only)         |
-| `disallowedTools`     | string[] | No       | Tools to deny (Claude only)                                                    |
-| `permissionMode`      | string   | No       | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` (Claude only) |
-| `skills`              | string[] | No       | Named skills available to the agent                                            |
-| `mcpServers`          | string[] | No       | Named top-level MCP servers available to the agent                             |
-| `sandboxMode`         | string   | No       | Target-native sandbox policy                                                   |
-| `nicknameCandidates`  | string[] | No       | Candidate display names for spawned agents                                     |
-| `handoffs`            | array    | No       | Delegation entries (`label`, `agent`, `prompt`, `send`; GitHub only)           |
-| `maxTurns`            | number   | No       | Maximum agentic turns before stopping (Claude only)                            |
-| `memory`              | string   | No       | Memory scope: `user`, `project`, `local` (Claude only)                         |
-| `background`          | boolean  | No       | Run the agent as a background process (Claude only)                            |
-| `isolation`           | string   | No       | Isolation mode: `worktree` (Claude only)                                       |
+| Property              | Type     | Required | Description                                                                          |
+| --------------------- | -------- | -------- | ------------------------------------------------------------------------------------ |
+| `description`         | string   | Yes      | When the agent should be invoked                                                     |
+| `content`             | string   | No       | Additional system prompt for the subagent                                            |
+| `tools`               | string[] | No       | Allowed tools (inherits all if omitted)                                              |
+| `model`               | string   | No       | AI model to use (platform-specific values)                                           |
+| `reasoningEffort`     | string   | No       | Target-native reasoning level                                                        |
+| `specModel`           | string   | No       | Model for Specification/planning mode (GitHub, Factory only)                         |
+| `specReasoningEffort` | string   | No       | Reasoning effort for spec mode: `low`, `medium`, `high` (Factory only)               |
+| `disallowedTools`     | string[] | No       | Tools to deny (Claude, grok only)                                                    |
+| `permissionMode`      | string   | No       | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` (Claude, grok only) |
+| `skills`              | string[] | No       | Named skills available to the agent                                                  |
+| `mcpServers`          | string[] | No       | Named top-level MCP servers available to the agent                                   |
+| `sandboxMode`         | string   | No       | Target-native sandbox policy                                                         |
+| `nicknameCandidates`  | string[] | No       | Candidate display names for spawned agents                                           |
+| `handoffs`            | array    | No       | Delegation entries (`label`, `agent`, `prompt`, `send`; GitHub only)                 |
+| `maxTurns`            | number   | No       | Maximum agentic turns before stopping (Claude, grok only)                            |
+| `memory`              | string   | No       | Memory scope: `user`, `project`, `local` (Claude, grok only)                         |
+| `background`          | boolean  | No       | Run the agent as a background process (Claude, grok only)                            |
+| `isolation`           | string   | No       | Isolation mode: `worktree` (Claude, grok only)                                       |
 
 Every canonical field has an explicit per-target status in the
 [Field Support Matrix](../features/agents.md#field-support-matrix). A field a
