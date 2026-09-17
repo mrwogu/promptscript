@@ -217,6 +217,21 @@ export function validateAgentFieldMatrix(
     }
   }
 
+  // Status groups may only name targets with native agent output; a group
+  // naming anything else would report support no target actually has.
+  issues.push(
+    ...Object.entries(groups).flatMap(([field, group]) =>
+      (['emitted', 'transformed'] as const).flatMap((status) =>
+        (group[status] ?? [])
+          .filter((target) => !nativeSet.has(target))
+          .map(
+            (target) =>
+              `matrix lists "${target}" as ${status} for field "${field}" but it has no native agent output`
+          )
+      )
+    )
+  );
+
   for (const target of nativeTargets) {
     const support = Object.fromEntries(
       CANONICAL_AGENT_FIELDS.map((field) => [field, fieldStatus(groups[field], target)])

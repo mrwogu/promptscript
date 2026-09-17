@@ -92,8 +92,11 @@ function matchCatalogResource(
   for (const resource of TARGET_CAPABILITIES[target].resources) {
     let next: ResourceMatch | undefined;
     if (resource.kind === 'main') {
-      if (resource.path === normalizedPath) {
-        next = { kind: 'main', specificity: resource.path.length + 2 };
+      // Same matcher as every other kind: a '<name>' placeholder in a main
+      // path must still claim its files before the skillBaseDir fallback.
+      const specificity = matchResourcePath(resource.path, normalizedPath);
+      if (specificity > 0) {
+        next = { kind: 'main', specificity };
       }
     } else {
       const specificity =

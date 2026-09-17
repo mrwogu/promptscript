@@ -240,6 +240,14 @@ describe('agent field capability matrix', () => {
     expect(issues).not.toContain('native agent target "claude" emits no canonical fields');
   });
 
+  it('reports status groups naming targets without native agent output', () => {
+    const issues = validateAgentFieldMatrix(matrixWithEmitted(['claude', 'windsurf']), ['claude']);
+
+    expect(issues).toContain(
+      'matrix lists "windsurf" as emitted for field "description" but it has no native agent output'
+    );
+  });
+
   it('emits description on every native agent target', () => {
     for (const target of listNativeAgentTargets()) {
       expect(getAgentFieldStatus(target, 'description')).toBe('emitted');
