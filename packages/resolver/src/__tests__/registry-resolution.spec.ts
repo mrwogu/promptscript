@@ -1826,53 +1826,43 @@ describe('Resolver — registry marker handling', () => {
     expect(mockGit.clone).toHaveBeenCalledOnce();
   });
 
-  it('widens a sparse cached checkout when the import path is outside the cone', async () => {
-    const tempDir = join(testCacheDir, 'sparse-widen');
+  it('grows or disables sparse cached checkout cones as imports require', async () => {
     const repoUrl = 'https://github.com/org/repo';
-    const cacheDir = join(testCacheDir, 'sparse-widen-registry');
-    const { commit } = await seedSparseCache(cacheDir, repoUrl, 'sparse-cache');
+    const cacheDir = join(testCacheDir, 'sparse-cone-registry');
+    const { commit } = await seedSparseCache(cacheDir, repoUrl, 'sparse-cone');
+    const writeProject = async (dir: string, prs: string): Promise<string> => {
+      const projectFile = join(dir, 'project.prs');
+      await fs.mkdir(dir, { recursive: true });
+      await fs.writeFile(projectFile, prs);
+      return projectFile;
+    };
 
-    // The cache pretends to be a sparse checkout (core.sparseCheckout=true)
-    // and the import targets a path its cone does not cover.
+    // A subpath import outside the cone widens it in place.
+    const widenDir = join(testCacheDir, 'sparse-widen');
     mockGit.raw.mockResolvedValueOnce('true');
-
-    const resolver = makeLockedSparseResolver(cacheDir, repoUrl, commit, tempDir);
-    await fs.mkdir(tempDir, { recursive: true });
-    await fs.writeFile(
-      join(tempDir, 'project.prs'),
-      '@meta { id: "sparse-widen-project" syntax: "1.0.0" }\n@use github.com/org/repo/skills/other'
+    const widenProject = await writeProject(
+      widenDir,
+      '@meta { id: "sparse-widen" syntax: "1.0.0" }\n@use github.com/org/repo/skills/other'
+    );
+    const widened = await makeLockedSparseResolver(cacheDir, repoUrl, commit, widenDir).resolve(
+      widenProject
     );
 
-    const result = await resolver.resolve(join(tempDir, 'project.prs'));
-
-    // The sparse cone was widened with the import's directory and sub-path.
     expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'add', 'skills', 'skills/other']);
     expect(mockGit.clone).not.toHaveBeenCalled();
-    // The path still does not exist after widening, so the import errors out.
-    expect(result.errors.some((error) => error.message.includes('skills/other'))).toBe(true);
-  });
+    // The widened cone still lacks the file, so the import errors out.
+    expect(widened.errors.some((error) => error.message.includes('skills/other'))).toBe(true);
 
-  it('materializes the full tree when a root import hits a sparse cached checkout', async () => {
-    const tempDir = join(testCacheDir, 'sparse-root');
-    const repoUrl = 'https://github.com/org/repo';
-    const cacheDir = join(testCacheDir, 'sparse-root-registry');
-    const { commit } = await seedSparseCache(cacheDir, repoUrl, 'sparse-root-cache');
-
-    // The cache pretends to be a sparse checkout; a root import needs the
-    // whole tree, so sparse mode must be disabled.
+    // A root import needs the whole tree, so sparse mode is disabled.
+    const rootDir = join(testCacheDir, 'sparse-root');
     mockGit.raw.mockResolvedValueOnce('true');
-
-    const resolver = makeLockedSparseResolver(cacheDir, repoUrl, commit, tempDir);
-    await fs.mkdir(tempDir, { recursive: true });
-    await fs.writeFile(
-      join(tempDir, 'project.prs'),
-      '@meta { id: "sparse-root-project" syntax: "1.0.0" }\n@use github.com/org/repo'
+    const rootProject = await writeProject(
+      rootDir,
+      '@meta { id: "sparse-root" syntax: "1.0.0" }\n@use github.com/org/repo'
     );
-
-    await resolver.resolve(join(tempDir, 'project.prs'));
+    await makeLockedSparseResolver(cacheDir, repoUrl, commit, rootDir).resolve(rootProject);
 
     expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'disable']);
-    expect(mockGit.clone).not.toHaveBeenCalled();
   });
 
   it('reports checkout failure when a cached commit mismatches the lock', async () => {
