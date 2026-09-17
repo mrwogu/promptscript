@@ -672,6 +672,27 @@ describe('compile command - createCliLogger warn path', () => {
     expect(writtenPaths.some((path) => path.endsWith('.claude/skills/audit/SKILL.md'))).toBe(true);
   });
 
+  it('previews the cleanup skip for resource-only dry runs', async () => {
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        ['.claude/agents/reviewer.md', { path: '.claude/agents/reviewer.md', content: 'agent' }],
+      ]),
+      outputPlan: createOwnedPlan([{ path: '.claude/agents/reviewer.md', owner: 'claude' }]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand(
+      { cwd: '/mock/project', dryRun: true, resources: ['agents'] },
+      mockServices
+    );
+
+    expect(mockDryRun).toHaveBeenCalledWith('Would skip managed cleanup for resource-only compile');
+    expect(mockCleanupManagedOutputs).not.toHaveBeenCalled();
+  });
+
   it('rejects unknown resource kinds before compiling', async () => {
     await compileCommand({ cwd: '/mock/project', resources: ['rules'] }, mockServices);
 

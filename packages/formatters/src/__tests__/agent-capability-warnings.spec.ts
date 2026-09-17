@@ -172,6 +172,46 @@ describe('agent capability warnings', () => {
     expect(getAgentCapabilityWarnings(ast, 'claude', 'full')).toEqual([]);
   });
 
+  it('reads agent fields from MixedContent blocks', () => {
+    const ast = createAgentsProgram({});
+    ast.blocks[0]!.content = {
+      type: 'MixedContent',
+      properties: {
+        reviewer: { description: 'Review changed code', tools: ['Read'] } as Record<string, Value>,
+      },
+      loc: createLoc(3),
+    };
+    const warnings = getAgentCapabilityWarnings(ast, 'cursor', 'full');
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]!.message).toContain('field "tools"');
+  });
+
+  it('skips agent entries that are not objects', () => {
+    const ast = createAgentsProgram({});
+    ast.blocks[0]!.content = {
+      type: 'ObjectContent',
+      properties: {
+        reviewer: 'plain string',
+        auditor: ['array', 'entry'],
+      },
+      loc: createLoc(3),
+    };
+    expect(getAgentCapabilityWarnings(ast, 'claude', 'full')).toEqual([]);
+  });
+
+  it('checks no fields when the agents block has no object content', () => {
+    const ast = createEmptyProgram();
+    ast.blocks.push({
+      type: 'Block',
+      name: 'agents',
+      content: { type: 'TextContent', value: 'free-form guidance', loc: createLoc(4) },
+      loc: createLoc(3),
+    });
+    // claude full emits agents, so only the block-level shape matters here:
+    // free-form text has no fields to lose.
+    expect(getAgentCapabilityWarnings(ast, 'claude', 'full')).toEqual([]);
+  });
+
   it('appends warnings to an existing output', () => {
     const ast = createAgentsProgram({ tools: ['Read'] });
     const output = {
