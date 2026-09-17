@@ -438,22 +438,12 @@ export class GitRegistry implements Registry {
             await this.performClone(git, fallbackRepoUrl, targetDir, tag, sparsePath);
             return;
           } catch (fallbackErr) {
-            const fbError =
-              fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
-            if (isGitTimeoutError(fbError)) {
-              throw createGitTimeoutError(fallbackRepoUrl, this.timeout, fbError);
-            }
-            if (this.isAccessError(fbError)) {
-              throw new GitAuthError(
-                `Authentication failed for both ${repoUrl} and fallback ${fallbackRepoUrl}`,
-                fallbackRepoUrl,
-                fbError
-              );
-            }
-            throw new GitCloneError(
-              `Failed to clone ${fallbackRepoUrl} at ${tag ?? 'default branch'}: ${fbError.message}`,
+            throw this.classifyFallbackCloneError(
+              repoUrl,
               fallbackRepoUrl,
-              fbError
+              fallbackErr,
+              tag,
+              'clone'
             );
           }
         }
@@ -660,8 +650,9 @@ export class GitRegistry implements Registry {
     await fs.mkdir(targetDir, { recursive: true });
 
     const git = this.createGit();
+    const cloneUrl = this.auth ? this.transportUrl : repoUrl;
     try {
-      await this.doCloneSparse(git, repoUrl, ref, targetDir, sparsePath);
+      await this.performClone(git, cloneUrl, targetDir, ref, sparsePath);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       if (isGitTimeoutError(error)) {
@@ -669,25 +660,15 @@ export class GitRegistry implements Registry {
       }
       if (this.isAccessError(error) && fallbackRepoUrl) {
         try {
-          await this.doCloneSparse(git, fallbackRepoUrl, ref, targetDir, sparsePath);
+          await this.performClone(git, fallbackRepoUrl, targetDir, ref, sparsePath);
           return;
         } catch (fallbackErr) {
-          const fbError =
-            fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
-          if (isGitTimeoutError(fbError)) {
-            throw createGitTimeoutError(fallbackRepoUrl, this.timeout, fbError);
-          }
-          if (this.isAccessError(fbError)) {
-            throw new GitAuthError(
-              `Authentication failed for both ${repoUrl} and fallback ${fallbackRepoUrl}`,
-              fallbackRepoUrl,
-              fbError
-            );
-          }
-          throw new GitCloneError(
-            `Failed to sparse-clone ${fallbackRepoUrl} at ${ref}: ${fbError.message}`,
+          throw this.classifyFallbackCloneError(
+            repoUrl,
             fallbackRepoUrl,
-            fbError
+            fallbackErr,
+            ref,
+            'sparse-clone'
           );
         }
       }
@@ -706,30 +687,32 @@ export class GitRegistry implements Registry {
   }
 
   /**
-   * Internal sparse-clone implementation (no fallback logic).
+   * Classify an error from the fallback clone attempt shared by
+   * `cloneAtTag` and `cloneSparse`: timeout, auth, or a plain clone failure.
    */
-  private async doCloneSparse(
-    git: SimpleGit,
+  private classifyFallbackCloneError(
     repoUrl: string,
-    ref: string,
-    targetDir: string,
-    sparsePath: string
-  ): Promise<void> {
-    if (existsSync(targetDir)) {
-      await fs.rm(targetDir, { recursive: true, force: true });
+    fallbackRepoUrl: string,
+    err: unknown,
+    ref: string | undefined,
+    action: string
+  ): Error {
+    const fbError = err instanceof Error ? err : new Error(String(err));
+    if (isGitTimeoutError(fbError)) {
+      return createGitTimeoutError(fallbackRepoUrl, this.timeout, fbError);
     }
-    await fs.mkdir(targetDir, { recursive: true });
-
-    await git.clone(repoUrl, targetDir, [
-      '--depth=1',
-      `--branch=${ref}`,
-      '--single-branch',
-      '--filter=blob:none',
-      '--sparse',
-    ]);
-
-    const repoGit = this.createGit(targetDir);
-    await repoGit.raw(['sparse-checkout', 'set', sparsePath]);
+    if (this.isAccessError(fbError)) {
+      return new GitAuthError(
+        `Authentication failed for both ${repoUrl} and fallback ${fallbackRepoUrl}`,
+        fallbackRepoUrl,
+        fbError
+      );
+    }
+    return new GitCloneError(
+      `Failed to ${action} ${fallbackRepoUrl} at ${ref ?? 'default branch'}: ${fbError.message}`,
+      fallbackRepoUrl,
+      fbError
+    );
   }
 
   /**
