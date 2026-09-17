@@ -198,11 +198,13 @@ export class CursorFormatter extends BaseFormatter {
       const effectiveHooks = applyHookTargetOverrides(hooks, 'cursor');
       if (hooksBlock && effectiveHooks.some((hook) => hook.enabled !== false)) {
         // The Cursor-specific PS4002 below already reports the omission, so
-        // skip the generic capability warning to avoid a duplicate.
+        // skip the generic hook capability warning to avoid a duplicate.
+        // Agent field loss still deserves PS4003 on this path.
+        const withAgentWarnings = appendAgentCapabilityWarnings(output, ast, this.name, version);
         return {
-          ...output,
+          ...withAgentWarnings,
           warnings: [
-            ...(output.warnings ?? []),
+            ...(withAgentWarnings.warnings ?? []),
             {
               code: 'PS4002',
               message: `Cursor ${version} mode cannot emit @hooks and will omit them.`,

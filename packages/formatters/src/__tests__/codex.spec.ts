@@ -522,6 +522,54 @@ describe('CodexFormatter', () => {
       expect(agentToml!.content).toContain('command = ["node", "fs.mjs"]');
     });
 
+    it('should resolve agent mcpServers names against the @mcpServers block', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'mcpServers',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                fs: { command: ['node', 'fs.mjs'] },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                worker: {
+                  description: 'Worker agent',
+                  content: 'Do work',
+                  mcpServers: ['fs', 'ghost'],
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      const agentToml = (result.additionalFiles ?? []).find(
+        (f) => f.path === '.codex/agents/worker.toml'
+      );
+      expect(agentToml).toBeDefined();
+      expect(agentToml!.content).toContain('[mcp_servers.fs]');
+      expect(agentToml!.content).toContain('command = ["node", "fs.mjs"]');
+      // A name without a top-level definition is omitted, not faked.
+      expect(agentToml!.content).not.toContain('mcp_servers.ghost');
+    });
+
     it('should handle agent with skills array', () => {
       const program: Program = {
         type: 'Program',
