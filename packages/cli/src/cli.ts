@@ -24,6 +24,7 @@ import { inspectCommand } from './commands/inspect.js';
 import { explainCommand } from './commands/explain.js';
 import { setContext, LogLevel, ConsoleOutput } from './output/console.js';
 import { checkForUpdates, printUpdateNotification } from './utils/version-check.js';
+import { collectResourceKinds } from './utils/resource-filter.js';
 import { importCommand } from './commands/import.js';
 import { upgradeCommand } from './commands/upgrade.js';
 import { hookCommand } from './commands/hook.js';
@@ -38,13 +39,6 @@ import {
 } from './commands/skills.js';
 
 const program = new Command();
-
-/**
- * Collect comma-separated --resources values into one list.
- */
-function collectResourceKinds(value: string, previous: string[]): string[] {
-  return [...previous, ...value.split(',').map((item) => item.trim())].filter(Boolean);
-}
 
 // Shared by compile and build so the flag cannot drift between them.
 const RESOURCES_FLAG = '--resources <items>';

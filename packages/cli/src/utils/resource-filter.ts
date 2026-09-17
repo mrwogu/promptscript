@@ -7,6 +7,15 @@ import {
 import type { FormatterOutput } from '@promptscript/compiler';
 
 /**
+ * Collect comma-separated `--resources` values into one list.
+ *
+ * Shared by the compile and build commands so both flags parse identically.
+ */
+export function collectResourceKinds(value: string, previous: string[]): string[] {
+  return [...previous, ...value.split(',').map((item) => item.trim())].filter(Boolean);
+}
+
+/**
  * Parse and validate a resource selection from CLI flags or config.
  *
  * Values may be comma-separated; order is preserved after deduplication.

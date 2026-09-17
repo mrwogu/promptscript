@@ -45,10 +45,18 @@ export type CanonicalAgentField = (typeof CANONICAL_AGENT_FIELDS)[number];
  */
 export type AgentFieldStatus = 'emitted' | 'transformed' | 'not-supported';
 
-interface AgentFieldStatusGroups {
+/**
+ * Status groups for one field: which native targets emit or transform it.
+ */
+export interface AgentFieldStatusGroups {
   readonly emitted?: readonly KnownTarget[];
   readonly transformed?: readonly KnownTarget[];
 }
+
+/**
+ * Complete field-to-groups mapping, the shape of the shipped matrix.
+ */
+export type AgentFieldMatrix = Readonly<Record<CanonicalAgentField, AgentFieldStatusGroups>>;
 
 // Targets whose native agent files exist (catalog `hasAgents` targets).
 // Grok delegates agent emission to the Claude formatter and therefore
@@ -107,6 +115,15 @@ const AGENT_FIELD_STATUS_GROUPS: Readonly<Record<CanonicalAgentField, AgentField
 };
 
 /**
+ * Status of one field according to the given groups.
+ */
+function fieldStatus(groups: AgentFieldStatusGroups, target: KnownTarget): AgentFieldStatus {
+  if (groups.emitted?.includes(target)) return 'emitted';
+  if (groups.transformed?.includes(target)) return 'transformed';
+  return 'not-supported';
+}
+
+/**
  * Return the capability status of one canonical agent field on a target.
  *
  * Targets without native agent output report `not-supported` for every field.
@@ -115,10 +132,7 @@ export function getAgentFieldStatus(
   target: KnownTarget,
   field: CanonicalAgentField
 ): AgentFieldStatus {
-  const groups = AGENT_FIELD_STATUS_GROUPS[field];
-  if (groups.emitted?.includes(target)) return 'emitted';
-  if (groups.transformed?.includes(target)) return 'transformed';
-  return 'not-supported';
+  return fieldStatus(AGENT_FIELD_STATUS_GROUPS[field], target);
 }
 
 /**
@@ -178,15 +192,18 @@ export function listNativeAgentTargets(): KnownTarget[] {
 }
 
 /**
- * Consistency issues in the agent field matrix.
+ * Consistency issues in an agent field matrix.
  *
  * Every catalog target with an `agents` resource must have at least one
  * emitted field, and every matrix status group must only name targets that
- * actually have native agent output.
+ * actually have native agent output. Inputs are injectable so tests can
+ * validate broken fixtures, mirroring validateTargetCapabilities.
  */
-export function validateAgentFieldMatrix(): string[] {
+export function validateAgentFieldMatrix(
+  groups: AgentFieldMatrix = AGENT_FIELD_STATUS_GROUPS,
+  nativeTargets: readonly KnownTarget[] = listNativeAgentTargets()
+): string[] {
   const issues: string[] = [];
-  const nativeTargets = listNativeAgentTargets();
   const nativeSet = new Set<string>(nativeTargets);
 
   if (nativeTargets.length !== ALL_NATIVE_AGENT_TARGETS.length) {
@@ -201,7 +218,9 @@ export function validateAgentFieldMatrix(): string[] {
   }
 
   for (const target of nativeTargets) {
-    const support = getAgentFieldSupport(target);
+    const support = Object.fromEntries(
+      CANONICAL_AGENT_FIELDS.map((field) => [field, fieldStatus(groups[field], target)])
+    ) as Record<CanonicalAgentField, AgentFieldStatus>;
     const emitted = CANONICAL_AGENT_FIELDS.filter((field) => support[field] === 'emitted');
     if (emitted.length === 0) {
       issues.push(`native agent target "${target}" emits no canonical fields`);

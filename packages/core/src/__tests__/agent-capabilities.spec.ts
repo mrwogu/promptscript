@@ -8,9 +8,25 @@ import {
   listUnsupportedAgentFields,
   validateAgentFieldMatrix,
   type AgentFieldStatus,
+  type AgentFieldStatusGroups,
   type CanonicalAgentField,
 } from '../agent-capabilities.js';
 import type { KnownTarget } from '../types/config.js';
+
+/**
+ * Build a matrix fixture where one target emits every field.
+ *
+ * The record is mutable so a test can drop single fields before validating.
+ */
+function matrixWithEmitted(
+  targets: readonly KnownTarget[]
+): Record<CanonicalAgentField, AgentFieldStatusGroups> {
+  const groups = {} as Record<CanonicalAgentField, AgentFieldStatusGroups>;
+  for (const field of CANONICAL_AGENT_FIELDS) {
+    groups[field] = { emitted: [...targets] };
+  }
+  return groups;
+}
 
 /**
  * Assert a complete per-target contract from a readable table.
@@ -170,6 +186,9 @@ describe('agent field capability matrix', () => {
         'sandboxMode',
       ])
     ).toEqual(['tools', 'permissionMode', 'sandboxMode']);
+    // One call exercising every path: canonical unsupported, canonical
+    // supported, and non-canonical fields together.
+    expect(listUnsupportedAgentFields('cursor', ['tools', 'model', 'bogus'])).toEqual(['tools']);
   });
 
   it('ignores non-canonical fields when listing unsupported fields', () => {
@@ -184,15 +203,46 @@ describe('agent field capability matrix', () => {
     const tools = listAgentFieldSupportTargets('tools');
     expect(tools.emitted).toEqual(['claude', 'grok', 'factory']);
     expect(tools.transformed).toEqual(['github']);
+
+    // handoffs has no transformed group, exercising the empty fallback.
+    const handoffs = listAgentFieldSupportTargets('handoffs');
+    expect(handoffs.emitted).toEqual(['github']);
+    expect(handoffs.transformed).toEqual([]);
   });
 
   it('passes matrix consistency validation', () => {
     expect(validateAgentFieldMatrix()).toEqual([]);
   });
 
+  it('reports every inconsistency class from a broken matrix', () => {
+    // claude emits everything; the second "native" target emits nothing and
+    // is unknown to the catalog, so each validation branch fires once.
+    const issues = validateAgentFieldMatrix(matrixWithEmitted(['claude']), ['claude', 'windsurf']);
+
+    expect(issues).toContain('native agent target count is 2, matrix declares 9');
+    expect(issues).toContain('matrix lists "github" but the catalog has no agents resource for it');
+    expect(issues).toContain('native agent target "windsurf" emits no canonical fields');
+    expect(issues).toContain(
+      'native agent target "windsurf" must at least emit description and content'
+    );
+    // claude itself stays consistent in this fixture.
+    expect(issues).not.toContain('native agent target "claude" emits no canonical fields');
+  });
+
+  it('reports a matrix that emits description without content', () => {
+    const groups = matrixWithEmitted(['claude']);
+    groups['content'] = {};
+    const issues = validateAgentFieldMatrix(groups, ['claude']);
+
+    expect(issues).toContain(
+      'native agent target "claude" must at least emit description and content'
+    );
+    expect(issues).not.toContain('native agent target "claude" emits no canonical fields');
+  });
+
   it('emits description on every native agent target', () => {
     for (const target of listNativeAgentTargets()) {
-      expect(getAgentFieldStatus(target, 'description' as CanonicalAgentField)).toBe('emitted');
+      expect(getAgentFieldStatus(target, 'description')).toBe('emitted');
     }
   });
 });
