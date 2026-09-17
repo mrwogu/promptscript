@@ -133,6 +133,24 @@ describe('classifyOutputResource', () => {
     );
   });
 
+  it('classifies relocated skill outputs by a configured skillBaseDir', () => {
+    const relocated = 'plugins/logstrip/.factory/skills/review/SKILL.md';
+    // Without the configured base directory the relocated path is main.
+    expect(classifyOutputResource('factory', relocated)).toBe('main');
+    expect(classifyOutputResource('factory', relocated, 'plugins/logstrip/.factory/skills')).toBe(
+      'skills'
+    );
+    // Leading and trailing slashes normalize away before matching.
+    expect(classifyOutputResource('factory', 'plugins/s/review/SKILL.md', '/plugins/s/')).toBe(
+      'skills'
+    );
+    // The catalog match wins when both apply, so a stray base directory
+    // cannot reclassify native agent files.
+    expect(classifyOutputResource('factory', '.factory/droids/reviewer.md', '.factory')).toBe(
+      'agents'
+    );
+  });
+
   it('exposes a stable selectable kind list', () => {
     expect(OUTPUT_RESOURCE_KINDS).toEqual([
       'agents',
