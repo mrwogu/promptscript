@@ -5,8 +5,10 @@ import {
   listAgentFieldSupportTargets,
   TARGET_CAPABILITIES,
   type CanonicalAgentField,
+  type KnownTarget,
   type Program,
   type SourceLocation,
+  type TargetResourceCapability,
   type Value,
 } from '@promptscript/core';
 import type { FormatterOutput, FormatterWarning } from './types.js';
@@ -67,6 +69,85 @@ function describeFieldSupport(field: CanonicalAgentField): string {
 }
 
 /**
+ * Block-level omission warning for a target without native agent output, or
+ * for a version that does not emit agent files.
+ */
+function describeBlockOmission(
+  agentsResource: TargetResourceCapability | undefined,
+  target: string,
+  version: string,
+  location: SourceLocation,
+  options: AgentCapabilityWarningOptions | undefined
+): FormatterWarning[] {
+  if (!agentsResource) {
+    if (options?.blockWarningHandled) return [];
+    return [
+      {
+        code: AGENT_COMPATIBILITY_CODE,
+        ruleName: 'agent-compatibility',
+        message: `Target "${target}" has no native agent output and will omit @agents.`,
+        suggestion:
+          'Compile a target with agent support or move agent guidance into instruction blocks.',
+        location,
+      },
+    ];
+  }
+
+  return [
+    {
+      code: AGENT_COMPATIBILITY_CODE,
+      ruleName: 'agent-compatibility',
+      message: `Target "${target}" version "${version}" cannot emit @agents and will omit it.`,
+      suggestion: `Use a version that emits agents: ${agentsResource.versions.join(', ')}.`,
+      location,
+    },
+  ];
+}
+
+/**
+ * Field-loss warning for one authored field, or undefined when the target
+ * can represent it.
+ */
+function describeFieldLoss(
+  agentName: string,
+  field: string,
+  target: KnownTarget,
+  location: SourceLocation
+): FormatterWarning | undefined {
+  // description and content are portable on every native target.
+  if (field === 'description' || field === 'content') return undefined;
+
+  const isCanonical = CANONICAL_AGENT_FIELDS.includes(field as CanonicalAgentField);
+  const status = isCanonical
+    ? getAgentFieldStatus(target, field as CanonicalAgentField)
+    : 'not-supported';
+  if (status !== 'not-supported') return undefined;
+
+  return {
+    code: AGENT_COMPATIBILITY_CODE,
+    ruleName: 'agent-compatibility',
+    message: `Agent "${agentName}": field "${field}" is not supported by target "${target}" and will be omitted.`,
+    suggestion: isCanonical
+      ? describeFieldSupport(field as CanonicalAgentField)
+      : 'Not a canonical @agents field; remove it or model it through a supported block.',
+    location,
+  };
+}
+
+function collectEntryFieldWarnings(
+  entry: AgentBlockEntry,
+  target: KnownTarget,
+  location: SourceLocation
+): FormatterWarning[] {
+  const warnings: FormatterWarning[] = [];
+  for (const field of Object.keys(entry.fields)) {
+    const warning = describeFieldLoss(entry.name, field, target, location);
+    if (warning) warnings.push(warning);
+  }
+  return warnings;
+}
+
+/**
  * Report `@agents` data a target cannot represent.
  *
  * A target without native agent output, or a version that does not emit
@@ -83,59 +164,16 @@ export function getAgentCapabilityWarnings(
   const agentsBlock = collectAgentEntries(ast);
   if (!agentsBlock || !isKnownTarget(target)) return [];
 
-  const capability = TARGET_CAPABILITIES[target];
-  const agentsResource = capability.resources.find((resource) => resource.kind === 'agents');
-
-  if (!agentsResource) {
-    if (options?.blockWarningHandled) return [];
-    return [
-      {
-        code: AGENT_COMPATIBILITY_CODE,
-        ruleName: 'agent-compatibility',
-        message: `Target "${target}" has no native agent output and will omit @agents.`,
-        suggestion:
-          'Compile a target with agent support or move agent guidance into instruction blocks.',
-        location: agentsBlock.location,
-      },
-    ];
+  const agentsResource = TARGET_CAPABILITIES[target].resources.find(
+    (resource) => resource.kind === 'agents'
+  );
+  if (!agentsResource || !agentsResource.versions.includes(version)) {
+    return describeBlockOmission(agentsResource, target, version, agentsBlock.location, options);
   }
 
-  if (!agentsResource.versions.includes(version)) {
-    return [
-      {
-        code: AGENT_COMPATIBILITY_CODE,
-        ruleName: 'agent-compatibility',
-        message: `Target "${target}" version "${version}" cannot emit @agents and will omit it.`,
-        suggestion: `Use a version that emits agents: ${agentsResource.versions.join(', ')}.`,
-        location: agentsBlock.location,
-      },
-    ];
-  }
-
-  const warnings: FormatterWarning[] = [];
-  for (const entry of agentsBlock.entries) {
-    for (const field of Object.keys(entry.fields)) {
-      // description and content are portable on every native target.
-      if (field === 'description' || field === 'content') continue;
-
-      const isCanonical = CANONICAL_AGENT_FIELDS.includes(field as CanonicalAgentField);
-      const status = isCanonical
-        ? getAgentFieldStatus(target, field as CanonicalAgentField)
-        : 'not-supported';
-      if (status !== 'not-supported') continue;
-
-      warnings.push({
-        code: AGENT_COMPATIBILITY_CODE,
-        ruleName: 'agent-compatibility',
-        message: `Agent "${entry.name}": field "${field}" is not supported by target "${target}" and will be omitted.`,
-        suggestion: isCanonical
-          ? describeFieldSupport(field as CanonicalAgentField)
-          : 'Not a canonical @agents field; remove it or model it through a supported block.',
-        location: agentsBlock.location,
-      });
-    }
-  }
-  return warnings;
+  return agentsBlock.entries.flatMap((entry) =>
+    collectEntryFieldWarnings(entry, target, agentsBlock.location)
+  );
 }
 
 /**
