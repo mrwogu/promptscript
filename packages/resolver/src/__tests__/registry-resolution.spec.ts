@@ -117,6 +117,49 @@ const TEST_REGISTRIES: RegistriesConfig = {
   },
 };
 
+/**
+ * Seed a registry cache entry with a real Git repository pinned to a lockfile.
+ * Returns the cache path and the committed hash.
+ */
+async function seedSparseCache(
+  cacheDir: string,
+  repoUrl: string,
+  id: string
+): Promise<{ cachePath: string; commit: string }> {
+  const registryCache = new RegistryCache(cacheDir);
+  const cachePath = registryCache.getCachePath(repoUrl, 'latest');
+  await fs.mkdir(cachePath, { recursive: true });
+  await fs.writeFile(join(cachePath, 'standards.prs'), `@meta { id: "${id}" syntax: "1.0.0" }`);
+  const commit = await initializeCacheGitRepository(cachePath);
+  await registryCache.set(repoUrl, 'latest', commit);
+  return { cachePath, commit };
+}
+
+/** Build a Resolver whose lockfile pins the seeded cache commit. */
+function makeLockedSparseResolver(
+  cacheDir: string,
+  repoUrl: string,
+  commit: string,
+  localPath: string
+): Resolver {
+  return new Resolver({
+    registryPath: resolve(FIXTURES_DIR, 'registry'),
+    localPath,
+    cache: false,
+    cacheDir,
+    lockfile: {
+      version: 1,
+      dependencies: {
+        [repoUrl]: {
+          version: 'latest',
+          commit,
+          integrity: 'sha256-test',
+        },
+      },
+    },
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Tests: loader marker functions
 // ---------------------------------------------------------------------------
@@ -1787,46 +1830,20 @@ describe('Resolver — registry marker handling', () => {
     const tempDir = join(testCacheDir, 'sparse-widen');
     const repoUrl = 'https://github.com/org/repo';
     const cacheDir = join(testCacheDir, 'sparse-widen-registry');
-    const registryCache = new RegistryCache(cacheDir);
-    const cachePath = registryCache.getCachePath(repoUrl, 'latest');
-
-    // Real Git metadata so the locked-commit verification passes.
-    await fs.mkdir(cachePath, { recursive: true });
-    await fs.writeFile(
-      join(cachePath, 'standards.prs'),
-      '@meta { id: "sparse-cache" syntax: "1.0.0" }'
-    );
-    const lockedCommit = await initializeCacheGitRepository(cachePath);
-    await registryCache.set(repoUrl, 'latest', lockedCommit);
+    const { commit } = await seedSparseCache(cacheDir, repoUrl, 'sparse-cache');
 
     // The cache pretends to be a sparse checkout (core.sparseCheckout=true)
     // and the import targets a path its cone does not cover.
     mockGit.raw.mockResolvedValueOnce('true');
 
-    const entryPath = join(tempDir, 'project.prs');
+    const resolver = makeLockedSparseResolver(cacheDir, repoUrl, commit, tempDir);
     await fs.mkdir(tempDir, { recursive: true });
     await fs.writeFile(
-      entryPath,
+      join(tempDir, 'project.prs'),
       '@meta { id: "sparse-widen-project" syntax: "1.0.0" }\n@use github.com/org/repo/skills/other'
     );
-    const resolver = new Resolver({
-      registryPath: resolve(FIXTURES_DIR, 'registry'),
-      localPath: tempDir,
-      cache: false,
-      cacheDir,
-      lockfile: {
-        version: 1,
-        dependencies: {
-          [repoUrl]: {
-            version: 'latest',
-            commit: lockedCommit,
-            integrity: 'sha256-test',
-          },
-        },
-      },
-    });
 
-    const result = await resolver.resolve(entryPath);
+    const result = await resolver.resolve(join(tempDir, 'project.prs'));
 
     // The sparse cone was widened with the import's directory and sub-path.
     expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'add', 'skills', 'skills/other']);
@@ -1839,46 +1856,20 @@ describe('Resolver — registry marker handling', () => {
     const tempDir = join(testCacheDir, 'sparse-root');
     const repoUrl = 'https://github.com/org/repo';
     const cacheDir = join(testCacheDir, 'sparse-root-registry');
-    const registryCache = new RegistryCache(cacheDir);
-    const cachePath = registryCache.getCachePath(repoUrl, 'latest');
-
-    // Real Git metadata so the locked-commit verification passes.
-    await fs.mkdir(cachePath, { recursive: true });
-    await fs.writeFile(
-      join(cachePath, 'standards.prs'),
-      '@meta { id: "sparse-root-cache" syntax: "1.0.0" }'
-    );
-    const lockedCommit = await initializeCacheGitRepository(cachePath);
-    await registryCache.set(repoUrl, 'latest', lockedCommit);
+    const { commit } = await seedSparseCache(cacheDir, repoUrl, 'sparse-root-cache');
 
     // The cache pretends to be a sparse checkout; a root import needs the
     // whole tree, so sparse mode must be disabled.
     mockGit.raw.mockResolvedValueOnce('true');
 
-    const entryPath = join(tempDir, 'project.prs');
+    const resolver = makeLockedSparseResolver(cacheDir, repoUrl, commit, tempDir);
     await fs.mkdir(tempDir, { recursive: true });
     await fs.writeFile(
-      entryPath,
+      join(tempDir, 'project.prs'),
       '@meta { id: "sparse-root-project" syntax: "1.0.0" }\n@use github.com/org/repo'
     );
-    const resolver = new Resolver({
-      registryPath: resolve(FIXTURES_DIR, 'registry'),
-      localPath: tempDir,
-      cache: false,
-      cacheDir,
-      lockfile: {
-        version: 1,
-        dependencies: {
-          [repoUrl]: {
-            version: 'latest',
-            commit: lockedCommit,
-            integrity: 'sha256-test',
-          },
-        },
-      },
-    });
 
-    await resolver.resolve(entryPath);
+    await resolver.resolve(join(tempDir, 'project.prs'));
 
     expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'disable']);
     expect(mockGit.clone).not.toHaveBeenCalled();
