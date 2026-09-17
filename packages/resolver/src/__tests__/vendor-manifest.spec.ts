@@ -781,20 +781,10 @@ fi
     );
   });
 
-  it('rejects partial clone metadata that could fetch objects during verification', async () => {
-    const repositoryDir = await createTempDirectory();
-    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
-    const commit = await initializeVendoredGitRepository(repositoryDir);
-    await writeFile(
-      join(repositoryDir, VENDOR_GIT_DIR, 'config'),
-      '\n[remote "origin"]\n\tpromisor = true\n',
-      { flag: 'a' }
-    );
-
-    await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
-      'partial Git object sources'
-    );
-  });
+  const verifyWithAllowPartial = (repositoryDir: string, commit: string) =>
+    verifyGitRepositoryCheckout(repositoryDir, VENDOR_GIT_DIR, commit, new Set(), {
+      allowPartial: true,
+    });
 
   it('accepts partial clone metadata for registry caches with allowPartial', async () => {
     const repositoryDir = await createTempDirectory();
@@ -806,11 +796,9 @@ fi
       { flag: 'a' }
     );
 
-    await expect(
-      verifyGitRepositoryCheckout(repositoryDir, VENDOR_GIT_DIR, commit, new Set(), {
-        allowPartial: true,
-      })
-    ).resolves.toBeUndefined();
+    // Registry caches are cloned with a blob filter, so partial metadata is
+    // expected there, while vendored code must still reject it outright.
+    await expect(verifyWithAllowPartial(repositoryDir, commit)).resolves.toBeUndefined();
     await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
       'partial Git object sources'
     );
@@ -826,11 +814,7 @@ fi
     await expect(
       verifyGitRepositoryCheckout(repositoryDir, VENDOR_GIT_DIR, commit)
     ).rejects.toThrow('contents do not match');
-    await expect(
-      verifyGitRepositoryCheckout(repositoryDir, VENDOR_GIT_DIR, commit, new Set(), {
-        allowPartial: true,
-      })
-    ).resolves.toBeUndefined();
+    await expect(verifyWithAllowPartial(repositoryDir, commit)).resolves.toBeUndefined();
   });
 
   it('rejects worktree-specific Git configuration', async () => {
