@@ -4298,15 +4298,45 @@ describe('skillsAddCommand local sources', () => {
     expect(mockCp).not.toHaveBeenCalled();
     expect(process.exitCode).toBe(1);
 
-    // --force replaces the existing copy
+    // --force replaces the existing copy: old directory moved aside, then
+    // removed only after the entry write succeeded.
     await skillsAddCommand('./vendor/my-skill', { copy: true, force: true });
 
-    expect(mockRm).toHaveBeenCalledWith(resolve('.promptscript/skills/my-skill'), {
+    const managedDir = resolve('.promptscript/skills/my-skill');
+    const backupCall = mockRename.mock.calls.find(
+      (call) => String(call[0]) === managedDir
+    ) as unknown as [string, string] | undefined;
+    expect(backupCall).toBeDefined();
+    expect(backupCall![1]).toContain('my-skill.replaced-');
+    expect(mockCp).toHaveBeenCalledWith(skillDir, managedDir, {
       recursive: true,
-      force: true,
+      dereference: true,
     });
-    expect(mockCp).toHaveBeenCalled();
+    expect(mockRm).toHaveBeenCalledWith(backupCall![1], { recursive: true, force: true });
+    expect(mockRm).not.toHaveBeenCalledWith(managedDir, { recursive: true, force: true });
     expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('restores the replaced skill directory when the copy fails', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('.promptscript/project.prs');
+    const managedDir = resolve('.promptscript/skills/my-skill');
+    arrangeLocalSkillSource(skillDir, entryFile);
+    arrangeManagedScan(skillDir, entryFile, ['my-skill']);
+    mockCp.mockRejectedValueOnce(new Error('cp boom'));
+
+    await skillsAddCommand('./vendor/my-skill', { copy: true, force: true });
+
+    // Partial destination removed, backup restored, entry untouched.
+    expect(mockRm).toHaveBeenCalledWith(managedDir, { recursive: true, force: true });
+    const backupCall = mockRename.mock.calls.find(
+      (call) => String(call[0]) === managedDir
+    ) as unknown as [string, string] | undefined;
+    expect(backupCall).toBeDefined();
+    expect(mockRename).toHaveBeenCalledWith(backupCall![1], managedDir);
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
+    expect(process.exitCode).toBe(1);
   });
 
   it('refuses in-place references outside the project root and points at --copy', async () => {
@@ -4395,6 +4425,43 @@ describe('skillsAddCommand local sources', () => {
 
     expect(mockFail).toHaveBeenCalledWith('Symbolic-linked skill directories are not supported');
     expect(process.exitCode).toBe(1);
+  });
+
+  it('dereferences a symlinked source with --copy', async () => {
+    const skillDir = resolve('vendor/my-skill');
+    const entryFile = resolve('.promptscript/project.prs');
+    const managedDir = resolve('.promptscript/skills/my-skill');
+    arrangeLocalSkillSource(skillDir, entryFile);
+    // lstat reports the link itself; stat (which follows it) reports a directory.
+    mockLstat.mockImplementation((p: string) => {
+      if (p === skillDir) {
+        return Promise.resolve({
+          isSymbolicLink: () => true,
+          isFile: () => false,
+          isDirectory: () => false,
+        });
+      }
+      return Promise.reject(Object.assign(new Error('not found'), { code: 'ENOENT' }));
+    });
+    mockStat.mockImplementation((p: string) => {
+      if (p === skillDir) {
+        return Promise.resolve({
+          isSymbolicLink: () => false,
+          isFile: () => false,
+          isDirectory: () => true,
+        });
+      }
+      return Promise.reject(Object.assign(new Error('not found'), { code: 'ENOENT' }));
+    });
+
+    await skillsAddCommand('./vendor/my-skill', { copy: true });
+
+    expect(mockCp).toHaveBeenCalledWith(skillDir, managedDir, {
+      recursive: true,
+      dereference: true,
+    });
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    expect(findPrsWrite('project.prs')).toContain('@use ./skills/my-skill');
   });
 
   it('validates frontmatter with the resolver validator before writing', async () => {

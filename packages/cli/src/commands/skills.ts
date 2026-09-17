@@ -11,10 +11,10 @@ import {
   stat,
   cp,
   mkdir,
-} from 'fs/promises';
-import { resolve, join, basename, dirname, relative, isAbsolute, sep } from 'path';
-import { existsSync } from 'fs';
-import { tmpdir, homedir } from 'os';
+} from 'node:fs/promises';
+import { resolve, join, basename, dirname, relative, isAbsolute, sep } from 'node:path';
+import { existsSync } from 'node:fs';
+import { tmpdir, homedir } from 'node:os';
 import type { Ora } from 'ora';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import { parse } from '@promptscript/parser';
@@ -1031,11 +1031,62 @@ async function rollbackSkillsAdd(state: SkillsAddRollbackState): Promise<Error |
 }
 
 /**
+ * Result of a local-skill pipeline step: a value on success, or a
+ * user-facing failure message plus an optional hint printed below it.
+ */
+type LocalSkillStep<T> = { ok: true; value: T } | { ok: false; message: string; hint?: string };
+
+/** Report a failed pipeline step and set the error exit code. */
+function failLocalSkillStep(spinner: Ora, step: { message: string; hint?: string }): void {
+  spinner.fail(step.message);
+  if (step.hint) {
+    ConsoleOutput.error(step.hint);
+  }
+  process.exitCode = 1;
+}
+
+/**
+ * Skill names installed under `.promptscript/skills/`, excluding the
+ * directory being added (re-referencing the same directory is not a
+ * collision).
+ */
+async function scanManagedSkillNames(managedRoot: string, skillDir: string): Promise<string[]> {
+  if (!existsSync(managedRoot)) return [];
+  const entries = await readdir(managedRoot, { withFileTypes: true });
+  const names: string[] = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    if (resolve(managedRoot, entry.name) === resolve(skillDir)) continue;
+    names.push(entry.name);
+  }
+  return names;
+}
+
+/**
+ * Skill names referenced by local `@use` lines in the entry file, excluding
+ * paths that resolve to the directory being added.
+ */
+function collectLocalUseNames(
+  lines: readonly string[],
+  skillDir: string,
+  entryDir: string
+): string[] {
+  const names: string[] = [];
+  for (const line of lines) {
+    const usePath = extractUsePath(line);
+    if (!usePath || !(usePath.startsWith('./') || usePath.startsWith('../'))) continue;
+    const absUsePath = resolve(entryDir, usePath);
+    const dir = usePath.endsWith('.md') ? dirname(absUsePath) : absUsePath;
+    if (dir === resolve(skillDir)) continue;
+    names.push(basename(dir));
+  }
+  return names;
+}
+
+/**
  * Collect names that already occupy a skill slot in this project:
  * lockfile markdown-sourced skills, directories under `.promptscript/skills/`,
- * and local `@use` references in the entry file. Entries pointing at
- * `skillDir` itself are skipped - re-referencing the same directory is not a
- * collision.
+ * and local `@use` references in the entry file.
  */
 async function collectLocalExistingNames(
   lockfile: Lockfile,
@@ -1044,27 +1095,310 @@ async function collectLocalExistingNames(
   entryDir: string
 ): Promise<Set<string>> {
   const names = new Set(collectExistingSkillNames(lockfile));
-
   const managedRoot = resolve(process.cwd(), MANAGED_SKILLS_DIR);
-  if (existsSync(managedRoot)) {
-    const entries = await readdir(managedRoot, { withFileTypes: true });
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-      if (resolve(managedRoot, entry.name) === resolve(skillDir)) continue;
-      names.add(entry.name);
-    }
+  for (const name of await scanManagedSkillNames(managedRoot, skillDir)) {
+    names.add(name);
   }
-
-  for (const line of lines) {
-    const usePath = extractUsePath(line);
-    if (!usePath || !(usePath.startsWith('./') || usePath.startsWith('../'))) continue;
-    const absUsePath = resolve(entryDir, usePath);
-    const dir = usePath.endsWith('.md') ? dirname(absUsePath) : absUsePath;
-    if (dir === resolve(skillDir)) continue;
-    names.add(basename(dir));
+  for (const name of collectLocalUseNames(lines, skillDir, entryDir)) {
+    names.add(name);
   }
-
   return names;
+}
+
+/** A classified local skill source: where the SKILL.md and its directory live. */
+interface LocalSkillSourcePaths {
+  skillMdPath: string;
+  skillDir: string;
+}
+
+/**
+ * Classify a local source path as a skill directory (or a SKILL.md file
+ * inside one). Symlinked directories are rejected for in-place references
+ * because the resolver skips them at compile time; `--copy` dereferences
+ * them, so the link target is classified instead.
+ */
+async function classifyLocalSkillSource(
+  expanded: string,
+  copyRequested: boolean
+): Promise<LocalSkillStep<LocalSkillSourcePaths>> {
+  const absSource = resolve(process.cwd(), expanded);
+  if (!existsSync(absSource)) {
+    return { ok: false, message: `Path not found: ${expanded}` };
+  }
+  const lstatDetails = await lstat(absSource);
+  if (lstatDetails.isSymbolicLink() && !copyRequested) {
+    return {
+      ok: false,
+      message: 'Symbolic-linked skill directories are not supported',
+      hint: 'The resolver skips symlinked directories at compile time. Use --copy to install the skill files.',
+    };
+  }
+  // With --copy the link is dereferenced, so classify the link target.
+  const details = lstatDetails.isSymbolicLink() ? await stat(absSource) : lstatDetails;
+  if (details.isFile()) {
+    if (!absSource.toLowerCase().endsWith('.md')) {
+      return {
+        ok: false,
+        message: `Not a SKILL.md: ${expanded}`,
+        hint: 'A local file source must be a SKILL.md, or the directory holding it.',
+      };
+    }
+    return { ok: true, value: { skillMdPath: absSource, skillDir: dirname(absSource) } };
+  }
+  if (details.isDirectory()) {
+    const skillMdPath = join(absSource, 'SKILL.md');
+    if (!existsSync(skillMdPath)) {
+      return {
+        ok: false,
+        message: `No SKILL.md found in: ${expanded}`,
+        hint: 'A skill directory must contain a SKILL.md file.',
+      };
+    }
+    return { ok: true, value: { skillMdPath, skillDir: absSource } };
+  }
+  return { ok: false, message: `Unsupported file type: ${expanded}` };
+}
+
+/** The planned `@use` path for a local skill and where a copy would land. */
+interface LocalSkillUsePlan {
+  usePath: string;
+  managedDir: string;
+  willCopy: boolean;
+}
+
+/**
+ * Plan the `@use` path for a local skill. With `--copy` the skill is
+ * installed into `.promptscript/skills/<name>`; otherwise it is referenced
+ * where it lies, which requires it to stay inside the project root and to
+ * produce a path the parser can express.
+ */
+function planLocalUsePath(
+  skillDir: string,
+  entryDir: string,
+  copyRequested: boolean
+): LocalSkillStep<LocalSkillUsePlan> {
+  const skillName = basename(skillDir);
+  const managedDir = resolve(process.cwd(), MANAGED_SKILLS_DIR, skillName);
+  const sourceIsManaged = resolve(skillDir) === resolve(managedDir);
+  const willCopy = copyRequested && !sourceIsManaged;
+
+  if (willCopy) {
+    return { ok: true, value: { usePath: toUsePath(entryDir, managedDir), managedDir, willCopy } };
+  }
+  // In-place references must stay inside the project root: the resolver's
+  // loader rejects relative imports that escape it (path traversal guard).
+  const relToRoot = relative(process.cwd(), skillDir);
+  if (relToRoot.startsWith('..') || isAbsolute(relToRoot)) {
+    return {
+      ok: false,
+      message: 'Skill is outside the project root',
+      hint: `"${skillDir}" cannot be referenced in place because it lies outside the project root. Use --copy to install it into ${MANAGED_SKILLS_DIR}/.`,
+    };
+  }
+  const usePath = toUsePath(entryDir, skillDir);
+  if (!USE_PATH_PATTERN.test(usePath)) {
+    return {
+      ok: false,
+      message: `Cannot reference this path in a .prs file: ${usePath}`,
+      hint: '@use paths allow only letters, digits, underscores, hyphens, dots and slashes. Use --copy to install the skill under .promptscript/skills/, or rename the folder.',
+    };
+  }
+  return { ok: true, value: { usePath, managedDir, willCopy } };
+}
+
+/**
+ * Validate the local SKILL.md and report the outcome. Mirrors the remote
+ * flow: errors (or warnings under --strict) fail the add, plain warnings are
+ * printed and the add continues.
+ */
+function validateLocalSkillFrontmatter(
+  options: SkillsAddOptions,
+  skillMdPath: string,
+  skillContent: string,
+  existingNames: ReadonlySet<string>,
+  usePath: string,
+  spinner: Ora
+): 'pass' | 'fail' {
+  if (options.skipValidation) return 'pass';
+  const result = validateSkillFrontmatter(skillContent, { filePath: skillMdPath, existingNames });
+  const hasWarnings = result.issues.some((issue) => issue.severity === 'warning');
+  if (!result.valid || (options.strict && hasWarnings)) {
+    spinner.fail('SKILL.md failed validation');
+    ConsoleOutput.error(usePath);
+    printValidationIssues(result.issues);
+    return 'fail';
+  }
+  if (hasWarnings) {
+    spinner.warn('SKILL.md has validation warnings');
+    printValidationIssues(result.issues);
+    spinner.start('Adding skill...');
+  }
+  return 'pass';
+}
+
+/** The write plan for a local skill add. */
+interface LocalSkillCommitPlan {
+  entryFile: string;
+  originalEntryContent: string;
+  updatedEntryContent: string;
+  willCopy: boolean;
+  skillDir: string;
+  managedDir: string;
+}
+
+/**
+ * Write a local skill add as one user-visible transaction: install the copy
+ * (moving any replaced directory aside first), then write the entry file. On
+ * any failure the partial copy is removed, a replaced directory is restored
+ * from its backup, and the entry file is left untouched. The backup is
+ * deleted only after every write succeeded.
+ */
+async function commitLocalSkillAdd(plan: LocalSkillCommitPlan, spinner: Ora): Promise<void> {
+  spinner.text = plan.willCopy ? 'Copying skill...' : 'Adding skill...';
+  let replacedBackupDir: string | undefined;
+  let copyStarted = false;
+  try {
+    if (plan.willCopy) {
+      await mkdir(dirname(plan.managedDir), { recursive: true });
+      if (existsSync(plan.managedDir)) {
+        // Reaching here means --force was given (the non-force refusal ran earlier).
+        replacedBackupDir = `${plan.managedDir}.replaced-${process.pid}-${Date.now()}`;
+        await rename(plan.managedDir, replacedBackupDir);
+      }
+      copyStarted = true;
+      await cp(plan.skillDir, plan.managedDir, { recursive: true, dereference: true });
+    }
+    await assertFileUnchanged(plan.entryFile, plan.originalEntryContent);
+    await writeFileAtomically(plan.entryFile, plan.updatedEntryContent);
+  } catch (error) {
+    if (copyStarted) {
+      await rm(plan.managedDir, { recursive: true, force: true }).catch(() => {
+        // Best-effort cleanup must not hide the original error.
+      });
+    }
+    if (replacedBackupDir) {
+      await rename(replacedBackupDir, plan.managedDir).catch(() => {
+        // Best-effort restore must not hide the original error.
+      });
+    }
+    throw error;
+  }
+  if (replacedBackupDir) {
+    await rm(replacedBackupDir, { recursive: true, force: true }).catch(() => {
+      // Best-effort cleanup of the replaced skill directory.
+    });
+  }
+}
+
+/**
+ * Check the skill name against already-installed names. Returns a refusal
+ * message when the name is taken and `--force` was not given; with `--force`
+ * the name is dropped from the validator's collision set instead.
+ */
+function checkSkillNameCollision(
+  skillName: string,
+  willCopy: boolean,
+  force: boolean,
+  existingNames: Set<string>
+): string | undefined {
+  if (existingNames.has(skillName) && willCopy && !force) {
+    return `Skill "${skillName}" already exists in this project`;
+  }
+  if (force) {
+    existingNames.delete(skillName);
+  }
+  return undefined;
+}
+
+/** Everything the later stages of a local skill add need. */
+interface LocalSkillContext {
+  skillMdPath: string;
+  skillDir: string;
+  skillName: string;
+  entryFile: string;
+  entryDir: string;
+  originalEntryContent: string;
+  usePath: string;
+  managedDir: string;
+  willCopy: boolean;
+}
+
+/**
+ * Resolve and validate everything about a local skill add that can fail
+ * before any write: the source path, the entry file, and the planned
+ * `@use` path.
+ */
+async function prepareLocalSkillAdd(
+  expanded: string,
+  options: SkillsAddOptions
+): Promise<LocalSkillStep<LocalSkillContext>> {
+  const parsed = parseSkillSource(expanded);
+  if (parsed.version !== 'latest') {
+    return {
+      ok: false,
+      message: 'Versioned local paths are not supported',
+      hint: 'Local skills are referenced in place, so there is no version to pin.',
+    };
+  }
+
+  const classified = await classifyLocalSkillSource(expanded, options.copy === true);
+  if (!classified.ok) {
+    return classified;
+  }
+  const { skillDir, skillMdPath } = classified.value;
+
+  const entryFile = await resolveEntryFile(options.file);
+  const originalEntryContent = await readFile(entryFile, 'utf-8');
+
+  const plan = planLocalUsePath(skillDir, dirname(entryFile), options.copy === true);
+  if (!plan.ok) {
+    return plan;
+  }
+
+  return {
+    ok: true,
+    value: {
+      skillMdPath,
+      skillDir,
+      skillName: basename(skillDir),
+      entryFile,
+      entryDir: dirname(entryFile),
+      originalEntryContent,
+      usePath: plan.value.usePath,
+      managedDir: plan.value.managedDir,
+      willCopy: plan.value.willCopy,
+    },
+  };
+}
+
+/** Print the dry-run preview for a local skill add. */
+function printLocalSkillDryRun(ctx: LocalSkillContext, newLine: string, spinner: Ora): void {
+  spinner.succeed('Dry run — no files modified');
+  ConsoleOutput.newline();
+  ConsoleOutput.dryRun(`Would add to ${ctx.entryFile}:`);
+  ConsoleOutput.dryRun(`  ${newLine}`);
+  if (ctx.willCopy) {
+    ConsoleOutput.dryRun(`Would copy ${ctx.skillDir} → ${ctx.managedDir}`);
+  }
+  ConsoleOutput.dryRun('No lockfile entry (local skills are not pinned)');
+}
+
+/** Print the success summary for a local skill add. */
+function reportLocalSkillAdded(ctx: LocalSkillContext, newLine: string, spinner: Ora): void {
+  spinner.succeed('Skill added');
+  ConsoleOutput.newline();
+  ConsoleOutput.success(`${newLine}  →  ${ctx.entryFile}`);
+  if (ctx.willCopy) {
+    ConsoleOutput.muted(`Copied into ${MANAGED_SKILLS_DIR}/${ctx.skillName}`);
+  }
+  ConsoleOutput.muted('Local skill - not recorded in the lockfile');
+}
+
+/** Report an aborted local skill add and set the error exit code. */
+function reportLocalSkillError(error: unknown, spinner: Ora): void {
+  spinner.fail('Failed to add skill');
+  ConsoleOutput.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = 1;
 }
 
 /**
@@ -1085,194 +1419,84 @@ async function addLocalSkill(
   let transactionLock: SkillsAddLockHandle | undefined;
 
   try {
-    const expanded = expandHomePath(rawSource.trim());
-    const parsed = parseSkillSource(expanded);
-    if (parsed.version !== 'latest') {
-      spinner.fail('Versioned local paths are not supported');
-      ConsoleOutput.error('Local skills are referenced in place, so there is no version to pin.');
-      process.exitCode = 1;
-      return;
-    }
-
-    const absSource = resolve(process.cwd(), expanded);
-    if (!existsSync(absSource)) {
-      spinner.fail(`Path not found: ${expanded}`);
-      process.exitCode = 1;
-      return;
-    }
-
-    const details = await lstat(absSource);
-    if (details.isSymbolicLink()) {
-      spinner.fail('Symbolic-linked skill directories are not supported');
-      ConsoleOutput.error(
-        'The resolver skips symlinked directories at compile time. Use --copy to install the skill files.'
-      );
-      process.exitCode = 1;
-      return;
-    }
-
-    let skillDir: string;
-    let skillMdPath: string;
-    if (details.isFile()) {
-      if (!absSource.toLowerCase().endsWith('.md')) {
-        spinner.fail(`Not a SKILL.md: ${expanded}`);
-        ConsoleOutput.error('A local file source must be a SKILL.md, or the directory holding it.');
-        process.exitCode = 1;
-        return;
-      }
-      skillMdPath = absSource;
-      skillDir = dirname(absSource);
-    } else if (details.isDirectory()) {
-      skillMdPath = join(absSource, 'SKILL.md');
-      if (!existsSync(skillMdPath)) {
-        spinner.fail(`No SKILL.md found in: ${expanded}`);
-        ConsoleOutput.error('A skill directory must contain a SKILL.md file.');
-        process.exitCode = 1;
-        return;
-      }
-      skillDir = absSource;
-    } else {
-      spinner.fail(`Unsupported file type: ${expanded}`);
-      process.exitCode = 1;
-      return;
-    }
-
-    const skillName = basename(skillDir);
-
     if (!options.dryRun) {
       transactionLock = await acquireSkillsAddLock();
     }
 
-    spinner.text = 'Resolving entry file...';
-    const entryFile = await resolveEntryFile(options.file);
-    const content = await readFile(entryFile, 'utf-8');
-    const lines = content.split('\n');
-
-    const entryDir = dirname(entryFile);
-    const managedDir = resolve(process.cwd(), MANAGED_SKILLS_DIR, skillName);
-    const sourceIsManaged = resolve(skillDir) === resolve(managedDir);
-    const willCopy = options.copy === true && !sourceIsManaged;
-
-    let usePath: string;
-    if (willCopy) {
-      usePath = toUsePath(entryDir, managedDir);
-    } else {
-      // In-place references must stay inside the project root: the resolver's
-      // loader rejects relative imports that escape it (path traversal guard).
-      const relToRoot = relative(process.cwd(), skillDir);
-      if (relToRoot.startsWith('..') || isAbsolute(relToRoot)) {
-        spinner.fail('Skill is outside the project root');
-        ConsoleOutput.error(
-          `"${expanded}" cannot be referenced in place because it lies outside the project root. Use --copy to install it into ${MANAGED_SKILLS_DIR}/.`
-        );
-        process.exitCode = 1;
-        return;
-      }
-      usePath = toUsePath(entryDir, skillDir);
-    }
-
-    if (!USE_PATH_PATTERN.test(usePath)) {
-      spinner.fail(`Cannot reference this path in a .prs file: ${usePath}`);
-      ConsoleOutput.error(
-        '@use paths allow only letters, digits, underscores, hyphens, dots and slashes. Use --copy to install the skill under .promptscript/skills/, or rename the folder.'
-      );
-      process.exitCode = 1;
+    spinner.text = 'Resolving skill source...';
+    const prepared = await prepareLocalSkillAdd(expandHomePath(rawSource.trim()), options);
+    if (!prepared.ok) {
+      failLocalSkillStep(spinner, prepared);
       return;
     }
+    const ctx = prepared.value;
 
-    const alreadyImported = lines.some((line) => extractUsePath(line) === usePath);
+    const lines = ctx.originalEntryContent.split('\n');
+    const alreadyImported = lines.some((line) => extractUsePath(line) === ctx.usePath);
     if (alreadyImported) {
-      spinner.warn(`Skill already imported: ${usePath}`);
+      spinner.warn(`Skill already imported: ${ctx.usePath}`);
       return;
     }
 
     const lockfile = await loadLockfile();
-    const existingNames = await collectLocalExistingNames(lockfile, lines, skillDir, entryDir);
-    if (willCopy && existingNames.has(skillName) && options.force !== true) {
-      spinner.fail(`Skill "${skillName}" already exists in this project`);
+    const existingNames = await collectLocalExistingNames(
+      lockfile,
+      lines,
+      ctx.skillDir,
+      ctx.entryDir
+    );
+    const refusal = checkSkillNameCollision(
+      ctx.skillName,
+      ctx.willCopy,
+      options.force === true,
+      existingNames
+    );
+    if (refusal) {
+      spinner.fail(refusal);
       ConsoleOutput.error('Use --force to replace it.');
       process.exitCode = 1;
       return;
     }
-    if (options.force === true) {
-      existingNames.delete(skillName);
-    }
 
     spinner.text = options.skipValidation ? 'Reading SKILL.md...' : 'Validating SKILL.md...';
-    const skillContent = await readFile(skillMdPath, 'utf-8');
-    if (!options.skipValidation) {
-      const result = validateSkillFrontmatter(skillContent, {
-        filePath: skillMdPath,
-        existingNames,
-      });
-      const hasWarnings = result.issues.some((issue) => issue.severity === 'warning');
-      if (!result.valid || (options.strict && hasWarnings)) {
-        spinner.fail('SKILL.md failed validation');
-        ConsoleOutput.error(usePath);
-        printValidationIssues(result.issues);
-        process.exitCode = 1;
-        return;
-      }
-      if (hasWarnings) {
-        spinner.warn('SKILL.md has validation warnings');
-        printValidationIssues(result.issues);
-        spinner.start('Adding skill...');
-      }
-    }
-
-    const insertionPoint = findInsertionPoint(lines);
-    const newLine = `@use ${usePath}`;
-    lines.splice(insertionPoint, 0, newLine);
-    const updatedContent = lines.join('\n');
-
-    if (options.dryRun) {
-      spinner.succeed('Dry run — no files modified');
-      ConsoleOutput.newline();
-      ConsoleOutput.dryRun(`Would add to ${entryFile}:`);
-      ConsoleOutput.dryRun(`  ${newLine}`);
-      if (willCopy) {
-        ConsoleOutput.dryRun(`Would copy ${skillDir} → ${managedDir}`);
-      }
-      ConsoleOutput.dryRun('No lockfile entry (local skills are not pinned)');
+    const skillContent = await readFile(ctx.skillMdPath, 'utf-8');
+    const validationOutcome = validateLocalSkillFrontmatter(
+      options,
+      ctx.skillMdPath,
+      skillContent,
+      existingNames,
+      ctx.usePath,
+      spinner
+    );
+    if (validationOutcome === 'fail') {
+      process.exitCode = 1;
       return;
     }
 
-    let copiedDir: string | undefined;
-    if (willCopy) {
-      spinner.text = 'Copying skill...';
-      await mkdir(dirname(managedDir), { recursive: true });
-      if (existsSync(managedDir)) {
-        // Reaching here means --force was given (the non-force refusal ran earlier).
-        await rm(managedDir, { recursive: true, force: true });
-      }
-      await cp(skillDir, managedDir, { recursive: true, dereference: true });
-      copiedDir = managedDir;
+    const insertionPoint = findInsertionPoint(lines);
+    const newLine = `@use ${ctx.usePath}`;
+    lines.splice(insertionPoint, 0, newLine);
+
+    if (options.dryRun) {
+      printLocalSkillDryRun(ctx, newLine, spinner);
+      return;
     }
 
-    try {
-      await assertFileUnchanged(entryFile, content);
-      await writeFileAtomically(entryFile, updatedContent);
-    } catch (error) {
-      // The copy is part of the same user-visible transaction as the .prs edit.
-      if (copiedDir) {
-        await rm(copiedDir, { recursive: true, force: true }).catch(() => {
-          // Best-effort cleanup must not hide the write error.
-        });
-      }
-      throw error;
-    }
+    await commitLocalSkillAdd(
+      {
+        entryFile: ctx.entryFile,
+        originalEntryContent: ctx.originalEntryContent,
+        updatedEntryContent: lines.join('\n'),
+        willCopy: ctx.willCopy,
+        skillDir: ctx.skillDir,
+        managedDir: ctx.managedDir,
+      },
+      spinner
+    );
 
-    spinner.succeed('Skill added');
-    ConsoleOutput.newline();
-    ConsoleOutput.success(`${newLine}  →  ${entryFile}`);
-    if (willCopy) {
-      ConsoleOutput.muted(`Copied into ${MANAGED_SKILLS_DIR}/${skillName}`);
-    }
-    ConsoleOutput.muted('Local skill - not recorded in the lockfile');
+    reportLocalSkillAdded(ctx, newLine, spinner);
   } catch (error) {
-    spinner.fail('Failed to add skill');
-    ConsoleOutput.error(error instanceof Error ? error.message : String(error));
-    process.exitCode = 1;
+    reportLocalSkillError(error, spinner);
   } finally {
     if (transactionLock) {
       await releaseSkillsAddLock(transactionLock);
