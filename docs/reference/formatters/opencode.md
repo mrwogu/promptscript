@@ -84,7 +84,8 @@ description: PromptScript output format for OpenCode
 - Agents go to `.opencode/agents/<name>.md`
 - Three output modes: `simple`, `multifile`, `full`
 - `@hooks` compile to a generated plugin at `.opencode/plugins/promptscript.ts` in `multifile` and `full` modes; only `pre-tool-use` and `post-tool-use` map to `tool.execute.before` and `tool.execute.after`
-- Generated plugin hooks observe tool execution and never block it; sibling user plugins in `.opencode/plugins/` are never touched
+- Generated hook commands start asynchronously, use a 30-second default timeout, and escalate from `SIGTERM` to `SIGKILL`; sibling user plugins in `.opencode/plugins/` are never touched
+- OpenCode tool hooks expose no model or agent context, so generated payloads omit those fields and compilation reports `PS4002`
 - OpenCode coverage limits: MCP tool calls and some subagent paths may not fire plugin hooks, and failed tool calls have no dedicated error event
 - OpenCode tool names are lowercase (`edit`, `write`, `bash`); matchers authored for Claude-style names need an `opencode` target override
 
