@@ -569,6 +569,7 @@ target modes that support additional files:
 | Gemini CLI     | `.gemini/settings.json`                                                | `multifile`, `full` |
 | Windsurf       | `.windsurf/hooks.json`                                                 | `multifile`, `full` |
 | Grok Build     | `.grok/hooks/promptscript.json`                                        | `full`              |
+| OpenCode       | `.opencode/plugins/promptscript.ts` (generated plugin)                 | `multifile`, `full` |
 | VS Code Agent  | `.github/hooks/promptscript-vscode.json` when `vscode` override exists | target-specific     |
 
 Simple mode and targets without native project hooks report `PS4002` instead of
