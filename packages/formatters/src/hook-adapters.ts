@@ -556,28 +556,30 @@ const OPENCODE_EVENT_MAP: Record<PortableHookEvent, string> = {
 };
 
 /**
+ * Per-target portable-to-native event maps.
+ *
+ * Windsurf is excluded because its events map to arrays of native names;
+ * Codex is the fallback for targets without an explicit entry.
+ */
+const EVENT_MAPS: Readonly<
+  Partial<Record<HookTarget, Partial<Record<PortableHookEvent, string>>>>
+> = {
+  claude: CLAUDE_EVENT_MAP,
+  cursor: CURSOR_EVENT_MAP,
+  factory: FACTORY_EVENT_MAP,
+  github: GITHUB_EVENT_MAP,
+  gemini: GEMINI_EVENT_MAP,
+  grok: GROK_EVENT_MAP,
+  vscode: VSCODE_EVENT_MAP,
+  opencode: OPENCODE_EVENT_MAP,
+};
+
+/**
  * Get the target-native event name for a portable event.
  */
 export function mapEvent(event: PortableHookEvent, target: HookTarget): string | null {
   if (target === 'windsurf') return WINDSURF_EVENT_MAP[event][0] ?? null;
-  const map =
-    target === 'claude'
-      ? CLAUDE_EVENT_MAP
-      : target === 'cursor'
-        ? CURSOR_EVENT_MAP
-        : target === 'factory'
-          ? FACTORY_EVENT_MAP
-          : target === 'github'
-            ? GITHUB_EVENT_MAP
-            : target === 'gemini'
-              ? GEMINI_EVENT_MAP
-              : target === 'grok'
-                ? GROK_EVENT_MAP
-                : target === 'vscode'
-                  ? VSCODE_EVENT_MAP
-                  : target === 'opencode'
-                    ? OPENCODE_EVENT_MAP
-                    : CODEX_EVENT_MAP;
+  const map = EVENT_MAPS[target] ?? CODEX_EVENT_MAP;
   return map[event] || null;
 }
 
