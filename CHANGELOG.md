@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.0](https://github.com/mrwogu/promptscript/compare/v1.18.1...v1.19.0) (2026-09-18)
+
+
+### Features
+
+* **cli:** accept local paths in prs skills add ([828d566](https://github.com/mrwogu/promptscript/commit/828d5661d8a03b0aebfe594555c39c12b6bea5e8)), closes [#457](https://github.com/mrwogu/promptscript/issues/457)
+* **cli:** add resource-only compile and global output safety ([f84d731](https://github.com/mrwogu/promptscript/commit/f84d731ff1965636ae0735bf6ee1898fa799b4f8))
+* **compiler:** pass external content roots to validator ([d937597](https://github.com/mrwogu/promptscript/commit/d937597ca98f9f2eb271a61a2a51f381c39034f1))
+* **core:** add [@agents](https://github.com/agents) field capability matrix ([9863fb8](https://github.com/mrwogu/promptscript/commit/9863fb899ea30b86e48cbe8f5e5fe9acd50dc9de))
+* **core:** add validation.scanExternalContent option ([20f3df4](https://github.com/mrwogu/promptscript/commit/20f3df4e9f533ed6e36875315ba0d937f10023d2))
+* **core:** classify opencode plugin hooks as native ([6ced3cb](https://github.com/mrwogu/promptscript/commit/6ced3cb10f6acdcaaab1246cd96def6b56fe93d4))
+* **core:** constrain output.resources to resource kinds ([c252c85](https://github.com/mrwogu/promptscript/commit/c252c8541cf9deb4dc969b5ba945bdf987a3c8aa))
+* **formatters:** add gitlab-duo target ([8527181](https://github.com/mrwogu/promptscript/commit/852718127218f646dd62b370cd563a5fa8111e9a)), closes [#460](https://github.com/mrwogu/promptscript/issues/460)
+* **formatters:** generate opencode lifecycle plugin from [@hooks](https://github.com/hooks) ([fa9e03a](https://github.com/mrwogu/promptscript/commit/fa9e03afd465c5b8f194569426d058e3da9b6b58))
+* **formatters:** warn when [@agents](https://github.com/agents) fields are dropped by a target ([29342e5](https://github.com/mrwogu/promptscript/commit/29342e5bc06a55772b68e6e2f6e51f5106ac0c86))
+* **playground:** match opencode plugin outputs ([9e1ef82](https://github.com/mrwogu/promptscript/commit/9e1ef82e027b6e9805266b860dc03def13f2260d))
+
+
+### Bug Fixes
+
+* **cli:** clarify AI migration next steps ([ce2a4cd](https://github.com/mrwogu/promptscript/commit/ce2a4cdaa165da986ef9670eb149385e75ff6853))
+* **cli:** harden local skills add after review ([4de4010](https://github.com/mrwogu/promptscript/commit/4de401016a851dbe50d4dc1972d8bb9585c6e411))
+* **cli:** honor output.resources behind empty flag default ([9f35e8e](https://github.com/mrwogu/promptscript/commit/9f35e8e85a4a2fb5542eb2ecf9092a9bbba9e5bb))
+* **cli:** rewrite tmp paths in remote skill messages ([d035044](https://github.com/mrwogu/promptscript/commit/d035044ecbb19cbc0c6925412e2d179fb580cad6))
+* **core:** classify relocated skill outputs as skills ([abd8af6](https://github.com/mrwogu/promptscript/commit/abd8af6389b8444a2a74502ea30e9b9e577630c3))
+* **core:** harden resource classification and matrix validation ([48c7fa6](https://github.com/mrwogu/promptscript/commit/48c7fa6d80c14cd7ec78413610633ea330bd137a))
+* **core:** keep KNOWN_TARGETS literal for exhaustiveness ([3287b66](https://github.com/mrwogu/promptscript/commit/3287b6673c43521d89bf9b67515ad1e09c8157f7))
+* **formatters:** gate multifile skills behind skillsInMultifile ([10cb337](https://github.com/mrwogu/promptscript/commit/10cb33770b9c87f33375ac3eeff09a6eef31bde0))
+* **formatters:** harden opencode hook runtime ([ef159e3](https://github.com/mrwogu/promptscript/commit/ef159e3b6de4fbb8a2ae4ab0c187c980aeaad7f7))
+* **formatters:** keep agent warnings and codex mcp names ([b7c0f52](https://github.com/mrwogu/promptscript/commit/b7c0f527960a71a483c9199b7f1004b5560ded95))
+* **formatters:** preserve imported root skill paths ([2f4d4da](https://github.com/mrwogu/promptscript/commit/2f4d4da8e31ebf33654ad3a57c6be051626b2448))
+* **formatters:** quote dotted mcp server names in codex TOML ([65572c0](https://github.com/mrwogu/promptscript/commit/65572c0a4a1be81c0ae2094109a5824b0247b0c7))
+* **playground:** filter outputs by formatter ownership ([cd04cd2](https://github.com/mrwogu/promptscript/commit/cd04cd29dfcb80958411cd3c6a8bc017d91434ca))
+* **resolver:** add sparse registry clones and configurable timeout ([734c3e1](https://github.com/mrwogu/promptscript/commit/734c3e166b71e5ac81c92e4bb18e55ad1f07f8c2))
+* **resolver:** address CodeRabbit review on sparse clone cone handling ([dcde8cb](https://github.com/mrwogu/promptscript/commit/dcde8cb96309cdecad58b3d7e5528793a3580b9e))
+* **resolver:** carry real source paths in synthesized skill nodes ([08814ca](https://github.com/mrwogu/promptscript/commit/08814caa15b12d8e4c7f1f7633b0ad6540178bf5))
+* **resolver:** improve skill metadata diagnostics ([48f7ead](https://github.com/mrwogu/promptscript/commit/48f7ead32088c0c33ffee0ef8afc822111a910b3)), closes [#444](https://github.com/mrwogu/promptscript/issues/444)
+* **validator:** make PS012 and PS026 traceable on imported skills ([28d2466](https://github.com/mrwogu/promptscript/commit/28d24665116b4f224957538c695915caf08f15e2))
+* **validator:** require biological context for amino-acid exemption ([db09f1a](https://github.com/mrwogu/promptscript/commit/db09f1a4b38f1c2c69b823a83eefe755dc1332c1))
+
 ## [1.18.1](https://github.com/mrwogu/promptscript/compare/v1.18.0...v1.18.1) (2026-08-17)
 
 
