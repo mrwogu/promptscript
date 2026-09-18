@@ -6,7 +6,7 @@ export type HookSupportStatus =
 export type HookTimeoutUnit = 'milliseconds' | 'seconds' | 'none';
 
 export type HookProjectRootStrategy =
-  'environment' | 'git-root' | 'native-cwd' | 'workspace-cwd' | 'none';
+  'environment' | 'git-root' | 'native-cwd' | 'workspace-cwd' | 'plugin-context' | 'none';
 
 export type HookTerminalGuarantee = 'guaranteed' | 'best-effort' | 'not-guaranteed';
 
@@ -151,11 +151,22 @@ export const HOOK_CAPABILITIES = {
     },
   },
   opencode: {
-    ...UNSUPPORTED_CAPABILITY,
-    status: 'plugin-only',
-    fallback:
-      'OpenCode lifecycle events require a JavaScript or TypeScript plugin; use `prs compile --watch` for regeneration.',
+    status: 'native',
+    configPath: '.opencode/plugins/promptscript.ts',
+    events: ['pre-tool-use', 'post-tool-use'],
+    commandFormat: 'generated TypeScript plugin with bounded JSON payloads',
+    timeoutUnit: 'milliseconds',
+    projectRootStrategy: 'plugin-context',
+    platforms: ['unix'],
+    nativeVersions: ['multifile', 'full'],
+    fallback: "Use OpenCode version 'multifile' or 'full'.",
     documentationUrl: 'https://opencode.ai/docs/plugins/',
+    terminal: {
+      guarantee: 'not-guaranteed',
+      toolNames: [],
+      notes:
+        'OpenCode exposes tool.execute.before and tool.execute.after only; a dedicated terminal command event is not guaranteed, and MCP tool calls plus some subagent paths may not fire plugin hooks at all.',
+    },
   },
   gemini: {
     status: 'native',
