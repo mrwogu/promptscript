@@ -116,15 +116,18 @@ describe('target hook capability warnings', () => {
     });
     expect(getTargetHookCapabilityWarnings(disabledForTarget, 'opencode', 'full')).toEqual([]);
 
+    // A globally disabled hook re-enabled per target must still warn on a
+    // target that cannot emit hooks at all; native OpenCode must not.
     const enabledForTarget = makeTargetAst({
       event: 'post-tool-use',
       command: ['echo', 'check'],
       enabled: false,
-      targets: { opencode: { enabled: true } },
+      targets: { roo: { enabled: true }, opencode: { enabled: true } },
     });
-    expect(getTargetHookCapabilityWarnings(enabledForTarget, 'opencode', 'full')).toEqual([
+    expect(getTargetHookCapabilityWarnings(enabledForTarget, 'roo', 'full')).toEqual([
       expect.objectContaining({ code: 'PS4002' }),
     ]);
+    expect(getTargetHookCapabilityWarnings(enabledForTarget, 'opencode', 'full')).toEqual([]);
   });
 
   it('registers native hook files for cleanup in unsupported modes', () => {

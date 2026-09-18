@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import type { Program, SourceLocation } from '@promptscript/core';
+import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { OpenCodeFormatter, OPENCODE_VERSIONS } from '../formatters/opencode.js';
 
 const createLoc = (): SourceLocation => ({
@@ -954,6 +954,129 @@ describe('OpenCodeFormatter', () => {
       const result = formatter.format(ast, { version: 'full' });
       const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
       expect(skillFile?.path).toBe('.opencode/skills/custom/deploy/SKILL.md');
+    });
+  });
+
+  describe('hook plugin generation', () => {
+    const createHooksProgram = (hook: Record<string, Value>): Program => ({
+      ...createMinimalProgram(),
+      blocks: [
+        {
+          type: 'Block',
+          name: 'hooks',
+          content: {
+            type: 'ObjectContent',
+            properties: { validate: hook },
+            loc: createLoc(),
+          },
+          loc: createLoc(),
+        },
+      ],
+    });
+
+    it('emits the plugin at .opencode/plugins/promptscript.ts in full mode', () => {
+      const ast = createHooksProgram({
+        event: 'pre-tool-use',
+        matcher: 'edit|write',
+        command: ['node', '.promptscript/scripts/check.mjs', '--strict'],
+        cwd: 'project',
+        timeoutMs: 30000,
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const pluginFile = result.additionalFiles?.find(
+        (f) => f.path === '.opencode/plugins/promptscript.ts'
+      );
+      expect(pluginFile).toBeDefined();
+      expect(pluginFile?.content).toContain('"event":"tool.execute.before"');
+      expect(pluginFile?.content).toContain('"matcher":"edit|write"');
+      expect(pluginFile?.content).toContain('"timeoutMs":30000');
+      expect(result.managedOutputFiles).toContain('.opencode/plugins/promptscript.ts');
+      expect(result.managedOutputDirectories).toContain('.opencode/plugins');
+    });
+
+    it('emits the plugin in multifile mode', () => {
+      const ast = createHooksProgram({
+        event: 'post-tool-use',
+        command: ['prs', 'capture'],
+      });
+
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      const pluginFile = result.additionalFiles?.find(
+        (f) => f.path === '.opencode/plugins/promptscript.ts'
+      );
+      expect(pluginFile).toBeDefined();
+      expect(pluginFile?.content).toContain('"event":"tool.execute.after"');
+    });
+
+    it('warns and omits the plugin in simple mode', () => {
+      const ast = createHooksProgram({
+        event: 'pre-tool-use',
+        command: ['node', 'check.mjs'],
+      });
+
+      const result = formatter.format(ast, { version: 'simple' });
+
+      expect(
+        result.additionalFiles?.some((f) => f.path === '.opencode/plugins/promptscript.ts')
+      ).toBeFalsy();
+      // The plugin file stays registered so cleanup removes PromptScript
+      // output from earlier richer compiles.
+      expect(result.managedOutputFiles).toContain('.opencode/plugins/promptscript.ts');
+      expect(result.warnings).toContainEqual(
+        expect.objectContaining({
+          code: 'PS4002',
+          message: expect.stringContaining('version "simple" cannot emit @hooks'),
+        })
+      );
+    });
+
+    it('does not emit the plugin without a hooks block', () => {
+      const result = formatter.format(createMinimalProgram(), { version: 'full' });
+
+      expect(
+        result.additionalFiles?.some((f) => f.path === '.opencode/plugins/promptscript.ts')
+      ).toBeFalsy();
+      expect(result.managedOutputFiles).toContain('.opencode/plugins/promptscript.ts');
+      expect(result.warnings).toBeUndefined();
+    });
+
+    it('omits events OpenCode cannot represent and reports PS4002 with location', () => {
+      const ast = createHooksProgram({
+        event: 'session-start',
+        command: ['echo', 'start'],
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      expect(
+        result.additionalFiles?.some((f) => f.path === '.opencode/plugins/promptscript.ts')
+      ).toBeFalsy();
+      expect(result.warnings).toContainEqual(
+        expect.objectContaining({
+          code: 'PS4002',
+          message:
+            'Hook "validate" uses event "session-start", which opencode cannot represent and will omit.',
+          location: ast.blocks[0]!.loc,
+        })
+      );
+    });
+
+    it('emits no plugin when every hook is disabled', () => {
+      const ast = createHooksProgram({
+        event: 'pre-tool-use',
+        command: ['node', 'check.mjs'],
+        enabled: false,
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      expect(
+        result.additionalFiles?.some((f) => f.path === '.opencode/plugins/promptscript.ts')
+      ).toBeFalsy();
+      expect(result.warnings).toBeUndefined();
     });
   });
 });

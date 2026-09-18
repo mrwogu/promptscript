@@ -30,7 +30,8 @@ export type HookTarget =
   | 'vscode'
   | 'gemini'
   | 'windsurf'
-  | 'grok';
+  | 'grok'
+  | 'opencode';
 
 export interface HookTargetOverride {
   event?: PortableHookEvent;
@@ -154,6 +155,7 @@ const HOST_CWD_STRATEGIES = {
   'git-root': false,
   'native-cwd': true,
   'workspace-cwd': true,
+  'plugin-context': false,
   none: false,
 } as const satisfies Record<HookProjectRootStrategy, boolean>;
 
@@ -539,6 +541,21 @@ const VSCODE_EVENT_MAP: Record<PortableHookEvent, string> = {
 };
 
 /**
+ * OpenCode plugin hook names. Only tool execution intercepts are native;
+ * every other lifecycle event is omitted with a PS4002 warning.
+ */
+const OPENCODE_EVENT_MAP: Record<PortableHookEvent, string> = {
+  'pre-terminal-command': '',
+  'pre-tool-use': 'tool.execute.before',
+  'post-tool-use': 'tool.execute.after',
+  'session-start': '',
+  setup: '',
+  'subagent-start': '',
+  notification: '',
+  stop: '',
+};
+
+/**
  * Get the target-native event name for a portable event.
  */
 export function mapEvent(event: PortableHookEvent, target: HookTarget): string | null {
@@ -558,7 +575,9 @@ export function mapEvent(event: PortableHookEvent, target: HookTarget): string |
                 ? GROK_EVENT_MAP
                 : target === 'vscode'
                   ? VSCODE_EVENT_MAP
-                  : CODEX_EVENT_MAP;
+                  : target === 'opencode'
+                    ? OPENCODE_EVENT_MAP
+                    : CODEX_EVENT_MAP;
   return map[event] || null;
 }
 
@@ -585,6 +604,7 @@ function getEffectiveMatcher(hook: HookDefinition, target: HookTarget): string |
 export function convertTimeout(timeoutMs: number, target: HookTarget): number {
   if (target === 'gemini') return timeoutMs;
   if (target === 'windsurf') return timeoutMs;
+  if (target === 'opencode') return timeoutMs;
   if (
     target === 'claude' ||
     target === 'cursor' ||
@@ -1046,4 +1066,230 @@ function escapeTomlHookString(value: string): string {
     .replace(/"/g, '\\"')
     .replace(/\n/g, '\\n')
     .replace(/\r/g, '\\r');
+}
+
+/**
+ * Project-local OpenCode plugin path PromptScript owns.
+ */
+export const OPENCODE_PLUGIN_PATH = '.opencode/plugins/promptscript.ts';
+
+/**
+ * Serialized hook rule embedded in the generated OpenCode plugin.
+ */
+export interface OpenCodeHookRule {
+  id: string;
+  event: 'tool.execute.before' | 'tool.execute.after';
+  matcher?: string;
+  command: string[];
+  cwd?: string;
+  timeoutMs?: number;
+}
+
+function buildOpenCodeHookRule(hook: HookDefinition): OpenCodeHookRule | null {
+  const nativeEvent = mapEvent(hook.event, 'opencode');
+  if (nativeEvent !== 'tool.execute.before' && nativeEvent !== 'tool.execute.after') return null;
+
+  const command =
+    hook.command ??
+    (hook.script
+      ? [...getPosixInterpreter(hook.script.interpreter), hook.script.path, ...hook.script.args]
+      : []);
+  if (command.length === 0) return null;
+
+  const rule: OpenCodeHookRule = {
+    id: hook.id.replace(/[^A-Za-z0-9._-]/g, '-'),
+    event: nativeEvent,
+    ...(hook.matcher !== undefined ? { matcher: hook.matcher } : {}),
+    command,
+    ...(hook.cwd !== undefined && hook.cwd !== 'project' ? { cwd: hook.cwd } : {}),
+    ...(hook.timeoutMs !== undefined ? { timeoutMs: hook.timeoutMs } : {}),
+  };
+  return rule;
+}
+
+const OPENCODE_PLUGIN_RUNTIME = `
+const PAYLOAD_LIMIT_BYTES = 32768;
+
+interface OpenCodePluginContext {
+  directory: string;
+  worktree?: string;
+}
+
+interface OpenCodeToolInput {
+  tool?: string;
+  sessionID?: string;
+  callID?: string;
+}
+
+interface OpenCodeToolOutput {
+  args?: unknown;
+}
+
+interface OpenCodeToolResult {
+  args?: unknown;
+  title?: unknown;
+  output?: unknown;
+  metadata?: unknown;
+}
+
+interface OpenCodeCompiledRule {
+  rule: OpenCodeHookRule;
+  matcher: RegExp | null;
+}
+
+function safeStringify(value: unknown): string {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return '{}';
+  }
+}
+
+// Keep the payload bounded: drop oversized tool arguments first, then the
+// result object, so the command always receives parseable JSON.
+function boundedPayload(payload: Record<string, unknown>): string {
+  const full = safeStringify(payload);
+  if (full.length <= PAYLOAD_LIMIT_BYTES) return full;
+  const withoutArgs = { ...payload, args: '[truncated]' };
+  const trimmed = safeStringify(withoutArgs);
+  if (trimmed.length <= PAYLOAD_LIMIT_BYTES) return trimmed;
+  return safeStringify({ ...withoutArgs, result: '[truncated]' });
+}
+
+function buildPayload(
+  rule: OpenCodeHookRule,
+  input: OpenCodeToolInput,
+  output: { args?: unknown },
+  result?: unknown
+): Record<string, unknown> {
+  const payload: Record<string, unknown> = {
+    target: 'opencode',
+    hook: rule.id,
+    event: rule.event === 'tool.execute.before' ? 'pre-tool-use' : 'post-tool-use',
+    tool: input.tool,
+    args: output.args,
+    sessionID: input.sessionID,
+    callID: input.callID,
+    timestamp: new Date().toISOString()
+  };
+  if (result !== undefined) payload.result = result;
+  return payload;
+}
+
+// Hooks observe tool execution and never block it: failures are logged and the
+// tool call proceeds, so a broken hook cannot disrupt the agent session.
+async function runRule(
+  rule: OpenCodeHookRule,
+  projectRoot: string,
+  payload: string
+): Promise<void> {
+  try {
+    const cwd = rule.cwd ? projectRoot + '/' + rule.cwd : projectRoot;
+    const proc = Bun.spawn({
+      cmd: rule.command,
+      cwd,
+      stdin: 'pipe',
+      stdout: 'inherit',
+      stderr: 'inherit'
+    });
+    const timer =
+      rule.timeoutMs !== undefined ? setTimeout(() => proc.kill(), rule.timeoutMs) : undefined;
+    try {
+      proc.stdin.write(payload);
+      proc.stdin.end();
+      await proc.exited;
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+    }
+  } catch (error: unknown) {
+    console.error('[promptscript] opencode hook "' + rule.id + '" failed:', error);
+  }
+}
+
+export const PromptScriptHooks = async (context: OpenCodePluginContext) => {
+  const projectRoot = context.worktree || context.directory;
+  const compiled: OpenCodeCompiledRule[] = [];
+  for (const rule of HOOK_RULES) {
+    if (rule.matcher === undefined) {
+      compiled.push({ rule, matcher: null });
+      continue;
+    }
+    try {
+      compiled.push({ rule, matcher: new RegExp(rule.matcher) });
+    } catch (error: unknown) {
+      console.error(
+        '[promptscript] opencode hook "' + rule.id + '" has an invalid matcher:',
+        rule.matcher
+      );
+    }
+  }
+
+  return {
+    'tool.execute.before': async (input: OpenCodeToolInput, output: OpenCodeToolOutput) => {
+      for (const entry of compiled) {
+        if (entry.rule.event !== 'tool.execute.before') continue;
+        if (entry.matcher !== null && !entry.matcher.test(String(input.tool))) continue;
+        await runRule(
+          entry.rule,
+          projectRoot,
+          boundedPayload(buildPayload(entry.rule, input, output))
+        );
+      }
+    },
+    'tool.execute.after': async (input: OpenCodeToolInput, output: OpenCodeToolResult) => {
+      for (const entry of compiled) {
+        if (entry.rule.event !== 'tool.execute.after') continue;
+        if (entry.matcher !== null && !entry.matcher.test(String(input.tool))) continue;
+        const result = {
+          title: output.title,
+          output: output.output,
+          metadata: output.metadata
+        };
+        await runRule(
+          entry.rule,
+          projectRoot,
+          boundedPayload(buildPayload(entry.rule, input, output, result))
+        );
+      }
+    }
+  };
+};
+`;
+
+/**
+ * Generate the project-local OpenCode plugin for portable hook definitions.
+ *
+ * Returns the plugin source, or null when no enabled hook maps to an OpenCode
+ * tool execution event. Output is deterministic for equal hook input.
+ */
+export function generateOpenCodePlugin(hooks: HookDefinition[]): string | null {
+  const rules: OpenCodeHookRule[] = [];
+  for (const hook of applyHookTargetOverrides(hooks, 'opencode')) {
+    if (hook.enabled === false) continue;
+    const rule = buildOpenCodeHookRule(hook);
+    if (rule) rules.push(rule);
+  }
+  if (rules.length === 0) return null;
+
+  const serializedRules = rules.map((rule) => JSON.stringify(rule));
+  return (
+    '// Generated by PromptScript - do not edit.\n' +
+    '// Recompiling the .promptscript sources rewrites this file; manual edits are discarded.\n' +
+    '// Scope: OpenCode fires these hooks for local tool executions only. MCP tool calls,\n' +
+    '// some subagent paths, and failed tool calls have no dedicated plugin hook.\n' +
+    '\n' +
+    'interface OpenCodeHookRule {\n' +
+    '  id: string;\n' +
+    "  event: 'tool.execute.before' | 'tool.execute.after';\n" +
+    '  matcher?: string;\n' +
+    '  command: string[];\n' +
+    '  cwd?: string;\n' +
+    '  timeoutMs?: number;\n' +
+    '}\n' +
+    '\n' +
+    'const HOOK_RULES: readonly OpenCodeHookRule[] = [\n' +
+    serializedRules.map((rule) => '  ' + rule).join(',\n') +
+    '\n];\n' +
+    OPENCODE_PLUGIN_RUNTIME
+  );
 }
