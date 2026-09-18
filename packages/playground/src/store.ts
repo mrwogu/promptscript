@@ -436,6 +436,7 @@ export const selectOutputsForFormatter = (
       /\.opencode\/commands\/.*\.md$/,
       /\.opencode\/skills\/.*\/SKILL\.md$/,
       /\.opencode\/agents\/.*\.md$/,
+      /^\.opencode\/plugins\/.*\.ts$/,
     ],
     gemini: [
       /^GEMINI\.md$/,
