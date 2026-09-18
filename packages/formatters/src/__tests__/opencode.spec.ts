@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { Program, SourceLocation, Value } from '@promptscript/core';
-import { OpenCodeFormatter, OPENCODE_VERSIONS } from './opencode.js';
+import { OpenCodeFormatter, OPENCODE_VERSIONS } from '../formatters/opencode.js';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',
