@@ -225,6 +225,13 @@
         "overwrite": {
           "type": "boolean",
           "description": "Whether to overwrite existing files without warning"
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OutputResourceKind"
+          },
+          "description": "Compile only selected resource kinds (agents, skills, commands, mcp, hooks, plugins, main). A global install can emit agent and skill directories without unrelated root instruction files."
         }
       },
       "additionalProperties": false,
@@ -368,6 +375,19 @@
       ],
       "additionalProperties": false,
       "description": "Extended registry alias entry for monorepos or custom roots."
+    },
+    "OutputResourceKind": {
+      "type": "string",
+      "enum": [
+        "main",
+        "skills",
+        "agents",
+        "commands",
+        "hooks",
+        "mcp",
+        "plugins"
+      ],
+      "description": "Resource kinds a compile run can select.\n\n`main` is the target's instruction surface (root instruction files, rules, workflows, local memory); everything else matches the catalog resource categories."
     },
     "BuildProfileConfig": {
       "type": "object",

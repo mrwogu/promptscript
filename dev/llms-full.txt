@@ -1605,18 +1605,54 @@ Known agent references are rewritten with the same namespace. For example, an im
 
 Validators check supported enum values and forbidden fields before formatters generate output. Target-specific fields are emitted only where the native agent format supports them.
 
+## Field Support Matrix
+
+Every canonical `@agents` field has an explicit status per native target. The matrix is machine-readable in `@promptscript/core` (`agent-capabilities.ts`) and drives the compiler diagnostics, so the table below cannot drift from what formatters actually emit:
+
+- **emitted** - written to the native agent file under the same name
+- **transformed** - written under a target-native name or representation
+- **not supported** - the native agent format cannot represent it
+
+| Field                 | GitHub      | Claude  | Cursor  | Factory | Codex       | OpenCode | Augment | Amp     | Grok    |
+| --------------------- | ----------- | ------- | ------- | ------- | ----------- | -------- | ------- | ------- | ------- |
+| `description`         | emitted     | emitted | emitted | emitted | emitted     | emitted  | emitted | emitted | emitted |
+| `content`             | emitted     | emitted | emitted | emitted | transformed | emitted  | emitted | emitted | emitted |
+| `tools`               | transformed | emitted | -       | emitted | -           | -        | -       | -       | emitted |
+| `model`               | transformed | emitted | emitted | emitted | emitted     | -        | -       | -       | emitted |
+| `reasoningEffort`     | -           | -       | -       | emitted | transformed | -        | -       | -       | -       |
+| `specModel`           | transformed | -       | -       | emitted | -           | -        | -       | -       | -       |
+| `specReasoningEffort` | -           | -       | -       | emitted | -           | -        | -       | -       | -       |
+| `disallowedTools`     | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
+| `permissionMode`      | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
+| `skills`              | -           | emitted | -       | -       | transformed | -        | -       | -       | emitted |
+| `mcpServers`          | transformed | emitted | emitted | emitted | transformed | -        | -       | -       | emitted |
+| `sandboxMode`         | -           | -       | -       | -       | transformed | -        | -       | -       | -       |
+| `nicknameCandidates`  | -           | -       | -       | -       | transformed | -        | -       | -       | -       |
+| `handoffs`            | emitted     | -       | -       | -       | -           | -        | -       | -       | -       |
+| `maxTurns`            | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
+| `memory`              | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
+| `background`          | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
+| `isolation`           | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
+
+GitHub transformation examples: `tools` maps PromptScript and Claude Code tool names to Copilot aliases (`Grep` and `Glob` both become `search`), and `model` maps common Claude and OpenAI aliases (`sonnet` becomes `Claude Sonnet 4.5`). Codex transformation examples: `content` becomes `developer_instructions`, `reasoningEffort` becomes `model_reasoning_effort`, and `skills` becomes the `skills.config` array.
+
+Every other target has no native agent output: the whole `@agents` block is omitted and reported with a `PS4003` warning instead of being dropped silently. The same diagnostic fires per field when a native target cannot represent authored data (for example `tools` on Cursor, or `skills` on GitHub), naming the agent, the field, the target, and which targets do support the field.
+
 ## Native Output
 
 Targets with native agent systems receive dedicated files. Common examples:
 
-| Target         | Native output                |
-| -------------- | ---------------------------- |
-| Claude Code    | `.claude/agents/<name>.md`   |
-| GitHub Copilot | `.github/agents/<name>.md`   |
-| Cursor         | `.cursor/agents/<name>.md`   |
-| Factory AI     | `.factory/droids/<name>.md`  |
-| Codex          | `.codex/agents/<name>.toml`  |
-| OpenCode       | `.opencode/agents/<name>.md` |
+| Target         | Native output                                                  |
+| -------------- | -------------------------------------------------------------- |
+| Claude Code    | `.claude/agents/<name>.md`                                     |
+| GitHub Copilot | `.github/agents/<name>.md`                                     |
+| Cursor         | `.cursor/agents/<name>.md`                                     |
+| Factory AI     | `.factory/droids/<name>.md`                                    |
+| Codex          | `.codex/agents/<name>.toml`                                    |
+| OpenCode       | `.opencode/agents/<name>.md`                                   |
+| Augment        | `.augment/agents/<name>.md`                                    |
+| Amp            | `.agents/agents/<name>.md`                                     |
+| Grok Build     | `.claude/agents/<name>.md` (delegated to the Claude formatter) |
 
 Targets without a native agent contract still receive project instructions through their primary output. Check [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) before depending on target-specific fields.
 
@@ -1686,6 +1722,20 @@ targets:
   - codex:
       version: full
 ```
+
+Codex also emits agent TOML files in `multifile` mode. Compiling a version that cannot emit agents reports `PS4003` for the whole block instead of dropping it silently.
+
+## Global Installs
+
+`output.baseDir` (or `prs compile --output`) can point at a global root such as `${HOME}`. To install only generated resources without unrelated root instruction files, select resource kinds:
+
+```bash
+prs compile --output "$HOME" --resources agents,skills
+```
+
+Valid kinds are `agents`, `skills`, `commands`, `mcp`, `hooks`, `plugins`, and `main`. Without `main`, root instruction files such as `CLAUDE.md` or `AGENTS.md` are omitted, so a global compile produces only directories like `.claude/skills/`, `.claude/agents/`, or `.factory/droids/`. The same selection can be pinned in config with `output.resources`.
+
+Global output is guarded: compiling into the home directory without a resource selection prints a warning first, and protected personal override files (`~/.factory/AGENTS.md` today) are refused outright. Resource-only runs skip managed cleanup so unselected files are never treated as obsolete and deleted; run a full compile to prune stale generated files.
 
 ## Design Guidelines
 
@@ -3548,27 +3598,34 @@ Define specialized AI agents for target platforms with native agent support:
 }
 ```
 
-| Property              | Type     | Required | Description                                                                    |
-| --------------------- | -------- | -------- | ------------------------------------------------------------------------------ |
-| `description`         | string   | Yes      | When the agent should be invoked                                               |
-| `content`             | string   | No       | Additional system prompt for the subagent                                      |
-| `tools`               | string[] | No       | Allowed tools (inherits all if omitted)                                        |
-| `model`               | string   | No       | AI model to use (platform-specific values)                                     |
-| `reasoningEffort`     | string   | No       | Target-native reasoning level                                                  |
-| `specModel`           | string   | No       | Model for Specification/planning mode (GitHub, Factory only)                   |
-| `specReasoningEffort` | string   | No       | Reasoning effort for spec mode: `low`, `medium`, `high` (Factory only)         |
-| `disallowedTools`     | string[] | No       | Tools to deny (Claude only)                                                    |
-| `permissionMode`      | string   | No       | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` (Claude only) |
-| `skills`              | string[] | No       | Named skills available to the agent                                            |
-| `mcpServers`          | string[] | No       | Named top-level MCP servers available to the agent                             |
-| `sandboxMode`         | string   | No       | Target-native sandbox policy                                                   |
-| `nicknameCandidates`  | string[] | No       | Candidate display names for spawned agents                                     |
+| Property              | Type     | Required | Description                                                                          |
+| --------------------- | -------- | -------- | ------------------------------------------------------------------------------------ |
+| `description`         | string   | Yes      | When the agent should be invoked                                                     |
+| `content`             | string   | No       | Additional system prompt for the subagent                                            |
+| `tools`               | string[] | No       | Allowed tools (inherits all if omitted)                                              |
+| `model`               | string   | No       | AI model to use (platform-specific values)                                           |
+| `reasoningEffort`     | string   | No       | Target-native reasoning level                                                        |
+| `specModel`           | string   | No       | Model for Specification/planning mode (GitHub, Factory only)                         |
+| `specReasoningEffort` | string   | No       | Reasoning effort for spec mode: `low`, `medium`, `high` (Factory only)               |
+| `disallowedTools`     | string[] | No       | Tools to deny (Claude, grok only)                                                    |
+| `permissionMode`      | string   | No       | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` (Claude, grok only) |
+| `skills`              | string[] | No       | Named skills available to the agent                                                  |
+| `mcpServers`          | string[] | No       | Named top-level MCP servers available to the agent                                   |
+| `sandboxMode`         | string   | No       | Target-native sandbox policy                                                         |
+| `nicknameCandidates`  | string[] | No       | Candidate display names for spawned agents                                           |
+| `handoffs`            | array    | No       | Delegation entries (`label`, `agent`, `prompt`, `send`; GitHub only)                 |
+| `maxTurns`            | number   | No       | Maximum agentic turns before stopping (Claude, grok only)                            |
+| `memory`              | string   | No       | Memory scope: `user`, `project`, `local` (Claude, grok only)                         |
+| `background`          | boolean  | No       | Run the agent as a background process (Claude, grok only)                            |
+| `isolation`           | string   | No       | Isolation mode: `worktree` (Claude, grok only)                                       |
+
+Every canonical field has an explicit per-target status in the [Field Support Matrix](https://getpromptscript.dev/dev/features/agents/#field-support-matrix). A field a target cannot represent is reported with a `PS4003` compatibility warning (agent, field, target, and supporting targets) and omitted, never dropped silently.
 
 Agents output by platform:
 
 **GitHub Output** (`.github/agents/code-reviewer.md`, version: full)
 
-Supports: `name`, `description`, `tools`, `model`, `specModel`. Tool and model names are automatically mapped to GitHub Copilot's format:
+Supports `description`, `content`, `handoffs`, and `mcpServers` (inlined from the referenced `@mcpServers` entries), plus `tools`, `model`, and `specModel` under mapping:
 
 - Tools: `Read` → `read`, `Grep`/`Glob` → `search`, `Bash` → `execute`
 - Models: `sonnet` → `Claude Sonnet 4.5`, `opus` → `Claude Opus 4.5`, `haiku` → `Claude Haiku 4.5`
@@ -3599,7 +3656,7 @@ Review checklist:
 
 **Claude Output** (`.claude/agents/code-reviewer.md`, version: full)
 
-Supports all properties including `disallowedTools`, `permissionMode`, `skills`:
+Supports `description`, `content`, `tools`, `disallowedTools`, `model`, `permissionMode`, `skills`, `maxTurns`, `memory`, `mcpServers`, `background`, and `isolation` (`reasoningEffort`, `specModel`, `specReasoningEffort`, `sandboxMode`, `nicknameCandidates`, and `handoffs` are reported with `PS4003` and omitted):
 
 ```markdown
 ---
@@ -5591,6 +5648,7 @@ prs compile [options]
 | `-a, --all`                  | Compile to all configured targets                       |
 | `-w, --watch`                | Watch mode for continuous compilation                   |
 | `-o, --output <dir>`         | Override output directory                               |
+| `--resources <items>`        | Compile only selected resources (see below)             |
 | `--dry-run`                  | Preview changes without writing                         |
 | `--no-migrate-factory-hooks` | Warn instead of migrating legacy Factory settings hooks |
 | `--registry <path>`          | Override the configured registry path                   |
@@ -5624,6 +5682,8 @@ Before anything is written, every enabled target contributes its files to a sing
 
 When compiling the Factory target and `.factory/hooks.json` is absent, `prs compile` migrates unambiguous hooks from `.factory/settings.json` before writing generated output. `--dry-run` reports the planned canonical and legacy file changes without writing. `--no-migrate-factory-hooks` keeps the legacy file unchanged and reports `PS4002` instead. Unknown events, malformed entries, and mixed ownership abort migration without a partial write.
 
+`--resources <items>` compiles only the named resource kinds: `agents`, `skills`, `commands`, `mcp`, `hooks`, `plugins`, and `main`. Multiple kinds are comma-separated and the flag overrides `output.resources` in the config. A selection without `main` omits root instruction files (and rule, workflow, and local-memory outputs), so a global install can generate only `.claude/agents/`, `.factory/droids/`, or skill directories. Resource-only runs skip managed cleanup, because cleanup would classify every unselected file as obsolete; run a full compile to prune stale generated files. Writing into the home directory without a resource selection prints a warning, and protected personal files such as `~/.factory/AGENTS.md` are refused outright.
+
 **Examples:**
 
 ```bash
@@ -5647,6 +5707,9 @@ prs compile --watch
 
 # Preview changes
 prs compile --dry-run
+
+# Install only agents and skills into a global output root
+prs compile --output "$HOME" --resources agents,skills
 
 # Compile a named build profile
 prs compile --build logstrip-factory
@@ -5712,7 +5775,7 @@ builds:
 prs build logstrip-factory
 ```
 
-The command accepts the applicable compile options from `prs compile`, including `--target`, `--format`, `--output`, `--dry-run`, `--config`, `--force`, `--strict`, `--ignore-hashes`, `--registry`, `--watch`, and `--cwd`.
+The command accepts the applicable compile options from `prs compile`, including `--target`, `--format`, `--output`, `--resources`, `--dry-run`, `--config`, `--force`, `--strict`, `--ignore-hashes`, `--registry`, `--watch`, and `--cwd`.
 
 ______________________________________________________________________
 
@@ -7894,13 +7957,19 @@ output:
   baseDir: '.'
   header: Managed by the platform team.
   overwrite: false
+  resources:
+    - agents
+    - skills
 ```
 
-| Field       | Type    | Default | Description                                                          |
-| ----------- | ------- | ------- | -------------------------------------------------------------------- |
-| `baseDir`   | string  | `.`     | Base directory for generated output                                  |
-| `header`    | string  | -       | Header added to Markdown after PromptScript metadata and frontmatter |
-| `overwrite` | boolean | `false` | Overwrite conflicting user files without prompting, like `--force`   |
+| Field       | Type     | Default | Description                                                                                                                           |
+| ----------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `baseDir`   | string   | `.`     | Base directory for generated output                                                                                                   |
+| `header`    | string   | -       | Header added to Markdown after PromptScript metadata and frontmatter                                                                  |
+| `overwrite` | boolean  | `false` | Overwrite conflicting user files without prompting, like `--force`                                                                    |
+| `resources` | string[] | -       | Compile only these resource kinds (`agents`, `skills`, `commands`, `mcp`, `hooks`, `plugins`, `main`); `prs compile --resources` wins |
+
+`resources` selects what a compile emits. A selection without `main` omits root instruction files, so `baseDir: '${HOME}'` with `resources: [agents, skills]` installs only generated agent and skill directories into the global root. Protected personal files such as `~/.factory/AGENTS.md` are never written, and resource-only runs skip managed cleanup.
 
 ### formatting
 
@@ -8416,7 +8485,8 @@ GitLab Duo output mapping:
 - `CLAUDE.md` is gitignored by many project templates - you may need to `git add -f CLAUDE.md`
 - `CLAUDE.local.md` is intentionally not committed to git (private developer overrides)
 - Skills support frontmatter fields: `name`, `description`, plus newer fields like `model`, `allowedTools`, `disallowedTools`, `permissionMode`, `specModel`, `specReasoningEffort`
-- Agent files support: `name`, `description`, `model`, `allowedTools`, `disallowedTools`, `permissionMode`, `specModel`, `specReasoningEffort`, `skills`
+- Agent files support: `description`, `content`, `tools`, `disallowedTools`, `model`, `permissionMode`, `skills`, `maxTurns`, `memory`, `mcpServers`, `background`, `isolation`. Fields other targets own (`reasoningEffort`, `specModel`, `specReasoningEffort`, `sandboxMode`, `nicknameCandidates`, `handoffs`) are reported with `PS4003` and omitted
+- Agent-level lifecycle hooks are not part of `@agents`; define them through `@hooks`
 - The `@local` block content goes to `CLAUDE.local.md` with an import statement added to the main `CLAUDE.md`
 
 ## Example Output
@@ -19538,7 +19608,7 @@ PromptScript automatically maps tool and model names to GitHub Copilot's format:
 | `sonnet-4`   | `Claude Sonnet 4`   |
 | `inherit`    | *(omitted)*         |
 
-Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` are ignored for GitHub output.
+Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` cannot be represented in GitHub output: each one is reported with a `PS4003` compatibility warning and omitted.
 
 `.claude/agents/code-reviewer.md`
 
@@ -19629,14 +19699,19 @@ targets:
 
 ## Platform Comparison
 
-| Target         | Native agent output          | Notable capabilities                                   |
-| -------------- | ---------------------------- | ------------------------------------------------------ |
-| GitHub Copilot | `.github/agents/<name>.md`   | Tools, model mapping, specification model              |
-| Claude Code    | `.claude/agents/<name>.md`   | Tools, deny lists, permissions, skills, MCP references |
-| Cursor         | `.cursor/agents/<name>.md`   | Model, tools, MCP references                           |
-| Factory AI     | `.factory/droids/<name>.md`  | Models, reasoning effort, tools, MCP references        |
-| Codex          | `.codex/agents/<name>.toml`  | Reasoning effort, sandbox, nicknames, skills           |
-| OpenCode       | `.opencode/agents/<name>.md` | Models, tools, permissions                             |
+| Target         | Native agent output          | Notable capabilities                                                 |
+| -------------- | ---------------------------- | -------------------------------------------------------------------- |
+| GitHub Copilot | `.github/agents/<name>.md`   | Tools and model mapping, specification model, handoffs, inline MCP   |
+| Claude Code    | `.claude/agents/<name>.md`   | Tools, deny lists, permissions, skills, max turns, memory, MCP names |
+| Cursor         | `.cursor/agents/<name>.md`   | Name, description, model, MCP references (no tools)                  |
+| Factory AI     | `.factory/droids/<name>.md`  | Models, reasoning effort, spec models, tools, MCP references         |
+| Codex          | `.codex/agents/<name>.toml`  | Reasoning effort, sandbox, nicknames, skills config, MCP tables      |
+| OpenCode       | `.opencode/agents/<name>.md` | Description and content (automatic `mode: subagent`)                 |
+| Augment        | `.augment/agents/<name>.md`  | Description and content                                              |
+| Amp            | `.agents/agents/<name>.md`   | Description and content                                              |
+| Grok Build     | `.claude/agents/<name>.md`   | Full Claude contract through delegation                              |
+
+Fields a target cannot represent are reported with `PS4003` compatibility warnings (agent name, field, target, and the targets that do support the field) instead of being dropped silently. See the [Field Support Matrix](https://getpromptscript.dev/dev/features/agents/#field-support-matrix) for the authoritative per-target statuses.
 
 Project lifecycle hooks are defined separately through `@hooks`. Agents can reference shared capabilities from `@skills` and `@mcpServers`.
 
