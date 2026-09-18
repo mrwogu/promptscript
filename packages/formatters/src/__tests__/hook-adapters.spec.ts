@@ -9,12 +9,14 @@ import {
   generateGeminiHooks,
   generateGitHubHooks,
   generateGrokHooks,
+  generateOpenCodePlugin,
   generateVSCodeHooks,
   generateWindsurfHooks,
   getEnabledHookScriptResources,
   getHookCompatibilityWarnings,
   mapEvent,
   convertTimeout,
+  OPENCODE_PLUGIN_PATH,
   type HookDefinition,
   type HookTarget,
 } from '../hook-adapters.js';
@@ -219,12 +221,23 @@ describe('hook-adapters', () => {
       ['vscode', 'PreToolUse'],
       ['github', null],
       ['grok', null],
+      ['opencode', null],
     ] as const)(
       'should map pre-terminal-command for %s without overstating coverage',
       (target, event) => {
         expect(mapEvent('pre-terminal-command', target)).toBe(event);
       }
     );
+
+    it('should map OpenCode tool events only', () => {
+      expect(mapEvent('pre-tool-use', 'opencode')).toBe('tool.execute.before');
+      expect(mapEvent('post-tool-use', 'opencode')).toBe('tool.execute.after');
+      expect(mapEvent('session-start', 'opencode')).toBeNull();
+      expect(mapEvent('setup', 'opencode')).toBeNull();
+      expect(mapEvent('subagent-start', 'opencode')).toBeNull();
+      expect(mapEvent('notification', 'opencode')).toBeNull();
+      expect(mapEvent('stop', 'opencode')).toBeNull();
+    });
   });
 
   describe('convertTimeout', () => {
@@ -260,6 +273,10 @@ describe('hook-adapters', () => {
     it('should preserve milliseconds for Gemini and Windsurf', () => {
       expect(convertTimeout(1500, 'gemini')).toBe(1500);
       expect(convertTimeout(1500, 'windsurf')).toBe(1500);
+    });
+
+    it('should preserve milliseconds for OpenCode plugins', () => {
+      expect(convertTimeout(1500, 'opencode')).toBe(1500);
     });
   });
 
@@ -1635,6 +1652,266 @@ describe('hook-adapters', () => {
           message: 'Hook "stop" uses matcher with "stop", which gemini ignores.',
         })
       );
+    });
+
+    it('reports unsupported OpenCode events without warning on supported fields', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          check: {
+            event: 'pre-tool-use',
+            matcher: 'edit|write',
+            command: ['node', 'check.mjs'],
+            cwd: 'project',
+            timeoutMs: 5000,
+          },
+          notify: {
+            event: 'session-start',
+            command: ['echo', 'start'],
+          },
+          chatty: {
+            event: 'pre-tool-use',
+            command: ['echo', 'check'],
+            statusMessage: 'Checking',
+          },
+        })
+      );
+
+      const messages = getHookCompatibilityWarnings(hooks, 'opencode').map(
+        (warning) => warning.message
+      );
+
+      // timeoutMs, matcher, and cwd are representable by the generated plugin.
+      expect(messages).not.toContain(
+        'Hook "check" uses timeoutMs, which opencode cannot represent and will omit.'
+      );
+      expect(messages).not.toContain(
+        'Hook "check" relies on opencode native cwd, so PromptScript cannot independently guarantee project-root execution.'
+      );
+      expect(messages).toContain(
+        'Hook "notify" uses event "session-start", which opencode cannot represent and will omit.'
+      );
+      expect(messages).toContain(
+        'Hook "chatty" uses statusMessage, which opencode cannot represent and will omit.'
+      );
+    });
+  });
+
+  describe('generateOpenCodePlugin', () => {
+    it('exposes the deterministic project-local plugin path', () => {
+      expect(OPENCODE_PLUGIN_PATH).toBe('.opencode/plugins/promptscript.ts');
+    });
+
+    it('emits a rule per supported tool event with all portable fields', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          validate: {
+            event: 'pre-tool-use',
+            matcher: 'edit|write',
+            command: ['node', '.promptscript/scripts/check.mjs', '--strict'],
+            cwd: 'tools/hooks',
+            timeoutMs: 30000,
+          },
+          capture: {
+            event: 'post-tool-use',
+            command: ['prs', 'capture'],
+          },
+        })
+      );
+
+      const plugin = generateOpenCodePlugin(hooks)!;
+      expect(plugin).toContain(
+        '{"id":"validate","event":"tool.execute.before","matcher":"edit|write","command":["node",".promptscript/scripts/check.mjs","--strict"],"cwd":"tools/hooks","timeoutMs":30000}'
+      );
+      expect(plugin).toContain(
+        '{"id":"capture","event":"tool.execute.after","command":["prs","capture"]}'
+      );
+    });
+
+    it('compiles a portable script into an interpreted command', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          validate: {
+            event: 'post-tool-use',
+            script: {
+              path: '.promptscript/scripts/check file.py',
+              interpreter: 'python3',
+              args: ['--label=hello world'],
+            },
+            cwd: 'project',
+          },
+          fetch: {
+            event: 'pre-tool-use',
+            script: {
+              path: '.promptscript/scripts/fetch.ts',
+              interpreter: 'deno',
+              args: [],
+            },
+          },
+        })
+      );
+
+      const plugin = generateOpenCodePlugin(hooks)!;
+      // cwd "project" normalizes away because the plugin already spawns from
+      // the project root.
+      expect(plugin).toContain(
+        '{"id":"validate","event":"tool.execute.after","command":["python3",".promptscript/scripts/check file.py","--label=hello world"]}'
+      );
+      expect(plugin).toContain(
+        '{"id":"fetch","event":"tool.execute.before","command":["deno","run",".promptscript/scripts/fetch.ts"]}'
+      );
+    });
+
+    it('skips disabled hooks and hooks without a representable event', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          off: {
+            event: 'pre-tool-use',
+            command: ['node', 'off.mjs'],
+            enabled: false,
+          },
+          session: {
+            event: 'session-start',
+            command: ['echo', 'start'],
+          },
+          on: {
+            event: 'pre-tool-use',
+            command: ['node', 'on.mjs'],
+          },
+        })
+      );
+
+      const plugin = generateOpenCodePlugin(hooks)!;
+      expect(plugin).toContain('"id":"on"');
+      expect(plugin).not.toContain('"id":"off"');
+      expect(plugin).not.toContain('"id":"session"');
+    });
+
+    it('returns null when no hook can be emitted', () => {
+      const unsupported = extractHooks(
+        makeHooksBlock({
+          session: { event: 'stop', command: ['echo', 'done'] },
+        })
+      );
+      expect(generateOpenCodePlugin(unsupported)).toBeNull();
+
+      const allDisabled = extractHooks(
+        makeHooksBlock({
+          off: { event: 'pre-tool-use', command: ['node', 'off.mjs'], enabled: false },
+        })
+      );
+      expect(generateOpenCodePlugin(allDisabled)).toBeNull();
+    });
+
+    it('applies opencode target overrides', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          check: {
+            event: 'pre-tool-use',
+            command: ['node', 'base.mjs'],
+            targets: {
+              opencode: {
+                command: ['node', 'opencode check.mjs', '--strict mode'],
+              },
+            },
+          },
+          skipped: {
+            event: 'post-tool-use',
+            command: ['node', 'skipped.mjs'],
+            targets: {
+              opencode: { enabled: false },
+            },
+          },
+        })
+      );
+
+      const plugin = generateOpenCodePlugin(hooks)!;
+      expect(plugin).toContain('"command":["node","opencode check.mjs","--strict mode"]');
+      expect(plugin).not.toContain('"id":"skipped"');
+    });
+
+    it('keeps command quoting safe through JSON serialization', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          tricky: {
+            event: 'pre-tool-use',
+            command: ['node', 'check file.mjs', '--label="hello world"', "it's", 'back\\slash'],
+          },
+        })
+      );
+
+      const plugin = generateOpenCodePlugin(hooks)!;
+      // The rule is valid JSON, so quoting is handled by JSON.stringify and
+      // every shell metacharacter survives as one argument.
+      const ruleLine = plugin
+        .split('\n')
+        .find((line) => line.includes('"id":"tricky"'))!
+        .trim()
+        .replace(/,$/, '');
+      expect(JSON.parse(ruleLine)).toEqual({
+        id: 'tricky',
+        event: 'tool.execute.before',
+        command: ['node', 'check file.mjs', '--label="hello world"', "it's", 'back\\slash'],
+      });
+    });
+
+    it('produces a self-contained deterministic plugin', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          validate: {
+            event: 'pre-tool-use',
+            matcher: 'edit|write',
+            script: {
+              path: '.promptscript/scripts/validate.py',
+              interpreter: 'python3',
+              args: ['--strict'],
+            },
+            cwd: 'project',
+            timeoutMs: 30000,
+          },
+        })
+      );
+
+      const plugin = generateOpenCodePlugin(hooks)!;
+
+      // Generation marker and regeneration warning.
+      expect(plugin).toContain('Generated by PromptScript');
+      // No imports: the plugin must run from the plugin directory alone.
+      expect(plugin).not.toMatch(/^\s*import\s/m);
+      expect(plugin).not.toMatch(/\brequire\(/);
+      // Both native events are registered.
+      expect(plugin).toContain("'tool.execute.before'");
+      expect(plugin).toContain("'tool.execute.after'");
+      // Payload carries bounded tool context for path extraction and
+      // attribution: tool, args, session, call, timestamp.
+      expect(plugin).toContain("target: 'opencode'");
+      expect(plugin).toContain('tool: input.tool');
+      expect(plugin).toContain('args: output.args');
+      expect(plugin).toContain('sessionID: input.sessionID');
+      expect(plugin).toContain('callID: input.callID');
+      expect(plugin).toContain('timestamp: new Date().toISOString()');
+      // Payload bounds and malformed-argument safety.
+      expect(plugin).toContain('const PAYLOAD_LIMIT_BYTES = 32768;');
+      expect(plugin).toContain("args: '[truncated]'");
+      expect(plugin).toContain("return '{}';");
+      // Timeout is enforced by killing the spawned command.
+      expect(plugin).toContain('proc.kill()');
+      // Hooks observe tool execution and never block it.
+      expect(plugin).toContain('never block');
+      // Deterministic recompilation.
+      expect(generateOpenCodePlugin(hooks)).toBe(plugin);
+    });
+
+    it('documents the OpenCode coverage limits in the generated header', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          validate: { event: 'pre-tool-use', command: ['node', 'check.mjs'] },
+        })
+      );
+      const plugin = generateOpenCodePlugin(hooks)!;
+
+      expect(plugin).toContain('MCP tool calls');
+      expect(plugin).toContain('subagent');
+      expect(plugin).toContain('failed tool calls');
     });
   });
 });

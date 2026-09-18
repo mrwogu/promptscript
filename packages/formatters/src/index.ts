@@ -163,18 +163,21 @@ export {
   generateGitHubHooks,
   generateVSCodeHooks,
   generateGrokHooks,
+  generateOpenCodePlugin,
   applyHookTargetOverrides,
   getEnabledHookScriptResources,
   generateWindsurfHooks,
   getHookCompatibilityWarnings,
   mapEvent,
   convertTimeout,
+  OPENCODE_PLUGIN_PATH,
 } from './hook-adapters.js';
 export type {
   HookDefinition,
   HookScriptDefinition,
   HookTarget,
   HookTargetOverride,
+  OpenCodeHookRule,
   PortableHookEvent,
 } from './hook-adapters.js';
 export {
