@@ -100,6 +100,20 @@ describe('classifyOutputResource', () => {
     );
   });
 
+  it('classifies OpenCode outputs including the generated plugin', () => {
+    expectKinds(
+      'opencode',
+      `
+        OPENCODE.md => main
+        .opencode/commands/deploy.md => commands
+        .opencode/skills/audit/SKILL.md => skills
+        .opencode/agents/reviewer.md => agents
+        .opencode/plugins/promptscript.ts => hooks
+        .opencode/plugins/my-plugin.ts => main
+      `
+    );
+  });
+
   it('falls back to main for unknown owners and uncovered paths', () => {
     expectKinds(
       'cli',

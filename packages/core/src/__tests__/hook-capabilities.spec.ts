@@ -20,7 +20,17 @@ describe('hook capabilities', () => {
       .sort();
 
     expect(nativeTargets).toEqual(
-      ['claude', 'codex', 'cursor', 'factory', 'gemini', 'github', 'grok', 'windsurf'].sort()
+      [
+        'claude',
+        'codex',
+        'cursor',
+        'factory',
+        'gemini',
+        'github',
+        'grok',
+        'opencode',
+        'windsurf',
+      ].sort()
     );
     for (const target of nativeTargets) {
       const capability: HookCapability =
@@ -66,6 +76,7 @@ describe('hook capabilities', () => {
       notes: expect.stringContaining('dedicated pre-run'),
     });
     expect(HOOK_CAPABILITIES.github.terminal?.guarantee).toBe('not-guaranteed');
+    expect(HOOK_CAPABILITIES.opencode.terminal?.guarantee).toBe('not-guaranteed');
     expect(HOOK_RUNTIME_CAPABILITIES.vscode.terminal).toEqual({
       guarantee: 'best-effort',
       toolNames: ['run_in_terminal'],
@@ -92,6 +103,12 @@ describe('hook capabilities', () => {
         .map(([target]) => target)
         .sort()
     ).toEqual(['github', 'windsurf']);
+    expect(
+      Object.entries(HOOK_RUNTIME_CAPABILITIES)
+        .filter(([, capability]) => capability.projectRootStrategy === 'plugin-context')
+        .map(([target]) => target)
+        .sort()
+    ).toEqual(['opencode']);
     expect(HOOK_RUNTIME_CAPABILITIES.vscode.projectRootStrategy).toBe('workspace-cwd');
   });
 });
