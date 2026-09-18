@@ -4,7 +4,7 @@ import {
   isOutputResourceKind,
   OUTPUT_RESOURCE_KINDS,
   type OutputResourceKind,
-} from '../output-resources.js';
+} from './output-resources.js';
 
 /**
  * Assert a batch of classifications from a readable table.

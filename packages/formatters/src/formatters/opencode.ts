@@ -26,13 +26,14 @@ export const OPENCODE_VERSIONS: SimpleFormatterVersions = {
   },
   multifile: {
     name: 'multifile',
-    description: 'OPENCODE.md + .opencode/commands/<name>.md (skills via full mode)',
+    description:
+      'OPENCODE.md + .opencode/commands/<name>.md + .opencode/plugins/promptscript.ts (skills via full mode)',
     outputPath: 'OPENCODE.md',
   },
   full: {
     name: 'full',
     description:
-      'Multifile + .opencode/skills/<name>/SKILL.md + .opencode/commands/<name>.md + .opencode/agents/<name>.md',
+      'Multifile + .opencode/skills/<name>/SKILL.md + .opencode/commands/<name>.md + .opencode/agents/<name>.md + .opencode/plugins/promptscript.ts',
     outputPath: 'OPENCODE.md',
   },
 } as const;
@@ -66,10 +67,16 @@ export class OpenCodeFormatter extends MarkdownInstructionFormatter {
     });
   }
 
+  /**
+   * Return supported OpenCode output modes.
+   */
   static getSupportedVersions(): SimpleFormatterVersions {
     return OPENCODE_VERSIONS;
   }
 
+  /**
+   * Format single-file output while retaining stale-plugin cleanup metadata.
+   */
   protected override formatSimple(ast: Program, options?: FormatOptions): FormatterOutput {
     const output = super.formatSimple(ast, options);
     return {
@@ -80,10 +87,16 @@ export class OpenCodeFormatter extends MarkdownInstructionFormatter {
     };
   }
 
+  /**
+   * Format multifile output and attach the generated hook plugin.
+   */
   protected override formatMultifile(ast: Program, options?: FormatOptions): FormatterOutput {
     return this.appendHookPlugin(ast, super.formatMultifile(ast, options));
   }
 
+  /**
+   * Format full output and attach the generated hook plugin.
+   */
   protected override formatFull(ast: Program, options?: FormatOptions): FormatterOutput {
     return this.appendHookPlugin(ast, super.formatFull(ast, options));
   }
@@ -104,10 +117,19 @@ export class OpenCodeFormatter extends MarkdownInstructionFormatter {
 
     const hooks = extractHooks(hooksBlock);
     const plugin = generateOpenCodePlugin(hooks);
-    const warnings = getHookCompatibilityWarnings(hooks, 'opencode').map((warning) => ({
-      ...warning,
-      location: hooksBlock.loc,
-    }));
+    const warnings = [
+      ...getHookCompatibilityWarnings(hooks, 'opencode'),
+      ...(plugin !== null
+        ? [
+            {
+              code: 'PS4002' as const,
+              message:
+                'OpenCode tool hooks do not expose model or agent context; the generated payload omits those fields.',
+              suggestion: 'Use sessionID and callID for attribution.',
+            },
+          ]
+        : []),
+    ].map((warning) => ({ ...warning, location: hooksBlock.loc }));
 
     return {
       ...output,

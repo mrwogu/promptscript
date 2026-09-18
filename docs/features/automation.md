@@ -134,11 +134,13 @@ OpenCode has no JSON hook contract, so PromptScript generates a project-local
 plugin at `.opencode/plugins/promptscript.ts` instead. The plugin maps
 `pre-tool-use` to `tool.execute.before` and `post-tool-use` to
 `tool.execute.after`, filters by matcher, resolves the project root from the
-OpenCode plugin context, enforces `timeoutMs`, and passes a bounded JSON
-payload on stdin with the tool name, arguments, session ID, call ID, and
-timestamp (plus the tool result on `post-tool-use`). Hooks observe tool
-execution and never block it, and recompilation rewrites only the
-PromptScript-owned plugin file, never sibling user plugins.
+OpenCode plugin context, enforces `timeoutMs` with a 30-second default, and
+passes a byte-bounded JSON payload on stdin with the tool name, arguments,
+session ID, call ID, and timestamp (plus the tool result on `post-tool-use`).
+Hook commands start asynchronously, so they do not delay tool execution.
+Timeouts terminate a command with `SIGTERM`, then `SIGKILL` after a grace
+period. Recompilation rewrites only the PromptScript-owned plugin file, never
+sibling user plugins.
 
 OpenCode plugin coverage has audited limits that PromptScript does not claim
 beyond:
@@ -147,6 +149,8 @@ beyond:
 - Some subagent paths have missed plugin hooks in reported versions.
 - Failed tool calls have no dedicated `tool.execute.error` event, so a hook
   cannot observe failures through the post event.
+- Tool hook input exposes no model or agent context. Generated payloads omit
+  those unavailable fields and compilation reports `PS4002`.
 - Only `pre-tool-use` and `post-tool-use` are emitted; session, setup,
   subagent, notification, stop, and terminal command events are reported with
   `PS4002` and omitted.

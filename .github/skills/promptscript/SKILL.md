@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-09-18T09:43:44.739Z | source: .promptscript/project.prs | target: github
+# promptscript-generated: 2026-09-18T11:53:30.627Z | source: .promptscript/project.prs | target: github
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -573,6 +573,12 @@ target modes that support additional files:
 | Grok Build     | `.grok/hooks/promptscript.json`                                        | `full`              |
 | OpenCode       | `.opencode/plugins/promptscript.ts` (generated plugin)                 | `multifile`, `full` |
 | VS Code Agent  | `.github/hooks/promptscript-vscode.json` when `vscode` override exists | target-specific     |
+
+OpenCode starts generated hook commands asynchronously. It enforces authored
+timeouts or a 30-second default, then escalates from `SIGTERM` to `SIGKILL`.
+Payloads are bounded by UTF-8 byte length. OpenCode tool hooks expose tool
+arguments, session ID, and call ID, but no model or agent context; compilation
+reports that limitation with `PS4002`.
 
 Simple mode and targets without native project hooks report `PS4002` instead of
 silently dropping hooks. Use `prs compile --watch` as fallback. Plugin-only and

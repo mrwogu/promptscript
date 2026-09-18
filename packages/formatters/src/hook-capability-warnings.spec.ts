@@ -8,8 +8,8 @@ import {
   type SourceLocation,
   type Value,
 } from '@promptscript/core';
-import { getTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
-import { BUILTIN_FORMATTERS } from '../builtin-formatters.js';
+import { getTargetHookCapabilityWarnings } from './hook-capability-warnings.js';
+import { BUILTIN_FORMATTERS } from './builtin-formatters.js';
 
 const loc: SourceLocation = { file: 'hooks.prs', line: 1, column: 1 };
 const ast: Program = {

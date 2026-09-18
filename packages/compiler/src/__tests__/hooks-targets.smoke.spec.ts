@@ -132,7 +132,9 @@ describe('Hook target smoke tests', () => {
     expect(opencodePlugin).toContain("'tool.execute.before'");
     expect(opencodePlugin).toContain("'tool.execute.after'");
     expect(opencodePlugin).toContain('sessionID: input.sessionID');
-    expect(opencodePlugin).toContain('proc.kill()');
+    expect(opencodePlugin).toContain("proc.kill('SIGTERM')");
+    expect(opencodePlugin).toContain("proc.kill('SIGKILL')");
+    expect(opencodePlugin).toContain('void runRule(');
     expect(opencodePlugin).not.toContain('"cwd"');
   });
 

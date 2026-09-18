@@ -6,7 +6,7 @@ import {
   isPortableHookInterpreter,
   isPortableHookScriptPath,
   type HookCapability,
-} from '../index.js';
+} from './index.js';
 
 describe('hook capabilities', () => {
   it('classifies every built-in target', () => {

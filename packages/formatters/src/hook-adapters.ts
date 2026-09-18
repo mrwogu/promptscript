@@ -1087,6 +1087,9 @@ export interface OpenCodeHookRule {
   timeoutMs?: number;
 }
 
+/**
+ * Convert one portable hook to the generated OpenCode runtime contract.
+ */
 function buildOpenCodeHookRule(hook: HookDefinition): OpenCodeHookRule | null {
   const nativeEvent = mapEvent(hook.event, 'opencode');
   if (nativeEvent !== 'tool.execute.before' && nativeEvent !== 'tool.execute.after') return null;
@@ -1094,7 +1097,11 @@ function buildOpenCodeHookRule(hook: HookDefinition): OpenCodeHookRule | null {
   const command =
     hook.command ??
     (hook.script
-      ? [...getPosixInterpreter(hook.script.interpreter), hook.script.path, ...hook.script.args]
+      ? [
+          ...getPosixInterpreter(hook.script.interpreter),
+          getScriptPathFromNativeCwd(hook),
+          ...hook.script.args,
+        ]
       : []);
   if (command.length === 0) return null;
 
@@ -1111,6 +1118,8 @@ function buildOpenCodeHookRule(hook: HookDefinition): OpenCodeHookRule | null {
 
 const OPENCODE_PLUGIN_RUNTIME = `
 const PAYLOAD_LIMIT_BYTES = 32768;
+const DEFAULT_TIMEOUT_MS = 30000;
+const KILL_GRACE_MS = 1000;
 
 interface OpenCodePluginContext {
   directory: string;
@@ -1121,6 +1130,7 @@ interface OpenCodeToolInput {
   tool?: string;
   sessionID?: string;
   callID?: string;
+  args?: unknown;
 }
 
 interface OpenCodeToolOutput {
@@ -1128,7 +1138,6 @@ interface OpenCodeToolOutput {
 }
 
 interface OpenCodeToolResult {
-  args?: unknown;
   title?: unknown;
   output?: unknown;
   metadata?: unknown;
@@ -1147,21 +1156,27 @@ function safeStringify(value: unknown): string {
   }
 }
 
+function payloadByteLength(value: string): number {
+  return new TextEncoder().encode(value).byteLength;
+}
+
 // Keep the payload bounded: drop oversized tool arguments first, then the
 // result object, so the command always receives parseable JSON.
 function boundedPayload(payload: Record<string, unknown>): string {
   const full = safeStringify(payload);
-  if (full.length <= PAYLOAD_LIMIT_BYTES) return full;
+  if (payloadByteLength(full) <= PAYLOAD_LIMIT_BYTES) return full;
   const withoutArgs = { ...payload, args: '[truncated]' };
   const trimmed = safeStringify(withoutArgs);
-  if (trimmed.length <= PAYLOAD_LIMIT_BYTES) return trimmed;
-  return safeStringify({ ...withoutArgs, result: '[truncated]' });
+  if (payloadByteLength(trimmed) <= PAYLOAD_LIMIT_BYTES) return trimmed;
+  const withoutResult = safeStringify({ ...withoutArgs, result: '[truncated]' });
+  if (payloadByteLength(withoutResult) <= PAYLOAD_LIMIT_BYTES) return withoutResult;
+  return '{"target":"opencode","args":"[truncated]","result":"[truncated]"}';
 }
 
 function buildPayload(
   rule: OpenCodeHookRule,
   input: OpenCodeToolInput,
-  output: { args?: unknown },
+  args: unknown,
   result?: unknown
 ): Record<string, unknown> {
   const payload: Record<string, unknown> = {
@@ -1169,7 +1184,7 @@ function buildPayload(
     hook: rule.id,
     event: rule.event === 'tool.execute.before' ? 'pre-tool-use' : 'post-tool-use',
     tool: input.tool,
-    args: output.args,
+    args,
     sessionID: input.sessionID,
     callID: input.callID,
     timestamp: new Date().toISOString()
@@ -1178,8 +1193,8 @@ function buildPayload(
   return payload;
 }
 
-// Hooks observe tool execution and never block it: failures are logged and the
-// tool call proceeds, so a broken hook cannot disrupt the agent session.
+// Hooks observe tool execution asynchronously. Failures are logged, and every
+// process gets a bounded lifetime so a broken hook cannot disrupt the session.
 async function runRule(
   rule: OpenCodeHookRule,
   projectRoot: string,
@@ -1194,14 +1209,24 @@ async function runRule(
       stdout: 'inherit',
       stderr: 'inherit'
     });
-    const timer =
-      rule.timeoutMs !== undefined ? setTimeout(() => proc.kill(), rule.timeoutMs) : undefined;
+    const timeoutMs = rule.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    let graceTimer: ReturnType<typeof setTimeout> | undefined;
+    const timer = setTimeout(() => {
+      proc.kill('SIGTERM');
+      graceTimer = setTimeout(() => proc.kill('SIGKILL'), KILL_GRACE_MS);
+    }, timeoutMs);
     try {
       proc.stdin.write(payload);
       proc.stdin.end();
-      await proc.exited;
+      const exitCode = await proc.exited;
+      if (exitCode !== 0) {
+        console.error(
+          '[promptscript] opencode hook "' + rule.id + '" exited with code ' + exitCode
+        );
+      }
     } finally {
-      if (timer !== undefined) clearTimeout(timer);
+      clearTimeout(timer);
+      if (graceTimer !== undefined) clearTimeout(graceTimer);
     }
   } catch (error: unknown) {
     console.error('[promptscript] opencode hook "' + rule.id + '" failed:', error);
@@ -1231,10 +1256,10 @@ export const PromptScriptHooks = async (context: OpenCodePluginContext) => {
       for (const entry of compiled) {
         if (entry.rule.event !== 'tool.execute.before') continue;
         if (entry.matcher !== null && !entry.matcher.test(String(input.tool))) continue;
-        await runRule(
+        void runRule(
           entry.rule,
           projectRoot,
-          boundedPayload(buildPayload(entry.rule, input, output))
+          boundedPayload(buildPayload(entry.rule, input, output.args))
         );
       }
     },
@@ -1247,10 +1272,10 @@ export const PromptScriptHooks = async (context: OpenCodePluginContext) => {
           output: output.output,
           metadata: output.metadata
         };
-        await runRule(
+        void runRule(
           entry.rule,
           projectRoot,
-          boundedPayload(buildPayload(entry.rule, input, output, result))
+          boundedPayload(buildPayload(entry.rule, input, input.args, result))
         );
       }
     }
@@ -1275,10 +1300,12 @@ export function generateOpenCodePlugin(hooks: HookDefinition[]): string | null {
 
   const serializedRules = rules.map((rule) => JSON.stringify(rule));
   return (
+    '// promptscript-generated: opencode-plugin\n' +
     '// Generated by PromptScript - do not edit.\n' +
     '// Recompiling the .promptscript sources rewrites this file; manual edits are discarded.\n' +
     '// Scope: OpenCode fires these hooks for local tool executions only. MCP tool calls,\n' +
     '// some subagent paths, and failed tool calls have no dedicated plugin hook.\n' +
+    '// OpenCode tool hooks do not expose model or agent context; payloads omit those fields.\n' +
     '\n' +
     'interface OpenCodeHookRule {\n' +
     '  id: string;\n' +

@@ -694,13 +694,14 @@ const VERSION_CAPABILITIES: Readonly<Record<KnownTarget, TargetVersionData>> = {
       simple: { name: 'simple', description: 'Single OPENCODE.md file', outputPath: 'OPENCODE.md' },
       multifile: {
         name: 'multifile',
-        description: 'OPENCODE.md + .opencode/commands/<name>.md (skills via full mode)',
+        description:
+          'OPENCODE.md + .opencode/commands/<name>.md + .opencode/plugins/promptscript.ts (skills via full mode)',
         outputPath: 'OPENCODE.md',
       },
       full: {
         name: 'full',
         description:
-          'Multifile + .opencode/skills/<name>/SKILL.md + .opencode/commands/<name>.md + .opencode/agents/<name>.md',
+          'Multifile + .opencode/skills/<name>/SKILL.md + .opencode/commands/<name>.md + .opencode/agents/<name>.md + .opencode/plugins/promptscript.ts',
         outputPath: 'OPENCODE.md',
       },
     },

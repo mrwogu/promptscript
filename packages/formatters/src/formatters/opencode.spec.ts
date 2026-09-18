@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { Program, SourceLocation, Value } from '@promptscript/core';
-import { OpenCodeFormatter, OPENCODE_VERSIONS } from '../formatters/opencode.js';
+import { OpenCodeFormatter, OPENCODE_VERSIONS } from './opencode.js';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',
@@ -47,7 +47,9 @@ describe('OpenCodeFormatter', () => {
       expect(versions.simple.name).toBe('simple');
       expect(versions.simple.description).toBe('Single OPENCODE.md file');
       expect(versions.multifile.name).toBe('multifile');
+      expect(versions.multifile.description).toContain('.opencode/plugins/promptscript.ts');
       expect(versions.full.name).toBe('full');
+      expect(versions.full.description).toContain('.opencode/plugins/promptscript.ts');
     });
   });
 
@@ -994,6 +996,12 @@ describe('OpenCodeFormatter', () => {
       expect(pluginFile?.content).toContain('"timeoutMs":30000');
       expect(result.managedOutputFiles).toContain('.opencode/plugins/promptscript.ts');
       expect(result.managedOutputDirectories).toContain('.opencode/plugins');
+      expect(result.warnings).toContainEqual(
+        expect.objectContaining({
+          code: 'PS4002',
+          message: expect.stringContaining('do not expose model or agent context'),
+        })
+      );
     });
 
     it('emits the plugin in multifile mode', () => {
