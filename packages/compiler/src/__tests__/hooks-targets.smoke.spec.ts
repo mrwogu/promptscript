@@ -74,6 +74,7 @@ describe('Hook target smoke tests', () => {
         { name: 'gemini', config: { version: 'full' } },
         { name: 'github', config: { version: 'full' } },
         { name: 'grok', config: { version: 'full' } },
+        { name: 'opencode', config: { version: 'full' } },
         { name: 'windsurf', config: { version: 'full' } },
       ],
     });
@@ -119,6 +120,20 @@ describe('Hook target smoke tests', () => {
     expect(result.outputs.has('.gemini/settings.json')).toBe(true);
     expect(result.outputs.has('.grok/hooks/promptscript.json')).toBe(true);
     expect(result.outputs.has('.windsurf/hooks.json')).toBe(true);
+
+    // OpenCode receives a project-local plugin: the portable script compiles
+    // to one rule with matcher and timeout preserved verbatim, while the
+    // project cwd is normalized away because the plugin spawns from the
+    // project root itself.
+    const opencodePlugin = result.outputs.get('.opencode/plugins/promptscript.ts')!.content;
+    expect(opencodePlugin).toContain(
+      '{"id":"validate","event":"tool.execute.before","matcher":"Edit|Write","command":["python3",".promptscript/scripts/validate script.py","--strict"],"timeoutMs":30000}'
+    );
+    expect(opencodePlugin).toContain("'tool.execute.before'");
+    expect(opencodePlugin).toContain("'tool.execute.after'");
+    expect(opencodePlugin).toContain('sessionID: input.sessionID');
+    expect(opencodePlugin).toContain('proc.kill()');
+    expect(opencodePlugin).not.toContain('"cwd"');
   });
 
   it('compiles terminal command hooks with deterministic native coverage', async () => {
