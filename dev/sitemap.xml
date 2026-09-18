@@ -1909,6 +1909,10 @@
          <lastmod>2026-09-18</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/OpenCodeFormatter/</loc>
+         <lastmod>2026-09-18</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/TraeFormatter/</loc>
          <lastmod>2026-09-18</lastmod>
     </url>
@@ -1990,6 +1994,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/generateGrokHooks/</loc>
+         <lastmod>2026-09-18</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/generateOpenCodePlugin/</loc>
          <lastmod>2026-09-18</lastmod>
     </url>
     <url>
@@ -2154,6 +2162,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/MarkdownSkillConfig/</loc>
+         <lastmod>2026-09-18</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/OpenCodeHookRule/</loc>
          <lastmod>2026-09-18</lastmod>
     </url>
     <url>
@@ -2701,6 +2713,10 @@
          <lastmod>2026-09-18</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/OPENCODE_PLUGIN_PATH/</loc>
+         <lastmod>2026-09-18</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/OPENCODE_VERSIONS/</loc>
          <lastmod>2026-09-18</lastmod>
     </url>
@@ -2714,10 +2730,6 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/OpenClawFormatter/</loc>
-         <lastmod>2026-09-18</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/OpenCodeFormatter/</loc>
          <lastmod>2026-09-18</lastmod>
     </url>
     <url>
