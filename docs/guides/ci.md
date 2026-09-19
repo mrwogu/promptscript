@@ -326,6 +326,7 @@ promptscript:
   stage: validate
   image: node:20-alpine
   before_script:
+    - apk add --no-cache git
     - npm install -g @promptscript/cli
   script:
     - prs validate --strict
@@ -354,6 +355,7 @@ promptscript:
   variables:
     GITHUB_TOKEN: $REGISTRY_TOKEN
   before_script:
+    - apk add --no-cache git
     - npm install -g @promptscript/cli
   script:
     - prs pull
@@ -384,6 +386,7 @@ promptscript:
     paths:
       - .promptscript-home/.promptscript/.cache/
   before_script:
+    - apk add --no-cache git
     - npm install -g @promptscript/cli
   script:
     - prs pull
@@ -407,6 +410,7 @@ promptscript:
   stage: validate
   image: node:20-alpine
   before_script:
+    - apk add --no-cache git
     - npm install -g @promptscript/cli
   script:
     - prs validate --strict
