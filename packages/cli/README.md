@@ -20,9 +20,19 @@ native configuration for 50 AI coding platforms.
 
 [![Watch the PromptScript introduction](https://img.youtube.com/vi/7sHMn-DbZig/maxresdefault.jpg)](https://youtu.be/7sHMn-DbZig)
 
-AI coding platforms use different files for instructions, skills, agents, commands, MCP
-integrations, hooks, and settings. PromptScript replaces hand-maintained copies with one validated,
-composable, Git-native source and target-specific compilers.
+## What is PromptScript?
+
+PromptScript is an open-source language and compiler for AI agent configuration. `.prs` sources
+define instructions, skills, agents, MCP servers, hooks, and workflows, while `promptscript.yaml`
+configures targets and organization policies. PromptScript compiles them into the native files each
+AI tool already reads, including `CLAUDE.md`, `.github/copilot-instructions.md`, `.cursor/rules`,
+and output for 47 more targets.
+
+Every AI coding tool uses its own file names, formats, and paths. Teams using several tools end up
+maintaining several copies of the same rules. Those copies drift, and a change made for one tool may
+never reach the others.
+
+PromptScript fixes the source instead of patching each generated file:
 
 ```text
 .promptscript/project.prs
@@ -32,6 +42,16 @@ composable, Git-native source and target-specific compilers.
 ```
 
 No runtime proxy. Each selected platform keeps consuming its own native configuration.
+
+## Why maintain native files by hand?
+
+Even a few tools create copies that need the same manual updates. Errors stay hidden until an agent
+reads the broken file. Policy changes become separate edits across every repository and tool.
+
+With PromptScript, you change one source, review the generated diff, and validate it in CI. Git
+records each change. Remote dependencies stay pinned in `promptscript.lock`, so builds remain
+reproducible. Adding or switching tools does not require rewriting the source. See the
+[full comparison](https://getpromptscript.dev/guides/vs-manual/).
 
 ## Install
 

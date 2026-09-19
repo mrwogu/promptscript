@@ -26,11 +26,11 @@ native configuration for 50 AI coding platforms._
 
 ## What is PromptScript?
 
-PromptScript is an open-source language and compiler for AI agent configuration. You write one `.prs`
-file that defines instructions, skills, agents, MCP servers, hooks, workflows, and policies. The
-compiler turns it into the native files each AI tool already knows: `CLAUDE.md` for Claude Code,
-`.github/copilot-instructions.md` for GitHub Copilot, `.cursor/rules` for Cursor, and 47 more
-targets.
+PromptScript is an open-source language and compiler for AI agent configuration. `.prs` sources
+define instructions, skills, agents, MCP servers, hooks, and workflows, while `promptscript.yaml`
+configures targets and organization policies. The compiler turns them into the native files each AI
+tool already knows: `CLAUDE.md` for Claude Code, `.github/copilot-instructions.md` for GitHub
+Copilot, `.cursor/rules` for Cursor, and 47 more targets.
 
 Why does this matter? Every AI coding tool reads its own instruction files, in its own format, from
 its own paths. A team using Claude Code, Copilot, and Cursor keeps three copies of the same rules.
