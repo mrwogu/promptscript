@@ -251,7 +251,7 @@ targets:
 Install the CLI and validate source:
 
 ```bash
-npm install -g @promptscript/cli@1.16.0
+npm install -g @promptscript/cli@1.19.0
 prs validate --strict
 prs compile --dry-run
 prs diff --all --full
@@ -377,7 +377,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install -g @promptscript/cli@1.16.0
+      - run: npm install -g @promptscript/cli@1.19.0
       - run: prs validate --strict
       - run: prs compile
       - run: test -z "$(git status --porcelain --untracked-files=all)"

@@ -74,7 +74,6 @@ targets.
 
 ## Examples
 
-- [Real-Life Tutorial: Checkout Service](https://getpromptscript.dev/dev/examples/real-life-checkout-service/index.md): End-to-end production checkout service rollout
 - [Minimal](https://getpromptscript.dev/dev/examples/minimal/index.md): Minimal project setup
 - [Composition and Order](https://getpromptscript.dev/dev/examples/composition-and-order/index.md): Composition precedence and declaration order
 - [Merge vs Replace](https://getpromptscript.dev/dev/examples/merge-vs-replace/index.md): Extend, field replacement, and override

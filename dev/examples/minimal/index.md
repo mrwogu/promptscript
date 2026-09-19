@@ -75,20 +75,20 @@ If starting from scratch:
 prs init
 ```
 
+### Validate
+
+Check for issues before generating anything. Strict mode turns warnings into errors:
+
+```bash
+prs validate --strict
+```
+
 ### Compile
 
 Generate the output file:
 
 ```bash
 prs compile
-```
-
-### Validate
-
-Check for issues:
-
-```bash
-prs validate
 ```
 
 ## Generated Output

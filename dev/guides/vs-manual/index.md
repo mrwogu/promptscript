@@ -2,7 +2,7 @@
 
 ## The Manual Approach
 
-Without PromptScript, teams maintain separate configuration files for each AI tool in every repository. Even with just 2–3 tools, this quickly becomes unmanageable across many repos:
+Without PromptScript, teams maintain separate configuration files for each AI tool in every repository. Even with just 2-3 tools, this quickly becomes unmanageable across many repos:
 
 ```text
 .github/copilot-instructions.md   # GitHub Copilot
@@ -27,7 +27,7 @@ GEMINI.md                          # Gemini CLI
 With PromptScript, you write one `.prs` file and compile to all 50 targets:
 
 ```
-@meta { id: "my-project" syntax: "1.0.0" }
+@meta { id: "my-project" syntax: "1.5.0" }
 
 @inherit @company/backend-standards
 
@@ -88,3 +88,9 @@ GEMINI.md
 ## Getting Started
 
 Ready to switch? See the [Migration Guide](https://getpromptscript.dev/dev/guides/migration/index.md) to convert existing configs, or start fresh with the [Getting Started guide](https://getpromptscript.dev/dev/getting-started/index.md).
+
+Evaluating for a team or organization? Also see:
+
+- [Target Platform Matrix](https://getpromptscript.dev/dev/reference/formatters/index.md) - exact output paths per tool
+- [CI/CD Integration](https://getpromptscript.dev/dev/guides/ci/index.md) - validation and drift detection in your pipeline
+- [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md) - registry, policies, and governance across repositories

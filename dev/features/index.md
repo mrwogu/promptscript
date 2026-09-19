@@ -35,7 +35,7 @@ flowchart LR
 ```
 @meta {
   id: "checkout-service"
-  syntax: "1.4.0"
+  syntax: "1.5.0"
   tags: ["payments", "typescript"]
 }
 
@@ -119,7 +119,7 @@ Compile configured targets:
 prs compile
 ```
 
-Use named builds to generate scoped agent configuration for monorepo packages:
+Use named builds when one repository hosts several packages or apps and each needs its own agent configuration. Every build has its own entry file, output directory, and target list, so `packages/api` and `packages/web` each get files scoped to their subtree. Define them in `promptscript.yaml` (see the [Configuration Reference](https://getpromptscript.dev/dev/reference/config/index.md)):
 
 ```yaml
 builds:
@@ -152,4 +152,4 @@ PromptScript applies the same lifecycle to every agent capability:
 1. Review generated changes in pull requests.
 1. Enforce `prs validate --strict` and compilation checks in CI.
 
-See [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md), [Security](https://getpromptscript.dev/dev/guides/security/index.md), and [Policy Engine](https://getpromptscript.dev/dev/guides/policy-engine/index.md).
+See [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md), [Security](https://getpromptscript.dev/dev/guides/security/index.md), [Policy Engine](https://getpromptscript.dev/dev/guides/policy-engine/index.md), and [CI/CD Integration](https://getpromptscript.dev/dev/guides/ci/index.md) for the pipeline that enforces it.

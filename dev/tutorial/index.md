@@ -1,6 +1,6 @@
 # Enterprise Tutorial: Building Layered AI Infrastructure
 
-This tutorial starts after your first successful local compile. You will simulate a PromptOps deployment for a software team and build a hierarchical context system that scales.
+This tutorial starts after your first successful local compile. You will build a layered configuration system for a software team: an organization base, a team layer that inherits it, and a project that inherits both.
 
 ## Learning Objectives
 
@@ -27,7 +27,7 @@ Create `registry/@acme/org.prs`:
 ```
 @meta {
   id: "@acme/org"
-  syntax: "1.0.0"
+  syntax: "1.5.0"
   org: "ACME Corporation"
 }
 
@@ -74,7 +74,7 @@ Create `registry/@acme/frontend-team.prs`:
 ```
 @meta {
   id: "@acme/frontend-team"
-  syntax: "1.0.0"
+  syntax: "1.5.0"
   team: "Frontend"
 }
 
@@ -122,7 +122,7 @@ Create `.promptscript/project.prs` in your project:
 ```
 @meta {
   id: "checkout-app"
-  syntax: "1.4.0"
+  syntax: "1.5.0"
 }
 
 # In a multi-file setup, you would inherit from frontend team:
@@ -187,7 +187,7 @@ Create `promptscript.yaml`:
 
 ```yaml
 id: checkout-app
-syntax: '1.4.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -249,24 +249,30 @@ Add reusable capabilities to `.promptscript/project.prs`:
 
 See [Agent Platform](https://getpromptscript.dev/dev/features/index.md) for MCP servers, plugins, and target-specific capabilities.
 
-## Step 6: Compile and Verify
+## Step 6: Validate and Compile
 
-Compile all targets:
+Validate your configuration first, so broken references and policy violations surface before anything is written:
+
+```bash
+prs validate --strict
+```
+
+Then compile all targets:
 
 ```bash
 prs compile
 ```
 
-Preview without writing files:
+Preview what would change without writing files:
 
 ```bash
 prs compile --dry-run
 ```
 
-Validate your configuration:
+Inspect the generated diff before you commit:
 
 ```bash
-prs validate --strict
+prs diff --all
 ```
 
 ## Understanding Inheritance
@@ -327,6 +333,29 @@ jobs:
           prs compile
           git diff --exit-code
 ```
+
+## Your Daily Workflow
+
+After the initial setup, everyday use is a short loop:
+
+```bash
+# 1. Edit the source
+$EDITOR .promptscript/project.prs
+
+# 2. Validate
+prs validate --strict
+
+# 3. Compile
+prs compile
+
+# 4. Review the generated diff, then commit
+git status
+git diff
+git add .promptscript/project.prs CLAUDE.md .github .cursor
+git commit -m "update agent instructions"
+```
+
+The generated files are committed next to the source, so reviewers see both in the pull request. CI runs the same validation and fails when committed output no longer matches the source.
 
 ## Next Steps
 

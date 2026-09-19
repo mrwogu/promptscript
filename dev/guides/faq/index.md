@@ -42,7 +42,7 @@ Sources can be local files (`./base`) or registry packages (`@company/standards`
 A registry is just a Git repository with `.prs` files. Configure it in your project:
 
 ```bash
-prs registry add company https://github.com/your-org/promptscript-registry.git
+prs registry add @company https://github.com/your-org/promptscript-registry.git
 ```
 
 See the [Registry guide](https://getpromptscript.dev/dev/guides/registry/index.md) for full setup instructions.
@@ -78,12 +78,19 @@ A required field is missing. The error message identifies the block and field to
 
 ### Compiled output doesn't match expected format
 
-Ensure you're using the latest version of `@promptscript/cli`. Formatter behavior can change between versions. Run:
+Check your CLI version first, then update through the same method you used to install:
 
 ```bash
 prs --version
-npm update -g @promptscript/cli
 ```
+
+```bash
+npm update -g @promptscript/cli      # npm global install
+npx @promptscript/cli@latest compile # npx, no install step
+docker pull ghcr.io/mrwogu/promptscript:latest  # Docker
+```
+
+Formatter behavior can change between versions, so teams that pin the CLI version in CI should upgrade the pin deliberately.
 
 ## How do I contribute?
 

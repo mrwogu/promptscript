@@ -19,6 +19,7 @@ Start treating your AI instructions as managed infrastructure.
 | Starting point             | Next step                                                                                                 |
 | -------------------------- | --------------------------------------------------------------------------------------------------------- |
 | New repository             | Continue with [Installation](#installation) and [Interactive Initialization](#interactive-initialization) |
+| In a hurry                 | Skip the demo and go to [Quick Start: New Projects](#quick-start-new-projects)                            |
 | Existing instruction files | Use [Quick Start: Migrating Existing Projects](#quick-start-migrating-existing-projects)                  |
 | PromptScript 1.15 project  | Follow [Upgrade 1.15 to 1.16](https://getpromptscript.dev/dev/guides/upgrade-1-15-to-1-16/index.md)       |
 | Need language semantics    | Open [Language Reference](https://getpromptscript.dev/dev/reference/language/index.md)                    |
@@ -95,7 +96,7 @@ validation:
 - **Multi-target setup** - Select which AI tools you want to generate output for
 - **Pre-configured** - Generates ready-to-compile configuration based on your stack
 
-## Quick Start: From Zero to PromptOps
+## Quick Start: New Projects
 
 ### 1. Initialize Your Repository
 
@@ -217,7 +218,13 @@ Add reusable skills, specialist agents, tool integrations, and automation to the
 
 PromptScript compiles each capability where the configured target supports it. See [Agent Platform](https://getpromptscript.dev/dev/features/index.md) and the [feature coverage matrix](https://getpromptscript.dev/dev/testing/feature-coverage/index.md) for target-specific support.
 
-### 4. Compile to Native Formats
+### 4. Validate and Compile to Native Formats
+
+Check the definition before anything is written. Strict mode turns warnings into errors, so broken references and policy violations surface here instead of in generated files:
+
+```bash
+prs validate --strict
+```
 
 Transform your universal `.prs` definition into platform-specific optimization formats.
 
@@ -243,10 +250,12 @@ includePromptScriptSkill: false
 
 ### 5. Commit to Git
 
-Commit your configuration and the generated files. Your AI context is now version-controlled infrastructure.
+Review the generated diff, then commit your configuration and the generated files explicitly. Your AI context is now version-controlled infrastructure.
 
 ```bash
-git add .
+git status
+git diff
+git add .promptscript/ promptscript.yaml CLAUDE.md .github .cursor
 git commit -m "chore: initialize promptscript infrastructure"
 ```
 
@@ -575,7 +584,7 @@ Browse real-world configuration examples for various use cases.
 
 # Enterprise Tutorial: Building Layered AI Infrastructure
 
-This tutorial starts after your first successful local compile. You will simulate a PromptOps deployment for a software team and build a hierarchical context system that scales.
+This tutorial starts after your first successful local compile. You will build a layered configuration system for a software team: an organization base, a team layer that inherits it, and a project that inherits both.
 
 ## Learning Objectives
 
@@ -602,7 +611,7 @@ Create `registry/@acme/org.prs`:
 ```
 @meta {
   id: "@acme/org"
-  syntax: "1.0.0"
+  syntax: "1.5.0"
   org: "ACME Corporation"
 }
 
@@ -649,7 +658,7 @@ Create `registry/@acme/frontend-team.prs`:
 ```
 @meta {
   id: "@acme/frontend-team"
-  syntax: "1.0.0"
+  syntax: "1.5.0"
   team: "Frontend"
 }
 
@@ -697,7 +706,7 @@ Create `.promptscript/project.prs` in your project:
 ```
 @meta {
   id: "checkout-app"
-  syntax: "1.4.0"
+  syntax: "1.5.0"
 }
 
 # In a multi-file setup, you would inherit from frontend team:
@@ -762,7 +771,7 @@ Create `promptscript.yaml`:
 
 ```yaml
 id: checkout-app
-syntax: '1.4.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -824,24 +833,30 @@ Add reusable capabilities to `.promptscript/project.prs`:
 
 See [Agent Platform](https://getpromptscript.dev/dev/features/index.md) for MCP servers, plugins, and target-specific capabilities.
 
-## Step 6: Compile and Verify
+## Step 6: Validate and Compile
 
-Compile all targets:
+Validate your configuration first, so broken references and policy violations surface before anything is written:
+
+```bash
+prs validate --strict
+```
+
+Then compile all targets:
 
 ```bash
 prs compile
 ```
 
-Preview without writing files:
+Preview what would change without writing files:
 
 ```bash
 prs compile --dry-run
 ```
 
-Validate your configuration:
+Inspect the generated diff before you commit:
 
 ```bash
-prs validate --strict
+prs diff --all
 ```
 
 ## Understanding Inheritance
@@ -902,6 +917,29 @@ jobs:
           prs compile
           git diff --exit-code
 ```
+
+## Your Daily Workflow
+
+After the initial setup, everyday use is a short loop:
+
+```bash
+# 1. Edit the source
+$EDITOR .promptscript/project.prs
+
+# 2. Validate
+prs validate --strict
+
+# 3. Compile
+prs compile
+
+# 4. Review the generated diff, then commit
+git status
+git diff
+git add .promptscript/project.prs CLAUDE.md .github .cursor
+git commit -m "update agent instructions"
+```
+
+The generated files are committed next to the source, so reviewers see both in the pull request. CI runs the same validation and fails when committed output no longer matches the source.
 
 ## Next Steps
 
@@ -1166,7 +1204,7 @@ targets:
 Install the CLI and validate source:
 
 ```bash
-npm install -g @promptscript/cli@1.16.0
+npm install -g @promptscript/cli@1.19.0
 prs validate --strict
 prs compile --dry-run
 prs diff --all --full
@@ -1292,7 +1330,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install -g @promptscript/cli@1.16.0
+      - run: npm install -g @promptscript/cli@1.19.0
       - run: prs validate --strict
       - run: prs compile
       - run: test -z "$(git status --porcelain --untracked-files=all)"
@@ -1401,7 +1439,7 @@ flowchart LR
 ```
 @meta {
   id: "checkout-service"
-  syntax: "1.4.0"
+  syntax: "1.5.0"
   tags: ["payments", "typescript"]
 }
 
@@ -1485,7 +1523,7 @@ Compile configured targets:
 prs compile
 ```
 
-Use named builds to generate scoped agent configuration for monorepo packages:
+Use named builds when one repository hosts several packages or apps and each needs its own agent configuration. Every build has its own entry file, output directory, and target list, so `packages/api` and `packages/web` each get files scoped to their subtree. Define them in `promptscript.yaml` (see the [Configuration Reference](https://getpromptscript.dev/dev/reference/config/index.md)):
 
 ```yaml
 builds:
@@ -1518,7 +1556,7 @@ PromptScript applies the same lifecycle to every agent capability:
 1. Review generated changes in pull requests.
 1. Enforce `prs validate --strict` and compilation checks in CI.
 
-See [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md), [Security](https://getpromptscript.dev/dev/guides/security/index.md), and [Policy Engine](https://getpromptscript.dev/dev/guides/policy-engine/index.md).
+See [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md), [Security](https://getpromptscript.dev/dev/guides/security/index.md), [Policy Engine](https://getpromptscript.dev/dev/guides/policy-engine/index.md), and [CI/CD Integration](https://getpromptscript.dev/dev/guides/ci/index.md) for the pipeline that enforces it.
 
 # Agents
 
@@ -13347,6 +13385,10 @@ flowchart LR
 
 ## GitHub Actions
 
+Pin the CLI version
+
+Examples below install the latest CLI for simplicity. Pin an exact version in CI (`npm install -g @promptscript/cli@1.19.0`) so validation and compiled output stay reproducible, then upgrade the pin deliberately with a reviewed change.
+
 ### Basic Validation
 
 Create `.github/workflows/promptscript.yml`:
@@ -13507,13 +13549,15 @@ name: PromptScript (Optimized)
 on:
   push:
     paths:
-      - '.promptscript/**/*.prs'
+      - '.promptscript/**'
       - 'promptscript.yaml'
+      - 'promptscript.lock'
       - '.github/workflows/promptscript.yml'
   pull_request:
     paths:
-      - '.promptscript/**/*.prs'
+      - '.promptscript/**'
       - 'promptscript.yaml'
+      - 'promptscript.lock'
       - '.github/workflows/promptscript.yml'
 
 jobs:
@@ -13589,7 +13633,8 @@ jobs:
         run: npm install -g @promptscript/cli
 
       - name: Validate ${{ matrix.project }}
-        working-directory: apps/${{ matrix.project }}
+        # Projects do not all live under apps/ - shared sits in packages/.
+        working-directory: ${{ matrix.project == 'shared' && 'packages/shared' || format('apps/{0}', matrix.project) }}
         run: |
           prs validate --strict
           prs compile
@@ -13612,6 +13657,7 @@ promptscript:
   stage: validate
   image: node:20-alpine
   before_script:
+    - apk add --no-cache git
     - npm install -g @promptscript/cli
   script:
     - prs validate --strict
@@ -13640,6 +13686,7 @@ promptscript:
   variables:
     GITHUB_TOKEN: $REGISTRY_TOKEN
   before_script:
+    - apk add --no-cache git
     - npm install -g @promptscript/cli
   script:
     - prs pull
@@ -13653,6 +13700,8 @@ promptscript:
 
 ### With Caching
 
+PromptScript caches Git registry clones under `~/.promptscript/.cache/` (the user home directory, not the project directory), so cache the home path explicitly:
+
 ```yaml
 stages:
   - validate
@@ -13660,13 +13709,17 @@ stages:
 promptscript:
   stage: validate
   image: node:20-alpine
+  variables:
+    HOME: ${CI_PROJECT_DIR}/.promptscript-home
   cache:
     key: promptscript-${CI_COMMIT_REF_SLUG}
     paths:
-      - .promptscript/.cache/
+      - .promptscript-home/.promptscript/.cache/
   before_script:
+    - apk add --no-cache git
     - npm install -g @promptscript/cli
   script:
+    - prs pull
     - prs validate --strict
     - prs compile
     - git diff --exit-code
@@ -13674,6 +13727,7 @@ promptscript:
     - changes:
         - .promptscript/**/*
         - promptscript.yaml
+        - promptscript.lock
 ```
 
 ### Merge Request Validation
@@ -13681,41 +13735,31 @@ promptscript:
 ```yaml
 stages:
   - validate
-  - report
 
-promptscript:validate:
+promptscript:
   stage: validate
   image: node:20-alpine
   before_script:
+    - apk add --no-cache git
     - npm install -g @promptscript/cli
   script:
     - prs validate --strict
     - prs compile
-  artifacts:
-    paths:
-      - .github/copilot-instructions.md
-      - CLAUDE.md
-    expire_in: 1 week
+    # One job compiles and checks drift, so every generated file is covered.
+    # An artifact-based split would only compare the listed paths.
+    - |
+      if ! git diff --quiet; then
+        echo "Compiled files differ from source"
+        git diff --stat
+        exit 1
+      fi
+      echo "All files in sync"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         - .promptscript/**/*
         - promptscript.yaml
-
-promptscript:drift:
-  stage: report
-  image: node:20-alpine
-  needs: [promptscript:validate]
-  script:
-    - |
-      if ! git diff --quiet; then
-        echo "⚠️ Compiled files differ from source"
-        git diff --stat
-        exit 1
-      fi
-      echo "✅ All files in sync"
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        - promptscript.lock
 ```
 
 ______________________________________________________________________
@@ -14176,14 +14220,15 @@ npx husky init
 ```bash
 # Only run if .prs files are staged
 if git diff --cached --name-only | grep -qE '\.prs$|promptscript\.yaml$'; then
-  echo "🔍 Validating PromptScript files..."
+  echo "Validating PromptScript files..."
   npx --package=@promptscript/cli prs validate --strict
   npx --package=@promptscript/cli prs compile
 
-  # Check if compile changed any files
-  if ! git diff --quiet; then
-    echo "⚠️  Compiled files changed. Please stage the changes."
-    git diff --stat
+  # Check if compile changed or created any files, including untracked ones.
+  # Adjust the path list to the outputs of your configured targets.
+  if [ -n "$(git status --porcelain --untracked-files=all -- CLAUDE.md AGENTS.md .github .claude .cursor .promptscript 2>/dev/null)" ]; then
+    echo "Compiled files changed. Please stage the changes."
+    git status --porcelain --untracked-files=all
     exit 1
   fi
 fi
@@ -16827,456 +16872,6 @@ The extractor is an internal implementation detail. Keeping it internal allows:
 - **Flexibility**: Can change extraction strategy transparently
 # Examples
 
-# Real-Life Tutorial: Checkout Service
-
-This tutorial follows a platform team adding PromptScript to an existing TypeScript checkout service. The repository already contains hand-written Claude Code and GitHub Copilot instructions. The team needs one reviewed source of truth without losing payment rules or silently replacing user-owned files.
-
-Open the [Playground](/playground/) and choose **Real-Life Checkout Service** to compile the same three PromptScript files in your browser.
-
-## Scenario
-
-The checkout service owns payment authorization, retries, and webhook handling. Its deployment has four requirements:
-
-1. Organization rules apply to every service.
-1. Payment rules remain reusable by other payment services.
-1. Checkout-specific policy can replace one inherited standard without duplicating the full organization policy.
-1. Claude Code and GitHub Copilot receive native instructions, skills, agents, hooks, and release prompts from the same source.
-
-Acceptance criteria:
-
-- Every `.prs` file uses syntax `1.5.0`.
-- `prs validate --strict` succeeds.
-- The resolved testing standard is `Minimum 95% coverage for payment flows`.
-- Generated output contains the payment security skill and reviewer agent.
-- CI fails when committed generated files drift from PromptScript sources.
-- Existing instruction files are backed up and reviewed before takeover.
-
-## Repository Layout
-
-Start with this layout:
-
-```text
-checkout-service/
-├── .github/
-│   └── copilot-instructions.md
-├── .promptscript/
-│   ├── org-base.prs
-│   ├── payment-policy.prs
-│   └── project.prs
-├── src/
-│   ├── checkout/
-│   └── webhooks/
-├── AGENTS.md
-├── CLAUDE.md
-├── package.json
-└── promptscript.yaml
-```
-
-`AGENTS.md`, `CLAUDE.md`, and `.github/copilot-instructions.md` represent existing, user-owned instructions. Do not delete them to make compilation pass.
-
-## Step 1: Add Organization Policy
-
-Create `.promptscript/org-base.prs`:
-
-```
-@meta {
-  id: "commerce-org-base"
-  syntax: "1.5.0"
-  tags: ["commerce", "typescript"]
-}
-
-@identity {
-  """
-  You are an engineering assistant for a production commerce platform.
-  Prefer safe, observable, reversible changes.
-  """
-}
-
-@context {
-  language: "TypeScript"
-  runtime: "Node.js 20"
-  packageManager: "pnpm"
-}
-
-@standards {
-  testing: ["Minimum 80% coverage"]
-  git: {
-    format: "Conventional Commits"
-  }
-  review: ["Require one approving review"]
-  operations: ["Add structured logs", "Document rollback steps"]
-}
-
-@restrictions {
-  - "Never commit credentials or production customer data"
-  - "Never bypass required checks on protected branches"
-}
-```
-
-This file provides defaults. Service repositories inherit it and can make explicit, reviewable changes after inheritance.
-
-## Step 2: Add Reusable Payment Policy
-
-Create `.promptscript/payment-policy.prs`:
-
-```
-@meta {
-  id: "payment-policy"
-  syntax: "1.5.0"
-  tags: ["payments", "pci"]
-  params: {
-    provider: enum("Stripe", "Adyen") = "Stripe"
-    maxRetries: number = 3
-  }
-}
-
-@standards {
-  testing: ["Test approved, declined, timeout, and retry paths"]
-  security: ["Tokenize payment data", "Verify {{provider}} webhook signatures"]
-  reliability: [
-    "Use idempotency keys",
-    "Bound {{provider}} retries to {{maxRetries}} attempts with backoff"
-  ]
-}
-
-@restrictions {
-  - "Never log PAN, CVV, access tokens, or raw webhook secrets"
-  - "Never exceed {{maxRetries}} {{provider}} payment retries"
-}
-```
-
-The payment policy is composed with `@use`, so another payment service can use the same rules without inheriting checkout identity or project metadata. `provider` accepts only `Stripe` or `Adyen`. `maxRetries` defaults to `3`, so services override it only when their provider contract requires another limit.
-
-## Step 3: Compose Checkout Policy
-
-Create `.promptscript/project.prs`:
-
-```
-@meta {
-  id: "checkout-service"
-  syntax: "1.5.0"
-  tags: ["checkout", "payments", "production"]
-}
-
-@inherit ./org-base
-@use ./payment-policy(provider: "Adyen", maxRetries: 2)
-
-@context {
-  service: "checkout"
-  framework: "Fastify"
-  database: "PostgreSQL"
-  owns: ["payment authorization", "payment retries", "webhook processing"]
-}
-
-@standards {
-  @header "Checkout Engineering Policy"
-  @header git-commits "Checkout Commit Policy"
-
-  observability: [
-    "Attach checkoutId and paymentAttemptId to structured logs",
-    "Emit latency and failure metrics for each payment provider"
-  ]
-}
-
-@override standards.testing {
-  ["Minimum 95% coverage for payment flows"]
-}
-
-@extend restrictions {
-  - "Never change retry or idempotency behavior without integration tests"
-}
-
-@skills {
-  payment-security: {
-    description: "Review checkout changes for payment and data-handling risk"
-    allowedTools: ["Read", "Grep", "Bash"]
-    content: """
-      Review changed checkout and webhook code.
-      Check authorization boundaries, idempotency, secret handling,
-      webhook verification, logs, and failure recovery.
-      Report findings by severity with concrete remediation.
-    """
-  }
-}
-
-@agents {
-  payment-reviewer: {
-    description: "Review checkout changes before merge"
-    tools: ["Read", "Grep", "Glob", "Bash"]
-    model: "sonnet"
-    skills: ["payment-security"]
-    content: """
-      Inspect the diff, affected tests, and operational impact.
-      Reject changes that weaken idempotency, webhook verification,
-      auditability, or rollback safety.
-    """
-  }
-}
-
-@hooks {
-  verify-payment-edits: {
-    event: "post-tool-use"
-    matcher: "Edit|Write"
-    command: ["pnpm", "test", "--", "src/checkout", "src/webhooks"]
-    timeoutMs: 120000
-    targets: {
-      github: {
-        matcher: "edit|create"
-      }
-    }
-  }
-}
-
-@shortcuts {
-  release-readiness: {
-    description: "Prepare a checkout release for human approval"
-    prompt: true
-    content: """
-      1. Review changes to checkout, retries, and webhook processing
-      2. Run unit and integration tests for payment flows
-      3. Verify dashboards, alerts, feature flags, and rollback steps
-      4. Summarize residual risk
-      5. Stop before deployment and request human approval
-    """
-  }
-}
-```
-
-Declaration order is intentional:
-
-| Declaration                       | Result                                                |
-| --------------------------------- | ----------------------------------------------------- |
-| `@inherit ./org-base`             | Adds identity, context, standards, and restrictions   |
-| Parameterized `@use`              | Adds payment policy for Adyen with two retries        |
-| Local `@context` and `@standards` | Adds checkout ownership and observability             |
-| `@override standards.testing`     | Replaces inherited and imported testing values        |
-| `@extend restrictions`            | Appends one checkout-specific restriction             |
-| Capability blocks                 | Adds native skill, reviewer, hook, and release prompt |
-
-The override removes both `Minimum 80% coverage` and the imported payment test list from `standards.testing`. Template parameters resolve before output, so no `{{provider}}` or `{{maxRetries}}` placeholders remain. Other organization and payment standards remain.
-
-## Step 4: Configure Native Targets
-
-Create `promptscript.yaml`:
-
-```yaml
-id: checkout-service
-syntax: '1.5.0'
-
-input:
-  entry: .promptscript/project.prs
-
-targets:
-  - claude:
-      version: full
-  - github:
-      version: full
-```
-
-`version: full` is required for separate native capability files. Simpler target modes may emit only the main instruction file.
-
-## Step 5: Validate Before Writing
-
-Install the CLI and validate source:
-
-```bash
-npm install -g @promptscript/cli@1.16.0
-prs validate --strict
-prs compile --dry-run
-prs diff --all --full
-```
-
-Stop if validation fails or the full diff omits existing business rules. Resolve source errors first. Do not use `--force` as an error bypass.
-
-## Step 6: Take Over Existing Output Safely
-
-Create a recoverable baseline before PromptScript owns existing files:
-
-```bash
-git status --short
-git switch -c chore/adopt-promptscript
-
-printf '%s\n' \
-  '/.promptscript-migration-backup/' \
-  '/.promptscript-rollback-output-*/' >> .git/info/exclude
-
-mkdir .promptscript-migration-backup
-for path in AGENTS.md CLAUDE.md .claude .github; do
-  if [ -e "$path" ]; then
-    cp -R "$path" .promptscript-migration-backup/
-  fi
-done
-```
-
-Copy only paths that exist. Keep this local backup out of the commit. The backup covers user-owned main instructions and any existing native capability directories. Record the pre-adoption commit for a complete rollback after merge:
-
-```bash
-git rev-parse HEAD > .promptscript-migration-backup/pre-adoption-commit
-```
-
-Review the complete plan:
-
-```bash
-prs validate --strict
-prs compile --dry-run
-prs diff --all --full
-```
-
-Approve every conflict path and confirm the PromptScript source preserves all required policy. Then perform one controlled takeover:
-
-```bash
-prs compile --force
-git status --short
-git add --intent-to-add -- \
-  .promptscript \
-  promptscript.yaml \
-  AGENTS.md \
-  CLAUDE.md \
-  .claude \
-  .github
-git diff -- .
-prs diff --all --full
-```
-
-Run this before staging migration content. `--intent-to-add` makes new files visible to `git diff` without staging their content. Expected final `prs diff --all --full` result: no drift. Expected Git status and diff: only approved PromptScript sources, configuration, and generated target files.
-
-## Step 7: Inspect Generated Artifacts
-
-Exact native paths depend on target capabilities and target mode. This configuration generates main instructions plus supported capability files, including:
-
-```text
-AGENTS.md
-CLAUDE.md
-.claude/agents/payment-reviewer.md
-.claude/commands/release-readiness.md
-.claude/settings.json
-.claude/skills/payment-security/SKILL.md
-.github/copilot-instructions.md
-.github/agents/payment-reviewer.md
-.github/hooks/promptscript.json
-.github/prompts/release-readiness.prompt.md
-.github/skills/payment-security/SKILL.md
-```
-
-`CLAUDE.md` is Claude Code's main instruction file. GitHub full mode also generates top-level `AGENTS.md` as its agent index. PromptScript can emit its built-in skill beside project skills.
-
-Inspect main instructions for these resolved rules:
-
-```text
-Minimum 95% coverage for payment flows
-Use idempotency keys
-Verify Adyen webhook signatures
-Bound Adyen retries to 2 attempts with backoff
-Don't exceed 2 Adyen payment retries
-Don't change retry or idempotency behavior without integration tests
-```
-
-GitHub normalizes negative restrictions from `Never` to `Don't`. Also verify:
-
-- `Minimum 80% coverage` is absent.
-- `Test approved, declined, timeout, and retry paths` is absent from the replaced testing field.
-- `{{provider}}`, `{{maxRetries}}`, and default provider `Stripe` are absent.
-- Organization Git and operations standards remain.
-- Payment security and reliability standards remain.
-- The payment reviewer references the payment security skill where supported.
-- Claude hook matcher is `Edit|Write`.
-- GitHub hook matcher is `edit|create`.
-- Release readiness is a native Claude command and GitHub prompt file.
-
-## Step 8: Add CI Drift Protection
-
-Commit generated output so reviewers can inspect platform-specific changes. Add `.github/workflows/promptscript.yml`:
-
-```yaml
-name: PromptScript
-
-on:
-  pull_request:
-  push:
-    branches: [main]
-
-permissions:
-  contents: read
-
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm install -g @promptscript/cli@1.16.0
-      - run: prs validate --strict
-      - run: prs compile
-      - run: test -z "$(git status --porcelain --untracked-files=all)"
-```
-
-The final step catches modified, deleted, and untracked generated files. Update the pinned CLI version through the same reviewed dependency process as other build tools.
-
-## Step 9: Roll Out
-
-Use a small rollout before organization-wide adoption:
-
-1. Merge the checkout service first.
-1. Ask payment and platform owners to review generated Claude and GitHub files.
-1. Track compile failures, drift failures, review defects, and developer feedback for one release cycle.
-1. Reuse `payment-policy.prs` in one additional payment service.
-1. Promote the organization base only after both services produce equivalent policy and stable CI.
-
-Operational success signals:
-
-- No lost instruction or ownership conflicts.
-- No unreviewed generated-file drift.
-- Payment reviewer catches violations before merge.
-- Developers can trace every generated rule to one `.prs` declaration.
-- Rollback remains tested and documented.
-
-## Rollback
-
-Before the adoption commit, preserve current output and restore the complete pre-adoption target set:
-
-```bash
-rollback_dir=".promptscript-rollback-output-$(date +%Y%m%d%H%M%S)"
-mkdir "$rollback_dir"
-
-for path in AGENTS.md CLAUDE.md .claude .github; do
-  if [ -e "$path" ]; then
-    mv "$path" "$rollback_dir/"
-  fi
-  if [ -e ".promptscript-migration-backup/$path" ]; then
-    cp -R ".promptscript-migration-backup/$path" "$path"
-  fi
-done
-```
-
-This removes newly generated capability files from active target paths while preserving them in a timestamped local directory. Confirm no user work was added under `.claude/` or `.github/` after the backup before running it.
-
-After the adoption commit, revert that complete commit instead of restoring individual generated paths:
-
-```bash
-git log --oneline -- .promptscript/project.prs
-git revert <adoption-commit>
-git status --short
-```
-
-The revert restores modified files and removes generated files introduced by the adoption commit. Verify restored target files against the backup. Compare the adoption commit's parent with the recorded pre-adoption commit if adoption was split across multiple commits.
-
-Then fix PromptScript source, rerun the dry run and full diff, and repeat the controlled takeover. Do not delete target files, disable a target, or keep `output.overwrite: true` merely to hide an ownership or parity problem.
-
-## Production Checklist
-
-- Source files use syntax `1.5.0`.
-- Composition order has a written reason.
-- Replacement values are asserted by reviewers or tests.
-- Existing target files have recoverable backups.
-- `prs validate --strict` passes.
-- `prs compile --dry-run` shows only expected paths.
-- `prs diff --all --full` is empty after compile.
-- Git diff contains only approved source and generated changes.
-- CI reproduces output and fails on drift.
-- Payment and platform owners approve rollout and rollback.
-
 # Minimal Example
 
 The simplest possible PromptScript setup for a single project.
@@ -17354,20 +16949,20 @@ If starting from scratch:
 prs init
 ```
 
+### Validate
+
+Check for issues before generating anything. Strict mode turns warnings into errors:
+
+```bash
+prs validate --strict
+```
+
 ### Compile
 
 Generate the output file:
 
 ```bash
 prs compile
-```
-
-### Validate
-
-Check for issues:
-
-```bash
-prs validate
 ```
 
 ## Generated Output
@@ -17911,7 +17506,7 @@ workspace/
 │   │   └── project.prs
 │   ├── promptscript.yaml
 │   └── ...
-└── project-c/
+└── project-c/            # Not yet initialized - no promptscript.yaml
     └── ...
 ```
 
@@ -17993,7 +17588,7 @@ workspace/
 ```
 @meta {
   id: "customer-dashboard"
-  syntax: "1.0.0"
+  syntax: "1.5.0"
 }
 
 # In a multi-file setup, you would inherit from team:
@@ -18048,7 +17643,7 @@ workspace/
 
 ```yaml
 id: customer-dashboard
-syntax: '1.4.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -18070,7 +17665,7 @@ targets:
 ```
 @meta {
   id: "admin-portal"
-  syntax: "1.0.0"
+  syntax: "1.5.0"
 }
 
 # In a multi-file setup, you would inherit from team:
@@ -18118,7 +17713,7 @@ targets:
 
 ```yaml
 id: admin-portal
-syntax: '1.4.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -18158,33 +17753,42 @@ cd project-a && prs compile
 cd ../project-b && prs compile
 ```
 
-Or use a script:
+Or use a script. It skips directories that are not yet initialized, so a new `project-c/` without a `promptscript.yaml` does not break the loop:
 
 ```bash
 #!/bin/bash
 for dir in project-*/; do
-  echo "Compiling $dir..."
-  (cd "$dir" && prs compile)
+  if [ ! -f "$dir/promptscript.yaml" ]; then
+    echo "Skipping $dir (no promptscript.yaml)"
+    continue
+  fi
+  echo "Validating and compiling $dir..."
+  (cd "$dir" && prs validate --strict && prs compile)
 done
 ```
 
 ### Validate
 
+Validation runs per project, because each project owns its own `promptscript.yaml` and `promptscript.lock`:
+
 ```bash
-prs validate --strict
+cd project-a && prs validate --strict
+cd ../project-b && prs validate --strict
 ```
 
 ### Update Team Config
 
 When you update `@team/frontend`:
 
-1. Update version in `@meta`
+1. Tag the registry change (for example `v1.2.0`) and review it like any other code
 1. Notify team members
 1. Each project recompiles to get updates
 
 ## CI/CD Integration
 
 ### GitHub Actions
+
+Each project owns its own `promptscript.yaml`, so CI runs per project. Path filters keep jobs scoped, and `working-directory` points each job at its project:
 
 ```yaml
 # .github/workflows/promptscript.yml
@@ -18193,12 +17797,17 @@ name: PromptScript CI
 on:
   push:
     paths:
-      - '.promptscript/**'
-      - 'promptscript.yaml'
+      - 'project-*/.promptscript/**'
+      - 'project-*/promptscript.yaml'
+      - 'project-*/promptscript.lock'
+      - 'registry/**'
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [project-a, project-b]
     steps:
       - uses: actions/checkout@v4
 
@@ -18216,9 +17825,11 @@ jobs:
         run: npm install -g @promptscript/cli
 
       - name: Validate
+        working-directory: ${{ matrix.project }}
         run: prs validate --strict
 
       - name: Check compiled files
+        working-directory: ${{ matrix.project }}
         run: |
           prs compile
           git diff --exit-code
@@ -20695,7 +20306,7 @@ Sources can be local files (`./base`) or registry packages (`@company/standards`
 A registry is just a Git repository with `.prs` files. Configure it in your project:
 
 ```bash
-prs registry add company https://github.com/your-org/promptscript-registry.git
+prs registry add @company https://github.com/your-org/promptscript-registry.git
 ```
 
 See the [Registry guide](https://getpromptscript.dev/dev/guides/registry/index.md) for full setup instructions.
@@ -20731,12 +20342,19 @@ A required field is missing. The error message identifies the block and field to
 
 ### Compiled output doesn't match expected format
 
-Ensure you're using the latest version of `@promptscript/cli`. Formatter behavior can change between versions. Run:
+Check your CLI version first, then update through the same method you used to install:
 
 ```bash
 prs --version
-npm update -g @promptscript/cli
 ```
+
+```bash
+npm update -g @promptscript/cli      # npm global install
+npx @promptscript/cli@latest compile # npx, no install step
+docker pull ghcr.io/mrwogu/promptscript:latest  # Docker
+```
+
+Formatter behavior can change between versions, so teams that pin the CLI version in CI should upgrade the pin deliberately.
 
 ## How do I contribute?
 
@@ -20751,7 +20369,7 @@ See [CONTRIBUTING.md](https://github.com/mrwogu/promptscript/blob/main/CONTRIBUT
 
 ## The Manual Approach
 
-Without PromptScript, teams maintain separate configuration files for each AI tool in every repository. Even with just 2–3 tools, this quickly becomes unmanageable across many repos:
+Without PromptScript, teams maintain separate configuration files for each AI tool in every repository. Even with just 2-3 tools, this quickly becomes unmanageable across many repos:
 
 ```text
 .github/copilot-instructions.md   # GitHub Copilot
@@ -20776,7 +20394,7 @@ GEMINI.md                          # Gemini CLI
 With PromptScript, you write one `.prs` file and compile to all 50 targets:
 
 ```
-@meta { id: "my-project" syntax: "1.0.0" }
+@meta { id: "my-project" syntax: "1.5.0" }
 
 @inherit @company/backend-standards
 
@@ -20837,6 +20455,12 @@ GEMINI.md
 ## Getting Started
 
 Ready to switch? See the [Migration Guide](https://getpromptscript.dev/dev/guides/migration/index.md) to convert existing configs, or start fresh with the [Getting Started guide](https://getpromptscript.dev/dev/getting-started/index.md).
+
+Evaluating for a team or organization? Also see:
+
+- [Target Platform Matrix](https://getpromptscript.dev/dev/reference/formatters/index.md) - exact output paths per tool
+- [CI/CD Integration](https://getpromptscript.dev/dev/guides/ci/index.md) - validation and drift detection in your pipeline
+- [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md) - registry, policies, and governance across repositories
 
 # Parity Testing
 

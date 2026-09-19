@@ -19,7 +19,7 @@ workspace/
 │   │   └── project.prs
 │   ├── promptscript.yaml
 │   └── ...
-└── project-c/
+└── project-c/            # Not yet initialized - no promptscript.yaml
     └── ...
 ```
 
@@ -101,7 +101,7 @@ workspace/
 ```
 @meta {
   id: "customer-dashboard"
-  syntax: "1.0.0"
+  syntax: "1.5.0"
 }
 
 # In a multi-file setup, you would inherit from team:
@@ -156,7 +156,7 @@ workspace/
 
 ```yaml
 id: customer-dashboard
-syntax: '1.4.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -178,7 +178,7 @@ targets:
 ```
 @meta {
   id: "admin-portal"
-  syntax: "1.0.0"
+  syntax: "1.5.0"
 }
 
 # In a multi-file setup, you would inherit from team:
@@ -226,7 +226,7 @@ targets:
 
 ```yaml
 id: admin-portal
-syntax: '1.4.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -266,33 +266,42 @@ cd project-a && prs compile
 cd ../project-b && prs compile
 ```
 
-Or use a script:
+Or use a script. It skips directories that are not yet initialized, so a new `project-c/` without a `promptscript.yaml` does not break the loop:
 
 ```bash
 #!/bin/bash
 for dir in project-*/; do
-  echo "Compiling $dir..."
-  (cd "$dir" && prs compile)
+  if [ ! -f "$dir/promptscript.yaml" ]; then
+    echo "Skipping $dir (no promptscript.yaml)"
+    continue
+  fi
+  echo "Validating and compiling $dir..."
+  (cd "$dir" && prs validate --strict && prs compile)
 done
 ```
 
 ### Validate
 
+Validation runs per project, because each project owns its own `promptscript.yaml` and `promptscript.lock`:
+
 ```bash
-prs validate --strict
+cd project-a && prs validate --strict
+cd ../project-b && prs validate --strict
 ```
 
 ### Update Team Config
 
 When you update `@team/frontend`:
 
-1. Update version in `@meta`
+1. Tag the registry change (for example `v1.2.0`) and review it like any other code
 1. Notify team members
 1. Each project recompiles to get updates
 
 ## CI/CD Integration
 
 ### GitHub Actions
+
+Each project owns its own `promptscript.yaml`, so CI runs per project. Path filters keep jobs scoped, and `working-directory` points each job at its project:
 
 ```yaml
 # .github/workflows/promptscript.yml
@@ -301,12 +310,17 @@ name: PromptScript CI
 on:
   push:
     paths:
-      - '.promptscript/**'
-      - 'promptscript.yaml'
+      - 'project-*/.promptscript/**'
+      - 'project-*/promptscript.yaml'
+      - 'project-*/promptscript.lock'
+      - 'registry/**'
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [project-a, project-b]
     steps:
       - uses: actions/checkout@v4
 
@@ -324,9 +338,11 @@ jobs:
         run: npm install -g @promptscript/cli
 
       - name: Validate
+        working-directory: ${{ matrix.project }}
         run: prs validate --strict
 
       - name: Check compiled files
+        working-directory: ${{ matrix.project }}
         run: |
           prs compile
           git diff --exit-code

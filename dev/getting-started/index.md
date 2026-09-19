@@ -7,6 +7,7 @@ Start treating your AI instructions as managed infrastructure.
 | Starting point             | Next step                                                                                                 |
 | -------------------------- | --------------------------------------------------------------------------------------------------------- |
 | New repository             | Continue with [Installation](#installation) and [Interactive Initialization](#interactive-initialization) |
+| In a hurry                 | Skip the demo and go to [Quick Start: New Projects](#quick-start-new-projects)                            |
 | Existing instruction files | Use [Quick Start: Migrating Existing Projects](#quick-start-migrating-existing-projects)                  |
 | PromptScript 1.15 project  | Follow [Upgrade 1.15 to 1.16](https://getpromptscript.dev/dev/guides/upgrade-1-15-to-1-16/index.md)       |
 | Need language semantics    | Open [Language Reference](https://getpromptscript.dev/dev/reference/language/index.md)                    |
@@ -83,7 +84,7 @@ validation:
 - **Multi-target setup** - Select which AI tools you want to generate output for
 - **Pre-configured** - Generates ready-to-compile configuration based on your stack
 
-## Quick Start: From Zero to PromptOps
+## Quick Start: New Projects
 
 ### 1. Initialize Your Repository
 
@@ -205,7 +206,13 @@ Add reusable skills, specialist agents, tool integrations, and automation to the
 
 PromptScript compiles each capability where the configured target supports it. See [Agent Platform](https://getpromptscript.dev/dev/features/index.md) and the [feature coverage matrix](https://getpromptscript.dev/dev/testing/feature-coverage/index.md) for target-specific support.
 
-### 4. Compile to Native Formats
+### 4. Validate and Compile to Native Formats
+
+Check the definition before anything is written. Strict mode turns warnings into errors, so broken references and policy violations surface here instead of in generated files:
+
+```bash
+prs validate --strict
+```
 
 Transform your universal `.prs` definition into platform-specific optimization formats.
 
@@ -231,10 +238,12 @@ includePromptScriptSkill: false
 
 ### 5. Commit to Git
 
-Commit your configuration and the generated files. Your AI context is now version-controlled infrastructure.
+Review the generated diff, then commit your configuration and the generated files explicitly. Your AI context is now version-controlled infrastructure.
 
 ```bash
-git add .
+git status
+git diff
+git add .promptscript/ promptscript.yaml CLAUDE.md .github .cursor
 git commit -m "chore: initialize promptscript infrastructure"
 ```
 
