@@ -176,6 +176,11 @@ jobs:
           elif [[ -f "gh-pages-content/${VERSION}/llms.txt" ]]; then
             cp "gh-pages-content/${VERSION}/llms.txt" gh-pages-content/llms.txt
           fi
+          if [[ -f "gh-pages-content/${LLMS_DIR}/llms-full.txt" ]]; then
+            cp "gh-pages-content/${LLMS_DIR}/llms-full.txt" gh-pages-content/llms-full.txt
+          elif [[ -f "gh-pages-content/${VERSION}/llms-full.txt" ]]; then
+            cp "gh-pages-content/${VERSION}/llms-full.txt" gh-pages-content/llms-full.txt
+          fi
 
       - name: Cleanup old version directories
         run: |
