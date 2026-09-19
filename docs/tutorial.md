@@ -6,8 +6,8 @@ description: Enterprise tutorial for organization, team, and project layers
 # Enterprise Tutorial: Building Layered AI Infrastructure
 
 This tutorial starts after your first successful local compile. You will
-simulate a PromptOps deployment for a software team and build a hierarchical
-context system that scales.
+build a layered configuration system for a software team: an organization
+base, a team layer that inherits it, and a project that inherits both.
 
 ## Learning Objectives
 
@@ -34,7 +34,7 @@ Create `registry/@acme/org.prs`:
 ```promptscript
 @meta {
   id: "@acme/org"
-  syntax: "1.0.0"
+  syntax: "1.5.0"
   org: "ACME Corporation"
 }
 
@@ -73,7 +73,7 @@ Create `registry/@acme/org.prs`:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0zagHN5YiXACe7DIVnyAjBQAMl7eMHqNJkAEEAwgFkAooJfq067BBsNgC+YmLc0pxYEFh6wjpyINpJtgCazACughjUMNniTgCS2XBwEHAC7IIA7uoA1hCsGtlYgq6e3r7+0WwUCQBizFBQzNWCLGQYrHEsUo3NFVNSOVJw+VKCAEbwrTRK0YzwfbbJIWGs3Iusy9Sr8bazMLKithI0jYwQ5PCyyAkSEnkg2Go3GsCm42YUjy71Yn2+cHkdH+APkABFmIwMnwqhhhoI0BlNlAIIw2gAFQqIkDI16okAAdWoMTyHAqazA6my+MeNgBggAuglQqwEnAYFjmbFfij5AA1PHSbB5PFQQQZcXUSSsQlYJGykAAORgADcYFqcCtHoJxYxclhqQkhawReFchVmYweqw1i8JABaRLGs1aoh+cUU4p1GB6NZc232taNSHQvmCQPyYPmyEkEgxG2cMrRM2CZYCQRYZiCENlNiQ9jUIZpjPOKDVDCx6uKst5DXZxq6s6ii5wHDqLBYh33QEgFS2jJSvTyRwAJVNEBgY2tnK188X1YyUFY5owm2gMQ3jpOs6kmOpjgA4pwTxxS5jsVEAnWdxWcOUUzAIQgMEAoMFE1B6PgRCkN8VC0DSIA1oErD4KYwFAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0zagHN5YiXACe7DIVnyAjBQCsFAAzbxg9RpMgAggGEAsgFFBb9WnVsCDY7AF8xMW5pTiwILD1hHTkQbRT7AE1mAFdBDGoYXPEXAElcuDgIOAF2QQB3dQBrCFYNXKxBd29ff0DYtgokgDFmKChmWsEWMgxWBJYpZtaqmak8qThCqUEAI3h2miVYxngB+1SwiNZuZdZV6nXE+3mYWVF7CRpmxghyeFlkJISCTyYajcaTWAzSbMKQFT6sb6-ODyOiAoHyAAizEYWT4NQwo0EaCy2ygEEYHQACsVkSBUe90SAAOrUOIFDhVDZgdS5QnPOxAwQAXSS4VYSTgMBxrPi-zR8gAagTpNgCgSoIIspLqJJWMSsCj5SAAHIwABuMB1ODWz0EksY+SwtKSItYYsi+SqrMYfVYGzeEgAtMlTRadUQApKqaUGjA9BsefbHRtmtDYQLBMH5KHLdCSCQ4nbOBVYhbBKsBIIsMxBGGKmxoexqCMM1nXFBahh47XlRWClrc819RdxVc4Dh1FgcU7HsCQCp7VkZXp5M4AErmiAwCa27k6xfL2tZKCsS0YbbQOJb51nedSbG05wAcU4Z445exuJiQQbe6rOEqNMYDCEBQiFBgYmoPR8CIUhfioWg6RAOtglYfBTFAoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -87,7 +87,7 @@ Create `registry/@acme/frontend-team.prs`:
 ```promptscript
 @meta {
   id: "@acme/frontend-team"
-  syntax: "1.0.0"
+  syntax: "1.5.0"
   team: "Frontend"
 }
 
@@ -127,7 +127,7 @@ Create `registry/@acme/frontend-team.prs`:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0Yamw6spAWg6l5YiXACe7DIVnyAjBQAM9w+MH6SVkADEN7TlKcBfMTEAYkEASXEhEgBXKCwIHUhYQTh+aLQ6QRNmaMEAdxyoKUlWHBhqCCxBdWYSQWZqAHMMVggAL2wINkQQwW4IUvLKvqVVBsaJUIAKahhGiDgsahNBHUEpBYwAI1hisAbBcgwTRo1o7QBKMX6pTnisFdFnQxAnCQBNHMEMWe-q7y0xVuADcYFBmGg+OxBEQ0OUsBQjIIAMpwxgQDBQdowEqCABKMCUWEyABUTHDkYwKmhid9tIISMxbtRxHkYFsXDBGDhWMxwfN4Ijnq8RWJAqxriwfIQqk8JC83oISWV-ppfJzSIJoqk4D1nGsCUTBNYABz5So4JXkmCU6lYJFrABqlRx+2ogi25ykWNYjQdSow0DyAykAGFkcjqgdFiYfX79YJnRxFoIANRK+DxX2CAAyEC21B+KzdnMWcH9hsYVQAitFysXo+VQe7FtgYEiFa9WOLegBRGXq8YpATaH5SODm3CqnzaHRwNEQSCMQTUWLwa5EQHDlpSMdwCgsW7CJHqUgwArUADWusEyFmRIAukjMFgOCyb8gcMxmNfMiwyMwcCVF0rCZPIszaOUhwaGg5YgE+zithwACyLQYI0MBQlg7iVjWdbLGmgihmqMoBEErDcHAX7UFgjDRFgE5ynIIAqP+aBsHc8juKG94cH8rDnvihJVoIbEcewiryCoX4-lxzE8YSfFCHRiy1EJRoyZekkscm9pIMxADqFR8bpE7agMExJpmdLFCSmYWbm+aFssAQgP4D4MHcyz4EQpDkDAVC0CADDNkBbD4NYblAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0Yamw6spAWg6l5YiXACe7DIVnyAjBQCsFAAyHxg-SSsgAYhvacpLgC+YmIAxIIAkuJCJACuUFgQOpCwgnD8sWh0gibMsYIA7nlQUpKsODDUEFiC6swkgszUAOYYrBAAXtgQbIhhgtwQ5ZXVA0qqTc0S4QAU1DDNEHBY1CaCOoJSSxgARrClYE2C5BgmzRqx2gCUYoNSnIlYa6KuhiAuEgCaeYIY87+1XxaUr3ABuMCgzDQfHYgiIaEqWAoRkEAGUEYwIBgoJ0YGVBAAlGBKLDZAAqJgRqMYVTQpN+2kEJGY92o4gKMB2bhgjBwrGYkMW8GRr3eYrEwVYtxYfkINReEjeH0EZIqgM0-m5pEEsXScD6rg2RJJgmsAA5CtUcCrKTBqbSsCiNgA1ap4w7UQQ7S5SHGsZpOlUYaAFIZSADCqNRtSOyxMfoDhsEro4y0EAGoVfBEv7BAAZCA7ah-NYe7nLOCB42MGoARVilVLscq4M9y2wMBRSverEl-QAonLNZM0gJtH8pHBLbh1X5tDo4BiIJBGIJqPF4LciMDR20pBO4BQWPdhCj1KQYEVqABrfWCZDzEkAXRRmCwHDZd+QOGYzFv2RYMhmDgaoelYbJ5HmbRKmODQ0ErEAX1cdsOAAWTaDBmhgGEsE8as6wbVYM0EcMNTlIIQlYbg4B-agsEYWIsCnBU5BAFRALQNgHnkTxw0fDgAVYS9CWJGtBA4rj2GVeQVB-P8eNYvjiQEoQGOWeoRJNOTr2ktjU0dJBWIAdSqAT9KnXUhimFNswZUoyWzKz80LYtViCEBAifBgHlWfAiFIcgYCoWgQAYVsQLYfBrA8oA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -141,7 +141,7 @@ Create `.promptscript/project.prs` in your project:
 ```promptscript
 @meta {
   id: "checkout-app"
-  syntax: "1.4.0"
+  syntax: "1.5.0"
 }
 
 # In a multi-file setup, you would inherit from frontend team:
@@ -201,7 +201,7 @@ Create `.promptscript/project.prs` in your project:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDGjTyxEuAE92GQrPkBGCgBYKABn2sAvmLEBiQQElxQkmqgsCE1IWEE4fjU0OkEjdUEAd3UoKUlWRWoILEEwamYSHLz2TlSOUkQPQW4IdJhM7O4MRj4Aely2DlYpTTKCwU8ACmoYAHMIOCxqI0FNQSlxjAAjWFSwZmpBcgwjEby1LoBKMW4WYsJs0XFNvIArJSwLEABhRRV1bIBBXSgIRmwINhOCRSeCMTJoIJsR4AUU0LBIfGojBggkYr1UGhyUGYCScBjkIH0hKuABUcONJHBBLgUWilBjsjpyL9-mwcutBB8ngBZaEAcipMDh+URyM2UGwa2oJAo+IA0jBpmAYNg1MM4BUrrNuQEgpoJjA0Kj0e9EhAAF4YahSfGzAAK2z47GuzGRcDgNRGZtwggAypMIGgYLbOVIpOqqQA3DA-KSs1ghgDy1rq4TUCKt0wwXVRbEg0vj+KJTlcCdYnjtt3u+qDjAgkEY4QEXStUjgxyInVSE2zcetVMuEhYINkg4k1PgQVYI1H+PHucjdQwIxgsgAHABWOfjmAAJlXgmGAEc1BBhjarhJS1e3Fcmm6PYtoFkjLPL4k-jOCbuKJZOR8gXHY9T3PWRJjUYMrlLUtjjgHB1iwRgNAHIsQBaOk3g0eRHgACRgKAjQSLIcGNelTTAbEEkEbExkYQD5BaTAjCdLBsIJPCCO9Ej-XBFEmJYtIOF2QtiQkBiMEsSwjDY+QACUYEjCAYCo4cUSlQR73gR9nywaZxjgCD22JGDWG4ZRWBxFYV2EVDiyudxPA+O0vEEaEujQZgaiwdsywke1E19ElBBaHQIHQk0NHQ4ZsBRWYnmijhSMw7IIndAFfJmQQ7QAVSCkK0DCjCGRaRBpEy7K0DjRKiveEM7QCvLQvCsjItKqR0Pych+FiwQnk62BErQNU0QwCJbwkBzBAVaY+rINhOG88bMpeFqsAAdQtVtMu5DAajNS1rVzUwajqEMPjDCMADF1gKWZfXJXRPRaJ8oB+acNIurS6sdBbrulTKeMDFFoVgFiqS80ZqELLVBGTEFqF9dMSEzZarRSpGUfmOAtmkq5i2MkBnAAXQYBapnwIhSC6qhaBABhF1odL8EsQmgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDGjTyxEuAE92GQrPkBGCgFYKABn2sAvmLEBiQQElxQkmqgsCE1IWEE4fjU0OkEjdUEAd3UoKUlWRWoILEEwamYSHLz2TlSOUkQPQW4IdJhM7O4MRj4Aely2DlYpTTKCwU8ACmoYAHMIOCxqI0FNQSlxjAAjWFSwZmpBcgwjEby1LoBKMW4WYsJs0XFNvIArJSwLEABhRRV1bIBBXSgIRmwINhOCRSeCMTJoIJsR4AUU0LBIfGojBggkYr1UGhyUGYCScBjkIH0hKuABUcONJHBBLgUWilBjsjpyL9-mwcutBB8ngBZaEAcipMDh+URyM2UGwa2oJAo+IA0jBpmAYNg1MM4BUrrNuQEgpoJjA0Kj0e9EhAAF4YahSfGzAAK2z47GuzGRcDgNRGZtwggAypMIGgYLbOVIpOqqQA3DA-KSs1ghgDy1rq4TUCKt0wwXVRbEg0vj+KJTlcCdYnjtt3u+qDjAgkEY4QEXStUjgxyInVSE2zcetVMuEhYINkg4k1PgQVYI1H+PHucjdQwIxgsgAHDY5+OYAAmVeCYYARzUEGGNquElLl7cVyabo9i2gWSMs4viT+M4JO4olk5HyB45HieZ6yJMajBlcpalsccA4OsWCMBoA5FiALR0m8GjyI8AASMBQEaCRZDgxr0qaYDYgkgjYmMjAAfILSYEYTpYFhBK4fh3rEf64IooxzFpBwuyFsSEj0RgliWEYrHyAASjAkYQDAlHDiiUqCHe8APk+WDTOMcDge2xLQaw3DKKwOIrCuwgocWVzuJ4Hx2l4gjQl0aDMDUWDtmWEj2omvokoILQ6BAaEmhoaHDNgKKzE8UUcCRGHZBE7oAj5MyCHaACqgXBWgoXoQyLSINIGVZWgcYJYV7whna-m5SFYWkRFJVSGh+TkPwMWCE8HWwAlaBqmiGARDeEj2YICrTL1ZBsJwXljRlLzNVgADqFqthl3IYDUZqWtauamDUdQhh8YYRgAYusBSzL65K6J6LSPlAPzTup52abVjrzVd0oZdxgYotCsDMVSnmjNQhZaoIyYgtQvrpiQmZLVayWI8j8xwFsUlXMWRkgM4AC6DDzVM+BEKQnVULQIAMIutBpfglgE0AA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -212,7 +212,7 @@ Create `promptscript.yaml`:
 
 ```yaml
 id: checkout-app
-syntax: '1.4.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -280,24 +280,31 @@ Add reusable capabilities to `.promptscript/project.prs`:
 
 See [Agent Platform](features/index.md) for MCP servers, plugins, and target-specific capabilities.
 
-## Step 6: Compile and Verify
+## Step 6: Validate and Compile
 
-Compile all targets:
+Validate your configuration first, so broken references and policy violations surface before
+anything is written:
+
+```bash
+prs validate --strict
+```
+
+Then compile all targets:
 
 ```bash
 prs compile
 ```
 
-Preview without writing files:
+Preview what would change without writing files:
 
 ```bash
 prs compile --dry-run
 ```
 
-Validate your configuration:
+Inspect the generated diff before you commit:
 
 ```bash
-prs validate --strict
+prs diff --all
 ```
 
 ## Understanding Inheritance
@@ -358,6 +365,30 @@ jobs:
           prs compile
           git diff --exit-code
 ```
+
+## Your Daily Workflow
+
+After the initial setup, everyday use is a short loop:
+
+```bash
+# 1. Edit the source
+$EDITOR .promptscript/project.prs
+
+# 2. Validate
+prs validate --strict
+
+# 3. Compile
+prs compile
+
+# 4. Review the generated diff, then commit
+git status
+git diff
+git add .promptscript/project.prs CLAUDE.md .github .cursor
+git commit -m "update agent instructions"
+```
+
+The generated files are committed next to the source, so reviewers see both in the pull request.
+CI runs the same validation and fails when committed output no longer matches the source.
 
 ## Next Steps
 

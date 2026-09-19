@@ -12,6 +12,7 @@ Start treating your AI instructions as managed infrastructure.
 | Starting point | Next step |
 | -------------- | --------- |
 | New repository | Continue with [Installation](#installation) and [Interactive Initialization](#interactive-initialization) |
+| In a hurry | Skip the demo and go to [Quick Start: New Projects](#quick-start-new-projects) |
 | Existing instruction files | Use [Quick Start: Migrating Existing Projects](#quick-start-migrating-existing-projects) |
 | PromptScript 1.15 project | Follow [Upgrade 1.15 to 1.16](guides/upgrade-1-15-to-1-16.md) |
 | Need language semantics | Open [Language Reference](reference/language.md) |
@@ -111,7 +112,7 @@ Generated Files
 - **Multi-target setup** - Select which AI tools you want to generate output for
 - **Pre-configured** - Generates ready-to-compile configuration based on your stack
 
-## Quick Start: From Zero to PromptOps
+## Quick Start: New Projects
 
 ### 1. Initialize Your Repository
 
@@ -189,7 +190,7 @@ Open `.promptscript/project.prs` and customize:
 }
 ```
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoA2CgAZdrAL5ix3aZywQsi4Xrkhd-uKCAJrMAK6CGNQwggDuzNQA1hCsAOaCbJGCAEowGNqRaOQQjNgQbBS+ACpaOIJwAoyJslWKaDAAyozUEGhYdDl5BWYAHAMAap4wvgH2TqwuDRisUlFScD5BLFIwssi+EvIAqnAxYGGs2uWsGFCCaqnUpCQp6Q2KsPJ0B34ACtFgGDUQQ4ZjMRIbZZSQQsMjMOCea73bAcaisOBfH7yADqPQ4gg4DQ2YASkSgd2200CEgAumJ5otQdQsIwwlgNqIggBiQQdCBkWD1LA9NKCQBJhIIpMxWXwjB5MmwoIoZiAAPTRABuEBgsXkphAuS1OphzB2ghJwIAjmFbp5vFDBAAjeBYe5PK6MeD2Xw8gDyjs0BVinjqajIWFkwrCMQlqU4QOw8DdzHD5ugXqC8lVhJ0SE2EgkYb6keo0Z+Ozg3V68tY+txU0EF08BJdGOpBZY7Hc+tmQQLgnr+KbrpzGzCCLSiB+EmUgkmOciG1wMQXpdYrCB08Es5qDVeggAMhBHU9qN4LSa4Rv2Bi+wXZwBBJ-IrCo8QACgf1CeaRgAwf2j-nApzMgAlFi-iQb4DKZmqAL5FgCR6vmBZFhGBKltMd4VlWfTXPqHRhKkcYNII8HaAk+78moGowLK7L2P2nYcOwPZQXeEgPjcSoAF4rjgMSUpEKz1ERJGuuRiEiuk1HUMwtH0cSpLOq+QKCCQGApAIKQYI60B2pUHGCP88BArRTowDgGBaqSDpEOQmniEMdTRLCso7NCjBWb+hn9rM7bzA4IAODSDDuGe+BEKQ5AwFQtAgAwtG0Nc+BmMFQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoBWCgAZdrAL5ix3aZywQsi4Xrkhd-uKCAJrMAK6CGNQwggDuzNQA1hCsAOaCbJGCAEowGNqRaOQQjNgQbBS+ACpaOIJwAoyJslWKaDAAyozUEGhYdDl5BWYAHAMAap4wvgH2TqwuDRisUlFScD5BLFIwssi+EvIAqnAxYGGs2uWsGFCCaqnUpCQp6Q2KsPJ0B34ACtFgGDUQQ4ZjMRIbZZSQQsMjMOCea73bAcaisOBfH7yADqPQ4gg4DQ2YASkSgd2200CEgAumJ5otQdQsIwwlgNqIggBiQQdCBkWD1LA9NKCQBJhIIpMxWXwjB5MmwoIoZiAAPTRABuEBgsXkphAuS1OphzB2ghJwIAjmFbp5vFDBAAjeBYe5PK6MeD2Xw8gDyjs0BVinjqajIWFkwrCMQlqU4QOw8DdzHD5ugXqC8lVhJ0SE2EgkYb6keo0Z+Ozg3V68tY+txU0EF08BJdGOpBZY7Hc+tmQQLgnr+KbrpzGzCCLSiB+EmUgkmOciG1wMQXpdYrCB08Es5qDVeggAMhBHU9qN4LSa4Rv2Bi+wXZwBBJ-IrCo8QACgf1CeaRgAwf2j-nApzMgAlFi-iQb4DKZmqAL5FgCR6vmBZFhGBKltMd4VlWfTXPqHRhKkcYNII8HaAk+78moGowLK7L2P2nYcOwPZQXeEgPjcSoAF4rjgMSUpEKz1ERJGuuRiEiuk1HUMwtH0cSpLOq+QKCCQGApAIKQYI60B2pUHGCP88BArRTowDgGBaqSDpEOQmniEMdTRLCso7NCjBWb+hn9rM7bzA4IAODSDDuGe+BEKQ5AwFQtAgAwtG0Nc+BmMFQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -250,7 +251,14 @@ PromptScript compiles each capability where the configured target supports it. S
 [Agent Platform](features/index.md) and the
 [feature coverage matrix](testing/feature-coverage.md) for target-specific support.
 
-### 4. Compile to Native Formats
+### 4. Validate and Compile to Native Formats
+
+Check the definition before anything is written. Strict mode turns warnings into errors, so
+broken references and policy violations surface here instead of in generated files:
+
+```bash
+prs validate --strict
+```
 
 Transform your universal `.prs` definition into platform-specific optimization formats.
 
@@ -280,10 +288,13 @@ includePromptScriptSkill: false
 
 ### 5. Commit to Git
 
-Commit your configuration and the generated files. Your AI context is now version-controlled infrastructure.
+Review the generated diff, then commit your configuration and the generated files explicitly.
+Your AI context is now version-controlled infrastructure.
 
 ```bash
-git add .
+git status
+git diff
+git add .promptscript/ promptscript.yaml CLAUDE.md .github .cursor
 git commit -m "chore: initialize promptscript infrastructure"
 ```
 
@@ -497,7 +508,7 @@ You are a Python developer working on a FastAPI service.
 }
 ```
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMaCAFo4MagDcIjGPLES4AT3YZCs+QEYKANgoAGPawC+Ysd2mcsELIeH65IHqB4oIAmswAroIY1DDRggAKhrhsglIwGjBQzGjqggDuzNQA1hCsAOaCqUIAYhhwWACCCQCSgmqa2jAU-kGOLqxuLOxEWH4hUBgVERjl8LLIaMk4bAC6-tQR7BB85iBJKeIAzBQWFo4SYNSkMIUlcAtg9QJK6yFS2BgARvUwewnMBrlWIAZQAigAZfquVjcBpTD7UKRwcYSFjpBb+CTyADq1G8cR8uUEODKWBRYCK0SgUEEYC2jC8bDg8joWICAFU1NEjKxGAB6DD5DDeOlUlr8gDyVVy1yZrBZwQkbwGbliDXxjIgzNRgmUAQAImwAORjFgkEiiiicDR06DwfogJyrBieaiGfBEUjkbo0eggTK0bWsfAWJ1AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMaCAFo4MagDcIjGPLES4AT3YZCs+QEYKAVgoAGPawC+Ysd2mcsELIeH65IHqB4oIAmswAroIY1DDRggAKhrhsglIwGjBQzGjqggDuzNQA1hCsAOaCqUIAYhhwWACCCQCSgmqa2jAU-kGOLqxuLOxEWH4hUBgVERjl8LLIaMk4bAC6-tQR7BB85iBJKeIAzBQWFo4SYNSkMIUlcAtg9QJK6yFS2BgARvUwewnMBrlWIAZQAigAZfquVjcBpTD7UKRwcYSFjpBb+CTyADq1G8cR8uUEODKWBRYCK0SgUEEYC2jC8bDg8joWICAFU1NEjKxGAB6DD5DDeOlUlr8gDyVVy1yZrBZwQkbwGbliDXxjIgzNRgmUAQAImwAORjFgkEiiiicDR06DwfogJyrBieaiGfBEUjkbo0eggTK0bWsfAWJ1AA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
