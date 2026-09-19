@@ -5,9 +5,12 @@ site_author: PromptScript Team
 repo_url: https://github.com/mrwogu/promptscript
 repo_name: mrwogu/promptscript
 
-# Exclude build artifacts from documentation
+# Exclude build artifacts and internal working documents from the published site
 exclude_docs: |
   __snapshots__/
+  design/
+  plans/
+  superpowers/
 
 copyright: Copyright &copy; 2026 PromptScript Contributors
 
@@ -141,7 +144,6 @@ plugins:
           - guides/import.md: Import existing agent instructions
           - guides/formatter-architecture.md: Internal architecture of formatters
         Examples:
-          - examples/real-life-checkout-service.md: End-to-end production checkout service rollout
           - examples/minimal.md: Minimal project setup
           - examples/composition-and-order.md: Composition precedence and declaration order
           - examples/merge-vs-replace.md: Extend, field replacement, and override
