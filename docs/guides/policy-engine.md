@@ -1,3 +1,8 @@
+---
+title: Policy Engine
+description: Enforce declarative organization policies on skill extensions during validation
+---
+
 # Policy Engine
 
 The policy engine validates skill extensions against declarative organizational rules.

@@ -1,3 +1,8 @@
+---
+title: Importing Existing AI Instructions
+description: Convert CLAUDE.md, GitHub Copilot, Cursor, and other AI instruction files into PromptScript
+---
+
 # Importing Existing AI Instructions
 
 The `prs import` command converts existing AI instruction files into PromptScript format. This allows teams to adopt PromptScript without losing their existing configurations.

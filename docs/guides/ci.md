@@ -48,6 +48,11 @@ flowchart LR
 
 ## GitHub Actions
 
+!!! tip "Pin the CLI version"
+Examples below install the latest CLI for simplicity. Pin an exact version in CI
+(`npm install -g @promptscript/cli@1.19.0`) so validation and compiled output stay
+reproducible, then upgrade the pin deliberately with a reviewed change.
+
 ### Basic Validation
 
 Create `.github/workflows/promptscript.yml`:
@@ -213,13 +218,15 @@ name: PromptScript (Optimized)
 on:
   push:
     paths:
-      - '.promptscript/**/*.prs'
+      - '.promptscript/**'
       - 'promptscript.yaml'
+      - 'promptscript.lock'
       - '.github/workflows/promptscript.yml'
   pull_request:
     paths:
-      - '.promptscript/**/*.prs'
+      - '.promptscript/**'
       - 'promptscript.yaml'
+      - 'promptscript.lock'
       - '.github/workflows/promptscript.yml'
 
 jobs:
@@ -295,7 +302,8 @@ jobs:
         run: npm install -g @promptscript/cli
 
       - name: Validate ${{ matrix.project }}
-        working-directory: apps/${{ matrix.project }}
+        # Projects do not all live under apps/ - shared sits in packages/.
+        working-directory: ${{ matrix.project == 'shared' && 'packages/shared' || format('apps/{0}', matrix.project) }}
         run: |
           prs validate --strict
           prs compile
@@ -359,6 +367,9 @@ promptscript:
 
 ### With Caching
 
+PromptScript caches Git registry clones under `~/.promptscript/.cache/` (the user home
+directory, not the project directory), so cache the home path explicitly:
+
 ```yaml
 stages:
   - validate
@@ -366,13 +377,16 @@ stages:
 promptscript:
   stage: validate
   image: node:20-alpine
+  variables:
+    HOME: ${CI_PROJECT_DIR}/.promptscript-home
   cache:
     key: promptscript-${CI_COMMIT_REF_SLUG}
     paths:
-      - .promptscript/.cache/
+      - .promptscript-home/.promptscript/.cache/
   before_script:
     - npm install -g @promptscript/cli
   script:
+    - prs pull
     - prs validate --strict
     - prs compile
     - git diff --exit-code
@@ -380,6 +394,7 @@ promptscript:
     - changes:
         - .promptscript/**/*
         - promptscript.yaml
+        - promptscript.lock
 ```
 
 ### Merge Request Validation
@@ -387,9 +402,8 @@ promptscript:
 ```yaml
 stages:
   - validate
-  - report
 
-promptscript:validate:
+promptscript:
   stage: validate
   image: node:20-alpine
   before_script:
@@ -397,31 +411,21 @@ promptscript:validate:
   script:
     - prs validate --strict
     - prs compile
-  artifacts:
-    paths:
-      - .github/copilot-instructions.md
-      - CLAUDE.md
-    expire_in: 1 week
+    # One job compiles and checks drift, so every generated file is covered.
+    # An artifact-based split would only compare the listed paths.
+    - |
+      if ! git diff --quiet; then
+        echo "Compiled files differ from source"
+        git diff --stat
+        exit 1
+      fi
+      echo "All files in sync"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         - .promptscript/**/*
         - promptscript.yaml
-
-promptscript:drift:
-  stage: report
-  image: node:20-alpine
-  needs: [promptscript:validate]
-  script:
-    - |
-      if ! git diff --quiet; then
-        echo "⚠️ Compiled files differ from source"
-        git diff --stat
-        exit 1
-      fi
-      echo "✅ All files in sync"
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        - promptscript.lock
 ```
 
 ---
@@ -882,14 +886,15 @@ Catch issues before they reach CI with local pre-commit hooks.
    ```bash
    # Only run if .prs files are staged
    if git diff --cached --name-only | grep -qE '\.prs$|promptscript\.yaml$'; then
-     echo "🔍 Validating PromptScript files..."
+     echo "Validating PromptScript files..."
      npx --package=@promptscript/cli prs validate --strict
      npx --package=@promptscript/cli prs compile
 
-     # Check if compile changed any files
-     if ! git diff --quiet; then
-       echo "⚠️  Compiled files changed. Please stage the changes."
-       git diff --stat
+     # Check if compile changed or created any files, including untracked ones.
+     # Adjust the path list to the outputs of your configured targets.
+     if [ -n "$(git status --porcelain --untracked-files=all -- CLAUDE.md AGENTS.md .github .claude .cursor .promptscript 2>/dev/null)" ]; then
+       echo "Compiled files changed. Please stage the changes."
+       git status --porcelain --untracked-files=all
        exit 1
      fi
    fi
