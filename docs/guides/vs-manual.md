@@ -7,7 +7,7 @@ description: Compare managing AI instructions manually vs with PromptScript
 
 ## The Manual Approach
 
-Without PromptScript, teams maintain separate configuration files for each AI tool in every repository. Even with just 2–3 tools, this quickly becomes unmanageable across many repos:
+Without PromptScript, teams maintain separate configuration files for each AI tool in every repository. Even with just 2-3 tools, this quickly becomes unmanageable across many repos:
 
 === "Files to maintain (per repo)"
 
@@ -38,7 +38,7 @@ With PromptScript, you write one `.prs` file and compile to all 50 targets:
 === "Single source file"
 
     ```promptscript
-    @meta { id: "my-project" syntax: "1.0.0" }
+    @meta { id: "my-project" syntax: "1.5.0" }
 
     @inherit @company/backend-standards
 
@@ -57,6 +57,12 @@ With PromptScript, you write one `.prs` file and compile to all 50 targets:
       - "Always validate input"
     }
     ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prOwGJB3CKxwxqELM5ZkMrOQB6ACMMRgBrTjEFOAFWMQxqMThBQScACmoYAHMIWOo5QQVBMTyMYNgxQTBmakFyDDls6mYAV3iASjsXMU4sL0LgO1SZUZBhwQBNNsFEmFnWQSI0D29egDcYKGYVuoB3WvDXbME2QVx5gEEABQBJbQ91iEYYCgmx0dZbe1ZuWP8EkkUkNFoIWL1JCIoP5sq0MNl4JJkDIACpyFYAZUYnjQmhAAF06Od4P1WNkkTIAGpeEkyfGCb7fbpZfLPfpsYETYoyAByME2dWWzDgVzugkicjgn1S3JAlyge0aKXWGCg4mw81caFaeLs1hA1kJBHYBXwRFI5FeNHoIAFcAgbHwRgNQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 === "One command"
 
@@ -103,3 +109,9 @@ With PromptScript, you write one `.prs` file and compile to all 50 targets:
 ## Getting Started
 
 Ready to switch? See the [Migration Guide](migration.md) to convert existing configs, or start fresh with the [Getting Started guide](../getting-started.md).
+
+Evaluating for a team or organization? Also see:
+
+- [Target Platform Matrix](../reference/formatters/index.md) - exact output paths per tool
+- [CI/CD Integration](ci.md) - validation and drift detection in your pipeline
+- [Enterprise Setup](enterprise.md) - registry, policies, and governance across repositories
