@@ -6,16 +6,6 @@ meta:
     content: PromptScript, agent platform, configuration as code, AI instructions, AI agents, AI skills, MCP servers, GitHub Copilot, Claude Code, Cursor, Factory AI, Codex, AI governance, PromptOps
   - name: robots
     content: index, follow
-  - property: og:title
-    content: PromptScript - Define Once, Compile Everywhere
-  - property: og:description
-    content: One validated source for your complete AI agent platform. Native output for 50 coding agents.
-  - property: og:type
-    content: website
-  - name: twitter:card
-    content: summary_large_image
-  - name: twitter:title
-    content: PromptScript - Define Once, Compile Everywhere
 hide:
   - navigation
   - toc
