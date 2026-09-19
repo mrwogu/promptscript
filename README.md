@@ -24,11 +24,20 @@ native configuration for 50 AI coding platforms._
 
 ---
 
-AI coding tools no longer consume one instruction file. They discover skills, specialist agents,
-commands, MCP integrations, hooks, workflows, and platform-specific settings from different paths
-and schemas. Managing these files by hand creates drift between tools, repositories, and teams.
+## What is PromptScript?
 
-PromptScript turns that surface area into one validated, composable, Git-native source:
+PromptScript is an open-source language and compiler for AI agent configuration. You write one `.prs`
+file that defines instructions, skills, agents, MCP servers, hooks, workflows, and policies. The
+compiler turns it into the native files each AI tool already knows: `CLAUDE.md` for Claude Code,
+`.github/copilot-instructions.md` for GitHub Copilot, `.cursor/rules` for Cursor, and 47 more
+targets.
+
+Why does this matter? Every AI coding tool reads its own instruction files, in its own format, from
+its own paths. A team using Claude Code, Copilot, and Cursor keeps three copies of the same rules.
+They drift. A standard changes in one file but not the others, and nobody notices until an agent
+breaks something.
+
+PromptScript fixes the source, not the symptoms:
 
 ```text
 PromptScript source
@@ -37,8 +46,39 @@ PromptScript source
     -> compile deterministic target-native files
 ```
 
-No runtime proxy. No lowest-common-denominator output. Each formatter emits the richest native
-representation its platform supports.
+One source of truth, Git-native review, validation in CI, deterministic output. No runtime proxy
+between developers and their tools. Each formatter emits the richest native representation its
+platform supports - if a target cannot express something, it is omitted, not approximated.
+
+It fits one developer with two tools, and it fits an organization where a platform team ships
+standards to hundreds of repositories through inheritance and a Git registry.
+
+## Why maintain the files by hand?
+
+Each tool wants its own file, schema, and path. Even a few tools means copies that drift. A policy
+change becomes manual edits everywhere, and errors sit undetected until an agent hits them at
+runtime.
+
+With PromptScript you change the source once, review the generated diff in the pull request, and
+let CI validate it. Git history records what changed and why. Remote dependencies are pinned in a
+lockfile, so builds are reproducible. Switching tools, or adding a new one, never rewrites the
+source. See the [full comparison](https://getpromptscript.dev/guides/vs-manual/).
+
+## Contents
+
+- [What is PromptScript?](#what-is-promptscript)
+- [Why maintain the files by hand?](#why-maintain-the-files-by-hand)
+- [Quick Start](#quick-start)
+- [Define a Complete Agent Platform](#define-a-complete-agent-platform)
+- [One Language, Complete Platform](#one-language-complete-platform)
+- [Compose Instead of Copying](#compose-instead-of-copying)
+- [Portable Skills, Native Agents](#portable-skills-native-agents)
+- [50 Built-In Targets](#50-built-in-targets)
+- [Built for Repositories and Organizations](#built-for-repositories-and-organizations)
+- [Adopt Without a Rewrite](#adopt-without-a-rewrite)
+- [Tooling](#tooling)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
 
 ## Quick Start
 
@@ -147,7 +187,7 @@ Or [open the playground](https://getpromptscript.dev/playground/) and compile in
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaODGoA3CIxjyxEuAE92GQrPkBGCgDYKABhOsAvmLHdpnLBBY5sKmciAm4eKCAJrqghjUMIIA7szUyhCsAOaCbIK4SYyKKupYgjr6hjAUoQAKiRV6SVjUGKxwGIwBeZkcWdSBwW1S8WpSgRgARtCDNVER7l6sPnACrFIJUnAhUdyKGFK6YQCi2Zkwupk5AMprG9Rb7hIsh7LI8gCqOuUthmUAKuY0DBrowBmgsPI6GF-vAyjAmtRgpM1HBznBttQ1LB5ABdMRLFY4NJYRgabaieYgAD0iQMMGS8lklIkEhozDIWFkLTUxiiEkOcDBEAhEDYthAACUERAGYIydREux5Tg2ll4E9WSx2P4JdL6cl5WlEl1WPA4NCdArBtCOKsLfF1rlga1uqwMFBJGROlgapEJEtCaxuHAMlAoBTQla1AMgpo6bLkszQgL4MLReKwvrE4JMOY+Mqimr4IIwGlykoY4NBANQ3BNRIPVBmMkYFJ-sxmBG3vJpQcoWEAOKJNAD+QAIQwcBweJTRp17AlAEl2sCuqMCuxDNgxaxoRgNMSBgAvHdsS1KRJYB3DXMYfP+QQbASCVXrKBXP2hQPeYMkRhoNcuiIpGUQQBivKaC0nTKLoyb8vkrSriSEqrOMzANkaJAkMMPYgKwzCHGOIAUNSWCdhG1LgXAvJwBQJAAFb1iA+JRD+yzBhg6rsKBEgJgycE7KyT5puCbp6jKcpFtkJaTDAZaJIIfDUOqmHkV2cB4X2UjEcOMCjiA0LyIOzaTMRk7TrOCGhtA3aCO8IDRrG5jxpJjIsXO-6AcBuiafZ8jUZB0EqLoVnCdqHCLlmbkqsWIwvDAtpwjeTrMC6Z7up6EDel0X5sQSv57J2yi8YIegetI2AwJo0nqn5LKsgiuphGgzCrFBFGaKixj+qyOGkoo1ASsc4xYAAPgA6rGPVziw2G4f5IBoKwaAkMRWLLIZYRBGuxTKGFgjsT4qTpGAzbJKViSwFOMDwcJgrpuJYT1PpCRJEI5Ufs+bY1jA106JhEXNb2ajiAAjmoFVBIIWRVQ6NHzSehRvnV+5OjQr2KVdMA3Up-AHNgGB5QGBUcdw5BqFkmSlZwVNmpc2R3ayD1ibuErXKqiQjLT5wMzkjAYJg0wfgEGq9RIIFs2EDguK4mE2eGfkOU5gyuQaB0SMSzAlXhn2VRwNUo2LrHCV5QH6L5eGBdVwWwdQB2BiAHi4gw-hIvgRCkOQ1Q0PQICS2w+B2E7QA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaODGoA3CIxjyxEuAE92GQrPkBGCgFYKABhOsAvmLHdpnLBBY5sKmciAm4eKCAJrqghjUMIIA7szUyhCsAOaCbIK4SYyKKupYgjr6hjAUoQAKiRV6SVjUGKxwGIwBeZkcWdSBwW1S8WpSgRgARtCDNVER7l6sPnACrFIJUnAhUdyKGFK6YQCi2Zkwupk5AMprG9Rb7hIsh7LI8gCqOuUthmUAKuY0DBrowBmgsPI6GF-vAyjAmtRgpM1HBznBttQ1LB5ABdMRLFY4NJYRgabaieYgAD0iQMMGS8lklIkEhozDIWFkLTUxiiEkOcDBEAhEDYthAACUERAGYIydREux5Tg2ll4E9WSx2P4JdL6cl5WlEl1WPA4NCdArBtCOKsLfF1rlga1uqwMFBJGROlgapEJEtCaxuHAMlAoBTQla1AMgpo6bLkszQgL4MLReKwvrE4JMOY+Mqimr4IIwGlykoY4NBANQ3BNRIPVBmMkYFJ-sxmBG3vJpQcoWEAOKJNAD+QAIQwcBweJTRp17AlAEl2sCuqMCuxDNgxaxoRgNMSBgAvHdsS1KRJYB3DXMYfP+QQbASCVXrKBXP2hQPeYMkRhoNcuiIpGUQQBivKaC0nTKLoyb8vkrSriSEqrOMzANkaJAkMMPYgKwzCHGOIAUNSWCdhG1LgXAvJwBQJAAFb1iA+JRD+yzBhg6rsKBEgJgycE7KyT5puCbp6jKcpFtkJaTDAZaJIIfDUOqmHkV2cB4X2UjEcOMCjiA0LyIOzaTMRk7TrOCGhtA3aCO8IDRrG5jxpJjIsXO-6AcBuiafZ8jUZB0EqLoVnCdqHCLlmbkqsWIwvDAtpwjeTrMC6Z7up6EDel0X5sQSv57J2yi8YIegetI2AwJo0nqn5LKsgiuphGgzCrFBFGaKixj+qyOGkoo1ASsc4xYAAPgA6rGPVziw2G4f5IBoKwaAkMRWLLIZYRBGuxTKGFgjsT4qTpGAzbJKViSwFOMDwcJgrpuJYT1PpCRJEI5Ufs+bY1jA106JhEXNb2ajiAAjmoFVBIIWRVQ6NHzSehRvnV+5OjQr2KVdMA3Up-AHNgGB5QGBUcdw5BqFkmSlZwVNmpc2R3ayD1ibuErXKqiQjLT5wMzkjAYJg0wfgEGq9RIIFs2EDguK4mE2eGfkOU5gyuQaB0SMSzAlXhn2VRwNUo2LrHCV5QH6L5eGBdVwWwdQB2BiAHi4gw-hIvgRCkOQ1Q0PQICS2w+B2E7QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
