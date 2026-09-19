@@ -1,5 +1,13 @@
 # GitHub Copilot Instructions
 
+## Context
+
+### Authentication Module
+
+- OAuth 2.0 with PKCE
+- JWT tokens with refresh rotation
+- SSO via SAML 2.0
+
 ## code-standards
 
 ### auth

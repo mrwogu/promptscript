@@ -1,5 +1,13 @@
 # CLAUDE.md
 
+## Context
+
+### Authentication Module
+
+- OAuth 2.0 with PKCE
+- JWT tokens with refresh rotation
+- SSO via SAML 2.0
+
 ## Code Style
 
 - Store tokens in httpOnly cookies

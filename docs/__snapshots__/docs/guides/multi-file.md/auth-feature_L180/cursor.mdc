@@ -5,6 +5,13 @@ alwaysApply: true
 
 You are working on the project.
 
+Context:
+### Authentication Module
+
+- OAuth 2.0 with PKCE
+- JWT tokens with refresh rotation
+- SSO via SAML 2.0
+
 Code style:
 - Store tokens in httpOnly cookies
 - Session timeout: 3600 seconds

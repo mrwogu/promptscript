@@ -181,6 +181,73 @@ function createContextProgram(
   };
 }
 
+function createHeadingContextProgram(): Program {
+  // Mirrors the parser output for a 1.5.0 @context whose text opens with a
+  // "## Tech Stack" heading: the heading is promoted to a legacy
+  // PresentationEntry and the remainder keeps its block-body indentation.
+  const text =
+    '\n  - React 18 with TypeScript\n  - Vite\n\n  ## Architecture\n\n  - Feature folders';
+  return {
+    type: 'Program',
+    meta: {
+      type: 'MetaBlock',
+      fields: { id: 'headers', syntax: '1.5.0' },
+      loc,
+    },
+    blocks: [
+      {
+        type: 'Block',
+        name: 'context',
+        content: { type: 'TextContent', value: text, loc },
+        canonicalBody: createBlockBody(
+          [
+            {
+              type: 'PresentationEntry',
+              title: 'Tech Stack',
+              source: 'legacy',
+              loc,
+              titleLoc: loc,
+            },
+            { type: 'TextEntry', text, loc },
+          ],
+          loc
+        ),
+        loc,
+      },
+    ],
+    uses: [],
+    extends: [],
+    loc,
+  };
+}
+
+function createPlainTextContextProgram(): Program {
+  // Text-only @context without identity or presentation entries: the
+  // 1.0.0 shape where nothing consumes the text, so the context section
+  // must render it under the default title.
+  const text = 'Preserve this context body.';
+  return {
+    type: 'Program',
+    meta: {
+      type: 'MetaBlock',
+      fields: { id: 'headers', syntax: '1.0.0' },
+      loc,
+    },
+    blocks: [
+      {
+        type: 'Block',
+        name: 'context',
+        content: { type: 'TextContent', value: text, loc },
+        canonicalBody: createBlockBody([{ type: 'TextEntry', text, loc }], loc),
+        loc,
+      },
+    ],
+    uses: [],
+    extends: [],
+    loc,
+  };
+}
+
 describe('section header overrides across formatters', () => {
   const formatters = [
     ['claude', new ClaudeFormatter()],
@@ -255,4 +322,29 @@ describe('section header overrides across formatters', () => {
     expect(output.content).toContain('Localized Project');
     expect(output.content).toContain('Preserve this identity body.');
   });
+
+  it.each(formatters)(
+    'should render heading-promoted context once and flat for %s',
+    (_name, formatter) => {
+      const output = formatter.format(createHeadingContextProgram(), { version: 'simple' });
+
+      // One rendering of the context, never duplicated across sections.
+      expect(output.content.match(/React 18 with TypeScript/g)).toHaveLength(1);
+      expect(output.content.match(/Feature folders/g)).toHaveLength(1);
+      // Block-body indentation must not survive as markdown list nesting.
+      expect(output.content).not.toMatch(/\n\s+- Vite/);
+      // Remaining h2 headings are demoted to h3 under the titled section.
+      expect(output.content).toContain('### Architecture');
+    }
+  );
+
+  it.each(formatters)(
+    'should render text-only context without identity once for %s',
+    (_name, formatter) => {
+      const output = formatter.format(createPlainTextContextProgram(), { version: 'simple' });
+
+      expect(output.content.match(/Preserve this context body\./g)).toHaveLength(1);
+      expect(output.content).toContain('Context');
+    }
+  );
 });

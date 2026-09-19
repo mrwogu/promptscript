@@ -18,6 +18,7 @@ import {
 } from '@promptscript/core';
 import { ConventionRenderer } from './convention-renderer.js';
 import { StandardsExtractor } from './extractors/index.js';
+import { resolveSourceSectionTitle } from './section-title-resolver.js';
 import type { FormatOptions, Formatter, FormatterOutput, SkillFileConfig } from './types.js';
 
 /**
@@ -247,6 +248,22 @@ export abstract class BaseFormatter implements Formatter {
     }
 
     return this.valueToString(value).split('\n')[0] ?? fallback;
+  }
+
+  /**
+   * Whether the `@context` block's text is consumed by the project/intro
+   * fallback. Must mirror the project() and intro() consumption conditions
+   * exactly, otherwise the context section would either duplicate the text
+   * (predicate too narrow) or drop it entirely (predicate too wide).
+   */
+  protected contextTextConsumedByProject(ast: Program): boolean {
+    const identity = this.findBlock(ast, 'identity');
+    if (identity) return false;
+    const context = this.findBlock(ast, 'context');
+    if (!context) return false;
+    if (resolveSourceSectionTitle(ast, 'context')) return false;
+    const projectTitle = resolveSourceSectionTitle(ast, 'project');
+    return context.content.type === 'MixedContent' || projectTitle !== undefined;
   }
 
   /**

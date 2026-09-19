@@ -35,7 +35,8 @@ flowchart TB
   formatters --> core
 ```
 
-## Key Libraries
+Context:
+### Key Libraries
 
 - Parser: Chevrotain
 - CLI: Commander.js
