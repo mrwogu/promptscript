@@ -44,7 +44,7 @@ flowchart LR
 ```promptscript
 @meta {
   id: "checkout-service"
-  syntax: "1.4.0"
+  syntax: "1.5.0"
   tags: ["payments", "typescript"]
 }
 
@@ -110,6 +110,12 @@ flowchart LR
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaODGoA3CIxjyxEuAE92GQrPkBGCgFYKABhPjBAgOZxZyeZjmfOxw8nRyIFjmaPCM1BBoWPIAumIAvmJi3NKcWBBRwqYRJiBFAJrqghjUMIIA7szUyhCsXoJsVYKBwViCOvqGMBRFAAo1-Xq1WNQYrHAYjHkdLRxe8QWzUlVqUvkYAEbQ+ebDHiXuGaxZcAKsUtVScIUeLFIwfvIAqjp904a9ABVojAAMpxBJJEDheQAdXWU3gWCeYEagn2ajgLXgT2oalgoRAqVYl2uzSgUCeog8OkYanW5k0NQMMDqsipEgkbzg4MSEDYthAACUYMy6l0MEFcoJGDhZl54IIUdQ+ko6cdBPE4MoCUUJBhycw6jApADmMwKR8hTAMFIwhEAOI1NB2+QAIQwcBwKV10rYHHYAoAknMYottrhcoZsHzWOEMBocI0IAAvaNscI0mpIuN3cWS9iCe4CQSyu5QFpeYalDyXEmsXiMNAg3STWjPCQQOBwNQwTTTBbKXRsn39kONLACm67ZjuDm+kgkTaW1jMN4ukAUAD0WDNFM3ne78AoJAAVgSiRJa5l6xh5SF2xqRRAWUOH5zYvFefyIsLRdLS-KTz7DASq1Hw1DyrOHI7uaviCP4Vo2uujowM6UIOlAzD7Ou7qet6HhmGSFrwfINJqlEjJPiy+FziQjbNvouhwQhB49n2MwqLoNEciw7C5AKv7PmKMpysavpvOEHA3HAOZbMwMQzEsrD6pIZALFgVZFFeVz1omzDag+ej6tI2C9iJrTwMOBGCCK-ERGgzA3H2u6aBixjVrR2Ayq+8gAKK7FgAA+cL5O5PosAuS4kSAaCsGgJDrriVzofIUShooKjcdpWQNE0YCYXUlJFDUsAeu8b6Fh+EIxgKABqxlFrUmxdE61RNY+pU6FBEi8f6E4-mo4gAI5qMZBReKZMl9GokXxMmtTmYBsktahbUddaPx8AIRYYJpNbpNe3DkGoXgtEVHjdLkmicKdrAwLoFZWXOXI8kpAojBKPQ2a0WIPa00oYJghzlgU6JlmF1mtpi372K4rjdX0RHMaRqr0pRorcRIenapaRnlo1miLfAmOCHRTYtkxlqsb2-acdQWXpCAaTJAwuTUOY+BEKQ5BDDQ9AgFDMb4HYTNAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Target support varies because each AI platform exposes a different native contract. PromptScript
 preserves one source model while formatters map supported capabilities to target-native output.
 Use the [target platform matrix](target-platforms.md) to choose versions and capabilities.
@@ -130,7 +136,10 @@ Compile configured targets:
 prs compile
 ```
 
-Use named builds to generate scoped agent configuration for monorepo packages:
+Use named builds when one repository hosts several packages or apps and each needs its own agent
+configuration. Every build has its own entry file, output directory, and target list, so
+`packages/api` and `packages/web` each get files scoped to their subtree. Define them in
+`promptscript.yaml` (see the [Configuration Reference](../reference/config.md)):
 
 ```yaml
 builds:
@@ -163,5 +172,6 @@ PromptScript applies the same lifecycle to every agent capability:
 5. Review generated changes in pull requests.
 6. Enforce `prs validate --strict` and compilation checks in CI.
 
-See [Enterprise Setup](../guides/enterprise.md), [Security](../guides/security.md), and
-[Policy Engine](../guides/policy-engine.md).
+See [Enterprise Setup](../guides/enterprise.md), [Security](../guides/security.md),
+[Policy Engine](../guides/policy-engine.md), and [CI/CD Integration](../guides/ci.md) for the
+pipeline that enforces it.

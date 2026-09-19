@@ -57,7 +57,7 @@ my-project/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSEVhBIYoAWiKlyMeWIlwAnuwyFZ8gIwUAbBQAMe1gF8xY7tM5YIWQ8P1yQPUDxQQBNZgBXQQxqGGjBHBgoNDAIqEEWKSUAc2i4OAg4AXZBMGZqQVxCwRpmACsYRiwKfwAxZkYIuEE2DNgMVjpBWIwpDAAjWAzmKRgWkKDHF1Y3FnYiLD8FwJ3-ABUcauqhPcM0GABlRmoINE3ahqbBLpzBEhmYanFx+HvqDCaEEY8HmEkWwWWbiKAzG1Ck3VEIUyMFkyH8YJAAFU4HFUqxAWw1DVqMxsv8SIpWLkioZYPI6OiAgARDoRPglNARSZAwQAQQACgBJboAd28OEEACkLizGI4JABdMSQ1jcOA4cpYTpYBH+eQAekSyXk5hAFw1IsEIpw2EEhkiGQGCSSaCt4vlAX1sQAbhAYCKTQEAEowX3+6azUrlQQARwiam8vkKcAi8A9Bo4RUD8gA6jcOM9lJtMzqliAnAqGJ5qIZ8FoyJQaPQQN7PgU2PgLOWgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSEVhBIYoAWiKlyMeWIlwAnuwyFZ8gIwUArBQAMe1gF8xY7tM5YIWQ8P1yQPUDxQQBNZgBXQQxqGGjBHBgoNDAIqEEWKSUAc2i4OAg4AXZBMGZqQVxCwRpmACsYRiwKfwAxZkYIuEE2DNgMVjpBWIwpDAAjWAzmKRgWkKDHF1Y3FnYiLD8FwJ3-ABUcauqhPcM0GABlRmoINE3ahqbBLpzBEhmYanFx+HvqDCaEEY8HmEkWwWWbiKAzG1Ck3VEIUyMFkyH8YJAAFU4HFUqxAWw1DVqMxsv8SIpWLkioZYPI6OiAgARDoRPglNARSZAwQAQQACgBJboAd28OEEACkLizGI4JABdMSQ1jcOA4cpYTpYBH+eQAekSyXk5hAFw1IsEIpw2EEhkiGQGCSSaCt4vlAX1sQAbhAYCKTQEAEowX3+6azUrlQQARwiam8vkKcAi8A9Bo4RUD8gA6jcOM9lJtMzqliAnAqGJ5qIZ8FoyJQaPQQN7PgU2PgLOWgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -86,20 +86,20 @@ If starting from scratch:
 prs init
 ```
 
+### Validate
+
+Check for issues before generating anything. Strict mode turns warnings into errors:
+
+```bash
+prs validate --strict
+```
+
 ### Compile
 
 Generate the output file:
 
 ```bash
 prs compile
-```
-
-### Validate
-
-Check for issues:
-
-```bash
-prs validate
 ```
 
 ## Generated Output

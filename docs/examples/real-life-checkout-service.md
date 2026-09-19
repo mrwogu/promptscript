@@ -98,6 +98,12 @@ Create `.promptscript/org-base.prs`:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFNmJPtUYwAtM2oBzNQCMMcGPLES4AT3YZCs+QEYKAVgoAGY+MECtcWcnkslMCpGIHRyIFhmaPCM1BBoWPIAumIAvmJi3NKcWBARwiZhxiAFAJrMAK6CGNQwVeKcWhCsMIFNWlVwcBBwAuyCYJpVgjTMUuWMOWyC-sqqw1DYA9QkFAUACjVggYJwGFuhzLqG1ABuGLqwoTUngV0XtYw4GKxa8KvuRW5prBks7ERYfLuBYvcoYV42EAAFUiMAAyjE4gliu5qOV2BA+JCAHKjGAUABWcEEACZXCiJJhGABrcEwACyzzp1EhaFYaBIX3SrG4PWeUmqUmJoncHB6bR88npTUx5RIggAHM4AKTTZg3ah0pIFRpYWQiiQSJYkbCQgDCbBuGLYGCgggtSlycDcEm+EmuEBgAHdJSAAEowACO5QgNUEbFqGDQIxObUEHu92vczCimsmrG8gl8IAAglIpDssGiJuUagWoMwvPJQvIACLMRhy7Lx5hQKD6GmFmBoZ0gZKsb4ZGo9WITCBsYUFNRhbEwDVqx2AmIwKTZCC24mDEZjMdTRs9RTbAUCF2CafyWfz3SRAzEmrB0Mr6Y4GA0zfiEYcCZP3Sa1iPeAvhAFJEgYbJqDMfAiFIch8RoegQA1Lo2HwWxgKAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 This file provides defaults. Service repositories inherit it and can make
 explicit, reviewable changes after inheritance.
 
@@ -130,6 +136,12 @@ Create `.promptscript/payment-policy.prs`:
   - "Never exceed {{maxRetries}} {{provider}} payment retries"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhMATz7sAtGmZQIjRfLES4i9hkKz5ARgoBWCgAY94wQIDmcWcnlKVWOPLpyFRgh5AF19QUxqUjdhcIkaZgA3aRhqWU4AVxIACnkAZSxqCDQYPwCAQSlFTnkASkEAXgCCopKHCQkSEwAlfiL4WVYsgCNUxsEAZnCAXzFZ1jFuOAFWKQxqKThYxw5liFZnd3kAFXgsQQw0BMSYKX8pGEYtVlv-LAg+ZgysfwxVwWofUUEWwOF8IDCjjgjwyRSwiiOIGOzAA1pwIAAvGAg5Scc5rARleQANVSEDAwOAwGuKWo02mggA7jBhjhmKjBHAIM5WNhYfBQuFAVoMMNoBB4UdHBJ5ABVaGSB5kZgcVg6QRoxTguhxAIAIS+-ypNIedIZgMKEHgTmYwmAXUIvUt8HpFywHDIPiZEpwgmGGEYKOYYDA7UEkPmi0ByyKjHebC2okcqgCADkYDdqIIoMxnIIAArlVP+ADCxOJv0YjHgWywqM4cH8zCzUUZTJZbI50MYFvB4RT8nTmcERGrtztDqd-TgruN1CStNdXjxAL6Vr7rGmIGmIQYeOoinwRFI5BgVFoIAYma5bHw5m3QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 The payment policy is composed with `@use`, so another payment service can use
 the same rules without inheriting checkout identity or project metadata.
@@ -231,6 +243,12 @@ Create `.promptscript/project.prs`:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaODGoA3CIxjyxEuAE92GQrPkBGCgFYKABhPjBAgOZxZyeYyKKupY8nRyIJjmfOxwYRE0zFJqjFgQbPIAumIAvmJi3BCsitQQWIIUAPTM1F6aAEYYOgVqOhWVUTFaaMxQhuYAFIkGUrq2IACCUuac8STWAEr8pfCyAEwAlPms3CzsROWiHjr6hjDjgUqqGu4SYNSkMADuNcrjAGJNaWDmt4JS2AwjR04wACsw4FgvNQYABlACKABk-swnqxfIJ-JEMNFOOUMBocDUIAAvbDpVjxeSdPGCGFYFZxEDheRPGD1InMZSCRJGOBwIpeLK5bbcSEYVgA6hSODCUyCbiKDCjagRADCQWu5QAoqwvEUYLpBYJwX1GL8QPLFTBlbpBPqtCwSCQyrL5BqriFBGrmM6yibev13PLmPUTnogdAyuY-PKJPIJlgBIFBJdghoAJJSQQS7M09iJjhkLBZzzMQSQ6gpLBqGHZqDMHxhOMRbUu8pQbCcc05yWCMAYaC1mCCPgMwyysA1QQ2lP58rDaS6P7ZVh5Sk7Zh6XSlUYVgSSjDSuAUDiQ41HCRYgCyRQgJDUJEEAE5HABSVNb3QYLwjqeq+d+wbJ4mVXdcCgOThsxhStDDSNhZUvQRNAiAA5GBt1VQIJV-OllnMQRpyXMhmA4Vge3qGAcAwAxpyeMoiQ0SR9mhck2E8eAsCZEUNzFZRoCgRD5XnbQlFraNZCQiRRjgRhSjQeDWHGJYDGeVNNS9bC9Xgftp0A3N-kBTRqMlPo9TpCA4GUP4JAwKBgJgKQABVmF6DEsSWZUqRAABxGE0G8gAhJocGFDwJD2MisHGExLXCiRBBUiA1K039szTLVe2zNkOVc7kWFGCgWwkD0VBzQliTJRTBHqdRD0ZcJiJ6MjzXCHQ5P4QQTKkMyvDoYrBByzluUwiBIEYNjWHCBsfHCAyByHGE8JYTDzCK+KJCWHpqHKSBJUFWV6gInRRqwAj6NwT9yPpEcYT4KQIEm9aEoiWL5XXcCdh-PEhI8ESYVUtlqEklsZLkiAFIpZSMOSp51M9JjUp0yj-xHPhamMOKXqwVzBNjEBPKkby-JgALmQiHyG3qIKQrCl6SCSGAoHGOA2FYfgbIrfj7Pc6kcS6UTGHEs66YSyK8Riy0sZewQM3RNAlHKXARwesAwDmtXFccjjITgOa+2YBWHkUuzJDIDBUmemWlgAK0V9ScJ03BsEGm1lE4SRRhIlrzHCIa8sEUbxsm-qNvKh6BHqKMzvCadqF6KBGjKuAMDAfg1pbN7pY+0Vht+iQg-MTQRMc10QfijCJYSCEtBx3pNFaTGW3mLBLmB1sI4AHwAdVKDhOadeZJXxtBWDQEhvLPUJyfkTRNG8uBqEYSoMpCBel8qf2uVAls0j4EJrwxOw1hcU+3HigQMa48uZftBi1HqG-b9HbA2-GUusE7jqu05iR1xe-+ggc68TgESHaQsuJyg8DCWATQYCaBhMqA0-In7SXgODSGbAwT+SPCOIQq8mIwJtG0f8XVHwShzGgYYdlOaJGLLIBkahjDxXFuwSWv9BAOESjDFKJlfyyhxvDdMWBwj0gallV2uUuQ8njnyAUeoBprAoIlNQ4hVH+gMkUDgrFqpT0nHpfmtIwDATiGHAAzMogAakaH4hlQG1SPDKOasAdp637DaGsS1jE-jcQZeO9kk7ckhKTUxt8AAsyjYSPnmKUEkt14DSDUKbUoVkBrOEELCHGaAaowFRv8UmDZcTsAkTCAAjkwyEZCh6UOoVATOUs-gfRADkTIDA8TUHMPgIgpByAwCoLQZkIBMICjYPgOwzSgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Declaration order is intentional:
 
 | Declaration                       | Result                                                |
@@ -273,7 +291,7 @@ target modes may emit only the main instruction file.
 Install the CLI and validate source:
 
 ```bash
-npm install -g @promptscript/cli@1.16.0
+npm install -g @promptscript/cli@1.19.0
 prs validate --strict
 prs compile --dry-run
 prs diff --all --full
@@ -413,7 +431,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install -g @promptscript/cli@1.16.0
+      - run: npm install -g @promptscript/cli@1.19.0
       - run: prs validate --strict
       - run: prs compile
       - run: test -z "$(git status --porcelain --untracked-files=all)"

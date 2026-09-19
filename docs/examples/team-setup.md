@@ -24,7 +24,7 @@ workspace/
 │   │   └── project.prs
 │   ├── promptscript.yaml
 │   └── ...
-└── project-c/
+└── project-c/            # Not yet initialized - no promptscript.yaml
     └── ...
 ```
 
@@ -100,7 +100,7 @@ workspace/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUgHow1Nh1ZT5YiXACe7DIVnyAjBQAMVneMFKSpkADF17TtpBiAvmLHdpTiwILH1hXTkvKIiATWYAV0EMahgkwTUND0EpGAA3GChmNBhqQTZ7HFTXTK17GFIKWITBACN46ClBEmYc6lY6JMZGeDgIFthBAHcYFqS0cghGbAg2OEa7HWjWX1Z-FndCLHCN6K87AGJzwQAVGEYcQQBlAUYAaz87AFpBACV6xiOZgAHFMQg9rvpio9GNQIGgsBFvgA1EKpMDMUo5fKFNB8dhJWptDoQVgAc0RNww0EmJKkAGFHo90hjBHBQlASeSvr9-kcAIrxEphdGlOAlfKigQcCkojhswQAahu8GCZMEABkxtRksKWXKsHAPhJLoIAILUe6ogHxFJGwTfZz1LA2mCfFoYMWddFQXqsrDUeLW23cx44ZIwTosMhsIKCDktbXUMIACm4UcwrH0ynaAEoKaaAAoASUEjA5sdJnBKy3KGRIggA8sVWIWS3BioxDSdNj4Ptw2RgtMkpHBjhIWDlZMgIhJ5ABVMU3SEwaGw+HM0oYKBQUs9GDyOgzyIFlJgErpeKsAErVhbwQ0Zik7UkEicv36WAHo-zxdgS-Xtg73TGN2FHGlcEEHBmGYV5DRAQ87FnEA-gwAFBAFIUN1ZcVzwHDgBgALXiAdahFUty3xPD9zOCQAF07X1Tkp2-EAF1SWUVSSUd9XSZ8YEmDF3ngliAFkqSMElBCBSwAFJdxyXcJQwSsv0QyIAHVYQ4QRLxCAlOhJDgnxrcR9TgiJ6N2OxUOGOBRhaaAQn0Zi1PkZxmG3ZhJkEdS6VNABxQQACYKDMM1TUEUl2hyDlWHgVSJCQ00hhGMZHNCOo2TfFIAEd2hSTwLN7KzuBSNlYQA1hR1Ebl5AAOTyc9iNSMsPVHYC4tA2wJG+erGtKZqCTCUJilBXAEiOAArYjgkgJZgjYbr7UiU0oEmDB9FHMMtAmQoMCkN9B06Ep1ElbB4po5a+olSDhwnVJW0EOcfnVcztj7OAoOoLBGHiA0x0iZQOqCeQnDpFJzrSOLvJQtDgfxcCHjMpb5GUKCYNByJwadVIhF+tlmHrWGjnRoSIlR-VMfkTTUUy-7iLfDj5SO5UsrVTUEx1FGQGUDAzDMfQqeQvIIH4+S0RZGzUocjlQlsbwQG8WiGCCJN8CIUhyBgKhaHgkAJVGNh8DMRWgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUgHow1Nh1ZT5YiXACe7DIVnyAjBQCsFAAw7xgpSVMgAYuvadtIMQF8xYtzSnFgQWPrCunI+MVEAmswAroIY1DApgmoaXoJSMABuMFDMaDDUgmyOOOnu2VqOMKQU8UmCAEaJ0FKCJMx51Kx0KYyM8HAQbbCCAO4wbSlo5BCM2BBscM0OOrGs-qyBLJ6EWJFbsT4OAMSXggAqMIw4ggDKAowA1gEOALSCAEqNRgnMwADhmYSet30pWejGoEDQWCivwAamF0mBmOU8oVimg+OwUvUOl0IKwAObIu4YaDTMlSADCz2emSxgjg4SgZMpP3+gJOAEVEmUIpjynAyoVxQIOFS0RwOYIANR3eChCmCAAyE2oqVFbIVWDgXwk10EAEFqI90UDEmkTYJfq5Glg7TBvm0MBLupioP12VhqIlbfbec8cKkYN0WGQ2CFBFy2rrqBEABTcGOYVj6ZSdACUVPNAAUAJKCRhc+PkzhlVaVLIkQQAeVKrGLZbgpUYxrO2z8X24HIwWlSUjgpwkLDysmQUQk8gAqhK7tCYLD4YjWeUMFAoOW+jB5HQ59Ei2kwGVMolWEC1qwd4IaMxybqSCRuQH9LAjyfF8uwNet5sA+mZxuw450rggg4MwzDvMaIDHg484gACGBAoIQoilu7KSpeQ4cEMABaiRDvUYrlpWhIEYeFwSAAug6hrcjOv4gEu6TymqKTjoamSvjA0xYp8iFsQAsjSRhkoIII2AApPueT7lKGDVj+yHRAA6vCHCCNeYREt0ZIcC+dbiIaCFRIx+wOOhoxwOMbTQGE+isRp8iuMwu7MNMgiaQy5oAOKCAATBQZgWuagjkp0eRcqw8DqRIKHmiMYwTM54QNByH5pAAjp0aTeFZ-Y2dwaQcvCQGsOOoi8vIAByBSXqR6QVl646gQl4H2BIvyNc15StUSEThKU4K4EkJwAFakaEkArKEbC9Y60TmlA0wYPo44RloUzFBgUgfsO3RlOo0rYIldGrQNUrQaOU7pO2ggLn8mqWbsA5wDB1BYIwiRGhO0TKF1ITyC4DJpJdGQJb5aEYaDhKQU8FkrfIygwXB4PRJDLrpEI-0cswjbwycmMiVE6OGtj8jaei2WA6RH5cYqJ2qjlGrakmepoyAygYGYZj6DTqEFBAgmKRibJ2elTlcuE9i+CAvj0QwIQpvgRCkOQMBULQiEgFK4xsPgZjK0AA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -112,7 +112,7 @@ workspace/
 ```promptscript
 @meta {
   id: "customer-dashboard"
-  syntax: "1.0.0"
+  syntax: "1.5.0"
 }
 
 # In a multi-file setup, you would inherit from team:
@@ -164,7 +164,7 @@ workspace/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMArnCzM+1ALRSMcHACNmGalPliJcAJ7sMhWfICMFAAxOTrAL5ixAYkEBJcUIkClBYEOqQsIJw-ApodILmzAqCAO5JUFKSrDgw1BBYgmDUqoIcpIjegtwQ2bn5VWUkAPRFbBysmYI+ABTUMADmEMrU5oLqglJDGLqwmWDM1ILkGOb9xQodAJRi3CzsRAWi4kvFAFYwjFi2IADCSipqggAi2noGRq4SfWjMcPkL5mug1wCl0FBYzQhmFY5iajHuqlymle+kMxhAnmOJgxGOOXh8AEF9AosJiJABlGBQMDqaLUABuEEYMAmKPecwWgnhykRtFKzEEJAwrAw-RZuBgEEWGEYLA2WDgdFMgkZMBSggWUlyisEwsyWGoMoA1lEcBA0Hx2HAKGSuj4ANIwUYAMRg2AUfTgtvGBNlSXYUX4oVY-Tguo6JxgYFynGZXuO4wA8kZcoIzTyRuH9YbGEaav1leNybEftQCqFc-xBcLRTBLaSE4IAHLMUKQRjYCBsSPRvqsOPK7GuDysHZG1jMFKzMXCQc4z52wQEgAKvkEAFEOj8agrbQAhbQsgCqACUADKyHBYLBoOCIJpNDBoCDg1TQ8yv5r0uy2-GEv3yoWggAOLrgAKoIj4AQG4zAVWMpygGWoCNA8YSOMy5HhBUGIQU4xHmgWgcLq0ENsqf6CMmWq0EBoHYZq2pjIIZ5DAUDE0Y2dGQexcBNIg0hMXBbEposyEYKhv74oIxZoKWDboSB4GQRWRr8GG4wscopRMqpu6NsuibkthKlqUxNx9Ng4o6fwc5Du4mLcDoCxYPCCqzliIBNOx8jXAAElSaCpPkOAaiJ6h9FAllzBslxdiKUD5OYC7yDh-qkkgcggP5UCBSkwUkbh1YimK9bDiAbgALoMJwBrmPgRCkOQMBULQIAMPS2pxfgdjlUAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMArnCzM+1ALRSMcHACNmGalPliJcAJ7sMhWfICMFAKwUADCdYBfMWIDEggJLiQiQKUFgQ6pCwgnD8Cmh0gubMCoIA7ilQUpKsODDUEFiCYNSqghykiL6C3BC5+YU1FSQA9CVsHKzZgn4AFNQwAOYQytTmguqCUiMYurDZYMzUguQY5oOlCl0AlGLcLOxERaLiK6UAVjCMWLYgAMJKKmqCACLaegZG7hIDaMxwhSW5luw1wCl0FBYrShmFY5hajEeqnymne+kMxhA3lOJixWNOPj8AEF9AosNiJABlGBQMDqWLUABuEEYMCmaM+CyWgkRymRtHKzEEJAwrAwgzZuBgEGWGEYLC2WDgdFMgmZMDSgiWUnyysEouyWGocoA1jEcBA0Hx2HAKBSen4ANIwcYAMRg2AUAzg9smRPlKXYMX44VYgzg+q6ZxgYHynFZPtOkwA8kZ8oILXyxpHDcbGCa6oNVZNKfE-tQiuF8-xhaLxTBreSk4IAHLMcKQRjYCBsaOxgasBOq3HuLysPYm1jMNLzCXCYd474OwREgAK-kEAFEun86kr7QAhbRsgCqACUADKyHBYLBoOCIFotDBoCCQ1Sw8zv1qMuz2wnEgGirFoIADim4ACqCM+QFBpMoE1nKCpBjqAjQImEiTKuJ5QTByFFJMJ5oFoHD6rBTaqgBgipjqtAgeBuHarqEyCBeIxFExdHNgx0GcXALSINILEIRxabLKhGDof+hKCKWaDlk2mFgZB0FVia-ARpMbHKOULLqfuzarsmlK4WpGksXcAzYJKen8AuI6eNi3A6EsWCIkq844iALScfItwABI0mg6SFDgWpieoAxQNZCxbNcPZilAhTmEu8h4YG5JIHIICBVAwVpKFZH4bWYoSo2o4gB4AC6DCcEa5j4EQpDkDAVC0CADCMrqCX4HYlVAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -173,7 +173,7 @@ workspace/
 
 ```yaml
 id: customer-dashboard
-syntax: '1.4.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -195,7 +195,7 @@ targets:
 ```promptscript
 @meta {
   id: "admin-portal"
-  syntax: "1.0.0"
+  syntax: "1.5.0"
 }
 
 # In a multi-file setup, you would inherit from team:
@@ -240,7 +240,7 @@ targets:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMUkhFYBaNM2oCo8sRLgBPdhkKz5ARgoAGa7tYBfMWIDEggJLihJAK5QsEVUhYQTh+bzQ6QQNmb0EAdxioKUlWHBhqCCxBMGpmEkEOUkQXQW4VNIys7kKSAHoctg5WZMFXAApqGABzCDgsagNBVUEpXowAI1hksE1BcgwDLtzvZoBKMW4WdiIs0XE53IArGEYsMxAAQSUVQQAFTW07CU6NOEzNA3Oe3G9xihY6gDMKwDLVFMo1BotBgdCAnPtdHC4ftnK4LuMYlh4RIPBxqKwYYJwTcodpsrMSBgCT1WF1BIxvH08uk4JFNFIWXQ9ETmiEDH0YPktpAut5qNgIGwKNjWq4ANIwQYAMRg2DF8BlwwAwoysMzqIJKdTBZwsfthgB5agcg00ZiMeBvWnc4YAZX5HCFbBFYolbBdgguBKgBn8jDgIwwcBwGIw1u5iLsjlYGx2nGSfSpUjjUgje30JzFmU+wm5Egw3lwpogjD9rHOrtdFsEnQAjt4IJ0pE8JETKzhNBAAF5184AJWYsFU4yjMGSbWJrEicHCpMiADcIDA4ul1sje33RlgADLMLo0rqyNsdrvc5PJjadPoZU6S1h5gPyC5QOILCOMNJGAAa0ERl0jmdJlDgN42AjcYYBmToiVfWCe2GeRTzpGEoCJa5PBQ99yQNCsjyTeFuGjB4GSwD8ERAME8Pkc4AAkYCgNB4kyHBcIhbIVgImFix7eRaheB4mLkEAAHFOHSbAYBbGBSTgJMQHsABdBhTQGfAiFIcgYCoWgQAYdcWTffBzDUoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMUkhFYBaNM2oCo8sRLgBPdhkKz5ARgoBWCgAZdrAL5ixAYkEBJcUJIBXKFgQqpCwgnD8vmh0ggbMvoIA7nFQUpKsODDUEFiCYNTMJIIcpIhugtwqGVk53MUkAPR5bBysqYLuABTUMADmEHBY1AaCqoJS-RgARrCpYJqC5BgGPfm+rQCUYtws7EQ5ouIL+QBWMIxYZiAAgkoqggAKmtoOEt0acNmaBpd9uL6TFBYDSBmFYBnqimUag0WgwOhALkOugRCMOrncV0mcSwiIkXg41FYcMEkLuMO0uXmJAwRL6rB6gkYvgGBUycGimikbLoehJrTCBgGMEKO0gPV81GwEDYFFx7XcAGkYMMAGIwbAS+By0YAYWZWFZ1EE1Npws4OMOowA8tQuUaaMxGPAPvTeaMAMqCjgithiiVSthuwRXIlQAyBRhwMYYOA4LEYW285EOZysLZ7TipAY0qQJqRRg76M4S7LfYS8iQYXy4c0QRgB1iXd3uq2CboAR18EG6UheEhJ1ZwmggAC8G5cAErMWCqSYxmCpDqk1jROCRcnRABuEBgCUym1R-YH4ywABlmD06T1ZB2uz3eanU1tugMsudpawC0H5FcoAkllGjAZIwADWgjMpkCyZMocAfGwUaTDAczdCS77wX2ozyOeDJwlAJK3N4aGfpSRpVieKaItwsZPEyWBfkiIAQgR8iXAAEjAUBoIk2Q4PhUK5GsRFwqWfbyPUbxPCxcggAA4pwmTYDAbYwOScApiAjgALoMOaQz4EQpDkDAVC0CADCbmyH74OYGlAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -249,7 +249,7 @@ targets:
 
 ```yaml
 id: admin-portal
-syntax: '1.4.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -289,33 +289,45 @@ cd project-a && prs compile
 cd ../project-b && prs compile
 ```
 
-Or use a script:
+Or use a script. It skips directories that are not yet initialized, so a new
+`project-c/` without a `promptscript.yaml` does not break the loop:
 
 ```bash
 #!/bin/bash
 for dir in project-*/; do
-  echo "Compiling $dir..."
-  (cd "$dir" && prs compile)
+  if [ ! -f "$dir/promptscript.yaml" ]; then
+    echo "Skipping $dir (no promptscript.yaml)"
+    continue
+  fi
+  echo "Validating and compiling $dir..."
+  (cd "$dir" && prs validate --strict && prs compile)
 done
 ```
 
 ### Validate
 
+Validation runs per project, because each project owns its own
+`promptscript.yaml` and `promptscript.lock`:
+
 ```bash
-prs validate --strict
+cd project-a && prs validate --strict
+cd ../project-b && prs validate --strict
 ```
 
 ### Update Team Config
 
 When you update `@team/frontend`:
 
-1. Update version in `@meta`
+1. Tag the registry change (for example `v1.2.0`) and review it like any other code
 2. Notify team members
 3. Each project recompiles to get updates
 
 ## CI/CD Integration
 
 ### GitHub Actions
+
+Each project owns its own `promptscript.yaml`, so CI runs per project. Path filters keep jobs
+scoped, and `working-directory` points each job at its project:
 
 ```yaml
 # .github/workflows/promptscript.yml
@@ -324,12 +336,17 @@ name: PromptScript CI
 on:
   push:
     paths:
-      - '.promptscript/**'
-      - 'promptscript.yaml'
+      - 'project-*/.promptscript/**'
+      - 'project-*/promptscript.yaml'
+      - 'project-*/promptscript.lock'
+      - 'registry/**'
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [project-a, project-b]
     steps:
       - uses: actions/checkout@v4
 
@@ -347,9 +364,11 @@ jobs:
         run: npm install -g @promptscript/cli
 
       - name: Validate
+        working-directory: ${{ matrix.project }}
         run: prs validate --strict
 
       - name: Check compiled files
+        working-directory: ${{ matrix.project }}
         run: |
           prs compile
           git diff --exit-code
