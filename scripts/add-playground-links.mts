@@ -21,6 +21,7 @@ const PLAYGROUND_URL = PLAYGROUND_BASE_URL;
 // Marker to identify auto-generated playground links
 const LINK_MARKER_START = '<!-- playground-link-start -->';
 const LINK_MARKER_END = '<!-- playground-link-end -->';
+const SKIP_LINK_MARKER = '<!-- playground-link-skip -->';
 
 // Regex to match playground link blocks (for removal/update)
 const LINK_BLOCK_REGEX = new RegExp(
@@ -143,6 +144,10 @@ ${LINK_MARKER_END}
 `;
 }
 
+function shouldSkipPlaygroundLink(content: string, offset: number): boolean {
+  return content.slice(0, offset).trimEnd().endsWith(SKIP_LINK_MARKER);
+}
+
 /**
  * Process a single markdown file.
  */
@@ -169,37 +174,44 @@ function processMarkdownFile(filePath: string, mode: 'add' | 'check' | 'clean'):
   content = withoutLinks;
 
   // Find all PRS code blocks and add links after them
-  const newContent = content.replace(CODE_BLOCK_REGEX, (match, codeContent: string) => {
-    // Dedent first (removes common leading whitespace from tabbed content), then trim
-    const trimmedCode = dedent(codeContent).trim();
+  const newContent = content.replace(
+    CODE_BLOCK_REGEX,
+    (match, codeContent: string, offset: number) => {
+      if (shouldSkipPlaygroundLink(content, offset)) {
+        return match;
+      }
 
-    // Skip empty or very short examples
-    if (trimmedCode.length < 10) {
-      return match;
+      // Dedent first (removes common leading whitespace from tabbed content), then trim
+      const trimmedCode = dedent(codeContent).trim();
+
+      // Skip empty or very short examples
+      if (trimmedCode.length < 10) {
+        return match;
+      }
+
+      // Skip examples that are clearly fragments (no meta block, just showing syntax)
+      // But include examples that look complete (have --- or meaningful content)
+      const looksComplete =
+        trimmedCode.includes('---') ||
+        trimmedCode.startsWith('name:') ||
+        trimmedCode.startsWith('# ') ||
+        trimmedCode.includes('inherit ') ||
+        trimmedCode.includes('use ');
+
+      // Also include examples that are just content blocks (instructions)
+      const hasContent = trimmedCode.length > 30;
+
+      if (!looksComplete && !hasContent) {
+        return match;
+      }
+
+      const url = generatePlaygroundUrl(trimmedCode);
+      const linkBlock = createLinkBlock(url);
+      added++;
+
+      return match + linkBlock;
     }
-
-    // Skip examples that are clearly fragments (no meta block, just showing syntax)
-    // But include examples that look complete (have --- or meaningful content)
-    const looksComplete =
-      trimmedCode.includes('---') ||
-      trimmedCode.startsWith('name:') ||
-      trimmedCode.startsWith('# ') ||
-      trimmedCode.includes('inherit ') ||
-      trimmedCode.includes('use ');
-
-    // Also include examples that are just content blocks (instructions)
-    const hasContent = trimmedCode.length > 30;
-
-    if (!looksComplete && !hasContent) {
-      return match;
-    }
-
-    const url = generatePlaygroundUrl(trimmedCode);
-    const linkBlock = createLinkBlock(url);
-    added++;
-
-    return match + linkBlock;
-  });
+  );
 
   if (mode === 'check') {
     // In check mode, compare and report differences
