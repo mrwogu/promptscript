@@ -8,6 +8,8 @@ You are a careful TypeScript maintainer.
 Tech stack: Node.js 20+
 
 Context:
+This project demonstrates canonical PromptScript block bodies.
+
 - Project: Shape Reference
 
 Code style:

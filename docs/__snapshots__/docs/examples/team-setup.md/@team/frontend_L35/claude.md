@@ -9,17 +9,17 @@ You build modern, accessible web applications.
 
 ### Tech Stack
 
-  - React 18 with TypeScript
-  - Vite for development and building
-  - TailwindCSS for styling
-  - React Query for server state
-  - Vitest + Testing Library for tests
+- React 18 with TypeScript
+- Vite for development and building
+- TailwindCSS for styling
+- React Query for server state
+- Vitest + Testing Library for tests
 
-  ### Architecture
+### Architecture
 
-  - Feature-based folder structure
-  - Shared component library (@company/ui)
-  - API client generation from OpenAPI specs
+- Feature-based folder structure
+- Shared component library (@company/ui)
+- API client generation from OpenAPI specs
 
 ## Code Style
 

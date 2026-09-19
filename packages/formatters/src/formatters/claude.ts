@@ -1211,8 +1211,7 @@ export class ClaudeFormatter extends BaseFormatter {
     const contextBlock = this.findBlock(ast, 'context');
     if (!contextBlock) return null;
 
-    const identity = this.findBlock(ast, 'identity');
-    const textIsConsumedByProject = !identity && !resolveSourceSectionTitle(ast, 'context');
+    const textIsConsumedByProject = this.contextTextConsumedByProject(ast);
     const propertyItems = this.contextPropertyItems(ast);
 
     let body = '';
@@ -1222,8 +1221,11 @@ export class ClaudeFormatter extends BaseFormatter {
       const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
       const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
       if (remainingText) {
-        // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
-        const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
+        // Strip the .prs block-body indentation that markdown would read as
+        // list nesting, then downgrade "## " headings to "### " so they do
+        // not collide with the formatter's own h2 section headings.
+        const dedentedText = this.dedent(remainingText);
+        const downgradedText = dedentedText.replace(/^(\s*)## /gm, '$1### ');
         body = this.normalizeMarkdownForPrettier(downgradedText).trim();
       }
     }

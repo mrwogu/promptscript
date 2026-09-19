@@ -895,13 +895,18 @@ ${fullText}`;
       }
     }
 
-    // Fall back to extracting text which may contain architecture info
+    // Fall back to an "## Architecture" section with a code block, matching
+    // the claude/markdown-instruction extraction rule. Free-form text that
+    // merely mentions architecture stays in the context section, otherwise
+    // the whole context body would be duplicated here.
     const text = this.extractText(context.content);
-    if (text?.includes('Architecture')) {
-      return text.trim();
-    }
+    const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
+    if (!archMatch) return null;
 
-    return null;
+    const content = archMatch.replace('## Architecture', '');
+    const normalizedContent = this.normalizeMarkdownForPrettier(content);
+    const title = resolveSectionTitle(ast, 'architecture', { defaultTitle: 'Architecture' });
+    return `## ${title}\n\n${normalizedContent.trim()}`;
   }
 
   private contextSection(ast: Program): string | null {
@@ -919,13 +924,17 @@ ${fullText}`;
     );
 
     let body = '';
-    if (resolveSourceSectionTitle(ast, 'context')) {
+    if (!this.contextTextConsumedByProject(ast)) {
       const text = this.extractText(context.content);
       const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
       const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
       if (remainingText) {
-        const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
-        body = this.stripAllIndent(downgradedText);
+        // Strip the .prs block-body indentation that markdown would read as
+        // list nesting, then downgrade "## " headings to "### " so they do
+        // not collide with the formatter's own h2 section headings.
+        const dedentedText = this.dedent(remainingText);
+        const downgradedText = dedentedText.replace(/^(\s*)## /gm, '$1### ');
+        body = downgradedText.trim();
       }
     }
 

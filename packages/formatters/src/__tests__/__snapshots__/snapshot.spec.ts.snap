@@ -195,7 +195,7 @@ flowchart TB
     formatters[formatters - Output formatters]
     cli[cli - Command-line interface]
   end
-  
+
   cli --> compiler
   compiler --> parser
   compiler --> resolver
@@ -207,7 +207,8 @@ flowchart TB
   formatters --> core
 \`\`\`
 
-## Key Libraries
+Context:
+### Key Libraries
 
 - Parser: Chevrotain
 - CLI: Commander.js

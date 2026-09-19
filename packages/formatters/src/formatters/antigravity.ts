@@ -768,8 +768,7 @@ ${this.stripAllIndent(content)}`;
     const contextBlock = this.findBlock(ast, 'context');
     if (!contextBlock) return null;
 
-    const identity = this.findBlock(ast, 'identity');
-    const textIsConsumedByProject = !identity && !resolveSourceSectionTitle(ast, 'context');
+    const textIsConsumedByProject = this.contextTextConsumedByProject(ast);
     const propertyItems = this.contextPropertyItems(ast, ['frameworks']);
 
     let body = '';

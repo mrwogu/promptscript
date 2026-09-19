@@ -7,6 +7,9 @@ You are a careful maintainer.
 
 Tech stack: Node.js 20+
 
+Context:
+This service processes checkout requests.
+
 Code style:
 - Use strict TypeScript
 - Use named exports
