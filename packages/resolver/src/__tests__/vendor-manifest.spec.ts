@@ -823,6 +823,21 @@ fi
     await expect(verifyWithAllowPartial(repositoryDir, commit)).resolves.toBeUndefined();
   });
 
+  it('rejects external includes in the main Git config', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config'),
+      '\n[include]\n\tpath = /etc/gitconfig\n',
+      { flag: 'a' }
+    );
+
+    await expect(verifyWithAllowPartial(repositoryDir, commit)).rejects.toThrow(
+      'External or partial Git object sources'
+    );
+  });
+
   it.each(['worktreeConfig', 'worktreeConfig = yes', 'worktreeConfig = on', 'worktreeConfig = 1'])(
     'recognizes Git boolean syntax for %s',
     async (setting) => {
