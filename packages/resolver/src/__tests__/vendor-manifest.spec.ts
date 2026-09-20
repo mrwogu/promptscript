@@ -836,6 +836,25 @@ fi
     await expect(verifyWithAllowPartial(repositoryDir, commit)).resolves.toBeUndefined();
   });
 
+  it('rejects oversized config.worktree even with allowPartial', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config'),
+      '\n[extensions]\n\tworktreeConfig = true\n',
+      { flag: 'a' }
+    );
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config.worktree'),
+      `# ${'x'.repeat(1024 * 1024)}\n`
+    );
+
+    await expect(verifyWithAllowPartial(repositoryDir, commit)).rejects.toThrow(
+      'Git worktree config exceeds'
+    );
+  });
+
   it('rejects external includes in worktree config even with allowPartial', async () => {
     const repositoryDir = await createTempDirectory();
     await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
