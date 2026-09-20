@@ -94,6 +94,7 @@ export async function lockCommand(options: LockOptions): Promise<void> {
       ? resolve(projectRoot, config.input.entry)
       : resolve(localPath, 'project.prs');
     const registry = await resolveRegistryPath(config, {
+      allowMissingLockEntry: true,
       ...(!options.update && Object.keys(existing.dependencies).length > 0
         ? { lockfile: existing }
         : {}),

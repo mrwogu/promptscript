@@ -16,6 +16,7 @@ const {
   mockCreateRegistryOptions,
   mockValidateRemoteAccess,
   mockGenerateLockfileReferences,
+  mockResolveRegistryPath,
 } = vi.hoisted(() => {
   const mockStart = vi.fn().mockReturnThis();
   const mockSucceed = vi.fn().mockReturnThis();
@@ -39,6 +40,11 @@ const {
   const mockCreateRegistryOptions = vi.fn();
   const mockValidateRemoteAccess = vi.fn();
   const mockGenerateLockfileReferences = vi.fn().mockResolvedValue({});
+  const mockResolveRegistryPath = vi.fn().mockResolvedValue({
+    path: '/registry',
+    isRemote: false,
+    source: 'local',
+  });
   return {
     mockSucceed,
     mockFail,
@@ -55,6 +61,7 @@ const {
     mockCreateRegistryOptions,
     mockValidateRemoteAccess,
     mockGenerateLockfileReferences,
+    mockResolveRegistryPath,
   };
 });
 
@@ -84,11 +91,7 @@ vi.mock('../lock-references.js', () => ({
 }));
 
 vi.mock('../../utils/registry-resolver.js', () => ({
-  resolveRegistryPath: vi.fn().mockResolvedValue({
-    path: '/registry',
-    isRemote: false,
-    source: 'local',
-  }),
+  resolveRegistryPath: mockResolveRegistryPath,
 }));
 
 vi.mock('@promptscript/resolver', () => ({
@@ -264,6 +267,44 @@ describe('lockCommand', () => {
       url: 'https://github.com/company/registry.git',
       auth: { type: 'token', tokenEnvVar: 'REGISTRY_TOKEN' },
     });
+  });
+
+  it('allows adding a default registry to an existing lockfile', async () => {
+    const config = {
+      targets: [],
+      registry: {
+        git: {
+          url: 'https://github.com/company/registry.git',
+        },
+      },
+    };
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue(config);
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/company/other': {
+            version: 'main',
+            commit: 'a'.repeat(40),
+            integrity: 'sha256-existing',
+          },
+        },
+      })
+    );
+
+    await lockCommand({});
+
+    expect(mockResolveRegistryPath).toHaveBeenCalledWith(config, {
+      allowMissingLockEntry: true,
+      lockfile: expect.objectContaining({
+        dependencies: expect.objectContaining({
+          'github.com/company/other': expect.any(Object),
+        }),
+      }),
+    });
+    expect(mockWriteFile).toHaveBeenCalled();
   });
 
   it('should pass a per-entry timeout to dependency resolution', async () => {
