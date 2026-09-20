@@ -251,6 +251,30 @@ function extractLinkableCode(
 }
 
 /**
+ * Compare regenerated content with the original file and describe the drift.
+ * Any difference counts, including stale URLs when the link count is unchanged.
+ */
+function buildCheckResult(
+  filePath: string,
+  newContent: string,
+  originalContent: string,
+  added: number,
+  existingLinkCount: number
+): ProcessResult {
+  if (newContent === originalContent) {
+    return { file: filePath, added: 0, removed: 0, updated: 0 };
+  }
+  if (existingLinkCount === 0 && added > 0) {
+    return { file: filePath, added, removed: 0, updated: 0 };
+  }
+  if (added !== existingLinkCount) {
+    return { file: filePath, added: 0, removed: 0, updated: Math.abs(added - existingLinkCount) };
+  }
+  // Equal link counts but different content: stale URLs after example edits.
+  return { file: filePath, added: 0, removed: 0, updated: added };
+}
+
+/**
  * Process a single markdown file.
  */
 function processMarkdownFile(filePath: string, mode: 'add' | 'check' | 'clean'): ProcessResult {
@@ -295,18 +319,7 @@ function processMarkdownFile(filePath: string, mode: 'add' | 'check' | 'clean'):
 
   if (mode === 'check') {
     // In check mode, compare and report differences
-    if (newContent !== originalContent) {
-      const diff = Math.abs(added - existingLinkCount);
-      if (existingLinkCount === 0 && added > 0) {
-        return { file: filePath, added, removed: 0, updated: 0 };
-      }
-      if (added !== existingLinkCount) {
-        return { file: filePath, added: 0, removed: 0, updated: diff };
-      }
-      // Equal link counts but different content: stale URLs after example edits.
-      return { file: filePath, added: 0, removed: 0, updated: added };
-    }
-    return { file: filePath, added: 0, removed: 0, updated: 0 };
+    return buildCheckResult(filePath, newContent, originalContent, added, existingLinkCount);
   }
 
   // Write the updated content
