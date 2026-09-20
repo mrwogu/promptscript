@@ -77,38 +77,30 @@ export async function collectRemoteImports(
   const seen = new Set<string>();
   const results: RemoteImport[] = [];
 
-  async function scanReference(path: PathReference, sourceFile: string): Promise<void> {
-    let resolved: string;
-    try {
-      resolved = loader.resolveRef(path, sourceFile);
-    } catch (error) {
-      if (options.strict) {
-        throw new Error(`Cannot resolve import '${path.raw}' in ${sourceFile}`, {
-          cause: error,
-        });
-      }
-      return;
-    }
+  function recordRemoteImport(path: PathReference, sourceFile: string, resolved: string): boolean {
     const marker = parseRegistryMarker(resolved);
-
-    if (marker) {
-      const key = `${marker.repoUrl}\0${marker.path}\0${marker.version}`;
-      if (options.deduplicate === false || !seen.has(key)) {
-        seen.add(key);
-        results.push({
-          ...marker,
-          ...(options.includeLocations
-            ? {
-                sourceFile,
-                sourceLine: path.loc.line,
-                rawSource: path.raw,
-              }
-            : {}),
-        });
-      }
-      return;
+    if (!marker) {
+      return false;
     }
 
+    const key = `${marker.repoUrl}\0${marker.path}\0${marker.version}`;
+    if (options.deduplicate === false || !seen.has(key)) {
+      seen.add(key);
+      results.push({
+        ...marker,
+        ...(options.includeLocations
+          ? {
+              sourceFile,
+              sourceLine: path.loc.line,
+              rawSource: path.raw,
+            }
+          : {}),
+      });
+    }
+    return true;
+  }
+
+  async function scanLocalReference(resolved: string): Promise<void> {
     if (!resolved.endsWith('.prs') && !resolved.endsWith('.md')) {
       return;
     }
@@ -128,6 +120,23 @@ export async function collectRemoteImports(
     }
     if (options.strict) {
       throw new Error(`Imported PromptScript file not found: ${resolved}`);
+    }
+  }
+
+  async function scanReference(path: PathReference, sourceFile: string): Promise<void> {
+    let resolved: string;
+    try {
+      resolved = loader.resolveRef(path, sourceFile);
+    } catch (error) {
+      if (options.strict) {
+        throw new Error(`Cannot resolve import '${path.raw}' in ${sourceFile}`, {
+          cause: error,
+        });
+      }
+      return;
+    }
+    if (!recordRemoteImport(path, sourceFile, resolved)) {
+      await scanLocalReference(resolved);
     }
   }
 
