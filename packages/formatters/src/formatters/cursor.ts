@@ -929,11 +929,9 @@ ${fullText}`;
       const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
       const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
       if (remainingText) {
-        // Strip the .prs block-body indentation that markdown would read as
-        // list nesting, then downgrade "## " headings to "### " so they do
-        // not collide with the formatter's own h2 section headings.
-        const dedentedText = this.dedent(remainingText);
-        const downgradedText = dedentedText.replace(/^(\s*)## /gm, '$1### ');
+        // Downgrade "## " headings to "### " so they do not collide with the
+        // formatter's own h2 section headings.
+        const downgradedText = remainingText.replace(/^([ \t]*)## /gm, '$1### ');
         body = downgradedText.trim();
       }
     }

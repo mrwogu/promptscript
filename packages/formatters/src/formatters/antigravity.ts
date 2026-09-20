@@ -779,7 +779,7 @@ ${this.stripAllIndent(content)}`;
       const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
       if (remainingText) {
         // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
-        const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
+        const downgradedText = remainingText.replace(/^([ \t]*)## /gm, '$1### ');
         body = this.stripAllIndent(downgradedText);
       }
     }
