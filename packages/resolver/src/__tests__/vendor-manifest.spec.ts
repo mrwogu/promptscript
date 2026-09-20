@@ -823,6 +823,19 @@ fi
     await expect(verifyWithAllowPartial(repositoryDir, commit)).resolves.toBeUndefined();
   });
 
+  it('accepts worktree config without a config.worktree file', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config'),
+      '\n[extensions]\n\tworktreeConfig = true\n',
+      { flag: 'a' }
+    );
+
+    await expect(verifyWithAllowPartial(repositoryDir, commit)).resolves.toBeUndefined();
+  });
+
   it('rejects external includes in worktree config even with allowPartial', async () => {
     const repositoryDir = await createTempDirectory();
     await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
