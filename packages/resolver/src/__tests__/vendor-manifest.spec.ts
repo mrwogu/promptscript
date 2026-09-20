@@ -823,6 +823,63 @@ fi
     await expect(verifyWithAllowPartial(repositoryDir, commit)).resolves.toBeUndefined();
   });
 
+  it.each(['worktreeConfig', 'worktreeConfig = yes', 'worktreeConfig = on', 'worktreeConfig = 1'])(
+    'recognizes Git boolean syntax for %s',
+    async (setting) => {
+      const repositoryDir = await createTempDirectory();
+      await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+      const commit = await initializeVendoredGitRepository(repositoryDir);
+      await writeFile(
+        join(repositoryDir, VENDOR_GIT_DIR, 'config'),
+        `\n[extensions]\n\t${setting}\n`,
+        { flag: 'a' }
+      );
+      await writeFile(
+        join(repositoryDir, VENDOR_GIT_DIR, 'config.worktree'),
+        '[include]\n\tpath = /etc/gitconfig\n'
+      );
+
+      await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+        'External or partial Git object sources'
+      );
+      await expect(verifyWithAllowPartial(repositoryDir, commit)).rejects.toThrow(
+        'External or partial Git object sources'
+      );
+    }
+  );
+
+  it('accepts disabled worktree config', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config'),
+      '\n[extensions]\n\tworktreeConfig = false\n',
+      { flag: 'a' }
+    );
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config.worktree'),
+      '[include]\n\tpath = /etc/gitconfig\n'
+    );
+
+    await expect(verifyVendoredGitRepository(repositoryDir, commit)).resolves.toBeUndefined();
+  });
+
+  it('rejects invalid worktree config booleans', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config'),
+      '\n[extensions]\n\tworktreeConfig = invalid\n',
+      { flag: 'a' }
+    );
+
+    await expect(verifyWithAllowPartial(repositoryDir, commit)).rejects.toThrow(
+      'Invalid Git worktree config extension'
+    );
+  });
+
   it('accepts worktree config without a config.worktree file', async () => {
     const repositoryDir = await createTempDirectory();
     await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
