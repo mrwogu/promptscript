@@ -1695,7 +1695,10 @@ export class Resolver {
         version && /^[0-9a-f]{40}$/i.test(version) && !/^0{40}$/.test(version) ? version : null;
       const lockedCommit = lockfileCommit ?? markerCommit;
       if (this.options.lockfile && !lockfileCommit) {
-        throw new Error(`Remote dependency is not pinned by the lockfile: ${repoUrl}`);
+        throw new Error(
+          `Remote dependency is not pinned by the lockfile: ${repoUrl}. ` +
+            `Run 'prs lock' to pin it, then re-run this command.`
+        );
       }
 
       const requestedRef = lockEntry?.version ?? (version || undefined);
@@ -1721,7 +1724,10 @@ export class Resolver {
       }
       if (this.options.vendorDir && vendorManifest) {
         if (!lockEntry || !lockedCommit) {
-          throw new Error(`Vendored dependency is not pinned by the lockfile: ${repoUrl}`);
+          throw new Error(
+            `Vendored dependency is not pinned by the lockfile: ${repoUrl}. ` +
+              `Run 'prs lock' to pin it, then re-run this command.`
+          );
         }
         vendoredPath = await resolveVendoredRepository(
           this.options.vendorDir,
