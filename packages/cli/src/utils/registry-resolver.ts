@@ -41,6 +41,8 @@ export interface ResolvedRegistry {
 export interface ResolveRegistryOptions {
   vendorDir?: string;
   lockfile?: Lockfile;
+  /** Allow lock generation to resolve a registry missing from an existing lockfile. */
+  allowMissingLockEntry?: boolean;
   /** Refuse cache repair, network access, and all registry writes. */
   readOnly?: boolean;
 }
@@ -99,7 +101,7 @@ export async function resolveRegistryPath(
     if (options.vendorDir && existsSync(options.vendorDir) && !vendorManifest) {
       throw new Error(`Vendor manifest is missing: ${options.vendorDir}`);
     }
-    if (options.lockfile && !lockedRepository) {
+    if (options.lockfile && !lockedRepository && !options.allowMissingLockEntry) {
       throw new Error(
         `Git registry is not pinned by the lockfile: ${gitConfig.url}. ` +
           `Run 'prs lock' to pin it, then re-run this command.`

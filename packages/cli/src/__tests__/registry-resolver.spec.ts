@@ -448,6 +448,37 @@ describe('utils/registry-resolver', () => {
       ).rejects.toThrow('Git registry is not pinned by the lockfile');
     });
 
+    it('allows lock generation to resolve a registry missing from the lockfile', async () => {
+      const config: PromptScriptConfig = {
+        id: 'test',
+        syntax: '1.0.0',
+        targets: ['github'],
+        registry: {
+          git: { url: 'https://github.com/org/registry.git' },
+        },
+      };
+
+      await expect(
+        resolveRegistryPath(config, {
+          lockfile: {
+            version: 1,
+            dependencies: {
+              'https://github.com/other/registry.git': {
+                version: 'main',
+                commit: 'a'.repeat(40),
+                integrity: 'sha256-test',
+              },
+            },
+          },
+          allowMissingLockEntry: true,
+        })
+      ).resolves.toMatchObject({
+        repositoryUrl: 'https://github.com/org/registry.git',
+        source: 'git',
+      });
+      expect(mockGitRegistry.fetch).toHaveBeenCalledWith('registry-manifest.yaml');
+    });
+
     it('rejects a vendor manifest without a lockfile pin', async () => {
       mockLoadVendorManifest.mockResolvedValue({ version: 1, dependencies: {} });
       const config: PromptScriptConfig = {
