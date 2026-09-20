@@ -155,6 +155,22 @@ function shouldSkipPlaygroundLink(content: string, offset: number): boolean {
 }
 
 /**
+ * Parse a markdown fence line: backtick count and info string, or null when
+ * the line does not open or close a fence. Manual parsing avoids the
+ * super-linear backtracking a backtick-plus-anything regex would have.
+ */
+function parseFence(line: string): { length: number; info: string } | null {
+  if (!line.startsWith('```')) {
+    return null;
+  }
+  let length = 3;
+  while (length < line.length && line[length] === '`') {
+    length++;
+  }
+  return { length, info: line.slice(length).trim() };
+}
+
+/**
  * Find ```prs / ```promptscript fence lines that must not get playground links:
  * - fences nested inside another fence (example content, not runnable code)
  * - fences of four or more backticks, where the code block regex would stop at
@@ -167,12 +183,13 @@ function findUnlinkableFenceLines(content: string): Array<[number, number]> {
   let offset = 0;
 
   for (const line of content.split('\n')) {
-    const fence = line.match(/^(`{3,})(.*)$/);
+    const fence = parseFence(line);
     if (fence) {
-      const length = fence[1].length;
-      const [lang] = fence[2].trim().split(/\s+/);
+      const { length, info } = fence;
+      const [lang] = info.split(/\s+/);
       const isPrs = lang === 'prs' || lang === 'promptscript';
-      if (stack.length > 0 && length >= stack[stack.length - 1]) {
+      const openLength = stack.at(-1);
+      if (openLength !== undefined && length >= openLength) {
         stack.pop();
       } else {
         stack.push(length);
@@ -185,6 +202,52 @@ function findUnlinkableFenceLines(content: string): Array<[number, number]> {
   }
 
   return ranges;
+}
+
+/**
+ * Return the playground-ready code for a matched block, or null when the block
+ * must not carry a link: skip marker, unsafe fence, or a short fragment example.
+ */
+function extractLinkableCode(
+  content: string,
+  codeContent: string,
+  offset: number,
+  unlinkableFences: Array<[number, number]>
+): string | null {
+  if (shouldSkipPlaygroundLink(content, offset)) {
+    return null;
+  }
+
+  // Skip fences we cannot link safely (nested or 4+ backticks)
+  if (unlinkableFences.some(([start, end]) => offset >= start && offset < end)) {
+    return null;
+  }
+
+  // Dedent first (removes common leading whitespace from tabbed content), then trim
+  const trimmedCode = dedent(codeContent).trim();
+
+  // Skip empty or very short examples
+  if (trimmedCode.length < 10) {
+    return null;
+  }
+
+  // Skip examples that are clearly fragments (no meta block, just showing syntax)
+  // But include examples that look complete (have --- or meaningful content)
+  const looksComplete =
+    trimmedCode.includes('---') ||
+    trimmedCode.startsWith('name:') ||
+    trimmedCode.startsWith('# ') ||
+    trimmedCode.includes('inherit ') ||
+    trimmedCode.includes('use ');
+
+  // Also include examples that are just content blocks (instructions)
+  const hasContent = trimmedCode.length > 30;
+
+  if (!looksComplete && !hasContent) {
+    return null;
+  }
+
+  return trimmedCode;
 }
 
 /**
@@ -217,40 +280,12 @@ function processMarkdownFile(filePath: string, mode: 'add' | 'check' | 'clean'):
   const newContent = content.replace(
     CODE_BLOCK_REGEX,
     (match, codeContent: string, offset: number) => {
-      if (shouldSkipPlaygroundLink(content, offset)) {
+      const linkableCode = extractLinkableCode(content, codeContent, offset, unlinkableFences);
+      if (linkableCode === null) {
         return match;
       }
 
-      // Skip fences we cannot link safely (nested or 4+ backticks)
-      if (unlinkableFences.some(([start, end]) => offset >= start && offset < end)) {
-        return match;
-      }
-
-      // Dedent first (removes common leading whitespace from tabbed content), then trim
-      const trimmedCode = dedent(codeContent).trim();
-
-      // Skip empty or very short examples
-      if (trimmedCode.length < 10) {
-        return match;
-      }
-
-      // Skip examples that are clearly fragments (no meta block, just showing syntax)
-      // But include examples that look complete (have --- or meaningful content)
-      const looksComplete =
-        trimmedCode.includes('---') ||
-        trimmedCode.startsWith('name:') ||
-        trimmedCode.startsWith('# ') ||
-        trimmedCode.includes('inherit ') ||
-        trimmedCode.includes('use ');
-
-      // Also include examples that are just content blocks (instructions)
-      const hasContent = trimmedCode.length > 30;
-
-      if (!looksComplete && !hasContent) {
-        return match;
-      }
-
-      const url = generatePlaygroundUrl(trimmedCode);
+      const url = generatePlaygroundUrl(linkableCode);
       const linkBlock = createLinkBlock(url);
       added++;
 
