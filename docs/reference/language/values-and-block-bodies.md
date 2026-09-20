@@ -44,7 +44,7 @@ one canonical body shape.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEACNmYgJ4BaODgxp4MwXEXsMhSTICMFAGwUADNoC+U1ve7jOWCFkXD7g6SBl-W3gCazACughjUMOGCjBEwYCFQgiQYEPppMNQUXj5+vqx2DqzcLOxEWJ4BgtQh7BB8RiAAcgowFABWcIIATJYA1P45ef7eACo4EF1wmQBuEIxRNMwLcNNdjDgwjADWoRWRAI4h8Fhw2VXD+YWOcAKsYhFiXcA5LGIwksgyAKrTOljUeYVUaKTQAZUYgLQWBkdB8vyirFIMDEgiIaGY1FOMgAuvZrsVIrdAYxXGxnjllD4mjAZpk0YQMX9ppD+HB-DYQDYcQwXNRFPgiKRyG0aPQQHTaBA2PhjFygA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEACNmYgJ4BaODgxp4MwXEXsMhSTICMFAKwUADNoC+U1ve7jOWCFkXD7g6SBl-W3gCazACughjUMOGCjBEwYCFQgiQYEPppMNQUXj5+vqx2DqzcLOxEWJ4BgtQh7BB8RiAAcgowFABWcIIATJYA1P45ef7eACo4EF1wmQBuEIxRNMwLcNNdjDgwjADWoRWRAI4h8Fhw2VXD+YWOcAKsYhFiXcA5LGIwksgyAKrTOljUeYVUaKTQAZUYgLQWBkdB8vyirFIMDEgiIaGY1FOMgAuvZrsVIrdAYxXGxnjllD4mjAZpk0YQMX9ppD+HB-DYQDYcQwXNRFPgiKRyG0aPQQHTaBA2PhjFygA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -80,7 +80,7 @@ Common remediation:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJhlZsIjDFAC0cHM2pZGAVywzBcAJ7sMhSTICMFAGwUADAYC+U1q+7rN2vXGGvB0iAA9NQwAG4QMADuMpLA-gGCYvCM1BBoWBBsFiAASuGRUYK61KHsxThyAObwMgkBLOycWDl1IPWJ+RHRxZqhjFis8HB0hjAlEFhGo3JighxwWHAUHW11rAEurE4gTgC6DM3URvhEpOQwVLQgDGEwtFms+Ja7QA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJhlZsIjDFAC0cHM2pZGAVywzBcAJ7sMhSTICMFAKwUADAYC+U1q+7rN2vXGGvB0iAA9NQwAG4QMADuMpLA-gGCYvCM1BBoWBBsFiAASuGRUYK61KHsxThyAObwMgkBLOycWDl1IPWJ+RHRxZqhjFis8HB0hjAlEFhGo3JighxwWHAUHW11rAEurE4gTgC6DM3URvhEpOQwVLQgDGEwtFms+Ja7QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

@@ -136,7 +136,7 @@ replacement makes intent clearer.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBjUAbhEYwZguAE92GQpJkBGCgDYKABjUBfKa2vc4A1mIzUxcYdcGCO9iKwDmksgyAKpyggBS8FgydNIgoTCCALLMjDgYMgC61lY2rNzMCvLU4on2GI7OrhTeWL5+7qyeQfFhAGoQtVk5IBaZDJxY1Br4RKTkMFS0IAxFtBBs+Pq9QA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBjUAbhEYwZguAE92GQpJkBGCgFYKABjUBfKa2vc4A1mIzUxcYdcGCO9iKwDmksgyAKpyggBS8FgydNIgoTCCALLMjDgYMgC61lY2rNzMCvLU4on2GI7OrhTeWL5+7qyeQfFhAGoQtVk5IBaZDJxY1Br4RKTkMFS0IAxFtBBs+Pq9QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -230,6 +230,12 @@ Hooks that were customized directly in `.codex/config.toml` rather than in
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAI7PMBrOAAJgAHVbDhYZtRLYAtGwUwAJhCyJREqVJgA3TpuFiQaZnCwKs-KAoCucGKZ275WRjhjUtpgKLqWC6Suiwk8qyqWsimaKxoJKZ0JuCy7qYAuq5SWBjUAOYwWHBa4iG6wiyqRKXCnBgARrBRwljU9jDCAL7Z3a49rF0gXRkMRtQAnvhEpOQwVLQgDIa0EGz4AIzDQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## 9. Review Portable Hooks
 

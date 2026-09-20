@@ -189,12 +189,12 @@ Open `.promptscript/project.prs` and customize:
   }
 }
 ```
+
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoBWCgAZdrAL5ix3aZywQsi4Xrkhd-uKCAJrMAK6CGNQwggDuzNQA1hCsAOaCbJGCAEowGNqRaOQQjNgQbBS+ACpaOIJwAoyJslWKaDAAyozUEGhYdDl5BWYAHAMAap4wvgH2TqwuDRisUlFScD5BLFIwssi+EvIAqnAxYGGs2uWsGFCCaqnUpCQp6Q2KsPJ0B34ACtFgGDUQQ4ZjMRIbZZSQQsMjMOCea73bAcaisOBfH7yADqPQ4gg4DQ2YASkSgd2200CEgAumJ5otQdQsIwwlgNqIggBiQQdCBkWD1LA9NKCQBJhIIpMxWXwjB5MmwoIoZiAAPTRABuEBgsXkphAuS1OphzB2ghJwIAjmFbp5vFDBAAjeBYe5PK6MeD2Xw8gDyjs0BVinjqajIWFkwrCMQlqU4QOw8DdzHD5ugXqC8lVhJ0SE2EgkYb6keo0Z+Ozg3V68tY+txU0EF08BJdGOpBZY7Hc+tmQQLgnr+KbrpzGzCCLSiB+EmUgkmOciG1wMQXpdYrCB08Es5qDVeggAMhBHU9qN4LSa4Rv2Bi+wXZwBBJ-IrCo8QACgf1CeaRgAwf2j-nApzMgAlFi-iQb4DKZmqAL5FgCR6vmBZFhGBKltMd4VlWfTXPqHRhKkcYNII8HaAk+78moGowLK7L2P2nYcOwPZQXeEgPjcSoAF4rjgMSUpEKz1ERJGuuRiEiuk1HUMwtH0cSpLOq+QKCCQGApAIKQYI60B2pUHGCP88BArRTowDgGBaqSDpEOQmniEMdTRLCso7NCjBWb+hn9rM7bzA4IAODSDDuGe+BEKQ5AwFQtAgAwtG0Nc+BmMFQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
-
 
 ### 3. Define Agent Capabilities
 
@@ -240,12 +240,12 @@ Add reusable skills, specialist agents, tool integrations, and automation to the
   }
 }
 ```
+
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpcuI2oQ0WCGy1iQAJRVr105nOk4MrAObxhAIxhhmS4RIYag9LHV0MKChmdRgZABVmZiEtZEsbDBlLOmFLAHElNGzckAAhDDgcSwBdcKkWdk4sC2tbDQdqJUYsVng4HLgYRgBXIywATxyOOCx+4VcZQIwIdmXWDC9oCAmKMMlhAF8JI9YJbhJGNABlYOVgkXF9iDg4YYUsagxGPmCtR91hB9XHA0P5miUZjIzHsASwSCQFqlLKxHDBipYKAB6LBJISY56veAUEgAKzgNXCJxOZwwHnYD3CSlUGl+2n2enghmMpnMJRszPsaGGUWESgAjm8ZuSQHVhPxBHAkUxUYo2uoKezApcbtQ7rQlQS3vIgd9ghrYWwOOwWvy7ICcDBpKMlOxhFCwGB5m41jN5t0IHdRTAJRAlEF6bsZfsqRIzjgknwGftlJEIDJsO9xmh4H9ZSomi1QTNjbj5MNBjDdAisIwHdQWgBRKFYAA+AHUxmioxb4YjhGkQGhWGgSOiQNRhqcQDlLBNs7WhnxzYdjrHWNx1P4+GBouok1IlLAKjBc5r9FyTGZWC0AAqFDABDDCFNQNMZxaHmDHyv1S0FvmTsINDMCSQxYMIEqphMwjetM8ysIsNAwJgASfsegQwFgmTYBgkaUscIAHNUDBNNQ4z4EQpDkDAVC0NOIB6nAV74AAjIRQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
-
 
 PromptScript compiles each capability where the configured target supports it. See
 [Agent Platform](features/index.md) and the
@@ -507,12 +507,12 @@ You are a Python developer working on a FastAPI service.
   - "Don't commit .env files"
 }
 ```
+
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMaCAFo4MagDcIjGPLES4AT3YZCs+QEYKAVgoAGPawC+Ysd2mcsELIeH65IHqB4oIAmswAroIY1DDRggAKhrhsglIwGjBQzGjqggDuzNQA1hCsAOaCqUIAYhhwWACCCQCSgmqa2jAU-kGOLqxuLOxEWH4hUBgVERjl8LLIaMk4bAC6-tQR7BB85iBJKeIAzBQWFo4SYNSkMIUlcAtg9QJK6yFS2BgARvUwewnMBrlWIAZQAigAZfquVjcBpTD7UKRwcYSFjpBb+CTyADq1G8cR8uUEODKWBRYCK0SgUEEYC2jC8bDg8joWICAFU1NEjKxGAB6DD5DDeOlUlr8gDyVVy1yZrBZwQkbwGbliDXxjIgzNRgmUAQAImwAORjFgkEiiiicDR06DwfogJyrBieaiGfBEUjkbo0eggTK0bWsfAWJ1AA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
-
 
 For detailed migration guidance, see:
 

@@ -41,6 +41,12 @@ Reference it in your `.prs` file:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwkgE8AtP0GJREqVIAm8RtQhosENsrEgAyjmbUswzXG279bYczDCA7jmzDcEEYqhRrZnhjVWEAXwkwkDCAXQZOLGoZfCJSchgqWhAGADcYWgNWfABGaKA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 That's it. Run `prs compile` and the skill is available in all your AI agents.
 
 ## SKILL.md Frontmatter
@@ -118,6 +124,12 @@ You can also declare references in your `.prs` file using the `references` prope
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwjNUY4IHRlgCu1GAFo1ANwgwA7olESpUgCbxG1CGiwQ2hsSABKMHfumz5ilWuHnGEHB2rHCOxiZqYDBqrIzwhsjhJsIUAPSR0ZxxcKkycgowSqowFCSmSSZpGTHZqSTMpsqwcKXlkiYAuuEAvhLdIN0dDJxY1ACe+ESk5CU09CBa0UFs+ACMA0A" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 The validator checks that referenced files use allowed extensions (PS025) and don't contain sensitive content (PS026).
 
 ## Behavior Properties (in .prs)
@@ -135,6 +147,12 @@ Properties like `userInvocable`, `disableModelInvocation`, `context`, and `agent
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpcuI2oQ0WCGy1iQAZRiMArkawBPeWGb24MGdOZzhS1Q1LHV07T2oASVZldwwAI1gtLGo7GBCpFnYiLAtwZmo+YMldDABzThzhS3LWGGoMKHk0BzRmTyLdYQaoZnUvABVmZiEtZEsAJRgMGUs6KpAAcSU0WfmAIQw4HEsAXRCAXwl9kH2dhgrqJ3wiUnIYKloQBmU6uDNWfABGE6A" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 | Property                 | Type     | Default | Supported by                     |
 | ------------------------ | -------- | ------- | -------------------------------- |
@@ -290,6 +308,12 @@ Pass values in the `.prs` file:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwjnCwBaAOacY1bM2qJREqVKgZWCgK4YlmsSDQBPXG3PadYVSRgB3dXzMXr8LHck6WADcVExhNAE4ABnsAXwkYkBiAXQZOLGpLfCJSchgqWhAGYNoINnwARkSgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Parameter types
 
 | Type      | Description               | Example                                                  |
@@ -347,6 +371,12 @@ Declare that one skill requires another:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwqBHYBaRjhiM+iURKlSAJvEbUIaLBDZqxIAEoBXSTPayA5mY3CAvhOdhLUKHOowAbhAwAO5q4pKaOnB6BkYmwmYAwsxksBzCLDrCfoEhThFSfgCOlhB+cGrIZrZYCkoqZgC6zm6sLiAujQycWNQAnvhEpOQwVLQgDP4wtMas+ACMHUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 PromptScript validates that required skills exist and have no circular dependencies.
 
@@ -457,6 +487,12 @@ Reference in `.prs` with behavior properties:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwliRIQsiURKlSAJvEbUIaLBDaKxIAMLUY2GMIDuMKFAC0cLNQCujLM9OrhAc3nTmsvJwhsoqznAw1ACSrABuzIwYAEawik7OMKEAvhJZIFkAugycTgCe+ESk5DBUtCAMsZFweqz4AIz5QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Review skill with checklist
 
 ```
@@ -493,6 +529,12 @@ Reference in `.prs` with behavior properties:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthw6jABuEGAHdEoiVKkATeI2oQ0WCGxViQAYWZbpchYuGKIuYYxwxGfKBDhYTa9QFc4GGoASVZZZkYMACNYFSxqPxhfKQwoKGZFGA0AFWZmIRVkEwAlGAwNEzphEwBxGTQTAF1fAF8JFpAWxoZOeIBPfCJSchgqWhAGWSC4Q1Z8AEZOoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Data-driven skill with scripts
 

@@ -27,7 +27,7 @@ XML tags, or structured JSON, TOML, and YAML keys.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgozRhigQAXjCkBaGswBWMRlnliJcAJ7sMhWfICMFAGwUADCdYBfMWO5wBrKQxqKThhU0FuHBgMKRhqORAAUVYAcwhWGDj0lMEAZX9A4Lh3CUjo2Pi0rC0WEhIILFD5AGFmOobBAAVmVUZzEoiomLjBKSUAVz4rLAg2BIARCamBGbnu3v6Qb3FBFljZZHkAVTgYQT9qCCNBABVzNBhcxku0YxAAXXCq2WBBMGZqCRsLYmGwAG6cVasFTyQReHZjRiTSHYWasH6CCGXMDmACCYA41FkWGo4zO8I8IA87wYkOo5nwRFI5BgVFoIAYWLgaPwdipQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgozRhigQAXjCkBaGswBWMRlnliJcAJ7sMhWfICMFAKwUADCdYBfMWO5wBrKQxqKThhU0FuHBgMKRhqORAAUVYAcwhWGDj0lMEAZX9A4Lh3CUjo2Pi0rC0WEhIILFD5AGFmOobBAAVmVUZzEoiomLjBKSUAVz4rLAg2BIARCamBGbnu3v6Qb3FBFljZZHkAVTgYQT9qCCNBABVzNBhcxku0YxAAXXCq2WBBMGZqCRsLYmGwAG6cVasFTyQReHZjRiTSHYWasH6CCGXMDmACCYA41FkWGo4zO8I8IA87wYkOo5nwRFI5BgVFoIAYWLgaPwdipQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

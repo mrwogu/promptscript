@@ -53,12 +53,24 @@ A PromptScript file (`.prs`) consists of:
 @override path { ... }  # Atomic replacement of an existing target
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAwsxIlOWOLzhYM1LLwDuEXL24AdVmoACIqb2C8KB3gF9eps+eW8ASjACOAVwjUYAE0S8AsjCkvsGTRCsODDUirwamEoW5nwA8mhYEGwYUO4AkkEhihisjDCa9nAw4ZE4vMgY4ikQlQC6ZnEJSawp6WTMMnBqAS6iigCeuvqGJtF8guyivABGUMyMANZdrBosk4SyegYUxpqSOb7ULuJbI5rOkqGMiWwnwztGezgdWIz2YkPbuyuY1KR3X0eKwA5vZpMdPmcVnAFtAoACoRoMMDRAiHpo5B0FmA5nI0d8NM9mEtIeiViRGGgAMohABuIXxQIiUHswMCjM0C1YzDksBcKNJBKIpHI8EFTLmjBS4s0RA4rBcvFK4pivAAQpKFrwSMwXBBIFKbqxlhpmPTqKFekrsGVTg9THwAIJYIQQRi8ZzkDB5ETsXjMMC8HK8IgQSSBYG8KTUFFYEBGWoMUTUfr4YVkSg0eggc1wZr4ACM8aAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Aliased imports qualify imported agents so repeated local names remain distinct:
 
 ```promptscript
 @use ./frontend-team as frontend
 @use ./backend-team as backend
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9GGpsOrACYBaDqUEY4g8ZM7SAOqz4DhIgEYZGAaw3yYi5YKOmNIAL4BdBpyzUAnviKlyMKrQgDABuMLQQbPgAjI5AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 An imported `reviewer` becomes `frontend.reviewer` or `backend.reviewer`. Unique unaliased names
 remain unchanged. Conflicting unaliased definitions produce a source-aware diagnostic instead of
@@ -75,15 +87,15 @@ Namespaces can be nested through aliased imports:
 @use ./team as frontend
 ```
 
-The inner team's `reviewer` resolves to `frontend.inner.reviewer`. Agent references are rewritten
-with the same qualified name, including `agent` fields and `handoffs` entries, so references do not
-retain the source-local `reviewer` name.
-
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAwsxIlOWOLzhYM1LLwDuEXL24AdVmoACIqb2C8KB3gF9eps+eW8ASjACOAVwjUYAE0S8AsjCkvsGTRCsODDUirwamEoW5nwA8mhYEGwYUO4AkkEhihisjDCa9nAw4ZE4vMgY4ikQlQC6ZnEJSawp6WTMMnBqAS6iigCeuvqGJtF8guyivABGUMyMANZdrBosk4SyegYUxpqSOb7ULuJbI5rOkqGMiWwnwztGezgdWIz2YkPbuyuY1KR3X0eKwA5vZpMdPmcVnAFtAoACoRoMMDRAiHpo5B0FmA5nI0d8NM9mEtIeiViRGGgAMohABuIXxQIiUHswMCjM0C1YzDksBcKNJBKIpHI8EFTLmjBS4u6KyIHFYLl4pXFMV4ACFJQteCRmC4IJApTdWMsNMx6dRQr1ldgyqcHqY+ABBLBCCCMXjOcgYPIidi8ZhgXg5XhECCSQLA3hSagorAgIy1Biiaj9fDCsiUGj0EAWuDNfAARgTQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEHpKrQA6rAAIBXODF4UA9BFasY1ALQCSvDHF6Ll1UaL41mAKxiMsQuKMnTZcjVp1hqbDqwAmIAL4BdBk4sagBPfCJSchhrEAYANxU4CDZ8AEZfIA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
+
+The inner team's `reviewer` resolves to `frontend.inner.reviewer`. Agent references are rewritten
+with the same qualified name, including `agent` fields and `handoffs` entries, so references do not
+retain the source-local `reviewer` name.
 
 Syntax `1.5.0` resolves top-level declarations in source order. Put `@meta`
 first, then imports, local blocks, and modifications in the order they should
@@ -2020,7 +2032,7 @@ project: {{projectName}}
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAoqwBuEamxKcsvIRmoQMAI1i8AtLzBiSvOAE84HLdl6ZaMXlggSAOqwxoIAVWpREvACTAAggAUAkgH0HACUAGUQVHCwsNDhEAHo4uwgKIlJyGAoWEgBfGxs+ABUYMihsMxk5RWU1DWYtAAEIVhwYOSkTUjheI2p4ZighMwtrVhpmACsYRixXYGAxyemAOVIYbOyQbIBdBklqHXxUkoyaehBB2gg2fABGTaA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAoqwBuEamxKcsvIRmoQMAI1i8AtLzBiSvOAE84HLdl6ZaMXlggSAOqwxoIAVWpREvKyAAkwAIIAFAJIA+g4ASgAyiCo4WFhocIgA9Al2EBREpOQwFCwkAL7uNjZ8ACowZFDYZjJyispqGsxaAAIQrDgwclImpHC8RtTwzFBCZhbWrDTMAFYwjFiuwMCTM3MAcqQwubkguQC6DJLUOvjp5Vk09CAjtBBs+ACMO0A" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -2236,13 +2248,7 @@ Multiline strings (`"""..."""`) cannot be used as "loose" content inside an obje
     types: [flowchart sequence]
     """
     Example:
-    ```
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPGCIGAObVScRJJly5YZtRLYNUkAFkY+jBEHGt2rAE808DcjBRmAd0Y4RWcXBgARwBXTkYYAF1bORsQG1ltAFFiMlhEEABfCIZOLGp7fCJSchgqWhAGADdzOAg2fABGTKA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-mermaid
+    ```mermaid
     flowchart LR
       A[Input] --> B[Process] --> C[Output]
     ```
@@ -2265,13 +2271,7 @@ Expecting token of type --> RBrace <-- but found --> '"""...
     format: "Mermaid"
     types: [flowchart sequence]
     example: """
-      ```
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPGCIGAObVScRJJly5YZtRLYNUkAFkY+jBEHGt2rAE808DcjBRmAd0Y4RWcXBgARwBXTkYYAF1bOSJSchgjEBsQEABfCIZOLGp7fFiyShp6EAA3czgINnwARjSgA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-mermaid
+      ```mermaid
       flowchart LR
         A[Input] --> B[Process] --> C[Output]
       ```
@@ -2338,6 +2338,12 @@ which keeps single-variable fields readable:
   regions: [${PRIMARY_REGION:-us-east-1}, "eu-west-1"]
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgArqwCOC5hykBaTgDdNOjLXliJcAJ7sMhWfICMFAKwUADMdYBfMWO4t2RLMImgroQ1Gx87LIAJMAAcgDyACIAogD6ybEAaoiaUjA6MFDMaBFYnuKC1DAA5hBscLLIMQAKAEoAkgCyAIKtAJqprckA4u3xsTkKcNoYcFiatu50cgQKmgDu8PO28gC6Yu4g7rsMnFjUZvhEpOQwVLQgDAW0daz4tkdAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 The value is always a string. Quote the reference when the field mixes it with
 other text.
@@ -2580,7 +2586,7 @@ This complete example exercises root and nested replacement shapes:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEMwBuMatXEwAtHBwY08GYLgBPdhkKSZARgoA2CgAZdAXymsn3FewhZ9w6SBkyA8lBiomKcWB76fr4ggo6s3NTwWMqM4Wxw3qo+gcGJcMkQqRBsDi75GKxiGNRiGcBOgoIc+RCsAOaSyDIAqnAwggBSSTIAug2CLKyQHd6cGABGsBJN1ACu-YkF8JJmsU5xLvKKyqEhYRHeMgByMADuZ+6epfFHSiqCeQVF6d5dIFfMQSrVhwDBgfqMDD5OCjPYvBRvU7lSrVWrCcZRGQAJRgAEdVhBEsFOG1WjBFK02h9VrA4BRMb5WI1muF2p0en1BAA1DzDEBjJkTNjTSQiOaLGDLZLrD78ZTbQS7OKNLIyAAizEYqz47EEYAw0FWeT8rDi3FeJ36yKqNTpk2mFHFS28+qgnLNFve1tRduFEDaFE28rqggAzLEQPYRgwwtR9PgiKRyDAqLQQAwEXBiqx8GZI0A" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEMwBuMatXEwAtHBwY08GYLgBPdhkKSZARgoBWCgAZdAXymsn3FewhZ9w6SBkyA8lBiomKcWB76fr4ggo6s3NTwWMqM4Wxw3qo+gcGJcMkQqRBsDi75GKxiGNRiGcBOgoIc+RCsAOaSyDIAqnAwggBSSTIAug2CLKyQHd6cGABGsBJN1ACu-YkF8JJmsU5xLvKKyqEhYRHeMgByMADuZ+6epfFHSiqCeQVF6d5dIFfMQSrVhwDBgfqMDD5OCjPYvBRvU7lSrVWrCcZRGQAJRgAEdVhBEsFOG1WjBFK02h9VrA4BRMb5WI1muF2p0en1BAA1DzDEBjJkTNjTSQiOaLGDLZLrD78ZTbQS7OKNLIyAAizEYqz47EEYAw0FWeT8rDi3FeJ36yKqNTpk2mFHFS28+qgnLNFve1tRduFEDaFE28rqggAzLEQPYRgwwtR9PgiKRyDAqLQQAwEXBiqx8GZI0A" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

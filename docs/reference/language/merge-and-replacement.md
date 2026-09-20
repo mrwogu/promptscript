@@ -67,7 +67,7 @@ does not support every nested target or skill property.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdENRjkMjGH3YzBcAJ7sMhSTICMFAGwUADGoC+U1te5wBrMRmpi4w64MEd7EVgHNJZBkAVTgYQQApeCwZOmkQUPCAWWZGHAwZAF0PQRYANxhqDD8YSRESXwgSAFcSSQAOU0E5NGZqLD0QDkIYkEErVgHbZgLqanFw+wxHZ1cKbyxfP3dWTyCEsMEANQgFrOsh1m4RwvGxSYcnFzgKfMLimAoK1iralc8ATgBWA5ALTIYnCw1A0+CIpHIjxo9BAozgEDY+H0fyAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdENRjkMjGH3YzBcAJ7sMhSTICMFAKwUADGoC+U1te5wBrMRmpi4w64MEd7EVgHNJZBkAVTgYQQApeCwZOmkQUPCAWWZGHAwZAF0PQRYANxhqDD8YSRESXwgSAFcSSQAOU0E5NGZqLD0QDkIYkEErVgHbZgLqanFw+wxHZ1cKbyxfP3dWTyCEsMEANQgFrOsh1m4RwvGxSYcnFzgKfMLimAoK1iralc8ATiMDkAtMhk4WGoGnwRFI5EeNHoIFGcAgbHw+l+QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
