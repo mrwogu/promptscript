@@ -9,11 +9,15 @@
  */
 
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
-import { join, relative } from 'path';
+import { join, relative, sep } from 'path';
 import LZString from 'lz-string';
 
 const PLAYGROUND_BASE_URL = 'https://getpromptscript.dev/playground/';
 const PLAYGROUND_DEV_URL = 'https://getpromptscript.dev/playground-dev/';
+
+// Top-level docs directories excluded from the site build (mkdocs exclude_docs).
+// Regenerating badges for unpublished pages is wasted work, so they are skipped.
+const EXCLUDED_DOC_DIRS = new Set(['design', 'plans', 'superpowers']);
 
 // Use production playground by default
 const PLAYGROUND_URL = PLAYGROUND_BASE_URL;
@@ -134,18 +138,53 @@ function generatePlaygroundUrl(code: string, filename = 'example.prs'): string {
  * Create the markdown link block.
  */
 function createLinkBlock(url: string): string {
-  // Using a styled link that works in both GitHub and MkDocs
+  // Using a styled link that works in both GitHub and MkDocs.
+  // Blank line before the block and no trailing newline keep the output
+  // Prettier-stable, so `format:check` and `playground:links --check` agree.
   return `
+
 ${LINK_MARKER_START}
 <a href="${url}" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
-${LINK_MARKER_END}
-`;
+${LINK_MARKER_END}`;
 }
 
 function shouldSkipPlaygroundLink(content: string, offset: number): boolean {
   return content.slice(0, offset).trimEnd().endsWith(SKIP_LINK_MARKER);
+}
+
+/**
+ * Find ```prs / ```promptscript fence lines that must not get playground links:
+ * - fences nested inside another fence (example content, not runnable code)
+ * - fences of four or more backticks, where the code block regex would stop at
+ *   the first inner ``` and corrupt the example
+ * Returns the character range of each such fence's opening line.
+ */
+function findUnlinkableFenceLines(content: string): Array<[number, number]> {
+  const ranges: Array<[number, number]> = [];
+  const stack: number[] = []; // lengths of currently open fences, in backticks
+  let offset = 0;
+
+  for (const line of content.split('\n')) {
+    const fence = line.match(/^(`{3,})(.*)$/);
+    if (fence) {
+      const length = fence[1].length;
+      const [lang] = fence[2].trim().split(/\s+/);
+      const isPrs = lang === 'prs' || lang === 'promptscript';
+      if (stack.length > 0 && length >= stack[stack.length - 1]) {
+        stack.pop();
+      } else {
+        stack.push(length);
+        if (isPrs && (stack.length > 1 || length !== 3)) {
+          ranges.push([offset, offset + line.length]);
+        }
+      }
+    }
+    offset += line.length + 1;
+  }
+
+  return ranges;
 }
 
 /**
@@ -172,12 +211,18 @@ function processMarkdownFile(filePath: string, mode: 'add' | 'check' | 'clean'):
 
   // Work with content without existing links
   content = withoutLinks;
+  const unlinkableFences = findUnlinkableFenceLines(content);
 
   // Find all PRS code blocks and add links after them
   const newContent = content.replace(
     CODE_BLOCK_REGEX,
     (match, codeContent: string, offset: number) => {
       if (shouldSkipPlaygroundLink(content, offset)) {
+        return match;
+      }
+
+      // Skip fences we cannot link safely (nested or 4+ backticks)
+      if (unlinkableFences.some(([start, end]) => offset >= start && offset < end)) {
         return match;
       }
 
@@ -219,9 +264,12 @@ function processMarkdownFile(filePath: string, mode: 'add' | 'check' | 'clean'):
       const diff = Math.abs(added - existingLinkCount);
       if (existingLinkCount === 0 && added > 0) {
         return { file: filePath, added, removed: 0, updated: 0 };
-      } else if (added !== existingLinkCount) {
+      }
+      if (added !== existingLinkCount) {
         return { file: filePath, added: 0, removed: 0, updated: diff };
       }
+      // Equal link counts but different content: stale URLs after example edits.
+      return { file: filePath, added: 0, removed: 0, updated: added };
     }
     return { file: filePath, added: 0, removed: 0, updated: 0 };
   }
@@ -274,9 +322,14 @@ function main(): void {
   // Find all markdown files in docs/ and README.md
   const files: string[] = [];
 
-  // Add docs directory
+  // Add docs directory, skipping top-level dirs excluded from the site build
   const docsDir = join(rootDir, 'docs');
-  files.push(...findMarkdownFiles(docsDir));
+  files.push(
+    ...findMarkdownFiles(docsDir).filter((file) => {
+      const [topLevel] = relative(docsDir, file).split(sep);
+      return !EXCLUDED_DOC_DIRS.has(topLevel);
+    })
+  );
 
   // Add root README
   const readmePath = join(rootDir, 'README.md');
