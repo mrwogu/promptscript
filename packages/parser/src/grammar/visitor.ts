@@ -1218,11 +1218,39 @@ class PromptScriptVisitor extends BaseVisitor {
   }
 
   private parseTextBlock(token: IToken): string {
-    let value = token.image.slice(3, -3).trim();
+    let value = this.normalizeTextBlockIndent(token.image.slice(3, -3));
     if (this.interpolateEnv) {
       value = this.interpolateEnvVars(value);
     }
     return value;
+  }
+
+  /**
+   * Strip the common leading whitespace shared by the non-empty lines of a
+   * text block, then trim. A plain trim() would leave the first line at
+   * column 0 while every following line keeps its source indentation, so
+   * markdown consumers read the block body indent as list nesting. Stripping
+   * the common indent keeps relative (nested) indentation intact.
+   */
+  private normalizeTextBlockIndent(raw: string): string {
+    let minIndent = Infinity;
+    for (const line of raw.split('\n')) {
+      if (line.trim().length === 0) continue;
+      const match = /^([ \t]*)/.exec(line);
+      const indent = match?.[1]?.length ?? 0;
+      if (indent < minIndent) {
+        minIndent = indent;
+        if (minIndent === 0) break;
+      }
+    }
+    if (minIndent === Infinity || minIndent === 0) {
+      return raw.trim();
+    }
+    return raw
+      .split('\n')
+      .map((line) => line.slice(minIndent))
+      .join('\n')
+      .trim();
   }
 
   /**

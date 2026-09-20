@@ -212,6 +212,26 @@ describe('visitor coverage - edge cases', () => {
       expect(identity?.content.type).toBe('TextContent');
     });
 
+    it('should strip the common block indent and keep nested indentation', () => {
+      const source = `
+        @meta { id: "test" }
+        @context {
+          """
+          - Parent
+            - Child
+          """
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const context = result.ast?.blocks.find((b) => b.name === 'context');
+      expect(context?.content.type).toBe('TextContent');
+      if (context?.content.type === 'TextContent') {
+        expect(context.content.value).toBe('- Parent\n  - Child');
+      }
+    });
+
     it('should handle empty text block', () => {
       const source = `
         @meta { id: "test" }
