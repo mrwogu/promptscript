@@ -71,6 +71,20 @@ async function readBoundedRegularFile(
   }
 }
 
+async function readOptionalBoundedRegularFile(
+  filePath: string,
+  description: string
+): Promise<Buffer> {
+  try {
+    return await readBoundedRegularFile(filePath, MAX_GIT_CONFIG_BYTES, description);
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
+      return Buffer.alloc(0);
+    }
+    throw error;
+  }
+}
+
 async function resolveSafeRepositorySymlink(
   symlinkPath: string,
   repositoryRoot: string,
@@ -249,16 +263,35 @@ export async function verifyGitRepositoryCheckout(
     'Vendor Git config'
   );
   const localConfig = localConfigContent.toString('utf-8');
+  const usesWorktreeConfig = /\bworktreeconfig\s*=\s*true\b/i.test(localConfig);
   // Partial clones (promisor remotes) are rejected for vendored repositories,
-  // which must stay self-contained. Registry caches may use partial clones
-  // (see issue #455), so `allowPartial` relaxes only the partial-clone checks.
+  // which must stay self-contained. Registry caches clone with
+  // --filter=blob:none --sparse (see issue #455), and `git clone --sparse`
+  // enables the worktreeConfig extension, so `allowPartial` relaxes the
+  // partial-clone and worktree-config checks. The worktree config file stays
+  // inside the Git directory, but its include directives could still pull in
+  // external configuration, so those are rejected even with `allowPartial`.
+  const externalGitSourcesError = (): string =>
+    `External or partial Git object sources are not allowed: ${gitDir}. ` +
+    (options.allowPartial
+      ? `Delete the checkout directory ${directory} and re-run this command to re-clone it.`
+      : `Run 'prs vendor sync' to re-vendor the dependency, then re-run this command.`);
   if (
     /^[ \t]*\[(?:include|includeif)\b/im.test(localConfig) ||
-    /\bworktreeconfig\s*=\s*true\b/i.test(localConfig) ||
     (!options.allowPartial &&
-      (/\bpromisor\s*=\s*true\b/i.test(localConfig) || /\bpartialclone/i.test(localConfig)))
+      (usesWorktreeConfig ||
+        /\bpromisor\s*=\s*true\b/i.test(localConfig) ||
+        /\bpartialclone/i.test(localConfig)))
   ) {
-    throw new Error(`External or partial Git object sources are not allowed: ${gitDir}`);
+    throw new Error(externalGitSourcesError());
+  }
+  if (options.allowPartial && usesWorktreeConfig) {
+    const worktreeConfig = (
+      await readOptionalBoundedRegularFile(join(gitDir, 'config.worktree'), 'Git worktree config')
+    ).toString('utf-8');
+    if (/^[ \t]*\[(?:include|includeif)\b/im.test(worktreeConfig)) {
+      throw new Error(externalGitSourcesError());
+    }
   }
   await rejectMetadataPath('commondir', 'Git common directories are not allowed');
   await rejectMetadataPath(
