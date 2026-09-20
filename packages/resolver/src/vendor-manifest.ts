@@ -85,6 +85,32 @@ async function readOptionalBoundedRegularFile(
   }
 }
 
+async function readGitBooleanConfig(
+  filePath: string,
+  key: string,
+  description: string
+): Promise<boolean> {
+  try {
+    const result = await execFileAsync(
+      'git',
+      ['config', '--no-includes', '--file', filePath, '--bool', '--get', key],
+      {
+        env: {
+          PATH: process.env['PATH'],
+          GIT_CONFIG_GLOBAL: NULL_DEVICE,
+          GIT_CONFIG_NOSYSTEM: '1',
+        },
+      }
+    );
+    return result.stdout.trim() === 'true';
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 1) {
+      return false;
+    }
+    throw new Error(`Invalid ${description}: ${filePath}`, { cause: error });
+  }
+}
+
 async function resolveSafeRepositorySymlink(
   symlinkPath: string,
   repositoryRoot: string,
@@ -263,7 +289,6 @@ export async function verifyGitRepositoryCheckout(
     'Vendor Git config'
   );
   const localConfig = localConfigContent.toString('utf-8');
-  const usesWorktreeConfig = /\bworktreeconfig\s*=\s*true\b/i.test(localConfig);
   // Partial clones (promisor remotes) are rejected for vendored repositories,
   // which must stay self-contained. Registry caches clone with
   // --filter=blob:none --sparse (see issue #455), and `git clone --sparse`
@@ -276,12 +301,19 @@ export async function verifyGitRepositoryCheckout(
     (options.allowPartial
       ? `Delete the checkout directory ${directory} and re-run this command to re-clone it.`
       : `Run 'prs vendor sync' to re-vendor the dependency, then re-run this command.`);
+  if (/^[ \t]*\[(?:include|includeif)\b/im.test(localConfig)) {
+    throw new Error(externalGitSourcesError());
+  }
+  const usesWorktreeConfig = await readGitBooleanConfig(
+    join(gitDir, 'config'),
+    'extensions.worktreeConfig',
+    'Git worktree config extension'
+  );
   if (
-    /^[ \t]*\[(?:include|includeif)\b/im.test(localConfig) ||
-    (!options.allowPartial &&
-      (usesWorktreeConfig ||
-        /\bpromisor\s*=\s*true\b/i.test(localConfig) ||
-        /\bpartialclone/i.test(localConfig)))
+    !options.allowPartial &&
+    (usesWorktreeConfig ||
+      /\bpromisor\s*=\s*true\b/i.test(localConfig) ||
+      /\bpartialclone/i.test(localConfig))
   ) {
     throw new Error(externalGitSourcesError());
   }
