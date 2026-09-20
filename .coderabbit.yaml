@@ -1,0 +1,11 @@
+# CodeRabbit review configuration.
+# Mirrors the settings previously maintained in the CodeRabbit organization UI
+# (profile: chill, snapshot files ignored) and enables the request-changes
+# workflow so unresolved review comments block merging via the required
+# "CodeRabbit" branch rule.
+language: en-US
+reviews:
+  profile: chill
+  request_changes_workflow: true
+  path_filters:
+    - '!**/*.snap'

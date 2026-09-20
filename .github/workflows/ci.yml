@@ -717,3 +717,44 @@ jobs:
           docker run --rm -v "$(pwd):/workspace" promptscript:ci-test compile
           test -f .github/copilot-instructions.md
           echo "Docker smoke test passed"
+
+  # SonarCloud posts its own gate check, but the default quality gate treats
+  # new code smells (e.g. S8786 regex findings) as non-blocking. This job
+  # enforces the stricter project policy: the PR must carry zero open
+  # SonarCloud issues before it can merge.
+  sonar-issues:
+    name: Sonar Issues
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Wait for SonarCloud analysis of this commit
+        env:
+          PR_KEY: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          deadline=$((SECONDS + 900))
+          while [ $SECONDS -lt $deadline ]; do
+            sha=$(curl -fsS "https://sonarcloud.io/api/project_pull_requests/list?project=mrwogu_promptscript" \
+              | jq -r --arg key "$PR_KEY" '.pullRequests[]? | select(.key == $key) | .commit.sha' || echo '')
+            if [ "$sha" = "$HEAD_SHA" ]; then
+              echo "SonarCloud analyzed commit $HEAD_SHA"
+              exit 0
+            fi
+            echo "waiting for SonarCloud analysis (last analyzed: ${sha:-none})"
+            sleep 15
+          done
+          echo "::error::SonarCloud did not analyze commit $HEAD_SHA within 15 minutes"
+          exit 1
+
+      - name: Fail on any open SonarCloud issue
+        env:
+          PR_KEY: ${{ github.event.pull_request.number }}
+        run: |
+          report=$(curl -fsS "https://sonarcloud.io/api/issues/search?componentKeys=mrwogu_promptscript&pullRequest=${PR_KEY}&resolved=false&ps=500")
+          total=$(printf '%s' "$report" | jq -r '.total')
+          if [ "$total" != "0" ]; then
+            printf '%s' "$report" | jq -r '.issues[] | "- \(.severity) \(.rule) at \(.component):\(.line // 0) - \(.message)"'
+            echo "::error::SonarCloud reports ${total} open issue(s) on this pull request. Fix them (or resolve them in SonarCloud) before merging."
+            exit 1
+          fi
+          echo "SonarCloud reports zero open issues on this pull request"
