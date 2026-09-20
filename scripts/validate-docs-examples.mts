@@ -511,13 +511,15 @@ function validateCodeBlock(block: CodeBlock): ValidationError[] {
 
 /**
  * Get the snapshot directory path for a code block.
- * Uses meta.id + line number to ensure uniqueness even when the same ID appears multiple times.
+ * Keys snapshots by content, not position: meta.id + content hash for id blocks,
+ * content hash for blocks without a meta.id. Unrelated line edits around a block
+ * stop forcing snapshot renames, and the hash still distinguishes blocks
+ * that share the same meta.id in one file.
  */
 function getSnapshotDir(block: CodeBlock, rootDir: string): string {
   const relFile = relative(rootDir, block.file);
-  const baseId = block.metaId ?? `_hash_${hashCode(block.content)}`;
-  // Include line number to distinguish blocks with same ID in same file
-  const identifier = `${baseId}_L${block.line}`;
+  const contentHash = hashCode(block.content);
+  const identifier = block.metaId ? `${block.metaId}_H${contentHash}` : `_hash_${contentHash}`;
   return join(rootDir, SNAPSHOTS_DIR, relFile, identifier);
 }
 
