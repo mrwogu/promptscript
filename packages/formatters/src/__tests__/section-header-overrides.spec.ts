@@ -184,9 +184,8 @@ function createContextProgram(
 function createHeadingContextProgram(): Program {
   // Mirrors the parser output for a 1.5.0 @context whose text opens with a
   // "## Tech Stack" heading: the heading is promoted to a legacy
-  // PresentationEntry and the remainder keeps its block-body indentation.
-  const text =
-    '\n  - React 18 with TypeScript\n  - Vite\n\n  ## Architecture\n\n  - Feature folders';
+  // PresentationEntry and the remainder arrives dedented by the parser.
+  const text = '\n- React 18 with TypeScript\n- Vite\n\n## Architecture\n\n- Feature folders';
   return {
     type: 'Program',
     meta: {
@@ -234,6 +233,42 @@ function createPlainTextContextProgram(): Program {
       loc,
     },
     blocks: [
+      {
+        type: 'Block',
+        name: 'context',
+        content: { type: 'TextContent', value: text, loc },
+        canonicalBody: createBlockBody([{ type: 'TextEntry', text, loc }], loc),
+        loc,
+      },
+    ],
+    uses: [],
+    extends: [],
+    loc,
+  };
+}
+
+function createNestedListContextProgram(): Program {
+  // Authored nested lists survive the parser's common-indent strip, so the
+  // context section must keep the relative child indentation.
+  const text = '- Parent\n  - Child';
+  return {
+    type: 'Program',
+    meta: {
+      type: 'MetaBlock',
+      fields: { id: 'headers', syntax: '1.0.0' },
+      loc,
+    },
+    blocks: [
+      {
+        type: 'Block',
+        name: 'identity',
+        content: { type: 'TextContent', value: 'You are a developer.', loc },
+        canonicalBody: createBlockBody(
+          [{ type: 'TextEntry', text: 'You are a developer.', loc }],
+          loc
+        ),
+        loc,
+      },
       {
         type: 'Block',
         name: 'context',
@@ -347,4 +382,16 @@ describe('section header overrides across formatters', () => {
       expect(output.content).toContain('Context');
     }
   );
+
+  // github and antigravity deliberately strip all leading whitespace in the
+  // context section, so they flatten nested lists by design and are excluded.
+  it.each([
+    ['claude', new ClaudeFormatter()],
+    ['factory', new FactoryFormatter()],
+    ['cursor', new CursorFormatter()],
+  ] as const)('should preserve nested list indentation in context for %s', (_name, formatter) => {
+    const output = formatter.format(createNestedListContextProgram(), { version: 'simple' });
+
+    expect(output.content).toContain('- Parent\n  - Child');
+  });
 });

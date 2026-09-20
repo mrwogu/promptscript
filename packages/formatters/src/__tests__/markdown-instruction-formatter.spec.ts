@@ -275,7 +275,7 @@ describe('MarkdownInstructionFormatter', () => {
       expect(result.content).toContain('### Key Libraries');
     });
 
-    it('should dedent indented @context text so list items stay flat', () => {
+    it('should render @context text so list items stay flat', () => {
       const ast: Program = {
         ...createMinimalProgram(),
         blocks: [
@@ -296,8 +296,9 @@ describe('MarkdownInstructionFormatter', () => {
               type: 'MixedContent',
               text: {
                 type: 'TextContent',
-                // Triple-quoted text keeps authoring indentation after the trimmed first line
-                value: '\n  ## Key Libraries\n\n  - Parser: Chevrotain\n  - Testing: Vitest\n  ',
+                // The parser strips the common block indent, so the text
+                // arrives at the formatter without authoring indentation
+                value: '## Key Libraries\n\n- Parser: Chevrotain\n- Testing: Vitest',
                 loc: createLoc(),
               },
               properties: { languages: ['TypeScript'] },
