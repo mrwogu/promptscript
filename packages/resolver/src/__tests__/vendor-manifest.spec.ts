@@ -804,6 +804,44 @@ fi
     );
   });
 
+  it('accepts worktree config from sparse registry cache clones with allowPartial', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config'),
+      '\n[extensions]\n\tworktreeConfig = true\n',
+      { flag: 'a' }
+    );
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config.worktree'),
+      '[core]\n\tsparseCheckout = true\n\tsparseCheckoutCone = true\n'
+    );
+
+    // `git clone --sparse` sets worktreeConfig and stores the sparseCheckout
+    // flags in config.worktree, so registry cache verification must accept both.
+    await expect(verifyWithAllowPartial(repositoryDir, commit)).resolves.toBeUndefined();
+  });
+
+  it('rejects external includes in worktree config even with allowPartial', async () => {
+    const repositoryDir = await createTempDirectory();
+    await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config'),
+      '\n[extensions]\n\tworktreeConfig = true\n',
+      { flag: 'a' }
+    );
+    await writeFile(
+      join(repositoryDir, VENDOR_GIT_DIR, 'config.worktree'),
+      '[include]\n\tpath = /etc/gitconfig\n'
+    );
+
+    await expect(verifyWithAllowPartial(repositoryDir, commit)).rejects.toThrow(
+      'External or partial Git object sources'
+    );
+  });
+
   it('accepts sparse checkouts missing tracked files with allowPartial', async () => {
     const repositoryDir = await createTempDirectory();
     await writeFile(join(repositoryDir, 'base.prs'), '@meta { id: "base" }');
