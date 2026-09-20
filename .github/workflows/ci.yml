@@ -85,6 +85,14 @@ jobs:
         if: matrix.node-version == '25.x'
         run: pnpm docs:validate:check
 
+      - name: Playground Links Drift Check
+        if: matrix.node-version == '25.x'
+        run: |
+          if ! pnpm playground:links --check; then
+            echo "::error::Playground links are out of date. Run 'pnpm playground:links' locally and commit the changes."
+            exit 1
+          fi
+
       - name: Documentation Highlighting Check
         if: matrix.node-version == '25.x'
         run: |
