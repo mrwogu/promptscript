@@ -35,6 +35,12 @@ Define examples at the top level using `@examples`:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAmCgAZdrAL5ix3IqXLxhewdU6kYygBuGNQQGABGsLKi4hKSrGgArlimTGxwWIKEggC8gmb2cYLMyUkpcmmsGZIcJADCJey5+YWCTo4gDgC6DJxY1Ir4bmSUNPQggTC0EGz4Zp1AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Each entry is a named example with `input` and `output` fields (both required).
 
 ## Example Properties
@@ -70,6 +76,12 @@ Use the optional `description` field to label what the example demonstrates:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFNmJEhCwBaOFgCeseWIlxN7DIVnyAjBQBMFAAy7WAXzFjuRUuXjC9gsDGyqWJRVZUXEJQSl4RmoINCwINlMQADE-LABXahhBQOUsQQB3FRxBOBY0GHtwyVY0dKwkgEEpSKlBdLgYakEMepxOeMZsBPEi3EEAKQB1ABVBLGYAa044KvDmerqGuXA0gApe3ABKWQwWydnVACMMTraOrp6+gYgh+LY1p1ZvSEIAxTyIW8EkiZRicRGSQAQukAOY+CCEHIAlRrCQQWr1JLJREwNqsdJQKCCNDMDEcboYkkYTR8dilLoAN1elRAwMEGywWySvz2mFpAzgJ0EWTgzCgjOyBKJJLJ7EeVMYOAw1Fh2WVrCksGonzEDhADgAugwBtRNPg3GRKDR6CBJbQRvgzAagA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Multi-Line Content
 
 Use triple-quoted strings (`"""`) for multi-line inputs and outputs:
@@ -98,6 +110,12 @@ Use triple-quoted strings (`"""`) for multi-line inputs and outputs:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhqMMBkZZm1CKwDmAWiKly8eWIlwAnuwyFZ8gIwUATBQAMx1gF8xY7vrKw4wiaCRFjUKlg6YACurKoQbLKi4hKCUvCMGmhY8aw2IACihKHhkqxQmjCCUMxaEIylaoJCrKQwUoLRsdlsbimlaFFYecYgQX0srHBYgopwUVDTALyCUXAwtGN9ghSQC+sAFFGCiwB8KxThEABulQBkt+fUzLDHi8sA5BhSJJrvAJSbPoUEgYNCHY5nKIUGAg6B-ADcmxGvRSzEGAyGclG2MBHRicTYgi0-AAgnEbiTvpp8rCoHBDmtaLIAKqM5AAXT+simGm0HMCyS2M34UWo4lW6zguKBuw41HBp3Olxugnuj2elTeHy+P1Y-2lKWBoIVkOhtIRuM8gqxyOSVvcIHc7IYnFCZnwvkMVFoIAYN1oOXwtkdQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Multi-line strings preserve formatting and are ideal for code examples.
 
@@ -135,6 +153,12 @@ You can attach examples directly to a skill definition. This keeps the examples 
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgazAFYxGWALRwA1tChx5YiXACe7DIVnyAjBQBMFAAwHWAXzFju23XGGHBLEhIILFlRcQlBKXhGagg0LAg2SxAAYWoYbBhBAHNg-2ZA4J8wZigoZgB3CFZs-NYAN04EtgwoQRLqEmxnCMEiUnJ4UL9egCMMOAhGYfDeiWq0AFcQuRAAQSkoqUiMai1BEmYowSxmbOzYE+ZBOH4Emp9MbJgeuYlmZaWV+TAMrAAKW5Ye7ZOAASlkGE2Oz2ByOWVO51gr16blYIwiVVw6lG6QwOhq6kYOAwNRgMzeEiicBicWarGSACE8QTasTSc9JOI1gAFACSKLmC2WyQASpxSDBtgB6Ra3Wh9VhSNDMapYK6CaUYRgsRbsfQgDG9D5YL7JX7Yf4YNAQMEAQlk6VYks1cpgCs4ytV7A1Wp1H31gokaNRGJY7CayQMhtmEQA6jhOP48SD8oUsHBEEbBDZBABVW51RrsRLOtoBILqjpdFZYYxoGCAlgNiGRaKxeKl7P2QQAaRgMDQJ0TN0WoxUakEUGqWT1UWoggA7LZ-CTqNqOLRswBmCj5wsQMju7AQRpwo7JKHbC1YRbpeSCVjMdXyK9S9p-O8vGO9aOvNEuCALgALoME01DGPg-RkJQND0CAjS0KW+BWEBQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Skill-level examples appear in the skill's output file alongside its instructions.
 
@@ -185,6 +209,12 @@ You can define as many named examples as needed. Names must be unique within a b
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFNmUmAFpqMAG4QYAd2VFS5ePLES4AT3YZCs+QEYKAJgoAGY6wC+Ysd31lYcYRNBEgg4OAhWAHM9ampmamUcDFYpKAjI2VFxCUElOEZqCDQsCDYbEABBKG0MMwDtagw0QQxzVkZBRgwoKACIwSxqMwB6LqxGHDccyVY0AFcscuMQIOnWiw6wOfaStkEwfgmAVTgYagAKaVk4QfSASkDs6YkWVhvBNQCAXhaaiCx9occOcAAbDJoQYZzU60YYAEmA0ncILuAG5Vs81Fg5tRxJ8KAArOBsc5ojESTxPOQrGkY5gLeaLanLcktNqbbaMXbiA7jHAnM6XGSCG6FKIPLLPHKDMyPKXTV7vT6CH4YP4A3kTUHgtCQ6FnODwxFSZFkqlSiBgQTnACE+OYAGsHrg4tpBKwdIIAKKxeKggASABVAwAFQQI-E3bDQ03o82Y-g4vHwQnE1ikuPywTuTrYCbWs7UCWs6ZQZiRSJnCiFv0Ack1-Jh+ww0BgUlrdGEkikncL2bNWYkLuYbsLmfllKlk5yLJW2UpQRoMAOCUVTMlOTyBSK3PKAs6bHeYHignU3Tm8AGSQBHvUZ06SSiMCmOQijPKsABAFkKgANAD6ABKXqBoBACSXoAMoqoIADML4SPSWDvtSa6CD+AHAaBEHQT88FzhSXjZEQ5AQIw-yqImuLKFgZhoDAmQYluhTFKUrDlBUUhSB8VHiLR9EBFgzCCPMABGaQcjsbFwAhMwofIWxSXsGBcecGCyKwcwkKJZydqJGlaTpRZdliSYtIIADUgiiai2ayUh8ngJy3ItKp6nuoZunWQZ2lnHcPlGSZvHmVZNl2QRdkeCA7gALoMJwMr4L4hhULQIAMHetBsfgtjRUAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## How It Compiles
 
 The `@examples` block compiles to a dedicated **Examples** section in the output instruction file.
@@ -205,6 +235,12 @@ Given this source:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhWpCKwDmAWiKly8eWIlwAnuwyFZ8gIwUATBQAMu1gF8xY7prKw4wvYMakYUGp+cDCyouISglLwjNQQaFgQbGYgAGoYcRgARrCCiiTKKr5sAG6ciWwOkZKsaACuWCksrHBYgnUh1AD6+TCCALyCAOQAglAQjDBDVZHMDfWNckxsre2dAHL+A8NjE1Mzzk4gjgC6DOXUBvju2lS0IAxltEms+ObHQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 The compiled output includes:
 
@@ -238,6 +274,12 @@ const userName = 'Alice'
   syntax: "1.2.0"    # Required for @examples
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAmCgAZ5EiQGJBAJRgBHAK4RqMKYLBmakFuIlJyeDEAXxAogF0GTixqRXwwskoaehAANxhaCDZ8M1igA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 If your file uses `syntax: "1.0.0"` or `"1.1.0"`, run:
 

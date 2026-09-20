@@ -423,6 +423,12 @@ Once aliases are configured, use them in any import path:
 @use @company/@stacks/react@^1.0.0
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEASvGZQAbvF4ABFmQysAnryzNeAcwi4ArgCMK0gPQZGJGHprMyWOI2oQ0WALRaMcGAB1WEiKxwwbWSdKY8noSzNQqek4u7u58AGq+cBBsMAAmvBhQEM68EGRhWO4SGi4B5kFyIXBYhgDWcHrUMIZYEgB6AIwUAAw9IAC+ALoMnFjUcvhEpOQwVLQgDGK0yaz4HQNAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### targets
 
 Configures output targets. Targets can be specified as a simple list of names or with detailed configuration.

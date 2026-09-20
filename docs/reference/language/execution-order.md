@@ -57,7 +57,7 @@ it applies ordered semantics and leaves PS018 to request a syntax upgrade.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEM2piY1GGIC0zNIuwQ2cGYLgBPdhkKSZARgoA2CgAY9AXymtn3OANZiM8uMOeDBDncIVgBzSWQZAFU4GEEAKXgsGQBdZycXVm5mADdFanE49wxPbzE4CiCsENC-VgDIkBi4gDUIKtT051ciDk99Dy8fOoCqmoiZACUYAEcAVwglUXYYUOotNkCk3RA01gcQBxSGTixqA3wiUnIYKloQBjzabVZ8c0OgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEM2piY1GGIC0zNIuwQ2cGYLgBPdhkKSZARgoBWCgAY9AXymtn3OANZiM8uMOeDBDncIVgBzSWQZAFU4GEEAKXgsGQBdZycXVm5mADdFanE49wxPbzE4CiCsENC-VgDIkBi4gDUIKtT051ciDk99Dy8fOoCqmoiZACUYAEcAVwglUXYYUOotNkCk3RA01gcQBxSGTixqA3wiUnIYKloQBjzabVZ8c0OgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

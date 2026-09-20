@@ -28,6 +28,12 @@ configured AI platform.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwuDEYBXahCwBPALTUYANwgwA7olESpUgCbxGitFghsDYkACUtO3cJZnhYZtWEY05CEZsG0kZeUUVYUV+OHsjYzkZagBJVk1mIIAjWAMsajkYeNMIOAxsmABZZjMoVPSg61tPDCFCyWMWqGZdGBMAFWZmIQNkeycME3s6YXsAcQ00KZmQACEMOBx7AF0itzYOdjsQOOP242EnbT1fOVxOawaQ6YxbnG8IAC9gtmmwjSxhDgMKwTFAIKwAObTcFoW7CTQtCAmb6sOi7UwwNCcMysRjKKIlPjPEHCOSsUpgGB7EgkYEmYREWS3EIUXYnOLtAC+Ek5IE5WwY92oynwRFI5BgVFoIAYmhgtBC+AAjHygA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Directory Skill
 
 Portable skills can use a complete directory:
@@ -151,6 +157,12 @@ Skills can come from local files, registries, or Git repositories:
 @use @company/skills/release@^2.0.0
 @use github.com/acme/agent-skills/database-review@1.3.0
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9HADW0KHDExGvahCwBPALTUYANwgwA7hRIATADqs+AwdxZkMrZWMlRpIjbAwDuAPQBMFAAz+puZCAOZKOLwARhTWIhiMJDBxIZxYqhJSMobYGJHuMOpaOrrcAIwUAMz+IAC+ALoMqdTK+ESk5DBUtCAMmjC0EGz4pbVAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Remote references are recorded in `promptscript.lock` with commit and integrity information.
 

@@ -411,6 +411,12 @@ Files in `.github/instructions/` with `applyTo` frontmatter should be migrated u
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJszTRmWALQRWcLNQCujLBDZwlJCAHNq2PaxmC4AT3YZCkmQEYKABndWAvlMutuxpoY1GJwwr6CghisgVDBSixkbJxYcJLAEZFRaOQ2ACrMksgyGDlwAPQYYkas5QBUdfUUqTJ00iClaBUA7jAARgBuEDDd9Y11zXAyALqZkWLwjNQQaLpsTiAAgjGacdSCiWjJ7AfMYqrG1gKsYsGhMnOn7CkbDyCPAKpwMIIA8qwABU0cBwBxw0WMPwWHB0FkEYGY+wwUCgpySrBScAoj02UG6GBsYQgZFgfBO-wAIvANMwbPDEQdYNFNGhsawsu03pkfKwvCAvNMGClqDZ8ERSOQYFRaCAGAMYLQLPhnPygA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 `prs migrate --static` discovers project instruction files and converts
 `.github/instructions/*.instructions.md` files with `applyTo` frontmatter to named `@guards`
 entries. Review the generated files before compilation.

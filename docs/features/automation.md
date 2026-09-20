@@ -40,6 +40,12 @@ The `@hooks` block requires syntax `1.4.0`:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAI7PMBrOAAJgAHVbDhANwxQIAE2wwAtFgCeaeIlESpUmNM5YdYkGmZwsa-lBUBXODDN79JbIxwxqpkAFEFCCwAHwB1aiDnEFcpOEYItBNdSX0pTFxfKmpmMiw4hKwAenyIRLhC2XklDip1FxTUiHZvGhgOH2EzNHVcNgBmetSpDGoAczgdZDMVFSsIxiwzAF0Y4QBfVcYAdwVfGmYAKxgFwf0sCBIYZnssAFkJ4QBGACYABnfX1atsR1v4OAwoxgvgAwl5GAImqNhAAVTQwADK8VKi2iDWELHYTXsMAA8qwAGIYaD2ajA4RgOROVacDAAI1gu2EWGoONcG1YaxAayWDGM1HU+CIpHIMCy9BARloEDY+Ee3KAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Target-specific behavior
 
 Keep a portable executable as the default, then override only the fields that
@@ -64,6 +70,12 @@ differ on a host. A target can replace the executable with its own `command`:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAI7PMBrOAAJgAHVbDhHaiQisMUALRpmUCIwCeiURKlSYAN05YdYkDRhKZchcpYkSGVgBNze-Q6eudyc62YXGHM6YXMqamYyLDhGagg0LAB6WPjEuCTGHBhGAWsYWXlFChIAKzhzAF0PKSwMagBzGBidcUl9KTAMRixmam1ddo6pL2cXX39A4JBQ8Joo9LiE5NTljKycvK6evs0S8pCwkCUlOCx4nuESKaqa-QBfO6lDWKnWp-0nLA3qMyYAVzOUQA+jYilBQfwoO4hg8Pg0ILh-gAjd6wjqcDDI2DjYRdKBwYLo4SPWGkqSk+4ge6VBgmfr4IikcgwCL0EDGWgQNj4ACM1KAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Supported override fields are `event`, `command`, `script`, `matcher`,
 `timeoutMs`, `statusMessage`, `continueOnFailure`, `enabled`, and `cwd`.
@@ -170,6 +182,12 @@ script: {
 cwd: "project"
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-nI9RGlkQACYAB1WQoZlzDRIKtWZksPPgID0q-ivUA3DFAgATbDCoBPOeMkR2MajRgdqskGnO42AZisShGagBzOGFkOQBacLgsPkYsOQBdcQBfcUYAdyNXGmYAKxg4uRBkhIZOGPN8IlJyMxp6EF17OAg2fABGYqA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Each hook requires exactly one of `command` or `script`. A portable script:
 
 - Must be under `.promptscript/scripts/` and use forward slashes.
@@ -195,6 +213,12 @@ targets: {
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-lhtQOYwscRAAJgAHVYiRfCLgCuAI1ESp0kXEbUIaLCsnr1mXKPEgq1ZmSFadWAPSbtuuPYBuGKBAAm2GAFpZBUUqAE8zA0MRCHYYahpBONMQNFDcNgBmCLVDXj5hEWQzf384LG1GLBESZm8YMwBdSOkAX0i21haQFoaGTnLQ-CJSchgLehA3OLgINnwARm6gA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Enabled target-only scripts are checked by both Node and browser compilers.
 Scripts attached only to disabled target overrides are not required or emitted.
 
@@ -209,6 +233,12 @@ Existing command arrays remain supported:
 command: ["python3", ".promptscript/scripts/validate.py", "--strict"]
 cwd: "project"
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-iySRqwBNEAAmQAdEGgCeuNgGYJdYRKrVmZLHEbUIaLAHotOvXH0A3DFAgDsMKlMXKQAWmdwsOxlgkBdMa0YAdyEnGmYAKxgvCRAAXx8GTg8pfCJScjsaehAzGFoINnwARjigA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 To migrate a target-specific command, remove project-root variables and shell
 wrappers from source:
@@ -227,6 +257,12 @@ script: {
 }
 cwd: "project"
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAgmA7VEvNjF5pm1LBgBGsXtXjMArtUYSw03jABuMagE9erbBAO9Z1AOYwsAHVZxG1CGiyjgT3pOw5RBxAqamYyLBc3DwB6SPcI6L0MKAgAE2wYKiMgn14IdkMae0NAkDQjXDYAZhzWXwxbOFFkIIBaVrgsN0ZHEABdJwBfJ0YAd1TSmmYAKxgeoJBBvoZOLqN8IlJyTJp6EANaCDZ8AEZFoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 `cwd: "project"` makes the project-root requirement explicit. A value such as
 `cwd: "tools/hooks"` resolves from project root. The location of the generated
@@ -462,6 +498,12 @@ Workflows describe repeatable multi-step procedures:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIDuz1ANZgozXnAAEwADqsJE6jFgY4MRFNnz5AE3iNqENFght10kAAVFmRRIwSAbhigRt2GNoVKYKmOc1aLOycWGYg-uFyWvIAjBQSAEowDhAwvBKMOBisAObwEnAQrIwwErilNMkmAK6SisqqAdEATPEJ1XJgAiTYxrl0Ei7sRTkDWACeaKWZMIyCcAPZnhxwWHBNWgDM8QBqzq7uEnmsMNTunlbMZFgAyvqGWBLM1VhoLxvyACzxVjA2pfUfKoJKxmCsPhIAKxtGAAR2q8EeGDQNGYTigEgARjAurY3piXHAcCMNhF-FEAL6yCkgCkAXQYIWo43wRFI5BgVFoIAYDlOhTY+BitKAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Targets with native workflow discovery receive dedicated files, such as
 `.claude/workflows/<name>.md`. Other targets retain workflow guidance through their instruction
 output when supported by the formatter.
@@ -506,6 +548,12 @@ Use `@shortcuts` for user-invoked actions:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJw7PUsjAK5Y4AAmAAdVuPFSQAemoxYGODAWJJMuXJrMyWbVmrDNsvQBN4jahDRYIbbQoBKw2SrUbxAdwEAazAoZj8FXT0Wdk5jeRAAMWYoUL9xXBhxbxh1TIDqYNTxDFYrcTgsZjRxACMYMAFMtGEaqAg+CFYAcwoIywBfGX6QfoBdBljqAE98IlJyGCpaEAYANxhaZ1Z8AEYRoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Recommended model:
 

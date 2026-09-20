@@ -933,7 +933,7 @@ Choose modification syntax by migration intent:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQgBzathhiAtDWYArGIywzBcAJ7sMhSTICMFAGwUADPoC+U1i+5wBrMRmpi4wl0FBDg8IVnlJZBkAVTgYQQApeD0QOmkQWPiAWWZGHAwZAF0XZ1dWbmYANxhqanF4jwwvHz8KEKww+QDWIKiMuMEANQh2opKQR0KGTixqQ3wiUnIYKlpUkGraCDZ8CwmgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQgBzathhiAtDWYArGIywzBcAJ7sMhSTICMFAKwUADPoC+U1i+5wBrMRmpi4wl0FBDg8IVnlJZBkAVTgYQQApeD0QOmkQWPiAWWZGHAwZAF0XZ1dWbmYANxhqanF4jwwvHz8KEKww+QDWIKiMuMEANQh2opKQR0KGTixqQ3wiUnIYKlpUkGraCDZ8CwmgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
