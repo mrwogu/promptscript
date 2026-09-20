@@ -18,7 +18,14 @@ vi.mock('fs/promises', () => ({
 }));
 
 import { collectRemoteImports } from '../lock-scanner.js';
-import type { Program, PathReference, UseDeclaration } from '@promptscript/core';
+import type {
+  Block,
+  InheritDeclaration,
+  InlineUseDeclaration,
+  Program,
+  PathReference,
+  UseDeclaration,
+} from '@promptscript/core';
 
 /** Helper to build a minimal PathReference. */
 function pathRef(raw: string, overrides: Partial<PathReference> = {}): PathReference {
@@ -43,13 +50,49 @@ function useDecl(raw: string, overrides: Partial<PathReference> = {}): UseDeclar
   };
 }
 
-/** Helper to build a minimal Program with uses. */
-function program(uses: UseDeclaration[]): Program {
+function inheritDecl(raw: string, overrides: Partial<PathReference> = {}): InheritDeclaration {
+  return {
+    type: 'InheritDeclaration',
+    path: pathRef(raw, overrides),
+    loc: { file: 'test.prs', line: 1, column: 1 },
+  };
+}
+
+function inlineUseDecl(raw: string, overrides: Partial<PathReference> = {}): InlineUseDeclaration {
+  return {
+    type: 'InlineUseDeclaration',
+    path: pathRef(raw, overrides),
+    loc: { file: 'test.prs', line: 1, column: 1 },
+  };
+}
+
+function skillsBlock(inlineUses: InlineUseDeclaration[]): Block {
+  return {
+    type: 'Block',
+    name: 'skills',
+    content: {
+      type: 'ObjectContent',
+      properties: {},
+      inlineUses,
+      loc: { file: 'test.prs', line: 1, column: 1 },
+    },
+    loc: { file: 'test.prs', line: 1, column: 1 },
+  };
+}
+
+interface ProgramOptions {
+  inherit?: InheritDeclaration;
+  blocks?: Block[];
+}
+
+/** Helper to build a minimal Program with references. */
+function program(uses: UseDeclaration[], options: ProgramOptions = {}): Program {
   return {
     type: 'Program',
     uses,
-    blocks: [],
+    blocks: options.blocks ?? [],
     extends: [],
+    ...(options.inherit ? { inherit: options.inherit } : {}),
     loc: { file: 'test.prs', line: 1, column: 1 },
   };
 }
@@ -118,6 +161,54 @@ describe('collectRemoteImports', () => {
 
     expect(result).toEqual([
       { repoUrl: 'https://github.com/org/repo', path: 'skills', version: '' },
+    ]);
+  });
+
+  it('should collect direct github.com @inherit imports', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue('@inherit github.com/org/repo/base');
+    mockParse.mockReturnValue({
+      ast: program([], {
+        inherit: inheritDecl('github.com/org/repo/base', {
+          segments: ['github.com', 'org', 'repo', 'base'],
+        }),
+      }),
+      errors: [],
+    });
+
+    const result = await collectRemoteImports('/project/project.prs', {
+      localPath: LOCAL_PATH,
+    });
+
+    expect(result).toEqual([{ repoUrl: 'https://github.com/org/repo', path: 'base', version: '' }]);
+  });
+
+  it('should collect inline github.com @use imports from skills', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue('@skills { @use github.com/org/repo/skills/shared }');
+    mockParse.mockReturnValue({
+      ast: program([], {
+        blocks: [
+          skillsBlock([
+            inlineUseDecl('github.com/org/repo/skills/shared', {
+              segments: ['github.com', 'org', 'repo', 'skills', 'shared'],
+            }),
+          ]),
+        ],
+      }),
+      errors: [],
+    });
+
+    const result = await collectRemoteImports('/project/project.prs', {
+      localPath: LOCAL_PATH,
+    });
+
+    expect(result).toEqual([
+      {
+        repoUrl: 'https://github.com/org/repo',
+        path: 'skills/shared',
+        version: '',
+      },
     ]);
   });
 

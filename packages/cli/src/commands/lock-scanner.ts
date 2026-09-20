@@ -3,7 +3,7 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import { parse } from '@promptscript/parser';
 import { detectContentType, FileLoader, parseRegistryMarker } from '@promptscript/resolver';
-import type { RegistriesConfig } from '@promptscript/core';
+import type { PathReference, RegistriesConfig } from '@promptscript/core';
 
 /**
  * A remote import discovered by scanning `.prs` files.
@@ -19,7 +19,7 @@ export interface RemoteImport {
   sourceFile?: string;
   /** Source line containing this import when location collection is enabled */
   sourceLine?: number;
-  /** Original @use source text when location collection is enabled */
+  /** Original reference text when location collection is enabled */
   rawSource?: string;
 }
 
@@ -43,7 +43,7 @@ export interface ScanOptions {
 
 /**
  * Scan `.prs` files starting from an entry point, recursively follow local
- * `@use` imports, and collect all remote `@use` references.
+ * references, and collect remote `@use`, `@inherit`, and inline skill imports.
  *
  * Remote references are those that resolve to registry markers — either direct
  * URL-style imports (e.g. `github.com/org/repo/path`) or registry alias
@@ -77,6 +77,60 @@ export async function collectRemoteImports(
   const seen = new Set<string>();
   const results: RemoteImport[] = [];
 
+  async function scanReference(path: PathReference, sourceFile: string): Promise<void> {
+    let resolved: string;
+    try {
+      resolved = loader.resolveRef(path, sourceFile);
+    } catch (error) {
+      if (options.strict) {
+        throw new Error(`Cannot resolve import '${path.raw}' in ${sourceFile}`, {
+          cause: error,
+        });
+      }
+      return;
+    }
+    const marker = parseRegistryMarker(resolved);
+
+    if (marker) {
+      const key = `${marker.repoUrl}\0${marker.path}\0${marker.version}`;
+      if (options.deduplicate === false || !seen.has(key)) {
+        seen.add(key);
+        results.push({
+          ...marker,
+          ...(options.includeLocations
+            ? {
+                sourceFile,
+                sourceLine: path.loc.line,
+                rawSource: path.raw,
+              }
+            : {}),
+        });
+      }
+      return;
+    }
+
+    if (!resolved.endsWith('.prs') && !resolved.endsWith('.md')) {
+      return;
+    }
+    if (existsSync(resolved)) {
+      await scan(resolved);
+      return;
+    }
+    if (resolved.endsWith('.prs')) {
+      const skillDirectory = resolved.slice(0, -'.prs'.length);
+      if (existsSync(skillDirectory)) {
+        const skillFile = join(skillDirectory, 'SKILL.md');
+        if (existsSync(skillFile)) {
+          await scan(skillFile);
+        }
+        return;
+      }
+    }
+    if (options.strict) {
+      throw new Error(`Imported PromptScript file not found: ${resolved}`);
+    }
+  }
+
   async function scan(filePath: string): Promise<void> {
     if (visited.has(filePath)) return;
     visited.add(filePath);
@@ -100,58 +154,19 @@ export async function collectRemoteImports(
     }
     if (!ast) return;
 
-    for (const use of ast.uses) {
-      let resolved: string;
-      try {
-        resolved = loader.resolveRef(use.path, filePath);
-      } catch (error) {
-        if (options.strict) {
-          throw new Error(`Cannot resolve import '${use.path.raw}' in ${filePath}`, {
-            cause: error,
-          });
-        }
-        continue;
-      }
-      const marker = parseRegistryMarker(resolved);
-
-      if (marker) {
-        const key = `${marker.repoUrl}\0${marker.path}\0${marker.version}`;
-        if (options.deduplicate === false || !seen.has(key)) {
-          seen.add(key);
-          results.push({
-            ...marker,
-            ...(options.includeLocations
-              ? {
-                  sourceFile: filePath,
-                  sourceLine: use.path.loc.line,
-                  rawSource: use.path.raw,
-                }
-              : {}),
-          });
-        }
-      } else {
-        // Local file — recurse into it
-        if (!resolved.endsWith('.prs') && !resolved.endsWith('.md')) {
-          continue;
-        }
-        if (existsSync(resolved)) {
-          await scan(resolved);
-          continue;
-        }
-        if (resolved.endsWith('.prs')) {
-          const skillDirectory = resolved.slice(0, -'.prs'.length);
-          if (existsSync(skillDirectory)) {
-            const skillFile = join(skillDirectory, 'SKILL.md');
-            if (existsSync(skillFile)) {
-              await scan(skillFile);
-            }
-            continue;
-          }
-        }
-        if (options.strict) {
-          throw new Error(`Imported PromptScript file not found: ${resolved}`);
-        }
-      }
+    const inlineUses = ast.blocks.flatMap((block) =>
+      block.name === 'skills' &&
+      (block.content.type === 'ObjectContent' || block.content.type === 'MixedContent')
+        ? (block.content.inlineUses ?? [])
+        : []
+    );
+    const paths = [
+      ...(ast.inherit ? [ast.inherit.path] : []),
+      ...ast.uses.map((use) => use.path),
+      ...inlineUses.map((use) => use.path),
+    ];
+    for (const path of paths) {
+      await scanReference(path, filePath);
     }
   }
 
