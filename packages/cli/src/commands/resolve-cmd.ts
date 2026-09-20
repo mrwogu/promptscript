@@ -222,7 +222,10 @@ export async function resolveCommand(
 
     if (manifest) {
       if (!lockKey || !dependency) {
-        throw new Error(`Vendored dependency is not pinned by the lockfile: ${marker.repoUrl}`);
+        throw new Error(
+          `Vendored dependency is not pinned by the lockfile: ${marker.repoUrl}. ` +
+            `Run 'prs lock' to pin it, then re-run this command.`
+        );
       }
       const vendoredPath = await resolveVendoredRepository(
         vendorDir,
@@ -241,7 +244,10 @@ export async function resolveCommand(
           cachePath,
           '.git',
           dependency.commit,
-          new Set(['.prs-registry-meta.json'])
+          new Set(['.prs-registry-meta.json']),
+          {
+            allowPartial: true,
+          }
         );
       } catch {
         source = 'stale cache';

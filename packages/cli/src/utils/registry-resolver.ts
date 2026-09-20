@@ -100,11 +100,17 @@ export async function resolveRegistryPath(
       throw new Error(`Vendor manifest is missing: ${options.vendorDir}`);
     }
     if (options.lockfile && !lockedRepository) {
-      throw new Error(`Git registry is not pinned by the lockfile: ${gitConfig.url}`);
+      throw new Error(
+        `Git registry is not pinned by the lockfile: ${gitConfig.url}. ` +
+          `Run 'prs lock' to pin it, then re-run this command.`
+      );
     }
     if (options.vendorDir && vendorManifest) {
       if (!lockedRepository) {
-        throw new Error(`Vendored registry is not pinned by the lockfile: ${gitConfig.url}`);
+        throw new Error(
+          `Vendored registry is not pinned by the lockfile: ${gitConfig.url}. ` +
+            `Run 'prs lock' to pin it, then re-run this command.`
+        );
       }
       const [repoUrl, dependency] = lockedRepository;
       const repositoryPath = await resolveVendoredRepository(
