@@ -158,7 +158,8 @@ export async function resolveRegistryPath(
           cachePath,
           '.git',
           lockedRepository[1].commit,
-          new Set(['.prs-cache-meta.json'])
+          new Set(['.prs-cache-meta.json']),
+          { allowPartial: true }
         );
         return {
           path: await resolveRegistrySubPath(cachePath, gitConfig.path),
@@ -226,7 +227,8 @@ export async function resolveRegistryPath(
         cachePath,
         '.git',
         lockedRepository[1].commit,
-        new Set(['.prs-cache-meta.json'])
+        new Set(['.prs-cache-meta.json']),
+        { allowPartial: true }
       );
     }
 

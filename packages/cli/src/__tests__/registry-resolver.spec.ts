@@ -557,7 +557,8 @@ describe('utils/registry-resolver', () => {
         '/home/user/.promptscript/.cache/git/test-key',
         '.git',
         commit,
-        new Set(['.prs-cache-meta.json'])
+        new Set(['.prs-cache-meta.json']),
+        { allowPartial: true }
       );
     });
 
@@ -670,7 +671,8 @@ describe('utils/registry-resolver', () => {
         '/home/user/.promptscript/.cache/git/test-key',
         '.git',
         commit,
-        new Set(['.prs-cache-meta.json'])
+        new Set(['.prs-cache-meta.json']),
+        { allowPartial: true }
       );
       expect(mockGitRegistry.fetch).not.toHaveBeenCalled();
     });
@@ -717,7 +719,22 @@ describe('utils/registry-resolver', () => {
         'main',
         commit
       );
-      expect(mockVerifyGitRepository).toHaveBeenCalledTimes(2);
+      expect(mockVerifyGitRepository).toHaveBeenNthCalledWith(
+        1,
+        '/home/user/.promptscript/.cache/git/test-key',
+        '.git',
+        commit,
+        new Set(['.prs-cache-meta.json']),
+        { allowPartial: true }
+      );
+      expect(mockVerifyGitRepository).toHaveBeenNthCalledWith(
+        2,
+        '/home/user/.promptscript/.cache/git/test-key',
+        '.git',
+        commit,
+        new Set(['.prs-cache-meta.json']),
+        { allowPartial: true }
+      );
     });
 
     it('should clone git registry when cache is invalid', async () => {
