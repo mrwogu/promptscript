@@ -274,8 +274,15 @@ function requireDirectoryArgs(
  *
  * Argument positions are flat and operation-specific, exactly like the
  * inline scripts this worker replaced.
+ *
+ * `stdinContent` lets in-process callers (tests) supply the file content
+ * directly; spawned workers leave it undefined and the worker reads fd 0.
  */
-export function performManagedOutputOperation(op: string, args: string[]): string {
+export function performManagedOutputOperation(
+  op: string,
+  args: string[],
+  stdinContent?: Buffer
+): string {
   switch (op) {
     case 'unlink': {
       const [name, directoryDev, directoryIno, fileDev, fileIno, expectedHash] = args;
@@ -288,13 +295,13 @@ export function performManagedOutputOperation(op: string, args: string[]): strin
       const dir = requireDirectoryArgs(op, name, directoryDev, directoryIno);
       return guardedRewrite(
         { ...dir, fileDev, fileIno, expectedHash, requestedMode },
-        readFileSync(0)
+        stdinContent ?? readFileSync(0)
       );
     }
     case 'create': {
       const [name, directoryDev, directoryIno, requestedMode] = args;
       const dir = requireDirectoryArgs(op, name, directoryDev, directoryIno);
-      return guardedCreate({ ...dir, requestedMode }, readFileSync(0));
+      return guardedCreate({ ...dir, requestedMode }, stdinContent ?? readFileSync(0));
     }
     case 'mkdir': {
       const [name, directoryDev, directoryIno] = args;
@@ -311,13 +318,13 @@ export function performManagedOutputOperation(op: string, args: string[]): strin
  * Returns the process exit code: 0 when the operation reported a status
  * word, 1 on unexpected failures.
  */
-export function runManagedOutputWorkerProtocol(opArgs: string[]): number {
+export function runManagedOutputWorkerProtocol(opArgs: string[], stdinContent?: Buffer): number {
   const [op, ...rest] = opArgs;
   if (op === undefined) {
     return 1;
   }
   try {
-    process.stdout.write(performManagedOutputOperation(op, rest));
+    process.stdout.write(performManagedOutputOperation(op, rest, stdinContent));
     return 0;
   } catch {
     return 1;

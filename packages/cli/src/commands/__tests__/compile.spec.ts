@@ -584,6 +584,37 @@ describe('compile command - createCliLogger warn path', () => {
     );
   });
 
+  it('should fail non-zero when cleanup cannot re-execute the CLI', async () => {
+    mockCleanupManagedOutputs.mockResolvedValue({
+      removed: [],
+      removedDirectories: [],
+      unresolvedSelfInvocation: true,
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockWarn).toHaveBeenCalledWith(
+      'Managed output cleanup was skipped: this runtime cannot safely re-execute the CLI.'
+    );
+    expect(mockWarn).toHaveBeenCalledWith(
+      'Remove obsolete generated files (PromptScript marker header) under the output directory manually, or reinstall the CLI.'
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should preview the cleanup skip without failing in dry-run mode', async () => {
+    mockCleanupManagedOutputs.mockResolvedValue({
+      removed: [],
+      removedDirectories: [],
+      unresolvedSelfInvocation: true,
+    });
+
+    await compileCommand({ cwd: '/mock/project', dryRun: true }, mockServices);
+
+    expect(mockWarn).toHaveBeenCalledTimes(2);
+    expect(process.exitCode).toBeUndefined();
+  });
+
   it('writes only selected resources and skips managed cleanup', async () => {
     mockCompile.mockResolvedValue({
       success: true,

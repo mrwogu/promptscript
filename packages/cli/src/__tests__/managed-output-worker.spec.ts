@@ -4,11 +4,12 @@ import { lstat, mkdtemp, readFile, rm, stat, symlink, writeFile } from 'node:fs/
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   MANAGED_OUTPUT_WORKER_COMMAND,
   performManagedOutputOperation,
   runManagedOutputWorkerProtocol,
+  wasDispatchedAsManagedOutputWorker,
 } from '../managed-output-worker.js';
 
 const workerPath = fileURLToPath(new URL('../managed-output-worker.ts', import.meta.url));
@@ -19,34 +20,35 @@ interface WorkerResult {
 }
 
 /**
- * Spawn the worker exactly the way the cleanup client does: cwd pinned to the
- * directory, content (when needed) piped through stdin.
+ * Run the worker protocol in-process exactly the way a spawned worker would:
+ * cwd pinned to the directory, content (when needed) supplied instead of
+ * fd 0, status word captured from stdout. Child processes escape the
+ * coverage instrumenter, so every operation is exercised here in-process.
  */
 async function runWorker(
   cwd: string,
   opArgs: string[],
   stdinContent?: string
 ): Promise<WorkerResult> {
-  return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [workerPath, MANAGED_OUTPUT_WORKER_COMMAND, ...opArgs], {
-      cwd,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
-    let stdout = '';
-    child.stdout.setEncoding('utf-8');
-    child.stdout.on('data', (chunk: string) => {
-      stdout += chunk;
-    });
-    child.on('error', reject);
-    child.on('close', (code) => {
-      resolve({ stdout, code: code ?? 1 });
-    });
-    if (stdinContent === undefined) {
-      child.stdin.end();
-    } else {
-      child.stdin.end(stdinContent);
-    }
-  });
+  const originalWrite = process.stdout.write.bind(process.stdout);
+  let stdout = '';
+  process.stdout.write = ((chunk: string | Uint8Array): boolean => {
+    stdout += typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString('utf-8');
+    return true;
+  }) as typeof process.stdout.write;
+  const originalCwd = process.cwd();
+  let code: number;
+  try {
+    process.chdir(cwd);
+    code = runManagedOutputWorkerProtocol(
+      opArgs,
+      stdinContent === undefined ? undefined : Buffer.from(stdinContent, 'utf-8')
+    );
+  } finally {
+    process.chdir(originalCwd);
+    process.stdout.write = originalWrite;
+  }
+  return { stdout, code };
 }
 
 function sha256(content: string): string {
@@ -83,7 +85,7 @@ describe('managed output worker protocol', () => {
     expect(result.code).toBe(1);
   });
 
-  it('reports no operation when called without a command word', () => {
+  it('reports no operation when called without an operation word', () => {
     expect(runManagedOutputWorkerProtocol([])).toBe(1);
   });
 
@@ -104,6 +106,7 @@ describe('managed output worker protocol', () => {
       String(directory.ino),
     ]);
     expect(first.stdout).toBe('ready');
+    expect(first.code).toBe(0);
     expect((await lstat(join(project, 'hooks'))).isDirectory()).toBe(true);
 
     const second = await runWorker(project, [
@@ -147,6 +150,7 @@ describe('managed output worker protocol', () => {
       'hello'
     );
     expect(created.stdout).toBe('created');
+    expect(created.code).toBe(0);
     expect(await readFile(join(project, 'run.sh'), 'utf-8')).toBe('hello');
     expect((await lstat(join(project, 'run.sh'))).mode & 0o777).toBe(0o755);
 
@@ -271,5 +275,55 @@ describe('managed output worker protocol', () => {
       expect(result.stdout).toBe('skipped');
     }
     expect(await readFile(join(outside, 'keep.md'), 'utf-8')).toBe('keep');
+  });
+
+  it('runs the spawned worker end to end via the hidden command', async () => {
+    const project = await createProject('worker-spawned-');
+    const directory = await stat(project);
+
+    const result = await new Promise<WorkerResult>((resolve, reject) => {
+      const child = spawn(
+        process.execPath,
+        [
+          workerPath,
+          MANAGED_OUTPUT_WORKER_COMMAND,
+          'mkdir',
+          'hooks',
+          String(directory.dev),
+          String(directory.ino),
+        ],
+        { cwd: project, stdio: ['pipe', 'pipe', 'pipe'] }
+      );
+      let stdout = '';
+      child.stdout.setEncoding('utf-8');
+      child.stdout.on('data', (chunk: string) => {
+        stdout += chunk;
+      });
+      child.on('error', reject);
+      child.on('close', (code) => {
+        resolve({ stdout, code: code ?? 1 });
+      });
+      child.stdin.end();
+    });
+
+    expect(result.code).toBe(0);
+    expect(result.stdout).toBe('ready');
+    expect((await lstat(join(project, 'hooks'))).isDirectory()).toBe(true);
+  });
+
+  it('dispatches the hidden command from argv at import time', async () => {
+    const originalArgv = process.argv;
+    const originalExitCode = process.exitCode;
+    vi.resetModules();
+    process.argv = [originalArgv[0]!, originalArgv[1]!, MANAGED_OUTPUT_WORKER_COMMAND, 'mkdir'];
+    try {
+      const worker = await import('../managed-output-worker.js');
+      expect(worker.wasDispatchedAsManagedOutputWorker()).toBe(true);
+      expect(process.exitCode).toBe(1);
+    } finally {
+      process.argv = originalArgv;
+      process.exitCode = originalExitCode;
+    }
+    expect(wasDispatchedAsManagedOutputWorker()).toBe(false);
   });
 });

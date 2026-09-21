@@ -193,6 +193,16 @@ describe('resolveFlushSelfInvocation', () => {
     });
   });
 
+  it('fails closed on node when the entrypoint cannot be resolved', () => {
+    const originalArgv = process.argv;
+    process.argv = [originalArgv[0]!];
+    try {
+      expect(resolveFlushSelfInvocation(config)).toBeUndefined();
+    } finally {
+      process.argv = originalArgv;
+    }
+  });
+
   it('re-executes the compiled binary for deno standalone', () => {
     vi.stubGlobal('Deno', { build: { standalone: true } });
     expect(resolveFlushSelfInvocation(config)).toEqual({

@@ -138,6 +138,30 @@ describe('maybeSpawnFlush', () => {
     expect(spawn).not.toHaveBeenCalled();
   });
 
+  it('fails closed when spawning the detached flush child throws', () => {
+    const cacheDirectory = directory();
+    new TelemetrySession({
+      config: config(cacheDirectory),
+      metadata,
+      runtime: 'deno',
+      command: 'compile',
+    }).finish('success');
+
+    expect(
+      maybeSpawnFlush(config(cacheDirectory), {
+        selfInvocation: {
+          executable: '/deno',
+          prefixArgs: ['run', '--allow-env', 'npm:@promptscript/cli@1.16.0'],
+        },
+        environment: {},
+        spawn: () => {
+          throw new Error('spawn failed');
+        },
+        now: Date.parse('2026-08-06T12:00:00.000Z'),
+      })
+    ).toBe(false);
+  });
+
   it('does not spawn when the spool is empty', () => {
     const cacheDirectory = directory();
     const spawn = vi.fn(() => ({ unref: vi.fn() }));
