@@ -37,42 +37,75 @@ interface ExcludeMatch {
 }
 
 /**
+ * Find the deepest import root containing a file.
+ *
+ * Roots can overlap when one repository is reachable through several roots
+ * (registry cache, vendor directory, configured reference roots); the root
+ * with the longest import key wins so a nested root beats its parent.
+ */
+function findDeepestImportRoot(roots: readonly ImportRoot[], file: string): ImportRoot | undefined {
+  let best: ImportRoot | undefined;
+  let bestKey = '';
+  for (const root of roots) {
+    if (!isPathInside(root.path, file)) continue;
+    const key = normalizeImportKey(root.import);
+    if (best === undefined || key.length > bestKey.length) {
+      best = root;
+      bestKey = key;
+    }
+  }
+  return best;
+}
+
+/**
+ * Find the exclude covering a file within one import root.
+ *
+ * An exclude declared with a sub-path (e.g. `github.com/org/repo/skills/foo`)
+ * only covers content under that sub-path.
+ */
+function matchExcludeForRoot(
+  root: ImportRoot,
+  excludes: readonly ValidationExclude[],
+  file: string
+): ExcludeMatch | undefined {
+  const rootImport = normalizeImportKey(root.import);
+  const relation = relative(resolve(root.path), resolve(file)).replaceAll('\\', '/');
+  for (const exclude of excludes) {
+    const excludeImport = normalizeImportKey(exclude.import);
+    if (excludeImport === rootImport) {
+      return { root, exclude, subPath: '' };
+    }
+    if (!excludeImport.startsWith(`${rootImport}/`)) {
+      continue;
+    }
+    const subPath = excludeImport.slice(rootImport.length + 1);
+    if (relation === subPath || relation.startsWith(`${subPath}/`)) {
+      return { root, exclude, subPath };
+    }
+  }
+  return undefined;
+}
+
+/**
  * Find the exclude covering a source location, if any.
  *
  * The location must sit inside an import root (registry cache, vendored
  * repository, or configured reference root) reported by the compiler, so
- * local project content is never excluded. An exclude declared with a
- * sub-path (e.g. `github.com/org/repo/skills/foo`) only covers content under
- * that sub-path.
+ * local project content is never excluded.
  */
 function findExcludeMatch(
   loc: SourceLocation | undefined,
   config: ValidatorConfig
 ): ExcludeMatch | undefined {
-  if (!loc || !config.excludes || config.excludes.length === 0) return undefined;
+  if (!loc) return undefined;
+  const excludes = config.excludes;
   const roots = config.importRoots;
-  if (!roots || roots.length === 0) return undefined;
-
-  // Longest import key first so a nested root wins over its parent repository.
-  const sortedRoots = [...roots].sort((left, right) => right.import.length - left.import.length);
-  for (const root of sortedRoots) {
-    if (!isPathInside(root.path, loc.file)) continue;
-    const rootImport = normalizeImportKey(root.import);
-    for (const exclude of config.excludes) {
-      const excludeImport = normalizeImportKey(exclude.import);
-      if (excludeImport === rootImport) {
-        return { root, exclude, subPath: '' };
-      }
-      if (excludeImport.startsWith(`${rootImport}/`)) {
-        const subPath = excludeImport.slice(rootImport.length + 1);
-        const relation = relative(resolve(root.path), resolve(loc.file)).replaceAll('\\', '/');
-        if (relation === subPath || relation.startsWith(`${subPath}/`)) {
-          return { root, exclude, subPath };
-        }
-      }
-    }
+  if (!excludes || excludes.length === 0 || !roots || roots.length === 0) {
+    return undefined;
   }
-  return undefined;
+  const root = findDeepestImportRoot(roots, loc.file);
+  if (!root) return undefined;
+  return matchExcludeForRoot(root, excludes, loc.file);
 }
 
 /**
