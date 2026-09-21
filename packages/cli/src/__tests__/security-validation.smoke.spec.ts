@@ -239,6 +239,74 @@ describe('security validation smoke tests', () => {
     });
   });
 
+  describe('consumer-side suppression', () => {
+    it('should subtract allowed patterns from blocked-patterns through the full pipeline', () => {
+      const prs = `@meta {
+  id: "warp-docs"
+  syntax: "1.0.0"
+}
+
+@knowledge {
+  """
+  Bypass rules map to WARP Split Tunnel exclude entries.
+  """
+}
+`;
+
+      const parseResult = parse(prs);
+      expect(parseResult.ast).toBeDefined();
+      const validator = createValidator({
+        allowedPatterns: ['bypass\\s+(your\\s+)?(rules|restrictions)'],
+      });
+      const result = validator.validate(parseResult.ast!);
+
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should fail with PS040 when an exclude no longer matches the pinned commit', () => {
+      const prs = `@meta {
+  id: "pinned-import"
+  syntax: "1.0.0"
+}
+
+@identity {
+  """
+  Assistant with imported skills.
+  """
+}
+`;
+
+      const parseResult = parse(prs);
+      expect(parseResult.ast).toBeDefined();
+      const validator = createValidator({
+        lockfile: {
+          version: 1,
+          dependencies: {
+            'github.com/org/repo': {
+              version: 'v1.0.0',
+              commit: 'f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5',
+              integrity: 'sha256-abc',
+            },
+          },
+        },
+        excludes: [
+          {
+            import: 'github.com/org/repo',
+            commit: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+            rules: ['blocked-patterns'],
+          },
+        ],
+      });
+      const result = validator.validate(parseResult.ast!);
+
+      expect(result.valid).toBe(false);
+      const stale = result.errors.find((m) => m.ruleId === 'PS040');
+      expect(stale).toBeDefined();
+      expect(stale!.message).toContain('Stale exclude');
+    });
+  });
+
   describe('multilingual prompt injection detection', () => {
     it('should detect Polish prompt injection with SECURITY_STRICT_MULTILINGUAL', () => {
       const polishInjection = `@meta {

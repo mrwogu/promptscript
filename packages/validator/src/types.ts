@@ -5,6 +5,7 @@ import type {
   SourceLocation,
   PolicyDefinition,
   Lockfile,
+  ValidationExclude,
 } from '@promptscript/core';
 
 /**
@@ -122,6 +123,36 @@ export interface ValidatorConfig {
    * @default false
    */
   scanExternalContent?: boolean;
+  /**
+   * Rule exclusions for specific imports, bound to the commit pinned in the
+   * lockfile. Declared by the consumer in promptscript.yaml; an imported file
+   * can never mute its own scan.
+   */
+  excludes?: ValidationExclude[];
+  /**
+   * Pattern sources exempt from blocked-patterns detection. A blocked pattern
+   * is subtracted from the active set when its source text matches an entry
+   * exactly.
+   */
+  allowedPatterns?: (string | RegExp)[];
+  /**
+   * Absolute roots holding imported content, keyed by import source and the
+   * commit the lockfile pins for it. Computed by the compiler from the
+   * lockfile (registry cache, vendor directory, reference roots).
+   */
+  importRoots?: ImportRoot[];
+}
+
+/**
+ * Root directory of imported content for one lockfile dependency.
+ */
+export interface ImportRoot {
+  /** Normalized import key (matches promptscript.lock dependency keys) */
+  import: string;
+  /** Commit SHA the lockfile pins for the import */
+  commit: string;
+  /** Absolute path holding the import's resolved content */
+  path: string;
 }
 
 /**

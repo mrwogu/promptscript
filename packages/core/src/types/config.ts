@@ -184,6 +184,23 @@ export interface BuildProfileConfig {
 }
 
 /**
+ * Per-import validation exclusion, bound to the commit pinned in promptscript.lock.
+ *
+ * Suppression is declared by the consumer, never by the scanned content: an
+ * imported file cannot mute its own scan. When the lockfile pins a different
+ * commit than the one recorded here, the exclude stops applying and validation
+ * fails, so the consumer consciously re-reviews the new content.
+ */
+export interface ValidationExclude {
+  /** Import source as declared in `@use` or as pinned in promptscript.lock */
+  import: string;
+  /** Commit SHA the exclude was reviewed at; must match the lockfile pin */
+  commit?: string;
+  /** Rule names (e.g. `blocked-patterns`) or IDs (e.g. `PS005`) to skip for this import */
+  rules: string[];
+}
+
+/**
  * PromptScript configuration file (promptscript.yaml).
  */
 export interface PromptScriptConfig {
@@ -438,6 +455,24 @@ export interface PromptScriptConfig {
      * @default false
      */
     scanExternalContent?: boolean;
+    /**
+     * Rule exclusions for specific imports, bound to the pinned commit.
+     * @example
+     * excludes:
+     *   - import: github.com/cloudflare/skills
+     *     commit: 1a2b3c4d5e6f...
+     *     rules: [blocked-patterns, authority-injection]
+     */
+    excludes?: ValidationExclude[];
+    /**
+     * Pattern sources exempt from blocked-patterns detection. A pattern is
+     * subtracted from the active set when its source text matches an entry
+     * exactly. Mirror of blockedPatterns for exceptions.
+     * @example
+     * allowedPatterns:
+     *   - 'bypass\s+(your\s+)?(rules|restrictions)'
+     */
+    allowedPatterns?: string[];
   };
 
   /** Extension compliance policies */

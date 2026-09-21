@@ -1,4 +1,5 @@
 import type { ValidationRule } from '../types.js';
+import { isRuleExcludedForLocation } from '../import-exclusions.js';
 import { walkText, offsetLocation } from '../walker.js';
 
 /**
@@ -527,19 +528,29 @@ export const blockedPatterns: ValidationRule = {
   description: 'Content must not contain blocked patterns (prompt injection prevention)',
   defaultSeverity: 'error',
   validate: (ctx) => {
+    // allowedPatterns subtract patterns from the active set by exact source
+    // text, mirroring how blockedPatterns appends them.
+    const allowedSources = new Set(
+      (ctx.config.allowedPatterns ?? []).map((p) => (typeof p === 'string' ? p : p.source))
+    );
+
     // Combine default patterns with custom patterns from config
     const patterns: RegExp[] = [
       ...DEFAULT_BLOCKED_PATTERNS,
       ...(ctx.config.blockedPatterns ?? []).map((p) =>
         typeof p === 'string' ? new RegExp(p, 'i') : p
       ),
-    ];
+    ].filter((p) => !allowedSources.has(p.source));
 
     // Walk all text content and check against patterns.
     // Exclude skill resource files (bundled source code, not prompt instructions).
     walkText(
       ctx.ast,
       (text, loc) => {
+        // Consumer-declared excludes only ever suppress imported content.
+        if (isRuleExcludedForLocation(blockedPatterns, loc, ctx.config)) {
+          return;
+        }
         for (const pattern of patterns) {
           // Use a global copy to find all matches with their positions
           const globalPattern = new RegExp(
