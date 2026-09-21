@@ -591,8 +591,10 @@ async function main(): Promise<void> {
         '',
       ].join('\n')
     );
+    // The watcher needs the real PATH so deno, git, and the CLI resolve;
+    // everything user-owned is isolated through HOME and DENO_DIR.
     const child = spawn(
-      'deno',
+      'deno', // NOSONAR
       ['run', ...DENO_PERMISSIONS, 'npm:@promptscript/cli', 'compile', '--watch'],
       {
         cwd: projectDir,
@@ -835,8 +837,10 @@ async function main(): Promise<void> {
     );
     // Port 0 is rejected by the CLI, so reserve a concrete free port instead.
     const port = await findFreePort();
+    // Same PATH story as the watch test: the server child needs real tool
+    // lookup while HOME stays isolated.
     const child = spawn(
-      'deno',
+      'deno', // NOSONAR
       [
         'run',
         ...DENO_PERMISSIONS,
@@ -902,7 +906,8 @@ async function main(): Promise<void> {
 
       // The pager only engages on a TTY. script(1) itself needs a TTY on
       // stdin, so allocate a pty through python3 instead.
-      const python3 = spawnSync('python3', ['--version'], { windowsHide: true }).status === 0;
+      // Probing python3 inherits PATH on purpose; the harness only checks availability.
+      const python3 = spawnSync('python3', ['--version'], { windowsHide: true }).status === 0; // NOSONAR
       if (python3) {
         const paged = await run(
           'python3',
@@ -1180,7 +1185,7 @@ async function runContainerSmoke(version: string): Promise<void> {
           'cd /work/container-project',
           '"$bin_id" compile',
           'test -f .factory/rules/restrictions.md',
-          'printf "USER OWNED\\n" > .factory/rules/user-owned.md',
+          String.raw`printf "USER OWNED\n" > .factory/rules/user-owned.md`,
           'cat > .promptscript/project.prs << "PRSEOF"',
           '@meta {',
           '  id: "container"',
