@@ -337,6 +337,8 @@ builds:
           version: full
       - codex:
           version: full
+          output: AGENTS.override.md
+          agentsFile: AGENTS.override.md
   web:
     entry: .promptscript/web.prs
     output: packages/web
