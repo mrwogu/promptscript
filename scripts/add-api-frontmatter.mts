@@ -21,7 +21,7 @@
  */
 
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 
 const API_ROOT = resolve('docs/api-reference');
 const CHECK_MODE = process.argv.includes('--check');
@@ -282,7 +282,8 @@ let updated = 0;
 let current = 0;
 
 for (const file of files) {
-  const relativePath = relative(API_ROOT, file);
+  // Normalize to forward slashes so path-segment logic works on Windows too
+  const relativePath = relative(API_ROOT, file).split(sep).join('/');
   const content = readFileSync(file, 'utf-8');
   const body = stripFrontmatter(content);
   let meta: PageMeta;
