@@ -641,6 +641,51 @@ jobs:
 
           echo "Template interpolation working correctly"
 
+  deno-smoke:
+    name: Deno Smoke Test
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '25'
+          cache: 'pnpm'
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download CLI artifact
+        id: artifact
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          name: cli-dist
+          path: dist/packages/cli
+
+      - name: Build CLI bundle (when no artifact was produced)
+        if: steps.artifact.outcome == 'failure'
+        run: pnpm nx build cli
+
+      - name: Bundle portability checks
+        run: pnpm deno:check
+
+      - name: Deno integration suite
+        run: pnpm deno:suite
+
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
