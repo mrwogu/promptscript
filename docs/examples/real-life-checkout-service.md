@@ -31,7 +31,8 @@ Acceptance criteria:
 - `prs validate --strict` succeeds.
 - The resolved testing standard is `Minimum 95% coverage for payment flows`.
 - Generated output contains the payment security skill and reviewer agent.
-- CI fails when committed generated files drift from PromptScript sources.
+- CI fails when committed generated files drift from PromptScript sources,
+  including generated paths a clone ignores.
 - Existing instruction files are backed up and reviewed before takeover.
 
 ## Repository Layout
@@ -430,12 +431,21 @@ jobs:
       - run: npm install -g @promptscript/cli@1.19.0
       - run: prs validate --strict
       - run: prs compile
-      - run: test -z "$(git status --porcelain --untracked-files=all)"
+      - run: test -z "$(git status --porcelain --untracked-files=all --ignored=matching -- AGENTS.md CLAUDE.md .claude .github)"
 ```
 
-The final step catches modified, deleted, and untracked generated files. Update
-the pinned CLI version through the same reviewed dependency process as other
-build tools.
+The final step catches modified, deleted, untracked, and ignored generated
+files. Generated outputs are part of the repository and must stay tracked:
+never list them in `.gitignore`, because a plain `git status` check is blind to
+ignored paths and their drift would go unnoticed. `--ignored=matching` plus the
+generated-path list closes that hole - a clone that ignores a generated output
+surfaces it as `!!` and fails the build instead of hiding the drift. Extend the
+path list when you add targets. Update the pinned CLI version through the same
+reviewed dependency process as other build tools.
+
+`prs diff --all --full` also reads generated files from disk regardless of
+ignore rules, but it exits 0 even when drift is present, so treat it as a local
+review aid - not the CI gate.
 
 ## Step 9: Roll Out
 
@@ -509,4 +519,5 @@ controlled takeover. Do not delete target files, disable a target, or keep
 - [ ] `prs diff --all --full` is empty after compile.
 - [ ] Git diff contains only approved source and generated changes.
 - [ ] CI reproduces output and fails on drift.
+- [ ] Generated outputs are tracked, never gitignored.
 - [ ] Payment and platform owners approve rollout and rollback.
