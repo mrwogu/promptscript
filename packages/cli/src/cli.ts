@@ -1,13 +1,8 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { fileURLToPath, pathToFileURL } from 'url';
-import { dirname } from 'path';
-import { getPackageVersion } from '@promptscript/core';
+import { pathToFileURL } from 'url';
+import { CLI_VERSION } from './cli-version.js';
 import { initCommand } from './commands/init.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const CLI_VERSION = getPackageVersion(__dirname, '../package.json');
 
 import { compileCommand } from './commands/compile.js';
 import { validateCommand } from './commands/validate.js';
@@ -90,7 +85,7 @@ program
     }
 
     // Check for updates (fire-and-forget, respects cache and quiet mode)
-    const currentVersion = getPackageVersion(__dirname, '../package.json');
+    const currentVersion = CLI_VERSION;
     checkForUpdates(currentVersion).then((updateInfo) => {
       if (updateInfo) {
         printUpdateNotification(updateInfo);

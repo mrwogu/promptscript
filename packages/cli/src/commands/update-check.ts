@@ -1,18 +1,13 @@
-import { getPackageVersion } from '@promptscript/core';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { CLI_VERSION } from '../cli-version.js';
 import { ConsoleOutput } from '../output/console.js';
 import { forceCheckForUpdates } from '../utils/version-check.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 /**
  * Check for CLI updates command.
  * Always checks online (ignores cache) and displays current version + status.
  */
 export async function updateCheckCommand(): Promise<void> {
-  const currentVersion = getPackageVersion(__dirname, '../../package.json');
+  const currentVersion = CLI_VERSION;
 
   // Print current version
   console.log(`@promptscript/cli v${currentVersion}`);
