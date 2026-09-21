@@ -8,11 +8,13 @@ import type { ImportRoot, ValidatorConfig } from './types.js';
  * Strips transport details so `https://github.com/org/repo.git`,
  * `git@github.com:org/repo`, and `github.com/org/repo` all compare equal.
  * Mirrors the normalization the compiler applies to lockfile dependency keys.
+ * Patterns stay linear: a fixed alternation with no nested quantifiers, so
+ * adversarial import strings cannot trigger polynomial backtracking.
  */
 export function normalizeImportKey(value: string): string {
   return value
-    .replace(/^(?:https?:\/\/|git:\/\/)/i, '')
-    .replace(/^git@([^:]+):/, '$1/')
+    .replace(/^(?:https?|git):\/\//i, '')
+    .replace(/^git@([^:/]+):/, '$1/')
     .replace(/\.git(?=\/|$)/, '')
     .replace(/\/+$/, '');
 }
