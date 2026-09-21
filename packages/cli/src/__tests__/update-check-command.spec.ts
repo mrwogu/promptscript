@@ -5,9 +5,9 @@ vi.mock('../utils/version-check.js', () => ({
   forceCheckForUpdates: vi.fn(),
 }));
 
-// Mock @promptscript/core
-vi.mock('@promptscript/core', () => ({
-  getPackageVersion: vi.fn(() => '1.0.0'),
+// Mock the statically resolved CLI version
+vi.mock('../cli-version.js', () => ({
+  CLI_VERSION: '1.0.0',
 }));
 
 // Mock console output
