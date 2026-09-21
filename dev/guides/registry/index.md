@@ -4,41 +4,110 @@ PromptScript supports registries - collections of reusable configurations that c
 
 ## Quick Start
 
+This walkthrough runs end to end from an empty directory. You create a registry, publish it to a Git host, bind a project to it, and compile - every snippet is a command you can run.
+
 ### 1. Create a Registry
 
 ```bash
-prs registry init my-company-registry
+prs registry init my-registry --yes --name "My Company Registry" --namespaces @core @stacks @fragments
 ```
 
-This scaffolds a complete registry with starter configurations. See [Creating a Registry](#creating-a-registry) for details.
+This scaffolds the directory, manifest, and three starter configurations in `@core`:
 
-### 2. Configure Your Project
-
-Add to your `promptscript.yaml`:
-
-```yaml
-registry:
-  git:
-    url: https://github.com/your-org/your-registry.git
-    ref: main # Or pin to version: v1.0.0
+```text
+my-registry/
+├── registry-manifest.yaml
+├── README.md
+├── @core/
+│   ├── base.prs        # universal AI assistant foundation
+│   ├── quality.prs    # code quality standards mixin
+│   └── security.prs    # security best practices mixin
+├── @stacks/           # empty, add stack configs here
+└── @fragments/        # empty, add mixins here
 ```
 
-### 2. Inherit Configurations
-
-```
-@meta {
-  id: "my-project"
-  syntax: "1.0.0"
-}
-
-@inherit @stacks/react
-@use @fragments/testing
-```
-
-### 3. Compile
+Check it before publishing:
 
 ```bash
-prs compile  # Automatically fetches registry and generates output
+prs registry validate ./my-registry
+```
+
+See [Creating a Registry](#creating-a-registry) for the interactive mode and other options.
+
+### 2. Publish the Registry
+
+`prs registry init` does not create a Git repository, so the registry is not reachable from any project yet. Put it under version control and push it to your Git host:
+
+```bash
+cd my-registry
+git init -b main
+git add .
+git commit -m "feat: initial registry"
+git remote add origin https://github.com/your-org/my-registry.git  # replace your-org with your GitHub org or user
+git push -u origin main
+```
+
+From now on, `prs registry publish` re-publishes registry updates - it validates, commits, and pushes in one step (see [Publishing a Registry](#publishing-a-registry)).
+
+### 3. Bind Your Project
+
+Return to the starting directory and create a project:
+
+```bash
+cd ..
+mkdir my-project
+cd my-project
+mkdir -p .promptscript
+```
+
+In your project root, point `promptscript.yaml` at the registry you just pushed and pick compile targets:
+
+```yaml
+# promptscript.yaml
+registry:
+  git:
+    url: https://github.com/your-org/my-registry.git # same URL you pushed to above
+    ref: main # Or pin to version: v1.0.0
+
+targets:
+  - github # compiles .github/copilot-instructions.md - pick your tools here
+```
+
+No Git host handy? A local registry works for the rest of this walkthrough - skip the push and configure `registry: { path: ../my-registry }` instead.
+
+### 4. Use Registry Configurations
+
+Reference configurations by their namespace and file name. The starter registry already ships `@core/quality`, so this resolves out of the box:
+
+```
+# .promptscript/project.prs
+@meta {
+  id: "my-project"
+  syntax: "1.5.0"
+}
+
+@use @core/quality
+@use @core/security
+```
+
+### 5. Validate and Compile
+
+```bash
+prs validate  # resolves the registry, validates the project
+prs compile   # fetches the registry, writes the compiled files
+```
+
+Expected output:
+
+```text
+- Loading configuration...
+✔ Validation successful
+
+- Compiling...
+  ✓ .github/copilot-instructions.md
+  ✓ .github/skills/promptscript/SKILL.md
+  ✓ AGENTS.md
+✔ Compilation successful
 ```
 
 **Note:** When using a Git registry, the CLI automatically clones and caches the repository. You don't need to run `prs pull` separately - the `compile` and `validate` commands handle this automatically.
@@ -95,30 +164,30 @@ See [Skill Overlays](https://getpromptscript.dev/dev/guides/skill-overlays/index
 
 ## Usage Patterns
 
-### Pattern 1: Inherit a Tech Stack
+### Pattern 1: Inherit the Base
 
 ```
-@meta { id: "react-app" syntax: "1.0.0" }
+@meta { id: "base-project" syntax: "1.5.0" }
 
-@inherit @stacks/react
+@inherit @core/base
 ```
 
-### Pattern 2: Mix in Fragments
+### Pattern 2: Mix in Shared Standards
 
 ```
-@meta { id: "secure-app" syntax: "1.0.0" }
+@meta { id: "secure-project" syntax: "1.5.0" }
 
-@inherit @stacks/node
-@use @fragments/testing
-@use @fragments/security/owasp-security-review
+@inherit @core/base
+@use @core/quality
+@use @core/security
 ```
 
-### Pattern 3: Use Prompts Directly
+### Pattern 3: Use a Mixin Directly
 
 ```
-@meta { id: "terminal" syntax: "1.0.0" }
+@meta { id: "security-review" syntax: "1.5.0" }
 
-@inherit @prompts/coding/linux-terminal
+@use @core/security
 ```
 
 ## How Git Registry Resolution Works
@@ -470,7 +539,7 @@ Project aliases win over user aliases, which win over system aliases. This lets 
 Once configured, use the alias as the scope prefix in any import:
 
 ```
-@meta { id: "my-project" syntax: "1.0.0" }
+@meta { id: "my-project" syntax: "1.5.0" }
 
 # Resolves to github.com/acme/promptscript-base/@org/base.prs
 @inherit @company/@org/base
@@ -488,7 +557,7 @@ Beyond registry aliases, PromptScript supports Go-module-style bare URL imports.
 ### Basic URL Import
 
 ```
-@meta { id: "my-project" syntax: "1.0.0" }
+@meta { id: "my-project" syntax: "1.5.0" }
 
 # Import directly from a public GitHub repo
 @use github.com/acme/shared-standards/@fragments/security
@@ -545,7 +614,7 @@ When you import a repository that does not contain `.prs` files, PromptScript lo
 ### Example: Importing an Open-Source Skill Library
 
 ```
-@meta { id: "my-project" syntax: "1.0.0" }
+@meta { id: "my-project" syntax: "1.5.0" }
 
 # This repo has a SKILL.md but no .prs files - auto-discovered
 @use github.com/some-org/claude-skills/skills/tdd-workflow
@@ -574,19 +643,31 @@ Compilation never rewrites the lockfile. Run `prs lock` after adding or changing
 
 ### Lockfile Format
 
+Actual `prs lock` output for a project configured with `registry.git.url: https://github.com/acme/promptscript-base.git`:
+
 ```yaml
-# promptscript.lock
+# promptscript.lock - written by `prs lock`
 version: 1
 dependencies:
-  github.com/acme/promptscript-base:
+  https://github.com/acme/promptscript-base.git:
     version: main
     commit: a3f8c2d91b4e6f7890123456789abcdef0123456
     integrity: sha256-pending
+```
+
+For a default Git registry, the dependency key preserves the configured URL. `version` records the requested ref, while `commit` records the resolved 40-character commit SHA.
+
+Projects whose skills pull registry reference files (via `@skills.references`) also get a `references` map. The shape below is illustrative - the key and hash values come from your own locked content - but the field types are exact:
+
+```yaml
+# Illustrative view - run `prs lock` to see real values
 references:
   "github.com/acme/promptscript-base\0references/testing.md\0main":
-    hash: sha256-f6e5d4c3b2a1...
-    lockedAt: 2026-03-23T10:00:00.000Z
+    hash: sha256-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef # 64-char SHA-256
+    lockedAt: 2026-03-23T10:00:00.000Z # ISO timestamp of when `prs lock` recorded this hash
 ```
+
+`integrity: sha256-pending` is the literal value `prs lock` writes for Git dependencies: the commit pin is the security guarantee, so no content hash is claimed for the repository as a whole. Managed Markdown-sourced skill entries get a computed `sha256-<hex>` instead, aggregated from their child entries.
 
 ### Integrity Hashes
 
