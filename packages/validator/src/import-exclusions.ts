@@ -8,15 +8,43 @@ import type { ImportRoot, ValidatorConfig } from './types.js';
  * Strips transport details so `https://github.com/org/repo.git`,
  * `git@github.com:org/repo`, and `github.com/org/repo` all compare equal.
  * Mirrors the normalization the compiler applies to lockfile dependency keys.
- * Patterns stay linear: a fixed alternation with no nested quantifiers, so
- * adversarial import strings cannot trigger polynomial backtracking.
+ * Implemented with plain string operations so adversarial import strings
+ * cannot trigger regex backtracking (CodeQL js/polynomial-redos, Sonar S8786).
  */
 export function normalizeImportKey(value: string): string {
-  return value
-    .replace(/^(?:https?|git):\/\//i, '')
-    .replace(/^git@([^:/]+):/, '$1/')
-    .replace(/\.git(?=\/|$)/, '')
-    .replace(/\/+$/, '');
+  let result = value;
+
+  // Strip the transport scheme (http, https, git), case-insensitively.
+  const lower = result.toLowerCase();
+  for (const scheme of ['https://', 'http://', 'git://']) {
+    if (lower.startsWith(scheme)) {
+      result = result.slice(scheme.length);
+      break;
+    }
+  }
+
+  // Rewrite git@host:path to host/path.
+  if (result.startsWith('git@')) {
+    const separator = result.indexOf(':');
+    if (separator > 4) {
+      result = `${result.slice(4, separator)}/${result.slice(separator + 1)}`;
+    }
+  }
+
+  // Drop the first .git marker that precedes a path segment or ends the key.
+  const marker = result.indexOf('.git/');
+  if (marker !== -1) {
+    result = `${result.slice(0, marker)}/${result.slice(marker + 5)}`;
+  } else if (result.endsWith('.git')) {
+    result = result.slice(0, -4);
+  }
+
+  // Trim trailing slashes.
+  let end = result.length;
+  while (end > 0 && result[end - 1] === '/') {
+    end--;
+  }
+  return result.slice(0, end);
 }
 
 function isPathInside(root: string, candidate: string): boolean {
