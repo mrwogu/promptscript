@@ -372,6 +372,9 @@ importers:
       '@fastify/cors':
         specifier: ^11.3.0
         version: 11.3.0
+      '@fastify/rate-limit':
+        specifier: ^11.2.0
+        version: 11.2.0
       '@fastify/websocket':
         specifier: ^11.3.0
         version: 11.3.0
@@ -396,10 +399,6 @@ importers:
       yaml:
         specifier: ^2.9.1
         version: 2.9.1
-    devDependencies:
-      '@fastify/rate-limit':
-        specifier: ^11.2.0
-        version: 11.2.0
 
   packages/telemetry:
     dependencies:

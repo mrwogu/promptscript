@@ -28,6 +28,7 @@ dependencies['simple-git'] = resolverPkg.dependencies['simple-git'];
 // Server dependencies (server is bundled, but its deps are external)
 dependencies['fastify'] = serverPkg.dependencies['fastify'];
 dependencies['@fastify/cors'] = serverPkg.dependencies['@fastify/cors'];
+dependencies['@fastify/rate-limit'] = serverPkg.dependencies['@fastify/rate-limit'];
 dependencies['@fastify/websocket'] = serverPkg.dependencies['@fastify/websocket'];
 dependencies['ws'] = serverPkg.dependencies['ws'];
 dependencies['fast-glob'] = serverPkg.dependencies['fast-glob'];

@@ -8,6 +8,7 @@
   "types": "./src/index.d.ts",
   "dependencies": {
     "@fastify/cors": "^11.3.0",
+    "@fastify/rate-limit": "^11.2.0",
     "@fastify/websocket": "^11.3.0",
     "@swc/helpers": "~0.5.23",
     "@types/ws": "^8.18.1",
@@ -17,7 +18,5 @@
     "ws": "^8.21.3",
     "yaml": "^2.9.1"
   },
-  "devDependencies": {
-    "@fastify/rate-limit": "^11.2.0"
-  }
+  "devDependencies": {}
 }
