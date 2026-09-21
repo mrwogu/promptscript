@@ -1,6 +1,12 @@
 export type TelemetryOutcome = 'success' | 'error' | 'cancelled';
 export type SendResult = 'sent' | 'unknown' | 'retryable' | 'rejected';
 
+/**
+ * Runtime hosting the CLI. Node and Deno records must not mix: batches and
+ * spool keys are separated by this value.
+ */
+export type TelemetryRuntime = 'node' | 'deno';
+
 export interface CommandTelemetryEvent {
   name: 'command';
   command: string;
@@ -25,6 +31,7 @@ export interface RuntimeMetadata {
 }
 
 export interface SpoolRecord extends RuntimeMetadata {
+  runtime: TelemetryRuntime;
   event: TelemetryEvent;
 }
 
@@ -32,7 +39,7 @@ export interface TelemetryPayload extends RuntimeMetadata {
   schema: 1;
   app: 'promptscript';
   event_schema: 1;
-  runtime: 'node';
+  runtime: TelemetryRuntime;
   events: TelemetryEvent[];
 }
 

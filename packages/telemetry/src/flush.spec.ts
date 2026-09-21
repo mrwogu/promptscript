@@ -29,6 +29,7 @@ function record(count = 1, feature = 'strict'): SpoolRecord {
     runtime_version: '24',
     os: 'darwin',
     arch: 'arm64',
+    runtime: 'node',
     event: { name: 'feature', feature, count },
   };
 }

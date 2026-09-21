@@ -42,6 +42,7 @@ import {
   flushCliTelemetry,
   normalizedCommandName,
   prepareCliTelemetry,
+  resolveFlushSelfInvocation,
   telemetryStatus,
 } from './session.js';
 
@@ -110,7 +111,15 @@ describe('CLI telemetry lifecycle', () => {
       cwd: 'project',
       config: 'promptscript.yaml',
     });
-    expect(mocks.maybeSpawnFlush).toHaveBeenCalledWith(config);
+    expect(mocks.maybeSpawnFlush).toHaveBeenCalledWith(
+      config,
+      expect.objectContaining({
+        selfInvocation: {
+          executable: process.execPath,
+          prefixArgs: [process.argv[1]],
+        },
+      })
+    );
 
     finishCliTelemetry('error');
     expect(readFileSync(join(config.cacheDirectory, 'telemetry.ndjson'), 'utf8')).toContain(
@@ -169,5 +178,44 @@ describe('CLI telemetry lifecycle', () => {
       spool: { records: 2, bytes: 200 },
       state: { lastSuccess: '2026-08-06T12:00:00.000Z' },
     });
+  });
+});
+
+describe('resolveFlushSelfInvocation', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('respawns the node entrypoint on node', () => {
+    expect(resolveFlushSelfInvocation(config)).toEqual({
+      executable: process.execPath,
+      prefixArgs: [process.argv[1]],
+    });
+  });
+
+  it('re-executes the compiled binary for deno standalone', () => {
+    vi.stubGlobal('Deno', { build: { standalone: true } });
+    expect(resolveFlushSelfInvocation(config)).toEqual({
+      executable: process.execPath,
+      prefixArgs: [],
+    });
+  });
+
+  it('re-runs the pinned npm package with scoped permissions for deno run', () => {
+    vi.stubGlobal('Deno', { build: { standalone: false } });
+    const invocation = resolveFlushSelfInvocation(config);
+
+    expect(invocation?.executable).toBe(process.execPath);
+    expect(invocation?.prefixArgs[0]).toBe('run');
+    expect(invocation?.prefixArgs).toContain('--allow-env');
+    expect(invocation?.prefixArgs).toContain('--allow-sys');
+    expect(invocation?.prefixArgs).toContain('--allow-net=telemetry.example');
+    expect(invocation?.prefixArgs).toContain(`--allow-write=${config.cacheDirectory}`);
+    expect(invocation?.prefixArgs).toContain('npm:@promptscript/cli@1.19.1');
+  });
+
+  it('fails closed when the endpoint host cannot be parsed', () => {
+    vi.stubGlobal('Deno', { build: { standalone: false } });
+    expect(resolveFlushSelfInvocation({ ...config, endpoint: 'not-a-url' })).toBeUndefined();
   });
 });

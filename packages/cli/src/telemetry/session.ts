@@ -1,4 +1,6 @@
 import type { Command } from 'commander';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   getSpoolInfo,
   isExcludedCommand,
@@ -8,9 +10,13 @@ import {
   runtimeMetadata,
   sanitizeFeature,
   TelemetrySession,
+  type FlushSelfInvocation,
   type ResolvedTelemetryConfig,
   type TelemetryOutcome,
 } from '@promptscript/telemetry';
+import { getRuntimeInfo } from '../runtime/runtime-info.js';
+import { CLI_VERSION } from '../cli-version.js';
+import { USER_CONFIG_PATH } from '../config/user-config.js';
 import { resolveCliTelemetryConfig } from './config.js';
 
 let activeSession: TelemetrySession | null = null;
@@ -99,6 +105,59 @@ function installExitHandler(): void {
   exitHandlerInstalled = true;
 }
 
+/**
+ * Resolve how this process re-executes itself for a background flush.
+ *
+ * Node spawns its entrypoint as before. A deno compile binary re-executes
+ * itself with the hidden flush command. Under `deno run` the published npm
+ * package is re-run with scoped permissions: env and sys for the CLI, net
+ * only for the collector host, reads on the directories the flush child
+ * inspects, and writes only on the telemetry spool.
+ */
+export function resolveFlushSelfInvocation(
+  config: ResolvedTelemetryConfig
+): FlushSelfInvocation | undefined {
+  const { runtime, standalone } = getRuntimeInfo();
+  if (runtime === 'deno') {
+    if (standalone) {
+      return { executable: process.execPath, prefixArgs: [] };
+    }
+    const endpointHost = endpointHostOf(config.endpoint);
+    if (endpointHost === undefined) return undefined;
+    // After bundling, this module lives next to index.js in the package.
+    const cliDirectory = dirname(fileURLToPath(import.meta.url));
+    const readScopes = [
+      process.cwd(),
+      dirname(USER_CONFIG_PATH),
+      config.cacheDirectory,
+      cliDirectory,
+    ].join(',');
+    return {
+      executable: process.execPath,
+      prefixArgs: [
+        'run',
+        '--allow-env',
+        '--allow-sys',
+        `--allow-net=${endpointHost}`,
+        `--allow-read=${readScopes}`,
+        `--allow-write=${config.cacheDirectory}`,
+        `npm:@promptscript/cli@${CLI_VERSION}`,
+      ],
+    };
+  }
+  const entrypoint = process.argv[1];
+  if (entrypoint === undefined) return undefined;
+  return { executable: process.execPath, prefixArgs: [entrypoint] };
+}
+
+function endpointHostOf(endpoint: string): string | undefined {
+  try {
+    return new URL(endpoint).host;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function prepareCliTelemetry(command: Command, appVersion: string): Promise<void> {
   const name = normalizedCommandName(command);
   if (isExcludedCommand(name) || process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'] === '1') {
@@ -109,10 +168,11 @@ export async function prepareCliTelemetry(command: Command, appVersion: string):
     ...(typeof options['cwd'] === 'string' ? { cwd: options['cwd'] } : {}),
     ...(typeof options['config'] === 'string' ? { config: options['config'] } : {}),
   });
-  maybeSpawnFlush(config);
+  maybeSpawnFlush(config, { selfInvocation: resolveFlushSelfInvocation(config) });
   activeSession = new TelemetrySession({
     config,
     metadata: runtimeMetadata(appVersion),
+    runtime: getRuntimeInfo().runtime,
     command: name,
     features: commandFeatures(command),
   });
