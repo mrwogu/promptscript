@@ -42,11 +42,21 @@ Install the CLI toolchain to compile, validate, and manage your PromptScript fil
     yarn global add @promptscript/cli
     ```
 
+=== "Deno"
+
+    ```bash
+    deno install -g --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run npm:@promptscript/cli
+    ```
+
 Verify installation:
 
 ```bash
 prs --version
 ```
+
+The CLI also runs under Deno and can be compiled into a standalone binary
+with no runtime dependencies. See the
+[CLI reference](reference/cli.md#running-under-deno) for the full Deno guide.
 
 ## Interactive Initialization
 
