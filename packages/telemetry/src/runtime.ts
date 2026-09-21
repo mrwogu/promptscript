@@ -4,6 +4,7 @@ interface RuntimeInput {
   platform?: NodeJS.Platform;
   architecture?: string;
   nodeVersion?: string;
+  runtimeVersion?: string;
 }
 
 function operatingSystem(platform: NodeJS.Platform): RuntimeMetadata['os'] {
@@ -30,10 +31,16 @@ function architecture(value: string): RuntimeMetadata['arch'] {
   }
 }
 
+function majorVersion(version: string): string {
+  return version.split('.')[0] ?? '0';
+}
+
 export function runtimeMetadata(appVersion: string, input: RuntimeInput = {}): RuntimeMetadata {
   return {
     app_version: appVersion,
-    runtime_version: (input.nodeVersion ?? process.versions.node).split('.')[0] ?? '0',
+    runtime_version: majorVersion(
+      input.runtimeVersion ?? input.nodeVersion ?? process.versions.node
+    ),
     os: operatingSystem(input.platform ?? process.platform),
     arch: architecture(input.architecture ?? process.arch),
   };

@@ -26,12 +26,23 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
+interface DenoNamespace {
+  build: Record<string, unknown>;
+  version?: unknown;
+}
+
 /**
  * Type guard for the Deno namespace without depending on Deno type
  * definitions (the CLI bundles no @types/deno).
  */
-function isDenoNamespace(value: unknown): value is { build: Record<string, unknown> } {
+function isDenoNamespace(value: unknown): value is DenoNamespace {
   return isRecord(value) && isRecord(value['build']);
+}
+
+function getDenoNamespace(): DenoNamespace | undefined {
+  const denoCandidate: unknown =
+    'Deno' in globalThis ? (globalThis as { Deno?: unknown }).Deno : undefined;
+  return isDenoNamespace(denoCandidate) ? denoCandidate : undefined;
 }
 
 /**
@@ -39,10 +50,20 @@ function isDenoNamespace(value: unknown): value is { build: Record<string, unkno
  * compiled standalone binary (`Deno.build.standalone`).
  */
 export function getRuntimeInfo(): RuntimeInfo {
-  const denoCandidate: unknown =
-    'Deno' in globalThis ? (globalThis as { Deno?: unknown }).Deno : undefined;
-  if (isDenoNamespace(denoCandidate)) {
-    return { runtime: 'deno', standalone: denoCandidate.build['standalone'] === true };
+  const denoNamespace = getDenoNamespace();
+  if (denoNamespace !== undefined) {
+    return { runtime: 'deno', standalone: denoNamespace.build['standalone'] === true };
   }
   return { runtime: 'node', standalone: false };
+}
+
+/** Report the full version of the runtime hosting this process. */
+export function getRuntimeVersion(): string {
+  const denoNamespace = getDenoNamespace();
+  if (denoNamespace === undefined) {
+    return process.versions.node;
+  }
+  return isRecord(denoNamespace.version) && typeof denoNamespace.version['deno'] === 'string'
+    ? denoNamespace.version['deno']
+    : '0';
 }

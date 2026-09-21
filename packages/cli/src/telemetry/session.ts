@@ -14,7 +14,7 @@ import {
   type ResolvedTelemetryConfig,
   type TelemetryOutcome,
 } from '@promptscript/telemetry';
-import { getRuntimeInfo } from '../runtime/runtime-info.js';
+import { getRuntimeInfo, getRuntimeVersion } from '../runtime/runtime-info.js';
 import { CLI_VERSION } from '../cli-version.js';
 import { USER_CONFIG_PATH } from '../config/user-config.js';
 import { resolveCliTelemetryConfig } from './config.js';
@@ -169,10 +169,11 @@ export async function prepareCliTelemetry(command: Command, appVersion: string):
     ...(typeof options['config'] === 'string' ? { config: options['config'] } : {}),
   });
   maybeSpawnFlush(config, { selfInvocation: resolveFlushSelfInvocation(config) });
+  const runtimeInfo = getRuntimeInfo();
   activeSession = new TelemetrySession({
     config,
-    metadata: runtimeMetadata(appVersion),
-    runtime: getRuntimeInfo().runtime,
+    metadata: runtimeMetadata(appVersion, { runtimeVersion: getRuntimeVersion() }),
+    runtime: runtimeInfo.runtime,
     command: name,
     features: commandFeatures(command),
   });
