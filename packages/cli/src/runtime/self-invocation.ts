@@ -47,6 +47,27 @@ const DENO_WORKER_FLAGS = [
   '--allow-write=.',
 ] as const;
 
+const NODE_LOADER_FLAGS = new Set(['--import', '--loader', '--experimental-loader']);
+
+function getNodeLoaderArgs(args: readonly string[]): string[] {
+  const loaderArgs: string[] = [];
+  for (let index = 0; index < args.length; index++) {
+    const arg = args[index]!;
+    if (NODE_LOADER_FLAGS.has(arg)) {
+      const value = args[index + 1];
+      if (value !== undefined) {
+        loaderArgs.push(arg, value);
+        index++;
+      }
+      continue;
+    }
+    if ([...NODE_LOADER_FLAGS].some((flag) => arg.startsWith(`${flag}=`))) {
+      loaderArgs.push(arg);
+    }
+  }
+  return loaderArgs;
+}
+
 /**
  * Resolve how to re-execute this program, or undefined when no safe
  * self-invocation exists (callers must then fail closed).
@@ -67,5 +88,8 @@ export function resolveSelfInvocation(options: SelfInvocationOptions): SelfInvoc
   }
 
   if (options.workerPath === undefined) return undefined;
-  return { executable: process.execPath, prefixArgs: [options.workerPath] };
+  return {
+    executable: process.execPath,
+    prefixArgs: [...getNodeLoaderArgs(process.execArgv), options.workerPath],
+  };
 }

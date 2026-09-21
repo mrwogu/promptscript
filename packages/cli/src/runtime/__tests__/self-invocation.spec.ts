@@ -15,6 +15,38 @@ describe('resolveSelfInvocation', () => {
     });
   });
 
+  it('should preserve node loader arguments for TypeScript workers', () => {
+    const originalExecArgv = process.execArgv;
+    process.execArgv = [
+      '--conditions',
+      'development',
+      '--import',
+      '@swc-node/register/esm-register',
+      '--inspect=0',
+    ];
+    try {
+      expect(resolveSelfInvocation({ workerPath })).toEqual({
+        executable: process.execPath,
+        prefixArgs: ['--import', '@swc-node/register/esm-register', workerPath],
+      });
+    } finally {
+      process.execArgv = originalExecArgv;
+    }
+  });
+
+  it('should preserve inline node loader arguments', () => {
+    const originalExecArgv = process.execArgv;
+    process.execArgv = ['--experimental-loader=tsx'];
+    try {
+      expect(resolveSelfInvocation({ workerPath })).toEqual({
+        executable: process.execPath,
+        prefixArgs: ['--experimental-loader=tsx', workerPath],
+      });
+    } finally {
+      process.execArgv = originalExecArgv;
+    }
+  });
+
   it('should return undefined on node without a worker module', () => {
     expect(resolveSelfInvocation({ workerPath: undefined })).toBeUndefined();
   });
