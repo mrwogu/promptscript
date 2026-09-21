@@ -602,10 +602,11 @@ central registry and consumed by every frontend project:
 
 The single `@use @acme/design-system` line is the whole project-level usage. It
 composes the shared `component-review` and `token-migration` skills into
-`checkout-app`, so the Design Systems team updates them once in the registry and
-every consuming project picks the change up on the next compile. Agents in
-consuming projects can then reference the skills by name without re-authoring
-them per repository.
+`checkout-app`. Projects receive a Design Systems update only after refreshing
+their reviewed registry pin and recompiling; compilation alone keeps the cached
+or lockfile-pinned revision. See [Updating Dependencies](../guides/registry.md#updating-dependencies)
+for the scoped `prs update` workflow. Agents in consuming projects can then
+reference the skills by name without re-authoring them per repository.
 
 ### Project Config
 
@@ -631,6 +632,7 @@ targets:
       output: CLAUDE.md
   - cursor:
       output: .cursor/rules/project.mdc
+      version: full
 
 validation:
   rules:
