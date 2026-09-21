@@ -2,6 +2,10 @@
 import { Command } from 'commander';
 import { pathToFileURL } from 'url';
 import { CLI_VERSION } from './cli-version.js';
+// Dispatches the hidden __managed-output-worker command before Commander
+// parsing, telemetry init, and the update check, including in deno compile
+// binaries where the process re-executes itself as a worker.
+import { wasDispatchedAsManagedOutputWorker } from './managed-output-worker.js';
 import { initCommand } from './commands/init.js';
 
 import { compileCommand } from './commands/compile.js';
@@ -367,6 +371,11 @@ registerRegistryCommands(registry);
  * @param args - Command line arguments (defaults to process.argv)
  */
 export async function run(args: string[] = process.argv): Promise<void> {
+  if (wasDispatchedAsManagedOutputWorker()) {
+    // Worker dispatch already handled this process and set its exit code;
+    // the commander program must not also parse the worker arguments.
+    return;
+  }
   try {
     await program.parseAsync(args);
   } catch (error) {
