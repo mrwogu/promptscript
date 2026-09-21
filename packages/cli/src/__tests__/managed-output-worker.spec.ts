@@ -277,6 +277,97 @@ describe('managed output worker protocol', () => {
     expect(await readFile(join(outside, 'keep.md'), 'utf-8')).toBe('keep');
   });
 
+  it('skips unlink when the file vanished before the operation', async () => {
+    const project = await createProject('worker-unlink-missing-');
+    const directory = await stat(project);
+
+    const result = await runWorker(project, [
+      'unlink',
+      'missing.md',
+      String(directory.dev),
+      String(directory.ino),
+      '1',
+      '2',
+    ]);
+
+    expect(result.stdout).toBe('skipped');
+    expect(result.code).toBe(0);
+  });
+
+  it('skips rewrite when the directory identity does not match', async () => {
+    const project = await createProject('worker-rewrite-unpinned-');
+    await writeFile(join(project, 'hooks.json'), 'old');
+
+    const result = await runWorker(
+      project,
+      ['rewrite', 'hooks.json', '1', '2', '3', '4', sha256('old'), ''],
+      'new'
+    );
+
+    expect(result.stdout).toBe('skipped');
+    expect(await readFile(join(project, 'hooks.json'), 'utf-8')).toBe('old');
+  });
+
+  it('skips rewrite when the file vanished before the operation', async () => {
+    const project = await createProject('worker-rewrite-missing-');
+    const directory = await stat(project);
+
+    const result = await runWorker(
+      project,
+      [
+        'rewrite',
+        'missing.json',
+        String(directory.dev),
+        String(directory.ino),
+        '1',
+        '2',
+        sha256('x'),
+        '',
+      ],
+      'new'
+    );
+
+    expect(result.stdout).toBe('skipped');
+    expect(result.code).toBe(0);
+  });
+
+  it('skips rewrite when the file identity does not match', async () => {
+    const project = await createProject('worker-rewrite-identity-');
+    const directory = await stat(project);
+    await writeFile(join(project, 'hooks.json'), 'old');
+    const file = await lstat(join(project, 'hooks.json'));
+
+    const result = await runWorker(
+      project,
+      [
+        'rewrite',
+        'hooks.json',
+        String(directory.dev),
+        String(directory.ino),
+        String(file.dev),
+        '424242',
+        sha256('old'),
+        '',
+      ],
+      'new'
+    );
+
+    expect(result.stdout).toBe('skipped');
+    expect(await readFile(join(project, 'hooks.json'), 'utf-8')).toBe('old');
+  });
+
+  it('skips create when the directory identity does not match', async () => {
+    const project = await createProject('worker-create-unpinned-');
+
+    const result = await runWorker(project, ['create', 'run.sh', '1', '2', '493'], 'hello');
+
+    expect(result.stdout).toBe('skipped');
+    expect(result.code).toBe(0);
+    await expect(readFile(join(project, 'run.sh'), 'utf-8')).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
+  });
+
   it('runs the spawned worker end to end via the hidden command', async () => {
     const project = await createProject('worker-spawned-');
     const directory = await stat(project);
@@ -320,6 +411,10 @@ describe('managed output worker protocol', () => {
       const worker = await import('../managed-output-worker.js');
       expect(worker.wasDispatchedAsManagedOutputWorker()).toBe(true);
       expect(process.exitCode).toBe(1);
+
+      // The CLI runner must return without parsing the worker arguments.
+      const cli = await import('../cli.js');
+      await expect(cli.run()).resolves.toBeUndefined();
     } finally {
       process.argv = originalArgv;
       process.exitCode = originalExitCode;
