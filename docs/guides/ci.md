@@ -848,8 +848,14 @@ workflows:
 
 For consistent environments across all CI systems, use the official Docker image. This eliminates Node.js version mismatches and simplifies configuration.
 
+!!! warning "Pseudoconfiguration - not copy-pasteable"
+The block below shows the shape of a Docker-based pipeline, not valid syntax
+for any single CI system (`image:` and `steps:` keys are borrowed from
+different systems). Use it as a mental model only - concrete, runnable
+pipelines are in the [Docker Guide](docker.md).
+
 ```yaml
-# Any CI system with Docker support
+# Pseudoconfiguration - any CI system with Docker support
 image: ghcr.io/mrwogu/promptscript:latest
 
 steps:
