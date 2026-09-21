@@ -75,9 +75,9 @@ vi.mock('../../config/loader.js', () => ({
   findConfigFile: mockFindConfigFile,
 }));
 
-vi.mock('fs', () => ({ existsSync: mockExistsSync }));
+vi.mock('node:fs', () => ({ existsSync: mockExistsSync }));
 
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   writeFile: mockWriteFile,
   readFile: mockReadFile,
 }));

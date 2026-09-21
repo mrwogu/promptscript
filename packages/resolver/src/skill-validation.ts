@@ -1,5 +1,5 @@
-import { basename, dirname, join } from 'path';
-import { existsSync } from 'fs';
+import { basename, dirname, join } from 'node:path';
+import { existsSync } from 'node:fs';
 import { ResolveError } from '@promptscript/core';
 import type { SourceLocation } from '@promptscript/core';
 import { extractSkillFrontmatter, parseSkillMd, type ParsedSkillMd } from './skills.js';

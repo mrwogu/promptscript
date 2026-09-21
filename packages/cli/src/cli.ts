@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { pathToFileURL } from 'url';
+import { pathToFileURL } from 'node:url';
 import { CLI_VERSION } from './cli-version.js';
 // Dispatches the hidden __managed-output-worker command before Commander
 // parsing, telemetry init, and the update check, including in deno compile

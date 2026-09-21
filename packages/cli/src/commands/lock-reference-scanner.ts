@@ -5,8 +5,8 @@ import {
   isInsideCachePath,
   isRealPathInside,
 } from '@promptscript/resolver';
-import { readFile } from 'fs/promises';
-import { dirname, isAbsolute, relative, resolve, sep } from 'path';
+import { readFile } from 'node:fs/promises';
+import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 
 export interface RegistryReferenceRoot {
   repoUrl: string;

@@ -12,11 +12,11 @@ const mockExistsSync = vi.fn();
 const mockReadFile = vi.fn();
 const mockParseYaml = vi.fn();
 
-vi.mock('fs', () => ({
+vi.mock('node:fs', () => ({
   existsSync: (...args: unknown[]) => mockExistsSync(...args),
 }));
 
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   readFile: (...args: unknown[]) => mockReadFile(...args),
 }));
 

@@ -58,14 +58,14 @@ vi.mock('../config/loader.js', () => ({
   ],
 }));
 
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   writeFile: (...args: unknown[]) => mockWriteFile(...args),
   mkdir: (...args: unknown[]) => mockMkdir(...args),
   readFile: (...args: unknown[]) => mockReadFile(...args),
   readdir: vi.fn().mockResolvedValue([]),
 }));
 
-vi.mock('fs', () => ({
+vi.mock('node:fs', () => ({
   existsSync: (...args: unknown[]) => mockExistsSync(...args),
   readFileSync: vi.fn().mockReturnValue(''),
 }));

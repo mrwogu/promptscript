@@ -1,6 +1,6 @@
-import { writeFile, readFile } from 'fs/promises';
-import { existsSync } from 'fs';
-import { resolve } from 'path';
+import { writeFile, readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import type { LockOptions } from '../types.js';
 import { loadConfig, findConfigFile } from '../config/loader.js';

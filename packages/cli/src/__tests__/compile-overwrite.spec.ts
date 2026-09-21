@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import type { CliServices } from '../services.js';
 
 // Mock the compiler module - using vi.hoisted to access the mock in vi.mock
@@ -74,7 +74,7 @@ vi.mock('../config/loader.js', () => ({
 }));
 
 // Mock fs/promises
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   writeFile: (...args: unknown[]) => mockWriteFile(...args),
   chmod: (...args: unknown[]) => mockChmod(...args),
   mkdir: (...args: unknown[]) => mockMkdir(...args),
@@ -125,7 +125,7 @@ vi.mock('chalk', () => ({
 }));
 
 // Mock fs.existsSync for the entry file check
-vi.mock('fs', async (importOriginal) => {
+vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('fs')>();
   return {
     ...actual,

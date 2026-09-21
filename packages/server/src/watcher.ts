@@ -1,5 +1,5 @@
 import { watch, type FSWatcher } from 'chokidar';
-import { relative } from 'path';
+import { relative } from 'node:path';
 
 export interface FileWatchEvent {
   type: 'file:changed' | 'file:created' | 'file:deleted';

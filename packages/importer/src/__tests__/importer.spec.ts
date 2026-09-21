@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { importFile } from '../importer.js';
 
 const fixturesDir = resolve(__dirname, 'fixtures');

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { homedir } from 'os';
+import { homedir } from 'node:os';
 import type { Logger, OutputPlan } from '@promptscript/core';
 import type { CliServices } from '../../services.js';
 
@@ -103,7 +103,7 @@ vi.mock('../../config/loader.js', () => ({
   CONFIG_FILES: ['promptscript.yaml'],
 }));
 
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   writeFile: (...args: unknown[]) => mockWriteFile(...args),
   chmod: (...args: unknown[]) => mockChmod(...args),
   mkdir: (...args: unknown[]) => mockMkdir(...args),
@@ -156,7 +156,7 @@ vi.mock('chalk', () => ({
   },
 }));
 
-vi.mock('fs', async (importOriginal) => {
+vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('fs')>();
   return {
     ...actual,

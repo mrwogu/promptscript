@@ -1,5 +1,5 @@
-import { existsSync } from 'fs';
-import { relative, resolve } from 'path';
+import { existsSync } from 'node:fs';
+import { relative, resolve } from 'node:path';
 import {
   collectProvenance,
   type Program,

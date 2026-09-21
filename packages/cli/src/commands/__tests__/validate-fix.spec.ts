@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync, symlinkSync } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync, symlinkSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { fixSyntaxVersion, discoverPrsFiles, validateCommand } from '../validate.js';
 
 describe('fixSyntaxVersion', () => {

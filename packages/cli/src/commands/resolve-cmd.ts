@@ -1,6 +1,6 @@
-import { existsSync, readFileSync, statSync } from 'fs';
-import { join, resolve } from 'path';
-import { homedir } from 'os';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { homedir } from 'node:os';
 import { parse as parseYaml } from 'yaml';
 import type { Lockfile, LockfileDependency, PathReference } from '@promptscript/core';
 import { isValidLockfile } from '@promptscript/core';

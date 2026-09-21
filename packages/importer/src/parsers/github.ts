@@ -1,4 +1,4 @@
-import { basename } from 'path';
+import { basename } from 'node:path';
 import { parseMarkdownSections } from './markdown.js';
 import type { FormatParser } from './types.js';
 import type { MarkdownSection } from './markdown.js';

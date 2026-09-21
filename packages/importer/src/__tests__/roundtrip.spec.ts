@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { validateRoundtrip } from '../roundtrip.js';
 
 const fixturesDir = resolve(__dirname, 'fixtures');

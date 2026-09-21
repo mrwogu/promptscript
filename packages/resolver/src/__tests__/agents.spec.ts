@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtemp, writeFile, mkdir, rm, symlink } from 'fs/promises';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { mkdtemp, writeFile, mkdir, rm, symlink } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { resolveNativeAgents } from '../skills.js';
 import type { Program, ObjectContent, TextContent } from '@promptscript/core';
 

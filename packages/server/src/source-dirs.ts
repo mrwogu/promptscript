@@ -1,5 +1,5 @@
-import { readFile } from 'fs/promises';
-import { join, dirname } from 'path';
+import { readFile } from 'node:fs/promises';
+import { join, dirname } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 
 const DEFAULT_SOURCE_DIR = '.promptscript';

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { mkdtemp, rm, writeFile } from 'fs/promises';
-import { tmpdir } from 'os';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Resolver } from '../resolver.js';
 import { resolveSkillComposition } from '../skill-composition.js';
 import type {

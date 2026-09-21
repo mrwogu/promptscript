@@ -8,9 +8,9 @@ import {
   rename,
   rm,
   writeFile,
-} from 'fs/promises';
-import { existsSync } from 'fs';
-import { basename, dirname, join, resolve } from 'path';
+} from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { basename, dirname, join, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import type { VendorSyncOptions, VendorCheckOptions } from '../types.js';
 import { loadConfig } from '../config/loader.js';

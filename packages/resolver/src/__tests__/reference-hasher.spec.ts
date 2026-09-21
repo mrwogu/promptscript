@@ -1,7 +1,7 @@
 import { afterEach, describe, it, expect } from 'vitest';
-import { mkdtemp, mkdir, rm, symlink, writeFile } from 'fs/promises';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { mkdtemp, mkdir, rm, symlink, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import {
   hashContent,
   buildReferenceKey,

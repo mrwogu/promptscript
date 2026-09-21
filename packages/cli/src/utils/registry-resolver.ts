@@ -5,9 +5,9 @@
  * For git registries, this can require an existing cache or vendor checkout.
  */
 
-import { homedir } from 'os';
-import { existsSync } from 'fs';
-import { isAbsolute, join, relative, resolve, sep } from 'path';
+import { homedir } from 'node:os';
+import { existsSync } from 'node:fs';
+import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import type { Lockfile, PromptScriptConfig } from '@promptscript/core';
 import {
   createGitRegistry,

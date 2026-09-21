@@ -32,11 +32,11 @@ vi.mock('@promptscript/resolver', () => ({
   validateAlias: (alias: string) => /^@[a-z0-9][a-z0-9-]*$/.test(alias),
 }));
 
-vi.mock('fs', () => ({
+vi.mock('node:fs', () => ({
   existsSync: mockExistsSync,
 }));
 
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   readFile: mockReadFile,
   writeFile: mockWriteFile,
   mkdir: mockMkdir,

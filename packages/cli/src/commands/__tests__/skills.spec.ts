@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { join, resolve, dirname } from 'path';
+import { join, resolve, dirname } from 'node:path';
 
 const {
   mockSucceed,
@@ -170,9 +170,9 @@ vi.mock('../lock-scanner.js', () => ({
   collectRemoteImports: mockCollectRemoteImports,
 }));
 
-vi.mock('fs', () => ({ existsSync: mockExistsSync }));
+vi.mock('node:fs', () => ({ existsSync: mockExistsSync }));
 
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   writeFile: mockWriteFile,
   readFile: mockReadFile,
   readdir: mockReaddir,
@@ -187,7 +187,7 @@ vi.mock('fs/promises', () => ({
   mkdir: mockMkdir,
 }));
 
-vi.mock('os', () => ({
+vi.mock('node:os', () => ({
   tmpdir: () => '/tmp',
   homedir: mockHomedir,
 }));

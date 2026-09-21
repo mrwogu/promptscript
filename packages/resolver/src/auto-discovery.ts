@@ -1,5 +1,5 @@
-import { readFile, readdir, access, lstat } from 'fs/promises';
-import { resolve, basename } from 'path';
+import { readFile, readdir, access, lstat } from 'node:fs/promises';
+import { resolve, basename } from 'node:path';
 import { ResolveError } from '@promptscript/core';
 import type { Logger, Program, Block, TextContent, Value } from '@promptscript/core';
 import { parseSkillMd } from './skills.js';

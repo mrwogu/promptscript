@@ -134,6 +134,19 @@ function temporaryName(name: string): string {
   return `.${name}.promptscript-${process.pid}-${Date.now()}`;
 }
 
+/**
+ * Probed on first use: 0 where the runtime has no O_NOFOLLOW (Windows). O_EXCL
+ * stays the primary creation guard there; everywhere else this flag keeps
+ * temp file opens from following a planted symlink. Probing lazily (not at
+ * module load) so test doubles that replace node:fs still load this module.
+ */
+let openNofollowFlag: number | undefined;
+
+function openFlagsForTempFile(): number {
+  openNofollowFlag ??= constants.O_NOFOLLOW ?? 0;
+  return constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | openNofollowFlag;
+}
+
 /** Guarded rewrite: replace file content only when it still matches expectations. */
 function guardedRewrite(args: ManagedOutputOperationArgs, content: Buffer): string {
   if (!isPinnedDirectory(args)) return WORKER_STATUSES.skipped;
@@ -153,7 +166,7 @@ function guardedRewrite(args: ManagedOutputOperationArgs, content: Buffer): stri
   try {
     const descriptor = openSync(
       temporary,
-      constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW,
+      openFlagsForTempFile(),
       args.requestedMode === undefined || args.requestedMode === ''
         ? file.mode & 0o777
         : Number(args.requestedMode) & 0o777
@@ -202,11 +215,7 @@ function guardedCreate(args: ManagedOutputOperationArgs, content: Buffer): strin
   const temporary = temporaryName(args.name);
   let temporaryCreated = false;
   try {
-    const descriptor = openSync(
-      temporary,
-      constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW,
-      Number(args.requestedMode)
-    );
+    const descriptor = openSync(temporary, openFlagsForTempFile(), Number(args.requestedMode));
     temporaryCreated = true;
     try {
       writeFileSync(descriptor, content);

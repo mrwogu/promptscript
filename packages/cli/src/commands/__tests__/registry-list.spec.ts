@@ -24,7 +24,7 @@ vi.mock('../../config/loader.js', () => ({
   findConfigFile: mockFindConfigFile,
 }));
 
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   readFile: mockReadFile,
 }));
 

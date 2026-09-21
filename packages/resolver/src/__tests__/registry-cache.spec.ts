@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { promises as fs } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
-import { fileURLToPath } from 'url';
+import { promises as fs } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { RegistryCache } from '../registry-cache.js';
 
 const __filename = fileURLToPath(import.meta.url);

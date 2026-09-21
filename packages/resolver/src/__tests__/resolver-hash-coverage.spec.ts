@@ -4,11 +4,11 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { execFile } from 'child_process';
-import { join } from 'path';
-import { promises as fs, existsSync, unlinkSync } from 'fs';
-import { tmpdir } from 'os';
-import { promisify } from 'util';
+import { execFile } from 'node:child_process';
+import { join } from 'node:path';
+import { promises as fs, existsSync, unlinkSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { promisify } from 'node:util';
 import { Resolver } from '../resolver.js';
 import { RegistryCache } from '../registry-cache.js';
 import type { Lockfile } from '@promptscript/core';

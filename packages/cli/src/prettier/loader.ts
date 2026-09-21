@@ -1,6 +1,6 @@
-import { existsSync } from 'fs';
-import { readFile } from 'fs/promises';
-import { join, dirname, resolve } from 'path';
+import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
+import { join, dirname, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import type { PrettierMarkdownOptions, PromptScriptConfig } from '@promptscript/core';
 import { DEFAULT_PRETTIER_OPTIONS } from '@promptscript/core';

@@ -1,22 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { join } from 'path';
+import { join } from 'node:path';
 import { loadUserConfig } from '../config/user-config.js';
 
 // Mock fs modules
-vi.mock('fs', () => ({
+vi.mock('node:fs', () => ({
   existsSync: vi.fn(),
 }));
 
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   readFile: vi.fn(),
 }));
 
-vi.mock('os', () => ({
+vi.mock('node:os', () => ({
   homedir: () => '/mock/home',
 }));
 
-import { existsSync } from 'fs';
-import { readFile } from 'fs/promises';
+import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 
 const mockExistsSync = vi.mocked(existsSync);
 const mockReadFile = vi.mocked(readFile);

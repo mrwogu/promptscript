@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import type { RegistryValidateOptions } from '../../types.js';
 import { type CliServices, createDefaultServices } from '../../services.js';
 import { createSpinner, ConsoleOutput } from '../../output/console.js';

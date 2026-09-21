@@ -1,7 +1,7 @@
-import { readFile } from 'fs/promises';
-import { existsSync } from 'fs';
-import { join } from 'path';
-import { homedir } from 'os';
+import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { homedir } from 'node:os';
 import { parse as parseYaml } from 'yaml';
 import type { UserConfig } from '@promptscript/core';
 

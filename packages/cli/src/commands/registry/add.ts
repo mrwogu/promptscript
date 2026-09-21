@@ -1,6 +1,6 @@
-import { readFile, writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import { dirname } from 'path';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { dirname } from 'node:path';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import type { RegistryAddOptions } from '../../types.js';
 import { ConsoleOutput } from '../../output/console.js';

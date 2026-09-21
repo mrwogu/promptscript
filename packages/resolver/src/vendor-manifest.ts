@@ -1,9 +1,9 @@
-import { createHash } from 'crypto';
-import { execFile, spawn } from 'child_process';
-import { constants } from 'fs';
-import { lstat, open, readFile, readdir, readlink, realpath } from 'fs/promises';
-import { basename, dirname, join, posix, relative, sep } from 'path';
-import { promisify } from 'util';
+import { createHash } from 'node:crypto';
+import { execFile, spawn } from 'node:child_process';
+import { constants } from 'node:fs';
+import { lstat, open, readFile, readdir, readlink, realpath } from 'node:fs/promises';
+import { basename, dirname, join, posix, relative, sep } from 'node:path';
+import { promisify } from 'node:util';
 import { isInsideCachePath } from './reference-hasher.js';
 
 export const VENDOR_MANIFEST_FILE = '.vendor-manifest.json';

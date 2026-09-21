@@ -103,7 +103,7 @@ vi.mock('@promptscript/resolver', () => ({
   validateAlias: mockValidateAlias,
 }));
 
-vi.mock('fs', () => ({
+vi.mock('node:fs', () => ({
   existsSync: (path: string) =>
     path.endsWith('promptscript.lock') ? mockLockfileExists() : mockExistsSync(path),
   readFileSync: mockReadFileSync,

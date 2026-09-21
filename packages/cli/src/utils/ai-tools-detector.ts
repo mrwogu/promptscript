@@ -1,6 +1,6 @@
 import { FormatterRegistry } from '@promptscript/formatters';
 import { detectFormat, type DetectedFormat } from '@promptscript/importer';
-import { isAbsolute, relative, resolve } from 'path';
+import { isAbsolute, relative, resolve } from 'node:path';
 import { type CliServices, createDefaultServices } from '../services.js';
 
 /**

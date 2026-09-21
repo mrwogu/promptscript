@@ -1,5 +1,5 @@
-import { readFile } from 'fs/promises';
-import { resolve, dirname, basename, isAbsolute, relative } from 'path';
+import { readFile } from 'node:fs/promises';
+import { resolve, dirname, basename, isAbsolute, relative } from 'node:path';
 import type { PathReference, RegistriesConfig, Lockfile } from '@promptscript/core';
 import { FileNotFoundError } from '@promptscript/core';
 import type { Registry } from './registry.js';

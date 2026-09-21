@@ -1,8 +1,9 @@
-import { lstat, realpath } from 'fs/promises';
-import { realpathSync, statSync } from 'fs';
-import { dirname, isAbsolute, relative, resolve, sep } from 'path';
+import { lstat, realpath } from 'node:fs/promises';
+import { statSync } from 'node:fs';
+import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 import {
   isCanonicalBlock,
+  portableRealpathSync,
   toLegacyBlock,
   type CanonicalProgram,
   type Program,
@@ -40,7 +41,7 @@ export function findProjectRootMarker(entryPath: string): string | undefined {
   const resolvedEntryPath = resolve(entryPath);
   let canonicalEntryPath: string;
   try {
-    canonicalEntryPath = realpathSync.native(resolvedEntryPath);
+    canonicalEntryPath = portableRealpathSync(resolvedEntryPath);
   } catch {
     canonicalEntryPath = resolvedEntryPath;
   }

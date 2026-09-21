@@ -7,7 +7,7 @@ const fsMocks = vi.hoisted(() => ({
   realpath: vi.fn(),
 }));
 
-vi.mock('fs/promises', async (importOriginal) => {
+vi.mock('node:fs/promises', async (importOriginal) => {
   const actual = await importOriginal<typeof import('fs/promises')>();
   fsMocks.realpath.mockImplementation(actual.realpath);
   return {

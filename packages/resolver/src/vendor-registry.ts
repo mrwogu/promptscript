@@ -9,8 +9,8 @@
  * @packageDocumentation
  */
 
-import { readFile, stat, readdir } from 'fs/promises';
-import { join } from 'path';
+import { readFile, stat, readdir } from 'node:fs/promises';
+import { join } from 'node:path';
 import { FileNotFoundError } from '@promptscript/core';
 import type { Registry } from './registry.js';
 

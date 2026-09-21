@@ -1,5 +1,5 @@
-import { readFile } from 'fs/promises';
-import { existsSync } from 'fs';
+import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { parse as parseYaml } from 'yaml';
 import { interpolateEnvVars as interpolateEnvironmentVariables } from '@promptscript/core';
 import type { PromptScriptConfig } from '@promptscript/core';

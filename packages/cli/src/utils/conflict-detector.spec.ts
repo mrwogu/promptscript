@@ -7,7 +7,7 @@ const fsProbe = vi.hoisted(() => ({
   errorCode: undefined as string | undefined,
 }));
 
-vi.mock('fs', async (importOriginal) => {
+vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('fs')>();
   return {
     ...actual,

@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import * as parser from '@promptscript/parser';
 import { CircularDependencyError, ParseError } from '@promptscript/core';
 import { Resolver, createResolver } from '../resolver.js';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

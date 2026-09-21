@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import { getPackageInfo, getPackageVersion } from '../utils/package.js';
 
-vi.mock('fs', () => ({
+vi.mock('node:fs', () => ({
   readFileSync: vi.fn(),
 }));
 

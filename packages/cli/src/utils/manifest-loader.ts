@@ -1,4 +1,4 @@
-import { join, dirname } from 'path';
+import { join, dirname } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import type { RegistryManifest, CatalogEntry, NamespaceDefinition } from '@promptscript/core';
 import type { CliServices } from '../services.js';
