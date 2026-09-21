@@ -558,7 +558,7 @@ later operations are separate decisions:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBjUAbhEYwZguAE92GQpJkBGCgDYKABjUBfKa2sBiQdwisc8iFgdwBjANZwA9FgaaPCM1BBoWAC0UBAARoKC9gAU1DAA5hCe1BqCkYJimRixsGKCYMzUguQYGmnUzACurGIAlHYODXIOLKl+cowNYYEJyakZWTl5BXBFJWUVVVA1dY3Nbaz23J0w3RUwfgCODRgxw4mCKemZWNm5+YXFMKXlldW19U2t1tyeGM0Y1DEcGE1gSYhg5GYGj47EkyBkACUYEcIKlBBg0DRmAoTjIALrWKw2VjcbHyMLg9QCf6AuAUDieJxpEGsBLwkAAVS6ADU3PAsPjCSALHiGJwbhp8ERSOQYFRaCAGAp5HAIGx8PphUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBjUAbhEYwZguAE92GQpJkBGCgFYKABjUBfKa2sBiQdwisc8iFgdwBjANZwA9FgaaPCM1BBoWAC0UBAARoKC9gAU1DAA5hCe1BqCkYJimRixsGKCYMzUguQYGmnUzACurGIAlHYODXIOLKl+cowNYYEJyakZWTl5BXBFJWUVVVA1dY3Nbaz23J0w3RUwfgCODRgxw4mCKemZWNm5+YXFMKXlldW19U2t1tyeGM0Y1DEcGE1gSYhg5GYGj47EkyBkACUYEcIKlBBg0DRmAoTjIALrWKw2VjcbHyMLg9QCf6AuAUDieJxpEGsBLwkAAVS6ADU3PAsPjCSALHiGJwbhp8ERSOQYFRaCAGAp5HAIGx8PphUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -596,7 +596,7 @@ Create reusable fragments:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAmGoYA5iU5Y4Aeg5wsEViKq0AOq37isGXsDW9eEACaJeKkIOFiJ02fMVm9vOAE92GQibMBGCgDYKAAwOrAC+amr8chishhjUhnA6jrYKIibIZgCqcDC8AG4QtrwYiUVCpDAA7szUANZmdKYgALIYCloKvAAcAQCkvCyGuSx5MJYwDU0A6tSFuQCurIXFMQbsMCLC8my8tnBmALpqYawRcDg1WIzzkkms+mYy8FhmJrr3+rxDcIyzaNusTwgGZzAbMMjUGA4ThwCCjXbPfYgRz6FjrdhAkEcXiLZbRQxrDibbAQHZ7XhgGq7aEDebUSHsAY4aIiGAUYL6E4PEBSEZjUQTJB3T5feC-CD-UmApoAYWhjFqCLkYNG4w5nzRHAxTQASosVfzWSsCZC0Jcces5DACQAjKEYAo1dnIj4nEIgEIHBgSajOfBEUjkNk0eggVWwtj4LweoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAmGoYA5iU5Y4Aeg5wsEViKq0AOq37isGXsDW9eEACaJeKkIOFiJ02fMVm9vOAE92GQibMBGCgFYKAAwOrAC+amr8chishhjUhnA6jrYKIibIZgCqcDC8AG4QtrwYiUVCpDAA7szUANZmdKYgALIYCloKvAAcAQCkvCyGuSx5MJYwDU0A6tSFuQCurIXFMQbsMCLC8my8tnBmALpqYawRcDg1WIzzkkms+mYy8FhmJrr3+rxDcIyzaNusTwgGZzAbMMjUGA4ThwCCjXbPfYgRz6FjrdhAkEcXiLZbRQxrDibbAQHZ7XhgGq7aEDebUSHsAY4aIiGAUYL6E4PEBSEZjUQTJB3T5feC-CD-UmApoAYWhjFqCLkYNG4w5nzRHAxTQASosVfzWSsCZC0Jcces5DACQAjKEYAo1dnIj4nEIgEIHBgSajOfBEUjkNk0eggVWwtj4LweoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

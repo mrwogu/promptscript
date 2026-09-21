@@ -49,7 +49,7 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBwY0MALTUYfMRGwQ2MwXACe7DIUkyAjBQBsFAAy6AvlNZPuc5tSyMArljjCngtIgAPSqAG4QMADuMpLAAYGCYvCM1BBoWNqspiAASjAR0YLe1KrsxfKsAObwMgmBLOycWDl1IPWJ+YVRxe6qjFis8HB0ejAlEFj6oxxwvqMYrGKCzIrUWmwYUKJkGAMUHW11rIGOrPYg9gC6DM3U+vhEpOQwVLQgDGEwtFn4ZpdAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBwY0MALTUYfMRGwQ2MwXACe7DIUkyAjBQCsFAAy6AvlNZPuc5tSyMArljjCngtIgAPSqAG4QMADuMpLAAYGCYvCM1BBoWNqspiAASjAR0YLe1KrsxfKsAObwMgmBLOycWDl1IPWJ+YVRxe6qjFis8HB0ejAlEFj6oxxwvqMYrGKCzIrUWmwYUKJkGAMUHW11rIGOrPYg9gC6DM3U+vhEpOQwVLQgDGEwtFn4ZpdAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -82,7 +82,7 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJhlZsIjDFAC01eFmqKsENnBmC4AT3YZCkmQEYKANgoAGAwF8prV93VxN23azjDXQUEVaRAAORgANxhqQSI0ZjgYQxhGdSx9EEDg0Ijo2LgAawg0QUjlcWxfGVcnECcAXQZOTSN8IlJyGCpaEAZ8uF98S3qgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJhlZsIjDFAC01eFmqKsENnBmC4AT3YZCkmQEYKAVgoAGAwF8prV93VxN23azjDXQUEVaRAAORgANxhqQSI0ZjgYQxhGdSx9EEDg0Ijo2LgAawg0QUjlcWxfGVcnECcAXQZOTSN8IlJyGCpaEAZ8uF98S3qgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

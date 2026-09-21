@@ -512,6 +512,12 @@ targets:
 @use @company/security@2.0.0
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMArnCzM+1ALRpm1AVHliJcAJ7sMhWfICMFAAy39rAL5ixAYkEBJVjhjUIWQTBqVUEWMgxWI0EAIww4GEFAFAJBanhmKAA3eEEVQQBzfxwFaIowgHoMRj4ymlU0LDhGP3r1WPiytpgqWjdBbghvX38+sMxIjriEwXcAClSC5Woo9UEpCDgMaNgpQO1BcgwjPOCFVikASl6AFRhSdTg0GEYISEZBZQipDGopOF7uJQJbgcUhlD6MADWcDKqUqAWmgjmMAWWCWghWaw2WxgOzAewORxOZ0urHcAAUBjlmIIhA8ni8IG9UrBJv9ASM6hEjGCngo-FgjNwAEy2WwSWbzdao5ardabba7aj7KCHY7MU4XECOAC6DE40vwRFI5C6NHoICytAgbHwli1QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### 3. Compile
 
 ```bash
@@ -541,6 +547,12 @@ URL imports work without any alias configuration:
 # Versioned URL import
 @use github.com/acme/shared-standards/stacks/typescript@1.0.0
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWIDEggCIRqWrIICqAJQAZSTJmam9AFAJBVmZBDCgIDDgomBgpVLFuAFc4GEEAcwhcTIAjChYSAHoMRj4KuBwMTyllOAFWKUapOAqwagw8vnZunMZM6kLFR1YXAHk0ThbmMcZcuABraChYzKxmZSkIOBYANxgmwV7mEkEAZQBpAEkAgIoSKQzs3IKi0vK6q5gylCeQqjCgGEyaRaGygUGGMLhFSwUmaAHdQmswFBmKipi4AGpnOAQNipXyBYJoUI6VhZHL5Qo4EplK5VGowOoNJotNodahdOoCRhrbpYRTzI7jNBYbgWayWEB2AC6DE4WGoinwRFI5BgVFoIAYp1oJNY+DMiqAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Debug the resolution chain with:
 

@@ -9,11 +9,15 @@
  */
 
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
-import { join, relative } from 'path';
+import { join, relative, sep } from 'path';
 import LZString from 'lz-string';
 
 const PLAYGROUND_BASE_URL = 'https://getpromptscript.dev/playground/';
 const PLAYGROUND_DEV_URL = 'https://getpromptscript.dev/playground-dev/';
+
+// Top-level docs directories excluded from the site build (mkdocs exclude_docs).
+// Regenerating badges for unpublished pages is wasted work, so they are skipped.
+const EXCLUDED_DOC_DIRS = new Set(['design', 'plans', 'superpowers']);
 
 // Use production playground by default
 const PLAYGROUND_URL = PLAYGROUND_BASE_URL;
@@ -134,18 +138,140 @@ function generatePlaygroundUrl(code: string, filename = 'example.prs'): string {
  * Create the markdown link block.
  */
 function createLinkBlock(url: string): string {
-  // Using a styled link that works in both GitHub and MkDocs
+  // Using a styled link that works in both GitHub and MkDocs.
+  // Blank line before the block and no trailing newline keep the output
+  // Prettier-stable, so `format:check` and `playground:links --check` agree.
   return `
+
 ${LINK_MARKER_START}
 <a href="${url}" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
-${LINK_MARKER_END}
-`;
+${LINK_MARKER_END}`;
 }
 
 function shouldSkipPlaygroundLink(content: string, offset: number): boolean {
   return content.slice(0, offset).trimEnd().endsWith(SKIP_LINK_MARKER);
+}
+
+/**
+ * Parse a markdown fence line: backtick count and info string, or null when
+ * the line does not open or close a fence. Manual parsing avoids the
+ * super-linear backtracking a backtick-plus-anything regex would have.
+ */
+function parseFence(line: string): { length: number; info: string } | null {
+  if (!line.startsWith('```')) {
+    return null;
+  }
+  let length = 3;
+  while (length < line.length && line[length] === '`') {
+    length++;
+  }
+  return { length, info: line.slice(length).trim() };
+}
+
+/**
+ * Find ```prs / ```promptscript fence lines that must not get playground links:
+ * - fences nested inside another fence (example content, not runnable code)
+ * - fences of four or more backticks, where the code block regex would stop at
+ *   the first inner ``` and corrupt the example
+ * Returns the character range of each such fence's opening line.
+ */
+function findUnlinkableFenceLines(content: string): Array<[number, number]> {
+  const ranges: Array<[number, number]> = [];
+  const stack: number[] = []; // lengths of currently open fences, in backticks
+  let offset = 0;
+
+  for (const line of content.split('\n')) {
+    const fence = parseFence(line);
+    if (fence) {
+      const { length, info } = fence;
+      const [lang] = info.split(/\s+/);
+      const isPrs = lang === 'prs' || lang === 'promptscript';
+      const openLength = stack.at(-1);
+      if (openLength !== undefined && length >= openLength) {
+        stack.pop();
+      } else {
+        stack.push(length);
+        if (isPrs && (stack.length > 1 || length !== 3)) {
+          ranges.push([offset, offset + line.length]);
+        }
+      }
+    }
+    offset += line.length + 1;
+  }
+
+  return ranges;
+}
+
+/**
+ * Return the playground-ready code for a matched block, or null when the block
+ * must not carry a link: skip marker, unsafe fence, or a short fragment example.
+ */
+function extractLinkableCode(
+  content: string,
+  codeContent: string,
+  offset: number,
+  unlinkableFences: Array<[number, number]>
+): string | null {
+  if (shouldSkipPlaygroundLink(content, offset)) {
+    return null;
+  }
+
+  // Skip fences we cannot link safely (nested or 4+ backticks)
+  if (unlinkableFences.some(([start, end]) => offset >= start && offset < end)) {
+    return null;
+  }
+
+  // Dedent first (removes common leading whitespace from tabbed content), then trim
+  const trimmedCode = dedent(codeContent).trim();
+
+  // Skip empty or very short examples
+  if (trimmedCode.length < 10) {
+    return null;
+  }
+
+  // Skip examples that are clearly fragments (no meta block, just showing syntax)
+  // But include examples that look complete (have --- or meaningful content)
+  const looksComplete =
+    trimmedCode.includes('---') ||
+    trimmedCode.startsWith('name:') ||
+    trimmedCode.startsWith('# ') ||
+    trimmedCode.includes('inherit ') ||
+    trimmedCode.includes('use ');
+
+  // Also include examples that are just content blocks (instructions)
+  const hasContent = trimmedCode.length > 30;
+
+  if (!looksComplete && !hasContent) {
+    return null;
+  }
+
+  return trimmedCode;
+}
+
+/**
+ * Compare regenerated content with the original file and describe the drift.
+ * Any difference counts, including stale URLs when the link count is unchanged.
+ */
+function buildCheckResult(
+  filePath: string,
+  newContent: string,
+  originalContent: string,
+  added: number,
+  existingLinkCount: number
+): ProcessResult {
+  if (newContent === originalContent) {
+    return { file: filePath, added: 0, removed: 0, updated: 0 };
+  }
+  if (existingLinkCount === 0 && added > 0) {
+    return { file: filePath, added, removed: 0, updated: 0 };
+  }
+  if (added !== existingLinkCount) {
+    return { file: filePath, added: 0, removed: 0, updated: Math.abs(added - existingLinkCount) };
+  }
+  // Equal link counts but different content: stale URLs after example edits.
+  return { file: filePath, added: 0, removed: 0, updated: added };
 }
 
 /**
@@ -172,40 +298,18 @@ function processMarkdownFile(filePath: string, mode: 'add' | 'check' | 'clean'):
 
   // Work with content without existing links
   content = withoutLinks;
+  const unlinkableFences = findUnlinkableFenceLines(content);
 
   // Find all PRS code blocks and add links after them
   const newContent = content.replace(
     CODE_BLOCK_REGEX,
     (match, codeContent: string, offset: number) => {
-      if (shouldSkipPlaygroundLink(content, offset)) {
+      const linkableCode = extractLinkableCode(content, codeContent, offset, unlinkableFences);
+      if (linkableCode === null) {
         return match;
       }
 
-      // Dedent first (removes common leading whitespace from tabbed content), then trim
-      const trimmedCode = dedent(codeContent).trim();
-
-      // Skip empty or very short examples
-      if (trimmedCode.length < 10) {
-        return match;
-      }
-
-      // Skip examples that are clearly fragments (no meta block, just showing syntax)
-      // But include examples that look complete (have --- or meaningful content)
-      const looksComplete =
-        trimmedCode.includes('---') ||
-        trimmedCode.startsWith('name:') ||
-        trimmedCode.startsWith('# ') ||
-        trimmedCode.includes('inherit ') ||
-        trimmedCode.includes('use ');
-
-      // Also include examples that are just content blocks (instructions)
-      const hasContent = trimmedCode.length > 30;
-
-      if (!looksComplete && !hasContent) {
-        return match;
-      }
-
-      const url = generatePlaygroundUrl(trimmedCode);
+      const url = generatePlaygroundUrl(linkableCode);
       const linkBlock = createLinkBlock(url);
       added++;
 
@@ -215,15 +319,7 @@ function processMarkdownFile(filePath: string, mode: 'add' | 'check' | 'clean'):
 
   if (mode === 'check') {
     // In check mode, compare and report differences
-    if (newContent !== originalContent) {
-      const diff = Math.abs(added - existingLinkCount);
-      if (existingLinkCount === 0 && added > 0) {
-        return { file: filePath, added, removed: 0, updated: 0 };
-      } else if (added !== existingLinkCount) {
-        return { file: filePath, added: 0, removed: 0, updated: diff };
-      }
-    }
-    return { file: filePath, added: 0, removed: 0, updated: 0 };
+    return buildCheckResult(filePath, newContent, originalContent, added, existingLinkCount);
   }
 
   // Write the updated content
@@ -274,9 +370,14 @@ function main(): void {
   // Find all markdown files in docs/ and README.md
   const files: string[] = [];
 
-  // Add docs directory
+  // Add docs directory, skipping top-level dirs excluded from the site build
   const docsDir = join(rootDir, 'docs');
-  files.push(...findMarkdownFiles(docsDir));
+  files.push(
+    ...findMarkdownFiles(docsDir).filter((file) => {
+      const [topLevel] = relative(docsDir, file).split(sep);
+      return !EXCLUDED_DOC_DIRS.has(topLevel);
+    })
+  );
 
   // Add root README
   const readmePath = join(rootDir, 'README.md');

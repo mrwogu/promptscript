@@ -35,6 +35,12 @@ Template values (`{{variable}}`) are **never executed** as code. They are:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEg4MRgFdqMALQcyUbDHliJcAJ7sMhWfICMFAAy394wZmqk4s0Y4k1mAKyVYAOVIYWTgsaghWAHMDQQBfMQTWMW5pTiwILCNhWP0QBwkAdWZqAGtIqME2YWBvP0ZA4LikiTyHOJA4gF0GdOojfCJSchgqWhAGADcYWgg2fEtOoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Even if `projectName` contains suspicious content like `"; rm -rf /`, it's treated as a literal string in the output markdown-never executed.
 
 ### Output Is Static Markdown
@@ -55,11 +61,23 @@ Parameters are validated at compile time:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAKjDJRsMXgBMYkVhCwQ2AHVYABEjCwZewJb16ZqpOIi07de5tSzHWAVxIAjGNTMuXfALI24WXo96bbBydTXRJmSWNOOwAKBRBJADc4ul44mnC4gEpdDy8fPzYxZjBeXHgxBIwoG3hTAF8lOpA6gF0GTixqAE98IlJyGCpaEAYEpzh5VnwARmagA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ```promptscript
 # Usage - these would cause compile errors:
 @inherit ./template(port: "not-a-number")  # ❌ Type mismatch
 @inherit ./template(mode: "staging")        # ❌ Invalid enum value
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAqnAwBzGLwC0vXPDEB3ZgFcoAE16MMCuGJZloYmNWrNaiADqsAAhFY4DELLwoB6DmSjYYACjTGsiXqYgrMxY4hjirAokAEYGgQCUvLx8gDLkvAAqAJ5oYiQQcCTYjDjmVjZ2Ds6u5B6eJMzKMP6BcFgi1sIJSd3dqbwAkqwAbhhQEKqcUbwjUAowIAC+ALoMnFjUmfhEpOQwVLQgDEMGcBBs+ACMi0A" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Trusting External Stacks
 
@@ -79,6 +97,12 @@ The primary concern with external stacks isn't code execution-it's **prompt inje
   """
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAEgE80zXDCwRGGKLxLTJEZgFc4vOFgyMA1gB1WAAQgATThKyDewPb146Qdh6xsBNZbwzUY73jhhQ0YEoyGHBwEOoY7BR61rwAkgCyAAoA8gBKACoAggByGYjxAOaszJ7uUDI0MABuiiq8EKzq1EqMEmyqkUYUPbEO9vasAL4gQwC6DKbUgvhEpOQwVLQgDNUwtIqs+ACMo0A" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Mitigations
 
@@ -106,6 +130,12 @@ The primary concern with external stacks isn't code execution-it's **prompt inje
    # Risky: unpinned (could change)
    @inherit @stacks/typescript
    ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEA4s2YATRLzQRWrGMN4A3GLQhsAOqz4ABSTkUQsvDXCwZGAazgB6LAE808RtQhosGgIwUATBQDMvXnwAKahgAcwgjamteAFpeYXCMACNYWTBmanEoDGsQ6mYAV1ZhAEo1PgAlcNNrMUKJKRleAJZ8qFlGHAxWEJhS9QNtXX1DYzNLGzs4Byd9fybgsIio2Pi4JJTeNIzybNyCouKQAF8AXQZOLEj8IlJyGCpaEAYFJTZ8V2OgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 4. **Code Review Changes**
 
@@ -357,6 +387,12 @@ Template variables come from parent stacks or passed parameters:
 @inherit @stacks/app(projectName: "my-app")
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAahigBXeLxYkYvMNWYleAdxzMYANxjVeEVnCwZ2EbGNxSOZKEYA6rAALacGiFl43dGRgGs4Aegxo0ABQ0zABWMIxYAHKkMIi8liAkAJ4AtH5oCQCUIAC+ALoMnFjUSfhEpOQwVLQgDOq0EGz4AIy5QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Security Best Practices
 
 ### 1. Validate Parameter Inputs
@@ -377,6 +413,12 @@ When creating templates, use specific types:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYMzVScRMLESJAYkEBxZswAmclqzhZpEVjE2CsATzTwFiklphzOAVxIAKESE0wAbjCjM0PnYPOkEPGi0nRiwINg8AShsJNGZqLDlWFwAjGGokwX1qCGi5LI1YDFYxfJUAQUZGGDQBLNg5QqMAc0EAdxxOQTBYQghWmEEjNCcsQWMTE3yIgCsYaIA5UgcCgy6bAF8xPZA9gF0GTgNzfCJSchgqWhAGX1pY1nwARmOgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### 2. Don't Include Secrets in Templates
 
 Never put secrets in template parameters or content:
@@ -390,6 +432,12 @@ Never put secrets in template parameters or content:
   apiKey: "${API_KEY}"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEgMuS8AQhgAmiXnBiNqMLHF4RWvTNVJyYtADqsAAkpyaIWXhQD0GNBAAUliAGkYATwlaQcANYBaKTLlePZy9DWTcASh0dPkBQcl4AcWZmcV4AVyleTgA3CGo2Ek4TTIxqCAwAI1gFMGZqSWlZeR1dFnYiE2AdXl47RxdeNwASYABBAAUASQB9ewBRAE0AXzcdBZAFgF0GAuonfCJSchgqWhAGTM04CDZ8AEY1oA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### 3. Audit Your Registry
 

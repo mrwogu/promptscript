@@ -64,7 +64,7 @@ legacy phase ordering.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEARhjgwqtADqsAAiRhYMvYLwgATRLzEhBwjbzgBPdhkJqNARgoA2CgAYdAXwmS4c1sozVlcBRN68OziFYAczVkDQBVYV4AKXgsDQBdH14WADcYagwgmDUADltWB1YJPgBHAFcMKAgsPVE4Rxk5BSVVdRAKqpq9HX1DY3bzK1sQXiKnFzcPL2BktIysnN4ATgLfahhUiBgAd1CNACUYCogN3gw0GmZUqsSJIpLeK4ArGEYsesbZeUUVExAXm94qM+nIBmZLDZ7I5AjgMjVeBQAPRaGCOcpRZGdaq1RzODCudyebysXxQZiMKr7EAHcqkuAkZgAaxgfjiDRASUKjmuGWoKlZ+MJ0wo80y2RaywArGMQHYEgxOFhqHp8ERSOQRDR6CB0rQIGx8KY5UA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEARhjgwqtADqsAAiRhYMvYLwgATRLzEhBwjbzgBPdhkJqNARgoBWCgAYdAXwmS4c1sozVlcBRN68OziFYAczVkDQBVYV4AKXgsDQBdH14WADcYagwgmDUADltWB1YJPgBHAFcMKAgsPVE4Rxk5BSVVdRAKqpq9HX1DY3bzK1sQXiKnFzcPL2BktIysnN4ATgLfahhUiBgAd1CNACUYCogN3gw0GmZUqsSJIpLeK4ArGEYsesbZeUUVExAXm94qM+nIBmZLDZ7I5AjgMjVeBQAPRaGCOcpRZGdaq1RzODCudyebysXxQZiMKr7EAHcqkuAkZgAaxgfjiDRASUKjmuGWoKlZ+MJ0wo80y2RaywsYxAdgSDE4WGoenwRFI5BENHoIHStAgbHwpllQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

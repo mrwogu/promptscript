@@ -32,6 +32,12 @@ Import a base skill and extend it:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgFc4MASzIZWATwD0cANbQocXhhUAjNaN58AFNRgBzCHCzUpvALS8AJiYzrYN3mGbVe5DFMPVmg1jYAlAA6rPxEHAG8miIUCkpwFCw2MJYGAG4QMADuvMChvLbwjNQQaFgQbIi8wSAAwswpvBlZudkQuLympYwc7iKMgqVYFow4MIzycLUFvCzsnFjVMyAzrIWFAKKsOJKMMM4tObzZbvJgUMy5ru64ogNDHRYcpBSzK2sAviCfALoMi3M+CIpHIMCotBADHSMFolVY+AAjD8gA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Resolution Order
 
 When multiple `@use` and `@extend` declarations target the same skill, priority is determined by **declaration order** in the `.prs` file:
@@ -54,6 +60,12 @@ When multiple `@use` and `@extend` declarations target the same skill, priority 
   references: ["travel-patterns.md"]   # appended after retail
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgFc4MAQCNBAWmowsGaAHo4Aa2hQ4vDBplzovXnwAUMgOYQ4WagE9ek3gBNzGMbHu8wzar3IYrJ6syCrPYAlAA6rHxCIuJSlhgAbjBQSqpQ6poa8UlQ+kam5pY2do5wzq7unt5Qvv6BweGRvACCaOQQMG4QrLye9jDUiLw68rmQtFh0vNnJvCIswRH8RBzBw7KjFCpqcBQs-dIwCR0A7rzAEfr9cIzUEGhYEGxDYSAASht6MscwJ6+X6zAA04jHgQ2QrxG0EkmCwHGorF2JHsrwAuhEAL4RJYrThuGZQLZpdR7ZgHb6nc4A663e6PZ68V4AFWoiVmFN+r303J5fBO3Q0hhq8PWPlBjX0MiBMlYoLg4NeBJh2HhiIoyLR3L4GDaeM6mjAIqhUExIAxqIYnCK+CIpHIMCotBADCStCerHwAEYzUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Result: `description` = `"Travel review"` (last replace wins), `references` includes both `retail-patterns.md` and `travel-patterns.md` (append accumulates).
 
@@ -80,6 +92,12 @@ When `@extend` targets a skill, each property follows a specific merge strategy:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJEesATAAQAjDHBgU4Aa2hQ4FATHLMAnkOAAdVkKEt2nLIiGaQp8zt1CAcjADuQpStUlDQu82rSwUZg+rKUBiMEKwA5kK4MKLiktq65mZmlhhQvnYwAgAqzMzyxsimAELiOKZ0JiAASjAYAuWVAOrUEBymALraAL4gXe0MhtSq+ESk5JI09CAAbjC0EGz4AIy9QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 The overlay's `content` and `allowedTools` completely replace the base values.
 
 ### Append Example
@@ -93,6 +111,12 @@ The overlay's `content` and `allowedTools` completely replace the base values.
   requires: ["security-scan"]
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJEesATAAQAjDHBgU4Aa2hQ4FDNUY4IHRlgCu1GAFodANwgwA7kOAAdVkKE6wMHa0bxEQ5FZs2LIOw87O4AHoRTV0lFTUYDW1JEgFvD09vX0cA4NCSZgFNWAU4hOshAF1EnQBHTQgdOFd3EAlGbTUAT104RgxWbxLWAF8QXqKGTixqZvwiUnJJGnoQAwc4CDZ8AEYBoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 The overlay's `references` and `requires` are appended to the base lists (deduplicated).
 
@@ -109,6 +133,12 @@ The overlay's `references` and `requires` are appended to the base lists (dedupl
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJEesATAAQAjDHBgU4Aa2hQ4FFgJgBaajABuEGAHchwADqshQiKzQBXLHET6jJkxI0xqELAE9bh4w5PK4jK5oWBBstgYgALJmECQWJEJOLm7uEfa+Qh5oMLac8em+zMGhrDZCyFDMOnRCJDACEPE1OBAA5jgAugVCAL7pfaw9ID0dDJxY1O74RKTkkjT0IM60JfgAjMNAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 New input fields are added to the base. Existing fields with the same key are overwritten.
 
@@ -128,6 +158,12 @@ Use the `!` prefix to remove entries from a lower layer's append-strategy arrays
   ]
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJEesATAAQAjDHBgU4Aa2hQ4FFgJgBaajABuEGAHchwADqshQ9WBjrWjeIiHIjJkwZABCMxc7W4AemU0YjNgwAiqYWBzUrAokAs4Ojs7ull7erLqh2BFRFDFxxkIAuvHqAI4ArhDqcLb2+U6usADmGIwAnipYzMxQeY5CziTMypEdXT0g8UWsAL4g0wUMnFjUrfhEpOSSNPQgGhZwEGz4AIxzQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Path Matching
 
@@ -165,6 +201,12 @@ The `sealed` property prevents higher layers from replacing specified skill prop
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwgCYxyzAJ6JREqVNlxG1CGiwQ2ysSAAK1ZtICujPWxlyoikpyzCA7s2p8wD10dVqWdmdDED9QyTUpAGFtPUYMKDt5BSd2YRpmRhhLahhhQBQCGWZhVmYXEnMIMAUKfykwvwipOBgE7OVkI0COdiM6YSMNLR0bViMAXX8AXwkpkCnxhmdqBXwiUnIYKloQBgA3GFp9VnwARnmgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Boolean Shorthand
 
 `sealed: true` seals all replace-strategy properties at once:
@@ -178,6 +220,12 @@ The `sealed` property prevents higher layers from replacing specified skill prop
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlmSgQMrRjAC0jHDEZ9EoiVKkATeI2oQ0WCG21iQAYWaz5imMIBuME5EbYLra7r0s7JxYViB+IBSR4X6SenAwGLD62ljUAK4w-gC+ElkgWQC6DMHUAJ74RKTkMFS0IAxutD74AIz5QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Enforcement
 
@@ -224,6 +272,12 @@ Layer 4: project      — local project overrides
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAizIZWATwD0cANbQoccSwAmMALTUYANwgwA7lVoAdVvxIwsGXsF4RFiXgZCDmwsQubK1m7Toe84o9gxCOwcARgpwgAZfAF8jI35pWThLI15eJVV1LV07YDT03mU4RmoINCwINhCQAGVzVkUMakUM9xhebO8HAvSWdk4sGp6QXsKAJS9dNuVeMGZqXgBHAFcMKAgsUTo-GEYVsq2dkVaSDAhAi4wAI2hN0QoxkZ7WQs6YMBh1VkZ4O2QHOpPt9fvIhJgxCo4A0mi04BQSIoHABdMbqVYQdRwf4ODbsFSMHB7KQosZwGDrGC2XgAphsDjsUmvXhxVgxEAxZEMQbUUT4IikcgwfT0EAaL5wKqsfChDlAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Layer 2: Product Overlay
 
 ```promptscript
@@ -237,6 +291,12 @@ Layer 4: project      — local project overrides
   references: ["references/product-patterns.md"]
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAjWYATAK6MsAejgBraFDiSWwmAFpqMAG4QYAdyq0AOq34kYWDL2C8IwxL0MhB1EeKnK1G7Xse84AT3YMQntHAEYKCIAGXwBfY2M+flE4GAEWMgxWf2k5KAUlEU8tHV1eDDheACMKtN4+AAoNAHMIOCxqf15VXmE2jCrYYV4wZmpecgx-ZpdRVmEASmN+Ig556tqKWXk4Cg91Er0rY15e+EZqCDQsCDZQkAAFFzEJVTg0GEYISEZeD14vKVHCcATAwDANKxGPB7MhHBpwZDoYohC8sKpMFgONRWLsSMJHABdYyxECxQkMTgdfz4IikcgwAz0ECaCFwW6sfBhMlAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Layer 2 replaces `description` (allowed), appends to `references`, but **cannot** replace `content` (sealed by Layer 1).
 
@@ -257,6 +317,12 @@ Layer 2 replaces `description` (allowed), appends to `references`, but **cannot*
   requires: ["security-scan"]
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgCMArgHo4Aa2hQ4olgBMYAWmowAbhBgB3KrQA6rfiRhYMvYLwjzEvPSCFiFy1Ru13ecAJ7sMhG3YBGCiCABncAXwMDPn5hOBgBGmZ5YUYscSkoGTlk53VNLV4MOF5BYoTePgAKVQBzCDgsak9eJV55BoxBWHleMGZqXnIMT1rqZmFWeQBKA34iDinS8opJaTgKJxV87XMDXl5VMBhVVkZ4G2R9g9sQAEIjk85z2SSUtKVMLA5qVg2SeR2OjXA52R6nF6iERKDDURg4CAcNLCVQUAFAkG3cHPeBQ4RKEjJYSwf6AkDXAC611UAEdhBBVHBLnZ4owUYjPEo4IwMKw7FTWOEQOEKQxOE1PPgiKRyDBdPQQGoTnAIGx8AFhUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Layer 3 removes a Layer 2 reference via negation, adds BU-specific references, and appends a new requirement.
 
@@ -313,6 +379,12 @@ seal it:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpLdpyxaxIE2cm6pAYWoQsERhijClqjcPXNqfMFGbrhQBQCYRpmDkYOGWEwamYSYWZlGGpbOTgKHV0zU1MLKTgYJxgZLWQTfQ52EwBdTIBfCTqQOuqGQ2oAT3wiUnIYKloQBiTaCDZ8AEZmoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 This ensures no `@extend` can silently replace the core instructions.
 
 **Use references instead of inline content.** Rather than putting all context in `content`,
@@ -330,6 +402,12 @@ replace individual reference files without touching the sealed content:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpLdpyxaxIE2cm6pAYWZLhS1RuHrbfMFGbrhACjgwMsDIAlBQ6umamphZSSmAwSqyM8FrIJrHxnElwAPSYWBzUrHAUJDImdMJpMHEJWdlwWBisMhjUMsWlJgC6YVJ+ATAyKSb6HOzdYQC+EpMgk10MhtQAnvhEpOQwVLQgDMrxcBBs+ACMc0A" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Detecting Problems After Base Updates
 
@@ -373,6 +451,12 @@ breaking changes:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpcuI2oQ0WCGy1iQAYWZzhS1RuHKATBQAMwwCgE9+FmoAroxYAUoywurM1HxgUMzqljq6LOycWBYgiSAUOVmJksIAvhKFIIUAugxp1ACe+ESk5DBUtCAMyjC0Zqz4AIxlQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 When you make breaking changes (removing sections, restructuring content, changing property
 types), bump the version in the description and communicate via your team's changelog.

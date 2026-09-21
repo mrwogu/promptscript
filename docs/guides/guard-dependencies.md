@@ -66,6 +66,12 @@ Add a `requires` array to any named guard entry:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAmCgAZdrAL5ix3AOYBXDNSlxheuSAYaBDKLOzUzFCwtPKyouISgkHkigAqzLLI8gBU2QD02RRhWBFRMNQUWHDyALr+EtQwAI7uEI1wmfJBIQBuGFDS2BBs8nQB3cpwWu7UEFiKtfWCxZxYpiC6GwmJggDCbCWR0cvMUhCsroJwAqxSXj6ISxLKggCqU4JSMGicX6yMikkrE02mG4jAzGoSSiV3KPQgjHgT0ELwASvwZuJ5j8pIJ2mg2B9mAAjEFVJabewSJysfxdYLKPoDO5YMGxPzbJJoFLpTogXIFChMwZYSGVaogOqclbsdaUzkSABq-RFYLx7lgHWRL3eMGWUAwcDgjJVLMhny0kOwkOqCpRggAglAAO4YRS+RpYTGCbEwXHCllq9oa8mcylbanOBL0kJTRgzOYLJAcnbJKBpDKCLL8-KFDz3cWLTmNFpteB8iYBoYjSVLGVrALynYSADK01m80E+e86s1jztL2VzOweoAUgB1VI+5gAa04vmJMAhjUEakRRvOrm1ggAMsxLv0oIJ3KwMO5cJCIAAvP1JRjr3zYDhkUM7cP+GkOEAOGoMVbURR8CIUhyBgKhaBABgenKOAwXwMxvyAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 The `requires` values must be names of other guards defined in the same (or inherited) `@guards` block.
 
 ## Transitive Dependencies
@@ -90,6 +96,12 @@ Dependencies are resolved transitively. If guard A requires B, and B requires C,
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIDmArhmoATOAAJgAHVZixk8DGz9qMALQZ5iCdNmyMacgE8AKsy3J5+tHAD0YRVmVqMNgFSu3FLHHkBdHboqAI78ECpw5vJwOEIwwqpQzLy8EKy8frqZsgDEYgDiMN5a0bHxicmpvGIA1GIARhhwaiyskOkyui0c7FryAGIOTmIAgmLU-LBwFPIBAL7SAVExKmVJKWma2h2ywaHhkSANTaotbRlZF7kFRfWNzWxn22JdnFi9IMNQAO4YhuL8TTEcCw40YjhWYgAUgBlADyADkxOV1rxpiA5gsOvIjvdWhB0kgtpkXj05CA+swoIkvmIaMwAFYwMGqL4QYQwZ7MYSVIFYDCsYRCURojGsWYgWa+BivaiGfBEUjkGBUWggBgANxgtAgbHwAEYJUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Resolving `feature-a` produces: `feature-a` + `shared-logging` + `base-config`.
 
@@ -129,6 +141,12 @@ A guard without an `applyTo` field is never directly applied to any files — it
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIDmArhmoATOAAJgAHVZixkkFgCeaeI2oQ0WALTV+sOPMQTps2RjTlFAFWZHk8gFQOA9A4pYDIALonT1GACO-BD+cHbycDhCMMJaLKwAbpxYEGyePjKm8RzsRvL5IL6mYlbKMADKahracCqMEJCMYrr6iEWmWmIAcsxiEGRQEPVYYhisimJKKgaZxZ0ACv5gMNR97CtgGIzwYsxJq1Mwo4MYcPDtBfmZAL7SvvL+W9ot50jGs6MWUNa2YvYgTlc7jghHkGWK-iCIXg4RAkWisXiSXYqVY6Xa2WSeUKOPasgASjAnlpajB6o1mnoYXixJ0AKpnMRgfisRgpNgYKBiFhkNjJcQAdwguDEOGYzAA1jNirJOgBBL4TADyrHm-Ei3KirF4R2EMA4bNRF1xhRud0yESi-kRbGR7LRhnexQAxN1euZLDYxIAUAjE6piu1Y3zECQgGGagWCoQxbByWGxlw+snKVoDNGYACsySMkclUWEafTGRKYAAjDCluKnI5gZirSCwMSsUjnJO0sSLGDLVbNkgBohoOseY2J2S3VjXEDXLwMZLURT4IikcgwKi0EAMfZwVH4ACMU6AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 `shared-conventions` is a pure context library: it will never be applied on its own, but its content is injected into both `typescript-rules` and `react-rules` whenever they apply.
 
@@ -178,6 +196,12 @@ To fix a cycle, reorganize the guards so that shared content lives in a dependen
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAQjDDNqMXgApGAT0awAlIgA6rPhl6iAjgFcIouLwBGdQ+pjbd8Xmt6AEwl4xq1EcuV8AgmA7UJkQjAAmCsoAAgDmWhjU-vrAyry8iiBwOJEBiYi8sazx8SzsnFgZiQDKKaL+6lqwcBSJcbwAvi7ZCSAY6Zn18Rho5FIAKswZyIkUY4kAul2m5nrDicmp-pPTeRzsRSAASlWWwt4YtSD1Taz1iQYdWTlWvVADQ7wjIGNHUy3xmjpzTwtlaSB3jc1gVNjtqrx9oYjidlA0QA0JgwCtQpPgiKRyDAqLQQAwAG4OOAQNj4ACMCKAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Validation
 

@@ -76,6 +76,12 @@ This creates the following structure:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwsNTYdWAEwC0C+BADmrRKIlSpquI2oQ0WCG21iQAVQCSAemsANYQY2SA7hFzC4MDNSMOBgARrCu2KEYfnBWusIAvhLxLCQk3triknoGRiZmFsJWAMLU-hzC6t7CqelYsSDxUgCuftS2rABuzIyhsNpY1M0w8UmsKcyqSmWdEDAemU2u8Hmm5lpFIABKMLPzNZMwNcGs6vBx2S1tHd29YTADQyPZYwkgCQC6DJyDAJ74RFI5BgVFoIAYnRgtHW+AAjO8gA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 You only need the skill name and optional metadata. PromptScript loads content from `SKILL.md` automatically.
 
 ### 4. Compile
@@ -163,6 +169,12 @@ When a skill from `npx skills` doesn't have the exact settings you need, overrid
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwliRIQsiURKlSAJvEbUIaLBDaKxIAMLUY2GNOaz5IgO7ycl1gDdOuthijCwzaiWyGyioArnAw1ACSLsyMGABGsIpY1MEWKulSAMTCAPKu1FrqwupgGMFQWEFqEHDxsACyzOpQUc4x2HqsSSkW2XnhhRYlZRVBAL4SYyBjALoMbtQAnvhEpOQwVLQgDPlwnfgAjNNAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 The `content` always comes from `SKILL.md` and cannot be overridden in `.prs`. For other properties, the `.prs` file takes precedence - for example, `description` from `.prs` overrides `description` from SKILL.md frontmatter.
 
 ## Parameterized skills
@@ -191,6 +203,12 @@ Pass parameter values in your `.prs` file:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpUDKwDmAVwyGYWsSDQBPXGys7hAXwnOQzgLoNOWajfwiUnIYKloQBmUYWgg2fABGDyA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Updating skills
 
