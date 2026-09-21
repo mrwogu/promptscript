@@ -45,7 +45,7 @@ See [Creating a Registry](#creating-a-registry) for the interactive mode and oth
 
 ```bash
 cd my-registry
-git init
+git init -b main
 git add .
 git commit -m "feat: initial registry"
 git remote add origin https://github.com/your-org/my-registry.git  # replace your-org with your GitHub org or user
@@ -55,6 +55,15 @@ git push -u origin main
 From now on, `prs registry publish` re-publishes registry updates - it validates, commits, and pushes in one step (see [Publishing a Registry](#publishing-a-registry)).
 
 ### 3. Bind Your Project
+
+Return to the starting directory and create a project:
+
+```bash
+cd ..
+mkdir my-project
+cd my-project
+mkdir -p .promptscript
+```
 
 In your project root, point `promptscript.yaml` at the registry you just pushed and pick compile targets:
 
@@ -69,7 +78,7 @@ targets:
   - github # compiles .github/copilot-instructions.md - pick your tools here
 ```
 
-No Git host handy? A local registry works for the rest of this walkthrough - skip the push and configure `registry: { path: ./my-registry }` instead.
+No Git host handy? A local registry works for the rest of this walkthrough - skip the push and configure `registry: { path: ../my-registry }` instead.
 
 ### 4. Use Registry Configurations
 
@@ -166,46 +175,46 @@ See [Skill Overlays](./skill-overlays.md) for the overlay model itself, and the 
 
 ## Usage Patterns
 
-### Pattern 1: Inherit a Tech Stack
+### Pattern 1: Inherit the Base
 
 ```promptscript
-@meta { id: "react-app" syntax: "1.5.0" }
+@meta { id: "base-project" syntax: "1.5.0" }
 
-@inherit @stacks/react
+@inherit @core/base
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdENRgZGWALQY0aGYLgBPdhkKSZARgoBWCgAYNAXymtbAYkHcIrHDGoQsTuAMYBrOAB6OQUvQUcACjkAcwgfai1BJUExOIwAI1gxQTBmakFyDC1o6mYAV1YxAEoQKwBdBk4sBPwiUnIYKloQBgA3dzgINnxDWqA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEACMMcGAFoazAFYxGWGYLgBPdhkKSZARgoBWCgAYdAXymtHAYkHcIrHDGoQsbltQwAPTyioKCrgAUgQDmEHBY1HqCSoJi8RiysGKCYMzUguQYejHUzACurGIAlCB2ALoMnIl6+ESk5DBUtCAMAG7ecBBs+KZ1QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
 
-### Pattern 2: Mix in Fragments
+### Pattern 2: Mix in Shared Standards
 
 ```promptscript
-@meta { id: "secure-app" syntax: "1.5.0" }
+@meta { id: "secure-project" syntax: "1.5.0" }
 
-@inherit @stacks/node
-@use @fragments/testing
-@use @fragments/security/owasp-security-review
+@inherit @core/base
+@use @core/quality
+@use @core/security
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBiMArtRgBaDGjQzBcAJ7sMhSTICMFAKwUADFoC+U1vYDEg7hFY4Y1CFhdwBjAGs4AHpWZjEYQUFnAAplAHMIP2odQRVBMSSMACNYMUEwZmpBcgwdeOpmBVYxAEonFwU5FzBqDHi+dhCOPzd4qNiEpKwUtIys3Jh8wuLS8srquobuJsjuVvbOrBC5RS8sHWDmAHcMODQVXaVvHRVlADcIGGOBwTiYROTU9My4HLyCkUSlAyhUqjVaiAbABdBicEY6fBEUjkGBUWggBj3TxwCBsfDGKFAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBiMArtRgBaGswBW8rDMFwAnuwyFJMgIwUArBQAMugL5TWTgMSDuEVjhjUIWdyzKAPQARhhygoJuABTKAOYQcFjU+oIqgmKJGCGwYoJgzNSC5Bj6cdTMCqxiAJSu7goR3IEwQQCOChhQfqlRgrEwCUkpaRlZOTB5BUUlZRVVtfXcjTABha1yir5YvTHxicmp6Zlw2bn5hcVQpeWV1TUg9gC6DJyH+ESk5DBUtCAMADcfHAIGx8GZHkA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
 
-### Pattern 3: Use Prompts Directly
+### Pattern 3: Use a Mixin Directly
 
 ```promptscript
-@meta { id: "terminal" syntax: "1.5.0" }
+@meta { id: "security-review" syntax: "1.5.0" }
 
-@inherit @prompts/coding/linux-terminal
+@use @core/security
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEB2okIrDFBmC4AT3YZCkmQEYKAVgoAGVQF8prKwGJB3RThjUIWezWZkscAPQsxigDmPlCKAK6EALRyCkpQgoJ2ABTUMIEQcFjU6oKRggFwGABGsGKCYMzUguQY6oHUzGGsYgCUIOYAugycWer4RKTkMFS0IAwAbs5wEGz4eu1AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBiMArtQhYAngFpqMAG4QYAdxmC4q9hkKSZARgoBWCgAYjAXyms3AYkHcFc7yy0AejlFZTVBQS8ACi0Acwg4LGpVQXVBMQSMACNYMUEwZmpBcgxVWOpmBVYxAEoQZwBdBk4k1XwiUnIYKloQBm0YWgg2fCt6oA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -698,17 +707,22 @@ remote imports, then commit the result.
 
 ### Lockfile Format
 
-Actual `prs lock` output for a project using one Git registry:
+Actual `prs lock` output for a project configured with
+`registry.git.url: https://github.com/acme/promptscript-base.git`:
 
 ```yaml
 # promptscript.lock - written by `prs lock`
 version: 1
 dependencies:
-  github.com/acme/promptscript-base: # repository URL, protocol stripped
-    version: main # requested ref (tag/branch), or `latest`
-    commit: a3f8c2d91b4e6f7890123456789abcdef0123456 # resolved 40-char commit SHA
+  https://github.com/acme/promptscript-base.git:
+    version: main
+    commit: a3f8c2d91b4e6f7890123456789abcdef0123456
     integrity: sha256-pending
 ```
+
+For a default Git registry, the dependency key preserves the configured URL.
+`version` records the requested ref, while `commit` records the resolved
+40-character commit SHA.
 
 Projects whose skills pull registry reference files (via `@skills.references`) also get a `references` map. The shape below is illustrative - the key and hash values come from your own locked content - but the field types are exact:
 
@@ -716,7 +730,7 @@ Projects whose skills pull registry reference files (via `@skills.references`) a
 # Illustrative view - run `prs lock` to see real values
 references:
   "github.com/acme/promptscript-base\0references/testing.md\0main":
-    hash: sha256-f6e5d4c3b2a1098765432109abcdef0123456789abcdef0123456789abcdef0123 # 64-char SHA-256
+    hash: sha256-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef # 64-char SHA-256
     lockedAt: 2026-03-23T10:00:00.000Z # ISO timestamp of when `prs lock` recorded this hash
 ```
 

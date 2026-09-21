@@ -48,12 +48,13 @@ Controls which layers can extend which, based on distance in a defined layer hie
 Example: with `layers: ['@core', '@team', '@project']` and `maxDistance: 1`, a `@project` extension cannot directly modify a `@core` skill — it must go through `@team`.
 
 !!! warning "Currently schematic"
-Layer-boundary distance is measured against the skill's base-definition
-provenance (`__baseSource`), which the resolver does not attach to plain
-`@use` + `@extend` chains yet. On a normal `prs validate` run today this
-policy kind does not produce violations - the scenario above is schematic.
-Property-protection and registry-allowlist do fire end to end (see
-[Runnable Walkthrough](#runnable-walkthrough)).
+
+    Layer-boundary distance is measured against the skill's base-definition
+    provenance (`__baseSource`), which the resolver does not attach to plain
+    `@use` + `@extend` chains yet. On a normal `prs validate` run today this
+    policy kind does not produce violations - the scenario above is schematic.
+    Property-protection and registry-allowlist do fire end to end (see
+    [Runnable Walkthrough](#runnable-walkthrough)).
 
 ### Property Protection
 
