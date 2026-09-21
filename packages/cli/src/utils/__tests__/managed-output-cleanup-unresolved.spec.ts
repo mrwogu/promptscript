@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import type { PathLike } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { FormatterOutput } from '@promptscript/compiler';
@@ -15,6 +16,17 @@ import {
 vi.mock('../../runtime/self-invocation.js', () => ({
   resolveSelfInvocation: () => undefined,
 }));
+
+// Pretend the bundled worker exists so the module path resolution picks the
+// published layout instead of the development source layout.
+vi.mock('node:fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs')>();
+  return {
+    ...actual,
+    existsSync: (path: PathLike) =>
+      String(path).endsWith('managed-output-worker.js') || actual.existsSync(path),
+  };
+});
 
 const GENERATED_MARKER =
   '<!-- PromptScript 2026-07-15T00:00:00.000Z | source: project.prs | target: factory - do not edit -->';
@@ -96,6 +108,16 @@ describe('guarded cleanup without a resolvable self-invocation', () => {
   it('refuses hook creation, including missing ancestor directories', async () => {
     const project = await createProject('cleanup-unresolved-create-');
     const hookFile = join(project, '.claude', 'nested', 'settings.json');
+
+    const created = await createHookOutputSafely(hookFile, project, '{}\n');
+
+    expect(created).toBe(false);
+    await expect(readFile(hookFile, 'utf-8')).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('refuses hook creation when the file sits directly in the root', async () => {
+    const project = await createProject('cleanup-unresolved-create-direct-');
+    const hookFile = join(project, 'settings.json');
 
     const created = await createHookOutputSafely(hookFile, project, '{}\n');
 
