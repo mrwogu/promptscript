@@ -3841,6 +3841,92 @@ describe('Stage 1.5: Reference Integrity', () => {
     expect(roots).toContain('/custom/repo-root');
   });
 
+  it('should pass import roots keyed by lockfile dependencies to the validator', async () => {
+    mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+    const lockfile = {
+      version: 1 as const,
+      dependencies: {
+        'github.com/org/repo': {
+          version: 'v1.0.0',
+          commit: 'a1b2c3d4e5f6',
+          integrity: 'sha256-abc',
+        },
+      },
+    };
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        vendorDir: '/project/.promptscript/vendor',
+        referenceRoots: { 'https://github.com/org/repo.git': ['/custom/repo-root'] },
+        lockfile,
+      },
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    const importCall = mockUpdateConfig.mock.calls.find(
+      (c) => c[0] && 'importRoots' in (c[0] as Record<string, unknown>)
+    );
+    expect(importCall).toBeDefined();
+    const call = importCall![0] as Record<string, unknown>;
+    expect(call['lockfile']).toEqual(lockfile);
+    const importRoots = call['importRoots'] as Array<{
+      import: string;
+      commit: string;
+      path: string;
+    }>;
+    expect(importRoots).toContainEqual({
+      import: 'github.com/org/repo',
+      commit: 'a1b2c3d4e5f6',
+      path: resolve('/cache/registries/github.com/org/repo/v1.0.0'),
+    });
+    expect(importRoots).toContainEqual({
+      import: 'github.com/org/repo',
+      commit: 'a1b2c3d4e5f6',
+      path: resolve('/project/.promptscript/vendor', 'github.com/org/repo'),
+    });
+    expect(importRoots).toContainEqual({
+      import: 'github.com/org/repo',
+      commit: 'a1b2c3d4e5f6',
+      path: resolve('/custom/repo-root'),
+    });
+  });
+
+  it('should pass import roots even when hashes are ignored', async () => {
+    mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+    const compiler = createTestCompiler({
+      ignoreHashes: true,
+      resolver: {
+        registryPath: '/registry',
+        lockfile: {
+          version: 1 as const,
+          dependencies: {
+            'github.com/org/repo': {
+              version: 'v1.0.0',
+              commit: 'a1b2c3d4e5f6',
+              integrity: 'sha256-abc',
+            },
+          },
+        },
+      },
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    const importCall = mockUpdateConfig.mock.calls.find(
+      (c) => c[0] && 'importRoots' in (c[0] as Record<string, unknown>)
+    );
+    expect(importCall).toBeDefined();
+    const call = importCall![0] as Record<string, unknown>;
+    const importRoots = call['importRoots'] as Array<{ import: string; commit: string }>;
+    expect(importRoots).toContainEqual(
+      expect.objectContaining({ import: 'github.com/org/repo', commit: 'a1b2c3d4e5f6' })
+    );
+    expect(call['lockfile']).toBeDefined();
+  });
+
   it('should collect registry references from skills blocks and pass to validator', async () => {
     const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
     const ast = createTestProgram({

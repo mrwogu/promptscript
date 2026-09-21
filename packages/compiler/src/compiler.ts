@@ -15,7 +15,12 @@ import {
   Resolver,
   type ResolvedAST,
 } from '@promptscript/resolver';
-import { Validator, type ValidatorConfig, type ValidationMessage } from '@promptscript/validator';
+import {
+  Validator,
+  type ValidatorConfig,
+  type ValidationMessage,
+  type ImportRoot,
+} from '@promptscript/validator';
 import { minimatch } from 'minimatch';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'path';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- imported for upcoming formatter integration
@@ -498,7 +503,54 @@ export class Compiler {
     for (const roots of Object.values(this.options.resolver.referenceRoots ?? {})) {
       externalRoots.push(...roots);
     }
-    this.validator.updateConfig({ externalRoots });
+
+    // Map each lockfile dependency to the roots holding its resolved content,
+    // so consumer-declared validation excludes can bind findings to an import
+    // and verify the exclude against the pinned commit.
+    const importRoots: ImportRoot[] = [];
+    if (this.options.resolver.lockfile) {
+      const registryCache = new RegistryCache(cacheDir);
+      for (const [repoUrl, dependency] of Object.entries(
+        this.options.resolver.lockfile.dependencies
+      )) {
+        const importKey = normalizeRepositoryKey(repoUrl);
+        try {
+          importRoots.push({
+            import: importKey,
+            commit: dependency.commit,
+            path: resolve(registryCache.getCachePath(repoUrl, dependency.version)),
+          });
+        } catch {
+          // Invalid cache keys are reported by reference hash verification.
+        }
+        if (this.options.resolver.vendorDir) {
+          try {
+            importRoots.push({
+              import: importKey,
+              commit: dependency.commit,
+              path: resolve(
+                this.options.resolver.vendorDir,
+                getVendorRepositoryRelativePath(repoUrl)
+              ),
+            });
+          } catch {
+            // Non-vendor repository URLs can still use configured reference roots.
+          }
+        }
+        const configuredRoots = Object.entries(this.options.resolver.referenceRoots ?? {}).find(
+          ([configuredRepoUrl]) =>
+            normalizeRepositoryKey(configuredRepoUrl) === normalizeRepositoryKey(repoUrl)
+        )?.[1];
+        for (const path of configuredRoots ?? []) {
+          importRoots.push({ import: importKey, commit: dependency.commit, path: resolve(path) });
+        }
+      }
+    }
+    this.validator.updateConfig({
+      externalRoots,
+      importRoots,
+      lockfile: this.options.resolver.lockfile,
+    });
 
     if (!this.options.ignoreHashes && this.options.resolver.lockfile) {
       this.logger.verbose('=== Stage 1.5: Reference Integrity ===');

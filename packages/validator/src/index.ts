@@ -28,6 +28,7 @@ export type {
   ValidationRule,
   ValidatorConfig,
   ValidateOptions,
+  ImportRoot,
 } from './types.js';
 
 // Rules
@@ -54,7 +55,16 @@ export {
   unicodeSecurity,
   duplicateSkills,
   validBlockShape,
+  importExcludes,
 } from './rules/index.js';
+
+// Import exclusion helpers
+export {
+  normalizeImportKey,
+  isRuleExcludedForLocation,
+  findLockfileDependency,
+  type ResolvedImportDependency,
+} from './import-exclusions.js';
 
 // Security presets
 export {

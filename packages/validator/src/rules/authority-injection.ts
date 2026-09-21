@@ -1,4 +1,5 @@
 import type { ValidationRule } from '../types.js';
+import { isRuleExcludedForLocation } from '../import-exclusions.js';
 import { walkText } from '../walker.js';
 
 interface WarningSuppressionPattern {
@@ -626,6 +627,10 @@ export const authorityInjection: ValidationRule = {
     walkText(
       ctx.ast,
       (text, loc) => {
+        // Consumer-declared excludes only ever suppress imported content.
+        if (isRuleExcludedForLocation(authorityInjection, loc, ctx.config)) {
+          return;
+        }
         const strippedText = stripFencedCodeBlocks(text);
         const listItems = findDefensiveListItems(strippedText);
         const normalizedText = normalizeText(strippedText);
