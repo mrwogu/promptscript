@@ -13,9 +13,9 @@
     "@types/ws": "^8.18.1",
     "chokidar": "^5.0.0",
     "fast-glob": "^3.3.0",
-    "fastify": "^5.12.3",
+    "fastify": "^5.12.5",
     "ws": "^8.21.3",
-    "yaml": "^2.9.0"
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
     "@fastify/rate-limit": "^11.2.0"
