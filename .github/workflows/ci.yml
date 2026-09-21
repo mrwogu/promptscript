@@ -93,6 +93,14 @@ jobs:
             exit 1
           fi
 
+      - name: API Docs Frontmatter Check
+        if: matrix.node-version == '25.x'
+        run: |
+          if ! pnpm docs:generate:check; then
+            echo "::error::Generated API docs are missing title/description frontmatter. Run 'pnpm docs:generate' locally and investigate the reported pages."
+            exit 1
+          fi
+
       - name: Documentation Highlighting Check
         if: matrix.node-version == '25.x'
         run: |
