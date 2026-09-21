@@ -177,8 +177,9 @@ function extractSummary(lines: readonly string[], headingIndex: number): string 
 
 /** Strips markdown link/emphasis/code markup and escapes so YAML values stay plain text. */
 function cleanSummary(paragraph: string): string {
-  let text = paragraph.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1');
-  text = text.replace(/`/g, '').replace(/\*\*/g, '').replace(/~~/g, '');
+  // Disjoint character classes keep the link regex linear (no backtracking blowup)
+  let text = paragraph.replace(/\[([^\][]+)\]\(([^()]*)\)/g, '$1');
+  text = text.replaceAll('`', '').replaceAll('**', '').replaceAll('~~', '');
   return text
     .replace(/\\([\\`*_{}[\]()#+.!|<>-])/g, '$1')
     .replace(/\s+/g, ' ')
@@ -268,7 +269,7 @@ function renderFrontmatter(meta: PageMeta): string {
   return `---\ntitle: ${JSON.stringify(meta.title)}\ndescription: ${JSON.stringify(meta.description)}\n---\n`;
 }
 
-const files = collectMarkdownFiles(API_ROOT).sort();
+const files = collectMarkdownFiles(API_ROOT).sort((a, b) => a.localeCompare(b));
 if (files.length === 0) {
   console.error(
     `No markdown pages under ${relative(process.cwd(), API_ROOT)} - run typedoc first (pnpm docs:generate).`
