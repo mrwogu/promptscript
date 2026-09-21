@@ -40,6 +40,7 @@
           "simple-git",
           "fastify",
           "@fastify/cors",
+          "@fastify/rate-limit",
           "@fastify/websocket",
           "ws",
           "fast-glob"
