@@ -1752,13 +1752,7 @@ Multiline strings (`"""..."""`) cannot be used as "loose" content inside an obje
     types: [flowchart sequence]
     """
     Example:
-    ```
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPGCIGAObVScRJJly5YZtRLYNUkAFkY+jBEHGt2rAE808DcjBRmAd0Y4RWcXBgARwBXTkYYAF1bORsQG1ltAFFiMlhEEABfCIZOLGp7fCJSchgqWhAGADdzOAg2fABGTKA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-mermaid
+    ```mermaid
     flowchart LR
       A[Input] --> B[Process] --> C[Output]
     ```
@@ -1781,13 +1775,7 @@ Expecting token of type --> RBrace <-- but found --> '"""...
     format: "Mermaid"
     types: [flowchart sequence]
     example: """
-      ```
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPGCIGAObVScRJJly5YZtRLYNUkAFkY+jBEHGt2rAE808DcjBRmAd0Y4RWcXBgARwBXTkYYAF1bOSJSchgjEBsQEABfCIZOLGp7fFiyShp6EAA3czgINnwARjSgA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-mermaid
+      ```mermaid
       flowchart LR
         A[Input] --> B[Process] --> C[Output]
       ```
