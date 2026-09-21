@@ -201,7 +201,98 @@ PromptScript preserves the directory structure when emitting native skill packag
 
 ## Monorepo Build Profiles
 
-Named builds compile scoped agent configuration for multiple packages from one repository:
+Named builds compile scoped agent configuration for multiple packages from one repository. A payments platform with two services keeps one shared team config and one entry per service:
+
+```text
+payments-platform/
+├── .promptscript/
+│   ├── team.prs            # Shared team config
+│   ├── api.prs             # payments-api entry
+│   └── web.prs             # checkout-web entry
+├── packages/
+│   ├── api/
+│   └── web/
+└── promptscript.yaml
+```
+
+Create the shared team config, `.promptscript/team.prs`. Both service entries inherit it, so team rules live in exactly one file:
+
+```
+@meta {
+  id: "payments-team"
+  syntax: "1.5.0"
+  tags: ["payments"]
+}
+
+@identity {
+  """
+  You work on the ACME payments platform.
+  Preserve transaction integrity and auditability.
+  """
+}
+
+@standards {
+  code: ["Use strict TypeScript", "Write tests for business rules"]
+  testing: ["Use Vitest with the AAA pattern", "Cover failure and retry paths"]
+}
+
+@restrictions {
+  - "Never log PAN, CVV, or raw webhook secrets"
+}
+```
+
+Each entry inherits the team config and adds only service-specific blocks. `.promptscript/api.prs`:
+
+```
+@meta {
+  id: "payments-api"
+  syntax: "1.5.0"
+}
+
+@inherit ./team
+
+@context {
+  service: "payments-api"
+  framework: "Fastify"
+  owns: ["authorization", "retries"]
+}
+
+@agents {
+  api-reviewer: {
+    description: "Review payments-api changes before merge"
+    tools: ["Read", "Grep", "Glob", "Bash"]
+    model: "sonnet"
+    content: "Inspect handlers, tests, and migration impact. Reject changes that weaken idempotency."
+  }
+}
+```
+
+`.promptscript/web.prs`:
+
+```
+@meta {
+  id: "checkout-web"
+  syntax: "1.5.0"
+}
+
+@inherit ./team
+
+@context {
+  service: "checkout-web"
+  framework: "React 18"
+  owns: ["checkout flow", "payment forms"]
+}
+
+@skills {
+  payment-forms: {
+    description: "Review payment form changes for PCI and a11y risk"
+    allowedTools: ["Read", "Grep"]
+    content: "Check card-data handling, error states, and keyboard access in checkout forms."
+  }
+}
+```
+
+Declare one build profile per service in `promptscript.yaml`:
 
 ```yaml
 builds:
@@ -213,6 +304,8 @@ builds:
           version: full
       - codex:
           version: full
+          output: AGENTS.override.md
+          agentsFile: AGENTS.override.md
   web:
     entry: .promptscript/web.prs
     output: packages/web
@@ -221,9 +314,40 @@ builds:
           version: full
 ```
 
+Validate every entry, then compile each build separately:
+
 ```bash
+prs validate .promptscript/team.prs .promptscript/api.prs .promptscript/web.prs --strict
 prs compile --build api
+prs compile --build web
 prs compile --all-builds
+```
+
+In CI, fan the builds out through a matrix so each service validates and compiles in its own job:
+
+```yaml
+# .github/workflows/promptscript.yml
+name: PromptScript
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  promptscript:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build: [api, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install -g @promptscript/cli@1.19.1
+      - run: prs validate .promptscript/team.prs .promptscript/${{ matrix.build }}.prs --strict
+      - run: prs compile --build ${{ matrix.build }} --dry-run
 ```
 
 ## Related Documentation

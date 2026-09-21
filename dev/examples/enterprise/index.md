@@ -57,7 +57,8 @@ acme-promptscript-registry/
 ├── @acme/
 │   ├── base.prs              # Organization base
 │   ├── security.prs          # Security standards
-│   └── compliance.prs        # Compliance (SOC2, GDPR)
+│   ├── compliance.prs        # Compliance (SOC2, GDPR)
+│   └── design-system.prs     # Shared @acme/ui skills
 ├── @frontend/
 │   ├── base.prs              # Frontend team base
 │   ├── react.prs             # React-specific
@@ -299,6 +300,55 @@ acme-promptscript-registry/
 }
 ```
 
+### [acme/design-system.prs](https://github.com/acme/design-system.prs "GitHub Repository: acme/design-system.prs")
+
+The design system is a shared capability, so its skills are authored once in the central registry and consumed by every frontend project:
+
+```
+@meta {
+  id: "@acme/design-system"
+  syntax: "1.5.0"
+  team: "Design Systems"
+}
+
+@identity {
+  """
+  You build user interfaces with the @acme/ui design system.
+  Consume components and tokens; never fork them.
+  """
+}
+
+@skills {
+  component-review: {
+    description: "Review frontend changes against @acme/ui component and token contracts"
+    allowedTools: ["Read", "Grep", "Bash"]
+    content: """
+      Review changed components and styles against the design system:
+
+      1. Use @acme/ui components instead of new markup
+      2. Style through @acme/design-tokens, never raw values
+      3. Flag hardcoded colors, spacing, or font sizes
+      4. Check accessibility: WCAG 2.1 AA, keyboard, focus order
+      5. Report violations by severity with file and line
+    """
+  }
+
+  token-migration: {
+    description: "Migrate a package from raw styles to @acme/design-tokens"
+    allowedTools: ["Read", "Grep", "Bash"]
+    content: """
+      Migrate one package at a time:
+
+      1. List raw colors, spacing, and font sizes in the package
+      2. Map each raw value to the nearest design token
+      3. Replace raw values with token references
+      4. Run visual regression tests
+      5. Report values with no matching token as new-token proposals
+    """
+  }
+}
+```
+
 ### [frontend/base.prs](https://github.com/frontend/base.prs "GitHub Repository: frontend/base.prs")
 
 ```
@@ -431,6 +481,9 @@ acme-promptscript-registry/
 # In a multi-file setup, you would inherit from frontend base:
 @inherit @frontend/base
 
+# Pull shared design-system skills into this project:
+@use @acme/design-system
+
 @context {
   project: "Checkout Application"
   repository: "github.com/acme/checkout-app"
@@ -505,6 +558,8 @@ acme-promptscript-registry/
 }
 ```
 
+The single `@use @acme/design-system` line is the whole project-level usage. It composes the shared `component-review` and `token-migration` skills into `checkout-app`. Projects receive a Design Systems update only after refreshing their reviewed registry pin and recompiling; compilation alone keeps the cached or lockfile-pinned revision. See [Updating Dependencies](https://getpromptscript.dev/dev/guides/registry/#updating-dependencies) for the scoped `prs update` workflow. Agents in consuming projects can then reference the skills by name without re-authoring them per repository.
+
 ### Project Config
 
 ```yaml
@@ -529,6 +584,7 @@ targets:
       output: CLAUDE.md
   - cursor:
       output: .cursor/rules/project.mdc
+      version: full
 
 validation:
   rules:
