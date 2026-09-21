@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { collectRegistryReferences } from '../lock-reference-scanner.js';
 import type { Program, SourceLocation, Block, Value } from '@promptscript/core';
 import { buildReferenceKey } from '@promptscript/resolver';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import type { TargetEntry } from '@promptscript/core';
-import { resolve } from 'path';
-import { existsSync } from 'fs';
+import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 import { parseTargetEntries } from '../utils/target-config.js';
 
 describe('parseTargets', () => {
@@ -126,7 +126,7 @@ function findConfigInDir(dir: string): string | undefined {
   return undefined;
 }
 
-vi.mock('fs', async (importOriginal) => {
+vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('fs')>();
   return {
     ...actual,

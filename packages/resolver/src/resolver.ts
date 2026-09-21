@@ -1,6 +1,6 @@
-import { existsSync } from 'fs';
-import { lstat, readdir, readFile } from 'fs/promises';
-import { basename, isAbsolute, join, relative, resolve, sep } from 'path';
+import { existsSync } from 'node:fs';
+import { lstat, readdir, readFile } from 'node:fs/promises';
+import { basename, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { parse } from '@promptscript/parser';
 import {
   noopLogger,

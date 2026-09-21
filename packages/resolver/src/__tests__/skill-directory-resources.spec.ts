@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { mkdtemp, mkdir, rm, writeFile } from 'fs/promises';
-import { basename, join } from 'path';
-import { tmpdir } from 'os';
+import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { basename, join } from 'node:path';
+import { tmpdir } from 'node:os';
 import type { ObjectContent, Program, Value } from '@promptscript/core';
 import { Resolver } from '../resolver.js';
 import { discoverNativeContent } from '../auto-discovery.js';

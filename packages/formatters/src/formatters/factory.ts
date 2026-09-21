@@ -1,5 +1,5 @@
 import type { Program, Value } from '@promptscript/core';
-import { posix } from 'path';
+import { posix } from 'node:path';
 import type { ConventionRenderer } from '../convention-renderer.js';
 import {
   MarkdownInstructionFormatter,

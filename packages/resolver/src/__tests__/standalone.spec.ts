@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { join } from 'path';
-import { promises as fs } from 'fs';
-import { tmpdir } from 'os';
+import { join } from 'node:path';
+import { promises as fs } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { resolve, createResolver } from '../index.js';
 
 describe('standalone resolve function', () => {

@@ -1,4 +1,4 @@
-import { execFileSync } from 'child_process';
+import { execFileSync } from 'node:child_process';
 
 const CLIPBOARD_COMMANDS: Record<string, [string, string[]][]> = {
   darwin: [['pbcopy', []]],

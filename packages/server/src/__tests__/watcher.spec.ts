@@ -1,6 +1,6 @@
-import { mkdtemp, writeFile, unlink, mkdir, rm } from 'fs/promises';
-import { tmpdir } from 'os';
-import { join } from 'path';
+import { mkdtemp, writeFile, unlink, mkdir, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { createFileWatcher, type FileWatchEvent } from '../watcher.js';
 
 describe('createFileWatcher', () => {

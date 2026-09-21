@@ -1,4 +1,4 @@
-import { dirname, relative, resolve } from 'path';
+import { dirname, relative, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import {
   getLatestSyntaxVersion,

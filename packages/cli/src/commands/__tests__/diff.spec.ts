@@ -99,11 +99,11 @@ vi.mock('@promptscript/compiler', () => ({
   }),
 }));
 
-vi.mock('fs', () => ({
+vi.mock('node:fs', () => ({
   existsSync: mockExistsSync,
 }));
 
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   readFile: mockReadFile,
 }));
 
@@ -153,7 +153,7 @@ vi.mock('chalk', () => {
   };
 });
 
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { diffCommand, createDiffLogger } from '../diff.js';
 import { ConsoleOutput } from '../../output/console.js';
 import { createOutputPlan } from '@promptscript/core';

@@ -9,7 +9,7 @@
  * @packageDocumentation
  */
 
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 
 /**
  * Parsed Git URL structure.

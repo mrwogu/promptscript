@@ -810,9 +810,17 @@ async function closeDirectoryGuards(guards: DirectoryGuard[]): Promise<void> {
   }
 }
 
+/** Platform-optional open flags, probed on first use: 0 where the runtime lacks them. */
+let openNofollowFlag: number | undefined;
+let openDirectoryFlag: number | undefined;
+
 async function safeOpenDirectory(path: string): Promise<FileHandle | undefined> {
   try {
-    return await open(path, constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
+    // Probed lazily (not at module load) so test doubles that replace
+    // node:fs wholesale still load this module.
+    openNofollowFlag ??= constants.O_NOFOLLOW ?? 0;
+    openDirectoryFlag ??= constants.O_DIRECTORY ?? 0;
+    return await open(path, constants.O_RDONLY | openDirectoryFlag | openNofollowFlag);
   } catch (error: unknown) {
     if (
       isNodeError(error) &&

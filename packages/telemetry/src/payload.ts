@@ -101,7 +101,6 @@ function toPayload(batch: BatchBuilder): TelemetryPayload {
     schema: 1,
     app: 'promptscript',
     event_schema: TELEMETRY_EVENT_SCHEMA,
-    runtime: batch.metadata.runtime,
     ...batch.metadata,
     events: batch.events,
   };

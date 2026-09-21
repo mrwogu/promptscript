@@ -1,6 +1,6 @@
-import { readFile } from 'fs/promises';
-import { existsSync } from 'fs';
-import { join } from 'path';
+import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { parse } from '@promptscript/parser';
 import { detectContentType, FileLoader, parseRegistryMarker } from '@promptscript/resolver';
 import type { PathReference, RegistriesConfig } from '@promptscript/core';

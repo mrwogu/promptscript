@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { resolve, dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-import { mkdtemp, mkdir, writeFile, symlink, rm, chmod } from 'fs/promises';
-import { tmpdir } from 'os';
+import { resolve, dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { mkdtemp, mkdir, writeFile, symlink, rm, chmod } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import type { Logger, ObjectContent } from '@promptscript/core';
 import { Resolver } from '../resolver.js';
 

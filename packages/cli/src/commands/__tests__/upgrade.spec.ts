@@ -8,9 +8,9 @@ import {
   statSync,
   symlinkSync,
   writeFileSync,
-} from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
+} from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { getLatestSyntaxVersion } from '@promptscript/core';
 import { upgradeCommand } from '../upgrade.js';
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { claudeParser } from '../../parsers/claude.js';
 import { githubParser } from '../../parsers/github.js';
 import { cursorParser } from '../../parsers/cursor.js';

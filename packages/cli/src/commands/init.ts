@@ -1,4 +1,4 @@
-import { basename, resolve } from 'path';
+import { basename, resolve } from 'node:path';
 import {
   getLatestSyntaxVersion,
   type PromptScriptConfig,

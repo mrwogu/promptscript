@@ -1,5 +1,5 @@
-import { mkdir, stat, writeFile, readFile, lstat } from 'fs/promises';
-import { join, resolve, relative } from 'path';
+import { mkdir, stat, writeFile, readFile, lstat } from 'node:fs/promises';
+import { join, resolve, relative } from 'node:path';
 
 interface CacheMeta {
   commit: string;

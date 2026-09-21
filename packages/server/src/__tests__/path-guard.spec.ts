@@ -1,7 +1,7 @@
 import { resolveSafePath } from '../path-guard.js';
-import { mkdtemp, mkdir, symlink, rm, realpath, writeFile } from 'fs/promises';
-import { tmpdir } from 'os';
-import { join } from 'path';
+import { mkdtemp, mkdir, symlink, rm, realpath, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 describe('resolveSafePath', () => {
   const workspace = '/workspace';

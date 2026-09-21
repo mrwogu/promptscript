@@ -1,5 +1,5 @@
-import { resolve, join } from 'path';
-import { existsSync, readFileSync, writeFileSync, readdirSync } from 'fs';
+import { resolve, join } from 'node:path';
+import { existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import type { ValidateOptions } from '../types.js';
 import type { CompileResult } from '@promptscript/compiler';
 import { findConfigFile, loadConfig } from '../config/loader.js';

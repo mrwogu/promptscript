@@ -1,5 +1,5 @@
-import { existsSync } from 'fs';
-import { resolve, basename } from 'path';
+import { existsSync } from 'node:fs';
+import { resolve, basename } from 'node:path';
 import type { ObjectContent, TextContent } from '@promptscript/core';
 import { Resolver } from '@promptscript/resolver';
 import type { InspectOptions } from '../types.js';

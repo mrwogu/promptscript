@@ -1,4 +1,4 @@
-import { dirname } from 'path';
+import { dirname } from 'node:path';
 import { ResolveError } from '@promptscript/core';
 import type { Logger, Value } from '@promptscript/core';
 import {

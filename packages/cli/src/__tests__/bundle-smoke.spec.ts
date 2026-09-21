@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { execFileSync } from 'child_process';
-import { existsSync } from 'fs';
-import { join } from 'path';
+import { execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 /**
  * Smoke tests for the bundled CLI package.

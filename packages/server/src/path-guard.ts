@@ -1,5 +1,5 @@
-import { resolve, relative, isAbsolute, dirname, basename } from 'path';
-import { realpath } from 'fs/promises';
+import { resolve, relative, isAbsolute, dirname, basename } from 'node:path';
+import { realpath } from 'node:fs/promises';
 
 export class PathTraversalError extends Error {
   constructor(requestedPath: string) {

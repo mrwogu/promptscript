@@ -2,12 +2,12 @@
  * Integration tests for registry resolution wiring in FileLoader and Resolver.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { execFile } from 'child_process';
-import { existsSync, promises as fs } from 'fs';
-import { join, resolve, dirname } from 'path';
-import { tmpdir } from 'os';
-import { fileURLToPath } from 'url';
-import { promisify } from 'util';
+import { execFile } from 'node:child_process';
+import { existsSync, promises as fs } from 'node:fs';
+import { join, resolve, dirname } from 'node:path';
+import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 import { ResolveError, type PathReference, type RegistriesConfig } from '@promptscript/core';
 import {
   FileLoader,

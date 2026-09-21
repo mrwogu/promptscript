@@ -11,9 +11,9 @@ vi.mock('@promptscript/parser', () => ({
   parse: mockParse,
 }));
 
-vi.mock('fs', () => ({ existsSync: mockExistsSync }));
+vi.mock('node:fs', () => ({ existsSync: mockExistsSync }));
 
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   readFile: mockReadFile,
 }));
 

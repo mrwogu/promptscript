@@ -5,9 +5,9 @@ import {
   parseSkillMd,
   resolveSkillScripts,
 } from '../skills.js';
-import { chmod, mkdir, writeFile, rm, symlink } from 'fs/promises';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { chmod, mkdir, writeFile, rm, symlink } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import type { Program, Block, ObjectContent, TextContent } from '@promptscript/core';
 
 describe('resolveNativeSkills', () => {

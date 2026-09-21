@@ -3,9 +3,9 @@
  *   cloneAtTag, listTags, resolveVersion, cloneSparse
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { existsSync, promises as fs } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { existsSync, promises as fs } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import {
   GitRegistry,
   GitRefNotFoundError,

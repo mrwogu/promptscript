@@ -1,6 +1,6 @@
-import { mkdir, writeFile } from 'fs/promises';
-import { existsSync } from 'fs';
-import { resolve, dirname, relative } from 'path';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { resolve, dirname, relative } from 'node:path';
 import type { PullOptions } from '../types.js';
 import { loadConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';

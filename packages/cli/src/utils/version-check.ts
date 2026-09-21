@@ -1,6 +1,6 @@
-import { homedir } from 'os';
-import { join } from 'path';
-import { readFile, writeFile, mkdir } from 'fs/promises';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { ConsoleOutput, isQuiet, isVerbose } from '../output/console.js';
 
 const NPM_REGISTRY_URL = 'https://registry.npmjs.org/@promptscript/cli/latest';

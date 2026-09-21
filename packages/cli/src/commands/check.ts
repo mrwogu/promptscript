@@ -1,6 +1,6 @@
-import { existsSync } from 'fs';
-import { readFile } from 'fs/promises';
-import { resolve } from 'path';
+import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { Compiler } from '@promptscript/compiler';
 import {

@@ -1,7 +1,7 @@
 import { ConsoleOutput } from '../../output/console.js';
 import { loadUserConfig } from '../../config/user-config.js';
 import { findConfigFile } from '../../config/loader.js';
-import { readFile } from 'fs/promises';
+import { readFile } from 'node:fs/promises';
 import { parse as parseYaml } from 'yaml';
 import type { PromptScriptConfig } from '@promptscript/core';
 import type { RegistryListOptions } from '../../types.js';

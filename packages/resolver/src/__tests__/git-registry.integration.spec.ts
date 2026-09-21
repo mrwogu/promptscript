@@ -12,9 +12,9 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { existsSync, promises as fs } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { existsSync, promises as fs } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { GitRegistry, GitRefNotFoundError } from '../git-registry.js';
 
 const INTEGRATION_ENABLED = process.env['TEST_GIT_REGISTRY_INTEGRATION'] === 'true';

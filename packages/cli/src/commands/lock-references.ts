@@ -1,5 +1,5 @@
-import { homedir } from 'os';
-import { resolve, join } from 'path';
+import { homedir } from 'node:os';
+import { resolve, join } from 'node:path';
 import type { Lockfile, PromptScriptConfig } from '@promptscript/core';
 import { RegistryCache, Resolver } from '@promptscript/resolver';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';

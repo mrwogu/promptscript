@@ -1,5 +1,5 @@
-import { readFile } from 'fs/promises';
-import { basename } from 'path';
+import { readFile } from 'node:fs/promises';
+import { basename } from 'node:path';
 import { detectFormat, getParser, type DetectedFormat } from './detector.js';
 import { mapSections } from './mapper.js';
 import { emitPrs } from './emitter.js';
