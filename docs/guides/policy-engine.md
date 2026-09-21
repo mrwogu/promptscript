@@ -47,6 +47,14 @@ Controls which layers can extend which, based on distance in a defined layer hie
 
 Example: with `layers: ['@core', '@team', '@project']` and `maxDistance: 1`, a `@project` extension cannot directly modify a `@core` skill — it must go through `@team`.
 
+!!! warning "Currently schematic"
+Layer-boundary distance is measured against the skill's base-definition
+provenance (`__baseSource`), which the resolver does not attach to plain
+`@use` + `@extend` chains yet. On a normal `prs validate` run today this
+policy kind does not produce violations - the scenario above is schematic.
+Property-protection and registry-allowlist do fire end to end (see
+[Runnable Walkthrough](#runnable-walkthrough)).
+
 ### Property Protection
 
 Prevents overriding specific properties on skills.
@@ -82,6 +90,137 @@ prs validate --skip-policies
 ```
 
 > **Note:** Never use `--skip-policies` in CI pipelines.
+
+## Runnable Walkthrough
+
+This scenario is fully self-contained - no Git host, no network. Create the files below in an empty directory, run `prs validate`, and watch PS030 fire.
+
+```text
+policy-demo/
+├── promptscript.yaml
+├── .promptscript/
+│   └── project.prs
+└── registry/
+    ├── @core/
+    │   └── skills.prs       # Layer 1: base skill definition
+    └── @team/
+        └── overlay.prs      # Layer 2: overrides content, not in the allowlist
+```
+
+```yaml
+# promptscript.yaml
+registry:
+  path: ./registry
+
+policies:
+  - name: protect-content
+    kind: property-protection
+    description: 'Content override requires explicit approval'
+    severity: warning
+    properties: ['content', 'description']
+
+  - name: approved-registries
+    kind: registry-allowlist
+    description: 'Extensions must come from approved registries'
+    severity: error
+    allowed: ['@core']
+```
+
+```promptscript
+# registry/@core/skills.prs
+@meta {
+  id: "@core/skills"
+  syntax: "1.5.0"
+}
+
+@skills {
+  "code-review": {
+    description: "Base code review skill"
+    content: """
+      Review code for quality, correctness, and security.
+    """
+  }
+}
+```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAE1MAOYQ4WagE8A9AAEWAyXADW0KHCq0AOq2kkYWDL2BbevCABNEvDSFnN5SlXGvHeccewyFL1gIwUArBQADM6sAL5aWtIOUKqGLtYsZjAAtAIAbhAwAO7WlkasJibJcIzUEGhYEGzeIABCGHAwvEnNGVnZrsqxoUUtbBzstc4gLn0ASjCZOf3JvGB2vACOAK4YUBBY4nT91AKMWKzwcDsYrGauMIwr5VsUY1ajTy4R4SBhALoMnGLi+ESkcgwdT0EDpGC0aqsfA+d5AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+```promptscript
+# registry/@team/overlay.prs
+@meta {
+  id: "@team/overlay"
+  syntax: "1.5.0"
+}
+
+@use @core/skills
+
+@extend skills.code-review {
+  content: """
+    Team-specific review checklist with banking compliance steps.
+  """
+}
+```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAE1MAOYQ4WagE8A9AAEOpScwBuMalAziqtADqtpJGFgy9gO3rwgATRLy0hZMeUpVrxt07zjj2GQtdsBGCgBWCgAGN1YAXx0dPmkAVzgYXmkWAUk4AGtoKDgzPgAKAWFRCV4AWl4LEQwAI1gLXjBmal5ydUFqZnjWCwBKHWkiDl6PbKhcihYLGHKBRQgYAHdjdxZ2Tiw-EDcd1jMzABUHEnK4NBhGCEhGfhgF5d5GHEvMqBEsXiWIXF5ajFY2VYgiezDI7wBjGSohgaDgFHcuwikRAkQAugxNhJ8ERSOQYJp6CBlLQIGx8P5UUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+```promptscript
+# .promptscript/project.prs
+@meta {
+  id: "demo-project"
+  syntax: "1.5.0"
+}
+
+@use @team/overlay
+```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1UgTMEswC0shUsuHecAJ7sMhc5YCMFACsFAAMLqwAvurqfBoArnAwvBocpFLMAG4w1FAY7kZ8ABTUMADmEHBY1Pl2vCYVGABGsCa8YMzUvOR5pYJxrCYAlCARALoMnFXu+ESk5DAqIAxZtBBs+H4jQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+Run validation from the `policy-demo` directory:
+
+```text
+$ prs validate
+- Loading configuration...
+✖ Validation failed
+
+Errors (1):
+  ✗ [approved-registries] Skill 'code-review' was modified by registry '@team' which is not in the allowed list
+
+Warnings (1):
+  ⚠ PS030: [protect-content] Skill 'code-review' has a protected property 'content' that was overridden by '/home/you/policy-demo/registry/@team/overlay.prs'
+    suggestion: Property 'content' is protected and must not be overridden by downstream layers.
+
+$ echo $?
+1
+```
+
+Two things to read from this output:
+
+- The registry-allowlist violation is an **error**, so validation fails with exit code 1 - exactly what a CI pipeline needs.
+- The property-protection violation is a **warning**, so it is reported (with its suggestion line) but does not fail the run. With `prs validate --strict` it becomes an error.
+
+Fix the violation by allowing the `@team` registry:
+
+```yaml
+- name: approved-registries
+  kind: registry-allowlist
+  description: 'Extensions must come from approved registries'
+  severity: error
+  allowed: ['@core', '@team']
+```
+
+Re-run and the error is gone - validation succeeds with exit code 0, leaving only the `protect-content` warning.
 
 ## How It Works
 
@@ -154,14 +293,37 @@ validation:
 
 ## Programmatic API
 
-The policy engine is available as a standalone API:
+The policy engine is available as a standalone API. This snippet runs against the walkthrough project above - `config` and the resolved AST are both loaded here, so it is executable as-is:
 
 ```typescript
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { parse as parseYaml } from 'yaml';
+import { Resolver } from '@promptscript/resolver';
 import { parsePolicies, evaluatePolicies } from '@promptscript/validator';
 
-// Parse and validate policy definitions
+// Parse and validate policy definitions from promptscript.yaml
+const config = parseYaml(readFileSync('promptscript.yaml', 'utf-8'));
 const { policies, errors } = parsePolicies(config.policies);
+if (errors.length > 0) {
+  throw new Error(`Policy definition errors:\n${errors.join('\n')}`);
+}
 
-// Evaluate against resolved AST
-const violations = evaluatePolicies(policies, resolvedAst);
+// Resolve the project AST (imports and @extend applied)
+const resolver = new Resolver({
+  registryPath: resolve('./registry'),
+  localPath: './.promptscript',
+});
+const resolved = await resolver.resolve(resolve('./.promptscript/project.prs'));
+if (resolved.errors.length > 0 || !resolved.ast) {
+  throw new Error(`Resolution failed: ${resolved.errors.map((e) => e.message).join('; ')}`);
+}
+
+// Evaluate policies against the resolved AST
+const violations = evaluatePolicies(policies, resolved.ast);
+for (const violation of violations) {
+  console.log(`[${violation.policyName}] ${violation.message}`);
+}
 ```
+
+Requires the workspace packages (`@promptscript/resolver`, `@promptscript/validator`) and `yaml` (v2) as dependencies.
