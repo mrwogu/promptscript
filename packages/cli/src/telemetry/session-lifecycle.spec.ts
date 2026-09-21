@@ -76,6 +76,7 @@ afterEach(() => {
   rmSync(config.cacheDirectory, { recursive: true, force: true });
   delete process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'];
   process.exitCode = undefined;
+  vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 
@@ -120,6 +121,9 @@ describe('CLI telemetry lifecycle', () => {
         },
       })
     );
+    expect(mocks.runtimeMetadata).toHaveBeenCalledWith('1.16.0', {
+      runtimeVersion: process.versions.node,
+    });
 
     finishCliTelemetry('error');
     expect(readFileSync(join(config.cacheDirectory, 'telemetry.ndjson'), 'utf8')).toContain(
@@ -139,6 +143,20 @@ describe('CLI telemetry lifecycle', () => {
     expect(readFileSync(join(config.cacheDirectory, 'telemetry.ndjson'), 'utf8')).toContain(
       '"outcome":"success"'
     );
+  });
+
+  it('passes the deno runtime version to telemetry metadata', async () => {
+    vi.stubGlobal('Deno', {
+      build: { standalone: false },
+      version: { deno: '2.9.7' },
+    });
+
+    await prepareCliTelemetry(new Command('compile'), '1.16.0');
+
+    expect(mocks.runtimeMetadata).toHaveBeenCalledWith('1.16.0', {
+      runtimeVersion: '2.9.7',
+    });
+    finishCliTelemetry();
   });
 
   it('runs exit and signal handlers without losing lifecycle control', async () => {

@@ -24,4 +24,8 @@ describe('runtimeMetadata', () => {
       });
     }
   );
+
+  it('uses the explicit runtime version', () => {
+    expect(runtimeMetadata('1.16.0', { runtimeVersion: '2.9.7' }).runtime_version).toBe('2');
+  });
 });
