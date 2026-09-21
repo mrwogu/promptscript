@@ -4,16 +4,21 @@ import { defineConfig } from 'vite';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 
+const browserFsShim = resolve(__dirname, 'src/shims/fs.ts');
+
+export const BROWSER_NODE_ALIASES = {
+  fs: browserFsShim,
+  path: 'path-browserify',
+  'node:path': 'path-browserify',
+} as const;
+
 export default defineConfig(() => ({
   root: __dirname,
   cacheDir: '../../node_modules/.vite/packages/browser-compiler',
   plugins: [nxViteTsPaths(), nxCopyAssetsPlugin(['*.md'])],
   resolve: {
-    alias: {
-      // Provide browser shims for Node.js modules
-      fs: resolve(__dirname, 'src/shims/fs.ts'),
-      path: 'path-browserify',
-    },
+    // Keep prefixed imports browser-safe after the Deno portability sweep.
+    alias: BROWSER_NODE_ALIASES,
   },
   build: {
     lib: {
