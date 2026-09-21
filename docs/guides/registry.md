@@ -9,47 +9,107 @@ PromptScript supports registries - collections of reusable configurations that c
 
 ## Quick Start
 
+This walkthrough runs end to end from an empty directory. You create a registry, publish it to a Git host, bind a project to it, and compile - every snippet is a command you can run.
+
 ### 1. Create a Registry
 
 ```bash
-prs registry init my-company-registry
+prs registry init my-registry --yes --name "My Company Registry" --namespaces @core @stacks @fragments
 ```
 
-This scaffolds a complete registry with starter configurations. See [Creating a Registry](#creating-a-registry) for details.
+This scaffolds the directory, manifest, and three starter configurations in `@core`:
 
-### 2. Configure Your Project
+```text
+my-registry/
+├── registry-manifest.yaml
+├── README.md
+├── @core/
+│   ├── base.prs        # universal AI assistant foundation
+│   ├── quality.prs    # code quality standards mixin
+│   └── security.prs    # security best practices mixin
+├── @stacks/           # empty, add stack configs here
+└── @fragments/        # empty, add mixins here
+```
 
-Add to your `promptscript.yaml`:
+Check it before publishing:
+
+```bash
+prs registry validate ./my-registry
+```
+
+See [Creating a Registry](#creating-a-registry) for the interactive mode and other options.
+
+### 2. Publish the Registry
+
+`prs registry init` does not create a Git repository, so the registry is not reachable from any project yet. Put it under version control and push it to your Git host:
+
+```bash
+cd my-registry
+git init
+git add .
+git commit -m "feat: initial registry"
+git remote add origin https://github.com/your-org/my-registry.git  # replace your-org with your GitHub org or user
+git push -u origin main
+```
+
+From now on, `prs registry publish` re-publishes registry updates - it validates, commits, and pushes in one step (see [Publishing a Registry](#publishing-a-registry)).
+
+### 3. Bind Your Project
+
+In your project root, point `promptscript.yaml` at the registry you just pushed and pick compile targets:
 
 ```yaml
+# promptscript.yaml
 registry:
   git:
-    url: https://github.com/your-org/your-registry.git
+    url: https://github.com/your-org/my-registry.git # same URL you pushed to above
     ref: main # Or pin to version: v1.0.0
+
+targets:
+  - github # compiles .github/copilot-instructions.md - pick your tools here
 ```
 
-### 2. Inherit Configurations
+No Git host handy? A local registry works for the rest of this walkthrough - skip the push and configure `registry: { path: ./my-registry }` instead.
+
+### 4. Use Registry Configurations
+
+Reference configurations by their namespace and file name. The starter registry already ships `@core/quality`, so this resolves out of the box:
 
 ```promptscript
+# .promptscript/project.prs
 @meta {
   id: "my-project"
-  syntax: "1.0.0"
+  syntax: "1.5.0"
 }
 
-@inherit @stacks/react
-@use @fragments/testing
+@use @core/quality
+@use @core/security
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWIDEg7hFY4Y1CFldwBjADWcAD01DAY2hIuABThAOYQ-tSKgsqCUkkYAEawUoJgzNSC5BiK8dTMAK6sUgCUzq5VcDCuYNQY8XzsoRz+7vHRgnEwicmp6ZlwOXkFRSVQZRXVtXUgdgC6DJxYKfhEpOQwVLQgDABuXnAQbPhm60A" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1UgSATwC0shUsuHeca+wyFzlgIwUArBQADM6sAL7q6nwaAK5wMLwaLNQwUgCOMRhQEFjWRnwAFCkA5hBwWNR5trwmZRgARrAmvGDM1LzkGNbFgjGsJgCUUYlxCUltqfGMMeK5+bxFMKXllbzVtXANTS1tHVBdPcx9gyBhALoMnBXW+ESk5DAqIAwAbjC0EGz4PqdAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
 
-### 3. Compile
+### 5. Validate and Compile
 
 ```bash
-prs compile  # Automatically fetches registry and generates output
+prs validate  # resolves the registry, validates the project
+prs compile   # fetches the registry, writes the compiled files
+```
+
+Expected output:
+
+```text
+- Loading configuration...
+✔ Validation successful
+
+- Compiling...
+  ✓ .github/copilot-instructions.md
+  ✓ .github/skills/promptscript/SKILL.md
+  ✓ AGENTS.md
+✔ Compilation successful
 ```
 
 **Note:** When using a Git registry, the CLI automatically clones and caches the repository. You don't need to run `prs pull` separately - the `compile` and `validate` commands handle this automatically.
@@ -109,13 +169,13 @@ See [Skill Overlays](./skill-overlays.md) for the overlay model itself, and the 
 ### Pattern 1: Inherit a Tech Stack
 
 ```promptscript
-@meta { id: "react-app" syntax: "1.0.0" }
+@meta { id: "react-app" syntax: "1.5.0" }
 
 @inherit @stacks/react
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdENRgZGWALQY0aGYLgBPdhkKSZARgoAGUxoC+U1tYDEg7hFY4Y1CFgdwBjANZwA9HIKHoL2ABRyAOYQXtRagkqCYjEYAEawYoJgzNSC5BhakdTMAK6sYgCUIBYAugycWHH4RKTkMFS0IAwAbq5wEGz4htVAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdENRgZGWALQY0aGYLgBPdhkKSZARgoBWCgAYNAXymtbAYkHcIrHDGoQsTuAMYBrOAB6OQUvQUcACjkAcwgfai1BJUExOIwAI1gxQTBmakFyDC1o6mYAV1YxAEoQKwBdBk4sBPwiUnIYKloQBgA3dzgINnxDWqA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -123,7 +183,7 @@ See [Skill Overlays](./skill-overlays.md) for the overlay model itself, and the 
 ### Pattern 2: Mix in Fragments
 
 ```promptscript
-@meta { id: "secure-app" syntax: "1.0.0" }
+@meta { id: "secure-app" syntax: "1.5.0" }
 
 @inherit @stacks/node
 @use @fragments/testing
@@ -131,7 +191,7 @@ See [Skill Overlays](./skill-overlays.md) for the overlay model itself, and the 
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBiMArtRgBaDGjQzBcAJ7sMhSTICMFAAzmtAXymtbAYkHcIrHDGoQsTuAMYBrOAB6VmYxGEFBRwAKZQBzCB9qHUEVQTEEjAAjWDFBMGZqQXIMHVjqZgVWMQBKBycFOScwagxYvnYgjh8XWIjouISsJJS0jOyYXPzC4tLyypq67gbw7mbW9qwguUUPLB1A5gB3DDg0FW2lTx0VZQA3CBhDvsEYmHjE5NT0uCycvIKilASmUKlVqiArABdBicIY6fBEUjkGBUWggBi3dxwCBsfDGCFAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBiMArtRgBaDGjQzBcAJ7sMhSTICMFAKwUADFoC+U1vYDEg7hFY4Y1CFhdwBjAGs4AHpWZjEYQUFnAAplAHMIP2odQRVBMSSMACNYMUEwZmpBcgwdeOpmBVYxAEonFwU5FzBqDHi+dhCOPzd4qNiEpKwUtIys3Jh8wuLS8srquobuJsjuVvbOrBC5RS8sHWDmAHcMODQVXaVvHRVlADcIGGOBwTiYROTU9My4HLyCkUSlAyhUqjVaiAbABdBicEY6fBEUjkGBUWggBj3TxwCBsfDGKFAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -139,13 +199,13 @@ See [Skill Overlays](./skill-overlays.md) for the overlay model itself, and the 
 ### Pattern 3: Use Prompts Directly
 
 ```promptscript
-@meta { id: "terminal" syntax: "1.0.0" }
+@meta { id: "terminal" syntax: "1.5.0" }
 
 @inherit @prompts/coding/linux-terminal
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEB2okIrDFBmC4AT3YZCkmQEYKABiOqAvlNYWAxIO6KcMahCy2azMljgB6FmMUBzLyhFAFdCAFo5BSUoQUEbAApqGH8IOCxqdUFwwT84DAAjWDFBMGZqQXIMdX9qZhDWMQBKEFMAXQZODPV8IlJyGCpaEAYAN0c4CDZ8PVagA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEB2okIrDFBmC4AT3YZCkmQEYKAVgoAGVQF8prKwGJB3RThjUIWezWZkscAPQsxigDmPlCKAK6EALRyCkpQgoJ2ABTUMIEQcFjU6oKRggFwGABGsGKCYMzUguQY6oHUzGGsYgCUIOYAugycWer4RKTkMFS0IAwAbs5wEGz4eu1AA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -510,7 +570,7 @@ Project aliases win over user aliases, which win over system aliases. This lets 
 Once configured, use the alias as the scope prefix in any import:
 
 ```promptscript
-@meta { id: "my-project" syntax: "1.0.0" }
+@meta { id: "my-project" syntax: "1.5.0" }
 
 # Resolves to github.com/acme/promptscript-base/@org/base.prs
 @inherit @company/@org/base
@@ -520,7 +580,7 @@ Once configured, use the alias as the scope prefix in any import:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKABjNaAvlNY2AxIIBK8ZlABu8QVmaCA5hFwAVwAjChYSAHoMRj4I5TIsOEZqCDQsBWCMOBgI7mZqXwjM7KpaG24IVhwYFKxBbnDMVjlc-MLimBt7Jxd3T28-AJwQsOZI6NiOUgUwajYOVjFcuAFGAGs4COoYaKxSuHLA7PqpyO4V6I2tnY0QSwBdBk4sajl8IlJyGH2QBg9aCBsfBGO5AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prOwGJBAJXjMoAN3iCszQQHMIXABXACMKFhIAegxGPijlMiw4RmoINCwFUIw4GCjuZmp-KOzcqlo7bghWHBg0rEFuSMxWOXzC4tKYO0cXN09vXwCgnDCI5mjY+I5SBTBqNg5WMXy4AUYAazgo6hhYrHK4SuDcxpno7jXYrZ29jRBrAF0GTixqOXwiUnIYQ5AGLy0CBsfBGB5AA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -534,7 +594,7 @@ Beyond registry aliases, PromptScript supports Go-module-style bare URL imports.
 ### Basic URL Import
 
 ```promptscript
-@meta { id: "my-project" syntax: "1.0.0" }
+@meta { id: "my-project" syntax: "1.5.0" }
 
 # Import directly from a public GitHub repo
 @use github.com/acme/shared-standards/@fragments/security
@@ -544,7 +604,7 @@ Beyond registry aliases, PromptScript supports Go-module-style bare URL imports.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKABjNaAvlNY2AxIICSZZtSyCxEauqxQ5gsGpmEkEhNABXACMoCEZBAHEILAAJKMFvNGYbbnC4GEEAcyScKIoWEgB6DEY+CrgcDG8xBTgBVjFGsTgK7kCMAr52brzGcOokuRt7Jxc3AKCQjFZ-RPccZlbs3Pyi3wxIsuCK+VcCiuUyLG7uVuqAa260OVw2EEsAXQZOLGo5fCJSOQYFRaCAGAA3GC0CCvRAgIxvIA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prOwGJBASTLNqWQWIjV1WKHKCYNTMJIJCaACuAEZQEIyCAOIQWAASMYK+aMx23JFwMIIA5ik4MRQsJAD0GIx8VXA4GL5iCnACrGLNYnBV3MEYRXzsvQWMkdQpcnaOLm4eQSFhGKyByZ44zO25+YUl-hjRFaFV8u5FVcpkWL3c7bUA1r1ocrhsINYAugycWNRy+CIpHIMCotBADAAbjBaBB3ogQEYPkA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -603,14 +663,14 @@ When you import a repository that does not contain `.prs` files, PromptScript lo
 ### Example: Importing an Open-Source Skill Library
 
 ```promptscript
-@meta { id: "my-project" syntax: "1.0.0" }
+@meta { id: "my-project" syntax: "1.5.0" }
 
 # This repo has a SKILL.md but no .prs files - auto-discovered
 @use github.com/some-org/claude-skills/skills/tdd-workflow
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKABjNaAvlNY2AxIIAqOCHEHUYaZoJwY3QgGUAaQBJABkwihIxQQAjAFcsQVZvKlpBSFg3BUEMROYFMVcWADcYDzEbbni4GEEAcwhceNiKFhIAejhmPgVmanqOxig8sRgFOABraCg4LumoWY6sMTEFAHd+ybAoZnWQSwBdBk4sajl8IlJyGDT6EDLaCDZ8IwOgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prOwGJBAFRwQ4g6jDTNBODB5CAMoA0gCSADIRFCRiggBGAK5Ygqy+VLSCkLAeCoIYycwKYu4sAG4wXmJ23IlwMIIA5hC4ifEULCQA9HDMfArM1I1djFAFYjAKcADW0FBwPbNQ811YYmIKAO6D02BQzJsg1gC6DJxY1HL4RKTkMBn0IBW0EGz4RkdAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -638,19 +698,29 @@ remote imports, then commit the result.
 
 ### Lockfile Format
 
+Actual `prs lock` output for a project using one Git registry:
+
 ```yaml
-# promptscript.lock
+# promptscript.lock - written by `prs lock`
 version: 1
 dependencies:
-  github.com/acme/promptscript-base:
-    version: main
-    commit: a3f8c2d91b4e6f7890123456789abcdef0123456
+  github.com/acme/promptscript-base: # repository URL, protocol stripped
+    version: main # requested ref (tag/branch), or `latest`
+    commit: a3f8c2d91b4e6f7890123456789abcdef0123456 # resolved 40-char commit SHA
     integrity: sha256-pending
+```
+
+Projects whose skills pull registry reference files (via `@skills.references`) also get a `references` map. The shape below is illustrative - the key and hash values come from your own locked content - but the field types are exact:
+
+```yaml
+# Illustrative view - run `prs lock` to see real values
 references:
   "github.com/acme/promptscript-base\0references/testing.md\0main":
-    hash: sha256-f6e5d4c3b2a1...
-    lockedAt: 2026-03-23T10:00:00.000Z
+    hash: sha256-f6e5d4c3b2a1098765432109abcdef0123456789abcdef0123456789abcdef0123 # 64-char SHA-256
+    lockedAt: 2026-03-23T10:00:00.000Z # ISO timestamp of when `prs lock` recorded this hash
 ```
+
+`integrity: sha256-pending` is the literal value `prs lock` writes for Git dependencies: the commit pin is the security guarantee, so no content hash is claimed for the repository as a whole. Managed Markdown-sourced skill entries get a computed `sha256-<hex>` instead, aggregated from their child entries.
 
 ### Integrity Hashes
 
