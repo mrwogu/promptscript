@@ -350,13 +350,14 @@ async function removeManagedFile(
 
     if (prunedHooks && !prunedHooks.empty) {
       const didRewrite = await guardedRewrite(
-        directory,
-        basename(file),
-        directoryStat,
-        fileStat,
-        content,
-        prunedHooks.content,
-        undefined,
+        {
+          directory,
+          name: basename(file),
+          directoryStat,
+          fileStat,
+          expectedContent: content,
+          content: prunedHooks.content,
+        },
         onUnresolvedWorker
       );
       if (didRewrite) rewritten.push(file);
@@ -401,15 +402,15 @@ export async function rewriteHookOutputIfUnchanged(
     const directoryStat = await safeLstat(directory);
     if (!directoryStat?.isDirectory() || directoryStat.isSymbolicLink()) return false;
 
-    return guardedRewrite(
+    return guardedRewrite({
       directory,
-      basename(candidate),
+      name: basename(candidate),
       directoryStat,
       fileStat,
       expectedContent,
       content,
-      mode
-    );
+      mode,
+    });
   } finally {
     await closeDirectoryGuards(guards);
   }
@@ -466,14 +467,19 @@ export async function removeHookOutputIfUnchanged(
   }
 }
 
+/** One guarded rewrite request: what to replace and with what. */
+interface GuardedRewriteRequest {
+  directory: string;
+  name: string;
+  directoryStat: FileIdentity;
+  fileStat: FileIdentity;
+  expectedContent: string;
+  content: string;
+  mode?: number;
+}
+
 async function guardedRewrite(
-  directory: string,
-  name: string,
-  directoryStat: FileIdentity,
-  fileStat: FileIdentity,
-  expectedContent: string,
-  content: string,
-  mode?: number,
+  request: GuardedRewriteRequest,
   onUnresolvedWorker?: () => void
 ): Promise<boolean> {
   const invocation = getWorkerSelfInvocation();
@@ -481,7 +487,7 @@ async function guardedRewrite(
     onUnresolvedWorker?.();
     return false;
   }
-  const expectedHash = createHash('sha256').update(expectedContent).digest('hex');
+  const expectedHash = createHash('sha256').update(request.expectedContent).digest('hex');
 
   return new Promise((resolveResult) => {
     const child = spawn(
@@ -489,16 +495,16 @@ async function guardedRewrite(
       workerSpawnArgs(
         invocation,
         'rewrite',
-        name,
-        String(directoryStat.dev),
-        String(directoryStat.ino),
-        String(fileStat.dev),
-        String(fileStat.ino),
+        request.name,
+        String(request.directoryStat.dev),
+        String(request.directoryStat.ino),
+        String(request.fileStat.dev),
+        String(request.fileStat.ino),
         expectedHash,
-        mode === undefined ? '' : String(mode)
+        request.mode === undefined ? '' : String(request.mode)
       ),
       {
-        cwd: directory,
+        cwd: request.directory,
         stdio: ['pipe', 'pipe', 'ignore'],
         windowsHide: true,
       }
@@ -517,7 +523,7 @@ async function guardedRewrite(
     child.stdin.on('error', () => {
       resolveResult(false);
     });
-    child.stdin.end(content);
+    child.stdin.end(request.content);
   });
 }
 
