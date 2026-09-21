@@ -62,7 +62,8 @@ acme-promptscript-registry/
 ├── @acme/
 │   ├── base.prs              # Organization base
 │   ├── security.prs          # Security standards
-│   └── compliance.prs        # Compliance (SOC2, GDPR)
+│   ├── compliance.prs        # Compliance (SOC2, GDPR)
+│   └── design-system.prs     # Shared @acme/ui skills
 ├── @frontend/
 │   ├── base.prs              # Frontend team base
 │   ├── react.prs             # React-specific
@@ -322,6 +323,62 @@ acme-promptscript-registry/
 </a>
 <!-- playground-link-end -->
 
+### @acme/design-system.prs
+
+The design system is a shared capability, so its skills are authored once in the
+central registry and consumed by every frontend project:
+
+```promptscript
+@meta {
+  id: "@acme/design-system"
+  syntax: "1.5.0"
+  team: "Design Systems"
+}
+
+@identity {
+  """
+  You build user interfaces with the @acme/ui design system.
+  Consume components and tokens; never fork them.
+  """
+}
+
+@skills {
+  component-review: {
+    description: "Review frontend changes against @acme/ui component and token contracts"
+    allowedTools: ["Read", "Grep", "Bash"]
+    content: """
+      Review changed components and styles against the design system:
+
+      1. Use @acme/ui components instead of new markup
+      2. Style through @acme/design-tokens, never raw values
+      3. Flag hardcoded colors, spacing, or font sizes
+      4. Check accessibility: WCAG 2.1 AA, keyboard, focus order
+      5. Report violations by severity with file and line
+    """
+  }
+
+  token-migration: {
+    description: "Migrate a package from raw styles to @acme/design-tokens"
+    allowedTools: ["Read", "Grep", "Bash"]
+    content: """
+      Migrate one package at a time:
+
+      1. List raw colors, spacing, and font sizes in the package
+      2. Map each raw value to the nearest design token
+      3. Replace raw values with token references
+      4. Run visual regression tests
+      5. Report values with no matching token as new-token proposals
+    """
+  }
+}
+```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0U+BADmrALRwAnnA4l5YiQfYZCs+QEYKAVgoAGU+MEdSNkABEN2wQBlQ2M4NwBfMTFuaU4sCCx9YTM5EFM09wBNZgBXQQAjHOgpQRy4GGpJdgqwJXhBAHcEnA8cGEFFZRgVIsF1OC1xAyMYEgoUgGE2OBy+QRYyNji4QQxWEqxmAGtOOABuQVYYADcKwTBmai3W0fH3dIio1m44LegoFdF3BbQl9h1qCcIDAGrIvhIJP1GNQIGh4mxvAAlIEg87UNgcdbzHBrTT1DCaDAQVhGDpKVS9H5-LCrLGbHbiFjsahKLBhDIQ1ZQKDMBowKQAFWYzA+smQ8mRGCk8joqQA4oC0DLUgAhDBwHDyAC6KQkTMxWG8D3cnORx2BDWxuP582YiyO7BWaxKRn0sCdhOJpNw7X6g0Ew2MiCenIk9kEAFVymSuj0ILb7csqiMpYJmGBDqiSBgrjklSaIQAmChBRKwVronKaFqdVR+7Q6em7WVHU6VFmW44YKA5eC6iEAZhLADEoATBDjqFIWOoSiwebRZXBMIxiZpZZdzhiAxAAF59gsSAAsJYmbUY1yUjHgA3y0AS+lkAHUJgBBOWCYu2QSv1+ynb6PkzA5lIsoXIwZRplOFT9hITiCMivzUDS5oitgEDTAUSTlG2D6NM05zQO0zqCFAxIwP2DwcoIkSsCkTa6CQWgsvCrBgv2UIwnCGFsakACyzHYMRggrlsBLtGA6IkIIHYBmW9SbDGdb+LoDHsv23Y8nygrCqKgjiiAkrSiAsryAqMBKiZqrqpqIA6gW+pxEaaTUZyAmaCx7RLCJShiXiqw0kI8R8MGdGHoI4YADIQKSsnzpccBLiua6yiRFzsDu+4rMSNw+Re4mwZ+JZ8RgaCCDASgtLJXY9u0ik+pmObwDS9biAxhVDghFljteMkYJ23a9isTS4B42ycDJMBgBUnDXmE4UnghOTiOaMzdpNHk3jxHjNfNoaCPBiGXChg31CNLSsMwgjZlgjA4GuY0MqsKxHA0jbjeINDML8cDdntEJUSktHhCA4RagwcTUPo+BEKQ5AwFQtAmSAbYDGw+C2KDQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### @frontend/base.prs
 
 ```promptscript
@@ -460,6 +517,9 @@ acme-promptscript-registry/
 # In a multi-file setup, you would inherit from frontend base:
 @inherit @frontend/base
 
+# Pull shared design-system skills into this project:
+@use @acme/design-system
+
 @context {
   project: "Checkout Application"
   repository: "github.com/acme/checkout-app"
@@ -535,10 +595,17 @@ acme-promptscript-registry/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOGIwDWzAK5YAtBjRoA9DWZkscRtQhosC6swBWQrFVoAdVgAESMLBl7BTvXhAAmiXsaaCR4qTLTv7vHAAnuwYhK7uAIwUAKwUAAz+rAC+pqZ8AJKsvDYkYlBYEJKQsIFWYmh0vEHivADu4lBOjqyC6li8YDoknTrsnM0ARhhwMIjpvGYQrTDtk11sHKxOcsOjDnwAFNQwAOYQcFjUQbySvE4HGIOwzWDM1LzkGEG7OmLLAJSmZiz9hB12bKPHT6RhYCIgADCnlEEl4AEFZFAIIxsBA2EkHDs0Mw4BAsPcghD9rgxIMKCwSHIMIxLHIBEJYT5ZJjeBxSBDIUpLNRGDBWYonGIwQB5OqsWYQgBSGAlvAAyiR8ThWRwBAAZGAYFxuEBS5g4bIAEWY-JAaSB-nN5qB3D4IoAbrMHRAYHULQ4ALL5QqSQ4wND8GHeTpQZh1Tr3BGQz0AUV4MEklJ5fMeUGwd2oJAoAQAErKnLA4PwMNQOjsXW6qnAcBo0NNdlVMEFLOwqgX+GxIFm0Wwc6wAnbeABpGAnLIcV691hwD2nXgABWerfBCqOGhgvFjsBXs6BZ3ltdkDdch40sdY+zl8IXGQCZwAKmFXPCHRh09QMPeEax30FCowcCnnsK68AA1LwnoQIQmASlAc5DvCvK1mqWBiDsc5nFBajMMUfRLM0myeswQqlAAYjATizNOXz7gqOClpRgSCFAUCuGYNJ0smsx8n6LHwXRFHYOhm5gOmuxAbw6oYO8AhGqWwhQEEARWkkqQDuYRAEYE1jLKWTjFoCDjNiurhGQ4wLMC6VHUBC8rrmgZoBMZjAQFyZDIrKfKuEcYj8kCDgSk61D2fcMCQvp8nWD51B+QE6nqd8wisOGNy7Ju5mqTaGx8DeGRbssOLTCoCFDhFZYKs6KKbpsqJlhQnEwBSSi0Q4ZwAOKxg+vD0qWHQdVY-DoTs7AlmW34LgAqt1vVlnI+IwCQcByIgzjzpNaBONgm4LSQ35GrG6pdfGs1aLty2rc0ZwAEqLVZO0cHtGk5Xw0KMiG8pVamtXBhIDW0k1lKtfOC4ivKM0Ml4EhyIcfXzlk+IQO+EAAF6bpDTITdNPUY94K3ODDR71pe86fR0NZ1g2WMQ79WiXQoy6cP1i46HycDFiZTMTWDNPvdD9OUuQVibmc7lCxwvD3DZpW8EJaE7LL4l7t+uMSNISKJs2L4a4uzwtJOn6FBidGq1IRA0PAkkihKSbIiIQZ81gKu09IYDdiQL5uxAWadNMXlU89vBDrG1A6A8XJUcrdGQvC10PgA+rGnoLg+ACarjlR0DHFiljiPXubUKrmGQLreABy7Xx5NZfwgAavCGTqvCABCR0Z7KKXk0ebLMDkThODs7MTfCqdxmXCcHZC6oZGXsZGq4S4tkznQYNAlHfjPtexuPIrXanifXddu+uBkj2S3CzBgDpzAiCp1pqRaZg1vcWCMBIhl3-SLtieG7gQrmMAoCBjqMqB2UMOg-wjBADyi0mbTlZO4BmS92B-11AAoB9RQH2XUI5R4jNRrFT2IbdEA5sq6kJpTS8qD3DoOAaAimx4SaoigG-dMRtSGfzqk7JAaDAF0NwGNDoJBZQYHSiuNSIBkgAF0GBM2OPgIgpAhZGHoCAYKeI2D4EiJIoAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOGIwDWzAK5YAtBjRoA9DWZkscRtQhosC6swBWQrFVoAdVgAESMLBl7BTvXhAAmiXsaaCR4qTLTv7vHAAnuwYhK7uAIwUAKwUAAz+rAC+pqZ8AJKsvDYkYlBYEJKQsIFWYmh0vEHivADu4lBOjqyC6li8YDoknTrsnM0ARhhwMIjpvGYQrTDtk11sHKxOcsOjDnwAFNQwAOYQcFjUQbySvE4HGIOwzWDM1LzkGEG7OmLLAJQTAAr5UIE4DA7ZpOeAQXasSTBQ4wHpwYTQKBwFpYZi8XAHR46fSMLDjVh8MxidZmDCMSxyUFwcGQ6EcHq8LY7faHY6nc6Xa4wW73R5QZ6vcSfUxmFj9QgdOzZLF6AwREAAYU8ogkvAAgrIoBBGNgIGwkg4dmhmNTUcd5ftcGJBhQWCQ5GSKQIhCqfLIDeiYKR5QqlJZqIwYB7FE4xLiAPJ1VizeUAKQw0d4AGUSBBcB6OAIADJelxuECx5g4bIAEWYQZAaWl-krlel3D44YAbrMmxAYHUqw4ALL5QpQjhofjK7ydKDMOqdXlqhXdgCivBgkjt-sDfOwd2oJAoAQAEgmnLBkTrqB0dm2O1U4DgNGhprsqpggpZ2FUD-w2JAt7q2DvWAEG14ABpGATiyDhXh-Vg4C7dlvmeF88WTI4NBgXg51gRCYOlM4kxvWR71cPCNDnVh9kTNVvgyAIzgAFTCVw1SbDB+WoDAaPVVgWKCQpGDgIi9kQ3gAGpeG7CBCEwaMoFgwC1QDG9MywMQdlgs5xLUZhij6JZmk2btmFDUoADFuVmKCvhw5NAWBAEYCgKBXFJckYDkFdZkDKFBAcjjTOwFS0LAfldn43gswwd4BBLIFhCgIIAhrJJUn-cwiF0wJrGWIEnGRKUHCfRDXDyhwZTbUFqHlJMULQCsAnyxgIF9MgtQTQNXCOMQg2lBxoxbagqvuGAFWy6LrHa6hOoCZLkpFYRWAnG5djQ4rErrDY+EojJ0OWY1phUWTAOG09k1bbU0M2E9DEdGBbSUSyHDOABxOdaN4NygQ6J6rH4FSdnYfgPo474AFVXve085DTWE4DkRBnHZYG0CcbA0KhkgOJLOcsxehdwa0NGYbh5ozgAJVhZgW0cekDr4JUXVHJNTrXC6RwkChrtukh7rg8MkzB50vAkORDg+9ksjTCAWIgAAvNCBddIHQbe+XvFh5xhfwu8yPZRmOmvW970V-nWa0ImFAQzhPt4b4dEDOBkQKy2gd5436aFs27XIKw0LOJqvY4Xh7nKg7eD85SdlD4LsI4lWJGkTUlyfRiE+t54UT2NjCn1KzY6kIgaHgULw2jZctREYc3awGOTekMAvxIRi64gLdOmmVrDZS9b0OoHQHl9Kk1N4BU1RJ2iAH0527b5aIATVcI6OkBZF5qp6GOKTXcMm+KiADlHrH4Gd7VAA1NUMizNUACFsfnhN5r1-D0TRDAnCcHZ7aBtUZ-nHfx8xhUswZB3nOEsrh4LPktp0DA0BuQcSAcfOcv9wwkxnhPEmJNkGuAyPSQOqpmBgAyswEQCVaxJSrGYa89wsCMAkLlEhbka5BQnO4eUu57JDjqGmHAFdBYdCYZOCAzVYSWygh6dw5sIHsBYfmNhUAOFcOQuoGqjwLb-T2hnURa18wawNmRaR7hZHyNwACXRuwAZQBofyLO-4tHiMuvokAhj6gKMurwEgCYMBLUQklEAyQAC6DBLbHHwEQUgXsjD0BAH1akbB8CRF8UAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
+
+The single `@use @acme/design-system` line is the whole project-level usage. It
+composes the shared `component-review` and `token-migration` skills into
+`checkout-app`, so the Design Systems team updates them once in the registry and
+every consuming project picks the change up on the next compile. Agents in
+consuming projects can then reference the skills by name without re-authoring
+them per repository.
 
 ### Project Config
 

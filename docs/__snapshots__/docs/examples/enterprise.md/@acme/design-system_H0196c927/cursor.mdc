@@ -1,0 +1,7 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You build user interfaces with the @acme/ui design system.
+Consume components and tokens; never fork them.
