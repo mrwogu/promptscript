@@ -1052,6 +1052,17 @@ async function compileCommandWithResult(
           ConsoleOutput.muted(`Rewrote mixed managed hook file: ${rewrittenPath}`);
         }
       }
+      if (cleanupResult.unresolvedSelfInvocation) {
+        ConsoleOutput.warn(
+          'Managed output cleanup was skipped: this runtime cannot safely re-execute the CLI.'
+        );
+        ConsoleOutput.warn(
+          'Remove obsolete generated files (PromptScript marker header) under the output directory manually, or reinstall the CLI.'
+        );
+        if (!options.dryRun) {
+          process.exitCode = 1;
+        }
+      }
     }
     // Report success only after every output and cleanup step completed, so a
     // write-phase failure never follows a "Compilation successful" line.

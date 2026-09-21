@@ -1,4 +1,4 @@
-import { constants } from 'node:fs';
+import { constants, existsSync } from 'node:fs';
 import { execFile, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
@@ -12,8 +12,11 @@ import {
   type FileHandle,
 } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import type { FormatterOutput } from '@promptscript/compiler';
+import { resolveSelfInvocation, type SelfInvocation } from '../runtime/self-invocation.js';
+import { MANAGED_OUTPUT_WORKER_COMMAND } from '../managed-output-worker.js';
 
 const execFileAsync = promisify(execFile);
 const PROMPTSCRIPT_MARKER_PATTERNS = [
@@ -39,214 +42,47 @@ const OWNED_COMMAND_FIELDS = new Set([
   'windows',
   'working_directory',
 ]);
-const GUARDED_UNLINK_SCRIPT = String.raw`
-const crypto = require('node:crypto');
-const fs = require('node:fs');
-const [name, directoryDev, directoryIno, fileDev, fileIno, expectedHash] =
-  process.argv.slice(1);
-const skip = () => process.stdout.write('skipped');
-if (!name || name === '.' || name === '..' || name.includes('/') || name.includes('\\')) {
-  skip();
-  process.exit(0);
+/**
+ * Resolve the managed output worker module path relative to this module.
+ *
+ * Published installs bundle the worker next to the main bundle
+ * (dist/managed-output-worker.js); in development the TypeScript source
+ * (src/managed-output-worker.ts) is spawned directly via Node type
+ * stripping. Deno standalone binaries never use this path - they re-execute
+ * the binary itself.
+ */
+function resolveWorkerModulePath(): string | undefined {
+  const bundled = fileURLToPath(new URL('./managed-output-worker.js', import.meta.url));
+  if (existsSync(bundled)) return bundled;
+  const source = fileURLToPath(new URL('../managed-output-worker.ts', import.meta.url));
+  return existsSync(source) ? source : undefined;
 }
-const directory = fs.statSync('.');
-if (String(directory.dev) !== directoryDev || String(directory.ino) !== directoryIno) {
-  skip();
-  process.exit(0);
-}
-let file;
-try {
-  file = fs.lstatSync(name);
-} catch (error) {
-  if (error && error.code === 'ENOENT') {
-    skip();
-    process.exit(0);
+
+let cachedWorkerModulePath: string | undefined | null = null;
+
+/**
+ * Resolve how this process spawns the managed output worker. The worker
+ * module path is resolved once; the invocation itself is resolved per
+ * operation so the runtime and process.execPath are read fresh, matching
+ * the per-spawn reads of the previous inline-script implementation.
+ * Undefined means no safe self-invocation exists and every guarded
+ * operation fails closed.
+ */
+function getWorkerSelfInvocation(): SelfInvocation | undefined {
+  if (cachedWorkerModulePath === null) {
+    cachedWorkerModulePath = resolveWorkerModulePath();
   }
-  throw error;
+  return resolveSelfInvocation({ workerPath: cachedWorkerModulePath });
 }
-if (
-  !file.isFile() ||
-  file.isSymbolicLink() ||
-  String(file.dev) !== fileDev ||
-  String(file.ino) !== fileIno
-) {
-  skip();
-  process.exit(0);
+
+/** Build the worker argv: <prefix> <hidden command> <operation> <args...> */
+function workerSpawnArgs(
+  invocation: SelfInvocation,
+  operation: string,
+  ...operationArgs: string[]
+): string[] {
+  return [...invocation.prefixArgs, MANAGED_OUTPUT_WORKER_COMMAND, operation, ...operationArgs];
 }
-if (expectedHash) {
-  const current = fs.readFileSync(name);
-  const currentHash = crypto.createHash('sha256').update(current).digest('hex');
-  if (currentHash !== expectedHash) {
-    skip();
-    process.exit(0);
-  }
-}
-fs.unlinkSync(name);
-process.stdout.write('removed');
-`;
-const GUARDED_REWRITE_SCRIPT = String.raw`
-const crypto = require('node:crypto');
-const fs = require('node:fs');
-const [name, directoryDev, directoryIno, fileDev, fileIno, expectedHash, requestedMode] =
-  process.argv.slice(1);
-const skip = () => process.stdout.write('skipped');
-if (!name || name === '.' || name === '..' || name.includes('/') || name.includes('\\')) {
-  skip();
-  process.exit(0);
-}
-const directory = fs.statSync('.');
-if (String(directory.dev) !== directoryDev || String(directory.ino) !== directoryIno) {
-  skip();
-  process.exit(0);
-}
-let file;
-try {
-  file = fs.lstatSync(name);
-} catch (error) {
-  if (error && error.code === 'ENOENT') {
-    skip();
-    process.exit(0);
-  }
-  throw error;
-}
-if (
-  !file.isFile() ||
-  file.isSymbolicLink() ||
-  String(file.dev) !== fileDev ||
-  String(file.ino) !== fileIno
-) {
-  skip();
-  process.exit(0);
-}
-const current = fs.readFileSync(name);
-const currentHash = crypto.createHash('sha256').update(current).digest('hex');
-if (currentHash !== expectedHash) {
-  skip();
-  process.exit(0);
-}
-const content = fs.readFileSync(0);
-const temporary = '.' + name + '.promptscript-' + process.pid + '-' + Date.now();
-let temporaryCreated = false;
-try {
-  const descriptor = fs.openSync(
-    temporary,
-    fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_NOFOLLOW,
-    requestedMode === '' ? file.mode & 0o777 : Number(requestedMode) & 0o777
-  );
-  temporaryCreated = true;
-  try {
-    fs.writeFileSync(descriptor, content);
-    fs.fsyncSync(descriptor);
-  } finally {
-    fs.closeSync(descriptor);
-  }
-  const latest = fs.lstatSync(name);
-  const latestHash = crypto
-    .createHash('sha256')
-    .update(fs.readFileSync(name))
-    .digest('hex');
-  if (
-    !latest.isFile() ||
-    latest.isSymbolicLink() ||
-    String(latest.dev) !== fileDev ||
-    String(latest.ino) !== fileIno ||
-    latestHash !== expectedHash
-  ) {
-    fs.unlinkSync(temporary);
-    temporaryCreated = false;
-    skip();
-  } else {
-    fs.renameSync(temporary, name);
-    temporaryCreated = false;
-    process.stdout.write('rewritten');
-  }
-} finally {
-  if (temporaryCreated) {
-    try {
-      fs.unlinkSync(temporary);
-    } catch {}
-  }
-}
-`;
-const GUARDED_CREATE_SCRIPT = String.raw`
-const fs = require('node:fs');
-const [name, directoryDev, directoryIno, requestedMode] = process.argv.slice(1);
-const skip = () => process.stdout.write('skipped');
-if (!name || name === '.' || name === '..' || name.includes('/') || name.includes('\\')) {
-  skip();
-  process.exit(0);
-}
-const directory = fs.statSync('.');
-if (String(directory.dev) !== directoryDev || String(directory.ino) !== directoryIno) {
-  skip();
-  process.exit(0);
-}
-try {
-  fs.lstatSync(name);
-  skip();
-  process.exit(0);
-} catch (error) {
-  if (!error || error.code !== 'ENOENT') throw error;
-}
-const content = fs.readFileSync(0);
-const temporary = '.' + name + '.promptscript-' + process.pid + '-' + Date.now();
-let temporaryCreated = false;
-try {
-  const descriptor = fs.openSync(
-    temporary,
-    fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_NOFOLLOW,
-    Number(requestedMode)
-  );
-  temporaryCreated = true;
-  try {
-    fs.writeFileSync(descriptor, content);
-    fs.fsyncSync(descriptor);
-  } finally {
-    fs.closeSync(descriptor);
-  }
-  fs.linkSync(temporary, name);
-  fs.unlinkSync(temporary);
-  temporaryCreated = false;
-  process.stdout.write('created');
-} catch (error) {
-  if (error && error.code === 'EEXIST') {
-    skip();
-  } else {
-    throw error;
-  }
-} finally {
-  if (temporaryCreated) {
-    try {
-      fs.unlinkSync(temporary);
-    } catch {}
-  }
-}
-`;
-const GUARDED_MKDIR_SCRIPT = String.raw`
-const fs = require('node:fs');
-const [name, directoryDev, directoryIno] = process.argv.slice(1);
-const skip = () => process.stdout.write('skipped');
-if (!name || name === '.' || name === '..' || name.includes('/') || name.includes('\\')) {
-  skip();
-  process.exit(0);
-}
-const directory = fs.statSync('.');
-if (String(directory.dev) !== directoryDev || String(directory.ino) !== directoryIno) {
-  skip();
-  process.exit(0);
-}
-try {
-  fs.mkdirSync(name);
-} catch (error) {
-  if (!error || error.code !== 'EEXIST') throw error;
-}
-const created = fs.lstatSync(name);
-if (!created.isDirectory() || created.isSymbolicLink()) {
-  skip();
-  process.exit(0);
-}
-process.stdout.write('ready');
-`;
 
 export interface ManagedOutputCleanupResult {
   /** Obsolete files removed, or that would be removed in dry-run mode */
@@ -255,6 +91,12 @@ export interface ManagedOutputCleanupResult {
   rewritten?: string[];
   /** Managed directories pruned because they became empty */
   removedDirectories: string[];
+  /**
+   * True when this runtime could not resolve a safe way to run the guarded
+   * worker, so cleanup was skipped and obsolete output was left in place.
+   * Callers must warn and exit non-zero.
+   */
+  unresolvedSelfInvocation?: boolean;
 }
 
 export interface ManagedOutputCleanupOptions {
@@ -291,6 +133,10 @@ export async function cleanupManagedOutputs(
   const removed: string[] = [];
   const rewritten: string[] = [];
   const removedDirectories: string[] = [];
+  let unresolvedWorker = false;
+  const reportUnresolvedWorker = (): void => {
+    unresolvedWorker = true;
+  };
 
   for (const directory of managedDirectories) {
     const ancestorGuards = await openAncestorDirectories(outputRoot, directory);
@@ -301,7 +147,8 @@ export async function cleanupManagedOutputs(
         desiredFiles,
         options.dryRun === true,
         removed,
-        ancestorGuards
+        ancestorGuards,
+        reportUnresolvedWorker
       );
     } finally {
       await closeDirectoryGuards(ancestorGuards);
@@ -310,7 +157,14 @@ export async function cleanupManagedOutputs(
 
   for (const file of managedFiles) {
     if (desiredFiles.has(file)) continue;
-    await removeManagedFile(file, outputRoot, options.dryRun === true, removed, rewritten);
+    await removeManagedFile(
+      file,
+      outputRoot,
+      options.dryRun === true,
+      removed,
+      rewritten,
+      reportUnresolvedWorker
+    );
   }
 
   // Prune managed directories left empty by the removals (e.g. .github/hooks
@@ -336,6 +190,7 @@ export async function cleanupManagedOutputs(
     removed,
     ...(rewritten.length > 0 ? { rewritten } : {}),
     removedDirectories,
+    ...(unresolvedWorker ? { unresolvedSelfInvocation: true } : {}),
   };
 }
 
@@ -466,7 +321,8 @@ async function removeManagedFile(
   outputRoot: string,
   dryRun: boolean,
   removed: string[],
-  rewritten: string[]
+  rewritten: string[],
+  onUnresolvedWorker: () => void
 ): Promise<void> {
   const fileStat = await safeLstat(file);
   if (!fileStat?.isFile() || fileStat.isSymbolicLink()) return;
@@ -499,13 +355,24 @@ async function removeManagedFile(
         directoryStat,
         fileStat,
         content,
-        prunedHooks.content
+        prunedHooks.content,
+        undefined,
+        onUnresolvedWorker
       );
       if (didRewrite) rewritten.push(file);
       return;
     }
 
-    if (await guardedUnlink(directory, basename(file), directoryStat, fileStat)) {
+    if (
+      await guardedUnlink(
+        directory,
+        basename(file),
+        directoryStat,
+        fileStat,
+        undefined,
+        onUnresolvedWorker
+      )
+    ) {
       removed.push(file);
     }
   } finally {
@@ -606,25 +473,30 @@ async function guardedRewrite(
   fileStat: FileIdentity,
   expectedContent: string,
   content: string,
-  mode?: number
+  mode?: number,
+  onUnresolvedWorker?: () => void
 ): Promise<boolean> {
+  const invocation = getWorkerSelfInvocation();
+  if (invocation === undefined) {
+    onUnresolvedWorker?.();
+    return false;
+  }
   const expectedHash = createHash('sha256').update(expectedContent).digest('hex');
 
   return new Promise((resolveResult) => {
     const child = spawn(
-      process.execPath,
-      [
-        '-e',
-        GUARDED_REWRITE_SCRIPT,
-        '--',
+      invocation.executable,
+      workerSpawnArgs(
+        invocation,
+        'rewrite',
         name,
         String(directoryStat.dev),
         String(directoryStat.ino),
         String(fileStat.dev),
         String(fileStat.ino),
         expectedHash,
-        mode === undefined ? '' : String(mode),
-      ],
+        mode === undefined ? '' : String(mode)
+      ),
       {
         cwd: directory,
         stdio: ['pipe', 'pipe', 'ignore'],
@@ -656,18 +528,21 @@ async function guardedCreate(
   content: string,
   mode: number
 ): Promise<boolean> {
+  const invocation = getWorkerSelfInvocation();
+  if (invocation === undefined) {
+    return false;
+  }
   return new Promise((resolveResult) => {
     const child = spawn(
-      process.execPath,
-      [
-        '-e',
-        GUARDED_CREATE_SCRIPT,
-        '--',
+      invocation.executable,
+      workerSpawnArgs(
+        invocation,
+        'create',
         name,
         String(directoryStat.dev),
         String(directoryStat.ino),
-        String(mode),
-      ],
+        String(mode)
+      ),
       {
         cwd: directory,
         stdio: ['pipe', 'pipe', 'ignore'],
@@ -697,7 +572,8 @@ async function visitDirectory(
   desiredFiles: Set<string>,
   dryRun: boolean,
   removed: string[],
-  ancestorGuards: DirectoryGuard[]
+  ancestorGuards: DirectoryGuard[],
+  onUnresolvedWorker: () => void
 ): Promise<void> {
   const directoryHandle = await safeOpenDirectory(directory);
   if (!directoryHandle) return;
@@ -714,7 +590,7 @@ async function visitDirectory(
       if (!entryStat || entryStat.isSymbolicLink()) continue;
 
       if (entryStat.isDirectory()) {
-        await visitDirectory(entryPath, desiredFiles, dryRun, removed, guards);
+        await visitDirectory(entryPath, desiredFiles, dryRun, removed, guards, onUnresolvedWorker);
         continue;
       }
 
@@ -735,7 +611,16 @@ async function visitDirectory(
         (await directoryGuardsMatch(guards))
       ) {
         const directoryStat = await directoryHandle.stat();
-        if (await guardedUnlink(directory, entry.name, directoryStat, entryStat)) {
+        if (
+          await guardedUnlink(
+            directory,
+            entry.name,
+            directoryStat,
+            entryStat,
+            undefined,
+            onUnresolvedWorker
+          )
+        ) {
           removed.push(entryPath);
         }
       }
@@ -750,26 +635,34 @@ async function guardedUnlink(
   name: string,
   directoryStat: FileIdentity,
   fileStat: FileIdentity,
-  expectedContent?: string
+  expectedContent?: string,
+  onUnresolvedWorker?: () => void
 ): Promise<boolean> {
+  const invocation = getWorkerSelfInvocation();
+  if (invocation === undefined) {
+    // Fail closed: without a resolvable self-invocation there is no way to
+    // run the worker, and guarded operations never degrade to in-process
+    // filesystem writes.
+    onUnresolvedWorker?.();
+    return false;
+  }
   const expectedHash =
     expectedContent === undefined
       ? undefined
       : createHash('sha256').update(expectedContent).digest('hex');
   try {
     const result = await execFileAsync(
-      process.execPath,
-      [
-        '-e',
-        GUARDED_UNLINK_SCRIPT,
-        '--',
+      invocation.executable,
+      workerSpawnArgs(
+        invocation,
+        'unlink',
         name,
         String(directoryStat.dev),
         String(directoryStat.ino),
         String(fileStat.dev),
         String(fileStat.ino),
-        ...(expectedHash === undefined ? [] : [expectedHash]),
-      ],
+        ...(expectedHash === undefined ? [] : [expectedHash])
+      ),
       {
         cwd: directory,
         encoding: 'utf-8',
@@ -778,10 +671,11 @@ async function guardedUnlink(
     );
     return result.stdout === 'removed';
   } catch {
-    // Runtimes where process.execPath cannot evaluate a child script (packaged
-    // binaries or restricted spawn environments) fall back to an in-process
-    // guarded unlink that re-verifies the file identity immediately before
-    // removing it.
+    // Runtimes where the worker cannot be spawned (packaged binaries with a
+    // broken executable path, restricted spawn environments) fall back to an
+    // in-process guarded unlink that re-verifies the file identity immediately
+    // before removing it. Only the unlink without expected content has this
+    // fallback; everything else stays failed.
     if (expectedContent !== undefined) return false;
     return removeIfUnchanged(resolve(directory, name), fileStat);
   }
@@ -884,17 +778,20 @@ async function guardedMkdir(
   name: string,
   directoryStat: FileIdentity
 ): Promise<boolean> {
+  const invocation = getWorkerSelfInvocation();
+  if (invocation === undefined) {
+    return false;
+  }
   try {
     const result = await execFileAsync(
-      process.execPath,
-      [
-        '-e',
-        GUARDED_MKDIR_SCRIPT,
-        '--',
+      invocation.executable,
+      workerSpawnArgs(
+        invocation,
+        'mkdir',
         name,
         String(directoryStat.dev),
-        String(directoryStat.ino),
-      ],
+        String(directoryStat.ino)
+      ),
       {
         cwd: directory,
         encoding: 'utf-8',
