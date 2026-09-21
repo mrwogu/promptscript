@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.1](https://github.com/mrwogu/promptscript/compare/v1.19.0...v1.19.1) (2026-09-21)
+
+
+### Bug Fixes
+
+* **ci:** harden playground links script and gate drift in CI ([ac53736](https://github.com/mrwogu/promptscript/commit/ac5373624e827006afef2228deb5c7db25d6d452)), closes [#472](https://github.com/mrwogu/promptscript/issues/472)
+* **ci:** install Git in Alpine examples ([718eab5](https://github.com/mrwogu/promptscript/commit/718eab5c04709e7055af0909915217c2e48b0465))
+* **cli:** allow lock to add registry pins ([07ff7e1](https://github.com/mrwogu/promptscript/commit/07ff7e152752f0a690193eeabb29669c9a893be0))
+* **cli:** allow partial locked registry caches ([d7775ce](https://github.com/mrwogu/promptscript/commit/d7775cedd390d36b9d1c4e9fbd201ad8efcf907e))
+* **cli:** hint prs lock and verify sparse caches in resolve ([85969bd](https://github.com/mrwogu/promptscript/commit/85969bddd39e1b68627823cdfd3f9d4483e0c60b))
+* **cli:** scan all remote composition references ([1d3e7b3](https://github.com/mrwogu/promptscript/commit/1d3e7b30df3d5635113983801ce4fa0f617109e2))
+* **formatters:** render [@context](https://github.com/context) text once and keep lists flat ([71a88f4](https://github.com/mrwogu/promptscript/commit/71a88f4c48abfb61481dacfc44d1585b2531c780)), closes [#470](https://github.com/mrwogu/promptscript/issues/470)
+* **parser:** strip common indent from text blocks ([7751cc1](https://github.com/mrwogu/promptscript/commit/7751cc1b25b88d63e3bb480f9fcfb277c608e9cb))
+* **playground:** skip links for multi-file examples ([13fea9a](https://github.com/mrwogu/promptscript/commit/13fea9acfc167dc265927c44689bf07803f4dcce))
+* **resolver:** accept sparse worktree config in cache verification ([910a596](https://github.com/mrwogu/promptscript/commit/910a5968ff5f13f72f0224efff9982cb19ab1077))
+* **resolver:** hint prs lock for unpinned dependency errors ([2b65481](https://github.com/mrwogu/promptscript/commit/2b65481cbce22b08210cb9deda8479d2512896a3))
+* **resolver:** parse Git config booleans ([c9e5739](https://github.com/mrwogu/promptscript/commit/c9e5739fd901c92b83061456db60e3e48b8c3b81))
+
 ## [1.19.0](https://github.com/mrwogu/promptscript/compare/v1.18.1...v1.19.0) (2026-09-18)
 
 

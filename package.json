@@ -1,6 +1,6 @@
 {
   "name": "@promptscript/source",
-  "version": "1.19.0",
+  "version": "1.19.1",
   "license": "MIT",
   "homepage": "https://getpromptscript.dev/",
   "scripts": {
@@ -48,7 +48,7 @@
     "@typescript-eslint/eslint-plugin": "^8.70.0",
     "@typescript-eslint/parser": "^8.70.0",
     "@vitest/coverage-v8": "^4.1.11",
-    "@vscode/vsce": "^4.0.0",
+    "@vscode/vsce": "^3.9.2",
     "esbuild": "^0.28.2",
     "eslint": "^10.10.0",
     "eslint-config-prettier": "^10.1.8",
