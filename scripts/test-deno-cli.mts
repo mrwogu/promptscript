@@ -15,7 +15,7 @@
  * needs podman or docker; it is skipped when no container runtime exists.
  *
  * Usage:
- *   node --import @swc-node/register/esm-register scripts/test-deno-cli.mts [cliPackageDir]
+ *   node --import @swc-node/register/esm-register scripts/test-deno-cli.mts
  */
 import { spawn, spawnSync } from 'node:child_process';
 import {
@@ -35,7 +35,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const CLI_PACKAGE_DIR = resolve(process.argv[2] ?? join(REPO_ROOT, 'dist', 'packages', 'cli'));
+const CLI_PACKAGE_DIR = join(REPO_ROOT, 'dist', 'packages', 'cli');
 const WORKSPACE = mkdtempSync(join(tmpdir(), 'prs-deno-suite-'));
 const IS_WINDOWS = platform() === 'win32';
 const DENO_PERMISSIONS = [

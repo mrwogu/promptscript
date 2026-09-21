@@ -12,14 +12,14 @@
  * - no realpathSync.native call (Deno lacks it)
  *
  * Usage:
- *   node --import @swc-node/register/esm-register scripts/check-deno-bundle.mts [cliPackageDir]
+ *   node --import @swc-node/register/esm-register scripts/check-deno-bundle.mts
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const CLI_PACKAGE_DIR = resolve(process.argv[2] ?? join(REPO_ROOT, 'dist', 'packages', 'cli'));
+const CLI_PACKAGE_DIR = join(REPO_ROOT, 'dist', 'packages', 'cli');
 
 /** Node builtin module names; under Deno every specifier needs node:. */
 const NODE_BUILTINS = [
@@ -69,7 +69,7 @@ const NODE_BUILTINS = [
 
 /** Specifier positions where a builtin may appear (static/dynamic/CJS). */
 const BARE_BUILTIN_PATTERN = new RegExp(
-  `(?:\\bfrom\\s+|\\brequire\\s*\\(\\s*|\\bimport\\s*\\(\\s*|\\bimport\\s+)['"](${NODE_BUILTINS.join('|')})['"]`
+  String.raw`(?:\bfrom\s+|\brequire\s*\(\s*|\bimport\s*\(\s*|\bimport\s+)['"](${NODE_BUILTINS.join('|')})['"]`
 );
 
 /** Relative import of package.json - the pre-#486 version-read pattern. */
@@ -120,7 +120,7 @@ for (const file of bundleFiles) {
 }
 
 for (const [file, source] of bundles) {
-  const bareMatch = source.match(BARE_BUILTIN_PATTERN);
+  const bareMatch = BARE_BUILTIN_PATTERN.exec(source);
   check(
     bareMatch === null,
     `${file}: bare Node builtin import "${bareMatch?.[1]}" - Deno requires the node: prefix`

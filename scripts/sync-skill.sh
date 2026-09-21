@@ -27,7 +27,7 @@ DESTINATIONS=(
 GENERATED_DIR="$ROOT/packages/cli/src/generated"
 GENERATED_FILE="$GENERATED_DIR/promptscript-skill.ts"
 
-if [ ! -f "$SOURCE" ]; then
+if [[ ! -f "$SOURCE" ]]; then
   echo "ERROR: $SOURCE not found" >&2
   exit 1
 fi
@@ -35,6 +35,7 @@ fi
 # Writes the embedded skill module generated from SKILL.md to the given path.
 # The output is normalized with Prettier so regeneration is byte-stable.
 generate_embedded_skill() {
+  local generated_path="$1"
   node -e '
     const fs = require("node:fs");
     const source = fs.readFileSync(process.argv[1], "utf8");
@@ -49,33 +50,34 @@ generate_embedded_skill() {
       "",
     ].join("\n");
     fs.writeFileSync(process.argv[2], output);
-  ' "$SOURCE" "$1"
-  "$ROOT/node_modules/.bin/prettier" --write "$1" > /dev/null
+  ' "$SOURCE" "$generated_path"
+  "$ROOT/node_modules/.bin/prettier" --write "$generated_path" > /dev/null
 }
 
-if [ "${1:-}" = "--check" ]; then
+mode="${1:-}"
+if [[ "$mode" = "--check" ]]; then
   failed=0
   source_hash=$(shasum -a 256 "$SOURCE" | cut -d' ' -f1)
   for dest in "${DESTINATIONS[@]}"; do
-    if [ ! -f "$dest" ]; then
+    if [[ ! -f "$dest" ]]; then
       echo "MISSING: $dest" >&2
       failed=1
       continue
     fi
     dest_hash=$(shasum -a 256 "$dest" | cut -d' ' -f1)
-    if [ "$source_hash" != "$dest_hash" ]; then
+    if [[ "$source_hash" != "$dest_hash" ]]; then
       echo "OUT OF SYNC: $dest" >&2
       failed=1
     fi
   done
   expected_dir="$(mktemp -d)"
   generate_embedded_skill "$expected_dir/promptscript-skill.ts"
-  if [ ! -f "$GENERATED_FILE" ] || ! cmp -s "$expected_dir/promptscript-skill.ts" "$GENERATED_FILE"; then
+  if [[ ! -f "$GENERATED_FILE" ]] || ! cmp -s "$expected_dir/promptscript-skill.ts" "$GENERATED_FILE"; then
     echo "OUT OF SYNC: $GENERATED_FILE" >&2
     failed=1
   fi
   rm -rf "$expected_dir"
-  if [ "$failed" -ne 0 ]; then
+  if [[ "$failed" -ne 0 ]]; then
     echo "Run './scripts/sync-skill.sh' to fix." >&2
     exit 1
   fi
