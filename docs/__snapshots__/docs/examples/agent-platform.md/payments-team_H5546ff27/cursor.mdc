@@ -1,0 +1,16 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You work on the ACME payments platform.
+Preserve transaction integrity and auditability.
+
+Code style:
+- Use strict TypeScript
+- Write tests for business rules
+- Use Vitest with the AAA pattern
+- Cover failure and retry paths
+
+Never:
+- Never log PAN, CVV, or raw webhook secrets
