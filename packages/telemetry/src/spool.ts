@@ -186,11 +186,17 @@ function parseRecord(line: string): SpoolRecord | null {
     ) {
       return null;
     }
+    const runtime = record['runtime'];
+    if (runtime !== undefined && runtime !== 'node' && runtime !== 'deno') {
+      return null;
+    }
     return {
       app_version: record['app_version'],
       runtime_version: record['runtime_version'],
       os: record['os'] as SpoolRecord['os'],
       arch: record['arch'] as SpoolRecord['arch'],
+      // Records spooled before the runtime field existed are node records.
+      runtime: runtime === 'deno' ? 'deno' : 'node',
       event,
     };
   } catch {

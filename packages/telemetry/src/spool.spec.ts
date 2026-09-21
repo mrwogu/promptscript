@@ -36,6 +36,7 @@ function record(version = '1.16.0'): SpoolRecord {
     runtime_version: '24',
     os: 'darwin',
     arch: 'arm64',
+    runtime: 'node',
     event: { name: 'feature', feature: 'strict', count: 1 },
   };
 }
@@ -58,6 +59,43 @@ describe('telemetry spool', () => {
     expect(getSpoolInfo(directory).records).toBe(2);
     expect(completeSpoolClaim(directory, [])).toBe(true);
     expect(getSpoolInfo(directory).records).toBe(0);
+  });
+
+  it('treats legacy records without a runtime field as node records', () => {
+    const directory = temporaryDirectory();
+    const legacyLine = JSON.stringify({
+      app_version: '1.16.0',
+      runtime_version: '24',
+      os: 'darwin',
+      arch: 'arm64',
+      event: { name: 'feature', feature: 'strict', count: 1 },
+    });
+    writeFileSync(join(directory, 'telemetry.ndjson'), `${legacyLine}\n`);
+    appendSpoolRecords(directory, [record()]);
+
+    const claim = claimSpool(directory);
+
+    expect(claim?.records).toHaveLength(2);
+    expect(claim?.corruptLines).toBe(0);
+    expect(claim?.records.every((entry) => entry.runtime === 'node')).toBe(true);
+  });
+
+  it('rejects records with an unknown runtime value', () => {
+    const directory = temporaryDirectory();
+    const bogusLine = JSON.stringify({
+      app_version: '1.16.0',
+      runtime_version: '24',
+      os: 'darwin',
+      arch: 'arm64',
+      runtime: 'bun',
+      event: { name: 'feature', feature: 'strict', count: 1 },
+    });
+    writeFileSync(join(directory, 'telemetry.ndjson'), `${bogusLine}\n`);
+
+    const claim = claimSpool(directory);
+
+    expect(claim?.records).toHaveLength(0);
+    expect(claim?.corruptLines).toBe(1);
   });
 
   it('uses unique sidecars while a writer lock is held', () => {

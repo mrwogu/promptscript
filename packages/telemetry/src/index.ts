@@ -5,6 +5,7 @@ export {
   maybeSpawnFlush,
   TelemetrySession,
   type DetachedChild,
+  type FlushSelfInvocation,
   type SpawnDetached,
   type TelemetrySessionOptions,
 } from './reporter.js';
@@ -31,4 +32,5 @@ export type {
   TelemetryEvent,
   TelemetryOutcome,
   TelemetryPayload,
+  TelemetryRuntime,
 } from './types.js';
