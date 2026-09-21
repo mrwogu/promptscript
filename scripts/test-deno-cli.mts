@@ -612,6 +612,10 @@ async function main(): Promise<void> {
         60_000
       );
       assert(output, 'initial watch compile did not produce output');
+      // Give the watcher time to finish its initial scan before the first
+      // edit; an edit that lands inside the scan is suppressed by
+      // ignoreInitial and would never trigger a recompile.
+      await delay(2_000);
       writeProjectFile(
         projectDir,
         '.promptscript/project.prs',
@@ -626,11 +630,34 @@ async function main(): Promise<void> {
           '',
         ].join('\n')
       );
-      const recompiled = await waitForContent(
+      let recompiled = await waitForContent(
         join(projectDir, '.github/copilot-instructions.md'),
         'Watch two',
         60_000
       );
+      if (!recompiled) {
+        // The settle window can still be too short on slow machines; nudge
+        // once more, when the watcher is guaranteed to be ready.
+        writeProjectFile(
+          projectDir,
+          '.promptscript/project.prs',
+          [
+            '@meta {',
+            '  id: "watch"',
+            '  syntax: "1.5.0"',
+            '}',
+            '@restrictions {',
+            '  - "Watch retry"',
+            '}',
+            '',
+          ].join('\n')
+        );
+        recompiled = await waitForContent(
+          join(projectDir, '.github/copilot-instructions.md'),
+          'Watch retry',
+          60_000
+        );
+      }
       assert(recompiled, 'watch did not recompile after the edit');
     } finally {
       child.kill('SIGKILL');
