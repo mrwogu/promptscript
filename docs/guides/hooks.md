@@ -53,12 +53,6 @@ Notes for compiled `@hooks` output:
 }
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAI7PMBrOAAJgAHVbDhANwxQIAE2wxEoiVKkxpnLKrEg0zOFgC0WflBMBXODH3qNcRtQhpdayRqmZcekFWpmMiwnFzcAelDXEPDZeSUOChIAKzh7Ty8IdhhqGhgOaj9WZgU7EAcvDGoAczhVZH0TE2MXRix9AF0K4QBfbsYAdwU-GmZkmDb0qT7WHpAejoYdagBPfCJSchgA+hBtWgg2fABGeaA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 Compilation fails if the script is missing, is not a regular file, or escapes
 `.promptscript/scripts/` through traversal or a symlink. Targets and output
 modes without native project hooks report `PS4002` and an actionable fallback

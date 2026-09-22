@@ -275,12 +275,6 @@ const userName = 'Alice'
 }
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAmCgAZ5EiQGJBAJRgBHAK4RqMKYLBmakFuIlJyeDEAXxAogF0GTixqRXwwskoaehAANxhaCDZ8M1igA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 If your file uses `syntax: "1.0.0"` or `"1.1.0"`, run:
 
 ```bash

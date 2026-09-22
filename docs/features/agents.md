@@ -52,24 +52,12 @@ define the same local agent name without overwriting one another:
 @use ./backend-team as backend
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9GGpsOrACYBaDqUEY4g8ZM7SAOqz4DhIgEYZGAaw3yYi5YKOmNIAL4BdBpyzUAnviKlyMKrQgDABuMLQQbPgAjI5AA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 If both fragments define `reviewer`, the resolved names are `frontend.reviewer` and
 `backend.reviewer`. An unaliased import keeps its original name when that name is unique:
 
 ```promptscript
 @use ./shared-reviewer
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9HBwZqMACYBaKQDcIMAO4xqIAL4BdBpyzUAnviKlyMKrRAMF6uBDb4AjFqA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 The resulting agent remains `reviewer`. If an unaliased import conflicts with a local or another
 imported definition, compilation stops with a diagnostic that lists every source, import path,
@@ -94,12 +82,6 @@ an outer import as `frontend` resolves the inner team's `reviewer` agent to
 # project.prs
 @use ./team as frontend
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEHpKrQA6rAAIBXODF4UA9BFasY1ALQCSvDHF6Ll1UaL41mAKxiMsQuKMnTZcjVp1hqbDqwAmIAL4BdBk4sagBPfCJSchhrEAYANxU4CDZ8AEZfIA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 Known agent references are rewritten with the same namespace. For example, an imported definition
 that contains `agent: "reviewer"` or a handoff entry targeting `"reviewer"` points to
@@ -214,7 +196,7 @@ Agents reference reusable skills by name:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwgCbYMAIwxwYAWjgYwMLAE9EoiVKnT4jahDRYIbPWJAAROYuXDGODKwDmMYes06XODCMfHC2BoYs7JxYNiAASjAAbhAwAO7CJBAe1NhWrHB0wtTMUFCKwcLyMG7JzNSFUMzBEJ6F7tIycsI08DDUiblsFGGSwgC+EhOsEtwYXuwi4qOZ2YOsKtRJKal9ekuGMiZmFnmxCclpnVgKSt4rOZZsoSDhUvyCcHrItrLXTqq+LTaWwAXVeLjYHHYZy2lxozDQzGUHXuaxEVTAdW8xnIzG0JGiwxeoymYxAYxBDGi1G0+CIpHIMCotBADESfTgeXwAEZyUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq15xbAwAIww4GABaOAwwYUcw6uDgqThGagg0LAg2FJAAEXqmlp0cDFZ1Ow6urEdFmEZSuDz+nTYOdimAJRgANwgYc14SCBdsCdY4Ol5XKCgm3d4GmCW12Y1HeUGYuwgK3eyxkdRE9mo8Bg1EuzzYFAOvEKBSKvg0nFMvD690eanGbFaiOut2RvTiA3gw1G5NY5yuNzucMazTsDyeLP2IHpsnKXzgYWQES58za626EQAusKWOwCWzqXcaMw0MwWjI+WSXsp-mBgXYpORmI4tFgMUKatj8iB8gqGATqI58ERSOQYFRaCAGJdkXAXvhUs6gA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -244,7 +226,7 @@ Define project MCP servers once, then reference them from agents:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAImNoBlGNQBuwuAAJgAHVYSJEOHACuMALRZqGRgGthiKbPnzNGVnDTNqWA9JBwsAEwjM7R4yxIkzjg8juszI4wdnQSdhQA9FjMzFBwkYoq8BQkAFZwdgC67gC+svmsstwYAOacWJIychI0QcqMWGrMAO6s+oY18sFwjNQQaFgurLYgAGoYUBCO2DASLVY6EmUYEOZYtdT1jRLUMACOyhB7JBWZIO7yfILCYrR+dkmqGlq6wtmXEizsFaMASjAMI5lo0IGJdgcjiczstWMC7hAwABPEGMGCDMxor79Dj9DAUNw1Qq5EC5LIMCrUJH4IikcgwKi0EAMO5wYb4ACMpKAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH0FGNABlGGoAN0rlQKtjODg3GABaLDVGAGtKsPrg4I6MVjg0ZmosFJA4LHEIZjyBnWYSEmHQ3mQI1mYpCLpwkAoAeixmZig4Y6Vm+AoSACs4CIBdOMKCot8NTlNefvsrnEbkYWFaFlYvX+cWCUjgjGoEDQWHmrCmADUMFAIOJsHZzOMumJ1BgICMsIDdiCKdQYABHNwQWlaUyLAYkUoVaq1MJbEA3FrtTo9aivGHLdi-KYAJRgEjEoIgNV4tIZTJgLOU614NURYEcCsYMGRwyNOkRHERGAobI++RA+ReDF+1Ec+CIpHIMCotBADF1cFR+FSDqAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

@@ -28,7 +28,7 @@ Define local stdio servers:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAImNoBlGNQBuwuAAJgAHVYSJ1GGmZwIWZtQCeAWnXMocRFNnz5WahlZxl1LEekg4WACYRmDk6ZYkSl50eQHVmZnGAc6CQcKAHo9A2jFZVV1LW0+NAoSACs4BwBdTzMIEhhmAFcsAFlDCQBmAAZG+s8AX1kWkBa8hk5zTXwiUnIYKloQBjFaN1Z8AEZOoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH0FGNABlGGoAN0rlQKteahg0ZjgTZmpHAFosZmYoODD64OCsNVY4FuosFJA4LHEIZjyRnWYSEgxPMOQI1mYpCLpwkAoAel7+uDOmlrbezq6SUooSACs4CIBdONGIIXcWAAsoNeABmbKQ3INQoFED5L4MThjRz4IikcgwKi0EAMGq0JasfCpeFAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -48,7 +48,7 @@ Define remote HTTP or SSE servers:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAImNoBlGNQBuwuAAJgAHVYSJAa1bMA7rAAmAcxgBaAEYY4MRFNnz5WahlZw0zalhPSQOLFjTOz5gK7UoTlzc0OEQAelC+NAoiUnIYChYSUIw0CE85cxwYDHVxExkM8wkADR0AYSgITkcJZxpmMiw4RmoINCx0ooBfLx7WLpAugF0GauoAT3wYskoaehAxWgg2fABGQaA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH0FGNABlGGoAN0rlQKteAGtWC1hxdRgAWgAjDDgYMPrg4Kw1Vjg0ZmosFJAcLCw0POHeN2ooWfnFuEQAel2SUooiUnIYCl1djDQIZeGcGAlawbiVgA1OgGEoCE4Z8JANGYZFMjGoEDQWDuwUKDVh+RA+QAugw-tRHPgTtFzjR6CAarQIGx8KlEUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -91,7 +91,7 @@ Agents reference top-level servers by name:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIYDmnLHAAEwADqthwiK0YQAJoIC01eGjaLqiURKlTFcRtQhosENtrEgAkqwBu8M32wxpshYJEBXODL7DmACM4GGo7DEDoCCwAT2F5bAwrXT0SRjQAZVCHWm1kKyCQsIio2Ks6YSsIODgvGCUsagxGAGtQqwBdFKkWdkFLEABhZihYRixhGDsPWRgKmbMwOIgyZqwKjFZ5YRoYTFVhVRIYeQhsc1YKZMlhAF8JW5BbjoZBahj8IlJyGCpaEAYOV8bHwAEYnkA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34NTlNeQKtrRggpdgBaang0NilqMMrg4Kk4RmoINCwINhSQAElWADd4IfVsOwhWGrrytzhF9UMAIzgYakmMLegTR15xbAw8rt4SRjQAZT3p2jDkCOYdp8PjrEcIunCICUcDcMHqWDUjAA1nsIgBdOLBFjsMqjADCzCgsEYWF4MEmtU4jBgAMJ7AgYFOEDIGBxAIwnnsTUwTV4TSE4gg2GGrAoV14hQKIHycIYZWojnwRFI5BgVFoIAYz3WbHwqWFQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -115,7 +115,7 @@ Plugins group related capabilities:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gALkCuAcwis4AAmAAdVqNFwYjPtQhYAngFo4fZTETipMmQBN4jJWiwQ2uiSADK8xcpWjqMAG4QYAd1GMMmACNoZU84G30DNxhaS1ZrEABGCgAGFPDpAzgAa2goOF1kGzkFJVU1Vw9vGzpRG1xXbDUSZmMoGwBdCJkcZmYs-NFCkDcMKAhDbBg1AU5oycM1SFgwkE6MmRJGNHtqKNoCmzc+KFY5oLGyiawMAIw5DoiAXylHkEf2hk4sahV8IlJyDAqLQQAw9nBYvgEm8gA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH35yN3UIVmVAq1kYRjdqE0cAWjg3Exgw6uDgqThGRrQsCDYUkABlOoam3moYADcIGHMdDEwAI2gTJbg8nt55mFoR1jH07Jy9nrgAa2goODDkCLgpxqwWucXliLpwkFwc2wzRIzCkUAiAF04sEcMxmDdHrxniB5hgoBBxNgYM11JwjtjxM1ILBdiBoTVgiRGGhJtRDrQnhF5m4oKwCZsMR9mliROsMK8oXFCgUQPlIQxOFhqI58ERSOQYFRaCAGAy4Cd8KkxUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

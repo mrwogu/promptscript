@@ -323,7 +323,7 @@ Agents can reference reusable skills and project MCP servers:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwmNWrNqAWhwZWAEygRWAc0SiJUqaviNqENFghtdYkAFFZ84crUbtwzFg7VWcG-oMs7JxY1iB+YZIGUgCCUADuGACeIgCucDDCWNSJCozYjDjCAEZQzIx8cBRV-lLhfpEAvhJNrBLcJIxoAMoyAG4yIuKREHBwKTAKWRjlMrpDUVM+aPIhwjZwWKqW9VEsJCQqqrrINqzMRjZ0ayAUAPRYzMxCtyNj8BQkAFa+IAC6-i0Wm0MFpgoN-EYiiktKDqHMasIjHATGYLFZrgARGBQrTCOBoGCMCAYDQbHYGfiCODHGwyOSKZzqTRaGz-SJSDrdPoDGkgV7jSbUaZ8GSshGBDjsUIATWYKWEGGoGRU0kIBOoWER2OhsIo5MBIAavwYwWy+CIpHIMCotBADH6tEsrHwAEZDUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq14YaldqAFocDE8oCFZ1MOrg4Kk4RmoINCwINhSQAFF65mpeFraO9XtsDmpWODzenTYOdgnYkDjtgEEocydlNzg7LGpHRsZsRhxeACMoZkZSuAo-4-CRyBcUKBSKvhIjDQAGU6gA3OpVOJKOBuGCNO4Yb51boAzEbNCzLATOBYcRjLa9XQkVqhXjICKsZhSCJ0QEUAD0WGYzEqHJRaN+JAAVpsQABdEE+UHFDScUy8Hq8KRvNzqdQ4xUA-qDYajcaAgAiMFVyzgaBgjAgGHapMpwTKFTgYQZBBmTQW4nanQikpqwUhMPhiJdEQF6Mx2OovoBLHY8omAE13GJqHZWrVCBbqFhlSa1RrqBRKaD8iB8uKGPL7vgiKRyDAqLQQAwEbQxqx8Kly0A" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

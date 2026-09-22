@@ -92,7 +92,7 @@ Common changes:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAQjDDNqMRLywZqAcxhYAtABMYaTsva8SAVyhZoEVjF5wcIrIy1YKAHVYABE2YtY4vYLd69rIAPSiAbhAwAO7e4t4RIB6evABKMIEhvBbUohqMOBissnA2rJ6REawAviDFALoMnFjUAJ74RKTkMFS0IAz+MLQQbPgAjGVAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AIRgwZmoYMJFqdWEAWik0TiltEjcoLGgIVjs4HEqsRjcsCh9+AaGR015Aq3CQAHoqgDcIGHMIlJBY3YXggCUYdc2dN2oq7UYcDFZ6uHGFvbz8kHyAXQZOLGpHfCIpHIMCotBADFWMFoEDY+FS7yAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -110,7 +110,7 @@ Common changes:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAgmA7VEvIuQiMIWXmmbUsGAEaxeLEiQysAJrzg4MaGBQA6rAAL75WRgFcscXsDO9eJkAHpqMAG4QYAO7uos6srq7a8IzUEGhYEGyi7gBKvv4BarbU3uxqBqwA5vDuLuEs7JxYSSAlNWHhrql+gWry3oxYrPBwdHowdjFYAJ69WroccA6m9a61JfUAvmYLIAsAugyV1EP4RKTkxjT0ID4wtAms+ACMq0A" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AQTAOajCicghGE3tmahEAI1gdZhISDE9ZHAw0GAoffjgcRqxGN1NeQKtwkAB6ahgANwgYcwiw2eDgqThGagg0LAg2FJAAJVX18x03amXtRj7WdXg83fb2TiwL2JAcS+1zWG3ajxgjCwrHgcDoskhDxMjnh3RkHDgpiGc2CAM+vEKBRA+QAugxftRHPgiKRyIMaPQQCsYLQzqx8KliUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -159,7 +159,7 @@ replacement, and `@override` for complete existing targets.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPHccMDIJjVxUkAFFWAcwisYq-TvEBlfkJFiNMuQqUq1erAFoWJEhCwSNAYWYeXuIACsxQEIwAnjastuIsKojiyBoAqnAw4nzUEVjiACqRaDCmjDloWBoAunHOScDiYMzUJNhJGiysAG6cWBBsGFAa4gC+MiMgI1UMvdSR+ESk5DBUtCAMPbT9rPgAjJNAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344EU8ManFlQKsBHBgJGGpwkABRVnUIVhgmrvVeAGUy8QqqvOD+esbmzqwAWl0SE2UIgGFmEiWsXgAFZigIRkc8uJYpMOQIgFU4O1LqQ+2AFUc0GAHGB7QsCIBdONmYWAKmY1BI2BSTDYADdOFgIGwMFAIrxCgUQPlfgw4dRHPgiKRyDAqLQQAxYbQEax8KkMUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -232,7 +232,7 @@ Hooks that were customized directly in `.codex/config.toml` rather than in
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAI7PMBrOAAJgAHVbDhYZtRLYAtGwUwAJhCyJREqVJgA3TpuFiQaZnCwKs-KAoCucGKZ275WRjhjUtpgKLqWC6Suiwk8qyqWsimaKxoJKZ0JuCy7qYAuq5SWBjUAOYwWHBa4iG6wiyqRKXCnBgARrBRwljU9jDCAL7Z3a49rF0gXRkMRtQAnvhEpOQwVLQgDIa0EGz4AIzDQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34cZmYAa2VAqxVmahJsAFo2RukTMOrg4JgAN04sFJA0ZjgsRqwyqEa3OBg8rt4GrEYcGGpBgFFxE3mu3QbPMOQItFY0Egi6cPA6pYiAXTjgkWp1YTgOp73mKWTeYF4nAwACNYKEFNQ3HZCjVgjC4T58iB8vcGP1qI58ERSOQYFRaCAGH1aBA2PhUsigA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -256,12 +256,6 @@ Repository-local programs should use `script` and explicit project cwd:
   }
 }
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAI7PMBrOAAJgAHVbDhHaiQisMUALRpmUCIwCeiURKlSYAN05YdYkDRhKZchcpYkSGVgBNze-XEbUIaU7sl9KUxcMxAqamYyLC8fPwB6WN8Y+MYcGEYBaxhZeUUKEgArOHdAoPkZSxkw1mYXGFKggF8PKUYAdxcwmmZCjKxG-SwMagBzGBidcTL9UYhcAFcAIynhTgwl2C7hMEU4GGEWmaOpI6aQJoBdBhNqTXwiUnIYCPoQY1oINnwARgugA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 Project-root wrappers fail closed when required root discovery fails. Review
 PS4002 warnings for best-effort and unsupported terminal interception.

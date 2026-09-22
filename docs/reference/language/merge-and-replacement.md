@@ -22,7 +22,7 @@ Choose operation from intent, not convenience.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJEesATAARwsGQRmoC4Q4AB1WQoR1ERWAc0RDkckACUYARwCuEajCFqO66tghtl8LHF0BdBQF8QH1w05ZqAE98IlJyGCpaEAYANxhae1Z8AEZvIA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34iDk9ZEU8ManFlQKsFeCwIVnUw5AiAJRgARzcIajsWjhdsCCMOOFMIgF0ffJB8mYZOLGpHfCJSchgqWhAGADcYWnHWfFTFoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -39,7 +39,7 @@ recursively.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJEesATAARwsGQRmoC4Q4AB1WQoR1ERWAcwCEiIcjkgAqnBhCAahBVZ9AXQUBfEHesNOWagE98RUuRhVaIAwAbjC0EGz4AIyOQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34iDk9ZEU8ManFlQKsFeCwIVnUAQjDkCIBVODsANRMmiIBdH3yQfJGGTixqR3wiUnIYKloQBgA3GFoINnxUyaA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

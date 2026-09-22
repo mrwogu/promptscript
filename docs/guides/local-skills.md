@@ -148,7 +148,7 @@ You can add skills from multiple sources:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwgK4QAtNMJyazOSQyFEoiVKkATeI2oQ0WCGy1iQAVQCSAemsANYQbgQA5pIjsYUKJ6cjDDCAO4QuMJwMBjUjDgYAEawrthJGNFwVjq60tHUtqwAbsyMSbBaYBhCMDkAvhI5LCQkEVrikrpuRiZmFsJWAMLUMRzCHhHCza1YWSA5UnkwBcWl5TBaWNTStZ0NrHUgdQC6DJxbAJ74RKTkMFS0IAxFy+5s+ACMR0A" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq143CABaN0J6mmZ6kiSw6uDgqThGagg0LAg2FJAAVQBJAHoJgA1ePoh1Kwh2GCgoFc5GO3MTHFkYDGpGHAwAI1gl7CuMOHg8ntrH6inWADdmRivYMLAGEqMDihVYcV0JBMXTivXgAyGIzG4RAAGFqCcOLx1CYdMwSFDTM8em43h9vr9rjAwlhqG4QTUwfkQPkALoMTi0xz4IikcgwKi0EAMT4wWijVj4VIsoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -306,7 +306,7 @@ When using local skills, the `.prs` file only needs metadata - the content comes
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEgoOS8A4s2YATXgFpeLdpyy8ozDGJgSw1ZiV4BlANIBJADJGKJCRgCuWLdgiMMUKAE8AOqwACcANbQocXmB3Xl4SZ0kfP0RA4JDeVThGagg0LAg2aNcQABFmeF44LRhcCFYAc15LOBgwSygs2IBfd2bWdz5AGXJeAFVWVhhGeDgMamcpeMtye2x8-WNTcxk2DnZ3L18nAKDWELCIjaho7bj4+CSUtIzeLNz8wpJinFKKqpq6hp242RWsTJAG-6fE4UEG8ABMAAYIYpSvlmGBeKU4FhqJZGJdWAEQRRYiEAR8Qq1GiBGgBdBjyUb4IikcgwKi0EAMABuMFo6VY+AAjCSgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5AUHJeAHFmZhkAWh02Dm0oZglpFVcSXgBlAGkASQAZAYoSGQw3LGYSbAhGDCgoRx9+OABraChlQKteEkcatY2w7eDgqThGagg0LAg2FJAAEWYDOSFFVnVeNzgYMDcoHlgoUCkVWHxADLkvAAqqxWDBGPA4BhqI5eHVxG5yLNsAZeoNhqN6uxOFhlocFls4nsDusFsc4md4Jdrrd7uEni9lG9hDgIJ9vr9-oCQIziY0sA9YqKdqdeBQFbwAEzZbK8KD8gzMMDWOBYahuRhs1jKBUUMXSoG8EH5ED5AC6DFJqPwRFI5BgVFoIAYADcYLQ7qx8Kk7UA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

@@ -68,7 +68,7 @@ Use triple quotes for any content with:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIQAmnLBCwBPAATAAOqzFjJIeYpliAmswCuYjNRhaxcThGbUxAFRFoYAZUbUIaLGIEA3GFGaXqFadNlr1JmDMjOpwWjoYcIi+YgC0YgDCsBgyLAIx8eaW+hhgMKIZZvBCrADmMYoKCqwAviA1ALoMgtQi+ESk5DBUtCAMrrRGrPgAjPVAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34IKXYTR15Aq3CQWLqagE13MWo7UThOCGZqXgAVRzQYAGVGagg0LF4pADcYKGYh6goipvdesGZGN2UMNow4RDiAWl4AYVgMKxYpE-7BuzgMMGFHO774LAhWdTj6vPyIHyAF0GJwsNRHPgiKRyDAqLQQAw5rRuqx8KkgUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -95,7 +95,7 @@ Group standards by category for clarity:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPEtBMROOQy5cqSACqcGOLABXVoywQ2GKOJrMA5tVIkIrG1ewdqrOJrpr1mgOrUEBxWBtR6hsambBIA7jicVsxwcBAARrCavgC6vhx8TjbKqrJ+IIHBevlYEmDM1OIWlmgGGRCM+kYmZp7evhrauuIAgqOuWO6yABTD1PbOMHQjJkvDKTDUWACUWaW5pYLMjAYknPzRrMX94poAIkcnZ6FtHcMACgCSccE44gBSAGV7ow+qUBgBpGAwNDiABKAFFhrcALLw8QGGFYZjiYQcXZyfYAXxAhOyDDO1AAnvgiKRyDAqLQQAwAG4bVJsfAARhJQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344EU8ManFlQKsdZikw5DjgiIBVODswD0YsCDYMKHtXF1ISCFZ1e2wOalY4CLpm8JAAdWoTOzQ3ak7u3rZlcxxOe2Y4OAgAIxiQOIBdOI5S8fVGpYi1jYV4UxVmajEUEGW2uEEYKj2fTmC3eIHadgAgkiplgZlYABQI6hqCYwOi8BE9fEI84wahYACUeWCD1q4mYjDcWhE+1Yb1qLRAABEGUzOFh7G5QeCEQAFACShxMOF4ACkAMo8xgwjnLADSMBgaF4ACUAKIIrkAWT1vDc2qw8nE2Bg1N4tPyIHydwY-OojnwRFI5BgVFoIAYADcyRc2PhUk6gA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -113,7 +113,7 @@ Always use dash prefix for restrictions:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gALXxbUIjLBDZwABMAA6rceIC04qSAByMAG4xq4liRIQs4uDEZ8sE5ttMwAJpxEYocZTLmLlAETYByQwFdjcQxWAE9xLBC0GHEIWQAVSJgAZVMINCwXWQUlEABBdWYIG3E7MAw-KEMiNEtzTIBfEHqAXQZ7ahD8IlJyGCpaEAZNWlFWfABGJqA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH35qeCxqCEYsCDZlQKteAFpwkAA5GAA3GGodZhISE1kYRlLTQx6R6U5qjCg4PODmiIARNgByLF43ODsMVkcFRzQ7CCsAFSOYAGURiDQsBaaWgEEO5ggZKTAMNyhNojQzGopjy+RA+QAugxptRHPgiKRyDAqLQQAwurQaqx8KlwUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -130,7 +130,7 @@ Always use dash prefix for restrictions:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJw7PUsjAK5Y4AAmAAdVuPFSQAeg5wsCxPJAAlYbNwxxKrOLjCIHBTLkLFAIzNQAJus0AhB4-FgB4ms0fCjFgQbJasAL4g4QC6DJxY1ACe+ESk5DBUtCAMAG4wtCGs+ACMUUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344HGZqLEY3U15Aq3CQAHoOOCwIlJAAJQ8FHDsWrFk3Exg84IjGgCNhqG8kBoAhGZkwcvtXcTdGLAg2PPyQfIBdBk4sakd8IlJyGCpaEAYANxhaXdZ8VMOgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -154,7 +154,7 @@ Always use dash prefix for restrictions:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJw7PUsjAK5Y4AAmAAdVuPFSQAemowAbhBgB3BYkky5cmszJZdWasJj6DAE3iNqENFghtdCgAoxqYASXEsduIq6loK1nIs7Jym8iDh8bIGcgBKahqa4rgwAcxBvtSIEQYAjBTiACoAnmg5cBhgMFhV4hBwcJZwxXIATOUAotTUAuI4GKw2UBCsAObiMxhoXUnJAMzlAMowIo7N4qrCUKzeGABG0BAu8N3iACzlXj5+44w5Ua-UrMvJCeFJAL4yf4gf4AXQYMWoVXwRFI5BgVFoIAYqm8cFcrHwJRBQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344HGZqLEY3U15Aq3CQAHpqGAA3CBhzCLC64OCaZjIsMKxqNxg44Kk4RmoINCwINhSQAAUYajBykh1mKV4W9s68vt32TmGG2JBJvoAlNo7zBRw7Fn2t6kRb4PTeABVHGg7HAMGBhI5jHA4OM4D9eAAmCi8ACi1Fc1F4OAwnigEFY6l46gwaDh9VOAGZkQBlGBVOZYSGtNxQVgbDAAI2gJg6ZNOwQALMj1pttjjGG82BLqKw+X1rideIUCiB8gBdBgXaiOfBEUjkGBUWggBitDZwJasfCpVVAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -211,7 +211,7 @@ When combining multiple source files:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIQAmnLBCwBPAATAAOqzFjJIeYpliAmswCuYjNRhaxAgG4wozNDGoVL02YoULWAXxAOAug0HUR+IqXIwqtCAMRrQQbPgAjM5AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34IKXYTR15Aq3CQWLqagE13MWo7USkANxgoZjQYagohuPq8-JB8gF0GTixqR3wiUnIYKloQBm7aCDZ8VImgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -252,12 +252,6 @@ When combining multiple source files:
 }
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPEtBMRJJly5fAJ6xlU8AFdWjLBDYYou1WosgLstQEFBgiMdNRxrZhwkYARsz0scVwYcU1KCgpLOWtbOQBfGXiQeIBdBk4sag18IlJyGCpaEAYANxhaE1Z8AEYUoA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 **Correct:**
 
 ```promptscript
@@ -272,7 +266,7 @@ When combining multiple source files:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPEtBMRJJly5fAJ6xlU8AFdWjLBDYYou1WtbMOcHSAsPZauQEFBgiMdNRx12+IYAEbMeljiuDDimpQUFJZyjhbOAL4yKSApALoMnFjUGvhEpOQwVLQgDABuMLQmrPgAjJlAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344EU8ManFlQKsdZikwmuDg0sdYFPAPRiwINgwoPObeVmYOOA7YkDihgEFJE17WfuHRgwwAI3csBRw7VsoKCmnwqdO4woKQfIBdBk4sakd8IlJyGCpaEAYANxhaRfwqSuQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -291,7 +285,7 @@ When combining multiple source files:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPEtBMROOQy5cqSACqcGOIAqATzQwAyo2oQ0WTXTXrNAORgA3GNXEBXXeIGHNcgDEBjgQEmG+4tTwWJaMWBBs9gC6MgC+IGnJDJyxhvhEpOQwVLQgDG60iaz4AIyZQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344EU8ManFlQKsdZikw5DjgiIBVODsAFUc0GABlRmoINCwIumbwkAA5GAA3GGpeNw6xVkcI4L5OnCVjZVFqeCwhxiwINjiAXR98kHzLhk5jx3wiUnIYKloQBnnac9Y+FSdyAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -311,7 +305,7 @@ When combining multiple source files:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPEtBMROOQy5cqSACqcGOIAqATzQwAyo2oQ0WTWvEBdGQF8ZM7tXhZLjLBDYTpWXEAWnFNADkYADcYanEAV11xAUNxLGMYW1YnECd7Bk4vQ3wiUnIYKloQBhjaP1Z8AEZcoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344EU8ManFlQKsdZikw5DjgiIBVODsAFUc0GABlRmoINCw84IBdH0LWYup4LCHGLAg2ariAWnCQADkYADcYal43DrFWRwUemDz8kHzxhk4Fx3wiUnIYKloQBgPaFdY+FSdyAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -326,12 +320,6 @@ When combining multiple source files:
 }
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIvtFYABMAA6rQYKgZWAcwCuGGfESDkWAJ5p4jahDRC063G0HU5AI3UBdMQF8Qtqw05Zq6-EVLkYVWiAYAbjC0EGz4AIwOQA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 **Correct:**
 
 ```promptscript
@@ -341,7 +329,7 @@ When combining multiple source files:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIvtFYABMAA6rQYKgZWAcwCuGGfESDkWAJ5p4jahDRY6gtOtxtD1OQCN1AXTEBfEPZsNOWauvxFS5GFVogDABuMLQQbPgAjE5AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34WdiIsXkCrXigMVnU3DXgw5CxHNHhGagg0LDp7R1w2fuo3ACNHAF0ffJB8yYZOLGpHfCJSchgqWhAGADcYWgg2fFS5oA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

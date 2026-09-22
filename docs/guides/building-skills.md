@@ -42,7 +42,7 @@ Reference it in your `.prs` file:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwkgE8AtP0GJREqVIAm8RtQhosENsrEgAyjmbUswzXG279bYczDCA7jmzDcEEYqhRrZnhjVWEAXwkwkDCAXQZOLGoZfCJSchgqWhAGADcYWgNWfABGaKA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq14SRwBaMoqw6uDgqThGagg0LAg2FJAAZRxmaixeDq6evqNmMF5zHGwFHCVZcqgoSeZ4PODCgpB8gF0GTixqR3wiUnIYKloQBgA3GFp+1nxU46A" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -124,12 +124,6 @@ You can also declare references in your `.prs` file using the `references` prope
 }
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwjNUY4IHRlgCu1GAFo1ANwgwA7olESpUgCbxG1CGiwQ2hsSABKMHfumz5ilWuHnGEHB2rHCOxiZqYDBqrIzwhsjhJsIUAPSR0ZxxcKkycgowSqowFCSmSSZpGTHZqSTMpsqwcKXlkiYAuuEAvhLdIN0dDJxY1ACe+ESk5CU09CBa0UFs+ACMA0A" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 The validator checks that referenced files use allowed extensions (PS025) and don't contain sensitive content (PS026).
 
 ## Behavior Properties (in .prs)
@@ -149,7 +143,7 @@ Properties like `userInvocable`, `disableModelInvocation`, `context`, and `agent
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpcuI2oQ0WCGy1iQAZRiMArkawBPeWGb24MGdOZzhS1Q1LHV07T2oASVZldwwAI1gtLGo7GBCpFnYiLAtwZmo+YMldDABzThzhS3LWGGoMKHk0BzRmTyLdYQaoZnUvABVmZiEtZEsAJRgMGUs6KpAAcSU0WfmAIQw4HEsAXRCAXwl9kH2dhgrqJ3wiUnIYKloQBmU6uDNWfABGE6A" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCpOEZqCDQsCDYUkABlGEY3AaxHerBmabhpWqleJtb2vO7eNxXqAElWZqWMACNYMKxqNxg44JZ2IiwxxepSne6NTlfwkHUnBgaig9TQMzQzBWX2CGCgUAs0gAKsxmJUwsgIgAlGASCJ0f4AcSaaHx-wAQhg4DgIgBdOKFAogfK0hi-aiOfBEUjkGBUWggBjNYFwEasfCpZlAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -309,7 +303,7 @@ Pass values in the `.prs` file:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwjnCwBaAOacY1bM2qJREqVKgZWCgK4YlmsSDQBPXG3PadYVSRgB3dXzMXr8LHck6WADcVExhNAE4ABnsAXwkYkBiAXQZOLGpLfCJSchgqWhAGYNoINnwARkSgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqwV4LABadU4YNSxmajDq4OCoDFZ1Nw0YFJA0R1w2PO6VNSFzdtKRsY44LCnulgA3FqGwgE5cmsKCkHyAXQZOLGpHfCJSchgqWhAGbdoINnxU06A" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -373,7 +367,7 @@ Declare that one skill requires another:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwqBHYBaRjhiM+iURKlSAJvEbUIaLBDZqxIAEoBXSTPayA5mY3CAvhOdhLUKHOowAbhAwAO5q4pKaOnB6BkYmwmYAwsxksBzCLDrCfoEhThFSfgCOlhB+cGrIZrZYCkoqZgC6zm6sLiAujQycWNQAnvhEpOQwVLQgDP4wtMas+ACMHUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq14oCHYAWkYcGEZSsOrg4Kk4RmoINCwINhSQACUPWvqh1nU84MLWOLA3KCgG6hgANwgYcw647vg+gaGR8JAAYWZo4TsWKV5Nnb35rs2ARzcITbgw5AidUazVapQiAF04ot8iB8uCGJwsNRHPgiKRyDAqLQQAwtjBaMNWPhUrCgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -488,7 +482,7 @@ Reference in `.prs` with behavior properties:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwliRIQsiURKlSAJvEbUIaLBDaKxIAMLUY2GMIDuMKFAC0cLNQCujLM9OrhAc3nTmsvJwhsoqznAw1ACSrABuzIwYAEawik7OMKEAvhJZIFkAugycTgCe+ESk5DBUtCAMsZFweqz4AIz5QA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mEhITMOrg4Kk4RmoINCwINhSQAGFqGGw7cxgoKABaOCxqN0YsN2GZdRNa+pM4PJbeNzgYagBJVgA3ZkYMACNYMLm3GDjCgpB8gF0GTjnHfCJSchgVFoIAYp0OcF6rHwqVeQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -531,7 +525,7 @@ Reference in `.prs` with behavior properties:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthw6jABuEGAHdEoiVKkATeI2oQ0WCGxViQAYWZbpchYuGKIuYYxwxGfKBDhYTa9QFc4GGoASVZZZkYMACNYFSxqPxhfKQwoKGZFGA0AFWZmIRVkEwAlGAwNEzphEwBxGTQTAF1fAF8JFpAWxoZOeIBPfCJSchgqWhAGWSC4Q1Z8AEZOoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq15qGAA3CBhzMOrg4Kk4RmoINCwINhSQAGFmKVqGpvNecxMcHRwYRlKoJSw89t43OBhqAElWeuZGDAAjWDCsajcYOOCMKCgLaQAVZmZKsOQIgCUYCQidHCIAA4nU0BEALpxQoFED5SEMThXRz4IikcgwKi0EAMeq7OADVj4VLwoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

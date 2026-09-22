@@ -95,12 +95,6 @@ Reference configurations by their namespace and file name. The starter registry 
 @use @core/security
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1UgSATwC0shUsuHeca+wyFzlgIwUArBQADM6sAL7q6nwaAK5wMLwaLNQwUgCOMRhQEFjWRnwAFCkA5hBwWNR5trwmZRgARrAmvGDM1LzkGNbFgjGsJgCUUYlxCUltqfGMMeK5+bxFMKXllbzVtXANTS1tHVBdPcx9gyBhALoMnBXW+ESk5DAqIAwAbjC0EGz4PqdAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### 5. Validate and Compile
 
 ```bash
@@ -183,12 +177,6 @@ See [Skill Overlays](./skill-overlays.md) for the overlay model itself, and the 
 @inherit @core/base
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEACMMcGAFoazAFYxGWGYLgBPdhkKSZARgoBWCgAYdAXymtHAYkHcIrHDGoQsbltQwAPTyioKCrgAUgQDmEHBY1HqCSoJi8RiysGKCYMzUguQYejHUzACurGIAlCB2ALoMnIl6+ESk5DBUtCAMAG7ecBBs+KZ1QA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### Pattern 2: Mix in Shared Standards
 
 ```promptscript
@@ -199,12 +187,6 @@ See [Skill Overlays](./skill-overlays.md) for the overlay model itself, and the 
 @use @core/security
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBiMArtRgBaGswBW8rDMFwAnuwyFJMgIwUArBQAMugL5TWTgMSDuEVjhjUIWdyzKAPQARhhygoJuABTKAOYQcFjU+oIqgmKJGCGwYoJgzNSC5Bj6cdTMCqxiAJSu7goR3IEwQQCOChhQfqlRgrEwCUkpaRlZOTB5BUUlZRVVtfXcjTABha1yir5YvTHxicmp6Zlw2bn5hcVQpeWV1TUg9gC6DJyH+ESk5DBUtCAMADcfHAIGx8GZHkA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### Pattern 3: Use a Mixin Directly
 
 ```promptscript
@@ -212,12 +194,6 @@ See [Skill Overlays](./skill-overlays.md) for the overlay model itself, and the 
 
 @use @core/security
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBiMArtQhYAngFpqMAG4QYAdxmC4q9hkKSZARgoBWCgAYjAXyms3AYkHcFc7yy0AejlFZTVBQS8ACi0Acwg4LGpVQXVBMQSMACNYMUEwZmpBcgxVWOpmBVYxAEoQZwBdBk4k1XwiUnIYKloQBm0YWgg2fCt6oA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ## How Git Registry Resolution Works
 
@@ -310,12 +286,6 @@ Or in `.prs` files:
 ```promptscript
 @inherit @stacks/react@1.0.0
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgFwsGRgGs4AemowZWfgEYKABm29efABTKA5hCnUAnrwC0vACZmMAI1h3eYZtV7kMF49WYAV1Y7AEoQAF8AXQZOLEt8IlJyGCpaEAYAN1E4CDZ8dUigA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ---
 
@@ -588,12 +558,6 @@ Once configured, use the alias as the scope prefix in any import:
 @use @team/@stacks/react
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prOwGJBAJXjMoAN3iCszQQHMIXABXACMKFhIAegxGPijlMiw4RmoINCwFUIw4GCjuZmp-KOzcqlo7bghWHBg0rEFuSMxWOXzC4tKYO0cXN09vXwCgnDCI5mjY+I5SBTBqNg5WMXy4AUYAazgo6hhYrHK4SuDcxpno7jXYrZ29jRBrAF0GTixqOXwiUnIYQ5AGLy0CBsfBGB5AA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ---
 
 ## Go-Style URL Imports
@@ -612,12 +576,6 @@ Beyond registry aliases, PromptScript supports Go-module-style bare URL imports.
 @use gitlab.com/myorg/prompts/@stacks/python
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prOwGJBASTLNqWQWIjV1WKHKCYNTMJIJCaACuAEZQEIyCAOIQWAASMYK+aMx23JFwMIIA5ik4MRQsJAD0GIx8VXA4GL5iCnACrGLNYnBV3MEYRXzsvQWMkdQpcnaOLm4eQSFhGKyByZ44zO25+YUl-hjRFaFV8u5FVcpkWL3c7bUA1r1ocrhsINYAugycWNRy+CIpHIMCotBADAAbjBaBB3ogQEYPkA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### Version Pinning in URL Imports
 
 Append a version specifier with `@`:
@@ -632,12 +590,6 @@ Append a version specifier with `@`:
 # Pin to a branch
 @use github.com/acme/shared-standards/@org/base@main
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAChFa8szXhmFEMjLCIwBzADqsAAgFc4MXvIi41AIwosSAemkkYJuDgzUYAEwC0cLBPu37cEyubV5J-QxNFQBGCgAmCgAGZWU+QWFRcV5NEgA3GGpeagl5LQAKKGx4WUwsRhxeIV4wwgBKZXVNbV0cAyNmU3NLa1sHZ1dWd2pPb19-QOCAPTCo6NjWeOqkjF59HNYKxo0tHT1DYzNGCysbOycXNw8vHz8AoJgVEgwhEABfAF0GTixqAE98FIyJQaPQQBlaBA2PgQu8gA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 | Specifier | Meaning                               |
 | --------- | ------------------------------------- |
@@ -677,12 +629,6 @@ When you import a repository that does not contain `.prs` files, PromptScript lo
 # This repo has a SKILL.md but no .prs files - auto-discovered
 @use github.com/some-org/claude-skills/skills/tdd-workflow
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prOwGJBAFRwQ4g6jDTNBODB5CAMoA0gCSADIRFCRiggBGAK5Ygqy+VLSCkLAeCoIYycwKYu4sAG4wXmJ23IlwMIIA5hC4ifEULCQA9HDMfArM1I1djFAFYjAKcADW0FBwPbNQ811YYmIKAO6D02BQzJsg1gC6DJxY1HL4RKTkMBn0IBW0EGz4RkdAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 PromptScript fetches the repository, detects the `SKILL.md`, and synthesizes a virtual `.prs` fragment that you can merge into your project just like any other import.
 
@@ -855,12 +801,6 @@ Or in URL imports:
 ```promptscript
 @use git@github.com:acme/private-skills/@fragments/security
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQBzCFm6jcvAEYUWJRBkYkYAehoQAbthgBaOAGtoUOKu5hqGYSvamBjXtTEBPEAF8Aug05ZqrxATEZJQ09CCaMLQQbPgAjO5AA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 Ensure your SSH key is added to `ssh-agent` or configured in `~/.ssh/config`.
 

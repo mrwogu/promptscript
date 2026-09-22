@@ -182,12 +182,6 @@ policies:
 @use @team/overlay
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1UgTMEswC0shUsuHecAJ7sMhc5YCMFACsFAAMLqwAvurqfBoArnAwvBocpFLMAG4w1FAY7kZ8ABTUMADmEHBY1Pl2vCYVGABGsCa8YMzUvOR5pYJxrCYAlCARALoMnFXu+ESk5DAqIAxZtBBs+H4jQA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 Run validation from the `policy-demo` directory:
 
 ```text

@@ -81,12 +81,6 @@ Split by type of concern:
 }
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1UgSATwC0shUsuHeca+wyFzlgIwUADAHOrAC+6up8GhCsODDiWLwaLGQYrNZSYILsnCZGfAAU1DAA5hBwWNTWvLa8JmUYAEawuWDM1LzkGNbFggCurCYAlBG8AJJkbQlFcGhscBAN0BBYVZkYxdrsapq9cDD8GdTrmyJSe4y98dbqGrv7FIfHnKcc5dHFN3cHaxvPcFImZgXE7YCBsT57b5HX5bKQsEwwWzlaywcKaUzPZZVAysIzOEDBIwATWYvV4GCK5NcnDB7QRADcYFBmGg4rw2LxcPsAMK7LBCNkABUmGCgnJgpAoLnxwTCrBuLGyhASOKMDkUWG8IF55QF7WF1F0UEJvCKs3m-MqWtKuF6DQoyThQkwaThfL19hFxoJoRAIQAugxnpV8ERSOQYCoQAxGbQwax8D4-UA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 **Security fragment:**
 
 ```promptscript
@@ -289,12 +283,6 @@ The `@use` directive imports and merges content from other files - like CSS impo
 @use @core/guards/security as sec
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAkmWbUsvMNQwBzEp1EBaXgCMozRgGs4vDNRi8Z1STAAmvCO2a8AnswCu1MdBgAdVgAEbcXRQD04qTPY4b09GOwgsSxcXPkE0YVFxZhJeHUkIOCxqSNY+d09eVxYyDFZLYKwSo20jII4Ms0leXj4AClT0zMteBSN0jGVjMWFecgxLSWpbViMASmiBIRFeAHdwnC0oCAxNBTBh1yIOaa1GRng4ebzdQuEYb0kbaqCQsIitTRCm1vaMrO7eXpwfqwEx7eyjcaTGzTGYgAC+AF0GLIsvgiKRyDAqLQQAwAG4wWgQNj4ACM8KAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### How @use Merges Content
 
 When you `@use` a file, all blocks from the source are merged into your file:
@@ -327,12 +315,6 @@ later local blocks and modification operations apply after an earlier import.
 # Result: @restrictions contains both items
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEcMRgFdqELAE8qtADqsAAtXhZRjLBDZxewWb14BaXtJAA5GADcY1XkTTMBvAIIAFAJK8A1jHFwjsgL6ysnw0zABWglhSPvJC9hQA9ALCohKB8opwyhCq6qya2qy6BkYAYsxQUMwA7rwA8gDqDgDKTrwA5kIQACYwUBCs8L6sAaxBvABK8EJQWIi8Ckoqahq8LOwY-ZoARsy4vGIwJAh+ALoMnMri+ESk5DBRIAwWtLn4AIwgfkA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### Alias for Selective Extension
 
 When you need to modify imported content rather than just merge it, use an alias:
@@ -347,7 +329,7 @@ When you need to modify imported content rather than just merge it, use an alias
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgFc4MAS2owA9FgCeaeI2oQ0WXhji8sG3nwAUEgOYQ4WajN4BaXgBNjGAEaxrvMM2q9yGGQerNBrawBKAB1WPgBRQg4A3jh5RghIRl4IMjcOZ0dmRgBrOFD+ImjnLQoTDACMamsNYFDeTXgsCFYDRF5gXhYANxhqDAMYdoBOAFZeAF9QiZAJgF0GTlMZfCJSchgqWhAGXtoINnwARlmgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+Nzg7fhZqGAB6LEc0eEZqCDQsMWVTYL4ACmr1JSxqR14AWl5xJQwAI1gZMGZqeygnF3dPAEpi3gBRQg5PWUbGCEhGYzJFjhlZ5kYAazgffiIDmVMKOBFPDGpxZUCVgU8CwEFY6jCwB0zAAbjA1OoYGEAJwZXiFAogfIAXQYnCGjnwRFI5BgVFoIAYcNoEDY+FSWKAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -368,12 +350,6 @@ imported source wins:
 # Result: /test -> "Run full suite"
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9GGoYA5iU5Y4IgEYYBg1WrUBiQdzg5m1LI15zBOZYJEc4WQQFoAfIIA6IAEq9WgjxBtW5Lp1Y+FVFxKRl2eQwAEwA3DFZGGGj1QS0dPQMjEzM4Cz87Rxd3TzBeKChBOF4fGADWLVd4cqxEfPgbB2c3D0EyiqqajhcQAF8AXQZZagBPfCJSchgqWhAGWJhaCDZ8AEYxoA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 For object properties, later imports override:
 
 ```promptscript
@@ -381,12 +357,6 @@ For object properties, later imports override:
 @use ./strict   # @standards.coverage = 95
 # Result: coverage = 95 (later imported source wins)
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9ACMMAwdOkBiQdzhYMrACYZqquBRYA3GNQwBzIQF5BADgAMAHVZ8popdQiMsM+YuVqNWnc31DE0FzAE4AVjt5ACV4XigsREE9A2MzQQjBAAoobANBCDJmag5VQThmXmpGIQB3CFY4AEoQAF8AXQZOLGoAT3wiUnIYKloQBkC4CDZ8AEY2oA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 See [Composition and Precedence](../reference/language/composition.md) for the
 normative matrix and resolved declaration-order examples.
@@ -406,12 +376,6 @@ normative matrix and resolved declaration-order examples.
 @use @fragments/testing
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9GGpsOrACb8AjBQAMu3rz4AKajADmEOFmqzeAWl5rLGAEaw1vMM2q9yGWWbKAK7qAJQAOqx8-EFwMJLeMPJxjEFiWLaGvCbmlta2Dk5wru6e3r5Q-oHMIWoRUQKx8fxKGGYknFhw8hxWQmYGxqYWVjb2js5uMB5ePn4BwWEgAL4AugydNvhEpOQwVLQgDABuonAQbPiaK0A" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### When to Use Local Fragments
 
 - **Project-specific**: Only relevant to this project
@@ -422,12 +386,6 @@ normative matrix and resolved declaration-order examples.
 @use ./fragments/project-specific
 @use ./features/checkout
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9GGoYA5iU5Y4ImswBWMRlgC0cNKoiRGAHVZ8BwsTGy9q8EYxyqA1s15YQAXwC6DWdQCe+IqTkMFS0IAwAbjC0EGz4AIxuQA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ## Best Practices
 
@@ -444,12 +402,6 @@ Each fragment should have a single responsibility:
 # everything.prs - Security, testing, docs, etc.
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEgoOS8A4s2YATRLwDKEVgHNYvavDRs4EAEbQIWAJ4AdVnzgxGAV2o7dVWrwC0vAPKsou3ifOW9Ss7DiG+DjgsWTkbOHsnFzcgkPl3LAxWMQxqMX9WAN5AGXJeACEMCV4AWQhCGDFeFlZGGGpWDL4YADc63VxQ8MipUwsrOl5Y0IGxZkY4AZgsRgoQAF8AXQZOLGpdfCJSchhwkAZW2gg2fABGeaA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### 2. Use Meaningful Names
 
 ```promptscript
@@ -461,12 +413,6 @@ Each fragment should have a single responsibility:
 @use ./fragments/stuff
 @use ./fragments/misc
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEgoOS8A4s2YATADqsAAgFc4MXhQD0YahgDmJTljjKMaCAFoWrAG46IbOFLkKlq9Vp16Y1as2pGcGVmKgQrBpSUnyAMuS8AEIYkjLyiipqmtrsenBYsmBgtvEOSc6pyiQQcIwgAL4Augw61ACe+ESk5DBUtCAMFrRWrPgAjBVAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ### 3. Document Dependencies
 
@@ -482,12 +428,6 @@ Add comments explaining why fragments are needed:
 # Project-specific payment integrations
 @use ./features/stripe-integration
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAyjEYBXahCwBPXizJQIGVoxi9qMAI7CIqgCa8wzarwxQovAIIBhALIBRXjWYArIVjgAdVnwACwuMq8sqgD0fiJikry8fAAUqgDmEHBY1FIAtLzaiRgARrC6+obkGBJx1MzCrNoAlB58AGJl7Jy6HEkQrHH22BzUrHB6ZSQZ8BBxrLxwEkkwJLW8Pn7zGIwkMKmaQa1Y7Z1RvLEwCUkpvOmZcDl5egb2UMWl5ZU1nrwACmXOjFipcGhCEJBGF0JKt2Lx2hxStgIGx3KwFsoKEEwDBsKJ4CFkhA-qkIYdqNC2CAAL4AXQYnGSEnwRFI5BgVFoIAYADcYLQYax8ABGElAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ### 4. Keep Import Lists Organized
 
@@ -508,12 +448,6 @@ Add comments explaining why fragments are needed:
 @use ./fragments/testing
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEA8tQDmGVhABe2CGwD0HUrwBGGODAA6rPgAEIrHDGoQsvLSzKiAnjLDU2HVgBNevPgApqMIRDhZqF3gC0vA7eGIqwTmDM1LzkGBZCtgCujgCUGnwAwtEwvD6iDhjUDnC8rhhQaDhhMFgQjBXpmiZJqiYsHjJm5BCijLkuZR5ePn6BwaHhMJHRsVDxicwpDk3arbmmOTKqjEmGWP6D7p7evv5BIXBhEbxRMXEJyWkZvAAqMAo2GEIknFhwLy06xMNjsnAcMgwjH6cDgEEU0CMhzcw1OYwukxudzmCyeK0BwK0oPY4JkaAMdxIfQGKJOo3OEyuUxm93mjyWz2aAAVbAArGCMYxfH5-AGsIFtCjWajfX7sOCQtAQDQS3JS4Vy-5yeB1VhCEAAXwAugw-n58ERSOQYFRaCAGAA3Axwtj4ACMhqAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### 5. Avoid Deep Nesting
 
 ```promptscript
@@ -524,12 +458,6 @@ Add comments explaining why fragments are needed:
 # ❌ Bad: Deep nesting
 @use ./fragments/standards/code/security/v2/latest
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEgoOS8A4s2YATRLwBiUbLzhZqAV0ZYl1GAB1WAASVwYvCgHow1DAHMSnLHGMHG6iFgCe2vQaOnzVm3Y4KEKwW2tp8gDLkvABCGBK8ACIwMGi8rPBYQSG6+oYmZpbW7HYKGKxiGNRidixiMPYwjtTOLsYAbgBMxrIBWCAAvgC6DDbULvhEpOQwVLQgDK0wtBBs+ACM-UA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ## Example: Complete Multi-File Setup
 
@@ -594,12 +522,6 @@ my-project/
   "/deploy": "Deploy to staging environment"
 }
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWIDEggJKscMahCyCOpQQAjDDgYQRZWSABzAFdqbAg2Z0FuCA8vHxT-EgB6YNCJFwAKahgoiDgsakVBZUEpCoxA2ClBMGZqQXIMRSjqZhjWKQBKZNcyDt81TW02+Ki+djgxbhiCihywecWsOBzQxjifRRW1sI2tjAXOXZyOSrSo0-XN7Zu9jDQIZUqMIYxqFJlqxVi9LtcljkpMxDjsEklWCtpDdjsI9HIQLpMeJBABNAaCAFhIShViJTpgGJQKA-ASMADW9RgADcYFBmGgvIIAO4demPQRsQQAWRqAAV+jMsBR0fiYm1mNTmNy-DAAhFWexEqw4IShl1JVosD9OYwIJBGF1sBxqDqZTisbYHIiQREOIRfKIcdMjaYQKLBBKNEbbBJsn6xVBsO1qCRbOjHdiJABBQQkCCMfqhajMjPwZT5GCtbpYGMkBWdKTYIRqRjwOCPe3ogAqWhwggAynT6Yh0XUAEIYBmcGSCAByzCkMAo6jgdEEzcUnI7mYgaCw87H8CwACkO33BAAxfrsEeyABKau088Xy9X6-nADUfDADwARauF2Ri5iVPowDsAEUABl50vBpgQkOp3EuSpqBibQ4hgWQAGkYkCLxWH4eB52TAB1fcHUxYixGdFY4BwSZDl2NEiP2ARqB0JAMXcHwIAwKAIAALzCKdWXZNAdkEThcxPHZQwxKEYHIZgTmY+Q32k9kaiwZhBF+cpWCiYTWFEthxOxOwQDsABdBgbmqfAiFIchpxoegQFZWhtXwMxjKAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ### Configuration (promptscript.yaml)
 
