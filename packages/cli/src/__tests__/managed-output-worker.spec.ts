@@ -14,6 +14,11 @@ import {
 
 const workerPath = fileURLToPath(new URL('../managed-output-worker.ts', import.meta.url));
 
+// The spawned worker runs the TypeScript source through a bare Node child,
+// which only works with native type stripping (Node 22.18+/23.6+). On older
+// Node the child exits with ERR_UNKNOWN_FILE_EXTENSION, so skip there.
+const canStripTypes = (process.features as { typescript?: string | false }).typescript === 'strip';
+
 interface WorkerResult {
   stdout: string;
   code: number;
@@ -368,39 +373,42 @@ describe('managed output worker protocol', () => {
     });
   });
 
-  it('runs the spawned worker end to end via the hidden command', async () => {
-    const project = await createProject('worker-spawned-');
-    const directory = await stat(project);
+  it.skipIf(!canStripTypes)(
+    'runs the spawned worker end to end via the hidden command',
+    async () => {
+      const project = await createProject('worker-spawned-');
+      const directory = await stat(project);
 
-    const result = await new Promise<WorkerResult>((resolve, reject) => {
-      const child = spawn(
-        process.execPath,
-        [
-          workerPath,
-          MANAGED_OUTPUT_WORKER_COMMAND,
-          'mkdir',
-          'hooks',
-          String(directory.dev),
-          String(directory.ino),
-        ],
-        { cwd: project, stdio: ['pipe', 'pipe', 'pipe'] }
-      );
-      let stdout = '';
-      child.stdout.setEncoding('utf-8');
-      child.stdout.on('data', (chunk: string) => {
-        stdout += chunk;
+      const result = await new Promise<WorkerResult>((resolve, reject) => {
+        const child = spawn(
+          process.execPath,
+          [
+            workerPath,
+            MANAGED_OUTPUT_WORKER_COMMAND,
+            'mkdir',
+            'hooks',
+            String(directory.dev),
+            String(directory.ino),
+          ],
+          { cwd: project, stdio: ['pipe', 'pipe', 'pipe'] }
+        );
+        let stdout = '';
+        child.stdout.setEncoding('utf-8');
+        child.stdout.on('data', (chunk: string) => {
+          stdout += chunk;
+        });
+        child.on('error', reject);
+        child.on('close', (code) => {
+          resolve({ stdout, code: code ?? 1 });
+        });
+        child.stdin.end();
       });
-      child.on('error', reject);
-      child.on('close', (code) => {
-        resolve({ stdout, code: code ?? 1 });
-      });
-      child.stdin.end();
-    });
 
-    expect(result.code).toBe(0);
-    expect(result.stdout).toBe('ready');
-    expect((await lstat(join(project, 'hooks'))).isDirectory()).toBe(true);
-  });
+      expect(result.code).toBe(0);
+      expect(result.stdout).toBe('ready');
+      expect((await lstat(join(project, 'hooks'))).isDirectory()).toBe(true);
+    }
+  );
 
   it('dispatches the hidden command from argv at import time', async () => {
     const originalArgv = process.argv;
