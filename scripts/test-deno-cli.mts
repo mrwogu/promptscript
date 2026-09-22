@@ -32,7 +32,7 @@ import {
 import { createServer as createNetServer } from 'node:net';
 import { platform, tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const CLI_PACKAGE_DIR = join(REPO_ROOT, 'dist', 'packages', 'cli');
@@ -88,13 +88,13 @@ function skip(name: string, reason: string): void {
 function run(
   command: string,
   args: string[],
-  options: { cwd?: string; env?: NodeJS.ProcessEnv; timeoutMs?: number } = {}
+  options: { cwd?: string; env?: NodeJS.ProcessEnv; timeoutMs?: number; shell?: boolean } = {}
 ): Promise<RunResult> {
   return new Promise((resolveRun) => {
     const child = spawn(command, args, {
       cwd: options.cwd,
       env: options.env,
-      shell: false,
+      shell: options.shell ?? false,
       windowsHide: true,
     });
     let stdout = '';
@@ -166,7 +166,10 @@ async function denoRun(
 }
 
 function npm(projectDir: string, args: string[]): Promise<RunResult> {
-  return run('npm', args, { cwd: projectDir, timeoutMs: 300_000 });
+  // Windows ships npm only as npm.cmd, and spawning batch files without a
+  // shell has thrown EINVAL since Node's CVE-2024-27980 fix. Arguments are
+  // fixed literals, so a shell is safe here.
+  return run('npm', args, { cwd: projectDir, timeoutMs: 300_000, shell: IS_WINDOWS });
 }
 
 function makeProject(name: string, dependency: string): string {
@@ -711,7 +714,7 @@ async function main(): Promise<void> {
         'syntax: 1.5.0',
         'registry:',
         '  git:',
-        `    url: file://${registryDir}`,
+        `    url: ${pathToFileURL(registryDir).href}`,
         '    ref: main',
         'targets:',
         '  - claude',
@@ -990,7 +993,8 @@ async function main(): Promise<void> {
   }
 
   // --------------------------------------------------------- compiled binary
-  const binaryPath = join(WORKSPACE, 'prs-bin');
+  // Deno appends .exe to the output name when compiling on Windows.
+  const binaryPath = join(WORKSPACE, IS_WINDOWS ? 'prs-bin.exe' : 'prs-bin');
   await test('deno compile produces a working standalone binary', async () => {
     const entry = join(distProject, 'node_modules', '@promptscript', 'cli', 'bin', 'prs.js');
     const result = await run('deno', ['compile', ...DENO_PERMISSIONS, '-o', binaryPath, entry], {
