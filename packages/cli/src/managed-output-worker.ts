@@ -110,7 +110,14 @@ function sha256(content: Buffer | string): string {
   return createHash('sha256').update(content).digest('hex');
 }
 
-/** Guarded unlink: only removes a regular file with a verified identity. */
+/**
+ * Guarded unlink: only removes a regular file with a verified identity.
+ *
+ * Unlike guardedRewrite this needs no second verification pass: nothing runs
+ * between the checks below and the unlink, so the checks already sit at the
+ * moment of the mutation. guardedRewrite has to re-verify because it creates,
+ * writes, and fsyncs a temporary file in between.
+ */
 function guardedUnlink(args: ManagedOutputOperationArgs): string {
   if (!isPinnedDirectory(args)) return WORKER_STATUSES.skipped;
   let file;
