@@ -182,15 +182,8 @@ function unresolvedImportKind(target: string): 'registry' | 'remote' | 'local' |
 /** Split `./phases/triage(severity: "high")` into target and argument text. */
 const PARAMETERIZED_TARGET_REGEX = /^([^(]+)\((.*)\)$/;
 
-/**
- * One `key: value` pair from a parameterized import's argument list.
- *
- * Every part matches a disjoint set of characters, which is what keeps it
- * linear. In particular the unquoted alternative cannot start on whitespace,
- * otherwise it would compete with the `[ \t]*` in front of it for the same
- * spaces and the engine would have to try every way of splitting them.
- */
-const ARGUMENT_REGEX = /([A-Za-z_]\w*)[ \t]*:[ \t]*("[^"]*"|'[^']*'|[^\s,)"'][^,)"']*)/g;
+/** A bare parameter name. Anchored, so it cannot backtrack. */
+const PARAMETER_NAME_REGEX = /^[A-Za-z_]\w*$/;
 
 interface ImportTarget {
   /** Target without its argument list. */
@@ -199,16 +192,57 @@ interface ImportTarget {
   args: Array<{ name: string; literal: string }>;
 }
 
+/** Split on commas outside a quoted literal. */
+function splitArguments(text: string): string[] {
+  const parts: string[] = [];
+  let current = '';
+  let quote: string | null = null;
+  for (const character of text) {
+    if (quote !== null) {
+      current += character;
+      if (character === quote) quote = null;
+    } else if (character === '"' || character === "'") {
+      quote = character;
+      current += character;
+    } else if (character === ',') {
+      parts.push(current);
+      current = '';
+    } else {
+      current += character;
+    }
+  }
+  parts.push(current);
+  return parts;
+}
+
+/**
+ * Read the `name: value` pairs a parameterized import passes.
+ *
+ * Scanned rather than matched with one pattern. Expressing this as a regular
+ * expression needs character classes on both sides of the separator that
+ * overlap on whitespace, which backtracks super-linearly; a scan is linear by
+ * construction and says what it does.
+ */
+function parseArguments(text: string): ImportTarget['args'] {
+  const args: ImportTarget['args'] = [];
+  for (const part of splitArguments(text)) {
+    const colon = part.indexOf(':');
+    if (colon === -1) continue;
+    const name = part.slice(0, colon).trim();
+    const literal = part.slice(colon + 1).trim();
+    if (literal !== '' && PARAMETER_NAME_REGEX.test(name)) {
+      args.push({ name, literal });
+    }
+  }
+  return args;
+}
+
 function parseImportTarget(target: string): ImportTarget {
   const match = PARAMETERIZED_TARGET_REGEX.exec(target);
   if (match === null) {
     return { path: target, args: [] };
   }
-  const args = [...match[2]!.matchAll(ARGUMENT_REGEX)].map((argument) => ({
-    name: argument[1]!,
-    literal: argument[2]!.trim(),
-  }));
-  return { path: match[1]!, args };
+  return { path: match[1]!, args: parseArguments(match[2]!) };
 }
 
 /**
