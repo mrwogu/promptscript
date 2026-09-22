@@ -169,8 +169,15 @@ function unresolvedImportKind(target: string): 'registry' | 'remote' | 'local' |
 /** Split `./phases/triage(severity: "high")` into target and argument text. */
 const PARAMETERIZED_TARGET_REGEX = /^([^(]+)\((.*)\)$/;
 
-/** One `key: value` pair from a parameterized import's argument list. */
-const ARGUMENT_REGEX = /([A-Za-z_]\w*)\s*:\s*("[^"]*"|'[^']*'|[\w.-]+)/g;
+/**
+ * One `key: value` pair from a parameterized import's argument list.
+ *
+ * The separator uses explicit spaces and tabs, and the unquoted alternative
+ * excludes quotes, so no two parts of the pattern can match the same character.
+ * That keeps it linear; `\s*` on both sides of the colon alongside an
+ * overlapping alternation backtracks super-linearly.
+ */
+const ARGUMENT_REGEX = /([A-Za-z_]\w*)[ \t]*:[ \t]*("[^"]*"|'[^']*'|[^,)"']+)/g;
 
 interface ImportTarget {
   /** Target without its argument list. */
@@ -186,7 +193,7 @@ function parseImportTarget(target: string): ImportTarget {
   }
   const args = [...match[2]!.matchAll(ARGUMENT_REGEX)].map((argument) => ({
     name: argument[1]!,
-    literal: argument[2]!,
+    literal: argument[2]!.trim(),
   }));
   return { path: match[1]!, args };
 }
