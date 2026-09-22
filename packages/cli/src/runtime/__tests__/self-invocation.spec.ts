@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { resolveSelfInvocation } from '../self-invocation.js';
 
 describe('resolveSelfInvocation', () => {
@@ -15,36 +17,71 @@ describe('resolveSelfInvocation', () => {
     });
   });
 
-  it('should preserve node loader arguments for TypeScript workers', () => {
+  function withExecArgv<T>(execArgv: string[], body: () => T): T {
     const originalExecArgv = process.execArgv;
-    process.execArgv = [
-      '--conditions',
-      'development',
-      '--import',
-      '@swc-node/register/esm-register',
-      '--inspect=0',
-    ];
+    process.execArgv = execArgv;
     try {
-      expect(resolveSelfInvocation({ workerPath })).toEqual({
-        executable: process.execPath,
-        prefixArgs: ['--import', '@swc-node/register/esm-register', workerPath],
-      });
+      return body();
     } finally {
       process.execArgv = originalExecArgv;
     }
+  }
+
+  it('should preserve node loader arguments for TypeScript workers', () => {
+    const invocation = withExecArgv(
+      ['--conditions', 'development', '--import', '@swc-node/register/esm-register', '--inspect=0'],
+      () => resolveSelfInvocation({ workerPath })
+    );
+
+    expect(invocation?.prefixArgs).toEqual([
+      '--import',
+      // The child runs in the output directory, so the bare specifier must
+      // arrive as an absolute URL resolved from the parent installation.
+      expect.stringMatching(/^file:\/\/.*@swc-node[/\\]register/),
+      workerPath,
+    ]);
   });
 
   it('should preserve inline node loader arguments', () => {
-    const originalExecArgv = process.execArgv;
-    process.execArgv = ['--experimental-loader=tsx'];
-    try {
-      expect(resolveSelfInvocation({ workerPath })).toEqual({
-        executable: process.execPath,
-        prefixArgs: ['--experimental-loader=tsx', workerPath],
-      });
-    } finally {
-      process.execArgv = originalExecArgv;
-    }
+    const invocation = withExecArgv(['--experimental-loader=tsx'], () =>
+      resolveSelfInvocation({ workerPath })
+    );
+
+    expect(invocation?.prefixArgs).toHaveLength(2);
+    expect(invocation?.prefixArgs[0]).toMatch(/^--experimental-loader=/);
+    expect(invocation?.prefixArgs[1]).toBe(workerPath);
+  });
+
+  it('should resolve a relative loader path against the parent cwd', () => {
+    const invocation = withExecArgv(['--import', './loaders/hook.mjs'], () =>
+      resolveSelfInvocation({ workerPath })
+    );
+
+    expect(invocation?.prefixArgs).toEqual([
+      '--import',
+      pathToFileURL(resolve(process.cwd(), 'loaders/hook.mjs')).href,
+      workerPath,
+    ]);
+  });
+
+  it('should forward loader URLs unchanged', () => {
+    const invocation = withExecArgv(['--import', 'data:text/javascript,void 0'], () =>
+      resolveSelfInvocation({ workerPath })
+    );
+
+    expect(invocation?.prefixArgs).toEqual(['--import', 'data:text/javascript,void 0', workerPath]);
+  });
+
+  it('should forward an unresolvable bare loader specifier unchanged', () => {
+    const invocation = withExecArgv(['--import', '@promptscript/no-such-loader'], () =>
+      resolveSelfInvocation({ workerPath })
+    );
+
+    expect(invocation?.prefixArgs).toEqual([
+      '--import',
+      '@promptscript/no-such-loader',
+      workerPath,
+    ]);
   });
 
   it('should return undefined on node without a worker module', () => {
