@@ -3893,6 +3893,58 @@ describe('Stage 1.5: Reference Integrity', () => {
     });
   });
 
+  it('should ignore managed skill child entries when building import roots', async () => {
+    mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+    const childImport = 'github.com/org/repo/skills/expert';
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        vendorDir: '/project/.promptscript/vendor',
+        lockfile: {
+          version: 1,
+          dependencies: {
+            'github.com/org/repo': {
+              version: 'v1.0.0',
+              commit: 'a1b2c3d4e5f6',
+              integrity: 'sha256-owner',
+              source: 'md',
+              skills: [childImport],
+            },
+            [childImport]: {
+              version: 'v1.0.0',
+              commit: 'a1b2c3d4e5f6',
+              integrity: 'sha256-child',
+              source: 'md',
+            },
+          },
+        },
+      },
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    const importCall = mockUpdateConfig.mock.calls.find(
+      (call) => call[0] && 'importRoots' in (call[0] as Record<string, unknown>)
+    );
+    expect(importCall).toBeDefined();
+    const importRoots = (importCall![0] as Record<string, unknown>)['importRoots'] as Array<{
+      import: string;
+      commit: string;
+      path: string;
+    }>;
+    expect(importRoots).toContainEqual({
+      import: 'github.com/org/repo',
+      commit: 'a1b2c3d4e5f6',
+      path: resolve('/project/.promptscript/vendor', 'github.com/org/repo'),
+    });
+    expect(importRoots).not.toContainEqual(
+      expect.objectContaining({
+        import: childImport,
+      })
+    );
+  });
+
   it('should pass import roots even when hashes are ignored', async () => {
     mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
     const compiler = createTestCompiler({
