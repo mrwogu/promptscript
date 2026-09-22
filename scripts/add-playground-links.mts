@@ -321,6 +321,29 @@ function shouldSkipPlaygroundLink(content: string, offset: number): boolean {
   return content.slice(0, offset).trimEnd().endsWith(SKIP_LINK_MARKER);
 }
 
+/** Prose that introduces the following example as something not to do. */
+const NEGATIVE_EXAMPLE_REGEX = /(?:^\**\s*(?:wrong|incorrect|bad|avoid|don't|do not|never)\b)|❌/i;
+
+/**
+ * True when the line right before the fence presents it as a mistake.
+ *
+ * A "Try in Playground" button on an anti-pattern misleads either way. When the
+ * snippet happens to compile, the badge tells the reader that what the page just
+ * called wrong actually works, and supplying a `@meta` header makes that more
+ * likely rather than less: the "Missing @meta Block" example under Common
+ * Mistakes compiles cleanly once the very header it is criticised for lacking is
+ * added. When the snippet does not compile the badge is simply broken. Neither
+ * is worth shipping, so negative examples get no badge.
+ */
+function precedesNegativeExample(content: string, offset: number): boolean {
+  const lead = content
+    .slice(0, offset)
+    .split('\n')
+    .filter((line) => line.trim() !== '')
+    .at(-1);
+  return lead !== undefined && NEGATIVE_EXAMPLE_REGEX.test(lead.trim());
+}
+
 /**
  * Parse a markdown fence line: backtick count and info string, or null when
  * the line does not open or close a fence. Manual parsing avoids the
@@ -385,7 +408,7 @@ function extractLinkableCode(
   offset: number,
   unlinkableFences: Array<[number, number]>
 ): string | null {
-  if (shouldSkipPlaygroundLink(content, offset)) {
+  if (shouldSkipPlaygroundLink(content, offset) || precedesNegativeExample(content, offset)) {
     return null;
   }
 
