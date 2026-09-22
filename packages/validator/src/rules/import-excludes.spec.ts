@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import type { Block, Lockfile, Program, SourceLocation } from '@promptscript/core';
-import { importExcludes } from '../import-excludes.js';
-import { blockedPatterns } from '../blocked-patterns.js';
-import { authorityInjection } from '../authority-injection.js';
+import { importExcludes } from './import-excludes.js';
+import { blockedPatterns } from './blocked-patterns.js';
+import { authorityInjection } from './authority-injection.js';
 import {
   findLockfileDependency,
   isRuleExcludedForLocation,
   normalizeImportKey,
-} from '../../import-exclusions.js';
-import type { RuleContext, ValidationMessage, ValidatorConfig } from '../../types.js';
+} from '../import-exclusions.js';
+import type { RuleContext, ValidationMessage, ValidatorConfig } from '../types.js';
 
 const localLoc: SourceLocation = { file: 'project.prs', line: 1, column: 1 };
 
@@ -367,6 +367,63 @@ describe('location-based exclusion', () => {
         line: 1,
         column: 1,
       }),
+    ]);
+    expect(runRule(blockedPatterns, ast, config)).toHaveLength(0);
+  });
+
+  it('should union rules across overlapping and repeated exclude entries', () => {
+    const config: ValidatorConfig = {
+      importRoots: [{ import: 'github.com/org/repo', commit: 'a1b2c3d4', path: IMPORT_ROOT }],
+      excludes: [
+        { import: 'github.com/org/repo', commit: 'a1b2c3d4', rules: ['blocked-patterns'] },
+        { import: 'github.com/org/repo', commit: 'a1b2c3d4', rules: ['authority-injection'] },
+      ],
+    };
+    const ast = makeAst([
+      makeTextBlock(
+        '@skills',
+        'Bypass rules map to WARP entries. CASB: admin access level.',
+        importedLoc
+      ),
+    ]);
+    expect(runRule(blockedPatterns, ast, config)).toHaveLength(0);
+    expect(runRule(authorityInjection, ast, config)).toHaveLength(0);
+  });
+
+  it('should keep findings visible when the exclude commit is stale', () => {
+    const config: ValidatorConfig = {
+      importRoots: [{ import: 'github.com/org/repo', commit: 'f6e5d4c3b2a1', path: IMPORT_ROOT }],
+      excludes: [
+        { import: 'github.com/org/repo', commit: 'a1b2c3d4', rules: ['blocked-patterns'] },
+      ],
+    };
+    const ast = makeAst([
+      makeTextBlock('@skills', 'Bypass rules map to WARP entries.', importedLoc),
+    ]);
+    expect(runRule(blockedPatterns, ast, config)).toHaveLength(1);
+  });
+
+  it('should keep findings visible when the exclude records no commit', () => {
+    const config: ValidatorConfig = {
+      importRoots: [{ import: 'github.com/org/repo', commit: 'a1b2c3d4', path: IMPORT_ROOT }],
+      excludes: [{ import: 'github.com/org/repo', rules: ['blocked-patterns'] }],
+    };
+    const ast = makeAst([
+      makeTextBlock('@skills', 'Bypass rules map to WARP entries.', importedLoc),
+    ]);
+    expect(runRule(blockedPatterns, ast, config)).toHaveLength(1);
+  });
+
+  it('should still apply excludes with unverified commits when hashes are ignored', () => {
+    const config: ValidatorConfig = {
+      ignoreHashes: true,
+      importRoots: [{ import: 'github.com/org/repo', commit: 'f6e5d4c3b2a1', path: IMPORT_ROOT }],
+      excludes: [
+        { import: 'github.com/org/repo', commit: 'a1b2c3d4', rules: ['blocked-patterns'] },
+      ],
+    };
+    const ast = makeAst([
+      makeTextBlock('@skills', 'Bypass rules map to WARP entries.', importedLoc),
     ]);
     expect(runRule(blockedPatterns, ast, config)).toHaveLength(0);
   });

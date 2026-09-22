@@ -55,15 +55,6 @@ function isPathInside(root: string, candidate: string): boolean {
   );
 }
 
-interface ExcludeMatch {
-  /** Import root holding the location's file */
-  root: ImportRoot;
-  /** Consumer-declared exclude that covers the location */
-  exclude: ValidationExclude;
-  /** Sub-path of the import the exclude is scoped to ('' for the whole repository) */
-  subPath: string;
-}
-
 /**
  * Find the deepest import root containing a file.
  *
@@ -86,45 +77,48 @@ function findDeepestImportRoot(roots: readonly ImportRoot[], file: string): Impo
 }
 
 /**
- * Find the exclude covering a file within one import root.
+ * Collect every exclude covering a file within one import root.
  *
  * An exclude declared with a sub-path (e.g. `github.com/org/repo/skills/foo`)
- * only covers content under that sub-path.
+ * only covers content under that sub-path. Entries may overlap or repeat, so
+ * all covering entries are returned and the caller unions their rules.
  */
-function matchExcludeForRoot(
+function findCoveringExcludes(
   root: ImportRoot,
   excludes: readonly ValidationExclude[],
   file: string
-): ExcludeMatch | undefined {
+): readonly ValidationExclude[] {
   const rootImport = normalizeImportKey(root.import);
   const relation = relative(resolve(root.path), resolve(file)).replaceAll('\\', '/');
+  const covering: ValidationExclude[] = [];
   for (const exclude of excludes) {
     const excludeImport = normalizeImportKey(exclude.import);
     if (excludeImport === rootImport) {
-      return { root, exclude, subPath: '' };
+      covering.push(exclude);
+      continue;
     }
     if (!excludeImport.startsWith(`${rootImport}/`)) {
       continue;
     }
     const subPath = excludeImport.slice(rootImport.length + 1);
     if (relation === subPath || relation.startsWith(`${subPath}/`)) {
-      return { root, exclude, subPath };
+      covering.push(exclude);
     }
   }
-  return undefined;
+  return covering;
 }
 
 /**
- * Find the exclude covering a source location, if any.
+ * Collect the excludes covering a source location, if any.
  *
  * The location must sit inside an import root (registry cache, vendored
  * repository, or configured reference root) reported by the compiler, so
  * local project content is never excluded.
  */
-function findExcludeMatch(
+function findCoveringExcludesForLocation(
   loc: SourceLocation | undefined,
   config: ValidatorConfig
-): ExcludeMatch | undefined {
+): { root: ImportRoot; excludes: readonly ValidationExclude[] } | undefined {
   if (!loc) return undefined;
   const excludes = config.excludes;
   const roots = config.importRoots;
@@ -133,7 +127,8 @@ function findExcludeMatch(
   }
   const root = findDeepestImportRoot(roots, loc.file);
   if (!root) return undefined;
-  return matchExcludeForRoot(root, excludes, loc.file);
+  const covering = findCoveringExcludes(root, excludes, loc.file);
+  return covering.length > 0 ? { root, excludes: covering } : undefined;
 }
 
 /**
@@ -141,15 +136,26 @@ function findExcludeMatch(
  *
  * Exclusion is consumer-declared (promptscript.yaml `validation.excludes`)
  * and only ever applies to imported content, never to local project files.
+ *
+ * Every covering exclude entry is evaluated, so overlapping or repeated
+ * entries union their rules. An entry only suppresses findings while its
+ * recorded commit matches the commit the lockfile pins for the import;
+ * with a missing or stale commit the findings reappear (PS040 reports the
+ * mismatch separately). `--ignore-hashes` skips the binding check.
  */
 export function isRuleExcludedForLocation(
   rule: { name: string; id: string },
   loc: SourceLocation | undefined,
   config: ValidatorConfig
 ): boolean {
-  const match = findExcludeMatch(loc, config);
+  const match = findCoveringExcludesForLocation(loc, config);
   if (!match) return false;
-  return match.exclude.rules.some((excluded) => excluded === rule.name || excluded === rule.id);
+  return match.excludes.some(
+    (exclude) =>
+      (config.ignoreHashes ||
+        (typeof exclude.commit === 'string' && exclude.commit === match.root.commit)) &&
+      exclude.rules.some((excluded) => excluded === rule.name || excluded === rule.id)
+  );
 }
 
 /** Lockfile dependency resolved for an exclude's import source. */

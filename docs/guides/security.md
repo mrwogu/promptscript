@@ -209,7 +209,7 @@ validation:
       rules: [blocked-patterns, authority-injection]
 ```
 
-When `prs lock` moves the pinned commit, the exclude stops applying and PS040 fails the build with a message naming both SHAs, so the consumer consciously re-reviews the new content and updates or removes the exclude. Excludes never apply to local project files, and `rules` accepts rule names or rule IDs. `--ignore-hashes` skips the commit binding check along with the rest of the integrity story.
+When `prs lock` moves the pinned commit, the exclude stops applying (the original findings reappear) and PS040 fails the build with a message naming both SHAs, so the consumer consciously re-reviews the new content and updates or removes the exclude. Excludes never apply to local project files, `rules` accepts rule names or rule IDs, and overlapping or repeated entries union their rules. `--ignore-hashes` skips the commit binding check along with the rest of the integrity story.
 
 **Allowed patterns.** A pattern is subtracted from the `blocked-patterns` set when its source text matches an entry exactly, mirroring how `blockedPatterns` appends patterns. Copy the source text from the finding message (it prints the pattern source):
 
