@@ -905,6 +905,10 @@
          <lastmod>2026-09-22</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/portableRealpathSync/</loc>
+         <lastmod>2026-09-22</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/prefixProvenance/</loc>
          <lastmod>2026-09-22</lastmod>
     </url>
@@ -3773,6 +3777,10 @@
          <lastmod>2026-09-22</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/telemetry/src/interfaces/FlushSelfInvocation/</loc>
+         <lastmod>2026-09-22</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/telemetry/src/interfaces/FlushState/</loc>
          <lastmod>2026-09-22</lastmod>
     </url>
@@ -3826,6 +3834,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/telemetry/src/type-aliases/TelemetryOutcome/</loc>
+         <lastmod>2026-09-22</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/telemetry/src/type-aliases/TelemetryRuntime/</loc>
          <lastmod>2026-09-22</lastmod>
     </url>
     <url>

@@ -30,11 +30,19 @@ pnpm add -g @promptscript/cli
 yarn global add @promptscript/cli
 ```
 
+```bash
+deno install -g --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run npm:@promptscript/cli
+```
+
+Requires a Deno-capable CLI release (1.20.0 or later) and Deno 2.9+.
+
 Verify installation:
 
 ```bash
 prs --version
 ```
+
+The CLI also runs under Deno and can be compiled into a standalone binary with no runtime dependencies. See the [CLI reference](https://getpromptscript.dev/dev/reference/cli/#running-under-deno) for the full Deno guide.
 
 ## Interactive Initialization
 

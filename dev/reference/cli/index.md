@@ -16,6 +16,49 @@ pnpm add -g @promptscript/cli
 yarn global add @promptscript/cli
 ```
 
+```bash
+deno install -g --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run npm:@promptscript/cli
+```
+
+Requires a Deno-capable CLI release (1.20.0 or later) and Deno 2.9+.
+
+## Running under Deno
+
+Beside the global install above, the CLI runs on Deno 2.9 or later in two other ways: straight from a project-local install, and as a compiled standalone binary.
+
+Inside a project that has `@promptscript/cli` in its dependencies, point Deno at the installed bin shim:
+
+```bash
+deno run --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run node_modules/@promptscript/cli/bin/prs.js init
+```
+
+An `npm:@promptscript/cli` specifier resolves the published registry release instead of the version installed in `node_modules`, so use the path above whenever the project's own dependency is what should run.
+
+Compile a self-contained binary that needs no runtime installed:
+
+```bash
+deno compile --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run -o prs node_modules/@promptscript/cli/bin/prs.js
+./prs --version
+```
+
+Add `--target x86_64-unknown-linux-gnu` (or `aarch64-unknown-linux-gnu`, `x86_64-pc-windows-msvc`) to cross-compile for another platform.
+
+The permission flags cover everything the CLI does:
+
+| Flag                            | Used for                                      |
+| ------------------------------- | --------------------------------------------- |
+| `--allow-env`, `--allow-sys`    | runtime detection, configuration, telemetry   |
+| `--allow-read`, `--allow-write` | project files, caches, vendored dependencies  |
+| `--allow-net`                   | registries, update checks, telemetry delivery |
+| `--allow-run`                   | git subprocesses, pagers, clipboard, cleanups |
+
+Notes:
+
+- All commands work under Deno, including `compile --watch`, registry operations over git, and the managed-output cleanup.
+- The cleanup re-executes the CLI through a hidden worker command: under `deno run` the worker gets read and write access scoped to the output directory, and a compiled binary re-executes itself.
+- Telemetry reports `runtime: deno`; `DO_NOT_TRACK=1` keeps it disabled.
+- Node.js 20+ remains fully supported with unchanged behavior.
+
 ## Global Options
 
 These options are available for all commands:
