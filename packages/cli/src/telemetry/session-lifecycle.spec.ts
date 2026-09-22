@@ -236,10 +236,19 @@ describe('resolveFlushSelfInvocation', () => {
     expect(invocation?.executable).toBe(process.execPath);
     expect(invocation?.prefixArgs[0]).toBe('run');
     expect(invocation?.prefixArgs).toContain('--allow-env');
-    expect(invocation?.prefixArgs).toContain('--allow-sys');
+    expect(invocation?.prefixArgs).toContain('--allow-sys=cpus,homedir');
     expect(invocation?.prefixArgs).toContain('--allow-net=telemetry.example');
     expect(invocation?.prefixArgs).toContain(`--allow-write=${config.cacheDirectory}`);
     expect(invocation?.prefixArgs).toContain('npm:@promptscript/cli@1.19.1');
+  });
+
+  it('never grants the flush child unscoped system access', () => {
+    vi.stubGlobal('Deno', { build: { standalone: false } });
+    const invocation = resolveFlushSelfInvocation(config);
+
+    expect(invocation?.prefixArgs).not.toContain('--allow-sys');
+    expect(invocation?.prefixArgs).not.toContain('--allow-all');
+    expect(invocation?.prefixArgs).not.toContain('-A');
   });
 
   it('fails closed when the endpoint host cannot be parsed', () => {

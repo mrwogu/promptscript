@@ -142,8 +142,16 @@ export function resolveFlushSelfInvocation(
       executable: process.execPath,
       prefixArgs: [
         'run',
+        // Unscoped on purpose. Deno throws NotCapable on any name outside a
+        // scoped --allow-env list, and the bundle's transitive dependencies
+        // read environment variables while their modules initialize, so an
+        // enumerated list turns every new dependency into a silently dropped
+        // flush. The child is spawned detached with stdio ignored, so it never
+        // reports anything back.
         '--allow-env',
-        '--allow-sys',
+        // os.cpus() through fast-glob and os.homedir() for the cache path are
+        // the only system calls the flush makes; anything wider is not needed.
+        '--allow-sys=cpus,homedir',
         `--allow-net=${endpointHost}`,
         `--allow-read=${readScopes}`,
         `--allow-write=${config.cacheDirectory}`,
