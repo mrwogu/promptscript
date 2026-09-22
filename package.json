@@ -17,7 +17,7 @@
     "docs:generate": "typedoc && node --import @swc-node/register/esm-register scripts/add-api-frontmatter.mts",
     "docs:generate:check": "typedoc && node --import @swc-node/register/esm-register scripts/add-api-frontmatter.mts && node --import @swc-node/register/esm-register scripts/add-api-frontmatter.mts --check",
     "playground:serve": "nx serve playground",
-    "playground:links": "ts-node --esm scripts/add-playground-links.mts",
+    "playground:links": "node --import @swc-node/register/esm-register scripts/add-playground-links.mts",
     "docs:validate": "node --import @swc-node/register/esm-register scripts/validate-docs-examples.mts",
     "docs:validate:check": "node --import @swc-node/register/esm-register scripts/validate-docs-examples.mts --check",
     "docs:formatters": "node --import @swc-node/register/esm-register scripts/generate-formatter-docs.mts && npx prettier --write docs/reference/formatters/*.md",

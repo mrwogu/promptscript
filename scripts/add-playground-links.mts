@@ -1,6 +1,11 @@
-#!/usr/bin/env npx ts-node --esm
+#!/usr/bin/env node --import @swc-node/register/esm-register
 /**
  * Script to add "Try in Playground" links after PromptScript code examples in markdown files.
+ *
+ * A badge is emitted only when the snippet it encodes compiles through
+ * `@promptscript/browser-compiler`, the engine the playground itself runs, with
+ * the formatters a first-time visitor has enabled. Anything that would open on
+ * an error gets no badge.
  *
  * Usage:
  *   pnpm playground:links          # Add links to all docs
@@ -11,6 +16,12 @@
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
 import { join, relative, sep } from 'path';
 import LZString from 'lz-string';
+import {
+  LATEST_SYNTAX_VERSION,
+  TARGET_DEFINITIONS,
+  type KnownTarget,
+} from '../packages/core/src/index.js';
+import { compile } from '../packages/browser-compiler/src/index.js';
 
 const PLAYGROUND_BASE_URL = 'https://getpromptscript.dev/playground/';
 const PLAYGROUND_DEV_URL = 'https://getpromptscript.dev/playground-dev/';
@@ -21,6 +32,9 @@ const EXCLUDED_DOC_DIRS = new Set(['design', 'plans', 'superpowers']);
 
 // Use production playground by default
 const PLAYGROUND_URL = PLAYGROUND_BASE_URL;
+
+// Virtual file name the playground state uses for the single encoded example.
+const PLAYGROUND_ENTRY = 'example.prs';
 
 // Marker to identify auto-generated playground links
 const LINK_MARKER_START = '<!-- playground-link-start -->';
@@ -55,6 +69,25 @@ interface ProcessResult {
 function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+/**
+ * Formatters a first-time playground visitor has enabled.
+ *
+ * The badge has to be validated against the same set the playground compiles
+ * with on open, otherwise the gate either rejects examples that work or accepts
+ * examples that fail. Mirrors `createDefaultTargets` in the playground store.
+ */
+function playgroundDefaultFormatters(): Array<{ name: KnownTarget }> {
+  return (
+    Object.entries(TARGET_DEFINITIONS) as Array<
+      [KnownTarget, { features: { defaultEnabled: boolean } }]
+    >
+  )
+    .filter(([, definition]) => definition.features.defaultEnabled)
+    .map(([name]) => ({ name }));
+}
+
+const PLAYGROUND_FORMATTERS = playgroundDefaultFormatters();
 
 /**
  * Remove common leading whitespace from all lines (dedent).
@@ -96,42 +129,148 @@ function encodeState(content: string, filename = 'example.prs'): string {
   return LZString.compressToEncodedURIComponent(json);
 }
 
+// Registry reference: @inherit/@use @namespace/path, optional version and alias.
+//   @inherit @company/base, @inherit @org/security@v1.0.0
+//   @use @fragments/testing as test
+const REGISTRY_IMPORT_REGEX =
+  /^([ \t]*)(@(?:inherit|use)\s+@[\w-]+\/[\w\/-]+(?:@v?[\d.]+)?(?:\s+as\s+\w+)?)\s*$/gm;
+
+// Remote reference: a git host, an explicit URL, or scp-style git syntax.
+//   @use github.com/acme/agent-skills/security-review@^2.0.0
+//   @inherit https://example.com/standards.prs
+//   @use git@github.com:acme/agent-skills
+const REMOTE_IMPORT_REGEX =
+  /^([ \t]*)(@(?:inherit|use)\s+(?:https?:\/\/|git@|[\w-]+(?:\.[\w-]+)+\/)\S*(?:\s+as\s+\w+)?)\s*$/gm;
+
 /**
- * Prepare code for playground by commenting out @inherit and @use directives
- * that reference registry packages (not local files).
+ * Prepare code for the playground by commenting out imports it cannot fetch.
  *
- * Registry packages are commented:
- *   @inherit @company/base, @inherit @org/security
- *   @use @company/security, @use @fragments/testing as test
+ * The playground compiles one encoded file against a small bundled registry, so
+ * anything that would need a network fetch or a sibling file has to be disabled
+ * or the example opens on an error. Registry references were always handled;
+ * remote references are too, because a host-style target like
+ * `github.com/acme/...` does not start with `@` and used to slip through and
+ * fail with a clone error against a repository that does not exist.
  *
- * Local paths are kept as-is:
- *   @inherit ./local.prs, @inherit ../parent.prs
+ * Local paths are left alone: they are opted out per snippet with
+ * `<!-- playground-link-skip -->`.
  */
-function prepareCodeForPlayground(code: string): string {
-  // Match @inherit or @use followed by @ and a namespace (registry reference)
-  // Pattern: @inherit/@use @namespace/path (optionally with @version and alias)
-  // Examples that get commented:
-  //   @inherit @company/base
-  //   @inherit @acme/frontend-team
-  //   @inherit @org/security@v1.0.0
-  //   @use @company/security
-  //   @use @fragments/testing as test
-  // Examples that stay uncommented:
-  //   @inherit ./local.prs
-  //   @inherit ../parent/file.prs
-  return code.replace(
-    /^(\s*)(@(?:inherit|use)\s+@[\w-]+\/[\w\/-]+(?:@v?[\d.]+)?(?:\s+as\s+\w+)?)\s*$/gm,
-    '$1# $2  # (registry - disabled for playground)'
-  );
+function prepareCodeForPlayground(code: string): PreparedSnippet {
+  const withoutUnfetchableImports = code
+    .replace(REGISTRY_IMPORT_REGEX, '$1# $2  # (registry - disabled for playground)')
+    .replace(REMOTE_IMPORT_REGEX, '$1# $2  # (remote - disabled for playground)');
+  return {
+    code: withPlaygroundMeta(withoutUnfetchableImports),
+    // The header alone is not a demonstration, so it does not count as content.
+    demonstratesExample: hasActiveCode(withoutMetaBlock(withoutUnfetchableImports)),
+  };
+}
+
+/** A snippet rewritten for the playground, plus whether it is still worth linking. */
+interface PreparedSnippet {
+  code: string;
+  /**
+   * False when disabling imports left nothing of the example behind.
+   *
+   * Such a snippet still compiles once the `@meta` header is supplied, so the
+   * badge would open without an error and show an empty project. A button that
+   * promises a demonstration and delivers nothing is worse than no button, so
+   * these get skipped.
+   */
+  demonstratesExample: boolean;
 }
 
 /**
- * Generate playground URL for a code example.
+ * Drop the `@meta` block, leaving only the blocks the example demonstrates.
+ *
+ * Braces are counted rather than regex-matched so a nested shape inside the
+ * header cannot end the block early.
  */
-function generatePlaygroundUrl(code: string, filename = 'example.prs'): string {
-  const preparedCode = prepareCodeForPlayground(code);
-  const encoded = encodeState(preparedCode, filename);
-  return `${PLAYGROUND_URL}?s=${encoded}`;
+function withoutMetaBlock(code: string): string {
+  const start = code.search(META_BLOCK_REGEX);
+  if (start === -1) {
+    return code;
+  }
+  let depth = 0;
+  for (let index = code.indexOf('{', start); index < code.length; index++) {
+    if (code[index] === '{') {
+      depth++;
+    } else if (code[index] === '}') {
+      depth--;
+      if (depth === 0) {
+        return code.slice(0, start) + code.slice(index + 1);
+      }
+    }
+  }
+  return code.slice(0, start);
+}
+
+/** True when some line is neither blank nor a comment. */
+function hasActiveCode(code: string): boolean {
+  return code.split('\n').some((line) => {
+    const trimmed = line.trim();
+    return trimmed !== '' && !trimmed.startsWith('#');
+  });
+}
+
+const META_BLOCK_REGEX = /^[ \t]*@meta\s*\{/m;
+
+/**
+ * Give a snippet the `@meta` block the compiler requires, when it has none.
+ *
+ * Most documentation examples show a single block to explain one feature, so
+ * they carry no `@meta` and cannot compile on their own - that alone accounted
+ * for 169 badges that opened on `@meta block is required`. Supplying the header
+ * here keeps the badge working without padding every fragment in the docs with
+ * four lines of boilerplate that would distract from what the example teaches.
+ *
+ * The header is commented as added, in the same spirit as the disabled imports
+ * above, so nobody mistakes it for part of the documented example.
+ */
+function withPlaygroundMeta(code: string): string {
+  if (META_BLOCK_REGEX.test(code)) {
+    return code;
+  }
+  return [
+    '# @meta added so this fragment compiles on its own in the playground',
+    '@meta {',
+    '  id: "example"',
+    `  syntax: "${LATEST_SYNTAX_VERSION}"`,
+    '}',
+    '',
+    code,
+  ].join('\n');
+}
+
+/**
+ * Compile a prepared snippet the way the playground would.
+ *
+ * This is the badge gate. Static heuristics can only approximate "will the
+ * playground run this", and the approximation was wrong often enough to ship
+ * badges that opened on `@meta block is required` or on a failed clone. Running
+ * the playground's own compiler answers it exactly.
+ */
+async function compilesInPlayground(preparedCode: string): Promise<boolean> {
+  try {
+    const result = await compile(new Map([[PLAYGROUND_ENTRY, preparedCode]]), PLAYGROUND_ENTRY, {
+      formatters: PLAYGROUND_FORMATTERS,
+      bundledRegistry: true,
+    });
+    return result.success;
+  } catch {
+    // A snippet that makes the compiler throw cannot carry a working badge.
+    return false;
+  }
+}
+
+/**
+ * Generate the playground URL for an already prepared snippet.
+ *
+ * Takes prepared code rather than raw code so the encoded state is byte-for-byte
+ * what `compilesInPlayground` validated.
+ */
+function playgroundUrlFor(preparedCode: string): string {
+  return `${PLAYGROUND_URL}?s=${encodeState(preparedCode, PLAYGROUND_ENTRY)}`;
 }
 
 /**
@@ -206,7 +345,11 @@ function findUnlinkableFenceLines(content: string): Array<[number, number]> {
 
 /**
  * Return the playground-ready code for a matched block, or null when the block
- * must not carry a link: skip marker, unsafe fence, or a short fragment example.
+ * must not carry a link: skip marker, unsafe fence, or an empty example.
+ *
+ * Whether the snippet actually runs is decided by `compilesInPlayground`, not
+ * here. The shape-guessing this function used to do ("looks complete", "longer
+ * than 30 characters") let 169 snippets without an `@meta` block through.
  */
 function extractLinkableCode(
   content: string,
@@ -231,23 +374,63 @@ function extractLinkableCode(
     return null;
   }
 
-  // Skip examples that are clearly fragments (no meta block, just showing syntax)
-  // But include examples that look complete (have --- or meaningful content)
-  const looksComplete =
-    trimmedCode.includes('---') ||
-    trimmedCode.startsWith('name:') ||
-    trimmedCode.startsWith('# ') ||
-    trimmedCode.includes('inherit ') ||
-    trimmedCode.includes('use ');
-
-  // Also include examples that are just content blocks (instructions)
-  const hasContent = trimmedCode.length > 30;
-
-  if (!looksComplete && !hasContent) {
-    return null;
-  }
-
   return trimmedCode;
+}
+
+/** One `prs`/`promptscript` fence considered for a badge. */
+interface LinkCandidate {
+  /** Full fence text, so the badge can be appended straight after it. */
+  block: string;
+  /** Offset of the fence within the link-free content. */
+  offset: number;
+  /** Playground-ready snippet, or null when static rules already rejected it. */
+  preparedCode: string | null;
+}
+
+function collectLinkCandidates(
+  content: string,
+  unlinkableFences: Array<[number, number]>
+): LinkCandidate[] {
+  const candidates: LinkCandidate[] = [];
+  CODE_BLOCK_REGEX.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = CODE_BLOCK_REGEX.exec(content)) !== null) {
+    const linkableCode = extractLinkableCode(content, match[1], match.index, unlinkableFences);
+    const prepared = linkableCode === null ? null : prepareCodeForPlayground(linkableCode);
+    candidates.push({
+      block: match[0],
+      offset: match.index,
+      preparedCode: prepared === null || !prepared.demonstratesExample ? null : prepared.code,
+    });
+  }
+  return candidates;
+}
+
+/**
+ * Splice a badge in after every candidate whose snippet compiles.
+ */
+async function insertPlaygroundLinks(
+  content: string,
+  candidates: LinkCandidate[]
+): Promise<{ content: string; added: number }> {
+  const runnable = await Promise.all(
+    candidates.map((candidate) =>
+      candidate.preparedCode === null ? false : compilesInPlayground(candidate.preparedCode)
+    )
+  );
+
+  let result = '';
+  let cursor = 0;
+  let added = 0;
+  for (const [index, candidate] of candidates.entries()) {
+    if (!runnable[index]) continue;
+    const blockEnd = candidate.offset + candidate.block.length;
+    result +=
+      content.slice(cursor, blockEnd) + createLinkBlock(playgroundUrlFor(candidate.preparedCode!));
+    cursor = blockEnd;
+    added++;
+  }
+  return { content: result + content.slice(cursor), added };
 }
 
 /**
@@ -277,10 +460,12 @@ function buildCheckResult(
 /**
  * Process a single markdown file.
  */
-function processMarkdownFile(filePath: string, mode: 'add' | 'check' | 'clean'): ProcessResult {
+async function processMarkdownFile(
+  filePath: string,
+  mode: 'add' | 'check' | 'clean'
+): Promise<ProcessResult> {
   const originalContent = readFileSync(filePath, 'utf-8');
   let content = originalContent;
-  let added = 0;
   let removed = 0;
   let updated = 0;
 
@@ -299,23 +484,10 @@ function processMarkdownFile(filePath: string, mode: 'add' | 'check' | 'clean'):
   // Work with content without existing links
   content = withoutLinks;
   const unlinkableFences = findUnlinkableFenceLines(content);
-
-  // Find all PRS code blocks and add links after them
-  const newContent = content.replace(
-    CODE_BLOCK_REGEX,
-    (match, codeContent: string, offset: number) => {
-      const linkableCode = extractLinkableCode(content, codeContent, offset, unlinkableFences);
-      if (linkableCode === null) {
-        return match;
-      }
-
-      const url = generatePlaygroundUrl(linkableCode);
-      const linkBlock = createLinkBlock(url);
-      added++;
-
-      return match + linkBlock;
-    }
-  );
+  const candidates = collectLinkCandidates(content, unlinkableFences);
+  const linked = await insertPlaygroundLinks(content, candidates);
+  const newContent = linked.content;
+  let added = linked.added;
 
   if (mode === 'check') {
     // In check mode, compare and report differences
@@ -360,7 +532,7 @@ function findMarkdownFiles(dir: string): string[] {
 /**
  * Main function.
  */
-function main(): void {
+async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const mode = args.includes('--check') ? 'check' : args.includes('--clean') ? 'clean' : 'add';
   const rootDir = process.cwd();
@@ -390,7 +562,7 @@ function main(): void {
 
   for (const file of files) {
     try {
-      const result = processMarkdownFile(file, mode);
+      const result = await processMarkdownFile(file, mode);
       if (result.added > 0 || result.removed > 0 || result.updated > 0) {
         results.push(result);
         totalAdded += result.added;
@@ -435,4 +607,4 @@ function main(): void {
   console.log('✅ Done!\n');
 }
 
-main();
+await main();
