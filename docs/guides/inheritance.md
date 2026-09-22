@@ -33,12 +33,6 @@ Use `@inherit` to extend another PromptScript file:
 @inherit @company/frontend-team
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWIDEg7hFY4Y1CFlcsyGKyKAPRg1GwcrFLKHKQSLgAU1DAA5hBwWNSKgsqCUukYAEawUoJgzNSC5BiKKeEArlEAlCB2ALoMnJmK+ESk5DBUtCAMAG5ecBBs+GatQA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 The child inherits all blocks from the parent, which can then be extended.
 
 ## Registry Structure
@@ -108,12 +102,6 @@ Different blocks merge differently during inheritance:
     }
     ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOaABMqtADqsAAiRhYMvYBN68IQxLzFNBUIZqW84AT3YZC6zQEYKABht7WAXwkTJEVjhjUIWXhQD0mNScWM5SqsHehgr6eiD2ygCazACuBmgwjBAYUBAAXjAqrLwASjAYjD5CMABuMFDMaDLsFDFxbRIOIA4AugzB1Ib4RKTkMKL0ILW0EGz4Fl1AA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 === "Merged Output"
 
     ```markdown
@@ -163,12 +151,6 @@ Different blocks merge differently during inheritance:
       code: ["Use React framework", "80% test coverage required"]
     }
     ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOaABMqtADqsAAiRhYMvYBN68IQxLzFNBUIZqW84AT3YZC6zQEYKABht7WAXwkTJEVjhjUIWXhQD0mNScWM5ScHKsQhjUQnAK+ixCMOrImgCqcDC8AEowGIw+YNSkMADuzNQA1pp0GiAAHNYApLwc4fzMAG6eGADmWUEAjgCuEEG6IAC6Eg4gDpMMwdSG+ESk5DCi9CDdtBBs+BZzQA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 === "Merged Output"
 
@@ -221,12 +203,6 @@ Different blocks merge differently during inheritance:
     }
     ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOaABMqtADqsAAiRhYMvYBN68IQxLzFNBUIZqW84AT3YZC6zQEYKABht7WAXwkTJEVjhjUIWXhQD0mNScWM5SQXBYXoxYEGxwCvoAtBogAIJQAO4YhvEArnAwvAAqhmgwAMqMXmghIBIOIA4AugzB1Ib4RKTkMKL0IABunnCxrPgWjUA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 === "Merged Output"
 
     ```markdown
@@ -278,12 +254,6 @@ Different blocks merge differently during inheritance:
     }
     ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOaABMqtADqsAAiRhYMvYBN68IQxLzFNBUIZqW84AT3YZC6zQEYKABht7WAXwkTJEVjhjUIWXhQD0mNScWM5ScDjM1FiMAK5YcAr6mn4ccCFIGiAA6l4cvKnxvADu3ji8AGre8OlJIH5QbunmIABKMay8AKIAygAyjfYOIA4AugzB1Ib4RKTkMKL0IABunnAQbPgWw0A" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 === "Merged Output"
 
     ```markdown
@@ -314,7 +284,7 @@ The `@extend` block modifies specific paths:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9ACMMcGL158AFNRgBzCHCzVZvALS8AJgYyLYF3mGbVe5DLN3VmAV1YWAlAA6rHwAghb2WMy8EBacWOKyQfxEHL7RsewJvMBB6gEg+YWs6mFW8WwYUOlxWSzsKRS5vIUFBawAviDtALoMccb4RKTkMFS0IAwAbqJwEGz4AIxdQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAegAjDDg7Xj4ACmoYdSUsakdeAFpecSUMJtgZMGZqeygnF3dPAEpi3gBBSQV5CCl2E0cffiIOTxDOLCPeQKtwkFjH++3x67YMKEvDrCGWdjOFDiTzy+RA+QAugwroN8ERSOQYFRaCAGAA3SpwCBsfCpcFAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -332,7 +302,7 @@ The `@extend` block modifies specific paths:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9ACMMcGL158AFNRgBzCHCzVZvALS8AJgYyLYF3mGbVe5DLN3VmAV1YWAlAA6rHwAssxWYCas8Bz2htRejFheOkH8RBy+vIYyFhjUFnAULBYwFByGQrq8wEHqMABMMIi8OgCOXhA6FnW8LABuohi6zbwAnAAMQQC+INMAugycRrL4RKTkZTT0IIO0EGz4AIxzQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAegAjDDg7Xj4ACmoYdSUsakdeAFpecSUMJtgZMGZqeygnF3dPAEpi3gBZZnGwIdZ4Dhk4AbdGLDcen34iDk9ZEU8ManE4ChYpCg4TsvVeQKsvBgACYYGEegBHNwQHreQEsABulQ0YN4AE5cgUQPkALoMTgDRz4IikcgwKi0EAMJG0CBsfCpbFAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -358,7 +328,7 @@ The `@extend` block modifies specific paths:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9ACMMcGL158AFNRgBzCHCzVZvALS8AJgYyLYF3mGbVe5DLN3VmAV1YWAlAA6rPxEHL68EBacWOImwEHqASBJKazqAJrevBg62Q6e7Jz2RGiiWBQJvCnJyawAvkFBIYRh9oYyFjkWcBQsUbzxafmkMADuTgDWiFUgOhiMWKkNrE2hRbw6hmILEGxwA5XmSQCqqg4+O2wYULxSaGzR+2xQsksgdQC6DNHG+ESk5BgVFoIAYADdRHBdqx8ABGd5AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAegAjDDg7Xj4ACmoYdSUsakdeAFpecSUMJtgZMGZqeygnF3dPAEoffiIOTxDOLBMhwKtwkFjT44BNdzEesRVXdk4ZIjRKrAo4s7zC1g2tp9kIk8GGo4jgFBYUl4R2CqlIMHMcwA1ikQD0MIwsN8ir5-jsenABhBMRA2MoYSMTgBVNoqDwktgYKA6ZhkNh7MysKCOb4gfIAXQYe0G+CIpHIMCotBADAAbpU4KTWPhUnygA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -389,12 +359,6 @@ Example — overlay content and add a reference file without replacing the base 
 }
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgFc4MASzIZWATwD0cANbQocXhhUKlK3nwAU1GAHMIcLNSm8AtLwAmxjACNY13mGbVe5DFIPVmg1tYAlAA6rPxEHAG8GlDKFCzWMBb6AG4QMADuvMChvLws7JxYiLzBIGUVrHkAoqw4kowwzqnpWRkQuNGmEIwc7iKMgtQd5ow4MIzycBS5peXzs-pgMPqsjXAlyLN5FDIR1BgWBRyEWBQk1rMAuqEAviC3VwxFZvhEpOQwVLQgDCkrcAgbHwAEYHkA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 The overlay's `references` list is appended to the base skill's list. The `content` field replaces
 the base skill's content entirely.
 
@@ -416,12 +380,6 @@ Use the `!` prefix to remove entries added by a lower layer:
   ]
 }
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgFc4MASzIZWATwD0cANbQocXhhUKlK3nwAU1GAHMIcLNSm8AtLwAmxjACNY13mGbVe5DFIPVmg1tYAlAA6rPxEHAG8GlDKFCzWMBb6AG4QMADuvMChvLz6YDD6rIzwiLzIuXm8wSAAhAVFnKVwMok0MIzYMNYWmFgc1KxwFCTWtVV5tY3FLTKsmX3Yg8Oj4yBVALpV+gCOghD6cOWVrNU19bAGGIxSFljMzFATZ9W1JMyJQ-ePzxuv21YAF8QEDNgxOKYpPgiKRyDAqLQQAwUkU4BA2PgAIygoA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 Negation uses normalized path matching — `"!./references/foo.md"` matches `"references/foo.md"`.
 If a negation doesn't match any base entry, a warning is logged during compilation.
@@ -446,7 +404,7 @@ The `sealed` property prevents higher layers from replacing specified skill prop
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpLdpyxaxIE2cm6pAYWoQsERhijClqjcPXNqfMFGbqKHV0zU1MLKTgYJxgZLWQTfQ52EwBdIIBfCXSQdJSGQ2oAT3wiUnIYKloQBmUYWgg2fABGHKA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCWdk4sFJBYoZru3gBhahMIRgwoXibW9t5zZmpSsCgLCjjg4byxuBg56TDkCN6OdgiAXTjCgpB8m4Z+6kd8IlJyGCpaEAYzRgtAgbHwqSeQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -482,12 +440,6 @@ Use `@use` to import and merge fragments (like mixins):
 @use @fragments/api-standards as api
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWIDEg7hFY4Y1CFlcsyGKyKAPRg1GwcrFISLgAU1DAA5hBwWNSKgsqCUikYAEaw0WDM1ILkGIqJ4QCuUQCUzoIAkmQlvmEYiXzscJmCBcyMANa9GAmCfNSJMNHuWMyCiszVpZCwjdzVcDB+JTDB24wrPhmCcQnJqel9OXD5hYLFpeWVNfUbWzvcLAnB-uQQQKMHZnQTxJIpNIZLK3e4zR4lMpQCpVZbvVguTbbVwdLqcLBwYIcVLuRIxMEXSHXGG5Arwp5IlFvKQNDGCADqPhwggwUEBvSyvLgCwwADcMNA4QjStwiJEpB9sdxcd0CcEMGgIMpUoEpGMpKNRpryeDLlCbrSHgyXqjaiyQHYALoMfHpfBEUjkGBUWggBiirxwCBsfBmB1AA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### How @use Differs from @inherit
 
 | Feature              | `@inherit`                                    | `@use`                                        |
@@ -511,12 +463,6 @@ Use `@use` to import and merge fragments (like mixins):
 @inherit @stacks/typescript-lib
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAKjghxeNZgCsYjLLwCSAZV4YBATzQx5jahDQyoEAEbUM1FQB1WfAAIRWOGNplW4WDIwDWcAPRY18LTpYALT6Bry8fAAU1DAA5sJYprxBvAAmwhgGsKm8YMzUolAYKrHUzACurKkAlCAAvgC6DJyJKvhEpOQwVLQgDABuDnAQbPgAjPVAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 **Use `@use` for:**
 
 - Adding optional capabilities (security, testing, quality)
@@ -529,12 +475,6 @@ Use `@use` to import and merge fragments (like mixins):
 @use @core/quality
 @use @fragments/testing
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAKjghxeNZgCsYjLLwASAQQDKvXPBi9GGTACNoELBHgAdVnwACAVzjqzLajAD01xher6Anr158AFPYDmwljUngC0vAAmwhjasBG8YMzUolAY7v7UzBasEQCUJuZWNnaOAI4WGFAeXr4BQSG84VFwMXEJSSlpGVk5+aa8ltYDYNQY-iScWHAOHHAGrP41vH4wgXMNTdGxMPGJyeRdmdl5IAC+ALoMkyH4RKTkMFS0IAwAbjC0EGz4AIxnQA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ### Merge Precedence
 
@@ -556,12 +496,6 @@ later operations are separate decisions:
   ["Use Vitest"]
 }
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBjUAbhEYwZguAE92GQpJkBGCgFYKABjUBfKa2sBiQdwisc8iFgdwBjANZwA9FgaaPCM1BBoWAC0UBAARoKC9gAU1DAA5hCe1BqCkYJimRixsGKCYMzUguQYGmnUzACurGIAlHYODXIOLKl+cowNYYEJyakZWTl5BXBFJWUVVVA1dY3Nbaz23J0w3RUwfgCODRgxw4mCKemZWNm5+YXFMKXlldW19U2t1tyeGM0Y1DEcGE1gSYhg5GYGj47EkyBkACUYEcIKlBBg0DRmAoTjIALrWKw2VjcbHyMLg9QCf6AuAUDieJxpEGsBLwkAAVS6ADU3PAsPjCSALHiGJwbhp8ERSOQYFRaCAGAp5HAIGx8PphUA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 Use [Composition and Precedence](../reference/language/composition.md) as the
 normative source for conflict rules, declaration order, and resolved examples.
@@ -699,12 +633,6 @@ Use semantic versioning for registry files:
 @inherit @company/frontend@1.0.0
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9GGpsOrACb8AjBQAMu3rz4AKajADmEOFmqzeAWl5rLGAEaw1vMM2q9yGWWbKAK7qAJQgAL4Augyc1rL4RKTkMFS0IAwAbqJwEGz4mpFAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### 5. Document Inheritance Chains
 
 Include comments explaining the hierarchy:
@@ -714,12 +642,6 @@ Include comments explaining the hierarchy:
 # @company/base → @company/frontend → this file
 @inherit @company/frontend
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAkqxwxqELBlaMYvRjgwRWiADqs+AARZkJATwD0AIwxxpgJMJeG5ltZ6w1Nh1YATXmdwQ4vSLBXqFw0VjmmpjWurb2nM68fAAU1DAA5u5Y1Nq8ALS8ju4Y+rDOYMzUvOQY2gl2AK5OAJQgAL4AugycKdr4RKTkMFS0IAwAbiJwEGz4AIwNQA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ## Common Patterns
 
@@ -752,7 +674,7 @@ flowchart TD
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAqnBi84ODNRgATETEYBXahCwBPOr2YA3GNUWThHUgFo4aWREiMAOqz4ABCKxzalvWyzIZWygPRhqbDlZpXj4ACgkAcwg4LGplXkNeSWiMACNYaTBmal5yDGUI-zkggEprOzkhVxYJbyF5RRVeEN5wmCiYuISklPSpXiycvIKi0vLXSuE3bJhvd3IIT0ZhFraO2PjE5Lg0jIHs3Kh8wuZiyTLWWyJA6RjPSXFJOAp6hSV44GtmjElkrAg2BgoAAlOSwOCIXjISwgADCAGUAAq8Jw-bRwGEAXWsAF8QDjMQxOBt8ERSOQYFRaCAGFpaADWPgAIz4oA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AVTg7OBwMamlZGEY3ahNHOkMANxhqJqkFGFIAWjg0eohIRmKBCFYcTpMBXUxWRwB6VTYOT2C+AAoa9SUsakdeft5xJQwAI1gZMGZqeygnF3dPAEoJ-jdy+fuYZfKDSaWGOvB2ewORxOZwu11qdweDmcrg84g+rD4Xx+-BYNWWCygEAwrEYdjBvF2MH2cEOx1O5zgVxuKnuj2eKPePn4RA2MhpxPE1XEcAogMazV4gSsYkkJggbAwUAASm5YHAwsgIgBhADKAAVeDMJJ04BEALo+fIgfJmhicWn4IikcgwKi0EAMDq0eWsfCpa1AA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -773,7 +695,7 @@ flowchart TD
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9GGpsOrACa9efABTUYAcwhws1WbwC0vNUYwAjWBrDNqvchln7lAV3UBKADqs-CzsRBLAgZqcAG4QyqwknFiIrspqXoxYEGyBAL6BgfxhnBp6xmKZ2axwvBGsmpb+IAByzLwhcMyUUMz6vMbYMInscE2RFrxNrVYwtl59LGowY6y5ILkAugxJpvhEpOQwVLQgDNGicFX4AIzrQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAelU2Dk9gvgAKahh1JSxqR14AWl5xJQwAI1gZMGZqeygnF3dPAEoffhZ2IixeQKteTgA3CFdWLSwwmmZxN0YsCDYfQtYNnc4Zbrh+iHvH1mU+2CIwiADl5Fs5JQoMx1LIRBwLnA8sDwiBwaMYBM3HCWFI8vkQPkALoMTj9Rz4IikcgwKi0EAMI6VOD-fCpIlAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -809,12 +731,6 @@ Define parameters in the `@meta` block using the `params` field:
 }
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAnCwZGAazgB6LAE808RtQhosAWigQARlVoAdVvxIxhvYHt68IAE0S8dIQcLGSZcuAqWr1Gu2d5xp7BiENnYAjBQADJE+rOaY1KRwNqax5rw0zABWMIxYAHKkMDZCiqwA5r7m1ACu7BCGxVilZbwAvLYgrMyWMKEAHDFpfk0QuQD8NhrMzLAYrJW8HEIAYgmGAO7M1KI2nNUkABR2AG4QS1h2dB3ZQpcdJMyMOBh2AJRtHafng7wAvnr-eb6DLZXImXysQrJYAgnL5Qq-QFVWpYepFEzAGp1QyIgF6PQOOaWDDUSxwcGpc4Qco2ZB2ACqcBgGPOq0Km22iN4YC2vAwUCgi3gWDgdgAugCQL8xQxOE1pPgiKRyDBtPQQMcYLQIGx8KEpUA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### Parameter Types
 
 | Type      | Syntax                 | Description             |
@@ -846,23 +762,11 @@ Pass parameters when using `@inherit` or `@use`:
 @inherit @stacks/typescript-lib(projectName: "my-app", runtime: "node20")
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCSBIBPALQY0aHSt5w97DIS06AjBQAMzs6wC+UqdIiscMaggsXmk4BUYAazgAeiw9NHhGQLQsAygIACMACgFhUQA5Uhg7XUNjUxA6XmoAV3YIORLWZnUYACYnHQBKEHcAXQZOLGo9fCJSchhxehAANwC4CDZ8e16gA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 Or with `@use`:
 
 ```promptscript
 @use ./fragments/testing(framework: "vitest", coverage: 90)
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9GGoYA5iU5Y4IjnCwRWkgBTjSMAO7NqAa0SCAOiABuERVlN1BLMzAmSYRgJwAGAJQgAvgF0GWWoAT3wiUnIYKloQBgdaCDZ8AEZfIA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ### Template Variables
 
@@ -953,12 +857,6 @@ Use `{{variable}}` syntax to reference parameters in content:
       """
     }
     ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCUxwiA1swCuWALQY0aHSt5wAnuwyEtOgIwUADJ+usAvlKlpCFY9aggsXmk4BUZ9OAB6ahgMUXNLAAoBYVEAOVIYFxAAYT1Y4wiAQUsdOn5maiwtAA4PFoBKAJkNTixwuyUbaxAfVQBNY1s0EQgMKAgALxg1Vl4YUxYSOWpGJcZSwxNeMChmAHc4CkHh66lfEF8AXQYe6jt8IlJyGHF6EAA3GC0CBsfCue5AA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 === "Resolved Output"
 
@@ -1053,12 +951,6 @@ Error: Type mismatch for parameter 'mode': expected enum("dev", "prod"), got "st
   }
 }
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhucAYwDWcAPQY0EALRwY1AG4RGMeWIlwAnuwyFZ8gIwUADK-PjBmaqTizRnhIAxIIAcqQwgsxggriRAIIACgCSgvpGJmaBaQbGpuF8skrUEKwA5mIWEoIhABIAKvWJXszUWIJgrbE4kel5kQAUUjBgGACuUFiyAMwucwCUVRJorVOCrGMkAEYGggC8grNzldkhAKKsxtRsfOyCJMzDS-ePMLKcmwPyw4YwUMxoW5YeR0OQgJQYMqlCogUHyGiPMaMLAQNjyeb7ME-P4AoEeCQAXzEBJABIAugxOFhqFZ8ERSOQYFRaLCQL9aKjWPhHKSgA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ## Debugging Inheritance
 

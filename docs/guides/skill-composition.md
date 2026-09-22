@@ -32,12 +32,6 @@ Use `@use` directives inside a `@skills` block to import sub-skills as ordered p
 }
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhmaOPLES4AT3YZCs+QEYKBgAwrWAXzFjucANbQocYasGK4s0eImCp8RtQhoWBBsuiAACtTMUgCujEFsglj+GADmMIJgzNSCjFDM0VKCcDDUAG4QjPCmXjlsHOyhKiDONQCa+YIY1OlCNFGx8eJJEKnpWYw48EnYWRSCAGLMUHkA7omTgmg4GMWOAEYwqy1eEOJZPtRzAMorEFgTggdYKzCcgiQYrNEYUJ2shX4EiQouk9jsYIUEix2EQsBRjk1qoILJ5uNFioIKAB6LbguBYyY-XAAWjgjE+zjRGOxuN2WOGowAFMVSiU7upQn47hUfvIAJSU9HpGnbOksHzEyCETqODDRLDMKViMwgMwAXQYnCS6nwRFI5BgVFoIAYrNowVY+D0qqAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 The resolver flattens all sub-skills into a single skill with labeled phase sections, unioned `allowedTools`, concatenated references, and `composedFrom` metadata tracking provenance.
 
 ## Why Composition?
@@ -147,12 +141,6 @@ All existing `@use` features work inside skill blocks:
   }
 }
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthw5mjiJREqVIAm8RtQhosENvLEgACtWbKAro21tpaGNWw7WcfRMVKAxMIBKMKPYBuMMKYuK5S3KZwgRQA9Gg4GJFw0TgwGFC4ALRwjBisLpLuwgDqELhBGHYkMBy0ocLhkcIxcQnw0VgaGADmMAAUkQEaWACeekxDEDlQ+nTC2lXMpljyAMwADACU+UrCHiVlaRAJwr2qNSQQrPBB8Y2spDBbBWERUbG3bSyqGZCEwscYJbMX7bQreLoQOAdYblELPXb1V71ODxagwZTvVpJEhsUrMDSsLpSDy9NEQqHUGEZYTKSEYABGsGUwjA+KCvmGXWMplYyieUgAvhIBSABQBdBicaH4IikcgwKi0EAMQZwBz4ACMoqAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ## How Composition Works
 
@@ -291,12 +279,6 @@ prs validate --strict
   @use ./phases/code-fix as autofix
 }
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhmaOPLES4AT3YZCs+QEYKBgAwrWAXzFjucANbQocYasGK4s0eImCp8RtQhoWBBsuiAACtTMUgCujEFsglj+GADmMIJgzNSCjFDM0VKCcDDUAG4QjPCmXoLRxdQAkqylzIwYAEawsknRMM4SLOycWKEqIP1eAJr5ghjU6UI0UbHx4kkQqelZjDjwSdhZFJaeNQBizFB5AO6Ju4JoOBjFju0w15LiWT7UiBMSBoIAErRcS7DBQXA5XaMGyODB+ZhwOGXIolcqVZQnLwAJgoggAKsk0rNWIVck84BAwOoMhBSXSUpiahIAMx4gCCaHINIw0SwzBI2BghUghHggiuu3mRQwYD6rD+ggAylcIFgdoJXlgrjBOIJBaxouDBAAKOkcajwoKlGAAShJZMi4hNIOwHFJwvtJCi8uZmqewpc4kGHEIWCOWLG1UEFk83Dq6QoAHoHgG4EmwRCcABaOBtBVxhOCZOp55J9abE3FG3+LDqUJ+NUVcHyW3OePFYspx5llg+bOi2ZwvnMUViMwgMwAXQYw2o6nwRFI5BgVFoIAYNcpbHweknQA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ### Sub-Skills
 

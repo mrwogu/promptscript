@@ -29,7 +29,7 @@ as field values remain part of an `object` body:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gALXxbUIjLBDZwABMAA6rceIC04qSAByMAG4xq4ommZwY4g4z5Y4ymQF8ZM7nCwZWAEwzUnE6bPEsnMROORlAFUDIwEhLHEAFQBPNBgAZRMINCxlOiUQEMNWUhgnHUI9ajNlAF0rEEsyhk4BGPwiUnIYKloQBk1aUVZ8AEYqoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH35qeCxqCEYsCDZlQKteAFpwkAA5GAA3GGpeIjRmODtBxlLTPMLWYrgRTwxqcTq4likw5AiAVUHZcsqsXgAVRzQYAGURiDQsCLoWzbtWUmlewn7qMZAAXR98kHyPhk45Uc+CIpHIMCotBADC6tBqrHwqV+QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -239,7 +239,7 @@ supported forms:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJw7PUsjAK5Y4AAmAAdVuPEBicQGVhaNAI4ATcXEYYoGauM3MRJTlmwQ24i9QCeMuVJAB6ajABuEGAHcXiOIuAEpePr7iLJow4gCOwvoQWI4gMk4KyqrqgjDasADmGIz24iTCUFjQEKwxdiW+STjiltT5MFgAtNFonNHs4syiaKLpLq4ccJ0FRSmBLvOpsnLiwcKyE2LiGKzaHtlY4mAY0MIecBSjqVdpS4oAwttsEHpQtoQwIpYARrC27A6XcbwLABSTpOTRXTUCBoSpsOYgVbrYFweZLOQsdgWBELcHLJHNFFbHbiPYaQ7HKCneAXdFBa6LOQAXxkTJATIAugw6vgiKRyDAqLQQAxPDBaNZWPgAIzsoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344HGZqLEY3U15Aq14+AGU3NDRyjhk4RgwoDGpecWYqrREsCCNOLGpHOIiAemoYADcIGHMIlJAAJWXV8x1mKV4ARzcekxmQIvqmlraK6V5YdQxGR14SNygxqAhWO0m0145hMOAUfXUwgAtFI0JwpNp3Fg0NVZiA5hw4Fgoc9XpdNrErvVglsPAp4DUMJ5eIt7lgVBhoG5FnAKGjCddgnwAMJUtgQbpQXhEGBVEQAI1gwvY0zRGIpG1qcWCUi61AgaDGbE2pJsFLgeWCwRY7EmBKuRKNRt15KxyipMlp7QZTJZbOJ4Qtht4hQKIHyAF0GIDHPgiKRyDAqLQQAwljBaONWPhUv6gA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -293,7 +293,7 @@ replacement. The rule ignores custom block names:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIekC0AE2YkMEVgAJgAHUkT+E6SADCAVzhYREjNWoYAnhJbtOWCdRijxcCQDcMUCIKWyAviFcBdBqer78RKTkMFS0IAy2MLQQbPgAjB5AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34OUgBacWYSDAgrQKteMvCQAGE3OCwqsWo1Rx02Dm1qGGra5QA3DCgIbxAffJB8gF0GTixqR3wiUnIYKloQBnGYWgg2fFTFoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

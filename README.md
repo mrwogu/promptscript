@@ -262,12 +262,6 @@ Build organization, team, and project layers with deterministic merge rules:
 }
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9OWxhm1Er158AFNRgBzCHCzVZvALS8AJoYwAjWJd4rqvJbL3VmAV1aWAlAA6rHz8XnAwAhyk8rYYjADWnI6avDr6hsamFtZwdg5Oqq5QGO6ePv5BoeG8BrhethRS8nEkMM16nFhmcPHQUHDylth2GOFmugBuEDAA7vwAjBQAzBQADEGVzBOiYpYRRjJD1JZwFBxGQnq8wEEayAEgAKrVAGri8FgPdLwPAEowAEcvBBdLwAJwAVgApLwWNtqBgOg8ALpBAC+G1Y-CIHF8vAOvgwxzg11uvHOWEuiF49xAvx8vCEHA82AgbHJHxJQl4AGEAJIo9EgNHIhidEz4IikcgwKi0EAMeFwNmsfDzYVAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 - `@inherit` creates a single-parent base chain.
 - `@use` composes multiple local, registry, Git, or Markdown resources.
 - `@extend` merges selected paths and supports skill-specific overlays.
@@ -304,12 +298,6 @@ Import versioned skills without copy-paste:
 ```promptscript
 @use github.com/acme/agent-skills/security-review@^2.0.0
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQBzCLl4AjCixIB6DIxIx5wzlgC0cANbQocWQMa9qYgJ7rqMAG4QYAd24A9AEwUADO5ABfALoM11Kb4RKTkMFS0IAxWMLQQbPgAjN5AA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ```bash
 prs skills add github.com/acme/agent-skills/security-review@2.1.0
