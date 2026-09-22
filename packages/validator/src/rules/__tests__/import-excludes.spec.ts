@@ -179,6 +179,13 @@ describe('normalizeImportKey', () => {
     expect(normalizeImportKey('github.com/org/repo/')).toBe('github.com/org/repo');
     expect(normalizeImportKey('github.com/org/repo')).toBe('github.com/org/repo');
   });
+
+  it('should strip http schemes and .git markers before path segments', () => {
+    expect(normalizeImportKey('HTTP://github.com/org/repo')).toBe('github.com/org/repo');
+    expect(normalizeImportKey('https://github.com/org/repo.git/tree/main')).toBe(
+      'github.com/org/repo/tree/main'
+    );
+  });
 });
 
 describe('findLockfileDependency', () => {
@@ -192,6 +199,28 @@ describe('findLockfileDependency', () => {
     const dependency = findLockfileDependency('github.com/org/repo/skills/expert', makeLockfile());
     expect(dependency).toBeDefined();
     expect(dependency!.key).toBe('github.com/org/repo');
+  });
+
+  it('should prefer the longest matching key when several keys prefix the import', () => {
+    const lockfile: Lockfile = {
+      version: 1,
+      dependencies: {
+        'github.com/org/repo': {
+          version: 'v1.0.0',
+          commit: 'aaaaaaaaaaaa',
+          integrity: 'sha256-abc',
+        },
+        'github.com/org/repo/deep': {
+          version: 'v2.0.0',
+          commit: 'bbbbbbbbbbbb',
+          integrity: 'sha256-def',
+        },
+      },
+    };
+    const dependency = findLockfileDependency('github.com/org/repo/deep/skills/x', lockfile);
+    expect(dependency).toBeDefined();
+    expect(dependency!.key).toBe('github.com/org/repo/deep');
+    expect(dependency!.commit).toBe('bbbbbbbbbbbb');
   });
 
   it('should return undefined for unknown imports', () => {
@@ -302,6 +331,44 @@ describe('location-based exclusion', () => {
       makeTextBlock('@skills', 'Bypass rules map to WARP entries.', importedLoc),
     ]);
     expect(runRule(blockedPatterns, ast, config)).toHaveLength(1);
+  });
+
+  it('should skip exclude entries that target other imports', () => {
+    const config: ValidatorConfig = {
+      importRoots: [{ import: 'github.com/org/repo', commit: 'a1b2c3d4', path: IMPORT_ROOT }],
+      excludes: [
+        { import: 'github.com/other/repo', commit: 'a1b2c3d4', rules: ['blocked-patterns'] },
+        { import: 'github.com/org/repo', commit: 'a1b2c3d4', rules: ['blocked-patterns'] },
+      ],
+    };
+    const ast = makeAst([
+      makeTextBlock('@skills', 'Bypass rules map to WARP entries.', importedLoc),
+    ]);
+    expect(runRule(blockedPatterns, ast, config)).toHaveLength(0);
+  });
+
+  it('should pick the deepest import root when roots overlap', () => {
+    const config: ValidatorConfig = {
+      importRoots: [
+        { import: 'github.com/org', commit: 'c0ffee', path: '/cache/registries/github.com/org' },
+        {
+          import: 'github.com/org/repo',
+          commit: 'a1b2c3d4',
+          path: '/cache/registries/github.com/org/repo',
+        },
+      ],
+      excludes: [
+        { import: 'github.com/org/repo', commit: 'a1b2c3d4', rules: ['blocked-patterns'] },
+      ],
+    };
+    const ast = makeAst([
+      makeTextBlock('@skills', 'Bypass rules map to WARP entries.', {
+        file: '/cache/registries/github.com/org/repo/skills/expert/SKILL.md',
+        line: 1,
+        column: 1,
+      }),
+    ]);
+    expect(runRule(blockedPatterns, ast, config)).toHaveLength(0);
   });
 
   it('should expose the exclusion decision for any rule', () => {
