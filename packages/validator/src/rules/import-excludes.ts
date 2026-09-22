@@ -16,15 +16,20 @@ export const importExcludes: ValidationRule = {
   description: 'Import validation excludes must match the commit pinned in the lockfile',
   defaultSeverity: 'error',
   validate: (ctx) => {
-    const excludes = ctx.config.excludes;
-    if (!excludes || excludes.length === 0) return;
-
-    // With --ignore-hashes the whole integrity story is disabled. Exclusions
-    // still apply location-wise, but commit binding cannot be verified.
-    if (ctx.config.ignoreHashes) return;
+    const configuredExcludes: unknown = ctx.config.excludes;
+    if (configuredExcludes === undefined) return;
+    if (!Array.isArray(configuredExcludes)) {
+      ctx.report({
+        message:
+          'Invalid validation.excludes entry: expected { import: string, commit: string, rules: string[] }',
+        suggestion: 'Fix the exclude entry in promptscript.yaml',
+      });
+      return;
+    }
+    if (configuredExcludes.length === 0) return;
 
     const lockfile = ctx.config.lockfile;
-    if (!lockfile) {
+    if (!ctx.config.ignoreHashes && !lockfile) {
       ctx.report({
         message:
           'validation.excludes requires a lockfile. Run `prs lock` to pin imports, then record excludes against the pinned commits.',
@@ -33,7 +38,7 @@ export const importExcludes: ValidationRule = {
       return;
     }
 
-    for (const exclude of excludes) {
+    for (const exclude of configuredExcludes) {
       if (!isValidationExcludeLike(exclude)) {
         ctx.report({
           message:
@@ -42,6 +47,11 @@ export const importExcludes: ValidationRule = {
         });
         continue;
       }
+
+      // With --ignore-hashes the whole integrity story is disabled. Exclusions
+      // still apply location-wise, but commit binding cannot be verified.
+      if (ctx.config.ignoreHashes) continue;
+      if (!lockfile) continue;
 
       const dependency = findLockfileDependency(exclude.import, lockfile);
       if (!dependency) {

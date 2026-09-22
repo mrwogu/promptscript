@@ -4,6 +4,7 @@ import {
   createOutputPlan,
   noopLogger,
   type Logger,
+  type LockfileDependency,
   type OutputPlanCandidate,
   type OutputPlan,
   type PSError,
@@ -84,6 +85,11 @@ function normalizeRepositoryKey(value: string): string {
     .replace(/^(?:https?:\/\/|git:\/\/)/i, '')
     .replace(/^git@([^:]+):/, '$1/')
     .replace(/\.git(?=\/|$)/, '');
+}
+
+/** Return whether a lock entry owns a repository checkout. */
+function ownsImportRoots(dependency: LockfileDependency): boolean {
+  return dependency.source !== 'md' || dependency.skills !== undefined;
 }
 
 /**
@@ -513,6 +519,7 @@ export class Compiler {
       for (const [repoUrl, dependency] of Object.entries(
         this.options.resolver.lockfile.dependencies
       )) {
+        if (!ownsImportRoots(dependency)) continue;
         const importKey = normalizeRepositoryKey(repoUrl);
         try {
           importRoots.push({

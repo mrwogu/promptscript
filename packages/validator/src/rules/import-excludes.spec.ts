@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Block, Lockfile, Program, SourceLocation } from '@promptscript/core';
+import { createValidator } from '../validator.js';
 import { importExcludes } from './import-excludes.js';
 import { blockedPatterns } from './blocked-patterns.js';
 import { authorityInjection } from './authority-injection.js';
@@ -14,6 +15,11 @@ const localLoc: SourceLocation = { file: 'project.prs', line: 1, column: 1 };
 
 /** Registry cache root holding imported content. */
 const IMPORT_ROOT = '/home/user/.promptscript/cache/registries/github.com/org/repo/v1.0.0';
+const importedLoc: SourceLocation = {
+  file: `${IMPORT_ROOT}/skills/expert/SKILL.md`,
+  line: 1,
+  column: 1,
+};
 
 function makeTextBlock(name: string, text: string, loc: SourceLocation): Block {
   return {
@@ -155,6 +161,42 @@ describe('PS040: import-excludes', () => {
     expect(messages[0]!.message).toContain('Invalid validation.excludes entry');
   });
 
+  it('should report malformed excludes through the full validator', () => {
+    const ast = makeAst([
+      makeTextBlock('@skills', 'Bypass rules map to WARP entries.', importedLoc),
+    ]);
+    const baseConfig = {
+      lockfile: makeLockfile(),
+      importRoots: [
+        {
+          import: 'github.com/org/repo',
+          commit: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+          path: IMPORT_ROOT,
+        },
+      ],
+    };
+    const malformedConfigs: unknown[] = [
+      { ...baseConfig, excludes: 'blocked-patterns' },
+      {
+        ...baseConfig,
+        excludes: [{ import: 123, rules: ['blocked-patterns'] }],
+      },
+      {
+        ...baseConfig,
+        ignoreHashes: true,
+        excludes: [{ import: 'github.com/org/repo', rules: 'blocked-patterns' }],
+      },
+    ];
+
+    for (const config of malformedConfigs) {
+      const result = createValidator(config as ValidatorConfig).validate(ast);
+      const invalidExcludes = result.errors.filter((message) => message.ruleId === 'PS040');
+
+      expect(invalidExcludes).toHaveLength(1);
+      expect(invalidExcludes[0]!.message).toContain('Invalid validation.excludes entry');
+    }
+  });
+
   it('should skip commit binding checks when hashes are ignored', () => {
     const config: ValidatorConfig = {
       lockfile: makeLockfile('f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5'),
@@ -229,12 +271,6 @@ describe('findLockfileDependency', () => {
 });
 
 describe('location-based exclusion', () => {
-  const importedLoc: SourceLocation = {
-    file: `${IMPORT_ROOT}/skills/expert/SKILL.md`,
-    line: 1,
-    column: 1,
-  };
-
   function excludeConfig(rules: string[]): ValidatorConfig {
     return {
       importRoots: [{ import: 'github.com/org/repo', commit: 'a1b2c3d4', path: IMPORT_ROOT }],
@@ -319,6 +355,28 @@ describe('location-based exclusion', () => {
     ]);
     expect(runRule(blockedPatterns, excludedAst, config)).toHaveLength(0);
     expect(runRule(blockedPatterns, otherAst, config)).toHaveLength(1);
+  });
+
+  it('should scope sub-path excludes to implicit .prs files', () => {
+    const config: ValidatorConfig = {
+      importRoots: [{ import: 'github.com/org/repo', commit: 'a1b2c3d4', path: IMPORT_ROOT }],
+      excludes: [
+        {
+          import: 'github.com/org/repo/standards',
+          commit: 'a1b2c3d4',
+          rules: ['blocked-patterns'],
+        },
+      ],
+    };
+    const ast = makeAst([
+      makeTextBlock('@standards', 'Bypass rules map to WARP entries.', {
+        file: `${IMPORT_ROOT}/standards.prs`,
+        line: 1,
+        column: 1,
+      }),
+    ]);
+
+    expect(runRule(blockedPatterns, ast, config)).toHaveLength(0);
   });
 
   it('should not exclude anything without import roots', () => {

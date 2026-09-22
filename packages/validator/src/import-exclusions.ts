@@ -80,8 +80,9 @@ function findDeepestImportRoot(roots: readonly ImportRoot[], file: string): Impo
  * Collect every exclude covering a file within one import root.
  *
  * An exclude declared with a sub-path (e.g. `github.com/org/repo/skills/foo`)
- * only covers content under that sub-path. Entries may overlap or repeat, so
- * all covering entries are returned and the caller unions their rules.
+ * covers that directory or the implicit `.prs` file resolved for the path.
+ * Entries may overlap or repeat, so all covering entries are returned and the
+ * caller unions their rules.
  */
 function findCoveringExcludes(
   root: ImportRoot,
@@ -101,7 +102,11 @@ function findCoveringExcludes(
       continue;
     }
     const subPath = excludeImport.slice(rootImport.length + 1);
-    if (relation === subPath || relation.startsWith(`${subPath}/`)) {
+    if (
+      relation === subPath ||
+      relation === `${subPath}.prs` ||
+      relation.startsWith(`${subPath}/`)
+    ) {
       covering.push(exclude);
     }
   }
@@ -120,9 +125,12 @@ function findCoveringExcludesForLocation(
   config: ValidatorConfig
 ): { root: ImportRoot; excludes: readonly ValidationExclude[] } | undefined {
   if (!loc) return undefined;
-  const excludes = config.excludes;
+  const configuredExcludes: unknown = config.excludes;
+  const excludes = Array.isArray(configuredExcludes)
+    ? configuredExcludes.filter(isValidationExcludeLike)
+    : [];
   const roots = config.importRoots;
-  if (!excludes || excludes.length === 0 || !roots || roots.length === 0) {
+  if (excludes.length === 0 || !roots || roots.length === 0) {
     return undefined;
   }
   const root = findDeepestImportRoot(roots, loc.file);
