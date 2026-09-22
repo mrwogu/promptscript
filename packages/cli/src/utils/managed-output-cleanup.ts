@@ -15,6 +15,7 @@ import { basename, dirname, isAbsolute, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import type { FormatterOutput } from '@promptscript/compiler';
+import { getRuntimeInfo } from '../runtime/runtime-info.js';
 import { resolveSelfInvocation, type SelfInvocation } from '../runtime/self-invocation.js';
 import { MANAGED_OUTPUT_WORKER_COMMAND } from '../managed-output-worker.js';
 
@@ -52,10 +53,22 @@ const OWNED_COMMAND_FIELDS = new Set([
  * the binary itself.
  */
 function resolveWorkerModulePath(): string | undefined {
-  const bundled = fileURLToPath(new URL('./managed-output-worker.js', import.meta.url));
-  if (existsSync(bundled)) return bundled;
-  const source = fileURLToPath(new URL('../managed-output-worker.ts', import.meta.url));
-  return existsSync(source) ? source : undefined;
+  // A compiled binary re-executes itself and never loads the module from
+  // disk, so probing first would only spend a filesystem read that a
+  // restricted Deno runner is free to refuse.
+  if (getRuntimeInfo().standalone) return undefined;
+  try {
+    const bundled = fileURLToPath(new URL('./managed-output-worker.js', import.meta.url));
+    if (existsSync(bundled)) return bundled;
+    const source = fileURLToPath(new URL('../managed-output-worker.ts', import.meta.url));
+    return existsSync(source) ? source : undefined;
+  } catch {
+    // A refused read (Deno raises NotCapable) or a module URL that is not a
+    // filesystem path must surface as an unresolved worker. Letting it throw
+    // here would escape the guarded operations, which resolve the invocation
+    // outside their own try blocks, and skip the fail-closed warning.
+    return undefined;
+  }
 }
 
 let cachedWorkerModulePath: string | undefined | null = null;
