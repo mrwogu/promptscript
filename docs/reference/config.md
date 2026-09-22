@@ -433,6 +433,12 @@ Once aliases are configured, use them in any import path:
 @use @company/@stacks/react@^1.0.0
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AJXhmKAA3A35dTFZHBXl1Exw3ACMKXQB6DEYhbppmMlNGagg0LABadow4GB9+CFYcGHGsATqMBu7+Zmp1btn5otY+ADU1uAg2aTEoCDnjMn2sRbd5zeH6x124EUYAGs4N1qDA+lh+AA9dLZHIgfJ0dDYPCIEC1b7bX57A5HOYwKi0EAMFjsThYHi8ADKbjQ5AgdzkClWvCIpHIdmoHmUqzBFF4ADlmBtMNQNswwMy7OJmIw3FoRFgbqw6GJPLxWMKxLwwRgoPY+oCNATFkIRLxAlYQil0VsdjjDscFiA4nAEiJkuEQOksrkXVaSBBCMswlguQsCot-ttxBhqOJlJbgiwpGFkBEAApQPowHAVKTUWQiTxx7wgAC6cQ4-2W6jTmezjFz+bWRZjpYilcjvjB-3GjCVbETcSmXqzObzUALOvgYYgA+VeXyCKRIEwuHwGLIWL+AOBoPBA+hsJyhPoTDYHC4aL4NLpD0Z8lsrKiHJ13N4vIJgq1ovFkufGU5QVbBlVVGMNS1URdX1TAgWNChTX8C04ggUIvS3H5d0NEFdSPGFTz9V13SSG0fRyPJgkDYNWFDcMfEKXxoxLeNhytFMYHrEBxybSdp2Y2N407KtZ1rLieObKdWwEjsKwYxZeznBchxQq1RwbCcW0LRT+0HVglwRcsGHJahHHwNlogJGhz2qWhlXwVIESAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### targets
 
 Configures output targets. Targets can be specified as a simple list of names or with detailed configuration.

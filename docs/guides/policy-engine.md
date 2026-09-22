@@ -167,7 +167,7 @@ policies:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAE1MAOYQ4WagE8A9AAEOpScwBuMalAziqtADqtpJGFgy9gO3rwgATRLy0hZMeUpVrxt07zjj2GQtdsBGCgBWCgAGN1YAXx0dPmkAVzgYXmkWAUk4AGtoKDgzPgAKAWFRCV4AWl4LEQwAI1gLXjBmal5ydUFqZnjWCwBKGN0iDl6PbKhcihYLGHKBRQgYAHdjdxZ2Tiw-EDcd1jMzABUHEnK4NBhGCEhGfhgF5d5GHEvMqBEsXiWIXF5ajFY2VYgiezDI7wBjGSohgaDgFHcuwikRAkQAugxNhJ8ERSOQYJp6CBlLQIGx8P5UUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAE1MAOYQ4WagE8A9AAEOpScwBuMalAziqtADqtpJGFgy9gO3rwgATRLy0hZMeUpVrxt07zjj2GQtdsBGCgBWCgAGN1YAXx0daQBXOBheaRYBSTgAa2goOBjdIg5WCw8sqByKFgsYAFoBRQgYAHdjdxZ2Tiw-EDdu1jMzABUHEmq4NBhGCEhGfhh6pt5GHAmMqBEsXkaIXF4AIwxWLNZBReYyNYPGJNEYNDgKdx6IyJBIunRsPEQ7VJh00vKNHoTDYhSwPF4AGU4mhyA1inBmLxcEkiKRyElqHFWHBeMsBBReAA5ZgbTDUDbMMDI5a8CzMRhxfTeLAQNh0XgHYqsUmc2YYKC8TCMDIYQQwB66fSGFp9cxWGw-ZhpTLZXK9Myeby+RWBELhDW8EgQQgQVjWMRxGA6aK6URcjDUCy4kxyyowazIWwABTUVxwzCgVWoHkMRUdFlsAF13BxRGbBJ6fX6YAGgypQw6ndGbbEBKJqBBGKy2C73NVFb6MP7A8HZgWiyXWM9XlGGB0JPg0ecJUCQAxlLQ2ax8P5XkA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -181,6 +181,12 @@ policies:
 
 @use @team/overlay
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1UgTMEswC0shUsuHecAJ7sMhc5YCMFACsFAAMLqwAvurqGgCucDC8GhykUswAbjDUUBjuIBF06Nh4iCDJMKkZWTnuKiAMLOycWDy8AMqxaOQQMCZuzLy4iUSk5InUsaxwvDhZMBS8AHLMWLyY1KvMYIOzvCbMjLHaXlgQbHS8GKx9rCuXvNQVUGsYjADWGADm8zHauvquUy+MopEhpTLZXLhIweLw+CwgALBMIgVwkCCECCscxYCYwdRRTRwXTXDDUEzTAysIwsazmZCWAAKOUYMBwzCg1mobhJJjJJksAF1XBxiVjPvSmSy2RyuTyrnzyUKCTFHsTxEozlMAdTeHYEczXjLOVkHvBcRBNWxwhF8oKGM1qHlSiMyJQaPQQBC4Fr8H58kA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Run validation from the `policy-demo` directory:
 
