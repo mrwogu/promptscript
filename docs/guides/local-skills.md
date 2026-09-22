@@ -305,12 +305,6 @@ When using local skills, the `.prs` file only needs metadata - the content comes
 }
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5AUHJeAHFmZhkAWh02Dm0oZglpFVcSXgBlAGkASQAZAYoSGQw3LGYSbAhGDCgoRx9+OABraChlQKteEkcatY2w7eDgqThGagg0LAg2FJAAEWYDOSFFVnVeNzgYMDcoHlgoUCkVWHxADLkvAAqqxWDBGPA4BhqI5eHVxG5yLNsAZeoNhqN6uxOFhlocFls4nsDusFsc4md4Jdrrd7uEni9lG9hDgIJ9vr9-oCQIziY0sA9YqKdqdeBQFbwAEzZbK8KD8gzMMDWOBYahuRhs1jKBUUMXSoG8EH5ED5AC6DFJqPwRFI5BgVFoIAYADcYLQ7qx8Kk7UA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### Use relative paths in skill instructions
 
 Skills should reference their resource files using the target's skill path:
