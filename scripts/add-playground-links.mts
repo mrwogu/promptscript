@@ -185,12 +185,12 @@ const PARAMETERIZED_TARGET_REGEX = /^([^(]+)\((.*)\)$/;
 /**
  * One `key: value` pair from a parameterized import's argument list.
  *
- * The separator uses explicit spaces and tabs, and the unquoted alternative
- * excludes quotes, so no two parts of the pattern can match the same character.
- * That keeps it linear; `\s*` on both sides of the colon alongside an
- * overlapping alternation backtracks super-linearly.
+ * Every part matches a disjoint set of characters, which is what keeps it
+ * linear. In particular the unquoted alternative cannot start on whitespace,
+ * otherwise it would compete with the `[ \t]*` in front of it for the same
+ * spaces and the engine would have to try every way of splitting them.
  */
-const ARGUMENT_REGEX = /([A-Za-z_]\w*)[ \t]*:[ \t]*("[^"]*"|'[^']*'|[^,)"']+)/g;
+const ARGUMENT_REGEX = /([A-Za-z_]\w*)[ \t]*:[ \t]*("[^"]*"|'[^']*'|[^\s,)"'][^,)"']*)/g;
 
 interface ImportTarget {
   /** Target without its argument list. */
@@ -607,6 +607,26 @@ interface LinkCandidate {
   line: number;
 }
 
+/**
+ * Build the playground state for one fence, or null when it carries no badge.
+ *
+ * An error badge is encoded verbatim. Supplying a `@meta` header or a placeholder
+ * import would repair the very mistake the reader came to see: the
+ * "Missing @meta Block" example compiles fine once the header is added.
+ */
+function prepareCandidate(
+  linkableCode: string | null,
+  expectsError: boolean
+): PreparedSnippet | null {
+  if (linkableCode === null) {
+    return null;
+  }
+  if (!expectsError) {
+    return prepareCodeForPlayground(linkableCode);
+  }
+  return { files: new Map([[PLAYGROUND_ENTRY, linkableCode]]), demonstratesExample: true };
+}
+
 function collectLinkCandidates(
   content: string,
   unlinkableFences: Array<[number, number]>
@@ -617,15 +637,7 @@ function collectLinkCandidates(
   while ((match = CODE_BLOCK_REGEX.exec(content)) !== null) {
     const linkableCode = extractLinkableCode(content, match[1], match.index, unlinkableFences);
     const expectsError = expectsPlaygroundError(content, match.index);
-    // An error badge is encoded verbatim. Supplying a `@meta` header or a
-    // placeholder import would repair the very mistake the reader came to see:
-    // the "Missing @meta Block" example compiles fine once the header is added.
-    const prepared =
-      linkableCode === null
-        ? null
-        : expectsError
-          ? { files: new Map([[PLAYGROUND_ENTRY, linkableCode]]), demonstratesExample: true }
-          : prepareCodeForPlayground(linkableCode);
+    const prepared = prepareCandidate(linkableCode, expectsError);
     candidates.push({
       block: match[0],
       offset: match.index,
