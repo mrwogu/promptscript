@@ -129,18 +129,48 @@ function encodeState(content: string, filename = 'example.prs'): string {
   return LZString.compressToEncodedURIComponent(json);
 }
 
-// Registry reference: @inherit/@use @namespace/path, optional version and alias.
-//   @inherit @company/base, @inherit @org/security@v1.0.0
-//   @use @fragments/testing as test
-const REGISTRY_IMPORT_REGEX =
-  /^([ \t]*)(@(?:inherit|use)\s+@[\w-]+\/[\w\/-]+(?:@v?[\d.]+)?(?:\s+as\s+\w+)?)\s*$/gm;
+/** An `@inherit`/`@use` line, split into indent and import target. */
+const IMPORT_LINE_REGEX = /^([ \t]*)@(?:inherit|use)[ \t]+(\S+)/;
 
-// Remote reference: a git host, an explicit URL, or scp-style git syntax.
-//   @use github.com/acme/agent-skills/security-review@^2.0.0
-//   @inherit https://example.com/standards.prs
-//   @use git@github.com:acme/agent-skills
-const REMOTE_IMPORT_REGEX =
-  /^([ \t]*)(@(?:inherit|use)\s+(?:https?:\/\/|git@|[\w-]+(?:\.[\w-]+)+\/)\S*(?:\s+as\s+\w+)?)\s*$/gm;
+/** Explicit URL or scp-style git target. */
+const URL_TARGET_REGEX = /^(?:https?:\/\/|git@)/;
+
+/** Host-style git target such as `github.com/acme/agent-skills`. */
+const HOST_TARGET_REGEX = /^[\w-]+(?:\.[\w-]+)+\//;
+
+/**
+ * Classify an import target by what the playground would have to fetch, or null
+ * when nothing needs fetching.
+ *
+ * Kept as small separate tests rather than one alternation-heavy pattern, which
+ * is both easier to follow and cheap to extend with a new target shape.
+ */
+function unfetchableImportKind(target: string): 'registry' | 'remote' | null {
+  if (target.startsWith('@')) {
+    return 'registry';
+  }
+  if (target.startsWith('./') || target.startsWith('../')) {
+    return null;
+  }
+  return URL_TARGET_REGEX.test(target) || HOST_TARGET_REGEX.test(target) ? 'remote' : null;
+}
+
+/** Comment out every import line the playground cannot resolve. */
+function disableUnfetchableImports(code: string): string {
+  return code
+    .split('\n')
+    .map((line) => {
+      const match = IMPORT_LINE_REGEX.exec(line);
+      if (match === null) {
+        return line;
+      }
+      const kind = unfetchableImportKind(match[2]!);
+      return kind === null
+        ? line
+        : `${match[1]}# ${line.trim()}  # (${kind} - disabled for playground)`;
+    })
+    .join('\n');
+}
 
 /**
  * Prepare code for the playground by commenting out imports it cannot fetch.
@@ -156,9 +186,7 @@ const REMOTE_IMPORT_REGEX =
  * `<!-- playground-link-skip -->`.
  */
 function prepareCodeForPlayground(code: string): PreparedSnippet {
-  const withoutUnfetchableImports = code
-    .replace(REGISTRY_IMPORT_REGEX, '$1# $2  # (registry - disabled for playground)')
-    .replace(REMOTE_IMPORT_REGEX, '$1# $2  # (remote - disabled for playground)');
+  const withoutUnfetchableImports = disableUnfetchableImports(code);
   return {
     code: withPlaygroundMeta(withoutUnfetchableImports),
     // The header alone is not a demonstration, so it does not count as content.
@@ -400,7 +428,7 @@ function collectLinkCandidates(
     candidates.push({
       block: match[0],
       offset: match.index,
-      preparedCode: prepared === null || !prepared.demonstratesExample ? null : prepared.code,
+      preparedCode: prepared?.demonstratesExample ? prepared.code : null,
     });
   }
   return candidates;
@@ -414,7 +442,7 @@ async function insertPlaygroundLinks(
   candidates: LinkCandidate[]
 ): Promise<{ content: string; added: number }> {
   const runnable = await Promise.all(
-    candidates.map((candidate) =>
+    candidates.map(async (candidate) =>
       candidate.preparedCode === null ? false : compilesInPlayground(candidate.preparedCode)
     )
   );
@@ -529,6 +557,66 @@ function findMarkdownFiles(dir: string): string[] {
   return files;
 }
 
+/** Every markdown file the site publishes: docs/ minus excluded dirs, plus the root README. */
+function collectDocFiles(rootDir: string): string[] {
+  const docsDir = join(rootDir, 'docs');
+  const published = findMarkdownFiles(docsDir).filter((file) => {
+    const [topLevel] = relative(docsDir, file).split(sep);
+    return !EXCLUDED_DOC_DIRS.has(topLevel);
+  });
+  return [...published, join(rootDir, 'README.md')];
+}
+
+/** Per-file changes, keeping files that ended up unchanged out of the report. */
+async function processAll(
+  files: string[],
+  mode: 'add' | 'check' | 'clean'
+): Promise<ProcessResult[]> {
+  const results: ProcessResult[] = [];
+  for (const file of files) {
+    try {
+      const result = await processMarkdownFile(file, mode);
+      if (result.added > 0 || result.removed > 0 || result.updated > 0) {
+        results.push(result);
+      }
+    } catch (error) {
+      console.error(`Error processing ${file}:`, error);
+    }
+  }
+  return results;
+}
+
+function describeChanges(result: ProcessResult): string {
+  const changes: string[] = [];
+  if (result.added > 0) changes.push(`+${result.added} added`);
+  if (result.removed > 0) changes.push(`-${result.removed} removed`);
+  if (result.updated > 0) changes.push(`~${result.updated} updated`);
+  return changes.join(', ');
+}
+
+function reportResults(results: ProcessResult[], fileCount: number, rootDir: string): void {
+  console.log('Changes:');
+  for (const result of results) {
+    console.log(`  ${relative(rootDir, result.file)}: ${describeChanges(result)}`);
+  }
+
+  const total = (key: 'added' | 'removed' | 'updated'): number =>
+    results.reduce((sum, result) => sum + result[key], 0);
+
+  console.log(`\nSummary:`);
+  console.log(`  Files processed: ${fileCount}`);
+  console.log(`  Files changed: ${results.length}`);
+  for (const [key, label] of [
+    ['added', 'Links added'],
+    ['removed', 'Links removed'],
+    ['updated', 'Links updated'],
+  ] as const) {
+    const count = total(key);
+    if (count > 0) console.log(`  ${label}: ${count}`);
+  }
+  console.log();
+}
+
 /**
  * Main function.
  */
@@ -539,67 +627,17 @@ async function main(): Promise<void> {
 
   console.log(`\n🎮 Playground Links - Mode: ${mode.toUpperCase()}\n`);
 
-  // Find all markdown files in docs/ and README.md
-  const files: string[] = [];
+  const files = collectDocFiles(rootDir);
+  const results = await processAll(files, mode);
 
-  // Add docs directory, skipping top-level dirs excluded from the site build
-  const docsDir = join(rootDir, 'docs');
-  files.push(
-    ...findMarkdownFiles(docsDir).filter((file) => {
-      const [topLevel] = relative(docsDir, file).split(sep);
-      return !EXCLUDED_DOC_DIRS.has(topLevel);
-    })
-  );
-
-  // Add root README
-  const readmePath = join(rootDir, 'README.md');
-  files.push(readmePath);
-
-  const results: ProcessResult[] = [];
-  let totalAdded = 0;
-  let totalRemoved = 0;
-  let totalUpdated = 0;
-
-  for (const file of files) {
-    try {
-      const result = await processMarkdownFile(file, mode);
-      if (result.added > 0 || result.removed > 0 || result.updated > 0) {
-        results.push(result);
-        totalAdded += result.added;
-        totalRemoved += result.removed;
-        totalUpdated += result.updated;
-      }
-    } catch (error) {
-      console.error(`Error processing ${file}:`, error);
-    }
-  }
-
-  // Print results
   if (results.length === 0) {
     console.log('✅ No changes needed.\n');
     return;
   }
 
-  console.log('Changes:');
-  for (const result of results) {
-    const relPath = relative(rootDir, result.file);
-    const changes: string[] = [];
-    if (result.added > 0) changes.push(`+${result.added} added`);
-    if (result.removed > 0) changes.push(`-${result.removed} removed`);
-    if (result.updated > 0) changes.push(`~${result.updated} updated`);
-    console.log(`  ${relPath}: ${changes.join(', ')}`);
-  }
+  reportResults(results, files.length, rootDir);
 
-  console.log(`\nSummary:`);
-  console.log(`  Files processed: ${files.length}`);
-  console.log(`  Files changed: ${results.length}`);
-  if (totalAdded > 0) console.log(`  Links added: ${totalAdded}`);
-  if (totalRemoved > 0) console.log(`  Links removed: ${totalRemoved}`);
-  if (totalUpdated > 0) console.log(`  Links updated: ${totalUpdated}`);
-  console.log();
-
-  // Exit with error in check mode if changes are needed
-  if (mode === 'check' && results.length > 0) {
+  if (mode === 'check') {
     console.error('❌ Playground links are out of date. Run `pnpm playground:links` to update.\n');
     process.exit(1);
   }
