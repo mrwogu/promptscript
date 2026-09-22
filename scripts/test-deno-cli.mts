@@ -201,15 +201,8 @@ async function makeInstalledProject(name: string): Promise<string> {
 
 function writeProjectFile(projectDir: string, relativePath: string, content: string): void {
   const target = join(projectDir, relativePath);
-  mkdirSync(join(dirname0(target)), { recursive: true });
+  mkdirSync(dirname(target), { recursive: true });
   writeFileSync(target, content);
-}
-
-/** Parent directory of a path, dependency-free (mkdir -p for file targets). */
-function dirname0(path: string): string {
-  const separator = path.lastIndexOf('/');
-  if (separator === -1) return '.';
-  return path.slice(0, separator);
 }
 
 function readCliPackageVersion(): string {
