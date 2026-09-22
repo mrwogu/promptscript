@@ -1,5 +1,5 @@
 import type { Command } from 'commander';
-import { dirname } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   getSpoolInfo,
@@ -126,11 +126,17 @@ export function resolveFlushSelfInvocation(
     if (endpointHost === undefined) return undefined;
     // After bundling, this module lives next to index.js in the package.
     const cliDirectory = dirname(fileURLToPath(import.meta.url));
+    // The flush child inherits PROMPTSCRIPT_CONFIG; include its directory in
+    // the read scope or env-config users lose every background flush.
+    const environmentConfig = process.env['PROMPTSCRIPT_CONFIG'];
     const readScopes = [
       process.cwd(),
       dirname(USER_CONFIG_PATH),
       config.cacheDirectory,
       cliDirectory,
+      ...(environmentConfig === undefined || environmentConfig === ''
+        ? []
+        : [dirname(resolve(process.cwd(), environmentConfig))]),
     ].join(',');
     return {
       executable: process.execPath,

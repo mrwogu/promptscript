@@ -246,4 +246,18 @@ describe('resolveFlushSelfInvocation', () => {
     vi.stubGlobal('Deno', { build: { standalone: false } });
     expect(resolveFlushSelfInvocation({ ...config, endpoint: 'not-a-url' })).toBeUndefined();
   });
+
+  it('grants the flush child reads on the PROMPTSCRIPT_CONFIG directory', () => {
+    vi.stubGlobal('Deno', { build: { standalone: false } });
+    vi.stubEnv('PROMPTSCRIPT_CONFIG', '/custom/conf/promptscript.yaml');
+    try {
+      const invocation = resolveFlushSelfInvocation(config);
+      const readFlag = invocation?.prefixArgs.find((arg) => arg.startsWith('--allow-read='));
+
+      expect(readFlag).toBeDefined();
+      expect(readFlag).toContain('/custom/conf');
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
 });
