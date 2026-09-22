@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 
 const mockValidateRoundtrip = vi.hoisted(() => vi.fn());
 
@@ -46,7 +46,7 @@ const mockWriteFileSync = vi.fn();
 const mockMkdirSync = vi.fn();
 const mockExistsSync = vi.fn().mockReturnValue(false);
 
-vi.mock('fs', async () => {
+vi.mock('node:fs', async () => {
   const actual = await vi.importActual<typeof import('fs')>('fs');
   return {
     ...actual,

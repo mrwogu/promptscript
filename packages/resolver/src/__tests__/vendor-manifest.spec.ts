@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { execFile } from 'child_process';
-import { chmod, mkdtemp, mkdir, rename, rm, symlink, unlink, writeFile } from 'fs/promises';
-import { delimiter, join } from 'path';
-import { tmpdir } from 'os';
-import { promisify } from 'util';
+import { execFile } from 'node:child_process';
+import { chmod, mkdtemp, mkdir, rename, rm, symlink, unlink, writeFile } from 'node:fs/promises';
+import { delimiter, join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { promisify } from 'node:util';
 import {
   VENDOR_GIT_DIR,
   VENDOR_MANIFEST_FILE,

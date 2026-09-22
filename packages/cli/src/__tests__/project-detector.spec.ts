@@ -7,7 +7,7 @@ import {
 } from '../utils/project-detector.js';
 import { type CliServices } from '../services.js';
 
-vi.mock('path', () => ({
+vi.mock('node:path', () => ({
   basename: vi.fn().mockReturnValue('test-project'),
 }));
 

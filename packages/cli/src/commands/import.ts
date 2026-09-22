@@ -1,6 +1,6 @@
-import { resolve, join, basename } from 'path';
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import { stat, readdir, readFile, writeFile, mkdir } from 'fs/promises';
+import { resolve, join, basename } from 'node:path';
+import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { stat, readdir, readFile, writeFile, mkdir } from 'node:fs/promises';
 import { importFile, validateRoundtrip } from '@promptscript/importer';
 import type { DetectedFormat } from '@promptscript/importer';
 import { createSpinner, ConsoleOutput } from '../output/console.js';

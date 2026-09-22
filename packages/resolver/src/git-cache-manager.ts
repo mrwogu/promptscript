@@ -10,9 +10,9 @@
  * @packageDocumentation
  */
 
-import { existsSync, promises as fs } from 'fs';
-import { join } from 'path';
-import { homedir } from 'os';
+import { existsSync, promises as fs } from 'node:fs';
+import { join } from 'node:path';
+import { homedir } from 'node:os';
 import { getCacheKey } from './git-url-utils.js';
 
 /**
@@ -338,14 +338,12 @@ export class GitCacheManager {
           );
         }
       } catch (error) {
-        if (
-          !(
-            typeof error === 'object' &&
-            error !== null &&
-            'code' in error &&
-            error.code === 'ENOENT'
-          )
-        ) {
+        if (!(
+          typeof error === 'object' &&
+          error !== null &&
+          'code' in error &&
+          error.code === 'ENOENT'
+        )) {
           throw error;
         }
       }

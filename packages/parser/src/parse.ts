@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import { PSLexer } from './lexer/lexer.js';
 import { acquireParser, releaseParser } from './grammar/parser-pool.js';
 import { createVisitor, type EnvProvider } from './grammar/visitor.js';

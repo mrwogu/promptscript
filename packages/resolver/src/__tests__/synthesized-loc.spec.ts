@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { resolve as resolvePath, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { mkdtemp, mkdir, writeFile } from 'fs/promises';
-import { tmpdir } from 'os';
+import { resolve as resolvePath, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { Resolver } from '../resolver.js';
 import { discoverNativeContent } from '../auto-discovery.js';
 import { VIRTUAL_LOC } from '../ast-factory.js';

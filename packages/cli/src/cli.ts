@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { fileURLToPath, pathToFileURL } from 'url';
-import { dirname } from 'path';
-import { getPackageVersion } from '@promptscript/core';
+import { pathToFileURL } from 'node:url';
+import { CLI_VERSION } from './cli-version.js';
+// Dispatches the hidden __managed-output-worker command before Commander
+// parsing, telemetry init, and the update check, including in deno compile
+// binaries where the process re-executes itself as a worker.
+import { wasDispatchedAsManagedOutputWorker } from './managed-output-worker.js';
 import { initCommand } from './commands/init.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const CLI_VERSION = getPackageVersion(__dirname, '../package.json');
 
 import { compileCommand } from './commands/compile.js';
 import { validateCommand } from './commands/validate.js';
@@ -90,7 +89,7 @@ program
     }
 
     // Check for updates (fire-and-forget, respects cache and quiet mode)
-    const currentVersion = getPackageVersion(__dirname, '../package.json');
+    const currentVersion = CLI_VERSION;
     checkForUpdates(currentVersion).then((updateInfo) => {
       if (updateInfo) {
         printUpdateNotification(updateInfo);
@@ -372,6 +371,11 @@ registerRegistryCommands(registry);
  * @param args - Command line arguments (defaults to process.argv)
  */
 export async function run(args: string[] = process.argv): Promise<void> {
+  if (wasDispatchedAsManagedOutputWorker()) {
+    // Worker dispatch already handled this process and set its exit code;
+    // the commander program must not also parse the worker arguments.
+    return;
+  }
   try {
     await program.parseAsync(args);
   } catch (error) {

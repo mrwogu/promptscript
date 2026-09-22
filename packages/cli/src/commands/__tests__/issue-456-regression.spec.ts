@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { resolve as resolvePath, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { mkdtemp, mkdir, writeFile } from 'fs/promises';
-import { tmpdir } from 'os';
+import { resolve as resolvePath, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { normalizeProgram } from '@promptscript/core';
 import { Resolver } from '@promptscript/resolver';
 import { Validator } from '@promptscript/validator';

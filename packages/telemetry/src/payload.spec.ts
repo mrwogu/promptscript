@@ -9,6 +9,7 @@ function record(event: TelemetryEvent, overrides: Partial<SpoolRecord> = {}): Sp
     runtime_version: '24',
     os: 'darwin',
     arch: 'arm64',
+    runtime: 'node',
     event,
     ...overrides,
   };
@@ -56,6 +57,16 @@ describe('buildTelemetryBatches', () => {
 
     expect(batches).toHaveLength(2);
     expect(batches.map((batch) => batch.payload.app_version)).toEqual(['1.16.0', '1.17.0']);
+  });
+
+  it('keeps node and deno records in separate batches with the runtime field', () => {
+    const batches = buildTelemetryBatches([
+      record({ name: 'feature', feature: 'strict', count: 1 }),
+      record({ name: 'feature', feature: 'strict', count: 1 }, { runtime: 'deno' }),
+    ]);
+
+    expect(batches).toHaveLength(2);
+    expect(batches.map((batch) => batch.payload.runtime)).toEqual(['node', 'deno']);
   });
 
   it('keeps different event keys in one metadata batch', () => {

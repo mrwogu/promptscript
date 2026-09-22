@@ -2,8 +2,6 @@
 /**
  * Prepares package.json for publishing by removing workspace dependencies
  * (which are bundled by esbuild) and keeping only external dependencies.
- *
- * Also fixes version detection paths in the bundled code.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -18,23 +16,6 @@ const pkg = JSON.parse(readFileSync(join(cliRoot, 'package.json'), 'utf-8'));
 const resolverPkg = JSON.parse(readFileSync(join(root, 'packages/resolver/package.json'), 'utf-8'));
 const serverPkg = JSON.parse(readFileSync(join(root, 'packages/server/package.json'), 'utf-8'));
 
-// Fix version detection paths in bundled index.js
-// After bundling, all code is in index.js and package.json is in the same directory.
-// Source paths like '../package.json' and '../../package.json' need to be './package.json'.
-const indexPath = join(distRoot, 'index.js');
-let indexContent = readFileSync(indexPath, 'utf-8');
-// Replace getPackageVersion calls with incorrect relative paths
-indexContent = indexContent.replace(
-  /getPackageVersion\(__dirname\d*, ["']\.\.\/package\.json["']\)/g,
-  'getPackageVersion(__dirname3, "./package.json")'
-);
-indexContent = indexContent.replace(
-  /getPackageVersion\(__dirname\d*, ["']\.\.\/\.\.\/package\.json["']\)/g,
-  'getPackageVersion(__dirname3, "./package.json")'
-);
-writeFileSync(indexPath, indexContent);
-console.log('✓ Fixed version detection paths in bundled code');
-
 // Remove workspace dependencies (they are bundled)
 const dependencies = Object.fromEntries(
   Object.entries(pkg.dependencies || {}).filter(([, version]) => !version.startsWith('workspace:'))
@@ -47,6 +28,7 @@ dependencies['simple-git'] = resolverPkg.dependencies['simple-git'];
 // Server dependencies (server is bundled, but its deps are external)
 dependencies['fastify'] = serverPkg.dependencies['fastify'];
 dependencies['@fastify/cors'] = serverPkg.dependencies['@fastify/cors'];
+dependencies['@fastify/rate-limit'] = serverPkg.dependencies['@fastify/rate-limit'];
 dependencies['@fastify/websocket'] = serverPkg.dependencies['@fastify/websocket'];
 dependencies['ws'] = serverPkg.dependencies['ws'];
 dependencies['fast-glob'] = serverPkg.dependencies['fast-glob'];

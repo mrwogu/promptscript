@@ -7,6 +7,7 @@ import type {
   RuntimeMetadata,
   SpoolRecord,
   TelemetryOutcome,
+  TelemetryRuntime,
 } from './types.js';
 
 const FLUSH_INTERVAL_MS = 4 * 60 * 60 * 1_000;
@@ -15,6 +16,8 @@ const FLUSH_RECORD_THRESHOLD = 50;
 export interface TelemetrySessionOptions {
   config: ResolvedTelemetryConfig;
   metadata: RuntimeMetadata;
+  /** Runtime hosting the CLI, passed in by the CLI (telemetry is a leaf). */
+  runtime: TelemetryRuntime;
   command: string;
   features?: string[];
   startTime?: number;
@@ -34,9 +37,20 @@ export type SpawnDetached = (
   }
 ) => DetachedChild;
 
+/**
+ * How the CLI re-executes itself to flush telemetry in the background.
+ * Node spawns the CLI entrypoint; deno compile binaries re-execute
+ * themselves; deno run re-runs the npm package with scoped permissions.
+ */
+export interface FlushSelfInvocation {
+  executable: string;
+  prefixArgs: string[];
+}
+
 export class TelemetrySession {
   private readonly config: ResolvedTelemetryConfig;
   private readonly metadata: RuntimeMetadata;
+  private readonly runtime: TelemetryRuntime;
   private readonly command: string;
   private readonly features: string[];
   private readonly startTime: number;
@@ -46,6 +60,7 @@ export class TelemetrySession {
   public constructor(options: TelemetrySessionOptions) {
     this.config = options.config;
     this.metadata = options.metadata;
+    this.runtime = options.runtime;
     this.excluded = isExcludedCommand(options.command);
     this.command = sanitizeCommand(options.command);
     this.features = (options.features ?? [])
@@ -63,6 +78,7 @@ export class TelemetrySession {
     const records: SpoolRecord[] = [
       {
         ...this.metadata,
+        runtime: this.runtime,
         event: {
           name: 'command',
           command: this.command,
@@ -73,6 +89,7 @@ export class TelemetrySession {
       },
       ...this.features.map((feature): SpoolRecord => ({
         ...this.metadata,
+        runtime: this.runtime,
         event: { name: 'feature', feature, count: 1 },
       })),
     ];
@@ -101,25 +118,36 @@ export function maybeSpawnFlush(
   options: {
     executable?: string;
     entrypoint?: string;
+    selfInvocation?: FlushSelfInvocation;
     environment?: NodeJS.ProcessEnv;
     now?: number;
     spawn?: SpawnDetached;
   } = {}
 ): boolean {
   const environment = options.environment ?? process.env;
-  const entrypoint = options.entrypoint ?? process.argv[1];
+  // An explicitly provided selfInvocation (even undefined) wins: the CLI
+  // resolved how to re-execute itself, and undefined means no safe way
+  // exists. Only when the key is absent does the legacy entrypoint path run.
+  const selfInvocation = Object.hasOwn(options, 'selfInvocation')
+    ? options.selfInvocation
+    : (() => {
+        const entrypoint = options.entrypoint ?? process.argv[1];
+        return entrypoint === undefined
+          ? undefined
+          : { executable: options.executable ?? process.execPath, prefixArgs: [entrypoint] };
+      })();
   if (
     !config.enabled ||
     environment['PROMPTSCRIPT_TELEMETRY_FLUSH'] === '1' ||
-    entrypoint === undefined ||
+    selfInvocation === undefined ||
     !shouldFlush(config, options.now ?? Date.now())
   ) {
     return false;
   }
   try {
     const child = (options.spawn ?? spawn)(
-      options.executable ?? process.execPath,
-      [entrypoint, '__telemetry-flush'],
+      selfInvocation.executable,
+      [...selfInvocation.prefixArgs, '__telemetry-flush'],
       {
         detached: true,
         stdio: 'ignore',

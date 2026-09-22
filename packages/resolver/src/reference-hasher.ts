@@ -1,6 +1,6 @@
-import { createHash } from 'crypto';
-import { realpath } from 'fs/promises';
-import { isAbsolute, normalize, relative, resolve, sep } from 'path';
+import { createHash } from 'node:crypto';
+import { realpath } from 'node:fs/promises';
+import { isAbsolute, normalize, relative, resolve, sep } from 'node:path';
 
 /**
  * Compute SHA-256 hash of in-memory content.

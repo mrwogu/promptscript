@@ -1,6 +1,4 @@
-import { fileURLToPath } from 'url';
-import { basename, dirname, resolve } from 'path';
-import { readFileSync, existsSync } from 'fs';
+import { basename, resolve } from 'node:path';
 import {
   getLatestSyntaxVersion,
   type PromptScriptConfig,
@@ -8,23 +6,7 @@ import {
 } from '@promptscript/core';
 import { stringify as stringifyYaml } from 'yaml';
 import { type CliServices, createDefaultServices } from '../services.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-/**
- * Directory containing bundled SKILL.md files shipped with the CLI package.
- * In bundled mode (dist/packages/cli/index.js): skills/ is a sibling directory.
- * In dev mode (packages/cli/src/commands/init.ts): skills/ is two levels up.
- */
-function findSkillsDir(): string {
-  const candidates = [resolve(__dirname, 'skills'), resolve(__dirname, '..', '..', 'skills')];
-  for (const dir of candidates) {
-    if (existsSync(dir)) return dir;
-  }
-  return candidates[0] as string;
-}
-const BUNDLED_SKILLS_DIR = findSkillsDir();
+import { PROMPTSCRIPT_SKILL_CONTENT } from '../generated/promptscript-skill.js';
 
 import { importMultipleFiles } from '@promptscript/importer';
 import type { InitOptions } from '../types.js';
@@ -568,31 +550,26 @@ function deliverMigrationPrompt(prompt: string): boolean {
 export function getSkillWrites(targets: AIToolTarget[]): PlannedWrite[] {
   const writes: PlannedWrite[] = [];
   const skillName = 'promptscript';
-  const skillSource = resolve(BUNDLED_SKILLS_DIR, skillName, 'SKILL.md');
-  try {
-    const rawSkillContent = readFileSync(skillSource, 'utf-8');
-    const skillContent = addPromptScriptMarker(rawSkillContent);
+  const rawSkillContent = PROMPTSCRIPT_SKILL_CONTENT;
+  const skillContent = addPromptScriptMarker(rawSkillContent);
 
-    writes.push({
-      path: `.promptscript/skills/${skillName}/SKILL.md`,
-      content: skillContent,
-    });
+  writes.push({
+    path: `.promptscript/skills/${skillName}/SKILL.md`,
+    content: skillContent,
+  });
 
-    for (const target of targets) {
-      const targetSkillDir = getTargetSkillDir(target, skillName);
-      if (targetSkillDir && !writes.some((write) => write.path === targetSkillDir.path)) {
-        const formatter = FormatterRegistry.get(target);
-        let targetContent = skillContent;
-        if (formatter?.transformInjectedSkillContent) {
-          targetContent = addPromptScriptMarker(
-            formatter.transformInjectedSkillContent(rawSkillContent)
-          );
-        }
-        writes.push({ path: targetSkillDir.path, content: targetContent });
+  for (const target of targets) {
+    const targetSkillDir = getTargetSkillDir(target, skillName);
+    if (targetSkillDir && !writes.some((write) => write.path === targetSkillDir.path)) {
+      const formatter = FormatterRegistry.get(target);
+      let targetContent = skillContent;
+      if (formatter?.transformInjectedSkillContent) {
+        targetContent = addPromptScriptMarker(
+          formatter.transformInjectedSkillContent(rawSkillContent)
+        );
       }
+      writes.push({ path: targetSkillDir.path, content: targetContent });
     }
-  } catch {
-    ConsoleOutput.warn(`Could not install migration skill from ${skillSource}`);
   }
 
   return writes;

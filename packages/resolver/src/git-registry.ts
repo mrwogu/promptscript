@@ -11,9 +11,9 @@
  * @packageDocumentation
  */
 
-import { existsSync, promises as fs } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { existsSync, promises as fs } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import type { SimpleGit, SimpleGitOptions } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import { FileNotFoundError, isGitTimeoutError } from '@promptscript/core';

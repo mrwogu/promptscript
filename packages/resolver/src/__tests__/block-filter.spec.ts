@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Resolver } from '../resolver.js';
 
 const __filename = fileURLToPath(import.meta.url);

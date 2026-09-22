@@ -1,5 +1,5 @@
-import { readFile, readdir, access, lstat, realpath } from 'fs/promises';
-import { basename, resolve, dirname, relative, isAbsolute, sep } from 'path';
+import { readFile, readdir, access, lstat, realpath } from 'node:fs/promises';
+import { basename, resolve, dirname, relative, isAbsolute, sep } from 'node:path';
 import { isAlias, isCollection, isNode, isPair, isSeq, parseDocument } from 'yaml';
 import {
   isGeneratedByPromptScript,

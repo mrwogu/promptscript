@@ -1,5 +1,5 @@
-import { resolve, join } from 'path';
-import { execFileSync } from 'child_process';
+import { resolve, join } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import type { RegistryPublishOptions } from '../../types.js';
 import { type CliServices, createDefaultServices } from '../../services.js';
 import { createSpinner, ConsoleOutput } from '../../output/console.js';

@@ -8,6 +8,8 @@ Define instructions, skills, agents, MCP servers, hooks, workflows, and policies
 native configuration for 50 AI coding platforms.
 
 [![npm version](https://img.shields.io/npm/v/@promptscript/cli.svg)](https://www.npmjs.com/package/@promptscript/cli)
+[![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-5FA04E?logo=nodedotjs&logoColor=white)](https://getpromptscript.dev/getting-started/#installation)
+[![Deno 2.9+](https://img.shields.io/badge/Deno-2.9%2B-70FFAF?logo=deno&logoColor=000000)](https://getpromptscript.dev/reference/cli/#running-under-deno)
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/mrwogu/promptscript/blob/main/LICENSE)
 
@@ -73,6 +75,48 @@ Verify installation:
 ```bash
 prs --version
 ```
+
+## Running under Deno
+
+The CLI also runs on Deno 2.9 or later, either straight from the installed
+package or compiled into a standalone binary that needs no other runtime.
+
+In any project that has `@promptscript/cli` in its dependencies, point Deno at
+the installed bin shim:
+
+```bash
+deno run --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run node_modules/@promptscript/cli/bin/prs.js init
+```
+
+An `npm:@promptscript/cli` specifier resolves the published registry release
+instead of the version installed in `node_modules`, so use the path above
+whenever the project's own dependency is what should run.
+
+Compile a self-contained `prs` binary, for example for CI images or machines
+without Node:
+
+```bash
+deno compile --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run -o prs node_modules/@promptscript/cli/bin/prs.js
+./prs --version
+```
+
+Add `--target x86_64-unknown-linux-gnu` (or `aarch64-unknown-linux-gnu`,
+`x86_64-pc-windows-msvc`) to cross-compile for another platform.
+
+What the permissions are for:
+
+| Flag                            | Used for                                              |
+| ------------------------------- | ----------------------------------------------------- |
+| `--allow-env`, `--allow-sys`    | runtime detection, configuration, telemetry           |
+| `--allow-read`, `--allow-write` | project files, caches, vendored dependencies          |
+| `--allow-net`                   | registries, update checks, telemetry delivery         |
+| `--allow-run`                   | git subprocesses, pagers, clipboard, guarded cleanups |
+
+Guarded managed-output cleanup re-executes the CLI through a hidden worker
+command: under `deno run` the worker is spawned with read and write access
+scoped to the output directory, and a compiled binary re-executes itself.
+Telemetry reports `runtime: deno` and is disabled with `DO_NOT_TRACK=1`.
+Node.js 20+ remains fully supported with unchanged behavior.
 
 ## 60-Second Quick Start
 

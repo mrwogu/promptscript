@@ -1,7 +1,7 @@
 import type { TargetConfig } from '@promptscript/core';
-import { DEFAULT_OUTPUT_PATHS, isKnownTarget } from '@promptscript/core';
-import * as fs from 'fs';
-import { basename, dirname, resolve, relative, isAbsolute, sep } from 'path';
+import { DEFAULT_OUTPUT_PATHS, isKnownTarget, portableRealpathSync } from '@promptscript/core';
+import * as fs from 'node:fs';
+import { basename, dirname, resolve, relative, isAbsolute, sep } from 'node:path';
 
 /**
  * Detect output path conflicts: multiple targets writing to the same file.
@@ -100,7 +100,7 @@ function resolveThroughExistingAncestor(path: string): string {
     current = parent;
   }
 
-  return resolve(fs.realpathSync.native(current), ...missingSegments);
+  return resolve(portableRealpathSync(current), ...missingSegments);
 }
 
 /**

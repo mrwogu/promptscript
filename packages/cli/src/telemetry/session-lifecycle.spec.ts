@@ -42,6 +42,7 @@ import {
   flushCliTelemetry,
   normalizedCommandName,
   prepareCliTelemetry,
+  resolveFlushSelfInvocation,
   telemetryStatus,
 } from './session.js';
 
@@ -75,6 +76,7 @@ afterEach(() => {
   rmSync(config.cacheDirectory, { recursive: true, force: true });
   delete process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'];
   process.exitCode = undefined;
+  vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 
@@ -110,7 +112,18 @@ describe('CLI telemetry lifecycle', () => {
       cwd: 'project',
       config: 'promptscript.yaml',
     });
-    expect(mocks.maybeSpawnFlush).toHaveBeenCalledWith(config);
+    expect(mocks.maybeSpawnFlush).toHaveBeenCalledWith(
+      config,
+      expect.objectContaining({
+        selfInvocation: {
+          executable: process.execPath,
+          prefixArgs: [process.argv[1]],
+        },
+      })
+    );
+    expect(mocks.runtimeMetadata).toHaveBeenCalledWith('1.16.0', {
+      runtimeVersion: process.versions.node,
+    });
 
     finishCliTelemetry('error');
     expect(readFileSync(join(config.cacheDirectory, 'telemetry.ndjson'), 'utf8')).toContain(
@@ -130,6 +143,20 @@ describe('CLI telemetry lifecycle', () => {
     expect(readFileSync(join(config.cacheDirectory, 'telemetry.ndjson'), 'utf8')).toContain(
       '"outcome":"success"'
     );
+  });
+
+  it('passes the deno runtime version to telemetry metadata', async () => {
+    vi.stubGlobal('Deno', {
+      build: { standalone: false },
+      version: { deno: '2.9.7' },
+    });
+
+    await prepareCliTelemetry(new Command('compile'), '1.16.0');
+
+    expect(mocks.runtimeMetadata).toHaveBeenCalledWith('1.16.0', {
+      runtimeVersion: '2.9.7',
+    });
+    finishCliTelemetry();
   });
 
   it('runs exit and signal handlers without losing lifecycle control', async () => {
@@ -169,5 +196,77 @@ describe('CLI telemetry lifecycle', () => {
       spool: { records: 2, bytes: 200 },
       state: { lastSuccess: '2026-08-06T12:00:00.000Z' },
     });
+  });
+});
+
+describe('resolveFlushSelfInvocation', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('respawns the node entrypoint on node', () => {
+    expect(resolveFlushSelfInvocation(config)).toEqual({
+      executable: process.execPath,
+      prefixArgs: [process.argv[1]],
+    });
+  });
+
+  it('fails closed on node when the entrypoint cannot be resolved', () => {
+    const originalArgv = process.argv;
+    process.argv = [originalArgv[0]!];
+    try {
+      expect(resolveFlushSelfInvocation(config)).toBeUndefined();
+    } finally {
+      process.argv = originalArgv;
+    }
+  });
+
+  it('re-executes the compiled binary for deno standalone', () => {
+    vi.stubGlobal('Deno', { build: { standalone: true } });
+    expect(resolveFlushSelfInvocation(config)).toEqual({
+      executable: process.execPath,
+      prefixArgs: [],
+    });
+  });
+
+  it('re-runs the pinned npm package with scoped permissions for deno run', () => {
+    vi.stubGlobal('Deno', { build: { standalone: false } });
+    const invocation = resolveFlushSelfInvocation(config);
+
+    expect(invocation?.executable).toBe(process.execPath);
+    expect(invocation?.prefixArgs[0]).toBe('run');
+    expect(invocation?.prefixArgs).toContain('--allow-env');
+    expect(invocation?.prefixArgs).toContain('--allow-sys=cpus,homedir');
+    expect(invocation?.prefixArgs).toContain('--allow-net=telemetry.example');
+    expect(invocation?.prefixArgs).toContain(`--allow-write=${config.cacheDirectory}`);
+    expect(invocation?.prefixArgs).toContain('npm:@promptscript/cli@1.19.1');
+  });
+
+  it('never grants the flush child unscoped system access', () => {
+    vi.stubGlobal('Deno', { build: { standalone: false } });
+    const invocation = resolveFlushSelfInvocation(config);
+
+    expect(invocation?.prefixArgs).not.toContain('--allow-sys');
+    expect(invocation?.prefixArgs).not.toContain('--allow-all');
+    expect(invocation?.prefixArgs).not.toContain('-A');
+  });
+
+  it('fails closed when the endpoint host cannot be parsed', () => {
+    vi.stubGlobal('Deno', { build: { standalone: false } });
+    expect(resolveFlushSelfInvocation({ ...config, endpoint: 'not-a-url' })).toBeUndefined();
+  });
+
+  it('grants the flush child reads on the PROMPTSCRIPT_CONFIG directory', () => {
+    vi.stubGlobal('Deno', { build: { standalone: false } });
+    vi.stubEnv('PROMPTSCRIPT_CONFIG', '/custom/conf/promptscript.yaml');
+    try {
+      const invocation = resolveFlushSelfInvocation(config);
+      const readFlag = invocation?.prefixArgs.find((arg) => arg.startsWith('--allow-read='));
+
+      expect(readFlag).toBeDefined();
+      expect(readFlag).toContain('/custom/conf');
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });

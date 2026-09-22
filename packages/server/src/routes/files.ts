@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
-import { readFile, writeFile, unlink, stat, mkdir } from 'fs/promises';
-import { dirname } from 'path';
+import { readFile, writeFile, unlink, stat, mkdir } from 'node:fs/promises';
+import { dirname } from 'node:path';
 import fg from 'fast-glob';
 import { resolveSafePath, PathTraversalError } from '../path-guard.js';
 import { resolveFileGlobs } from '../source-dirs.js';

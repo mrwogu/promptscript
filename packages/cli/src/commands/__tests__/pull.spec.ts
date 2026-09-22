@@ -71,11 +71,11 @@ vi.mock('@promptscript/resolver', () => ({
   GitRefNotFoundError: class GitRefNotFoundError extends Error {},
 }));
 
-vi.mock('fs', () => ({
+vi.mock('node:fs', () => ({
   existsSync: mockExistsSync,
 }));
 
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   mkdir: mockMkdir,
   writeFile: mockWriteFile,
 }));

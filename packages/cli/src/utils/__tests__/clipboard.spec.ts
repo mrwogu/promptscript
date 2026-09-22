@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { copyToClipboard } from '../clipboard.js';
-import { execFileSync } from 'child_process';
+import { execFileSync } from 'node:child_process';
 
-vi.mock('child_process', () => ({
+vi.mock('node:child_process', () => ({
   execFileSync: vi.fn(),
 }));
 

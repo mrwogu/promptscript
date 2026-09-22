@@ -1,4 +1,6 @@
 import type { Command } from 'commander';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   getSpoolInfo,
   isExcludedCommand,
@@ -8,9 +10,13 @@ import {
   runtimeMetadata,
   sanitizeFeature,
   TelemetrySession,
+  type FlushSelfInvocation,
   type ResolvedTelemetryConfig,
   type TelemetryOutcome,
 } from '@promptscript/telemetry';
+import { getRuntimeInfo, getRuntimeVersion } from '../runtime/runtime-info.js';
+import { CLI_VERSION } from '../cli-version.js';
+import { USER_CONFIG_PATH } from '../config/user-config.js';
 import { resolveCliTelemetryConfig } from './config.js';
 
 let activeSession: TelemetrySession | null = null;
@@ -99,6 +105,73 @@ function installExitHandler(): void {
   exitHandlerInstalled = true;
 }
 
+/**
+ * Resolve how this process re-executes itself for a background flush.
+ *
+ * Node spawns its entrypoint as before. A deno compile binary re-executes
+ * itself with the hidden flush command. Under `deno run` the published npm
+ * package is re-run with scoped permissions: env and sys for the CLI, net
+ * only for the collector host, reads on the directories the flush child
+ * inspects, and writes only on the telemetry spool.
+ */
+export function resolveFlushSelfInvocation(
+  config: ResolvedTelemetryConfig
+): FlushSelfInvocation | undefined {
+  const { runtime, standalone } = getRuntimeInfo();
+  if (runtime === 'deno') {
+    if (standalone) {
+      return { executable: process.execPath, prefixArgs: [] };
+    }
+    const endpointHost = endpointHostOf(config.endpoint);
+    if (endpointHost === undefined) return undefined;
+    // After bundling, this module lives next to index.js in the package.
+    const cliDirectory = dirname(fileURLToPath(import.meta.url));
+    // The flush child inherits PROMPTSCRIPT_CONFIG; include its directory in
+    // the read scope or env-config users lose every background flush.
+    const environmentConfig = process.env['PROMPTSCRIPT_CONFIG'];
+    const readScopes = [
+      process.cwd(),
+      dirname(USER_CONFIG_PATH),
+      config.cacheDirectory,
+      cliDirectory,
+      ...(environmentConfig === undefined || environmentConfig === ''
+        ? []
+        : [dirname(resolve(process.cwd(), environmentConfig))]),
+    ].join(',');
+    return {
+      executable: process.execPath,
+      prefixArgs: [
+        'run',
+        // Unscoped on purpose. Deno throws NotCapable on any name outside a
+        // scoped --allow-env list, and the bundle's transitive dependencies
+        // read environment variables while their modules initialize, so an
+        // enumerated list turns every new dependency into a silently dropped
+        // flush. The child is spawned detached with stdio ignored, so it never
+        // reports anything back.
+        '--allow-env',
+        // os.cpus() through fast-glob and os.homedir() for the cache path are
+        // the only system calls the flush makes; anything wider is not needed.
+        '--allow-sys=cpus,homedir',
+        `--allow-net=${endpointHost}`,
+        `--allow-read=${readScopes}`,
+        `--allow-write=${config.cacheDirectory}`,
+        `npm:@promptscript/cli@${CLI_VERSION}`,
+      ],
+    };
+  }
+  const entrypoint = process.argv[1];
+  if (entrypoint === undefined) return undefined;
+  return { executable: process.execPath, prefixArgs: [entrypoint] };
+}
+
+function endpointHostOf(endpoint: string): string | undefined {
+  try {
+    return new URL(endpoint).host;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function prepareCliTelemetry(command: Command, appVersion: string): Promise<void> {
   const name = normalizedCommandName(command);
   if (isExcludedCommand(name) || process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'] === '1') {
@@ -109,10 +182,12 @@ export async function prepareCliTelemetry(command: Command, appVersion: string):
     ...(typeof options['cwd'] === 'string' ? { cwd: options['cwd'] } : {}),
     ...(typeof options['config'] === 'string' ? { config: options['config'] } : {}),
   });
-  maybeSpawnFlush(config);
+  maybeSpawnFlush(config, { selfInvocation: resolveFlushSelfInvocation(config) });
+  const runtimeInfo = getRuntimeInfo();
   activeSession = new TelemetrySession({
     config,
-    metadata: runtimeMetadata(appVersion),
+    metadata: runtimeMetadata(appVersion, { runtimeVersion: getRuntimeVersion() }),
+    runtime: runtimeInfo.runtime,
     command: name,
     features: commandFeatures(command),
   });

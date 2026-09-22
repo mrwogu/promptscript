@@ -1,4 +1,4 @@
-import { dirname, isAbsolute, join, parse, resolve } from 'path';
+import { dirname, isAbsolute, join, parse, resolve } from 'node:path';
 import type { CliServices } from '../services.js';
 import { assertSafeWritePath } from './write-plan.js';
 

@@ -1,4 +1,4 @@
-import { join, resolve } from 'path';
+import { join, resolve } from 'node:path';
 import type { FileSystem, PromptSystem } from '../services.js';
 import { slugify } from './slugify.js';
 

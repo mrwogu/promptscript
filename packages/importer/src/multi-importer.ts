@@ -1,4 +1,4 @@
-import { basename } from 'path';
+import { basename } from 'node:path';
 import { importFile } from './importer.js';
 import { mergeSections, type SourcedSection } from './merger.js';
 import { emitModularFiles, type ModularEmitOptions } from './emitter.js';

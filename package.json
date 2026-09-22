@@ -26,6 +26,8 @@
     "skill:sync": "./scripts/sync-skill.sh",
     "skill:check": "./scripts/sync-skill.sh --check",
     "grammar:check": "node --import @swc-node/register/esm-register scripts/check-grammar.mts",
+    "deno:check": "node --import @swc-node/register/esm-register scripts/check-deno-bundle.mts",
+    "deno:suite": "node --import @swc-node/register/esm-register scripts/test-deno-cli.mts",
     "docs:highlight:check": "node --import @swc-node/register/esm-register scripts/check-docs-highlighting.mts",
     "vscode:package": "nx package vscode",
     "vscode:publish": "nx publish vscode",

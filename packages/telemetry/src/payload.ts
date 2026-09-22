@@ -5,28 +5,39 @@ import {
   TELEMETRY_EVENT_SCHEMA,
 } from './schema.js';
 import type {
-  RuntimeMetadata,
   SpoolRecord,
   TelemetryBatch,
   TelemetryEvent,
   TelemetryPayload,
+  TelemetryRuntime,
 } from './types.js';
 
+/** Metadata shared by spool records, aggregates, and batches. */
+interface BatchMetadata {
+  app_version: string;
+  runtime_version: string;
+  os: 'darwin' | 'linux' | 'windows' | 'other';
+  arch: 'arm64' | 'x86_64' | 'other';
+  runtime: TelemetryRuntime;
+}
+
 interface Aggregate {
-  metadata: RuntimeMetadata;
+  metadata: BatchMetadata;
   event: TelemetryEvent;
   sourceIndexes: number[];
 }
 
 interface BatchBuilder {
-  metadata: RuntimeMetadata;
+  metadata: BatchMetadata;
   events: TelemetryEvent[];
   eventKeys: Set<string>;
   sourceIndexes: Set<number>;
 }
 
-function metadataKey(record: RuntimeMetadata): string {
-  return [record.app_version, record.runtime_version, record.os, record.arch].join(':');
+function metadataKey(record: BatchMetadata): string {
+  return [record.app_version, record.runtime_version, record.os, record.arch, record.runtime].join(
+    ':'
+  );
 }
 
 function eventKey(event: TelemetryEvent): string {
@@ -76,6 +87,7 @@ function aggregateRecords(records: SpoolRecord[]): Aggregate[] {
         runtime_version: record.runtime_version,
         os: record.os,
         arch: record.arch,
+        runtime: record.runtime,
       },
       event: copyEvent(record.event),
       sourceIndexes: [index],
@@ -89,7 +101,6 @@ function toPayload(batch: BatchBuilder): TelemetryPayload {
     schema: 1,
     app: 'promptscript',
     event_schema: TELEMETRY_EVENT_SCHEMA,
-    runtime: 'node',
     ...batch.metadata,
     events: batch.events,
   };

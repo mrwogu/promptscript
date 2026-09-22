@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import type { FormatterOutput } from '@promptscript/compiler';
 import type { Logger } from '@promptscript/core';
 

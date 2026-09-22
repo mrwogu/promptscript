@@ -3,7 +3,7 @@ import { registryPublishCommand } from '../commands/registry/publish.js';
 import { type CliServices } from '../services.js';
 
 // Mock child_process
-vi.mock('child_process', () => ({
+vi.mock('node:child_process', () => ({
   execFileSync: vi.fn().mockReturnValue(''),
 }));
 
@@ -29,7 +29,7 @@ vi.mock('chalk', () => ({
   },
 }));
 
-import { execFileSync } from 'child_process';
+import { execFileSync } from 'node:child_process';
 
 const mockExecFileSync = vi.mocked(execFileSync);
 

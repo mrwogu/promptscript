@@ -1,5 +1,5 @@
-import { randomUUID } from 'crypto';
-import { dirname, isAbsolute, relative, resolve } from 'path';
+import { randomUUID } from 'node:crypto';
+import { dirname, isAbsolute, relative, resolve } from 'node:path';
 import type { CliServices } from '../services.js';
 
 export interface PlannedWrite {

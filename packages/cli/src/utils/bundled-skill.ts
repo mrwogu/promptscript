@@ -1,34 +1,15 @@
-import { existsSync } from 'fs';
-import { readFile } from 'fs/promises';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
 import type { Logger } from '@promptscript/core';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { PROMPTSCRIPT_SKILL_CONTENT } from '../generated/promptscript-skill.js';
 
 /**
- * Resolve the bundled PromptScript skill in development and bundled layouts.
+ * Resolve the bundled PromptScript skill.
+ *
+ * The SKILL.md content is embedded at build time (scripts/sync-skill.sh
+ * generates src/generated/promptscript-skill.ts), so it is available in
+ * every execution mode - including `deno compile` binaries, which have no
+ * package directory to discover files in.
  */
 export async function loadBundledSkillContent(logger: Logger): Promise<string | undefined> {
-  const skillRelPath = 'skills/promptscript/SKILL.md';
-  const candidates = [
-    resolve(__dirname, skillRelPath),
-    resolve(__dirname, '..', skillRelPath),
-    resolve(__dirname, '..', '..', skillRelPath),
-  ];
-
-  for (const candidate of candidates) {
-    if (!existsSync(candidate)) continue;
-    try {
-      const content = await readFile(candidate, 'utf-8');
-      logger.debug(`Loaded bundled PromptScript skill from ${candidate} (${content.length} bytes)`);
-      return content;
-    } catch {
-      continue;
-    }
-  }
-
-  logger.verbose('Warning: Could not load bundled PromptScript SKILL.md - skill injection skipped');
-  return undefined;
+  logger.debug(`Using embedded PromptScript skill (${PROMPTSCRIPT_SKILL_CONTENT.length} bytes)`);
+  return PROMPTSCRIPT_SKILL_CONTENT;
 }

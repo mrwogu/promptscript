@@ -55,7 +55,7 @@ vi.mock('@promptscript/resolver', () => ({
 
 // Mock fs
 const mockExistsSync = vi.fn();
-vi.mock('fs', () => ({
+vi.mock('node:fs', () => ({
   existsSync: (path: string) => mockExistsSync(path),
 }));
 

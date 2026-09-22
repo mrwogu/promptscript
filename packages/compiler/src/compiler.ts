@@ -1,8 +1,8 @@
-import { realpathSync } from 'fs';
 import {
   AgentConflictError,
   createOutputPlan,
   noopLogger,
+  portableRealpathSync,
   type Logger,
   type LockfileDependency,
   type OutputPlanCandidate,
@@ -23,7 +23,7 @@ import {
   type ImportRoot,
 } from '@promptscript/validator';
 import { minimatch } from 'minimatch';
-import { dirname, isAbsolute, join, relative, resolve, sep } from 'path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- imported for upcoming formatter integration
 import { verifyReferenceIntegrity } from './reference-verifier.js';
 import {
@@ -58,7 +58,7 @@ export const MAX_ENTRY_RESOLVERS = 50;
 export const MAX_RESOLVED_DEPENDENCIES = 50;
 
 function resolverCacheKey(projectRoot: string): string {
-  return realpathSync.native(projectRoot);
+  return portableRealpathSync(projectRoot);
 }
 
 function resolveEntryPath(entryPath: string): string {
@@ -67,7 +67,7 @@ function resolveEntryPath(entryPath: string): string {
     entryPath.endsWith('.prs') || entryPath.endsWith('.md') ? entryPath : `${entryPath}.prs`;
   const absolutePath = isAbsolute(fileName) ? fileName : resolve(process.cwd(), fileName);
   try {
-    return realpathSync.native(absolutePath);
+    return portableRealpathSync(absolutePath);
   } catch {
     return absolutePath;
   }
@@ -193,7 +193,7 @@ function absoluteWatchPath(path: string, baseDir: string = process.cwd()): strin
 function canonicalWatchPath(path: string, baseDir: string = process.cwd()): string {
   const absolutePath = absoluteWatchPath(path, baseDir);
   try {
-    return realpathSync.native(absolutePath);
+    return portableRealpathSync(absolutePath);
   } catch {
     return absolutePath;
   }
@@ -1010,7 +1010,7 @@ export class Compiler {
   async watch(entryPath: string, options: WatchOptions = {}): Promise<Watcher> {
     // Dynamic import of chokidar to avoid bundling issues
     const { default: chokidar } = await import('chokidar');
-    const { dirname, resolve } = await import('path');
+    const { dirname, resolve } = await import('node:path');
 
     const baseDir = dirname(resolve(entryPath));
     const includePatterns = options.include ?? ['**/*.prs'];

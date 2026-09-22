@@ -1,6 +1,6 @@
-import { writeFile, mkdir, readFile, readdir } from 'fs/promises';
-import { existsSync, readFileSync } from 'fs';
-import type { PathLike, Stats } from 'fs';
+import { writeFile, mkdir, readFile, readdir } from 'node:fs/promises';
+import { existsSync, readFileSync } from 'node:fs';
+import type { PathLike, Stats } from 'node:fs';
 import * as prompts from '@inquirer/prompts';
 
 export interface FileSystem {

@@ -42,6 +42,7 @@ describe('TelemetrySession', () => {
     const session = new TelemetrySession({
       config: config(cacheDirectory),
       metadata,
+      runtime: 'node',
       command: 'compile',
       features: ['strict', 'target:claude', 'path:/private/repo'],
       startTime: 0,
@@ -71,11 +72,13 @@ describe('TelemetrySession', () => {
     new TelemetrySession({
       config: config(disabledDirectory, false),
       metadata,
+      runtime: 'node',
       command: 'compile',
     }).finish('success');
     new TelemetrySession({
       config: config(excludedDirectory),
       metadata,
+      runtime: 'node',
       command: 'hook',
     }).finish('success');
 
@@ -85,6 +88,80 @@ describe('TelemetrySession', () => {
 });
 
 describe('maybeSpawnFlush', () => {
+  it('spawns through a provided self-invocation for deno run mode', () => {
+    const cacheDirectory = directory();
+    new TelemetrySession({
+      config: config(cacheDirectory),
+      metadata,
+      runtime: 'deno',
+      command: 'compile',
+    }).finish('success');
+    const spawn = vi.fn(() => ({ unref: vi.fn() }));
+
+    const spawned = maybeSpawnFlush(config(cacheDirectory), {
+      selfInvocation: {
+        executable: '/deno',
+        prefixArgs: ['run', '--allow-env', 'npm:@promptscript/cli@1.16.0'],
+      },
+      environment: {},
+      spawn,
+      now: Date.parse('2026-08-06T12:00:00.000Z'),
+    });
+
+    expect(spawned).toBe(true);
+    expect(spawn).toHaveBeenCalledWith(
+      '/deno',
+      ['run', '--allow-env', 'npm:@promptscript/cli@1.16.0', '__telemetry-flush'],
+      expect.objectContaining({ detached: true, stdio: 'ignore' })
+    );
+  });
+
+  it('does not spawn when no self-invocation can be resolved', () => {
+    const cacheDirectory = directory();
+    new TelemetrySession({
+      config: config(cacheDirectory),
+      metadata,
+      runtime: 'node',
+      command: 'compile',
+    }).finish('success');
+    const spawn = vi.fn(() => ({ unref: vi.fn() }));
+
+    expect(
+      maybeSpawnFlush(config(cacheDirectory), {
+        selfInvocation: undefined,
+        environment: {},
+        entrypoint: undefined,
+        spawn,
+        now: Date.parse('2026-08-06T12:00:00.000Z'),
+      })
+    ).toBe(false);
+    expect(spawn).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when spawning the detached flush child throws', () => {
+    const cacheDirectory = directory();
+    new TelemetrySession({
+      config: config(cacheDirectory),
+      metadata,
+      runtime: 'deno',
+      command: 'compile',
+    }).finish('success');
+
+    expect(
+      maybeSpawnFlush(config(cacheDirectory), {
+        selfInvocation: {
+          executable: '/deno',
+          prefixArgs: ['run', '--allow-env', 'npm:@promptscript/cli@1.16.0'],
+        },
+        environment: {},
+        spawn: () => {
+          throw new Error('spawn failed');
+        },
+        now: Date.parse('2026-08-06T12:00:00.000Z'),
+      })
+    ).toBe(false);
+  });
+
   it('does not spawn when the spool is empty', () => {
     const cacheDirectory = directory();
     const spawn = vi.fn(() => ({ unref: vi.fn() }));
@@ -105,6 +182,7 @@ describe('maybeSpawnFlush', () => {
       new TelemetrySession({
         config: config(cacheDirectory),
         metadata,
+        runtime: 'node',
         command: 'compile',
       }).finish('success');
     }
@@ -125,6 +203,7 @@ describe('maybeSpawnFlush', () => {
     new TelemetrySession({
       config: config(cacheDirectory),
       metadata,
+      runtime: 'node',
       command: 'compile',
     }).finish('success');
     const unref = vi.fn();
@@ -159,6 +238,7 @@ describe('maybeSpawnFlush', () => {
     new TelemetrySession({
       config: config(cacheDirectory),
       metadata,
+      runtime: 'node',
       command: 'compile',
     }).finish('success');
     const spawn = vi.fn(() => ({ unref: vi.fn() }));
@@ -186,6 +266,7 @@ describe('maybeSpawnFlush', () => {
     new TelemetrySession({
       config: config(cacheDirectory),
       metadata,
+      runtime: 'node',
       command: 'compile',
     }).finish('success');
     const spawn = vi.fn(() => {
@@ -206,6 +287,7 @@ describe('maybeSpawnFlush', () => {
     new TelemetrySession({
       config: config(cacheDirectory),
       metadata,
+      runtime: 'node',
       command: 'compile',
     }).finish('success');
     writeFlushState(cacheDirectory, { lastAttempt: '2026-08-06T11:00:00.000Z' });

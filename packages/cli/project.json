@@ -21,6 +21,7 @@
       "options": {
         "outputPath": "dist/packages/cli",
         "main": "packages/cli/src/index.ts",
+        "additionalEntryPoints": ["packages/cli/src/managed-output-worker.ts"],
         "tsConfig": "packages/cli/tsconfig.lib.json",
         "assets": ["packages/cli/*.md", "packages/cli/bin/**/*", "packages/cli/skills/**/*"],
         "bundle": true,
@@ -39,6 +40,7 @@
           "simple-git",
           "fastify",
           "@fastify/cors",
+          "@fastify/rate-limit",
           "@fastify/websocket",
           "ws",
           "fast-glob"

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { homedir } from 'os';
+import { homedir } from 'node:os';
 import type { Logger, OutputPlan } from '@promptscript/core';
 import type { CliServices } from '../../services.js';
 
@@ -103,7 +103,7 @@ vi.mock('../../config/loader.js', () => ({
   CONFIG_FILES: ['promptscript.yaml'],
 }));
 
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   writeFile: (...args: unknown[]) => mockWriteFile(...args),
   chmod: (...args: unknown[]) => mockChmod(...args),
   mkdir: (...args: unknown[]) => mockMkdir(...args),
@@ -156,7 +156,7 @@ vi.mock('chalk', () => ({
   },
 }));
 
-vi.mock('fs', async (importOriginal) => {
+vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('fs')>();
   return {
     ...actual,
@@ -582,6 +582,37 @@ describe('compile command - createCliLogger warn path', () => {
     expect(mockDryRun).toHaveBeenCalledWith(
       `Would remove empty managed directory: ${prunedDirectory}`
     );
+  });
+
+  it('should fail non-zero when cleanup cannot re-execute the CLI', async () => {
+    mockCleanupManagedOutputs.mockResolvedValue({
+      removed: [],
+      removedDirectories: [],
+      unresolvedSelfInvocation: true,
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockWarn).toHaveBeenCalledWith(
+      'Managed output cleanup was skipped: this runtime cannot safely re-execute the CLI.'
+    );
+    expect(mockWarn).toHaveBeenCalledWith(
+      'Remove obsolete generated files (PromptScript marker header) under the output directory manually, or reinstall the CLI.'
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should preview the cleanup skip without failing in dry-run mode', async () => {
+    mockCleanupManagedOutputs.mockResolvedValue({
+      removed: [],
+      removedDirectories: [],
+      unresolvedSelfInvocation: true,
+    });
+
+    await compileCommand({ cwd: '/mock/project', dryRun: true }, mockServices);
+
+    expect(mockWarn).toHaveBeenCalledTimes(2);
+    expect(process.exitCode).toBeUndefined();
   });
 
   it('writes only selected resources and skips managed cleanup', async () => {

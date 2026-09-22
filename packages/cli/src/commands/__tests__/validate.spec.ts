@@ -64,13 +64,13 @@ vi.mock('@promptscript/compiler', () => ({
   }),
 }));
 
-vi.mock('fs', () => ({
+vi.mock('node:fs', () => ({
   existsSync: mockExistsSync,
 }));
 
 import { validateCommand } from '../validate.js';
 import { ConsoleOutput } from '../../output/console.js';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 
 describe('validateCommand', () => {
   let consoleSpy: ReturnType<typeof vi.spyOn>;

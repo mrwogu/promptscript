@@ -63,11 +63,11 @@ vi.mock('../utils/registry-resolver', () => ({
 
 // Mock fs.existsSync
 const mockExistsSync = vi.fn();
-vi.mock('fs', () => ({
+vi.mock('node:fs', () => ({
   existsSync: (path: string) => mockExistsSync(path),
 }));
 
-vi.mock('fs/promises', () => ({
+vi.mock('node:fs/promises', () => ({
   readFile: mockReadFile,
 }));
 
