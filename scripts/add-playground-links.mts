@@ -21,7 +21,7 @@ import {
   TARGET_DEFINITIONS,
   type KnownTarget,
 } from '../packages/core/src/index.js';
-import { compile } from '../packages/browser-compiler/src/index.js';
+import { BUNDLED_REGISTRY, compile } from '../packages/browser-compiler/src/index.js';
 
 const PLAYGROUND_BASE_URL = 'https://getpromptscript.dev/playground/';
 const PLAYGROUND_DEV_URL = 'https://getpromptscript.dev/playground-dev/';
@@ -117,16 +117,18 @@ function dedent(text: string): string {
 
 /**
  * Encode playground state to URL-safe string (same as playground uses).
+ *
+ * The state carries a file list, so an example that imports siblings travels
+ * with them instead of arriving broken.
  */
-function encodeState(content: string, filename = 'example.prs'): string {
+function encodeState(files: Map<string, string>): string {
   const state: ShareableState = {
-    files: [{ path: filename, content }],
-    entry: filename,
+    files: [...files].map(([path, content]) => ({ path, content })),
+    entry: PLAYGROUND_ENTRY,
     version: '1',
   };
 
-  const json = JSON.stringify(state);
-  return LZString.compressToEncodedURIComponent(json);
+  return LZString.compressToEncodedURIComponent(JSON.stringify(state));
 }
 
 /** An `@inherit`/`@use` line, split into indent and import target. */
@@ -138,67 +140,188 @@ const URL_TARGET_REGEX = /^(?:https?:\/\/|git@)/;
 /** Host-style git target such as `github.com/acme/agent-skills`. */
 const HOST_TARGET_REGEX = /^[\w-]+(?:\.[\w-]+)+\//;
 
+/** Paths the bundled playground registry already answers, without the extension. */
+const BUNDLED_REGISTRY_IDS = new Set(
+  Object.keys(BUNDLED_REGISTRY).map((path) => path.replace(/\.prs$/, ''))
+);
+
 /**
- * Classify an import target by what the playground would have to fetch, or null
- * when nothing needs fetching.
+ * Classify an import target by what the playground would have to supply, or
+ * null when it already resolves on its own.
  *
  * Kept as small separate tests rather than one alternation-heavy pattern, which
  * is both easier to follow and cheap to extend with a new target shape.
  */
-function unfetchableImportKind(target: string): 'registry' | 'remote' | null {
+function unresolvedImportKind(target: string): 'registry' | 'remote' | 'local' | null {
+  if (BUNDLED_REGISTRY_IDS.has(target)) {
+    // Already in the bundled registry, so it resolves untouched.
+    return null;
+  }
   if (target.startsWith('@')) {
     return 'registry';
   }
   if (target.startsWith('./') || target.startsWith('../')) {
-    return null;
+    return 'local';
   }
   return URL_TARGET_REGEX.test(target) || HOST_TARGET_REGEX.test(target) ? 'remote' : null;
 }
 
-/** Comment out every import line the playground cannot resolve. */
-function disableUnfetchableImports(code: string): string {
-  return code
-    .split('\n')
-    .map((line) => {
-      const match = IMPORT_LINE_REGEX.exec(line);
-      if (match === null) {
-        return line;
-      }
-      const kind = unfetchableImportKind(match[2]!);
-      return kind === null
-        ? line
-        : `${match[1]}# ${line.trim()}  # (${kind} - disabled for playground)`;
-    })
+/** Split `./phases/triage(severity: "high")` into target and argument text. */
+const PARAMETERIZED_TARGET_REGEX = /^([^(]+)\((.*)\)$/;
+
+/** One `key: value` pair from a parameterized import's argument list. */
+const ARGUMENT_REGEX = /([A-Za-z_]\w*)\s*:\s*("[^"]*"|'[^']*'|[\w.-]+)/g;
+
+interface ImportTarget {
+  /** Target without its argument list. */
+  path: string;
+  /** Argument names and the literal each call site passes. */
+  args: Array<{ name: string; literal: string }>;
+}
+
+function parseImportTarget(target: string): ImportTarget {
+  const match = PARAMETERIZED_TARGET_REGEX.exec(target);
+  if (match === null) {
+    return { path: target, args: [] };
+  }
+  const args = [...match[2]!.matchAll(ARGUMENT_REGEX)].map((argument) => ({
+    name: argument[1]!,
+    literal: argument[2]!,
+  }));
+  return { path: match[1]!, args };
+}
+
+/**
+ * Virtual file name for a supplied import.
+ *
+ * Registry and remote targets resolve as `<target>.prs`, which is how the
+ * bundled registry is keyed. Local targets keep their path, and an extension is
+ * added only when the import omitted one.
+ */
+function stubFileName(kind: 'registry' | 'remote' | 'local', path: string): string {
+  const cleaned = kind === 'local' ? path.replace(/^\.\//, '') : path;
+  return /\.(?:prs|md)$/.test(cleaned) ? cleaned : `${cleaned}.prs`;
+}
+
+const STUB_NOTICE =
+  '# Supplied so the example runs here. Not part of the documentation, and not a real package.';
+
+/** `params` entry per call-site argument, typed from the literal it was given. */
+function stubParamsBlock(args: ImportTarget['args']): string {
+  if (args.length === 0) {
+    return '';
+  }
+  const entries = args.map(({ name, literal }) => {
+    const isQuoted = literal.startsWith('"') || literal.startsWith("'");
+    if (isQuoted) return `    ${name}?: string = "example"`;
+    if (literal === 'true' || literal === 'false') return `    ${name}?: boolean = false`;
+    return Number.isNaN(Number(literal))
+      ? `    ${name}?: string = "example"`
+      : `    ${name}?: number = 0`;
+  });
+  return `  params: {\n${entries.join('\n')}\n  }\n`;
+}
+
+/**
+ * Minimal stand-in for an import the playground cannot fetch.
+ *
+ * Declaring the parameters the call site passes matters for more than getting
+ * past validation: the caller's own values then interpolate into the output, so
+ * a parameterized example still demonstrates its real arguments.
+ *
+ * The blocks are generic but not empty, because an example that overrides or
+ * extends a path needs that path to exist in the parent.
+ */
+function stubContent(fileName: string, target: ImportTarget): string {
+  if (fileName.endsWith('.md')) {
+    return `<!-- ${STUB_NOTICE.replace(/^# /, '')} -->\n\n# ${target.path}\n\nPlaceholder content.\n`;
+  }
+  // A local target keeps its path in the import but not in the id, where a
+  // leading ./ would only look like a mistake.
+  const id = target.path.replace(/^\.{1,2}\//, '');
+  return [
+    STUB_NOTICE,
+    '@meta {',
+    `  id: "${id}"`,
+    `  syntax: "${LATEST_SYNTAX_VERSION}"`,
+    '  mixin: true',
+    stubParamsBlock(target.args).replace(/\n$/, ''),
+    '}',
+    '',
+    '@standards {',
+    '  code: ["Placeholder standard"]',
+    '  testing: ["Placeholder standard"]',
+    '}',
+    '',
+    '@restrictions {',
+    '  - "Placeholder restriction"',
+    '}',
+    '',
+  ]
+    .filter((line) => line !== '')
     .join('\n');
 }
 
 /**
- * Prepare code for the playground by commenting out imports it cannot fetch.
+ * Supply a stand-in file for every import the playground cannot fetch, and
+ * comment out the ones no stand-in fits.
  *
- * The playground compiles one encoded file against a small bundled registry, so
- * anything that would need a network fetch or a sibling file has to be disabled
- * or the example opens on an error. Registry references were always handled;
- * remote references are too, because a host-style target like
- * `github.com/acme/...` does not start with `@` and used to slip through and
- * fail with a clone error against a repository that does not exist.
+ * Commenting them all out was the old behaviour and it cost real examples: an
+ * `@inherit` line is often the whole point of the section, and disabling it left
+ * either a broken badge or a demonstration of nothing. The playground state can
+ * carry several files, so the imports stay live and travel with a placeholder.
+ */
+function supplyUnresolvedImports(code: string): { code: string; stubs: Map<string, string> } {
+  const stubs = new Map<string, string>();
+  const lines = code.split('\n').map((line) => {
+    const match = IMPORT_LINE_REGEX.exec(line);
+    if (match === null) {
+      return line;
+    }
+    const target = parseImportTarget(match[2]!);
+    const kind = unresolvedImportKind(target.path);
+    if (kind === null) {
+      return line;
+    }
+    const fileName = stubFileName(kind, target.path);
+    // A traversing path would escape the virtual project, so those stay disabled.
+    if (fileName.startsWith('..')) {
+      return `${match[1]}# ${line.trim()}  # (${kind} - disabled for playground)`;
+    }
+    stubs.set(fileName, stubContent(fileName, target));
+    return line;
+  });
+  return { code: lines.join('\n'), stubs };
+}
+
+/**
+ * Turn a documentation snippet into a playground state.
  *
- * Local paths are left alone: they are opted out per snippet with
- * `<!-- playground-link-skip -->`.
+ * The playground resolves against a small bundled registry and whatever files
+ * the state carries, so anything needing a network fetch has to be supplied.
+ * Imports get a placeholder file each; only what no placeholder fits, such as a
+ * path traversing out of the project, is commented out. The `@meta` header is
+ * added when the fragment has none.
  */
 function prepareCodeForPlayground(code: string): PreparedSnippet {
-  const withoutUnfetchableImports = disableUnfetchableImports(code);
+  const supplied = supplyUnresolvedImports(code);
+  const files = new Map<string, string>([[PLAYGROUND_ENTRY, withPlaygroundMeta(supplied.code)]]);
+  for (const [path, content] of supplied.stubs) {
+    files.set(path, content);
+  }
   return {
-    code: withPlaygroundMeta(withoutUnfetchableImports),
+    files,
     // The header alone is not a demonstration, so it does not count as content.
-    demonstratesExample: hasActiveCode(withoutMetaBlock(withoutUnfetchableImports)),
+    demonstratesExample: hasActiveCode(withoutMetaBlock(supplied.code)),
   };
 }
 
 /** A snippet rewritten for the playground, plus whether it is still worth linking. */
 interface PreparedSnippet {
-  code: string;
+  /** Entry file first, then any placeholder it imports. */
+  files: Map<string, string>;
   /**
-   * False when disabling imports left nothing of the example behind.
+   * False when nothing of the example is left to demonstrate.
    *
    * Such a snippet still compiles once the `@meta` header is supplied, so the
    * badge would open without an error and show an empty project. A button that
@@ -278,9 +401,9 @@ function withPlaygroundMeta(code: string): string {
  * badges that opened on `@meta block is required` or on a failed clone. Running
  * the playground's own compiler answers it exactly.
  */
-async function compilesInPlayground(preparedCode: string): Promise<boolean> {
+async function compilesInPlayground(files: Map<string, string>): Promise<boolean> {
   try {
-    const result = await compile(new Map([[PLAYGROUND_ENTRY, preparedCode]]), PLAYGROUND_ENTRY, {
+    const result = await compile(files, PLAYGROUND_ENTRY, {
       formatters: PLAYGROUND_FORMATTERS,
       bundledRegistry: true,
     });
@@ -294,11 +417,11 @@ async function compilesInPlayground(preparedCode: string): Promise<boolean> {
 /**
  * Generate the playground URL for an already prepared snippet.
  *
- * Takes prepared code rather than raw code so the encoded state is byte-for-byte
- * what `compilesInPlayground` validated.
+ * Takes the prepared file set rather than raw code so the encoded state is
+ * byte-for-byte what `compilesInPlayground` validated.
  */
-function playgroundUrlFor(preparedCode: string): string {
-  return `${PLAYGROUND_URL}?s=${encodeState(preparedCode, PLAYGROUND_ENTRY)}`;
+function playgroundUrlFor(files: Map<string, string>): string {
+  return `${PLAYGROUND_URL}?s=${encodeState(files)}`;
 }
 
 /**
@@ -433,8 +556,8 @@ interface LinkCandidate {
   block: string;
   /** Offset of the fence within the link-free content. */
   offset: number;
-  /** Playground-ready snippet, or null when static rules already rejected it. */
-  preparedCode: string | null;
+  /** Playground-ready file set, or null when static rules already rejected it. */
+  preparedFiles: Map<string, string> | null;
 }
 
 function collectLinkCandidates(
@@ -450,7 +573,7 @@ function collectLinkCandidates(
     candidates.push({
       block: match[0],
       offset: match.index,
-      preparedCode: prepared?.demonstratesExample ? prepared.code : null,
+      preparedFiles: prepared?.demonstratesExample ? prepared.files : null,
     });
   }
   return candidates;
@@ -465,7 +588,7 @@ async function insertPlaygroundLinks(
 ): Promise<{ content: string; added: number }> {
   const runnable = await Promise.all(
     candidates.map(async (candidate) =>
-      candidate.preparedCode === null ? false : compilesInPlayground(candidate.preparedCode)
+      candidate.preparedFiles === null ? false : compilesInPlayground(candidate.preparedFiles)
     )
   );
 
@@ -476,7 +599,7 @@ async function insertPlaygroundLinks(
     if (!runnable[index]) continue;
     const blockEnd = candidate.offset + candidate.block.length;
     result +=
-      content.slice(cursor, blockEnd) + createLinkBlock(playgroundUrlFor(candidate.preparedCode!));
+      content.slice(cursor, blockEnd) + createLinkBlock(playgroundUrlFor(candidate.preparedFiles!));
     cursor = blockEnd;
     added++;
   }
