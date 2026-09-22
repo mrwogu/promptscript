@@ -93,9 +93,23 @@ interface DistPackageJson {
   bin?: string | { prs?: string };
 }
 
+function fail(message: string): never {
+  console.error(`Deno bundle checks failed (1):\n  - ${message}`);
+  process.exit(1);
+}
+
 const packageJsonPath = join(CLI_PACKAGE_DIR, 'package.json');
-check(existsSync(packageJsonPath), 'dist package.json is missing');
-const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as DistPackageJson;
+// Every check below reads this file, so a missing or unparseable manifest has
+// to stop here with the real reason instead of an ENOENT stack trace.
+if (!existsSync(packageJsonPath)) {
+  fail(`dist package.json is missing: ${packageJsonPath} - run "pnpm nx build cli" first`);
+}
+let pkg: DistPackageJson;
+try {
+  pkg = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as DistPackageJson;
+} catch (error) {
+  fail(`dist package.json is not valid JSON: ${(error as Error).message}`);
+}
 check(
   typeof pkg.version === 'string' && /^\d+\.\d+\.\d+/.test(pkg.version),
   'dist package.json has no semver version'
