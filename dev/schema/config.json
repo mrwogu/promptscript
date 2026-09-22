@@ -314,6 +314,22 @@
           "type": "boolean",
           "description": "Scan imported (registry cache / vendored) content with heuristic validation rules. Heuristic rules skip imported content by default because a project cannot fix findings in someone else's skill. Concrete security findings (decoded payloads, suspicious URLs) always scan imported content.",
           "default": false
+        },
+        "excludes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ValidationExclude"
+          },
+          "description": "Rule exclusions for specific imports, bound to the pinned commit.",
+          "example": "excludes:\n  - import: github.com/cloudflare/skills\n    commit: 1a2b3c4d5e6f...\n    rules: [blocked-patterns, authority-injection]"
+        },
+        "allowedPatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Pattern sources exempt from blocked-patterns detection. A pattern is subtracted from the active set when its source text matches an entry exactly. Mirror of blockedPatterns for exceptions.",
+          "example": "allowedPatterns:\n  - 'bypass\\s+(your\\s+)?(rules|restrictions)'"
         }
       },
       "additionalProperties": false,
@@ -931,6 +947,32 @@
       ],
       "additionalProperties": false,
       "description": "Section rendering configuration."
+    },
+    "ValidationExclude": {
+      "type": "object",
+      "properties": {
+        "import": {
+          "type": "string",
+          "description": "Import source as declared in `@use` or as pinned in promptscript.lock"
+        },
+        "commit": {
+          "type": "string",
+          "description": "Commit SHA the exclude was reviewed at; must match the lockfile pin"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Rule names (e.g. `blocked-patterns`) or IDs (e.g. `PS005`) to skip for this import"
+        }
+      },
+      "required": [
+        "import",
+        "rules"
+      ],
+      "additionalProperties": false,
+      "description": "Per-import validation exclusion, bound to the commit pinned in promptscript.lock.\n\nSuppression is declared by the consumer, never by the scanned content: an imported file cannot mute its own scan. When the lockfile pins a different commit than the one recorded here, the exclude stops applying and validation fails, so the consumer consciously re-reviews the new content."
     },
     "PolicyDefinition": {
       "anyOf": [

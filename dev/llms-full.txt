@@ -7199,6 +7199,16 @@ validation:
   # heuristic rules. Off by default.
   scanExternalContent: false
 
+  # Per-import rule exclusions bound to the lockfile commit.
+  # excludes:
+  #   - import: github.com/org/repo
+  #     commit: <sha from promptscript.lock>
+  #     rules: [blocked-patterns, authority-injection]
+
+  # Pattern sources exempt from blocked-patterns detection.
+  # allowedPatterns:
+  #   - 'bypass\s+(your\s+)?(rules|restrictions)'
+
 # ====================
 # Watch Configuration
 # ====================
@@ -7954,14 +7964,24 @@ validation:
   rules:
     empty-block: warning
   scanExternalContent: false
+  excludes:
+    - import: github.com/cloudflare/skills
+      commit: 1a2b3c4d5e6f7890abcdef1234567890abcdef12
+      rules: [blocked-patterns, authority-injection]
+  allowedPatterns:
+    - 'bypass\s+(your\s+)?(rules|restrictions)'
 ```
 
-| Field                 | Type     | Default | Description                                                                                                                                                                                                                                                        |
-| --------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `requiredGuards`      | string[] | `[]`    | Guards every resolved project must define                                                                                                                                                                                                                          |
-| `rules`               | object   | `{}`    | Rule severity overrides                                                                                                                                                                                                                                            |
-| `guardRequiresDepth`  | number   | `3`     | Maximum guard dependency recursion depth                                                                                                                                                                                                                           |
-| `scanExternalContent` | boolean  | `false` | Scan imported (registry cache / vendored) content with heuristic rules. Heuristic findings in third-party skills are skipped by default because the importing project cannot fix them; concrete security findings (decoded payloads, suspicious URLs) always scan. |
+| Field                 | Type     | Default | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| --------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `requiredGuards`      | string[] | `[]`    | Guards every resolved project must define                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `rules`               | object   | `{}`    | Rule severity overrides                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `guardRequiresDepth`  | number   | `3`     | Maximum guard dependency recursion depth                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `scanExternalContent` | boolean  | `false` | Scan imported (registry cache / vendored) content with heuristic rules. Heuristic findings in third-party skills are skipped by default because the importing project cannot fix them; concrete security findings (decoded payloads, suspicious URLs) always scan.                                                                                                                                                                                                                                                                                                |
+| `excludes`            | array    | `[]`    | Per-import rule exclusions bound to the lockfile. Each entry needs `import` (the import source, optionally with a sub-path), `commit` (the SHA pinned in `promptscript.lock` when the content was reviewed), and `rules` (rule names or IDs to skip). Excludes apply only to imported content, never to local project files, and overlapping or repeated entries union their rules. When the lockfile pins a different commit, the entry stops suppressing (the original findings reappear) and PS040 fails the build so the consumer re-reviews the new content. |
+| `allowedPatterns`     | string[] | `[]`    | Pattern sources exempt from `blocked-patterns` detection. A blocked pattern is subtracted from the active set when its source text matches an entry exactly; other patterns keep scanning.                                                                                                                                                                                                                                                                                                                                                                        |
+
+Consumed by `blocked-patterns` (PS005) and `authority-injection` (PS011), the two heuristic text rules that always scan imported content. Excludes are declared by the consumer, never by the scanned file: a disable comment inside an imported skill cannot mute its own scan.
 
 ### watch
 
@@ -13252,6 +13272,34 @@ The pipeline also avoids false positives for legitimate content like MD5/SHA256 
 Long uppercase runs over the nucleotide alphabet (`ACGTUN`) are treated as DNA data, not Base64. Amino-acid one-letter codes cover every uppercase letter, so a run of them counts as protein data only when the surrounding text has biological context (for example "protein sequence" or "residues"). Reference files shipped with scientific skills regularly carry such sequences.
 
 **Imported content:** the speculative "long Base64" heuristic and the reference-content check (PS026) skip content that was inlined from the registry cache or a vendored repository, because the importing project cannot fix findings in someone else's skill and `--strict` would turn them into hard failures. Findings that decode to concrete malicious payloads always scan imported content. To scan imported content with the heuristics as well, set `validation.scanExternalContent: true` in `promptscript.yaml`.
+
+#### Suppressing false positives on imported content
+
+PS005 and PS011 always scan imported content, so declarative technical documentation inside a third-party skill can fail `prs compile` (for example "Bypass rules map to WARP Split Tunnel exclude entries" in Cloudflare's Zero Trust docs matches the `bypass ... rules` pattern, and "admin access level" matches the authority-injection `ADMIN ... ACCESS` pattern). Suppression for these cases is consumer-side only: an inline disable comment inside the imported file would let that file mute its own scan, so it is not supported.
+
+Two knobs exist in `promptscript.yaml`, both declared by the importing project:
+
+**Per-import excludes bound to the lockfile.** Each entry names the import (a repository, optionally with a sub-path), the rules to skip for that import's content, and the commit SHA the content was reviewed at. The SHA must match the pin in `promptscript.lock`:
+
+```yaml
+validation:
+  excludes:
+    - import: github.com/cloudflare/skills
+      commit: 1a2b3c4d5e6f7890abcdef1234567890abcdef12
+      rules: [blocked-patterns, authority-injection]
+```
+
+When `prs lock` moves the pinned commit, the exclude stops applying (the original findings reappear) and PS040 fails the build with a message naming both SHAs, so the consumer consciously re-reviews the new content and updates or removes the exclude. Excludes never apply to local project files, `rules` accepts rule names or rule IDs, and overlapping or repeated entries union their rules. `--ignore-hashes` skips the commit binding check along with the rest of the integrity story.
+
+**Allowed patterns.** A pattern is subtracted from the `blocked-patterns` set when its source text matches an entry exactly, mirroring how `blockedPatterns` appends patterns. Copy the source text from the finding message (it prints the pattern source):
+
+```yaml
+validation:
+  allowedPatterns:
+    - 'bypass\s+(your\s+)?(rules|restrictions)'
+```
+
+All other patterns keep scanning.
 
 Findings on synthesized skill nodes point at the file the content was inlined from (the `SKILL.md` path or the scanned directory), never at a virtual `<synthesized>` location. The PS012 heuristic message includes the first 20 characters of the encoded run so a sequence reads as a sequence, not as a payload.
 

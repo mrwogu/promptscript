@@ -157,6 +157,34 @@ Long uppercase runs over the nucleotide alphabet (`ACGTUN`) are treated as DNA d
 
 **Imported content:** the speculative "long Base64" heuristic and the reference-content check (PS026) skip content that was inlined from the registry cache or a vendored repository, because the importing project cannot fix findings in someone else's skill and `--strict` would turn them into hard failures. Findings that decode to concrete malicious payloads always scan imported content. To scan imported content with the heuristics as well, set `validation.scanExternalContent: true` in `promptscript.yaml`.
 
+#### Suppressing false positives on imported content
+
+PS005 and PS011 always scan imported content, so declarative technical documentation inside a third-party skill can fail `prs compile` (for example "Bypass rules map to WARP Split Tunnel exclude entries" in Cloudflare's Zero Trust docs matches the `bypass ... rules` pattern, and "admin access level" matches the authority-injection `ADMIN ... ACCESS` pattern). Suppression for these cases is consumer-side only: an inline disable comment inside the imported file would let that file mute its own scan, so it is not supported.
+
+Two knobs exist in `promptscript.yaml`, both declared by the importing project:
+
+**Per-import excludes bound to the lockfile.** Each entry names the import (a repository, optionally with a sub-path), the rules to skip for that import's content, and the commit SHA the content was reviewed at. The SHA must match the pin in `promptscript.lock`:
+
+```yaml
+validation:
+  excludes:
+    - import: github.com/cloudflare/skills
+      commit: 1a2b3c4d5e6f7890abcdef1234567890abcdef12
+      rules: [blocked-patterns, authority-injection]
+```
+
+When `prs lock` moves the pinned commit, the exclude stops applying (the original findings reappear) and PS040 fails the build with a message naming both SHAs, so the consumer consciously re-reviews the new content and updates or removes the exclude. Excludes never apply to local project files, `rules` accepts rule names or rule IDs, and overlapping or repeated entries union their rules. `--ignore-hashes` skips the commit binding check along with the rest of the integrity story.
+
+**Allowed patterns.** A pattern is subtracted from the `blocked-patterns` set when its source text matches an entry exactly, mirroring how `blockedPatterns` appends patterns. Copy the source text from the finding message (it prints the pattern source):
+
+```yaml
+validation:
+  allowedPatterns:
+    - 'bypass\s+(your\s+)?(rules|restrictions)'
+```
+
+All other patterns keep scanning.
+
 Findings on synthesized skill nodes point at the file the content was inlined from (the `SKILL.md` path or the scanned directory), never at a virtual `<synthesized>` location. The PS012 heuristic message includes the first 20 characters of the encoded run so a sequence reads as a sequence, not as a payload.
 
 ### Using Security Presets
