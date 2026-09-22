@@ -202,6 +202,8 @@ When combining multiple source files:
 
 **Wrong:**
 
+<!-- playground-link-expect-error -->
+
 ```promptscript
 @identity {
   """
@@ -209,6 +211,12 @@ When combining multiple source files:
   """
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIQAmnLBCwBPAATAAOqzFjJIeYpliAmswCuYjNRhaxAgG4wozNDGoVL02YoULWAXxAOAug0HUR+IqXIwqtCAMRrQQbPgAjM5AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/See_the_error_in-Playground-red?style=flat-square" alt="See the error in Playground" />
+</a>
+<!-- playground-link-end -->
 
 **Correct:**
 
@@ -235,6 +243,8 @@ When combining multiple source files:
 
 **Wrong:**
 
+<!-- playground-link-expect-error -->
+
 ```promptscript
 @standards {
   code: {
@@ -245,6 +255,12 @@ When combining multiple source files:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPEtBMRJJly5fAJ6xlU8AFdWjLBDYYou1WosgLstQEFBgiMdNRxrZhwkYARsz0scVwYcU1KCgpLOWtbOQBfGXiQeIBdBk4sag18IlJyGCpaEAYANxhaE1Z8AEYUoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/See_the_error_in-Playground-red?style=flat-square" alt="See the error in Playground" />
+</a>
+<!-- playground-link-end -->
 
 **Correct:**
 
@@ -302,11 +318,19 @@ When combining multiple source files:
 
 **Wrong:**
 
+<!-- playground-link-expect-error -->
+
 ```promptscript
 @context {
   languages: [typescript python ruby]
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIvtFYABMAA6rQYKgZWAcwCuGGfESDkWAJ5p4jahDRC063G0HU5AI3UBdMQF8Qtqw05Zq6-EVLkYVWiAYAbjC0EGz4AIwOQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/See_the_error_in-Playground-red?style=flat-square" alt="See the error in Playground" />
+</a>
+<!-- playground-link-end -->
 
 **Correct:**
 
