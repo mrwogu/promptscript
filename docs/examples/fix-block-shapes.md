@@ -27,12 +27,6 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 }
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344HGZqLEY3U15Aq3CQAHpqGAA3CBhzCJSQWN764IAlNo7zHTdqFu1GHAxWdXgKOL68-JB8gF0GTixqR3wiUnIYKloQBlaYWgg2fFT1oA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 **Correct: explicit command object**
 
 ```promptscript
@@ -63,12 +57,6 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
   items: ["Never expose secrets", "Never skip validation"]
 }
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH35qeCxqCEYsCDZlQKtjDhI4MOQIgDkYADcYal4iNGY4O2HGUtMIunCQTp6+uABrCDReLowoCHFsGtYIgF0ffJB8vYZOcsd8IlJyGCpaEAY5uB38VOOgA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 **Correct: canonical array body**
 
