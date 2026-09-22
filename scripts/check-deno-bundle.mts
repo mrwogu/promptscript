@@ -107,6 +107,10 @@ const binFile =
   typeof pkg.bin === 'string'
     ? pkg.bin.replace(/^\.\//, '')
     : (pkg.bin?.prs ?? '').replace(/^\.\//, '');
+// Deno runs the package's bin exclusively; a dist package without a usable
+// bin (missing entirely or a bin map without "prs") must fail here, not be
+// filtered out of the checked files below.
+check(binFile !== '', 'dist package.json has no usable "prs" bin');
 
 const bundleFiles = [mainFile, 'managed-output-worker.js', binFile].filter((file) => file !== '');
 const bundles: Array<[string, string]> = [];
