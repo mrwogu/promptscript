@@ -597,7 +597,7 @@ Then inherit:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4ABVcAKxhGLBV9YoEIVhwYahMBXUxWRwB6ACMMODtePgAKahh1JSxqR14AWl5xJQxe2BkwZmp7KCcXd08ASh9+FnYiGsCrYd4y5krqubg0KohIRh02DkIsH3yQfIAugxONNHPgiKRyDAqLQQAwAG4tOAQNj4VL-IA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4ABVcAKxhGLBV9YoEIVhwYahMBXUxWRwB6ACMMODtePgAKahh1JSxqR14AWl5xJQxe2BkwZmp7KCcXd08ASiLfFnYiGsCrYd4y5krqubg0KohIRh02DkIsH3yQfIAugxONNHPgiKRyDAqLQQAwAG4tOAQNj4VL-IA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -901,7 +901,7 @@ Modify inherited blocks at specific paths:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAegAjDDg7Xj4ACmoYdSUsakdeAFpecSUMJtgZMGZqeygnF3dPAEpi3gBBSQV5In6y9RDOLBNHH34iDk9j9jPeQKtwkFiXp+3x07YMKF4iNEqpza1l4ACUYBhGFgxjAAG4wKDMNBaLAUOKvPKFVgbACyzHGYCGrHgHBkcBEngw1HEcAuV04ZIp4ipNIoLCkFA45MODziqlIMHMcwA1ikQLCTCS8sEWPC1OoYGEAJy5ApFVh8D67Xg9clVKEQNjKKlqc6+ek3XUDCAGo28p6jCIAVWBYA8ttYPx0zDIbBOZlYUHOb2CjpAADl5IxFnA4MMWm0ZLU-exaW98iB8gBdBgnQb4IikcgwKi0EAMOVwQ2sfCpTNAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAegAjDDg7Xj4ACmoYdSUsakdeAFpecSUMJtgZMGZqeygnF3dPAEoi1j4AQUkFeSJ+svUQziwTRx9+Ig5PE-Zz3kCrcJBY1+ed8bO2DCheIjQlTObWsvAASjAMIwsGMYAA3GBQZhoLRYChxN55QqsYq8ACyzHGYCGrHgHBkcBEngw1HEcEu104FKp4hpdIoLCkFA4lKOjziqlIMHMcwA1ikQHCTGS8sEWAi1OoYGEAJy5Aobba7LDyHqUqrQiBsZQ0tQXXyM256gYQQ3G-nPUYRACqILAHjtrF+OmYZDYpzMrCgF3ewSdIAAcvJGIs4HBhi02jJav72PT3vkQPkALoMU6DfBEUjkGBUWggBgKuBG1j4VJZoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

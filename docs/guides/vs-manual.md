@@ -59,7 +59,7 @@ With PromptScript, you write one `.prs` file and compile to all 50 targets:
     ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prOwGJB3CKxwxqELM5ZkMrOQB6ACMMRgBrTjEFOAFWMQxqMThBQScACmoYAHMIWOo5QQVBMTyMYNgxQTBmakFyDDls6mYAV3iASjsXMU4sL0LgO1SZUZBhwQBNNsFEmFnWQSI0D29egDcYKGYVuoB3WvDXbME2QVx5gEEABQBJbQ91iEYYCgmx0dZbe1ZuWP8EkkUkNFoIWL1JCIoP5sq0MNl4JJkDIACpyFYAZUYnjQmhAAF06Od4P1WNkkTIAGpeEkyfGCb7fbpZfLPfpsYETYoyAByME2dWWzDgVzugkicjgn1S3JAlyge0aKXWGCg4mw81caFaeLs1hA1kJBHYBXwRFI5FeNHoIAFcAgbHwRgNQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prOwGJB3CKxwxqELM5ZkMrOQB6ACMMRgBrTjEFOAFWMQxqMThBQScACmoYAHMIWOo5QQVBMTyMYNgxQTBmakFyDDls6mYAV3iASjs7FzFOLC9C4DtUmTGQEcEATTbBRJg51kEiNA9vPoA3GChmVbqAd1rw12zBNkFcBYBBAAUASW0PDYhGGApJ8bHWW3tWblj-AkkilhktBCw+pIRFB-NlWhhsvBJMgZAAVOSrADKjE8aE0IAAunQLvABqxssiZAA1LykmQEwQ-H49LL5F4DNggybFGQAORgWzqK2YcGu90EkTkcC+qR5ICuUH2jRSGwwUHE2AWrjQrXxdmsIGsRII7AK+CIpHIbxo9BAgrgEDY+CMhqAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

@@ -283,7 +283,7 @@ For incompatible block shapes, the existing target body wins. Under syntax
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AZXdqRhgw-hZqGAB6dTcManE4ergYRjdqE0cffjq4LF7GLAg2ZUCrXgBacJAAORgANxhqXiI0Zk7ZLrrTPMLWYt4AFRb1YTCKeppmACsurCpaU-43XZrmOsbm1vanW6vSwjmCfAAFHV1EoRmD5uIlBgAEawGRgH72KBOFzuTwASgGQxGEDGE1YUzi8wiADFmFAoBZeAB5ADqAEESgAFXhNCBSKAQVjwI5FVh8ABK8DcUCwYjAHA2QmoV0Q72Jo3Gkx0bBEQuUyOYuGMHBIyghch6lRUEFoWDoChwnAUl2E+JA+QAugxOHD8ERSOQYK96CA1rRyfhUh6gA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AZXdqRhgw-hZqGAB6dTcManE4ergYRjdqE0cffjq4LF7GLAg2ZUCrXgBacJAAORgANxhqXiI0Zk7ZLrrTPMLWYt4AFRb1YTCKeppmACsurCpaU-43XZrmOsbm1vanW6vSwjmCfAAFHV1EoRmD5uIlBgAEawGRgH72KBOFzuTwASiKviGIwgYwmrCmcXmEQAYswoFALLwAPIAdQAgiUAAq8JoQKRQCCseBHIl8ABK8DcUCwYjAHA2QmoV0Q7xJo3Gkx0bBEwuUyOYuGMHBIyghch6lRUEFoWDoChwnAUl2E+JA+QAugxOHD8ERSOQYK96CA1rQKfhUh6gA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -302,7 +302,7 @@ When you provide an alias, imported blocks are also stored with a prefix for use
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+Nzg7fhZqGAB6LEc0eEZqCDQsMWVTYL4ACmr1JSxqR14AWl5xJQwAI1gZMGZqeygnF3dPAEpi3gA5C15Hdx0MKyIOT2MyRY4ZWeZGAGs4H34zzhlTCjgRTwxqcWUgSsCngWAgrHUYWAOmYADcYGp1DAwgBObK8QoFED5AC6DE4Q0c+CIpHIMCotBADHhtAgbHwqWxQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+Nzg7fhZqGAB6LEc0eEZqCDQsMWVTYL4ACmr1JSxqR14AWl5xJQwAI1gZMGZqeygnF3dPAEoi1j4AOQteR3cdDCsiDk9jMkWOGVnmRgBrOB9+c84ZUwo4EU8ManEykCVgU8CwEFY6jCwB0zAAbjA1OoYGEAJzZXiFAogfIAXQYnCGjnwRFI5BgVFoIAYCNoEDY+FSOKAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

@@ -394,7 +394,7 @@ For self-hosted GitLab, you can use the built-in `CI_JOB_TOKEN` for repositories
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUnAD0Yamw6sp8sRLgBPdhkKz5ARgoAGa7tYBfMWIDEggJLihJAK5QsEAFpIWEE4fm80OkEDZm9BAHdYqClJVhwYaggsRBdBbgg0jKy85moAcxUAIwwwiVcACmoYMog4LGoDQQDBKVaMStgUsFLBcgwDMo1vbQBKMXypTn8sTtFxORBdTfWATVjBDCaDwXVNThTFgDcYKGY0PnZBIjQMrAo9QQBRQhfqfzDZAAlGAYRhYKIAFQMLwAyoxMmhwYIIRhoPEClIAMIwmEfLZ2RyseYsdhELDCD7qUgwRLUADWZhAwNB5PMAA47BIoBhWGVvBgyjBGVDYfCIIjBABWTmhFZQAplYWoqDo7TY3HbewgewAXQYSw6+CIpHIMCotBADGutAgbHw5m1QA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUnAD0Yamw6sp8sRLgBPdhkKz5ARgoAGa7tYBfMWIDEggJLihJAK5QsEAFpIWEE4fm80OkEDZm9BAHdYqClJVhwYaggsRBdBbgg0jKy85moAcxUAIwwwiVcACmoYMog4LGoDQQDBKVaMStgUsFLBcgwDMo1vbQBKJ1Z8qU5-LE7RcTkQXS2NgE1YwQwmw8F1TU4UpYA3GChmND52QSI0DKwKPUEAUUJX6n8wrIAEowDCMLBRAAqBleAGVGJk0BDBJCMNB4gUpABhWGwz7bOyOVhibgsdhELDCT7qUgwRLUADWZhAILBlPMAA47BIoBhWGVvBgyjBmdC4QiIEjBABWbmhVZQAplUVoqAY7Q4vE7ewgewAXQYyw6+CIpHIMCotBADButAgbHw5l1QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -455,7 +455,7 @@ targets:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMArnCzM+1ALRpm1AVHliJcAJ7sMhWfICMFAAy39rAL5ixAYkEBJcUJIKoWCHVIWEE4fgU0OkEjZgVBAHdYqClJVhwYaggsRDdBbgg0jKy8jlI4AHowajYOViluazsbCXcACmoYAHMIZWojQXVBKR6MACNYFLBtQXIMI07qhTqASjFuFnYiLGEDGeqAKxhGbLkQAGElFTVBAAVtXQdd-RAHCQBlGCgwdTDqADcIIwYDN7hgoIIptRBABBM4AWQAooJGJdVBk4BRdgAxGDYBQdOCyDCMFhLbYkDCsDCdGB8dhRbRSdFROARLQ6THiU7PMTOVhrOA4e4orBwHZc+TldkPJCnADq2gA1oI2CCdGCIbisPj4A5HCBHABdBicLB9fBEUjkGBUWggBh-dEQNj4SwGoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMArnCzM+1ALRpm1AVHliJcAJ7sMhWfICMFAAy39rAL5ixAYkEBJcUJIKoWCHVIWEE4fgU0OkEjZgVBAHdYqClJVhwYaggsRDdBbgg0jKy8jlI4AHowajYOViluazsbCXcACmoYAHMIZWojQXVBKR6MACNYFLBtQXIMI07qhTqAShdWbhZ2IixhAxnqgCsYRmy5EABhJRU1QQAFbV0HPf0QBwkAZRgoMHUw6gA3CCMGAzB4YKCCKbUQQAQXOAFkAKKCRhXVQZOAUPYAMRg2AUHTgsgwjBYSx2JAwrAwnRgfHYUW0UgxUTgES0Oix4jOLzEzlYYm4cBwD1RWDgu258nKHMeSDOAHVtABrQRsUE6cGQvFYAnwByOECOAC6DE4WD6+CIpHIMCotBADH+GIgbHwliNQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
