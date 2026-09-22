@@ -339,8 +339,7 @@ function precedesNegativeExample(content: string, offset: number): boolean {
   const lead = content
     .slice(0, offset)
     .split('\n')
-    .filter((line) => line.trim() !== '')
-    .at(-1);
+    .findLast((line) => line.trim() !== '');
   return lead !== undefined && NEGATIVE_EXAMPLE_REGEX.test(lead.trim());
 }
 
