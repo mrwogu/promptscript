@@ -1017,6 +1017,9 @@ async function compileCommandWithResult(
         writeResult.created.includes(legacyMigration.hooksPath)
       );
     }
+    // Tracks a cleanup that could not run at all; the run must report
+    // failure, not success, when obsolete outputs are left behind.
+    let cleanupIncomplete = false;
     if (resourceKinds.size > 0) {
       // Managed cleanup compares the disk against the full plan; a filtered
       // plan would classify unselected files as obsolete and delete them.
@@ -1061,12 +1064,17 @@ async function compileCommandWithResult(
         );
         if (!options.dryRun) {
           process.exitCode = 1;
+          cleanupIncomplete = true;
         }
       }
     }
-    // Report success only after every output and cleanup step completed, so a
-    // write-phase failure never follows a "Compilation successful" line.
-    spinner.succeed('Compilation successful');
+    // Report the outcome only after every output and cleanup step completed,
+    // so a write-phase or cleanup failure never follows a success line.
+    if (cleanupIncomplete) {
+      spinner.fail('Compilation incomplete');
+    } else {
+      spinner.succeed('Compilation successful');
+    }
     ConsoleOutput.newline();
     if (writeResult.unchanged.length > 0) {
       ConsoleOutput.muted(`Unchanged ${writeResult.unchanged.length} file(s)`);
@@ -1096,7 +1104,7 @@ async function compileCommandWithResult(
         compileCommandWithResult({ ...options, watch: false }, services)
       );
     }
-    return true;
+    return !cleanupIncomplete;
   } catch (error) {
     if (error instanceof Error && error.name === 'ExitPromptError') {
       // User cancelled with Ctrl+C during prompt
