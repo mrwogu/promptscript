@@ -60,6 +60,12 @@ Aliased imports qualify imported agents so repeated local names remain distinct:
 @use ./backend-team as backend
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODsKAHpVNg5PAFoOUjFlavZOb19S8oqAIwxGAGt2hpgmjGU+wfaQfLp0bDxEcFc2+saSKloQBhZVrB5eAGU3NHIIaVl5W14iUnI7ag9lHBhqGApeADlmLHsMal+zDAChevHEzEYbi0IiwEDYdDEnl4rB+Yl4bwwUD+gw072KQhEvECVhCKWWNWG6zywTgCREyXCIHSWVyIDiJAghAgrDCWEeMB8hV8cBEnn+4mUxOCLCkYWQEQAClB+jAcMwoFJqLJReJxREALpxDgi7nqOWK5WMVXqzXajBi6jeECGgrFN4i6gQRiwtiSuJ1RlKlVqjWvdHwPlen2sPL5GZzECYXD4SZDNajDY0ehMClcJZ8Y6nKDnGRyEF2W7RB5PXgvN4fb6-TAAwzA67gyHQ7Bw1gI+0yFG-UQYrGYHHqPG+AkBOIQUKM1OUjPU+KJBlpTI5Fccrk8hT8wXFEX98V+kkymDmkBBq0h23Hh1Ol3BY2w1hm3jy6+W62hrUP3VHQNQ9fHdSNvR7M9ggDC1gxtMMwM9CC2FjGZ9QYTg+UcfBK3uTZswAN1eOAe3wVIZiAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 An imported `reviewer` becomes `frontend.reviewer` or `backend.reviewer`. Unique unaliased names
 remain unchanged. Conflicting unaliased definitions produce a source-aware diagnostic instead of
 silently overwriting an agent. Native output maps dots to hyphens, for example
@@ -74,6 +80,12 @@ Namespaces can be nested through aliased imports:
 # project.prs
 @use ./team as frontend
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4OUipaH343ODsKAHoIVlYYagBaUpIxZUbm6iLWPhpmACsYRixyuErq2rqOrpVXdk5xEHy6dGw8RBAelvaYMpp6JjYOLh2+AGU3NHIIaVl5W14iUnI7ag9lHBaYCl4ADlmFh7BhqKDmGAFL9eOJmIw3FoRFgIGw6GJPLxWCCxLxqIcoGDGABrDT-SpCES8QJWEIpXZNfYdPLBOAJETJcIgdJZXIgOIkCCERphLBfGA+Qq+OAiTzg8TKWnBFhSMLICIABSgGEYMBwzCgUmosjl4gVEQAunEOLLGup1VqdXqDUaWqaMPLqN4QNaCpUCbLqBBxmjWEq4q1udrdfrDcb8fBxSHUWw8vk1hsQJhcPgOpMQAwWMsLiBrrd7o85DC7G9op9vrxfgSAcDQZgIYZoS94YjkdgwxjPTIcaDRASMETMKTyRRKf4aXEIKFuSyBXT2YkuWlMjlWbwhSLWGKJVLKrLhwqI3TVTBHSAYy74+6L16fX7grbUawHbwNQ-nTjN0TVfc1vStM9fEDZNQzYa9gijJ1Y1dBNoODWDWHTNZLQYThxUcfA6w+AsGAANxaOAw3wVI1iAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 The inner team's `reviewer` resolves to `frontend.inner.reviewer`. Agent references are rewritten
 with the same qualified name, including `agent` fields and `handoffs` entries, so references do not
@@ -283,7 +295,7 @@ For incompatible block shapes, the existing target body wins. Under syntax
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AZXdqRhgw-hZqGAB6dTcManE4ergYRjdqE0cffjq4LF7GLAg2ZUCrXgBacJAAORgANxhqXiI0Zk7ZLrrTPMLWYt4AFRb1YTCKeppmACsurCpaU-43XZrmOsbm1vanW6vSwjmCfAAFHV1EoRmD5uIlBgAEawGRgH72KBOFzuTwASiKviGIwgYwmrCmcXmEQAYswoFALLwAPIAdQAgiUAAq8JoQKRQCCseBHIl8ABK8DcUCwYjAHA2QmoV0Q7xJo3Gkx0bBEwuUyOYuGMHBIyghch6lRUEFoWDoChwnAUl2E+JA+QAugxOHD8ERSOQYK96CA1rQKfhUh6gA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AZXdqRhgw-hZqGAB6dTcManE4ergYRjdqE0cffjq4LF7GLAg2ZUCrXgBacJAAORgANxhqXiI0Zk7ZLrrTPMLWYt4AFRb1YTCKeppmACsurCpaAbddmuY6xubW9s63V6WH6J18QxGEDGE1YUzi8wiADFmFAoBZeAB5ADqAEESgAFXhNCBSKAQVjwI5FVh8ABK8DcUCwYjAHA2QmoV0Qp0G8Eh0MmOjYInJygARsxcMYOCRlAAKOQ9SoqCC0LB0BQ4TgKS7CACUIHydHQ2DwiBAXx+TRabQ6XR6fVe9CYws4WB4vBKbjQ5Ag0lk8lsmyi5Ds1A8yi1dQovEWkvsLWZzDAmrs4mY3S0InGbA1GE8vFY8dEdQwUATjAA1hoYBQBkIRLxpsESSkLbUGtb-nagX08sE4AkRMkFuksrkQHESBBCOSwiM3DAfMd+MN8+IbXCZiwpGFkBF8VAMJUcCipBs154bREALpxDjDcnqPcHo8ns-rWQiK+tW-LgYQqMOawk28ILIex4wKeUDnrwgFQsBRyGjeDButQjj4EQpChk6IAMGstAwvgqSGkAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -302,7 +314,7 @@ When you provide an alias, imported blocks are also stored with a prefix for use
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+Nzg7fhZqGAB6LEc0eEZqCDQsMWVTYL4ACmr1JSxqR14AWl5xJQwAI1gZMGZqeygnF3dPAEoi1j4AOQteR3cdDCsiDk9jMkWOGVnmRgBrOB9+c84ZUwo4EU8ManEykCVgU8CwEFY6jCwB0zAAbjA1OoYGEAJzZXiFAogfIAXQYnCGjnwRFI5BgVFoIAYCNoEDY+FSOKAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODt+FmoYAHosRzR4RmoINCwxZVMi1j4AOQteR3cdDCsiDk9jMmZqDhkAIyhmRgBrOGKxzhlTCjgRTwxqcWVAqwV4LAhWdTDgHWYANxg1dRgwgE5s3kKCkHy6dGweEQIAq0xqdQacCaLSwVFoIAYLHYnCwPF4AGU3GhyBBpLJ5LZeERSOQ7NQPMocE8YBReH02pgZoYwAoqbxxEs3FoRBc2HQxBNWMw2qIqhgoPYMCsNDTikIRLwTsEIKFwiDKuD6o1mq08sE4AkRMk1eksrkQHESBBCJcwlhyTAfN9+LsRuIDkdFXEWFIwsgIgAFKBSmA4ZhQKTUWR7d2HCIAXTiHF2l2uvH9ICDIbDEae0bdHoTTuKVV2zUYvNYxziAFo1VnGKHw5HeKX7RAKxA2Hl8r94wwUdRHPhidEaTR6CBHrQu6x8KlfkA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -382,7 +394,7 @@ declarations:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34WdiIsXkCre1cAKxhGLBSQAGEcBoBrdwqAZRhqADcIRhg84NiQCJ6cDGppHTYOQgqMNDQYWeVsBRwle2YIbUOduwAjZnFHCgmx3gBacJAAaRgYNHsnLQrxbFFuwzAvCgzHUcFu-DccDsFAA9BxSHdSkssHFOENXKwvmEaBc3I0IGwfPkQPkALoMThYaiOfBEUjkGBUWggBgDfpwAmsfCpElAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34WdiIsXkCre1cAKxhGLBSQAGEcBoBrdwqAZRhqADcIRhg84NiQCJ6cDGppHTYOQgqMNDQYWeVsBRwle2YIbUOduwAjZnFHCgmx3gBacJAAaRgYNHsnLQrxbFFuwzAvCgzHUcFu-DccDsFAA9BxSHdSkssHFOENXKwvmEaBc3I0IGwfPkQPk6OhsHhECB4SREYtylRaCAGEjOFgeLwem41lAIPM5CdeERSOQ7NQPMp2nMKLwAHLMCqYagVZiA2y8cTMRhuL7YAmsOhiTy8VgKsS8OYYKAfRgdDQwa6+IQiSpxCChR40ullZa3OAJETJR7pLK5SbVEgQQiHMJYcWjArFOAiTyzcTKKrBFhSMLICIABSgGBGOGYUCk1FkKZ+1G8IAAunEOMnDupcwWiyWyxWqxhU7WIo3E745snqMMsPqM3EHh3izBS+X+hb4HGJ-q8sT8vWGGzqI58MLog6aPQQAN+nB9fhUiSgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -1656,6 +1668,12 @@ inside `@extend` to replace its complete prior value:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEDWYArGIywzBcAJ7sMhSTICMFACwUADKoC+U1le4RWOGNQhZBFAPQsyGVuoC0AIww4GCsbIg5WMTUBSIxqMThhK0FBDjgsOwBzAEJJZBkAVWDBADVneBUQAF1kwSg7DNZMvMLigFEAZQAZBpka1nMQczp0bDxEJmYvHwCgmCpaEAYWdk4sfABiQQ6AVzRyCBgouGZUh0EiUnIYQWod1kSHannBADlmF0xqF2YwM5uxMxGDs+FoMmw6IJvFFWB8obcYBgoIJMIwANYYTLzGx8ARJVgpcS6SbTPyBYIyWoaLQ6aQgAwAVlMlIJghIEEIdkkWDuIQGNnS0LiCXxKRYYhgLRAAAUoBhGDAcMwoBLqNEhfE+rU0o1moJ8jK5QqlSrHOrYprqlZLKxuM90k5lBA2IlgLVfHTZfLFcrVQiHRAnWwWYNzFUGGtqOp8JcyJQaPQQAA3RxwZ2sfB6IZAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 `testing!` replaces the inherited `testing` value. Unmarked `linting` keeps the normal merge
 behavior. Replacement also works after `@use`, with aliased imports, and at nested target paths:
 
@@ -1666,6 +1684,12 @@ behavior. Replacement also works after `@use`, with aliased imports, and at nest
   frameworks!: ["Vue"]
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODsKAHo4HAxqaTFlatrpIt8iDk9ZGrrxCjgRT1rxOAosZmYoCFZ1XkCrFTUhc2ZqAGs4AEIw5AiANTcYCIBdH3yQfLp0bDxEECaeqloQBhZ2TiweXgBlNzRyCHqcgUODsRFI5Ds1A8yhBdQovAAcswsPZaijmGBgXZxMxGG4tCIsBA2HQxJ1WMixLw6hgoKjGKsNDAKMUhCJZnEIKFwndui0QHE4AkRMkeeksrkBfMSBBCFMwlgoYcCsV+hhBtRhhz5iwpNsIgAFKAYRgwHATKTUWQDcRDY5xDj9KbqfUgI0ms0WmBWtUa7wgE4q3x1frUCCMIlsZRzYIAWh57tN5qglup8EV4cjrDyZ3yRwY72ojnwYOizJo9BAADdvXBiax8KlzkA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 If the field does not exist, replacement sets it. Later overlays operate on the resulting value.
 The modifier applies only to direct fields in regular block extensions. Skill properties retain
@@ -1965,6 +1989,12 @@ PromptScript supports Go-module-style bare URL imports in `@use` and `@inherit` 
 @use gitlab.com/myorg/prompts/@stacks/python
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKABjNaAvlNY2AxIICSZZtSyCw1ZiUFC0AVwAjKAhGQQBxCCwACSDBahg0ZhtufzgYQQBzKJwgihYSAHoMRj5CuBwMBLEFOAFWMSqxOELuTwxMvnYW9MZ-aii5G3snFzcPLx9IrAAZDECUtIzsrCh5-O9C+VdMwuUyLBbuOpKAaxa0OVw2EEs6dGw8RBAV3MCNopKyiqqYGpOGk0ju1OpxDuV1P1BlRaCAGCx2GD8A4AMr+NDkCB-bTMQS4DJEUjkDLUfysOCCHAwBIUQQAOWY7kw42YYDxVMEYmYfS6AiwEDYdF8DUErEZvniMAwUEEmEYpw6MAoKT4AmENkEogk0heOTyBWKpRg5Uq1Vq9Ua1GarRBvJ6kIGWCGIA12l0AgMOpMAFYLC7WJqSBBCBBWJIsKSYDZrKxjhageqA4IWGIYJJkDIAAprRgwHDMKCp6jaeNWmQAXVdHDqocy6azObzBaLJYwgLLIErrBj3ASdQGGgF5MTmoUOuzJSbhepkv7oX5bBk0du9xAmFw+BWa3eBu21F2+zQ4LjZwuV3zrBh9CYbA4XGeqPRmOxcFx+MEhLIsHiZIpVJp9Lisy7isuyGRcjyYLYEOQptmIorikICTSrKZyKsqsaqkIwCuuIhi6qs6y7nIOx7JMR5HCc8pntctj+pqOh6J6xgUL6phLkmQYhmGeKRtGKQApazQjsmzCpvWIATrm+bTsWglNBWVbwPyrB1oIGaSY2MktvJHZdj2fYRvOQ4UjhSZjg2k7aTOhkDgudHLpY5YMGC1ByPgn7ElecIgAAbtScBDvgRi3EAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Extended Version Syntax
 
 Append a version specifier after the import path with `@`:
@@ -1979,6 +2009,12 @@ Append a version specifier after the import path with `@`:
 # Branch
 @use github.com/acme/shared-standards/@org/base@main
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AUWJGLAUNH343ODt1Exw3ACMKXQB6DEYhDrgcDGppAFo4EU9B8TgO-mZqdQ6WjHr+dIAmHKLWPgBlGBIANxhqXjVWdTsACihseErdTCwIFth7bEYcAEoauoam1vazBIXR6MD6AyG4lG43Ek2ms3mi2WMH4AD10tlNqxirwAEJnD4-eq8Rq4AGdbq9fqDEZjDATahTGZzBZLFYkDAQVggfJ0dDYPCIECk5ptCmg8E0qF0hlMhGs5GrCgbTE0ehMNgcLhC3ZuNDkCDSWTyWy8Iikch2ageZQ4Y4wCi8AByzEqmGolWYYAUdt44mYjDcWhETzYdDEnl4rFdYlOMAwUDejAA1hoHTUhCJeIErCEUsL-mKgSCqRDaTC4czEWyUetNiA4nAEiJkuEQOksrkG7mSBBCFywlhrTAfIVfDLYYzlDngiwpGFkBEAAo3RgwHDMKBSE4TyYRAC6cQ4Yy56gXy9X68329kFcZB9HNSGY2oEAqEDY07iwzbK+6V63Y44xfN9Q2xbt8h5PkQEeQUCzJItgUpMFqUhaF6UnOUWSRFZ0RyfC1RABgWHYTgsB4Xgdj1A0jTkH07HNaIrRtXg7SGR0XTdQZPW9U1-UDYNsA-VhwwwqMY1EIYEyTVMLgoDN-GzOIIFCNsRXJYtkMlNDdynKsFVwjF60bZsknzDtjJ7PsBwUYdH3HO8piU3M5xgc8QD-NcN0AndHIfXNjyec53M8gCb107wQEPAonzuV930-Zzgh-C9-28m9nyHUDhLySDeX5XB8HUxCSxQstpUc+FsJrQROVYKhaCIjVSO1EBdX1KBDRkOjTUYy1ThYtiHWdGN3R4+i-QDIMyKEsMIxkaNKkk+NE0wFM03k3xMwCZTVIiYrASQiVUPLDDK3lHCUQ5Lk8mCJtElbNJMks4Je37VhBzsmKHLOqckp0Zh514RcPMvdKgIi-zgkC08QrB68Ib8qL7P4TL4rAr9cxS0G0oRk40eythcp5fcGDI6hHHwPrKEIhgjloYT8FSHkgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 | Specifier | Meaning                               |
 | --------- | ------------------------------------- |
@@ -2006,6 +2042,12 @@ This means you can import skills from any repository — including projects that
 # Repo has SKILL.md but no .prs files — auto-discovered
 @use github.com/some-org/claude-skills/skills/tdd-workflow
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKABjNaAvlNY2AxIIBKMNM0E4McQQGUA0gEkAGUCKEjFBACMAVyxBVjcqWkFIWC9AFAJBDBjmBTEIOBYANxhqGDEbbii4GEEAcwhcKIiKFhIAejhmPgVmalq2xigssRgFOABraCg4DsmoabasMTEFAHde8bAoZlWQSzp0bDxEEHrG5taOrtHe-sHh0Ympmaf5maWV9epN7dXE+iYbA4XBODm8UTQ5AgZW0blwNSIpHINWoUVYXhwJRgFEEADlmLFMNRYswwIJ4YIxMxGFE+HosBA2HRMqxwvFYkJShgoIJMIxxhhatiKnwBMIbIJRBJpKcGjgmi0uldurcBkMoiMxnMFq8Fh81hstjsZBLtLoBAYZSYAKwWECmkgQQgQViSLComA2aysbhwASsjDUMReYCmlgjSTIGQABSGjBgOGYUBG1G0-rEgfKIAAuqaOH6XbVIzG4wmkym0xgA0GZLnWN7uKU-dQIBpGejxaxJQoZbGMPHE8mSoIm+7Wwy2Cb63tswxOO65PhEWRKDQAcVaO38EY9kA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Alias vs URL Import
 

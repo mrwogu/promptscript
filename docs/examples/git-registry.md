@@ -394,7 +394,7 @@ For self-hosted GitLab, you can use the built-in `CI_JOB_TOKEN` for repositories
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUnAD0Yamw6sp8sRLgBPdhkKz5ARgoAGa7tYBfMWIDEggJLihJAK5QsEAFpIWEE4fm80OkEDZm9BAHdYqClJVhwYaggsRBdBbgg0jKy85moAcxUAIwwwiVcACmoYMog4LGoDQQDBKVaMStgUsFLBcgwDMo1vbQBKJ1Z8qU5-LE7RcTkQXS2NgE1YwQwmw8F1TU4UpYA3GChmND52QSI0DKwKPUEAUUJX6n8wrIAEowDCMLBRAAqBleAGVGJk0BDBJCMNB4gUpABhWGwz7bOyOVhibgsdhELDCT7qUgwRLUADWZhAILBlPMAA47BIoBhWGVvBgyjBmdC4QiIEjBABWbmhVZQAplUVoqAY7Q4vE7ewgewAXQYyw6+CIpHIMCotBADButAgbHw5l1QA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUnAD0Yamw6sp8sRLgBPdhkKz5ARgoAGa7tYBfMWIDEggJLihJAK5QsEAFpIWEE4fm80OkEDZm9BAHdYqClJVhwYaggsRDFuCDSMrMFuZmoAcxUAIwwwp1Y8qU5-LANhPTkQXU7xQQBNWMEMahhBwXVNThTGgDcYKGY0PnZBIjQMrAp2gFFCNep-MNkAJRgMRiwogBUDNYBlRky0C8FLjGh4-KkAYVvb9q67I5WLkWOwiFg2j11KQYIlqABrMwgE5nCHmAAcdgkUAwrDK3gwZRgSOudweECeggArFjQi0oPkyiS3lAPtofn9uvYQPY6OhsHhEApShVqmEqLQQAxQVosPhXLcIuQIDAUnBmIJcCMiKRyCNqN5WHBBOlhhRBAA5ZgQzD7QTMMCa9KCKTMRjeJYCfxsKK4lKsa2jYYYKCCTCMeGEmCbep8ASQiTSJElcpVGowWmGYymDqWKm2boSEgQQj5WRYA0Zhy5OACbRDKTG0Q9FiNWTIeQABRxjBgOGYyQydL9DfkAF12hxa4z212e32B41qMP69QdCAJ9X6sNa5lzhA2E32gEOt2zgvB8udxWIPu2ICeWOGE1qAZ8DqyJQaPQQLNaAfWHwcweSAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -453,12 +453,6 @@ targets:
   "/portal": "Work on portal features"
 }
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMArnCzM+1ALRpm1AVHliJcAJ7sMhWfICMFAAy39rAL5ixAYkEBJcUJIKoWCHVIWEE4fgU0OkEjZgVBAHdYqClJVhwYaggsRDdBbgg0jKy8jlI4AHowajYOViluazsbCXcACmoYAHMIZWojQXVBKR6MACNYFLBtQXIMI07qhTqAShdWbhZ2IixhAxnqgCsYRmy5EABhJRU1QQAFbV0HPf0QBwkAZRgoMHUw6gA3CCMGAzB4YKCCKbUQQAQXOAFkAKKCRhXVQZOAUPYAMRg2AUHTgsgwjBYSx2JAwrAwnRgfHYUW0UgxUTgES0Oix4jOLzEzlYYm4cBwD1RWDgu258nKHMeSDOAHVtABrQRsUE6cGQvFYAnwByOECOAC6DE4WD6+CIpHIMCotBADH+GIgbHwliNQA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ## Alias-Based Import Workflow
 
@@ -535,6 +529,12 @@ URL imports work without any alias configuration:
 # Versioned URL import
 @use github.com/acme/shared-standards/stacks/typescript@1.0.0
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWIDEggCIRqWrIICqAJQAZSTJmam9AFAJBVmZBDCgIDDgomBgpVLFuAFc4GEEAcwhcTIAjChYSAHoMRj4KuBwMTyllOAFWKUapOAqwagw8vnZunMZM6kLFR1YXAHk0ThbmMcZcuABraChYzKxmZSkIOBYANxgmwV7mEkEAZQBpAEkAgIoSKQzs3IKi0vK6q5gylCeQqjCgGEyaRaGygUGGMLhFSwUmaAHdQmswFBmKipi4AGpnOAQNipXyBYJoUI6VhZHL5Qo4EplK5VGowOoNJotNodahdOoCRhrbpYRTzI7jNBYbgWayWEB2OjobB4RAgb5M36s6q1eqNVI8jDtTrdXr9QZYYZaMYTKi0EAMFjsThYfAuG6ZNDkCBkuAxXC5Iikci5aiZVhJHBnGAUQQAOWY3kwYUEzDAgkDgikzFGluwJNYdFi7SiSdigk8cUEmGF-VjGT4AmEekkMjkGsZzL+uo5+u5rWNfIF5oGruto3GYts+kMAhMHYsAFYbCBWyQIIQIKxZFhwzAxA5aYOTfykqJxIIWGlZMh5AAFcErHDMKBpaiCE-D+QAXVbHFabc8lvB8nxgF83zOT9eU6X9DwyTxWnGbRC3PVtlA7R9qnA1930reA9wgFC2FsOxFWVEBMFwfBNW7Vl-T4IFqBBMEIShdZNnhTikRRZR0WoTFsVRe16CYNgOC4dUPS9H0-QDaNBGDMhYErCMoxjONE2TRpvHTTMFJzPNXQLNhiyHMtvCEKstlrNZ6woRt+CEC8JGkUxOx+FlKgYwFgVBcFIUBDjYS4kKeLRDEsRxGdPznYx3OXVd103bdd33eDjxgs8W0va8YBAkAsOfXCoK-WCQD-S8AKwICCqKnDII-Mr+Tg+wEII5CarYNDLww0DsIgvDEMI4jWFI8iVWo9VaO1Spe05A1mmagVB2FUVxXgRgpRlOUrBEx0xJdSSQGk714jk-Sg2IZSwzUwRo08TTyxTXSMyzQzMnzLqixLKQLIraya2qOy8gbWkm2c1s3I7GavLZPUuUNZbhiFEUkQ2yUIGlWU9ssGKDCMBdzAoFc8bXS8Ny3HdM3StrMqHU0cokPK6rAwbSqy94Kv-AjasEO9CrZkqms51qj24YbOtQpnBD6wWBuF-CkKI77xrsH8GFdahFHwJTQ32hhTloQt8DMRUgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Debug the resolution chain with:
 

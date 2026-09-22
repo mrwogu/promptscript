@@ -264,6 +264,12 @@ Build organization, team, and project layers with deterministic merge rules:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34IVhwYahMBXUxWRwB6BywwZmoSYrc4O34OUnqAIwxGAGtOb19Ou3UTHDd+il16oaEl9U4sAFo4YegoOHrxbAxBro3qGAA3CBhzfnSAZhyi32YLisqpWRFPDGpxOAoHDgWFK6l4gSsvGQEQAql1eAA1EzwLAROjhEAAJRgAEc3BBzrwAJwZACkOleFQ0MAiAF0fIVWMUiBxPF8MD8-soIcEgSDWOowtCsR5rBwXNgIEY+cpSrwAMIASTpDJA+To6GweEQIH4NQ5DSaLTaVFoIAYLHY6x4vAAym40ORrjI5ApyrwiKRyHZqB5lOVzhReAA5ZhYey-cPMMBuuziZiMNxaEQgtjojkyVhhsS8c4YKARkbUijFIQicFxCChDF65hkA2NKDYY3tEBxOAJETJDHpLK5NuQkgQQilMJYX00grFYEZ37-CuQlhSIURAAKTcYMBwzCgUmo7M53hA9MhfNBK5A66GW53e4Phz+KqnvnOwMqjFTrG5cQ2GKvm+3XcKlzFF30-PJ8jVDUQEwXB8B6GA+kGEYxlNegmDYVksBte1HSgZ1ZHkWwPSib1cz9XgAxgINQ3DTBqCjGNiPjRNk0lNMxDZLNw1EPMC0wIs1hLXwywCStqwiBCkKGUZPDyYIO0Sbs0kyJ4B2CIcR1YMcJwZadvgfeceQpZcoTXDcbyA-cZ0PJ9eRRc8zMvCzALvGzDKfRl+FfccIA-KUvwXYJf3M69XOAnywICiCoM1OCdWmXA5gWOslkYFZqXYLYdigPYDiOE4YDOS5rluB4cjQ80MKtLgdT4XCnWkQjYxIr1YHIwKqJo7N6MYlqWKTdZ2NYdMuOzXjEP4mTi1LfwgpCFIQES2Z5kWZYYFWdZst2fZDhEQriquG47goR5+3bTskkW3s1LiTTRwUXTn34dy52-RdmFM4V-0styDLnOyFAcgULx+8LrP+x9jz0l9QL8z93uCv8XNvCK4f8tgYvyWkGHWahHHwT1omomh0LeWgAvwVI1SAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 - `@inherit` creates a single-parent base chain.
 - `@use` composes multiple local, registry, Git, or Markdown resources.
 - `@extend` merges selected paths and supports skill-specific overlays.
@@ -300,6 +306,12 @@ Import versioned skills without copy-paste:
 ```promptscript
 @use github.com/acme/agent-skills/security-review@^2.0.0
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODt1Exw3ACMKXQB6DEYhRvVOLABaOABraCg4erLGN2oTRw7qGAA3CBhzfgA9ACYcnJB8unRsPEQQCtwauuYSRuaYVvau3qh+wZhh0axxyZm5xZXs1Zp6JjYOLl2fAAym40ORZjI5AocHYiKRyHZqB5lDDJhReAA5ZhYewYag45hgaF2cTMYZaERYCBsOhiTy8VjYsS8SYYKC4xjdDQwCjFIQiXiBKwhFJ7SqHBpNFrc9hXPoDIYjMYTaazebLVa5EBxOAJETJcIgdJZLVxEgQQgQVhhLBImA+Qq+OAiTx48TKIXBFhSMLICIABSgTRgOGYUCk1FkLvEboiAF04hxnVb1L6A0HGCGwxGoxhXdRvCAEwVipNnaNGFS2B64h1DYHg6HwzBI2XbRBK9TWHl8us4wx2tRHPg4dEed8QAwpi24F38Kl1kA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ```bash
 prs skills add github.com/acme/agent-skills/security-review@2.1.0

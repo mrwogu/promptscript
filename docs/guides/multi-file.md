@@ -81,6 +81,12 @@ Split by type of concern:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1UgSATwC0shUsuHeca+wyFzlgIwUADAHOrAC+6uoaEKw4MOJYvBosZBis1lJgguycJuGsfACSZMzU8dTwaGxwEABG0BBY1rwZGADm2uxqmgCucDD86dSt7SJSvYxdcdYRPX0UA0OcIxxwWFEt0739zW2LcFImzOPD2BBsG7PzOx1SLCYwtivWsLmRd+z1jQasRs4gwUYATWYXV4GDKoNcnFO1F4dwAbjAoMw0LFeGxeLg+gBhHpYISogAKxV0UAxMFIFBcv2CYVYERYWUI8S+Rgciiw3hAOJW+JhRJKGCg-14ZQqVTx1GsnJa9RwXWqFCSNyEmFSN1xvPsxMFNJAITo6GweEQIESKpSaQybA4rBMKhADAZNqwPF4AGUumhyBAYCZXMwMTFeERSOQ+tQuqw4LwYmUKLwAHLMeKYEposCBvoHI6LE5sOig228VjJiFlQW8TCMADWrRglM02l0+hcpk5ZuSaqtWVtwrcHi8FhAfgArEE-t9eCQIIQouYsBGYOpaRoVikTGCTNGWbxbjBzMhLASoBhGDAcMwoHcYWvbZvLABdFzLVasFoHo8ns8Xq+o28b6gchAJ9QgiMoVnEJRTijFtJ1sIdj1Pc9L2vEV4AXCAoLOCcQj1A0QEwXB8G2YY9jGCYPntR1rUWV0PS9KAfT9OAA0xYNiDIWARUjaNY3rRNS1TeJmAzNjsy6Y5VnzQs-RLeI9HLUkq1rFp6wiJs9B3NshxI3ZRkUCiGj7dxdEHXwKDHfxhWnWdWHnRdlwif9N23Fw9w-EBEO-FC-10O9AMfZ90LWDyvOQ38bz8gCgJAldwIwrCYJ3eDPyQn9UPiyCpLpHC8MNIiTV064XzWKimBorgTT4ejvV9f1M3Y0MuIjGC+PjJMUzBYTRKDcTJOggt12LUsFPJJTTxUtTGx0TTWzMHTBiuJZgrfYyB05UdxxcGy5wxBzQM0ZzANcyd3N4Q9PK-cLUKOmKgpWELztS7yItcKL72AxzNEyzDspOowUsutKfJhH7Et1fV8uNcBFtI-ZDgk3NsrKp1aKq91PVq5jWKDENOPDHiY1ifiOsrLr0wavqkYGmThvktCK2UusGy0GbYKMbTLCKkYqY8bK1tMjaLK2ycdrsvauiXA7V3e472d3Zg7lCq70t89cPpAowSrfZXgde27AulsG-vlwGwtV0H0Ky6CIfwwjoe5vY9weBpKBoehyp7F10Zqxi6pYhq8bDbjWuJ9rBPJkTKYR-rpKGuSyzGsma2Z9S2a0+audhvTnceZ4JyMftBaHTarILqcZ12hdJa+mX1blnczou82Qbe+u7snbX3yeoGXpu2WO7iq3fug-7eDNlXW+Nm3cpCB8GEWSV8CDt3aAdEAEVoaD8B8PUgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 **Security fragment:**
 
 ```promptscript
@@ -283,6 +289,12 @@ The `@use` directive imports and merges content from other files - like CSS impo
 @use @core/guards/security as sec
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4ASTJmaiwVNU1OKoBaXgAjKGZGAGtlDGo7IWp1aWsseUd3ahV9H343ODsKAHpVDS1TednGN2oTRyLWUvLK6uYSXh71JSxqHd8Zu35dTFZHNZFPbvE4eY44LAhWdV2+zQFSq5hMODEUAgGGUjTAFQERA4njEjEY8DgU1uAhYPXm6jc70+6022zEynWIHydHQ2DwiHANRWxJgGy2WEcVFoIAYLHYdR4vAAym40OQIIM5AocHYiKRyHZqB5lDKehReAA5ZhVTCHZhgaV2cRtNwrbAQNh0MQo1jasSnGAYKD2DAdDQwChTIQiXiBKwhFKM5Z1Fls7Z5YJwBIiZLhEDpLK5EBxEgQQh-MKXNwwHyFXw-DBvagfX1xFhSMLICIABSgrpgOGYUCk4wLRe8IAAunFvr9-pWa3X0Y3mzBW69xO8It2ClMej8toxfmxlH7go1B-WRy2HQuIEuLaw8vkqTSQJhcPh7sdHs825Pi59e391Fz6Ew2MisIKRWKoZL5FsXg5WiRVlV4VUPU1O1dSqfVDV4Y0NjNZdWCtQsZFtKpRB6J0XTdAZPV8b0AjiCBQjja8yELO8JyJL54D7AFk39KNEljNJMhyCNeFTdNWEzJUc1nfM6MfUt-XLGABxAWstybHd7ynLse0Yl8ZLk4cFLHWQxI7Gc834edLn3VDVziDdZKHBttPGYzF1Q49T1pS8GWvPECXokl2U5Gh3z5L8f1FcUAIQkCFVOcDIPVLUdW6OCDSApDTTqc1LWtTC7Rwx1nUwAiPS9fwJOCcjA3cmB8UJR81lZUkOR4tiY0DBNuJY4I+IzBQhNzKYlPEtcdGYCteCrKz5NHccMOUmdgmffsRs3LSJt0qbi2nHrfHs0zD3M-1LM0mzlq2g82Cc-JOwYOornwcLKD8nkQAANzHOBD3wVIqSAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### How @use Merges Content
 
 When you `@use` a file, all blocks from the source are merged into your file:
@@ -315,6 +327,12 @@ later local blocks and modification operations apply after an earlier import.
 # Result: @restrictions contains both items
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz44GEY3ahNHKloffmp4LErGLAg2ZUCrXgBacJAAORgANxhqXiI0ZlLeAEEABQBJXgBrGEc4PMLWYvtXACsyrBqN3zdpigB6UvLKrEci3wa4JogWttYOuN6IgDFmKCgFl4AHkAOozADKc146jcECkUAgrHgmwefAASvA3FAsGF6o1mq12jo2CIkcoAEbMXDGDgkBD5OjobB4RAga4VKrHEAMFjsThYHi8CFuNDkCDSWTyWzjKLkOzUDzKHCjGAUXj9an2DDULCGMAKFW8cTMcpaERE1h0MSeXisLWiBoYKDaxjLDRqupCES8TrBeEpdllTl3PLBOAJETJPrpLK5EBxEgQQhIsJNNwwHxbfjPDCeHXiT5dFhSMLICJzKAYRgwHD-KRjXP56jeEAAXTiHGeSPUZYrVZrdagDdkImbrY7BTqTxeb2Jfp6fUr1dr9dGvBnhPemxA+TbDAF1Ec+CIpHl3IYI1o73wqV3QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Alias for Selective Extension
 
 When you need to modify imported content rather than just merge it, use an alias:
@@ -329,7 +347,7 @@ When you need to modify imported content rather than just merge it, use an alias
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+Nzg7fhZqGAB6LEc0eEZqCDQsMWVTYL4ACmr1JSxqR14AWl5xJQwAI1gZMGZqeygnF3dPAEoi1j4AUUIOT1lGxghIRmMyRY4ZWeZGAGs4H34iQ5lTCjgRTwxqcWUgSsCngWAgrHUYWAOmYADcYGp1DAwgBODK8QoFED5AC6DE4Q0c+CIpHIMCotBADHhtAgbHwqWxQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODt+FmoYAHosRzR4RmoINCwxZVMi1j4AUUIOT1kGxghIRmMyZmoOGQAjKGZGAGs4YqIBmVMKOBFPDGpxZUCrBXgsCFZ1MOAdZgA3GDV1GDCATgzeQoKQfLp0bDwiBAFSmNTqDTgTRaWCotBADBY7E4WB4vAAym40OQINJZPJbLwiKRyHZqB5lDhHjAKLwAHLMNqYaaGMAKSm8cSLNxaETnNh0MSDVgMsS8KoYKD2DDLDTU4pCES8Y7BCChcLAypg+qNZqtPLBOAJETJdXpLK5EBxEgQQgXMJYMkwHxffg7DB7A5HOIsKRhZARAAKUGlMBwzCgUmosl24n23hAAF04hwdhcrrx-SAgyGwxHHtH3bGDhEkwVilUds1GHzWF6TgBadXZxih8ORsVnKs1vL5H4JhjI6iOfBE6LUmj0EAPWgQNj4VI-IA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -350,6 +368,12 @@ imported source wins:
 # Result: /test -> "Run full suite"
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODsKAHpVDS1TCoAjDDLglta+fjgcZmosRjdTXhwm3gqOOCxeAFoAPnCQACUPXg8TBXhTPJLmyurNTjqJADcMVkZpVt52zu7e-uUh5VH1qdmIxaswNygoWTcTGDyfHm8C+WDCT3GLzm7xUXx+cD+HAiIHydHQ2DwiHAaj27DgDSaMCotBADBY7H2PF4AGU3GhyBBznIFDg7ERSOQ7NQPPcYNQibwAHLMCaYHqGMAsuziZh9WrYCBsOhiTy8VgisS8fkYH6YRgAaw0ROKQhEvECVhCKWxNX2+MaZTywTgCREyTm6SyuRAcRIEEIEFYYSw3IBBWK4xO4gw1HEygtwRYUjCyAiAAUoBgzl0oFJqLIRJ4Y94QABdOJjLCB9Qp9OZ7PMXN8gtR4sRcvh3z88bUCCMKtseNxSZzDNZmA5vNa9a9-uK1h5fIotEgTC4fC7Wr4o4nM7iYn0JhsDhcLF8Wn0qCMmTM2y8dnRLk8wZ8gXC0UxibMSV3mVy-YKkqKoyOqEyiNqupZoa6jGr4poBHEEChHMm52hUO6nNITrxIk7ppJkOTYX6AZBgooY+IUviRkWsZDpaSYwLWIBjg2Tb5tR0axu2FbrNWTEsROjZThxbZlhRxTdiGfYDqwdHBCOdbjpOzaSbOMmLiipYMPs1COPgD6cgepIgIcfJwPO+CpCiQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 For object properties, later imports override:
 
 ```promptscript
@@ -357,6 +381,12 @@ For object properties, later imports override:
 @use ./strict   # @standards.coverage = 95
 # Result: coverage = 95 (later imported source wins)
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODsKAHoAIwwy4Pq+fjgRTwxqcTgKFgA3GDV1OwBeXgAOXN9S8orm6ghGLAaBZoxW9s6evo0h3gBODJ8+ACV4NygsMI3+7b3eAAoobD7jMmZqDhk5N2pGO3MIVjgAEoQPk6OhsHhECAamUqLQQAwWOxOFgeLwAMpuNDkCDSWTyWy8Iikch2ageZQ4PowCi8AByzAWmDehjACipvHEzEYbi0IiwEDYdDEnl4rEZYl41BgGCg9gwjAA1lsKMUhCJeIErCEUtDajA8sE4AkRMlwiB0llciA4iQIIR-mEsOSDQVistVh1NXEWFIwsgIgAFB4-HDMKBSaiyFriNreEAAXTiHGa-3U-qDIZgYYjTw9sfaESTbt80pmcwFbGUWuCAFpzcGFdnw5GpfBnRXBaw8vkQWCQJhcPhy-M4fQmGwOFwoXxMdioLiPgSOcTomSKbwqdLaQymW0Fsw2YSuTy+dgu8KVjJxQtRNLZfKlSq1f5vdqIKFzSOsIb4okzWkmQ5L+doOqwTouj4hS+PmcbVj6zB+rwAYgI2oYtnmMZxkWybtmmGaoVmOatrBhaJlBxRlh28xdvB2r1pmTbEU8VGzDRbA9iCCYMCi1COPgq6kmOCIgL0tBdvgqQgkAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 See [Composition and Precedence](../reference/language/composition.md) for the
 normative matrix and resolved declaration-order examples.
@@ -387,6 +417,12 @@ normative matrix and resolved declaration-order examples.
 @use ./features/checkout
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODsKAHpVDS1TCppmACsYRiwAWjg0FohIRmLS8qqYbDdqeArGHBaAa3csEHy6dGw8RHA1TU46hubWjq7GHohGKloQBhZ2LZ5eAGU3NHIIaVl5W14iUnI7ag9lKbGFF4ADlmFh7BhqODmGAFFNeOJmIw3LVsBA2HQxJ5eKwwWJeGMMFAIYxphoYBRikIRLxAlYQil1jUtnB6q5du1Ot1enlgnAEiJkuEQOksrkQHESBBCBBWGEsL8YD5Cr44CJPJDxMo6cEWFIwsgIgAFKAYRgwHDMKBSaiydXiTURAC6cQ4atl6gNxtN5st1pgtrVGA11G8IBdBWKYzV1GOWHRrG1cTawpNZotVptBPgCrjCby+QWSxAmFw+DAwywo3Gkxmc1O9CYbA4XDWfHujygzxkcjhdk+0R+f14AIpILxmChhlh70RyNR8YxWJkuPBokJxMwpPJlN81ICcQgoWFFZG0YmU1Jc158USQrSmRyN6lMrlCkVyuKQZDWtpcT1MBeiAaa+pmAZ2sGDqhs6ro5h6QEgRm-qBvajrhp+vjRrmrQJkm9Ipt66Z+lmWGxjhbAFgsToMFs1COPgA7fA25wgAAbgGcAJvgqQLEAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Best Practices
 
 ### 1. Keep Fragments Focused
@@ -414,6 +450,12 @@ Each fragment should have a single responsibility:
 @use ./fragments/misc
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5AUHJeAHFmZm9fNzg7CgB6VQ0tU0aMNAgAWhZWADdOLAg2OB9+OobmtU0huEaYaldqbpwMTygIVnUi1j5AGXJeACEJccneJpbZ9nm4LDcwMDP6i+nWucaSJUYQfLp0bB4RDgGZteadHp9QbsEasOBUWggBh9DhcYF8ADKbjQ5Ag0lk8lsvCIpHIdmoHmUOEWMAovAAcswsPYMNRmcwwApqbxxMxGG42thYXQxJ5eKwmWJeNQYBgoCzGABrDS08ZCES8QJWEIpEHvG4dLq9NjQ4ajPLBOAJETJcIgdJZXIgOJfQhbMJYCkwHyFXx3dbiVniZRa4IsKRhZARAAKUAwjBgOGYUCk1FkIk8QYiAF04hw7lt1JGY3GE0mU4t0wGsyBcwVxjK7tQIIwzXDNXFunbY-HE8nU9L4J6W228vlfv8QJhcPgrmCFktmCs1htCwj6Ew2KisDxeFicZt8XIuXYSdFyZTeNSZXTGczMGzDJyibz+YK2yKA+LJaIZXKFcq6iqr46oBHEEChHac4fIsyyrAGmzbBa8SJLaaSZDkyGuu6Chej64z+pm1DBh22rhjAxYgD2Zb9pWhGBsROZ5kOhaUdRfYVmm9E1nWvr8I2w6trCIadt2pYcQOAnNkJbBjhOAIzsC0EGncDxgOuSKbuwQy7vuuJHoS3JnmS0qXtetIMpKD7ss+3KvgKQxCmwn5ihKzK-rK8qYEqKoUGq-ikcEEG6sp7SqY8yFWqhuoOphzrathrAenh9Z+hmDEkaGOjVBRvBRlR4nlgO3GMbWzEFtsbGFbRXHpTx+G+FJI7CYFvBdiWvZFZWTUyawcl-ApQJ6tc7RfHAjAaciW46eie7YvpMjHkSxmwKZ7bmbeVmsjZJ48nyDmJB+ooyG5Up-l58aAcBfgallwVQaCHxjYwkXWkkMUYU6LoQG6SW4W43qpfwJWZXE5FVZ1NVVkR3hldq+bDJVeUdTRnHQxlTFAz1bYidq7UFZDaPY7C-XZgwQzUI4+ArbSNAboMtCwvgqS-EAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### 3. Document Dependencies
 
 Add comments explaining why fragments are needed:
@@ -428,6 +470,12 @@ Add comments explaining why fragments are needed:
 # Project-specific payment integrations
 @use ./features/stripe-integration
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AZRhGN2oTRx1maIgMVkY7ahgARzcIVpkwZmoxKCheAEEAYQBZAFF7VwArctMffjc4O34WVoB6VYqqrEci1j4AMVd2ThkOOCwIVnV7bA5qVmVVOt4pOAh1KzhHa5gJCWKzWGEYQgAtJ1NlcbndDnwAApzBYQuBocoQSCMB6OLRYawcFzYCBsODA1a8CibMAwbCVeDbLBVDEQ25EtQ3NggfJ0dDYPCIED8MGQ6Gw27qKi0EAMFjnLhC0puNDkCDSWTyWy8IikcgtDzKHAwVoUXgAOWYBMw1AJzDACmNH2YFXxJLYdDEnl4rCtYl4rQwQ0wjAA1hoYBQlkIRLxAlYQilhaKYFCIDD4HD1Hlgn9EslwiB0llciA4iQIIRbmFmW4YD5Cr5ro1xBhqOJlPHgiwpGFkBFEVAwTAcMwoFJ+s3PG3vCAALpxCV3PsDofNUfjk2yETT9sRBcFJata5VRhcl5xuIQwuD4cbicBzOn895fI8vkgTC4fC0+nHpksqm7IwMS57SvQTBsBwiogMqqpQOqMhyI6di6tEBoXsapoWn6Np2g62riC6bhuuenotj6fqiIGwZguG6iRtG-iXgmEChIWv5YAycAARArLAaBpKsDm8T5kmxY5CJFZVqwNbUHWDZLFOrbtp2cQ9jAK4gLe65jg+ykzvui6ZpKWk6SOelbgZe7zopvjHsyEBnkJakJteq53pZ-QOc+Qmvjyc4MJwzKOPgaH6uBsogAAbiaXzckKqQ8kAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### 4. Keep Import Lists Organized
 
@@ -448,6 +496,12 @@ Add comments explaining why fragments are needed:
 @use ./fragments/testing
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AeWp1DFYIAC9sCDYAeg5SXgAjDDgYH34IVhwYahMBXUxWRwbVNg5PItY+AGFmajs4EU8ManFlAAoMKDQcDFbhCEY9gEput07hpZgGkagISsYu32u7fhZlhs7GN0GWEcsz4ABUYC1VBotKYrjd+JN2JxxA0MIxXnA4BBWtATMD3vDEdMUWgBmAliQXm9irwAAquABWMEYWBUak0nFhBLsFAm7JhcFRaAgcJ5fOhnMFHFWvXUIHydHQ2DwiBAX2YZEq4yJyKotBADBYSK4qr4AGU3GhyBBpLJ5LZeERSOQ7NQPMp+ssKLwAHLMVmYais5hgBT9XjiZj-GF1Nh0MSeXisf1iXjLPb2NEAaw0MAo3SEIl4gSsIRSapGWr5U2ReWCcASImS4RA6SyuRAcRIEEIvTCWDdb0KvlWlXEGy2xbiLCkYWQEVpUDRMBwzCgUmosjW482EQAunFpVhZXOF0vXqv1wMt2OJ-ufMP+MtVoMWfVWMoS8EALQtxfLy8NzTeAB1OY82DyfJ5UVEBMFwfB1R+R5nlYV49XoJgaxNEBzUta1bTkMM7CdaJXXdXhPTzX0U0DYNQwdSNo05WNWHjMckxTUR0ygTNGBzdQ8wLfwp1LCBQhbRD7mQqk63iRJmzSTIclk7te1YftBwfbpR3WTZP2nZhZ14ecQH-C81yAnSd28EAD1LI8T2Ms8AIs68rLvWytN8Z9QLfNh9NLX9nPMq9Nx819wNYSDoKVeDVQRVxjRRNEMSxHEniBdCDUw40sB4XgLStJ4CPtcMSJdNNyMo70-QDDY6KIiMozcGNIrYxNk1ZLiIR4zA+NzfNfELAI4jE8sEqw5L0XgNLcSBWSG3k8s22UztS1UvsFE0gptO3CcAuCGcYFPUzzxXVzN3c3dPPskDHJMszztCm9dJsuzH3CsD3wO3ggtOlzns+vyorWqCFVilU1R1TwGlJahyWoSlULzGgMKNaY8tNAq8OKmRCIdcrYEqj8KIGKjaszINDHo8NGJa5i2oTGROtTbjeP4wShuEr8ywk6GSTJCkZLW+tGySZalI7Lse02gc3CHXbbz0kTDsM46nP+kLLL2667OCBzWHUE7HsAtydberynxAiLvpV36-zO02wutr6INBmLYOVfAoQ5dhBQwYUssNLDMZw7GiptPHSuIqIKrdEnquouqqZDRq6da992uZzjgIzPqOcGvwix5saWx9gUhRFEW5KbCX2xUmX1K2+XLauyceaO43HYul7rPvW6ZUNruAe1pWLZ27yXeBn6-pNnugci6Lwc9uLwH5SUmjuw2g5yjH8sK-Co8awmyITsmapo+rqbT5qM7jJmOK63PeuzAahOL0bxIicuN4N9QFrFgpVsksG5qQ0i3Ce-A24-U7hrOez027931lvI2cDu4IPNv3D6U9IozwdiPa8C93xLz3AwTk1BHD4BPjvAAbgMLEbB8CpHlEAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### 5. Avoid Deep Nesting
 
 ```promptscript
@@ -458,6 +512,12 @@ Add comments explaining why fragments are needed:
 # ❌ Bad: Deep nesting
 @use ./fragments/standards/code/security/v2/latest
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5AUHJeAHFmZlDeADEobFksajdGLDdqGB9+Nzg7CgB6VQ0tUwG+xg6TR27e-qG1TU4xjjgsCFZ1ItY+QBlyXgAhCTCAERgYNF5WeHXN2b7eQeGl9jhxkU8ManE3lilxmCTajTAYANwATAMGqssCB8nR0Ng8IhwItRm8JlMsI4qLQQAwWOxljxeABlNxocgQaSyeS2XhEUjkOwtVjKHAwToUXgAOWYWHsXwFzDACg5vHEzEmo2wEDYdDEniu-LEvE6GCggsYAGsNDAKN0hCJeIErCEUqiRssMYCsTMQHE4AkRMlwiB0llcg6zSQIIQNmFmm4ugVumsMJ9vspTcE-jAwsgIgAFBqMGA4ZhQKTUJoR8RfbwgAC6cRhG3UCeTqfTmezucjhZLod8nTWwLacrZJriAFo3SmMGmM1nOWqbu31mw8vk4QiQJhcPhnuiBmXNrj6Ew2BwuCi+OTKVBqTI5GK7IzoiyPOzOfreSrMNRhaL6ZLpctZfLFTJWCrROrNUwHU9QNXwjQCOIIBqCJl2tVcbnLPJgidRJXTSTIciQ3hfX9VhAxaENCl8cMG2jOI40rEAByHWtRxI-NvgiJtgjXCteETKjq2HOt6ILJifCI-hW2aCAOzYMizT7KtBxrEcc2EidO2nWdEUXFFYNed48wLX5qhgAEgRBCEoWwG4N3xLciV3EB9wpKkaVPekL2ZNVr14DkuXvAVH2fM8JSlNwZUnVgFTzZUBX-GANS1XV1H1Q1-G7M0oItDSxl4qMBjjAy7TBSFoRuLCUJdC0PUw71ghwgMFAIgSww+BifiS2M9Mo6jZJ4hq+OLUsEM2NquNonMMsbOqW3HUTgok4IpM4mTuNHBTJqU70Z3yIsGGWahHHwZzKBoTdQU5OBO3wVI4SAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Example: Complete Multi-File Setup
 
@@ -522,6 +582,12 @@ my-project/
   "/deploy": "Deploy to staging environment"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWIDEggJKscMahCyCOpQQAjDDgYQRZWSABzAFdqbAg2MW4IDy8fQW5-EgB6YNDHVhdXMmZqXzVNbUEweKi+djhkmNDBChzajHrOLDgc0MY4n0Vm1vbO7sacjjgsVKjRsPG6ht6cjDQIZVmMVikMaikm1m4WpY6Vnr6pZkHVhKTWZOke4eE9ORBdL-FBAE1mDFBAcwkJQqxEtQajEoFBtgJGABrQRSGAANxgUGYaC8ggA7mVEfNBGxBABZRSCAAK1A0WiwFA+AKBYGYsOYeL8MACEQx7ESrDgwL2gkq9O2OMYEEgjFF2A41EFjN+31sDieJwiHEIvlEvzF2lMIAp1NpVR0Pwk2SNVKg2FZ1BItg+qstggAgoISBBGLTQtQ0T74Mp8jApKK7VgHSQamUUdghGpGPA4PNlR8ACpaHCCADKCMRiA+ykEACEMEjODJBAA5ZioijqOB0QQZxQ43O+iBoLAtmvwLAAKVzxcEADFaewq7IAErc7Qttsdrs9lsANR8MFHABEE6HZFTmLMotQYLmAIoAGRbc6kEGOEhL7k6s2oMW0cRgsgA0jFAl5WH4eAW3dAB1EcVS+KCxHVZI4BwMosEGXp3kg-oBHKeQjXcHwIAwKAIAALzCVEMSxNBVkEThA0nVZbAkeQclRchmBGJBPm3GAWMpLBmEEHYomJaiIFono1RAOw6HQbA8EQEAsm5XJQyoWgQAYLUenwFxcxiNByAgMN+L43AwiIUhyDCN9BUETxTwoWtmAqA5fGYMA-E8FFbhie45jYFtdnDVhHOBQRT3wuUkS6GBlV4fghD1CRpCNBTSDyEItzdAwjBMT4LAAVhsN1vUIVJZCwN8t3sOCBD2A4jlQiQWFRWRkHkW0KxgBCoFRKEdlqw55AAXQ+GY5lYKIWrau1ky6nr+Jq-YBpAYaqpOU9Xx9XzrISwQSymjrZtxdbys2gVxMk6TcHwCZVj6AYhiwRQVPoJg2A4Lg5O03T9MMuBjI8syyFgUKYms2zoocpzyhJNyTM8u4egeVh-JFILfCEMKoAixEopivgBAayRq3kG6rn6LQHrYj4soEHLzAoArLHor0IBK1gyoqmDqoCuqhR2pqv0EVqQHama2TmvrFqkIaRoHeZJpF6bOvF3FJbqmXVu4Y7vG0AU+dHfaxe6o6Bx1rbzqkkBMCuuTSamUa0xoF6NI+kAvr0gjfv+0ziCByzQaFcH7LrKGXNhjybgRowtpRwLgox7kscwSKomi5J8fij4ks+O21gd8bmZp4wjXywqPmK0q-E5zW1cOfXfgFhXReV43eoW9Xltl2Z5aFw2W4l9ulpW9UtdN062Hrx9Pmbw6oW18enh+OwJMt63ZPAS4pg2LZa6OZ61NeqdXfdn7wz+9yffM4GrMDrwIZDuVodci-4e8xGY+FOP0dCxPsdx9O4qE2ziTTeaxt7wh5nXQuhhaYlwZmXX4Fd2ZVxiJVEeu9J7hHrILYWM8VZt0gdLTuvx84TV7orA6+D5qEI1iPeeusJ6Ez2hQo2c16HmyXivS669c7XC8j5AU+91JvU0p9PM31PZn29lRX2FkQZgzvsHYKmAn7hxIvw9+ApY6CDRiFTGf9U540ATtYBG8ui3SYho6OZ1MowOLrleBTMiqs0ruVVBXMTgYMJo3cheDW7UP6kQlaVo5bjSbkrWeASpa0OSOwvWTDp4RKoXEpInC7CDQYD0agih8CAwskIkAGJaACnwGYCSQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Configuration (promptscript.yaml)
 
