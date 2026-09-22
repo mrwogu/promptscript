@@ -7,9 +7,10 @@
  * deno-compiled binary (which re-executes itself as the guarded worker).
  *
  * Every project that invokes the CLI installs it from the local dist bundle
- * (file: dependency), so `deno run npm:@promptscript/cli` resolves the local
- * package through node_modules instead of fetching a published one from the
- * npm registry.
+ * (file: dependency) and Deno is pointed at the bin shim inside node_modules.
+ * A bare `npm:@promptscript/cli` specifier would resolve the published
+ * registry release and ignore the local install entirely, so the suite would
+ * silently test a shipped version instead of the build under review.
  *
  * Needs: deno on PATH, npm, git. The node-free container smoke additionally
  * needs podman or docker; it is skipped when no container runtime exists.
@@ -143,6 +144,9 @@ function isolatedEnv(directory: string, overrides: NodeJS.ProcessEnv = {}): Node
     XDG_CONFIG_HOME: join(home, '.config'),
     XDG_CACHE_HOME: join(home, '.cache'),
     DENO_DIR: join(WORKSPACE, 'deno-cache'),
+    // A config path exported on the host machine wins over the fixture cwd,
+    // which would point the CLI at a project outside the workspace.
+    PROMPTSCRIPT_CONFIG: '',
     // Recognized telemetry off-values are 0/false/no/off; anything else leaves
     // it enabled and would send real payloads to the default endpoint.
     PROMPTSCRIPT_TELEMETRY: '0',
@@ -152,13 +156,25 @@ function isolatedEnv(directory: string, overrides: NodeJS.ProcessEnv = {}): Node
   };
 }
 
+/**
+ * Deno entry module for a project that installed the CLI from the local dist.
+ *
+ * Deno resolves an `npm:` specifier against the npm registry, not against the
+ * project's node_modules, so a bare `npm:@promptscript/cli` would run the
+ * published release. Pointing at the installed bin shim is what keeps the
+ * suite bound to the local bundle.
+ */
+function installedCliEntry(projectDir: string): string {
+  return join(projectDir, 'node_modules', '@promptscript', 'cli', 'bin', 'prs.js');
+}
+
 /** Run the CLI via `deno run` inside a project that has the CLI installed. */
 async function denoRun(
   projectDir: string,
   args: string[],
   options: { env?: NodeJS.ProcessEnv; timeoutMs?: number } = {}
 ): Promise<RunResult> {
-  return run('deno', ['run', ...DENO_PERMISSIONS, 'npm:@promptscript/cli', ...args], {
+  return run('deno', ['run', ...DENO_PERMISSIONS, installedCliEntry(projectDir), ...args], {
     cwd: projectDir,
     env: isolatedEnv(projectDir, options.env),
     timeoutMs: options.timeoutMs,
@@ -389,10 +405,12 @@ async function main(): Promise<void> {
 
   const tarballDir = join(WORKSPACE, 'tarball');
   mkdirSync(tarballDir, { recursive: true });
-  const packResult = await run('npm', ['pack', '--pack-destination', tarballDir, CLI_PACKAGE_DIR], {
-    cwd: tarballDir,
-    timeoutMs: 120_000,
-  });
+  const packResult = await npm(tarballDir, [
+    'pack',
+    '--pack-destination',
+    tarballDir,
+    CLI_PACKAGE_DIR,
+  ]);
   assert(packResult.code === 0, `npm pack failed: ${packResult.stderr}`);
   const tarballName = packResult.stdout.trim().split('\n').at(-1) ?? '';
   const tarballProject = makeProject('tarball-project', `file:${join(tarballDir, tarballName)}`);
@@ -591,7 +609,7 @@ async function main(): Promise<void> {
     // everything user-owned is isolated through HOME and DENO_DIR.
     const child = spawn(
       'deno', // NOSONAR
-      ['run', ...DENO_PERMISSIONS, 'npm:@promptscript/cli', 'compile', '--watch'],
+      ['run', ...DENO_PERMISSIONS, installedCliEntry(projectDir), 'compile', '--watch'],
       {
         cwd: projectDir,
         env: isolatedEnv(projectDir),
@@ -867,7 +885,7 @@ async function main(): Promise<void> {
       [
         'run',
         ...DENO_PERMISSIONS,
-        'npm:@promptscript/cli',
+        installedCliEntry(projectDir),
         'serve',
         '--port',
         String(port),
@@ -940,7 +958,7 @@ async function main(): Promise<void> {
             'deno',
             'run',
             ...DENO_PERMISSIONS,
-            'npm:@promptscript/cli',
+            installedCliEntry(projectDir),
             'diff',
           ],
           {
@@ -1199,6 +1217,15 @@ async function runContainerSmoke(version: string): Promise<void> {
         `${WORKSPACE}:/work`,
         '-w',
         '/work',
+        // Container runtimes do not forward host env, so the isolation the
+        // other scenarios get from isolatedEnv has to be restated here or the
+        // two compiles below spool and flush real telemetry from CI.
+        '-e',
+        'PROMPTSCRIPT_TELEMETRY=0',
+        '-e',
+        'DO_NOT_TRACK=1',
+        '-e',
+        'PROMPTSCRIPT_NO_UPDATE_CHECK=1',
         'debian:bookworm-slim',
         '/bin/bash',
         '-c',
