@@ -338,8 +338,10 @@ function supplyUnresolvedImports(code: string): { code: string; stubs: Map<strin
       return line;
     }
     const fileName = stubFileName(kind, target.path);
-    // A traversing path would escape the virtual project, so those stay disabled.
-    if (fileName.startsWith('..')) {
+    // A traversing path would escape the virtual project, and the entry name
+    // would have the placeholder overwrite the example itself, so both stay
+    // disabled rather than producing a state that is quietly wrong.
+    if (fileName.startsWith('..') || fileName === PLAYGROUND_ENTRY) {
       return `${match[1]}# ${line.trim()}  # (${kind} - disabled for playground)`;
     }
     stubs.set(fileName, stubContent(fileName, target));
@@ -531,6 +533,27 @@ const NEGATIVE_EXAMPLE_REGEX = /(?:^\**\s*(?:wrong|incorrect|bad|avoid|don't|do 
  * added. When the snippet does not compile the badge is simply broken. Neither
  * is worth shipping, so negative examples get no badge.
  */
+/**
+ * A comment inside the snippet marking part of it as what not to do.
+ *
+ * Restricted to comment lines so a restriction like `- "Never log secrets"` is
+ * not mistaken for one.
+ */
+const INLINE_NEGATIVE_REGEX =
+  /^[ \t]*#.*(?:❌|\b(?:bad|wrong|avoid|incorrect|don't|do not|never)\b)/im;
+
+/**
+ * True when the snippet itself contains both what to do and what not to do.
+ *
+ * Those fences carry a `# ✅ Good` half and a `# ❌ Bad` half, and one badge
+ * cannot speak for both. Supplying the placeholder files makes it worse than it
+ * used to be: the bad imports now resolve, so the badge actively demonstrates
+ * that the thing the fence labels Bad works fine.
+ */
+function containsNegativeExample(code: string): boolean {
+  return INLINE_NEGATIVE_REGEX.test(code);
+}
+
 function precedesNegativeExample(content: string, offset: number): boolean {
   const lead = content
     .slice(0, offset)
@@ -621,6 +644,10 @@ function extractLinkableCode(
 
   // Skip empty or very short examples
   if (trimmedCode.length < 10) {
+    return null;
+  }
+
+  if (containsNegativeExample(trimmedCode)) {
     return null;
   }
 
