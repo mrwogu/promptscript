@@ -1,5 +1,47 @@
-import type { ValidationRule } from '../types.js';
+import type { Lockfile } from '@promptscript/core';
+import type { RuleContext, ValidationRule } from '../types.js';
 import { findLockfileDependency, isValidationExcludeLike } from '../import-exclusions.js';
+
+function reportInvalidExclude(ctx: RuleContext): void {
+  ctx.report({
+    message:
+      'Invalid validation.excludes entry: expected { import: string, commit: string, rules: string[] }',
+    suggestion: 'Fix the exclude entry in promptscript.yaml',
+  });
+}
+
+function validateExclude(ctx: RuleContext, value: unknown, lockfile: Lockfile | undefined): void {
+  if (!isValidationExcludeLike(value)) {
+    reportInvalidExclude(ctx);
+    return;
+  }
+  if (ctx.config.ignoreHashes || !lockfile) return;
+
+  const dependency = findLockfileDependency(value.import, lockfile);
+  if (!dependency) {
+    ctx.report({
+      message: `Exclude for import "${value.import}" does not match any dependency pinned in promptscript.lock.`,
+      suggestion: 'Check the import source, or run `prs lock` to pin it',
+    });
+    return;
+  }
+
+  if (!value.commit) {
+    ctx.report({
+      message: `Exclude for import "${value.import}" must record the commit SHA it was reviewed at.`,
+      suggestion: `Add commit: ${dependency.commit} to the exclude entry`,
+    });
+    return;
+  }
+
+  if (value.commit !== dependency.commit) {
+    ctx.report({
+      message: `Stale exclude for import "${value.import}": promptscript.lock pins commit ${dependency.commit} but the exclude records ${value.commit}.`,
+      suggestion:
+        'Re-review the imported content at the new commit, then update or remove the exclude',
+    });
+  }
+}
 
 /**
  * PS040: Per-import validation excludes must stay bound to the pinned commit.
@@ -19,11 +61,7 @@ export const importExcludes: ValidationRule = {
     const configuredExcludes: unknown = ctx.config.excludes;
     if (configuredExcludes === undefined) return;
     if (!Array.isArray(configuredExcludes)) {
-      ctx.report({
-        message:
-          'Invalid validation.excludes entry: expected { import: string, commit: string, rules: string[] }',
-        suggestion: 'Fix the exclude entry in promptscript.yaml',
-      });
+      reportInvalidExclude(ctx);
       return;
     }
     if (configuredExcludes.length === 0) return;
@@ -39,44 +77,7 @@ export const importExcludes: ValidationRule = {
     }
 
     for (const exclude of configuredExcludes) {
-      if (!isValidationExcludeLike(exclude)) {
-        ctx.report({
-          message:
-            'Invalid validation.excludes entry: expected { import: string, commit: string, rules: string[] }',
-          suggestion: 'Fix the exclude entry in promptscript.yaml',
-        });
-        continue;
-      }
-
-      // With --ignore-hashes the whole integrity story is disabled. Exclusions
-      // still apply location-wise, but commit binding cannot be verified.
-      if (ctx.config.ignoreHashes) continue;
-      if (!lockfile) continue;
-
-      const dependency = findLockfileDependency(exclude.import, lockfile);
-      if (!dependency) {
-        ctx.report({
-          message: `Exclude for import "${exclude.import}" does not match any dependency pinned in promptscript.lock.`,
-          suggestion: 'Check the import source, or run `prs lock` to pin it',
-        });
-        continue;
-      }
-
-      if (!exclude.commit) {
-        ctx.report({
-          message: `Exclude for import "${exclude.import}" must record the commit SHA it was reviewed at.`,
-          suggestion: `Add commit: ${dependency.commit} to the exclude entry`,
-        });
-        continue;
-      }
-
-      if (exclude.commit !== dependency.commit) {
-        ctx.report({
-          message: `Stale exclude for import "${exclude.import}": promptscript.lock pins commit ${dependency.commit} but the exclude records ${exclude.commit}.`,
-          suggestion:
-            'Re-review the imported content at the new commit, then update or remove the exclude',
-        });
-      }
+      validateExclude(ctx, exclude, lockfile);
     }
   },
 };
