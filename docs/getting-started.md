@@ -48,6 +48,8 @@ Install the CLI toolchain to compile, validate, and manage your PromptScript fil
     deno install -g --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run npm:@promptscript/cli
     ```
 
+    Requires a Deno-capable CLI release (1.20.0 or later) and Deno 2.9+.
+
 Verify installation:
 
 ```bash

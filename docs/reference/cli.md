@@ -41,12 +41,16 @@ Beside the global install above, the CLI runs on Deno 2.9 or later in two
 other ways: straight from a project-local install, and as a compiled
 standalone binary.
 
-Inside a project that has `@promptscript/cli` in its dependencies, Deno
-resolves the package from `node_modules`:
+Inside a project that has `@promptscript/cli` in its dependencies, point Deno
+at the installed bin shim:
 
 ```bash
-deno run --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run npm:@promptscript/cli init
+deno run --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run node_modules/@promptscript/cli/bin/prs.js init
 ```
+
+An `npm:@promptscript/cli` specifier resolves the published registry release
+instead of the version installed in `node_modules`, so use the path above
+whenever the project's own dependency is what should run.
 
 Compile a self-contained binary that needs no runtime installed:
 
