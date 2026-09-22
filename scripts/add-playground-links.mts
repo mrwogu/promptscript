@@ -41,6 +41,17 @@ const LINK_MARKER_START = '<!-- playground-link-start -->';
 const LINK_MARKER_END = '<!-- playground-link-end -->';
 const SKIP_LINK_MARKER = '<!-- playground-link-skip -->';
 
+/**
+ * Opts a fence into an error badge: the reader is meant to see it fail.
+ *
+ * Placed immediately before the fence, by hand. Only the author knows whether
+ * the compiler error is the lesson the section teaches. Under "Missing @meta
+ * Block" it is, so opening the playground on `@meta block is required` proves
+ * the point. Under "Fix Shortcut Shape" it is not: that snippet compiles
+ * cleanly, the page is teaching a convention, and an error badge would lie.
+ */
+const EXPECT_ERROR_MARKER = '<!-- playground-link-expect-error -->';
+
 // Regex to match playground link blocks (for removal/update)
 const LINK_BLOCK_REGEX = new RegExp(
   `\\n?${escapeRegex(LINK_MARKER_START)}[\\s\\S]*?${escapeRegex(LINK_MARKER_END)}\\n?`,
@@ -64,6 +75,8 @@ interface ProcessResult {
   added: number;
   removed: number;
   updated: number;
+  /** Fences whose badge promise does not match what the compiler does. */
+  problems?: string[];
 }
 
 function escapeRegex(str: string): string {
@@ -431,10 +444,25 @@ function playgroundUrlFor(files: Map<string, string>): string {
   return `${PLAYGROUND_URL}?s=${encodeState(files)}`;
 }
 
+/** Badge wording and colour per outcome the reader should expect. */
+const BADGE_STYLES = {
+  runs: { label: 'Try_in-Playground', colour: 'blue', alt: 'Try in Playground' },
+  fails: {
+    label: 'See_the_error_in-Playground',
+    colour: 'red',
+    alt: 'See the error in Playground',
+  },
+} as const;
+
 /**
  * Create the markdown link block.
+ *
+ * An example that is meant to fail gets its own wording and colour. The same
+ * blue "Try in Playground" on a snippet that opens on an error reads as a broken
+ * button rather than a demonstration.
  */
-function createLinkBlock(url: string): string {
+function createLinkBlock(url: string, outcome: keyof typeof BADGE_STYLES): string {
+  const { label, colour, alt } = BADGE_STYLES[outcome];
   // Using a styled link that works in both GitHub and MkDocs.
   // Blank line before the block and no trailing newline keep the output
   // Prettier-stable, so `format:check` and `playground:links --check` agree.
@@ -442,13 +470,17 @@ function createLinkBlock(url: string): string {
 
 ${LINK_MARKER_START}
 <a href="${url}" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+  <img src="https://img.shields.io/badge/${label}-${colour}?style=flat-square" alt="${alt}" />
 </a>
 ${LINK_MARKER_END}`;
 }
 
 function shouldSkipPlaygroundLink(content: string, offset: number): boolean {
   return content.slice(0, offset).trimEnd().endsWith(SKIP_LINK_MARKER);
+}
+
+function expectsPlaygroundError(content: string, offset: number): boolean {
+  return content.slice(0, offset).trimEnd().endsWith(EXPECT_ERROR_MARKER);
 }
 
 /** Prose that introduces the following example as something not to do. */
@@ -537,7 +569,11 @@ function extractLinkableCode(
   offset: number,
   unlinkableFences: Array<[number, number]>
 ): string | null {
-  if (shouldSkipPlaygroundLink(content, offset) || precedesNegativeExample(content, offset)) {
+  if (shouldSkipPlaygroundLink(content, offset)) {
+    return null;
+  }
+  // A negative example is skipped unless the author opted it into an error badge.
+  if (precedesNegativeExample(content, offset) && !expectsPlaygroundError(content, offset)) {
     return null;
   }
 
@@ -565,6 +601,10 @@ interface LinkCandidate {
   offset: number;
   /** Playground-ready file set, or null when static rules already rejected it. */
   preparedFiles: Map<string, string> | null;
+  /** True when the reader is meant to land on a compile error. */
+  expectsError: boolean;
+  /** 1-based line of the fence, for reporting. */
+  line: number;
 }
 
 function collectLinkCandidates(
@@ -576,24 +616,40 @@ function collectLinkCandidates(
   let match: RegExpExecArray | null;
   while ((match = CODE_BLOCK_REGEX.exec(content)) !== null) {
     const linkableCode = extractLinkableCode(content, match[1], match.index, unlinkableFences);
-    const prepared = linkableCode === null ? null : prepareCodeForPlayground(linkableCode);
+    const expectsError = expectsPlaygroundError(content, match.index);
+    // An error badge is encoded verbatim. Supplying a `@meta` header or a
+    // placeholder import would repair the very mistake the reader came to see:
+    // the "Missing @meta Block" example compiles fine once the header is added.
+    const prepared =
+      linkableCode === null
+        ? null
+        : expectsError
+          ? { files: new Map([[PLAYGROUND_ENTRY, linkableCode]]), demonstratesExample: true }
+          : prepareCodeForPlayground(linkableCode);
     candidates.push({
       block: match[0],
       offset: match.index,
       preparedFiles: prepared?.demonstratesExample ? prepared.files : null,
+      expectsError,
+      line: content.slice(0, match.index).split('\n').length,
     });
   }
   return candidates;
 }
 
 /**
- * Splice a badge in after every candidate whose snippet compiles.
+ * Splice a badge in after every candidate that behaves as its badge promises.
+ *
+ * A normal badge needs the snippet to compile. An error badge needs it to fail,
+ * and a snippet that compiles instead is reported: the page claims the example is
+ * wrong while the compiler accepts it, which is worth someone's attention rather
+ * than a silently dropped badge.
  */
 async function insertPlaygroundLinks(
   content: string,
   candidates: LinkCandidate[]
-): Promise<{ content: string; added: number }> {
-  const runnable = await Promise.all(
+): Promise<{ content: string; added: number; problems: string[] }> {
+  const compiles = await Promise.all(
     candidates.map(async (candidate) =>
       candidate.preparedFiles === null ? false : compilesInPlayground(candidate.preparedFiles)
     )
@@ -602,15 +658,27 @@ async function insertPlaygroundLinks(
   let result = '';
   let cursor = 0;
   let added = 0;
+  const problems: string[] = [];
   for (const [index, candidate] of candidates.entries()) {
-    if (!runnable[index]) continue;
+    if (candidate.preparedFiles === null) continue;
+    if (candidate.expectsError && compiles[index]) {
+      problems.push(
+        `line ${candidate.line}: marked ${EXPECT_ERROR_MARKER} but the snippet compiles`
+      );
+      continue;
+    }
+    if (!candidate.expectsError && !compiles[index]) continue;
     const blockEnd = candidate.offset + candidate.block.length;
     result +=
-      content.slice(cursor, blockEnd) + createLinkBlock(playgroundUrlFor(candidate.preparedFiles!));
+      content.slice(cursor, blockEnd) +
+      createLinkBlock(
+        playgroundUrlFor(candidate.preparedFiles),
+        candidate.expectsError ? 'fails' : 'runs'
+      );
     cursor = blockEnd;
     added++;
   }
-  return { content: result + content.slice(cursor), added };
+  return { content: result + content.slice(cursor), added, problems };
 }
 
 /**
@@ -671,7 +739,10 @@ async function processMarkdownFile(
 
   if (mode === 'check') {
     // In check mode, compare and report differences
-    return buildCheckResult(filePath, newContent, originalContent, added, existingLinkCount);
+    return {
+      ...buildCheckResult(filePath, newContent, originalContent, added, existingLinkCount),
+      problems: linked.problems,
+    };
   }
 
   // Write the updated content
@@ -683,7 +754,7 @@ async function processMarkdownFile(
     }
   }
 
-  return { file: filePath, added, removed: 0, updated };
+  return { file: filePath, added, removed: 0, updated, problems: linked.problems };
 }
 
 /**
@@ -728,7 +799,8 @@ async function processAll(
   for (const file of files) {
     try {
       const result = await processMarkdownFile(file, mode);
-      if (result.added > 0 || result.removed > 0 || result.updated > 0) {
+      const changed = result.added > 0 || result.removed > 0 || result.updated > 0;
+      if (changed || (result.problems?.length ?? 0) > 0) {
         results.push(result);
       }
     } catch (error) {
@@ -743,7 +815,27 @@ function describeChanges(result: ProcessResult): string {
   if (result.added > 0) changes.push(`+${result.added} added`);
   if (result.removed > 0) changes.push(`-${result.removed} removed`);
   if (result.updated > 0) changes.push(`~${result.updated} updated`);
-  return changes.join(', ');
+  return changes.length > 0 ? changes.join(', ') : 'no change';
+}
+
+/** Fences whose badge promise does not match what the compiler does. */
+function reportProblems(results: ProcessResult[], rootDir: string): number {
+  const flagged = results.filter((result) => (result.problems?.length ?? 0) > 0);
+  if (flagged.length === 0) {
+    return 0;
+  }
+  let count = 0;
+  console.error('Mismatched error badges:');
+  for (const result of flagged) {
+    for (const problem of result.problems ?? []) {
+      console.error(`  ${relative(rootDir, result.file)}:${problem}`);
+      count++;
+    }
+  }
+  console.error(
+    '\nEither the snippet is not actually wrong, or the marker belongs on a different fence.\n'
+  );
+  return count;
 }
 
 function reportResults(results: ProcessResult[], fileCount: number, rootDir: string): void {
@@ -781,13 +873,29 @@ async function main(): Promise<void> {
 
   const files = collectDocFiles(rootDir);
   const results = await processAll(files, mode);
+  const changed = results.filter(
+    (result) => result.added > 0 || result.removed > 0 || result.updated > 0
+  );
 
   if (results.length === 0) {
     console.log('✅ No changes needed.\n');
     return;
   }
 
-  reportResults(results, files.length, rootDir);
+  if (changed.length > 0) {
+    reportResults(changed, files.length, rootDir);
+  }
+
+  // A mismatched error badge is wrong in every mode, so it fails the run even
+  // when the committed links are otherwise up to date.
+  if (reportProblems(results, rootDir) > 0) {
+    process.exit(1);
+  }
+
+  if (changed.length === 0) {
+    console.log('✅ No changes needed.\n');
+    return;
+  }
 
   if (mode === 'check') {
     console.error('❌ Playground links are out of date. Run `pnpm playground:links` to update.\n');
