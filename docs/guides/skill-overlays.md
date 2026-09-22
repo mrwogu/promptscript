@@ -33,7 +33,7 @@ Import a base skill and extend it:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+Nzg7fl1MVkcAejgAa2goZQxlACM2u14+AApqGHUlLGpHXgBaXnElDHbYGTBmansoJxd3TwBKH34iDk9eTvKKRua4ChYpcYGANwgYc15Aqyn4RmoINCwINhSQAGFmFJeLd7o9zCYcLIRhBGBxluVGG4PlgxowcDBGA04Hlgix2JwsH9YiA4sEAKKsHAYViMaQgmB3B68cxLBpgKAWFRLBQY2SY5EmMYcUgUOIkvL5ED5AC6DEJo3wRFI5BgVFoIAYNxgtB+rHwqWlQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+Nzg7fl1MVkcAejgAa2goZQxlACM2u14+AApqGHUlLGpHXgBaXnElDHbYGTBmansoJxd3TwBKIt8iDk9eTvKKRua4ChYpcYGANwgYc15Aqyn4RmoINCwINhSQAGFmFJeLd7o9zCYcLIRhBGBxluVGG4PlgxowcDBGA04Hlgix2JwsH9YiA4sEAKKsHAYViMaQgmB3B68cxLBpgKAWFRLBQY2SY5EmMYcUgUOIkvL5ED5AC6DEJo3wRFI5BgVFoIAYNxgtB+rHwqWlQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -62,7 +62,7 @@ When multiple `@use` and `@extend` declarations target the same skill, priority 
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+Nzg7fgAjNwBaan9oAHo4AGtoKGUMZXqRaGC+AAp69SUsakdeGt5xJQxK2BkwZmp7KCcXd08ASmKBMorqmrGMADcYKGa2qA6xZWOzqH7eIZgRuDGJqZm4OYWVZdW61cHnEO1YfAAgmhyBBpNZDNQpNQwj0MH1ILQsHQFGoHrIYCxPD5+EQOJ5eKjoBRWu04BQWFI6jATrDzLxAlZpvBGNQIGgsBA2CkQAAlBqPeosmDmPLBepgGD1ViMeBhZARSlQGqYLAcaisOkkbwgAC6PkKrGJpM4Mnu52pVw69OYjMlrPZcSkcB5fIFQvCIAAKrjzhTmayIsEo9G+OYIAbnms9WGHCqwXKYAqlSq4GqInatTq9QaKEaIiao3wMNCbXCMGBk5rzSB8iaGJwPvgiKRyDAqLQQAwzrRBax8KkW0A" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+Nzg7fgAjNwBaan9oAHo4AGtoKGUMZXqRaGC+AAp69SUsakdeGt5xJQxK2BkwZmp7KCcXd08ASmKBMorqmrGMADcYKGa2qA6xZWOzqH7eIZgRuDGJqZm4OYWVZdW61cHnEO1YuwAgmhyBBpNZDNQpNQwj0MH1ILQsHQFGoHrIYCxPD5+EQOJ5eKjoBRWu04BQWFI6jATrDzLxAlZpvBGNQIGgsBA2CkQAAlBqPeosmDmPLBepgGD1ViMeBhZARSlQGqYLAcaisOkkbwgAC6PkK4N8pM4Mnu52pVw69OYjMlrPZcSkcB5fIFQvCIAAKrjzhTmayIsEo9G+OYIAbnms9WGHCqwXKYAqlSq4GqInatTq9QaKEaIiao3wMNCbXCMGBk5rzSB8iaGJwPvgiKRyDAqLQQAwzrRBax8KkW0A" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -269,7 +269,7 @@ Layer 4: project      — local project overrides
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAjWYATAK6MsAejgBraFDiSWwmAFpqMAG4QYAdyq0AOq34kYWDL2C8IwxL0MhB1EeKnK1G7Xse84AT3YMQntHAEYKCIAGXwBfY2M+flE4GAEWMgxWf2k5KAUlEU8tHV1eDDheACMKtN4+AAoNAHMIOCxqf15VXmE2jCrYYV4wZmpecgx-ZpdRVmEASmN+Ig556tqKWXk4Cg91Er0rY15e+EZqCDQsCDZQkAAFFzEJVTg0GEYISEZeD14vKVHCcATAwDANKxGPB7MhHBpwZDoYohC8sKpMFgONRWLsSMJHABdYyxECxQkMTgdfz4IikcgwAz0ECaCFwW6sfBhMlAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAjWYATAK6MsAejgBraFDiSWwmAFpqMAG4QYAdyq0AOq34kYWDL2C8IwxL0MhB1EeKnK1G7Xse84AT3YMQntHAEYKCIAGXwBfY2M+flE4GAEWMgxWf2k5KAUlEU8tHV1eDDheACMKtN4+AAoNAHMIOCxqf15VXmE2jCrYYV4wZmpecgx-ZpdRVmEASgSTIg556tqKWXk4Cg91Er0rY15e+EZqCDQsCDZQkAAFFzEJVTg0GEYISEZeD14vKVHCcATAwDANKxGPB7MhHBpwZDoYohC8sKpMFgONRWLsSMJHABdYyxECxQkMTgdfz4IikcgwAz0ECaCFwW6sfBhMlAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -295,7 +295,7 @@ Layer 2 replaces `description` (allowed), appends to `references`, but **cannot*
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgCMArgHo4Aa2hQ4olgBMYAWmowAbhBgB3KrQA6rfiRhYMvYLwjzEvPSCFiFy1Ru13ecAJ7sMhG3YBGCiCABncAXwMDPn5hOBgBGmZ5YUYscSkoGTlk53VNLV4MOF5BYoTePgAKVQBzCDgsak9eJV55BoxBWHleMGZqXnIMT1rqZmFWeQBKA34iDinS8opJaTgKJxV87XMDXl5VMBhVVkZ4G2R9g9sQAEIjk85z2SSUtKVMLA5qVg2SeR2OjXA52R6nF6iERKDDURg4CAcNLCVQUAFAkG3cHPeBQ4RKEjJYSwf6AkDXAC611UAEdhBBVHBLnZ4owUYjPEo4IwMKw7FTWOEQOEKQxOE1PPgiKRyDBdPQQGoTnAIGx8AFhUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgCMArgHo4Aa2hQ4olgBMYAWmowAbhBgB3KrQA6rfiRhYMvYLwjzEvPSCFiFy1Ru13ecAJ7sMhG3YBGCiCABncAXwMDPn5hOBgBGmZ5YUYscSkoGTlk53VNLV4MOF5BYoTePgAKVQBzCDgsak9eJV55BoxBWHleMGZqXnIMT1rqZmFWeQBKKMMiDinS8opJaTgKJxV87XMDXl5VMBhVVkZ4G2R9g9sQAEIjk85z2SSUtKVMLA5qVg2SeR2OjXA52R6nF6iERKDDURg4CAcNLCVQUAFAkG3cHPeBQ4RKEjJYSwf6AkDXAC611UAEdhBBVHBLnZ4owUYjPEo4IwMKw7FTWOEQOEKQxOE1PPgiKRyDBdPQQGoTnAIGx8AFhUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

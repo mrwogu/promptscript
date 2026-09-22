@@ -329,7 +329,7 @@ When you need to modify imported content rather than just merge it, use an alias
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+Nzg7fhZqGAB6LEc0eEZqCDQsMWVTYL4ACmr1JSxqR14AWl5xJQwAI1gZMGZqeygnF3dPAEpi3gBRQg5PWUbGCEhGYzJFjhlZ5kYAazgffiIDmVMKOBFPDGpxZUCVgU8CwEFY6jCwB0zAAbjA1OoYGEAJwZXiFAogfIAXQYnCGjnwRFI5BgVFoIAYcNoEDY+FSWKAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+Nzg7fhZqGAB6LEc0eEZqCDQsMWVTYL4ACmr1JSxqR14AWl5xJQwAI1gZMGZqeygnF3dPAEoi1j4AUUIOT1lGxghIRmMyRY4ZWeZGAGs4H34iQ5lTCjgRTwxqcWUgSsCngWAgrHUYWAOmYADcYGp1DAwgBODK8QoFED5AC6DE4Q0c+CIpHIMCotBADHhtAgbHwqWxQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

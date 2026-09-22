@@ -284,7 +284,7 @@ The `@extend` block modifies specific paths:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAegAjDDg7Xj4ACmoYdSUsakdeAFpecSUMJtgZMGZqeygnF3dPAEpi3gBBSQV5CCl2E0cffiIOTxDOLCPeQKtwkFjH++3x67YMKEvDrCGWdjOFDiTzy+RA+QAugwroN8ERSOQYFRaCAGAA3SpwCBsfCpcFAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAegAjDDg7Xj4ACmoYdSUsakdeAFpecSUMJtgZMGZqeygnF3dPAEoi1j4AQUkFeQgpdhNHH34iDk8Qzixj3kCrcJBYp4ed8Zu2DCgro6whlnY5wocWeeXyIHyAF0GNdBvgiKRyDAqLQQAwAG6VOAQNj4VIQoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -302,7 +302,7 @@ The `@extend` block modifies specific paths:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAegAjDDg7Xj4ACmoYdSUsakdeAFpecSUMJtgZMGZqeygnF3dPAEpi3gBZZnGwIdZ4Dhk4AbdGLDcen34iDk9ZEU8ManE4ChYpCg4TsvVeQKsvBgACYYGEegBHNwQHreQEsABulQ0YN4AE5cgUQPkALoMTgDRz4IikcgwKi0EAMJG0CBsfCpbFAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAegAjDDg7Xj4ACmoYdSUsakdeAFpecSUMJtgZMGZqeygnF3dPAEoi1j4AWWZxsCHWeA4ZOAG3Riw3Hp9+Ig5PWRFPDGpxOAoWKQoOU7L1XkCVl4MAATDAwj0AI5uCA9bxAlgAN0qGnBvAAnLkCiB8gBdBicAaOfBEUjkGBUWggBjI2gQNj4VI4oA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -328,7 +328,7 @@ The `@extend` block modifies specific paths:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAegAjDDg7Xj4ACmoYdSUsakdeAFpecSUMJtgZMGZqeygnF3dPAEoffiIOTxDOLBMhwKtwkFjT44BNdzEesRVXdk4ZIjRKrAo4s7zC1g2tp9kIk8GGo4jgFBYUl4R2CqlIMHMcwA1ikQD0MIwsN8ir5-jsenABhBMRA2MoYSMTgBVNoqDwktgYKA6ZhkNh7MysKCOb4gfIAXQYe0G+CIpHIMCotBADAAbpU4KTWPhUnygA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAegAjDDg7Xj4ACmoYdSUsakdeAFpecSUMJtgZMGZqeygnF3dPAEoi3yIOTxDOLBMhwKtwkFjT44BNdzEesRVXdk4ZIjRKrAo4s7zC1h9+LaeshEngw1HEcAoLCkvCOwVUpBg5jmAGsUiAehhGFhvht-oRtjIenABhAsRA2MpYSMTgBVNoqDxktgYKA6ZhkNh7MysKCOb4gfIAXQYe0G+CIpHIMCotBADAAbpU4OTWPhUgKgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -594,7 +594,7 @@ Organization base should include only universal standards:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAizIZWATwD0Yamw6sAJlVoAdVvxIwsGXsBW9eEOYl5KQg5sLGTp7TnJO7ecUewyEjJgIwUADD-usAXxUVPn4IVhwYaggsASFMSwAjDDgYPT4ACmoYAHMIOCxqUV4AWl45fIxE2DleMGZqXnIMURzpAFd5AEoVMLlOLBjinVY9exB-PQBNZnbHNBhGCAwoCAAvNPC661la-oA3GChmNHV2Cgdx-yDWXpYbQliRsYnXhwAVRZxHTUYAayMACUYBhGFg6Lx3qIFgBlRjRNDg3gANRiMEubwmgRAAQAugwBkV8ERSOQYIp6CBDrQIGx8B4cUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAizIZWATwD0Yamw6sAJlVoAdVvxIwsGXsBW9eEOYl5KQg5sLGTp7TnJO7ecUewyEjJgIwUADD-usAXxUVPn4IVhwYaggsASFMSwAjDDgYPT4ACmoYAHMIOCxqUV4AWl45fIxE2DleMGZqXnIMURzpAFd5AEpg1QNOLBjinVY9exB-PQBNZnbHNBhGCAwoCAAvNPC661lauRgANxgoZjR1dgoHcf8g1hUzG0JYkbGJt4cAFUWcR01GAGsjAAlGAYRhYOi8D6iBYAZUY0TQEN4ADUYjAru8JoEQAEALoMAZFfBEUjkGCKeggI60CBsfAeXFAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -620,7 +620,7 @@ Organization base should include only universal standards:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCUxwiA1swCuWALQY0aHSt5wAnuwyEtOgIwUADJ+usAvlKk+aQhWPWoILF5pFjIMVjsAejBqNg5WdVU+AApqGABzCDgsajteU151QowAI1gMsGZqfigMOzyUo3SASilo1KJI5VZVAWFRFxAAYT1GQxNeAEFLKAhGbAg2HxtrEB9VAFFTGLlqRhheRhm5yLAoZgB3XnuInF4AZWKINHOQjnb1tgUba7EFSXwgXwAXQYnGKdnwRFI5Bg4noIAAbjBaBtWPhXBCgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCUxwiA1swCuWALQY0aHSt5wAnuwyEtOgIwUADJ+usAvlKk+aQhWPWoILF5pFjIMVjsAejBqNg5WdVU+AApqGABzCDgsajteU151QowAI1gMsGZqfigMOzyUo3SASgCZFnYiSOVWVQFhURcQAGE9RkMTXgBBSygIRmwINh8baxAfVQBRUxi5akYYXkZZ+ciwKGYAd14HiJxeAGViiDQLkI52jZsCg7PagqS+EC+AC6DE4xTs+CIpHIMHE9BAADcYLRNqx8K5IUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -674,7 +674,7 @@ flowchart TD
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AVTg7OBwMamlZGEY3ahNHOkMANxhqJqkFGFIAWjg0eohIRmKBCFYcTpMBXUxWRwB6VTYOT2C+AAoa9SUsakdeft5xJQwAI1gZMGZqeygnF3dPAEoJ-jdy+fuYZfKDSaWGOvB2ewORxOZwu11qdweDmcrg84g+rD4Xx+-BYNWWCygEAwrEYdjBvF2MH2cEOx1O5zgVxuKnuj2eKPePn4RA2MhpxPE1XEcAogMazV4gSsYkkJggbAwUAASm5YHAwsgIgBhADKAAVeDMJJ04BEALo+fIgfJmhicWn4IikcgwKi0EAMDq0eWsfCpa1AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AVTg7OBwMamlZGEY3ahNHOkMANxhqJqkFGFIAWjg0eohIRmKBCFYcTpMBXUxWRwB6VTYOT2C+AAoa9SUsakdeft5xJQwAI1gZMGZqeygnF3dPAEoJ-jdy+fuYZfKDSaWGOvB2ewORxOZwu11qdweDmcrg84g+rD4Xx+-BYNWWCygEAwrEYdjBvF2MH2cEOx1O5zgVxuKnuj2eKPeRV8RA2MhpxPE1XEcAogMazV4gSsYkkJggbAwUAASm5YHAwsgIgBhADKAAVeDMJJ04BEALo+fIgfJmhicWn4IikcgwKi0EAMDq0eWsfCpa1AA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -695,7 +695,7 @@ flowchart TD
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAelU2Dk9gvgAKahh1JSxqR14AWl5xJQwAI1gZMGZqeygnF3dPAEoffhZ2IixeQKteTgA3CFdWLSwwmmZxN0YsCDYfQtYNnc4Zbrh+iHvH1mU+2CIwiADl5Fs5JQoMx1LIRBwLnA8sDwiBwaMYBM3HCWFI8vkQPkALoMTj9Rz4IikcgwKi0EAMI6VOD-fCpIlAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz5+CFYcGGoTAV1MVkcAelU2Dk9gvgAKahh1JSxqR14AWl5xJQwAI1gZMGZqeygnF3dPAEoi3xZ2IixeQKteTgA3CFdWLSwwmmZxN0YsCDYfQtYffh3OGW64foh7x9Yyn2wRGEQAcvItnJKFBmOpZCIOBc4HkQeEQBDRjAJm54SwpHl8iB8gBdBicfqOfBEUjkGBUWggBhHSpwAH4VLEoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -857,6 +857,12 @@ Use `{{variable}}` syntax to reference parameters in content:
       """
     }
     ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCUxwiA1swCuWALQY0aHSt5wAnuwyEtOgIwUADJ+usAvlKk+aQhWPWoILF5pOAVGfTgAemoYDFFzSwAKAWFRADlSGBcQAGE9OONIgEFLHTp+ZmosLQAOD1aASlU+DOSAcwgY6jteU151AYwAI1h1XjAG-igMO17qY1Z1doCZDU4sCOHlVlVrEB9VAE1jWzQRCAwoCAAvGDVjmFMWEjlqRlfGMqGExzKDMADucAoNlOPl8IF8AF0GHshvgiKRyDBxPQQAA3GC0CBsfCueFAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 === "Resolved Output"
 

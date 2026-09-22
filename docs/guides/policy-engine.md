@@ -167,7 +167,7 @@ policies:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAE1MAOYQ4WagE8A9AAEOpScwBuMalAziqtADqtpJGFgy9gO3rwgATRLy0hZMeUpVrxt07zjj2GQtdsBGCgBWCgAGN1YAXx0dPmkAVzgYXmkWAUk4AGtoKDgzPgAKAWFRCV4AWl4LEQwAI1gLXjBmal5ydUFqZnjWCwBKHWkiDl6PbKhcihYLGHKBRQgYAHdjdxZ2Tiw-EDcd1jMzABUHEnK4NBhGCEhGfhgF5d5GHEvMqBEsXiWIXF5ajFY2VYgiezDI7wBjGSohgaDgFHcuwikRAkQAugxNhJ8ERSOQYJp6CBlLQIGx8P5UUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAE1MAOYQ4WagE8A9AAEOpScwBuMalAziqtADqtpJGFgy9gO3rwgATRLy0hZMeUpVrxt07zjj2GQtdsBGCgBWCgAGN1YAXx0dPmkAVzgYXmkWAUk4AGtoKDgzPgAKAWFRCV4AWl4LEQwAI1gLXjBmal5ydUFqZnjWCwBKGN0iDl6PbKhcihYLGHKBRQgYAHdjdxZ2Tiw-EDcd1jMzABUHEnK4NBhGCEhGfhgF5d5GHEvMqBEsXiWIXF5ajFY2VYgiezDI7wBjGSohgaDgFHcuwikRAkQAugxNhJ8ERSOQYJp6CBlLQIGx8P5UUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
