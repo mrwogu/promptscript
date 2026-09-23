@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-<!-- PromptScript 2026-08-06T10:43:22.128Z | source: .promptscript/project.prs | target: github - do not edit -->
+<!-- PromptScript 2026-09-23T10:19:05.979Z | source: .promptscript/project.prs | target: github - do not edit -->
 
 ## project
 
@@ -23,27 +23,27 @@ You write clean, type-safe, and well-tested code following strict TypeScript pra
 The project is organized as a monorepo with these packages:
 
 ```mermaid
-  flowchart TB
-    subgraph packages
-      core[core - Types, errors, utilities]
-      parser[parser - Chevrotain-based parser]
-      resolver[resolver - Inheritance & import resolution]
-      validator[validator - AST validation rules]
-      compiler[compiler - Pipeline orchestration]
-      formatters[formatters - Output formatters]
-      cli[cli - Command-line interface]
-    end
+flowchart TB
+  subgraph packages
+    core[core - Types, errors, utilities]
+    parser[parser - Chevrotain-based parser]
+    resolver[resolver - Inheritance & import resolution]
+    validator[validator - AST validation rules]
+    compiler[compiler - Pipeline orchestration]
+    formatters[formatters - Output formatters]
+    cli[cli - Command-line interface]
+  end
 
-    cli --> compiler
-    cli --> resolver
-    compiler --> resolver
-    compiler --> validator
-    compiler --> formatters
-    resolver --> parser
-    parser --> core
-    resolver --> core
-    validator --> core
-    formatters --> core
+  cli --> compiler
+  cli --> resolver
+  compiler --> resolver
+  compiler --> validator
+  compiler --> formatters
+  resolver --> parser
+  parser --> core
+  resolver --> core
+  validator --> core
+  formatters --> core
 ```
 
 ## Context
@@ -122,13 +122,13 @@ The project is organized as a monorepo with these packages:
 ## commands
 
 ```bash
-  pnpm install              # Install dependencies
-  pnpm nx build <pkg>       # Build package
-  pnpm nx test <pkg>        # Run tests
-  pnpm nx lint <pkg>        # Lint code
-  pnpm nx run-many -t test  # Test all packages
-  pnpm nx graph             # View dependency graph
-  pnpm prs compile          # Compile .prs files (uses local dev version)
+pnpm install              # Install dependencies
+pnpm nx build <pkg>       # Build package
+pnpm nx test <pkg>        # Run tests
+pnpm nx lint <pkg>        # Lint code
+pnpm nx run-many -t test  # Test all packages
+pnpm nx graph             # View dependency graph
+pnpm prs compile          # Compile .prs files (uses local dev version)
 ```
 
 ## git-commits
@@ -164,14 +164,14 @@ After completing any code changes, run the following commands to ensure code qua
 After completing ANY code changes, run ALL steps in order:
 
 ```bash
-  pnpm run format           # 1. Format code with Prettier
-  pnpm run lint             # 2. Check for linting errors
-  pnpm run typecheck        # 3. Verify TypeScript types
-  pnpm run test             # 4. Run all tests
-  pnpm prs validate --strict  # 5. Validate .prs files
-  pnpm schema:check         # 6. Verify JSON schemas are current
-  pnpm skill:check          # 7. Verify SKILL.md copies are in sync
-  pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
+pnpm run format           # 1. Format code with Prettier
+pnpm run lint             # 2. Check for linting errors
+pnpm run typecheck        # 3. Verify TypeScript types
+pnpm run test             # 4. Run all tests
+pnpm prs validate --strict  # 5. Validate .prs files
+pnpm schema:check         # 6. Verify JSON schemas are current
+pnpm skill:check          # 7. Verify SKILL.md copies are in sync
+pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
 ```
 
 ## donts
