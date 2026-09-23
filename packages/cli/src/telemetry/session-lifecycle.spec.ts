@@ -36,6 +36,7 @@ vi.mock('./config.js', () => ({
   resolveCliTelemetryConfig: mocks.resolveCliTelemetryConfig,
 }));
 
+import { CLI_VERSION } from '../cli-version.js';
 import {
   commandFeatures,
   finishCliTelemetry,
@@ -239,7 +240,10 @@ describe('resolveFlushSelfInvocation', () => {
     expect(invocation?.prefixArgs).toContain('--allow-sys=cpus,homedir');
     expect(invocation?.prefixArgs).toContain('--allow-net=telemetry.example');
     expect(invocation?.prefixArgs).toContain(`--allow-write=${config.cacheDirectory}`);
-    expect(invocation?.prefixArgs).toContain('npm:@promptscript/cli@1.19.1');
+    // Assert against CLI_VERSION, not a hardcoded version: release-please
+    // bumps package.json on the release branch, and a pinned literal breaks
+    // the build for every release PR.
+    expect(invocation?.prefixArgs).toContain(`npm:@promptscript/cli@${CLI_VERSION}`);
   });
 
   it('never grants the flush child unscoped system access', () => {
