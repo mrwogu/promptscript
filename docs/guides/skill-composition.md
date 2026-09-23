@@ -32,6 +32,12 @@ Use `@use` directives inside a `@skills` block to import sub-skills as ordered p
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhmaOPLES4AT3YZCs+QEYKBgAwrWAXzFjucANbQocYasGK4s0eImCp8RtQhoWBBsuiAACtTMUgCujEFsglj+GADmMIJgzNSCjFDM0VKCcDDUAG4QjPCmXjlsHOyhKiDONQCa+YIY1OlCNFGx8eJJEKnpWYw48EnYWRSCAGLMUHkA7omTgmg4GMWOAEYwqy1eEOJZPtRzAMorEFgTggdYKzCcgiQYrNEYUJ2shX4EiQouk9jsYIUEix2EQsBRjk1qoILJ5uNFioIKAB6LbguBYyY-XAAWjgjE+zjRGOxuN2WOGowAFMVSiU7upQn47hUfvIAJSU9HpGnbOksHzEyCETqODDRLDMKViMwgMx0dDYPCIEC0+AEmBEnCk8msKi0EAMaH1LD4ADEgiu0TQ5AgEKKzHW6SIpHI6Wo0VYjkm3TmADlmFhNl1I4rPd5mIxonwtIM6H9CqwI51BN0flHGDZRvDWLx+EIPBJpKFdfjCVASWSKc1PBotDo5CADABWCgmZsSEgQQinWRJaIwZVWOACf5dKSOCu1HyyZDyMJQDCVHBLC5FGdSOfyAC6zg409OKRXa43W53JT3nwP1Ckx8nJe60-8cWCgacnmJHbrpuMDblAu4fsM35sKYKpqhquD4DW9LJGkZr0EwdScDa2r2o6zpQK6hRwB6uBesQZCwDmAZBiUMBhlmmDUDGYBxlICZJlh2A-mmj6CJmkZCLmvyYAWRZWHwAh-pWMgdkhDJpEirYCO2+gUD2fbOIOw6sKO-oTp4jGkG4UleCybJYOoAD8sifheggALwdt6FETv2yJvtY+5zguzjijAV7hDeIF3tk06PoeIAnp4Z5BKwl6CKugXAaBu5hbOz6vuYVgQV+gw+f+gFBSl945RUgwwaq6o6pqiGinqfmSkOaEWhhMJcDhDpOi6brEXGzm+lRv7BnRgjhpGjHMax7HJgIqbpnxWaCQawmboWqHiWWJlVrJdX4g1SpuUp2ihN2vZIlpI6JHpHlpU+84mX5AVAbeYH3rdEVRRIMUXk9RUhQ+6UvpFHmlVBv6LgB17Jf9oPlc2sFHgwWHUOo+D9ZQNDoaytA-vgeiqkAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 The resolver flattens all sub-skills into a single skill with labeled phase sections, unioned `allowedTools`, concatenated references, and `composedFrom` metadata tracking provenance.
 
 ## Why Composition?
@@ -279,6 +285,12 @@ prs validate --strict
   @use ./phases/code-fix as autofix
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhmaOPLES4AT3YZCs+QEYKBgAwrWAXzFjucANbQocYasGK4s0eImCp8RtQhoWBBsuiAACtTMUgCujEFsglj+GADmMIJgzNSCjFDM0VKCcDDUAG4QjPCmXoLRxdQAkqylzIwYAEawsknRMM4SLOycWKEqIP1eAJr5ghjU6UI0UbHx4kkQqelZjDjwSdhZFJaeNQBizFB5AO6Ju4JoOBjFju0w15LiWT7UiBMSBoIAErRcS7DBQXA5XaMGyODB+ZhwOGXIolcqVZQnLwAJgoggAKsk0rNWIVck84BAwOoMhBSXSUpiahIAMx4gCCaHINIw0SwzBI2BghUghHggiuu3mRQwYD6rD+ggAylcIFgdoJXlgrjBOIJBaxouDBAAKOkcajwoKlGAAShJZMi4hNIOwHFJwvtJCi8uZmqewpc4kGHEIWCOWLG1UEFk83Dq6QoAHoHgG4EmwRCcABaOBtBVxhOCZOp55J9abE3FG3+LDqUJ+NUVcHyW3OePFYspx5llg+bOi2ZwvnMUViMwgMx0dDYPCIECl+AZmDg3C5-NUWggBgh4b4ADEyuiXKgEEDcGYt3SRFI5HS1BBjilMDxADlmFh7nNP6Or95WtEfBaKsdAOoIrAfrMgjzMamAwpsEa8PwQgeBI0ihIu6aZmueYYAq4yeBoWg6HIIAGAArBQJgERIJAQIQdLdA+8qxtYAiknMUiOKhOQ+rIyDyGEUDwjAOAXN8RTsVInHyAAus4HBwEErApPxgnCZUYlQBJSl4dJ1BSHJ45WPMSn+HEwSsNxzjZqRQkiVpEmmesFlsKYE5TjOuD4Jh5ZEi+ND0EwbDulgB5HieZ6FBef43mQsDQY+gjPm+kGYNQP5gH+UgAUBAggWBEGfkIMFQF+8FpIhfACE4njoaRvkVmk0ZEQIJH6BQlHUc4dEMawTG9M46WkG4tU1NWJRquoAD8shmQyggALykXFd7RrGrG6RxBnWZ4fYwGp4QaaJ4klJJekySA8meIpymqYIAlHQ5p3ZFt+mGVdxmsNwznmasu0SLZ6nPdpZ2-RUqzuZO04LrOPk9ku+0DvRm5BbuXDzoeSrHuQUVFJeuDXsQ8X3klKWCO+n7pZl2W5cM2CWaBengZBJUrmVcE2AhVjVShzj1fIvlI2ONFFJobWhBRVHRr1jGJMxX1sRdO1jbxPiHfZmkved20fddEi3QyGvHY5Z1vZd12seDrlWarQNPVroPZNbkMER5skMMM1DqPgq2UIF24gDWlJsPgeiTkAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Sub-Skills
 
