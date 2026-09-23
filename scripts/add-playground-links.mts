@@ -145,7 +145,9 @@ function encodeState(files: Map<string, string>): string {
 }
 
 /** An `@inherit`/`@use` line, split into indent and import target. */
-const IMPORT_LINE_REGEX = /^([ \t]*)@(?:inherit|use)[ \t]+(.*)$/;
+// The capture starts on a non-space character so it cannot compete with the
+// separator in front of it for the same whitespace, which is what backtracks.
+const IMPORT_LINE_REGEX = /^([ \t]*)@(?:inherit|use)[ \t]+(\S.*)$/;
 
 /**
  * Take the import target off the rest of an import line.
