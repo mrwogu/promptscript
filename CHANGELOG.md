@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.20.0](https://github.com/mrwogu/promptscript/compare/v1.19.1...v1.20.0) (2026-09-23)
+
+
+### Features
+
+* **ci:** badge examples that are meant to fail ([dfcdb9d](https://github.com/mrwogu/promptscript/commit/dfcdb9d675cc15ef5fd22e15dd8e1bca6d522852)), closes [#500](https://github.com/mrwogu/promptscript/issues/500)
+* **ci:** emit title and description frontmatter on API pages ([7cf4ff1](https://github.com/mrwogu/promptscript/commit/7cf4ff1f4ccefab41fac9aa448a2fdf075ba8e1c)), closes [#475](https://github.com/mrwogu/promptscript/issues/475)
+* **ci:** supply imported files in the playground state ([2e9c904](https://github.com/mrwogu/promptscript/commit/2e9c9041bade88288113227baef6b8e51c9380cd)), closes [#500](https://github.com/mrwogu/promptscript/issues/500)
+* **cli:** detect runtime and embed version and skill ([8ad47e8](https://github.com/mrwogu/promptscript/commit/8ad47e8c8a99c3991bfd530d28ccaa15b71f0788))
+* **cli:** port managed output ops to spawnable worker ([cd0e759](https://github.com/mrwogu/promptscript/commit/cd0e7594e439c9514f6a6f43259e69d37cdadc24))
+* **telemetry:** report runtime and flush via self-invocation ([d1d3ef2](https://github.com/mrwogu/promptscript/commit/d1d3ef2995f09e4bb2bc5bb7074be6cfd15c18d1))
+* **validator:** add import excludes and allowed patterns ([599a785](https://github.com/mrwogu/promptscript/commit/599a78545037e3e26065a048ae47d10691440faf))
+
+
+### Bug Fixes
+
+* **browser-compiler:** alias node path imports ([531d21d](https://github.com/mrwogu/promptscript/commit/531d21d70d124d1099189b8b561c5b53c830561b))
+* **ci:** gate playground badges on a real compile ([5e8bf1e](https://github.com/mrwogu/promptscript/commit/5e8bf1e28a2b31e6769a0caaefc15b83c74eed42)), closes [#500](https://github.com/mrwogu/promptscript/issues/500)
+* **ci:** never badge an example the page calls wrong ([df04434](https://github.com/mrwogu/promptscript/commit/df0443486228a2696b4a1b1e2780cf2f1963448b)), closes [#500](https://github.com/mrwogu/promptscript/issues/500)
+* **ci:** normalize path separators in frontmatter script ([ee31403](https://github.com/mrwogu/promptscript/commit/ee314030480777f430c4f2e302bc75847ab09239))
+* **ci:** read the whole parameterized import target ([485b02d](https://github.com/mrwogu/promptscript/commit/485b02d3a472187846fc5086263584a8438b77c6)), closes [#500](https://github.com/mrwogu/promptscript/issues/500)
+* **ci:** skip fences that teach good and bad at once ([ce8828c](https://github.com/mrwogu/promptscript/commit/ce8828c22fec15b97b9d7d67962b7656f67e7865)), closes [#500](https://github.com/mrwogu/promptscript/issues/500)
+* **ci:** sync copilot instructions with the compiled output ([7e325f8](https://github.com/mrwogu/promptscript/commit/7e325f87b120845b3ef361ea1ce7ca5296767222))
+* **cli:** detect runtime before probing for the worker ([14ac331](https://github.com/mrwogu/promptscript/commit/14ac331762f676d64f533db86400de142b73b3b1))
+* **cli:** externalize fastify rate-limit plugin ([a65a442](https://github.com/mrwogu/promptscript/commit/a65a4429e45d8ca54eb296cee8b1f300e4862a60))
+* **cli:** fail deno bundle check without prs bin ([f74b0bd](https://github.com/mrwogu/promptscript/commit/f74b0bd6f924b5509cb3135f0c0106b1655e2617))
+* **cli:** fail the deno bundle check on an unreadable manifest ([4855c49](https://github.com/mrwogu/promptscript/commit/4855c4911b8ede878c9b506065da8a0186233bcd))
+* **cli:** grant flush child reads on PROMPTSCRIPT_CONFIG dir ([d7bf94c](https://github.com/mrwogu/promptscript/commit/d7bf94c5f22081cc3ce65604ad55e2a50cff047e))
+* **cli:** preserve loader for source worker ([e0ca59c](https://github.com/mrwogu/promptscript/commit/e0ca59c8121fdad935a2e54af92f81e11bc23694))
+* **cli:** report failure when managed cleanup cannot run ([013c05a](https://github.com/mrwogu/promptscript/commit/013c05addacce35a7a8d97f6adbe112182828d60))
+* **cli:** resolve forwarded loader specifiers for the worker ([ba85ded](https://github.com/mrwogu/promptscript/commit/ba85deda5c494ce39fbc59a07e232c60c5c192ec))
+* **cli:** scope the deno flush child to the sys calls it makes ([37eea05](https://github.com/mrwogu/promptscript/commit/37eea05033085733f9eb19c4062f278429864f63))
+* **cli:** sync embedded skill after rebase ([16b03d6](https://github.com/mrwogu/promptscript/commit/16b03d6a3fd1a0e298965944d46135b6526d0029))
+* **telemetry:** report Deno runtime version ([f552d59](https://github.com/mrwogu/promptscript/commit/f552d59e22f0c1a07e2aa972dc5144c0e1461fc2))
+* **validator:** enforce exclude commit binding and union entries ([5ee9872](https://github.com/mrwogu/promptscript/commit/5ee987201252babba0688080064700467dfe67f1))
+* **validator:** harden import exclusions ([60ef9c3](https://github.com/mrwogu/promptscript/commit/60ef9c37c8311d91adf71b162e3099eea74375e0)), closes [#489](https://github.com/mrwogu/promptscript/issues/489)
+* **validator:** keep import key normalization linear ([239a0c2](https://github.com/mrwogu/promptscript/commit/239a0c2683b4c0714f84807d040e4663f864d70f))
+
 ## [1.19.1](https://github.com/mrwogu/promptscript/compare/v1.19.0...v1.19.1) (2026-09-21)
 
 
