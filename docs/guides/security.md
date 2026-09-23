@@ -391,6 +391,12 @@ Template variables come from parent stacks or passed parameters:
 @inherit @stacks/app(projectName: "my-app")
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4ANQwoNwNdO1VmEl5zHGYYADcYams4EXYIbANbBRhovp9+CFYcdpMBLoxGAGs4AHoMNDQAChpmACsYRiwAOVIYFJASRwBaVbQIgEoQfLp0bDxEEH5ZheXrqloQBhY7E4WB4vAAym41lAINJZPIBkRSOQ7NQPMpJtQYBReAdmFh7BhqPjmGAFJNeOJmIw3FoRFgIGw6GJPLxWHixLxMeUCQsNFjRkIRLxAlYQqcPiIvis1nlgnAEiJkuEQOksrkQHESBBCOMwlhUTA4pg1CQ4GERcFgltdvsjkIAPxhLrUcbqXgAXmViOiho1osKBVGs08hPEygtOmYUjCyAiAAUoHMYE0oFIOsHxKGIgBdOIcLqumPxxOMZPMVPtWTdTPUbwgXOB3yY50QfYM1jhuIXZUJpMptOc+D61v0th5fIPbMMYHURz4b3I370EBtWjt-CpB5AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Security Best Practices
 
 ### 1. Validate Parameter Inputs

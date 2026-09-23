@@ -822,11 +822,23 @@ Pass parameters when using `@inherit` or `@use`:
 @inherit @stacks/typescript-lib(projectName: "my-app", runtime: "node20")
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCSBIBPALQY0aHSt5w97DIS06AjBQAMzs6wC+UqdIiscMaggsXmk4BUYAazgAeiw9NHhGQLQsAygIACMACgFhUQA5Uhg7XUNjUxA6XmoAV3YIORLWZnUYACYnHQBKEHc6dGw8RBBQ8KjY+MTk1PSM8XomNg4uYb4AZRqTdJh1C2ZeXBheIlJyI9rWOF5-ahgKXnzmYMxqYOYwA-9edWZGGrlrFgIGwqhhWLtmsFFLcMFB+BhIhgAOZ3bxyBRKcwaEqjBHjOIJOBJCApNKZNyqSzWWzaECOACsrhA5hIEEIvi0WFqMHML1IcC0ylYqlUuREWEKcgA-FowoFWEjeABeWknMiwCkii5A6Wyrm+RUqnRqs6azwebxhMHqDDUdRXIWqFitLTIHQABSgCJgOGYUFa1AsCnBtvUOgAuuYOGEDa6PV7GD6-QGg9bQxGpObpLc5RBRMDLpjhbwDLTPd7ff6AtV4Pr82w3O5euGGJwuXp8CbKDQFgA3AJwAv4ey9IA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Or with `@use`:
 
 ```promptscript
 @use ./fragments/testing(framework: "vitest", coverage: 90)
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODsKAHpVDS1TCo44LAhWdQAKaqFzZmoAaxSQADcTeCwIuh1mAZg1dRgwgE5sgEoQfLp0bDxEcBnauHqR5vUqWhAGFnZOLB5eAGU3NHIIaVl5W14iUnI7ag9lHGmMAovAAcswsPYMNQIcwwAoAbxxMxGG5atgIGxxhhPLxWOCxLxqDAMFBIYwehogcUhCJeIErCF+tVNFd9g0mi08sE4AkRMlwiB0llciA4iQIIRmmEsL8YHFMGoSHAwvTgsEOjAur0APxhRrUI68AC8As+0TlooZwRYUxmMF1uNRACNpsbeLkGYUCsVGtjxFDxMpVRMpGFkBEAApQDCMGA4ZhQKTUWQiTwBiIAXTi7KOYcj0dj8cTrt9aeo3hAWe9viJ+ogjCabCDcQAtAKozG4wmk4SRgaGxjWHl8qsMwwrtRHPgzd8TvRBtM4IP8KlVkA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Template Variables
 
@@ -917,6 +929,12 @@ Use `{{variable}}` syntax to reference parameters in content:
       """
     }
     ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCUxwiA1swCuWALQY0aHSt5wAnuwyEtOgIwUADJ+usAvlKlpCFY9aggsXmk4BUZ9OAB6ahgMUXNLAAoBYVEAOVIYFxAAYT1Y4wiAQUsdOn5maiwtAA4PFoBKAJkNTixwuyUbaxAfVQBNY1s0EQgMKAgALxg1Vl4YUxYSOWpGJcZSwxNeMChmAHc4CkHh66lfEF86dGw8RBAomLjE5NSLNHF6JhsDhcV58ADKRkscxg6lszF4uCWRFI5CW1CMrDgvFCMAovByzAimAavGYYARel46mYjCMckcvTYtQwrFhrEJvEUSVm-BS+gwAHNcYE5AoBis1JptG9onyEtyftVhhL7I5nNL3ABWbzK1QkCCEYJaLDomA2YmkOBaZQS1RZERYPJyAD8WmiYVYAt4AF5pciyLARqo6g1XbxWHSAEYwag+3geGz+PyBWWsjDUdRYm2qFjqAq8ZA6AAKUBSMBwzCgedjqfU6fUOgAujYONFggKtIWQCWyxWqzHbAo0xmm7dAkl3RBRBA2FmbKZpT2dn3q7wJyap4zWD47r5GwwetQ7Ph-aj-iAGAA3GNwGesfCue5AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 === "Resolved Output"
 
