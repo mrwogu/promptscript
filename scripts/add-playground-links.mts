@@ -145,7 +145,34 @@ function encodeState(files: Map<string, string>): string {
 }
 
 /** An `@inherit`/`@use` line, split into indent and import target. */
-const IMPORT_LINE_REGEX = /^([ \t]*)@(?:inherit|use)[ \t]+(\S+)/;
+const IMPORT_LINE_REGEX = /^([ \t]*)@(?:inherit|use)[ \t]+(.*)$/;
+
+/**
+ * Take the import target off the rest of an import line.
+ *
+ * A parameter list holds spaces, so stopping at the first one truncates
+ * `./phases/triage(severity: "critical")` to `./phases/triage(severity:` and the
+ * placeholder lands under that name instead of the one the compiler resolves.
+ * Whitespace only ends the target outside parentheses, which also leaves an
+ * `as alias` suffix and a trailing comment behind.
+ */
+function readImportTarget(rest: string): string {
+  let depth = 0;
+  for (let index = 0; index < rest.length; index++) {
+    const character = rest[index]!;
+    if (character === '(') {
+      depth++;
+    } else if (character === ')' && depth > 0) {
+      depth--;
+      if (depth === 0) {
+        return rest.slice(0, index + 1);
+      }
+    } else if (depth === 0 && (character === ' ' || character === '\t')) {
+      return rest.slice(0, index);
+    }
+  }
+  return rest;
+}
 
 /** Explicit URL or scp-style git target. */
 const URL_TARGET_REGEX = /^(?:https?:\/\/|git@)/;
@@ -332,7 +359,7 @@ function supplyUnresolvedImports(code: string): { code: string; stubs: Map<strin
     if (match === null) {
       return line;
     }
-    const target = parseImportTarget(match[2]!);
+    const target = parseImportTarget(readImportTarget(match[2]!));
     const kind = unresolvedImportKind(target.path);
     if (kind === null) {
       return line;
