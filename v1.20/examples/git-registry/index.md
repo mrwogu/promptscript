@@ -1,0 +1,664 @@
+# Git Registry
+
+This example shows how to use a Git repository as a PromptScript registry for sharing configurations across teams.
+
+## Use Cases
+
+- **Central registry** - Share organization-wide standards via Git
+- **Version control** - Pin to specific versions using Git tags
+- **Access control** - Use GitHub/GitLab permissions for registry access
+- **CI/CD integration** - Automatic updates on registry changes
+
+## Basic Setup
+
+### Public Repository
+
+```yaml
+# promptscript.yaml
+id: my-project
+syntax: '1.4.0'
+
+input:
+  entry: .promptscript/project.prs
+
+registry:
+  git:
+    url: https://github.com/your-org/promptscript-registry.git
+    ref: main
+
+targets:
+  - github
+  - claude
+```
+
+### Private Repository with Token
+
+```yaml
+# promptscript.yaml
+id: my-project
+syntax: '1.4.0'
+
+input:
+  entry: .promptscript/project.prs
+
+registry:
+  git:
+    url: https://github.com/your-org/private-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
+  cache:
+    enabled: true
+    ttl: 3600000 # 1 hour in milliseconds
+
+targets:
+  - github
+  - claude
+```
+
+### SSH Authentication
+
+```yaml
+# promptscript.yaml
+id: my-project
+syntax: '1.4.0'
+
+input:
+  entry: .promptscript/project.prs
+
+registry:
+  git:
+    url: git@github.com:your-org/private-registry.git
+    ref: main
+    auth:
+      type: ssh
+      sshKeyPath: ~/.ssh/id_ed25519
+
+targets:
+  - github
+  - claude
+```
+
+## Self-Hosted Git Servers
+
+PromptScript works with **any Git server**, not just GitHub. This includes self-hosted GitLab, Gitea, Bitbucket Server, Azure DevOps, and other Git-compatible servers.
+
+### Self-Hosted GitLab
+
+```yaml
+# promptscript.yaml
+id: my-project
+syntax: '1.4.0'
+
+input:
+  entry: .promptscript/project.prs
+
+registry:
+  git:
+    url: https://gitlab.your-company.com/org/promptscript-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITLAB_TOKEN # Use any env var name you prefer
+
+targets:
+  - github
+  - claude
+```
+
+```bash
+# Set your GitLab Personal Access Token (requires read_repository scope)
+export GITLAB_TOKEN="glpat-xxxxxxxxxxxxxxxxxxxx"
+prs pull
+```
+
+### Self-Hosted GitLab with SSH
+
+```yaml
+registry:
+  git:
+    url: git@gitlab.your-company.com:org/promptscript-registry.git
+    ref: main
+    auth:
+      type: ssh
+      sshKeyPath: ~/.ssh/id_ed25519
+```
+
+### Gitea / Forgejo
+
+```yaml
+registry:
+  git:
+    url: https://gitea.your-company.com/org/promptscript-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITEA_TOKEN
+```
+
+### Bitbucket Server (Self-Hosted)
+
+```yaml
+registry:
+  git:
+    url: https://bitbucket.your-company.com/scm/org/promptscript-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: BITBUCKET_TOKEN
+```
+
+### Azure DevOps Server
+
+```yaml
+registry:
+  git:
+    url: https://dev.your-company.com/org/project/_git/promptscript-registry
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: AZURE_DEVOPS_TOKEN
+```
+
+### Token Types by Provider
+
+| Provider         | Token Type            | Required Scope    |
+| ---------------- | --------------------- | ----------------- |
+| GitLab           | Personal Access Token | `read_repository` |
+| GitLab           | Project Access Token  | `read_repository` |
+| GitLab           | Deploy Token          | `read_repository` |
+| Gitea            | Access Token          | `read:repository` |
+| Bitbucket Server | HTTP Access Token     | Repository read   |
+| Azure DevOps     | Personal Access Token | Code (Read)       |
+
+Environment Variable Naming
+
+The `tokenEnvVar` field accepts any environment variable name. Use a name that makes sense for your organization, such as `REGISTRY_TOKEN`, `GITLAB_TOKEN`, or `GIT_REGISTRY_PAT`.
+
+## Version Pinning
+
+### Pin to Specific Tag
+
+```yaml
+registry:
+  git:
+    url: https://github.com/your-org/promptscript-registry.git
+    ref: v1.2.0 # Pin to release v1.2.0
+```
+
+### Pin in .prs Files
+
+You can also pin specific imports to versions:
+
+```
+@meta {
+  id: "my-project"
+  syntax: "1.0.0"
+}
+
+# Pin to specific version (in a multi-file setup):
+@inherit @company/base@1.0.0
+
+# Use latest from configured ref:
+@use @company/security as sec
+```
+
+## Repository Structure
+
+Recommended structure for a Git registry:
+
+```text
+promptscript-registry/
+├── README.md
+├── CHANGELOG.md
+├── @org/
+│   ├── base.prs           # Organization base
+│   ├── security.prs       # Security policies
+│   └── compliance.prs     # Compliance rules
+├── @teams/
+│   ├── frontend.prs       # Frontend team config
+│   ├── backend.prs        # Backend team config
+│   └── mobile.prs         # Mobile team config
+└── @fragments/
+    ├── testing.prs        # Reusable testing rules
+    └── documentation.prs  # Documentation standards
+```
+
+## CLI Commands
+
+### Pull from Registry
+
+```bash
+# Pull using default branch from config
+prs pull
+
+# Pull from specific branch
+prs pull --branch develop
+
+# Pull from specific tag
+prs pull --tag v1.0.0
+
+# Pull from specific commit
+prs pull --commit abc123def
+
+# Force refresh (ignore cache)
+prs pull --refresh
+
+# Preview without pulling
+prs pull --dry-run
+```
+
+## CI/CD Integration
+
+### GitHub Actions
+
+```yaml
+# .github/workflows/promptscript.yml
+name: PromptScript CI
+
+on:
+  push:
+    paths:
+      - '.promptscript/**'
+      - 'promptscript.yaml'
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install PromptScript
+        run: npm install -g @promptscript/cli
+
+      - name: Pull registry updates
+        run: prs pull
+        env:
+          GITHUB_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+
+      - name: Compile
+        run: prs compile
+
+      - name: Check for changes
+        run: |
+          git diff --exit-code || {
+            echo "::error::Compiled files changed. Run 'prs compile' locally."
+            exit 1
+          }
+```
+
+### GitLab CI
+
+```yaml
+# .gitlab-ci.yml
+promptscript:
+  image: node:20
+  script:
+    - npm install -g @promptscript/cli
+    - prs pull
+    - prs compile
+    - git diff --exit-code
+  variables:
+    # Use GITLAB_TOKEN for GitLab registries, or match your tokenEnvVar config
+    GITLAB_TOKEN: $REGISTRY_TOKEN
+  only:
+    changes:
+      - .promptscript/**/*
+      - promptscript.yaml
+```
+
+Self-Hosted GitLab CI
+
+For self-hosted GitLab, you can use the built-in `CI_JOB_TOKEN` for repositories within the same GitLab instance:
+
+````text
+```yaml
+variables:
+  GITLAB_TOKEN: $CI_JOB_TOKEN
+````
+
+For cross-instance access, use a Project Access Token or Deploy Token stored in CI/CD variables.
+
+```
+
+## Complete Example
+
+### Registry Files
+
+**[org/base.prs](https://github.com/org/base.prs "GitHub Repository: org/base.prs")**
+
+```
+
+@meta { id: "@org/base" syntax: "1.0.0" org: "ACME Corp" }
+
+@identity { """ You are an AI assistant at ACME Corp. Follow our coding standards and best practices. """ }
+
+@standards { code: [ "Code review required for all changes", "Tests required for all code" ] git: [ "Use conventional commits format" ] }
+
+@restrictions {
+
+- "Never commit secrets"
+- "Always follow security policies" }
+
+```
+
+**[teams/frontend.prs](https://github.com/teams/frontend.prs "GitHub Repository: teams/frontend.prs")**
+
+```
+
+@meta { id: "@teams/frontend" syntax: "1.0.0" }
+
+# In a multi-file setup, you would inherit:
+
+@inherit @org/base
+
+@identity { """ You are a frontend development expert. Expertise: React, TypeScript, TailwindCSS """ }
+
+@context { framework: "React 18" language: "TypeScript 5" styling: "TailwindCSS" }
+
+````
+
+### Project Configuration
+
+**promptscript.yaml**
+
+```yaml
+id: customer-portal
+syntax: '1.4.0'
+
+inherit: '@teams/frontend'
+
+input:
+  entry: .promptscript/project.prs
+
+registry:
+  git:
+    url: https://github.com/acme/promptscript-registry.git
+    ref: v1.0.0
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
+  cache:
+    enabled: true
+    ttl: 3600000
+
+targets:
+  - github
+  - claude
+  - cursor
+````
+
+**.promptscript/project.prs**
+
+```
+@meta {
+  id: "customer-portal"
+  syntax: "1.0.0"
+}
+
+# In a multi-file setup, you would inherit:
+@inherit @teams/frontend@1.0.0
+
+@context {
+  project: "Customer Portal"
+
+  """
+  Self-service portal for ACME customers.
+  Features: account management, orders, support.
+  """
+}
+
+@shortcuts {
+  "/portal": "Work on portal features"
+}
+```
+
+## Alias-Based Import Workflow
+
+### 1. Configure Aliases
+
+Add aliases to `promptscript.yaml` once:
+
+```yaml
+# promptscript.yaml
+id: customer-portal
+syntax: '1.4.0'
+
+registries:
+  '@company': github.com/acme/promptscript-base
+  '@team': github.com/acme/team-frontend
+
+registry:
+  git:
+    url: https://github.com/acme/promptscript-base.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
+
+targets:
+  - github
+  - claude
+```
+
+### 2. Use Aliases in .prs Files
+
+```
+@meta {
+  id: "customer-portal"
+  syntax: "1.0.0"
+}
+
+# Inherit from company base — resolves to github.com/acme/promptscript-base/base.prs
+@inherit @company/base
+
+# Team-specific standards
+@use @team/stacks/react
+
+# Pin to a specific release
+@use @company/security@2.0.0
+```
+
+### 3. Compile
+
+```bash
+prs compile
+```
+
+PromptScript expands `@company` to `github.com/acme/promptscript-base`, clones (or uses cache), resolves the file path, and compiles.
+
+______________________________________________________________________
+
+## URL Import Example
+
+URL imports work without any alias configuration:
+
+```
+@meta {
+  id: "my-project"
+  syntax: "1.0.0"
+}
+
+# Direct URL import — no alias needed
+@use github.com/acme/shared-standards/fragments/security
+
+# Open-source skill auto-discovered from SKILL.md
+@use github.com/some-org/claude-skills/skills/tdd-workflow
+
+# Versioned URL import
+@use github.com/acme/shared-standards/stacks/typescript@1.0.0
+```
+
+Debug the resolution chain with:
+
+```bash
+prs resolve github.com/acme/shared-standards/@fragments/security
+```
+
+______________________________________________________________________
+
+## Lockfile Workflow
+
+### Initial Setup
+
+```bash
+# 1. Add remote imports to your .prs files, then lock:
+prs lock
+
+# 2. Commit the lockfile
+git add promptscript.lock
+git commit -m "chore: add PromptScript lockfile"
+```
+
+### Checking for Updates
+
+```bash
+# See what would change without updating
+prs update --dry-run
+
+# Update a specific package
+prs update github.com/acme/promptscript-base
+
+# Update all packages and commit
+prs update
+git add promptscript.lock
+git commit -m "chore(deps): update PromptScript dependencies"
+```
+
+### Verifying in CI
+
+```bash
+# Fail if lockfile is not up to date
+prs lock --dry-run
+```
+
+______________________________________________________________________
+
+## CI Pipeline Example with Vendor
+
+This example uses vendor mode so CI never needs network access to the registry.
+
+### Local Setup (run once or on updates)
+
+```bash
+# Sync vendor from the lockfile
+prs vendor sync
+
+# Commit vendor directory and lockfile
+git add .promptscript/vendor promptscript.lock
+git commit -m "chore: vendor PromptScript dependencies"
+```
+
+### GitHub Actions Pipeline
+
+```yaml
+# .github/workflows/promptscript.yml
+name: PromptScript CI
+
+on:
+  push:
+    paths:
+      - '.promptscript/**'
+      - 'promptscript.yaml'
+      - 'promptscript.lock'
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install PromptScript
+        run: npm install -g @promptscript/cli
+
+      - name: Check vendor is in sync
+        run: prs vendor check
+
+      - name: Validate
+        run: prs validate --strict
+
+      - name: Compile
+        run: prs compile
+
+      - name: Check for uncommitted changes
+        run: |
+          git diff --exit-code || {
+            echo "::error::Compiled files are out of date. Run 'prs compile' locally."
+            exit 1
+          }
+```
+
+### GitLab CI Pipeline
+
+```yaml
+# .gitlab-ci.yml
+promptscript:
+  image: node:20
+  script:
+    - npm install -g @promptscript/cli
+    - prs vendor check
+    - prs validate --strict
+    - prs compile
+    - git diff --exit-code
+  only:
+    changes:
+      - .promptscript/**/*
+      - promptscript.yaml
+      - promptscript.lock
+```
+
+______________________________________________________________________
+
+## Troubleshooting
+
+### Authentication Failed
+
+```text
+Error: Git authentication failed
+```
+
+**Solutions:**
+
+1. Check your token environment variable is set: `echo $GITLAB_TOKEN` (or your configured `tokenEnvVar`)
+1. Verify token has the required scope:
+1. GitHub: `repo` scope
+1. GitLab: `read_repository` scope
+1. Gitea: `read:repository` scope
+1. For SSH, ensure key is added: `ssh-add -l`
+1. For self-hosted servers, verify the URL is correct and accessible from your network
+
+### Ref Not Found
+
+```text
+Error: Git ref not found: v2.0.0
+```
+
+**Solutions:**
+
+1. List available tags: `git ls-remote --tags <url>`
+1. Use existing branch/tag
+1. Check for typos in version
+
+### Cache Issues
+
+```bash
+# Force refresh to bypass cache
+prs pull --refresh
+```
+
+## Best Practices
+
+1. **Version your registry** - Use semantic versioning with Git tags
+1. **Pin production versions** - Don't use `main` in production
+1. **Document changes** - Maintain a CHANGELOG.md
+1. **Test before releasing** - Validate all .prs files before tagging
+1. **Use short TTL in dev** - Faster iteration with `ttl: 60000`

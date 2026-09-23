@@ -1,0 +1,212 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/diff/v1.json",
+  "title": "PromptScript Compilation Diff",
+  "description": "Machine-readable report emitted by prs diff --format json.",
+  "type": "object",
+  "required": [
+    "$schema",
+    "version",
+    "contentIncluded",
+    "success",
+    "hasChanges",
+    "changes",
+    "unsupported",
+    "warnings",
+    "errors",
+    "summary"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "const": "https://getpromptscript.dev/schema/diff/v1.json"
+    },
+    "version": {
+      "const": 1
+    },
+    "contentIncluded": {
+      "type": "boolean",
+      "description": "Whether canonical output content is included in change entries."
+    },
+    "success": {
+      "type": "boolean",
+      "description": "False when compilation or report generation failed."
+    },
+    "hasChanges": {
+      "type": "boolean",
+      "description": "True when changes or unsupported capabilities are present."
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Change"
+      }
+    },
+    "unsupported": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Change"
+      },
+      "description": "The unsupported entries from changes, provided for direct automation."
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Warning"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Error"
+      }
+    },
+    "summary": {
+      "$ref": "#/definitions/Summary"
+    }
+  },
+  "definitions": {
+    "Change": {
+      "type": "object",
+      "required": ["target", "path", "source", "kind", "ownership"],
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["added", "changed", "removed", "unsupported", "user-owned"]
+        },
+        "ownership": {
+          "type": "string",
+          "enum": ["promptscript", "user", "unknown"]
+        },
+        "mode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 511,
+          "description": "Desired POSIX permission bits for the output file."
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        },
+        "content": {
+          "type": "string"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Warning"
+          }
+        },
+        "location": {
+          "$ref": "#/definitions/Location"
+        }
+      }
+    },
+    "Warning": {
+      "type": "object",
+      "required": ["code", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "suggestion": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#/definitions/Location"
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "required": ["message"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "location": {
+          "$ref": "#/definitions/Location"
+        }
+      }
+    },
+    "Location": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "Summary": {
+      "type": "object",
+      "required": ["total", "added", "changed", "removed", "unsupported", "userOwned", "unchanged"],
+      "additionalProperties": false,
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "added": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "changed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "removed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unsupported": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "userOwned": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unchanged": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

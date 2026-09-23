@@ -1,0 +1,91 @@
+# OpenCode Formatter
+
+| Property          | Value                                    |
+| ----------------- | ---------------------------------------- |
+| **Tier**          | Custom                                   |
+| **Main output**   | `OPENCODE.md`                            |
+| **Dot directory** | `.opencode/`                             |
+| **Skills**        | Yes (`.opencode/skills/<name>/SKILL.md`) |
+| **Agents**        | Yes (`.opencode/agents/<name>.md`)       |
+| **Commands**      | Yes (`.opencode/commands/<name>.md`)     |
+| **Local files**   | No                                       |
+
+## Output Files
+
+| File              | Path                                | Purpose                                       |
+| ----------------- | ----------------------------------- | --------------------------------------------- |
+| Main instructions | `OPENCODE.md`                       | Primary rule file                             |
+| Lifecycle hooks   | `.opencode/plugins/promptscript.ts` | Project hooks in `multifile` and `full` modes |
+| Skills            | `.opencode/skills/<name>/SKILL.md`  | Reusable skill definitions                    |
+| Commands          | `.opencode/commands/<name>.md`      | Slash commands                                |
+| Agents            | `.opencode/agents/<name>.md`        | Agent configurations                          |
+
+## Supported Features
+
+| Feature                    | Supported |
+| -------------------------- | --------- |
+| Markdown Output            | Yes       |
+| MDC Format                 | No        |
+| Code Blocks                | Yes       |
+| Mermaid Diagrams           | Yes       |
+| Single File Output         | Yes       |
+| Multiple Rule Files        | Yes       |
+| Workflow Files             | No        |
+| Nested Directory Structure | No        |
+| YAML Frontmatter           | Yes       |
+| Description in Frontmatter | Yes       |
+| Globs in Frontmatter       | No        |
+| Activation Type            | No        |
+| Glob Pattern Targeting     | No        |
+| Always Apply Rules         | Yes       |
+| Manual Activation          | No        |
+| Auto/Model Activation      | No        |
+| Structured Examples        | Yes       |
+| Character Limit Validation | No        |
+| Content Section Splitting  | Yes       |
+| Guard Dependencies         | Yes       |
+| Context File Inclusion     | No        |
+| @-Mentions                 | No        |
+| Tool Integration           | No        |
+| Path-Specific Rules        | No        |
+| Prompt Files               | No        |
+| Slash Commands             | Yes       |
+| Skills                     | Yes       |
+| Agent Instructions         | Yes       |
+| Local Memory               | No        |
+| Nested Memory              | No        |
+
+## Limitations & Quirks
+
+- Main file is `OPENCODE.md` at project root
+- Full feature support: commands, skills, and agents
+- Commands go to `.opencode/commands/<name>.md`
+- Skills go to `.opencode/skills/<name>/SKILL.md`
+- Agents go to `.opencode/agents/<name>.md`
+- Three output modes: `simple`, `multifile`, `full`
+- `@hooks` compile to a generated plugin at `.opencode/plugins/promptscript.ts` in `multifile` and `full` modes; only `pre-tool-use` and `post-tool-use` map to `tool.execute.before` and `tool.execute.after`
+- Generated hook commands start asynchronously, use a 30-second default timeout, and escalate from `SIGTERM` to `SIGKILL`; sibling user plugins in `.opencode/plugins/` are never touched
+- OpenCode tool hooks expose no model or agent context, so generated payloads omit those fields and compilation reports `PS4002`
+- OpenCode coverage limits: MCP tool calls and some subagent paths may not fire plugin hooks, and failed tool calls have no dedicated error event
+- OpenCode tool names are lowercase (`edit`, `write`, `bash`); matchers authored for Claude-style names need an `opencode` target override
+
+## Example Output
+
+```text
+project-root/
+├── OPENCODE.md                        # Main instructions
+└── .opencode/
+    ├── commands/
+    │   └── review.md                  # Command definition
+    ├── skills/
+    │   └── my-skill/
+    │       └── SKILL.md               # Skill definition
+    ├── agents/
+    │   └── reviewer.md               # Agent config
+    └── plugins/
+        └── promptscript.ts           # Generated lifecycle hooks plugin
+```
+
+## Official Documentation
+
+- [OpenCode](https://github.com/nicholasgriffintn/opencode)
