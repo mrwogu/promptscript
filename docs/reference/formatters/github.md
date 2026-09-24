@@ -83,6 +83,7 @@ description: PromptScript output format for GitHub Copilot
 - Prompt files (`.github/prompts/*.prompt.md`) support agent mode with `mode: agent` and `tools` list
 - Skills go to `.github/skills/<name>/SKILL.md` with YAML frontmatter
 - Agents go to `.github/agents/<name>.md` + top-level `AGENTS.md`
+- Agent `model` and `specModel` values become Copilot model names (display names such as `Claude Sonnet 4.5`); `inherit` is omitted, `auto` becomes `Auto`, and names outside the catalog pass through unchanged (see [Model Catalog](../models.md#target-model-names))
 - `@shortcuts` with `prompt: true` become prompt files; without `prompt` they become instruction files
 - `@hooks` uses `.github/hooks/promptscript.json` for Copilot CLI and cloud agent in `multifile` and `full` modes
 - Hook commands use GitHub's shell-specific `bash` and `powershell` fields
