@@ -1,4 +1,5 @@
 import type { ConventionName, OutputConvention } from './convention.js';
+import type { ModelsConfig } from './models.js';
 import type { PolicyDefinition } from './policy.js';
 import type { PrettierMarkdownOptions } from './prettier.js';
 import type { RegistriesConfig } from './registries.js';
@@ -412,6 +413,15 @@ export interface PromptScriptConfig {
    * Register custom conventions that can be referenced by name in targets.
    */
   customConventions?: Record<string, OutputConvention>;
+
+  /**
+   * Model catalog settings: the model set the instructions are written for
+   * and custom model profiles.
+   * @example
+   * models:
+   *   supported: [claude-opus-5-5, gpt-6-sol]
+   */
+  models?: ModelsConfig;
 
   /**
    * Universal directory for auto-discovering skills and commands.

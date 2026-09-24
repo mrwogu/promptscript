@@ -49,6 +49,10 @@ export * from './target-capabilities.js';
 // Agent field capability matrix
 export * from './agent-capabilities.js';
 
+// Model catalog
+export * from './model-catalog.js';
+export * from './model-profiles.js';
+
 // Hook capabilities
 export * from './hook-capabilities.js';
 
