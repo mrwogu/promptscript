@@ -11,6 +11,7 @@ First off, thank you for considering contributing to PromptScript! 🎉
 - [Coding Standards](#coding-standards)
 - [Testing](#testing)
 - [Documentation](#documentation)
+- [Updating the Model Catalog](#updating-the-model-catalog)
 
 ## Code of Conduct
 
@@ -256,6 +257,50 @@ describe('parseVersion', () => {
 - Add JSDoc comments to public APIs
 - Include examples for complex functionality
 - Update CHANGELOG.md following Keep a Changelog format
+
+## Updating the Model Catalog
+
+The built-in model profiles live in `packages/core/src/model-profiles.ts`.
+Update them when a provider releases, deprecates, or retires a model.
+
+1. Check the official sources. The provider pages give releases, API ids,
+   status, and retirement dates:
+   - Anthropic: [models overview](https://platform.claude.com/docs/en/about-claude/models/overview) and [model deprecations](https://platform.claude.com/docs/en/about-claude/model-deprecations)
+   - OpenAI: [models](https://developers.openai.com/api/docs/models) and [deprecations](https://developers.openai.com/api/docs/deprecations)
+   - Google: [Gemini models](https://ai.google.dev/gemini-api/docs/models) and [Gemini deprecations](https://ai.google.dev/gemini-api/docs/deprecations)
+   - xAI: [models](https://docs.x.ai/developers/models)
+
+   The tool pages show which model names each target accepts:
+   [Claude Code](https://code.claude.com/docs/en/model-config),
+   [GitHub Copilot](https://docs.github.com/en/copilot/reference/ai-models/supported-models),
+   [Factory AI](https://docs.factory.ai/models),
+   [Cursor](https://cursor.com/docs/models), and
+   [Codex](https://developers.openai.com/codex/models).
+
+2. Add a new release with the helper for its provider (`claude()`, `openai()`,
+   `google()`, or `xai()`) and set its `releaseDate`. Keep profiles grouped by
+   provider and family, oldest first.
+3. Set `successor` on the release it replaces. A release with a successor is
+   `legacy` by default. When the provider announces a retirement, set
+   `status: 'deprecated'` (or `'retired'` once it is gone) and
+   `retirementDate`.
+4. Update the `Checked on` date in the file header.
+5. Run `pnpm nx run-many -t test -p core,formatters,validator`. The core tests
+   check that the catalog is consistent.
+6. Regenerate the reference page with `pnpm docs:models`.
+7. When a floating alias (`opus`, `sonnet`, `haiku`, or `fable`) moves to a new
+   release, also:
+   - search for the display name of the replaced release, such as
+     `rg "Claude Sonnet 5" docs skills`, and update hand-written examples
+   - run `./scripts/sync-skill.sh` if `skills/promptscript/SKILL.md` changed
+   - run `pnpm docs:validate --update-outputs`, because documented compile
+     outputs show resolved model names
+   - run `pnpm prs compile` to refresh the agent files of this repository
+
+If a tool expects a different model name than `docs/reference/models.md`
+shows, fix its scheme in `MODEL_TARGET_SCHEMES`
+(`packages/core/src/model-catalog.ts`). Until a release ships the fix, users
+can set `models.profiles.<id>.targets` in `promptscript.yaml`.
 
 ## Publishing (Maintainers Only)
 
