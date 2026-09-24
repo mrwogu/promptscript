@@ -21,8 +21,8 @@ Start treating your AI instructions as managed infrastructure.
 | New repository             | Continue with [Installation](#installation) and [Interactive Initialization](#interactive-initialization) |
 | In a hurry                 | Skip the demo and go to [Quick Start: New Projects](#quick-start-new-projects)                            |
 | Existing instruction files | Use [Quick Start: Migrating Existing Projects](#quick-start-migrating-existing-projects)                  |
-| PromptScript 1.15 project  | Follow [Upgrade 1.15 to 1.16](https://getpromptscript.dev/v1.20/guides/upgrade-1-15-to-1-16/index.md)     |
-| Need language semantics    | Open [Language Reference](https://getpromptscript.dev/v1.20/reference/language/index.md)                  |
+| PromptScript 1.15 project  | Follow [Upgrade 1.15 to 1.16](https://getpromptscript.dev/dev/guides/upgrade-1-15-to-1-16/index.md)       |
+| Need language semantics    | Open [Language Reference](https://getpromptscript.dev/dev/reference/language/index.md)                    |
 
 New projects should reach a validated compile before adding registries, enterprise policy, or target-specific customization.
 
@@ -54,7 +54,7 @@ Verify installation:
 prs --version
 ```
 
-The CLI also runs under Deno and can be compiled into a standalone binary with no runtime dependencies. See the [CLI reference](https://getpromptscript.dev/v1.20/reference/cli/#running-under-deno) for the full Deno guide.
+The CLI also runs under Deno and can be compiled into a standalone binary with no runtime dependencies. See the [CLI reference](https://getpromptscript.dev/dev/reference/cli/#running-under-deno) for the full Deno guide.
 
 ## Interactive Initialization
 
@@ -224,7 +224,7 @@ Add reusable skills, specialist agents, tool integrations, and automation to the
 }
 ```
 
-PromptScript compiles each capability where the configured target supports it. See [Agent Platform](https://getpromptscript.dev/v1.20/features/index.md) and the [feature coverage matrix](https://getpromptscript.dev/v1.20/testing/feature-coverage/index.md) for target-specific support.
+PromptScript compiles each capability where the configured target supports it. See [Agent Platform](https://getpromptscript.dev/dev/features/index.md) and the [feature coverage matrix](https://getpromptscript.dev/dev/testing/feature-coverage/index.md) for target-specific support.
 
 ### 4. Validate and Compile to Native Formats
 
@@ -381,7 +381,7 @@ Keep Original Files During Transition
 
 You don't have to delete original files immediately. Run both systems in parallel until you're confident the migration is complete.
 
-See the [Migration Guide](https://getpromptscript.dev/v1.20/guides/migration/index.md) for backup, takeover, tracking, and rollback details.
+See the [Migration Guide](https://getpromptscript.dev/dev/guides/migration/index.md) for backup, takeover, tracking, and rollback details.
 
 ### Migration Example
 
@@ -441,8 +441,8 @@ You are a Python developer working on a FastAPI service.
 
 For detailed migration guidance, see:
 
-- [Migration Guide](https://getpromptscript.dev/v1.20/guides/migration/index.md) - Complete manual migration reference
-- [AI Migration Best Practices](https://getpromptscript.dev/v1.20/guides/ai-migration-best-practices/index.md) - Guidelines for AI-assisted migration
+- [Migration Guide](https://getpromptscript.dev/dev/guides/migration/index.md) - Complete manual migration reference
+- [AI Migration Best Practices](https://getpromptscript.dev/dev/guides/ai-migration-best-practices/index.md) - Guidelines for AI-assisted migration
 
 ## Project Structure
 
@@ -568,7 +568,7 @@ Supported tools: Claude Code, Factory AI, Cursor, Windsurf, Cline, Copilot, Gemi
 
 For tools that do not support hooks, use `prs compile --watch` as an alternative.
 
-See [Hooks and Workflows](https://getpromptscript.dev/v1.20/features/automation/index.md) for lifecycle policy and the [Hooks Guide](https://getpromptscript.dev/v1.20/guides/hooks/index.md) for source recompilation, output protection, and troubleshooting.
+See [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md) for lifecycle policy and the [Hooks Guide](https://getpromptscript.dev/dev/guides/hooks/index.md) for source recompilation, output protection, and troubleshooting.
 
 ## What's Next?
 
@@ -576,19 +576,19 @@ See [Hooks and Workflows](https://getpromptscript.dev/v1.20/features/automation/
 
 After your first compile, build an organization, team, and project hierarchy.
 
-→\](https://getpromptscript.dev/v1.20/tutorial/index.md) \[### Language Reference
+→\](https://getpromptscript.dev/dev/tutorial/index.md) \[### Language Reference
 
 Learn the full PromptScript syntax - blocks, directives, and inheritance.
 
-→\](https://getpromptscript.dev/v1.20/reference/language/index.md) \[### CLI Reference
+→\](https://getpromptscript.dev/dev/reference/language/index.md) \[### CLI Reference
 
 Explore all CLI commands - compile, validate, pull, and more.
 
-→\](https://getpromptscript.dev/v1.20/reference/cli/index.md) \[### Examples
+→\](https://getpromptscript.dev/dev/reference/cli/index.md) \[### Examples
 
 Browse real-world configuration examples for various use cases.
 
-→\](https://getpromptscript.dev/v1.20/examples/index.md)
+→\](https://getpromptscript.dev/dev/examples/index.md)
 
 # Enterprise Tutorial: Building Layered AI Infrastructure
 
@@ -607,7 +607,7 @@ By the end of this tutorial, you'll have:
 
 - Node.js 20+
 - PromptScript CLI installed (`npm install -g @promptscript/cli`)
-- A project that completed [Getting Started](https://getpromptscript.dev/v1.20/getting-started/index.md)
+- A project that completed [Getting Started](https://getpromptscript.dev/dev/getting-started/index.md)
 - A successful `prs validate --strict` and `prs compile`
 
 ## Step 1: Create Organization Base
@@ -839,7 +839,7 @@ Add reusable capabilities to `.promptscript/project.prs`:
 }
 ```
 
-See [Agent Platform](https://getpromptscript.dev/v1.20/features/index.md) for MCP servers, plugins, and target-specific capabilities.
+See [Agent Platform](https://getpromptscript.dev/dev/features/index.md) for MCP servers, plugins, and target-specific capabilities.
 
 ## Step 6: Validate and Compile
 
@@ -953,11 +953,11 @@ The generated files are committed next to the source, so reviewers see both in t
 
 You now have a complete PromptScript setup! Here's what to explore next:
 
-- [Language Reference](https://getpromptscript.dev/v1.20/reference/language/index.md) - Full syntax documentation
-- [Agent Platform](https://getpromptscript.dev/v1.20/features/index.md) - Agents, skills, integrations, and automation
-- [Inheritance Guide](https://getpromptscript.dev/v1.20/guides/inheritance/index.md) - Advanced inheritance patterns
-- [Enterprise Setup](https://getpromptscript.dev/v1.20/guides/enterprise/index.md) - Organization-wide deployment
-- [CLI Reference](https://getpromptscript.dev/v1.20/reference/cli/index.md) - All available commands
+- [Language Reference](https://getpromptscript.dev/dev/reference/language/index.md) - Full syntax documentation
+- [Agent Platform](https://getpromptscript.dev/dev/features/index.md) - Agents, skills, integrations, and automation
+- [Inheritance Guide](https://getpromptscript.dev/dev/guides/inheritance/index.md) - Advanced inheritance patterns
+- [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md) - Organization-wide deployment
+- [CLI Reference](https://getpromptscript.dev/dev/reference/cli/index.md) - All available commands
 
 # Real-Life Tutorial: Checkout Service
 
@@ -1516,15 +1516,15 @@ flowchart LR
 }
 ```
 
-Target support varies because each AI platform exposes a different native contract. PromptScript preserves one source model while formatters map supported capabilities to target-native output. Use the [target platform matrix](https://getpromptscript.dev/v1.20/features/target-platforms/index.md) to choose versions and capabilities.
+Target support varies because each AI platform exposes a different native contract. PromptScript preserves one source model while formatters map supported capabilities to target-native output. Use the [target platform matrix](https://getpromptscript.dev/dev/features/target-platforms/index.md) to choose versions and capabilities.
 
 ## Explore Features
 
-- [Agents](https://getpromptscript.dev/v1.20/features/agents/index.md) - specialized subagents, models, tools, skills, and MCP access
-- [Skills and Resources](https://getpromptscript.dev/v1.20/features/skills/index.md) - portable capability packages with references and scripts
-- [MCP and Plugins](https://getpromptscript.dev/v1.20/features/integrations/index.md) - tool servers and reusable capability bundles
-- [Hooks and Workflows](https://getpromptscript.dev/v1.20/features/automation/index.md) - lifecycle automation and repeatable procedures
-- [Target Platforms](https://getpromptscript.dev/v1.20/features/target-platforms/index.md) - 50 built-in targets and output families
+- [Agents](https://getpromptscript.dev/dev/features/agents/index.md) - specialized subagents, models, tools, skills, and MCP access
+- [Skills and Resources](https://getpromptscript.dev/dev/features/skills/index.md) - portable capability packages with references and scripts
+- [MCP and Plugins](https://getpromptscript.dev/dev/features/integrations/index.md) - tool servers and reusable capability bundles
+- [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md) - lifecycle automation and repeatable procedures
+- [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) - 50 built-in targets and output families
 
 ## Compile One or Many Projects
 
@@ -1534,7 +1534,7 @@ Compile configured targets:
 prs compile
 ```
 
-Use named builds when one repository hosts several packages or apps and each needs its own agent configuration. Every build has its own entry file, output directory, and target list, so `packages/api` and `packages/web` each get files scoped to their subtree. Define them in `promptscript.yaml` (see the [Configuration Reference](https://getpromptscript.dev/v1.20/reference/config/index.md)):
+Use named builds when one repository hosts several packages or apps and each needs its own agent configuration. Every build has its own entry file, output directory, and target list, so `packages/api` and `packages/web` each get files scoped to their subtree. Define them in `promptscript.yaml` (see the [Configuration Reference](https://getpromptscript.dev/dev/reference/config/index.md)):
 
 ```yaml
 builds:
@@ -1567,7 +1567,7 @@ PromptScript applies the same lifecycle to every agent capability:
 1. Review generated changes in pull requests.
 1. Enforce `prs validate --strict` and compilation checks in CI.
 
-See [Enterprise Setup](https://getpromptscript.dev/v1.20/guides/enterprise/index.md), [Security](https://getpromptscript.dev/v1.20/guides/security/index.md), [Policy Engine](https://getpromptscript.dev/v1.20/guides/policy-engine/index.md), and [CI/CD Integration](https://getpromptscript.dev/v1.20/guides/ci/index.md) for the pipeline that enforces it.
+See [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md), [Security](https://getpromptscript.dev/dev/guides/security/index.md), [Policy Engine](https://getpromptscript.dev/dev/guides/policy-engine/index.md), and [CI/CD Integration](https://getpromptscript.dev/dev/guides/ci/index.md) for the pipeline that enforces it.
 
 # Agents
 
@@ -1703,7 +1703,7 @@ Targets with native agent systems receive dedicated files. Common examples:
 | Amp            | `.agents/agents/<name>.md`                                     |
 | Grok Build     | `.claude/agents/<name>.md` (delegated to the Claude formatter) |
 
-Targets without a native agent contract still receive project instructions through their primary output. Check [Target Platforms](https://getpromptscript.dev/v1.20/features/target-platforms/index.md) before depending on target-specific fields.
+Targets without a native agent contract still receive project instructions through their primary output. Check [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) before depending on target-specific fields.
 
 ## Agents and Skills
 
@@ -1797,11 +1797,11 @@ Global output is guarded: compiling into the home directory without a resource s
 
 ## Related Documentation
 
-- [Language Reference: `@agents`](https://getpromptscript.dev/v1.20/reference/language/#agents)
-- [Agents Example](https://getpromptscript.dev/v1.20/examples/agents/index.md)
-- [Skills and Resources](https://getpromptscript.dev/v1.20/features/skills/index.md)
-- [MCP and Plugins](https://getpromptscript.dev/v1.20/features/integrations/index.md)
-- [Supported Formatters](https://getpromptscript.dev/v1.20/reference/formatters/index.md)
+- [Language Reference: `@agents`](https://getpromptscript.dev/dev/reference/language/#agents)
+- [Agents Example](https://getpromptscript.dev/dev/examples/agents/index.md)
+- [Skills and Resources](https://getpromptscript.dev/dev/features/skills/index.md)
+- [MCP and Plugins](https://getpromptscript.dev/dev/features/integrations/index.md)
+- [Supported Formatters](https://getpromptscript.dev/dev/reference/formatters/index.md)
 
 # Skills and Resources
 
@@ -1952,12 +1952,12 @@ Remote references are recorded in `promptscript.lock` with commit and integrity 
 
 ## Related Documentation
 
-- [Building Skills](https://getpromptscript.dev/v1.20/guides/building-skills/index.md)
-- [Local Skills](https://getpromptscript.dev/v1.20/guides/local-skills/index.md)
-- [Skill Composition](https://getpromptscript.dev/v1.20/guides/skill-composition/index.md)
-- [Skill Contracts](https://getpromptscript.dev/v1.20/guides/skill-contracts/index.md)
-- [Shared Resources](https://getpromptscript.dev/v1.20/guides/shared-resources/index.md)
-- [Language Reference: `@skills`](https://getpromptscript.dev/v1.20/reference/language/#skills)
+- [Building Skills](https://getpromptscript.dev/dev/guides/building-skills/index.md)
+- [Local Skills](https://getpromptscript.dev/dev/guides/local-skills/index.md)
+- [Skill Composition](https://getpromptscript.dev/dev/guides/skill-composition/index.md)
+- [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md)
+- [Shared Resources](https://getpromptscript.dev/dev/guides/shared-resources/index.md)
+- [Language Reference: `@skills`](https://getpromptscript.dev/dev/reference/language/#skills)
 
 # MCP Servers and Plugins
 
@@ -2011,7 +2011,7 @@ Define remote HTTP or SSE servers:
 | `disabledTools` | Disable selected tools                           |
 | `timeoutMs`     | Configure startup or request timeout             |
 
-Target formatters translate these properties into native MCP configuration. File paths and supported fields vary by platform. See the [formatter capability matrix](https://getpromptscript.dev/v1.20/reference/formatters/#mcp-hooks-plugins-support).
+Target formatters translate these properties into native MCP configuration. File paths and supported fields vary by platform. See the [formatter capability matrix](https://getpromptscript.dev/dev/reference/formatters/#mcp-hooks-plugins-support).
 
 ## Credential Handling
 
@@ -2072,11 +2072,11 @@ Recommended controls:
 
 ## Related Documentation
 
-- [Agents](https://getpromptscript.dev/v1.20/features/agents/index.md)
-- [Hooks and Workflows](https://getpromptscript.dev/v1.20/features/automation/index.md)
-- [Language Reference: `@mcpServers`](https://getpromptscript.dev/v1.20/reference/language/#mcpservers)
-- [Language Reference: `@plugins`](https://getpromptscript.dev/v1.20/reference/language/#plugins)
-- [Configuration Reference](https://getpromptscript.dev/v1.20/reference/config/#mcp-hooks-plugins-support)
+- [Agents](https://getpromptscript.dev/dev/features/agents/index.md)
+- [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md)
+- [Language Reference: `@mcpServers`](https://getpromptscript.dev/dev/reference/language/#mcpservers)
+- [Language Reference: `@plugins`](https://getpromptscript.dev/dev/reference/language/#plugins)
+- [Configuration Reference](https://getpromptscript.dev/dev/reference/config/#mcp-hooks-plugins-support)
 
 # Hooks and Workflows
 
@@ -2088,7 +2088,7 @@ PromptScript supports three automation layers:
 
 These layers solve different problems and can be used together.
 
-Both `@hooks` and `@workflows` use canonical object bodies. See [Block Shapes](https://getpromptscript.dev/v1.20/reference/block-shapes/index.md) for their shape diagnostics, merge behavior, and complete examples.
+Both `@hooks` and `@workflows` use canonical object bodies. See [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.md) for their shape diagnostics, merge behavior, and complete examples.
 
 ## Lifecycle Hooks
 
@@ -2512,12 +2512,12 @@ Build profiles support nested `AGENTS.md` and platform-specific output inside mo
 
 ## Related Documentation
 
-- [AI Tool Hooks](https://getpromptscript.dev/v1.20/guides/hooks/index.md)
-- [CLI Reference](https://getpromptscript.dev/v1.20/reference/cli/index.md)
-- [Configuration: Build Profiles](https://getpromptscript.dev/v1.20/reference/config/#builds)
-- [Language Reference: `@hooks`](https://getpromptscript.dev/v1.20/reference/language/#hooks)
-- [Language Reference: `@workflows`](https://getpromptscript.dev/v1.20/reference/language/#workflows)
-- [MCP Servers and Plugins](https://getpromptscript.dev/v1.20/features/integrations/index.md)
+- [AI Tool Hooks](https://getpromptscript.dev/dev/guides/hooks/index.md)
+- [CLI Reference](https://getpromptscript.dev/dev/reference/cli/index.md)
+- [Configuration: Build Profiles](https://getpromptscript.dev/dev/reference/config/#builds)
+- [Language Reference: `@hooks`](https://getpromptscript.dev/dev/reference/language/#hooks)
+- [Language Reference: `@workflows`](https://getpromptscript.dev/dev/reference/language/#workflows)
+- [MCP Servers and Plugins](https://getpromptscript.dev/dev/features/integrations/index.md)
 
 # Target Platforms
 
@@ -2663,7 +2663,7 @@ Target support is explicit and varies by native platform contract:
 | Workflows    | Native workflow files                             |
 | Plugins      | Native plugin manifests where implemented         |
 
-Use the [formatter matrix](https://getpromptscript.dev/v1.20/reference/formatters/index.md) for exact output paths and capability support.
+Use the [formatter matrix](https://getpromptscript.dev/dev/reference/formatters/index.md) for exact output paths and capability support.
 
 ## Scoped Monorepo Output
 
@@ -2703,7 +2703,7 @@ Portable PromptScript source does not force every platform into one schema. Inst
 1. Unsupported target-specific behavior reports an actionable compatibility warning.
 1. Main instruction output remains available across all targets.
 
-Lifecycle hooks have an exhaustive 50-target capability registry. Native project hooks are currently emitted for Claude, Codex, Cursor, Factory, Gemini, GitHub, Grok, and Windsurf. Plugin-only, custom-agent-scoped, unsupported, and incompatible output modes report `PS4002` rather than silently omitting enabled hooks. See the [hook capability matrix](https://getpromptscript.dev/v1.20/features/automation/#hook-capability-matrix).
+Lifecycle hooks have an exhaustive 50-target capability registry. Native project hooks are currently emitted for Claude, Codex, Cursor, Factory, Gemini, GitHub, Grok, and Windsurf. Plugin-only, custom-agent-scoped, unsupported, and incompatible output modes report `PS4002` rather than silently omitting enabled hooks. See the [hook capability matrix](https://getpromptscript.dev/dev/features/automation/#hook-capability-matrix).
 
 Review generated output and compatibility warnings when adopting a new target or target version.
 
@@ -2737,12 +2737,12 @@ GitLab Duo reads the root `AGENTS.md` file (GA in GitLab 18.8) and Agent Skills 
 
 ## Related Documentation
 
-- [Supported Formatters](https://getpromptscript.dev/v1.20/reference/formatters/index.md)
-- [Configuration: Targets](https://getpromptscript.dev/v1.20/reference/config/#targets)
-- [Agents](https://getpromptscript.dev/v1.20/features/agents/index.md)
-- [Skills and Resources](https://getpromptscript.dev/v1.20/features/skills/index.md)
-- [MCP Servers and Plugins](https://getpromptscript.dev/v1.20/features/integrations/index.md)
-- [Hooks and Workflows](https://getpromptscript.dev/v1.20/features/automation/index.md)
+- [Supported Formatters](https://getpromptscript.dev/dev/reference/formatters/index.md)
+- [Configuration: Targets](https://getpromptscript.dev/dev/reference/config/#targets)
+- [Agents](https://getpromptscript.dev/dev/features/agents/index.md)
+- [Skills and Resources](https://getpromptscript.dev/dev/features/skills/index.md)
+- [MCP Servers and Plugins](https://getpromptscript.dev/dev/features/integrations/index.md)
+- [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md)
 # Reference
 
 # Language Reference
@@ -2751,15 +2751,15 @@ Complete specification of the PromptScript language.
 
 ## Choose a Topic
 
-| Goal                                       | Reference                                                                                                          |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| Understand a complete `.prs` file          | [File Anatomy](https://getpromptscript.dev/v1.20/reference/language/file-anatomy/index.md)                         |
-| Choose valid block body shapes             | [Values and Block Bodies](https://getpromptscript.dev/v1.20/reference/language/values-and-block-bodies/index.md)   |
-| Predict inheritance and import results     | [Composition and Precedence](https://getpromptscript.dev/v1.20/reference/language/composition/index.md)            |
-| Understand declaration order               | [Execution Order](https://getpromptscript.dev/v1.20/reference/language/execution-order/index.md)                   |
-| Choose `@extend`, `field!`, or `@override` | [Merge and Replacement](https://getpromptscript.dev/v1.20/reference/language/merge-and-replacement/index.md)       |
-| Customize generated headings               | [Section Headers](https://getpromptscript.dev/v1.20/reference/language/section-headers/index.md)                   |
-| Upgrade syntax and resolve diagnostics     | [Versions and Diagnostics](https://getpromptscript.dev/v1.20/reference/language/versions-and-diagnostics/index.md) |
+| Goal                                       | Reference                                                                                                        |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| Understand a complete `.prs` file          | [File Anatomy](https://getpromptscript.dev/dev/reference/language/file-anatomy/index.md)                         |
+| Choose valid block body shapes             | [Values and Block Bodies](https://getpromptscript.dev/dev/reference/language/values-and-block-bodies/index.md)   |
+| Predict inheritance and import results     | [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md)            |
+| Understand declaration order               | [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md)                   |
+| Choose `@extend`, `field!`, or `@override` | [Merge and Replacement](https://getpromptscript.dev/dev/reference/language/merge-and-replacement/index.md)       |
+| Customize generated headings               | [Section Headers](https://getpromptscript.dev/dev/reference/language/section-headers/index.md)                   |
+| Upgrade syntax and resolve diagnostics     | [Versions and Diagnostics](https://getpromptscript.dev/dev/reference/language/versions-and-diagnostics/index.md) |
 
 Use this page as the complete block and grammar catalog. Task-oriented pages above explain decisions and show resolved results step by step.
 
@@ -2815,7 +2815,7 @@ Namespaces can be nested through aliased imports:
 
 The inner team's `reviewer` resolves to `frontend.inner.reviewer`. Agent references are rewritten with the same qualified name, including `agent` fields and `handoffs` entries, so references do not retain the source-local `reviewer` name.
 
-Syntax `1.5.0` resolves top-level declarations in source order. Put `@meta` first, then imports, local blocks, and modifications in the order they should apply. See [Execution Order](https://getpromptscript.dev/v1.20/reference/language/execution-order/index.md). Contextual `@header` entries live inside supported owner blocks, not at the top level.
+Syntax `1.5.0` resolves top-level declarations in source order. Put `@meta` first, then imports, local blocks, and modifications in the order they should apply. See [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md). Contextual `@header` entries live inside supported owner blocks, not at the top level.
 
 ## [@meta](https://github.com/meta "GitHub User: meta") Block (Required)
 
@@ -2992,7 +2992,7 @@ When you use `@use`, all blocks from the imported file are merged into your file
 - **ObjectContent**: Deep merged (the imported source wins same-shape key conflicts)
 - **ArrayContent**: Unique concatenation (preserves order, removes duplicates)
 
-For incompatible block shapes, the existing target body wins. Under syntax `1.5.0`, later declarations can modify the merged result, so a local block, `@extend`, or `@override` placed after `@use` can become the final value. See [Composition and Precedence](https://getpromptscript.dev/v1.20/reference/language/composition/index.md) for the normative matrix.
+For incompatible block shapes, the existing target body wins. Under syntax `1.5.0`, later declarations can modify the merged result, so a local block, `@extend`, or `@override` placed after `@use` can become the final value. See [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md) for the normative matrix.
 
 ```
 # Source: @core/guards/security
@@ -3685,7 +3685,7 @@ Define specialized AI agents for target platforms with native agent support:
 | `background`          | boolean  | No       | Run the agent as a background process (Claude, grok only)                            |
 | `isolation`           | string   | No       | Isolation mode: `worktree` (Claude, grok only)                                       |
 
-Every canonical field has an explicit per-target status in the [Field Support Matrix](https://getpromptscript.dev/v1.20/features/agents/#field-support-matrix). A field a target cannot represent is reported with a `PS4003` compatibility warning (agent, field, target, and supporting targets) and omitted, never dropped silently.
+Every canonical field has an explicit per-target status in the [Field Support Matrix](https://getpromptscript.dev/dev/features/agents/#field-support-matrix). A field a target cannot represent is reported with a `PS4003` compatibility warning (agent, field, target, and supporting targets) and omitted, never dropped silently.
 
 Agents output by platform:
 
@@ -3863,7 +3863,7 @@ Structured few-shot examples for AI assistants (requires syntax `1.2.0`):
 
 Examples can also be defined inline within a `@skills` entry via the `examples` property, scoping them to that specific skill.
 
-See the [Examples guide](https://getpromptscript.dev/v1.20/guides/examples/index.md) for a full walkthrough.
+See the [Examples guide](https://getpromptscript.dev/dev/guides/examples/index.md) for a full walkthrough.
 
 ### [@workflows](https://github.com/workflows "GitHub User: workflows")
 
@@ -3984,7 +3984,7 @@ GitHub output uses the version 1 repository-hook schema shared by Copilot CLI an
 
 When `@hooks` is removed or stops emitting, the CLI deletes the obsolete hook file (`.factory/hooks.json`, `.github/hooks/promptscript.json`, or `.github/hooks/promptscript-vscode.json`) only when every command in it carries the PromptScript ownership marker, and prunes managed directories (such as `.github/hooks/`) that the removal leaves empty.
 
-Every built-in target has an explicit hook capability classification. Targets without native project hooks and modes that cannot emit additional files report `PS4002` with a fallback such as `prs compile --watch`. See [Hooks and Workflows](https://getpromptscript.dev/v1.20/features/automation/#hook-capability-matrix) for the complete 50-target matrix and project-root behavior.
+Every built-in target has an explicit hook capability classification. Targets without native project hooks and modes that cannot emit additional files report `PS4002` with a fallback such as `prs compile --watch`. See [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/#hook-capability-matrix) for the complete 50-target matrix and project-root behavior.
 
 ### [@mcpServers](https://github.com/mcpServers "GitHub User: mcpServers")
 
@@ -4028,7 +4028,7 @@ Plaintext values are rejected for secret-bearing environment keys. Current targe
 
 VS Code is the exception to the wrapper key: `.vscode/mcp.json` nests servers under `servers` instead of `mcpServers`. TOML hosts keep the array form under `[mcp_servers.<name>]`.
 
-**Target Support:** The `@mcpServers` block is emitted to target-native MCP config files. See [Configuration Reference](https://getpromptscript.dev/v1.20/reference/config/#mcp-hooks-plugins-support) for the full list of supported targets and their output paths.
+**Target Support:** The `@mcpServers` block is emitted to target-native MCP config files. See [Configuration Reference](https://getpromptscript.dev/dev/reference/config/#mcp-hooks-plugins-support) for the full list of supported targets and their output paths.
 
 Agents can reference MCP servers by name via the `mcpServers` field in `@agents`:
 
@@ -4173,7 +4173,7 @@ The resolver emits warnings during compile when an `@extend` overlay drifts from
 | Stale skill target | `@extend` inside `@skills` would create a new skill not defined by the base |
 | Negation orphan    | `!entry` in `references`/`requires` doesn't match any base element          |
 
-These come from the resolver, not the validator (`PS0XX` rules). They appear during `prs compile`, not `prs validate`. See the [Skill Overlays Guide](https://getpromptscript.dev/v1.20/guides/skill-overlays/index.md) for examples and remediation.
+These come from the resolver, not the validator (`PS0XX` rules). They appear during `prs compile`, not `prs validate`. See the [Skill Overlays Guide](https://getpromptscript.dev/dev/guides/skill-overlays/index.md) for examples and remediation.
 
 ## Values
 
@@ -4433,7 +4433,7 @@ Registry aliases (configured via `registries` in `promptscript.yaml`) are a shor
 @inherit github.com/acme/base/@org/base
 ```
 
-See [Registry Aliases](https://getpromptscript.dev/v1.20/guides/registry/#registry-aliases) for alias configuration.
+See [Registry Aliases](https://getpromptscript.dev/dev/guides/registry/#registry-aliases) for alias configuration.
 
 ## Path References
 
@@ -4690,7 +4690,7 @@ Environment-root and Git-root wrappers exit non-zero before an interpreter or co
 
 ## Canonical Block Shape Reference
 
-See [Block Shapes](https://getpromptscript.dev/v1.20/reference/block-shapes/index.md) for the canonical shape, compatibility forms, merge rules, diagnostics, and formatter behavior of every built-in block.
+See [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.md) for the canonical shape, compatibility forms, merge rules, diagnostics, and formatter behavior of every built-in block.
 
 ## Atomic Replacement with [@override](https://github.com/override "GitHub User: override")
 
@@ -4830,10 +4830,10 @@ A `.prs` file contains metadata, composition directives, content blocks, and mod
 
 ## Related Reference
 
-- [Values and Block Bodies](https://getpromptscript.dev/v1.20/reference/language/values-and-block-bodies/index.md)
-- [Execution Order](https://getpromptscript.dev/v1.20/reference/language/execution-order/index.md)
-- [Merge and Replacement](https://getpromptscript.dev/v1.20/reference/language/merge-and-replacement/index.md)
-- [Complete Language Reference](https://getpromptscript.dev/v1.20/reference/language/index.md)
+- [Values and Block Bodies](https://getpromptscript.dev/dev/reference/language/values-and-block-bodies/index.md)
+- [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md)
+- [Merge and Replacement](https://getpromptscript.dev/dev/reference/language/merge-and-replacement/index.md)
+- [Complete Language Reference](https://getpromptscript.dev/dev/reference/language/index.md)
 
 # Values and Block Bodies
 
@@ -4908,7 +4908,7 @@ Run strict validation before release:
 prs validate --strict
 ```
 
-See [Block Shapes](https://getpromptscript.dev/v1.20/reference/block-shapes/index.md) for the complete built-in matrix and merge behavior.
+See [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.md) for the complete built-in matrix and merge behavior.
 
 # Composition and Precedence
 
@@ -4980,7 +4980,7 @@ local: ["Run smoke tests"]
 - Validate resolved output, not only source files.
 - Pin remote imports and commit `promptscript.lock`.
 
-See [Execution Order](https://getpromptscript.dev/v1.20/reference/language/execution-order/index.md) for operation timing and [Merge and Replacement](https://getpromptscript.dev/v1.20/reference/language/merge-and-replacement/index.md) for modification choices.
+See [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md) for operation timing and [Merge and Replacement](https://getpromptscript.dev/dev/reference/language/merge-and-replacement/index.md) for modification choices.
 
 # Execution Order
 
@@ -5163,7 +5163,7 @@ Use `@header` only for human-readable presentation. Never depend on it to rename
 - XML tags.
 - Target-native identifiers.
 
-See [Generated Section Headers](https://getpromptscript.dev/v1.20/reference/language/#generated-section-headers) for the complete owner and section-key matrix.
+See [Generated Section Headers](https://getpromptscript.dev/dev/reference/language/#generated-section-headers) for the complete owner and section-key matrix.
 
 # Versions and Diagnostics
 
@@ -5223,7 +5223,7 @@ prs diff --all
 
 Commit syntax upgrades, lockfile changes, source changes, and reviewed generated outputs together according to repository policy.
 
-See [Upgrade 1.15 to 1.16](https://getpromptscript.dev/v1.20/guides/upgrade-1-15-to-1-16/index.md) for release-specific migration steps.
+See [Upgrade 1.15 to 1.16](https://getpromptscript.dev/dev/guides/upgrade-1-15-to-1-16/index.md) for release-specific migration steps.
 
 # Block Shapes
 
@@ -5438,7 +5438,7 @@ The `@shortcuts` and `@commands` bodies are objects. Their values have three sup
 }
 ```
 
-A multiline scalar can become a native command file on one target and plain documentation on another. PS038 warns and suggests an explicit `content` object. Existing scalar and multiline forms remain compatible. Some targets require extra fields such as GitHub's `prompt: true`; consult the [formatter matrix](https://getpromptscript.dev/v1.20/reference/formatters/index.md) for target-specific output.
+A multiline scalar can become a native command file on one target and plain documentation on another. PS038 warns and suggests an explicit `content` object. Existing scalar and multiline forms remain compatible. Some targets require extra fields such as GitHub's `prompt: true`; consult the [formatter matrix](https://getpromptscript.dev/dev/reference/formatters/index.md) for target-specific output.
 
 ## Merge Behavior
 
@@ -5561,7 +5561,7 @@ prs telemetry disable
 
 `status` displays the effective setting, active vetoes, collector endpoint, queued record count, spool size, and latest delivery status. `enable` and `disable` update `~/.promptscript/config.yaml` atomically while preserving YAML comments.
 
-Project config, `DO_NOT_TRACK`, and `PROMPTSCRIPT_TELEMETRY=false` remain hard vetoes even after `prs telemetry enable`. Telemetry management commands do not create telemetry events. See [Anonymous Usage Telemetry](https://getpromptscript.dev/v1.20/reference/telemetry/index.md).
+Project config, `DO_NOT_TRACK`, and `PROMPTSCRIPT_TELEMETRY=false` remain hard vetoes even after `prs telemetry enable`. Telemetry management commands do not create telemetry events. See [Anonymous Usage Telemetry](https://getpromptscript.dev/dev/reference/telemetry/index.md).
 
 ### prs init
 
@@ -5823,7 +5823,7 @@ prs compile --debug
 
 Automatic compilation with hooks
 
-Instead of running `prs compile --watch` in a terminal, you can let your AI tool trigger compilation automatically. Run `prs hooks install` once to wire `prs compile` into your tool's native hook system — no manual watch process needed. See the [Hooks Guide](https://getpromptscript.dev/v1.20/guides/hooks/index.md) for details.
+Instead of running `prs compile --watch` in a terminal, you can let your AI tool trigger compilation automatically. Run `prs hooks install` once to wire `prs compile` into your tool's native hook system — no manual watch process needed. See the [Hooks Guide](https://getpromptscript.dev/dev/guides/hooks/index.md) for details.
 
 **Common Targets:**
 
@@ -5837,7 +5837,7 @@ Instead of running `prs compile --watch` in a terminal, you can let your AI tool
 | `gemini`      | `GEMINI.md`                       | Gemini CLI         |
 | `factory`     | `AGENTS.md`                       | Factory AI         |
 
-See [Target Platforms](https://getpromptscript.dev/v1.20/features/target-platforms/index.md) for all 50 built-in targets.
+See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for all 50 built-in targets.
 
 ### prs build
 
@@ -6503,7 +6503,7 @@ ______________________________________________________________________
 
 ### prs skills
 
-Manage markdown-imported skills. See the [Markdown Imports guide](https://getpromptscript.dev/v1.20/guides/markdown-imports/index.md) for full details.
+Manage markdown-imported skills. See the [Markdown Imports guide](https://getpromptscript.dev/dev/guides/markdown-imports/index.md) for full details.
 
 #### prs skills add
 
@@ -6795,7 +6795,7 @@ targets:
   - claude
 ```
 
-See the [Configuration Reference](https://getpromptscript.dev/v1.20/reference/config/index.md) for every field, default, and advanced option (registry, builds, validation, watch, formatting, customConventions, universalDir). The JSON schema is the source of truth: <https://getpromptscript.dev/latest/schema/config.json>.
+See the [Configuration Reference](https://getpromptscript.dev/dev/reference/config/index.md) for every field, default, and advanced option (registry, builds, validation, watch, formatting, customConventions, universalDir). The JSON schema is the source of truth: <https://getpromptscript.dev/latest/schema/config.json>.
 
 ## Environment Variables
 
@@ -7003,12 +7003,12 @@ prs hooks uninstall windsurf
 
 ## See Also
 
-- [`prs hook`](https://getpromptscript.dev/v1.20/reference/cli/hook/index.md) — the hook handler invoked at runtime
-- [Hooks Guide](https://getpromptscript.dev/v1.20/guides/hooks/index.md) - setup, generated configuration, and troubleshooting
+- [`prs hook`](https://getpromptscript.dev/dev/reference/cli/hook/index.md) — the hook handler invoked at runtime
+- [Hooks Guide](https://getpromptscript.dev/dev/guides/hooks/index.md) - setup, generated configuration, and troubleshooting
 
 # prs hook
 
-Low-level hook handler invoked by AI tool hook systems. Not intended for direct use — configure it via [`prs hooks install`](https://getpromptscript.dev/v1.20/reference/cli/hooks/index.md).
+Low-level hook handler invoked by AI tool hook systems. Not intended for direct use — configure it via [`prs hooks install`](https://getpromptscript.dev/dev/reference/cli/hooks/index.md).
 
 ## Synopsis
 
@@ -7127,8 +7127,8 @@ echo $?   # always 0
 
 ## See Also
 
-- [`prs hooks install`](https://getpromptscript.dev/v1.20/reference/cli/hooks/index.md) — scaffold hook configs automatically
-- [Hooks Guide](https://getpromptscript.dev/v1.20/guides/hooks/index.md) — end-to-end setup and troubleshooting
+- [`prs hooks install`](https://getpromptscript.dev/dev/reference/cli/hooks/index.md) — scaffold hook configs automatically
+- [Hooks Guide](https://getpromptscript.dev/dev/guides/hooks/index.md) — end-to-end setup and troubleshooting
 
 # Configuration
 
@@ -7357,7 +7357,7 @@ includePromptScriptSkill: true # default: true
 
 \* `targets` is required unless every target is declared inside a named [build profile](#builds). Such builds-only projects compile with `prs compile --build <name>` or `prs compile --all-builds`; a bare `prs compile` fails with the list of available profiles because there is no default target list to use.
 
-See the [Policy Engine guide](https://getpromptscript.dev/v1.20/guides/policy-engine/index.md) for `policies` syntax.
+See the [Policy Engine guide](https://getpromptscript.dev/dev/guides/policy-engine/index.md) for `policies` syntax.
 
 ### telemetry
 
@@ -7367,7 +7367,7 @@ Anonymous aggregate usage telemetry is enabled by default. Set `telemetry: false
 telemetry: false
 ```
 
-Project and user opt-outs are hard vetoes. Environment opt-in cannot override them. See [Anonymous Usage Telemetry](https://getpromptscript.dev/v1.20/reference/telemetry/index.md) for collected fields, delivery behavior, and all opt-out controls.
+Project and user opt-outs are hard vetoes. Environment opt-in cannot override them. See [Anonymous Usage Telemetry](https://getpromptscript.dev/dev/reference/telemetry/index.md) for collected fields, delivery behavior, and all opt-out controls.
 
 ### input
 
@@ -7582,7 +7582,7 @@ targets:
 
 **Available Targets:**
 
-PromptScript ships 50 built-in targets. See [Target Platforms](https://getpromptscript.dev/v1.20/features/target-platforms/index.md) for platform families and [Supported Formatters](https://getpromptscript.dev/v1.20/reference/formatters/index.md) for the full capability matrix.
+PromptScript ships 50 built-in targets. See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for platform families and [Supported Formatters](https://getpromptscript.dev/dev/reference/formatters/index.md) for the full capability matrix.
 
 | Target         | Default Output                    | Default Convention | Supported Versions                             |
 | -------------- | --------------------------------- | ------------------ | ---------------------------------------------- |
@@ -7676,7 +7676,7 @@ Hook files are emitted in `multifile` and `full` target modes. `simple` keeps it
 
 Cursor Slash Commands
 
-Multi-line `@shortcuts` are automatically converted to executable slash commands in `.cursor/commands/`. Type `/` in Cursor chat (1.6+) to invoke them. See [Language Reference](https://getpromptscript.dev/v1.20/reference/language/#cursor-slash-commands-16).
+Multi-line `@shortcuts` are automatically converted to executable slash commands in `.cursor/commands/`. Type `/` in Cursor chat (1.6+) to invoke them. See [Language Reference](https://getpromptscript.dev/dev/reference/language/#cursor-slash-commands-16).
 
 Cursor Identity Handling
 
@@ -7826,7 +7826,7 @@ targets:
 
 ````
 
-See [Formatters API](https://getpromptscript.dev/v1.20/api-reference/formatters/src/index.md) for more details.
+See [Formatters API](https://getpromptscript.dev/dev/api-reference/formatters/src/index.md) for more details.
 
 Building skills into plugin or library folders
 
@@ -8381,7 +8381,7 @@ PromptScript compiles one agent platform definition to native files for **50 AI 
 
 30 Markdown
 
-PromptScript treats instructions, skills, agents, commands, MCP servers, hooks, workflows, and plugins as platform capabilities. See [Target Platforms](https://getpromptscript.dev/v1.20/features/target-platforms/index.md) for the platform-family model.
+PromptScript treats instructions, skills, agents, commands, MCP servers, hooks, workflows, and plugins as platform capabilities. See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for the platform-family model.
 
 ## Rich Native Formatters
 
@@ -8391,94 +8391,94 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
 
 `CLAUDE.md`
 
-Skills Agents Commands Local\](https://getpromptscript.dev/v1.20/reference/formatters/claude/index.md) \[GitHub Copilot Custom
+Skills Agents Commands Local\](https://getpromptscript.dev/dev/reference/formatters/claude/index.md) \[GitHub Copilot Custom
 
 `.github/copilot-instructions.md`
 
-Skills Prompts\](https://getpromptscript.dev/v1.20/reference/formatters/github/index.md) \[Cursor Custom
+Skills Prompts\](https://getpromptscript.dev/dev/reference/formatters/github/index.md) \[Cursor Custom
 
 `.cursor/rules/project.mdc`
 
-Commands MDC Format\](https://getpromptscript.dev/v1.20/reference/formatters/cursor/index.md) \[Antigravity Custom
+Commands MDC Format\](https://getpromptscript.dev/dev/reference/formatters/cursor/index.md) \[Antigravity Custom
 
 `.agent/rules/project.md`
 
-Workflows Activation Types\](https://getpromptscript.dev/v1.20/reference/formatters/antigravity/index.md) \[Factory AI Custom
+Workflows Activation Types\](https://getpromptscript.dev/dev/reference/formatters/antigravity/index.md) \[Factory AI Custom
 
 `AGENTS.md`
 
-Skills Agents Commands\](https://getpromptscript.dev/v1.20/reference/formatters/factory/index.md) \[Gemini CLI Custom
+Skills Agents Commands\](https://getpromptscript.dev/dev/reference/formatters/factory/index.md) \[Gemini CLI Custom
 
 `GEMINI.md`
 
-Skills Commands\](https://getpromptscript.dev/v1.20/reference/formatters/gemini/index.md) \[OpenCode Custom
+Skills Commands\](https://getpromptscript.dev/dev/reference/formatters/gemini/index.md) \[OpenCode Custom
 
 `OPENCODE.md`
 
-Skills Agents Commands\](https://getpromptscript.dev/v1.20/reference/formatters/opencode/index.md) \[Codex Native
+Skills Agents Commands\](https://getpromptscript.dev/dev/reference/formatters/opencode/index.md) \[Codex Native
 
 `AGENTS.md + .codex/`
 
-Skills Agents TOML\](https://getpromptscript.dev/v1.20/features/target-platforms/#rich-native-formatters) \[Grok Native
+Skills Agents TOML\](https://getpromptscript.dev/dev/features/target-platforms/#rich-native-formatters) \[Grok Native
 
 `AGENTS.md`
 
-Skills Agents Commands\](https://getpromptscript.dev/v1.20/features/target-platforms/#rich-native-formatters)
+Skills Agents Commands\](https://getpromptscript.dev/dev/features/target-platforms/#rich-native-formatters)
 
 ## All Formatters
 
-| Formatter                                                                                  | Tier   | Output File                       | Skills | Agents | Local | Commands |
-| ------------------------------------------------------------------------------------------ | ------ | --------------------------------- | ------ | ------ | ----- | -------- |
-| [Antigravity](https://getpromptscript.dev/v1.20/reference/formatters/antigravity/index.md) | Custom | `.agent/rules/project.md`         | No     | No     | No    | Yes      |
-| [Claude Code](https://getpromptscript.dev/v1.20/reference/formatters/claude/index.md)      | Custom | `CLAUDE.md`                       | Yes    | Yes    | Yes   | Yes      |
-| [Cursor](https://getpromptscript.dev/v1.20/reference/formatters/cursor/index.md)           | Custom | `.cursor/rules/project.mdc`       | Yes    | Yes    | No    | Yes      |
-| [Factory AI](https://getpromptscript.dev/v1.20/reference/formatters/factory/index.md)      | Custom | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
-| [Gemini CLI](https://getpromptscript.dev/v1.20/reference/formatters/gemini/index.md)       | Custom | `GEMINI.md`                       | Yes    | No     | No    | Yes      |
-| [GitHub Copilot](https://getpromptscript.dev/v1.20/reference/formatters/github/index.md)   | Custom | `.github/copilot-instructions.md` | Yes    | Yes    | No    | Yes      |
-| [OpenCode](https://getpromptscript.dev/v1.20/reference/formatters/opencode/index.md)       | Custom | `OPENCODE.md`                     | Yes    | Yes    | No    | Yes      |
-| Cline                                                                                      | Tier 1 | `.clinerules`                     | No     | No     | No    | No       |
-| Codex                                                                                      | Tier 1 | `AGENTS.md`                       | Yes    | Yes    | No    | No       |
-| Continue                                                                                   | Tier 1 | `.continue/rules/project.md`      | No     | No     | No    | No       |
-| Roo Code                                                                                   | Tier 1 | `.roorules`                       | No     | No     | No    | No       |
-| Windsurf                                                                                   | Tier 1 | `.windsurf/rules/project.md`      | Yes    | No     | No    | No       |
-| Amp                                                                                        | Tier 2 | `AGENTS.md`                       | Yes    | Yes    | No    | No       |
-| Augment                                                                                    | Tier 2 | `.augment/rules/project.md`       | No     | Yes    | No    | No       |
-| Goose                                                                                      | Tier 2 | `.goosehints`                     | Yes    | No     | No    | No       |
-| Junie                                                                                      | Tier 2 | `.junie/guidelines.md`            | Yes    | No     | No    | No       |
-| Kilo Code                                                                                  | Tier 2 | `.kilocode/rules/project.md`      | Yes    | No     | No    | No       |
-| Kiro CLI                                                                                   | Tier 2 | `.kiro/steering/project.md`       | Yes    | No     | No    | No       |
-| Trae                                                                                       | Tier 2 | `.trae/rules/project_rules.md`    | Yes    | No     | No    | No       |
-| Adal                                                                                       | Tier 3 | `.adal/rules/project.md`          | Yes    | No     | No    | No       |
-| Aider                                                                                      | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Amazon Q                                                                                   | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| CodeBuddy                                                                                  | Tier 3 | `.codebuddy/rules/project.md`     | Yes    | No     | No    | No       |
-| Command Code                                                                               | Tier 3 | `.commandcode/rules/project.md`   | Yes    | No     | No    | Yes      |
-| Cortex                                                                                     | Tier 3 | `.cortex/rules/project.md`        | Yes    | No     | No    | No       |
-| Crush                                                                                      | Tier 3 | `AGENTS.md`                       | Yes    | No     | No    | No       |
-| Deep Agents                                                                                | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Devin                                                                                      | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| ForgeCode                                                                                  | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| GitLab Duo                                                                                 | Tier 3 | `AGENTS.md`                       | Yes    | No     | No    | No       |
-| Grok                                                                                       | Tier 3 | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
-| Hermes Agent                                                                               | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| iFlow                                                                                      | Tier 3 | `.iflow/rules/project.md`         | Yes    | No     | No    | No       |
-| Jules                                                                                      | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Kimi                                                                                       | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Kode                                                                                       | Tier 3 | `.kode/rules/project.md`          | Yes    | No     | No    | No       |
-| MCPJam                                                                                     | Tier 3 | `.mcpjam/rules/project.md`        | Yes    | No     | No    | No       |
-| Mimo                                                                                       | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Mistral Vibe                                                                               | Tier 3 | `.vibe/rules/project.md`          | Yes    | No     | No    | No       |
-| Mux                                                                                        | Tier 3 | `.mux/rules/project.md`           | No     | No     | No    | No       |
-| Neovate                                                                                    | Tier 3 | `.neovate/rules/project.md`       | No     | No     | No    | No       |
-| OpenClaw                                                                                   | Tier 3 | `INSTRUCTIONS.md`                 | Yes    | No     | No    | No       |
-| OpenHands                                                                                  | Tier 3 | `.openhands/rules/project.md`     | Yes    | No     | No    | No       |
-| Pi                                                                                         | Tier 3 | `.pi/rules/project.md`            | Yes    | No     | No    | No       |
-| Pochi                                                                                      | Tier 3 | `.pochi/rules/project.md`         | Yes    | No     | No    | No       |
-| Qoder                                                                                      | Tier 3 | `.qoder/rules/project.md`         | No     | No     | No    | No       |
-| Qwen Code                                                                                  | Tier 3 | `.qwen/rules/project.md`          | Yes    | No     | No    | No       |
-| Warp                                                                                       | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Zed                                                                                        | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Zencoder                                                                                   | Tier 3 | `.zencoder/rules/project.md`      | Yes    | No     | No    | No       |
+| Formatter                                                                                | Tier   | Output File                       | Skills | Agents | Local | Commands |
+| ---------------------------------------------------------------------------------------- | ------ | --------------------------------- | ------ | ------ | ----- | -------- |
+| [Antigravity](https://getpromptscript.dev/dev/reference/formatters/antigravity/index.md) | Custom | `.agent/rules/project.md`         | No     | No     | No    | Yes      |
+| [Claude Code](https://getpromptscript.dev/dev/reference/formatters/claude/index.md)      | Custom | `CLAUDE.md`                       | Yes    | Yes    | Yes   | Yes      |
+| [Cursor](https://getpromptscript.dev/dev/reference/formatters/cursor/index.md)           | Custom | `.cursor/rules/project.mdc`       | Yes    | Yes    | No    | Yes      |
+| [Factory AI](https://getpromptscript.dev/dev/reference/formatters/factory/index.md)      | Custom | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
+| [Gemini CLI](https://getpromptscript.dev/dev/reference/formatters/gemini/index.md)       | Custom | `GEMINI.md`                       | Yes    | No     | No    | Yes      |
+| [GitHub Copilot](https://getpromptscript.dev/dev/reference/formatters/github/index.md)   | Custom | `.github/copilot-instructions.md` | Yes    | Yes    | No    | Yes      |
+| [OpenCode](https://getpromptscript.dev/dev/reference/formatters/opencode/index.md)       | Custom | `OPENCODE.md`                     | Yes    | Yes    | No    | Yes      |
+| Cline                                                                                    | Tier 1 | `.clinerules`                     | No     | No     | No    | No       |
+| Codex                                                                                    | Tier 1 | `AGENTS.md`                       | Yes    | Yes    | No    | No       |
+| Continue                                                                                 | Tier 1 | `.continue/rules/project.md`      | No     | No     | No    | No       |
+| Roo Code                                                                                 | Tier 1 | `.roorules`                       | No     | No     | No    | No       |
+| Windsurf                                                                                 | Tier 1 | `.windsurf/rules/project.md`      | Yes    | No     | No    | No       |
+| Amp                                                                                      | Tier 2 | `AGENTS.md`                       | Yes    | Yes    | No    | No       |
+| Augment                                                                                  | Tier 2 | `.augment/rules/project.md`       | No     | Yes    | No    | No       |
+| Goose                                                                                    | Tier 2 | `.goosehints`                     | Yes    | No     | No    | No       |
+| Junie                                                                                    | Tier 2 | `.junie/guidelines.md`            | Yes    | No     | No    | No       |
+| Kilo Code                                                                                | Tier 2 | `.kilocode/rules/project.md`      | Yes    | No     | No    | No       |
+| Kiro CLI                                                                                 | Tier 2 | `.kiro/steering/project.md`       | Yes    | No     | No    | No       |
+| Trae                                                                                     | Tier 2 | `.trae/rules/project_rules.md`    | Yes    | No     | No    | No       |
+| Adal                                                                                     | Tier 3 | `.adal/rules/project.md`          | Yes    | No     | No    | No       |
+| Aider                                                                                    | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| Amazon Q                                                                                 | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| CodeBuddy                                                                                | Tier 3 | `.codebuddy/rules/project.md`     | Yes    | No     | No    | No       |
+| Command Code                                                                             | Tier 3 | `.commandcode/rules/project.md`   | Yes    | No     | No    | Yes      |
+| Cortex                                                                                   | Tier 3 | `.cortex/rules/project.md`        | Yes    | No     | No    | No       |
+| Crush                                                                                    | Tier 3 | `AGENTS.md`                       | Yes    | No     | No    | No       |
+| Deep Agents                                                                              | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| Devin                                                                                    | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| ForgeCode                                                                                | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| GitLab Duo                                                                               | Tier 3 | `AGENTS.md`                       | Yes    | No     | No    | No       |
+| Grok                                                                                     | Tier 3 | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
+| Hermes Agent                                                                             | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| iFlow                                                                                    | Tier 3 | `.iflow/rules/project.md`         | Yes    | No     | No    | No       |
+| Jules                                                                                    | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| Kimi                                                                                     | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| Kode                                                                                     | Tier 3 | `.kode/rules/project.md`          | Yes    | No     | No    | No       |
+| MCPJam                                                                                   | Tier 3 | `.mcpjam/rules/project.md`        | Yes    | No     | No    | No       |
+| Mimo                                                                                     | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| Mistral Vibe                                                                             | Tier 3 | `.vibe/rules/project.md`          | Yes    | No     | No    | No       |
+| Mux                                                                                      | Tier 3 | `.mux/rules/project.md`           | No     | No     | No    | No       |
+| Neovate                                                                                  | Tier 3 | `.neovate/rules/project.md`       | No     | No     | No    | No       |
+| OpenClaw                                                                                 | Tier 3 | `INSTRUCTIONS.md`                 | Yes    | No     | No    | No       |
+| OpenHands                                                                                | Tier 3 | `.openhands/rules/project.md`     | Yes    | No     | No    | No       |
+| Pi                                                                                       | Tier 3 | `.pi/rules/project.md`            | Yes    | No     | No    | No       |
+| Pochi                                                                                    | Tier 3 | `.pochi/rules/project.md`         | Yes    | No     | No    | No       |
+| Qoder                                                                                    | Tier 3 | `.qoder/rules/project.md`         | No     | No     | No    | No       |
+| Qwen Code                                                                                | Tier 3 | `.qwen/rules/project.md`          | Yes    | No     | No    | No       |
+| Warp                                                                                     | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| Zed                                                                                      | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| Zencoder                                                                                 | Tier 3 | `.zencoder/rules/project.md`      | Yes    | No     | No    | No       |
 
 ## MCP / Hooks / Plugins Support
 
@@ -9600,7 +9600,7 @@ PromptScript 1.6 applies declarations in source order. Import merge policy and l
 }
 ```
 
-Use [Composition and Precedence](https://getpromptscript.dev/v1.20/reference/language/composition/index.md) as the normative source for conflict rules, declaration order, and resolved examples. This guide focuses on designing inheritance hierarchies rather than restating that matrix.
+Use [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md) as the normative source for conflict rules, declaration order, and resolved examples. This guide focuses on designing inheritance hierarchies rather than restating that matrix.
 
 ### Fragment Files
 
@@ -10380,7 +10380,7 @@ For object properties, later imports override:
 # Result: coverage = 95 (later imported source wins)
 ```
 
-See [Composition and Precedence](https://getpromptscript.dev/v1.20/reference/language/composition/index.md) for the normative matrix and resolved declaration-order examples.
+See [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md) for the normative matrix and resolved declaration-order examples.
 
 ## Registry vs Local Fragments
 
@@ -10604,10 +10604,10 @@ If imports fail:
 
 ## Next Steps
 
-- [Local Skills](https://getpromptscript.dev/v1.20/guides/local-skills/index.md) - Install third-party skills with resource files
-- [Inheritance Guide](https://getpromptscript.dev/v1.20/guides/inheritance/index.md) - Deep dive into inheritance patterns
-- [Enterprise Setup](https://getpromptscript.dev/v1.20/guides/enterprise/index.md) - Organization-wide registries
-- [Configuration Reference](https://getpromptscript.dev/v1.20/reference/config/index.md) - Full config options
+- [Local Skills](https://getpromptscript.dev/dev/guides/local-skills/index.md) - Install third-party skills with resource files
+- [Inheritance Guide](https://getpromptscript.dev/dev/guides/inheritance/index.md) - Deep dive into inheritance patterns
+- [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md) - Organization-wide registries
+- [Configuration Reference](https://getpromptscript.dev/dev/reference/config/index.md) - Full config options
 
 # Building Skills
 
@@ -10660,19 +10660,19 @@ description: Security-focused code review
 Instructions here...
 ```
 
-| Property        | Type     | Default  | Description                                                                                                        |
-| --------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
-| `name`          | string   | required | Skill identifier (matches directory name)                                                                          |
-| `description`   | string   | required | What the skill does                                                                                                |
-| `license`       | string   | -        | License for the skill                                                                                              |
-| `compatibility` | string   | -        | Runtime requirements or compatible tools                                                                           |
-| `metadata`      | object   | -        | Additional string metadata                                                                                         |
-| `allowed-tools` | string[] | -        | Tools the skill may use                                                                                            |
-| `params`        | object   | -        | Parameter definitions for `{{variable}}` templates                                                                 |
-| `references`    | string[] | -        | File paths to attach to the skill's context (see below)                                                            |
-| `scripts`       | string[] | -        | Executable helper paths to attach to the skill                                                                     |
-| `inputs`        | object   | -        | Runtime input contract (see [Skill Contracts](https://getpromptscript.dev/v1.20/guides/skill-contracts/index.md))  |
-| `outputs`       | object   | -        | Runtime output contract (see [Skill Contracts](https://getpromptscript.dev/v1.20/guides/skill-contracts/index.md)) |
+| Property        | Type     | Default  | Description                                                                                                      |
+| --------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `name`          | string   | required | Skill identifier (matches directory name)                                                                        |
+| `description`   | string   | required | What the skill does                                                                                              |
+| `license`       | string   | -        | License for the skill                                                                                            |
+| `compatibility` | string   | -        | Runtime requirements or compatible tools                                                                         |
+| `metadata`      | object   | -        | Additional string metadata                                                                                       |
+| `allowed-tools` | string[] | -        | Tools the skill may use                                                                                          |
+| `params`        | object   | -        | Parameter definitions for `{{variable}}` templates                                                               |
+| `references`    | string[] | -        | File paths to attach to the skill's context (see below)                                                          |
+| `scripts`       | string[] | -        | Executable helper paths to attach to the skill                                                                   |
+| `inputs`        | object   | -        | Runtime input contract (see [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md))  |
+| `outputs`       | object   | -        | Runtime output contract (see [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md)) |
 
 Frontmatter is parsed as constrained YAML. Malformed YAML, aliases, anchors, explicit tags, and oversized values are rejected with a source location. Unknown fields remain available through frontmatter pass-through when a formatter supports them.
 
@@ -10931,7 +10931,7 @@ Scan the provided files for security issues.
 Report findings with at least {{severity}} severity.
 ```
 
-See [Skill Contracts](https://getpromptscript.dev/v1.20/guides/skill-contracts/index.md) for the full reference.
+See [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md) for the full reference.
 
 ## Skill Dependencies
 
@@ -10996,7 +10996,7 @@ Once your skill is in a public Git repository, others can import it directly usi
 @use github.com/your-org/your-skills/my-skill@1.0.0
 ```
 
-See [Markdown Imports](https://getpromptscript.dev/v1.20/guides/markdown-imports/index.md) for syntax details, version pinning, and the `prs skills` management commands.
+See [Markdown Imports](https://getpromptscript.dev/dev/guides/markdown-imports/index.md) for syntax details, version pinning, and the `prs skills` management commands.
 
 ### Share via Git (npx skills)
 
@@ -11022,7 +11022,7 @@ my-registry/
 
 Teams inherit them with `@use @company/skills`.
 
-See [Build Your Registry](https://getpromptscript.dev/v1.20/guides/registry/index.md) for details.
+See [Build Your Registry](https://getpromptscript.dev/dev/guides/registry/index.md) for details.
 
 ## Examples
 
@@ -11135,12 +11135,12 @@ python3 .claude/skills/stack-advisor/scripts/compare.py "react" "vue"
 
 ## See Also
 
-- [Skill Composition](https://getpromptscript.dev/v1.20/guides/skill-composition/index.md) - Compose complex skills from multiple sub-skill phases
-- [Markdown Imports](https://getpromptscript.dev/v1.20/guides/markdown-imports/index.md) - Import skills directly via `@use` without external tools
-- [Using npx skills](https://getpromptscript.dev/v1.20/guides/npx-skills/index.md) - Install open-source skills from GitHub
-- [Local Skills](https://getpromptscript.dev/v1.20/guides/local-skills/index.md) - Full reference for skill resolution and resource handling
-- [Skill Contracts](https://getpromptscript.dev/v1.20/guides/skill-contracts/index.md) - Define inputs and outputs
-- [Shared Resources](https://getpromptscript.dev/v1.20/guides/shared-resources/index.md) - Share files across all skills
+- [Skill Composition](https://getpromptscript.dev/dev/guides/skill-composition/index.md) - Compose complex skills from multiple sub-skill phases
+- [Markdown Imports](https://getpromptscript.dev/dev/guides/markdown-imports/index.md) - Import skills directly via `@use` without external tools
+- [Using npx skills](https://getpromptscript.dev/dev/guides/npx-skills/index.md) - Install open-source skills from GitHub
+- [Local Skills](https://getpromptscript.dev/dev/guides/local-skills/index.md) - Full reference for skill resolution and resource handling
+- [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md) - Define inputs and outputs
+- [Shared Resources](https://getpromptscript.dev/dev/guides/shared-resources/index.md) - Share files across all skills
 
 # Skill Composition
 
@@ -11491,10 +11491,10 @@ After `prs compile`, the `/ops` skill is available in all your AI agents with al
 
 ## See Also
 
-- [Building Skills](https://getpromptscript.dev/v1.20/guides/building-skills/index.md) — skill basics, parameters, and resource files
-- [Skill Contracts](https://getpromptscript.dev/v1.20/guides/skill-contracts/index.md) — define inputs and outputs for phases
-- [Inheritance](https://getpromptscript.dev/v1.20/guides/inheritance/index.md) — single inheritance with `@inherit`
-- [Multi-File Organization](https://getpromptscript.dev/v1.20/guides/multi-file/index.md) — project-level file composition
+- [Building Skills](https://getpromptscript.dev/dev/guides/building-skills/index.md) — skill basics, parameters, and resource files
+- [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md) — define inputs and outputs for phases
+- [Inheritance](https://getpromptscript.dev/dev/guides/inheritance/index.md) — single inheritance with `@inherit`
+- [Multi-File Organization](https://getpromptscript.dev/dev/guides/multi-file/index.md) — project-level file composition
 
 # Skill Contracts
 
@@ -11583,9 +11583,9 @@ The PS017 validation rule checks contract definitions:
 
 ## See Also
 
-- [Local Skills](https://getpromptscript.dev/v1.20/guides/local-skills/index.md) - Managing skills in your project
-- [Parameterized Skills](https://getpromptscript.dev/v1.20/guides/local-skills/#parameterized-skills) - Making skills configurable with `{{var}}` templates
-- [Shared Resources](https://getpromptscript.dev/v1.20/guides/shared-resources/index.md) - Share files across all skills
+- [Local Skills](https://getpromptscript.dev/dev/guides/local-skills/index.md) - Managing skills in your project
+- [Parameterized Skills](https://getpromptscript.dev/dev/guides/local-skills/#parameterized-skills) - Making skills configurable with `{{var}}` templates
+- [Shared Resources](https://getpromptscript.dev/dev/guides/shared-resources/index.md) - Share files across all skills
 
 # Skill Overlays Guide
 
@@ -12160,11 +12160,11 @@ It will:
 1. Suggest relevant configurations from your registry's catalog
 1. Generate your `promptscript.yaml` and `.promptscript/project.prs`
 
-You can also set a default registry via [user-level config](https://getpromptscript.dev/v1.20/guides/user-config/index.md) so `prs init --yes` automatically uses it.
+You can also set a default registry via [user-level config](https://getpromptscript.dev/dev/guides/user-config/index.md) so `prs init --yes` automatically uses it.
 
 ### How Overlay-Aware Suggestions Work
 
-When your registry catalogs Layer 2 / Layer 3 [skill overlays](https://getpromptscript.dev/v1.20/guides/skill-overlays/index.md), `prs init` collapses overlay relationships before showing the picker so you don't see both the base skill and its overlay as separate choices.
+When your registry catalogs Layer 2 / Layer 3 [skill overlays](https://getpromptscript.dev/dev/guides/skill-overlays/index.md), `prs init` collapses overlay relationships before showing the picker so you don't see both the base skill and its overlay as separate choices.
 
 Detection works two ways:
 
@@ -12191,7 +12191,7 @@ catalog:
     extends: '@skills/code-review-base'
 ```
 
-See [Skill Overlays](https://getpromptscript.dev/v1.20/guides/skill-overlays/index.md) for the overlay model itself, and the [Registry Manifest](#registry-manifest) section below for the full schema.
+See [Skill Overlays](https://getpromptscript.dev/dev/guides/skill-overlays/index.md) for the overlay model itself, and the [Registry Manifest](#registry-manifest) section below for the full schema.
 
 ## Usage Patterns
 
@@ -12533,8 +12533,8 @@ ______________________________________________________________________
 
 ## Next Steps
 
-- [Enterprise Setup](https://getpromptscript.dev/v1.20/guides/enterprise/index.md) - Scale PromptScript across your organization
-- [CI/CD Integration](https://getpromptscript.dev/v1.20/guides/ci/index.md) - Automate validation and compilation in your pipeline
+- [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md) - Scale PromptScript across your organization
+- [CI/CD Integration](https://getpromptscript.dev/dev/guides/ci/index.md) - Automate validation and compilation in your pipeline
 
 ______________________________________________________________________
 
@@ -14491,7 +14491,7 @@ For consistent environments across all CI systems, use the official Docker image
 
 Pseudoconfiguration - not copy-pasteable
 
-The block below shows the shape of a Docker-based pipeline, not valid syntax for any single CI system (`image:` and `steps:` keys are borrowed from different systems). Use it as a mental model only - concrete, runnable pipelines are in the [Docker Guide](https://getpromptscript.dev/v1.20/guides/docker/index.md).
+The block below shows the shape of a Docker-based pipeline, not valid syntax for any single CI system (`image:` and `steps:` keys are borrowed from different systems). Use it as a mental model only - concrete, runnable pipelines are in the [Docker Guide](https://getpromptscript.dev/dev/guides/docker/index.md).
 
 ```yaml
 # Pseudoconfiguration - any CI system with Docker support
@@ -14503,7 +14503,7 @@ steps:
   - git diff --exit-code
 ```
 
-See the [Docker Guide](https://getpromptscript.dev/v1.20/guides/docker/index.md) for complete examples including:
+See the [Docker Guide](https://getpromptscript.dev/dev/guides/docker/index.md) for complete examples including:
 
 - GitHub Actions with container jobs
 - GitLab CI with Docker image
@@ -15159,7 +15159,7 @@ defaults:
     - claude
 ````
 
-This allows `prs init --yes` to automatically connect to the company registry without manual configuration. See [User-Level Configuration](https://getpromptscript.dev/v1.20/guides/user-config/index.md) for details.
+This allows `prs init --yes` to automatically connect to the company registry without manual configuration. See [User-Level Configuration](https://getpromptscript.dev/dev/guides/user-config/index.md) for details.
 
 ### Environment Variables
 
@@ -15581,7 +15581,7 @@ Common changes:
 }
 ```
 
-See [Values and Block Bodies](https://getpromptscript.dev/v1.20/reference/language/values-and-block-bodies/index.md) for remediation patterns.
+See [Values and Block Bodies](https://getpromptscript.dev/dev/reference/language/values-and-block-bodies/index.md) for remediation patterns.
 
 ## 5. Review Replacement Intent
 
@@ -15745,7 +15745,7 @@ This guide helps you migrate existing AI instructions to PromptScript.
 
 Upgrading an existing PromptScript project?
 
-This guide converts third-party instruction files into PromptScript. Existing PromptScript 1.15 projects should use [Upgrade 1.15 to 1.16](https://getpromptscript.dev/v1.20/guides/upgrade-1-15-to-1-16/index.md).
+This guide converts third-party instruction files into PromptScript. Existing PromptScript 1.15 projects should use [Upgrade 1.15 to 1.16](https://getpromptscript.dev/dev/guides/upgrade-1-15-to-1-16/index.md).
 
 ## Choose a Migration Command
 
@@ -16585,15 +16585,15 @@ Use Composer with migration context or reference the PromptScript migration docu
 
 ### Best Practices for AI Migration
 
-For detailed guidelines on AI-assisted migration, including content mapping patterns and common pitfalls, see [AI Migration Best Practices](https://getpromptscript.dev/v1.20/guides/ai-migration-best-practices/index.md).
+For detailed guidelines on AI-assisted migration, including content mapping patterns and common pitfalls, see [AI Migration Best Practices](https://getpromptscript.dev/dev/guides/ai-migration-best-practices/index.md).
 
 ## Next Steps
 
 After migration:
 
-1. [Set up inheritance](https://getpromptscript.dev/v1.20/guides/inheritance/index.md) if you have multiple projects
-1. [Organize multi-file setup](https://getpromptscript.dev/v1.20/guides/multi-file/index.md) for complex projects
-1. [Configure CI/CD](https://getpromptscript.dev/v1.20/guides/enterprise/#cicd-integration) for validation
+1. [Set up inheritance](https://getpromptscript.dev/dev/guides/inheritance/index.md) if you have multiple projects
+1. [Organize multi-file setup](https://getpromptscript.dev/dev/guides/multi-file/index.md) for complex projects
+1. [Configure CI/CD](https://getpromptscript.dev/dev/guides/enterprise/#cicd-integration) for validation
 1. Train team on PromptScript workflow
 
 # AI Tool Hooks
@@ -16605,10 +16605,10 @@ This guide covers `prs hooks install`, which installs PromptScript auto-compilat
 Notes for compiled `@hooks` output:
 
 - **Legacy Factory settings** - before 1.16, `@hooks` could land in `.factory/settings.json`. When `.factory/hooks.json` is absent, `prs compile` moves unambiguous hooks to the canonical file and preserves unrelated settings. Migration is all-or-nothing for unknown events, malformed entries, and mixed ownership. Use `--dry-run` to preview both file changes, or `--no-migrate-factory-hooks` to retain warning-only `PS4002` behavior.
-- **Matcher portability** - `matcher` filters by target-native tool names (Factory `Execute`, GitHub Copilot tool names, Claude `Edit|Write`). A matcher that works on one target may match nothing on another. See [@hooks](https://getpromptscript.dev/v1.20/reference/language/#hooks).
-- **Terminal commands** - use `pre-terminal-command` instead of a broad `pre-tool-use` matcher. PromptScript supplies audited native tool defaults, allows `targets.<name>.matcher` overrides, and reports `PS4002` for best-effort or unsupported host coverage. See [Terminal command semantics](https://getpromptscript.dev/v1.20/features/automation/#terminal-command-semantics).
+- **Matcher portability** - `matcher` filters by target-native tool names (Factory `Execute`, GitHub Copilot tool names, Claude `Edit|Write`). A matcher that works on one target may match nothing on another. See [@hooks](https://getpromptscript.dev/dev/reference/language/#hooks).
+- **Terminal commands** - use `pre-terminal-command` instead of a broad `pre-tool-use` matcher. PromptScript supplies audited native tool defaults, allows `targets.<name>.matcher` overrides, and reports `PS4002` for best-effort or unsupported host coverage. See [Terminal command semantics](https://getpromptscript.dev/dev/features/automation/#terminal-command-semantics).
 - **Cleanup** - removing `@hooks` deletes the obsolete generated hook file once every command in it carries the PromptScript ownership marker, and prunes managed directories left empty (such as `.github/hooks/`).
-- **Working directory** - for repository-local lifecycle commands, set `cwd: "project"` in the language-level hook and keep shared scripts under `.promptscript/scripts/`. Generated hook file location does not set command working directory. Environment and Git-root wrappers exit before resource execution when the required root is unavailable; they never fall back to process cwd. See [Hooks and Workflows](https://getpromptscript.dev/v1.20/features/automation/#project-root-strategy-by-target) for target behavior, generated Factory and GitHub examples, and the complete capability matrix.
+- **Working directory** - for repository-local lifecycle commands, set `cwd: "project"` in the language-level hook and keep shared scripts under `.promptscript/scripts/`. Generated hook file location does not set command working directory. Environment and Git-root wrappers exit before resource execution when the required root is unavailable; they never fall back to process cwd. See [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/#project-root-strategy-by-target) for target behavior, generated Factory and GitHub examples, and the complete capability matrix.
 
 ```
 @hooks {
@@ -16736,7 +16736,7 @@ prs compile --watch
 
 This does not provide the output-protection behaviour of `pre-edit`. Keep generated files writable so watch mode can replace them, and rely on generation markers plus code review to prevent manual edits.
 
-See [`prs compile`](https://getpromptscript.dev/v1.20/reference/cli/#prs-compile) for full watch options.
+See [`prs compile`](https://getpromptscript.dev/dev/reference/cli/#prs-compile) for full watch options.
 
 ## Troubleshooting
 
@@ -16872,7 +16872,7 @@ This guide explains the internal architecture of PromptScript formatters, focusi
 
 PromptScript compiles to 50 AI agent targets. Rich native formatters, AGENTS.md targets, and shared Markdown formatters map the same PromptScript source to each platform's instruction and capability contracts. Shared extraction and rendering logic preserves semantic parity where native platforms support equivalent features.
 
-Formatter inputs follow the canonical and compatibility contracts in the [Block Shapes reference](https://getpromptscript.dev/v1.20/reference/block-shapes/index.md). That reference also identifies content whose output varies by target.
+Formatter inputs follow the canonical and compatibility contracts in the [Block Shapes reference](https://getpromptscript.dev/dev/reference/block-shapes/index.md). That reference also identifies content whose output varies by target.
 
 ```
 flowchart TB
@@ -17341,9 +17341,9 @@ prs compile
 
 ## Next Steps
 
-- Add more detailed [standards](https://getpromptscript.dev/v1.20/reference/language/#standards)
-- Add [restrictions](https://getpromptscript.dev/v1.20/reference/language/#restrictions) for safety
-- Consider [team setup](https://getpromptscript.dev/v1.20/examples/team-setup/index.md) for multiple projects
+- Add more detailed [standards](https://getpromptscript.dev/dev/reference/language/#standards)
+- Add [restrictions](https://getpromptscript.dev/dev/reference/language/#restrictions) for safety
+- Consider [team setup](https://getpromptscript.dev/dev/examples/team-setup/index.md) for multiple projects
 
 # Composition and Order
 
@@ -17407,7 +17407,7 @@ prs compile --dry-run
 
 Common failure: moving `@override` before target creation. Override targets must exist when operation runs.
 
-See [Composition and Precedence](https://getpromptscript.dev/v1.20/reference/language/composition/index.md).
+See [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md).
 
 # Merge vs Replace
 
@@ -17463,7 +17463,7 @@ prs compile --dry-run
 
 Common failure: using `@override` for missing path. Add target in base, import, or local block before replacement.
 
-See [Merge and Replacement](https://getpromptscript.dev/v1.20/reference/language/merge-and-replacement/index.md).
+See [Merge and Replacement](https://getpromptscript.dev/dev/reference/language/merge-and-replacement/index.md).
 
 # Fix Block Shape Warnings
 
@@ -17535,7 +17535,7 @@ prs diff --all
 
 Review every target. Compatibility warnings often indicate formatter-dependent behavior, so source-only comparison is insufficient.
 
-See [Values and Block Bodies](https://getpromptscript.dev/v1.20/reference/language/values-and-block-bodies/index.md) and [Block Shapes](https://getpromptscript.dev/v1.20/reference/block-shapes/index.md).
+See [Values and Block Bodies](https://getpromptscript.dev/dev/reference/language/values-and-block-bodies/index.md) and [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.md).
 
 # Custom Section Headers
 
@@ -17583,7 +17583,7 @@ prs compile --dry-run
 
 Inspect every configured target because available human-readable sections vary by formatter.
 
-See [Section Headers](https://getpromptscript.dev/v1.20/reference/language/section-headers/index.md).
+See [Section Headers](https://getpromptscript.dev/dev/reference/language/section-headers/index.md).
 
 # Portable Hooks
 
@@ -17719,7 +17719,7 @@ git diff -- .factory/hooks.json .github/hooks/
 
 Confirm the expected output paths and run the generated hook once in Factory and VS Code before rollout. Never commit executable policy without code review and least-privilege analysis.
 
-See [Hooks and Workflows](https://getpromptscript.dev/v1.20/features/automation/index.md) for capability matrix and root strategy.
+See [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md) for capability matrix and root strategy.
 
 # Migrate Factory Hooks
 
@@ -17798,7 +17798,7 @@ Apply only after reviewing dry-run:
 prs compile
 ```
 
-See [AI Tool Hooks](https://getpromptscript.dev/v1.20/guides/hooks/index.md) for installer behavior and cleanup.
+See [AI Tool Hooks](https://getpromptscript.dev/dev/guides/hooks/index.md) for installer behavior and cleanup.
 
 # Team Setup Example
 
@@ -18175,8 +18175,8 @@ jobs:
 
 ## Next Steps
 
-- [Enterprise Setup](https://getpromptscript.dev/v1.20/examples/enterprise/index.md) - Organization-wide deployment
-- [Inheritance Guide](https://getpromptscript.dev/v1.20/guides/inheritance/index.md) - Advanced patterns
+- [Enterprise Setup](https://getpromptscript.dev/dev/examples/enterprise/index.md) - Organization-wide deployment
+- [Inheritance Guide](https://getpromptscript.dev/dev/guides/inheritance/index.md) - Advanced patterns
 
 # Enterprise Example
 
@@ -18738,7 +18738,7 @@ The design system is a shared capability, so its skills are authored once in the
 }
 ```
 
-The single `@use @acme/design-system` line is the whole project-level usage. It composes the shared `component-review` and `token-migration` skills into `checkout-app`. Projects receive a Design Systems update only after refreshing their reviewed registry pin and recompiling; compilation alone keeps the cached or lockfile-pinned revision. See [Updating Dependencies](https://getpromptscript.dev/v1.20/guides/registry/#updating-dependencies) for the scoped `prs update` workflow. Agents in consuming projects can then reference the skills by name without re-authoring them per repository.
+The single `@use @acme/design-system` line is the whole project-level usage. It composes the shared `component-review` and `token-migration` skills into `checkout-app`. Projects receive a Design Systems update only after refreshing their reviewed registry pin and recompiling; compilation alone keeps the cached or lockfile-pinned revision. See [Updating Dependencies](https://getpromptscript.dev/dev/guides/registry/#updating-dependencies) for the scoped `prs update` workflow. Agents in consuming projects can then reference the skills by name without re-authoring them per repository.
 
 ### Project Config
 
@@ -19368,11 +19368,11 @@ Example local file (`CLAUDE.local.md`):
 
 ## See Also
 
-- [Local Skills Guide](https://getpromptscript.dev/v1.20/guides/local-skills/index.md) - Install third-party skills with resource files (CSV, scripts)
-- [Language Reference: @skills](https://getpromptscript.dev/v1.20/reference/language/#skills)
-- [Language Reference: @local](https://getpromptscript.dev/v1.20/reference/language/#local)
-- [Formatters API: GitHub](https://getpromptscript.dev/v1.20/api-reference/formatters/src/classes/GitHubFormatter/index.md)
-- [Formatters API: Claude](https://getpromptscript.dev/v1.20/api-reference/formatters/src/classes/ClaudeFormatter/index.md)
+- [Local Skills Guide](https://getpromptscript.dev/dev/guides/local-skills/index.md) - Install third-party skills with resource files (CSV, scripts)
+- [Language Reference: @skills](https://getpromptscript.dev/dev/reference/language/#skills)
+- [Language Reference: @local](https://getpromptscript.dev/dev/reference/language/#local)
+- [Formatters API: GitHub](https://getpromptscript.dev/dev/api-reference/formatters/src/classes/GitHubFormatter/index.md)
+- [Formatters API: Claude](https://getpromptscript.dev/dev/api-reference/formatters/src/classes/ClaudeFormatter/index.md)
 
 # Agents Example
 
@@ -19718,15 +19718,15 @@ targets:
 | Amp            | `.agents/agents/<name>.md`   | Description and content                                              |
 | Grok Build     | `.claude/agents/<name>.md`   | Full Claude contract through delegation                              |
 
-Fields a target cannot represent are reported with `PS4003` compatibility warnings (agent name, field, target, and the targets that do support the field) instead of being dropped silently. See the [Field Support Matrix](https://getpromptscript.dev/v1.20/features/agents/#field-support-matrix) for the authoritative per-target statuses.
+Fields a target cannot represent are reported with `PS4003` compatibility warnings (agent name, field, target, and the targets that do support the field) instead of being dropped silently. See the [Field Support Matrix](https://getpromptscript.dev/dev/features/agents/#field-support-matrix) for the authoritative per-target statuses.
 
 Project lifecycle hooks are defined separately through `@hooks`. Agents can reference shared capabilities from `@skills` and `@mcpServers`.
 
 ## See Also
 
-- [Language Reference - @agents](https://getpromptscript.dev/v1.20/reference/language/#agents)
-- [Agent Platform - Agents](https://getpromptscript.dev/v1.20/features/agents/index.md)
-- [Skills & Local Example](https://getpromptscript.dev/v1.20/examples/skills-and-local/index.md)
+- [Language Reference - @agents](https://getpromptscript.dev/dev/reference/language/#agents)
+- [Agent Platform - Agents](https://getpromptscript.dev/dev/features/agents/index.md)
+- [Skills & Local Example](https://getpromptscript.dev/dev/examples/skills-and-local/index.md)
 - [GitHub Copilot Custom Agents Documentation](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents)
 - [Claude Code Subagents Documentation](https://code.claude.com/docs/en/sub-agents)
 
@@ -19736,13 +19736,13 @@ These examples cover core agent-platform capabilities. Open the [Playground](/pl
 
 PromptScript 1.16 task examples:
 
-| Task                            | Example                                                                                              |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Predict composition results     | [Composition and Order](https://getpromptscript.dev/v1.20/examples/composition-and-order/index.md)   |
-| Choose merge or replacement     | [Merge vs Replace](https://getpromptscript.dev/v1.20/examples/merge-vs-replace/index.md)             |
-| Fix PS038 shape warnings        | [Fix Block Shape Warnings](https://getpromptscript.dev/v1.20/examples/fix-block-shapes/index.md)     |
-| Customize generated titles      | [Custom Section Headers](https://getpromptscript.dev/v1.20/examples/custom-section-headers/index.md) |
-| Build portable lifecycle policy | [Portable Hooks](https://getpromptscript.dev/v1.20/examples/portable-hooks/index.md)                 |
+| Task                            | Example                                                                                            |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Predict composition results     | [Composition and Order](https://getpromptscript.dev/dev/examples/composition-and-order/index.md)   |
+| Choose merge or replacement     | [Merge vs Replace](https://getpromptscript.dev/dev/examples/merge-vs-replace/index.md)             |
+| Fix PS038 shape warnings        | [Fix Block Shape Warnings](https://getpromptscript.dev/dev/examples/fix-block-shapes/index.md)     |
+| Customize generated titles      | [Custom Section Headers](https://getpromptscript.dev/dev/examples/custom-section-headers/index.md) |
+| Build portable lifecycle policy | [Portable Hooks](https://getpromptscript.dev/dev/examples/portable-hooks/index.md)                 |
 
 ## Complete Agent Platform
 
@@ -19856,7 +19856,7 @@ targets:
 
 Syntax 1.3 introduced `field!: value` inside regular `@extend` blocks. Marked fields replace their complete previous value, while unmarked fields retain normal merge behavior:
 
-For new syntax 1.6 projects, prefer `@override` when replacing a complete existing target. See [Merge vs Replace](https://getpromptscript.dev/v1.20/examples/merge-vs-replace/index.md).
+For new syntax 1.6 projects, prefer `@override` when replacing a complete existing target. See [Merge vs Replace](https://getpromptscript.dev/dev/examples/merge-vs-replace/index.md).
 
 ```
 @meta {
@@ -20084,12 +20084,12 @@ jobs:
 
 ## Related Documentation
 
-- [Agent Platform](https://getpromptscript.dev/v1.20/features/index.md)
-- [Agents](https://getpromptscript.dev/v1.20/features/agents/index.md)
-- [Skills and Resources](https://getpromptscript.dev/v1.20/features/skills/index.md)
-- [MCP Servers and Plugins](https://getpromptscript.dev/v1.20/features/integrations/index.md)
-- [Hooks and Workflows](https://getpromptscript.dev/v1.20/features/automation/index.md)
-- [Configuration Reference](https://getpromptscript.dev/v1.20/reference/config/#builds)
+- [Agent Platform](https://getpromptscript.dev/dev/features/index.md)
+- [Agents](https://getpromptscript.dev/dev/features/agents/index.md)
+- [Skills and Resources](https://getpromptscript.dev/dev/features/skills/index.md)
+- [MCP Servers and Plugins](https://getpromptscript.dev/dev/features/integrations/index.md)
+- [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md)
+- [Configuration Reference](https://getpromptscript.dev/dev/reference/config/#builds)
 
 # Git Registry
 
@@ -20765,7 +20765,7 @@ PromptScript is an agent platform configuration language and toolchain. You defi
 
 ## How many AI tools are supported?
 
-PromptScript currently compiles to **50 AI coding agent targets**. See the full list in [Target Platforms](https://getpromptscript.dev/v1.20/features/target-platforms/index.md) or the [formatter matrix](https://getpromptscript.dev/v1.20/reference/formatters/index.md).
+PromptScript currently compiles to **50 AI coding agent targets**. See the full list in [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) or the [formatter matrix](https://getpromptscript.dev/dev/reference/formatters/index.md).
 
 ## How do I install PromptScript?
 
@@ -20785,7 +20785,7 @@ Or use Docker:
 docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript compile
 ```
 
-See the [Getting Started guide](https://getpromptscript.dev/v1.20/getting-started/index.md) for details.
+See the [Getting Started guide](https://getpromptscript.dev/dev/getting-started/index.md) for details.
 
 ## How does inheritance work?
 
@@ -20794,7 +20794,7 @@ PromptScript supports hierarchical inheritance with `@inherit` and `@use` direct
 - `@inherit` - Extend a base configuration (single inheritance)
 - `@use` - Import and merge additional rule sets (multiple imports)
 
-Sources can be local files (`./base`) or registry packages (`@company/standards`). See the [Inheritance guide](https://getpromptscript.dev/v1.20/guides/inheritance/index.md).
+Sources can be local files (`./base`) or registry packages (`@company/standards`). See the [Inheritance guide](https://getpromptscript.dev/dev/guides/inheritance/index.md).
 
 ## How do I set up a private registry?
 
@@ -20804,7 +20804,7 @@ A registry is just a Git repository with `.prs` files. Configure it in your proj
 prs registry add @company https://github.com/your-org/promptscript-registry.git
 ```
 
-See the [Registry guide](https://getpromptscript.dev/v1.20/guides/registry/index.md) for full setup instructions.
+See the [Registry guide](https://getpromptscript.dev/dev/guides/registry/index.md) for full setup instructions.
 
 ## How do I integrate with CI/CD?
 
@@ -20815,7 +20815,7 @@ prs validate --strict  # Fail on any validation warnings
 prs compile --strict   # Compile configured targets and fail on output conflicts
 ```
 
-See the [CI/CD guide](https://getpromptscript.dev/v1.20/guides/ci/index.md).
+See the [CI/CD guide](https://getpromptscript.dev/dev/guides/ci/index.md).
 
 ## Common Errors
 
@@ -20829,7 +20829,7 @@ The `@inherit` or `@use` target cannot be resolved. Check:
 
 ### `PS1001: Unexpected token`
 
-The parser encountered invalid syntax, such as an unknown directive or misplaced token. Check the reported location and compare it with the [Language Reference](https://getpromptscript.dev/v1.20/reference/language/index.md).
+The parser encountered invalid syntax, such as an unknown directive or misplaced token. Check the reported location and compare it with the [Language Reference](https://getpromptscript.dev/dev/reference/language/index.md).
 
 ### `PS3001: Required field`
 
@@ -20949,13 +20949,13 @@ GEMINI.md
 
 ## Getting Started
 
-Ready to switch? See the [Migration Guide](https://getpromptscript.dev/v1.20/guides/migration/index.md) to convert existing configs, or start fresh with the [Getting Started guide](https://getpromptscript.dev/v1.20/getting-started/index.md).
+Ready to switch? See the [Migration Guide](https://getpromptscript.dev/dev/guides/migration/index.md) to convert existing configs, or start fresh with the [Getting Started guide](https://getpromptscript.dev/dev/getting-started/index.md).
 
 Evaluating for a team or organization? Also see:
 
-- [Target Platform Matrix](https://getpromptscript.dev/v1.20/reference/formatters/index.md) - exact output paths per tool
-- [CI/CD Integration](https://getpromptscript.dev/v1.20/guides/ci/index.md) - validation and drift detection in your pipeline
-- [Enterprise Setup](https://getpromptscript.dev/v1.20/guides/enterprise/index.md) - registry, policies, and governance across repositories
+- [Target Platform Matrix](https://getpromptscript.dev/dev/reference/formatters/index.md) - exact output paths per tool
+- [CI/CD Integration](https://getpromptscript.dev/dev/guides/ci/index.md) - validation and drift detection in your pipeline
+- [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md) - registry, policies, and governance across repositories
 
 # Parity Testing
 
@@ -21342,7 +21342,7 @@ type FeatureStatus =
   | 'partial'; // Partially implemented
 ```
 
-The target catalog contains 50 formatters. The matrix currently classifies 37 of them. A missing entry means the target has not been classified for that feature, not that the feature is unsupported. The formatter registry and generated [platform matrix](https://getpromptscript.dev/v1.20/reference/formatters/index.md) remain the source of truth for target availability.
+The target catalog contains 50 formatters. The matrix currently classifies 37 of them. A missing entry means the target has not been classified for that feature, not that the feature is unsupported. The formatter registry and generated [platform matrix](https://getpromptscript.dev/dev/reference/formatters/index.md) remain the source of truth for target availability.
 
 ### Categories
 
