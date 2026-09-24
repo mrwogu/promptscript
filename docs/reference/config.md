@@ -133,6 +133,23 @@ validation:
   # allowedPatterns:
   #   - 'bypass\s+(your\s+)?(rules|restrictions)'
 
+# ===================
+# Model Configuration
+# ===================
+models:
+  # Models the instructions are written and tested for (PS041)
+  supported:
+    - opus
+    - gpt-5.3-codex
+
+  # Custom model profiles, or overrides of built-in profiles
+  # profiles:
+  #   claude-opus-9:
+  #     provider: anthropic
+  #     family: claude-opus
+  #     version: '9'
+  #     displayName: Claude Opus 9
+
 # ====================
 # Watch Configuration
 # ====================
@@ -224,6 +241,7 @@ includePromptScriptSkill: true # default: true
 | `universalDir`             | string or boolean       | No       | Universal skills and commands directory         |
 | `includePromptScriptSkill` | boolean                 | No       | Include the bundled language skill              |
 | `validation`               | object                  | No       | Guard and validation rule settings              |
+| `models`                   | object                  | No       | Supported model set and model profiles          |
 | `policies`                 | array                   | No       | Extension compliance policies                   |
 
 `id` and `syntax` are required even when `input.entry` uses its default.
@@ -929,6 +947,124 @@ Consumed by `blocked-patterns` (PS005) and `authority-injection` (PS011), the
 two heuristic text rules that always scan imported content. Excludes are
 declared by the consumer, never by the scanned file: a disable comment inside
 an imported skill cannot mute its own scan.
+
+### models
+
+Configures the model catalog. PromptScript uses it to write the native model
+name each target expects in agent and skill `model` fields, and to check model
+references (PS041).
+
+```yaml
+models:
+  supported:
+    - opus
+    - claude-sonnet-5
+    - gpt-5.3-codex
+  profiles:
+    claude-opus-9:
+      provider: anthropic
+      family: claude-opus
+      version: '9'
+      displayName: Claude Opus 9
+      apiId: claude-opus-9
+      releaseDate: '2027-01-15'
+      targets:
+        github: Claude Opus 9 (Preview)
+```
+
+| Field       | Type     | Default | Description                                                                                                                                                                                    |
+| ----------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `supported` | string[] | -       | Model set the instructions are written and tested for. Entries are profile ids, aliases, API ids, display names, or floating aliases. When set, PS041 reports model references outside the set |
+| `profiles`  | object   | `{}`    | Custom model profiles, or overrides of built-in profiles, keyed by profile id                                                                                                                  |
+
+#### Model references
+
+PromptScript ships a built-in catalog of Anthropic, OpenAI, Google, and xAI
+models. Each profile records the provider, family, version, display name, API
+id, lifecycle status, successor, and release and retirement dates. The
+[Model Catalog](models.md) lists every built-in profile.
+
+A `model` or `specModel` value in `@agents`, and `model` in `@skills`, matches
+a profile by id, alias, API id, or display name, ignoring case. Two kinds of
+values are special:
+
+- `inherit` keeps the model already selected in the tool.
+- `opus`, `sonnet`, `haiku`, and `fable` are floating aliases. Each one points
+  at the newest release of its Claude family that is not retired, listed in
+  [Floating Aliases](models.md#floating-aliases).
+
+Names that are not in the catalog, such as gateway model ids, BYOK model ids,
+or Claude Code's `opusplan`, are written unchanged on every target. The
+exception is a value the target spells its own way: GitHub Copilot writes
+`auto` as `Auto`.
+
+#### Target model names
+
+| Target                  | Written value                                                                | `inherit` | Providers |
+| ----------------------- | ---------------------------------------------------------------------------- | --------- | --------- |
+| Claude Code, Grok Build | Floating aliases as written, other models as API id                          | Written   | Anthropic |
+| GitHub Copilot          | Display name, such as `Claude Sonnet 5` or `GPT-5.3-Codex`; `auto` is `Auto` | Omitted   | All       |
+| Factory AI              | API id                                                                       | Written   | All       |
+| Codex                   | API id                                                                       | Omitted   | OpenAI    |
+| Cursor                  | Profile id, which has no snapshot date, such as `claude-sonnet-4-5`          | Written   | All       |
+
+The [Model Catalog](models.md#target-model-names) shows what each target
+writes for common values.
+
+For older releases the API id is a dated snapshot, such as
+`claude-sonnet-4-5-20250929`. GitHub Copilot and Factory AI map `specModel`
+the same way, and Claude Code and Grok Build also map the `model` field of
+skills. A model from a provider the target cannot run is omitted from that
+target's output and reported with a PS4004 warning during compilation. So is
+a name with a line break or control character, whether it comes from the
+source or from a profile. A per-target name in `profiles.<id>.targets` always wins, including for
+providers the target would otherwise omit. Its keys are the target names from
+the table (`claude`, `grok`, `github`, `factory`, `codex`, `cursor`), matched
+without regard to case.
+
+#### Model profiles
+
+A `profiles` key that matches a built-in profile id changes only the fields it
+sets. Its `targets` entries merge with the built-in ones, and every other field
+it sets, including `aliases`, replaces the built-in value. Any other key adds a
+custom profile, so a team can use a model before PromptScript ships it. Unset
+fields of a custom profile default to the key (`family`, `displayName`, and
+`apiId`), `provider: custom`, and `status: current`.
+
+| Field            | Description                                                                                          |
+| ---------------- | ---------------------------------------------------------------------------------------------------- |
+| `provider`       | Model provider, such as `anthropic`, `openai`, `google`, or `xai`                                    |
+| `family`         | Model line that groups versions, such as `claude-opus`                                               |
+| `version`        | Version inside the family, such as `5.5`                                                             |
+| `displayName`    | Human-readable name, also the GitHub Copilot model name                                              |
+| `apiId`          | Provider API model id                                                                                |
+| `aliases`        | Additional names that resolve to the profile                                                         |
+| `status`         | `current`, `legacy` (superseded but still served), `deprecated` (retirement announced), or `retired` |
+| `successor`      | Profile id of the recommended replacement                                                            |
+| `releaseDate`    | Release date in `YYYY-MM-DD` format                                                                  |
+| `retirementDate` | Date the provider stops serving the model, in `YYYY-MM-DD` format                                    |
+| `targets`        | Native model name per target, such as `github: Claude Opus 9`                                        |
+
+A custom profile that joins a Claude family with a higher version also moves
+the floating alias. With the example above, `opus` resolves to Claude Opus 9,
+so GitHub Copilot agents that use `opus` get `Claude Opus 9 (Preview)`.
+
+#### Model validation
+
+PS041 (`valid-model-reference`) is a warning. It reports:
+
+- references to `deprecated` or `retired` models, with the replacement found
+  through the successor chain
+- when `supported` is set: references outside the set, references that are
+  not in the catalog, and `supported` entries that are not in the catalog
+- problems in `profiles`: a name used by two profiles, a profile or alias
+  named after a floating alias or `inherit`, a successor that is unknown or
+  loops back, a date not in `YYYY-MM-DD` format, and a `targets` key for a
+  target that does not write model names
+
+`legacy` models are still served, so they pass. Without `supported`, names
+that are not in the catalog are not reported, because tools accept many names
+no catalog can list.
 
 ### watch
 

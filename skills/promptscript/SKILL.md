@@ -248,7 +248,8 @@ Reusable skill definitions with metadata:
 ```
 
 Properties: description (required), content (required), trigger, disableModelInvocation,
-userInvocable, allowedTools, context ("fork" or "inherit"), agent, requires, references, inputs, outputs.
+userInvocable, allowedTools, context ("fork" or "inherit"), agent, model (Claude Code and Grok
+Build, mapped through the model catalog), requires, references, inputs, outputs.
 
 The `references` property attaches external files to the skill's context:
 
@@ -415,6 +416,18 @@ effort for the spec model (Factory only, values: "low", "medium", "high").
 Factory AI droids support additional properties: `model` (any model ID or "inherit"),
 `reasoningEffort` ("low", "medium", "high"), and `tools` (category name like "read-only"
 or array of tool IDs).
+
+Agent `model`/`specModel` and skill `model` values resolve against the model catalog
+(built-in profiles plus `models.profiles` in promptscript.yaml). Write a floating alias
+(`sonnet`, `opus`, `haiku`, `fable` - newest Claude release), a pinned model (profile id,
+alias, API id, or display name such as `claude-opus-5-5` or `Claude Opus 5.5`), or
+`inherit`. Each target gets its native name: Claude Code keeps aliases and uses API ids
+for pinned Claude models, GitHub Copilot gets display names (`Claude Sonnet 5`), Factory
+AI and Codex get API ids, and Cursor gets dateless ids. Names outside the catalog pass
+through unchanged, unless the target has its own spelling for them (GitHub Copilot writes
+`auto` as `Auto`). A model from a provider the target cannot run (a GPT model on Claude
+Code, a Claude model on Codex), or a name with a line break or control character, is
+omitted with a PS4004 warning.
 
 ### @workflows
 
@@ -1006,6 +1019,16 @@ policies:
     severity: error
     layers: ['@core', '@team', '@project']
     maxDistance: 1
+models:
+  supported: [opus, sonnet, gpt-5.3-codex]  # PS041 reports models outside this set
+  profiles:                                 # add models or override built-in profiles
+    claude-opus-9:
+      provider: anthropic
+      family: claude-opus                   # joins the family, so `opus` now resolves here
+      version: '9'
+      displayName: Claude Opus 9
+      targets:
+        github: Claude Opus 9 (Preview)     # per-target name always wins
 ```
 
 ### Lockfile: `promptscript.lock`
@@ -1114,6 +1137,7 @@ sections without changing filenames, frontmatter, XML tags, or structured keys:
 - **PS038 (`valid-block-shape`)**: rejects unsupported built-in block shapes and warns about formatter-sensitive legacy shapes or multiline shortcut scalars.
 - **PS039 (`agent-namespaces`)**: validates qualified agent name segments and checks them against recorded import provenance.
 - **PS040 (`import-excludes`)**: errors when a `validation.excludes` entry for an import does not record the commit pinned in promptscript.lock, so consumers re-review imports whose pinned commit changed.
+- **PS041 (`valid-model-reference`)**: warns when an agent `model`/`specModel` or skill `model` resolves to a deprecated or retired model, suggesting the successor. With `models.supported` set, it also warns about models outside the set, models missing from the catalog, and unknown `models.supported` entries. It also reports `models.profiles` problems: a name shared by two profiles or taken from a floating alias or `inherit`, unknown or looping successors, dates not in `YYYY-MM-DD`, and `targets` keys for targets that write no model names.
 - **PS021 (`use-block-filter`)**: errors when `only` and `exclude` are both specified in `@use` parameters.
 - **PS025 (`valid-skill-references`)**: errors when a `references` entry points to a file with a disallowed extension or a path that cannot be resolved.
 - **PS026 (`safe-reference-content`)**: warns when a referenced file contains potentially sensitive content (e.g., secrets, credentials).
@@ -1125,7 +1149,9 @@ sections without changing filenames, frontmatter, XML tags, or structured keys:
 
 Target formatters report **PS4002** when a hook event or field has no native equivalent,
 when a target cannot guarantee project-root execution, or when output mode cannot emit
-the additional hook file.
+the additional hook file. They report **PS4004** when an agent or skill model comes from
+a provider the target cannot run, or when its name has a line break or control character;
+the model field is omitted for that target.
 
 ### Fixing Syntax Versions
 

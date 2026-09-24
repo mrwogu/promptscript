@@ -17,7 +17,7 @@ Benefits of using subagents:
 - **Preserve context** - Keep exploration and implementation out of your main conversation
 - **Enforce constraints** - Limit which tools a subagent can use
 - **Specialize behavior** - Focused system prompts for specific domains
-- **Control costs** - Route tasks to faster, cheaper models (Claude only)
+- **Control costs** - Route tasks to faster, cheaper models on every target with a native `model` field
 
 ## Complete Example
 
@@ -182,16 +182,31 @@ Benefits of using subagents:
 
 ### Model Options
 
-**GitHub Copilot:** Any model available in your GitHub Copilot subscription (e.g., `gpt-4o`, `claude-sonnet-4`, `o1-mini`).
+Write one model value, and PromptScript maps it to the model name each target
+expects through the [model catalog](../reference/models.md):
 
-**Claude Code:**
+| Value                                | Meaning                                                       |
+| ------------------------------------ | ------------------------------------------------------------- |
+| `sonnet`, `opus`, `haiku`, `fable`   | Floating alias for the newest release of the Claude family    |
+| `claude-opus-5-5`, `Claude Opus 5.5` | Pinned release, by profile id, alias, API id, or display name |
+| `inherit`                            | Use same model as main conversation                           |
+| Any other name                       | Written unchanged, unless the target has its own spelling     |
 
-| Model     | Use Case                               |
-| --------- | -------------------------------------- |
-| `sonnet`  | Default. Balanced capability and speed |
-| `opus`    | Complex reasoning, highest capability  |
-| `haiku`   | Fast, low-latency for simple tasks     |
-| `inherit` | Use same model as main conversation    |
+**GitHub Copilot:** Catalog models become Copilot model names, so
+`claude-sonnet-4-5` becomes `Claude Sonnet 4.5` and `sonnet` becomes the
+newest Sonnet release. `inherit` is omitted, and `auto` becomes `Auto`.
+Other names pass through unchanged, so any name from your Copilot model
+picker works.
+
+**Claude Code:** Floating aliases and `inherit` stay as written. Pinned Claude
+releases become API ids, such as `claude-sonnet-4-5-20250929`. Models from
+other providers are omitted with a `PS4004` warning.
+
+**Factory AI, Codex, and Cursor:** Catalog models become model ids. Codex runs
+only OpenAI models, so it omits models from other providers with a `PS4004`
+warning. Factory AI and Cursor write `inherit`, Codex omits it. The
+[Model Catalog](../reference/models.md#target-model-names) shows what each
+target writes.
 
 ### Permission Modes (Claude only)
 
@@ -216,7 +231,7 @@ With `version: full`, agents are generated as separate files:
     name: code-reviewer
     description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability.
     tools: ['read', 'search', 'execute']
-    model: Claude Sonnet 4.5
+    model: Claude Sonnet 5
     ---
 
     You are a senior code reviewer ensuring high standards of code quality and security.
@@ -246,11 +261,13 @@ With `version: full`, agents are generated as separate files:
 
         | PromptScript | GitHub Copilot |
         |--------------|----------------|
-        | `sonnet` | `Claude Sonnet 4.5` |
-        | `opus` | `Claude Opus 4.5` |
-        | `haiku` | `Claude Haiku 4.5` |
-        | `sonnet-4` | `Claude Sonnet 4` |
+        | `sonnet`, `opus`, `haiku`, `fable` | Display name of the newest release in the family |
+        | `sonnet-4.5` | `Claude Sonnet 4.5` |
+        | `gpt-5.3-codex` | `GPT-5.3-Codex` |
         | `inherit` | *(omitted)* |
+
+        The [Model Catalog](../reference/models.md#floating-aliases) lists the
+        current release behind each floating alias.
 
         Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` cannot be
         represented in GitHub output: each one is reported with a `PS4003` compatibility warning
@@ -378,6 +395,7 @@ capabilities from `@skills` and `@mcpServers`.
 
 - [Language Reference - @agents](../reference/language.md#agents)
 - [Agent Platform - Agents](../features/agents.md)
+- [Model Catalog](../reference/models.md)
 - [Skills & Local Example](skills-and-local.md)
 - [GitHub Copilot Custom Agents Documentation](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents)
 - [Claude Code Subagents Documentation](https://code.claude.com/docs/en/sub-agents)
