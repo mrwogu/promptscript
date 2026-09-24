@@ -116,6 +116,7 @@ plugins:
           - reference/cli/hooks.md: AI tool hook installation and removal
           - reference/cli/hook.md: Low-level hook runtime contract
           - reference/config.md: Configuration file format
+          - reference/models.md: Built-in model catalog, floating aliases, and target model names
         Target Platforms:
           - reference/formatters/index.md: All 50 supported AI agent targets
           - reference/formatters/claude.md: Claude Code output format, skills, agents, local files
@@ -294,6 +295,7 @@ nav:
           - Hook Management: reference/cli/hooks.md
           - Hook Runtime: reference/cli/hook.md
       - Configuration: reference/config.md
+      - Model Catalog: reference/models.md
   - Operations:
       - Upgrade 1.15 to 1.16: guides/upgrade-1-15-to-1-16.md
       - AI Tool Hooks: guides/hooks.md
