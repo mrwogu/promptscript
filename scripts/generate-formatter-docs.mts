@@ -8,9 +8,9 @@
  * Usage: pnpm docs:formatters [--check]
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { FEATURE_MATRIX, type ToolName } from '@promptscript/formatters';
 import {
   TARGET_CAPABILITIES,
@@ -236,7 +236,10 @@ function validateAgainstFeatureMatrix(formatters: FormatterInfo[]): void {
 function replaceGeneratedSection(content: string, id: string, replacement: string): string {
   const startMarker = `<!-- generated:start:${id} -->`;
   const endMarker = `<!-- generated:end:${id} -->`;
-  const pattern = new RegExp(`${escapeRegex(startMarker)}[\\s\\S]*?${escapeRegex(endMarker)}`, 'g');
+  const pattern = new RegExp(
+    String.raw`${escapeRegex(startMarker)}[\s\S]*?${escapeRegex(endMarker)}`,
+    'g'
+  );
 
   const newBlock = [
     startMarker,
@@ -256,7 +259,7 @@ function replaceGeneratedSection(content: string, id: string, replacement: strin
 }
 
 function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
 // ---------------------------------------------------------------------------

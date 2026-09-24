@@ -39,9 +39,9 @@ import {
   mkdirSync,
   existsSync,
   rmSync,
-} from 'fs';
-import { join, relative } from 'path';
-import { createHash } from 'crypto';
+} from 'node:fs';
+import { join, relative } from 'node:path';
+import { createHash } from 'node:crypto';
 
 // Import PromptScript packages (using swc-node for direct TypeScript imports)
 import { parse, type ParseResult } from '../packages/parser/src/index.js';

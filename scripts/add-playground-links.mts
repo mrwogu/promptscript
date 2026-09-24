@@ -13,8 +13,8 @@
  *   pnpm playground:links --clean  # Remove all playground links
  */
 
-import { readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
-import { join, relative, sep } from 'path';
+import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
 import LZString from 'lz-string';
 import {
   LATEST_SYNTAX_VERSION,
@@ -54,7 +54,7 @@ const EXPECT_ERROR_MARKER = '<!-- playground-link-expect-error -->';
 
 // Regex to match playground link blocks (for removal/update)
 const LINK_BLOCK_REGEX = new RegExp(
-  `\\n?${escapeRegex(LINK_MARKER_START)}[\\s\\S]*?${escapeRegex(LINK_MARKER_END)}\\n?`,
+  String.raw`\n?${escapeRegex(LINK_MARKER_START)}[\s\S]*?${escapeRegex(LINK_MARKER_END)}\n?`,
   'g'
 );
 
@@ -80,7 +80,7 @@ interface ProcessResult {
 }
 
 function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
 /**
