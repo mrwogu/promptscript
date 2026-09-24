@@ -6,6 +6,7 @@ import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plu
 import { extractHooks, generateGrokHooks, getHookCompatibilityWarnings } from '../hook-adapters.js';
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
+import { appendModelCompatibilityWarnings } from '../model-mapping.js';
 
 /**
  * Supported Grok Build output format versions.
@@ -47,7 +48,8 @@ export const GROK_VERSIONS: Readonly<
  * - `full`: AGENTS.md, CLAUDE.md, Claude rules, commands, skills, agents, and local memory
  *
  * Grok is fully compatible with Claude Code with zero configuration, so
- * delegated files are byte-for-byte identical to Claude formatter output.
+ * delegated files match Claude formatter output, except where
+ * models.profiles gives the two targets different model names.
  */
 export class GrokFormatter extends BaseFormatter {
   readonly name = 'grok';
@@ -55,7 +57,7 @@ export class GrokFormatter extends BaseFormatter {
   readonly description = 'Grok Build instructions (AGENTS.md + Claude delegation)';
   readonly defaultConvention = 'markdown';
 
-  private claudeFormatter = new ClaudeFormatter();
+  private claudeFormatter = new ClaudeFormatter('grok');
 
   static getSupportedVersions(): FormatterVersionMap {
     return GROK_VERSIONS;
@@ -89,6 +91,7 @@ export class GrokFormatter extends BaseFormatter {
 
     output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
     output = appendAgentCapabilityWarnings(output, ast, this.name, version);
+    output = appendModelCompatibilityWarnings(output, ast, this.name, version, options?.models);
     return {
       ...output,
       managedOutputFiles: [
@@ -131,7 +134,8 @@ export class GrokFormatter extends BaseFormatter {
     // which is the main file in Claude multifile mode
     const additionalFiles: FormatterOutput[] = [];
     if (claudeMultifile.path !== 'AGENTS.md') {
-      additionalFiles.push(claudeMultifile);
+      // Claude's warnings name the claude target; format() adds Grok's own.
+      additionalFiles.push({ ...claudeMultifile, warnings: undefined });
     }
     if (claudeMultifile.additionalFiles) {
       additionalFiles.push(...claudeMultifile.additionalFiles);
@@ -163,8 +167,9 @@ export class GrokFormatter extends BaseFormatter {
     const additionalFiles: FormatterOutput[] = [];
     if (claudeFull.path !== 'AGENTS.md') {
       // Flatten Claude's additional files below so excluded settings do not
-      // reappear through recursive compiler output collection.
-      additionalFiles.push({ ...claudeFull, additionalFiles: undefined });
+      // reappear through recursive compiler output collection. Claude's
+      // warnings name the claude target; format() adds Grok's own.
+      additionalFiles.push({ ...claudeFull, additionalFiles: undefined, warnings: undefined });
     }
     if (claudeFull.additionalFiles) {
       additionalFiles.push(

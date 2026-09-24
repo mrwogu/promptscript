@@ -1,0 +1,258 @@
+import {
+  TARGET_CAPABILITIES,
+  getAgentFieldStatus,
+  getModelCatalog,
+  getModelTargetScheme,
+  isKnownTarget,
+  mapModelToTarget,
+  type Block,
+  type CanonicalAgentField,
+  type KnownTarget,
+  type ModelProfile,
+  type ModelsConfig,
+  type Program,
+  type TargetModel,
+  type Value,
+} from '@promptscript/core';
+import type { FormatterOutput, FormatterWarning } from './types.js';
+
+/**
+ * Stable diagnostic code for model references a target cannot write.
+ *
+ * PS4003 covers whole agent fields a target drops; a model value the target
+ * cannot name gets its own code so CI can tell the two apart.
+ */
+const MODEL_COMPATIBILITY_CODE = 'PS4004';
+
+const AGENT_MODEL_FIELDS: readonly CanonicalAgentField[] = ['model', 'specModel'];
+
+// Targets whose skill files carry a native `model` field.
+const SKILL_MODEL_TARGETS: ReadonlySet<string> = new Set(['claude', 'grok']);
+
+// Parsed by hand, not by regex: a pattern like /^model:(?:[ \t]+(.*))?$/
+// has adjacent variable groups, which static analysis flags as
+// super-linear backtracking.
+const MODEL_KEY = 'model:';
+
+/**
+ * Whether a frontmatter line is the top-level `model` field; indented
+ * lines are nested keys, not the model.
+ */
+export function isFrontmatterModelLine(line: string): boolean {
+  if (!line.startsWith(MODEL_KEY)) return false;
+  const rest = line.slice(MODEL_KEY.length);
+  return rest === '' || rest.startsWith(' ') || rest.startsWith('\t');
+}
+
+/**
+ * Model value of a raw SKILL.md frontmatter, or undefined when the
+ * frontmatter has no top-level `model` line or uses a block scalar.
+ */
+export function extractRawFrontmatterModel(frontmatter: string): string | undefined {
+  for (const line of frontmatter.split(/\r?\n/)) {
+    if (!isFrontmatterModelLine(line)) continue;
+    const raw = line.slice(MODEL_KEY.length).trim();
+    if (!raw || raw.startsWith('|') || raw.startsWith('>')) return undefined;
+    // Strip one layer of matching quotes, sliced by hand: a backreference
+    // pattern like /^(['"])(.*)\1$/ is a polynomial-regex candidate.
+    const quote = raw[0];
+    if ((quote === "'" || quote === '"') && raw.at(-1) === quote && raw.length >= 2) {
+      return raw.slice(1, -1);
+    }
+    return raw;
+  }
+  return undefined;
+}
+
+/**
+ * Native model name for a target, or undefined when the field is omitted.
+ */
+export function toTargetModel(
+  model: string | undefined,
+  target: string,
+  models?: ModelsConfig
+): string | undefined {
+  if (model === undefined) return undefined;
+  return mapModelToTarget(model, target, getModelCatalog(models)).value;
+}
+
+function describeInvalidName(
+  label: string,
+  target: string,
+  profile: ModelProfile | undefined
+): Pick<FormatterWarning, 'message' | 'suggestion'> {
+  if (!profile) {
+    return {
+      message: `${label} has a line break or control character, so it is omitted.`,
+      suggestion: 'Write the model name on one line, without control characters.',
+    };
+  }
+  return {
+    message: `${label} maps to a name with a line break or control character on target "${target}", so it is omitted.`,
+    suggestion: `Remove line breaks and control characters from models.profiles.${profile.id} in promptscript.yaml.`,
+  };
+}
+
+function describeOmission(
+  label: string,
+  target: string,
+  mapped: TargetModel
+): Pick<FormatterWarning, 'message' | 'suggestion'> | undefined {
+  if (mapped.issue === 'invalid-name') return describeInvalidName(label, target, mapped.profile);
+  if (mapped.issue !== 'unsupported-provider' || !mapped.profile) return undefined;
+
+  const providers = (getModelTargetScheme(target)?.providers ?? [])
+    .map((provider) => `"${provider}"`)
+    .join(' or ');
+  return {
+    message: `${label} comes from provider "${mapped.profile.provider}", which target "${target}" cannot run, so it is omitted.`,
+    suggestion: `Use a model from provider ${providers}, or set models.profiles.${mapped.profile.id}.targets.${target} in promptscript.yaml.`,
+  };
+}
+
+function blockEntries(ast: Program, name: string): Array<[string, Record<string, Value>, Block]> {
+  const block = ast.blocks.find((candidate) => candidate.name === name);
+  if (!block) return [];
+  if (block.content.type !== 'ObjectContent' && block.content.type !== 'MixedContent') return [];
+  return Object.entries(block.content.properties).flatMap(([entryName, value]) =>
+    value && typeof value === 'object' && !Array.isArray(value)
+      ? [
+          [entryName, value as Record<string, Value>, block] as [
+            string,
+            Record<string, Value>,
+            Block,
+          ],
+        ]
+      : []
+  );
+}
+
+function emitsResource(target: KnownTarget, kind: 'agents' | 'skills', version: string): boolean {
+  return TARGET_CAPABILITIES[target].resources.some(
+    (resource) => resource.kind === kind && resource.versions.includes(version)
+  );
+}
+
+/**
+ * PS4004 warning for one model reference, or undefined when the target
+ * writes it.
+ */
+function modelReferenceWarning(
+  owner: string,
+  field: string,
+  value: Value | undefined,
+  block: Block,
+  target: string,
+  catalog: ReturnType<typeof getModelCatalog>
+): FormatterWarning | undefined {
+  if (typeof value !== 'string') return undefined;
+  // JSON quoting keeps a multi-line value on one line of the warning.
+  const described = describeOmission(
+    `${owner}: ${field} ${JSON.stringify(value.trim())}`,
+    target,
+    mapModelToTarget(value, target, catalog)
+  );
+  return (
+    described && {
+      code: MODEL_COMPATIBILITY_CODE,
+      ruleName: 'model-compatibility',
+      ...described,
+      location: block.loc,
+    }
+  );
+}
+
+function agentModelWarnings(
+  ast: Program,
+  target: KnownTarget,
+  version: string,
+  catalog: ReturnType<typeof getModelCatalog>
+): FormatterWarning[] {
+  if (!emitsResource(target, 'agents', version)) return [];
+  const fields = AGENT_MODEL_FIELDS.filter(
+    (field) => getAgentFieldStatus(target, field) !== 'not-supported'
+  );
+  return blockEntries(ast, 'agents').flatMap(([name, entry, block]) =>
+    fields.flatMap((field) => {
+      const warning = modelReferenceWarning(
+        `Agent "${name}"`,
+        field,
+        entry[field],
+        block,
+        target,
+        catalog
+      );
+      return warning ? [warning] : [];
+    })
+  );
+}
+
+// A SKILL.md frontmatter model is mapped too, unless `.prs` overrides it.
+function frontmatterModelWarning(
+  name: string,
+  entry: Record<string, Value>,
+  block: Block,
+  target: KnownTarget,
+  catalog: ReturnType<typeof getModelCatalog>
+): FormatterWarning | undefined {
+  if (entry['model'] !== undefined) return undefined;
+  const frontmatter =
+    typeof entry['__rawFrontmatter'] === 'string' ? entry['__rawFrontmatter'] : undefined;
+  const rawModel = frontmatter !== undefined ? extractRawFrontmatterModel(frontmatter) : undefined;
+  return rawModel === undefined
+    ? undefined
+    : modelReferenceWarning(`Skill "${name}"`, 'model', rawModel, block, target, catalog);
+}
+
+function skillModelWarnings(
+  ast: Program,
+  target: KnownTarget,
+  version: string,
+  catalog: ReturnType<typeof getModelCatalog>
+): FormatterWarning[] {
+  if (!SKILL_MODEL_TARGETS.has(target) || !emitsResource(target, 'skills', version)) return [];
+  return blockEntries(ast, 'skills').flatMap(([name, entry, block]) => {
+    const warnings = [
+      modelReferenceWarning(`Skill "${name}"`, 'model', entry['model'], block, target, catalog),
+      frontmatterModelWarning(name, entry, block, target, catalog),
+    ].flatMap((warning) => (warning ? [warning] : []));
+    return warnings;
+  });
+}
+
+/**
+ * Report model references a target omits: models from a provider it cannot
+ * run, and names with a line break or control character. Names missing from
+ * the catalog are written as-is, so they are left to PS041. Only agent and
+ * skill files the target version emits are checked; a skill's SKILL.md
+ * frontmatter model counts only when `.prs` does not override it.
+ */
+export function getModelCompatibilityWarnings(
+  ast: Program,
+  target: string,
+  version: string,
+  models?: ModelsConfig
+): FormatterWarning[] {
+  if (!isKnownTarget(target) || !getModelTargetScheme(target)) return [];
+
+  const catalog = getModelCatalog(models);
+  return [
+    ...agentModelWarnings(ast, target, version, catalog),
+    ...skillModelWarnings(ast, target, version, catalog),
+  ];
+}
+
+/**
+ * Append model compatibility warnings to a formatter output.
+ */
+export function appendModelCompatibilityWarnings(
+  output: FormatterOutput,
+  ast: Program,
+  target: string,
+  version: string,
+  models?: ModelsConfig
+): FormatterOutput {
+  const warnings = getModelCompatibilityWarnings(ast, target, version, models);
+  if (warnings.length === 0) return output;
+  return { ...output, warnings: [...(output.warnings ?? []), ...warnings] };
+}

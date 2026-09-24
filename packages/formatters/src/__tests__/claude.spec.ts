@@ -1,6 +1,9 @@
 import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
 import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { ClaudeFormatter, CLAUDE_VERSIONS } from '../formatters/claude.js';
+import { createAstBuilders } from './ast-builders.js';
+
+const { createAgentsProgram, createSkillsProgram } = createAstBuilders('test.prs');
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',
@@ -720,6 +723,81 @@ describe('ClaudeFormatter', () => {
       expect(skillFile?.content).toMatch(/^---\n.*custom-field: preserved.*\n---/s);
     });
 
+    it('should map the raw frontmatter model through the catalog', () => {
+      const ast = createSkillsProgram({
+        commit: {
+          description: 'Create git commits',
+          content: 'Instructions for commit skill...',
+          __rawFrontmatter:
+            "name: 'commit'\ndescription: 'Create git commits'\nmodel: claude-sonnet-4-5",
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/skills/commit/SKILL.md')
+      );
+      expect(skillFile?.content).toContain('model: claude-sonnet-4-5-20250929');
+    });
+
+    it('should drop a raw frontmatter model the target cannot run, with PS4004', () => {
+      const ast = createSkillsProgram({
+        commit: {
+          description: 'Create git commits',
+          content: 'Instructions for commit skill...',
+          __rawFrontmatter: "name: 'commit'\nmodel: gpt-5",
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/skills/commit/SKILL.md')
+      );
+      expect(skillFile).toBeDefined();
+      expect(skillFile?.content).not.toContain('model:');
+      expect(result.warnings?.filter((w) => w.code === 'PS4004')).toEqual([
+        expect.objectContaining({
+          message: expect.stringContaining('Skill "commit": model "gpt-5"'),
+        }),
+      ]);
+    });
+
+    it('should let a .prs model override the raw frontmatter one', () => {
+      const ast = createSkillsProgram({
+        commit: {
+          description: 'Create git commits',
+          model: 'opus',
+          content: 'Instructions for commit skill...',
+          __rawFrontmatter: "name: 'commit'\nmodel: gpt-5",
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/skills/commit/SKILL.md')
+      );
+      expect(skillFile?.content).toContain('model: opus');
+      expect(result.warnings?.some((w) => w.code === 'PS4004')).toBeFalsy();
+    });
+
+    it('should add a .prs model to raw frontmatter without one', () => {
+      const ast = createSkillsProgram({
+        commit: {
+          description: 'Create git commits',
+          model: 'sonnet',
+          content: 'Instructions for commit skill...',
+          __rawFrontmatter: "name: 'commit'\ncustom-field: kept",
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/skills/commit/SKILL.md')
+      );
+      expect(skillFile?.content).toContain('model: sonnet');
+      expect(skillFile?.content).toContain('custom-field: kept');
+    });
+
     it('should emit resource files alongside skill SKILL.md in full mode', () => {
       const ast: Program = {
         ...createMinimalProgram(),
@@ -1184,7 +1262,7 @@ describe('ClaudeFormatter', () => {
         expect(validAgent).toBeDefined();
       });
 
-      it('should validate model values', () => {
+      it('should write model names missing from the catalog as-is', () => {
         const ast: Program = {
           ...createMinimalProgram(),
           blocks: [
@@ -1196,7 +1274,7 @@ describe('ClaudeFormatter', () => {
                 properties: {
                   'test-agent': {
                     description: 'Test agent',
-                    model: 'invalid-model',
+                    model: 'opusplan',
                     content: 'Test content.',
                   },
                 },
@@ -1211,9 +1289,120 @@ describe('ClaudeFormatter', () => {
         const agentFile = result.additionalFiles?.find(
           (f) => f.path === '.claude/agents/test-agent.md'
         );
+        expect(agentFile?.content).toContain('model: opusplan');
+        expect(result.warnings?.some((w) => w.code === 'PS4004')).toBeFalsy();
+      });
+
+      it('should quote agent model names YAML cannot write bare', () => {
+        const ast = createAgentsProgram({
+          'gateway-agent': {
+            description: 'Agent pinned to a gateway model',
+            model: 'custom:team-a',
+            content: 'Test content.',
+          },
+        });
+
+        const result = formatter.format(ast, { version: 'full' });
+        const agentFile = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/gateway-agent.md'
+        );
+        expect(agentFile?.content).toContain("model: 'custom:team-a'");
+        expect(result.warnings?.some((w) => w.code === 'PS4004')).toBeFalsy();
+      });
+
+      it('should omit models from other providers with a PS4004 warning', () => {
+        const ast = createAgentsProgram({
+          'gpt-agent': {
+            description: 'Agent pinned to an OpenAI model',
+            model: 'gpt-6-sol',
+            content: 'Test content.',
+          },
+        });
+
+        const result = formatter.format(ast, { version: 'full' });
+        const agentFile = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/gpt-agent.md'
+        );
         expect(agentFile).toBeDefined();
-        // Invalid model should be omitted
         expect(agentFile?.content).not.toContain('model:');
+        expect(result.warnings?.filter((w) => w.code === 'PS4004')).toEqual([
+          expect.objectContaining({
+            message: expect.stringContaining('Agent "gpt-agent": model "gpt-6-sol"'),
+          }),
+        ]);
+      });
+
+      it('should not let a model with a line break add frontmatter keys', () => {
+        const ast = createAgentsProgram({
+          'split-agent': {
+            description: 'Agent with a multi-line model',
+            model: 'opus\ntools: Bash',
+            content: 'Test content.',
+          },
+        });
+
+        const result = formatter.format(ast, { version: 'full' });
+        const agentFile = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/split-agent.md'
+        );
+        expect(agentFile).toBeDefined();
+        expect(agentFile?.content).not.toContain('model:');
+        expect(agentFile?.content).not.toContain('tools: Bash');
+        expect(result.warnings?.filter((w) => w.code === 'PS4004')).toEqual([
+          expect.objectContaining({
+            message: expect.stringContaining('has a line break or control character'),
+          }),
+        ]);
+      });
+
+      it('should map pinned models in agents and skills to Claude model ids', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  reviewer: {
+                    description: 'Reviewer',
+                    model: 'Claude Opus 4.5',
+                    content: 'Review.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+            {
+              type: 'Block',
+              name: 'skills',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  deploy: {
+                    description: 'Deploy to production',
+                    model: 'sonnet-5',
+                    content: 'Deploy.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'full' });
+        const agentFile = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/reviewer.md'
+        );
+        const skillFile = result.additionalFiles?.find(
+          (f) => f.path === '.claude/skills/deploy/SKILL.md'
+        );
+        expect(agentFile?.content).toContain('model: claude-opus-4-5-20251101');
+        expect(skillFile?.content).toContain('model: claude-sonnet-5');
       });
 
       it('should validate permissionMode values', () => {

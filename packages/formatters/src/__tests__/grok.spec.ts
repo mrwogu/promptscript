@@ -3,6 +3,9 @@ import { GrokFormatter } from '../formatters/grok.js';
 import { ClaudeFormatter } from '../formatters/claude.js';
 import type { Program } from '@promptscript/core';
 import type { FormatterOutput } from '../types.js';
+import { createAstBuilders } from './ast-builders.js';
+
+const { createSkillsProgram } = createAstBuilders('test.prs');
 
 function createLoc() {
   return { file: 'test.prs', line: 1, column: 0 };
@@ -343,6 +346,75 @@ describe('GrokFormatter', () => {
       const result = formatter.format(program, { version: 'full' });
       expect(result.additionalFiles).toBeDefined();
       expect(result.additionalFiles!.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('model mapping', () => {
+    function createAgentProgram(model: string): Program {
+      return {
+        ...createTestProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: { description: 'Reviewer agent', model, content: 'Review code.' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+    }
+
+    it('should apply grok model names from models.profiles to delegated agent files', () => {
+      const result = formatter.format(createAgentProgram('gpt-6-sol'), {
+        version: 'full',
+        models: { profiles: { 'gpt-6-sol': { targets: { grok: 'gpt-6-sol-bridge' } } } },
+      });
+
+      const agent = result.additionalFiles?.find((f) => f.path === '.claude/agents/reviewer.md');
+      expect(agent?.content).toContain('model: gpt-6-sol-bridge');
+      expect(result.warnings?.some((w) => w.code === 'PS4004')).toBeFalsy();
+    });
+
+    it('should omit models from other providers with a grok PS4004 warning', () => {
+      const result = formatter.format(createAgentProgram('gpt-6-sol'), { version: 'full' });
+
+      const agent = result.additionalFiles?.find((f) => f.path === '.claude/agents/reviewer.md');
+      expect(agent).toBeDefined();
+      expect(agent?.content).not.toContain('model:');
+      expect(result.warnings?.filter((w) => w.code === 'PS4004')).toEqual([
+        expect.objectContaining({ message: expect.stringContaining('target "grok"') }),
+      ]);
+    });
+
+    it.each(['multifile', 'full'])(
+      'should keep Claude warnings off delegated files in %s mode',
+      (version) => {
+        const result = formatter.format(createAgentProgram('gpt-6-sol'), { version });
+
+        expect(result.additionalFiles?.filter((f) => f.warnings !== undefined)).toEqual([]);
+      }
+    );
+
+    it('should map the raw frontmatter model of delegated skill files', () => {
+      const ast = createSkillsProgram({
+        commit: {
+          description: 'Create git commits',
+          content: 'Instructions for commit skill...',
+          __rawFrontmatter: "name: 'commit'\nmodel: claude-sonnet-4-5",
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/skills/commit/SKILL.md')
+      );
+      expect(skillFile?.content).toContain('model: claude-sonnet-4-5-20250929');
     });
   });
 });

@@ -22,6 +22,7 @@ import {
 } from '../mcp-helpers.js';
 import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
 import { resolveSourceSectionTitle } from '../section-title-resolver.js';
+import { toTargetModel } from '../model-mapping.js';
 
 /**
  * Supported Factory AI format versions.
@@ -566,7 +567,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
   // Droid File Generation (Factory-specific)
   // ============================================================
 
-  protected override extractAgents(ast: Program): FactoryDroidConfig[] {
+  protected override extractAgents(ast: Program, options?: FormatOptions): FactoryDroidConfig[] {
     const agentsBlock = this.findBlock(ast, 'agents');
     if (!agentsBlock) return [];
 
@@ -575,26 +576,46 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
 
     for (const [name, value] of Object.entries(props)) {
       if (!this.isSafeAgentName(name)) continue;
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
-        const obj = value as Record<string, Value>;
-        const description = obj['description'] ? this.valueToString(obj['description']) : '';
-        if (!description) continue; // description is required
-
-        droids.push({
-          name: this.getNativeAgentName(ast, name),
-          description,
-          content: obj['content'] ? this.valueToString(obj['content']) : '',
-          model: obj['model'] ? this.valueToString(obj['model']) : undefined,
-          reasoningEffort: this.parseReasoningEffort(obj['reasoningEffort']),
-          specModel: obj['specModel'] ? this.valueToString(obj['specModel']) : undefined,
-          specReasoningEffort: this.parseReasoningEffort(obj['specReasoningEffort']),
-          tools: this.parseDroidTools(obj['tools']),
-          mcpServers: this.parseMcpServerNames(obj['mcpServers']),
-        });
-      }
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+      const droid = this.parseDroid(ast, name, value as Record<string, Value>, options);
+      if (droid) droids.push(droid);
     }
 
     return droids;
+  }
+
+  /**
+   * Build one droid config, or undefined when it has no description.
+   */
+  private parseDroid(
+    ast: Program,
+    name: string,
+    obj: Record<string, Value>,
+    options?: FormatOptions
+  ): FactoryDroidConfig | undefined {
+    const description = obj['description'] ? this.valueToString(obj['description']) : '';
+    if (!description) return undefined; // description is required
+
+    return {
+      name: this.getNativeAgentName(ast, name),
+      description,
+      content: obj['content'] ? this.valueToString(obj['content']) : '',
+      model: this.droidModel(obj['model'], options),
+      reasoningEffort: this.parseReasoningEffort(obj['reasoningEffort']),
+      specModel: this.droidModel(obj['specModel'], options),
+      specReasoningEffort: this.parseReasoningEffort(obj['specReasoningEffort']),
+      tools: this.parseDroidTools(obj['tools']),
+      mcpServers: this.parseMcpServerNames(obj['mcpServers']),
+    };
+  }
+
+  /**
+   * Map a model reference to a Factory model ID through the model catalog.
+   * Names missing from the catalog pass through unchanged.
+   */
+  private droidModel(value: Value | undefined, options?: FormatOptions): string | undefined {
+    if (!value) return undefined;
+    return toTargetModel(this.valueToString(value), this.name, options?.models);
   }
 
   protected override generateAgentFile(config: MarkdownAgentConfig): FormatterOutput {
@@ -610,7 +631,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     }
 
     if (droidConfig.model) {
-      lines.push(`model: ${droidConfig.model}`);
+      lines.push(`model: ${this.yamlString(droidConfig.model)}`);
     }
 
     if (droidConfig.reasoningEffort) {
@@ -618,7 +639,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     }
 
     if (droidConfig.specModel) {
-      lines.push(`specModel: ${droidConfig.specModel}`);
+      lines.push(`specModel: ${this.yamlString(droidConfig.specModel)}`);
     }
 
     if (droidConfig.specReasoningEffort) {
@@ -1036,7 +1057,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     }
 
     if (this.config.hasAgents) {
-      const agents = this.extractAgents(ast);
+      const agents = this.extractAgents(ast, options);
       for (const agent of agents) {
         additionalFiles.push(this.generateAgentFile(agent));
       }

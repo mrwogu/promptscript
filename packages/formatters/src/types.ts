@@ -1,5 +1,6 @@
 import type {
   CanonicalProgram,
+  ModelsConfig,
   OutputConvention,
   OutputArtifact,
   PrettierMarkdownOptions,
@@ -65,6 +66,9 @@ export interface FormatOptions {
 
   /** Full target configuration, passed through from promptscript.yaml. */
   targetConfig?: import('@promptscript/core').TargetConfig;
+
+  /** Model catalog settings from promptscript.yaml, used to map agent models. */
+  models?: ModelsConfig;
 }
 
 /**

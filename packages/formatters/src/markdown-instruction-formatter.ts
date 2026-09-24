@@ -8,6 +8,7 @@ import {
   getTargetHookCapabilityWarnings,
 } from './hook-capability-warnings.js';
 import { appendAgentCapabilityWarnings } from './agent-capability-warnings.js';
+import { appendModelCompatibilityWarnings } from './model-mapping.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -211,8 +212,15 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     const agentOutput = appendAgentCapabilityWarnings(warnedOutput, ast, this.name, version, {
       blockWarningHandled: (this.config.unsupportedBlocks ?? []).includes('agents'),
     });
+    const modelOutput = appendModelCompatibilityWarnings(
+      agentOutput,
+      ast,
+      this.name,
+      version,
+      options?.models
+    );
 
-    return appendTargetHookCapabilityWarnings(agentOutput, ast, this.name, version);
+    return appendTargetHookCapabilityWarnings(modelOutput, ast, this.name, version);
   }
 
   protected hasEnabledHooks(ast: Program): boolean {
@@ -386,7 +394,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     }
 
     if (this.config.hasAgents) {
-      const agents = this.extractAgents(ast);
+      const agents = this.extractAgents(ast, options);
       for (const agent of agents) {
         additionalFiles.push(this.generateAgentFile(agent));
       }
@@ -566,7 +574,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
   // Agent Extraction & File Generation
   // ============================================================
 
-  protected extractAgents(ast: Program): MarkdownAgentConfig[] {
+  protected extractAgents(ast: Program, _options?: FormatOptions): MarkdownAgentConfig[] {
     const agentsBlock = this.findBlock(ast, 'agents');
     if (!agentsBlock) return [];
 
@@ -575,21 +583,30 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     const nativeNames = this.getNativeAgentNameMap(ast);
 
     for (const [name, value] of Object.entries(props)) {
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
-        if (!this.isSafeAgentName(name)) continue;
-        const obj = value as Record<string, Value>;
-        const description = obj['description'] ? this.valueToString(obj['description']) : '';
-        if (!description) continue; // description is required
-
-        agents.push({
-          name: nativeNames.get(name) ?? name,
-          description,
-          content: obj['content'] ? this.valueToString(obj['content']) : '',
-        });
-      }
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+      if (!this.isSafeAgentName(name)) continue;
+      const agent = this.parseAgent(nativeNames.get(name) ?? name, value as Record<string, Value>);
+      if (agent) agents.push(agent);
     }
 
     return agents;
+  }
+
+  /**
+   * Build one agent config, or undefined when it has no description.
+   */
+  private parseAgent(
+    nativeName: string,
+    obj: Record<string, Value>
+  ): MarkdownAgentConfig | undefined {
+    const description = obj['description'] ? this.valueToString(obj['description']) : '';
+    if (!description) return undefined; // description is required
+
+    return {
+      name: nativeName,
+      description,
+      content: obj['content'] ? this.valueToString(obj['content']) : '',
+    };
   }
 
   protected generateAgentFile(config: MarkdownAgentConfig): FormatterOutput {

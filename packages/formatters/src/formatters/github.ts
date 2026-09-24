@@ -18,6 +18,7 @@ import {
 } from '../hook-adapters.js';
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
+import { appendModelCompatibilityWarnings, toTargetModel } from '../model-mapping.js';
 import { resolveSectionTitle, resolveSourceSectionTitle } from '../section-title-resolver.js';
 
 /**
@@ -111,9 +112,9 @@ interface GitHubAgentConfig {
   description: string;
   /** Tools the agent can use */
   tools?: string[];
-  /** AI model to use (e.g., 'gpt-4o', 'claude-3.5-sonnet') */
+  /** Copilot model name (e.g., 'Claude Sonnet 4.5', 'GPT-5') */
   model?: string;
-  /** Model for Specification/planning mode (mixed models) */
+  /** Copilot model name for Specification/planning mode (mixed models) */
   specModel?: string;
   /** System prompt content */
   content: string;
@@ -165,36 +166,6 @@ const TOOL_NAME_MAPPING: Record<string, string> = {
   // Todo tools
   TodoWrite: 'todo',
   TodoRead: 'todo',
-};
-
-/**
- * Mapping from PromptScript/Claude Code model names to GitHub Copilot model names.
- *
- * GitHub Copilot uses full model names (e.g., "Claude Sonnet 4") while Claude Code
- * uses short aliases (e.g., "sonnet").
- *
- * @see https://code.visualstudio.com/docs/copilot/customization/custom-agents
- */
-const MODEL_NAME_MAPPING: Record<string, string> = {
-  // Claude models - default aliases map to latest versions (4.5)
-  sonnet: 'Claude Sonnet 4.5',
-  opus: 'Claude Opus 4.5',
-  haiku: 'Claude Haiku 4.5',
-  // Explicit version mappings
-  'sonnet-4': 'Claude Sonnet 4',
-  'sonnet-4.5': 'Claude Sonnet 4.5',
-  'opus-4': 'Claude Opus 4',
-  'opus-4.5': 'Claude Opus 4.5',
-  'haiku-4': 'Claude Haiku 4',
-  'haiku-4.5': 'Claude Haiku 4.5',
-  // OpenAI models (pass through if already in correct format)
-  'gpt-4o': 'GPT-4o',
-  'gpt-4.1': 'GPT-4.1',
-  'gpt-5': 'GPT-5',
-  'gpt-5-mini': 'GPT-5 mini',
-  // Special values
-  inherit: '', // Empty string means omit the model property
-  auto: 'Auto',
 };
 
 /**
@@ -255,6 +226,7 @@ export class GitHubFormatter extends BaseFormatter {
     }
     output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
     output = appendAgentCapabilityWarnings(output, ast, this.name, version);
+    output = appendModelCompatibilityWarnings(output, ast, this.name, version, options?.models);
 
     const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
     const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
@@ -389,7 +361,7 @@ export class GitHubFormatter extends BaseFormatter {
     }
 
     // Generate custom agent files (.github/agents/)
-    const customAgents = this.extractCustomAgents(ast);
+    const customAgents = this.extractCustomAgents(ast, options);
     for (const agent of customAgents) {
       additionalFiles.push(this.generateCustomAgentFile(agent));
     }
@@ -866,7 +838,7 @@ export class GitHubFormatter extends BaseFormatter {
    *
    * @see https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents
    */
-  private extractCustomAgents(ast: Program): GitHubAgentConfig[] {
+  private extractCustomAgents(ast: Program, options?: FormatOptions): GitHubAgentConfig[] {
     const agentsBlock = this.findBlock(ast, 'agents');
     if (!agentsBlock) return [];
 
@@ -877,39 +849,53 @@ export class GitHubFormatter extends BaseFormatter {
     const availableMcpServers = mcpServersBlock ? extractMcpServers(mcpServersBlock) : [];
 
     for (const [name, value] of Object.entries(props)) {
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
-        if (!this.isSafeAgentName(name)) continue;
-        const obj = value as Record<string, Value>;
-        const description = obj['description'] ? this.valueToString(obj['description']) : '';
-        if (!description) continue; // description is required
-
-        const handoffs = this.extractHandoffs(obj['handoffs']).map((handoff) => ({
-          ...handoff,
-          agent: this.getNativeAgentName(ast, handoff.agent),
-        }));
-        const mcpServersValue = obj['mcpServers'];
-        const mcpServerNames = Array.isArray(mcpServersValue)
-          ? mcpServersValue.filter(
-              (serverName): serverName is string => typeof serverName === 'string'
-            )
-          : [];
-        const mcpServers = availableMcpServers.filter((server) =>
-          mcpServerNames.includes(server.name)
-        );
-        agents.push({
-          name: nativeNames.get(name) ?? name,
-          description,
-          tools: this.parseToolsArray(obj['tools']),
-          model: obj['model'] ? this.valueToString(obj['model']) : undefined,
-          specModel: obj['specModel'] ? this.valueToString(obj['specModel']) : undefined,
-          handoffs: handoffs.length > 0 ? handoffs : undefined,
-          mcpServers: mcpServers.length > 0 ? mcpServers : undefined,
-          content: obj['content'] ? this.valueToString(obj['content']) : '',
-        });
-      }
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+      if (!this.isSafeAgentName(name)) continue;
+      const agent = this.parseCustomAgent(
+        ast,
+        nativeNames.get(name) ?? name,
+        value as Record<string, Value>,
+        availableMcpServers,
+        options
+      );
+      if (agent) agents.push(agent);
     }
 
     return agents;
+  }
+
+  /**
+   * Build one custom agent config, or undefined when it has no description.
+   */
+  private parseCustomAgent(
+    ast: Program,
+    nativeName: string,
+    obj: Record<string, Value>,
+    availableMcpServers: McpServerDefinition[],
+    options?: FormatOptions
+  ): GitHubAgentConfig | undefined {
+    const description = obj['description'] ? this.valueToString(obj['description']) : '';
+    if (!description) return undefined; // description is required
+
+    const handoffs = this.extractHandoffs(obj['handoffs']).map((handoff) => ({
+      ...handoff,
+      agent: this.getNativeAgentName(ast, handoff.agent),
+    }));
+    const mcpServersValue = obj['mcpServers'];
+    const mcpServerNames = Array.isArray(mcpServersValue)
+      ? mcpServersValue.filter((serverName): serverName is string => typeof serverName === 'string')
+      : [];
+    const mcpServers = availableMcpServers.filter((server) => mcpServerNames.includes(server.name));
+    return {
+      name: nativeName,
+      description,
+      tools: this.parseToolsArray(obj['tools']),
+      model: this.copilotModel(obj['model'], options),
+      specModel: this.copilotModel(obj['specModel'], options),
+      handoffs: handoffs.length > 0 ? handoffs : undefined,
+      mcpServers: mcpServers.length > 0 ? mcpServers : undefined,
+      content: obj['content'] ? this.valueToString(obj['content']) : '',
+    };
   }
 
   /**
@@ -982,21 +968,14 @@ export class GitHubFormatter extends BaseFormatter {
   }
 
   /**
-   * Map a model name from PromptScript/Claude Code format to GitHub Copilot format.
+   * Map a model reference to its Copilot model name through the model catalog.
+   * Names missing from the catalog pass through, so Copilot names work as-is.
    *
-   * @returns The mapped model name, or undefined if the model should be omitted (e.g., "inherit")
+   * @returns The Copilot model name, or undefined when the model is omitted (e.g., "inherit")
    */
-  private mapModelName(model: string | undefined): string | undefined {
-    if (!model) return undefined;
-
-    const mapped = MODEL_NAME_MAPPING[model.toLowerCase()];
-
-    // If mapped to empty string, omit the model property
-    if (mapped === '') return undefined;
-
-    // If we have a mapping, use it; otherwise pass through as-is
-    // (allows users to specify GitHub Copilot model names directly)
-    return mapped ?? model;
+  private copilotModel(value: Value | undefined, options?: FormatOptions): string | undefined {
+    if (!value) return undefined;
+    return toTargetModel(this.valueToString(value), this.name, options?.models);
   }
 
   /**
@@ -1018,16 +997,13 @@ export class GitHubFormatter extends BaseFormatter {
       lines.push(`tools: [${toolsArray}]`);
     }
 
-    // Map model name to GitHub Copilot format
-    const mappedModel = this.mapModelName(config.model);
-    if (mappedModel) {
-      lines.push(`model: ${mappedModel}`);
+    if (config.model) {
+      lines.push(`model: ${this.yamlString(config.model)}`);
     }
 
-    // Map spec mode model name (mixed models)
-    const mappedSpecModel = this.mapModelName(config.specModel);
-    if (mappedSpecModel) {
-      lines.push(`specModel: ${mappedSpecModel}`);
+    // Spec mode model name (mixed models)
+    if (config.specModel) {
+      lines.push(`specModel: ${this.yamlString(config.specModel)}`);
     }
 
     if (config.handoffs && config.handoffs.length > 0) {

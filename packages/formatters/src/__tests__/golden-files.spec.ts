@@ -2,8 +2,8 @@ import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { normalizeProgram, KNOWN_TARGETS } from '@promptscript/core';
-import type { Program, SourceLocation } from '@promptscript/core';
+import { getModelCatalog, normalizeProgram, KNOWN_TARGETS } from '@promptscript/core';
+import type { ModelProfile, Program, SourceLocation } from '@promptscript/core';
 import { GitHubFormatter } from '../formatters/github.js';
 import { formatProgram } from '../formatter-adapter.js';
 import { BUILTIN_FORMATTERS } from '../builtin-formatters.js';
@@ -81,6 +81,13 @@ const createLoc = (): SourceLocation => ({
   line: 1,
   column: 1,
 });
+
+// Floating aliases follow the newest catalog release, so tests read it from the catalog.
+function latestModel(family: string): ModelProfile {
+  const profile = getModelCatalog().getLatest(family);
+  if (!profile) throw new Error(`No ${family} release in the model catalog`);
+  return profile;
+}
 
 /**
  * Create the canonical AST matching .promptscript/project.prs
@@ -1069,8 +1076,10 @@ describe('Golden Files Tests', () => {
       );
       // Tools should be in inline YAML array format with GitHub Copilot canonical names
       expect(codeReviewerAgent?.content).toContain("tools: ['read', 'search', 'execute']");
-      // Model should be mapped from 'sonnet' to 'Claude Sonnet 4.5' (latest version)
-      expect(codeReviewerAgent?.content).toContain('model: Claude Sonnet 4.5');
+      // 'sonnet' maps to the Copilot name of the newest Sonnet release
+      expect(codeReviewerAgent?.content).toContain(
+        `model: ${latestModel('claude-sonnet').displayName}`
+      );
 
       const debuggerAgent = result.additionalFiles?.find(
         (f) => f.path === '.github/agents/debugger.md'
@@ -1293,7 +1302,8 @@ describe('Golden Files Tests', () => {
       expect(codeReviewerDroid?.content).toContain(
         'description: Reviews code for quality and best practices'
       );
-      expect(codeReviewerDroid?.content).toContain('model: sonnet');
+      // Factory takes model ids, so 'sonnet' maps to the newest Sonnet release
+      expect(codeReviewerDroid?.content).toContain(`model: ${latestModel('claude-sonnet').apiId}`);
 
       const debuggerDroid = result.additionalFiles?.find(
         (f) => f.path === '.factory/droids/debugger.md'

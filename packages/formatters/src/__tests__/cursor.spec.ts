@@ -2,6 +2,9 @@ import { describe, expect, it, beforeEach } from 'vitest';
 import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { CursorFormatter, CURSOR_VERSIONS } from '../formatters/cursor.js';
 import { CodexFormatter } from '../formatters/codex.js';
+import { createAstBuilders } from './ast-builders.js';
+
+const { createAgentsProgram } = createAstBuilders('test.prs');
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',
@@ -1690,6 +1693,61 @@ describe('CursorFormatter', () => {
       expect(reviewerFile?.content).toContain('Code reviewer');
       expect(testerFile).toBeDefined();
       expect(testerFile?.content).toContain('Test writer');
+    });
+
+    it('should map subagent models to Cursor model ids', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Reviewer',
+                  content: 'Review.',
+                  model: 'Claude Sonnet 4.5',
+                },
+                tester: {
+                  description: 'Tester',
+                  content: 'Test.',
+                  model: 'claude-opus-5[effort=high]',
+                },
+                helper: { description: 'Helper', content: 'Help.', model: 'inherit' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const agent = (name: string): string | undefined =>
+        result.additionalFiles?.find((f) => f.path === `.cursor/agents/${name}.md`)?.content;
+
+      // Cursor gets the dateless id, not the dated API snapshot
+      expect(agent('reviewer')).toContain('model: claude-sonnet-4-5\n');
+      expect(agent('tester')).toContain('model: claude-opus-5[effort=high]');
+      expect(agent('helper')).toContain('model: inherit');
+    });
+
+    it('should quote agent model names YAML cannot write bare', () => {
+      const ast = createAgentsProgram({
+        gateway: {
+          description: 'Gateway agent',
+          content: 'Help.',
+          model: 'custom:team-a',
+        },
+      });
+      const result = formatter.format(ast, { version: 'full' });
+
+      const agent = result.additionalFiles?.find((f) => f.path === '.cursor/agents/gateway.md');
+      expect(agent?.content).toContain("model: 'custom:team-a'");
     });
 
     it('should emit both skills and subagents in full mode', () => {

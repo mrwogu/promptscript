@@ -1,9 +1,9 @@
 ---
-# promptscript-generated: 2026-05-30T23:22:42.939Z | source: .promptscript/project.prs | target: github
+# promptscript-generated: 2026-09-23T18:39:16.977Z | source: .promptscript/project.prs | target: github
 name: prs-expert
 description: PromptScript language expert. Helps with syntax, compilation issues, and migrations.
 tools: ['read', 'search', 'execute', 'web']
-model: Claude Sonnet 4.5
+model: Claude Sonnet 5
 ---
 
 You are a PromptScript language expert.
