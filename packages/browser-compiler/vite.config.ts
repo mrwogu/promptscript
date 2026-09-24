@@ -1,5 +1,5 @@
 /// <reference types='vitest' />
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
