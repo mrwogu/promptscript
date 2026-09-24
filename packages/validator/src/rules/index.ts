@@ -40,6 +40,7 @@ import { validPlugins } from './valid-plugins.js';
 import { validSectionHeaders } from './valid-section-headers.js';
 import { validBlockShape } from './valid-block-shape.js';
 import { importExcludes } from './import-excludes.js';
+import { validModelReference } from './valid-model-reference.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -111,6 +112,7 @@ export { validPlugins } from './valid-plugins.js';
 export { validSectionHeaders } from './valid-section-headers.js';
 export { validBlockShape } from './valid-block-shape.js';
 export { importExcludes } from './import-excludes.js';
+export { validModelReference } from './valid-model-reference.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -185,6 +187,8 @@ export const allRules: ValidationRule[] = [
   agentNamespaces,
   // Import validation excludes bound to lockfile commits (PS040)
   importExcludes,
+  // Valid model references (PS041)
+  validModelReference,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,

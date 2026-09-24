@@ -1,6 +1,7 @@
 import type {
   CanonicalProgram,
   Logger,
+  ModelsConfig,
   Program,
   SourceLocation,
   PolicyDefinition,
@@ -141,6 +142,11 @@ export interface ValidatorConfig {
    * lockfile (registry cache, vendor directory, reference roots).
    */
   importRoots?: ImportRoot[];
+  /**
+   * Model catalog settings from promptscript.yaml (`models`). Custom profiles
+   * extend the catalog; `supported` enables model set checks.
+   */
+  models?: ModelsConfig;
 }
 
 /**
