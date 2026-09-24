@@ -19,6 +19,7 @@ const mockUpdateConfig = vi.fn();
 const mockVerifyReferenceHashes = vi.fn().mockResolvedValue([]);
 const mockRegistryCacheConstructor = vi.fn();
 const mockResolverConstructor = vi.fn();
+const mockValidatorConstructor = vi.fn();
 const mockInvalidate = vi.fn();
 const mockClearCache = vi.fn();
 
@@ -52,6 +53,10 @@ vi.mock('@promptscript/resolver', () => ({
 
 vi.mock('@promptscript/validator', () => ({
   Validator: class MockValidator {
+    constructor(options: unknown) {
+      mockValidatorConstructor(options);
+    }
+
     validate = mockValidate;
     updateConfig = mockUpdateConfig;
   },
@@ -222,6 +227,23 @@ describe('Compiler', () => {
 
       const compiler = createCompiler(options);
       expect(compiler).toBeInstanceOf(Compiler);
+    });
+
+    it('should pass models to the validator unless it has its own', () => {
+      const models = { supported: ['sonnet'] };
+      const validatorModels = { supported: ['opus'] };
+
+      createTestCompiler({ models });
+      createTestCompiler({ models, validator: { models: validatorModels } });
+
+      expect(mockValidatorConstructor).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ models })
+      );
+      expect(mockValidatorConstructor).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ models: validatorModels })
+      );
     });
 
     it('should preserve cwd registry lookup defaults in compile', async () => {
@@ -635,6 +657,43 @@ describe('Compiler', () => {
       expect(output).toBeDefined();
       expect(output?.content).toContain('github output');
       expect(output?.content).toContain('test-project');
+    });
+
+    it('should pass models to formatters', async () => {
+      const models = { profiles: { 'team-model': { provider: 'acme' } } };
+      const formatter = createMockFormatter('github');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const result = await createTestCompiler({ formatters: [formatter], models }).compile(
+        './test.prs'
+      );
+
+      expect(result.success).toBe(true);
+      expect(formatter.format).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ models })
+      );
+    });
+
+    it('should give formatters the models the validator uses', async () => {
+      const validatorModels = { profiles: { 'team-model': { provider: 'acme' } } };
+      const formatter = createMockFormatter('github');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      await createTestCompiler({
+        formatters: [formatter],
+        models: { supported: ['sonnet'] },
+        validator: { models: validatorModels },
+      }).compile('./test.prs');
+
+      expect(formatter.format).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ models: validatorModels })
+      );
     });
 
     it('keys outputs by normalized paths', async () => {

@@ -5,6 +5,7 @@ import {
   portableRealpathSync,
   type Logger,
   type LockfileDependency,
+  type ModelsConfig,
   type OutputPlanCandidate,
   type OutputPlan,
   type PSError,
@@ -261,12 +262,20 @@ export class Compiler {
   private readonly validator: Validator;
   private readonly loadedFormatters: LoadedFormatter[];
   private readonly logger: Logger;
+  // Validation and formatting share one catalog, so PS041 and the target
+  // model mapping agree about every name.
+  private readonly models?: ModelsConfig;
   private readonly resolvedDependencies = new Map<string, Set<string>>();
 
   constructor(private readonly options: CompilerOptions) {
     this.logger = options.logger ?? noopLogger;
+    this.models = options.validator?.models ?? options.models;
     this.resolver = new Resolver({ ...options.resolver, logger: this.logger });
-    this.validator = new Validator({ ...options.validator, logger: this.logger });
+    this.validator = new Validator({
+      ...options.validator,
+      models: this.models,
+      logger: this.logger,
+    });
     this.loadedFormatters = this.loadFormatters(options.formatters);
 
     this.logger.debug(`Compiler initialized with ${this.loadedFormatters.length} formatters`);
@@ -1260,6 +1269,7 @@ export class Compiler {
       version: config?.version,
       prettier: prettierOptions,
       targetConfig: config,
+      models: this.models,
     };
 
     const conventionName = config?.convention;
@@ -1432,6 +1442,10 @@ export interface CompileOptions {
    */
   prettier?: CompilerOptions['prettier'];
   /**
+   * Model catalog settings (`models` in promptscript.yaml).
+   */
+  models?: ModelsConfig;
+  /**
    * Content of the PromptScript SKILL.md to inject into compilation output.
    */
   skillContent?: string;
@@ -1489,6 +1503,7 @@ export async function compile(
     formatters,
     customConventions: options.customConventions,
     prettier: options.prettier,
+    models: options.models,
     skillContent: options.skillContent,
   });
 

@@ -4,6 +4,7 @@ import type {
   CanonicalProgram,
   FactoryRulesMode,
   Logger,
+  ModelsConfig,
   OutputConvention,
   OutputArtifact,
   OutputPlan,
@@ -56,6 +57,9 @@ export interface FormatOptions {
 
   /** Full target configuration, passed through from promptscript.yaml. */
   targetConfig?: TargetConfig;
+
+  /** Model catalog settings from promptscript.yaml, used to map agent models. */
+  models?: ModelsConfig;
 }
 
 /**
@@ -157,6 +161,12 @@ export interface CompilerOptions {
   customConventions?: Record<string, OutputConvention>;
   /** Prettier formatting options for markdown output */
   prettier?: PrettierMarkdownOptions;
+  /**
+   * Model catalog settings (`models` in promptscript.yaml). Formatters use
+   * them to map agent models; the validator uses them for PS041. When
+   * `validator.models` is set, both use that instead.
+   */
+  models?: ModelsConfig;
   /** Logger for verbose/debug output */
   logger?: Logger;
   /**
