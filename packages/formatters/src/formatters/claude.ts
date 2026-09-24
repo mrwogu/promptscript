@@ -10,6 +10,12 @@ import {
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
 import {
+  appendModelCompatibilityWarnings,
+  extractRawFrontmatterModel,
+  isFrontmatterModelLine,
+  toTargetModel,
+} from '../model-mapping.js';
+import {
   findMcpServersBlock,
   extractMcpServers,
   serializeMcpServersToJsonString,
@@ -99,11 +105,6 @@ interface ClaudeCommandConfig {
 }
 
 /**
- * Valid model values for Claude agents.
- */
-type ClaudeAgentModel = 'sonnet' | 'opus' | 'haiku' | 'inherit';
-
-/**
  * Valid permission modes for Claude agents.
  */
 type ClaudeAgentPermissionMode =
@@ -123,8 +124,8 @@ interface ClaudeAgentConfig {
   tools?: string[];
   /** Tools to deny (removed from inherited or specified list) */
   disallowedTools?: string[];
-  /** Model to use: sonnet, opus, haiku, or inherit (defaults to sonnet) */
-  model?: ClaudeAgentModel;
+  /** Model alias (sonnet, opus, haiku), full model ID, or inherit */
+  model?: string;
   /** Permission mode for the subagent */
   permissionMode?: ClaudeAgentPermissionMode;
   /** Skills to preload into the subagent's context at startup */
@@ -170,6 +171,15 @@ export class ClaudeFormatter extends BaseFormatter {
   readonly defaultConvention = 'markdown';
 
   /**
+   * @param modelTarget - Target whose model names agent and skill files use.
+   *   Grok writes its agent and skill files through this formatter, so its
+   *   `models.profiles` names must apply to them.
+   */
+  constructor(private readonly modelTarget: 'claude' | 'grok' = 'claude') {
+    super();
+  }
+
+  /**
    * Get supported versions for this formatter.
    */
   static getSupportedVersions(): typeof CLAUDE_VERSIONS {
@@ -202,6 +212,7 @@ export class ClaudeFormatter extends BaseFormatter {
 
     output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
     output = appendAgentCapabilityWarnings(output, ast, this.name, version);
+    output = appendModelCompatibilityWarnings(output, ast, this.name, version, options?.models);
     output = {
       ...output,
       managedOutputFiles: [
@@ -303,7 +314,7 @@ export class ClaudeFormatter extends BaseFormatter {
     }
 
     // Generate agent files
-    const agents = this.extractAgents(ast);
+    const agents = this.extractAgents(ast, options);
     for (const agent of agents) {
       additionalFiles.push(this.generateAgentFile(agent));
     }
@@ -623,7 +634,7 @@ export class ClaudeFormatter extends BaseFormatter {
           userInvocable: obj['userInvocable'] === true,
           disableModelInvocation: obj['disableModelInvocation'] === true,
           argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
-          model: obj['model'] ? this.valueToString(obj['model']) : undefined,
+          model: this.claudeModel(obj['model'], options),
           content: obj['content'] ? this.valueToString(obj['content']) : '',
           resources:
             obj['resources'] && Array.isArray(obj['resources'])
@@ -644,6 +655,38 @@ export class ClaudeFormatter extends BaseFormatter {
   }
 
   /**
+   * Apply the model field to raw SKILL.md frontmatter.
+   *
+   * A `.prs` model wins over the frontmatter one; without it, the
+   * frontmatter value is mapped through the model catalog for this target.
+   * Unmappable values drop the line (PS4004 reports why), and frontmatter
+   * without a model line gains one from `.prs`. Empty and block-scalar
+   * values are left untouched.
+   */
+  private applyRawFrontmatterModel(
+    rawFrontmatter: string,
+    prsModel: string | undefined,
+    options?: FormatOptions
+  ): string {
+    const lines = rawFrontmatter.split(/\r?\n/);
+    const modelIndex = lines.findIndex((line) => isFrontmatterModelLine(line));
+    if (modelIndex < 0) {
+      return prsModel === undefined
+        ? rawFrontmatter
+        : `${rawFrontmatter}\nmodel: ${this.yamlString(prsModel)}`;
+    }
+    const rawModel = extractRawFrontmatterModel(rawFrontmatter);
+    if (rawModel === undefined) return rawFrontmatter;
+    const mapped = prsModel ?? this.claudeModel(rawModel, options);
+    if (mapped === undefined) {
+      lines.splice(modelIndex, 1);
+    } else {
+      lines[modelIndex] = `model: ${this.yamlString(mapped)}`;
+    }
+    return lines.join('\n');
+  }
+
+  /**
    * Generate a .claude/skills/<name>/SKILL.md file.
    */
   private generateClaudeSkillFile(
@@ -655,7 +698,7 @@ export class ClaudeFormatter extends BaseFormatter {
     // YAML frontmatter (use quotes compatible with Prettier)
     lines.push('---');
     if (config.rawFrontmatter) {
-      lines.push(config.rawFrontmatter);
+      lines.push(this.applyRawFrontmatterModel(config.rawFrontmatter, config.model, options));
     } else {
       lines.push(`name: '${config.name}'`);
       // Use double quotes if description contains apostrophe, single quotes otherwise
@@ -683,7 +726,7 @@ export class ClaudeFormatter extends BaseFormatter {
         lines.push(`argument-hint: '${config.argumentHint}'`);
       }
       if (config.model) {
-        lines.push(`model: ${config.model}`);
+        lines.push(`model: ${this.yamlString(config.model)}`);
       }
     }
     lines.push('---');
@@ -803,7 +846,7 @@ export class ClaudeFormatter extends BaseFormatter {
   /**
    * Extract agent configurations from @agents block.
    */
-  private extractAgents(ast: Program): ClaudeAgentConfig[] {
+  private extractAgents(ast: Program, options?: FormatOptions): ClaudeAgentConfig[] {
     const agentsBlock = this.findBlock(ast, 'agents');
     if (!agentsBlock) return [];
 
@@ -815,7 +858,7 @@ export class ClaudeFormatter extends BaseFormatter {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         if (!this.isSafeAgentName(name)) continue;
         const obj = value as Record<string, Value>;
-        const agent = this.parseAgentConfig(nativeNames.get(name) ?? name, obj);
+        const agent = this.parseAgentConfig(nativeNames.get(name) ?? name, obj, options);
         if (agent) {
           agents.push(agent);
         }
@@ -828,7 +871,11 @@ export class ClaudeFormatter extends BaseFormatter {
   /**
    * Parse a single agent configuration from object properties.
    */
-  private parseAgentConfig(name: string, obj: Record<string, Value>): ClaudeAgentConfig | null {
+  private parseAgentConfig(
+    name: string,
+    obj: Record<string, Value>,
+    options?: FormatOptions
+  ): ClaudeAgentConfig | null {
     const description = obj['description'] ? this.valueToString(obj['description']) : '';
     if (!description) return null; // description is required
 
@@ -837,7 +884,7 @@ export class ClaudeFormatter extends BaseFormatter {
       description,
       tools: this.parseStringArray(obj['tools']),
       disallowedTools: this.parseStringArray(obj['disallowedTools']),
-      model: this.parseAgentModel(obj['model']),
+      model: this.claudeModel(obj['model'], options),
       permissionMode: this.parsePermissionMode(obj['permissionMode']),
       skills: this.parseStringArray(obj['skills']),
       maxTurns:
@@ -862,13 +909,13 @@ export class ClaudeFormatter extends BaseFormatter {
   }
 
   /**
-   * Parse model value, validating it's a known model.
+   * Map a model reference to a Claude Code model value through the model
+   * catalog. Floating aliases, inherit, and names missing from the catalog
+   * stay as written; models from other providers are omitted (PS4004).
    */
-  private parseAgentModel(value: Value | undefined): ClaudeAgentModel | undefined {
+  private claudeModel(value: Value | undefined, options?: FormatOptions): string | undefined {
     if (!value) return undefined;
-    const str = this.valueToString(value);
-    const validModels: ClaudeAgentModel[] = ['sonnet', 'opus', 'haiku', 'inherit'];
-    return validModels.includes(str as ClaudeAgentModel) ? (str as ClaudeAgentModel) : undefined;
+    return toTargetModel(this.valueToString(value), this.modelTarget, options?.models);
   }
 
   /**
@@ -925,7 +972,7 @@ export class ClaudeFormatter extends BaseFormatter {
     }
 
     if (config.model) {
-      lines.push(`model: ${config.model}`);
+      lines.push(`model: ${this.yamlString(config.model)}`);
     }
 
     if (config.permissionMode) {

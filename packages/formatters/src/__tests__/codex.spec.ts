@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { CodexFormatter } from '../formatters/codex.js';
 import type { Program, Value } from '@promptscript/core';
+import { createAstBuilders } from './ast-builders.js';
+
+const { createAgentsProgram } = createAstBuilders('test.prs');
 
 function createLoc() {
   return { file: 'test.prs', line: 1, column: 0 };
@@ -739,6 +742,25 @@ describe('CodexFormatter', () => {
       );
       expect(agentToml).toBeDefined();
       expect(agentToml!.content).toContain('model = "gpt-4"');
+    });
+
+    it('should map agent models to OpenAI ids and omit other providers', () => {
+      const program = createAgentsProgram({
+        planner: { description: 'Planner', content: 'Plan.', model: 'GPT-6 Sol' },
+        reviewer: { description: 'Reviewer', content: 'Review.', model: 'sonnet' },
+      });
+      const result = formatter.format(program, { version: 'multifile' });
+      const toml = (name: string): string | undefined =>
+        result.additionalFiles?.find((f) => f.path === `.codex/agents/${name}.toml`)?.content;
+
+      expect(toml('planner')).toContain('model = "gpt-6-sol"');
+      expect(toml('reviewer')).toBeDefined();
+      expect(toml('reviewer')).not.toContain('model =');
+      expect(result.warnings?.filter((w) => w.code === 'PS4004')).toEqual([
+        expect.objectContaining({
+          message: expect.stringContaining('Agent "reviewer": model "sonnet"'),
+        }),
+      ]);
     });
 
     it('should handle multiple agents', () => {

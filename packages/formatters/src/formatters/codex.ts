@@ -1,4 +1,4 @@
-import type { Program, Value } from '@promptscript/core';
+import type { ModelsConfig, Program, Value } from '@promptscript/core';
 import {
   MarkdownInstructionFormatter,
   type MarkdownAgentConfig,
@@ -11,6 +11,7 @@ import {
 } from '../hook-adapters.js';
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
+import { toTargetModel } from '../model-mapping.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -186,7 +187,8 @@ function agentMcpServerLines(
 function serializeAgentToml(
   agentName: string,
   agent: Record<string, Value>,
-  resolvedMcpServers?: ReadonlyMap<string, Record<string, unknown>>
+  resolvedMcpServers?: ReadonlyMap<string, Record<string, unknown>>,
+  models?: ModelsConfig
 ): string {
   const lines: string[] = [];
 
@@ -201,10 +203,11 @@ function serializeAgentToml(
   // developer_instructions from content (per architecture decision: content is sole source)
   lines.push(...agentInstructionsLines(agent['content']));
 
-  // model from agent config (optional)
+  // model from agent config (optional), mapped to an OpenAI model id
   const model = agent['model'];
-  if (typeof model === 'string') {
-    lines.push(`model = "${escapeTomlString(model)}"`);
+  const codexModel = typeof model === 'string' ? toTargetModel(model, 'codex', models) : undefined;
+  if (codexModel) {
+    lines.push(`model = "${escapeTomlString(codexModel)}"`);
   }
 
   // model_reasoning_effort from reasoningEffort
@@ -492,7 +495,12 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
         if (!isValidAgentName(agentName)) continue;
         const agent = agentValue as Record<string, Value>;
         const nativeAgentName = nativeNames.get(agentName) ?? agentName;
-        const toml = serializeAgentToml(nativeAgentName, agent, resolvedMcpServers);
+        const toml = serializeAgentToml(
+          nativeAgentName,
+          agent,
+          resolvedMcpServers,
+          options?.models
+        );
         extraFiles.push({
           path: `.codex/agents/${nativeAgentName}.toml`,
           content: toml,

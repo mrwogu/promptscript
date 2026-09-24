@@ -1,6 +1,10 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { GitHubFormatter, GITHUB_VERSIONS } from '../formatters/github.js';
+import { latestModel } from './latest-model.js';
+import { createAstBuilders } from './ast-builders.js';
+
+const { createAgentsProgram } = createAstBuilders('test.prs');
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',
@@ -1012,6 +1016,24 @@ describe('GitHubFormatter', () => {
       expect(agentFile?.content).toContain('model: GPT-4o');
     });
 
+    it('should quote agent model names YAML cannot write bare', () => {
+      const ast = createAgentsProgram({
+        'gateway-agent': {
+          description: 'Agent pinned to a gateway model',
+          model: 'custom:team-a',
+          specModel: '@team/b',
+          content: 'You are a smart agent.',
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/gateway-agent.md')
+      );
+      expect(agentFile?.content).toContain("model: 'custom:team-a'");
+      expect(agentFile?.content).toContain("specModel: '@team/b'");
+    });
+
     it('should map Claude Code model names to GitHub Copilot format', () => {
       const ast: Program = {
         ...createMinimalProgram(),
@@ -1040,8 +1062,7 @@ describe('GitHubFormatter', () => {
         f.path.includes('.github/agents/reviewer.md')
       );
       expect(agentFile).toBeDefined();
-      // 'sonnet' should be mapped to 'Claude Sonnet 4.5' (latest version)
-      expect(agentFile?.content).toContain('model: Claude Sonnet 4.5');
+      expect(agentFile?.content).toContain(`model: ${latestModel('claude-sonnet').displayName}`);
     });
 
     it('should omit model property when set to inherit', () => {
@@ -1110,13 +1131,48 @@ describe('GitHubFormatter', () => {
         f.path.includes('.github/agents/opus-agent.md')
       );
       expect(opusAgent).toBeDefined();
-      expect(opusAgent?.content).toContain('model: Claude Opus 4.5');
+      expect(opusAgent?.content).toContain(`model: ${latestModel('claude-opus').displayName}`);
 
       const haikuAgent = result.additionalFiles?.find((f) =>
         f.path.includes('.github/agents/haiku-agent.md')
       );
       expect(haikuAgent).toBeDefined();
-      expect(haikuAgent?.content).toContain('model: Claude Haiku 4.5');
+      expect(haikuAgent?.content).toContain(`model: ${latestModel('claude-haiku').displayName}`);
+    });
+
+    it('should use per-target model names from models.profiles', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Reviewer on a model Copilot names differently',
+                  model: 'claude-opus-5-5',
+                  content: 'Reviews code.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'full',
+        models: {
+          profiles: { 'claude-opus-5-5': { targets: { github: 'Claude Opus 5.5 (Preview)' } } },
+        },
+      });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/reviewer.md')
+      );
+      expect(agentFile?.content).toContain('model: Claude Opus 5.5 (Preview)');
     });
 
     it('should pass through unknown model names as-is', () => {
@@ -1131,7 +1187,7 @@ describe('GitHubFormatter', () => {
               properties: {
                 custom: {
                   description: 'Agent with custom model',
-                  model: 'Gemini 2.5 Pro',
+                  model: 'Acme Coder 2 (Preview)',
                   content: 'Uses custom model.',
                 },
               },
@@ -1148,7 +1204,7 @@ describe('GitHubFormatter', () => {
       );
       expect(agentFile).toBeDefined();
       // Unknown model names should pass through unchanged
-      expect(agentFile?.content).toContain('model: Gemini 2.5 Pro');
+      expect(agentFile?.content).toContain('model: Acme Coder 2 (Preview)');
     });
 
     it('should generate agent file with specModel (mixed models)', () => {
@@ -1180,8 +1236,8 @@ describe('GitHubFormatter', () => {
         f.path.includes('.github/agents/planner.md')
       );
       expect(agentFile).toBeDefined();
-      expect(agentFile?.content).toContain('model: Claude Sonnet 4.5');
-      expect(agentFile?.content).toContain('specModel: Claude Opus 4.5');
+      expect(agentFile?.content).toContain(`model: ${latestModel('claude-sonnet').displayName}`);
+      expect(agentFile?.content).toContain(`specModel: ${latestModel('claude-opus').displayName}`);
     });
 
     it('should map specModel names to GitHub Copilot format', () => {
@@ -1212,7 +1268,7 @@ describe('GitHubFormatter', () => {
       const agentFile = result.additionalFiles?.find((f) =>
         f.path.includes('.github/agents/planner.md')
       );
-      expect(agentFile?.content).toContain('model: Claude Sonnet 4.5');
+      expect(agentFile?.content).toContain(`model: ${latestModel('claude-sonnet').displayName}`);
       expect(agentFile?.content).toContain('specModel: GPT-4o');
     });
 
@@ -1244,7 +1300,7 @@ describe('GitHubFormatter', () => {
       const agentFile = result.additionalFiles?.find((f) =>
         f.path.includes('.github/agents/planner.md')
       );
-      expect(agentFile?.content).toContain('model: Claude Opus 4.5');
+      expect(agentFile?.content).toContain(`model: ${latestModel('claude-opus').displayName}`);
       expect(agentFile?.content).not.toContain('specModel:');
     });
 

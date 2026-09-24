@@ -1,6 +1,10 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { FactoryFormatter, FACTORY_VERSIONS } from '../formatters/factory.js';
+import { createAstBuilders } from './ast-builders.js';
+import { latestModel } from './latest-model.js';
+
+const { createAgentsProgram } = createAstBuilders('test.prs');
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',
@@ -2616,6 +2620,23 @@ describe('FactoryFormatter', () => {
       expect(droid?.content).toContain('specReasoningEffort: high');
     });
 
+    it('should quote droid model names YAML cannot write bare', () => {
+      const ast = createAgentsProgram({
+        planner: {
+          description: 'Planning specialist on a gateway model',
+          model: 'custom:team-a',
+          specModel: '@team/b',
+          content: 'You plan features.',
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
+      expect(droid?.content).toContain("model: 'custom:team-a'");
+      expect(droid?.content).toContain("specModel: '@team/b'");
+    });
+
     it('should generate droid with specModel only (no specReasoningEffort)', () => {
       const ast: Program = {
         ...createMinimalProgram(),
@@ -2675,8 +2696,26 @@ describe('FactoryFormatter', () => {
       const result = formatter.format(ast, { version: 'full' });
 
       const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
-      expect(droid?.content).toContain('specModel: opus');
+      expect(droid?.content).toContain(`specModel: ${latestModel('claude-opus').apiId}`);
       expect(droid?.content).not.toContain('specReasoningEffort:');
+    });
+
+    it('should map model references to Factory model ids', () => {
+      const ast = createAgentsProgram({
+        planner: {
+          description: 'Pinned droid',
+          model: 'Claude Sonnet 4.5',
+          specModel: 'custom:team-model',
+          content: 'Plan things.',
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
+      expect(droid?.content).toContain('model: claude-sonnet-4-5-20250929');
+      // Unknown names pass through, quoted so the colon stays inside the value
+      expect(droid?.content).toContain("specModel: 'custom:team-model'");
     });
 
     it('should ignore invalid reasoningEffort values', () => {

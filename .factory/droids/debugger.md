@@ -1,8 +1,8 @@
 ---
-# promptscript-generated: 2026-05-30T23:22:42.936Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-09-23T18:39:16.977Z | source: .promptscript/project.prs | target: factory
 name: debugger
 description: Debugs errors, test failures, and unexpected behavior. Knows PromptScript architecture.
-model: sonnet
+model: claude-sonnet-5
 tools: ['Read', 'Edit', 'Bash', 'Grep', 'Glob']
 ---
 

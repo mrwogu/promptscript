@@ -10,6 +10,7 @@ import {
 } from '../hook-adapters.js';
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
+import { appendModelCompatibilityWarnings, toTargetModel } from '../model-mapping.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -221,6 +222,7 @@ export class CursorFormatter extends BaseFormatter {
 
     output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
     output = appendAgentCapabilityWarnings(output, ast, this.name, version);
+    output = appendModelCompatibilityWarnings(output, ast, this.name, version, options?.models);
     return {
       ...output,
       managedOutputFiles: [
@@ -433,7 +435,11 @@ export class CursorFormatter extends BaseFormatter {
           agentLines.push(`name: ${nativeAgentName}`);
           if (description) agentLines.push(`description: ${JSON.stringify(description)}`);
           const model = obj['model'];
-          if (typeof model === 'string') agentLines.push(`model: ${model}`);
+          const cursorModel =
+            typeof model === 'string'
+              ? toTargetModel(model, this.name, options?.models)
+              : undefined;
+          if (cursorModel) agentLines.push(`model: ${this.yamlString(cursorModel)}`);
 
           // Agent-level mcpServers (references to top-level @mcpServers names)
           const agentMcp = obj['mcpServers'];
