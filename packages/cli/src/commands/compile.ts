@@ -676,6 +676,9 @@ function printWarnings(warnings: CompileResult['warnings']): void {
     console.log(`Warnings (${warnings.length}):`);
     for (const warn of warnings) {
       ConsoleOutput.warning(`${warn.ruleId}: ${warn.message}`);
+      if (warn.suggestion) {
+        ConsoleOutput.muted(`suggestion: ${warn.suggestion}`);
+      }
     }
   }
 }
@@ -910,6 +913,7 @@ async function compileCommandWithResult(
       formatters: targets,
       customConventions: config.customConventions,
       prettier: prettierOptions,
+      models: config.models,
       logger,
       skillContent,
       ignoreHashes: options.ignoreHashes,

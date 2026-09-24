@@ -254,6 +254,7 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       formatters: targets,
       customConventions: config.customConventions,
       prettier: prettierOptions,
+      models: config.models,
       logger,
       skillContent,
     });

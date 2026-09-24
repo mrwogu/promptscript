@@ -1740,6 +1740,38 @@ command = "echo old # promptscript-generated:owned"
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Test warning 1'));
     });
 
+    it('should print the suggestion under a warning that has one', async () => {
+      const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'content')]]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [
+          {
+            ruleId: 'PS041',
+            message: 'Agent "old-reviewer": model "claude-opus-4" is retired',
+            severity: 'warning',
+            suggestion: 'Switch to claude-opus-5-5 (Claude Opus 5.5).',
+          },
+          { ruleId: 'WARN002', message: 'Warning without a suggestion', severity: 'warning' },
+        ],
+        errors: [],
+      });
+
+      mockExistsSync.mockImplementation((path: string) => {
+        if (path.includes('project.prs')) return true;
+        return false;
+      });
+
+      await compileCommand({}, mockServices);
+
+      const printed = consoleSpy.mock.calls.map((call: unknown[]) => String(call[0]));
+      const suggestions = printed.filter((line: string) => line.includes('suggestion:'));
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions[0]).toContain('suggestion: Switch to claude-opus-5-5 (Claude Opus 5.5).');
+    });
+
     it('should not print warnings section when no warnings', async () => {
       const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'content')]]);
 
