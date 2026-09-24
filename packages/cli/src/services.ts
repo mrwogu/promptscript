@@ -10,8 +10,8 @@ export interface FileSystem {
   readdir: typeof readdir;
   existsSync: typeof existsSync;
   readFileSync: typeof readFileSync;
-  rename?: typeof import('fs/promises').rename;
-  rm?: typeof import('fs/promises').rm;
+  rename?: typeof import('node:fs/promises').rename;
+  rm?: typeof import('node:fs/promises').rm;
   lstat?: (path: PathLike) => Promise<Stats>;
   realpath?: (path: PathLike) => Promise<string>;
 }
