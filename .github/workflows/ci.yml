@@ -81,6 +81,14 @@ jobs:
             exit 1
           fi
 
+      - name: Model Docs Drift Check
+        if: matrix.node-version == '25.x'
+        run: |
+          if ! pnpm docs:models:check; then
+            echo "::error::Generated model catalog docs are out of date. Run 'pnpm docs:models' locally and commit the changes."
+            exit 1
+          fi
+
       - name: Validate documentation examples
         if: matrix.node-version == '25.x'
         run: pnpm docs:validate:check
