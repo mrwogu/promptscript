@@ -63,6 +63,17 @@ Complete reference documentation for PromptScript.
   <div class="ref-item__arrow">→</div>
 </a>
 
+<a href="models/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--blue">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3 5h18v2H3zm0 6h18v2H3zm0 6h12v2H3z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Model Catalog</h3>
+    <p>Built-in model profiles, floating aliases, and the model name each target writes.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
+
 <a href="formatters/" class="ref-item">
   <div class="ref-item__icon ref-item__icon--green">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M17 7h-4v2h4c1.65 0 3 1.35 3 3s-1.35 3-3 3h-4v2h4c2.76 0 5-2.24 5-5s-2.24-5-5-5zm-6 8H7c-1.65 0-3-1.35-3-3s1.35-3 3-3h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-2zm-3-4h8v2H8z"/></svg>

@@ -161,7 +161,9 @@ below cannot drift from what formatters actually emit:
 
 GitHub transformation examples: `tools` maps PromptScript and Claude Code tool
 names to Copilot aliases (`Grep` and `Glob` both become `search`), and `model`
-maps common Claude and OpenAI aliases (`sonnet` becomes `Claude Sonnet 4.5`).
+uses Copilot model names (`sonnet` becomes the newest Sonnet release, such as
+`Claude Sonnet 5`). Other targets keep the `model` field name but also get
+their native model names, see [Models](#models).
 Codex transformation examples: `content` becomes `developer_instructions`,
 `reasoningEffort` becomes `model_reasoning_effort`, and `skills` becomes the
 `skills.config` array.
@@ -191,6 +193,34 @@ Targets with native agent systems receive dedicated files. Common examples:
 
 Targets without a native agent contract still receive project instructions through their primary
 output. Check [Target Platforms](target-platforms.md) before depending on target-specific fields.
+
+## Models
+
+`model` and `specModel` values resolve against a built-in model catalog, and
+each target gets the model name it expects. Claude Code keeps floating aliases
+such as `sonnet`, GitHub Copilot gets display names such as `Claude Sonnet 5`,
+and Factory AI, Codex, and Cursor get model ids. The floating aliases `opus`,
+`sonnet`, `haiku`, and `fable` follow the newest release of their family in
+the catalog. Names the catalog does not know are written unchanged, unless
+the target spells them its own way: GitHub Copilot writes `auto` as `Auto`.
+
+A target that cannot run the model's provider, such as Codex with a Claude
+model, omits the field and reports `PS4004` during compilation. The same
+happens to a name with a line break or control character.
+
+PS041 reports agents pinned to deprecated or retired models, with the suggested
+replacement. When `models.supported` lists the models your instructions are
+written and tested for, PS041 also reports agents pinned to other models:
+
+```yaml
+models:
+  supported: [opus, sonnet, gpt-5.3-codex]
+```
+
+The [Model Catalog](../reference/models.md) lists every built-in model, the
+current release behind each floating alias, and what each target writes. See
+[Configuration: models](../reference/config.md#models) for adding models that
+are not in the built-in catalog yet.
 
 ## Agents and Skills
 

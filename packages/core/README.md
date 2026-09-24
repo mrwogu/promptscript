@@ -32,6 +32,7 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 | **canonical-ast**     | Immutable canonical AST factories and legacy compatibility projections             |
 | **block-merge**       | Shared inheritance and import block merge policies                                 |
 | **types/config**      | Configuration schema (`PromptScriptConfig`, input/output/registry types)           |
+| **types/models**      | Model configuration and profile types (`ModelsConfig`, `ModelProfile`)             |
 | **types/constants**   | Shared constants (block names, syntax version)                                     |
 | **types/convention**  | Convention type definitions for formatter output                                   |
 | **types/manifest**    | Registry manifest types                                                            |
@@ -47,6 +48,8 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 | **utils/version**     | Semantic version comparison (`parseVersion`)                                       |
 | **utils/levenshtein** | Edit-distance utilities (`levenshteinDistance`, `findClosestMatch`)                |
 | **syntax-versions**   | Syntax version registry and lookup helpers (see API reference below)               |
+| **model-profiles**    | Built-in model profiles (`MODEL_PROFILES`) with lifecycle status and successors    |
+| **model-catalog**     | Model catalog, alias resolution, model sets, and per-target model name mapping     |
 | **logger**            | `Logger` interface for verbose/debug output                                        |
 | **template**          | Template interpolation for parameterized skills                                    |
 

@@ -280,8 +280,11 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
   - Score effectiveness
 
 - [ ] **Model version targeting**
-  - Different outputs for Claude Sonnet 4 vs Opus 4
-  - Feature flags per model version
+  - [x] Model catalog with lifecycle status, successors, and per-target model names (`models` in `promptscript.yaml`)
+  - [x] Supported model set, with PS041 warnings for deprecated, retired, and out-of-set models
+  - [ ] `prs models` commands - list and show catalog models, upgrade model references in `.prs` files
+  - [ ] Model-specific guidance rules - emphasis, redundant reasoning prompts, instruction budget
+  - [ ] Different outputs per model version (conditional content variants)
 
 ### 11. Documentation & Community
 
