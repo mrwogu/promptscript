@@ -413,6 +413,7 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
             ...config.validation,
             policies: config.policies,
           },
+          models: config.models,
           formatters: [],
         });
 
