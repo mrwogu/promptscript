@@ -72,7 +72,7 @@ function stripYamlComment(value: string): string {
  * scalars like `model:x` do not count.
  */
 function splitYamlMapping(line: string): [string, string] | undefined {
-  if (line[0] === ' ' || line[0] === '\t') return undefined;
+  if (line.startsWith(' ') || line.startsWith('\t')) return undefined;
   const colon = line.indexOf(':');
   if (colon < 0) return undefined;
   const rest = line.slice(colon + 1);
@@ -85,8 +85,7 @@ function splitYamlMapping(line: string): [string, string] | undefined {
  * included; indented lines are nested keys, not the model.
  */
 export function isFrontmatterModelLine(line: string): boolean {
-  const mapping = splitYamlMapping(line);
-  return mapping !== undefined && mapping[0] === MODEL_KEY;
+  return splitYamlMapping(line)?.[0] === MODEL_KEY;
 }
 
 /**
