@@ -108,6 +108,18 @@ describe('extractRawFrontmatterModel', () => {
     expect(extractRawFrontmatterModel('model: "sonnet"')).toBe('sonnet');
   });
 
+  it('strips trailing comments and reads quoted keys', () => {
+    expect(extractRawFrontmatterModel('model: gpt-5 # pinned')).toBe('gpt-5');
+    expect(extractRawFrontmatterModel("model: 'gpt-5' # pinned")).toBe('gpt-5');
+    expect(extractRawFrontmatterModel('model: # only a comment')).toBeUndefined();
+    expect(extractRawFrontmatterModel('model: gpt-5#no-space')).toBe('gpt-5#no-space');
+    expect(extractRawFrontmatterModel('model: "gpt-5 # not a comment"')).toBe(
+      'gpt-5 # not a comment'
+    );
+    expect(extractRawFrontmatterModel("'model': gpt-5")).toBe('gpt-5');
+    expect(extractRawFrontmatterModel('"model": gpt-5')).toBe('gpt-5');
+  });
+
   it('ignores nested keys, block scalars, empty values, and missing lines', () => {
     expect(extractRawFrontmatterModel('  model: nested')).toBeUndefined();
     expect(extractRawFrontmatterModel('model: |\n  sonnet')).toBeUndefined();
