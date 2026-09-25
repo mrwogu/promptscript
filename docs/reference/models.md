@@ -114,13 +114,13 @@ before the provider retires it.
 | `claude-opus-4-8`   | Claude Opus 4.8   | `claude-opus-4-8`            | `opus-4.8`                               | legacy                | -          | `claude-opus-5`     |
 | `claude-opus-5`     | Claude Opus 5     | `claude-opus-5`              | `opus-5`                                 | legacy                | 2026-07-24 | `claude-opus-5-5`   |
 | `claude-opus-5-5`   | Claude Opus 5.5   | `claude-opus-5-5`            | `opus-5.5`                               | current               | 2026-09-22 | -                   |
-| `claude-3-5-sonnet` | Claude Sonnet 3.5 | `claude-3-5-sonnet-20241022` | `sonnet-3.5`, `claude-3-5-sonnet-latest` | retired on 2025-10-28 | 2024-10-22 | `claude-3-7-sonnet` |
-| `claude-3-7-sonnet` | Claude Sonnet 3.7 | `claude-3-7-sonnet-20250219` | `sonnet-3.7`, `claude-3-7-sonnet-latest` | retired on 2026-02-19 | 2025-02-24 | `claude-sonnet-4`   |
+| `claude-3-5-sonnet` | Claude 3.5 Sonnet | `claude-3-5-sonnet-20241022` | `sonnet-3.5`, `claude-3-5-sonnet-latest` | retired on 2025-10-28 | 2024-10-22 | `claude-3-7-sonnet` |
+| `claude-3-7-sonnet` | Claude 3.7 Sonnet | `claude-3-7-sonnet-20250219` | `sonnet-3.7`, `claude-3-7-sonnet-latest` | retired on 2026-02-19 | 2025-02-24 | `claude-sonnet-4`   |
 | `claude-sonnet-4`   | Claude Sonnet 4   | `claude-sonnet-4-20250514`   | `sonnet-4`                               | retired on 2026-06-15 | 2025-05-22 | `claude-sonnet-4-5` |
 | `claude-sonnet-4-5` | Claude Sonnet 4.5 | `claude-sonnet-4-5-20250929` | `sonnet-4.5`                             | legacy                | 2025-09-29 | `claude-sonnet-4-6` |
 | `claude-sonnet-4-6` | Claude Sonnet 4.6 | `claude-sonnet-4-6`          | `sonnet-4.6`                             | legacy                | -          | `claude-sonnet-5`   |
 | `claude-sonnet-5`   | Claude Sonnet 5   | `claude-sonnet-5`            | `sonnet-5`                               | current               | 2026-06-30 | -                   |
-| `claude-3-5-haiku`  | Claude Haiku 3.5  | `claude-3-5-haiku-20241022`  | `haiku-3.5`, `claude-3-5-haiku-latest`   | retired on 2026-02-19 | 2024-10-22 | `claude-haiku-4-5`  |
+| `claude-3-5-haiku`  | Claude 3.5 Haiku  | `claude-3-5-haiku-20241022`  | `haiku-3.5`, `claude-3-5-haiku-latest`   | retired on 2026-02-19 | 2024-10-22 | `claude-haiku-4-5`  |
 | `claude-haiku-4-5`  | Claude Haiku 4.5  | `claude-haiku-4-5-20251001`  | `haiku-4.5`                              | current               | 2025-10-15 | -                   |
 | `claude-fable-5`    | Claude Fable 5    | `claude-fable-5`             | `fable-5`                                | legacy                | 2026-06-09 | `claude-fable-5-1`  |
 | `claude-fable-5-1`  | Claude Fable 5.1  | `claude-fable-5-1`           | `fable-5.1`                              | current               | 2026-09-01 | -                   |

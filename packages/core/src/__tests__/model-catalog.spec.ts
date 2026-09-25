@@ -499,6 +499,16 @@ describe('built-in model profiles', () => {
     ]);
   });
 
+  it('keep the model names the Claude 3.x era used', () => {
+    const names = ['claude-3-5-sonnet', 'claude-3-7-sonnet', 'claude-3-5-haiku'];
+
+    expect(names.map((name) => mapModelToTarget(name, 'github', models).value)).toEqual([
+      'Claude 3.5 Sonnet',
+      'Claude 3.7 Sonnet',
+      'Claude 3.5 Haiku',
+    ]);
+  });
+
   it('pin dated snapshots for older Claude releases', () => {
     expect(mapModelToTarget('claude-sonnet-4-5', 'claude', models).value).toBe(
       'claude-sonnet-4-5-20250929'
