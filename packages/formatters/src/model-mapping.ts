@@ -29,37 +29,78 @@ const AGENT_MODEL_FIELDS: readonly CanonicalAgentField[] = ['model', 'specModel'
 // Targets whose skill files carry a native `model` field.
 const SKILL_MODEL_TARGETS: ReadonlySet<string> = new Set(['claude', 'grok']);
 
-// Parsed by hand, not by regex: a pattern like /^model:(?:[ \t]+(.*))?$/
+// Parsed by hand, not by regex: a pattern like /^'?model'?:(?:[ \t]+(.*))?$/
 // has adjacent variable groups, which static analysis flags as
 // super-linear backtracking.
-const MODEL_KEY = 'model:';
+const MODEL_KEY = 'model';
 
 /**
- * Whether a frontmatter line is the top-level `model` field; indented
- * lines are nested keys, not the model.
+ * One layer of matching quotes stripped from a YAML token.
+ */
+function unquoteYamlToken(token: string): string {
+  const quote = token[0];
+  if ((quote === "'" || quote === '"') && token.at(-1) === quote && token.length >= 2) {
+    return token.slice(1, -1);
+  }
+  return token;
+}
+
+/**
+ * Cut a YAML comment off a value part: a `#` outside quotes that starts
+ * the value or follows whitespace.
+ */
+function stripYamlComment(value: string): string {
+  let quote: string | undefined;
+  for (let i = 0; i < value.length; i++) {
+    const char = value[i];
+    if (quote === undefined) {
+      if (char === "'" || char === '"') {
+        quote = char;
+      } else if (char === '#' && (i === 0 || value[i - 1] === ' ' || value[i - 1] === '\t')) {
+        return value.slice(0, i);
+      }
+    } else if (char === quote) {
+      quote = undefined;
+    }
+  }
+  return value;
+}
+
+/**
+ * Split a top-level YAML mapping line into its key and value part, or
+ * undefined when the line is not one: nested keys, missing colons, and
+ * scalars like `model:x` do not count.
+ */
+function splitYamlMapping(line: string): [string, string] | undefined {
+  if (line[0] === ' ' || line[0] === '\t') return undefined;
+  const colon = line.indexOf(':');
+  if (colon < 0) return undefined;
+  const rest = line.slice(colon + 1);
+  if (rest !== '' && !rest.startsWith(' ') && !rest.startsWith('\t')) return undefined;
+  return [unquoteYamlToken(line.slice(0, colon).trim()), rest];
+}
+
+/**
+ * Whether a frontmatter line is the top-level `model` field, quoted key
+ * included; indented lines are nested keys, not the model.
  */
 export function isFrontmatterModelLine(line: string): boolean {
-  if (!line.startsWith(MODEL_KEY)) return false;
-  const rest = line.slice(MODEL_KEY.length);
-  return rest === '' || rest.startsWith(' ') || rest.startsWith('\t');
+  const mapping = splitYamlMapping(line);
+  return mapping !== undefined && mapping[0] === MODEL_KEY;
 }
 
 /**
  * Model value of a raw SKILL.md frontmatter, or undefined when the
  * frontmatter has no top-level `model` line or uses a block scalar.
+ * Trailing comments are stripped; quotes around the key and the value
+ * are read through.
  */
 export function extractRawFrontmatterModel(frontmatter: string): string | undefined {
   for (const line of frontmatter.split(/\r?\n/)) {
     if (!isFrontmatterModelLine(line)) continue;
-    const raw = line.slice(MODEL_KEY.length).trim();
+    const raw = stripYamlComment(line.slice(line.indexOf(':') + 1)).trim();
     if (!raw || raw.startsWith('|') || raw.startsWith('>')) return undefined;
-    // Strip one layer of matching quotes, sliced by hand: a backreference
-    // pattern like /^(['"])(.*)\1$/ is a polynomial-regex candidate.
-    const quote = raw[0];
-    if ((quote === "'" || quote === '"') && raw.at(-1) === quote && raw.length >= 2) {
-      return raw.slice(1, -1);
-    }
-    return raw;
+    return unquoteYamlToken(raw);
   }
   return undefined;
 }

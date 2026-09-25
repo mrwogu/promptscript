@@ -780,6 +780,63 @@ describe('ClaudeFormatter', () => {
       expect(result.warnings?.some((w) => w.code === 'PS4004')).toBeFalsy();
     });
 
+    it('should map a raw frontmatter model with a trailing comment', () => {
+      const ast = createSkillsProgram({
+        commit: {
+          description: 'Create git commits',
+          content: 'Instructions for commit skill...',
+          __rawFrontmatter: "name: 'commit'\nmodel: claude-sonnet-4-5 # pinned",
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/skills/commit/SKILL.md')
+      );
+      expect(skillFile?.content).toContain('model: claude-sonnet-4-5-20250929');
+      expect(skillFile?.content).not.toContain('# pinned');
+      expect(result.warnings?.some((w) => w.code === 'PS4004')).toBeFalsy();
+    });
+
+    it('should replace a quoted model key instead of adding a second one', () => {
+      const ast = createSkillsProgram({
+        commit: {
+          description: 'Create git commits',
+          model: 'opus',
+          content: 'Instructions for commit skill...',
+          __rawFrontmatter: "name: 'commit'\n'model': gpt-5",
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/skills/commit/SKILL.md')
+      );
+      expect(skillFile?.content).toContain('model: opus');
+      expect(skillFile?.content).not.toContain("'model':");
+    });
+
+    it('should drop a quoted-key model the target cannot run, with PS4004', () => {
+      const ast = createSkillsProgram({
+        commit: {
+          description: 'Create git commits',
+          content: 'Instructions for commit skill...',
+          __rawFrontmatter: "name: 'commit'\n'model': gpt-5",
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/skills/commit/SKILL.md')
+      );
+      expect(skillFile?.content).not.toContain('model');
+      expect(result.warnings?.filter((w) => w.code === 'PS4004')).toEqual([
+        expect.objectContaining({
+          message: expect.stringContaining('Skill "commit": model "gpt-5"'),
+        }),
+      ]);
+    });
+
     it('should add a .prs model to raw frontmatter without one', () => {
       const ast = createSkillsProgram({
         commit: {
