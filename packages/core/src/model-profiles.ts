@@ -13,6 +13,7 @@ import type { ModelProfile, ModelStatus } from './types/models.js';
 
 interface ReleaseFields {
   readonly apiId?: string;
+  readonly displayName?: string;
   readonly aliases?: readonly string[];
   readonly status?: ModelStatus;
   readonly successor?: string;
@@ -46,18 +47,27 @@ function release(
 /**
  * Claude release with the naming Anthropic uses from Claude 4 on:
  * `claude-opus-5-5`, "Claude Opus 5.5", and the short alias `opus-5.5`.
+ * The 3.x era put the version first ("Claude 3.5 Sonnet"), so those
+ * releases pass `displayName` themselves.
  */
 function claude(
   line: string,
   version: string,
   fields: ReleaseFields & { readonly id?: string } = {}
 ): ModelProfile {
-  const { id = `claude-${line}-${version.replaceAll('.', '-')}`, ...rest } = fields;
+  const { id = `claude-${line}-${version.replaceAll('.', '-')}`, displayName, ...rest } = fields;
   const name = `${line.charAt(0).toUpperCase()}${line.slice(1)}`;
-  return release('anthropic', `claude-${line}`, version, id, `Claude ${name} ${version}`, {
-    aliases: [`${line}-${version}`],
-    ...rest,
-  });
+  return release(
+    'anthropic',
+    `claude-${line}`,
+    version,
+    id,
+    displayName ?? `Claude ${name} ${version}`,
+    {
+      aliases: [`${line}-${version}`],
+      ...rest,
+    }
+  );
 }
 
 const openai = (
@@ -116,6 +126,7 @@ export const MODEL_PROFILES: readonly ModelProfile[] = [
   claude('sonnet', '3.5', {
     id: 'claude-3-5-sonnet',
     apiId: 'claude-3-5-sonnet-20241022',
+    displayName: 'Claude 3.5 Sonnet',
     aliases: ['sonnet-3.5', 'claude-3-5-sonnet-latest'],
     status: 'retired',
     successor: 'claude-3-7-sonnet',
@@ -125,6 +136,7 @@ export const MODEL_PROFILES: readonly ModelProfile[] = [
   claude('sonnet', '3.7', {
     id: 'claude-3-7-sonnet',
     apiId: 'claude-3-7-sonnet-20250219',
+    displayName: 'Claude 3.7 Sonnet',
     aliases: ['sonnet-3.7', 'claude-3-7-sonnet-latest'],
     status: 'retired',
     successor: 'claude-sonnet-4',
@@ -148,6 +160,7 @@ export const MODEL_PROFILES: readonly ModelProfile[] = [
   claude('haiku', '3.5', {
     id: 'claude-3-5-haiku',
     apiId: 'claude-3-5-haiku-20241022',
+    displayName: 'Claude 3.5 Haiku',
     aliases: ['haiku-3.5', 'claude-3-5-haiku-latest'],
     status: 'retired',
     successor: 'claude-haiku-4-5',
