@@ -43,6 +43,15 @@ describe('ClaudeFormatter', () => {
     formatter = new ClaudeFormatter();
   });
 
+  /** Format a program and return the result plus one Claude agent file. */
+  const formatAgentFile = (ast: Program, name: string) => {
+    const result = formatter.format(ast, { version: 'full' });
+    const agentFile = result.additionalFiles?.find(
+      (file) => file.path === `.claude/agents/${name}.md`
+    );
+    return { result, agentFile };
+  };
+
   it('should have correct name, outputPath and description', () => {
     expect(formatter.name).toBe('claude');
     expect(formatter.outputPath).toBe('CLAUDE.md');
@@ -795,9 +804,12 @@ describe('ClaudeFormatter', () => {
       expect(skillFile?.content).not.toContain("'model':");
     });
 
-    it('should drop a quoted-key model the target cannot run, with PS4004', () => {
+    it.each([
+      ['quoted-key', "name: 'commit'\n'model': gpt-5"],
+      ['block-scalar', "name: 'commit'\nmodel: |\n  gpt-5"],
+    ])('should drop a %s model the target cannot run, with PS4004', (_kind, raw) => {
       const { skillFile, result } = formatCommitSkill({
-        __rawFrontmatter: "name: 'commit'\n'model': gpt-5",
+        __rawFrontmatter: raw,
       });
 
       expect(skillFile?.content).not.toContain('model');
@@ -816,19 +828,6 @@ describe('ClaudeFormatter', () => {
       expect(skillFile?.content).toContain('model: claude-sonnet-4-5-20250929');
       expect(skillFile?.content).not.toMatch(/^ {2}claude-sonnet-4-5$/m);
       expect(skillFile?.content).not.toContain('model: |');
-    });
-
-    it('should drop a block-scalar model the target cannot run, with PS4004', () => {
-      const { skillFile, result } = formatCommitSkill({
-        __rawFrontmatter: "name: 'commit'\nmodel: |\n  gpt-5",
-      });
-
-      expect(skillFile?.content).not.toContain('model');
-      expect(result.warnings?.filter((w) => w.code === 'PS4004')).toEqual([
-        expect.objectContaining({
-          message: expect.stringContaining('Skill "commit": model "gpt-5"'),
-        }),
-      ]);
     });
 
     it('should add a .prs model to raw frontmatter without one', () => {
@@ -1328,10 +1327,7 @@ describe('ClaudeFormatter', () => {
           ],
         };
 
-        const result = formatter.format(ast, { version: 'full' });
-        const agentFile = result.additionalFiles?.find(
-          (f) => f.path === '.claude/agents/test-agent.md'
-        );
+        const { result, agentFile } = formatAgentFile(ast, 'test-agent');
         expect(agentFile?.content).toContain('model: opusplan');
         expect(result.warnings?.some((w) => w.code === 'PS4004')).toBeFalsy();
       });
@@ -1345,10 +1341,7 @@ describe('ClaudeFormatter', () => {
           },
         });
 
-        const result = formatter.format(ast, { version: 'full' });
-        const agentFile = result.additionalFiles?.find(
-          (f) => f.path === '.claude/agents/gateway-agent.md'
-        );
+        const { result, agentFile } = formatAgentFile(ast, 'gateway-agent');
         expect(agentFile?.content).toContain("model: 'custom:team-a'");
         expect(result.warnings?.some((w) => w.code === 'PS4004')).toBeFalsy();
       });
@@ -1362,10 +1355,7 @@ describe('ClaudeFormatter', () => {
           },
         });
 
-        const result = formatter.format(ast, { version: 'full' });
-        const agentFile = result.additionalFiles?.find(
-          (f) => f.path === '.claude/agents/gpt-agent.md'
-        );
+        const { result, agentFile } = formatAgentFile(ast, 'gpt-agent');
         expect(agentFile).toBeDefined();
         expect(agentFile?.content).not.toContain('model:');
         expect(result.warnings?.filter((w) => w.code === 'PS4004')).toEqual([
@@ -1384,10 +1374,7 @@ describe('ClaudeFormatter', () => {
           },
         });
 
-        const result = formatter.format(ast, { version: 'full' });
-        const agentFile = result.additionalFiles?.find(
-          (f) => f.path === '.claude/agents/split-agent.md'
-        );
+        const { result, agentFile } = formatAgentFile(ast, 'split-agent');
         expect(agentFile).toBeDefined();
         expect(agentFile?.content).not.toContain('model:');
         expect(agentFile?.content).not.toContain('tools: Bash');
