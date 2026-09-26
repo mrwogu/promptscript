@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.21.0](https://github.com/mrwogu/promptscript/compare/v1.20.0...v1.21.0) (2026-09-26)
+
+
+### Features
+
+* **cli:** read models config from promptscript.yaml ([f6a6f9a](https://github.com/mrwogu/promptscript/commit/f6a6f9a15b7584ea642e44ca5f252f873d661881))
+* **compiler:** pass models config to formatters and validator ([b23893e](https://github.com/mrwogu/promptscript/commit/b23893e1a71c3b6afce81db8fc668d949cb6c519))
+* **core:** add model catalog with built-in model profiles ([c0ce526](https://github.com/mrwogu/promptscript/commit/c0ce52658af9ac2a16d9fd60af516edcfa5ea269))
+* **core:** detect model catalog drift against OpenRouter ([7e781da](https://github.com/mrwogu/promptscript/commit/7e781da3ad9a6ed9a41ced9b61d272968ac30b75))
+* **formatters:** map agent and skill models to native names ([4249f55](https://github.com/mrwogu/promptscript/commit/4249f55aa59ddb2040b1d5f8b5f67835b4fa5c51))
+* **playground:** add a model catalog example ([f090b38](https://github.com/mrwogu/promptscript/commit/f090b38054145e58a2d94fed3a28a63823bc7309))
+* **validator:** add PS041 rule for model references ([ba36d0e](https://github.com/mrwogu/promptscript/commit/ba36d0e860b3787a1dc4f34bb69b8079308c95e1))
+* **validator:** link the model list from PS041 suggestions ([c49f9df](https://github.com/mrwogu/promptscript/commit/c49f9dfcfe4308c3d591bcb7b6c391e3e61621ef))
+
+
+### Bug Fixes
+
+* **core:** keep the Claude 3.x era display names ([2171d09](https://github.com/mrwogu/promptscript/commit/2171d09c68ba1f114426d89a8f082bbecd92a0f7))
+* **core:** satisfy strict typecheck in the drift spec ([4a96871](https://github.com/mrwogu/promptscript/commit/4a968717f98b84c1a71fd00683b8b92cdee2c369))
+* **formatters:** map block-scalar skill models ([574f4e1](https://github.com/mrwogu/promptscript/commit/574f4e18fe483312a9264d0a4125950b60e550b6))
+* **formatters:** parse quoted keys and comments in skill models ([b19cbf5](https://github.com/mrwogu/promptscript/commit/b19cbf5dd190f754bf6bc586ceaf0629934f123d))
+
 ## [1.20.0](https://github.com/mrwogu/promptscript/compare/v1.19.1...v1.20.0) (2026-09-23)
 
 
