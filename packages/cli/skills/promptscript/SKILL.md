@@ -311,7 +311,7 @@ Pass values in `@skills` block:
 
 Non-reserved properties (anything other than description, content, trigger,
 userInvocable, allowedTools, disableModelInvocation, context, agent, requires,
-inputs, outputs) are treated as skill parameter arguments.
+inputs, outputs, model) are treated as skill parameter arguments.
 
 ### Skill Dependencies
 
