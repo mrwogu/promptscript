@@ -79,12 +79,17 @@ PromptScript preserves the directory structure when producing native skill files
 | `disableModelInvocation`         | Prevent automatic model invocation |
 | `context`                        | Inherit or fork execution context  |
 | `agent`                          | Select agent type                  |
+| `model`                          | Select the model for the skill     |
 | `requires`                       | Declare skill dependencies         |
 | `references`                     | Bundle supporting documents        |
 | `scripts`                        | Bundle executable helpers          |
 | `inputs` and `outputs`           | Define typed skill contracts       |
 | `params`                         | Parameterize reusable skills       |
 | `examples`                       | Attach focused examples            |
+
+`model` sets the model used while the skill is active. Claude Code and Grok Build write it to the skill file, mapped through the [model catalog](https://getpromptscript.dev/dev/reference/models/index.md) the same way as agent models. Other targets have no skill model field and leave it out.
+
+For skills backed by a SKILL.md file, a `model` set in `.prs` wins over the SKILL.md frontmatter, and a frontmatter model without a `.prs` one is mapped the same way. A model the target cannot run is left out of the skill file and reported with a PS4004 warning during compilation.
 
 ## Universal and Native Paths
 

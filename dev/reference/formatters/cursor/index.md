@@ -63,6 +63,7 @@
 - `@shortcuts` with multi-line content become command files
 - The `.cursorrules` file (`legacy` mode) is deprecated; `.cursor/rules/*.mdc` is preferred
 - `full` mode adds commands, `.agents/skills/<name>/SKILL.md`, and `.cursor/agents/<name>.md`
+- Agent `model` values become model ids without a snapshot date, such as `claude-sonnet-4-5`; `inherit` is written as is (see [Model Catalog](https://getpromptscript.dev/dev/reference/models/#target-model-names))
 - `@hooks` emits `.cursor/hooks.json` only in `full` mode; other modes report `PS4002` and omit hooks
 - Supports `@file` and `@folder` context references in rules
 - Nested directory rules are supported

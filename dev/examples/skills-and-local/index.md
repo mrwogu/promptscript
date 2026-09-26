@@ -366,6 +366,7 @@ Example local file (`CLAUDE.local.md`):
 | `userInvocable`          | boolean  | No     | Yes    | Yes     | Allow user to manually invoke            |
 | `context`                | string   | No     | Yes    | No      | Context mode: `"fork"` or `"inherit"`    |
 | `agent`                  | string   | No     | Yes    | No      | Agent type for execution                 |
+| `model`                  | string   | No     | Yes    | No      | Model to use while the skill is active   |
 | `allowedTools`           | string[] | No     | Yes    | Yes     | Tools the skill can use                  |
 | `steps`                  | string[] | Yes    | No     | No      | Workflow steps (generates workflow file) |
 | `prompt`                 | boolean  | Yes    | No     | No      | Generate as prompt file instead          |

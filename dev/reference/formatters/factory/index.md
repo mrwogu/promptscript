@@ -61,6 +61,7 @@
 - Uses `AGENTS.md` as the main file (extends MarkdownInstructionFormatter)
 - Skills go to `.factory/skills/<name>/SKILL.md`
 - Agents are called "droids" - output to `.factory/droids/<name>.md`
+- Droid `model` and `specModel` values become API ids such as `claude-sonnet-4-5-20250929` or `gpt-5.3-codex`; `inherit` is written as is (see [Model Catalog](https://getpromptscript.dev/dev/reference/models/#target-model-names))
 - `@hooks` uses `.factory/hooks.json` with PascalCase event names in `multifile` and `full` modes
 - `pre-terminal-command` maps to `PreToolUse` with the deterministic `Execute` matcher unless `targets.factory.matcher` overrides it
 - Hook `matcher` values match Factory tool names (for example `Execute`, `Read`, `Edit|Write`); other targets use different tool-name vocabularies, so a matcher that works here may match nothing elsewhere

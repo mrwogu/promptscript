@@ -62,6 +62,7 @@
 - `CLAUDE.local.md` is intentionally not committed to git (private developer overrides)
 - Skills support frontmatter fields: `name`, `description`, plus newer fields like `model`, `allowedTools`, `disallowedTools`, `permissionMode`, `specModel`, `specReasoningEffort`
 - Agent files support: `description`, `content`, `tools`, `disallowedTools`, `model`, `permissionMode`, `skills`, `maxTurns`, `memory`, `mcpServers`, `background`, `isolation`. Fields other targets own (`reasoningEffort`, `specModel`, `specReasoningEffort`, `sandboxMode`, `nicknameCandidates`, `handoffs`) are reported with `PS4003` and omitted
+- Agent and skill `model` values keep floating aliases (`opus`, `sonnet`, `haiku`, `fable`) and `inherit` as written; pinned Claude releases become API ids such as `claude-sonnet-4-5-20250929`, and models from other providers are omitted with `PS4004` (see [Model Catalog](https://getpromptscript.dev/dev/reference/models/#target-model-names))
 - Agent-level lifecycle hooks are not part of `@agents`; define them through `@hooks`
 - The `@local` block content goes to `CLAUDE.local.md` with an import statement added to the main `CLAUDE.md`
 

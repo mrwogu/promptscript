@@ -272,6 +272,11 @@
       },
       "description": "Custom convention definitions. Register custom conventions that can be referenced by name in targets."
     },
+    "models": {
+      "$ref": "#/definitions/ModelsConfig",
+      "description": "Model catalog settings: the model set the instructions are written for and custom model profiles.",
+      "example": "models:\n  supported: [claude-opus-5-5, gpt-6-sol]"
+    },
     "universalDir": {
       "type": [
         "string",
@@ -947,6 +952,106 @@
       ],
       "additionalProperties": false,
       "description": "Section rendering configuration."
+    },
+    "ModelsConfig": {
+      "type": "object",
+      "properties": {
+        "supported": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Model set the instructions are written and tested for. Entries are profile ids, aliases, or provider model identifiers. Validation reports agents and skills pinned outside this set.",
+          "examples": [
+            [
+              "claude-opus-5-5",
+              "gpt-6-sol"
+            ]
+          ],
+          "example": [
+            "claude-opus-5-5",
+            "gpt-6-sol"
+          ]
+        },
+        "profiles": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/ModelProfileInput"
+          },
+          "description": "Custom model profiles, or overrides of built-in profiles, keyed by profile id."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Model catalog configuration (`models` in promptscript.yaml)."
+    },
+    "ModelProfileInput": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "description": "Model provider (e.g. 'anthropic', 'openai', 'google', 'xai')"
+        },
+        "family": {
+          "type": "string",
+          "description": "Family grouping the versions of one model line (e.g. 'claude-opus'). The newest non-retired release of a family backs its floating alias."
+        },
+        "version": {
+          "type": "string",
+          "description": "Version inside the family (e.g. '4.5')"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Human-readable name (e.g. 'Claude Opus 4.5')"
+        },
+        "apiId": {
+          "type": "string",
+          "description": "Provider API model identifier"
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Additional names that resolve to this profile"
+        },
+        "status": {
+          "$ref": "#/definitions/ModelStatus",
+          "description": "Lifecycle status"
+        },
+        "successor": {
+          "type": "string",
+          "description": "Profile id of the recommended replacement"
+        },
+        "releaseDate": {
+          "type": "string",
+          "description": "Release date in YYYY-MM-DD format"
+        },
+        "retirementDate": {
+          "type": "string",
+          "description": "Date the provider stops (or stopped) serving the model, in YYYY-MM-DD format"
+        },
+        "targets": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Native model names per target. A target listed here always receives this name, even when its naming scheme or provider list would not map the model. Keys are target names, matched case-insensitively. Only targets that write a native model field use them; validation reports other keys.",
+          "example": "targets:\n  github: Claude Opus 9 (Preview)"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Model profile declared in promptscript.yaml.\n\nA key of `models.profiles` that matches a built-in profile id overrides only the fields it sets. Any other key adds a new profile, so a team can use a model before PromptScript ships it in the built-in catalog.",
+      "example": "models:\n  profiles:\n    claude-opus-9:\n      provider: anthropic\n      family: claude-opus\n      version: '9'\n      displayName: Claude Opus 9\n      apiId: claude-opus-9\n      releaseDate: '2027-01-15'"
+    },
+    "ModelStatus": {
+      "type": "string",
+      "enum": [
+        "current",
+        "legacy",
+        "deprecated",
+        "retired"
+      ],
+      "description": "Lifecycle status of a model profile.\n- `current`: recommended for new instructions\n- `legacy`: still served, but superseded by a newer version\n- `deprecated`: the provider announced a retirement date\n- `retired`: the provider no longer serves the model"
     },
     "ValidationExclude": {
       "type": "object",

@@ -35,6 +35,10 @@ prs compile --dry-run
 
 `prs upgrade` parses every discovered file before writing, so an initial parse failure aborts the complete plan. Each file then uses atomic replacement and preserves permissions. Multi-file upgrade is not transactional: a write-time failure in a later file does not roll back files already replaced. Symlinks are skipped. Run upgrades on a clean version-control branch.
 
+## Model Versions
+
+`@meta.syntax` does not track AI models. Agent and skill `model` values resolve against the model catalog configured under [`models`](https://getpromptscript.dev/dev/reference/config/#models). Floating aliases such as `sonnet` follow the newest release in the catalog, and the [Model Catalog](https://getpromptscript.dev/dev/reference/models/index.md) lists every built-in model. PS041 reports pinned models that are deprecated or retired, together with their replacement, models outside `models.supported`, and inconsistent `models.profiles` entries.
+
 ## Key Diagnostics
 
 | Diagnostic | Meaning                                     | Action                                      |
@@ -44,7 +48,9 @@ prs compile --dry-run
 | PS034      | Invalid hook executable or option           | Fix command, script, or target override     |
 | PS037      | Invalid contextual section header           | Fix owner, key, title, or duplicate         |
 | PS038      | Unsupported or risky built-in block shape   | Convert to canonical shape                  |
+| PS041      | Unsupported model or invalid model profile  | Switch model or update `models` config      |
 | PS4002     | Target cannot preserve requested capability | Use documented target fallback              |
+| PS4004     | Target cannot run or write the model        | Pick another model or set a target name     |
 
 ## Release Gate
 

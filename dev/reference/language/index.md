@@ -833,6 +833,7 @@ review: { description: "Review code changes" userInvocable: true content: """ Pe
 | `userInvocable` | boolean | Claude, Factory | Allow user to manually invoke skill |
 | `context` | string | Claude | Context mode: `"fork"` or `"inherit"` |
 | `agent` | string | Claude | Agent type: `"general-purpose"`, etc. |
+| `model` | string | Claude, Grok | Model to use while the skill is active |
 | `allowedTools` | string[] | Claude, Factory | Tools the skill can use |
 
 Skills are output differently based on the formatter:
@@ -922,7 +923,7 @@ Define specialized AI agents for target platforms with native agent support:
 | `description`         | string   | Yes      | When the agent should be invoked                                                     |
 | `content`             | string   | No       | Additional system prompt for the subagent                                            |
 | `tools`               | string[] | No       | Allowed tools (inherits all if omitted)                                              |
-| `model`               | string   | No       | AI model to use (platform-specific values)                                           |
+| `model`               | string   | No       | AI model to use, mapped to each target's model names                                 |
 | `reasoningEffort`     | string   | No       | Target-native reasoning level                                                        |
 | `specModel`           | string   | No       | Model for Specification/planning mode (GitHub, Factory only)                         |
 | `specReasoningEffort` | string   | No       | Reasoning effort for spec mode: `low`, `medium`, `high` (Factory only)               |
@@ -947,14 +948,14 @@ Agents output by platform:
 Supports `description`, `content`, `handoffs`, and `mcpServers` (inlined from the referenced `@mcpServers` entries), plus `tools`, `model`, and `specModel` under mapping:
 
 - Tools: `Read` → `read`, `Grep`/`Glob` → `search`, `Bash` → `execute`
-- Models: `sonnet` → `Claude Sonnet 4.5`, `opus` → `Claude Opus 4.5`, `haiku` → `Claude Haiku 4.5`
+- Models: Copilot names from the [model catalog](https://getpromptscript.dev/dev/reference/models/index.md); floating aliases pick the newest release, listed in [Floating Aliases](https://getpromptscript.dev/dev/reference/models/#floating-aliases), and `inherit` is omitted
 
 ```markdown
 ---
 name: code-reviewer
 description: Reviews code for quality and best practices
 tools: ['read', 'search', 'execute']
-model: Claude Sonnet 4.5
+model: Claude Sonnet 5
 ---
 
 You are a senior code reviewer ensuring high standards.
