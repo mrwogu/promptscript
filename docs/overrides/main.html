@@ -17,11 +17,8 @@ set og_url = page.canonical_url or config.site_url %}
 <meta property="og:image" content="{{ page.meta.image }}" />
 <meta name="twitter:image" content="{{ page.meta.image }}" />
 {% else %}
-<meta property="og:image" content="https://getpromptscript.dev/latest/assets/images/og-image.png" />
-<meta
-  name="twitter:image"
-  content="https://getpromptscript.dev/latest/assets/images/og-image.png"
-/>
+<meta property="og:image" content="https://getpromptscript.dev/assets/images/og-image.png" />
+<meta name="twitter:image" content="https://getpromptscript.dev/assets/images/og-image.png" />
 {% endif %}
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
@@ -40,7 +37,7 @@ set og_url = page.canonical_url or config.site_url %}
       "@type": "Organization",
       "name": "PromptScript",
       "url": "{{ config.site_url }}",
-      "logo": "{{ config.site_url }}latest/assets/images/logo.svg",
+      "logo": "{{ config.site_url }}assets/images/logo.svg",
       "sameAs": ["https://github.com/mrwogu/promptscript", "https://www.npmjs.com/org/promptscript"]
     }
   }
