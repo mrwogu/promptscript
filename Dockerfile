@@ -8,7 +8,7 @@
 #   docker run --rm -v $(pwd):/workspace promptscript validate
 #   docker run --rm -v $(pwd):/workspace promptscript compile
 #
-# For more information, see: https://getpromptscript.dev/latest/guides/docker/
+# For more information, see: https://getpromptscript.dev/guides/docker/
 # =============================================================================
 
 # -----------------------------------------------------------------------------

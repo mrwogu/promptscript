@@ -29,6 +29,6 @@ Syntax highlighting and language support for [PromptScript](https://getpromptscr
 
 ## Learn More
 
-- [PromptScript Documentation](https://getpromptscript.dev/latest/)
-- [Language Reference](https://getpromptscript.dev/latest/reference/language/)
+- [PromptScript Documentation](https://getpromptscript.dev/)
+- [Language Reference](https://getpromptscript.dev/reference/language/)
 - [GitHub Repository](https://github.com/mrwogu/promptscript)

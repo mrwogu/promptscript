@@ -1,5 +1,10 @@
 name: Deploy Documentation
 
+# Docs are unversioned and served from the site root. They track the latest
+# release: tag pushes and manual runs rebuild docs + /playground. Pushes to
+# main only refresh /playground-dev. Legacy /latest/, /dev/ and /vX.Y/ URLs
+# are 301-redirected to the root by Cloudflare redirect rules.
+
 on:
   push:
     branches: [main]
@@ -7,11 +12,6 @@ on:
       - 'v*'
 
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to deploy (e.g., dev, v1.0.0). Full semver is converted to major.minor (v1.0.0-alpha.5 → v1.0)'
-        required: false
-        default: 'dev'
 
 permissions:
   contents: write
@@ -19,21 +19,24 @@ permissions:
   id-token: write
 
 concurrency:
-  # Separate groups for versioned vs dev deployments to prevent version deploys
-  # from being cancelled. Versioned deploys (tag push or dispatch with v* input)
-  # each get a unique group. Dev deploys share a group with cancel-in-progress.
-  group: ${{ (startsWith(github.ref, 'refs/tags/v') && format('pages-release-{0}', github.ref)) || (github.event.inputs.version != '' && github.event.inputs.version != 'dev' && format('pages-release-{0}', github.event.inputs.version)) || 'pages-dev' }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/v') && (github.event.inputs.version == '' || github.event.inputs.version == 'dev') }}
+  # One shared group: every run uploads a full gh-pages snapshot, so runs must
+  # not overlap or an older snapshot could be deployed after a newer one.
+  # GitHub keeps only one pending run per group, so a tag run still
+  # waiting in the queue can be replaced by a newer main push. Rerun it then.
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     # Skip main-branch push when release-please just created a tag on the same commit.
-    # The tag-push run will deploy both the versioned docs AND dev, so the main run is redundant.
+    # The tag-push run deploys docs AND refreshes /playground-dev, so the main run is redundant.
     if: >-
       github.event_name != 'push'
       || !startsWith(github.ref, 'refs/heads/')
       || !startsWith(github.event.head_commit.message, 'chore(main): release')
+    env:
+      IS_RELEASE: ${{ github.event_name != 'push' || github.ref_type == 'tag' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -56,12 +59,15 @@ jobs:
         run: pnpm build
 
       - name: Generate JSON Schema
+        if: env.IS_RELEASE == 'true'
         run: pnpm schema:generate
 
       - name: Generate API documentation
+        if: env.IS_RELEASE == 'true'
         run: pnpm docs:generate
 
       - name: Copy schema to docs
+        if: env.IS_RELEASE == 'true'
         run: |
           mkdir -p docs/schema
           cp schema/config.json docs/schema/config.json
@@ -69,6 +75,7 @@ jobs:
           cp schema/diff-v1.json docs/schema/diff/v1.json
 
       - name: Setup Python
+        if: env.IS_RELEASE == 'true'
         uses: actions/setup-python@v7
         with:
           python-version: '3.12'
@@ -76,201 +83,50 @@ jobs:
           cache-dependency-path: requirements-docs.txt
 
       - name: Install MkDocs dependencies
+        if: env.IS_RELEASE == 'true'
         run: pip install -r requirements-docs.txt
 
-      - name: Configure Git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin gh-pages --depth=1 || true
-
-      - name: Determine version
-        id: version
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          INPUT_VERSION: ${{ github.event.inputs.version }}
-          GIT_REF: ${{ github.ref }}
-        run: |
-          # Extract major.minor from semver (e.g., v1.2.3-alpha.4 → v1.2)
-          extract_minor_version() {
-            local full_version="$1"
-            echo "$full_version" | sed -E 's/^v?([0-9]+\.[0-9]+).*/v\1/'
-          }
-
-          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
-            # For manual dispatch, use input as-is for dev/latest, otherwise extract minor
-            if [[ "$INPUT_VERSION" == "dev" || "$INPUT_VERSION" == "latest" ]]; then
-              VERSION="$INPUT_VERSION"
-              echo "alias=" >> $GITHUB_OUTPUT
-            elif [[ "$INPUT_VERSION" == v* ]]; then
-              VERSION=$(extract_minor_version "$INPUT_VERSION")
-              echo "alias=latest" >> $GITHUB_OUTPUT
-            else
-              VERSION="$INPUT_VERSION"
-              echo "alias=" >> $GITHUB_OUTPUT
-            fi
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "full_version=$INPUT_VERSION" >> $GITHUB_OUTPUT
-          elif [[ "$GIT_REF" == refs/tags/v* ]]; then
-            FULL_VERSION=${GIT_REF#refs/tags/}
-            VERSION=$(extract_minor_version "$FULL_VERSION")
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
-            echo "alias=latest" >> $GITHUB_OUTPUT
-          else
-            echo "version=dev" >> $GITHUB_OUTPUT
-            echo "full_version=dev" >> $GITHUB_OUTPUT
-            echo "alias=" >> $GITHUB_OUTPUT
-          fi
-
-          echo "Deploying docs: version=$VERSION (from ${FULL_VERSION:-$VERSION})"
-
-      - name: Deploy documentation
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          ALIAS="${{ steps.version.outputs.alias }}"
-          IS_TAG="${{ startsWith(github.ref, 'refs/tags/v') }}"
-
-          # Fetch latest gh-pages to avoid push conflicts
-          git fetch origin gh-pages --depth=1 || true
-
-          # Deploy versioned docs
-          if [[ -n "$ALIAS" ]]; then
-            mike deploy --push --update-aliases "$VERSION" "$ALIAS"
-            mike set-default --push latest
-          else
-            mike deploy --push "$VERSION"
-          fi
-
-          # Tag runs also deploy dev so we don't need a separate main-push workflow run
-          if [[ "$IS_TAG" == "true" ]]; then
-            echo "Tag run: also deploying dev version"
-            git fetch origin gh-pages --depth=1 || true
-            mike deploy --push dev
-          fi
+      - name: Build documentation
+        if: env.IS_RELEASE == 'true'
+        run: mkdocs build
         env:
           MKDOCS_GIT_COMMITTERS_APIKEY: ${{ secrets.MKDOCS_GIT_COMMITTERS_APIKEY }}
           PYTHONPATH: ${{ github.workspace }}
-          DOCS_VERSION: ${{ steps.version.outputs.version }}
+
+      - name: Build playground
+        run: pnpm nx build playground
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
 
+      # gh-pages keeps the last deployed state, so a main push (playground-dev
+      # only) does not wipe the docs built from the latest release.
       - name: Checkout gh-pages
         uses: actions/checkout@v7
         with:
           ref: gh-pages
           path: gh-pages-content
 
-      - name: Copy root files (404, robots, llms)
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-          ALIAS: ${{ steps.version.outputs.alias }}
+      - name: Update site content
         run: |
-          cp docs/404.html gh-pages-content/404.html
-          cp docs/robots.txt gh-pages-content/robots.txt
-          # llms.txt is now auto-generated by mkdocs-llmstxt plugin during build
-          LLMS_DIR="${ALIAS:-$VERSION}"
-          if [[ -f "gh-pages-content/${LLMS_DIR}/llms.txt" ]]; then
-            cp "gh-pages-content/${LLMS_DIR}/llms.txt" gh-pages-content/llms.txt
-          elif [[ -f "gh-pages-content/${VERSION}/llms.txt" ]]; then
-            cp "gh-pages-content/${VERSION}/llms.txt" gh-pages-content/llms.txt
+          if [[ "$IS_RELEASE" == "true" ]]; then
+            # --delete also removes the old mike version dirs (latest, dev, vX.Y)
+            rsync -a --delete \
+              --exclude .git --exclude /playground --exclude /playground-dev \
+              site/ gh-pages-content/
+            rm -rf gh-pages-content/playground
+            cp -r dist/packages/playground gh-pages-content/playground
           fi
-          if [[ -f "gh-pages-content/${LLMS_DIR}/llms-full.txt" ]]; then
-            cp "gh-pages-content/${LLMS_DIR}/llms-full.txt" gh-pages-content/llms-full.txt
-          elif [[ -f "gh-pages-content/${VERSION}/llms-full.txt" ]]; then
-            cp "gh-pages-content/${VERSION}/llms-full.txt" gh-pages-content/llms-full.txt
-          fi
+          rm -rf gh-pages-content/playground-dev
+          cp -r dist/packages/playground gh-pages-content/playground-dev
 
-      - name: Cleanup old version directories
+      - name: Commit and push gh-pages
+        working-directory: gh-pages-content
         run: |
-          cd gh-pages-content
-
-          # Remove old full-semver version directories (v1.0.0, v1.0.0-alpha.5, etc.)
-          # Keep only: dev, latest, playground*, and major.minor versions (v1.0, v1.1)
-          for dir in v*; do
-            if [[ -d "$dir" ]]; then
-              # Check if directory matches old pattern (has patch version or prerelease)
-              # Old pattern: v1.0.0, v1.0.0-alpha.5, v1.0.0-beta.1
-              # New pattern: v1.0, v1.1 (only major.minor)
-              if [[ "$dir" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-                echo "Removing old version directory: $dir"
-                rm -rf "$dir"
-              fi
-            fi
-          done
-
-          # Update mike's versions.json to remove old entries
-          if [[ -f "versions.json" ]]; then
-            echo "Updating versions.json to remove old version entries..."
-            # Keep only entries that match: dev, or major.minor pattern (v1.0, v1.1)
-            # Remove entries with patch version (v1.0.0, v1.0.0-alpha.5)
-            jq '[.[] | select(.version == "dev" or (.version | test("^v[0-9]+\\.[0-9]+$")))]' versions.json > versions.json.tmp
-            mv versions.json.tmp versions.json
-            echo "Updated versions.json:"
-            cat versions.json
-          fi
-
-          # Commit cleanup if there are changes
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git diff --staged --quiet || git commit -m "Cleanup old version directories (keep only major.minor)"
-
-      - name: Generate sitemap index
-        run: |
-          cd gh-pages-content
-          echo '<?xml version="1.0" encoding="UTF-8"?>' > sitemap.xml
-          echo '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> sitemap.xml
-
-          # Find all versioned sitemaps (mike creates directories like dev/, latest/, v1.0/, v1.1/)
-          for sitemap in */sitemap.xml; do
-            if [[ -f "$sitemap" ]]; then
-              echo "  <sitemap>" >> sitemap.xml
-              echo "    <loc>https://getpromptscript.dev/${sitemap}</loc>" >> sitemap.xml
-              echo "  </sitemap>" >> sitemap.xml
-            fi
-          done
-
-          echo '</sitemapindex>' >> sitemap.xml
-
-          echo "Generated sitemap index:"
-          cat sitemap.xml
-
-      - name: Build playground
-        run: pnpm nx build playground
-
-      - name: Deploy playground version
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          ALIAS="${{ steps.version.outputs.alias }}"
-
-          # /playground = latest (production)
-          # /playground-dev = dev version
-          # Both directories are stored on gh-pages so they persist across deployments
-
-          IS_TAG="${{ startsWith(github.ref, 'refs/tags/v') }}"
-
-          cd gh-pages-content
-
-          if [[ "$VERSION" == "dev" ]]; then
-            # Dev build goes to /playground-dev
-            rm -rf playground-dev
-            cp -r ../dist/packages/playground playground-dev
-          else
-            # Tagged release goes to /playground (as latest)
-            if [[ "$ALIAS" == "latest" ]]; then
-              rm -rf playground
-              cp -r ../dist/packages/playground playground
-            fi
-            # Tag runs also update /playground-dev (same code, keeps dev in sync)
-            if [[ "$IS_TAG" == "true" ]]; then
-              rm -rf playground-dev
-              cp -r ../dist/packages/playground playground-dev
-            fi
-          fi
-
-          # Commit playground to gh-pages so it persists across deployments
-          git add playground playground-dev 2>/dev/null || true
-          git commit -m "Deploy playground ($VERSION)" || echo "No playground changes to commit"
+          git commit -m "Deploy ${GITHUB_REF_NAME} (${GITHUB_SHA::7})" || echo "No changes to commit"
 
           # Retry push up to 3 times to handle concurrent gh-pages pushes
           for attempt in 1 2 3; do
@@ -281,26 +137,6 @@ jobs:
             git pull --rebase origin gh-pages
             sleep 5
           done
-
-      - name: Prepare artifact (resolve symlinks)
-        run: |
-          cd gh-pages-content
-          # Pull latest changes after push
-          git pull --rebase origin gh-pages
-          # Convert 'latest' symlink to actual directory to avoid race conditions with tar
-          if [[ -L "latest" ]]; then
-            TARGET=$(readlink latest)
-            rm latest
-            if [[ -d "$TARGET" ]]; then
-              cp -r "$TARGET" latest
-            else
-              # Target was cleaned up, find the newest version directory
-              NEWEST=$(ls -d v[0-9]* 2>/dev/null | sort -V | tail -1)
-              if [[ -n "$NEWEST" ]]; then
-                cp -r "$NEWEST" latest
-              fi
-            fi
-          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
