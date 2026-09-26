@@ -51,6 +51,7 @@ export * from './agent-capabilities.js';
 
 // Model catalog
 export * from './model-catalog.js';
+export * from './model-drift.js';
 export * from './model-profiles.js';
 
 // Hook capabilities
