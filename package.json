@@ -24,6 +24,8 @@
     "docs:formatters:check": "node --import @swc-node/register/esm-register scripts/generate-formatter-docs.mts && npx prettier --write docs/reference/formatters/*.md && git diff --exit-code docs/reference/formatters/",
     "docs:models": "node --import @swc-node/register/esm-register scripts/generate-model-docs.mts && npx prettier --write docs/reference/models.md",
     "docs:models:check": "node --import @swc-node/register/esm-register scripts/generate-model-docs.mts && npx prettier --write docs/reference/models.md && git diff --exit-code docs/reference/models.md",
+    "models:drift": "node --import @swc-node/register/esm-register scripts/model-drift.mts --check",
+    "models:drift:apply": "node --import @swc-node/register/esm-register scripts/model-drift.mts --apply",
     "prs": "node --import @swc-node/register/esm-register packages/cli/src/cli.ts",
     "skill:sync": "./scripts/sync-skill.sh",
     "skill:check": "./scripts/sync-skill.sh --check",
