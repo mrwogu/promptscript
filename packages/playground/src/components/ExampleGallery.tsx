@@ -1145,6 +1145,62 @@ export const EXAMPLES: Example[] = [
     ],
   },
   {
+    id: 'with-models',
+    name: 'Model Catalog',
+    description: 'Floating aliases, pinned releases, and spec models per agent',
+    complexity: 'advanced',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "models-example"
+  syntax: "1.5.0"
+}
+
+@identity {
+  """
+  You are a development team lead.
+  You pick the right model for every job.
+  """
+}
+
+@agents {
+  triage: {
+    description: "Route incoming requests fast"
+    model: "sonnet"
+    tools: ["Read", "Grep", "Glob"]
+    content: """
+    You classify incoming requests and route them to the right agent.
+    A floating alias follows the newest release of its family.
+    """
+  }
+
+  deep-reviewer: {
+    description: "Review complex changes with a pinned release"
+    model: "claude-opus-4-5"
+    tools: ["Read", "Grep", "Glob"]
+    content: """
+    You are a senior code reviewer for complex, high-risk changes.
+    The pinned model id locks one exact release, so reviews stay reproducible.
+    """
+  }
+
+  spec-writer: {
+    description: "Draft specs with a cheaper spec model"
+    model: "sonnet"
+    specModel: "haiku"
+    tools: ["Read", "Write"]
+    content: """
+    You turn rough notes into implementation specs.
+    The spec draft runs on a cheaper model while the main model stays stronger.
+    """
+  }
+}
+`,
+      },
+    ],
+  },
+  {
     id: 'namespaced-agents',
     name: 'Namespaced Agents',
     description: 'Two teams contribute a reviewer without overwriting each other',
