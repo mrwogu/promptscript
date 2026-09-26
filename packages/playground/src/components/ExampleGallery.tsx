@@ -1157,18 +1157,10 @@ export const EXAMPLES: Example[] = [
   syntax: "1.5.0"
 }
 
-@identity {
-  """
-  You are a development team lead.
-  You pick the right model for every job.
-  """
-}
-
 @agents {
   triage: {
     description: "Route incoming requests fast"
     model: "sonnet"
-    tools: ["Read", "Grep", "Glob"]
     content: """
     You classify incoming requests and route them to the right agent.
     A floating alias follows the newest release of its family.
@@ -1187,8 +1179,8 @@ export const EXAMPLES: Example[] = [
 
   spec-writer: {
     description: "Draft specs with a cheaper spec model"
-    model: "sonnet"
     specModel: "haiku"
+    model: "sonnet"
     tools: ["Read", "Write"]
     content: """
     You turn rough notes into implementation specs.
