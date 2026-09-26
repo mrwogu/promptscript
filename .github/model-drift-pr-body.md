@@ -3,11 +3,13 @@
 The weekly Model Drift workflow drafted new releases of known model
 families from [OpenRouter](https://openrouter.ai) into
 `packages/core/src/model-profiles.ts` and regenerated
-`docs/reference/models.md`. The drafted entries carry the id, the
-provider API id (`canonical_slug`), the display name, and the OpenRouter
-listing date. The pull request merges itself as soon as every check
-passes; when a floating alias moved, the catalog tests fail on purpose
-and it waits for a human.
+`docs/reference/models.md`; the list is visible at
+[getpromptscript.dev/reference/models](https://getpromptscript.dev/reference/models/)
+once this merges and the docs deploy. The drafted entries carry the id,
+the provider API id (`canonical_slug`), the display name, and the
+OpenRouter listing date. The pull request merges itself as soon as every
+check passes; when a floating alias moved, the catalog tests fail on
+purpose and it waits for a human.
 
 ## Checklist before merging
 

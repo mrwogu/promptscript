@@ -56,6 +56,7 @@ function printReport(report: ModelDriftReport): void {
     console.log('Catalog releases OpenRouter does not list:');
     for (const id of report.absent) console.log(`  ${id}`);
   }
+  console.log('Model reference: https://getpromptscript.dev/reference/models/');
 }
 
 /** The call the profile helper for one family starts with. */
