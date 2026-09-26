@@ -1431,7 +1431,7 @@ targets:
   - claude
 ```
 
-See the [Configuration Reference](./config.md) for every field, default, and advanced option (registry, builds, validation, watch, formatting, customConventions, universalDir). The JSON schema is the source of truth: <https://getpromptscript.dev/latest/schema/config.json>.
+See the [Configuration Reference](./config.md) for every field, default, and advanced option (registry, builds, validation, watch, formatting, customConventions, universalDir). The JSON schema is the source of truth: <https://getpromptscript.dev/schema/config.json>.
 
 ## Environment Variables
 

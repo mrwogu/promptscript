@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://getpromptscript.dev/latest/schema/config.json",
+  "$id": "https://getpromptscript.dev/schema/config.json",
   "title": "PromptScript Configuration",
   "description": "PromptScript configuration file (promptscript.yaml).",
   "type": "object",
