@@ -19,10 +19,12 @@ permissions:
   id-token: write
 
 concurrency:
-  # Release deploys (tag or manual) get their own group so a later main push
-  # cannot cancel them. Main pushes share one group and cancel each other.
-  group: ${{ (github.event_name == 'push' && github.ref_type == 'branch' && 'pages-dev') || format('pages-release-{0}', github.ref) }}
-  cancel-in-progress: ${{ github.event_name == 'push' && github.ref_type == 'branch' }}
+  # One shared group: every run uploads a full gh-pages snapshot, so runs must
+  # not overlap or an older snapshot could be deployed after a newer one.
+  # GitHub keeps only one pending run per group, so a tag run still
+  # waiting in the queue can be replaced by a newer main push. Rerun it then.
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
