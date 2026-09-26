@@ -154,7 +154,7 @@ Properties like `userInvocable`, `disableModelInvocation`, `context`, and `agent
 | `disableModelInvocation` | boolean  | `false` | Claude, GitHub, Factory          |
 | `context`                | string   | -       | Claude (`"fork"` or `"inherit"`) |
 | `agent`                  | string   | -       | Claude                           |
-| `model`                  | string   | -       | Claude                           |
+| `model`                  | string   | -       | Claude, Grok                     |
 | `allowedTools`           | string[] | -       | Claude, Factory                  |
 
 `model` takes the same values as agent `model` and is mapped through the
