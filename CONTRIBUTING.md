@@ -269,8 +269,9 @@ known families to `model-profiles.ts` (id, API id, display name, listing
 date, and the successor on the release each one displaces), and opens a
 pull request with the checklist above the manual work: release and
 retirement dates, successors across families, floating aliases, and
-target-specific names. The drafted state fails the core catalog tests on
-purpose until the hardcoded expectations are updated. Run it on demand
+target-specific names. The pull request merges itself when every check
+passes; when a floating alias moved, the catalog tests fail on purpose
+until the hardcoded expectations are updated. Run it on demand
 with `pnpm models:drift:apply`, or check without editing with
 `pnpm models:drift`; `OPENROUTER_MODELS_URL` overrides the endpoint for
 local testing.
