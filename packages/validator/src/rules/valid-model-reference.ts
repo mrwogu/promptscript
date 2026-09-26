@@ -59,6 +59,7 @@ function collectReferences(ctx: RuleContext): ModelReference[] {
 }
 
 const PROFILES_HINT = 'or declare it under models.profiles in promptscript.yaml';
+const MODELS_DOC_LINK = 'https://getpromptscript.dev/reference/models/';
 
 /** `models.supported` as written, and resolved against the catalog */
 interface SupportedModels {
@@ -115,7 +116,7 @@ function checkReference(
       ctx.report({
         message: `${label} is not in the model catalog`,
         location: reference.location,
-        suggestion: `Use a model from models.supported, ${PROFILES_HINT}.`,
+        suggestion: `Use a model from models.supported, ${PROFILES_HINT}. See the model list: ${MODELS_DOC_LINK}`,
       });
     }
     return;
@@ -161,7 +162,7 @@ export const validModelReference: ValidationRule = {
     for (const entry of supported?.set.unknown ?? []) {
       ctx.report({
         message: `models.supported entry "${entry}" is not in the model catalog`,
-        suggestion: `Use a catalog model id or alias, ${PROFILES_HINT}.`,
+        suggestion: `Use a catalog model id or alias, ${PROFILES_HINT}. See the model list: ${MODELS_DOC_LINK}`,
       });
     }
     for (const reference of collectReferences(ctx)) {
