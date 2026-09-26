@@ -14,6 +14,14 @@ function loadExample(id: string): { entry: string; files: Record<string, string>
   };
 }
 
+/** Compile one gallery example and assert it succeeds. */
+async function compileExample(id: string, options: Parameters<typeof compile>[2]) {
+  const { entry, files } = loadExample(id);
+  const result = await compile(files, entry, options);
+  expect(result.success, `Example "${id}" failed to compile`).toBe(true);
+  return result;
+}
+
 describe('ExampleGallery — gallery examples compile', () => {
   it('uses current syntax for every PromptScript file', () => {
     for (const example of EXAMPLES) {
@@ -54,13 +62,10 @@ describe('ExampleGallery — gallery examples compile', () => {
   }
 
   it('resolves composition and replacement in declaration order', async () => {
-    const { entry, files } = loadExample('composition-order');
-
-    const result = await compile(files, entry, {
+    const result = await compileExample('composition-order', {
       formatters: [{ name: 'github', config: { version: 'full' } }],
     });
 
-    expect(result.success).toBe(true);
     const output = result.outputs.get('.github/copilot-instructions.md')?.content;
     expect(output).toContain('### coverage');
     expect(output).toContain('Minimum 95%');
@@ -71,16 +76,13 @@ describe('ExampleGallery — gallery examples compile', () => {
   });
 
   it('resolves model catalog entries to target-native model names', async () => {
-    const { entry, files } = loadExample('with-models');
-
-    const result = await compile(files, entry, {
+    const result = await compileExample('with-models', {
       formatters: [
         { name: 'claude', config: { version: 'full' } },
         { name: 'github', config: { version: 'full' } },
       ],
     });
 
-    expect(result.success).toBe(true);
     // Claude keeps the floating alias and expands the pinned release to its API id.
     const triage = result.outputs.get('.claude/agents/triage.md')?.content;
     expect(triage).toContain('model: sonnet');
@@ -102,42 +104,33 @@ describe('ExampleGallery — gallery examples compile', () => {
   });
 
   it('qualifies imported agents with their import alias', async () => {
-    const { entry, files } = loadExample('namespaced-agents');
-
-    const result = await compile(files, entry, {
+    const result = await compileExample('namespaced-agents', {
       formatters: [{ name: 'claude', config: { version: 'full' } }],
     });
 
-    expect(result.success).toBe(true);
     expect(result.outputs.has('.claude/agents/frontend-reviewer.md')).toBe(true);
     expect(result.outputs.has('.claude/agents/backend-reviewer.md')).toBe(true);
     expect(result.outputs.has('.claude/agents/reviewer.md')).toBe(false);
   });
 
   it('renders contextual section headers in generated output', async () => {
-    const { entry, files } = loadExample('custom-section-headers');
-
-    const result = await compile(files, entry, {
+    const result = await compileExample('custom-section-headers', {
       formatters: [{ name: 'github', config: { version: 'full' } }],
     });
 
-    expect(result.success).toBe(true);
     const output = result.outputs.get('.github/copilot-instructions.md')?.content;
     expect(output).toContain('## Engineering Standards');
     expect(output).toContain('## Commit Policy');
   });
 
   it('resolves the real-life checkout policy and emits native capabilities', async () => {
-    const { entry, files } = loadExample('real-life-checkout-service');
-
-    const result = await compile(files, entry, {
+    const result = await compileExample('real-life-checkout-service', {
       formatters: [
         { name: 'claude', config: { version: 'full' } },
         { name: 'github', config: { version: 'full' } },
       ],
     });
 
-    expect(result.success).toBe(true);
     // GitHub agent files cannot carry the authored `skills` list; the
     // compile surfaces that loss instead of dropping it silently.
     expect(result.warnings).toEqual([
@@ -191,16 +184,13 @@ describe('ExampleGallery — gallery examples compile', () => {
   });
 
   it('shows current Factory and GitHub hook outputs for agent platform example', async () => {
-    const { entry, files } = loadExample('agent-platform');
-
-    const result = await compile(files, entry, {
+    const result = await compileExample('agent-platform', {
       formatters: [
         { name: 'factory', config: { version: 'full' } },
         { name: 'github', config: { version: 'multifile' } },
       ],
     });
 
-    expect(result.success).toBe(true);
     expect(JSON.parse(result.outputs.get('.factory/hooks.json')!.content)).toMatchObject({
       hooks: {
         PostToolUse: [
