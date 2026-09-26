@@ -17,7 +17,7 @@ const config: Config = {
   path: path.resolve(__dirname, '../packages/core/src/types/config.ts'),
   tsconfig: path.resolve(__dirname, '../tsconfig.schema.json'),
   type: 'PromptScriptConfig',
-  schemaId: 'https://getpromptscript.dev/latest/schema/config.json',
+  schemaId: 'https://getpromptscript.dev/schema/config.json',
   expose: 'export',
   topRef: false,
   jsDoc: 'extended',
