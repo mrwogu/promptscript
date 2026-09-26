@@ -5,11 +5,13 @@ families from [OpenRouter](https://openrouter.ai) into
 `packages/core/src/model-profiles.ts` and regenerated
 `docs/reference/models.md`. The drafted entries carry the id, the
 provider API id (`canonical_slug`), the display name, and the OpenRouter
-listing date.
+listing date. The pull request merges itself as soon as every check
+passes; when a floating alias moved, the catalog tests fail on purpose
+and it waits for a human.
 
 ## Checklist before merging
 
-This pull request is a draft for a human: the core catalog tests fail on
+Only needed when the checks do not pass: the core catalog tests fail on
 purpose until the hardcoded expectations match the values you verified.
 
 - [ ] Verify release dates against the provider pages; OpenRouter reports

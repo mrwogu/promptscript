@@ -81,3 +81,11 @@ jobs:
             || gh pr edit chore/model-drift \
               --title 'Sync the model catalog with OpenRouter' \
               --body-file .github/model-drift-pr-body.md
+
+      - name: Auto-merge when every check passes
+        if: steps.drift.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr merge --auto --squash --delete-branch chore/model-drift \
+            || echo "Auto-merge unavailable; merge the drift pull request by hand."
