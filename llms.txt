@@ -38,6 +38,7 @@ targets.
 - [Hook Management](https://getpromptscript.dev/dev/reference/cli/hooks/index.md): AI tool hook installation and removal
 - [Hook Runtime](https://getpromptscript.dev/dev/reference/cli/hook/index.md): Low-level hook runtime contract
 - [Configuration](https://getpromptscript.dev/dev/reference/config/index.md): Configuration file format
+- [Model Catalog](https://getpromptscript.dev/dev/reference/models/index.md): Built-in model catalog, floating aliases, and target model names
 
 ## Target Platforms
 

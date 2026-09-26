@@ -1683,7 +1683,7 @@ Every canonical `@agents` field has an explicit status per native target. The ma
 | `background`          | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
 | `isolation`           | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
 
-GitHub transformation examples: `tools` maps PromptScript and Claude Code tool names to Copilot aliases (`Grep` and `Glob` both become `search`), and `model` maps common Claude and OpenAI aliases (`sonnet` becomes `Claude Sonnet 4.5`). Codex transformation examples: `content` becomes `developer_instructions`, `reasoningEffort` becomes `model_reasoning_effort`, and `skills` becomes the `skills.config` array.
+GitHub transformation examples: `tools` maps PromptScript and Claude Code tool names to Copilot aliases (`Grep` and `Glob` both become `search`), and `model` uses Copilot model names (`sonnet` becomes the newest Sonnet release, such as `Claude Sonnet 5`). Other targets keep the `model` field name but also get their native model names, see [Models](#models). Codex transformation examples: `content` becomes `developer_instructions`, `reasoningEffort` becomes `model_reasoning_effort`, and `skills` becomes the `skills.config` array.
 
 Every other target has no native agent output: the whole `@agents` block is omitted and reported with a `PS4003` warning instead of being dropped silently. The same diagnostic fires per field when a native target cannot represent authored data (for example `tools` on Cursor, or `skills` on GitHub), naming the agent, the field, the target, and which targets do support the field.
 
@@ -1704,6 +1704,21 @@ Targets with native agent systems receive dedicated files. Common examples:
 | Grok Build     | `.claude/agents/<name>.md` (delegated to the Claude formatter) |
 
 Targets without a native agent contract still receive project instructions through their primary output. Check [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) before depending on target-specific fields.
+
+## Models
+
+`model` and `specModel` values resolve against a built-in model catalog, and each target gets the model name it expects. Claude Code keeps floating aliases such as `sonnet`, GitHub Copilot gets display names such as `Claude Sonnet 5`, and Factory AI, Codex, and Cursor get model ids. The floating aliases `opus`, `sonnet`, `haiku`, and `fable` follow the newest release of their family in the catalog. Names the catalog does not know are written unchanged, unless the target spells them its own way: GitHub Copilot writes `auto` as `Auto`.
+
+A target that cannot run the model's provider, such as Codex with a Claude model, omits the field and reports `PS4004` during compilation. The same happens to a name with a line break or control character.
+
+PS041 reports agents pinned to deprecated or retired models, with the suggested replacement. When `models.supported` lists the models your instructions are written and tested for, PS041 also reports agents pinned to other models:
+
+```yaml
+models:
+  supported: [opus, sonnet, gpt-5.3-codex]
+```
+
+The [Model Catalog](https://getpromptscript.dev/dev/reference/models/index.md) lists every built-in model, the current release behind each floating alias, and what each target writes. See [Configuration: models](https://getpromptscript.dev/dev/reference/config/#models) for adding models that are not in the built-in catalog yet.
 
 ## Agents and Skills
 
@@ -1884,12 +1899,17 @@ PromptScript preserves the directory structure when producing native skill files
 | `disableModelInvocation`         | Prevent automatic model invocation |
 | `context`                        | Inherit or fork execution context  |
 | `agent`                          | Select agent type                  |
+| `model`                          | Select the model for the skill     |
 | `requires`                       | Declare skill dependencies         |
 | `references`                     | Bundle supporting documents        |
 | `scripts`                        | Bundle executable helpers          |
 | `inputs` and `outputs`           | Define typed skill contracts       |
 | `params`                         | Parameterize reusable skills       |
 | `examples`                       | Attach focused examples            |
+
+`model` sets the model used while the skill is active. Claude Code and Grok Build write it to the skill file, mapped through the [model catalog](https://getpromptscript.dev/dev/reference/models/index.md) the same way as agent models. Other targets have no skill model field and leave it out.
+
+For skills backed by a SKILL.md file, a `model` set in `.prs` wins over the SKILL.md frontmatter, and a frontmatter model without a `.prs` one is mapped the same way. A model the target cannot run is left out of the skill file and reported with a PS4004 warning during compilation.
 
 ## Universal and Native Paths
 
@@ -3580,6 +3600,7 @@ review: { description: "Review code changes" userInvocable: true content: """ Pe
 | `userInvocable` | boolean | Claude, Factory | Allow user to manually invoke skill |
 | `context` | string | Claude | Context mode: `"fork"` or `"inherit"` |
 | `agent` | string | Claude | Agent type: `"general-purpose"`, etc. |
+| `model` | string | Claude, Grok | Model to use while the skill is active |
 | `allowedTools` | string[] | Claude, Factory | Tools the skill can use |
 
 Skills are output differently based on the formatter:
@@ -3669,7 +3690,7 @@ Define specialized AI agents for target platforms with native agent support:
 | `description`         | string   | Yes      | When the agent should be invoked                                                     |
 | `content`             | string   | No       | Additional system prompt for the subagent                                            |
 | `tools`               | string[] | No       | Allowed tools (inherits all if omitted)                                              |
-| `model`               | string   | No       | AI model to use (platform-specific values)                                           |
+| `model`               | string   | No       | AI model to use, mapped to each target's model names                                 |
 | `reasoningEffort`     | string   | No       | Target-native reasoning level                                                        |
 | `specModel`           | string   | No       | Model for Specification/planning mode (GitHub, Factory only)                         |
 | `specReasoningEffort` | string   | No       | Reasoning effort for spec mode: `low`, `medium`, `high` (Factory only)               |
@@ -3694,14 +3715,14 @@ Agents output by platform:
 Supports `description`, `content`, `handoffs`, and `mcpServers` (inlined from the referenced `@mcpServers` entries), plus `tools`, `model`, and `specModel` under mapping:
 
 - Tools: `Read` → `read`, `Grep`/`Glob` → `search`, `Bash` → `execute`
-- Models: `sonnet` → `Claude Sonnet 4.5`, `opus` → `Claude Opus 4.5`, `haiku` → `Claude Haiku 4.5`
+- Models: Copilot names from the [model catalog](https://getpromptscript.dev/dev/reference/models/index.md); floating aliases pick the newest release, listed in [Floating Aliases](https://getpromptscript.dev/dev/reference/models/#floating-aliases), and `inherit` is omitted
 
 ```markdown
 ---
 name: code-reviewer
 description: Reviews code for quality and best practices
 tools: ['read', 'search', 'execute']
-model: Claude Sonnet 4.5
+model: Claude Sonnet 5
 ---
 
 You are a senior code reviewer ensuring high standards.
@@ -5202,6 +5223,10 @@ prs compile --dry-run
 
 `prs upgrade` parses every discovered file before writing, so an initial parse failure aborts the complete plan. Each file then uses atomic replacement and preserves permissions. Multi-file upgrade is not transactional: a write-time failure in a later file does not roll back files already replaced. Symlinks are skipped. Run upgrades on a clean version-control branch.
 
+## Model Versions
+
+`@meta.syntax` does not track AI models. Agent and skill `model` values resolve against the model catalog configured under [`models`](https://getpromptscript.dev/dev/reference/config/#models). Floating aliases such as `sonnet` follow the newest release in the catalog, and the [Model Catalog](https://getpromptscript.dev/dev/reference/models/index.md) lists every built-in model. PS041 reports pinned models that are deprecated or retired, together with their replacement, models outside `models.supported`, and inconsistent `models.profiles` entries.
+
 ## Key Diagnostics
 
 | Diagnostic | Meaning                                     | Action                                      |
@@ -5211,7 +5236,9 @@ prs compile --dry-run
 | PS034      | Invalid hook executable or option           | Fix command, script, or target override     |
 | PS037      | Invalid contextual section header           | Fix owner, key, title, or duplicate         |
 | PS038      | Unsupported or risky built-in block shape   | Convert to canonical shape                  |
+| PS041      | Unsupported model or invalid model profile  | Switch model or update `models` config      |
 | PS4002     | Target cannot preserve requested capability | Use documented target fallback              |
+| PS4004     | Target cannot run or write the model        | Pick another model or set a target name     |
 
 ## Release Gate
 
@@ -7260,6 +7287,23 @@ validation:
   # allowedPatterns:
   #   - 'bypass\s+(your\s+)?(rules|restrictions)'
 
+# ===================
+# Model Configuration
+# ===================
+models:
+  # Models the instructions are written and tested for (PS041)
+  supported:
+    - opus
+    - gpt-5.3-codex
+
+  # Custom model profiles, or overrides of built-in profiles
+  # profiles:
+  #   claude-opus-9:
+  #     provider: anthropic
+  #     family: claude-opus
+  #     version: '9'
+  #     displayName: Claude Opus 9
+
 # ====================
 # Watch Configuration
 # ====================
@@ -7351,6 +7395,7 @@ includePromptScriptSkill: true # default: true
 | `universalDir`             | string or boolean       | No       | Universal skills and commands directory         |
 | `includePromptScriptSkill` | boolean                 | No       | Include the bundled language skill              |
 | `validation`               | object                  | No       | Guard and validation rule settings              |
+| `models`                   | object                  | No       | Supported model set and model profiles          |
 | `policies`                 | array                   | No       | Extension compliance policies                   |
 
 `id` and `syntax` are required even when `input.entry` uses its default.
@@ -8034,6 +8079,88 @@ validation:
 
 Consumed by `blocked-patterns` (PS005) and `authority-injection` (PS011), the two heuristic text rules that always scan imported content. Excludes are declared by the consumer, never by the scanned file: a disable comment inside an imported skill cannot mute its own scan.
 
+### models
+
+Configures the model catalog. PromptScript uses it to write the native model name each target expects in agent and skill `model` fields, and to check model references (PS041).
+
+```yaml
+models:
+  supported:
+    - opus
+    - claude-sonnet-5
+    - gpt-5.3-codex
+  profiles:
+    claude-opus-9:
+      provider: anthropic
+      family: claude-opus
+      version: '9'
+      displayName: Claude Opus 9
+      apiId: claude-opus-9
+      releaseDate: '2027-01-15'
+      targets:
+        github: Claude Opus 9 (Preview)
+```
+
+| Field       | Type     | Default | Description                                                                                                                                                                                    |
+| ----------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `supported` | string[] | -       | Model set the instructions are written and tested for. Entries are profile ids, aliases, API ids, display names, or floating aliases. When set, PS041 reports model references outside the set |
+| `profiles`  | object   | `{}`    | Custom model profiles, or overrides of built-in profiles, keyed by profile id                                                                                                                  |
+
+#### Model references
+
+PromptScript ships a built-in catalog of Anthropic, OpenAI, Google, and xAI models. Each profile records the provider, family, version, display name, API id, lifecycle status, successor, and release and retirement dates. The [Model Catalog](https://getpromptscript.dev/dev/reference/models/index.md) lists every built-in profile.
+
+A `model` or `specModel` value in `@agents`, and `model` in `@skills`, matches a profile by id, alias, API id, or display name, ignoring case. Two kinds of values are special:
+
+- `inherit` keeps the model already selected in the tool.
+- `opus`, `sonnet`, `haiku`, and `fable` are floating aliases. Each one points at the newest release of its Claude family that is not retired, listed in [Floating Aliases](https://getpromptscript.dev/dev/reference/models/#floating-aliases).
+
+Names that are not in the catalog, such as gateway model ids, BYOK model ids, or Claude Code's `opusplan`, are written unchanged on every target. The exception is a value the target spells its own way: GitHub Copilot writes `auto` as `Auto`.
+
+#### Target model names
+
+| Target                  | Written value                                                                | `inherit` | Providers |
+| ----------------------- | ---------------------------------------------------------------------------- | --------- | --------- |
+| Claude Code, Grok Build | Floating aliases as written, other models as API id                          | Written   | Anthropic |
+| GitHub Copilot          | Display name, such as `Claude Sonnet 5` or `GPT-5.3-Codex`; `auto` is `Auto` | Omitted   | All       |
+| Factory AI              | API id                                                                       | Written   | All       |
+| Codex                   | API id                                                                       | Omitted   | OpenAI    |
+| Cursor                  | Profile id, which has no snapshot date, such as `claude-sonnet-4-5`          | Written   | All       |
+
+The [Model Catalog](https://getpromptscript.dev/dev/reference/models/#target-model-names) shows what each target writes for common values.
+
+For older releases the API id is a dated snapshot, such as `claude-sonnet-4-5-20250929`. GitHub Copilot and Factory AI map `specModel` the same way, and Claude Code and Grok Build also map the `model` field of skills. A model from a provider the target cannot run is omitted from that target's output and reported with a PS4004 warning during compilation. So is a name with a line break or control character, whether it comes from the source or from a profile. A per-target name in `profiles.<id>.targets` always wins, including for providers the target would otherwise omit. Its keys are the target names from the table (`claude`, `grok`, `github`, `factory`, `codex`, `cursor`), matched without regard to case.
+
+#### Model profiles
+
+A `profiles` key that matches a built-in profile id changes only the fields it sets. Its `targets` entries merge with the built-in ones, and every other field it sets, including `aliases`, replaces the built-in value. Any other key adds a custom profile, so a team can use a model before PromptScript ships it. Unset fields of a custom profile default to the key (`family`, `displayName`, and `apiId`), `provider: custom`, and `status: current`.
+
+| Field            | Description                                                                                          |
+| ---------------- | ---------------------------------------------------------------------------------------------------- |
+| `provider`       | Model provider, such as `anthropic`, `openai`, `google`, or `xai`                                    |
+| `family`         | Model line that groups versions, such as `claude-opus`                                               |
+| `version`        | Version inside the family, such as `5.5`                                                             |
+| `displayName`    | Human-readable name, also the GitHub Copilot model name                                              |
+| `apiId`          | Provider API model id                                                                                |
+| `aliases`        | Additional names that resolve to the profile                                                         |
+| `status`         | `current`, `legacy` (superseded but still served), `deprecated` (retirement announced), or `retired` |
+| `successor`      | Profile id of the recommended replacement                                                            |
+| `releaseDate`    | Release date in `YYYY-MM-DD` format                                                                  |
+| `retirementDate` | Date the provider stops serving the model, in `YYYY-MM-DD` format                                    |
+| `targets`        | Native model name per target, such as `github: Claude Opus 9`                                        |
+
+A custom profile that joins a Claude family with a higher version also moves the floating alias. With the example above, `opus` resolves to Claude Opus 9, so GitHub Copilot agents that use `opus` get `Claude Opus 9 (Preview)`.
+
+#### Model validation
+
+PS041 (`valid-model-reference`) is a warning. It reports:
+
+- references to `deprecated` or `retired` models, with the replacement found through the successor chain
+- when `supported` is set: references outside the set, references that are not in the catalog, and `supported` entries that are not in the catalog
+- problems in `profiles`: a name used by two profiles, a profile or alias named after a floating alias or `inherit`, a successor that is unknown or loops back, a date not in `YYYY-MM-DD` format, and a `targets` key for a target that does not write model names
+
+`legacy` models are still served, so they pass. Without `supported`, names that are not in the catalog are not reported, because tools accept many names no catalog can list.
+
 ### watch
 
 Configures watch mode.
@@ -8369,6 +8496,140 @@ registries:
     url: https://github.com/acme/standards.git
     fallbackUrl: git@github.com:acme/standards.git
 ```
+
+# Model Catalog
+
+PromptScript ships a catalog of Anthropic, OpenAI, Google, and xAI models. Agent `model` and `specModel` values and skill `model` values resolve against it, so you write a model once and each target gets the name it expects. PS041 uses the same catalog to report deprecated and retired models.
+
+This page is generated from the catalog source, so it matches what the compiler does. To use a model that is not listed yet, or to change a built-in profile, add it under `models.profiles` in `promptscript.yaml`. See [Configuration: models](https://getpromptscript.dev/dev/reference/config/#models).
+
+This version ships 58 profiles from 4 providers. They were last checked against the provider documentation on 2026-09-23.
+
+## Model References
+
+A value matches a profile by profile id, alias, API id, or display name, ignoring case. `claude-opus-5-5`, `opus-5.5`, and `Claude Opus 5.5` all select the same release. `inherit` keeps the model already selected in the tool.
+
+Names that are not in the catalog are written unchanged on every target, so gateway model ids, BYOK model ids, and Claude Code's `opusplan` keep working. The exception is a value the target spells its own way: GitHub Copilot writes `auto` as `Auto`.
+
+## Floating Aliases
+
+A floating alias points at the newest release of its Claude family that is not retired. Claude Code and Grok Build write the alias as it is and pick the release themselves. Other targets get the current release from this table, so they move to a new release when you upgrade PromptScript and compile again. Use a profile id when an agent must stay on one release.
+
+| Alias    | Family          | Current release    | Display name     |
+| -------- | --------------- | ------------------ | ---------------- |
+| `opus`   | `claude-opus`   | `claude-opus-5-5`  | Claude Opus 5.5  |
+| `sonnet` | `claude-sonnet` | `claude-sonnet-5`  | Claude Sonnet 5  |
+| `haiku`  | `claude-haiku`  | `claude-haiku-4-5` | Claude Haiku 4.5 |
+| `fable`  | `claude-fable`  | `claude-fable-5-1` | Claude Fable 5.1 |
+
+## Target Model Names
+
+Every target with a native model field has its own naming rule. This table shows what each one writes for a few example values:
+
+| Written in `.prs`        | Claude Code, Grok Build      | GitHub Copilot      | Factory AI                   | Codex            | Cursor                   |
+| ------------------------ | ---------------------------- | ------------------- | ---------------------------- | ---------------- | ------------------------ |
+| `opus`                   | `opus`                       | `Claude Opus 5.5`   | `claude-opus-5-5`            | omitted (PS4004) | `claude-opus-5-5`        |
+| `sonnet`                 | `sonnet`                     | `Claude Sonnet 5`   | `claude-sonnet-5`            | omitted (PS4004) | `claude-sonnet-5`        |
+| `haiku`                  | `haiku`                      | `Claude Haiku 4.5`  | `claude-haiku-4-5-20251001`  | omitted (PS4004) | `claude-haiku-4-5`       |
+| `fable`                  | `fable`                      | `Claude Fable 5.1`  | `claude-fable-5-1`           | omitted (PS4004) | `claude-fable-5-1`       |
+| `inherit`                | `inherit`                    | omitted             | `inherit`                    | omitted          | `inherit`                |
+| `claude-sonnet-4-5`      | `claude-sonnet-4-5-20250929` | `Claude Sonnet 4.5` | `claude-sonnet-4-5-20250929` | omitted (PS4004) | `claude-sonnet-4-5`      |
+| `gpt-5.3-codex`          | omitted (PS4004)             | `GPT-5.3-Codex`     | `gpt-5.3-codex`              | `gpt-5.3-codex`  | `gpt-5.3-codex`          |
+| `gemini-3.1-pro-preview` | omitted (PS4004)             | `Gemini 3.1 Pro`    | `gemini-3.1-pro-preview`     | omitted (PS4004) | `gemini-3.1-pro-preview` |
+
+- `omitted` means the output has no model field, so the tool uses its default model.
+- `omitted (PS4004)` means the target cannot run models from this provider. Compilation reports a PS4004 warning. To write a name anyway, set `models.profiles.<id>.targets.<target>` in `promptscript.yaml`.
+
+GitHub Copilot and Factory AI map `specModel` the same way. Claude Code and Grok Build also map the `model` field of skills, including a model written in the skill file's own frontmatter; a `model` set in `.prs` wins. The rules behind the table are listed in [Configuration: target model names](https://getpromptscript.dev/dev/reference/config/#target-model-names).
+
+## Profiles
+
+| Status       | Meaning                                                      |
+| ------------ | ------------------------------------------------------------ |
+| `current`    | Recommended for new instructions                             |
+| `legacy`     | Still served, but a newer release replaces it                |
+| `deprecated` | The provider announced it will retire the model; PS041 warns |
+| `retired`    | The provider no longer serves the model; PS041 warns         |
+
+PS041 suggests a replacement by following the successor chain to a current release. Dates follow the provider API. A tool can stop offering a model before the provider retires it.
+
+### Anthropic
+
+| Profile id          | Display name      | API id                       | Aliases                                  | Status                | Released   | Successor           |
+| ------------------- | ----------------- | ---------------------------- | ---------------------------------------- | --------------------- | ---------- | ------------------- |
+| `claude-opus-4`     | Claude Opus 4     | `claude-opus-4-20250514`     | `opus-4`                                 | retired on 2026-06-15 | 2025-05-22 | `claude-opus-4-1`   |
+| `claude-opus-4-1`   | Claude Opus 4.1   | `claude-opus-4-1-20250805`   | `opus-4.1`                               | retired on 2026-08-05 | 2025-08-05 | `claude-opus-4-5`   |
+| `claude-opus-4-5`   | Claude Opus 4.5   | `claude-opus-4-5-20251101`   | `opus-4.5`                               | legacy                | 2025-11-24 | `claude-opus-4-6`   |
+| `claude-opus-4-6`   | Claude Opus 4.6   | `claude-opus-4-6`            | `opus-4.6`                               | legacy                | -          | `claude-opus-4-7`   |
+| `claude-opus-4-7`   | Claude Opus 4.7   | `claude-opus-4-7`            | `opus-4.7`                               | legacy                | -          | `claude-opus-4-8`   |
+| `claude-opus-4-8`   | Claude Opus 4.8   | `claude-opus-4-8`            | `opus-4.8`                               | legacy                | -          | `claude-opus-5`     |
+| `claude-opus-5`     | Claude Opus 5     | `claude-opus-5`              | `opus-5`                                 | legacy                | 2026-07-24 | `claude-opus-5-5`   |
+| `claude-opus-5-5`   | Claude Opus 5.5   | `claude-opus-5-5`            | `opus-5.5`                               | current               | 2026-09-22 | -                   |
+| `claude-3-5-sonnet` | Claude 3.5 Sonnet | `claude-3-5-sonnet-20241022` | `sonnet-3.5`, `claude-3-5-sonnet-latest` | retired on 2025-10-28 | 2024-10-22 | `claude-3-7-sonnet` |
+| `claude-3-7-sonnet` | Claude 3.7 Sonnet | `claude-3-7-sonnet-20250219` | `sonnet-3.7`, `claude-3-7-sonnet-latest` | retired on 2026-02-19 | 2025-02-24 | `claude-sonnet-4`   |
+| `claude-sonnet-4`   | Claude Sonnet 4   | `claude-sonnet-4-20250514`   | `sonnet-4`                               | retired on 2026-06-15 | 2025-05-22 | `claude-sonnet-4-5` |
+| `claude-sonnet-4-5` | Claude Sonnet 4.5 | `claude-sonnet-4-5-20250929` | `sonnet-4.5`                             | legacy                | 2025-09-29 | `claude-sonnet-4-6` |
+| `claude-sonnet-4-6` | Claude Sonnet 4.6 | `claude-sonnet-4-6`          | `sonnet-4.6`                             | legacy                | -          | `claude-sonnet-5`   |
+| `claude-sonnet-5`   | Claude Sonnet 5   | `claude-sonnet-5`            | `sonnet-5`                               | current               | 2026-06-30 | -                   |
+| `claude-3-5-haiku`  | Claude 3.5 Haiku  | `claude-3-5-haiku-20241022`  | `haiku-3.5`, `claude-3-5-haiku-latest`   | retired on 2026-02-19 | 2024-10-22 | `claude-haiku-4-5`  |
+| `claude-haiku-4-5`  | Claude Haiku 4.5  | `claude-haiku-4-5-20251001`  | `haiku-4.5`                              | current               | 2025-10-15 | -                   |
+| `claude-fable-5`    | Claude Fable 5    | `claude-fable-5`             | `fable-5`                                | legacy                | 2026-06-09 | `claude-fable-5-1`  |
+| `claude-fable-5-1`  | Claude Fable 5.1  | `claude-fable-5-1`           | `fable-5.1`                              | current               | 2026-09-01 | -                   |
+| `claude-mythos-5`   | Claude Mythos 5   | `claude-mythos-5`            | `mythos-5`                               | legacy                | 2026-06-09 | `claude-mythos-5-1` |
+| `claude-mythos-5-1` | Claude Mythos 5.1 | `claude-mythos-5-1`          | `mythos-5.1`                             | current               | 2026-09-01 | -                   |
+
+### OpenAI
+
+| Profile id           | Display name       | API id               | Aliases | Status                         | Released   | Successor       |
+| -------------------- | ------------------ | -------------------- | ------- | ------------------------------ | ---------- | --------------- |
+| `gpt-4o`             | GPT-4o             | `gpt-4o`             | -       | legacy                         | 2024-05-13 | `gpt-4.1`       |
+| `gpt-4.1`            | GPT-4.1            | `gpt-4.1`            | -       | legacy                         | 2025-04-14 | `gpt-5.5`       |
+| `gpt-5`              | GPT-5              | `gpt-5`              | -       | deprecated, retires 2026-12-11 | 2025-08-07 | `gpt-5.1`       |
+| `gpt-5.1`            | GPT-5.1            | `gpt-5.1`            | -       | deprecated                     | 2025-11-13 | `gpt-5.2`       |
+| `gpt-5.2`            | GPT-5.2            | `gpt-5.2`            | -       | legacy                         | 2025-12-11 | `gpt-5.4`       |
+| `gpt-5.4`            | GPT-5.4            | `gpt-5.4`            | -       | legacy                         | 2026-03-05 | `gpt-5.5`       |
+| `gpt-5.5`            | GPT-5.5            | `gpt-5.5`            | -       | legacy                         | 2026-04-24 | `gpt-5.6-sol`   |
+| `gpt-5-mini`         | GPT-5 mini         | `gpt-5-mini`         | -       | deprecated, retires 2026-12-11 | 2025-08-07 | `gpt-5.4-mini`  |
+| `gpt-5.4-mini`       | GPT-5.4 mini       | `gpt-5.4-mini`       | -       | legacy                         | 2026-03-17 | `gpt-5.6-terra` |
+| `gpt-5-nano`         | GPT-5 nano         | `gpt-5-nano`         | -       | deprecated, retires 2026-12-11 | 2025-08-07 | `gpt-5.4-nano`  |
+| `gpt-5.4-nano`       | GPT-5.4 nano       | `gpt-5.4-nano`       | -       | legacy                         | 2026-03-17 | `gpt-5.6-luna`  |
+| `gpt-5-codex`        | GPT-5-Codex        | `gpt-5-codex`        | -       | legacy                         | -          | `gpt-5.1-codex` |
+| `gpt-5.1-codex`      | GPT-5.1-Codex      | `gpt-5.1-codex`      | -       | legacy                         | 2025-11-13 | `gpt-5.2-codex` |
+| `gpt-5.2-codex`      | GPT-5.2-Codex      | `gpt-5.2-codex`      | -       | deprecated                     | 2026-01-14 | `gpt-5.3-codex` |
+| `gpt-5.3-codex`      | GPT-5.3-Codex      | `gpt-5.3-codex`      | -       | current                        | 2026-02-24 | -               |
+| `gpt-5.1-codex-max`  | GPT-5.1-Codex-Max  | `gpt-5.1-codex-max`  | -       | legacy                         | 2025-12-04 | `gpt-5.2-codex` |
+| `gpt-5.1-codex-mini` | GPT-5.1-Codex-Mini | `gpt-5.1-codex-mini` | -       | legacy                         | 2025-11-13 | `gpt-5.3-codex` |
+| `gpt-5.6-sol`        | GPT-5.6 Sol        | `gpt-5.6-sol`        | -       | legacy                         | 2026-07-09 | `gpt-6-astra`   |
+| `gpt-6-sol`          | GPT-6 Sol          | `gpt-6-sol`          | -       | current                        | 2026-09-22 | -               |
+| `gpt-5.6-terra`      | GPT-5.6 Terra      | `gpt-5.6-terra`      | -       | legacy                         | 2026-07-09 | `gpt-6-sol`     |
+| `gpt-5.6-luna`       | GPT-5.6 Luna       | `gpt-5.6-luna`       | -       | legacy                         | 2026-07-09 | `gpt-6-luna`    |
+| `gpt-6-luna`         | GPT-6 Luna         | `gpt-6-luna`         | -       | current                        | 2026-09-22 | -               |
+| `gpt-6-astra`        | GPT-6 Astra        | `gpt-6-astra`        | -       | current                        | 2026-09-03 | -               |
+| `o3`                 | o3                 | `o3`                 | -       | deprecated, retires 2026-12-11 | 2025-04-16 | `gpt-5.5`       |
+| `o4-mini`            | o4-mini            | `o4-mini`            | -       | deprecated, retires 2026-10-23 | 2025-04-16 | `gpt-5.4-mini`  |
+
+### Google
+
+| Profile id               | Display name          | API id                   | Aliases                  | Status                         | Released   | Successor                |
+| ------------------------ | --------------------- | ------------------------ | ------------------------ | ------------------------------ | ---------- | ------------------------ |
+| `gemini-2.5-pro`         | Gemini 2.5 Pro        | `gemini-2.5-pro`         | -                        | legacy                         | 2025-06-17 | `gemini-3.1-pro-preview` |
+| `gemini-3.1-pro-preview` | Gemini 3.1 Pro        | `gemini-3.1-pro-preview` | `Gemini 3.1 Pro Preview` | current                        | 2026-02-19 | -                        |
+| `gemini-2.5-flash`       | Gemini 2.5 Flash      | `gemini-2.5-flash`       | -                        | legacy                         | 2025-06-17 | `gemini-3.5-flash`       |
+| `gemini-3.5-flash`       | Gemini 3.5 Flash      | `gemini-3.5-flash`       | -                        | legacy                         | 2026-05-19 | `gemini-3.6-flash`       |
+| `gemini-3.6-flash`       | Gemini 3.6 Flash      | `gemini-3.6-flash`       | -                        | legacy                         | 2026-07-21 | `gemini-3.7-flash`       |
+| `gemini-3.7-flash`       | Gemini 3.7 Flash      | `gemini-3.7-flash`       | -                        | legacy                         | 2026-08-13 | `gemini-3.8-flash`       |
+| `gemini-3.8-flash`       | Gemini 3.8 Flash      | `gemini-3.8-flash`       | -                        | current                        | 2026-09-02 | -                        |
+| `gemini-2.5-flash-lite`  | Gemini 2.5 Flash-Lite | `gemini-2.5-flash-lite`  | -                        | legacy                         | 2025-07-22 | `gemini-3.1-flash-lite`  |
+| `gemini-3.1-flash-lite`  | Gemini 3.1 Flash-Lite | `gemini-3.1-flash-lite`  | -                        | deprecated, retires 2027-05-07 | 2026-05-07 | `gemini-3.5-flash-lite`  |
+| `gemini-3.5-flash-lite`  | Gemini 3.5 Flash-Lite | `gemini-3.5-flash-lite`  | -                        | current                        | 2026-07-21 | -                        |
+
+### xAI
+
+| Profile id | Display name | API id     | Aliases | Status  | Released | Successor  |
+| ---------- | ------------ | ---------- | ------- | ------- | -------- | ---------- |
+| `grok-4.5` | Grok 4.5     | `grok-4.5` | -       | legacy  | -        | `grok-4.6` |
+| `grok-4.6` | Grok 4.6     | `grok-4.6` | -       | legacy  | -        | `grok-4.7` |
+| `grok-4.7` | Grok 4.7     | `grok-4.7` | -       | current | -        | -          |
 # Target Platforms
 
 # Supported Formatters
@@ -8603,6 +8864,7 @@ GitLab Duo output mapping:
 - `CLAUDE.local.md` is intentionally not committed to git (private developer overrides)
 - Skills support frontmatter fields: `name`, `description`, plus newer fields like `model`, `allowedTools`, `disallowedTools`, `permissionMode`, `specModel`, `specReasoningEffort`
 - Agent files support: `description`, `content`, `tools`, `disallowedTools`, `model`, `permissionMode`, `skills`, `maxTurns`, `memory`, `mcpServers`, `background`, `isolation`. Fields other targets own (`reasoningEffort`, `specModel`, `specReasoningEffort`, `sandboxMode`, `nicknameCandidates`, `handoffs`) are reported with `PS4003` and omitted
+- Agent and skill `model` values keep floating aliases (`opus`, `sonnet`, `haiku`, `fable`) and `inherit` as written; pinned Claude releases become API ids such as `claude-sonnet-4-5-20250929`, and models from other providers are omitted with `PS4004` (see [Model Catalog](https://getpromptscript.dev/dev/reference/models/#target-model-names))
 - Agent-level lifecycle hooks are not part of `@agents`; define them through `@hooks`
 - The `@local` block content goes to `CLAUDE.local.md` with an import statement added to the main `CLAUDE.md`
 
@@ -8690,6 +8952,7 @@ project-root/
 - Prompt files (`.github/prompts/*.prompt.md`) support agent mode with `mode: agent` and `tools` list
 - Skills go to `.github/skills/<name>/SKILL.md` with YAML frontmatter
 - Agents go to `.github/agents/<name>.md` + top-level `AGENTS.md`
+- Agent `model` and `specModel` values become Copilot model names (display names such as `Claude Sonnet 4.5`); `inherit` is omitted, `auto` becomes `Auto`, and names outside the catalog pass through unchanged (see [Model Catalog](https://getpromptscript.dev/dev/reference/models/#target-model-names))
 - `@shortcuts` with `prompt: true` become prompt files; without `prompt` they become instruction files
 - `@hooks` uses `.github/hooks/promptscript.json` for Copilot CLI and cloud agent in `multifile` and `full` modes
 - Hook commands use GitHub's shell-specific `bash` and `powershell` fields
@@ -8792,6 +9055,7 @@ project-root/
 - `@shortcuts` with multi-line content become command files
 - The `.cursorrules` file (`legacy` mode) is deprecated; `.cursor/rules/*.mdc` is preferred
 - `full` mode adds commands, `.agents/skills/<name>/SKILL.md`, and `.cursor/agents/<name>.md`
+- Agent `model` values become model ids without a snapshot date, such as `claude-sonnet-4-5`; `inherit` is written as is (see [Model Catalog](https://getpromptscript.dev/dev/reference/models/#target-model-names))
 - `@hooks` emits `.cursor/hooks.json` only in `full` mode; other modes report `PS4002` and omit hooks
 - Supports `@file` and `@folder` context references in rules
 - Nested directory rules are supported
@@ -8955,6 +9219,7 @@ project-root/
 - Uses `AGENTS.md` as the main file (extends MarkdownInstructionFormatter)
 - Skills go to `.factory/skills/<name>/SKILL.md`
 - Agents are called "droids" - output to `.factory/droids/<name>.md`
+- Droid `model` and `specModel` values become API ids such as `claude-sonnet-4-5-20250929` or `gpt-5.3-codex`; `inherit` is written as is (see [Model Catalog](https://getpromptscript.dev/dev/reference/models/#target-model-names))
 - `@hooks` uses `.factory/hooks.json` with PascalCase event names in `multifile` and `full` modes
 - `pre-terminal-command` maps to `PreToolUse` with the deterministic `Execute` matcher unless `targets.factory.matcher` overrides it
 - Hook `matcher` values match Factory tool names (for example `Execute`, `Read`, `Edit|Write`); other targets use different tool-name vocabularies, so a matcher that works here may match nothing elsewhere
@@ -10744,7 +11009,10 @@ Properties like `userInvocable`, `disableModelInvocation`, `context`, and `agent
 | `disableModelInvocation` | boolean  | `false` | Claude, GitHub, Factory          |
 | `context`                | string   | -       | Claude (`"fork"` or `"inherit"`) |
 | `agent`                  | string   | -       | Claude                           |
+| `model`                  | string   | -       | Claude, Grok                     |
 | `allowedTools`           | string[] | -       | Claude, Factory                  |
+
+`model` takes the same values as agent `model` and is mapped through the [model catalog](https://getpromptscript.dev/dev/reference/models/index.md).
 
 ## Writing Good Instructions
 
@@ -19345,6 +19613,7 @@ Example local file (`CLAUDE.local.md`):
 | `userInvocable`          | boolean  | No     | Yes    | Yes     | Allow user to manually invoke            |
 | `context`                | string   | No     | Yes    | No      | Context mode: `"fork"` or `"inherit"`    |
 | `agent`                  | string   | No     | Yes    | No      | Agent type for execution                 |
+| `model`                  | string   | No     | Yes    | No      | Model to use while the skill is active   |
 | `allowedTools`           | string[] | No     | Yes    | Yes     | Tools the skill can use                  |
 | `steps`                  | string[] | Yes    | No     | No      | Workflow steps (generates workflow file) |
 | `prompt`                 | boolean  | Yes    | No     | No      | Generate as prompt file instead          |
@@ -19387,7 +19656,7 @@ Benefits of using subagents:
 - **Preserve context** - Keep exploration and implementation out of your main conversation
 - **Enforce constraints** - Limit which tools a subagent can use
 - **Specialize behavior** - Focused system prompts for specific domains
-- **Control costs** - Route tasks to faster, cheaper models (Claude only)
+- **Control costs** - Route tasks to faster, cheaper models on every target with a native `model` field
 
 ## Complete Example
 
@@ -19546,16 +19815,20 @@ Benefits of using subagents:
 
 ### Model Options
 
-**GitHub Copilot:** Any model available in your GitHub Copilot subscription (e.g., `gpt-4o`, `claude-sonnet-4`, `o1-mini`).
+Write one model value, and PromptScript maps it to the model name each target expects through the [model catalog](https://getpromptscript.dev/dev/reference/models/index.md):
 
-**Claude Code:**
+| Value                                | Meaning                                                       |
+| ------------------------------------ | ------------------------------------------------------------- |
+| `sonnet`, `opus`, `haiku`, `fable`   | Floating alias for the newest release of the Claude family    |
+| `claude-opus-5-5`, `Claude Opus 5.5` | Pinned release, by profile id, alias, API id, or display name |
+| `inherit`                            | Use same model as main conversation                           |
+| Any other name                       | Written unchanged, unless the target has its own spelling     |
 
-| Model     | Use Case                               |
-| --------- | -------------------------------------- |
-| `sonnet`  | Default. Balanced capability and speed |
-| `opus`    | Complex reasoning, highest capability  |
-| `haiku`   | Fast, low-latency for simple tasks     |
-| `inherit` | Use same model as main conversation    |
+**GitHub Copilot:** Catalog models become Copilot model names, so `claude-sonnet-4-5` becomes `Claude Sonnet 4.5` and `sonnet` becomes the newest Sonnet release. `inherit` is omitted, and `auto` becomes `Auto`. Other names pass through unchanged, so any name from your Copilot model picker works.
+
+**Claude Code:** Floating aliases and `inherit` stay as written. Pinned Claude releases become API ids, such as `claude-sonnet-4-5-20250929`. Models from other providers are omitted with a `PS4004` warning.
+
+**Factory AI, Codex, and Cursor:** Catalog models become model ids. Codex runs only OpenAI models, so it omits models from other providers with a `PS4004` warning. Factory AI and Cursor write `inherit`, Codex omits it. The [Model Catalog](https://getpromptscript.dev/dev/reference/models/#target-model-names) shows what each target writes.
 
 ### Permission Modes (Claude only)
 
@@ -19578,7 +19851,7 @@ With `version: full`, agents are generated as separate files:
 name: code-reviewer
 description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability.
 tools: ['read', 'search', 'execute']
-model: Claude Sonnet 4.5
+model: Claude Sonnet 5
 ---
 
 You are a senior code reviewer ensuring high standards of code quality and security.
@@ -19607,13 +19880,14 @@ PromptScript automatically maps tool and model names to GitHub Copilot's format:
 
 **Models:**
 
-| PromptScript | GitHub Copilot      |
-| ------------ | ------------------- |
-| `sonnet`     | `Claude Sonnet 4.5` |
-| `opus`       | `Claude Opus 4.5`   |
-| `haiku`      | `Claude Haiku 4.5`  |
-| `sonnet-4`   | `Claude Sonnet 4`   |
-| `inherit`    | *(omitted)*         |
+| PromptScript                       | GitHub Copilot                                   |
+| ---------------------------------- | ------------------------------------------------ |
+| `sonnet`, `opus`, `haiku`, `fable` | Display name of the newest release in the family |
+| `sonnet-4.5`                       | `Claude Sonnet 4.5`                              |
+| `gpt-5.3-codex`                    | `GPT-5.3-Codex`                                  |
+| `inherit`                          | *(omitted)*                                      |
+
+The [Model Catalog](https://getpromptscript.dev/dev/reference/models/#floating-aliases) lists the current release behind each floating alias.
 
 Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` cannot be represented in GitHub output: each one is reported with a `PS4003` compatibility warning and omitted.
 
@@ -19726,6 +20000,7 @@ Project lifecycle hooks are defined separately through `@hooks`. Agents can refe
 
 - [Language Reference - @agents](https://getpromptscript.dev/dev/reference/language/#agents)
 - [Agent Platform - Agents](https://getpromptscript.dev/dev/features/agents/index.md)
+- [Model Catalog](https://getpromptscript.dev/dev/reference/models/index.md)
 - [Skills & Local Example](https://getpromptscript.dev/dev/examples/skills-and-local/index.md)
 - [GitHub Copilot Custom Agents Documentation](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents)
 - [Claude Code Subagents Documentation](https://code.claude.com/docs/en/sub-agents)
