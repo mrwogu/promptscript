@@ -90,7 +90,7 @@ function releaseDateFromCreated(created: number): string {
 }
 
 function escapeRegExp(text: string): string {
-  return text.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
 /**
@@ -106,7 +106,7 @@ function versionPattern(profile: ModelProfile): RegExp | undefined {
     return new RegExp(
       '^' +
         escapeRegExp(profile.id.slice(0, position)) +
-        '(\\d+(?:[.-]\\d+)*)' +
+        String.raw`(\d+(?:[.-]\d+)*)` +
         escapeRegExp(profile.id.slice(position + form.length)) +
         '$'
     );
@@ -159,6 +159,68 @@ function slugOfProfile(profile: ModelProfile): string {
     : profile.id.slice(0, position) + profile.version + profile.id.slice(position + dashed.length);
 }
 
+/** Whether the catalog already knows an entry under this exact slug. */
+function isKnownSlug(entry: OpenRouterModelEntry, profiles: readonly ModelProfile[]): boolean {
+  return profiles.some(
+    (profile) =>
+      profile.provider === entry.provider &&
+      (profile.id === entry.slug || profile.aliases.includes(entry.slug))
+  );
+}
+
+interface FamilyMatch {
+  readonly family: string;
+  readonly version: string;
+}
+
+/** The known family an entry's slug fits, with the version it carries. */
+function matchFamilyVersion(
+  entry: OpenRouterModelEntry,
+  patterns: ReadonlyArray<{ profile: ModelProfile; pattern: RegExp }>
+): FamilyMatch | undefined {
+  for (const { profile, pattern } of patterns) {
+    if (profile.provider !== entry.provider) continue;
+    const match = pattern.exec(entry.slug);
+    if (match === null) continue;
+    return { family: profile.family, version: (match[1] ?? '').replaceAll('-', '.') };
+  }
+  return undefined;
+}
+
+/** A candidate for one entry, or undefined when the catalog covers it. */
+function draftCandidate(
+  entry: OpenRouterModelEntry,
+  match: FamilyMatch,
+  profiles: readonly ModelProfile[],
+  listings: ReadonlyMap<string, OpenRouterModelEntry>
+): ModelDriftCandidate | undefined {
+  const latest = profiles
+    .filter((profile) => profile.provider === entry.provider && profile.family === match.family)
+    .sort((a, b) => compareModelVersions(a.version, b.version))
+    .at(-1);
+  // The catalog tracks a curated history, so only versions beyond the
+  // tracked ones count, and OpenRouter has to list them after the
+  // release they follow: grok-4.20 reads as newer than grok-4.7 by
+  // version but predates it.
+  if (latest === undefined || compareModelVersions(match.version, latest.version) <= 0) {
+    return undefined;
+  }
+  const latestListing = listings.get(slugOfProfile(latest));
+  if (latestListing !== undefined && entry.releaseDate <= latestListing.releaseDate) {
+    return undefined;
+  }
+  return {
+    provider: entry.provider,
+    family: match.family,
+    version: match.version,
+    id: entry.provider === 'anthropic' ? entry.slug.replaceAll('.', '-') : entry.slug,
+    displayName: entry.displayName,
+    releaseDate: entry.releaseDate,
+    retirementDate: entry.retirementDate,
+    apiId: entry.apiId,
+  };
+}
+
 /**
  * Compare OpenRouter models with the catalog. A model counts as a
  * candidate when its provider is tracked, its slug fits the id pattern of
@@ -181,51 +243,14 @@ export function detectModelDrift(
 
   for (const entry of entries) {
     slugs.add(entry.slug);
-    const known = profiles.some(
-      (profile) =>
-        profile.provider === entry.provider &&
-        (profile.id === entry.slug || profile.aliases.includes(entry.slug))
-    );
-    if (known) continue;
-
-    let family: string | undefined;
-    let version = '';
-    for (const { profile, pattern } of patterns) {
-      if (profile.provider !== entry.provider) continue;
-      const match = entry.slug.match(pattern);
-      if (match === null) continue;
-      family = profile.family;
-      version = (match[1] ?? '').replaceAll('-', '.');
-      break;
-    }
-    if (family === undefined) {
+    if (isKnownSlug(entry, profiles)) continue;
+    const match = matchFamilyVersion(entry, patterns);
+    if (match === undefined) {
       unmatched.push(entry.slug);
       continue;
     }
-    const familyProfiles = profiles.filter(
-      (profile) => profile.provider === entry.provider && profile.family === family
-    );
-    const latest = familyProfiles
-      .slice()
-      .sort((a, b) => compareModelVersions(a.version, b.version))
-      .at(-1);
-    // The catalog tracks a curated history, so only versions beyond the
-    // tracked ones count, and OpenRouter has to list them after the
-    // release they follow: grok-4.20 reads as newer than grok-4.7 by
-    // version but predates it.
-    if (latest === undefined || compareModelVersions(version, latest.version) <= 0) continue;
-    const latestListing = listings.get(slugOfProfile(latest));
-    if (latestListing !== undefined && entry.releaseDate <= latestListing.releaseDate) continue;
-    candidates.push({
-      provider: entry.provider,
-      family,
-      version,
-      id: entry.provider === 'anthropic' ? entry.slug.replaceAll('.', '-') : entry.slug,
-      displayName: entry.displayName,
-      releaseDate: entry.releaseDate,
-      retirementDate: entry.retirementDate,
-      apiId: entry.apiId,
-    });
+    const candidate = draftCandidate(entry, match, profiles, listings);
+    if (candidate !== undefined) candidates.push(candidate);
   }
 
   candidates.sort((a, b) => a.releaseDate.localeCompare(b.releaseDate));
@@ -261,15 +286,13 @@ export function displacedProfile(
  * with the fields OpenRouter knows about.
  */
 export function formatProfileEntry(candidate: ModelDriftCandidate): string {
-  const fields: string[] = [];
-  if (candidate.apiId !== undefined) {
-    fields.push(`apiId: '${candidate.apiId}'`);
-  }
-  if (candidate.retirementDate !== undefined) {
-    fields.push(`status: 'deprecated'`);
-    fields.push(`retirementDate: '${candidate.retirementDate}'`);
-  }
-  fields.push(`releaseDate: '${candidate.releaseDate}'`);
+  const fields = [
+    ...(candidate.apiId === undefined ? [] : [`apiId: '${candidate.apiId}'`]),
+    ...(candidate.retirementDate === undefined
+      ? []
+      : [`status: 'deprecated'`, `retirementDate: '${candidate.retirementDate}'`]),
+    `releaseDate: '${candidate.releaseDate}'`,
+  ];
   const body = fields.map((field) => `    ${field},`).join('\n');
   if (candidate.provider === 'anthropic') {
     const line = candidate.family.slice('claude-'.length);

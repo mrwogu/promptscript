@@ -181,4 +181,4 @@ async function main(): Promise<void> {
   if (report.candidates.length > 0) process.exitCode = 1;
 }
 
-void main();
+await main();
