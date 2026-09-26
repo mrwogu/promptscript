@@ -212,7 +212,7 @@ function compareVersionParts(leftPart: string, rightPart: string): number {
   return leftSuffix.localeCompare(rightSuffix);
 }
 
-function compareVersions(a: string, b: string): number {
+export function compareModelVersions(a: string, b: string): number {
   const left = a.split('.');
   const right = b.split('.');
   for (let index = 0; index < Math.max(left.length, right.length); index++) {
@@ -227,7 +227,7 @@ function compareVersions(a: string, b: string): number {
  */
 export function compareModelReleases(a: ModelProfile, b: ModelProfile): number {
   return (
-    compareVersions(a.version, b.version) ||
+    compareModelVersions(a.version, b.version) ||
     (a.releaseDate ?? '').localeCompare(b.releaseDate ?? '')
   );
 }
