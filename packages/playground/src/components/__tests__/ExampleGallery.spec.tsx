@@ -62,6 +62,39 @@ describe('ExampleGallery — gallery examples compile', () => {
     expect(output).toContain('Require integration tests');
   });
 
+  it('resolves model catalog entries to target-native model names', async () => {
+    const example = EXAMPLES.find((candidate) => candidate.id === 'with-models');
+    expect(example).toBeDefined();
+    const files = Object.fromEntries(example!.files.map((file) => [file.path, file.content]));
+
+    const result = await compile(files, example!.files[0]!.path, {
+      formatters: [
+        { name: 'claude', config: { version: 'full' } },
+        { name: 'github', config: { version: 'full' } },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+    // Claude keeps the floating alias and expands the pinned release to its API id.
+    const triage = result.outputs.get('.claude/agents/triage.md')?.content;
+    expect(triage).toContain('model: sonnet');
+    const reviewer = result.outputs.get('.claude/agents/deep-reviewer.md')?.content;
+    expect(reviewer).toContain('model: claude-opus-4-5-20251101');
+    // GitHub Copilot wants display names for both, and transforms specModel.
+    const githubReviewer = result.outputs.get('.github/agents/deep-reviewer.md')?.content;
+    expect(githubReviewer).toContain('model: Claude Opus 4.5');
+    const githubSpecWriter = result.outputs.get('.github/agents/spec-writer.md')?.content;
+    expect(githubSpecWriter).toContain('specModel: Claude Haiku 4.5');
+    // Claude has no specModel slot, so the compiler reports the loss.
+    expect(result.warnings).toContainEqual(
+      expect.objectContaining({
+        ruleId: 'PS4003',
+        message:
+          'Agent "spec-writer": field "specModel" is not supported by target "claude" and will be omitted.',
+      })
+    );
+  });
+
   it('qualifies imported agents with their import alias', async () => {
     const example = EXAMPLES.find((candidate) => candidate.id === 'namespaced-agents');
     expect(example).toBeDefined();
