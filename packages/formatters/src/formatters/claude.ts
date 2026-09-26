@@ -11,8 +11,7 @@ import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.
 import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
 import {
   appendModelCompatibilityWarnings,
-  extractRawFrontmatterModel,
-  isFrontmatterModelLine,
+  findRawFrontmatterModel,
   toTargetModel,
 } from '../model-mapping.js';
 import {
@@ -659,29 +658,28 @@ export class ClaudeFormatter extends BaseFormatter {
    *
    * A `.prs` model wins over the frontmatter one; without it, the
    * frontmatter value is mapped through the model catalog for this target.
-   * Unmappable values drop the line (PS4004 reports why), and frontmatter
-   * without a model line gains one from `.prs`. Empty and block-scalar
-   * values are left untouched.
+   * Unmappable values drop the whole property, block scalars included,
+   * and PS4004 reports why; frontmatter without a model line gains one
+   * from `.prs`. Empty values are left untouched.
    */
   private applyRawFrontmatterModel(
     rawFrontmatter: string,
     prsModel: string | undefined,
     options?: FormatOptions
   ): string {
-    const lines = rawFrontmatter.split(/\r?\n/);
-    const modelIndex = lines.findIndex((line) => isFrontmatterModelLine(line));
-    if (modelIndex < 0) {
+    const field = findRawFrontmatterModel(rawFrontmatter);
+    if (field === undefined) {
       return prsModel === undefined
         ? rawFrontmatter
         : `${rawFrontmatter}\nmodel: ${this.yamlString(prsModel)}`;
     }
-    const rawModel = extractRawFrontmatterModel(rawFrontmatter);
-    if (rawModel === undefined) return rawFrontmatter;
-    const mapped = prsModel ?? this.claudeModel(rawModel, options);
+    if (field.value === undefined) return rawFrontmatter;
+    const lines = rawFrontmatter.split(/\r?\n/);
+    const mapped = prsModel ?? this.claudeModel(field.value, options);
     if (mapped === undefined) {
-      lines.splice(modelIndex, 1);
+      lines.splice(field.keyIndex, field.lineCount);
     } else {
-      lines[modelIndex] = `model: ${this.yamlString(mapped)}`;
+      lines.splice(field.keyIndex, field.lineCount, `model: ${this.yamlString(mapped)}`);
     }
     return lines.join('\n');
   }
