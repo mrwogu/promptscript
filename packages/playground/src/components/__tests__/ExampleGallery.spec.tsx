@@ -4,6 +4,16 @@ import { compile } from '@promptscript/browser-compiler';
 import { EXAMPLES, ExampleGallery } from '../ExampleGallery';
 import { usePlaygroundStore } from '../../store';
 
+/** Load one gallery example as the compile input files plus entry path. */
+function loadExample(id: string): { entry: string; files: Record<string, string> } {
+  const example = EXAMPLES.find((candidate) => candidate.id === id);
+  if (!example) throw new Error(`Missing example "${id}"`);
+  return {
+    entry: example.files[0]?.path ?? '',
+    files: Object.fromEntries(example.files.map((file) => [file.path, file.content])),
+  };
+}
+
 describe('ExampleGallery — gallery examples compile', () => {
   it('uses current syntax for every PromptScript file', () => {
     for (const example of EXAMPLES) {
@@ -44,11 +54,9 @@ describe('ExampleGallery — gallery examples compile', () => {
   }
 
   it('resolves composition and replacement in declaration order', async () => {
-    const example = EXAMPLES.find((candidate) => candidate.id === 'composition-order');
-    expect(example).toBeDefined();
-    const files = Object.fromEntries(example!.files.map((file) => [file.path, file.content]));
+    const { entry, files } = loadExample('composition-order');
 
-    const result = await compile(files, example!.files[0]!.path, {
+    const result = await compile(files, entry, {
       formatters: [{ name: 'github', config: { version: 'full' } }],
     });
 
@@ -63,11 +71,9 @@ describe('ExampleGallery — gallery examples compile', () => {
   });
 
   it('resolves model catalog entries to target-native model names', async () => {
-    const example = EXAMPLES.find((candidate) => candidate.id === 'with-models');
-    expect(example).toBeDefined();
-    const files = Object.fromEntries(example!.files.map((file) => [file.path, file.content]));
+    const { entry, files } = loadExample('with-models');
 
-    const result = await compile(files, example!.files[0]!.path, {
+    const result = await compile(files, entry, {
       formatters: [
         { name: 'claude', config: { version: 'full' } },
         { name: 'github', config: { version: 'full' } },
@@ -96,11 +102,9 @@ describe('ExampleGallery — gallery examples compile', () => {
   });
 
   it('qualifies imported agents with their import alias', async () => {
-    const example = EXAMPLES.find((candidate) => candidate.id === 'namespaced-agents');
-    expect(example).toBeDefined();
-    const files = Object.fromEntries(example!.files.map((file) => [file.path, file.content]));
+    const { entry, files } = loadExample('namespaced-agents');
 
-    const result = await compile(files, example!.files[0]!.path, {
+    const result = await compile(files, entry, {
       formatters: [{ name: 'claude', config: { version: 'full' } }],
     });
 
@@ -111,11 +115,9 @@ describe('ExampleGallery — gallery examples compile', () => {
   });
 
   it('renders contextual section headers in generated output', async () => {
-    const example = EXAMPLES.find((candidate) => candidate.id === 'custom-section-headers');
-    expect(example).toBeDefined();
-    const files = Object.fromEntries(example!.files.map((file) => [file.path, file.content]));
+    const { entry, files } = loadExample('custom-section-headers');
 
-    const result = await compile(files, example!.files[0]!.path, {
+    const result = await compile(files, entry, {
       formatters: [{ name: 'github', config: { version: 'full' } }],
     });
 
@@ -126,11 +128,9 @@ describe('ExampleGallery — gallery examples compile', () => {
   });
 
   it('resolves the real-life checkout policy and emits native capabilities', async () => {
-    const example = EXAMPLES.find((candidate) => candidate.id === 'real-life-checkout-service');
-    expect(example).toBeDefined();
-    const files = Object.fromEntries(example!.files.map((file) => [file.path, file.content]));
+    const { entry, files } = loadExample('real-life-checkout-service');
 
-    const result = await compile(files, example!.files[0]!.path, {
+    const result = await compile(files, entry, {
       formatters: [
         { name: 'claude', config: { version: 'full' } },
         { name: 'github', config: { version: 'full' } },
@@ -191,11 +191,9 @@ describe('ExampleGallery — gallery examples compile', () => {
   });
 
   it('shows current Factory and GitHub hook outputs for agent platform example', async () => {
-    const example = EXAMPLES.find((candidate) => candidate.id === 'agent-platform');
-    expect(example).toBeDefined();
-    const files = Object.fromEntries(example!.files.map((file) => [file.path, file.content]));
+    const { entry, files } = loadExample('agent-platform');
 
-    const result = await compile(files, example!.files[0]!.path, {
+    const result = await compile(files, entry, {
       formatters: [
         { name: 'factory', config: { version: 'full' } },
         { name: 'github', config: { version: 'multifile' } },
