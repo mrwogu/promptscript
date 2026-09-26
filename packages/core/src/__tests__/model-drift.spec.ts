@@ -5,6 +5,7 @@ import {
   formatProfileEntry,
   parseOpenRouterModels,
 } from '../model-drift.js';
+import type { ModelDriftCandidate } from '../model-drift.js';
 import type { ModelProfile } from '../types/models.js';
 
 function fixture(
@@ -120,7 +121,7 @@ describe('parseOpenRouterModels', () => {
         entry('openai/gpt-5.2:batch', 'OpenAI: GPT-5.2 (batch)', RELEASE),
         entry('meta/llama-4', 'Meta: Llama 4', RELEASE),
         { id: 'openai/gpt-5.2' },
-        entry('openai/gpt-5.2', 'OpenAI: GPT-5.2', 'not-a-number'),
+        { id: 'openai/gpt-5.2', name: 'OpenAI: GPT-5.2', created: 'not-a-number' },
       ])
     );
 
@@ -284,7 +285,14 @@ describe('detectModelDrift', () => {
 });
 
 describe('displacedProfile', () => {
-  const candidate = { provider: 'anthropic', family: 'claude-opus', version: '6' };
+  const candidate: ModelDriftCandidate = {
+    provider: 'anthropic',
+    family: 'claude-opus',
+    version: '6',
+    id: 'claude-opus-6',
+    displayName: 'Claude Opus 6',
+    releaseDate: '2026-07-24',
+  };
 
   it('returns the current release of the family without a successor', () => {
     expect(displacedProfile(candidate, PROFILES)?.id).toBe('claude-opus-5-5');
