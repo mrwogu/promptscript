@@ -169,7 +169,7 @@ describe('PS041: valid-model-reference', () => {
         'Agent "a": model "my-private-model" is not in the model catalog'
       );
       expect(messages[0]?.suggestion).toBe(
-        'Use a model from models.supported, or declare it under models.profiles in promptscript.yaml.'
+        'Use a model from models.supported, or declare it under models.profiles in promptscript.yaml. See the model list: https://getpromptscript.dev/reference/models/'
       );
     });
 
