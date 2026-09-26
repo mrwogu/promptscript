@@ -4,6 +4,7 @@ import type { FormatterOutput } from '../types.js';
 import {
   appendModelCompatibilityWarnings,
   extractRawFrontmatterModel,
+  findRawFrontmatterModel,
   getModelCompatibilityWarnings,
   toTargetModel,
 } from '../model-mapping.js';
@@ -120,11 +121,47 @@ describe('extractRawFrontmatterModel', () => {
     expect(extractRawFrontmatterModel('"model": gpt-5')).toBe('gpt-5');
   });
 
-  it('ignores nested keys, block scalars, empty values, and missing lines', () => {
+  it('reads block scalars with their effective value', () => {
+    expect(extractRawFrontmatterModel('model: |\n  sonnet')).toBe('sonnet');
+    expect(extractRawFrontmatterModel('model: >-\n  sonnet')).toBe('sonnet');
+    expect(extractRawFrontmatterModel("name: 'commit'\nmodel: |\n  sonnet")).toBe('sonnet');
+    expect(extractRawFrontmatterModel('model: |\n  one\n  two')).toBe('one\ntwo');
+    expect(extractRawFrontmatterModel('model: >\n  one\n  two')).toBe('one two');
+    expect(extractRawFrontmatterModel('model: |2\n  sonnet')).toBe('sonnet');
+  });
+
+  it('ignores nested keys, empty values, and missing lines', () => {
     expect(extractRawFrontmatterModel('  model: nested')).toBeUndefined();
-    expect(extractRawFrontmatterModel('model: |\n  sonnet')).toBeUndefined();
     expect(extractRawFrontmatterModel('model:')).toBeUndefined();
+    expect(extractRawFrontmatterModel('model: |')).toBeUndefined();
+    expect(extractRawFrontmatterModel('model: |\nname: commit')).toBeUndefined();
     expect(extractRawFrontmatterModel("name: 'commit'")).toBeUndefined();
+  });
+});
+
+describe('findRawFrontmatterModel', () => {
+  it('reports where the field sits and how far it spans', () => {
+    expect(findRawFrontmatterModel("name: 'commit'\nmodel: sonnet")).toEqual({
+      keyIndex: 1,
+      lineCount: 1,
+      value: 'sonnet',
+    });
+    expect(
+      findRawFrontmatterModel("name: 'commit'\nmodel: |\n  gpt-5\n  mini\ndescription: x")
+    ).toEqual({
+      keyIndex: 1,
+      lineCount: 3,
+      value: 'gpt-5\nmini',
+    });
+  });
+
+  it('reports undefined and empty fields like the extractor does', () => {
+    expect(findRawFrontmatterModel("name: 'commit'")).toBeUndefined();
+    expect(findRawFrontmatterModel('model:')).toEqual({
+      keyIndex: 0,
+      lineCount: 1,
+      value: undefined,
+    });
   });
 });
 

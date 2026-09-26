@@ -808,6 +808,29 @@ describe('ClaudeFormatter', () => {
       ]);
     });
 
+    it('should replace a block-scalar model with a single mapped line', () => {
+      const { skillFile } = formatCommitSkill({
+        __rawFrontmatter: "name: 'commit'\nmodel: |\n  claude-sonnet-4-5",
+      });
+
+      expect(skillFile?.content).toContain('model: claude-sonnet-4-5-20250929');
+      expect(skillFile?.content).not.toMatch(/^ {2}claude-sonnet-4-5$/m);
+      expect(skillFile?.content).not.toContain('model: |');
+    });
+
+    it('should drop a block-scalar model the target cannot run, with PS4004', () => {
+      const { skillFile, result } = formatCommitSkill({
+        __rawFrontmatter: "name: 'commit'\nmodel: |\n  gpt-5",
+      });
+
+      expect(skillFile?.content).not.toContain('model');
+      expect(result.warnings?.filter((w) => w.code === 'PS4004')).toEqual([
+        expect.objectContaining({
+          message: expect.stringContaining('Skill "commit": model "gpt-5"'),
+        }),
+      ]);
+    });
+
     it('should add a .prs model to raw frontmatter without one', () => {
       const { skillFile } = formatCommitSkill({
         model: 'sonnet',

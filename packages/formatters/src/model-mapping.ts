@@ -81,6 +81,20 @@ function splitYamlMapping(line: string): [string, string] | undefined {
 }
 
 /**
+ * The top-level `model` field of a raw SKILL.md frontmatter: where its
+ * key line sits, how many lines the value spans, and its effective
+ * value.
+ */
+export interface FrontmatterModelField {
+  /** Zero-based index of the `model` key line. */
+  readonly keyIndex: number;
+  /** Lines the value spans; 1 unless it is a block scalar. */
+  readonly lineCount: number;
+  /** Effective value; undefined when the value is empty. */
+  readonly value: string | undefined;
+}
+
+/**
  * Whether a frontmatter line is the top-level `model` field, quoted key
  * included; indented lines are nested keys, not the model.
  */
@@ -89,19 +103,94 @@ export function isFrontmatterModelLine(line: string): boolean {
 }
 
 /**
- * Model value of a raw SKILL.md frontmatter, or undefined when the
- * frontmatter has no top-level `model` line or uses a block scalar.
- * Trailing comments are stripped; quotes around the key and the value
- * are read through.
+ * Block scalar indicator of a value (`|`, `|-`, `|2`, `>`, ...), or
+ * undefined when the value is not one.
  */
-export function extractRawFrontmatterModel(frontmatter: string): string | undefined {
-  for (const line of frontmatter.split(/\r?\n/)) {
-    if (!isFrontmatterModelLine(line)) continue;
-    const raw = stripYamlComment(line.slice(line.indexOf(':') + 1)).trim();
-    if (!raw || raw.startsWith('|') || raw.startsWith('>')) return undefined;
-    return unquoteYamlToken(raw);
+function blockScalarKind(value: string): 'literal' | 'folded' | undefined {
+  const first = value[0];
+  if (first !== '|' && first !== '>') return undefined;
+  for (const char of value.slice(1)) {
+    if (char !== '-' && char !== '+' && (char < '1' || char > '9')) return undefined;
+  }
+  return first === '|' ? 'literal' : 'folded';
+}
+
+/**
+ * Indented continuation lines of the block scalar starting after
+ * `keyIndex`, without trailing blank lines.
+ */
+function blockScalarLines(lines: readonly string[], keyIndex: number): string[] {
+  const block: string[] = [];
+  for (const line of lines.slice(keyIndex + 1)) {
+    if (line === '' || line.startsWith(' ') || line.startsWith('\t')) {
+      block.push(line);
+    } else {
+      break;
+    }
+  }
+  while (block.length > 0 && block.at(-1) === '') block.pop();
+  return block;
+}
+
+/**
+ * Effective text of a block scalar: literal scalars keep their line
+ * breaks, folded scalars fold them like YAML does.
+ */
+function blockScalarValue(block: readonly string[], kind: 'literal' | 'folded'): string {
+  const indents = block
+    .filter((line) => line !== '')
+    .map((line) => line.length - line.trimStart().length);
+  const indent = indents.length > 0 ? Math.min(...indents) : 0;
+  const content = block.map((line) => (line === '' ? '' : line.slice(indent)));
+  if (kind === 'literal') {
+    return content.join('\n').trim();
+  }
+  const paragraphs: string[][] = [[]];
+  for (const line of content) {
+    if (line === '') {
+      paragraphs.push([]);
+    } else {
+      paragraphs.at(-1)?.push(line.trim());
+    }
+  }
+  return paragraphs
+    .map((lines) => lines.join(' '))
+    .join('\n')
+    .trim();
+}
+
+/**
+ * Find the top-level `model` field of a raw SKILL.md frontmatter, or
+ * undefined when there is none. The first `model` line wins.
+ */
+export function findRawFrontmatterModel(frontmatter: string): FrontmatterModelField | undefined {
+  const lines = frontmatter.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const line: string | undefined = lines[i];
+    if (line === undefined || !isFrontmatterModelLine(line)) continue;
+    const valuePart = stripYamlComment(line.slice(line.indexOf(':') + 1)).trim();
+    if (!valuePart) {
+      return { keyIndex: i, lineCount: 1, value: undefined };
+    }
+    const kind = blockScalarKind(valuePart);
+    if (kind === undefined) {
+      return { keyIndex: i, lineCount: 1, value: unquoteYamlToken(valuePart) };
+    }
+    const block = blockScalarLines(lines, i);
+    const value = blockScalarValue(block, kind);
+    return { keyIndex: i, lineCount: 1 + block.length, value: value === '' ? undefined : value };
   }
   return undefined;
+}
+
+/**
+ * Model value of a raw SKILL.md frontmatter, or undefined when the
+ * frontmatter has no top-level `model` line or the value is empty.
+ * Trailing comments are stripped; quotes around the key and the value
+ * are read through; block scalars contribute their effective value.
+ */
+export function extractRawFrontmatterModel(frontmatter: string): string | undefined {
+  return findRawFrontmatterModel(frontmatter)?.value;
 }
 
 /**
