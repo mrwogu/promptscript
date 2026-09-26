@@ -1,0 +1,83 @@
+# Drafts new releases of known model families from OpenRouter's model
+# list. The weekly run (and workflow_dispatch) applies the drift to
+# packages/core/src/model-profiles.ts, regenerates the reference page,
+# and opens or updates a pull request with the manual checklist. The
+# catalog stays curated: nothing merges without human review, and the
+# drafted state fails the core catalog tests on purpose until the
+# hardcoded expectations are updated.
+name: Model Drift
+
+on:
+  schedule:
+    # Mondays, 06:00 UTC. Scheduled workflows only run on the default branch.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: model-drift
+  cancel-in-progress: false
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Use Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '25.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Draft model drift
+        run: pnpm models:drift:apply
+
+      - name: Check whether anything changed
+        id: drift
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Format the drafted profiles
+        if: steps.drift.outputs.changed == 'true'
+        run: pnpm exec prettier --write packages/core/src/model-profiles.ts
+
+      - name: Regenerate the model reference page
+        if: steps.drift.outputs.changed == 'true'
+        run: pnpm docs:models
+
+      - name: Push the drift branch
+        if: steps.drift.outputs.changed == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -B chore/model-drift
+          git add packages/core/src/model-profiles.ts docs/reference/models.md
+          git commit -m 'chore(core): draft new model releases from OpenRouter'
+          git push --force-with-lease origin chore/model-drift
+
+      - name: Open or update the drift pull request
+        if: steps.drift.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create --head chore/model-drift \
+            --title 'Sync the model catalog with OpenRouter' \
+            --body-file .github/model-drift-pr-body.md \
+            || gh pr edit chore/model-drift \
+              --title 'Sync the model catalog with OpenRouter' \
+              --body-file .github/model-drift-pr-body.md
