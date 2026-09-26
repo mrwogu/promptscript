@@ -263,6 +263,18 @@ describe('parseVersion', () => {
 The built-in model profiles live in `packages/core/src/model-profiles.ts`.
 Update them when a provider releases, deprecates, or retires a model.
 
+A weekly workflow drafts the mechanical part: it reads
+[OpenRouter](https://openrouter.ai)'s model list, adds new releases of
+known families to `model-profiles.ts` (id, API id, display name, listing
+date, and the successor on the release each one displaces), and opens a
+pull request with the checklist above the manual work: release and
+retirement dates, successors across families, floating aliases, and
+target-specific names. The drafted state fails the core catalog tests on
+purpose until the hardcoded expectations are updated. Run it on demand
+with `pnpm models:drift:apply`, or check without editing with
+`pnpm models:drift`; `OPENROUTER_MODELS_URL` overrides the endpoint for
+local testing.
+
 1. Check the official sources. The provider pages give releases, API ids,
    status, and retirement dates:
    - Anthropic: [models overview](https://platform.claude.com/docs/en/about-claude/models/overview) and [model deprecations](https://platform.claude.com/docs/en/about-claude/model-deprecations)
