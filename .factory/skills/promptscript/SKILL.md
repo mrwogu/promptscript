@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-09-24T12:40:24.356Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-09-26T06:14:36.139Z | source: .promptscript/project.prs | target: factory
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -283,7 +283,7 @@ Pass values in `@skills` block:
 
 Non-reserved properties (anything other than description, content, trigger,
 userInvocable, allowedTools, disableModelInvocation, context, agent, requires,
-inputs, outputs) are treated as skill parameter arguments.
+inputs, outputs, model) are treated as skill parameter arguments.
 
 ### Skill Dependencies
 
