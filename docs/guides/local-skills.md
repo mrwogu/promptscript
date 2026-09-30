@@ -59,77 +59,83 @@ mkdir -p .promptscript/skills
 
 You can add skills from multiple sources:
 
-=== "prs CLI"
+::::tabs
+:::tab[prs CLI]
 
-    Add a local skill directory (or a `SKILL.md` file) without any manual
-    `.prs` editing. The SKILL.md is validated and a `@use` line is inserted
-    for you:
+Add a local skill directory (or a `SKILL.md` file) without any manual
+`.prs` editing. The SKILL.md is validated and a `@use` line is inserted
+for you:
 
-    ```bash
-    # Reference the skill where it lies (must stay inside the project root)
-    prs skills add ./vendor/my-skill
+```bash
+# Reference the skill where it lies (must stay inside the project root)
+prs skills add ./vendor/my-skill
 
-    # Install into .promptscript/skills/ instead (e.g. a downloaded artifact)
-    prs skills add ~/Downloads/skills/my-skill --copy
+# Install into .promptscript/skills/ instead (e.g. a downloaded artifact)
+prs skills add ~/Downloads/skills/my-skill --copy
 
-    # Replace an already-installed skill with the same name
-    prs skills add ~/Downloads/skills/my-skill --copy --force
-    ```
+# Replace an already-installed skill with the same name
+prs skills add ~/Downloads/skills/my-skill --copy --force
+```
 
-    Local skills are not recorded in `promptscript.lock` - there is no commit
-    to pin. See [`prs skills add`](../reference/cli.md#prs-skills-add) for the
-    full rules.
+Local skills are not recorded in `promptscript.lock` - there is no commit
+to pin. See [`prs skills add`](../reference/cli.md#prs-skills-add) for the
+full rules.
+:::
+:::tab[npx skills (Skills.sh)]
 
-=== "npx skills (Skills.sh)"
+The [`skills`](https://www.npmjs.com/package/skills) CLI from the Agent Skills ecosystem
+lets you install skills from any GitHub repository:
 
-    The [`skills`](https://www.npmjs.com/package/skills) CLI from the Agent Skills ecosystem
-    lets you install skills from any GitHub repository:
+```bash
+# Browse available skills
+npx skills add anthropics/skills --list
 
-    ```bash
-    # Browse available skills
-    npx skills add anthropics/skills --list
+# Install a specific skill to your local skills directory
+npx skills add anthropics/skills \
+  --skill frontend-design \
+  --dir .promptscript/skills
 
-    # Install a specific skill to your local skills directory
-    npx skills add anthropics/skills \
-      --skill frontend-design \
-      --dir .promptscript/skills
+# Install from any GitHub repo
+npx skills add vercel-labs/agent-skills \
+  --skill ui-design \
+  --dir .promptscript/skills
+```
 
-    # Install from any GitHub repo
-    npx skills add vercel-labs/agent-skills \
-      --skill ui-design \
-      --dir .promptscript/skills
-    ```
+:::
+:::tab[npx openskills]
 
-=== "npx openskills"
+[OpenSkills](https://github.com/numman-ali/openskills) provides a universal skills loader:
 
-    [OpenSkills](https://github.com/numman-ali/openskills) provides a universal skills loader:
+```bash
+# Install a skill
+npx openskills install frontend-design \
+  --dir .promptscript/skills
+```
 
-    ```bash
-    # Install a skill
-    npx openskills install frontend-design \
-      --dir .promptscript/skills
-    ```
+:::
+:::tab[Manual download]
 
-=== "Manual download"
+Copy any skill directory that contains a `SKILL.md`:
 
-    Copy any skill directory that contains a `SKILL.md`:
+```bash
+# From a git repo
+git clone --depth 1 https://github.com/someone/cool-skill.git /tmp/cool-skill
+cp -r /tmp/cool-skill .promptscript/skills/cool-skill
 
-    ```bash
-    # From a git repo
-    git clone --depth 1 https://github.com/someone/cool-skill.git /tmp/cool-skill
-    cp -r /tmp/cool-skill .promptscript/skills/cool-skill
+# Or just create your own
+mkdir -p .promptscript/skills/my-skill
+cat > .promptscript/skills/my-skill/SKILL.md << 'EOF'
+---
+name: my-skill
+description: My custom skill
+---
 
-    # Or just create your own
-    mkdir -p .promptscript/skills/my-skill
-    cat > .promptscript/skills/my-skill/SKILL.md << 'EOF'
-    ---
-    name: my-skill
-    description: My custom skill
-    ---
+Instructions for this skill...
+EOF
+```
 
-    Instructions for this skill...
-    EOF
-    ```
+:::
+::::
 
 ### 3. Reference the skill in your `.prs` file
 

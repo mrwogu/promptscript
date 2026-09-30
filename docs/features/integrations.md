@@ -68,7 +68,7 @@ Define remote HTTP or SSE servers:
 | `timeoutMs`     | Configure startup or request timeout             |
 
 Target formatters translate these properties into native MCP configuration. File paths and supported
-fields vary by platform. See the [formatter capability matrix](../reference/formatters/index.md#mcp-hooks-plugins-support).
+fields vary by platform. See the [formatter capability matrix](../reference/formatters/index.md#mcp--hooks--plugins-support).
 
 ## Credential Handling
 
@@ -149,4 +149,4 @@ Recommended controls:
 - [Hooks and Workflows](automation.md)
 - [Language Reference: `@mcpServers`](../reference/language.md#mcpservers)
 - [Language Reference: `@plugins`](../reference/language.md#plugins)
-- [Configuration Reference](../reference/config.md#mcp-hooks-plugins-support)
+- [Configuration Reference](../reference/config.md#mcp-hooks-and-plugins-support)

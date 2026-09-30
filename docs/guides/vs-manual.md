@@ -9,54 +9,59 @@ description: Compare managing AI instructions manually vs with PromptScript
 
 Without PromptScript, teams maintain separate configuration files for each AI tool in every repository. Even with just 2-3 tools, this quickly becomes unmanageable across many repos:
 
-=== "Files to maintain (per repo)"
+::::tabs
+:::tab[Files to maintain (per repo)]
 
-    ```
-    .github/copilot-instructions.md   # GitHub Copilot
-    CLAUDE.md                          # Claude Code
-    .cursor/rules/project.mdc         # Cursor
-    AGENTS.md                          # Codex / Factory AI
-    GEMINI.md                          # Gemini CLI
-    ... one file per tool
-    ```
+```
+.github/copilot-instructions.md   # GitHub Copilot
+CLAUDE.md                          # Claude Code
+.cursor/rules/project.mdc         # Cursor
+AGENTS.md                          # Codex / Factory AI
+GEMINI.md                          # Gemini CLI
+... one file per tool
+```
 
-=== "Problems"
+:::
+:::tab[Problems]
 
-    | Problem | Impact |
-    |---------|--------|
-    | **No single source of truth** | Instructions drift between tools |
-    | **No validation** | Errors go undetected until runtime |
-    | **No inheritance** | Copy-paste across repos |
-    | **No audit trail** | Who changed what and when? |
-    | **Manual updates** | One policy change = PRs in every repo, for every tool |
-    | **Vendor lock-in** | Switching tools means rewriting instructions, READMEs, and docs |
+| Problem                       | Impact                                                          |
+| ----------------------------- | --------------------------------------------------------------- |
+| **No single source of truth** | Instructions drift between tools                                |
+| **No validation**             | Errors go undetected until runtime                              |
+| **No inheritance**            | Copy-paste across repos                                         |
+| **No audit trail**            | Who changed what and when?                                      |
+| **Manual updates**            | One policy change = PRs in every repo, for every tool           |
+| **Vendor lock-in**            | Switching tools means rewriting instructions, READMEs, and docs |
+| :::                           |
+| ::::                          |
 
 ## The PromptScript Approach
 
 With PromptScript, you write one `.prs` file and compile to all 50 targets:
 
-=== "Single source file"
+::::tabs
+:::tab[Single source file]
 
-    ```promptscript
-    @meta { id: "my-project" syntax: "1.5.0" }
+```promptscript
+@meta { id: "my-project" syntax: "1.5.0" }
 
-    @inherit @company/backend-standards
+@inherit @company/backend-standards
 
-    @identity {
-      """
-      You are an expert developer working on the API service.
-      """
-    }
+@identity {
+  """
+  You are an expert developer working on the API service.
+  """
+}
 
-    @standards {
-      code: { languages: ["TypeScript"], testing: ["Vitest"] }
-    }
+@standards {
+  code: { languages: ["TypeScript"], testing: ["Vitest"] }
+}
 
-    @restrictions {
-      - "Never expose API keys"
-      - "Always validate input"
-    }
-    ```
+@restrictions {
+  - "Never expose API keys"
+  - "Always validate input"
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prO9wiscMahCyDuLMhlZyA9ABGGIwA1pxiCnACrGIY1GJwdg7inFjucsJ2gtIgMvmsOQCazACugvEwFYVEaK4eYjAAbjBQzHXUggDuzNShTgDmgmyCuFUAggAKAJLark0QjDAU2bn5eay29qzc0b5xCXBZhYIsjZIiUL4DpRgD8JLIMgAqcnUAyoxuaJogALp0UbwdKsAaPGQANXcwJkf0EWy2DmowLcGggbCOwFWClyADlmq5BLVmHAJjNBOE5EkNjkcTJxlAuhgqYImhgoOJsFUnGhSr87NYQNY6OhsHhECAvMwfH4giFwrEojEDokqLQQAwWOw0vgAMSCd6lNDkCAwMTaZijFxE4hkWCCailVhHFzIiiCXHMDyYageZhgK1VMTMRilPh6dJsQH7QSsL0VB0wdmCTBhO7LBx8ATHHLiQyS7yYWXBMIRJX7eKJAo5HR6Ay5EzmKw0wQkCCEJySLCOmAChx7WKVzGrM4wcEgSZXJY4ZhQRqdAcq2GrDjRQbjychGAzueExeV5ebJEoxaR505wR0idT7ez+eJ6Kos8FQXWAEEdjUOT4IikcjLGh6BAFpaHRVh8CMIUgA" target="_blank" rel="noopener noreferrer">
@@ -64,35 +69,42 @@ With PromptScript, you write one `.prs` file and compile to all 50 targets:
 </a>
 <!-- playground-link-end -->
 
-=== "One command"
+:::
+::::
 
-    ```bash
-    prs compile
-    ```
+::::tabs
+:::tab[One command]
 
-    Generates all output files automatically:
+```bash
+prs compile
+```
 
-    ```
-    .github/copilot-instructions.md
-    CLAUDE.md
-    .cursor/rules/project.mdc
-    .windsurf/rules/project.md
-    .clinerules
-    AGENTS.md
-    GEMINI.md
-    ... all configured targets
-    ```
+Generates all output files automatically:
 
-=== "Benefits"
+```
+.github/copilot-instructions.md
+CLAUDE.md
+.cursor/rules/project.mdc
+.windsurf/rules/project.md
+.clinerules
+AGENTS.md
+GEMINI.md
+... all configured targets
+```
 
-    | Benefit | How |
-    |---------|-----|
-    | **Single source of truth** | One `.prs` file, up to 50 target outputs |
-    | **Compile-time validation** | Errors caught before deployment |
-    | **Hierarchical inheritance** | Org → Team → Project |
-    | **Full audit trail** | Git history on `.prs` files |
-    | **Controlled updates** | Change registry, then run `prs update` and recompile in each repo |
-    | **Tool-agnostic** | Switch tools without rewriting |
+:::
+:::tab[Benefits]
+
+| Benefit                      | How                                                               |
+| ---------------------------- | ----------------------------------------------------------------- |
+| **Single source of truth**   | One `.prs` file, up to 50 target outputs                          |
+| **Compile-time validation**  | Errors caught before deployment                                   |
+| **Hierarchical inheritance** | Org → Team → Project                                              |
+| **Full audit trail**         | Git history on `.prs` files                                       |
+| **Controlled updates**       | Change registry, then run `prs update` and recompile in each repo |
+| **Tool-agnostic**            | Switch tools without rewriting                                    |
+| :::                          |
+| ::::                         |
 
 ## Side-by-Side Comparison
 

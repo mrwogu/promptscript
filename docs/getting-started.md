@@ -24,31 +24,34 @@ enterprise policy, or target-specific customization.
 
 Install the CLI toolchain to compile, validate, and manage your PromptScript files.
 
-=== "npm"
+::::tabs
+:::tab[npm]
 
-    ```bash
-    npm install -g @promptscript/cli
-    ```
+```bash
+npm install -g @promptscript/cli
+```
+:::
+:::tab[pnpm]
 
-=== "pnpm"
+```bash
+pnpm add -g @promptscript/cli
+```
+:::
+:::tab[yarn]
 
-    ```bash
-    pnpm add -g @promptscript/cli
-    ```
+```bash
+yarn global add @promptscript/cli
+```
+:::
+:::tab[Deno]
 
-=== "yarn"
+```bash
+deno install -g --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run npm:@promptscript/cli
+```
 
-    ```bash
-    yarn global add @promptscript/cli
-    ```
-
-=== "Deno"
-
-    ```bash
-    deno install -g --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run npm:@promptscript/cli
-    ```
-
-    Requires a Deno-capable CLI release (1.20.0 or later) and Deno 2.9+.
+Requires a Deno-capable CLI release (1.20.0 or later) and Deno 2.9+.
+:::
+::::
 
 Verify installation:
 
@@ -376,33 +379,36 @@ copy the prompt from the terminal output instead.
 
 Use your AI assistant to migrate existing content. The migration skill analyzes your files and generates proper PromptScript.
 
-=== "Claude Code"
+::::tabs
+:::tab[Claude Code]
 
-    ```bash
-    # Use the PromptScript skill
-    /promptscript
+```bash
+# Use the PromptScript skill
+/promptscript
 
-    # Or describe what you want
-    "Migrate my existing CLAUDE.md to PromptScript"
-    ```
+# Or describe what you want
+"Migrate my existing CLAUDE.md to PromptScript"
+```
+:::
+:::tab[GitHub Copilot]
 
-=== "GitHub Copilot"
+```
+@workspace Use the promptscript skill to migrate my existing instructions
+```
+:::
+:::tab[Cursor]
 
-    ```
-    @workspace Use the promptscript skill to migrate my existing instructions
-    ```
+```bash
+"Use the PromptScript skill to migrate my existing instructions"
+```
+:::
+:::tab[Antigravity]
 
-=== "Cursor"
-
-    ```bash
-    "Use the PromptScript skill to migrate my existing instructions"
-    ```
-
-=== "Antigravity"
-
-    ```
-    "Migrate my existing AI instructions to PromptScript"
-    ```
+```
+"Migrate my existing AI instructions to PromptScript"
+```
+:::
+::::
 
 ### 3. What the AI Will Do
 
@@ -458,11 +464,12 @@ Do not remove files configured as PromptScript target outputs. Archive only
 obsolete instruction sources that are not configured outputs and whose content
 is preserved in `.prs` files.
 
-!!! tip "Keep Original Files During Transition"
+:::tip[Keep Original Files During Transition]
 You don't have to delete original files immediately. Run both systems in parallel until you're confident the migration is complete.
 
 See the [Migration Guide](guides/migration.md) for backup, takeover, tracking,
 and rollback details.
+:::
 
 ### Migration Example
 
@@ -587,9 +594,10 @@ registry:
   # Or remote: https://github.com/your-org/promptscript-registry
 ```
 
-!!! tip "Output Versions"
+:::tip[Output Versions]
 Use `version: multifile` or `version: full` to generate separate prompt/command files.
 Without it, shortcuts with `prompt: true` will only appear in the main file.
+:::
 
 ### Version Support
 

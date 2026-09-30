@@ -177,8 +177,9 @@ registry:
 | Bitbucket Server | HTTP Access Token     | Repository read   |
 | Azure DevOps     | Personal Access Token | Code (Read)       |
 
-!!! tip "Environment Variable Naming"
+:::tip[Environment Variable Naming]
 The `tokenEnvVar` field accepts any environment variable name. Use a name that makes sense for your organization, such as `REGISTRY_TOKEN`, `GITLAB_TOKEN`, or `GIT_REGISTRY_PAT`.
+:::
 
 ## Version Pinning
 
@@ -316,8 +317,9 @@ promptscript:
       - promptscript.yaml
 ```
 
-!!! note "Self-Hosted GitLab CI"
+:::note[Self-Hosted GitLab CI]
 For self-hosted GitLab, you can use the built-in `CI_JOB_TOKEN` for repositories within the same GitLab instance:
+:::
 
     ```yaml
     variables:
