@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import mermaid from 'astro-mermaid';
@@ -7,6 +8,24 @@ import starlightLlmsTxt from 'starlight-llms-txt';
 import { remarkMkdocsCompat } from './src/plugins/remark-mkdocs-compat.mjs';
 
 const SITE = 'https://getpromptscript.dev';
+
+// The live compile widget bundles @promptscript/browser-compiler for the
+// browser. Like the playground, it needs fs and path shims, but only in the
+// client bundle: Astro itself still runs on real Node modules.
+const browserShims = {
+  name: 'promptscript-browser-shims',
+  enforce: 'pre',
+  resolveId(id, _importer, options) {
+    if (options?.ssr) return null;
+    if (id === 'fs') {
+      return fileURLToPath(
+        new URL('../../packages/browser-compiler/src/shims/fs.ts', import.meta.url)
+      );
+    }
+    if (id === 'path') return this.resolve('path-browserify');
+    return null;
+  },
+};
 
 const promptscriptGrammar = {
   ...JSON.parse(
@@ -43,6 +62,9 @@ export default defineConfig({
   markdown: {
     remarkPlugins: [remarkMkdocsCompat],
   },
+  vite: {
+    plugins: [browserShims],
+  },
   integrations: [
     mermaid({ autoTheme: true }),
     starlight({
@@ -60,6 +82,7 @@ export default defineConfig({
       customCss: ['./src/styles/theme.css', './src/styles/legacy.css'],
       components: {
         PageTitle: './src/components/PageTitle.astro',
+        MarkdownContent: './src/components/MarkdownContent.astro',
       },
       expressiveCode: {
         shiki: { langs: [promptscriptGrammar] },

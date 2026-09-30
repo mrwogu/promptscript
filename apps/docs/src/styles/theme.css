@@ -97,3 +97,72 @@
 .content-panel:has(+ .content-panel .home-page) {
   display: none;
 }
+
+/* Live compile widget next to "Try in Playground" badges */
+.ps-compile-button {
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.6rem;
+  vertical-align: middle;
+  font: 600 var(--sl-text-xs) / 1.6 var(--sl-font);
+  color: var(--sl-color-accent-high);
+  background: var(--sl-color-accent-low);
+  border: 1px solid var(--sl-color-accent);
+  border-radius: 0.3rem;
+  cursor: pointer;
+}
+.ps-compile-button[aria-expanded='true'] {
+  color: var(--sl-color-white);
+  background: var(--sl-color-accent);
+}
+.ps-compile-panel {
+  margin-top: 0.75rem;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+.ps-compile-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  background: var(--sl-color-gray-6);
+  border-bottom: 1px solid var(--sl-color-gray-5);
+}
+.ps-compile-tab {
+  padding: 0.45rem 0.9rem;
+  font: 600 var(--sl-text-sm) / 1.4 var(--sl-font);
+  color: var(--sl-color-gray-3);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.ps-compile-tab[aria-selected='true'] {
+  color: var(--sl-color-white);
+  border-bottom-color: var(--sl-color-accent);
+}
+.ps-compile-file + .ps-compile-file {
+  border-top: 1px solid var(--sl-color-gray-5);
+}
+.ps-compile-path {
+  padding: 0.35rem 0.9rem;
+  font: 600 var(--sl-text-xs) / 1.5 var(--sl-font-mono);
+  color: var(--sl-color-gray-2);
+  background: var(--sl-color-gray-6);
+}
+.ps-compile-file pre,
+.ps-compile-panel pre {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  max-height: 22rem;
+  overflow: auto;
+  font: var(--sl-text-xs) / 1.55 var(--sl-font-mono);
+  white-space: pre;
+}
+.ps-compile-empty,
+.ps-compile-error {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  font-size: var(--sl-text-sm);
+}
+.ps-compile-error {
+  color: var(--sl-color-red-high);
+}

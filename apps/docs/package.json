@@ -11,9 +11,12 @@
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.1",
     "@astrojs/starlight": "^0.42.4",
+    "@promptscript/browser-compiler": "workspace:^",
     "astro": "^7.3.5",
     "astro-mermaid": "^2.1.0",
+    "lz-string": "^1.5.0",
     "mermaid": "^11.17.2",
+    "path-browserify": "^1.0.1",
     "sharp": "^0.35.5",
     "starlight-links-validator": "^0.26.0",
     "starlight-llms-txt": "^0.12.0"
