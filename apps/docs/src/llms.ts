@@ -33,16 +33,74 @@ export function markdownUrl(id: string): string {
   return id === 'index' ? `${SITE}/index.md` : `${SITE}/${id}/index.md`;
 }
 
+const text = (html: string): string => html.replaceAll(/<[^>]+>/g, '').trim();
+
+/** Drops a `<div class="...">` block with everything nested in it. */
+function dropDiv(body: string, className: string): string {
+  const lines = body.split('\n');
+  const kept: string[] = [];
+  let depth = 0;
+  for (const line of lines) {
+    if (depth === 0 && !line.includes(`<div class="${className}"`)) {
+      kept.push(line);
+      continue;
+    }
+    depth += (line.match(/<div\b/g) ?? []).length - (line.match(/<\/div>/g) ?? []).length;
+  }
+  return kept.join('\n');
+}
+
+/**
+ * Hub pages use HTML cards for readers. Agents get the same links as a plain
+ * list, without icons, demo terminals, or wrapper markup.
+ */
+export function cardsToMarkdown(body: string, pageId: string): string {
+  const pageUrl = pageId === 'index' ? `${SITE}/` : `${SITE}/${pageId}/`;
+  let result = body.replaceAll(
+    /<a href="([^"]+)" class="(?:ref-item|formatter-card)">([\s\S]*?)<\/a>/g,
+    (_card, href: string, inner: string) => {
+      const url = new URL(href, pageUrl);
+      const target =
+        url.origin === SITE
+          ? markdownUrl(url.pathname.replaceAll(/^\/|\/$/g, '') || 'index') + url.hash
+          : href;
+      const title =
+        text(/<h3>([\s\S]*?)<\/h3>/.exec(inner)?.[1] ?? '') ||
+        text(/formatter-card__name">([\s\S]*?)</.exec(inner)?.[1] ?? '');
+      const about = /<p>([\s\S]*?)<\/p>/.exec(inner)?.[1];
+      const output = /<code[^>]*>([\s\S]*?)<\/code>/.exec(inner)?.[1];
+      const tags = [...inner.matchAll(/formatter-card__tag[^"]*">([^<]*)</g)].map((m) => m[1]);
+      const details = about
+        ? text(about)
+        : [output && `\`${text(output)}\``, tags.join(', ')].filter(Boolean).join(' - ');
+      return `- [${title}](${target})${details ? `: ${details}` : ''}`;
+    }
+  );
+  for (const block of ['init-demo', 'formatter-tiers']) result = dropDiv(result, block);
+  return result
+    .replaceAll(
+      /^(?:<div class="(?:ref-list|formatter-cards)">|<\/div>|<!-- prettier-ignore -->)$\n?/gm,
+      ''
+    )
+    .replaceAll(/^<p class="[^"]*">(.*)<\/p>$/gm, '$1')
+    .replaceAll(/<\/?strong>/g, '**')
+    .replaceAll(/^(- \[.*)\n\n(?=- \[)/gm, '$1\n')
+    .replaceAll(/\n{3,}/g, '\n\n');
+}
+
 /** Page source with its H1 and with doc links pointing at other Markdown pages. */
 export function pageMarkdown(page: DocPage): string {
-  const body = (page.body ?? '').replaceAll(/\]\(([^)\s]+\.md(?:#[^)\s]*)?)\)/g, (link, url) => {
-    if (!page.filePath || url.startsWith('/')) return link;
-    const target = rewriteDocLinkFrom(url, posix.relative(DOCS_BASE, page.filePath));
-    const match = /^\/([^#]*)(#.*)?$/.exec(target);
-    if (!match) return `](${target})`;
-    const id = match[1].replace(/\/$/, '') || 'index';
-    return `](${markdownUrl(id)}${match[2] ?? ''})`;
-  });
+  const body = cardsToMarkdown(page.body ?? '', page.id).replaceAll(
+    /\]\(([^)\s]+\.md(?:#[^)\s]*)?)\)/g,
+    (link, url) => {
+      if (!page.filePath || url.startsWith('/')) return link;
+      const target = rewriteDocLinkFrom(url, posix.relative(DOCS_BASE, page.filePath));
+      const match = /^\/([^#]*)(#.*)?$/.exec(target);
+      if (!match) return `](${target})`;
+      const id = match[1].replace(/\/$/, '') || 'index';
+      return `](${markdownUrl(id)}${match[2] ?? ''})`;
+    }
+  );
   const trimmed = body.trimStart();
   return trimmed.startsWith('# ') ? trimmed : `# ${page.data.title}\n\n${trimmed}`;
 }
@@ -87,7 +145,7 @@ export function llmsIndex(sections: readonly LlmsSection[]): string {
   const lines = [
     '# PromptScript',
     '',
-    '> Prompt-as-Code for Enterprise AI. Standardize, audit, and deploy instructions across any AI coding assistant.',
+    '> Open-source compiler for AI coding agent rules. Write instructions, skills, agents, and MCP servers once and get native files for 50 tools.',
     '',
     LLMS_SUMMARY,
     '',

@@ -95,7 +95,7 @@ export default defineConfig({
     starlight({
       title: 'PromptScript',
       description:
-        'Prompt-as-Code for Enterprise AI. Standardize, audit, and deploy instructions across any AI coding assistant.',
+        'Open-source compiler for AI coding agent rules. Write instructions, skills, agents, and MCP servers once and get native files for 50 tools.',
       logo: { src: './public/assets/images/logo.svg' },
       favicon: '/assets/images/favicon.svg',
       social: [

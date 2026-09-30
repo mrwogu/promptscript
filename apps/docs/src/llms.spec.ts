@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  cardsToMarkdown,
   llmsFull,
   llmsIndex,
   llmsSections,
@@ -64,6 +65,77 @@ describe('pageMarkdown', () => {
     const source = page('guides/ci', { body: 'Just text.' });
 
     expect(pageMarkdown(source)).toBe('# Title guides/ci\n\nJust text.');
+  });
+});
+
+describe('cardsToMarkdown', () => {
+  it('turns hub cards into a plain list of Markdown links', () => {
+    const body = [
+      '<div class="ref-list">',
+      '',
+      '<a href="registry/" class="ref-item">',
+      '  <div class="ref-item__icon"><svg viewBox="0 0 24 24"><path d="M1"/></svg></div>',
+      '  <div class="ref-item__content">',
+      '    <h3>Registry</h3>',
+      '    <p>Share configs.</p>',
+      '  </div>',
+      '</a>',
+      '',
+      '<a href="../features/" class="ref-item">',
+      '  <h3>Features</h3>',
+      '</a>',
+      '',
+      '</div>',
+    ].join('\n');
+
+    expect(cardsToMarkdown(body, 'guides').trim()).toBe(
+      [
+        '- [Registry](https://getpromptscript.dev/guides/registry/index.md): Share configs.',
+        '- [Features](https://getpromptscript.dev/features/index.md)',
+      ].join('\n')
+    );
+  });
+
+  it('describes formatter cards by output file and tags', () => {
+    const body = [
+      '<a href="claude/" class="formatter-card">',
+      '  <span class="formatter-card__name">Claude Code</span>',
+      '  <code class="formatter-card__output">CLAUDE.md</code>',
+      '  <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>',
+      '  <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>',
+      '</a>',
+    ].join('\n');
+
+    expect(cardsToMarkdown(body, 'reference/formatters')).toBe(
+      '- [Claude Code](https://getpromptscript.dev/reference/formatters/claude/index.md): `CLAUDE.md` - Skills, Agents'
+    );
+  });
+
+  it('keeps the hash of a card link and unwraps HTML subtitles', () => {
+    const body = [
+      '<p class="subtitle">Compiles to <strong>50 targets</strong>.</p>',
+      '',
+      '<a href="../../features/x/#modes" class="ref-item"><h3>X</h3></a>',
+    ].join('\n');
+
+    expect(cardsToMarkdown(body, 'reference/formatters')).toBe(
+      'Compiles to **50 targets**.\n\n- [X](https://getpromptscript.dev/features/x/index.md#modes)'
+    );
+  });
+
+  it('drops demo terminals with all nested markup', () => {
+    const body = [
+      'Before.',
+      '<!-- prettier-ignore -->',
+      '<div class="init-demo" id="x">',
+      '<div class="a">',
+      'text',
+      '</div>',
+      '</div>',
+      'After.',
+    ].join('\n');
+
+    expect(cardsToMarkdown(body, 'getting-started')).toBe('Before.\nAfter.');
   });
 });
 

@@ -123,7 +123,7 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
   </div>
 </a>
 
-<a href="../../features/target-platforms/#rich-native-formatters" class="formatter-card">
+<a href="codex/" class="formatter-card">
   <div class="formatter-card__header">
     <span class="formatter-card__name">Codex</span>
     <span class="formatter-card__tier formatter-card__tier--custom">Native</span>
@@ -136,7 +136,7 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
   </div>
 </a>
 
-<a href="../../features/target-platforms/#rich-native-formatters" class="formatter-card">
+<a href="grok/" class="formatter-card">
   <div class="formatter-card__header">
     <span class="formatter-card__name">Grok</span>
     <span class="formatter-card__tier formatter-card__tier--custom">Native</span>
