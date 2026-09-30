@@ -1,0 +1,30 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+// Raw HTML on purpose: Markdown would split the <pre> code windows on blank
+// lines and turn quotes into smart quotes.
+import home from '../components/home.html?raw';
+---
+
+<StarlightPage
+  frontmatter={{
+    title: 'Agent Platform Configuration as Code',
+    description:
+      'Define AI instructions, skills, agents, MCP servers, hooks, workflows, and policies once. Compile native configuration for 50 AI coding agent platforms.',
+    template: 'splash',
+    tableOfContents: false,
+    editUrl: false,
+    lastUpdated: false,
+    head: [
+      {
+        tag: 'meta',
+        attrs: {
+          name: 'keywords',
+          content:
+            'PromptScript, agent platform, configuration as code, AI instructions, AI agents, AI skills, MCP servers, GitHub Copilot, Claude Code, Cursor, Factory AI, Codex, AI governance, PromptOps',
+        },
+      },
+    ],
+  }}
+>
+  <Fragment set:html={home} />
+</StarlightPage>

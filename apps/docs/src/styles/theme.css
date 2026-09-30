@@ -90,7 +90,7 @@
   margin-top: 0;
 }
 .home-code-window pre {
-  line-height: 1.55;
+  line-height: 1.4;
 }
 
 /* Homepage: drop the empty title panel left by the PageTitle override */
@@ -165,4 +165,9 @@
 }
 .ps-compile-error {
   color: var(--sl-color-red-high);
+}
+
+/* Homepage uses the old Material grid width (61rem at a 20px root) */
+.content-panel:has(.home-page) .sl-container {
+  max-width: 76.25rem;
 }
