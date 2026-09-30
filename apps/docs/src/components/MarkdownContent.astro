@@ -1,0 +1,10 @@
+---
+import Default from '@astrojs/starlight/components/MarkdownContent.astro';
+---
+
+<Default><slot /></Default>
+
+<script>
+  import { enhanceSnippets } from '../scripts/live-compile';
+  enhanceSnippets(document);
+</script>

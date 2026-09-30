@@ -16,7 +16,15 @@ module.exports = [
       // Used through Astro and its integrations, never imported directly.
       '@nx/dependency-checks': [
         'error',
-        { ignoredDependencies: ['@astrojs/markdown-remark', 'mermaid', 'sharp', 'vitest'] },
+        {
+          ignoredDependencies: [
+            '@astrojs/markdown-remark',
+            'mermaid',
+            'sharp',
+            'vitest',
+            'path-browserify',
+          ],
+        },
       ],
     },
   },
