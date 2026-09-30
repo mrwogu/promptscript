@@ -19,56 +19,46 @@
     </div>
     <div
       class="home-hero__visual"
-      aria-label="PromptScript source compiled to native platform files"
+      role="img"
+      aria-label="You edit one project.prs file. PromptScript generates CLAUDE.md, Copilot instructions, Cursor rules, AGENTS.md, GEMINI.md, Windsurf rules, and 44 more targets."
     >
-      <div class="home-code-window">
-        <div class="home-window-bar">
-          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-          <span>project.prs</span>
-          <span class="home-window-status">source</span>
-        </div>
-        <pre><code><span class="home-code-keyword">@inherit</span> <span class="home-code-reference">@company/platform</span>
-<span class="home-code-keyword">@identity</span> {
-&#32;&#32;<span class="home-code-string">"Checkout service"</span>
-}
-<span class="home-code-keyword">@skills</span> {
-&#32;&#32;security-review: {
-&#32;&#32;&#32;&#32;description: <span class="home-code-string">"Review code"</span>
-&#32;&#32;}
-}
-<span class="home-code-keyword">@agents</span> {
-&#32;&#32;reviewer: {
-&#32;&#32;&#32;&#32;skills: [<span class="home-code-string">"security-review"</span>]
-&#32;&#32;&#32;&#32;mcpServers: [<span class="home-code-string">"issues"</span>]
-&#32;&#32;}
-}
-<span class="home-code-keyword">@hooks</span> {
-&#32;&#32;validate: {
-&#32;&#32;&#32;&#32;event: <span class="home-code-string">"post-tool-use"</span>
-&#32;&#32;}
-}</code></pre>
+      <div class="home-converge__source">
+        <img src="/assets/images/logo.svg" alt="" width="48" height="48" />
+        <code>project.prs</code>
+        <span>The only file you edit</span>
       </div>
-      <div class="home-compile-arrow" aria-hidden="true"><i></i></div>
-      <div class="home-output-file home-output-file--claude">
-        <span>Claude Code</span>
-        <code>CLAUDE.md</code>
+      <div class="home-converge__lines" aria-hidden="true">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M0 50 C 55 50, 45 8.33, 100 8.33" />
+          <path d="M0 50 C 55 50, 45 25, 100 25" />
+          <path d="M0 50 C 55 50, 45 41.67, 100 41.67" />
+          <path d="M0 50 C 55 50, 45 58.33, 100 58.33" />
+          <path d="M0 50 C 55 50, 45 75, 100 75" />
+          <path d="M0 50 C 55 50, 45 91.67, 100 91.67" />
+        </svg>
       </div>
-      <div class="home-compile-arrow" aria-hidden="true"><i></i></div>
-      <div class="home-output-file home-output-file--github">
-        <span>GitHub Copilot</span>
-        <code>.github/agents/reviewer.md</code>
-      </div>
-      <div class="home-compile-arrow" aria-hidden="true"><i></i></div>
-      <div class="home-output-file home-output-file--factory">
-        <span>Factory AI</span>
-        <code>.factory/skills/security-review/</code>
-      </div>
-      <div class="home-compile-arrow" aria-hidden="true"><i></i></div>
-      <div class="home-output-file home-output-file--cursor">
-        <span>Cursor</span>
-        <code>.cursor/rules/project.mdc</code>
-      </div>
-      <div class="home-output-more">+ 46 targets</div>
+      <ul class="home-converge__files">
+        <li style="--sx: -190px; --sy: 40px; --sr: -10deg; --c: #d97757">
+          <i></i><code>CLAUDE.md</code><span>Claude Code</span><em>generated</em>
+        </li>
+        <li style="--sx: -70px; --sy: 95px; --sr: 7deg; --c: #8957e5">
+          <i></i><code>.github/copilot-instructions.md</code><span>GitHub Copilot</span
+          ><em>generated</em>
+        </li>
+        <li style="--sx: -230px; --sy: -15px; --sr: 5deg; --c: #64748b">
+          <i></i><code>.cursor/rules/project.mdc</code><span>Cursor</span><em>generated</em>
+        </li>
+        <li style="--sx: -120px; --sy: -75px; --sr: -6deg; --c: #10a37f">
+          <i></i><code>AGENTS.md</code><span>Codex</span><em>generated</em>
+        </li>
+        <li style="--sx: -40px; --sy: -125px; --sr: 9deg; --c: #4285f4">
+          <i></i><code>GEMINI.md</code><span>Gemini CLI</span><em>generated</em>
+        </li>
+        <li style="--sx: -210px; --sy: -160px; --sr: -4deg; --c: #0ea5a4">
+          <i></i><code>.windsurf/rules/project.md</code><span>Windsurf</span><em>generated</em>
+        </li>
+      </ul>
+      <p class="home-converge__more">+ 44 more targets, written for you</p>
     </div>
   </section>
   <div class="home-platforms">
