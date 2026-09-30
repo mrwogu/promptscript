@@ -5,20 +5,22 @@ description: Install the PromptScript CLI, create your first .prs file, and comp
 
 # Getting Started
 
-Start treating your AI instructions as managed infrastructure.
+Install the `prs` CLI, describe your AI rules in `.prs` files, and compile them into the
+files each AI coding tool reads, such as `CLAUDE.md` or `.github/copilot-instructions.md`.
 
 ## Choose Your Path
 
-| Starting point | Next step |
-| -------------- | --------- |
-| New repository | Continue with [Installation](#installation) and [Interactive Initialization](#interactive-initialization) |
-| In a hurry | Skip the demo and go to [Quick Start: New Projects](#quick-start-new-projects) |
-| Existing instruction files | Use [Quick Start: Migrating Existing Projects](#quick-start-migrating-existing-projects) |
-| PromptScript 1.15 project | Follow [Upgrade 1.15 to 1.16](guides/upgrade-1-15-to-1-16.md) |
-| Need language semantics | Open [Language Reference](reference/language.md) |
+| Your situation                             | Go to                                                                          |
+| ------------------------------------------ | ------------------------------------------------------------------------------ |
+| New to PromptScript, new or empty project  | [Installation](#installation), then [Quick Start: New Projects](#quick-start-new-projects) |
+| You already have `CLAUDE.md`, `AGENTS.md`, Copilot or Cursor rules | [Quick Start: Migrating Existing Projects](#quick-start-migrating-existing-projects) |
+| You want to try it without installing      | [Playground](/playground/)                                                     |
+| You use PromptScript 1.15                  | [Upgrade 1.15 to 1.16](guides/upgrade-1-15-to-1-16.md)                         |
+| You look up syntax                         | [Language Reference](reference/language.md)                                    |
 
-New projects should reach a validated compile before adding registries,
-enterprise policy, or target-specific customization.
+New words like target, block, or registry are explained in the [Glossary](glossary.md).
+Reach a validated compile first, then add registries, enterprise policy, or target-specific
+customization.
 
 ## Installation
 
@@ -677,7 +679,7 @@ troubleshooting.
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9zm6.82 6L12 12.72L5.18 9L12 5.28zM17 16l-5 2.72L7 16v-3.27l5 2.72l5-2.72z"/></svg>
   </div>
   <div class="ref-item__content">
-    <h3>Enterprise Tutorial</h3>
+    <h3>Tutorial: Team Layers</h3>
     <p>After your first compile, build an organization, team, and project hierarchy.</p>
   </div>
   <div class="ref-item__arrow">→</div>

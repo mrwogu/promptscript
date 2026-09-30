@@ -1,21 +1,47 @@
 ---
 title: FAQ & Troubleshooting
-description: 'Answers to common PromptScript questions: supported AI tools, installation, inheritance, private registries, CI/CD, and common errors.'
+description: 'Answers to common PromptScript questions: supported AI tools, AGENTS.md, migration, privacy, installation, inheritance, private registries, CI/CD, and common errors.'
 ---
 
 # FAQ & Troubleshooting
 
 ## What is PromptScript?
 
-PromptScript is an agent platform configuration language and toolchain. You define instructions,
-skills, agents, integrations, automation, and policy once, then compile native output for 50 AI
-coding agent targets.
+PromptScript is an open-source compiler for AI coding agent configuration. You write
+instructions, skills, agents, MCP servers, hooks, and plugins in `.prs` files, and it generates
+the native files for 50 tools, such as `CLAUDE.md`, `.github/copilot-instructions.md`, and
+Cursor rules. New to the terms? See the [Glossary](../glossary.md).
 
 ## How many AI tools are supported?
 
 PromptScript currently compiles to **50 AI coding agent targets**. See the full list in
 [Target Platforms](../features/target-platforms.md) or the
 [formatter matrix](../reference/formatters/index.md).
+
+## How is it different from a shared AGENTS.md file?
+
+`AGENTS.md` is one file that some tools read. PromptScript is the source behind it. It adds
+inheritance across repositories, parameters, skills, agents, MCP servers, validation, and a
+security scan, and it writes `AGENTS.md` together with the formats of every other tool.
+
+## Can I start from the instruction files I already have?
+
+Yes. `prs import` converts an existing `CLAUDE.md`, Copilot, Cursor, or `AGENTS.md` file,
+`prs migrate` imports a whole project, and the built-in `promptscript` skill lets your AI
+agent do the migration for you. See [Import Existing Instructions](import.md) and the
+[Migration Guide](migration.md).
+
+## Does PromptScript send my prompts anywhere?
+
+No. Compilation runs on your machine or in your CI. Anonymous usage telemetry is on by
+default and never includes source, prompts, compiled output, file paths, or project names.
+Turn it off with `prs telemetry disable` or `DO_NOT_TRACK=1`. See
+[Telemetry](../reference/telemetry.md).
+
+## Is PromptScript free?
+
+Yes. PromptScript is open source under the MIT license. The CLI is published on npm as
+`@promptscript/cli`.
 
 ## How do I install PromptScript?
 
