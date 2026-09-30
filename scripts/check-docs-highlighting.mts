@@ -88,8 +88,9 @@ function highlightFailures(code: string): string[] {
     for (const part of token.explanation ?? []) {
       const scopes = part.scopes.map((scope) => scope.scopeName);
       const text = part.content.trim();
-      if (scopes.some((scope) => scope.startsWith('invalid'))) bad.add(text);
-      else if (scopes.length === 1 && text && !/^[\w\s.-]+$/.test(text)) bad.add(text);
+      const invalid = scopes.some((scope) => scope.startsWith('invalid'));
+      const unscoped = scopes.length === 1 && text !== '' && !/^[\w\s.-]+$/.test(text);
+      if (invalid || unscoped) bad.add(text);
     }
   }
   return [...bad];

@@ -459,32 +459,42 @@ function generateFeatures(f: FormatterInfo): string {
   return lines.join('\n');
 }
 
+/** Inline code span for a Markdown table cell. */
+function code(value: string): string {
+  return '`' + value + '`';
+}
+
 function generateVersions(f: FormatterInfo): string {
   const lines = ['| Version | Output |', '|---------|--------|'];
   for (const version of f.versions) {
-    const label =
-      version.name === f.defaultVersion ? `\`${version.name}\` (default)` : `\`${version.name}\``;
-    lines.push(`| ${label} | ${version.description.replaceAll('|', '\\|')} |`);
+    const suffix = version.name === f.defaultVersion ? ' (default)' : '';
+    const description = version.description.replaceAll('|', String.raw`\|`);
+    lines.push(`| ${code(version.name)}${suffix} | ${description} |`);
   }
   return lines.join('\n');
 }
 
 function generateIntegrations(f: FormatterInfo): string {
   const lines = ['| Block | Support |', '|-------|---------|'];
-  lines.push(
-    `| \`@mcpServers\` | ${f.mcpConfigPath ? `\`${f.mcpConfigPath}\` (${f.mcpConfigFormat ?? 'json'})` : 'Not supported'} |`
-  );
-  const hooks = f.hookConfigPath
-    ? `\`${f.hookConfigPath}\`${f.hookVersions.length > 0 ? ` in ${f.hookVersions.map((v) => `\`${v}\``).join(', ')}` : ''}`
+
+  const mcp = f.mcpConfigPath
+    ? `${code(f.mcpConfigPath)} (${f.mcpConfigFormat ?? 'json'})`
     : 'Not supported';
-  lines.push(`| \`@hooks\` | ${hooks} |`);
+  lines.push(`| ${code('@mcpServers')} | ${mcp} |`);
+
+  let hooks = 'Not supported';
+  if (f.hookConfigPath) {
+    const versions = f.hookVersions.map(code).join(', ');
+    hooks = versions ? `${code(f.hookConfigPath)} in ${versions}` : code(f.hookConfigPath);
+  }
+  lines.push(`| ${code('@hooks')} | ${hooks} |`);
+
   if (f.hookEvents.length > 0) {
-    lines.push(`| Hook events | ${f.hookEvents.map((event) => `\`${event}\``).join(', ')} |`);
+    lines.push(`| Hook events | ${f.hookEvents.map(code).join(', ')} |`);
   }
   if (f.unsupportedBlocks.length > 0) {
-    lines.push(
-      `| Not emitted | ${f.unsupportedBlocks.map((block) => `\`@${block}\``).join(', ')} |`
-    );
+    const blocks = f.unsupportedBlocks.map((block) => code(`@${block}`)).join(', ');
+    lines.push(`| Not emitted | ${blocks} |`);
   }
   return lines.join('\n');
 }
