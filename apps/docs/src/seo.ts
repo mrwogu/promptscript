@@ -65,6 +65,12 @@ export function homeJsonLd(version: string): HeadTag {
       license: 'https://opensource.org/licenses/MIT',
       downloadUrl: 'https://www.npmjs.com/package/@promptscript/cli',
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      author: {
+        '@type': 'Person',
+        name: 'Wojciech Guziak',
+        url: 'https://github.com/mrwogu',
+        sameAs: ['https://www.linkedin.com/in/wojciechguziak/'],
+      },
       sameAs: ['https://github.com/mrwogu/promptscript'],
     },
   ]);
