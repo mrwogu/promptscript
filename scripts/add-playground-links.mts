@@ -26,7 +26,7 @@ import { BUNDLED_REGISTRY, compile } from '../packages/browser-compiler/src/inde
 const PLAYGROUND_BASE_URL = 'https://getpromptscript.dev/playground/';
 const PLAYGROUND_DEV_URL = 'https://getpromptscript.dev/playground-dev/';
 
-// Top-level docs directories excluded from the site build (mkdocs exclude_docs).
+// Top-level docs directories excluded from the site build (apps/docs content config).
 // Regenerating badges for unpublished pages is wasted work, so they are skipped.
 const EXCLUDED_DOC_DIRS = new Set(['design', 'plans', 'superpowers']);
 

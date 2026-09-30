@@ -1,0 +1,8 @@
+---
+import Default from '@astrojs/starlight/components/PageTitle.astro';
+
+// Splash pages (the homepage) render their own hero heading.
+const isSplash = Astro.locals.starlightRoute.entry.data.template === 'splash';
+---
+
+{!isSplash && <Default />}

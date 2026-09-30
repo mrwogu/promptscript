@@ -98,3 +98,7 @@ docs/superpowers/
 .claude/worktrees/
 apps/vscode/*.vsix
 notebook-lm-sources/
+
+# Astro docs site
+apps/docs/.astro/
+apps/docs/public/schema/
