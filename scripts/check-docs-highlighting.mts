@@ -1,6 +1,7 @@
 /**
  * Validates that every PromptScript snippet in the documentation can be
- * tokenized by the parser and by the Pygments lexer that renders the site.
+ * tokenized by the parser and highlighted by Shiki with the TextMate grammar,
+ * the same pair the docs site uses.
  *
  * Snippets are only skipped when they are pseudo-code overviews, so a
  * documented construct that no lexer understands fails the build.
@@ -11,9 +12,9 @@
  *   1 - A snippet produced a lexer error
  */
 
-import { spawnSync } from 'node:child_process';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
+import { createHighlighter, type BundledLanguage, type LanguageRegistration } from 'shiki';
 // Uses .js extension per swc-node convention (see check-grammar.mts for reference)
 import { tokenize } from '../packages/parser/src/lexer/index.js';
 
@@ -63,36 +64,35 @@ function isPseudoCode(code: string): boolean {
   return code.includes('...') || code.includes('[as alias]');
 }
 
-const PYGMENTS_PROGRAM = `
-import json, sys
-sys.path.insert(0, 'docs_extensions')
-from pygments.token import Error
-from promptscript_lexer import PromptScriptLexer
+const grammar = JSON.parse(
+  readFileSync(resolve('apps/vscode/syntaxes/promptscript.tmLanguage.json'), 'utf-8')
+) as LanguageRegistration;
+const highlighter = await createHighlighter({
+  langs: [{ ...grammar, name: 'promptscript' }],
+  themes: ['github-dark'],
+});
 
-lexer = PromptScriptLexer()
-failures = []
-for item in json.load(sys.stdin):
-    bad = sorted({value for token, value in lexer.get_tokens(item["code"]) if token is Error})
-    if bad:
-        failures.append({"id": item["id"], "tokens": bad})
-json.dump(failures, sys.stdout)
-`;
-
-function pygmentsFailures(snippets: Snippet[]): Map<number, string[]> {
-  const input = snippets.map((snippet, id) => ({ id, code: snippet.code }));
-  const result = spawnSync('python3', ['-c', PYGMENTS_PROGRAM], {
-    input: JSON.stringify(input),
-    encoding: 'utf-8',
+/**
+ * Text the grammar marks invalid, or leaves unscoped while it is not a plain
+ * word. Property keys stay unscoped on purpose, so words are fine.
+ */
+function highlightFailures(code: string): string[] {
+  const bad = new Set<string>();
+  const lines = highlighter.codeToTokensBase(code, {
+    // Registered at runtime from the grammar above, so not a bundled id.
+    lang: 'promptscript' as BundledLanguage,
+    theme: 'github-dark',
+    includeExplanation: true,
   });
-
-  if (result.status !== 0) {
-    console.error('Could not run the Pygments lexer:\n');
-    console.error(result.stderr || result.error?.message);
-    process.exit(1);
+  for (const token of lines.flat()) {
+    for (const part of token.explanation ?? []) {
+      const scopes = part.scopes.map((scope) => scope.scopeName);
+      const text = part.content.trim();
+      if (scopes.some((scope) => scope.startsWith('invalid'))) bad.add(text);
+      else if (scopes.length === 1 && text && !/^[\w\s.-]+$/.test(text)) bad.add(text);
+    }
   }
-
-  const failures = JSON.parse(result.stdout) as Array<{ id: number; tokens: string[] }>;
-  return new Map(failures.map((failure) => [failure.id, failure.tokens]));
+  return [...bad];
 }
 
 const snippets = collectSnippets().filter((snippet) => !isPseudoCode(snippet.code));
@@ -105,9 +105,11 @@ for (const snippet of snippets) {
   }
 }
 
-for (const [id, tokens] of pygmentsFailures(snippets)) {
-  const snippet = snippets[id]!;
-  errors.push(`${snippet.file}:${snippet.line} Pygments lexer rejects ${tokens.join(', ')}`);
+for (const snippet of snippets) {
+  const tokens = highlightFailures(snippet.code);
+  if (tokens.length > 0) {
+    errors.push(`${snippet.file}:${snippet.line} TextMate grammar rejects ${tokens.join(', ')}`);
+  }
 }
 
 if (errors.length > 0) {
@@ -116,7 +118,7 @@ if (errors.length > 0) {
     console.error(`  ${error}`);
   }
   console.error(
-    '\nReferences: packages/parser/src/lexer/tokens.ts, docs_extensions/promptscript_lexer.py\n'
+    '\nReferences: packages/parser/src/lexer/tokens.ts, apps/vscode/syntaxes/promptscript.tmLanguage.json\n'
   );
   process.exit(1);
 }

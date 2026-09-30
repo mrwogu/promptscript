@@ -8,9 +8,9 @@
  *   1 - Missing token coverage
  */
 
-import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { bundledLanguages, bundledLanguagesAlias } from 'shiki';
 import { BLOCK_TYPES } from '../packages/core/src/types/constants.js';
 import {
   CONTEXTUAL_DIRECTIVES,
@@ -196,8 +196,6 @@ function providesScope(
 const grammarPath = resolve('apps/vscode/syntaxes/promptscript.tmLanguage.json');
 const grammarJson = readFileSync(grammarPath, 'utf-8');
 const grammar = JSON.parse(grammarJson) as TmGrammar;
-const pygmentsPath = resolve('docs_extensions/promptscript_lexer.py');
-const pygmentsSource = readFileSync(pygmentsPath, 'utf-8');
 const languageConfigurationPath = resolve('apps/vscode/language-configuration.json');
 const vscodeLanguageConfiguration = JSON.parse(
   readFileSync(languageConfigurationPath, 'utf-8')
@@ -290,55 +288,6 @@ for (const directive of expectedContextualOperations) {
   }
 }
 
-const pygmentsBlockMatch = pygmentsSource.match(/BLOCK_DIRECTIVES = \(([\s\S]*?)\)\n\n/);
-if (!pygmentsBlockMatch) {
-  syncErrors.push('Pygments lexer does not expose BLOCK_DIRECTIVES');
-} else {
-  const pygmentsBlocks = new Set(
-    [...pygmentsBlockMatch[1]!.matchAll(/"([^"]+)"/g)].map((match) => match[1]!)
-  );
-  for (const blockType of BLOCK_TYPES) {
-    if (!pygmentsBlocks.has(blockType)) {
-      syncErrors.push(`Pygments lexer is missing block directive @${blockType}`);
-    }
-  }
-  for (const blockType of pygmentsBlocks) {
-    if (!(BLOCK_TYPES as readonly string[]).includes(blockType)) {
-      syncErrors.push(`Pygments lexer contains unknown block directive @${blockType}`);
-    }
-  }
-}
-
-const pygmentsOperationMatch = pygmentsSource.match(
-  /CONTEXTUAL_OPERATION_DIRECTIVES = \(([\s\S]*?)\)\n\n/
-);
-if (!pygmentsOperationMatch) {
-  syncErrors.push('Pygments lexer does not expose CONTEXTUAL_OPERATION_DIRECTIVES');
-} else {
-  const pygmentsOperations = new Set(
-    [...pygmentsOperationMatch[1]!.matchAll(/"([^"]+)"/g)].map((match) => `@${match[1]!}`)
-  );
-  for (const directive of expectedContextualOperations) {
-    if (!pygmentsOperations.has(directive)) {
-      syncErrors.push(`Pygments lexer is missing contextual operation ${directive}`);
-    }
-  }
-}
-
-const pygmentsContextualMatch = pygmentsSource.match(/CONTEXTUAL_DIRECTIVES = \(([\s\S]*?)\)\n\n/);
-if (!pygmentsContextualMatch) {
-  syncErrors.push('Pygments lexer does not expose CONTEXTUAL_DIRECTIVES');
-} else {
-  const pygmentsContextual = new Set(
-    [...pygmentsContextualMatch[1]!.matchAll(/"([^"]+)"/g)].map((match) => `@${match[1]!}`)
-  );
-  for (const directive of expectedContextualDirectives) {
-    if (!pygmentsContextual.has(directive)) {
-      syncErrors.push(`Pygments lexer is missing contextual directive ${directive}`);
-    }
-  }
-}
-
 const textMateOperationPattern = grammar.repository?.['override-directive']?.match;
 if (!textMateOperationPattern) {
   syncErrors.push('TextMate grammar does not define override-directive.match');
@@ -403,6 +352,7 @@ if (!grammar.repository?.['triple-string']?.patterns?.some((p) => p.include === 
 }
 
 const fenceLanguages = new Set<string>();
+const fenceRuleLanguages = new Map<string, string[]>();
 for (const [name, rule] of fenceRules) {
   if (name === 'fenced-code' || name === 'fenced-plain') continue;
 
@@ -411,7 +361,9 @@ for (const [name, rule] of fenceRules) {
     syncErrors.push(`TextMate ${name} does not name the languages it covers`);
     continue;
   }
-  for (const language of infoStringGroup[1]!.split('|')) {
+  const languages = infoStringGroup[1]!.split('|');
+  fenceRuleLanguages.set(name, languages);
+  for (const language of languages) {
     fenceLanguages.add(language);
   }
   if (!rule.contentName?.startsWith('meta.embedded.block.')) {
@@ -423,34 +375,14 @@ if (fenceLanguages.size === 0) {
   syncErrors.push('TextMate grammar defines no embedded fence languages');
 }
 
-// The Pygments lexer resolves the info string at runtime, so the guard is
-// that every language TextMate claims is one Pygments can actually load.
-const PYGMENTS_FENCE_PROBE = [
-  'import json, sys',
-  "sys.path.insert(0, 'docs_extensions')",
-  'from promptscript_lexer import PromptScriptLexer, fence_sublexer',
-  'names = json.load(sys.stdin)',
-  'unknown = [name for name in names if fence_sublexer(name) is None]',
-  'sample = \'@knowledge {\\n  api: """\\n  ```javascript\\n  const answer = 42;\\n  ```\\n  """\\n}\\n\'',
-  'tokens = list(PromptScriptLexer().get_tokens(sample))',
-  'delegates = any(str(token).startswith("Token.Keyword") and value == "const" for token, value in tokens)',
-  'json.dump({"unknown": unknown, "delegates": delegates}, sys.stdout)',
-].join('\n');
-
-const pygmentsFences = spawnSync('python3', ['-c', PYGMENTS_FENCE_PROBE], {
-  input: JSON.stringify([...fenceLanguages]),
-  encoding: 'utf-8',
-});
-
-if (pygmentsFences.status !== 0) {
-  syncErrors.push(`Could not query the Pygments lexers: ${pygmentsFences.stderr.trim()}`);
-} else {
-  const result = JSON.parse(pygmentsFences.stdout) as { unknown: string[]; delegates: boolean };
-  for (const language of result.unknown) {
-    syncErrors.push(`Pygments cannot highlight fenced ${language} that TextMate claims`);
-  }
-  if (!result.delegates) {
-    syncErrors.push('Pygments lexer does not delegate fenced code to other lexers');
+// The docs site highlights .prs with Shiki, so every embedded fence rule must
+// cover at least one language Shiki ships. Info-string aliases like golang are
+// fine as long as the rule also names the canonical id.
+const shikiKnows = (language: string): boolean =>
+  language in bundledLanguages || language in bundledLanguagesAlias;
+for (const [name, languages] of fenceRuleLanguages) {
+  if (!languages.some(shikiKnows)) {
+    syncErrors.push(`Shiki cannot highlight any language of TextMate ${name}`);
   }
 }
 

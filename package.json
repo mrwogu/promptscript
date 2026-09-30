@@ -65,6 +65,7 @@
     "nx": "23.2.1",
     "path-browserify": "^1.0.1",
     "prettier": "~3.9.9",
+    "shiki": "^4.4.3",
     "ts-json-schema-generator": "^2.9.0",
     "ts-node": "^10.9.2",
     "tslib": "^2.3.0",

@@ -1,6 +1,6 @@
 # add-block-keyword
 
-<!-- PromptScript 2026-08-04T15:31:20.016Z | source: .promptscript/project.prs | target: claude - do not edit -->
+<!-- PromptScript 2026-09-30T14:16:51.158Z | source: .promptscript/project.prs | target: claude - do not edit -->
 
 > Add or rename a PromptScript block keyword without desynchronizing tooling
 
@@ -16,11 +16,12 @@ them in the same change.
    `packages/core/src/syntax-versions.ts`.
 
 5. Formatters that render the block, plus their golden files.
-6. All three syntax highlighters: `docs_extensions/promptscript_lexer.py`,
-   `apps/vscode/syntaxes/promptscript.tmLanguage.json`, and
+6. Both syntax highlighters: `apps/vscode/syntaxes/promptscript.tmLanguage.json`
+   (VS Code and the docs site) and
    `packages/playground/src/utils/prs-language.ts`.
 
 7. Reference docs under `docs/reference/`.
 
-`pnpm grammar:check` catches a missed TextMate grammar entry. Nothing
-catches a missed Pygments or Monaco entry, so verify those by reading.
+`pnpm grammar:check` catches a missed TextMate grammar entry and a
+missed Monaco directive. Other Monaco rules are not checked, so verify
+those by reading.
