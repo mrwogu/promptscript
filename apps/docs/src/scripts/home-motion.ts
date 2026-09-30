@@ -11,6 +11,7 @@ const REVEAL = [
   '.home-section .home-code-window',
   '.home-native__copy',
   '.home-target-card',
+  '.home-plugins__notes li',
   '.home-scale',
   '.home-path-card',
   '.home-proof',
