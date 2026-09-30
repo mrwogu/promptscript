@@ -1946,14 +1946,11 @@ pre.init-demo__file-preview-content {
   .home-scale {
     grid-template-columns: 1fr;
     gap: 3.75rem;
+    padding: 2.5rem;
   }
 
   .home-scale__copy {
     max-width: 720px;
-  }
-
-  .home-scale {
-    padding: 2.5rem;
   }
 }
 
