@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { NAV_TABS, findActiveTab, sidebarForTab, type SidebarNode } from './nav';
+import { NAV_TABS, findActiveTab, paginationIn, sidebarForTab, type SidebarNode } from './nav';
 
 function sidebar(currentLabel?: string): SidebarNode[] {
   const link = (label: string): SidebarNode => ({
@@ -52,5 +52,19 @@ describe('NAV_TABS', () => {
     const groups = NAV_TABS.flatMap((tab) => tab.groups ?? []);
 
     expect(new Set(groups).size).toBe(groups.length);
+  });
+});
+
+describe('paginationIn', () => {
+  it('links the pages around the current one, also across nested groups', () => {
+    const { prev, next } = paginationIn(sidebar('Overview'));
+
+    expect(prev?.label).toBe('Migration Guide');
+    expect(next?.label).toBe('Commands');
+  });
+
+  it('has no previous page on the first link and nothing without a current page', () => {
+    expect(paginationIn(sidebar('Getting Started')).prev).toBeUndefined();
+    expect(paginationIn(sidebar())).toEqual({});
   });
 });

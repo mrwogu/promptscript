@@ -1,7 +1,7 @@
 import { defineRouteMiddleware } from '@astrojs/starlight/route-data';
 import { markdownUrl } from './llms';
 import { gitLastModified } from './plugins/git-lastmod.mjs';
-import { findActiveTab, sidebarForTab } from './nav';
+import { findActiveTab, paginationIn, sidebarForTab } from './nav';
 import { pageJsonLd, type Crumb } from './seo';
 import { SITE } from './site.mjs';
 
@@ -12,6 +12,8 @@ export const onRequest = defineRouteMiddleware((context) => {
   // Show only the sidebar groups of the active header tab.
   const tab = findActiveTab(route.sidebar, pathname);
   route.sidebar = sidebarForTab(route.sidebar, tab);
+  // Previous/next links would otherwise jump into another tab.
+  if (tab?.groups) route.pagination = paginationIn(route.sidebar) as typeof route.pagination;
 
   // TypeDoc pages are generated in CI, there is no source file to edit.
   if (route.entry.id.startsWith('api-reference')) route.editUrl = undefined;

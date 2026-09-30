@@ -10,9 +10,10 @@ export const SIDEBAR = [
     label: 'Start',
     items: [
       { label: 'Getting Started', slug: 'getting-started' },
-      { label: 'Tutorial', slug: 'tutorial' },
-      { label: 'Real-Life Checkout Service', slug: 'examples/real-life-checkout-service' },
       { label: 'Why PromptScript', slug: 'guides/vs-manual' },
+      { label: 'Tutorial: Team Layers', slug: 'tutorial' },
+      { label: 'Tutorial: Checkout Service', slug: 'examples/real-life-checkout-service' },
+      { label: 'Glossary', slug: 'glossary' },
       { label: 'FAQ', slug: 'guides/faq' },
     ],
   },
@@ -26,7 +27,7 @@ export const SIDEBAR = [
     ],
   },
   {
-    label: 'Agent Platform',
+    label: 'Core Features',
     items: [
       { label: 'Overview', slug: 'features' },
       { label: 'Agents', slug: 'features/agents' },
@@ -63,7 +64,7 @@ export const SIDEBAR = [
     ],
   },
   {
-    label: 'Scale to Organization',
+    label: 'Teams and Enterprise',
     collapsed: true,
     items: [
       { label: 'Enterprise Setup', slug: 'guides/enterprise' },
