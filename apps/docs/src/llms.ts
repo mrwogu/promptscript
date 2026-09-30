@@ -33,7 +33,17 @@ export function markdownUrl(id: string): string {
   return id === 'index' ? `${SITE}/index.md` : `${SITE}/${id}/index.md`;
 }
 
-const text = (html: string): string => html.replaceAll(/<[^>]+>/g, '').trim();
+/** Text content of an HTML snippet. A plain scan, so no regex backtracking. */
+function text(html: string): string {
+  let result = '';
+  let inTag = false;
+  for (const char of html) {
+    if (char === '<') inTag = true;
+    else if (char === '>') inTag = false;
+    else if (!inTag) result += char;
+  }
+  return result.trim();
+}
 
 /** Drops a `<div class="...">` block with everything nested in it. */
 function dropDiv(body: string, className: string): string {
@@ -73,7 +83,8 @@ export function cardsToMarkdown(body: string, pageId: string): string {
       const details = about
         ? text(about)
         : [output && `\`${text(output)}\``, tags.join(', ')].filter(Boolean).join(' - ');
-      return `- [${title}](${target})${details ? `: ${details}` : ''}`;
+      const suffix = details ? `: ${details}` : '';
+      return `- [${title}](${target})${suffix}`;
     }
   );
   for (const block of ['init-demo', 'formatter-tiers']) result = dropDiv(result, block);
