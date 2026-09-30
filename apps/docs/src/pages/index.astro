@@ -31,4 +31,8 @@ import { homeJsonLd } from '../seo';
   }}
 >
   <Fragment set:html={home} />
+  <script>
+    import { initHomeMotion } from '../scripts/home-motion';
+    initHomeMotion();
+  </script>
 </StarlightPage>
