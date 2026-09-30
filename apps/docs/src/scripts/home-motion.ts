@@ -12,6 +12,7 @@ const REVEAL = [
   '.home-native__copy',
   '.home-target-card',
   '.home-plugins__notes li',
+  '.home-models-wrap',
   '.home-scale',
   '.home-path-card',
   '.home-proof',

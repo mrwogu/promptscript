@@ -220,8 +220,9 @@
       <div class="home-eyebrow">Prompts as code</div>
       <h2>Inherit, compose, and extend</h2>
       <p>
-        Configuration is composable source, not copied text. Inherit a shared base, mix in reusable
-        fragments, and override only what changes - with deterministic, reviewable merges.
+        Configuration is composable source, not copied text. Inherit a shared base, pass it
+        arguments like a function, mix in reusable fragments, and override only what changes - with
+        deterministic, reviewable merges.
       </p>
     </div>
     <div class="home-compose__layout">
@@ -231,12 +232,12 @@
           <span>project.prs</span>
           <span class="home-window-status">source</span>
         </div>
-        <pre><code><span class="home-code-comment"># IS-A: inherit the organization base</span>
-<span class="home-code-keyword">@inherit</span> <span class="home-code-reference">@company/platform</span>
+        <pre><code><span class="home-code-comment"># IS-A: inherit a base, with arguments</span>
+<span class="home-code-keyword">@inherit</span> <span class="home-code-reference">@stacks/react-app</span>(projectName: <span class="home-code-string">"Checkout"</span>, port: 8080)
 
 <span class="home-code-comment"># HAS-A: compose reusable fragments</span>
 <span class="home-code-keyword">@use</span> <span class="home-code-reference">@core/security</span>
-<span class="home-code-keyword">@use</span> <span class="home-code-reference">@fragments/testing</span>
+<span class="home-code-keyword">@use</span> <span class="home-code-reference">./fragments/testing</span>(framework: <span class="home-code-string">"vitest"</span>)
 
 <span class="home-code-comment"># override only what changes</span>
 <span class="home-code-keyword">@extend</span> standards.code {
@@ -265,6 +266,16 @@
             <p>
               Mix in multiple "HAS-A" capabilities like security or testing. Later imports win on
               conflicts.
+            </p>
+          </div>
+        </a>
+        <a href="guides/inheritance/#passing-parameters" class="home-compose__op">
+          <span class="home-compose__op-token">params</span>
+          <div>
+            <h3>Pass arguments like functions</h3>
+            <p>
+              A base declares typed parameters with defaults, like
+              <code>port: number = 3000</code>, and uses them as <code>{{projectName}}</code>.
             </p>
           </div>
         </a>
@@ -492,7 +503,13 @@
           <span>incident.prs</span>
           <span class="home-window-status">source</span>
         </div>
-        <pre><code><span class="home-code-keyword">@mcpServers</span> {
+        <pre><code><span class="home-code-keyword">@skills</span> {
+&#32;&#32;triage: {
+&#32;&#32;&#32;&#32;description: <span class="home-code-string">"Classify incidents by severity"</span>
+&#32;&#32;}
+}
+
+<span class="home-code-keyword">@mcpServers</span> {
 &#32;&#32;observability: {
 &#32;&#32;&#32;&#32;transport: <span class="home-code-string">"http"</span>
 &#32;&#32;&#32;&#32;url: <span class="home-code-reference">"https://mcp.example.com/api"</span>
@@ -542,6 +559,24 @@
         </div>
       </div>
     </div>
+    <div class="home-stats home-plugins__stats">
+      <div>
+        <strong data-count="34">34</strong>
+        <span>lines of <code>.prs</code>, like the one above</span>
+      </div>
+      <div>
+        <strong data-count="17">17</strong>
+        <span>native files written by <code>prs compile</code></span>
+      </div>
+      <div>
+        <strong data-count="3">3</strong>
+        <span>formats: Markdown, JSON, and TOML</span>
+      </div>
+      <div>
+        <strong data-count="4">4</strong>
+        <span>tools: Claude Code, Copilot, Codex, Factory AI</span>
+      </div>
+    </div>
     <ul class="home-check-list home-plugins__notes">
       <li>stdio, HTTP, and SSE servers, with tool allow and deny lists</li>
       <li>Agents get only the MCP servers and skills you give them</li>
@@ -556,6 +591,67 @@
         >MCP servers and plugins <span>→</span></a
       >
     </p>
+  </section>
+  <section class="home-section" id="models">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">Model mapping</div>
+      <h2>Name a model once. Every tool gets its own spelling.</h2>
+      <p>
+        Each tool names models differently. Write <code>opus</code> or a full model id and
+        PromptScript writes the name each target expects. When a target cannot run that model, the
+        compiler warns (PS4004).
+      </p>
+    </div>
+    <div class="home-compose__layout">
+      <div class="home-code-window">
+        <div class="home-window-bar">
+          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>project.prs</span>
+          <span class="home-window-status">source</span>
+        </div>
+        <pre><code><span class="home-code-keyword">@agents</span> {
+&#32;&#32;reviewer: {
+&#32;&#32;&#32;&#32;description: <span class="home-code-string">"Review pull requests"</span>
+&#32;&#32;&#32;&#32;model: <span class="home-code-string">"opus"</span>
+&#32;&#32;}
+}</code></pre>
+      </div>
+      <div class="home-models-wrap">
+        <table class="home-models">
+          <thead>
+            <tr>
+              <th>Target</th>
+              <th>Writes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Claude Code</td>
+              <td><code>opus</code></td>
+            </tr>
+            <tr>
+              <td>GitHub Copilot</td>
+              <td><code>Claude Opus 5.5</code></td>
+            </tr>
+            <tr>
+              <td>Factory AI</td>
+              <td><code>claude-opus-5-5</code></td>
+            </tr>
+            <tr>
+              <td>Cursor</td>
+              <td><code>claude-opus-5-5</code></td>
+            </tr>
+            <tr>
+              <td>Codex</td>
+              <td><span class="home-models__warn">omitted, PS4004 warning</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <a href="reference/models/" class="home-text-link"
+          >Model catalog and aliases <span>→</span></a
+        >
+      </div>
+    </div>
   </section>
   <section class="home-section home-native" id="native-output">
     <div class="home-native__copy">
@@ -648,6 +744,12 @@
         Keep shared standards in Git, inherit them through explicit layers, pin remote dependencies,
         and enforce the result in CI.
       </p>
+      <ul class="home-scale__cmds">
+        <li><code>prs registry init</code><span>create a registry repository</span></li>
+        <li><code>prs registry publish</code><span>publish it to your Git remote</span></li>
+        <li><code>@inherit @company/platform</code><span>use it in every project</span></li>
+        <li><code>prs vendor sync</code><span>vendor it for offline builds</span></li>
+      </ul>
       <div class="home-scale__links">
         <a href="guides/enterprise/">Enterprise setup</a>
         <a href="guides/registry/">Git registry</a>
@@ -722,6 +824,71 @@
       <div class="home-scale__projects">100+ project repositories</div>
       <div class="home-scale__outputs">
         <span>Policies</span><span>Skills</span><span>Agents</span><span>Native files</span>
+      </div>
+    </div>
+  </section>
+  <section class="home-section" id="ai-skill">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">Built-in promptscript skill</div>
+      <h2>Your AI agent already knows PromptScript</h2>
+      <p>
+        Every compile ships a language skill to each agent that supports skills. Ask in plain words
+        and the agent writes the <code>.prs</code> for you: migrations, new skills, agents, or MCP
+        servers.
+      </p>
+    </div>
+    <div class="home-compose__layout">
+      <div class="home-code-window" data-typing>
+        <div class="home-window-bar">
+          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>terminal</span>
+          <span class="home-window-status">output</span>
+        </div>
+        <pre><code><span class="home-code-comment">$</span> prs compile
+&#32;&#32;✓ .claude/skills/promptscript/SKILL.md
+&#32;&#32;✓ .github/skills/promptscript/SKILL.md
+&#32;&#32;✓ .factory/skills/promptscript/SKILL.md
+&#32;&#32;✓ .agents/skills/promptscript/SKILL.md
+<span class="home-code-string">✔ Compilation successful</span>
+
+<span class="home-code-comment"># then, in Claude Code:</span>
+<span class="home-code-keyword">/promptscript</span> migrate our CLAUDE.md and Cursor rules
+
+<span class="home-code-comment"># or in Copilot Chat:</span>
+Use the promptscript skill to add an MCP
+server for our issue tracker</code></pre>
+      </div>
+      <div class="home-compose__ops">
+        <a href="reference/config/#includepromptscriptskill" class="home-compose__op">
+          <span class="home-compose__op-token">skill</span>
+          <div>
+            <h3>Always in the box</h3>
+            <p>
+              On by default. The skill covers every block, the CLI, and validation errors, and it
+              ships with the version you compile.
+            </p>
+          </div>
+        </a>
+        <a href="getting-started/#quick-start-migrating-existing-projects" class="home-compose__op">
+          <span class="home-compose__op-token">migrate</span>
+          <div>
+            <h3>Migration done by your agent</h3>
+            <p>
+              <code>prs migrate --llm</code> prepares the prompt, the agent converts your existing
+              files. <code>prs migrate --static</code> imports them without AI.
+            </p>
+          </div>
+        </a>
+        <a href="reference/cli/#prs-validate" class="home-compose__op">
+          <span class="home-compose__op-token">check</span>
+          <div>
+            <h3>Checked by the compiler</h3>
+            <p>
+              Whatever the agent writes goes through <code>prs validate --strict</code> and
+              <code>prs compile</code>, like code from a teammate.
+            </p>
+          </div>
+        </a>
       </div>
     </div>
   </section>
