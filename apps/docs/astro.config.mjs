@@ -123,6 +123,7 @@ export default defineConfig({
             { label: 'Skills and Resources', slug: 'features/skills' },
             { label: 'MCP Servers and Plugins', slug: 'features/integrations' },
             { label: 'Hooks and Workflows', slug: 'features/automation' },
+            { label: 'Target Output Families', slug: 'features/target-platforms' },
             { label: 'AI Tool Hooks', slug: 'guides/hooks' },
             { label: 'Examples (Few-Shot)', slug: 'guides/examples' },
           ],
@@ -167,17 +168,7 @@ export default defineConfig({
         {
           label: 'Targets',
           collapsed: true,
-          items: [
-            { label: 'Platform Matrix', slug: 'reference/formatters' },
-            { label: 'Output Families', slug: 'features/target-platforms' },
-            { label: 'Claude Code', slug: 'reference/formatters/claude' },
-            { label: 'GitHub Copilot', slug: 'reference/formatters/github' },
-            { label: 'Cursor', slug: 'reference/formatters/cursor' },
-            { label: 'Antigravity', slug: 'reference/formatters/antigravity' },
-            { label: 'Factory AI', slug: 'reference/formatters/factory' },
-            { label: 'Gemini CLI', slug: 'reference/formatters/gemini' },
-            { label: 'OpenCode', slug: 'reference/formatters/opencode' },
-          ],
+          items: [{ autogenerate: { directory: 'reference/formatters' } }],
         },
         {
           label: 'Reference',

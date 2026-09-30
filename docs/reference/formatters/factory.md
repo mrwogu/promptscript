@@ -1,6 +1,9 @@
 ---
 title: Factory AI Formatter
 description: PromptScript output format for Factory AI
+sidebar:
+  label: Factory AI
+  order: 1
 ---
 
 # Factory AI Formatter

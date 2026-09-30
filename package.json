@@ -21,7 +21,7 @@
     "docs:validate": "node --import @swc-node/register/esm-register scripts/validate-docs-examples.mts",
     "docs:validate:check": "node --import @swc-node/register/esm-register scripts/validate-docs-examples.mts --check",
     "docs:formatters": "node --import @swc-node/register/esm-register scripts/generate-formatter-docs.mts && npx prettier --write docs/reference/formatters/*.md",
-    "docs:formatters:check": "node --import @swc-node/register/esm-register scripts/generate-formatter-docs.mts && npx prettier --write docs/reference/formatters/*.md && git diff --exit-code docs/reference/formatters/",
+    "docs:formatters:check": "node --import @swc-node/register/esm-register scripts/generate-formatter-docs.mts && npx prettier --write docs/reference/formatters/*.md && git diff --exit-code docs/reference/formatters/ && test -z \"$(git status --porcelain docs/reference/formatters/)\"",
     "docs:models": "node --import @swc-node/register/esm-register scripts/generate-model-docs.mts && npx prettier --write docs/reference/models.md",
     "docs:models:check": "node --import @swc-node/register/esm-register scripts/generate-model-docs.mts && npx prettier --write docs/reference/models.md && git diff --exit-code docs/reference/models.md",
     "models:drift": "node --import @swc-node/register/esm-register scripts/model-drift.mts --check",

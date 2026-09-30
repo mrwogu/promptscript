@@ -43,7 +43,15 @@ interface FormatterInfo {
   hasDedicatedPage: boolean;
   hookConfigPath: string | null;
   hookVersions: readonly string[];
+  hookEvents: readonly string[];
+  hookDocsUrl: string | null;
   resources: readonly TargetResourceCapability[];
+  defaultEnabled: boolean;
+  defaultVersion: string;
+  versions: readonly { name: string; description: string }[];
+  mcpConfigPath: string | null;
+  mcpConfigFormat: string | null;
+  unsupportedBlocks: readonly string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -111,11 +119,15 @@ const DEDICATED_PAGES = new Set([
   'gemini',
 ]);
 
-function getHookMetadata(name: string): Pick<FormatterInfo, 'hookConfigPath' | 'hookVersions'> {
+function getHookMetadata(
+  name: string
+): Pick<FormatterInfo, 'hookConfigPath' | 'hookVersions' | 'hookEvents' | 'hookDocsUrl'> {
   const capability = TARGET_CAPABILITIES[name as keyof typeof TARGET_CAPABILITIES]?.hooks;
   return {
     hookConfigPath: capability?.configPath ?? null,
     hookVersions: capability?.nativeVersions ?? [],
+    hookEvents: capability?.events ?? [],
+    hookDocsUrl: capability?.documentationUrl ?? null,
   };
 }
 
@@ -153,6 +165,15 @@ function buildFormatterRegistry(): FormatterInfo[] {
       skillFileName: definition.skillPath.fileName ?? 'SKILL.md',
       hasDedicatedPage: DEDICATED_PAGES.has(definition.name),
       resources: definition.resources,
+      defaultEnabled: definition.features.defaultEnabled,
+      defaultVersion: definition.defaultVersion,
+      versions: Object.values(definition.versions).map(({ name: version, description }) => ({
+        name: version,
+        description,
+      })),
+      mcpConfigPath: definition.mcpConfigPath,
+      mcpConfigFormat: definition.mcpConfigFormat,
+      unsupportedBlocks: definition.unsupportedBlocks,
       ...hookMetadata,
     };
   });
@@ -308,7 +329,7 @@ function generateFormatterTable(formatters: FormatterInfo[]): string {
   ];
 
   for (const f of formatters) {
-    const nameCell = f.hasDedicatedPage ? `[${f.displayName}](${f.name}.md)` : f.displayName;
+    const nameCell = `[${f.displayName}](${f.name}.md)`;
     lines.push(
       `| ${nameCell} | ${tierLabel(f.tier)} | \`${f.outputPath}\` | ${yn(f.hasSkills)} | ${yn(f.hasAgents)} | ${yn(f.hasLocal)} | ${yn(f.hasCommands)} |`
     );
@@ -317,13 +338,25 @@ function generateFormatterTable(formatters: FormatterInfo[]): string {
   return lines.join('\n');
 }
 
+/** True when the target really writes into its dot directory. */
+function usesDotDir(f: FormatterInfo): boolean {
+  const paths = [
+    f.outputPath,
+    f.skillBasePath,
+    f.hookConfigPath,
+    f.mcpConfigPath,
+    ...f.resources.map((resource) => resource.path),
+  ];
+  return paths.some((path) => path?.startsWith(`${f.dotDir}/`));
+}
+
 function generateOverview(f: FormatterInfo): string {
   const lines = [
     `| Property | Value |`,
     `|----------|-------|`,
     `| **Tier** | ${tierLabel(f.tier)} |`,
     `| **Main output** | \`${f.outputPath}\` |`,
-    `| **Dot directory** | \`${f.dotDir}/\` |`,
+    ...(usesDotDir(f) ? [`| **Dot directory** | \`${f.dotDir}/\` |`] : []),
     `| **Skills** | ${yn(f.hasSkills)}${f.hasSkills ? ` (\`${skillPath(f)}\`)` : ''} |`,
     `| **Agents** | ${yn(f.hasAgents)}${f.hasAgents ? ` (\`${agentPath(f)}\`)` : ''} |`,
     `| **Commands** | ${yn(f.hasCommands)}${f.hasCommands ? ` (\`${commandPath(f)}\`)` : ''} |`,
@@ -426,6 +459,100 @@ function generateFeatures(f: FormatterInfo): string {
   return lines.join('\n');
 }
 
+function generateVersions(f: FormatterInfo): string {
+  const lines = ['| Version | Output |', '|---------|--------|'];
+  for (const version of f.versions) {
+    const label =
+      version.name === f.defaultVersion ? `\`${version.name}\` (default)` : `\`${version.name}\``;
+    lines.push(`| ${label} | ${version.description.replaceAll('|', '\\|')} |`);
+  }
+  return lines.join('\n');
+}
+
+function generateIntegrations(f: FormatterInfo): string {
+  const lines = ['| Block | Support |', '|-------|---------|'];
+  lines.push(
+    `| \`@mcpServers\` | ${f.mcpConfigPath ? `\`${f.mcpConfigPath}\` (${f.mcpConfigFormat ?? 'json'})` : 'Not supported'} |`
+  );
+  const hooks = f.hookConfigPath
+    ? `\`${f.hookConfigPath}\`${f.hookVersions.length > 0 ? ` in ${f.hookVersions.map((v) => `\`${v}\``).join(', ')}` : ''}`
+    : 'Not supported';
+  lines.push(`| \`@hooks\` | ${hooks} |`);
+  if (f.hookEvents.length > 0) {
+    lines.push(`| Hook events | ${f.hookEvents.map((event) => `\`${event}\``).join(', ')} |`);
+  }
+  if (f.unsupportedBlocks.length > 0) {
+    lines.push(
+      `| Not emitted | ${f.unsupportedBlocks.map((block) => `\`@${block}\``).join(', ')} |`
+    );
+  }
+  return lines.join('\n');
+}
+
+/** Full page for a target without a hand-written page. */
+function generateTargetPage(f: FormatterInfo): string {
+  const enabled = f.defaultEnabled
+    ? 'It is enabled by default in new projects.'
+    : 'It is not enabled by default, add it to `targets` to use it.';
+  const hookDocs = f.hookDocsUrl ? `\n\nNative hook reference: <${f.hookDocsUrl}>` : '';
+  return [
+    '---',
+    `title: ${f.displayName} Formatter`,
+    `description: PromptScript output format for ${f.displayName}`,
+    'sidebar:',
+    `  label: ${f.displayName}`,
+    '---',
+    '',
+    `# ${f.displayName} Formatter`,
+    '',
+    '<!-- Auto-generated by `pnpm docs:formatters`. Do not edit manually. -->',
+    '',
+    `PromptScript compiles your \`.prs\` sources to native ${f.displayName} configuration. The main output is \`${f.outputPath}\`. ${enabled}`,
+    '',
+    '## Enable the Target',
+    '',
+    '```yaml',
+    'targets:',
+    `  - ${f.name}`,
+    '```',
+    '',
+    'Pick an output version when you need more than the default:',
+    '',
+    '```yaml',
+    'targets:',
+    `  - ${f.name}:`,
+    `      version: ${f.defaultVersion}`,
+    '```',
+    '',
+    '## Overview',
+    '',
+    generateOverview(f),
+    '',
+    '## Output Files',
+    '',
+    generateOutputFiles(f),
+    '',
+    '## Output Versions',
+    '',
+    generateVersions(f),
+    '',
+    '## MCP and Hooks',
+    '',
+    generateIntegrations(f) + hookDocs,
+    '',
+    '## Supported Features',
+    '',
+    generateFeatures(f),
+    '',
+    '## See Also',
+    '',
+    '- [Platform matrix](index.md)',
+    '- [Configuration reference](../config.md)',
+    '- [Target platforms and output families](../../features/target-platforms.md)',
+    '',
+  ].join('\n');
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -493,6 +620,13 @@ function main(): void {
     } else {
       console.log('  No changes');
     }
+  }
+
+  // 3. Generate full pages for targets without a hand-written page
+  for (const f of FORMATTERS.filter((formatter) => !formatter.hasDedicatedPage)) {
+    const pagePath = join(DOCS_DIR, `${f.name}.md`);
+    if (!existsSync(pagePath)) hasChanges = true;
+    if (!checkMode) writeFileSync(pagePath, generateTargetPage(f), 'utf-8');
   }
 
   if (checkMode && hasChanges) {
