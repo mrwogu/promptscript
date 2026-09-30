@@ -16,7 +16,7 @@ export const NAV_TABS: readonly NavTab[] = [
   {
     label: 'Guides',
     href: '/features/',
-    groups: ['Agent Platform', 'Skills', 'Compose and Reuse', 'Scale to Organization'],
+    groups: ['Core Features', 'Skills', 'Compose and Reuse', 'Teams and Enterprise'],
   },
   { label: 'Targets', href: '/reference/formatters/', groups: ['Targets'] },
   { label: 'Reference', href: '/reference/', groups: ['Reference'] },
@@ -67,4 +67,14 @@ export function sidebarForTab<T extends SidebarNode>(
 ): T[] {
   if (!tab?.groups) return [...sidebar];
   return sidebar.filter((node) => node.type === 'group' && tab.groups?.includes(node.label));
+}
+
+/** Previous and next page inside the given sidebar, so paging stays inside one tab. */
+export function paginationIn<T extends SidebarNode>(sidebar: readonly T[]): { prev?: T; next?: T } {
+  const flat = (node: SidebarNode): SidebarNode[] =>
+    node.type === 'link' ? [node] : (node.entries ?? []).flatMap(flat);
+  const links = sidebar.flatMap(flat) as T[];
+  const index = links.findIndex((link) => link.isCurrent);
+  if (index === -1) return {};
+  return { prev: links[index - 1], next: links[index + 1] };
 }

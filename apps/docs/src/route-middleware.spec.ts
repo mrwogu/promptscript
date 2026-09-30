@@ -12,6 +12,7 @@ interface TestRoute {
   head: { tag: string; attrs?: Record<string, string>; content?: string }[];
   editUrl?: URL;
   lastUpdated?: Date;
+  pagination?: { prev?: unknown; next?: unknown };
 }
 
 function run(pathname: string, id: string): TestRoute {
@@ -41,6 +42,7 @@ describe('route middleware', () => {
     const route = run('/tutorial/', 'tutorial');
 
     expect(route.sidebar).toHaveLength(1);
+    expect(route.pagination).toEqual({ prev: undefined, next: undefined });
     expect(route.head[0].attrs).toEqual({
       rel: 'alternate',
       type: 'text/markdown',
