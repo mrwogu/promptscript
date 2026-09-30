@@ -1,0 +1,33 @@
+---
+import Default from '@astrojs/starlight/components/SocialIcons.astro';
+import { formatCount, projectStats } from '../stats';
+
+const { stars } = await projectStats();
+---
+
+{
+  stars !== undefined && (
+    <a class="ps-stars" href="https://github.com/mrwogu/promptscript">
+      <span aria-hidden="true">★</span> {formatCount(stars)}
+      <span class="sr-only">GitHub stars</span>
+    </a>
+  )
+}
+<Default />
+
+<style>
+  .ps-stars {
+    padding: 0.1875rem 0.625rem;
+    color: var(--sl-color-text-accent);
+    border: 1px solid var(--sl-color-hairline-shade);
+    border-radius: 999px;
+    font-size: var(--sl-text-sm);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .ps-stars:hover {
+    color: var(--sl-color-white);
+    border-color: var(--sl-color-text-accent);
+  }
+</style>
