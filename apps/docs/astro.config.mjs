@@ -83,6 +83,7 @@ export default defineConfig({
       components: {
         PageTitle: './src/components/PageTitle.astro',
         MarkdownContent: './src/components/MarkdownContent.astro',
+        Header: './src/components/Header.astro',
       },
       expressiveCode: {
         shiki: { langs: [promptscriptGrammar] },
@@ -117,8 +118,9 @@ export default defineConfig({
           exclude: ['api-reference/**'],
         }),
       ],
+      routeMiddleware: './src/route-middleware.ts',
+      // Top-level groups map to the header tabs in src/nav.ts.
       sidebar: [
-        { label: 'Playground', link: '/playground/', badge: { text: 'Try', variant: 'tip' } },
         {
           label: 'Start',
           items: [
@@ -265,7 +267,6 @@ export default defineConfig({
             { label: 'Feature Coverage', slug: 'testing/feature-coverage' },
           ],
         },
-        { label: 'Changelog', link: 'https://github.com/mrwogu/promptscript/releases' },
       ],
     }),
   ],
