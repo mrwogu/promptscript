@@ -1,5 +1,5 @@
 ---
-title: Agents Example - PromptScript
+title: Agents Example
 description: Learn how to define portable AI agents and compile them to native agent formats.
 ---
 
@@ -222,91 +222,96 @@ target writes.
 
 With `version: full`, agents are generated as separate files:
 
-=== "GitHub Copilot"
+::::tabs
+:::tab[GitHub Copilot]
 
-    `.github/agents/code-reviewer.md`
+`.github/agents/code-reviewer.md`
 
-    ```markdown
-    ---
-    name: code-reviewer
-    description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability.
-    tools: ['read', 'search', 'execute']
-    model: Claude Sonnet 5
-    ---
+```markdown
+---
+name: code-reviewer
+description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability.
+tools: ['read', 'search', 'execute']
+model: Claude Sonnet 5
+---
 
-    You are a senior code reviewer ensuring high standards of code quality and security.
+You are a senior code reviewer ensuring high standards of code quality and security.
 
-    When invoked:
+When invoked:
 
-    1. Run git diff to see recent changes
-       ...
-    ```
+1. Run git diff to see recent changes
+   ...
+```
 
-    !!! note "GitHub Copilot Mappings"
-        PromptScript automatically maps tool and model names to GitHub Copilot's format:
+:::::note[GitHub Copilot Mappings]
+PromptScript automatically maps tool and model names to GitHub Copilot's format:
 
-        **Tools:**
+**Tools:**
 
-        | PromptScript | GitHub Copilot |
-        |--------------|----------------|
-        | `Read` | `read` |
-        | `Grep`, `Glob` | `search` |
-        | `Bash` | `execute` |
-        | `Edit`, `Write` | `edit` |
-        | `WebFetch`, `WebSearch` | `web` |
-        | `Task` | `agent` |
-        | `TodoWrite` | `todo` |
+| PromptScript            | GitHub Copilot |
+| ----------------------- | -------------- |
+| `Read`                  | `read`         |
+| `Grep`, `Glob`          | `search`       |
+| `Bash`                  | `execute`      |
+| `Edit`, `Write`         | `edit`         |
+| `WebFetch`, `WebSearch` | `web`          |
+| `Task`                  | `agent`        |
+| `TodoWrite`             | `todo`         |
 
-        **Models:**
+**Models:**
 
-        | PromptScript | GitHub Copilot |
-        |--------------|----------------|
-        | `sonnet`, `opus`, `haiku`, `fable` | Display name of the newest release in the family |
-        | `sonnet-4.5` | `Claude Sonnet 4.5` |
-        | `gpt-5.3-codex` | `GPT-5.3-Codex` |
-        | `inherit` | *(omitted)* |
+| PromptScript                       | GitHub Copilot                                   |
+| ---------------------------------- | ------------------------------------------------ |
+| `sonnet`, `opus`, `haiku`, `fable` | Display name of the newest release in the family |
+| `sonnet-4.5`                       | `Claude Sonnet 4.5`                              |
+| `gpt-5.3-codex`                    | `GPT-5.3-Codex`                                  |
+| `inherit`                          | _(omitted)_                                      |
 
-        The [Model Catalog](../reference/models.md#floating-aliases) lists the
-        current release behind each floating alias.
+The [Model Catalog](../reference/models.md#floating-aliases) lists the
+current release behind each floating alias.
 
-        Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` cannot be
-        represented in GitHub output: each one is reported with a `PS4003` compatibility warning
-        and omitted.
+Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` cannot be
+represented in GitHub output: each one is reported with a `PS4003` compatibility warning
+and omitted.
+:::::
+:::
+:::tab[Claude Code]
 
-=== "Claude Code"
+`.claude/agents/code-reviewer.md`
 
-    `.claude/agents/code-reviewer.md`
+```markdown
+---
+name: code-reviewer
+description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability.
+tools: ['Read', 'Grep', 'Glob', 'Bash']
+model: sonnet
+---
 
-    ```markdown
-    ---
-    name: code-reviewer
-    description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability.
-    tools: ['Read', 'Grep', 'Glob', 'Bash']
-    model: sonnet
-    ---
+You are a senior code reviewer ensuring high standards of code quality and security.
 
-    You are a senior code reviewer ensuring high standards of code quality and security.
+When invoked:
 
-    When invoked:
+1. Run git diff to see recent changes
+   ...
+```
 
-    1. Run git diff to see recent changes
-       ...
-    ```
+`.claude/agents/db-reader.md`
 
-    `.claude/agents/db-reader.md`
+```markdown
+---
+name: db-reader
+description: Execute read-only database queries. Use when analyzing data or generating reports.
+tools: ['Bash', 'Read']
+disallowedTools: ['Write', 'Edit']
+model: haiku
+permissionMode: dontAsk
+---
 
-    ```markdown
-    ---
-    name: db-reader
-    description: Execute read-only database queries. Use when analyzing data or generating reports.
-    tools: ['Bash', 'Read']
-    disallowedTools: ['Write', 'Edit']
-    model: haiku
-    permissionMode: dontAsk
-    ---
+You are a database analyst with read-only access...
+```
 
-    You are a database analyst with read-only access...
-    ```
+:::
+::::
 
 ## Using with Skills and MCP Servers
 

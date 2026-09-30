@@ -181,9 +181,10 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | `1.4.0` | Stable  | All 1.3.0 features + `@hooks`, `@mcpServers`, `@plugins`                                                                                   |
 | `1.5.0` | Current | All 1.4.0 features + `@header` section titles, `@override` replacement, declaration order, unquoted `${VAR}` values                        |
 
-!!! note "Block Availability"
+:::note[Block Availability]
 `@workflows` emits workflow files such as `.claude/workflows/<name>.md`.
 `@prompts` is internal. `@hooks`, `@mcpServers`, and `@plugins` require syntax `1.4.0`.
+:::
 
 ### Block Version Requirements
 
@@ -238,8 +239,9 @@ Single inheritance from another PromptScript file:
 @inherit @stacks/react-app(projectName: "my-app", port: 3000)
 ```
 
-!!! note "Single Inheritance"
+:::note[Single Inheritance]
 Each file can only have one `@inherit` declaration. Use `@use` for composition.
+:::
 
 ## @use Declaration
 
@@ -326,9 +328,11 @@ When you provide an alias, imported blocks are also stored with a prefix for use
 <!-- playground-link-end -->
 
 <!-- prettier-ignore -->
-!!! tip "When to Use Alias"
-    - **Without alias**: Simple include/mixin behavior - blocks are merged directly
-    - **With alias**: When you need to selectively extend specific imported blocks
+:::tip[When to Use Alias]
+
+- **Without alias**: Simple include/mixin behavior - blocks are merged directly
+- **With alias**: When you need to selectively extend specific imported blocks
+  :::
 
 ### Block Filtering
 
@@ -446,9 +450,10 @@ The identity block defines who the AI assistant should be.
 | **Cursor**      | If it starts with "You are...", used as full intro; otherwise generates "You are working on {project}" |
 | **Antigravity** | Included in project description                                                                        |
 
-!!! tip "Best Practice"
+:::tip[Best Practice]
 Start your `@identity` with "You are..." for consistent output across all formatters.
 Multiline strings are automatically dedented to remove source indentation.
+:::
 
 ### @context
 
@@ -509,8 +514,9 @@ Coding standards and conventions using category-based arrays:
 
 Standards are organized by category with each category containing an array of human-readable rules. **You can use any category name** (e.g., `code`, `naming`, `security`, `api`, `documentation`) - all keys are supported and will generate corresponding subsections in the output.
 
-!!! note "Backwards Compatibility"
+:::note[Backwards Compatibility]
 The `errors` key is automatically mapped to `error-handling` in the output for backwards compatibility.
+:::
 
 #### Structured Keys: git, config, documentation, diagrams
 
@@ -549,8 +555,9 @@ Renders on Markdown instruction targets (e.g. Claude Code, Factory AI) as:
 - Require Review
 ```
 
-!!! note "Cursor target"
+:::note[Cursor target]
 Cursor uses its compact `key: value` style instead of humanized labels (`- branch: (feat|fix)/{project}/{issue-id}`, `- requireReview`).
+:::
 
 Free-form text is also supported via a triple-quoted string:
 
@@ -571,8 +578,9 @@ Free-form text is also supported via a triple-quoted string:
 </a>
 <!-- playground-link-end -->
 
-!!! note "Per-target support"
+:::note[Per-target support]
 Free-form text `@standards` currently renders only for the Factory target. Other targets render property-style `@standards` content only.
+:::
 
 ### @restrictions
 
@@ -665,8 +673,9 @@ Write unit tests using: - Vitest as the test runner - AAA pattern (Arrange, Act,
 
 <!-- /output -->
 
-!!! tip "Using Cursor Commands"
+:::tip[Using Cursor Commands]
 Type `/` in Cursor chat to see available commands, then select to execute.
+:::
 
 #### GitHub Copilot Output
 
@@ -732,8 +741,9 @@ To generate `.github/prompts/*.prompt.md` files for GitHub Copilot, use the obje
 | `mode`        | string   | No       | Set to `"agent"` for agentic prompts     |
 | `tools`       | string[] | No       | Tools available in agent mode            |
 
-!!! note "Output Mode Required"
+:::note[Output Mode Required]
 Prompt files are only generated when using `version: multifile` or `version: full` in your target configuration:
+:::
 
     ```yaml
     targets:
@@ -914,8 +924,9 @@ applyTo:
 
 <!-- /output -->
 
-!!! note "Version Required"
+:::note[Version Required]
 Path-specific instruction files are only generated with `version: multifile` or `version: full`:
+:::
 
     ```yaml
     targets:
@@ -1231,9 +1242,10 @@ Review checklist:
 
 <!-- /output -->
 
-!!! note "Agent Platform Features"
+:::note[Agent Platform Features]
 Agents can reference `@skills` and `@mcpServers`. Project lifecycle automation is defined
 separately through `@hooks`. Target-native support varies by formatter.
+:::
 
 ### @local
 
@@ -1272,8 +1284,9 @@ Or with key-value properties:
 }
 ```
 
-!!! note "@local Output"
+:::note[@local Output]
 The `@local` block generates `CLAUDE.local.md` when using the Claude formatter with `version: full`. This file should be added to `.gitignore`.
+:::
 
 ### @commands
 
@@ -1589,7 +1602,7 @@ VS Code is the exception to the wrapper key: `.vscode/mcp.json` nests servers
 under `servers` instead of `mcpServers`. TOML hosts keep the array form under
 `[mcp_servers.<name>]`.
 
-**Target Support:** The `@mcpServers` block is emitted to target-native MCP config files. See [Configuration Reference](config.md#mcp-hooks-plugins-support) for the full list of supported targets and their output paths.
+**Target Support:** The `@mcpServers` block is emitted to target-native MCP config files. See [Configuration Reference](config.md#mcp-hooks-and-plugins-support) for the full list of supported targets and their output paths.
 
 Agents can reference MCP servers by name via the `mcpServers` field in `@agents`:
 
@@ -1835,15 +1848,16 @@ Multi-line strings:
 - Are ideal for lists, instructions, and documentation
 - Can be used anywhere a string is expected
 
-!!! tip "When to Use Which"
+:::tip[When to Use Which]
 
-    | Content Type | Recommended Syntax |
-    | ------------ | ------------------ |
-    | Short description (1 line) | `"..."` or `'...'` |
-    | Multiple lines, lists, steps | `"""..."""` |
-    | Code examples, documentation | `"""..."""` |
+| Content Type                 | Recommended Syntax |
+| ---------------------------- | ------------------ |
+| Short description (1 line)   | `"..."` or `'...'` |
+| Multiple lines, lists, steps | `"""..."""`        |
+| Code examples, documentation | `"""..."""`        |
 
-    Both forms are semantically equivalent - choose based on readability.
+Both forms are semantically equivalent - choose based on readability.
+:::
 
 #### Example: Mixed Usage
 
@@ -2116,10 +2130,11 @@ The following are reserved and cannot be used as identifiers:
 - `workflows`, `hooks`, `mcpServers`, `plugins`, `examples`
 - `prompts` (reserved for internal prompt output)
 
-!!! note "Internal Block Type"
+:::note[Internal Block Type]
 The name `prompts` is reserved but is not a user-facing block. Prompt files are generated from
 `@shortcuts` with `prompt: true` for targets such as GitHub Copilot. Use the user-facing
 `@workflows` block for reusable procedures.
+:::
 
 ## File Extensions
 
@@ -2192,8 +2207,9 @@ Expecting token of type --> RBrace <-- but found --> '"""...
 </a>
 <!-- playground-link-end -->
 
-!!! tip "Rule of Thumb"
+:::tip[Rule of Thumb]
 Inside `{ }` braces, everything needs a key. Multiline strings without keys only work directly inside blocks like `@identity { ... }` or `@knowledge { ... }`.
+:::
 
 ## Environment Variable Interpolation
 
@@ -2267,19 +2283,21 @@ other text.
 </a>
 <!-- playground-link-end -->
 
-!!! warning "Missing Variables"
+:::caution[Missing Variables]
 If a variable is not set and no default is provided:
+:::
 
     - An empty string is substituted
     - A warning is logged to the console
 
     This follows Linux shell behavior for unset variables.
 
-!!! tip "Best Practices"
+:::tip[Best Practices]
 
-    1. **Always provide defaults** for non-sensitive values
-    2. **Never commit secrets** - use environment variables for API keys
-    3. **Document required variables** in your project README
+1. **Always provide defaults** for non-sensitive values
+2. **Never commit secrets** - use environment variables for API keys
+3. **Document required variables** in your project README
+   :::
 
 ## Generated Section Headers
 

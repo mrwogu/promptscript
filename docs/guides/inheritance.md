@@ -68,21 +68,22 @@ Different blocks merge differently during inheritance:
 
 `@identity`, `@knowledge`, and text content in other blocks concatenate:
 
-=== "Parent File"
+::::tabs
+:::tab[Parent File]
 
-    ```promptscript
-    # parent.prs
-    @meta {
-      id: "parent"
-      syntax: "1.0.0"
-    }
+```promptscript
+# parent.prs
+@meta {
+  id: "parent"
+  syntax: "1.0.0"
+}
 
-    @identity {
-      """
-      You are a helpful assistant.
-      """
-    }
-    ```
+@identity {
+  """
+  You are a helpful assistant.
+  """
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEm1Tliq0AOqwACJGFgy9g43rwgATRL1EgBQzYt5wAnuwyF1mgIwUADNd2sAvuPETVQiFgPy9ukHaUBNZgBXXgxBUN4cGCg0MCCoULg4CDhZdgpvXyzxexB7AF0GIWoDfCJSchgRehAANxhaCDZ8czygA" target="_blank" rel="noopener noreferrer">
@@ -90,23 +91,27 @@ Different blocks merge differently during inheritance:
 </a>
 <!-- playground-link-end -->
 
-=== "Child File"
+:::
+::::
 
-    ```promptscript
-    # child.prs
-    @meta {
-      id: "child"
-      syntax: "1.0.0"
-    }
+::::tabs
+:::tab[Child File]
 
-    @inherit ./parent
+```promptscript
+# child.prs
+@meta {
+  id: "child"
+  syntax: "1.0.0"
+}
 
-    @identity {
-      """
-      You specialize in React development.
-      """
-    }
-    ```
+@inherit ./parent
+
+@identity {
+  """
+  You specialize in React development.
+  """
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOaABMqtADqsAAiRhYMvYBN68IQxLzFNBUIZqW84AT3YZC6zQEYKABht7WAXwkTJEVjhjUIWXhQD0mNScWM5SqsHehgr6eiD2ygCazACuBmgwjBAYUBAAXjAqrLwASjAYjD5CMABuMFDMaDLsFDFxbRIOIA506Nh4iCCBwaL0TGwcXAN8AMrJaOQQMEIGzLy4BUSk5AXUyaxwvB5BFLwAcsw+gT7MYGsevELMjMlNclgQbHS8GKzLrBffXhBbK8TCMADWGAA5jAWlIZHJokUVGoNIMMEF2PEDMY5GY0VYAKx2OLIkgQQhudRYXYwDouOByX4YoQHRTIlhVdTITQABSg5RgOGYOk8BiZQhZmgAuvoOIy3FDuXyBYwhSKqtRxT9JdRdCBZY4XEFGV4Kh99kjlABaNH8wXC0Vak00iDmtj2ToOaUMYLUQz4TZkSg0Ua1WgW-AWLpAA" target="_blank" rel="noopener noreferrer">
@@ -114,33 +119,41 @@ Different blocks merge differently during inheritance:
 </a>
 <!-- playground-link-end -->
 
-=== "Merged Output"
+:::
+::::
 
-    ```markdown
-    ## Identity
+::::tabs
+:::tab[Merged Output]
 
-    You are a helpful assistant.
+```markdown
+## Identity
 
-    You specialize in React development.
-    ```
+You are a helpful assistant.
+
+You specialize in React development.
+```
+
+:::
+::::
 
 ### Objects (Deep Merge)
 
 `@standards` and object properties deep merge:
 
-=== "Parent File"
+::::tabs
+:::tab[Parent File]
 
-    ```promptscript
-    # parent.prs
-    @meta {
-      id: "parent"
-      syntax: "1.0.0"
-    }
+```promptscript
+# parent.prs
+@meta {
+  id: "parent"
+  syntax: "1.0.0"
+}
 
-    @standards {
-      code: ["Follow clean code principles", "Testing required"]
-    }
-    ```
+@standards {
+  code: ["Follow clean code principles", "Testing required"]
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEm1Tliq0AOqwACJGFgy9g43rwgATRL1EgBQzYt5wAnuwyF1mgIwUADNd2sAvuPES4s1iozUVceXpYqYdWRNADFmKChmAHdeRlgMVljmAP5qCFZGCHJ4TToNEAAVeCx0gHNeQQBHAFcIQRVNAF1xexB7RoYhagN8IlJskXoQADcYWgg2fHM2oA" target="_blank" rel="noopener noreferrer">
@@ -148,21 +161,25 @@ Different blocks merge differently during inheritance:
 </a>
 <!-- playground-link-end -->
 
-=== "Child File"
+:::
+::::
 
-    ```promptscript
-    # child.prs
-    @meta {
-      id: "child"
-      syntax: "1.0.0"
-    }
+::::tabs
+:::tab[Child File]
 
-    @inherit ./parent
+```promptscript
+# child.prs
+@meta {
+  id: "child"
+  syntax: "1.0.0"
+}
 
-    @standards {
-      code: ["Use React framework", "80% test coverage required"]
-    }
-    ```
+@inherit ./parent
+
+@standards {
+  code: ["Use React framework", "80% test coverage required"]
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOaABMqtADqsAAiRhYMvYBN68IQxLzFNBUIZqW84AT3YZC6zQEYKABht7WAXwkTJEVjhjUIWXhQD0mNScWM5ScHKsQhjUQnAK+ixCMOrImgCqcDC8AEowGIw+YNSkMADuzNQA1pp0GiAAHNYApLwc4fzMAG6eGADmWUEAjgCuEEG6IAC6Eg4gDnTo2HiIIIHBovRMbBxcK3wAysNo5BAwQgbMrR68RKTkA8OscR5BFLwAcsw+gT7MYFdZITMRjDGQmLAQNi1DCRXisL68eRBDBQXiYRiVPowCguGRyeKsZSqcyraLBezKIwmMx1KwAVjsIH0JAghDc6iw1GGMBmLnCMKiMTiikJHSSKU0AAUoPkYDhmDpPAYIoKJtNRW0IaxehKQNLZfLFdRlQLomreVIguEvAVIU8CcoALR1fWMOUKpLGq2ciC2tj2WYOSYMYLUQz4W5kSg0TbdWh2-AWOZAA" target="_blank" rel="noopener noreferrer">
@@ -170,34 +187,42 @@ Different blocks merge differently during inheritance:
 </a>
 <!-- playground-link-end -->
 
-=== "Merged Output"
+:::
+::::
 
-    ```yaml
-    code:
-      # Arrays are concatenated (parent first, then child)
-      - Follow clean code principles
-      - Testing required
-      - Use React framework
-      - 80% test coverage required
-    ```
+::::tabs
+:::tab[Merged Output]
+
+```yaml
+code:
+  # Arrays are concatenated (parent first, then child)
+  - Follow clean code principles
+  - Testing required
+  - Use React framework
+  - 80% test coverage required
+```
+
+:::
+::::
 
 ### Arrays (Concatenate)
 
 `@restrictions` and array values concatenate:
 
-=== "Parent File"
+::::tabs
+:::tab[Parent File]
 
-    ```promptscript
-    # parent.prs
-    @meta {
-      id: "parent"
-      syntax: "1.0.0"
-    }
+```promptscript
+# parent.prs
+@meta {
+  id: "parent"
+  syntax: "1.0.0"
+}
 
-    @restrictions {
-      - "Never expose secrets"
-    }
-    ```
+@restrictions {
+  - "Never expose secrets"
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEm1Tliq0AOqwACJGFgy9g43rwgATRL1EgBQzYt5wAnuwyF1mgIwUADNd2sAvuPETBcLNQiMsENnHl6AWg0QADkYADcYal4iNGY4GH0YRkEsODt7EHsAXQYhagN8IlJyGBF6EEjaH1Z8cyygA" target="_blank" rel="noopener noreferrer">
@@ -205,21 +230,25 @@ Different blocks merge differently during inheritance:
 </a>
 <!-- playground-link-end -->
 
-=== "Child File"
+:::
+::::
 
-    ```promptscript
-    # child.prs
-    @meta {
-      id: "child"
-      syntax: "1.0.0"
-    }
+::::tabs
+:::tab[Child File]
 
-    @inherit ./parent
+```promptscript
+# child.prs
+@meta {
+  id: "child"
+  syntax: "1.0.0"
+}
 
-    @restrictions {
-      - "Always use TypeScript"
-    }
-    ```
+@inherit ./parent
+
+@restrictions {
+  - "Always use TypeScript"
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOaABMqtADqsAAiRhYMvYBN68IQxLzFNBUIZqW84AT3YZC6zQEYKABht7WAXwkTJEVjhjUIWXhQD0mNScWM5SQXBYXoxYEGxwCvoAtBogAIJQAO4YhvEArnAwvAAqhmgwAMqMXmghIBIOIA506Nh4iCCBwaL0TGwcXO185blo5BAwQgbMvLiFRKTkhdS5rPEeQRS8AHLMPoE+zGAzHrxCzIy5MiYxbHS8GKyTrLv3vEEYULyYjADWGADmMAoLhkcgSrGUqnMHQwQXY9mURhMZhSVgArHY6hDeCQIIQ3OpIrkYPUXBEHkJYUJ4opsSwhDB1MhNAAFKAYRgwHDMHSeAxyR5UzQAXX0HAibn+TNZ7M53N51H5FKFIFFjhc4UiEGisVW4OUyRlHK5PIZis1URurHsDQcwoYwWohnw8zIlBoPQAbp44Lr8BZGkA" target="_blank" rel="noopener noreferrer">
@@ -227,33 +256,41 @@ Different blocks merge differently during inheritance:
 </a>
 <!-- playground-link-end -->
 
-=== "Merged Output"
+:::
+::::
 
-    ```markdown
-    ## Restrictions
+::::tabs
+:::tab[Merged Output]
 
-    - Never expose secrets
-    - Always use TypeScript
-    ```
+```markdown
+## Restrictions
+
+- Never expose secrets
+- Always use TypeScript
+```
+
+:::
+::::
 
 ### Shortcuts (Override)
 
 `@shortcuts` entries override by key:
 
-=== "Parent File"
+::::tabs
+:::tab[Parent File]
 
-    ```promptscript
-    # parent.prs
-    @meta {
-      id: "parent"
-      syntax: "1.0.0"
-    }
+```promptscript
+# parent.prs
+@meta {
+  id: "parent"
+  syntax: "1.0.0"
+}
 
-    @shortcuts {
-      "/test": "Write unit tests"
-      "/docs": "Generate documentation"
-    }
-    ```
+@shortcuts {
+  "/test": "Write unit tests"
+  "/docs": "Generate documentation"
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEm1Tliq0AOqwACJGFgy9g43rwgATRL1EgBQzYt5wAnuwyF1mgIwUADNd2sAvuPES4OZtSyMArljjy9mgD0HHBYmmYgAOrUEBy8XqyxvCG+dkpBKsyMcOEaIADinDDU2DC8md7SxlgQbHb2IPYAugxC1Ab4RKTkMCL0IABuxXC1rPjmjUA" target="_blank" rel="noopener noreferrer">
@@ -261,22 +298,26 @@ Different blocks merge differently during inheritance:
 </a>
 <!-- playground-link-end -->
 
-=== "Child File"
+:::
+::::
 
-    ```promptscript
-    # child.prs
-    @meta {
-      id: "child"
-      syntax: "1.0.0"
-    }
+::::tabs
+:::tab[Child File]
 
-    @inherit ./parent
+```promptscript
+# child.prs
+@meta {
+  id: "child"
+  syntax: "1.0.0"
+}
 
-    @shortcuts {
-      "/test": "Write tests with Vitest"
-      "/lint": "Run ESLint"
-    }
-    ```
+@inherit ./parent
+
+@shortcuts {
+  "/test": "Write tests with Vitest"
+  "/lint": "Run ESLint"
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOaABMqtADqsAAiRhYMvYBN68IQxLzFNBUIZqW84AT3YZC6zQEYKABht7WAXwkTJEVjhjUIWXhQD0mNScWM5ScDjM1FiMAK5YcAr6mn4ccCFIGiAA6l4cvKnxvADu3ji8AGre8OlJIH5QbunmIABKMay8AKIAygAyjfYOIA506Nh4iCCBwaL0TGwcXJN83TFo5BAwQgbM+R68RKTkMLzU7QkeQRS8AHLMPoE+zGB7J0LMsTImWBBsdLwYVjbVj3AGnGAYKC8TCMADWGAA5jAKC4ZHJEh0VGpMtN2PZlEYTGZMlYAKx2ED6EgQQhudRYM4wCROMJyIEYahCBKKTEsIQwdTITQABSgGEYMAiOk8BjZQg5uhAAF19AU3AjBSKxRKpfzqLLAfLOZoVY4XEE0l5GD82Nz9ABaTKi8WS5jS-UWhkQa2-ViDYZKhjBaiGfCHMiUGhzABunjgvvwFmGQA" target="_blank" rel="noopener noreferrer">
@@ -284,17 +325,24 @@ Different blocks merge differently during inheritance:
 </a>
 <!-- playground-link-end -->
 
-=== "Merged Output"
+:::
+::::
 
-    ```markdown
-    ## Shortcuts
+::::tabs
+:::tab[Merged Output]
 
-    | Command | Description |
-    |---------|-------------|
-    | /test | Write tests with Vitest |
-    | /docs | Generate documentation |
-    | /lint | Run ESLint |
-    ```
+```markdown
+## Shortcuts
+
+| Command | Description             |
+| ------- | ----------------------- |
+| /test   | Write tests with Vitest |
+| /docs   | Generate documentation  |
+| /lint   | Run ESLint              |
+```
+
+:::
+::::
 
 ## Using @extend
 
@@ -875,36 +923,37 @@ Use `{{variable}}` syntax to reference parameters in content:
 
 ### Complete Example
 
-=== "Template (Parent)"
+::::tabs
+:::tab[Template (Parent)]
 
-    ```promptscript
-    # @stacks/react-app.prs
-    @meta {
-      id: "@stacks/react-app"
-      syntax: "1.0.0"
-      params: {
-        projectName: string
-        port: number = 3000
-        strict: boolean = true
-      }
-    }
+```promptscript
+# @stacks/react-app.prs
+@meta {
+  id: "@stacks/react-app"
+  syntax: "1.0.0"
+  params: {
+    projectName: string
+    port: number = 3000
+    strict: boolean = true
+  }
+}
 
-    @identity {
-      """
-      You are a React developer working on {{projectName}}.
-      """
-    }
+@identity {
+  """
+  You are a React developer working on {{projectName}}.
+  """
+}
 
-    @context {
-      project: {{projectName}}
-      devServer: "http://localhost:{{port}}"
-      strictMode: {{strict}}
-    }
+@context {
+  project: {{projectName}}
+  devServer: "http://localhost:{{port}}"
+  strictMode: {{strict}}
+}
 
-    @standards {
-      code: ["TypeScript strict mode enabled"]
-    }
-    ```
+@standards {
+  code: ["TypeScript strict mode enabled"]
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAnCwZGAazgB6ajBFYAtBjRoqtADqt+JGMN7B1vXhAAmiXqpCDhYydNkKl5-bzgBPdhkKnzARgoAGf0dWA0xqUjhTPWCDXhpmACsYRiwAOVIYUyFqCFYAcycQ5mosU1YAVxIAIxhqXgBeXgBmPxaC5yxs5NNK5mZYDGCGjrKYJwBfdQnWdX5jTiwILBddJ0cQIIMATWYy3gxpPd4AJRlk3iMYADcYKGY0Gt4AdyLRHNzeNl1gOMTktK0xmMKKt1qDJuoZix2EQsCtoj8kiUvgi-ulAU4LpcAMo1a7ULwgHBYLBoRASCS3RgYKA4ZhCRDAb5FLDo9bRLIQZIAWWYF0iwA5yXRrCmMyEAyM+yMcDhBhYfN4yHMABUXPcsYxsmhYYLYSReTBeJwMJVYEZzABdSYgMYWhjzagufBEUjkGAqeggPFwCBsfDeG1AA" target="_blank" rel="noopener noreferrer">
@@ -912,23 +961,27 @@ Use `{{variable}}` syntax to reference parameters in content:
 </a>
 <!-- playground-link-end -->
 
-=== "Project (Child)"
+:::
+::::
 
-    ```promptscript
-    # project.prs
-    @meta {
-      id: "checkout-app"
-      syntax: "1.0.0"
-    }
+::::tabs
+:::tab[Project (Child)]
 
-    @inherit @stacks/react-app(projectName: "Checkout App", port: 8080)
+```promptscript
+# project.prs
+@meta {
+  id: "checkout-app"
+  syntax: "1.0.0"
+}
 
-    @identity {
-      """
-      You specialize in e-commerce checkout flows.
-      """
-    }
-    ```
+@inherit @stacks/react-app(projectName: "Checkout App", port: 8080)
+
+@identity {
+  """
+  You specialize in e-commerce checkout flows.
+  """
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCUxwiA1swCuWALQY0aHSt5wAnuwyEtOgIwUADJ+usAvlKlpCFY9aggsXmk4BUZ9OAB6ahgMUXNLAAoBYVEAOVIYFxAAYT1Y4wiAQUsdOn5maiwtAA4PFoBKAJkNTixwuyUbaxAfVQBNY1s0EQgMKAgALxg1Vl4YUxYSOWpGJcZSwxNeMChmAHc4CkHh66lfEF86dGw8RBAomLjE5NSLNHF6JhsDhcV58ADKRkscxg6lszF4uCWRFI5CW1CMrDgvFCMAovByzAimAavGYYARel46mYjCMckcvTYtQwrFhrEJvEUSVm-BS+gwAHNcYE5AoBis1JptG9onyEtyftVhhL7I5nNL3ABWbzK1QkCCEYJaLDomA2YmkOBaZQS1RZERYPJyAD8WmiYVYAt4AF5pciyLARqo6g1XbxWHSAEYwag+3geGz+PyBWWsjDUdRYm2qFjqAq8ZA6AAKUBSMBwzCgedjqfU6fUOgAujYONFggKtIWQCWyxWqzHbAo0xmm7dAkl3RBRBA2FmbKZpT2dn3q7wJyap4zWD47r5GwwetQ7Ph-aj-iAGAA3GNwGesfCue5AA" target="_blank" rel="noopener noreferrer">
@@ -936,26 +989,34 @@ Use `{{variable}}` syntax to reference parameters in content:
 </a>
 <!-- playground-link-end -->
 
-=== "Resolved Output"
+:::
+::::
 
-    ```markdown
-    ## Identity
+::::tabs
+:::tab[Resolved Output]
 
-    You are a React developer working on Checkout App.
+```markdown
+## Identity
 
-    You specialize in e-commerce checkout flows.
+You are a React developer working on Checkout App.
 
-    ## Context
+You specialize in e-commerce checkout flows.
 
-    - project: Checkout App
-    - devServer: http://localhost:8080
-    - strictMode: true
+## Context
 
-    ## Standards
+- project: Checkout App
+- devServer: http://localhost:8080
+- strictMode: true
 
-    ### Code
-    - TypeScript strict mode enabled
-    ```
+## Standards
+
+### Code
+
+- TypeScript strict mode enabled
+```
+
+:::
+::::
 
 ### Template Variables vs Environment Variables
 

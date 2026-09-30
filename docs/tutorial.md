@@ -1,5 +1,5 @@
 ---
-title: Tutorial
+title: 'Enterprise Tutorial: Building Layered AI Infrastructure'
 description: Enterprise tutorial for organization, team, and project layers
 ---
 

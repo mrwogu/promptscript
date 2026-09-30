@@ -344,8 +344,9 @@ registry:
 | `cache.enabled`        | boolean | `true`    | Enable caching                       |
 | `cache.ttl`            | number  | `3600000` | Cache TTL in milliseconds            |
 
-!!! tip "Version-tagged imports"
+:::tip[Version-tagged imports]
 With Git registry, you can pin imports to specific versions using Git tags:
+:::
 
     ```
     @inherit @company/base@1.0.0
@@ -541,7 +542,7 @@ platform families and [Supported Formatters](formatters/index.md) for the full c
 | `forgecode`    | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `hermes`       | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 
-### MCP, Hooks, and Plugins Support { #mcp-hooks-plugins-support }
+### MCP, Hooks, and Plugins Support
 
 The `@mcpServers`, `@hooks`, and `@plugins` blocks (syntax 1.4.0+) are emitted to target-native config files. Not all targets support all features.
 
@@ -580,12 +581,14 @@ present.
 | `agents-md` | `AGENTS.md` (Cursor 2.4+, no frontmatter required)                                                  |
 | `full`      | Multifile + `.agents/skills/<name>/SKILL.md` + `.cursor/agents/<name>.md` (Cursor 2.5+)             |
 
-!!! tip "Cursor Slash Commands"
+:::tip[Cursor Slash Commands]
 Multi-line `@shortcuts` are automatically converted to executable slash commands in `.cursor/commands/`.
 Type `/` in Cursor chat (1.6+) to invoke them. See [Language Reference](language.md#cursor-slash-commands-16).
+:::
 
-!!! info "Cursor Identity Handling"
+:::note[Cursor Identity Handling]
 The Cursor formatter handles `@identity` blocks intelligently:
+:::
 
     - If the identity starts with "You are...", the **full content** is used as the intro
     - Otherwise, a generated intro like "You are working on {project}" is created
@@ -715,16 +718,18 @@ error.
 | `skillBaseDir`  | string                  | target-specific | Custom base directory for generated skill files        |
 | `includeSkills` | boolean or string array | `true`          | Emit all skills, no skills, or only listed skill names |
 
-!!! warning "Output paths stay inside the output directory"
+:::caution[Output paths stay inside the output directory]
 A target `output` that resolves outside the output directory (`../`, or an
 absolute path pointing elsewhere, including through a symlink) aborts the
 compile before any file is written. Use `--output` or `output.baseDir` to
 change where the whole build lands; a base directory outside the project is
 allowed and reported as a warning.
+:::
 
-!!! tip "Disabling Targets"
+:::tip[Disabling Targets]
 Setting `enabled: false` skips the target during compilation.
 This is equivalent to removing the target from the list.
+:::
 
     ```yaml
     targets:
@@ -736,10 +741,11 @@ This is equivalent to removing the target from the list.
 
 See [Formatters API](../api-reference/formatters/src/README.md) for more details.
 
-!!! tip "Building skills into plugin or library folders"
+:::tip[Building skills into plugin or library folders]
 Use `skillBaseDir` when you want a target to place generated skills outside
 its default directory. For example, this writes Factory skills under
 `plugins/logstrip/skills` when combined with a build profile output:
+:::
 
     ```yaml
     builds:
@@ -1168,9 +1174,10 @@ When `prettier: true`, PromptScript searches for Prettier configuration files in
 | `'never'`    | Do not wrap prose (single long lines)       |
 | `'preserve'` | Preserve original line wrapping from source |
 
-!!! tip "Option Priority"
+:::tip[Option Priority]
 Explicit options (`proseWrap`, `tabWidth`, `printWidth`) override values from `.prettierrc`.
 This allows you to use your project's Prettier config as a base while customizing specific options.
+:::
 
 **Example: Match Project Prettier Config**
 
@@ -1303,9 +1310,10 @@ This provides:
 - **Validation** - errors for invalid fields or values
 - **Documentation** - hover tooltips with field descriptions
 
-!!! tip "Schema is the source of truth"
+:::tip[Schema is the source of truth]
 The JSON schema is automatically generated from TypeScript types in `@promptscript/core`.
 When in doubt about configuration options, the schema reflects the current implementation.
+:::
 
     Schema URL: [`schema/config.json`](https://getpromptscript.dev/schema/config.json)
 

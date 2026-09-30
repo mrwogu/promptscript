@@ -1,16 +1,15 @@
 ---
-title: 'PromptScript - Agent Platform Configuration as Code'
+title: 'Agent Platform Configuration as Code'
 description: 'Define AI instructions, skills, agents, MCP servers, hooks, workflows, and policies once. Compile native configuration for 50 AI coding agent platforms.'
-meta:
-  - name: keywords
-    content: PromptScript, agent platform, configuration as code, AI instructions, AI agents, AI skills, MCP servers, GitHub Copilot, Claude Code, Cursor, Factory AI, Codex, AI governance, PromptOps
-  - name: robots
-    content: index, follow
-hide:
-  - navigation
-  - toc
-  - edit
-  - view
+template: splash
+tableOfContents: false
+editUrl: false
+lastUpdated: false
+head:
+  - tag: meta
+    attrs:
+      name: keywords
+      content: PromptScript, agent platform, configuration as code, AI instructions, AI agents, AI skills, MCP servers, GitHub Copilot, Claude Code, Cursor, Factory AI, Codex, AI governance, PromptOps
 ---
 
 <!-- prettier-ignore -->

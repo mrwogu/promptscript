@@ -816,20 +816,25 @@ metrics:
 
 ## Best Practices Summary
 
-!!! tip "Organization Base"
+:::tip[Organization Base]
 Keep `@acme/base` focused on universal policies that apply everywhere.
+:::
 
-!!! tip "Security Integration"
+:::tip[Security Integration]
 Always `@use @acme/security` in team bases, never skip security.
+:::
 
-!!! tip "Version Management"
+:::tip[Version Management]
 Tag registry releases and pin versions in production projects.
+:::
 
-!!! warning "Breaking Changes"
+:::caution[Breaking Changes]
 Major version bumps require migration guides and team notification.
+:::
 
-!!! warning "Review Process"
+:::caution[Review Process]
 All registry changes need appropriate CODEOWNER approval.
+:::
 
 ## Rollout Timeline
 

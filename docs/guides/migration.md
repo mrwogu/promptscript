@@ -7,11 +7,12 @@ description: Migrating existing AI instructions to PromptScript
 
 This guide helps you migrate existing AI instructions to PromptScript.
 
-!!! note "Upgrading an existing PromptScript project?"
+:::note[Upgrading an existing PromptScript project?]
 
-    This guide converts third-party instruction files into PromptScript.
-    Existing PromptScript 1.15 projects should use
-    [Upgrade 1.15 to 1.16](upgrade-1-15-to-1-16.md).
+This guide converts third-party instruction files into PromptScript.
+Existing PromptScript 1.15 projects should use
+[Upgrade 1.15 to 1.16](upgrade-1-15-to-1-16.md).
+:::
 
 ## Choose a Migration Command
 
@@ -150,23 +151,25 @@ prs init
 
 ### Identity Block
 
-=== "Before (Markdown)"
+::::tabs
+:::tab[Before (Markdown)]
 
-    ```markdown
-    You are a senior developer working on the checkout service.
-    Focus on clean, maintainable code.
-    ```
+```markdown
+You are a senior developer working on the checkout service.
+Focus on clean, maintainable code.
+```
 
-=== "After (PromptScript)"
+:::
+:::tab[After (PromptScript)]
 
-    ```promptscript
-    @identity {
-      """
-      You are a senior developer working on the checkout service.
-      Focus on clean, maintainable code.
-      """
-    }
-    ```
+```promptscript
+@identity {
+  """
+  You are a senior developer working on the checkout service.
+  Focus on clean, maintainable code.
+  """
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34IKXYTR15Aq3CQWLqagE13MWo7UThOCGZqXikANxgoZjQYXvMegGsIVnVDGxw7RkXGSfcsWTH+iEYYCjiAMWZGNzMrRlgMVjpeEgwZkRmMACNYHWYpfZr6vPyQfIAugxOFhqI58ERSOQ9jR6CBBrRuqx8Kl-kA" target="_blank" rel="noopener noreferrer">
@@ -174,36 +177,41 @@ prs init
 </a>
 <!-- playground-link-end -->
 
+:::
+::::
+
 ### Context Block
 
-=== "Before (Markdown)"
+::::tabs
+:::tab[Before (Markdown)]
 
-    ```markdown
-    ## Tech Stack
+```markdown
+## Tech Stack
 
-    - Node.js 20
-    - TypeScript
-    - PostgreSQL
-    - Redis for caching
-    ```
+- Node.js 20
+- TypeScript
+- PostgreSQL
+- Redis for caching
+```
 
-=== "After (PromptScript)"
+:::
+:::tab[After (PromptScript)]
 
-    ```promptscript
-    @context {
-      stack: {
-        runtime: "Node.js 20"
-        language: "TypeScript"
-        database: "PostgreSQL"
-        cache: "Redis"
-      }
+```promptscript
+@context {
+  stack: {
+    runtime: "Node.js 20"
+    language: "TypeScript"
+    database: "PostgreSQL"
+    cache: "Redis"
+  }
 
-      """
-      The checkout service handles payment processing
-      and order management for the e-commerce platform.
-      """
-    }
-    ```
+  """
+  The checkout service handles payment processing
+  and order management for the e-commerce platform.
+  """
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34WdiIsXkCrWRFGAGswquDg6g8sCCEUkAA5ZikKACtlACZckDjgqAxWdTcNGC6AFUc0GABlRmoINCw85t5xbAwAIww4BfCQAAVmOCwXdYBFABk95sYMRhwLiIAlaSUb0KrDisXG42qi2+Om+9XcFXO1AAbhBGHYcNNxLBlJhHFoKjRmGi4HAIDM4pjDNQpNReCRpvN8SpmLTbLwYABaXRCaho+xTLBgFkkCig8F5fIgfIAXQYnCw1Ec+CIpHIMCotBADCRMFoEDY+FSUqAA" target="_blank" rel="noopener noreferrer">
@@ -211,31 +219,36 @@ prs init
 </a>
 <!-- playground-link-end -->
 
+:::
+::::
+
 ### Standards Block
 
-=== "Before (Markdown)"
+::::tabs
+:::tab[Before (Markdown)]
 
-    ```markdown
-    ## Coding Standards
+```markdown
+## Coding Standards
 
-    - Use functional programming patterns
-    - Write tests for all code (80% coverage)
-    - Document public APIs with JSDoc
-    - Use ESLint and Prettier
-    ```
+- Use functional programming patterns
+- Write tests for all code (80% coverage)
+- Document public APIs with JSDoc
+- Use ESLint and Prettier
+```
 
-=== "After (PromptScript)"
+:::
+:::tab[After (PromptScript)]
 
-    ```promptscript
-    @standards {
-      code: [
-        "Use functional programming style",
-        "Write tests for all code (80% coverage)",
-        "Document public APIs with JSDoc",
-        "Use ESLint and Prettier"
-      ]
-    }
-    ```
+```promptscript
+@standards {
+  code: [
+    "Use functional programming style",
+    "Write tests for all code (80% coverage)",
+    "Document public APIs with JSDoc",
+    "Use ESLint and Prettier"
+  ]
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344EU8ManFlQKsdZikw5DjgiIBVODswD0YsCDYMKHtXF1ISCFZ1WSxHGJA6ZvCQAHVqEzsOUuUwZmoxKEGWKV4ACgAObIBSOoA3GDV1GABKCPnalpAAEWZGNy0sezcACMoBBGLwAIIABQAkspzCYcLwAFIAZS+jBeCzaHV4AFEUQAZcb-DCeXiQ6jCXp3PLBAC6PnyIHydIYnCw1Ec+CIpHIMCotDmIFutD6rHwqWZQA" target="_blank" rel="noopener noreferrer">
@@ -243,27 +256,32 @@ prs init
 </a>
 <!-- playground-link-end -->
 
+:::
+::::
+
 ### Restrictions Block
 
-=== "Before (Markdown)"
+::::tabs
+:::tab[Before (Markdown)]
 
-    ```markdown
-    ## Don'ts
+```markdown
+## Don'ts
 
-    - Never commit secrets or credentials
-    - Don't use `var`, use `const` or `let`
-    - Never bypass code review
-    ```
+- Never commit secrets or credentials
+- Don't use `var`, use `const` or `let`
+- Never bypass code review
+```
 
-=== "After (PromptScript)"
+:::
+:::tab[After (PromptScript)]
 
-    ```promptscript
-    @restrictions {
-      - "Never commit secrets or credentials"
-      - "Don't use var, use const or let"
-      - "Never bypass code review"
-    }
-    ```
+```promptscript
+@restrictions {
+  - "Never commit secrets or credentials"
+  - "Don't use var, use const or let"
+  - "Never bypass code review"
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH35qeCxqCEYsCDZlQKteAFpwkAA5GAA3GGodZhISE1kYRlLTQx6R6U5qjCg4PODmiIARNgByLF43ODsOjGo6LZ3e1jhN5h7YLAWmlvaunoAjR0w4ZRYpXlKOiBhzPPyIHyAF0GNNqI58ERSOQYFRaCAGA84DVWPhUkCgA" target="_blank" rel="noopener noreferrer">
@@ -271,27 +289,32 @@ prs init
 </a>
 <!-- playground-link-end -->
 
+:::
+::::
+
 ### Shortcuts Block
 
-=== "Before (Markdown)"
+::::tabs
+:::tab[Before (Markdown)]
 
-    ```markdown
-    ## Commands
+```markdown
+## Commands
 
-    - /test - Run the test suite
-    - /lint - Run ESLint
-    - /build - Build for production
-    ```
+- /test - Run the test suite
+- /lint - Run ESLint
+- /build - Build for production
+```
 
-=== "After (PromptScript)"
+:::
+:::tab[After (PromptScript)]
 
-    ```promptscript
-    @shortcuts {
-      "/test": "Run the test suite with coverage"
-      "/lint": "Run ESLint and fix issues"
-      "/build": "Build for production deployment"
-    }
-    ```
+```promptscript
+@shortcuts {
+  "/test": "Run the test suite with coverage"
+  "/lint": "Run ESLint and fix issues"
+  "/build": "Build for production deployment"
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344HGZqLEY3U15Aq3CQAHoOOCwIlJAAJQ8FHDsWrFk3EztzExwdZgA3GDV1GDzgiMaoCHZ2hu6rAFEAZQAZNcGMTxUIQmM4ODd4RYbGgCNhqG8kBoAhZ5kwcvtXcTcjCwECMUnIzEcWjaIB8+RA+QAugxOFhqI58ERSOQYFRaCAGDNaCDWPhUvCgA" target="_blank" rel="noopener noreferrer">
@@ -299,41 +322,46 @@ prs init
 </a>
 <!-- playground-link-end -->
 
+:::
+::::
+
 ### Knowledge Block
 
-=== "Before (Markdown)"
+::::tabs
+:::tab[Before (Markdown)]
 
-    ```markdown
-    ## API Reference
+```markdown
+## API Reference
 
-    ### Authentication
+### Authentication
 
-    - POST /auth/login
-    - POST /auth/logout
+- POST /auth/login
+- POST /auth/logout
 
-    ### Orders
+### Orders
 
-    - GET /orders
-    - POST /orders
-    ```
+- GET /orders
+- POST /orders
+```
 
-=== "After (PromptScript)"
+:::
+:::tab[After (PromptScript)]
 
-    ```promptscript
-    @knowledge {
-      """
-      ## API Reference
+```promptscript
+@knowledge {
+  """
+  ## API Reference
 
-      ### Authentication
-      - POST /auth/login
-      - POST /auth/logout
+  ### Authentication
+  - POST /auth/login
+  - POST /auth/logout
 
-      ### Orders
-      - GET /orders - List orders
-      - POST /orders - Create order
-      """
-    }
-    ```
+  ### Orders
+  - GET /orders - List orders
+  - POST /orders - Create order
+  """
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34Aa1YLWHF1O0CrcJBYhrruPgBBAAUASV4AJRgwGGpORhgi5pbeVrdbdghGbAg2OIBaXnaAeQBlABVeAHoMaZw9qGZ1CFYVta3dg6OTs-csMeCWvnXqKVorgHEAUVuzE+g2UqwAMkosIZgd86qsNjt9kCvqDeABhIbYOzIwZxRp5fIgfIAXQYnCw1Ec+CIpHIMCotBADAAbiDFqx8KkiUA" target="_blank" rel="noopener noreferrer">
@@ -341,103 +369,111 @@ prs init
 </a>
 <!-- playground-link-end -->
 
+:::
+::::
+
 ## Step 4: Complete Migration
 
 ### Full Example
 
-=== "Before (CLAUDE.md)"
+::::tabs
+:::tab[Before (CLAUDE.md)]
 
-    ```markdown
-    # Checkout Service
+```markdown
+# Checkout Service
 
-    You are a senior developer working on the checkout service.
+You are a senior developer working on the checkout service.
 
-    ## Tech Stack
+## Tech Stack
 
-    - Node.js 20
-    - TypeScript
-    - PostgreSQL
+- Node.js 20
+- TypeScript
+- PostgreSQL
 
-    ## Standards
+## Standards
 
-    - Use functional programming
-    - Write tests (80% coverage)
-    - Document public APIs
+- Use functional programming
+- Write tests (80% coverage)
+- Document public APIs
 
-    ## Don'ts
+## Don'ts
 
-    - Never commit secrets
-    - Don't use var
+- Never commit secrets
+- Don't use var
 
-    ## Commands
+## Commands
 
-    /test - Run tests
-    /lint - Run linter
+/test - Run tests
+/lint - Run linter
 
-    ## API Reference
+## API Reference
 
-    ### Orders
+### Orders
 
-    - GET /orders
-    - POST /orders
-    ```
+- GET /orders
+- POST /orders
+```
 
-=== "After (project.prs)"
+:::
+:::tab[After (project.prs)]
 
-    ```promptscript
-    @meta {
-      id: "checkout-service"
-      syntax: "1.0.0"
-    }
+```promptscript
+@meta {
+  id: "checkout-service"
+  syntax: "1.0.0"
+}
 
-    @identity {
-      """
-      You are a senior developer working on the checkout service.
-      """
-    }
+@identity {
+  """
+  You are a senior developer working on the checkout service.
+  """
+}
 
-    @context {
-      stack: {
-        runtime: "Node.js 20"
-        language: "TypeScript"
-        database: "PostgreSQL"
-      }
-    }
+@context {
+  stack: {
+    runtime: "Node.js 20"
+    language: "TypeScript"
+    database: "PostgreSQL"
+  }
+}
 
-    @standards {
-      code: [
-        "Use functional programming style",
-        "Write tests for all code (80% coverage)",
-        "Document public APIs with JSDoc"
-      ]
-    }
+@standards {
+  code: [
+    "Use functional programming style",
+    "Write tests for all code (80% coverage)",
+    "Document public APIs with JSDoc"
+  ]
+}
 
-    @restrictions {
-      - "Never commit secrets"
-      - "Don't use var"
-    }
+@restrictions {
+  - "Never commit secrets"
+  - "Don't use var"
+}
 
-    @shortcuts {
-      "/test": "Run the test suite"
-      "/lint": "Run ESLint"
-    }
+@shortcuts {
+  "/test": "Run the test suite"
+  "/lint": "Run ESLint"
+}
 
-    @knowledge {
-      """
-      ## API Reference
+@knowledge {
+  """
+  ## API Reference
 
-      ### Orders
-      - GET /orders - List orders
-      - POST /orders - Create order
-      """
-    }
-    ```
+  ### Orders
+  - GET /orders - List orders
+  - POST /orders - Create order
+  """
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaODGoA3CIxjyxEuAE92GQrPkBGCgAYnJ1gF8xY7tM5YIWc2FTORATUPFBAE11QQxqGFjBHVYIZmpBKRg9GChmNF1BAHc05QhWAHNBNkFcBMZFFXUsJN0DIwpgsNcPVi8WdiJm0Qi4ARVZYYkJajV2CD5bEAA5ZkyKACs4QQAmR1cpwSgMCrUMcphFgBVzfIBlRmoINCx9qalsDAAjDB1FgAVmKNyvFbgBFAAyrx6PS8o2O72oUi2k0ELEysmQwQk8gAqjpBGBZow-GwMFBBDRmMDSCQypVRuZYPI6FiQgB1R4cGrwLBbMBpWJQclohIACgAHI4AKSo5jZahnGAASmZrPkABFmIw1Hx2BS1J8oIZBABBP4ASS2hX8OEEAClbprGK8ALpiGGsbjxUaPYmpVjI4KaEJLLIFFgkWnNHQPfhwV7BjVsADkzTU+L0cW6nk9cBwaSw2t5QQi8gA9BxRvJFgAlWY1RTc0ZJNT+YzhbEgMtG9jVkJ18QAUVu4LKL3CHu4ylYzEKsCk5xLna6EQAxKvTRbBDWYGBdJwjDmJOuNwB5RG6eMRYMAcUHl0EZbSmVogmDo+bz8vQcEf1PtwfJ8L1fYMAGF4mwBIv2oTpQjg90QDcF0GF8ahzHwIhSHIGAqFoEAGHlOB-XwOxEKAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
+
+:::
+::::
 
 ## Step 5: Configure and Compile
 
@@ -633,53 +669,55 @@ Some content may be specific to certain tools:
 
 Skills define reusable capabilities for AI agents:
 
-=== "Before (CLAUDE.md)"
+::::tabs
+:::tab[Before (CLAUDE.md)]
 
-    ```markdown
-    ## Skills
+```markdown
+## Skills
 
-    ### Code Review
+### Code Review
 
-    When reviewing code:
+When reviewing code:
 
-    1. Check for type safety
-    2. Verify error handling
-    3. Ensure tests exist
+1. Check for type safety
+2. Verify error handling
+3. Ensure tests exist
 
-    ### Deployment
+### Deployment
 
-    Steps to deploy:
+Steps to deploy:
 
-    1. Build the project
-    2. Run tests
-    3. Deploy to staging
-    ```
+1. Build the project
+2. Run tests
+3. Deploy to staging
+```
 
-=== "After (PromptScript)"
+:::
+:::tab[After (PromptScript)]
 
-    ```promptscript
-    @skills {
-      code-review: {
-        description: "Review code for quality and best practices"
-        content: """
-          When reviewing code:
-          1. Check for type safety
-          2. Verify error handling
-          3. Ensure tests exist
-        """
-      }
+```promptscript
+@skills {
+  code-review: {
+    description: "Review code for quality and best practices"
+    content: """
+      When reviewing code:
+      1. Check for type safety
+      2. Verify error handling
+      3. Ensure tests exist
+    """
+  }
 
-      deployment: {
-        description: "Deploy the application"
-        content: """
-          Deployment process:
-          1. Build the project
-          2. Run tests
-          3. Deploy to staging
-        """
-      }
-    }
-    ```
+  deployment: {
+    description: "Deploy the application"
+    content: """
+      Deployment process:
+      1. Build the project
+      2. Run tests
+      3. Deploy to staging
+    """
+  }
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCpOEZqCDQsCDYUkAAlFrbzWqkVZmpeAEc3DCgTRzFPXgAjeCx7NUZhxng87tr2Tiwx2JA4i4B1HE5eJtb2iFZ1WZhEB+66V4AGEXoxSvNFlhHGg7HAMGBhI4AcEAEwUXgANRgAzAmxxrkWOAwnnW3xRvAAzBiAKKsOBuJoKfbKIhKLAAu7nXiFVhxKTkZiOLQ3Xhdbq9fqDYajcIgAAiMEFm1sYjQ5AgjGwIz59xqwRYV3Yt3ueouwUVypFh2YpzgcH++sBGIAQm5oDJVTRmAArGDHCno3jjDzMuCmCnU3iWqBChTycMaL7qTmm7m8-IgfIAXQY12ojnwRFI5BgVFoIAYzRxcB1+FSWaAA" target="_blank" rel="noopener noreferrer">
@@ -687,41 +725,46 @@ Skills define reusable capabilities for AI agents:
 </a>
 <!-- playground-link-end -->
 
+:::
+::::
+
 ### @agents Block
 
 Define specialized AI subagents:
 
-=== "Before (AGENTS.md)"
+::::tabs
+:::tab[Before (AGENTS.md)]
 
-    ```markdown
-    # Code Reviewer
+```markdown
+# Code Reviewer
 
-    Reviews code for quality.
+Reviews code for quality.
 
-    Tools: Read, Grep, Bash
-    Model: claude-sonnet
+Tools: Read, Grep, Bash
+Model: claude-sonnet
 
-    Instructions:
-    Review code checking for type safety and error handling.
-    ```
+Instructions:
+Review code checking for type safety and error handling.
+```
 
-=== "After (PromptScript)"
+:::
+:::tab[After (PromptScript)]
 
-    ```promptscript
-    @agents {
-      code-reviewer: {
-        description: "Reviews code for quality and best practices"
-        tools: ["Read", "Grep", "Bash"]
-        model: "sonnet"
-        content: """
-          Review code checking for:
-          - Type safety
-          - Error handling
-          - Test coverage
-        """
-      }
-    }
-    ```
+```promptscript
+@agents {
+  code-reviewer: {
+    description: "Reviews code for quality and best practices"
+    tools: ["Read", "Grep", "Bash"]
+    model: "sonnet"
+    content: """
+      Review code checking for:
+      - Type safety
+      - Error handling
+      - Test coverage
+    """
+  }
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34NTlNeQKsdZikAWmoYADcIGHMYajDK4OCpOEZqCDQsCDYUkAAlJpbzZRYpFWZqXgBHNwwoE0cxT14AI3gsezVGYcZ4PO6FZmYoODDkCMmJCLpwkABxBrQXt4AhDDgOAiAF04sESDUYFAxnJWKxhBduix2GUxrEQGDupNmq1qvNGDgYIwANYQVjqBYdTHBWq8AAqjjQdjgGDAwkc1N4tIAotRXEscBhPBtyZzaXSDtVGu1Spj0YjCgUQPlgQwytRHPgiKRyDAqLQQAxpbQRqx8KllUA" target="_blank" rel="noopener noreferrer">
@@ -729,34 +772,39 @@ Define specialized AI subagents:
 </a>
 <!-- playground-link-end -->
 
+:::
+::::
+
 ### @local Block
 
 Private instructions not committed to version control:
 
-=== "Before (CLAUDE.local.md)"
+::::tabs
+:::tab[Before (CLAUDE.local.md)]
 
-    ```markdown
-    # Local Development
+```markdown
+# Local Development
 
-    - API endpoint: http://localhost:8080
-    - Debug mode enabled
-    - Use staging database
-    ```
+- API endpoint: http://localhost:8080
+- Debug mode enabled
+- Use staging database
+```
 
-=== "After (PromptScript)"
+:::
+:::tab[After (PromptScript)]
 
-    ```promptscript
-    @local {
-      apiEndpoint: "http://localhost:8080"
-      debugMode: true
+```promptscript
+@local {
+  apiEndpoint: "http://localhost:8080"
+  debugMode: true
 
-      """
-      Local development notes:
-      - Use staging database for testing
-      - Mock external services
-      """
-    }
-    ```
+  """
+  Local development notes:
+  - Use staging database for testing
+  - Mock external services
+  """
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34oZkYMKF5AqzE0CABRTzRmCHYUkBwsLDREAHpe0vKoHGY4LEQADmypvOCpACM3dQBZZikwrGo3GCKa2JBZ3gAZMoreKQA3GFK0LSxeVmYOOEQ4gFpeAFU4OzGNVvU52wGHmGB+KmY1AU8CwAPevFWjAA1rwiBxqKwzj9qBcIIx4HF9nl8iB8gBdBicTaOfBEUjkGBUWggBhXWgQNj4VKkoA" target="_blank" rel="noopener noreferrer">
@@ -764,36 +812,41 @@ Private instructions not committed to version control:
 </a>
 <!-- playground-link-end -->
 
+:::
+::::
+
 ### @guards Block with Globs
 
 File-specific rules using glob patterns:
 
-=== "Before (.github/instructions/)"
+::::tabs
+:::tab[Before (.github/instructions/)]
 
-    ```markdown
-    ---
-    applyTo: src/components/**/*.tsx
-    ---
+```markdown
+---
+applyTo: src/components/**/*.tsx
+---
 
-    # Component Guidelines
+# Component Guidelines
 
-    Use functional components with TypeScript.
-    ```
+Use functional components with TypeScript.
+```
 
-=== "After (PromptScript)"
+:::
+:::tab[After (PromptScript)]
 
-    ```promptscript
-    @guards {
-      globs: ["src/components/**/*.tsx"]
+```promptscript
+@guards {
+  globs: ["src/components/**/*.tsx"]
 
-      """
-      Component Guidelines:
-      - Use functional components
-      - Include TypeScript types
-      - Add unit tests
-      """
-    }
-    ```
+  """
+  Component Guidelines:
+  - Use functional components
+  - Include TypeScript types
+  - Add unit tests
+  """
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH351NwxqcWVAq151KGYAIzgw5Ai4akYAel00Nk5TToAqQaGKU0IIgF0imtiQPOCAYWYyPu0AcTcIKSgIVnhEOIBaXgBVODswD0YsCDYMKB0V3v32OGPeAElWRig3KV4ABVHGgYABlRjUCBoLAKEHwD4AQUkvA8JgU8FMcTmeXyIHykwY-WojnwRFI5BgVFoIAYADcYLQ7qx8Kl8UA" target="_blank" rel="noopener noreferrer">
@@ -801,39 +854,44 @@ File-specific rules using glob patterns:
 </a>
 <!-- playground-link-end -->
 
+:::
+::::
+
 ### @guards Named Entries
 
 For projects with multiple `.github/instructions/*.instructions.md` files — each with different `applyTo` patterns — use named entries in `@guards` to preserve the one-file-per-rule-set structure:
 
-=== "Before (.github/instructions/)"
+::::tabs
+:::tab[Before (.github/instructions/)]
 
-    ```markdown
-    ---
-    applyTo: apps/admin/**/*.ts
-    ---
+```markdown
+---
+applyTo: apps/admin/**/*.ts
+---
 
-    # Angular Component Standards
+# Angular Component Standards
 
+Use OnPush change detection for all components.
+Always implement OnDestroy for cleanup.
+```
+
+:::
+:::tab[After (PromptScript)]
+
+```promptscript
+@meta { id: "named-guards-migration" syntax: "1.0.0" }
+
+@guards {
+  angular-components: {
+    applyTo: ["apps/admin/**/*.ts"]
+    description: "Angular component coding standards"
+    content: """
     Use OnPush change detection for all components.
     Always implement OnDestroy for cleanup.
-    ```
-
-=== "After (PromptScript)"
-
-    ```promptscript
-    @meta { id: "named-guards-migration" syntax: "1.0.0" }
-
-    @guards {
-      angular-components: {
-        applyTo: ["apps/admin/**/*.ts"]
-        description: "Angular component coding standards"
-        content: """
-        Use OnPush change detection for all components.
-        Always implement OnDestroy for cleanup.
-        """
-      }
-    }
-    ```
+    """
+  }
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEK1IwxAWgDmAVwzUxcRSQjLq2CGxmC4AT3YZCkmQEYKABkcmAvlNbvuajVuHvBghisalAaiixkbJxYcJLA-gGBaORmACrMksgyGMlwAPQYYrqseQBUpWUUMTIAugkBYvCM1BBoWEasNiAAgsGqodSCEWhR7EPMYhDBpgKsYj5wMvXj7NFdSyDLAKpwMIIA8qwACqpwOEM4Qcp7jRyM7WyCYMyDGFBQ45Gs0XAUy91QADuGDMcFEZFgfDGhwAIvAsNRmGYni8hrAgqo0H9WIlpJt8Qk3KwXCAXDUGNFqGZ8ERSOQYFRaCAGAA3GC0Dr4WykoA" target="_blank" rel="noopener noreferrer">
@@ -841,37 +899,45 @@ For projects with multiple `.github/instructions/*.instructions.md` files — ea
 </a>
 <!-- playground-link-end -->
 
+:::
+::::
+
 Each named entry generates a separate `.github/instructions/<name>.instructions.md` file with the corresponding `applyTo` frontmatter. This is the recommended approach when migrating multiple instruction files — `prs import` can detect and convert these files automatically.
 
 ### @params Block
 
 Configurable parameters with types:
 
-=== "Before (Markdown)"
+::::tabs
+:::tab[Before (Markdown)]
 
-    ```markdown
-    ## Configuration
+```markdown
+## Configuration
 
-    - Verbosity: 1-5 (default: 3)
-    - Output format: json | text | markdown
-    - Strict mode: on/off
-    ```
+- Verbosity: 1-5 (default: 3)
+- Output format: json | text | markdown
+- Strict mode: on/off
+```
 
-=== "After (PromptScript)"
+:::
+:::tab[After (PromptScript)]
 
-    ```promptscript
-    @params {
-      verbosity: range(1..5) = 3
-      format?: enum("json", "text", "markdown") = "text"
-      strict: boolean = false
-    }
-    ```
+```promptscript
+@params {
+  verbosity: range(1..5) = 3
+  format?: enum("json", "text", "markdown") = "text"
+  strict: boolean = false
+}
+```
 
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH35MNRJlQKteADcYagAjZjgTRzC1VnUYAAp0zIBKXgBeXgBmOLBmahJsAH4wzjcSLoiAKzlWCLpwkA5CLE3t6eoAa3ELDZAB4Yjd-ZA4uCxqCEYsMMbmWAwrYbAMKDgMB8+RA+QAugxOE9HPgiKRyDAqLQQAxarQIGx8KlQUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
+
+:::
+::::
 
 ### @extend Block
 

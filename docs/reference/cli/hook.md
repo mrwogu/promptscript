@@ -110,8 +110,9 @@ If the edited file is not a `.prs` file, the hook exits 0 immediately without ru
 | 1    | Internal error | Tool may log a warning; edit is allowed            |
 | 2    | Block          | Tool cancels the edit and shows stderr to the user |
 
-!!! note
+:::note
 Exit code 2 is only used by `pre-edit`. `post-edit` always exits 0.
+:::
 
 ## Examples
 

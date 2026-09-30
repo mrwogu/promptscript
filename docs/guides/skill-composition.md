@@ -7,8 +7,9 @@ description: Compose complex skills from multiple sub-skill files — each phase
 
 Skill composition lets you build complex skills from multiple sub-skill files. Each sub-skill is a standard `.prs` file that can be independently tested, compiled, and owned by different teams.
 
-!!! tip "Try it interactively"
+:::tip[Try it interactively]
 Open the [PromptScript Playground](https://getpromptscript.dev/playground/) and load the **Skill Composition** example from the gallery (Examples → Advanced) to experiment with the multi-file ops/triage/code-fix layout described below without leaving your browser.
+:::
 
 Use `@use` directives inside a `@skills` block to import sub-skills as ordered phases:
 

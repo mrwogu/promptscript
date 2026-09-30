@@ -1,5 +1,5 @@
 ---
-title: Build Your Registry - PromptScript
+title: Build Your Registry
 description: Learn how to create and manage PromptScript registries for your organization, with self-service registry commands and decentralized architecture.
 ---
 
@@ -680,8 +680,9 @@ When you import a repository that does not contain `.prs` files, PromptScript lo
 
 PromptScript fetches the repository, detects the `SKILL.md`, and synthesizes a virtual `.prs` fragment that you can merge into your project just like any other import.
 
-!!! tip "Zero Config Required"
+:::tip[Zero Config Required]
 Auto-discovery works without any setup in the remote repo. The remote maintainer does not need to know about PromptScript.
+:::
 
 ---
 
@@ -753,8 +754,9 @@ prs compile --ignore-hashes
 prs validate --ignore-hashes
 ```
 
-!!! warning
+:::caution
 Never use `--ignore-hashes` in CI pipelines. Hash verification is a critical security check for production builds.
+:::
 
 ### Committing the Lockfile
 

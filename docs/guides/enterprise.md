@@ -5,8 +5,9 @@ description: Deploying PromptScript across your organization
 
 # Enterprise Setup
 
-!!! tip "Need help with enterprise deployment?"
+:::tip[Need help with enterprise deployment?]
 **Questions?** Open a [GitHub Issue](https://github.com/mrwogu/promptscript/issues) or start a conversation in [GitHub Discussions](https://github.com/mrwogu/promptscript/discussions). We're happy to help teams get set up.
+:::
 
 This guide covers deploying PromptScript across an enterprise organization.
 
@@ -431,8 +432,9 @@ targets:
       output: .cursor/rules/project.mdc
 ```
 
-!!! tip "Version Pinning with Git Tags"
+:::tip[Version Pinning with Git Tags]
 For production stability, pin to specific versions using Git tags:
+:::
 
     ```yaml
     registry:
@@ -797,17 +799,22 @@ Commit `promptscript.lock` to every repository that uses remote imports. This en
 
 ## Best Practices
 
-!!! tip "Registry Organization"
+:::tip[Registry Organization]
 Keep the registry organized with clear namespaces and documentation.
+:::
 
-!!! tip "Version Pinning"
+:::tip[Version Pinning]
 Pin versions in production projects to avoid unexpected changes.
+:::
 
-!!! tip "Change Communication"
+:::tip[Change Communication]
 Notify teams before making registry changes.
+:::
 
-!!! warning "Security Review"
+:::caution[Security Review]
 Review security-related changes carefully before merging.
+:::
 
-!!! warning "Breaking Changes"
+:::caution[Breaking Changes]
 Use major version bumps and provide migration guides for breaking changes.
+:::

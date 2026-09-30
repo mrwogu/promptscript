@@ -1,5 +1,5 @@
 ---
-title: Parity Testing - PromptScript
+title: Parity Testing
 description: Documentation for the parity testing mechanism for PromptScript formatters, including golden files and the parity matrix.
 ---
 

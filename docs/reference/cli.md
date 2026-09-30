@@ -9,31 +9,37 @@ Complete reference for the PromptScript command-line interface.
 
 ## Installation
 
-=== "npm"
+::::tabs
+:::tab[npm]
 
-    ```bash
-    npm install -g @promptscript/cli
-    ```
+```bash
+npm install -g @promptscript/cli
+```
 
-=== "pnpm"
+:::
+:::tab[pnpm]
 
-    ```bash
-    pnpm add -g @promptscript/cli
-    ```
+```bash
+pnpm add -g @promptscript/cli
+```
 
-=== "yarn"
+:::
+:::tab[yarn]
 
-    ```bash
-    yarn global add @promptscript/cli
-    ```
+```bash
+yarn global add @promptscript/cli
+```
 
-=== "Deno"
+:::
+:::tab[Deno]
 
-    ```bash
-    deno install -g --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run npm:@promptscript/cli
-    ```
+```bash
+deno install -g --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run npm:@promptscript/cli
+```
 
-    Requires a Deno-capable CLI release (1.20.0 or later) and Deno 2.9+.
+Requires a Deno-capable CLI release (1.20.0 or later) and Deno 2.9+.
+:::
+::::
 
 ## Running under Deno
 
@@ -426,8 +432,9 @@ prs compile --verbose
 prs compile --debug
 ```
 
-!!! tip "Automatic compilation with hooks"
+:::tip[Automatic compilation with hooks]
 Instead of running `prs compile --watch` in a terminal, you can let your AI tool trigger compilation automatically. Run `prs hooks install` once to wire `prs compile` into your tool's native hook system — no manual watch process needed. See the [Hooks Guide](../guides/hooks.md) for details.
+:::
 
 **Common Targets:**
 
@@ -754,10 +761,11 @@ prs pull --commit abc123
 prs pull --refresh
 ```
 
-!!! note "Git Registry Options"
+:::note[Git Registry Options]
 The `--branch`, `--tag`, and `--commit` options are mutually exclusive. These options and
 `--refresh` only apply to Git registries.
 For local or HTTP registries, these options are ignored.
+:::
 
 ---
 
@@ -834,11 +842,13 @@ prs serve --read-only
 | `/api/files/*` | GET/PUT/POST/DELETE | Read, update, create, delete files                        |
 | `/ws`          | WebSocket           | Real-time file change events                              |
 
-!!! note "Privacy"
+:::note[Privacy]
 All compilation happens locally in your browser - no data is sent to any external server. The `prs serve` command only serves files to the playground running in your browser.
+:::
 
-!!! note "Security"
+:::note[Security]
 The server only accepts requests from `https://getpromptscript.dev` by default (CORS). Use `--cors-origin` to allow other origins. Use `--read-only` to prevent file modifications.
+:::
 
 ---
 
