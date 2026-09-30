@@ -27,6 +27,17 @@
   --sl-nav-height: calc(var(--ps-nav-base) + var(--ps-tabs-height));
 }
 
+/* Starlight's desktop heading scale makes h3 almost as large as h2, so long
+   reference pages lose their hierarchy. A tighter scale keeps levels apart. */
+@media (min-width: 50rem) {
+  :root {
+    --sl-text-h1: 2.5rem;
+    --sl-text-h2: 1.75rem;
+    --sl-text-h3: 1.3125rem;
+    --sl-text-h4: 1.125rem;
+  }
+}
+
 :root[data-theme='dark'] {
   --sl-color-black: #0b1220;
   --sl-color-gray-6: #0f1b33;
