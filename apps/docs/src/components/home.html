@@ -1,20 +1,20 @@
 <div class="home-page">
   <section class="home-hero">
     <div class="home-hero__copy">
-      <div class="home-eyebrow">Agent platform configuration as code</div>
-      <h1>Define your agent platform once.<br /><span>Compile it everywhere.</span></h1>
+      <div class="home-eyebrow">Prompts as code for AI coding agents</div>
+      <h1>Write your AI rules once.<br /><span>Every agent follows them.</span></h1>
       <p class="home-hero__lead">
-        One composable source for instructions, skills, agents, MCP servers, hooks, workflows, and
-        policies. Inherit it across teams and compile native configuration for 50 AI coding
-        platforms.
+        Stop copy-pasting CLAUDE.md, Cursor rules, and Copilot instructions across repositories.
+        PromptScript turns them into versioned code: inherited from your organization, scanned for
+        prompt injection, and compiled to native files for 50 AI coding agents.
       </p>
       <div class="home-hero__actions">
         <a href="getting-started/" class="home-button home-button--primary">Get started</a>
-        <a href="#native-output" class="home-button home-button--secondary">See native output</a>
+        <a href="/playground/" class="home-button home-button--secondary">Try it in the browser</a>
       </div>
       <div class="home-install" aria-label="Install PromptScript CLI">
         <code>npm install -g @promptscript/cli</code>
-        <span>Open source · Git-native · CI-ready</span>
+        <span>Open source · MIT · Git-native · CI-ready</span>
       </div>
     </div>
     <div
@@ -82,45 +82,90 @@
     <span>OpenCode</span>
     <a href="reference/formatters/">and 43 more</a>
   </div>
-  <section class="home-section home-section--capabilities">
+  <section class="home-section">
     <div class="home-section__intro">
-      <div class="home-eyebrow">One language, complete platform</div>
-      <h2>More than instruction files</h2>
+      <div class="home-eyebrow">The problem</div>
+      <h2>AI instructions do not scale by copy-paste</h2>
       <p>
-        Model the complete operating environment for AI coding agents, then let each formatter emit
-        the richest native representation its platform supports.
+        Every AI tool wants its own file. Every repository keeps its own copy. Soon nobody knows
+        which rules the agents actually follow.
       </p>
     </div>
+    <div class="home-compare">
+      <div class="home-compare__col">
+        <h3>Without PromptScript</h3>
+        <ul class="home-check-list home-check-list--cross">
+          <li>
+            A different file for every tool: <code>CLAUDE.md</code>, <code>.cursor/rules</code>,
+            <code>copilot-instructions.md</code>, <code>AGENTS.md</code>
+          </li>
+          <li>Copies drift apart across dozens of repositories</li>
+          <li>Company standards live in a wiki the agents never read</li>
+          <li>Third-party skills can carry hidden prompt injection</li>
+          <li>Switching AI tools means rewriting everything</li>
+        </ul>
+      </div>
+      <div class="home-compare__col home-compare__col--with">
+        <h3>With PromptScript</h3>
+        <ul class="home-check-list">
+          <li>One <code>.prs</code> source, native output for 50 agents</li>
+          <li>Company standards inherited by every repository, not copied</li>
+          <li>Changes reviewed in Git and validated in CI</li>
+          <li>Built-in security scanner for every prompt and imported skill</li>
+          <li>Add or switch tools by editing one target list</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  <section class="home-section">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">Why teams use it</div>
+      <h2>Less copy-paste. More control.</h2>
+    </div>
     <div class="home-capability-grid">
-      <a href="reference/language/#identity" class="home-capability">
-        <span class="home-capability__token">@identity</span>
-        <h3>Instructions and policy</h3>
-        <p>Project context, standards, restrictions, examples, and path-specific rules.</p>
+      <a href="reference/formatters/" class="home-capability">
+        <span class="home-capability__token">consistency</span>
+        <h3>Every agent, same rules</h3>
+        <p>
+          Claude Code, Copilot, Cursor, and the rest read the same standards, each in the format it
+          expects.
+        </p>
       </a>
-      <a href="features/skills/" class="home-capability">
-        <span class="home-capability__token">@skills</span>
-        <h3>Portable skills</h3>
-        <p>Reusable capabilities with resources, scripts, dependencies, and typed contracts.</p>
-      </a>
-      <a href="features/agents/" class="home-capability">
-        <span class="home-capability__token">@agents</span>
-        <h3>Specialized agents</h3>
-        <p>Roles, models, tool policies, skills, permissions, and MCP access.</p>
-      </a>
-      <a href="features/integrations/" class="home-capability">
-        <span class="home-capability__token">@mcpServers</span>
-        <h3>Tools and integrations</h3>
-        <p>MCP servers and reusable plugins defined once at project level.</p>
-      </a>
-      <a href="features/automation/" class="home-capability">
-        <span class="home-capability__token">@hooks</span>
-        <h3>Automation</h3>
-        <p>Lifecycle hooks, repeatable workflows, and scoped monorepo builds.</p>
+      <a href="guides/security/" class="home-capability">
+        <span class="home-capability__token">security</span>
+        <h3>Prompts scanned before they ship</h3>
+        <p>
+          Catches prompt injection, authority overrides, encoded payloads, and invisible Unicode in
+          your files and in imported skills.
+        </p>
       </a>
       <a href="guides/policy-engine/" class="home-capability">
-        <span class="home-capability__token">policies</span>
-        <h3>Governance</h3>
-        <p>Inheritance boundaries, protected properties, registry controls, and CI validation.</p>
+        <span class="home-capability__token">governance</span>
+        <h3>Policy that teams cannot skip</h3>
+        <p>
+          Organization rules flow down to every team and project. Sealed properties and policies
+          keep them in place.
+        </p>
+      </a>
+      <a href="features/target-platforms/" class="home-capability">
+        <span class="home-capability__token">portability</span>
+        <h3>No lock-in to one AI tool</h3>
+        <p>Add, drop, or mix agents by changing the target list. Your source stays the same.</p>
+      </a>
+      <a href="guides/skill-composition/" class="home-capability">
+        <span class="home-capability__token">reuse</span>
+        <h3>Skills built like software</h3>
+        <p>
+          Compose skills from phases, pass parameters, define contracts, and share them through a
+          Git registry.
+        </p>
+      </a>
+      <a href="guides/import/" class="home-capability">
+        <span class="home-capability__token">adoption</span>
+        <h3>Start from the files you have</h3>
+        <p>
+          <code>prs import</code> converts existing CLAUDE.md, Copilot, Cursor, and AGENTS.md files.
+        </p>
       </a>
     </div>
   </section>
@@ -190,42 +235,127 @@
       </div>
     </div>
   </section>
-  <section class="home-section home-section--steps">
+  <section class="home-section" id="security">
     <div class="home-section__intro">
-      <div class="home-eyebrow">A deterministic toolchain</div>
-      <h2>From intent to native files</h2>
+      <div class="home-eyebrow">Built-in security scanner</div>
+      <h2>Stop prompt injection before it ships</h2>
       <p>
-        PromptScript brings compiler guarantees to agent configuration without hiding
-        platform-specific capabilities.
+        <code>prs validate</code> scans every instruction, skill, and imported file. Encoded
+        payloads are decoded first, so hiding an attack in hex or Base64 does not get it through.
       </p>
     </div>
-    <div class="home-step-grid">
-      <div class="home-step">
-        <span class="home-step__number">01</span>
-        <h3>Define</h3>
-        <p>
-          Compose organization, team, and project configuration from versioned
-          <code>.prs</code> sources.
-        </p>
-        <code class="home-step__command">@inherit @company/platform</code>
+    <div class="home-compose__layout">
+      <div class="home-code-window">
+        <div class="home-window-bar">
+          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>terminal</span>
+          <span class="home-window-status">output</span>
+        </div>
+        <pre><code><span class="home-code-comment">$</span> prs validate --strict
+<span class="home-code-error">✖ Validation failed</span>
+
+<span class="home-code-error">✗</span> Blocked pattern detected:
+&#32;&#32;ignore\s+(all\s+)?previous\s+instructions
+&#32;&#32;<span class="home-code-comment">at project.prs:8:1</span>
+
+<span class="home-code-error">✗</span> PS012: Malicious content detected
+&#32;&#32;in raw hex (spaced): Prompt injection
+&#32;&#32;Decoded: <span class="home-code-string">"IGNORE SAFETY RULES"</span>
+&#32;&#32;<span class="home-code-comment">at project.prs:16:14</span>
+
+<span class="home-code-error">✗</span> PS010: URL shortener detected:
+&#32;&#32;<span class="home-code-reference">http://bit.ly/deploy-help</span>
+&#32;&#32;<span class="home-code-comment">at project.prs:16:14</span></code></pre>
       </div>
-      <div class="home-step">
-        <span class="home-step__number">02</span>
-        <h3>Validate</h3>
-        <p>
-          Catch syntax, broken references, policy violations, and unsafe referenced content before
-          deployment.
-        </p>
-        <code class="home-step__command">prs validate --strict</code>
+      <div class="home-compose__ops">
+        <a href="guides/security/#security-rules" class="home-compose__op">
+          <span class="home-compose__op-token">PS005</span>
+          <div>
+            <h3>Injection and overrides</h3>
+            <p>
+              Phrases like "ignore previous instructions" and fake authority overrides fail the
+              build.
+            </p>
+          </div>
+        </a>
+        <a href="guides/security/#obfuscation-detection-ps012" class="home-compose__op">
+          <span class="home-compose__op-token">PS012</span>
+          <div>
+            <h3>Encoded payloads</h3>
+            <p>
+              Base64, hex, URL encoding, HTML entities, ROT13, and more are decoded and checked.
+            </p>
+          </div>
+        </a>
+        <a href="guides/security/#security-rules" class="home-compose__op">
+          <span class="home-compose__op-token">PS014</span>
+          <div>
+            <h3>Invisible Unicode</h3>
+            <p>Right-to-left overrides, zero-width characters, and homoglyphs.</p>
+          </div>
+        </a>
+        <a href="guides/security/#security-rules" class="home-compose__op">
+          <span class="home-compose__op-token">PS010</span>
+          <div>
+            <h3>Suspicious links</h3>
+            <p>Plain HTTP, link shorteners, and credentials in URLs.</p>
+          </div>
+        </a>
       </div>
-      <div class="home-step">
-        <span class="home-step__number">03</span>
-        <h3>Compile</h3>
-        <p>
-          Generate deterministic, reviewable files that every selected agent platform understands
-          natively.
-        </p>
-        <code class="home-step__command">prs compile</code>
+    </div>
+  </section>
+  <section class="home-section">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">Skill composition</div>
+      <h2>Build big skills from small, owned pieces</h2>
+      <p>
+        Split a complex skill into phases. Each phase is its own <code>.prs</code> file with its own
+        context, parameters, and allowed tools, so different teams can own different parts.
+      </p>
+    </div>
+    <div class="home-compose__layout">
+      <div class="home-code-window">
+        <div class="home-window-bar">
+          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>ops.prs</span>
+          <span class="home-window-status">source</span>
+        </div>
+        <pre><code><span class="home-code-keyword">@skills</span> {
+&#32;&#32;ops: {
+&#32;&#32;&#32;&#32;description: <span class="home-code-string">"Production operations"</span>
+
+&#32;&#32;&#32;&#32;<span class="home-code-comment"># every phase is a separate .prs file</span>
+&#32;&#32;&#32;&#32;<span class="home-code-keyword">@use</span> <span class="home-code-reference">./phases/health-scan</span>
+&#32;&#32;&#32;&#32;<span class="home-code-keyword">@use</span> <span class="home-code-reference">./phases/triage</span>(severity: <span class="home-code-string">"critical"</span>)
+&#32;&#32;&#32;&#32;<span class="home-code-keyword">@use</span> <span class="home-code-reference">./phases/code-fix</span> as autofix
+
+&#32;&#32;&#32;&#32;<span class="home-code-comment"># shared phases from the Git registry</span>
+&#32;&#32;&#32;&#32;<span class="home-code-keyword">@use</span> <span class="home-code-reference">@shared/phases/monitoring</span>
+&#32;&#32;}
+}</code></pre>
+      </div>
+      <div class="home-compose__ops">
+        <a href="guides/skill-composition/" class="home-compose__op">
+          <span class="home-compose__op-token">@use</span>
+          <div>
+            <h3>Phases with boundaries</h3>
+            <p>Each phase brings its own instructions and declares only the tools it needs.</p>
+          </div>
+        </a>
+        <a href="guides/skill-contracts/" class="home-compose__op">
+          <span class="home-compose__op-token">contracts</span>
+          <div>
+            <h3>Typed inputs and outputs</h3>
+            <p>Skills declare what they take and return, so they plug together cleanly.</p>
+          </div>
+        </a>
+        <a href="guides/skill-overlays/" class="home-compose__op">
+          <span class="home-compose__op-token">@extend</span>
+          <div>
+            <h3>Extend without forking</h3>
+            <p>Teams layer changes on a shared skill. Sealed properties stay locked.</p>
+          </div>
+        </a>
       </div>
     </div>
   </section>
@@ -268,6 +398,48 @@
         <code>.factory/droids/reviewer.md</code>
         <code>.factory/skills/security-review/SKILL.md</code>
       </div>
+    </div>
+  </section>
+  <section class="home-section home-section--capabilities">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">One language, complete platform</div>
+      <h2>More than instruction files</h2>
+      <p>
+        Model the complete operating environment for AI coding agents, then let each formatter emit
+        the richest native representation its platform supports.
+      </p>
+    </div>
+    <div class="home-capability-grid">
+      <a href="reference/language/#identity" class="home-capability">
+        <span class="home-capability__token">@identity</span>
+        <h3>Instructions and policy</h3>
+        <p>Project context, standards, restrictions, examples, and path-specific rules.</p>
+      </a>
+      <a href="features/skills/" class="home-capability">
+        <span class="home-capability__token">@skills</span>
+        <h3>Portable skills</h3>
+        <p>Reusable capabilities with resources, scripts, dependencies, and typed contracts.</p>
+      </a>
+      <a href="features/agents/" class="home-capability">
+        <span class="home-capability__token">@agents</span>
+        <h3>Specialized agents</h3>
+        <p>Roles, models, tool policies, skills, permissions, and MCP access.</p>
+      </a>
+      <a href="features/integrations/" class="home-capability">
+        <span class="home-capability__token">@mcpServers</span>
+        <h3>Tools and integrations</h3>
+        <p>MCP servers and reusable plugins defined once at project level.</p>
+      </a>
+      <a href="features/automation/" class="home-capability">
+        <span class="home-capability__token">@hooks</span>
+        <h3>Automation</h3>
+        <p>Lifecycle hooks, repeatable workflows, and scoped monorepo builds.</p>
+      </a>
+      <a href="guides/policy-engine/" class="home-capability">
+        <span class="home-capability__token">policies</span>
+        <h3>Governance</h3>
+        <p>Inheritance boundaries, protected properties, registry controls, and CI validation.</p>
+      </a>
     </div>
   </section>
   <section class="home-scale">

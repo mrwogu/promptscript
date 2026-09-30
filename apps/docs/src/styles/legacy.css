@@ -1575,68 +1575,43 @@ pre.init-demo__file-preview-content {
   line-height: 1.55;
 }
 
-.home-section--steps {
-  padding-top: 3.125rem;
-}
-
-.home-step-grid {
+.home-compare {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-  overflow: hidden;
-  border: 1px solid var(--home-line);
-  border-radius: 1.25rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
 }
 
-.home-step {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: 240px;
+.home-compare__col {
   padding: 1.6875rem;
   background: var(--home-panel);
-  border-right: 1px solid var(--home-line);
+  border: 1px solid var(--home-line);
+  border-radius: 1.0625rem;
 }
 
-.home-step:last-child {
-  border-right: 0;
+.home-compare__col--with {
+  border-color: rgba(109, 40, 217, 0.4);
+  box-shadow: 0 12px 30px rgba(109, 40, 217, 0.08);
 }
 
-.home-step__number {
-  color: #6d28d9;
-  font-family: var(--md-code-font-family);
-  font-size: 0.9rem;
-  font-weight: 800;
-}
-
-[data-theme='dark'] .home-step__number {
-  color: #c4b5fd;
-}
-
-.sl-markdown-content .home-step h3 {
-  margin: 1.5625rem 0 0.625rem;
-  color: var(--home-ink);
-  font-size: 1.25rem;
-}
-
-.sl-markdown-content .home-step p {
+.sl-markdown-content .home-compare h3 {
   margin: 0;
-  color: var(--home-muted);
-  font-size: 0.9rem;
-  line-height: 1.55;
+  color: var(--home-ink);
+  font-size: 1.125rem;
+  font-weight: 720;
 }
 
-.sl-markdown-content .home-step__command {
-  display: block;
-  overflow: hidden;
-  margin-top: auto;
-  padding: 0.6875rem 0.8125rem;
-  color: var(--home-ink);
-  background: rgba(100, 116, 139, 0.08);
-  border-radius: 0.5rem;
-  font-size: 0.8rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.sl-markdown-content .home-compare .home-check-list {
+  margin: 1.25rem 0 0;
+}
+
+.home-check-list.home-check-list--cross li::before {
+  color: #dc2626;
+  content: '✗';
+}
+
+.home-code-error {
+  color: #f87171;
+  font-weight: 700;
 }
 
 .home-native {
@@ -2127,17 +2102,8 @@ pre.init-demo__file-preview-content {
     gap: 2.5rem;
   }
 
-  .home-step-grid {
+  .home-compare {
     grid-template-columns: 1fr;
-  }
-
-  .home-step {
-    border-right: 0;
-    border-bottom: 1px solid var(--home-line);
-  }
-
-  .home-step:last-child {
-    border-bottom: 0;
   }
 
   .home-native {
