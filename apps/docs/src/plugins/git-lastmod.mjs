@@ -26,10 +26,11 @@ export function gitLastModified() {
   if (cached) return cached;
   try {
     // `:/docs` is the repo-level docs/ folder from any working directory.
-    const log = execFileSync('git', ['log', '--format=%x00%cI', '--name-only', '--', ':/docs'], {
-      encoding: 'utf8',
-      maxBuffer: 64 * 1024 * 1024,
-    });
+    // git from PATH on purpose: this runs only at build time on a dev machine
+    // or CI runner, like Starlight's own "Last updated" lookup.
+    const args = ['log', '--format=%x00%cI', '--name-only', '--', ':/docs'];
+    const options = { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 };
+    const log = execFileSync('git', args, options); // NOSONAR
     cached = lastModifiedByPath(log);
   } catch {
     // No git (e.g. a source tarball): pages just have no date.
