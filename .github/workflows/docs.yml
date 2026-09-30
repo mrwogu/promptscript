@@ -40,6 +40,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          # Full history for per-page "Last updated" dates
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -69,29 +72,13 @@ jobs:
       - name: Copy schema to docs
         if: env.IS_RELEASE == 'true'
         run: |
-          mkdir -p docs/schema
-          cp schema/config.json docs/schema/config.json
-          mkdir -p docs/schema/diff
-          cp schema/diff-v1.json docs/schema/diff/v1.json
-
-      - name: Setup Python
-        if: env.IS_RELEASE == 'true'
-        uses: actions/setup-python@v7
-        with:
-          python-version: '3.12'
-          cache: 'pip'
-          cache-dependency-path: requirements-docs.txt
-
-      - name: Install MkDocs dependencies
-        if: env.IS_RELEASE == 'true'
-        run: pip install -r requirements-docs.txt
+          mkdir -p apps/docs/public/schema/diff
+          cp schema/config.json apps/docs/public/schema/config.json
+          cp schema/diff-v1.json apps/docs/public/schema/diff/v1.json
 
       - name: Build documentation
         if: env.IS_RELEASE == 'true'
-        run: mkdocs build
-        env:
-          MKDOCS_GIT_COMMITTERS_APIKEY: ${{ secrets.MKDOCS_GIT_COMMITTERS_APIKEY }}
-          PYTHONPATH: ${{ github.workspace }}
+        run: pnpm nx build docs
 
       - name: Build playground
         run: pnpm nx build playground
@@ -113,7 +100,7 @@ jobs:
             # --delete also removes the old mike version dirs (latest, dev, vX.Y)
             rsync -a --delete \
               --exclude .git --exclude /playground --exclude /playground-dev \
-              site/ gh-pages-content/
+              dist/apps/docs/ gh-pages-content/
             rm -rf gh-pages-content/playground
             cp -r dist/packages/playground gh-pages-content/playground
           fi

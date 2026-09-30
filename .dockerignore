@@ -80,9 +80,9 @@ fixtures
 .promptscript/.cache
 *.local
 
-# Python/MkDocs (documentation)
+# Documentation site and Pygments lexer
+apps/docs
 docs_extensions
-mkdocs.yml
 __pycache__
 *.pyc
 .python-version

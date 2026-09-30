@@ -10,7 +10,7 @@ requires-python = ">=3.9"
 dependencies = ["pygments>=2.0"]
 
 [tool.setuptools]
-py-modules = ["promptscript_lexer", "mkdocs_hooks"]
+py-modules = ["promptscript_lexer"]
 
 [project.entry-points."pygments.lexers"]
 promptscript = "promptscript_lexer:PromptScriptLexer"
