@@ -99,3 +99,16 @@ export function pageJsonLd(article: ArticleInfo, crumbs: readonly Crumb[]): Head
     },
   ]);
 }
+
+export function faqJsonLd(items: readonly { question: string; answer: string }[]): HeadTag {
+  return jsonLdTag([
+    {
+      '@type': 'FAQPage',
+      mainEntity: items.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer },
+      })),
+    },
+  ]);
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { homeJsonLd, jsonLdTag, pageJsonLd } from './seo';
+import { faqJsonLd, homeJsonLd, jsonLdTag, pageJsonLd } from './seo';
 
 const parse = (content: string): { '@graph': Record<string, unknown>[] } => JSON.parse(content);
 
@@ -67,5 +67,20 @@ describe('pageJsonLd', () => {
 
     expect(article).not.toHaveProperty('description');
     expect(article).not.toHaveProperty('dateModified');
+  });
+});
+
+describe('faqJsonLd', () => {
+  it('turns each item into a question with an accepted answer', () => {
+    const graph = parse(faqJsonLd([{ question: 'Is it free?', answer: 'Yes.' }]).content)['@graph'];
+
+    expect(graph[0]['@type']).toBe('FAQPage');
+    expect(graph[0].mainEntity).toEqual([
+      {
+        '@type': 'Question',
+        name: 'Is it free?',
+        acceptedAnswer: { '@type': 'Answer', text: 'Yes.' },
+      },
+    ]);
   });
 });
