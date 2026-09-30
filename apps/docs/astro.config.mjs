@@ -111,6 +111,7 @@ export default defineConfig({
         MarkdownContent: './src/components/MarkdownContent.astro',
         Header: './src/components/Header.astro',
         Footer: './src/components/Footer.astro',
+        SocialIcons: './src/components/SocialIcons.astro',
       },
       expressiveCode: {
         shiki: { langs: [promptscriptGrammar], langAlias: { gitignore: 'ini' } },
