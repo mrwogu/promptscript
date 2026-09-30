@@ -2531,15 +2531,16 @@ pre.init-demo__file-preview-content {
 
 .home-converge__files b {
   padding: 0.0625rem 0.4375rem;
-  color: #047857;
-  background: rgba(5, 150, 105, 0.1);
+  color: #065f46;
+  background: #d1fae5;
   border-radius: 999px;
   font-size: 0.625rem;
   font-weight: 700;
 }
 
 [data-theme='dark'] .home-converge__files b {
-  color: #6ee7b7;
+  color: #a7f3d0;
+  background: #064e3b;
 }
 
 .sl-markdown-content .home-converge__more {
