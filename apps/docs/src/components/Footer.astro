@@ -1,0 +1,51 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+---
+
+<Default />
+<div class="ps-footer">
+  <p class="ps-footer__love">
+    Loved by a growing community of developers and AI enthusiasts around the world.
+  </p>
+  <p>
+    Created by <a href="https://github.com/mrwogu" rel="author">Wojciech Guziak</a>{' - '}Released
+    under the <a href="https://github.com/mrwogu/promptscript/blob/main/LICENSE">MIT License</a>
+  </p>
+  <p class="ps-footer__links">
+    <a href="https://github.com/mrwogu/promptscript">GitHub</a>
+    <a href="https://www.linkedin.com/in/wojciechguziak/" rel="author">LinkedIn</a>
+    <a href="https://www.npmjs.com/org/promptscript">npm</a>
+    <a href="https://github.com/mrwogu/promptscript/releases">Changelog</a>
+    <a href="/playground/">Playground</a>
+  </p>
+</div>
+
+<style>
+  .ps-footer {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--sl-color-hairline);
+    text-align: center;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-3);
+  }
+  .ps-footer p {
+    margin: 0.35rem 0;
+  }
+  .ps-footer a {
+    color: var(--sl-color-gray-2);
+  }
+  .ps-footer a:hover {
+    color: var(--sl-color-accent-high);
+  }
+  .ps-footer__love {
+    color: var(--sl-color-white);
+    font-weight: 600;
+  }
+  .ps-footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.25rem;
+  }
+</style>

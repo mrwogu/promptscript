@@ -110,6 +110,7 @@ export default defineConfig({
         PageTitle: './src/components/PageTitle.astro',
         MarkdownContent: './src/components/MarkdownContent.astro',
         Header: './src/components/Header.astro',
+        Footer: './src/components/Footer.astro',
       },
       expressiveCode: {
         shiki: { langs: [promptscriptGrammar], langAlias: { gitignore: 'ini' } },
