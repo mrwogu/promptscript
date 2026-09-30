@@ -1,6 +1,9 @@
 ---
 title: Antigravity Formatter
 description: PromptScript output format for Antigravity
+sidebar:
+  label: Antigravity
+  order: 1
 ---
 
 # Antigravity Formatter

@@ -1,6 +1,9 @@
 ---
 title: Cursor Formatter
 description: PromptScript output format for Cursor
+sidebar:
+  label: Cursor
+  order: 1
 ---
 
 # Cursor Formatter

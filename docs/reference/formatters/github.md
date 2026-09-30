@@ -1,6 +1,9 @@
 ---
 title: GitHub Copilot Formatter
 description: PromptScript output format for GitHub Copilot
+sidebar:
+  label: GitHub Copilot
+  order: 1
 ---
 
 # GitHub Copilot Formatter

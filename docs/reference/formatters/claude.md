@@ -1,6 +1,9 @@
 ---
 title: Claude Code Formatter
 description: PromptScript output format for Claude Code
+sidebar:
+  label: Claude Code
+  order: 1
 ---
 
 # Claude Code Formatter

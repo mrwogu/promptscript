@@ -1,6 +1,9 @@
 ---
 title: OpenCode Formatter
 description: PromptScript output format for OpenCode
+sidebar:
+  label: OpenCode
+  order: 1
 ---
 
 # OpenCode Formatter

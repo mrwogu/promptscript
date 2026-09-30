@@ -1,6 +1,9 @@
 ---
 title: Gemini CLI Formatter
 description: PromptScript output format for Gemini CLI
+sidebar:
+  label: Gemini CLI
+  order: 1
 ---
 
 # Gemini CLI Formatter
