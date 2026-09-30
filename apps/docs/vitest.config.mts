@@ -8,5 +8,9 @@ export default defineConfig({
     watch: false,
     environment: 'node',
     include: ['src/**/*.spec.ts'],
+    coverage: {
+      reportsDirectory: '../../coverage/apps/docs',
+      provider: 'v8' as const,
+    },
   },
 });
