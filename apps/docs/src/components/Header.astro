@@ -1,0 +1,29 @@
+---
+import Default from '@astrojs/starlight/components/Header.astro';
+import { NAV_TABS, findActiveTab } from '../nav';
+
+// The sidebar is already filtered to the active tab by route-middleware.ts,
+// so its groups still point at that tab.
+const active = findActiveTab(Astro.locals.starlightRoute.sidebar, Astro.url.pathname);
+---
+
+<div class="ps-header">
+  <div class="ps-header__main"><Default /></div>
+  <nav class="ps-tabs-nav" aria-label="Documentation sections">
+    <ul>
+      {
+        NAV_TABS.map((tab) => (
+          <li>
+            <a
+              href={tab.href}
+              aria-current={tab === active ? 'page' : undefined}
+              {...(tab.external ? { rel: 'noopener', target: '_blank' } : {})}
+            >
+              {tab.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</div>

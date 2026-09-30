@@ -167,6 +167,67 @@
   color: var(--sl-color-red-high);
 }
 
+/* Header tabs (src/components/Header.astro). The header grows by one tab row,
+   so the logo and the mobile menu button stay sized to the first row. */
+:root {
+  --ps-nav-base: 3.5rem;
+  --ps-tabs-height: 2.5rem;
+  --sl-nav-height: calc(var(--ps-nav-base) + var(--ps-tabs-height));
+}
+@media (min-width: 50rem) {
+  :root {
+    --ps-nav-base: 4rem;
+  }
+}
+.ps-header {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.ps-header__main {
+  height: calc(var(--ps-nav-base) - 2 * var(--sl-nav-pad-y));
+}
+.site-title img {
+  height: calc(var(--ps-nav-base) - 2 * var(--sl-nav-pad-y));
+}
+.sl-menu-button {
+  top: calc((var(--ps-nav-base) - var(--sl-menu-button-size)) / 2);
+}
+.ps-tabs-nav {
+  margin-top: auto;
+  margin-inline: calc(-1 * var(--sl-nav-pad-x));
+  padding-inline: var(--sl-nav-pad-x);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ps-tabs-nav ul {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ps-tabs-nav a {
+  display: block;
+  padding: 0.55rem 0.75rem calc(0.55rem - 2px);
+  white-space: nowrap;
+  font-size: var(--sl-text-sm);
+  font-weight: 500;
+  color: var(--sl-color-gray-2);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+.ps-tabs-nav a:hover {
+  color: var(--sl-color-white);
+}
+.ps-tabs-nav a[aria-current='page'] {
+  color: var(--sl-color-accent-high);
+  border-bottom-color: var(--sl-color-accent);
+}
+header.header {
+  padding-bottom: 0;
+}
+
 /* Homepage uses the old Material grid width (61rem at a 20px root) */
 .content-panel:has(.home-page) .sl-container {
   max-width: 76.25rem;
