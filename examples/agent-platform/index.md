@@ -1,11 +1,13 @@
 # Agent Platform Examples
 
-These examples cover core agent-platform capabilities. Open the [Playground](/playground/) and choose **Complete Agent Platform** or **Regular Field Replacement** to compile the same examples in your browser.
+These examples cover core agent-platform capabilities. Open the
+[Playground](/playground/) and choose **Complete Agent Platform** or
+**Regular Field Replacement** to compile the same examples in your browser.
 
 PromptScript 1.16 task examples:
 
-| Task                            | Example                                                                                        |
-| ------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Task                            | Example                                             |
+| ------------------------------- | --------------------------------------------------- |
 | Predict composition results     | [Composition and Order](https://getpromptscript.dev/examples/composition-and-order/index.md)   |
 | Choose merge or replacement     | [Merge vs Replace](https://getpromptscript.dev/examples/merge-vs-replace/index.md)             |
 | Fix PS038 shape warnings        | [Fix Block Shape Warnings](https://getpromptscript.dev/examples/fix-block-shapes/index.md)     |
@@ -14,9 +16,10 @@ PromptScript 1.16 task examples:
 
 ## Complete Agent Platform
 
-This syntax 1.6 example connects reusable skills, MCP tools, a specialist agent, lifecycle automation, a release workflow, and a plugin bundle:
+This syntax 1.6 example connects reusable skills, MCP tools, a specialist agent, lifecycle
+automation, a release workflow, and a plugin bundle:
 
-```
+```promptscript
 @meta {
   id: "checkout-agent-platform"
   syntax: "1.5.0"
@@ -97,6 +100,12 @@ This syntax 1.6 example connects reusable skills, MCP tools, a specialist agent,
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDAHNOW8tjDNqJeWIlwAnuwyFZ8gIwUArBQAM58YIE64s5HlMKz52OHk6ORAsKzR4RmoINCx5AF0xAF8xMW5pfQgY4Qso8xBigE11QQxqGEEAdxNlCFYdQTZqwWDQrEE4GGoANwhGGApigAVa-qG6rGoMVjgMRiwIDpaOHUTCxalqtSkCjAAjaAKrce9SryzWHLgBVikaqTgi7xYpGAD5AFV+n15iNegAVWIwADKCSSKRAkXkAHUdnN4Fh3sZqIITmo4C14O9qGpYOEQOlWHcHs0oFB3qJvP1GGodlZNLVhjB6rJ6RIJN84DDkutWA4QAAlGAc+pdDAhfSCRg4RZ6DEmPpKZkXQSJODKUnFCQYGnMeowKSg5jMWm-cUwDBSCJRADitTQjvkACEMHAcGkDQq2Bx2KKbt5eYIAJJLOKrA64fKMbDCyIYDQ4EwQABeSbYkUZtXRKeeMrl7EELwEgiVzygLR0V3DEglaBMvUgzzr7xOVnVgwGWr2klYjCghzqLGHBbqtT4Rxz4keMDQcAbvJuZW8d0prF4jDQkIGfdoHwkEDgcDUME08xWygG3P9N+jrdFjyOzC84ZYJBIextrGYb53RACgAHosEtWlQLPC94AoEgACtSXJcM1j4dQsAAWX8QQAGZ3AIzxN0ybId10fQ6WKdkIE5e8T15flBTWNhRQlKUFWrFVsRgTE6j4ag9E-XkIKtHDAlte1gJdJcpKgZgTmAr0fT9MNBBIQCYCgV82FYfghMsalrUEcTGU1GI2UlGj6hU8MSD3A9ZloG0YMva8FhUAYbN5CcgywVjLM5DjlTNANvkiDhHjgIt9mYOIFmY1gjUkMgViwcYNwkLdSO4dNmD1ejBiNaRsCvRVgpwnleUlfRRRbR5r0gzRcRgfS1OwRU6PkABRI4sAAH2RAoWoy7zmB-P9jKCVg0DMeEoiJe45vkGIY0UFQvIkNCYAw7DZEcAAmQiiPDR5sFxTCCXI0UAGE1uaVpBHBOJoUSZIhKy+4d0aahlDAOT6ko7xalgb0fnovl4lehLRQANSKis6kHGglxqRHtU0u1+lanyapKMoRvDZxBDYqygtaeA+haUYfEULpqPUQkMdB-0JH2ihibUcRMV-LA1laSJa3YOtwohDilD1aKfDRcJVIkXD2chNRxsSTNx04imkddVH0ZBwE+AECsMBZwQABYFYgtBuN4ro1BOWsfTrapi1qABHS9HmqNAaGYQqoH9ddig+nJyDUHQWkBiRun0TRODD3T+1aB9VMYqHhVFCZZR6QRY-xBO2kTTAzlrQocRrYb-SPPEWKiZx3A8VrdWgIyTI1FkLKlDaq0tPUbV94qOE0MryeQ-07P3Q8BjE+QXKvG8POoLytxADJUgYfRqCsfAiFIcgxhoegQEr4V8EcZegA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 The references between blocks are validated before output is generated:
 
 - The `reviewer` agent preloads `security-review` and receives access to `issue-tracker`.
@@ -122,11 +131,13 @@ targets:
 
 ## Regular Field Replacement
 
-Syntax 1.3 introduced `field!: value` inside regular `@extend` blocks. Marked fields replace their complete previous value, while unmarked fields retain normal merge behavior:
+Syntax 1.3 introduced `field!: value` inside regular `@extend` blocks. Marked fields replace their
+complete previous value, while unmarked fields retain normal merge behavior:
 
-For new syntax 1.6 projects, prefer `@override` when replacing a complete existing target. See [Merge vs Replace](https://getpromptscript.dev/examples/merge-vs-replace/index.md).
+For new syntax 1.6 projects, prefer `@override` when replacing a complete
+existing target. See [Merge vs Replace](https://getpromptscript.dev/examples/merge-vs-replace/index.md).
 
-```
+```promptscript
 @meta {
   id: "field-replacement"
   syntax: "1.3.0"
@@ -157,7 +168,14 @@ For new syntax 1.6 projects, prefer `@override` when replacing a complete existi
 }
 ```
 
-The resolved standards use only the new `testing` and `deployment` values. The `linting` array contains both entries because it was not marked for replacement.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJHgIMKFIC01GOQyMYfdvLES4AT3YZCs+QEYKAZgoAGfawC+Ysd2mcsELEeEG5EH0g8UEATWYAV0EMdRjBABUjNBgAZUZqCDQsQSkYADclZjRdHIw4OAg4AXYKAOCnV1Z3aoxWKVipOH9QjmqIVgBzWWR5AFU4GEEAKXgseTpAiamBjkHqbAg2QT6sOHkAXQCoVYHhwVGQZcEAUVSAGVXDgLzyZiNS2VFQiU0sMGY1BIFhAAGlIgAjGDUVj8eBOCQSdSDLasOAjeSROAqGDlLAqSzPUJNJruIgcdqCVrtTrdb4SXZnACEGKuk0EADUfHMFoEAGLMKBQZgAdx2OCmAEFpYJMFgODCiRITuwzqyAEqRcQqnKMCWMADW3ShALiLBIJB8+xAR1Cr2FHy8LJ6iNlUGwpuBgQAwsLIlJBJrmiFXcjUeiLpjsdp2BsoISQIt5DBItRijAVCK5gnbRISSBnAcGF5qEZ8ERSOQYFRaImQIVaKj8JYC0A" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+The resolved standards use only the new `testing` and `deployment` values. The `linting` array
+contains both entries because it was not marked for replacement.
 
 ## Portable Skill Resources
 
@@ -217,7 +235,7 @@ payments-platform/
 
 Create the shared team config, `.promptscript/team.prs`. Both service entries inherit it, so team rules live in exactly one file:
 
-```
+```promptscript
 @meta {
   id: "payments-team"
   syntax: "1.5.0"
@@ -241,9 +259,17 @@ Create the shared team config, `.promptscript/team.prs`. Both service entries in
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhMATz7s4AWg6l5YiXEXsMhWfICMFAKwUADNvGCBAczizk8pSqxx5AXTEBfMTFuaU4sCCxFYR05EG1YuwBNZgBXQQB3ZmoAa0E2exwYQQBBAGEAWQBRQXdQuGqobDBMkgpogAVqeBhqADdCrGoMVjgMRjC8iHYYB2pwyKGpQQxkqXCMACNoOda7ONsA1iC4AVYpDGopOtE7FikYF3kAVThC49mxwQAVRTQYAGVGLM0Fh5HQYgB1WYcezwTyCJrUQTrZJwSbwOrUZKwLwgXx2DjHSYOB4gZ6FABq4Vh6XCOHyhSKjOq2A41EOIDB8hKzD6iLAGGgyU6S1Ogk6A0imFwOLxByCnTeEDGEDYV2iahiADkYLzBFBmA5BG0ipqwSVyeSwZkxRg0ukYOscMxmDkXoD+Dj-CA-N4GKFqIp8ERSOQYFRaByQLzUWx8CZvUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Each entry inherits the team config and adds only service-specific blocks. `.promptscript/api.prs`:
 
-```
+<!-- playground-link-skip -->
+
+```promptscript
 @meta {
   id: "payments-api"
   syntax: "1.5.0"
@@ -269,7 +295,9 @@ Each entry inherits the team config and adds only service-specific blocks. `.pro
 
 `.promptscript/web.prs`:
 
-```
+<!-- playground-link-skip -->
+
+```promptscript
 @meta {
   id: "checkout-web"
   syntax: "1.5.0"
@@ -357,4 +385,4 @@ jobs:
 - [Skills and Resources](https://getpromptscript.dev/features/skills/index.md)
 - [MCP Servers and Plugins](https://getpromptscript.dev/features/integrations/index.md)
 - [Hooks and Workflows](https://getpromptscript.dev/features/automation/index.md)
-- [Configuration Reference](https://getpromptscript.dev/reference/config/#builds)
+- [Configuration Reference](https://getpromptscript.dev/reference/config/index.md#builds)

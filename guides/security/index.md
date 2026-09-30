@@ -14,7 +14,7 @@ Template values (`{{variable}}`) are **never executed** as code. They are:
 - Validated against expected types (string, number, boolean, enum)
 - Never passed to any code execution mechanism
 
-```
+```promptscript
 @meta {
   id: "secure-template"
   syntax: "1.0.0"
@@ -30,6 +30,12 @@ Template values (`{{variable}}`) are **never executed** as code. They are:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEg4MRgFdqMALQcyUbDHliJcAJ7sMhWfICMFAAy394wZmqk4s0Y4k1mAKyVYAOVIYWTgsaghWAHMDQQBfMQTWMW5pTiwILCNhWP0QBwkAdWZqAGtIqME2YWBvP0ZA4LikiTyHOJA4gF0GdOojfCJSchgqWhAGADcYWgg2fEtOoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Even if `projectName` contains suspicious content like `"; rm -rf /`, it's treated as a literal string in the output markdown-never executed.
 
 ### Output Is Static Markdown
@@ -40,7 +46,7 @@ PromptScript compiles to static markdown files (CLAUDE.md, copilot-instructions.
 
 Parameters are validated at compile time:
 
-```
+```promptscript
 # Template definition
 @meta {
   params: {
@@ -50,7 +56,7 @@ Parameters are validated at compile time:
 }
 ```
 
-```
+```promptscript
 # Usage - these would cause compile errors:
 @inherit ./template(port: "not-a-number")  # ❌ Type mismatch
 @inherit ./template(mode: "staging")        # ❌ Invalid enum value
@@ -64,7 +70,7 @@ While the template system itself is secure, you should still carefully evaluate 
 
 The primary concern with external stacks isn't code execution-it's **prompt injection**. A malicious stack could include instructions that manipulate the AI assistant's behavior:
 
-```
+```promptscript
 # Hypothetical malicious stack
 @identity {
   """
@@ -79,36 +85,37 @@ The primary concern with external stacks isn't code execution-it's **prompt inje
 
 1. **Review Before Installing**
 
-Always inspect external stacks before adding them to your registry:
+   Always inspect external stacks before adding them to your registry:
 
-```bash
-# Clone and review before adding
-git clone https://github.com/org/stack.git
-cat stack/*.prs
-```
+   ```bash
+   # Clone and review before adding
+   git clone https://github.com/org/stack.git
+   cat stack/*.prs
+   ```
 
-1. **Use Trusted Sources**
-1. Official PromptScript registry (`@core/*`, `@stacks/*`)
-1. Your organization's private registry
-1. Verified open-source projects
-1. **Pin Versions**
+2. **Use Trusted Sources**
+   - Official PromptScript registry (`@core/*`, `@stacks/*`)
+   - Your organization's private registry
+   - Verified open-source projects
 
-```
-# Good: pinned version
-@inherit @stacks/typescript@1.2.3
+3. **Pin Versions**
 
-# Risky: unpinned (could change)
-@inherit @stacks/typescript
-```
+   ```promptscript
+   # Good: pinned version
+   @inherit @stacks/typescript@1.2.3
 
-1. **Code Review Changes**
+   # Risky: unpinned (could change)
+   @inherit @stacks/typescript
+   ```
 
-When updating stack versions, diff the changes:
+4. **Code Review Changes**
 
-```bash
-# Compare versions
-git diff v1.2.3..v1.3.0 -- *.prs
-```
+   When updating stack versions, diff the changes:
+
+   ```bash
+   # Compare versions
+   git diff v1.2.3..v1.3.0 -- *.prs
+   ```
 
 ## Validation Rules for Security
 
@@ -374,10 +381,16 @@ Environment variables come from your local machine or CI environment. They're re
 
 Template variables come from parent stacks or passed parameters:
 
-```
+```promptscript
 # Values come from whoever instantiates the template
 @inherit @stacks/app(projectName: "my-app")
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4ANQwoNwNdO1VmEl5zHGYYADcYams4EXYIbANbBRhovp9+CFYcdpMBLoxGAGs4AHoMNDQAChpmACsYRiwAOVIYFJASRwBaVbQIgEoQfLp0bDxEEH5ZheXrqloQBhY7E4WB4vAAym41lAINJZPIBkRSOQ7NQPMpJtQYBReAdmFh7BhqPjmGAFJNeOJmIw3FoRFgIGw6GJPLxWHixLxMeUCQsNFjRkIRLxAlYQqcPiIvis1nlgnAEiJkuEQOksrkQHESBBCOMwlhUTA4pg1CQ4GERcFgltdvsjkIAPxhLrUcbqXgAXmViOiho1osKBVGs08hPEygtOmYUjCyAiAAUoHMYE0oFIOsHxKGIgBdOIcLqumPxxOMZPMVPtWTdTPUbwgXOB3yY50QfYM1jhuIXZUJpMptOc+D61v0th5fIPbMMYHURz4b3I370EBtWjt-CpB5AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Security Best Practices
 
@@ -385,7 +398,7 @@ Template variables come from parent stacks or passed parameters:
 
 When creating templates, use specific types:
 
-```
+```promptscript
 @meta {
   params: {
     # Good: constrained types
@@ -403,7 +416,7 @@ When creating templates, use specific types:
 
 Never put secrets in template parameters or content:
 
-```
+```promptscript
 # ❌ Bad: secrets in parameters
 @inherit ./api(apiKey: "sk-secret-key-here")
 
@@ -465,8 +478,8 @@ PromptScript intentionally supports only simple variable substitution (similar t
 If you discover a security vulnerability in PromptScript:
 
 1. **Do not** open a public issue
-1. Email security concerns to the maintainers
-1. Include a detailed description and reproduction steps
+2. Email security concerns to the maintainers
+3. Include a detailed description and reproduction steps
 
 ## Summary
 

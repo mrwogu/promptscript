@@ -1,6 +1,8 @@
 # Enterprise Tutorial: Building Layered AI Infrastructure
 
-This tutorial starts after your first successful local compile. You will build a layered configuration system for a software team: an organization base, a team layer that inherits it, and a project that inherits both.
+This tutorial starts after your first successful local compile. You will
+build a layered configuration system for a software team: an organization
+base, a team layer that inherits it, and a project that inherits both.
 
 ## Learning Objectives
 
@@ -24,7 +26,7 @@ Start by creating a base configuration that applies to your entire organization.
 
 Create `registry/@acme/org.prs`:
 
-```
+```promptscript
 @meta {
   id: "@acme/org"
   syntax: "1.5.0"
@@ -65,13 +67,19 @@ Create `registry/@acme/org.prs`:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0zagHN5YiXACe7DIVnyAjBQCsFAAzbxg9RpMgAggGEAsgFFBb9WnVsCDY7AF8xMW5pTiwILD1hHTkQbRT7AE1mAFdBDGoYXPEXAElcuDgIOAF2QQB3dQBrCFYNXKxBd29ff0DYtgokgDFmKChmWsEWMgxWBJYpZtaqmak8qThCqUEAI3h2miVYxngB+1SwiNZuZdZV6nXE+3mYWVF7CRpmxghyeFlkJISCTyYajcaTWAzSbMKQFT6sb6-ODyOiAoHyAAizEYWT4NQwo0EaCy2ygEEYHQACsVkSBUe90SAAOrUOIFDhVDZgdS5QnPOxAwQAXSS4VYSTgMBxrPi-zR8gAagTpNgCgSoIIspLqJJWMSsCj5SAAHIwABuMB1ODWz0EksY+SwtKSItYYsi+SqrMYfVYGzeEgAtMlTRadUQApKqaUGjA9BsefbHRtmtDYQLBMH5KHLdCSCQ4nbOBVYhbBKsBIIsMxBGGKmxoexqCMM1nXFBahh47XlRWClrc819RdxVc4Dh1FgcU7HsCQCp7VkZXp5M4AErmiAwCa27k6xfL2tZKCsS0YbbQOJb51nedSbG05wAcU4Z445exuJiQQbe6rOEqNMYDCEBQiFBgYmoPR8CIUhfioWg6RAOtglYfBTFAoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Step 2: Create Team Configuration
 
 Create a team-specific configuration that inherits from the org base.
 
 Create `registry/@acme/frontend-team.prs`:
 
-```
+```promptscript
 @meta {
   id: "@acme/frontend-team"
   syntax: "1.5.0"
@@ -113,13 +121,19 @@ Create `registry/@acme/frontend-team.prs`:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0Yamw6spAWg6l5YiXACe7DIVnyAjBQCsFAAyHxg-SSsgAYhvacpLgC+YmIAxIIAkuJCJACuUFgQOpCwgnD8sWh0gibMsYIA7nlQUpKsODDUEFiC6swkgszUAOYYrBAAXtgQbIhi3BDlldWCisowKk3NIawDUpyJWCbCRnIghuuuAJp5ghjUMHu1vlql8wBuMFDMaHzsgkRolVgUqwDKT4wQGFCdh4OCABKMCUWGyABUTE83owqmgwXttIISMx5tRxAUYAAjNwwRg4VjMa7NCDwV6uDZBGbcFh+Qg1UQU9bM1bgirHTT+XGkQSxdJwPquHRAkGMGrWAAchWqOEEkOhsIg8NWwoAatVDmAmoIsbFtL9WNMhXKMNACoMpABhN5vWrauBLA1GiRqjUOwQAajl8EShsEABkIFjqPtllrqLiHXAVSLQYIAIqxSph+2VS4Rh3YGCrSmbYKsMKCACi9K5UzSAm0+ykcGluA5fm0OjgnwgkEYgmo8Xg-SIpwrbSk1bgFBY8xWrnUpBgRWoAGsBYJkAdQQBdVaYLAcdGL5A4ZjMBfZFhkZhwao9VjZeQHbSVQQ0G7RkDr1yZjgAWTaGGaMDuWE8YE40TZNPUES1OXpKkC1mOB92oLBGFiLBa0ZCR5BUE80DYBZ5E8S0Vw4I5WBnWMxUELCcPYFx0JAFR90PPC1gIkEiKEJCHXqMiagYucaLWFQOAdJj5AAdSqIihJQ3lzz9dUpMRUpwR9QZmgDIMQ2oEwghAQI6HQbA8EQBQlFUKYqFoEAGFpLQsHwcI3kychSVKOBmDcdkiFIchDi7VhawqA4KEEAA5ZgakwBDGjADzDikZgkP-bo2GyQdBEJGohBXKAHyUOcfxgcleH4IQ0MkGQ1jGMyWn40xzEsNZbAcZxNgkEgIEIQZZCwLts1YfNuEzKtqBrCcJDHGBZGQeQAAUoCUGB9xKe8hqHEb5FfCQpNUqbZvmxhFqJNEB2GgIXzEAaDgdKoxUvVCYz2haluOq6eogW62B0wJVwYBYtPwLyyEoGh6BAdNzzYfBrF0oA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Step 3: Create Project Configuration
 
 Now create a project-specific configuration.
 
 Create `.promptscript/project.prs` in your project:
 
-```
+```promptscript
 @meta {
   id: "checkout-app"
   syntax: "1.5.0"
@@ -181,6 +195,12 @@ Create `.promptscript/project.prs` in your project:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDGjTyxEuAE92GQrPkBGCgFYKABn2sAvmLEBiQQElxQkmqgsCE1IWEE4fjU0OkEjdUEAd3UoKUlWRWoILEEwamYSHLz2TlSOUkQxbgh0mEzs7gxGPgB6XLYOVilNMpI3Vm4WYsJs0XFBGmYAKyUsCxAAYUUVdWyAQV0oCEZsCDYnCSl4Rky0ILY5gFFNFhI+akYYQUYl1Q0cqGYEpwM5EH0-sYAFRwEDgkjBuEezyUr2yOnIWx2bByzGoglW8wAshcAORgmDXfJ3B7jKDYMCokgUH4AaRgRhyMGwamo8AqY00gkxASCmjgHDQTxeK0SEAAXhhqFIfpyAAoYIx8djjPIPOBwaoAc1FuEEAGUsCcYDL0VIpKz1YIAG4YTZSJGsE0AeSltXCalukoZGE6TzYkGoJAdP3+TlcjtYnlleWmjC0cDQSggkEY4QEnUlUjglSIHVS-J99qlYNGEhYh1kpYkgg4-K1lZ+1b9VtqGE1MFkAA4bI3qzAAEwdwSsgCOaggrOlYwk4ZnfQkjTVGoARtAskYG9PEttNXN+xRLOjVvtq6Px5PZIa1MaxuHw5U4DhUVhGBoSyGQM1ocsNPI5gAJGAoEFBIshwIUYRFMAPgSQQPk1LYT3kZpMEVTgsD-X5AOAnVwINI1xgVJVsmqDhNWoYMAQkZCMEsSwjEw+QACUYCtCAYFg8tHgpNFF3gFc1ywBlQTga9swBe9+mUVhPlgKR22ED9QzGdxPFWWUvEEC5OjQZhSOzCMJDlJ09UBQRmh0CAv2FDQv1ZbBHk5eZ7I4CCf2yCJ1V2QzBDlABVMyLLQKzv1hZpEGkXzBD8tB7Vc0KVhNWUTMCyzrMg2yIqkL98nIfhHMEeZctgVy0BZZ4MAiedBFUwQ6QZIqyDYdCDJNRYMqwAB1cVMyizEMGqUUJSlP1TGqWoTVWM0LTgAAxSkor1EFdC1ZpVygTZWG1DBpv4pKiPQ+bA0Ww0IETLTYGIsFSJgcjgw5QQXUOag9Q9INqAZJzJQ8t6vUEKRQXIBUlL+CSQGcOh0GwPBEBABomhgVoijzbomSpGh6CYdp0PwTxXo2dj82YGtFEEIhSDy4c1FYMEMhgChBAAOWYbJMGobJmDAEnHikZhX2Ih0YkLQQZLhYcmSgQiVDbenKj4ARFLGaQ5nhlo2mKTpUdIE9jFMcxfmsOxHCowQSAgQhqkvahrzEcNuALDNi0VstmArQRkHkWUyQeJ8UjdB2i2lEAAF0flrIIttkD2QC9xoYF95600LTN5FDlxKgtU642898Hs9734+YP20UzzJs72MHnGDhh0I+-BybISgMZABgW1obz8EscGgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Step 4: Configure the Project
 
 Create `promptscript.yaml`:
@@ -211,7 +231,7 @@ targets:
 
 Add reusable capabilities to `.promptscript/project.prs`:
 
-```
+```promptscript
 @skills {
   checkout-review: {
     description: "Review checkout changes"
@@ -247,11 +267,18 @@ Add reusable capabilities to `.promptscript/project.prs`:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx0cGEZS9ywAWmoYADcIGHMw6uDgqThGagg0LAg2FJAAJQ6u81r6xrcsWoxWdXg8-p02DnYp2c7u+yctVbgMMGFHOl52jCgIcWwJ1juOOFM79Zk3OBg1GMZAwjCwFG2vEKBSKvg0nFMvD6iwaTVac26gN6cQG8GGo3Gk3CMwxC0YdVRK3sbigUF4bQAjm54KZIcEyhU4GFkBFyUs0W1juYIgBdHG7dgIw6ktYbaQo5arFhSMTqDAQVhfeyuABW9QuIk8GGo4jgEJAcWh0OKOGYzFKVTiDyeLw4zT5lKw2JqwQ6UuJaGYX2aWDtUGa-xgbN4JGwfOoUwAouITAAfADqIw40d0sc83IiaFYaBIETuEU+WFF4pE1E2pm9O2C6hMODcACNerxOBh27BQipHgCoeLgow3LRmAmkd3WL3+2EwEO7NCdquRzDWMVzFPSmAoBZHTU2rAMADG-1Bvixm8pgAFNqYNoKpr0mCngE5vb+iLTDz3R5nleNg7jgNwSFjEYAC87BGMofk8bUYCfWD3xgM87CEERXQwc1LR8fIQHyEUGARahHHwIhSHIGAqFoEAGHaQE4DefBUiIoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 See [Agent Platform](https://getpromptscript.dev/features/index.md) for MCP servers, plugins, and target-specific capabilities.
 
 ## Step 6: Validate and Compile
 
-Validate your configuration first, so broken references and policy violations surface before anything is written:
+Validate your configuration first, so broken references and policy violations surface before
+anything is written:
 
 ```bash
 prs validate --strict
@@ -279,7 +306,7 @@ prs diff --all
 
 The inheritance chain creates a layered configuration:
 
-```
+```mermaid
 flowchart TD
     A["@acme/org<br/>Organization base"] --> B["@acme/frontend-team<br/>Team specifics"]
     B --> C["checkout-app<br/>Project specifics"]
@@ -355,7 +382,8 @@ git add .promptscript/project.prs CLAUDE.md .github .cursor
 git commit -m "update agent instructions"
 ```
 
-The generated files are committed next to the source, so reviewers see both in the pull request. CI runs the same validation and fails when committed output no longer matches the source.
+The generated files are committed next to the source, so reviewers see both in the pull request.
+CI runs the same validation and fails when committed output no longer matches the source.
 
 ## Next Steps
 

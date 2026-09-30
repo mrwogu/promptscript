@@ -1,6 +1,7 @@
 # Migrate Factory Hooks
 
-Goal: move legacy PromptScript-owned hooks without overwriting unrelated Factory settings.
+Goal: move legacy PromptScript-owned hooks without overwriting unrelated
+Factory settings.
 
 ## Before
 
@@ -30,7 +31,8 @@ Goal: move legacy PromptScript-owned hooks without overwriting unrelated Factory
 prs compile --dry-run
 ```
 
-PromptScript plans migration only when `.factory/hooks.json` is absent and legacy ownership is unambiguous.
+PromptScript plans migration only when `.factory/hooks.json` is absent and
+legacy ownership is unambiguous.
 
 ## After
 

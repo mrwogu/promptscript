@@ -1,12 +1,14 @@
 # Skills and Resources
 
-Skills package reusable agent capabilities. A skill can contain instructions, invocation metadata, input and output contracts, references, assets, and executable scripts.
+Skills package reusable agent capabilities. A skill can contain instructions, invocation metadata,
+input and output contracts, references, assets, and executable scripts.
 
-PromptScript resolves each skill once and emits the target-native representation supported by each configured AI platform.
+PromptScript resolves each skill once and emits the target-native representation supported by each
+configured AI platform.
 
 ## Inline Skill
 
-```
+```promptscript
 @skills {
   security-review: {
     description: "Review code for application security risks"
@@ -20,6 +22,12 @@ PromptScript resolves each skill once and emits the target-native representation
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq1kYRjdqE0cAWmoYADcIGHMw6uDgqThGRrQsCDYUkAAlDq7zHWYpFWZqMTRyCEZscas4Ooam3kayuDz+3jc96gBJVnbmLYAjWDCsajcYOIGlDGeYAFlFjAoLd7lsxhMVBhKp8asFoVALNIACrMZiVMLICIzCQROjhEAAcTaaDxBIAQhg4DgIgBdL4LdicLCTWIgBnBGadbpiNy2dibbZsfEYPk4FYQABeQtY+L2w2EvBwGE8UAgrHU+PVaD5vHa0Ig4hldA5vCkaE4UlYjEcRyUpRFngurDgGDAdl0JBVMiI+whrAoDLZZ14hQKIHytIYzOojnwRFI5BgVFoIAY7RgtB2+FSEaAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Directory Skill
 
@@ -64,7 +72,8 @@ outputs:
 Review selected code and use bundled references when evaluating risk.
 ```
 
-PromptScript preserves the directory structure when producing native skill files. Script invocation and executable file modes remain platform and operating-system specific.
+PromptScript preserves the directory structure when producing native skill files. Script invocation
+and executable file modes remain platform and operating-system specific.
 
 ## Skill Capabilities
 
@@ -87,9 +96,15 @@ PromptScript preserves the directory structure when producing native skill files
 | `params`                         | Parameterize reusable skills       |
 | `examples`                       | Attach focused examples            |
 
-`model` sets the model used while the skill is active. Claude Code and Grok Build write it to the skill file, mapped through the [model catalog](https://getpromptscript.dev/reference/models/index.md) the same way as agent models. Other targets have no skill model field and leave it out.
+`model` sets the model used while the skill is active. Claude Code and Grok
+Build write it to the skill file, mapped through the
+[model catalog](https://getpromptscript.dev/reference/models/index.md) the same way as agent models. Other
+targets have no skill model field and leave it out.
 
-For skills backed by a SKILL.md file, a `model` set in `.prs` wins over the SKILL.md frontmatter, and a frontmatter model without a `.prs` one is mapped the same way. A model the target cannot run is left out of the skill file and reported with a PS4004 warning during compilation.
+For skills backed by a SKILL.md file, a `model` set in `.prs` wins over the
+SKILL.md frontmatter, and a frontmatter model without a `.prs` one is mapped
+the same way. A model the target cannot run is left out of the skill file and
+reported with a PS4004 warning during compilation.
 
 ## Universal and Native Paths
 
@@ -107,7 +122,8 @@ Target formatters then emit native paths such as:
 - `.opencode/skills/<name>/SKILL.md`
 - `.agents/skills/<name>/SKILL.md`
 
-Gemini full mode emits interoperable `.agents/skills/<name>/skill.md` files alongside native commands under `.gemini/commands/`.
+Gemini full mode emits interoperable `.agents/skills/<name>/skill.md` files alongside native
+commands under `.gemini/commands/`.
 
 ## Filter Skills Per Target
 
@@ -142,7 +158,7 @@ builds:
 
 Skills can come from local files, registries, or Git repositories:
 
-```
+```promptscript
 @use ./skills/security-review.md
 @use @company/skills/release@^2.0.0
 @use github.com/acme/agent-skills/database-review@1.3.0
@@ -157,4 +173,4 @@ Remote references are recorded in `promptscript.lock` with commit and integrity 
 - [Skill Composition](https://getpromptscript.dev/guides/skill-composition/index.md)
 - [Skill Contracts](https://getpromptscript.dev/guides/skill-contracts/index.md)
 - [Shared Resources](https://getpromptscript.dev/guides/shared-resources/index.md)
-- [Language Reference: `@skills`](https://getpromptscript.dev/reference/language/#skills)
+- [Language Reference: `@skills`](https://getpromptscript.dev/reference/language/index.md#skills)

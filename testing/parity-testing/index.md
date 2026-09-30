@@ -1,15 +1,16 @@
 # Parity Testing
 
-This document describes the parity testing mechanism for PromptScript formatters. The goal is to ensure consistent output across all formatters and detect anomalies.
+This document describes the parity testing mechanism for PromptScript formatters.
+The goal is to ensure consistent output across all formatters and detect anomalies.
 
 ## Overview
 
 PromptScript provides two complementary testing mechanisms:
 
 1. **Parity Matrix** - Specification-based testing that defines expected behavior
-1. **Golden Files** - Reference-based testing that compares against known-good output
+2. **Golden Files** - Reference-based testing that compares against known-good output
 
-```
+```mermaid
 flowchart TB
   subgraph "Parity Testing"
     AST[Canonical AST] --> PM[Parity Matrix Tests]
@@ -37,7 +38,7 @@ The Parity Matrix is a specification that defines:
 
 ### Location
 
-```text
+```
 packages/formatters/src/parity-matrix.ts
 ```
 
@@ -98,7 +99,7 @@ Golden files are reference outputs that formatters should match.
 
 ### Location
 
-```text
+```
 packages/formatters/src/__tests__/__golden__/
 ├── github.md           # Expected GitHub Copilot output
 ├── cursor.mdc          # Expected Cursor output
@@ -126,9 +127,9 @@ git commit -m "test: update golden files for new formatter output"
 ### How It Works
 
 1. Tests generate output from a canonical AST
-1. Output is normalized (timestamps removed, whitespace standardized)
-1. Normalized output is compared against golden files
-1. Differences indicate regression or intentional change
+2. Output is normalized (timestamps removed, whitespace standardized)
+3. Normalized output is compared against golden files
+4. Differences indicate regression or intentional change
 
 ## Running Tests
 
@@ -152,47 +153,47 @@ When adding a new formatter:
 
 1. **Add to Parity Matrix**
 
-Update `parity-matrix.ts` to include your formatter in `requiredBy` or `optionalFor` arrays:
+   Update `parity-matrix.ts` to include your formatter in `requiredBy` or `optionalFor` arrays:
 
-```typescript
-{
-  id: 'restrictions',
-  requiredBy: ['github', 'cursor', 'claude', 'antigravity', 'newformatter'],
-  // ...
-}
-```
+   ```typescript
+   {
+     id: 'restrictions',
+     requiredBy: ['github', 'cursor', 'claude', 'antigravity', 'newformatter'],
+     // ...
+   }
+   ```
 
-1. **Add Header Variations**
+2. **Add Header Variations**
 
-Add your formatter's header style to each section:
+   Add your formatter's header style to each section:
 
-```typescript
-headerVariations: {
-  github: "## Don'ts",
-  newformatter: "## Never Do",  // Your formatter's style
-}
-```
+   ```typescript
+   headerVariations: {
+     github: "## Don'ts",
+     newformatter: "## Never Do",  // Your formatter's style
+   }
+   ```
 
-1. **Generate Golden File**
+3. **Generate Golden File**
 
-Add configuration in `golden-files.spec.ts`:
+   Add configuration in `golden-files.spec.ts`:
 
-```typescript
-{
-  name: 'newformatter',
-  formatter: new NewFormatter(),
-  goldenFile: 'newformatter.md',
-  extension: 'md',
-}
-```
+   ```typescript
+   {
+     name: 'newformatter',
+     formatter: new NewFormatter(),
+     goldenFile: 'newformatter.md',
+     extension: 'md',
+   }
+   ```
 
-1. **Run Tests**
+4. **Run Tests**
 
-```bash
-pnpm nx test formatters
-```
+   ```bash
+   pnpm nx test formatters
+   ```
 
-Golden file will be created automatically on first run.
+   Golden file will be created automatically on first run.
 
 ## Detecting Anomalies
 
@@ -200,7 +201,7 @@ Golden file will be created automatically on first run.
 
 The parity matrix tests will fail if a formatter doesn't produce required sections:
 
-```text
+```
 github should produce required content types
 
 Expected: content matching restrictions patterns
@@ -211,7 +212,7 @@ Received: no match found
 
 Golden file tests will fail if output differs from reference:
 
-```text
+```
 github formatter output differs from golden file.
 Run with UPDATE_GOLDEN=true to update.
 
@@ -225,7 +226,7 @@ Line 15:
 
 Parity tests verify all formatters produce similar content:
 
-```text
+```
 all markdown formatters should produce content with multiple sections
 Expected: > 3 sections
 Received: 2 sections for claude
@@ -252,8 +253,8 @@ The CI workflow includes a dedicated step that detects when golden files are out
 **What it does:**
 
 1. Runs Golden Files tests
-1. Checks if any golden files changed during the test run
-1. Fails the build if files are out of date
+2. Checks if any golden files changed during the test run
+3. Fails the build if files are out of date
 
 ### Fixing CI Failures
 
@@ -277,7 +278,7 @@ git push
 
 ### PR Workflow
 
-```
+```mermaid
 flowchart LR
   subgraph "Developer"
     A[Change Formatter] --> B[Run Tests]
@@ -308,10 +309,10 @@ flowchart LR
 ## Best Practices
 
 1. **Run tests before commits** - Catch regressions early
-1. **Review golden file diffs** - Understand what changed
-1. **Update matrix for new features** - Keep specification current
-1. **Add content patterns** - Help detect missing functionality
-1. **Document header variations** - Track format differences
+2. **Review golden file diffs** - Understand what changed
+3. **Update matrix for new features** - Keep specification current
+4. **Add content patterns** - Help detect missing functionality
+5. **Document header variations** - Track format differences
 
 ## API Reference
 

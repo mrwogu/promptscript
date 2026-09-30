@@ -14,7 +14,7 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 
 **Wrong: target-dependent multiline scalar**
 
-```
+```promptscript
 @shortcuts {
   "/review": """
     Review current changes.
@@ -24,7 +24,7 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 
 **Correct: explicit command object**
 
-```
+```promptscript
 @meta { id: "shape-remediation" syntax: "1.5.0" }
 
 @shortcuts {
@@ -37,11 +37,17 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBwY0MALTUYfMRGwQ2MwXACe7DIUkyAjBQCsFAAy6AvlNZPuc5tSyMArljjCngtIgAPSqAG4QMADuMpLAAYGCYvCM1BBoWNqspiAASjAR0YLe1KrsxfKsAObwMgmBLOycWDl1IPWJ+YVRxe6qjFis8HB0ejAlEFj6oxxwvqMYrGKCzIrUWmwYUKJkGAMUHW11rIGOrPYg9gC6DM3U+vhEpOQwVLQgDGEwtFn4ZpdAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## 3. Fix Restrictions Shape
 
 **Wrong: structured compatibility form**
 
-```
+```promptscript
 @restrictions {
   items: ["Never expose secrets", "Never skip validation"]
 }
@@ -49,7 +55,7 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 
 **Correct: canonical array body**
 
-```
+```promptscript
 @meta { id: "canonical-restrictions" syntax: "1.5.0" }
 
 @restrictions {
@@ -57,6 +63,12 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
   - "Never skip validation"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJhlZsIjDFAC01eFmqKsENnBmC4AT3YZCkmQEYKAVgoAGAwF8prV93VxN23azjDXQUEVaRAAORgANxhqQSI0ZjgYQxhGdSx9EEDg0Ijo2LgAawg0QUjlcWxfGVcnECcAXQZOTSN8IlJyGCpaEAZ8uF98S3qgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## 4. Revalidate and Compare
 
@@ -66,6 +78,8 @@ prs compile --dry-run
 prs diff --all
 ```
 
-Review every target. Compatibility warnings often indicate formatter-dependent behavior, so source-only comparison is insufficient.
+Review every target. Compatibility warnings often indicate formatter-dependent
+behavior, so source-only comparison is insufficient.
 
-See [Values and Block Bodies](https://getpromptscript.dev/reference/language/values-and-block-bodies/index.md) and [Block Shapes](https://getpromptscript.dev/reference/block-shapes/index.md).
+See [Values and Block Bodies](https://getpromptscript.dev/reference/language/values-and-block-bodies/index.md)
+and [Block Shapes](https://getpromptscript.dev/reference/block-shapes/index.md).

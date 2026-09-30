@@ -7,11 +7,11 @@ Complete reference for `promptscript.yaml`.
 The CLI looks for configuration in this order:
 
 1. `--config` command line option
-1. `PROMPTSCRIPT_CONFIG` environment variable
-1. `promptscript.yaml` in current directory
-1. `promptscript.yml` in current directory
-1. `.promptscriptrc.yaml` in current directory
-1. `.promptscriptrc.yml` in current directory
+2. `PROMPTSCRIPT_CONFIG` environment variable
+3. `promptscript.yaml` in current directory
+4. `promptscript.yml` in current directory
+5. `.promptscriptrc.yaml` in current directory
+6. `.promptscriptrc.yml` in current directory
 
 ## Full Configuration
 
@@ -241,19 +241,25 @@ includePromptScriptSkill: true # default: true
 
 `id` and `syntax` are required even when `input.entry` uses its default.
 
-\* `targets` is required unless every target is declared inside a named [build profile](#builds). Such builds-only projects compile with `prs compile --build <name>` or `prs compile --all-builds`; a bare `prs compile` fails with the list of available profiles because there is no default target list to use.
+\* `targets` is required unless every target is declared inside a named [build
+profile](#builds). Such builds-only projects compile with `prs compile --build <name>` or
+`prs compile --all-builds`; a bare `prs compile` fails with the list of available profiles because
+there is no default target list to use.
 
 See the [Policy Engine guide](https://getpromptscript.dev/guides/policy-engine/index.md) for `policies` syntax.
 
 ### telemetry
 
-Anonymous aggregate usage telemetry is enabled by default. Set `telemetry: false` to disable every telemetry network request for this project:
+Anonymous aggregate usage telemetry is enabled by default. Set `telemetry:
+false` to disable every telemetry network request for this project:
 
 ```yaml
 telemetry: false
 ```
 
-Project and user opt-outs are hard vetoes. Environment opt-in cannot override them. See [Anonymous Usage Telemetry](https://getpromptscript.dev/reference/telemetry/index.md) for collected fields, delivery behavior, and all opt-out controls.
+Project and user opt-outs are hard vetoes. Environment opt-in cannot override
+them. See [Anonymous Usage Telemetry](https://getpromptscript.dev/reference/telemetry/index.md) for collected fields,
+delivery behavior, and all opt-out controls.
 
 ### input
 
@@ -279,8 +285,8 @@ input:
 Configures the inheritance registry. PromptScript supports three registry types:
 
 1. **Local filesystem** - for development or monorepos
-1. **HTTP/HTTPS** - for simple remote registries
-1. **Git repository** - recommended for teams (supports versioning via tags)
+2. **HTTP/HTTPS** - for simple remote registries
+3. **Git repository** - recommended for teams (supports versioning via tags)
 
 #### Local Registry
 
@@ -333,19 +339,16 @@ registry:
 | `cache.enabled`        | boolean | `true`    | Enable caching                       |
 | `cache.ttl`            | number  | `3600000` | Cache TTL in milliseconds            |
 
-Version-tagged imports
-
+:::tip[Version-tagged imports]
 With Git registry, you can pin imports to specific versions using Git tags:
+:::
 
-```text
-```
+    ```
+    @inherit @company/base@1.0.0
+    @use @company/security@2.1.0 as sec
+    ```
 
-@inherit @company/base@1.0.0 @use @company/security@2.1.0 as sec
-
-```
-
-This checkouts the specified tag before fetching the file.
-```
+    This checkouts the specified tag before fetching the file.
 
 ### registries
 
@@ -373,7 +376,9 @@ registries:
 
 #### Extended Form (with fallback URL)
 
-When registry files reference HTTPS URLs but you authenticate via SSH (or vice versa), set `fallbackUrl` so the clone is retried with the alternative URL on auth failures:
+When registry files reference HTTPS URLs but you authenticate via SSH (or vice
+versa), set `fallbackUrl` so the clone is retried with the alternative URL
+on auth failures:
 
 ```yaml
 registries:
@@ -426,19 +431,27 @@ registry:
       tokenEnvVar: GITHUB_TOKEN
 ```
 
-Setting aliases in user config makes them available in every project on the machine without adding them to individual `promptscript.yaml` files. Alias entries do not contain credentials. Use `registry.git.auth`, SSH configuration, or the Git credential helper for authentication.
+Setting aliases in user config makes them available in every project on the machine without adding
+them to individual `promptscript.yaml` files. Alias entries do not contain credentials. Use
+`registry.git.auth`, SSH configuration, or the Git credential helper for authentication.
 
 #### Usage in .prs Files
 
 Once aliases are configured, use them in any import path:
 
-```
+```promptscript
 # Resolves @company to github.com/acme/promptscript-base
 @inherit @company/@org/base
 
 # Versioned alias import
 @use @company/@stacks/react@^1.0.0
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AJXhmKAA3A35dTFZHBXl1Exw3ACMKXQB6DEYhbppmMlNGagg0LABadow4GB9+CFYcGHGsATqMBu7+Zmp1btn5otY+ADU1uAg2aTEoCDnjMn2sRbd5zeH6x124EUYAGs4N1qDA+lh+AA9dLZHIgfJ0dDYPCIEC1b7bX57A5HOYwKi0EAMFjsThYHi8ADKbjQ5AgdzkClWvCIpHIdmoHmUqzBFF4ADlmBtMNQNswwMy7OJmIw3FoRFgbqw6GJPLxWMKxLwwRgoPY+oCNATFkIRLxAlYQil0VsdjjDscFiA4nAEiJkuEQOksrkXVaSBBCMswlguQsCot-ttxBhqOJlJbgiwpGFkBEAApQPowHAVKTUWQiTxx7wgAC6cQ4-2W6jTmezjFz+bWRZjpYilcjvjB-3GjCVbETcSmXqzObzUALOvgYYgA+VeXyCKRIEwuHwGLIWL+AOBoPBA+hsJyhPoTDYHC4aL4NLpD0Z8lsrKiHJ13N4vIJgq1ovFkufGU5QVbBlVVGMNS1URdX1TAgWNChTX8C04ggUIvS3H5d0NEFdSPGFTz9V13SSG0fRyPJgkDYNWFDcMfEKXxoxLeNhytFMYHrEBxybSdp2Y2N407KtZ1rLieObKdWwEjsKwYxZeznBchxQq1RwbCcW0LRT+0HVglwRcsGHJahHHwNlogJGhz2qWhlXwVIESAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### targets
 
@@ -468,7 +481,8 @@ targets:
 
 **Available Targets:**
 
-PromptScript ships 50 built-in targets. See [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) for platform families and [Supported Formatters](https://getpromptscript.dev/reference/formatters/index.md) for the full capability matrix.
+PromptScript ships 50 built-in targets. See [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) for
+platform families and [Supported Formatters](https://getpromptscript.dev/reference/formatters/index.md) for the full capability matrix.
 
 | Target         | Default Output                    | Default Convention | Supported Versions                             |
 | -------------- | --------------------------------- | ------------------ | ---------------------------------------------- |
@@ -548,7 +562,9 @@ The `@mcpServers`, `@hooks`, and `@plugins` blocks (syntax 1.4.0+) are emitted t
 | `zed`         | `.zed/settings.json`             | -                                 | -                       |
 | `crush`       | `.crush/mcp.json`                | -                                 | -                       |
 
-Hook files are emitted in `multifile` and `full` target modes. `simple` keeps its single-file contract and reports a compatibility warning when `@hooks` is present.
+Hook files are emitted in `multifile` and `full` target modes. `simple` keeps
+its single-file contract and reports a compatibility warning when `@hooks` is
+present.
 
 **Cursor Versions:**
 
@@ -560,25 +576,25 @@ Hook files are emitted in `multifile` and `full` target modes. `simple` keeps it
 | `agents-md` | `AGENTS.md` (Cursor 2.4+, no frontmatter required)                                                  |
 | `full`      | Multifile + `.agents/skills/<name>/SKILL.md` + `.cursor/agents/<name>.md` (Cursor 2.5+)             |
 
-Cursor Slash Commands
+:::tip[Cursor Slash Commands]
+Multi-line `@shortcuts` are automatically converted to executable slash commands in `.cursor/commands/`.
+Type `/` in Cursor chat (1.6+) to invoke them. See [Language Reference](https://getpromptscript.dev/reference/language/index.md#cursor-slash-commands-16).
+:::
 
-Multi-line `@shortcuts` are automatically converted to executable slash commands in `.cursor/commands/`. Type `/` in Cursor chat (1.6+) to invoke them. See [Language Reference](https://getpromptscript.dev/reference/language/#cursor-slash-commands-16).
-
-Cursor Identity Handling
-
+:::note[Cursor Identity Handling]
 The Cursor formatter handles `@identity` blocks intelligently:
+:::
 
-```text
-- If the identity starts with "You are...", the **full content** is used as the intro
-- Otherwise, a generated intro like "You are working on {project}" is created
-- Multiline strings are automatically dedented to remove source indentation
+    - If the identity starts with "You are...", the **full content** is used as the intro
+    - Otherwise, a generated intro like "You are working on {project}" is created
+    - Multiline strings are automatically dedented to remove source indentation
 
-This means your `@identity` content appears exactly as written (without extra indentation).
-```
+    This means your `@identity` content appears exactly as written (without extra indentation).
 
 **Target Configuration:**
 
-Targets can be specified as simple names (list format) or with configuration (object format). The list format is recommended for most projects and matches `prs init` output:
+Targets can be specified as simple names (list format) or with configuration (object format).
+The list format is recommended for most projects and matches `prs init` output:
 
 ```yaml
 targets:
@@ -663,7 +679,11 @@ targets:
 | `multifile` | `AGENTS.md` + commands + `.factory/skills/<name>/SKILL.md` |
 | `full`      | Multifile output + `.factory/droids/<name>.md`             |
 
-Factory defaults to `rulesMode: monolith`, which preserves the existing single-file rules content in `AGENTS.md`. Set `rulesMode: split` with `multifile` or `full` to emit always-on files under `.factory/rules/` and a discoverability index in `AGENTS.md`. `rulesMode: split` with `simple` is an error.
+Factory defaults to `rulesMode: monolith`, which preserves the existing
+single-file rules content in `AGENTS.md`. Set `rulesMode: split` with
+`multifile` or `full` to emit always-on files under `.factory/rules/` and a
+discoverability index in `AGENTS.md`. `rulesMode: split` with `simple` is an
+error.
 
 **OpenCode Versions:**
 
@@ -693,84 +713,83 @@ Factory defaults to `rulesMode: monolith`, which preserves the existing single-f
 | `skillBaseDir`  | string                  | target-specific | Custom base directory for generated skill files        |
 | `includeSkills` | boolean or string array | `true`          | Emit all skills, no skills, or only listed skill names |
 
-Output paths stay inside the output directory
+:::caution[Output paths stay inside the output directory]
+A target `output` that resolves outside the output directory (`../`, or an
+absolute path pointing elsewhere, including through a symlink) aborts the
+compile before any file is written. Use `--output` or `output.baseDir` to
+change where the whole build lands; a base directory outside the project is
+allowed and reported as a warning.
+:::
 
-A target `output` that resolves outside the output directory (`../`, or an absolute path pointing elsewhere, including through a symlink) aborts the compile before any file is written. Use `--output` or `output.baseDir` to change where the whole build lands; a base directory outside the project is allowed and reported as a warning.
+:::tip[Disabling Targets]
+Setting `enabled: false` skips the target during compilation.
+This is equivalent to removing the target from the list.
+:::
 
-Disabling Targets
-
-Setting `enabled: false` skips the target during compilation. This is equivalent to removing the target from the list.
-
-````text
-```yaml
-targets:
-  - github               # Will compile
-  - claude:
-      enabled: false     # Will NOT compile (skipped)
-  - cursor               # Will compile
-````
-
-````
+    ```yaml
+    targets:
+      - github               # Will compile
+      - claude:
+          enabled: false     # Will NOT compile (skipped)
+      - cursor               # Will compile
+    ```
 
 See [Formatters API](https://getpromptscript.dev/api-reference/formatters/src/index.md) for more details.
 
-Building skills into plugin or library folders
-
+:::tip[Building skills into plugin or library folders]
 Use `skillBaseDir` when you want a target to place generated skills outside
 its default directory. For example, this writes Factory skills under
 `plugins/logstrip/skills` when combined with a build profile output:
+:::
 
-```text
-```yaml
-builds:
-  logstrip-factory:
-    output: plugins/logstrip
-    targets:
-      - factory:
-          version: multifile
-          skillBaseDir: skills
-          includeSkills:
-            - logstrip
-````
+    ```yaml
+    builds:
+      logstrip-factory:
+        output: plugins/logstrip
+        targets:
+          - factory:
+              version: multifile
+              skillBaseDir: skills
+              includeSkills:
+                - logstrip
+    ```
 
-Run it with:
+    Run it with:
 
-```bash
-prs compile --build logstrip-factory
-# or
-prs build logstrip-factory
-```
-
-````
+    ```bash
+    prs compile --build logstrip-factory
+    # or
+    prs build logstrip-factory
+    ```
 
 **Built-in Conventions:**
 
-| Convention | Section Format | Description |
-| --- | --- | --- |
-| `markdown` | `## Section Name` | Markdown headers |
-| `xml` | `<section-name>content</section-name>` | XML tags wrapping content |
+| Convention | Section Format                         | Description               |
+| ---------- | -------------------------------------- | ------------------------- |
+| `markdown` | `## Section Name`                      | Markdown headers          |
+| `xml`      | `<section-name>content</section-name>` | XML tags wrapping content |
 
 **Target-Specific Options:**
 
-| Option | Targets | Type | Description |
-| --- | --- | --- | --- |
-| `maxThreads` | `codex` | number | Max parallel agent threads (positive integer, maps to .codex/config.toml) |
-| `maxDepth` | `codex` | number | Max nesting depth for agent delegation (positive integer) |
-| `agentsFile` | `codex` | string | Override agents file name (default: AGENTS.md, scoped builds: AGENTS.override.md) |
-| `agentsFrontmatter` | AGENTS.md targets | string | `experimental` - emit AGENTS.md v1.1 YAML frontmatter (description, tags from [@meta](https://github.com/meta "GitHub User: meta")) |
-| `autoMode` | `claude` | string | Claude auto mode: `acceptEdits`, `plan`, `bypassPermissions` (maps to .claude/settings.json) |
+| Option              | Targets           | Type   | Description                                                                                  |
+| ------------------- | ----------------- | ------ | -------------------------------------------------------------------------------------------- |
+| `maxThreads`        | `codex`           | number | Max parallel agent threads (positive integer, maps to .codex/config.toml)                    |
+| `maxDepth`          | `codex`           | number | Max nesting depth for agent delegation (positive integer)                                    |
+| `agentsFile`        | `codex`           | string | Override agents file name (default: AGENTS.md, scoped builds: AGENTS.override.md)            |
+| `agentsFrontmatter` | AGENTS.md targets | string | `experimental` - emit AGENTS.md v1.1 YAML frontmatter (description, tags from @meta)         |
+| `autoMode`          | `claude`          | string | Claude auto mode: `acceptEdits`, `plan`, `bypassPermissions` (maps to .claude/settings.json) |
 
 **Codex Native Output:**
 
 The `codex` target emits native Codex agent TOML files in addition to `AGENTS.md`:
 
-```text
+```
 AGENTS.md                          # Root instructions
 .codex/agents/<name>.toml          # Agent definitions (TOML)
 .codex/config.toml                 # Project config (maxThreads, maxDepth, agentsFile)
 .codex/hooks.json                  # Project hooks
 .agents/skills/<name>/SKILL.md     # Skills (interoperable path)
-````
+```
 
 Agent field mapping (PRS -> Codex TOML):
 
@@ -831,7 +850,10 @@ targets:
 
 ### builds
 
-Defines named build profiles for compiling a specific entry point to a specific set of targets and output directories. Build profiles are useful when one repository needs to generate extra artifacts for subpackages, plugins, or tool-specific distribution folders without changing the default project build.
+Defines named build profiles for compiling a specific entry point to a
+specific set of targets and output directories. Build profiles are useful when
+one repository needs to generate extra artifacts for subpackages, plugins, or
+tool-specific distribution folders without changing the default project build.
 
 ```yaml
 builds:
@@ -856,7 +878,10 @@ prs build logstrip-factory
 prs compile --all-builds
 ```
 
-A profile without its own `targets` key falls back to the top-level `targets` list. When a project keeps every target inside profiles and omits top-level `targets`, a bare `prs compile` fails and lists the available profiles instead of compiling nothing. Inspect profile output with `prs diff --build <name>`.
+A profile without its own `targets` key falls back to the top-level `targets` list. When a project
+keeps every target inside profiles and omits top-level `targets`, a bare `prs compile` fails and
+lists the available profiles instead of compiling nothing. Inspect profile output with
+`prs diff --build <name>`.
 
 **Nested AGENTS.md via Build Profiles:**
 
@@ -887,7 +912,8 @@ Output paths are validated against project root - path traversal (`..`) is rejec
 | `output`  | string        | `output.baseDir` | Base output directory for this profile  |
 | `targets` | TargetEntry[] | `targets`        | Target list to compile for this profile |
 
-CLI flags still take precedence: `--target`/`--format` override the profile's target list, and `--output` overrides the profile's `output`.
+CLI flags still take precedence: `--target`/`--format` override the profile's
+target list, and `--output` overrides the profile's `output`.
 
 ### validation
 
@@ -918,11 +944,16 @@ validation:
 | `excludes`            | array    | `[]`    | Per-import rule exclusions bound to the lockfile. Each entry needs `import` (the import source, optionally with a sub-path), `commit` (the SHA pinned in `promptscript.lock` when the content was reviewed), and `rules` (rule names or IDs to skip). Excludes apply only to imported content, never to local project files, and overlapping or repeated entries union their rules. When the lockfile pins a different commit, the entry stops suppressing (the original findings reappear) and PS040 fails the build so the consumer re-reviews the new content. |
 | `allowedPatterns`     | string[] | `[]`    | Pattern sources exempt from `blocked-patterns` detection. A blocked pattern is subtracted from the active set when its source text matches an entry exactly; other patterns keep scanning.                                                                                                                                                                                                                                                                                                                                                                        |
 
-Consumed by `blocked-patterns` (PS005) and `authority-injection` (PS011), the two heuristic text rules that always scan imported content. Excludes are declared by the consumer, never by the scanned file: a disable comment inside an imported skill cannot mute its own scan.
+Consumed by `blocked-patterns` (PS005) and `authority-injection` (PS011), the
+two heuristic text rules that always scan imported content. Excludes are
+declared by the consumer, never by the scanned file: a disable comment inside
+an imported skill cannot mute its own scan.
 
 ### models
 
-Configures the model catalog. PromptScript uses it to write the native model name each target expects in agent and skill `model` fields, and to check model references (PS041).
+Configures the model catalog. PromptScript uses it to write the native model
+name each target expects in agent and skill `model` fields, and to check model
+references (PS041).
 
 ```yaml
 models:
@@ -949,14 +980,24 @@ models:
 
 #### Model references
 
-PromptScript ships a built-in catalog of Anthropic, OpenAI, Google, and xAI models. Each profile records the provider, family, version, display name, API id, lifecycle status, successor, and release and retirement dates. The [Model Catalog](https://getpromptscript.dev/reference/models/index.md) lists every built-in profile.
+PromptScript ships a built-in catalog of Anthropic, OpenAI, Google, and xAI
+models. Each profile records the provider, family, version, display name, API
+id, lifecycle status, successor, and release and retirement dates. The
+[Model Catalog](https://getpromptscript.dev/reference/models/index.md) lists every built-in profile.
 
-A `model` or `specModel` value in `@agents`, and `model` in `@skills`, matches a profile by id, alias, API id, or display name, ignoring case. Two kinds of values are special:
+A `model` or `specModel` value in `@agents`, and `model` in `@skills`, matches
+a profile by id, alias, API id, or display name, ignoring case. Two kinds of
+values are special:
 
 - `inherit` keeps the model already selected in the tool.
-- `opus`, `sonnet`, `haiku`, and `fable` are floating aliases. Each one points at the newest release of its Claude family that is not retired, listed in [Floating Aliases](https://getpromptscript.dev/reference/models/#floating-aliases).
+- `opus`, `sonnet`, `haiku`, and `fable` are floating aliases. Each one points
+  at the newest release of its Claude family that is not retired, listed in
+  [Floating Aliases](https://getpromptscript.dev/reference/models/index.md#floating-aliases).
 
-Names that are not in the catalog, such as gateway model ids, BYOK model ids, or Claude Code's `opusplan`, are written unchanged on every target. The exception is a value the target spells its own way: GitHub Copilot writes `auto` as `Auto`.
+Names that are not in the catalog, such as gateway model ids, BYOK model ids,
+or Claude Code's `opusplan`, are written unchanged on every target. The
+exception is a value the target spells its own way: GitHub Copilot writes
+`auto` as `Auto`.
 
 #### Target model names
 
@@ -968,13 +1009,28 @@ Names that are not in the catalog, such as gateway model ids, BYOK model ids, or
 | Codex                   | API id                                                                       | Omitted   | OpenAI    |
 | Cursor                  | Profile id, which has no snapshot date, such as `claude-sonnet-4-5`          | Written   | All       |
 
-The [Model Catalog](https://getpromptscript.dev/reference/models/#target-model-names) shows what each target writes for common values.
+The [Model Catalog](https://getpromptscript.dev/reference/models/index.md#target-model-names) shows what each target
+writes for common values.
 
-For older releases the API id is a dated snapshot, such as `claude-sonnet-4-5-20250929`. GitHub Copilot and Factory AI map `specModel` the same way, and Claude Code and Grok Build also map the `model` field of skills. A model from a provider the target cannot run is omitted from that target's output and reported with a PS4004 warning during compilation. So is a name with a line break or control character, whether it comes from the source or from a profile. A per-target name in `profiles.<id>.targets` always wins, including for providers the target would otherwise omit. Its keys are the target names from the table (`claude`, `grok`, `github`, `factory`, `codex`, `cursor`), matched without regard to case.
+For older releases the API id is a dated snapshot, such as
+`claude-sonnet-4-5-20250929`. GitHub Copilot and Factory AI map `specModel`
+the same way, and Claude Code and Grok Build also map the `model` field of
+skills. A model from a provider the target cannot run is omitted from that
+target's output and reported with a PS4004 warning during compilation. So is
+a name with a line break or control character, whether it comes from the
+source or from a profile. A per-target name in `profiles.<id>.targets` always wins, including for
+providers the target would otherwise omit. Its keys are the target names from
+the table (`claude`, `grok`, `github`, `factory`, `codex`, `cursor`), matched
+without regard to case.
 
 #### Model profiles
 
-A `profiles` key that matches a built-in profile id changes only the fields it sets. Its `targets` entries merge with the built-in ones, and every other field it sets, including `aliases`, replaces the built-in value. Any other key adds a custom profile, so a team can use a model before PromptScript ships it. Unset fields of a custom profile default to the key (`family`, `displayName`, and `apiId`), `provider: custom`, and `status: current`.
+A `profiles` key that matches a built-in profile id changes only the fields it
+sets. Its `targets` entries merge with the built-in ones, and every other field
+it sets, including `aliases`, replaces the built-in value. Any other key adds a
+custom profile, so a team can use a model before PromptScript ships it. Unset
+fields of a custom profile default to the key (`family`, `displayName`, and
+`apiId`), `provider: custom`, and `status: current`.
 
 | Field            | Description                                                                                          |
 | ---------------- | ---------------------------------------------------------------------------------------------------- |
@@ -990,17 +1046,26 @@ A `profiles` key that matches a built-in profile id changes only the fields it s
 | `retirementDate` | Date the provider stops serving the model, in `YYYY-MM-DD` format                                    |
 | `targets`        | Native model name per target, such as `github: Claude Opus 9`                                        |
 
-A custom profile that joins a Claude family with a higher version also moves the floating alias. With the example above, `opus` resolves to Claude Opus 9, so GitHub Copilot agents that use `opus` get `Claude Opus 9 (Preview)`.
+A custom profile that joins a Claude family with a higher version also moves
+the floating alias. With the example above, `opus` resolves to Claude Opus 9,
+so GitHub Copilot agents that use `opus` get `Claude Opus 9 (Preview)`.
 
 #### Model validation
 
 PS041 (`valid-model-reference`) is a warning. It reports:
 
-- references to `deprecated` or `retired` models, with the replacement found through the successor chain
-- when `supported` is set: references outside the set, references that are not in the catalog, and `supported` entries that are not in the catalog
-- problems in `profiles`: a name used by two profiles, a profile or alias named after a floating alias or `inherit`, a successor that is unknown or loops back, a date not in `YYYY-MM-DD` format, and a `targets` key for a target that does not write model names
+- references to `deprecated` or `retired` models, with the replacement found
+  through the successor chain
+- when `supported` is set: references outside the set, references that are
+  not in the catalog, and `supported` entries that are not in the catalog
+- problems in `profiles`: a name used by two profiles, a profile or alias
+  named after a floating alias or `inherit`, a successor that is unknown or
+  loops back, a date not in `YYYY-MM-DD` format, and a `targets` key for a
+  target that does not write model names
 
-`legacy` models are still served, so they pass. Without `supported`, names that are not in the catalog are not reported, because tools accept many names no catalog can list.
+`legacy` models are still served, so they pass. Without `supported`, names
+that are not in the catalog are not reported, because tools accept many names
+no catalog can list.
 
 ### watch
 
@@ -1054,7 +1119,11 @@ output:
 | `overwrite` | boolean  | `false` | Overwrite conflicting user files without prompting, like `--force`                                                                    |
 | `resources` | string[] | -       | Compile only these resource kinds (`agents`, `skills`, `commands`, `mcp`, `hooks`, `plugins`, `main`); `prs compile --resources` wins |
 
-`resources` selects what a compile emits. A selection without `main` omits root instruction files, so `baseDir: '${HOME}'` with `resources: [agents, skills]` installs only generated agent and skill directories into the global root. Protected personal files such as `~/.factory/AGENTS.md` are never written, and resource-only runs skip managed cleanup.
+`resources` selects what a compile emits. A selection without `main` omits
+root instruction files, so `baseDir: '${HOME}'` with `resources: [agents,
+skills]` installs only generated agent and skill directories into the global
+root. Protected personal files such as `~/.factory/AGENTS.md` are never
+written, and resource-only runs skip managed cleanup.
 
 ### formatting
 
@@ -1079,18 +1148,18 @@ formatting:
 When `prettier: true`, PromptScript searches for Prettier configuration files in this order:
 
 1. `.prettierrc`
-1. `.prettierrc.json`
-1. `.prettierrc.yaml`
-1. `.prettierrc.yml`
+2. `.prettierrc.json`
+3. `.prettierrc.yaml`
+4. `.prettierrc.yml`
 
 **Configuration Fields:**
 
-| Field        | Type       | Default   | Description                      |
-| ------------ | ---------- | --------- | -------------------------------- |
-| `prettier`   | boolean    | string    | object                           |
-| `proseWrap`  | `'always'` | `'never'` | `'preserve'`                     |
-| `tabWidth`   | number     | `2`       | Number of spaces per indentation |
-| `printWidth` | number     | `80`      | Maximum line width for wrapping  |
+| Field        | Type                                    | Default      | Description                          |
+| ------------ | --------------------------------------- | ------------ | ------------------------------------ |
+| `prettier`   | boolean \| string \| object             | -            | Enable auto-detect, path, or options |
+| `proseWrap`  | `'always'` \| `'never'` \| `'preserve'` | `'preserve'` | How to wrap prose in markdown        |
+| `tabWidth`   | number                                  | `2`          | Number of spaces per indentation     |
+| `printWidth` | number                                  | `80`         | Maximum line width for wrapping      |
 
 **ProseWrap Options:**
 
@@ -1100,9 +1169,10 @@ When `prettier: true`, PromptScript searches for Prettier configuration files in
 | `'never'`    | Do not wrap prose (single long lines)       |
 | `'preserve'` | Preserve original line wrapping from source |
 
-Option Priority
-
-Explicit options (`proseWrap`, `tabWidth`, `printWidth`) override values from `.prettierrc`. This allows you to use your project's Prettier config as a base while customizing specific options.
+:::tip[Option Priority]
+Explicit options (`proseWrap`, `tabWidth`, `printWidth`) override values from `.prettierrc`.
+This allows you to use your project's Prettier config as a base while customizing specific options.
+:::
 
 **Example: Match Project Prettier Config**
 
@@ -1145,7 +1215,8 @@ universalDir: false
 
 ### includePromptScriptSkill
 
-Controls whether the bundled PromptScript language skill is included in compilation output. When enabled, the compiler adds it only when the formatter exposes a bundled-skill output path.
+Controls whether the bundled PromptScript language skill is included in compilation output. When
+enabled, the compiler adds it only when the formatter exposes a bundled-skill output path.
 
 ```yaml
 # Include the PromptScript skill (default)
@@ -1234,13 +1305,12 @@ This provides:
 - **Validation** - errors for invalid fields or values
 - **Documentation** - hover tooltips with field descriptions
 
-Schema is the source of truth
+:::tip[Schema is the source of truth]
+The JSON schema is automatically generated from TypeScript types in `@promptscript/core`.
+When in doubt about configuration options, the schema reflects the current implementation.
+:::
 
-The JSON schema is automatically generated from TypeScript types in `@promptscript/core`. When in doubt about configuration options, the schema reflects the current implementation.
-
-```text
-Schema URL: [`schema/config.json`](https://getpromptscript.dev/schema/config.json)
-```
+    Schema URL: [`schema/config.json`](https://getpromptscript.dev/schema/config.json)
 
 ## Examples
 
@@ -1319,7 +1389,9 @@ registry:
 
 ### HTTPS Registry with SSH Fallback
 
-When registry references use HTTPS URLs but you authenticate via SSH keys, configure a `fallbackUrl` so PromptScript automatically retries the clone with SSH on auth failure:
+When registry references use HTTPS URLs but you authenticate via SSH keys,
+configure a `fallbackUrl` so PromptScript automatically retries the clone
+with SSH on auth failure:
 
 ```yaml
 registry:

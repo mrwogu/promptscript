@@ -4,11 +4,16 @@ This guide explains the internal architecture of PromptScript formatters, focusi
 
 ## Overview
 
-PromptScript compiles to 50 AI agent targets. Rich native formatters, AGENTS.md targets, and shared Markdown formatters map the same PromptScript source to each platform's instruction and capability contracts. Shared extraction and rendering logic preserves semantic parity where native platforms support equivalent features.
+PromptScript compiles to 50 AI agent targets. Rich native formatters, AGENTS.md targets, and shared
+Markdown formatters map the same PromptScript source to each platform's instruction and capability
+contracts. Shared extraction and rendering logic preserves semantic parity where native platforms
+support equivalent features.
 
-Formatter inputs follow the canonical and compatibility contracts in the [Block Shapes reference](https://getpromptscript.dev/reference/block-shapes/index.md). That reference also identifies content whose output varies by target.
+Formatter inputs follow the canonical and compatibility contracts in the
+[Block Shapes reference](https://getpromptscript.dev/reference/block-shapes/index.md). That reference also
+identifies content whose output varies by target.
 
-```
+```mermaid
 flowchart TB
     subgraph Input
         PRS[".prs file"]
@@ -99,9 +104,9 @@ abstract class BaseFormatter {
 The `StandardsExtractor` ensures all formatters handle `@standards` blocks identically. It:
 
 1. **Dynamically iterates** over all keys (not hardcoded list)
-1. **Separates concerns**: code standards vs. non-code (git, config, docs, diagrams)
-1. **Normalizes names**: `errors` → `error-handling` for backwards compatibility
-1. **Supports multiple formats**: arrays, objects, strings
+2. **Separates concerns**: code standards vs. non-code (git, config, docs, diagrams)
+3. **Normalizes names**: `errors` → `error-handling` for backwards compatibility
+4. **Supports multiple formats**: arrays, objects, strings
 
 ```typescript
 // Internal extraction result
@@ -116,7 +121,7 @@ interface ExtractedStandards {
 
 #### Extraction Flow
 
-```
+```mermaid
 flowchart LR
     subgraph "@standards block"
         TS["typescript: [...]"]
@@ -191,17 +196,17 @@ Tracks which sections each formatter supports, enabling:
 ### How Parity is Maintained
 
 1. **Shared extraction**: All formatters use `StandardsExtractor`
-1. **Common base class**: Shared utilities prevent drift
-1. **Parity tests**: `semantic-parity.spec.ts` validates identical handling
-1. **Golden file tests**: Snapshot testing catches regressions
+2. **Common base class**: Shared utilities prevent drift
+3. **Parity tests**: `semantic-parity.spec.ts` validates identical handling
+4. **Golden file tests**: Snapshot testing catches regressions
 
-### Adding New [@standards](https://github.com/standards "GitHub User: standards") Keys
+### Adding New @standards Keys
 
 When you add a custom key like `@standards { security: [...] }`:
 
 1. **No code changes needed** - extractors handle arbitrary keys
-1. All formatters automatically include it in output
-1. Parity tests verify consistent handling
+2. All formatters automatically include it in output
+3. Parity tests verify consistent handling
 
 ### Non-Code Keys
 
@@ -214,13 +219,19 @@ These keys are handled specially (not included in code standards section):
 | `documentation` | Doc standards       | `DocumentationStandards` |
 | `diagrams`      | Diagram preferences | `DiagramStandards`       |
 
-Known fields inside these objects get specialized rendering (e.g. `git.format`, `diagrams.types`). Custom fields are not dropped by `MarkdownInstructionFormatter`-based targets or Claude: they append them via the shared `BaseFormatter.appendGenericStandardItems()` helper as generic `Label: value` items (`true` renders as a bare label, `false`/`null` are skipped, nested objects render inline as `key: value` pairs). Cursor keeps its compact raw-key style (`key: value`) via the same stringify path. GitHub and Antigravity still render only their known fields.
+Known fields inside these objects get specialized rendering (e.g. `git.format`, `diagrams.types`).
+Custom fields are not dropped by `MarkdownInstructionFormatter`-based targets or Claude:
+they append them via the shared `BaseFormatter.appendGenericStandardItems()` helper as
+generic `Label: value` items (`true` renders as a bare label, `false`/`null` are skipped,
+nested objects render inline as `key: value` pairs). Cursor keeps its compact raw-key
+style (`key: value`) via the same stringify path. GitHub and Antigravity still render
+only their known fields.
 
 ## Testing Architecture
 
 ### Test Layers
 
-```text
+```
 ┌─────────────────────────────────────────┐
 │         semantic-parity.spec.ts         │  Cross-formatter parity
 ├─────────────────────────────────────────┤
@@ -267,7 +278,9 @@ export class MyAgentFormatter extends MarkdownInstructionFormatter {
 }
 ```
 
-Most supported targets use a thin formatter class that provides constructor configuration. The `MarkdownInstructionFormatter` base class handles standard sections (`@identity`, `@standards`, `@shortcuts`, and others) and outputs structured Markdown to the configured path.
+Most supported targets use a thin formatter class that provides constructor configuration. The
+`MarkdownInstructionFormatter` base class handles standard sections (`@identity`, `@standards`,
+`@shortcuts`, and others) and outputs structured Markdown to the configured path.
 
 ### Advanced Case: Custom Formatter
 
@@ -275,22 +288,23 @@ For agents with unique output formats (e.g., TOML commands, frontmatter metadata
 
 1. **Extend BaseFormatter**:
 
-```typescript
-export class MyFormatter extends BaseFormatter {
-  format(ast: Program): FormatterResult {
-    // Use this.standardsExtractor.extract() for @standards
-  }
-}
-```
+   ```typescript
+   export class MyFormatter extends BaseFormatter {
+     format(ast: Program): FormatterResult {
+       // Use this.standardsExtractor.extract() for @standards
+     }
+   }
+   ```
 
-1. **Register in FormatterRegistry**:
+2. **Register in FormatterRegistry**:
 
-```typescript
-registry.register('my-target', new MyFormatter());
-```
+   ```typescript
+   registry.register('my-target', new MyFormatter());
+   ```
 
-1. **Add parity tests**: Include in `semantic-parity.spec.ts`
-1. **Add golden files**: Create expected output snapshots
+3. **Add parity tests**: Include in `semantic-parity.spec.ts`
+
+4. **Add golden files**: Create expected output snapshots
 
 ## Key Design Decisions
 

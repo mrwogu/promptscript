@@ -11,7 +11,7 @@ Integrating PromptScript into CI/CD provides:
 - **Registry Sync** - Validate against latest registry standards
 - **Change Tracking** - Only run on relevant file changes
 
-```
+```mermaid
 flowchart LR
     subgraph CI["CI Pipeline"]
         checkout["Checkout"]
@@ -43,9 +43,11 @@ flowchart LR
 
 ## GitHub Actions
 
-Pin the CLI version
-
-Examples below install the latest CLI for simplicity. Pin an exact version in CI (`npm install -g @promptscript/cli@1.19.0`) so validation and compiled output stay reproducible, then upgrade the pin deliberately with a reviewed change.
+:::tip[Pin the CLI version]
+Examples below install the latest CLI for simplicity. Pin an exact version in CI
+(`npm install -g @promptscript/cli@1.19.0`) so validation and compiled output stay
+reproducible, then upgrade the pin deliberately with a reviewed change.
+:::
 
 ### Basic Validation
 
@@ -130,7 +132,8 @@ jobs:
 
 ### Drift Check Without Writing Files
 
-`prs diff --format json` reports the same drift without touching the working tree, which suits required checks on protected branches and jobs that post their findings elsewhere:
+`prs diff --format json` reports the same drift without touching the working tree, which suits
+required checks on protected branches and jobs that post their findings elsewhere:
 
 ```yaml
 - name: Check for drift
@@ -147,7 +150,11 @@ jobs:
     fi
 ```
 
-The command exits 0 for any valid report, including one with changes, so the job decides what counts as a failure. Reports follow the versioned [diff schema](https://getpromptscript.dev/schema/diff/v1.json): `changes[]` carries target, output path, change kind, ownership, and a `sha256-<hex>` content hash, `unsupported[]` repeats entries that the target cannot represent, and `--include-content` adds the generated content itself.
+The command exits 0 for any valid report, including one with changes, so the job decides what counts
+as a failure. Reports follow the versioned
+[diff schema](https://getpromptscript.dev/schema/diff/v1.json): `changes[]` carries target, output
+path, change kind, ownership, and a `sha256-<hex>` content hash, `unsupported[]` repeats entries
+that the target cannot represent, and `--include-content` adds the generated content itself.
 
 ### With Private Registry
 
@@ -299,7 +306,7 @@ jobs:
           git diff --exit-code
 ```
 
-______________________________________________________________________
+---
 
 ## GitLab CI/CD
 
@@ -358,7 +365,8 @@ promptscript:
 
 ### With Caching
 
-PromptScript caches Git registry clones under `~/.promptscript/.cache/` (the user home directory, not the project directory), so cache the home path explicitly:
+PromptScript caches Git registry clones under `~/.promptscript/.cache/` (the user home
+directory, not the project directory), so cache the home path explicitly:
 
 ```yaml
 stages:
@@ -420,13 +428,14 @@ promptscript:
         - promptscript.lock
 ```
 
-______________________________________________________________________
+---
 
 ## Azure DevOps Pipelines
 
-PR Triggers for Azure Repos
-
-YAML `pr:` triggers only work for GitHub and Bitbucket repositories. For Azure Repos, configure PR validation through branch policies in Project Settings → Repos → Branches.
+:::note[PR Triggers for Azure Repos]
+YAML `pr:` triggers only work for GitHub and Bitbucket repositories. For Azure Repos,
+configure PR validation through branch policies in Project Settings → Repos → Branches.
+:::
 
 ### Basic Pipeline
 
@@ -585,7 +594,7 @@ stages:
             displayName: 'Check drift'
 ```
 
-______________________________________________________________________
+---
 
 ## Jenkins
 
@@ -736,7 +745,7 @@ pipeline {
 }
 ```
 
-______________________________________________________________________
+---
 
 ## CircleCI
 
@@ -830,15 +839,19 @@ workflows:
       - validate-promptscript
 ```
 
-______________________________________________________________________
+---
 
 ## Docker-based CI
 
 For consistent environments across all CI systems, use the official Docker image. This eliminates Node.js version mismatches and simplifies configuration.
 
-Pseudoconfiguration - not copy-pasteable
+:::caution[Pseudoconfiguration - not copy-pasteable]
 
-The block below shows the shape of a Docker-based pipeline, not valid syntax for any single CI system (`image:` and `steps:` keys are borrowed from different systems). Use it as a mental model only - concrete, runnable pipelines are in the [Docker Guide](https://getpromptscript.dev/guides/docker/index.md).
+The block below shows the shape of a Docker-based pipeline, not valid syntax
+for any single CI system (`image:` and `steps:` keys are borrowed from
+different systems). Use it as a mental model only - concrete, runnable
+pipelines are in the [Docker Guide](https://getpromptscript.dev/guides/docker/index.md).
+:::
 
 ```yaml
 # Pseudoconfiguration - any CI system with Docker support
@@ -857,7 +870,7 @@ See the [Docker Guide](https://getpromptscript.dev/guides/docker/index.md) for c
 - Jenkins with Docker agent
 - Azure DevOps with container jobs
 
-______________________________________________________________________
+---
 
 ## Pre-commit Hooks
 
@@ -867,34 +880,34 @@ Catch issues before they reach CI with local pre-commit hooks.
 
 1. Install dependencies:
 
-```bash
-npm install --save-dev husky
-```
+   ```bash
+   npm install --save-dev husky
+   ```
 
-1. Initialize husky:
+2. Initialize husky:
 
-```bash
-npx husky init
-```
+   ```bash
+   npx husky init
+   ```
 
-1. Edit `.husky/pre-commit` (created by init):
+3. Edit `.husky/pre-commit` (created by init):
 
-```bash
-# Only run if .prs files are staged
-if git diff --cached --name-only | grep -qE '\.prs$|promptscript\.yaml$'; then
-  echo "Validating PromptScript files..."
-  npx --package=@promptscript/cli prs validate --strict
-  npx --package=@promptscript/cli prs compile
+   ```bash
+   # Only run if .prs files are staged
+   if git diff --cached --name-only | grep -qE '\.prs$|promptscript\.yaml$'; then
+     echo "Validating PromptScript files..."
+     npx --package=@promptscript/cli prs validate --strict
+     npx --package=@promptscript/cli prs compile
 
-  # Check if compile changed or created any files, including untracked ones.
-  # Adjust the path list to the outputs of your configured targets.
-  if [ -n "$(git status --porcelain --untracked-files=all -- CLAUDE.md AGENTS.md .github .claude .cursor .promptscript 2>/dev/null)" ]; then
-    echo "Compiled files changed. Please stage the changes."
-    git status --porcelain --untracked-files=all
-    exit 1
-  fi
-fi
-```
+     # Check if compile changed or created any files, including untracked ones.
+     # Adjust the path list to the outputs of your configured targets.
+     if [ -n "$(git status --porcelain --untracked-files=all -- CLAUDE.md AGENTS.md .github .claude .cursor .promptscript 2>/dev/null)" ]; then
+       echo "Compiled files changed. Please stage the changes."
+       git status --porcelain --untracked-files=all
+       exit 1
+     fi
+   fi
+   ```
 
 ### Using pre-commit Framework
 
@@ -939,7 +952,7 @@ For projects already using lint-staged:
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Best Practices
 
@@ -1016,7 +1029,7 @@ Use environment variables for CI configuration:
 | `PROMPTSCRIPT_VERBOSE` | Enable verbose output   |
 | `NO_COLOR`             | Disable colored output  |
 
-______________________________________________________________________
+---
 
 ## Troubleshooting
 

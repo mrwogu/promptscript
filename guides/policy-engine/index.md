@@ -1,6 +1,7 @@
 # Policy Engine
 
-The policy engine validates skill extensions against declarative organizational rules. Policies are evaluated during `prs validate` and optionally during `prs compile`.
+The policy engine validates skill extensions against declarative organizational rules.
+Policies are evaluated during `prs validate` and optionally during `prs compile`.
 
 ## Configuration
 
@@ -41,9 +42,15 @@ Controls which layers can extend which, based on distance in a defined layer hie
 
 Example: with `layers: ['@core', '@team', '@project']` and `maxDistance: 1`, a `@project` extension cannot directly modify a `@core` skill — it must go through `@team`.
 
-Currently schematic
+:::caution[Currently schematic]
 
-Layer-boundary distance is measured against the skill's base-definition provenance (`__baseSource`), which the resolver does not attach to plain `@use` + `@extend` chains yet. On a normal `prs validate` run today this policy kind does not produce violations - the scenario above is schematic. Property-protection and registry-allowlist do fire end to end (see [Runnable Walkthrough](#runnable-walkthrough)).
+Layer-boundary distance is measured against the skill's base-definition
+provenance (`__baseSource`), which the resolver does not attach to plain
+`@use` + `@extend` chains yet. On a normal `prs validate` run today this
+policy kind does not produce violations - the scenario above is schematic.
+Property-protection and registry-allowlist do fire end to end (see
+[Runnable Walkthrough](#runnable-walkthrough)).
+:::
 
 ### Property Protection
 
@@ -116,7 +123,7 @@ policies:
     allowed: ['@core']
 ```
 
-```
+```promptscript
 # registry/@core/skills.prs
 @meta {
   id: "@core/skills"
@@ -133,7 +140,13 @@ policies:
 }
 ```
 
-```
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAE1MAOYQ4WagE8A9AAEWAyXADW0KHCq0AOq2kkYWDL2BbevCABNEvDSFnN5SlXGvHeccewyFL1gIwUArBQADM6sAL5aWtIOUKqGLtYsZjAAtAIAbhAwAO7WlkasJibJcIzUEGhYEGzeIABCGHAwvEnNGVnZrsqxoUUtbBzstc4gLn0ASjCZOf3JvGB2vACOAK4YUBBY4nT91AKMWKzwcDsYrGauMIwr5VsUY1ajTy4R4SBhALoMnGLi+ESkcgwdT0EDpGC0aqsfA+d5AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+```promptscript
 # registry/@team/overlay.prs
 @meta {
   id: "@team/overlay"
@@ -149,7 +162,13 @@ policies:
 }
 ```
 
-```
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAE1MAOYQ4WagE8A9AAEOpScwBuMalAziqtADqtpJGFgy9gO3rwgATRLy0hZMeUpVrxt07zjj2GQtdsBGCgBWCgAGN1YAXx0daQBXOBheaRYBSTgAa2goOBjdIg5WCw8sqByKFgsYAFoBRQgYAHdjdxZ2Tiw-EDdu1jMzABUHEmq4NBhGCEhGfhh6pt5GHAmMqBEsXkaIXF4AIwxWLNZBReYyNYPGJNEYNDgKdx6IyJBIunRsPEQ7VJh00vKNHoTDYhSwPF4AGU4mhyA1inBmLxcEkiKRyElqHFWHBeMsBBReAA5ZgbTDUDbMMDI5a8CzMRhxfTeLAQNh0XgHYqsUmc2YYKC8TCMDIYQQwB66fSGFp9cxWGw-ZhpTLZXK9Myeby+RWBELhDW8EgQQgQVjWMRxGA6aK6URcjDUCy4kxyyowazIWwABTUVxwzCgVWoHkMRUdFlsAF13BxRGbBJ6fX6YAGgypQw6ndGbbEBKJqBBGKy2C73NVFb6MP7A8HZgWiyXWM9XlGGB0JPg0ecJUCQAxlLQ2ax8P5XkA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+```promptscript
 # .promptscript/project.prs
 @meta {
   id: "demo-project"
@@ -158,6 +177,12 @@ policies:
 
 @use @team/overlay
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1UgTMEswC0shUsuHecAJ7sMhc5YCMFACsFAAMLqwAvurqGgCucDC8GhykUswAbjDUUBjuIBF06Nh4iCDJMKkZWTnuKiAMLOycWDy8AMqxaOQQMCZuzLy4iUSk5InUsaxwvDhZMBS8AHLMWLyY1KvMYIOzvCbMjLHaXlgQbHS8GKx9rCuXvNQVUGsYjADWGADm8zHauvquUy+MopEhpTLZXLhIweLw+CwgALBMIgVwkCCECCscxYCYwdRRTRwXTXDDUEzTAysIwsazmZCWAAKOUYMBwzCg1mobhJJjJJksAF1XBxiVjPvSmSy2RyuTyrnzyUKCTFHsTxEozlMAdTeHYEczXjLOVkHvBcRBNWxwhF8oKGM1qHlSiMyJQaPQQBC4Fr8H58kA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Run validation from the `policy-demo` directory:
 
@@ -201,10 +226,10 @@ The policy engine operates on the resolved AST after all `@extend` and `@use` de
 For each configured policy, the engine:
 
 1. Iterates all skills in the `@skills` block
-1. Reads the `__layerTrace` entries
-1. Extracts the source registry from each trace entry (e.g., `@team` from `@team/overlay.prs`)
-1. Evaluates the policy rules against the trace data
-1. Produces violations with the policy's configured severity
+2. Reads the `__layerTrace` entries
+3. Extracts the source registry from each trace entry (e.g., `@team` from `@team/overlay.prs`)
+4. Evaluates the policy rules against the trace data
+5. Produces violations with the policy's configured severity
 
 ## Enterprise Example
 

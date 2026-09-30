@@ -2,11 +2,15 @@
 
 ## What is PromptScript?
 
-PromptScript is an agent platform configuration language and toolchain. You define instructions, skills, agents, integrations, automation, and policy once, then compile native output for 50 AI coding agent targets.
+PromptScript is an agent platform configuration language and toolchain. You define instructions,
+skills, agents, integrations, automation, and policy once, then compile native output for 50 AI
+coding agent targets.
 
 ## How many AI tools are supported?
 
-PromptScript currently compiles to **50 AI coding agent targets**. See the full list in [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) or the [formatter matrix](https://getpromptscript.dev/reference/formatters/index.md).
+PromptScript currently compiles to **50 AI coding agent targets**. See the full list in
+[Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) or the
+[formatter matrix](https://getpromptscript.dev/reference/formatters/index.md).
 
 ## How do I install PromptScript?
 
@@ -70,11 +74,13 @@ The `@inherit` or `@use` target cannot be resolved. Check:
 
 ### `PS1001: Unexpected token`
 
-The parser encountered invalid syntax, such as an unknown directive or misplaced token. Check the reported location and compare it with the [Language Reference](https://getpromptscript.dev/reference/language/index.md).
+The parser encountered invalid syntax, such as an unknown directive or misplaced token. Check the
+reported location and compare it with the [Language Reference](https://getpromptscript.dev/reference/language/index.md).
 
 ### `PS3001: Required field`
 
-A required field is missing. The error message identifies the block and field to add. Other validation failures use `PS3000` or a more specific `PS300x` code.
+A required field is missing. The error message identifies the block and field to add. Other
+validation failures use `PS3000` or a more specific `PS300x` code.
 
 ### Compiled output doesn't match expected format
 
@@ -90,13 +96,14 @@ npx @promptscript/cli@latest compile # npx, no install step
 docker pull ghcr.io/mrwogu/promptscript:latest  # Docker
 ```
 
-Formatter behavior can change between versions, so teams that pin the CLI version in CI should upgrade the pin deliberately.
+Formatter behavior can change between versions, so teams that pin the CLI version in CI should
+upgrade the pin deliberately.
 
 ## How do I contribute?
 
 See [CONTRIBUTING.md](https://github.com/mrwogu/promptscript/blob/main/CONTRIBUTING.md) for guidelines. Ways to help:
 
 1. Add support for new AI tools (formatters)
-1. Report bugs and suggest features
-1. Improve documentation
-1. Share PromptScript with your team
+2. Report bugs and suggest features
+3. Improve documentation
+4. Share PromptScript with your team

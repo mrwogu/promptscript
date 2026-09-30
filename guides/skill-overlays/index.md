@@ -16,7 +16,7 @@ In multi-layer architectures (company → product → BU → project), each laye
 
 Import a base skill and extend it:
 
-```
+```promptscript
 @use @company/skills as base
 
 @extend base.skills.code-review {
@@ -27,6 +27,12 @@ Import a base skill and extend it:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODt+XUxWRwB6OABraChlDGUAI1aYIt8iDk9eDrKKBqa4ChYpAFpqGAA3CBhzXkCrXik4RmoINCwINhSQAGFmKV4Z+cXecxMcWSwtxg5qWRhGNy2sRx0cV-q4POCLHYnCwB1iIDiwQAoqwcBhWIxpGc5gsluZmNR6mAoBYVBiFD8Xm8Pl8OKQKHFwXl8iB8nR0Ng8IgQBVmGR4bURlBmlRaCAGEC+lgeLwAMpuNDkBYyOQEuxEUjkOzUDzKH4zCi8AByzCw9gw1D1zDAcrWzDeWhEuzYdDE-VYurEyIwUH1jHqGhgFN8QhEyziEFC4RZlQ5dUa3P+ENWcASImSwfSWVy0eCJAghAgrDC9zcXQKxTgIk8BvEyhWgJOMDCyAiAAUoBhEThmFApM8i-DxKWIgBdOIcItZ9Q1+uN5ut9t3Ls9kD9gu+GZFh7W1jluKTYMNpswFttmDPJf3CCPPasam03sMEHURz4BXRL00eggWYHuBn-CpWlAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Resolution Order
 
 When multiple `@use` and `@extend` declarations target the same skill, priority is determined by **declaration order** in the `.prs` file:
@@ -34,7 +40,7 @@ When multiple `@use` and `@extend` declarations target the same skill, priority 
 - `@use` declarations are processed top-to-bottom — later imports override earlier ones for block name conflicts
 - `@extend` blocks are applied sequentially — later extends override earlier ones for replace-strategy properties, and append to earlier ones for append-strategy properties
 
-```
+```promptscript
 @use @bu-retail/skills as retail
 @use @bu-travel/skills as travel
 
@@ -49,6 +55,12 @@ When multiple `@use` and `@extend` declarations target the same skill, priority 
   references: ["travel-patterns.md"]   # appended after retail
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODt+ACM3AFpqf2gAejgAa2goZQxlOpFoYtLyquqsNQA3GCgm1qh2sWVhjDGoItY+AEE0cghpa0NqKWow7oxoFQhaLDoFUfHZGBZPYqIOT14j6AoWtrgKFilamBGW3MvECVl4UjgjGoEDQWAgbBSIAASvUoK8AUC8sE6mAYHVWIx4GFkBE3lBqpgsBxqKxviRvCAALo+QqsR6EZ4yeaLD5Tdo-Zh-OqAmDA0HBCFQmFwhHhEAAFWuaOFmJAwXVGr45ggtN4AAooNg8eiHISAJRxHF4ziEuDEiLc8YU7DU2kUekRRnqvgYDacKQyDBganonpLAogfJ0dDYPCIECVGpkyZfKi0EAMe7PLA8XgAZTcGygWxkcgUODsRFI5Ds1A8ygrdQovAAcswsPYMNQO8wwOW7OJmIw3FoRDLWJcMC9WO2xOiMGjMIxmhoYBRikIRCC4hBQnLE-8wynpnAsfFEsk5eksrkQHESBBCDqwsM3DAWcU4CJPF3xMpxTogowPaIAAAqGoSODMFA+yyN+4i-p6cQcF+OrqCB4EYJB0GwV+U4IXsSEFMUdRftCjDjv+cTVHKmHYTBxqkcMEAUfCbJ3hGUYxrg+AHo6EyfCeab0EwbDZrmBZFiWsjyLYvBVtEtb1rwjZrq2s6YN2hh9nJg7DqO2BsZO06zqIdQLp2y6ruuvibgEO57hEfFKse7RnnACQiJeaSZDkZ4Pk+rAvnW77Eb4eE-nsVFgr8wG8CSYEQTAUEMdQcH4YhTLIfAcKsOh8URHRyU4caEUEQyzJhfwTHkZR25gjRhVJSlsE1Sx455PkkaMgwnDDI4+AKTWwkZiAYy0Gx+CpJGQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Result: `description` = `"Travel review"` (last replace wins), `references` includes both `retail-patterns.md` and `travel-patterns.md` (append accumulates).
 
@@ -66,7 +78,7 @@ When `@extend` targets a skill, each property follows a specific merge strategy:
 
 ### Replace Example
 
-```
+```promptscript
 @extend base.skills.deploy {
   content: """
     New deployment workflow replacing the base.
@@ -75,11 +87,17 @@ When `@extend` targets a skill, each property follows a specific merge strategy:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34iDk9eACMMOBgKOABraCg4CilyZkdeQKsdNjKsFJBYoZ7ggDkYc142qA6tLF5zZmp6sFmp6hgHRghWdQUcOyqaijjhvOCMKHXpABVmZmaw5AiAIWqcCLpwkAAlGAkXx+AHVqCYYBEALo+fIgfKQhicLDURz4Iikci1Gj0EAANxgtAgbHwqThQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 The overlay's `content` and `allowedTools` completely replace the base values.
 
 ### Append Example
 
-```
+```promptscript
 @extend base.skills.architecture-review {
   references: [
     "references/bu-architecture.md"
@@ -93,7 +111,7 @@ The overlay's `references` and `requires` are appended to the base lists (dedupl
 
 ### Shallow Merge Example
 
-```
+```promptscript
 @extend base.skills.code-review {
   inputs: {
     severity: {
@@ -111,7 +129,7 @@ New input fields are added to the base. Existing fields with the same key are ov
 
 Use the `!` prefix to remove entries from a lower layer's append-strategy arrays:
 
-```
+```promptscript
 @extend base.skills.code-review {
   references: [
     "!references/deprecated-patterns.md"
@@ -132,7 +150,7 @@ Negation uses normalized path matching — `"!./references/foo.md"` matches `"re
 
 If a negation doesn't match any base entry, a warning is logged during compilation:
 
-```text
+```
 Negation "!references/old.md" did not match any base entry — it may be stale.
 ```
 
@@ -148,7 +166,7 @@ This usually means the base skill was updated and the entry you're negating no l
 
 The `sealed` property prevents higher layers from replacing specified skill properties:
 
-```
+```promptscript
 @skills {
   deploy: {
     description: "Production deployment workflow"
@@ -160,11 +178,17 @@ The `sealed` property prevents higher layers from replacing specified skill prop
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq14pcmZHMOrg4Kk4RmoINCwINhSQAAVXcTdGHqM6qAatLF5zZmpSsCnzPJadNg52ftiQOPWAYU6exgwoWph6xxn7V0ZpN2o7QBQCWvlWZlmSZnEIMEcKPtwnsQUC4DAztIwsgIix2JwsBE6MC2h0uuNWBEALpxQoFED5LEMBHURz4IikcgwKi0EAMABuMFovVY+FSBKAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Boolean Shorthand
 
 `sealed: true` seals all replace-strategy properties at once:
 
-```
+```promptscript
 @skills {
   compliance-check: {
     description: "Compliance verification"
@@ -174,11 +198,17 @@ The `sealed` property prevents higher layers from replacing specified skill prop
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1maIgMVkYYAFpGHBhGUrDq4OCpOEZqCDQsCDYUkABhOvIGprsANxhhyEZscdY8vtr2TixJ2JAKE6PtvrgYDFhQhWo3GDjCgpB8gF0GfepHfCJSchgVFoIAYy1om3wqVeQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Enforcement
 
 If an `@extend` block attempts to override a sealed property, compilation fails:
 
-```text
+```
 ResolveError: Cannot override sealed property 'content' on skill (sealed by base definition)
 ```
 
@@ -193,7 +223,7 @@ ResolveError: Cannot override sealed property 'content' on skill (sealed by base
 
 A 4-layer enterprise architecture:
 
-```text
+```
 Layer 1: @company     — organization-wide skill definitions
 Layer 2: @product     — product-specific customizations
 Layer 3: @bu          — business unit references and context
@@ -202,7 +232,7 @@ Layer 4: project      — local project overrides
 
 ### Layer 1: Company Base
 
-```
+```promptscript
 # @company/skills/code-review.prs
 @meta { id: "@company/code-review" syntax: "1.1.0" }
 
@@ -221,7 +251,7 @@ Layer 4: project      — local project overrides
 
 ### Layer 2: Product Overlay
 
-```
+```promptscript
 # @product/skills/code-review.prs
 @meta { id: "@product/code-review" syntax: "1.1.0" }
 
@@ -233,11 +263,17 @@ Layer 4: project      — local project overrides
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAjWYATAK6MsAejgBraFDiSWwmAFpqMAG4QYAdyq0AOq34kYWDL2C8IwxL0MhB1EeKnK1G7Xse84AT3YMQntHAEYKCIAGXwBfY2N+UTgYARYyDFZ-aTkoBSURTy0dXV4MOF4AI3KYBJMiDlZhKpqKWXk4Cg91Yr0rY15eFThGagg0LAg2UJAABRcxCVU4NBhGCEhGXg9eLxLHAd2YMBgNVkZ4e2RHDROzi8UhRaxVTCwOalZOkmFHAF1jLEQLE6OhsHhEE50pgsjkOgUVD1vPoaPQmGxGlgeLwAMqiNDkHTNODMXi4VJEUjkVLUURfXg4U4wCi8AByzCwvEw1E5zDAZMZQ2YjFEZiCkzYdDKTV4rA5ZSOGCgXIwjBkGAA5szEmYLP1WINbDN+NDMtl2nlFN09j4QIcAkEQg4QBEAKwUGJ2g28EgQQgQVj2LC02qseImOAWJoYajCCrAQ4eK6OWZQVUwHDMKAqah+KPCGO-EAA70cSMBjXJuZpi6Z7OnPOZAux-6AxIaSNjCRTekJ72qZ2p9N1nNHTsQbtsA5h4F-BicYP+fCUsiUVEgBiaU5wHv4MLAoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Layer 2 replaces `description` (allowed), appends to `references`, but **cannot** replace `content` (sealed by Layer 1).
 
 ### Layer 3: BU Overlay
 
-```
+```promptscript
 # @bu/skills/code-review.prs
 @meta { id: "@bu/code-review" syntax: "1.1.0" }
 
@@ -253,11 +289,17 @@ Layer 2 replaces `description` (allowed), appends to `references`, but **cannot*
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgCMArgHo4Aa2hQ4olgBMYAWmowAbhBgB3KrQA6rfiRhYMvYLwjzEvPSCFiFy1Ru13ecAJ7sMhG3YBGCiCABncAXwMDfmE4GAEaZnlhRixxKSgZOSTndU0tXgw4XkEimCjDIg5WeRKyiklpOAonFTztcwNeXlUwGFVWRngbZC7u2xAAQl7+ziHZROTUpUwsDmpWZpJ5Ozox7rsZgfnRESUMakYcCA5U4VUKbd39iaO5+FPhJRIk4VgtnYgMYAXTGqgAjsIIKo4CM7HFGPcbp4lHBGBhWHZQaxwiBwnR0Ng8Ih7IsUmlGplZK0XPldPQmGxqlgeLwAMrCNDkTS1ODMXi4eJEUjkeLUYSbXg4WYUXgAOWYWF4mGoSuYYAF0t48mYiOMPiwEDYdEKNV4rEVhR6MAwUGVGEYEgwAHMYBRosZTJ1WN0rP5SdRfql0k1soo2q4tHYxl4fH4JkEAKwUMJAn28EgQQgQVg2LDi8o46JwUw1C7yYrAMZOOEgAAKUAdMBwzCgimoHlL8nLWLGHBLOedtYbTZbbf6nYx3eogOxkUMMPzEFSRslVfTSgmI6GY-b1pL1GXhrY0ZxeOBDE4+c8+GFZEoNAZan6cFX+ACeKAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Layer 3 removes a Layer 2 reference via negation, adds BU-specific references, and appends a new requirement.
 
 ### Composed Result
 
-```text
+```
 description: "Product-specific code review"     ← Layer 2 (replaced)
 content: (Layer 1 original — sealed)             ← Layer 1 (protected)
 references:
@@ -288,13 +330,16 @@ The property view shows each property's current value, merge strategy, and which
 
 ## Governance: Managing Multi-Layer Skills
 
-When skills span multiple registry layers, structural changes in a base skill can break overlays that depend on its content. PromptScript provides tooling to detect and prevent problems, but organizational process is equally important.
+When skills span multiple registry layers, structural changes in a base skill can break overlays
+that depend on its content. PromptScript provides tooling to detect and prevent problems, but
+organizational process is equally important.
 
 ### Preventing Breakage
 
-**Seal critical properties.** If a base skill's `content` should never be replaced by overlays, seal it:
+**Seal critical properties.** If a base skill's `content` should never be replaced by overlays,
+seal it:
 
-```
+```promptscript
 @skills {
   code-review: {
     content: """
@@ -305,11 +350,19 @@ When skills span multiple registry layers, structural changes in a base skill ca
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCWdk4sFJBYoZru3gBhahMIRgwoXibW9t5zZmpSsCgLXkAUAntXDkYOGVVmEkNmmGopqTgKOODhvLG4GDnpMOQI3o52CIBdOKFAogfL-Bj9aiOfBEUjkGBUWggBiXWgQNj4VKgoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 This ensures no `@extend` can silently replace the core instructions.
 
-**Use references instead of inline content.** Rather than putting all context in `content`, move supplementary information to `references` files. Overlays can then append, negate, or replace individual reference files without touching the sealed content:
+**Use references instead of inline content.** Rather than putting all context in `content`,
+move supplementary information to `references` files. Overlays can then append, negate, or
+replace individual reference files without touching the sealed content:
 
-```
+```promptscript
 @skills {
   code-review: {
     content: """
@@ -321,9 +374,16 @@ This ensures no `@extend` can silently replace the core instructions.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCWdk4sFJBYoZru3gBhZibeJtb23nMp0rAoC14ACjgYDFhxAEoKOODhvLGmsBgm1kZ4MOQI88vOG7gAekwsDmpWOAoSbxAdHCIEeVxerzgIk8GGo4l+-wiAF0jrJtrs7hFehx2Ei4oUCiB8oiGP1qI58ERSOQYFRaICQM1LnAIGx8KlCUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Detecting Problems After Base Updates
 
-**Use `prs inspect` after updating a base registry.** When a base skill changes, run inspect on each overlay skill to verify the layer composition still makes sense:
+**Use `prs inspect` after updating a base registry.** When a base skill changes, run inspect
+on each overlay skill to verify the layer composition still makes sense:
 
 ```bash
 # After pulling a registry update
@@ -339,19 +399,22 @@ Look for:
 - Reference files that may no longer match the base skill's context
 - Unexpected changes in the layer count
 
-**Use `prs diff` to see compilation changes.** After pulling updates, compare the compiled output against the previous version:
+**Use `prs diff` to see compilation changes.** After pulling updates, compare the compiled
+output against the previous version:
 
 ```bash
 prs diff --target claude
 ```
 
-This shows exactly what changed in the final output, making it easy to spot when a base update broke an overlay.
+This shows exactly what changed in the final output, making it easy to spot when a base
+update broke an overlay.
 
 ### Organizational Best Practices
 
-**Version your registry skills.** Use a `version` field in skill descriptions to communicate breaking changes:
+**Version your registry skills.** Use a `version` field in skill descriptions to communicate
+breaking changes:
 
-```
+```promptscript
 @skills {
   code-review: {
     description: "Code review v2.0 — restructured workflow"
@@ -360,9 +423,17 @@ This shows exactly what changed in the final output, making it easy to spot when
 }
 ```
 
-When you make breaking changes (removing sections, restructuring content, changing property types), bump the version in the description and communicate via your team's changelog.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCpOEZqCDQsCDYUkABhOrsm1vbeZoAmHN5AFAJeJrgsajdGLDcmmXNmalKwKAs87tr2Tiwx2JAKJ4fL3kKCkHyAXQZb6kd8ERSOQYFRaCAGM0YLQRqx8KlPkA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
-**Maintain a registry changelog.** Keep a `CHANGELOG.md` at the root of each registry documenting skill changes:
+When you make breaking changes (removing sections, restructuring content, changing property
+types), bump the version in the description and communicate via your team's changelog.
+
+**Maintain a registry changelog.** Keep a `CHANGELOG.md` at the root of each registry
+documenting skill changes:
 
 ```markdown
 # @company Registry Changelog
@@ -383,10 +454,11 @@ When you make breaking changes (removing sections, restructuring content, changi
 **Coordinate between layers.** When Layer 2 maintains a skill that Layer 3 extends:
 
 1. Layer 2 communicates planned breaking changes before deploying
-1. Layer 3 runs `prs inspect --layers` to verify compatibility
-1. Both layers use `prs diff` in CI to detect unexpected changes
+2. Layer 3 runs `prs inspect --layers` to verify compatibility
+3. Both layers use `prs diff` in CI to detect unexpected changes
 
-**Test overlays in CI.** Add a CI step that compiles the overlay project and verifies the output is valid:
+**Test overlays in CI.** Add a CI step that compiles the overlay project and verifies
+the output is valid:
 
 ```yaml
 # .github/workflows/validate-overlay.yml
@@ -400,32 +472,39 @@ When you make breaking changes (removing sections, restructuring content, changi
 If an overlay becomes incompatible after a base update:
 
 1. **Run `prs inspect skill-name --layers`** to see the current layer composition
-1. **Check sealed properties** — if the base added `sealed` to a property your overlay was overriding, you'll get a compilation error with a clear message
-1. **Check references** — use negation (`!path`) to remove references that no longer apply, and add new ones that match the updated base
-1. **Review the base changelog** — look for breaking changes that affect your overlay
-1. **Consider using `sealed`** in your overlay to protect properties from further changes by downstream layers
+2. **Check sealed properties** — if the base added `sealed` to a property your overlay
+   was overriding, you'll get a compilation error with a clear message
+3. **Check references** — use negation (`!path`) to remove references that no longer
+   apply, and add new ones that match the updated base
+4. **Review the base changelog** — look for breaking changes that affect your overlay
+5. **Consider using `sealed`** in your overlay to protect properties from further changes
+   by downstream layers
 
 ### Overlay Consistency Warnings
 
-The resolver emits warnings during compilation when an overlay becomes structurally inconsistent with its base. These warnings help detect drift after a Layer 2 update. They are always shown — no `--verbose` flag required.
+The resolver emits warnings during compilation when an overlay becomes structurally
+inconsistent with its base. These warnings help detect drift after a Layer 2 update.
+They are always shown — no `--verbose` flag required.
 
 **Orphaned extend** — `@extend` targets a block that doesn't exist:
 
-```text
+```
 @extend target "base.skills.code-review" not found — overlay will be ignored.
 If the base skill was removed or renamed, update or remove this @extend block.
 ```
 
 This means the overlay is silently dropped. Either update the path or remove the `@extend`.
 
-**Stale skill target** — `@extend` creates a new skill in `@skills` that the base doesn't define:
+**Stale skill target** — `@extend` creates a new skill in `@skills` that the base doesn't
+define:
 
-```text
+```
 @extend creates new skill "deploy-prod" — base does not define it.
 If this was an overlay targeting an existing skill, verify the base still defines "deploy-prod".
 ```
 
-This usually means the base renamed or removed the skill. The overlay accidentally creates a new skill rather than extending an existing one.
+This usually means the base renamed or removed the skill. The overlay accidentally creates
+a new skill rather than extending an existing one.
 
 **Negation orphan** — see [Unmatched Negations](#unmatched-negations) above.
 
@@ -438,4 +517,6 @@ This usually means the base renamed or removed the skill. The overlay accidental
 | PS028 | valid-append-negation  | `!` prefix is only effective in `@extend` blocks                        |
 | PS029 | valid-sealed-property  | Sealed property names must be replace-strategy properties               |
 
-> **Note:** The overlay consistency warnings above are emitted by the resolver, not the validator. They appear during `prs compile` (always shown, not gated by `--strict`), while validator warnings (`PS0XX`) appear during `prs validate`.
+> **Note:** The overlay consistency warnings above are emitted by the resolver, not the
+> validator. They appear during `prs compile` (always shown, not gated by `--strict`),
+> while validator warnings (`PS0XX`) appear during `prs validate`.

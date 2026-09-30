@@ -1,17 +1,24 @@
 # Real-Life Tutorial: Checkout Service
 
-This tutorial follows a platform team adding PromptScript to an existing TypeScript checkout service. The repository already contains hand-written Claude Code and GitHub Copilot instructions. The team needs one reviewed source of truth without losing payment rules or silently replacing user-owned files.
+This tutorial follows a platform team adding PromptScript to an existing
+TypeScript checkout service. The repository already contains hand-written
+Claude Code and GitHub Copilot instructions. The team needs one reviewed source of
+truth without losing payment rules or silently replacing user-owned files.
 
-Open the [Playground](/playground/) and choose **Real-Life Checkout Service** to compile the same three PromptScript files in your browser.
+Open the [Playground](/playground/) and choose **Real-Life Checkout Service** to
+compile the same three PromptScript files in your browser.
 
 ## Scenario
 
-The checkout service owns payment authorization, retries, and webhook handling. Its deployment has four requirements:
+The checkout service owns payment authorization, retries, and webhook handling.
+Its deployment has four requirements:
 
 1. Organization rules apply to every service.
-1. Payment rules remain reusable by other payment services.
-1. Checkout-specific policy can replace one inherited standard without duplicating the full organization policy.
-1. Claude Code and GitHub Copilot receive native instructions, skills, agents, hooks, and release prompts from the same source.
+2. Payment rules remain reusable by other payment services.
+3. Checkout-specific policy can replace one inherited standard without
+   duplicating the full organization policy.
+4. Claude Code and GitHub Copilot receive native instructions, skills, agents,
+   hooks, and release prompts from the same source.
 
 Acceptance criteria:
 
@@ -19,7 +26,8 @@ Acceptance criteria:
 - `prs validate --strict` succeeds.
 - The resolved testing standard is `Minimum 95% coverage for payment flows`.
 - Generated output contains the payment security skill and reviewer agent.
-- CI fails when committed generated files drift from PromptScript sources, including generated paths a clone ignores.
+- CI fails when committed generated files drift from PromptScript sources,
+  including generated paths a clone ignores.
 - Existing instruction files are backed up and reviewed before takeover.
 
 ## Repository Layout
@@ -43,13 +51,15 @@ checkout-service/
 └── promptscript.yaml
 ```
 
-`AGENTS.md`, `CLAUDE.md`, and `.github/copilot-instructions.md` represent existing, user-owned instructions. Do not delete them to make compilation pass.
+`AGENTS.md`, `CLAUDE.md`, and `.github/copilot-instructions.md` represent
+existing, user-owned instructions. Do not delete them to make compilation
+pass.
 
 ## Step 1: Add Organization Policy
 
 Create `.promptscript/org-base.prs`:
 
-```
+```promptscript
 @meta {
   id: "commerce-org-base"
   syntax: "1.5.0"
@@ -84,13 +94,20 @@ Create `.promptscript/org-base.prs`:
 }
 ```
 
-This file provides defaults. Service repositories inherit it and can make explicit, reviewable changes after inheritance.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFNmJPtUYwAtM2oBzNQCMMcGPLES4AT3YZCs+QEYKAVgoAGY+MECtcWcnkslMCpGIHRyIFhmaPCM1BBoWPIAumIAvmJi3NKcWBARwiZhxiAFAJrMAK6CGNQwVeKcWhCsMIFNWlVwcBBwAuyCYJpVgjTMUuWMOWyC-sqqw1DYA9QkFAUACjVggYJwGFuhzLqG1ABuGLqwoTUngV0XtYw4GKxa8KvuRW5prBks7ERYfLuBYvcoYV42EAAFUiMAAyjE4gliu5qOV2BA+JCAHKjGAUABWcEEACZXCiJJhGABrcEwACyzzp1EhaFYaBIX3SrG4PWeUmqUmJoncHB6bR88npTUx5RIggAHM4AKTTZg3ah0pIFRpYWQiiQSJYkbCQgDCbBuGLYGCgggtSlycDcEm+EmuEBgAHdJSAAEowACO5QgNUEbFqGDQIxObUEHu92vczCimsmrG8gl8IAAglIpDssGiJuUagWoMwvPJQvIACLMRhy7Lx5hQKD6GmFmBoZ0gZKsb4ZGo9WITCBsYUFNRhbEwDVqx2AmIwKTZCC24mDEZjMdTRs9RTbAUCF2CafyWfz3SRAzEmrB0Mr6Y4GA0zfiEYcCZP3Sa1iPeAvhAFJEgYbJqDMfAiFIch8RoegQA1Lo2HwWxgKAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+This file provides defaults. Service repositories inherit it and can make
+explicit, reviewable changes after inheritance.
 
 ## Step 2: Add Reusable Payment Policy
 
 Create `.promptscript/payment-policy.prs`:
 
-```
+```promptscript
 @meta {
   id: "payment-policy"
   syntax: "1.5.0"
@@ -116,13 +133,24 @@ Create `.promptscript/payment-policy.prs`:
 }
 ```
 
-The payment policy is composed with `@use`, so another payment service can use the same rules without inheriting checkout identity or project metadata. `provider` accepts only `Stripe` or `Adyen`. `maxRetries` defaults to `3`, so services override it only when their provider contract requires another limit.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhMATz7sAtGmZQIjRfLES4i9hkKz5ARgoBWCgAY94wQIDmcWcnlKVWOPLpyFRgh5AF19QUxqUjdhcIkaZgA3aRhqWU4AVxIACnkAZSxqCDQYPwCAQSlFTnkASkEAXgCCopKHCQkSEwAlfiL4WVYsgCNUxsEAZnCAXzFZ1jFuOAFWKQxqKThYxw5liFZnd3kAFXgsQQw0BMSYKX8pGEYtVlv-LAg+ZgysfwxVwWofUUEWwOF8IDCjjgjwyRSwiiOIGOzAA1pwIAAvGAg5Scc5rARleQANVSEDAwOAwGuKWo02mggA7jBhjhmKjBHAIM5WNhYfBQuFAVoMMNoBB4UdHBJ5ABVaGSB5kZgcVg6QRoxTguhxAIAIS+-ypNIedIZgMKEHgTmYwmAXUIvUt8HpFywHDIPiZEpwgmGGEYKOYYDA7UEkPmi0ByyKjHebC2okcqgCADkYDdqIIoMxnIIAArlVP+ADCxOJv0YjHgWywqM4cH8zCzUUZTJZbI50MYFvB4RT8nTmcERGrtztDqd-TgruN1CStNdXjxAL6Vr7rGmIGmIQYeOoinwRFI5BgVFoIAYma5bHw5m3QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+The payment policy is composed with `@use`, so another payment service can use
+the same rules without inheriting checkout identity or project metadata.
+`provider` accepts only `Stripe` or `Adyen`. `maxRetries` defaults to `3`, so
+services override it only when their provider contract requires another limit.
 
 ## Step 3: Compose Checkout Policy
 
 Create `.promptscript/project.prs`:
 
-```
+<!-- playground-link-skip -->
+
+```promptscript
 @meta {
   id: "checkout-service"
   syntax: "1.5.0"
@@ -224,7 +252,10 @@ Declaration order is intentional:
 | `@extend restrictions`            | Appends one checkout-specific restriction             |
 | Capability blocks                 | Adds native skill, reviewer, hook, and release prompt |
 
-The override removes both `Minimum 80% coverage` and the imported payment test list from `standards.testing`. Template parameters resolve before output, so no `{{provider}}` or `{{maxRetries}}` placeholders remain. Other organization and payment standards remain.
+The override removes both `Minimum 80% coverage` and the imported payment test
+list from `standards.testing`. Template parameters resolve before output, so no
+`{{provider}}` or `{{maxRetries}}` placeholders remain. Other organization and
+payment standards remain.
 
 ## Step 4: Configure Native Targets
 
@@ -244,7 +275,8 @@ targets:
       version: full
 ```
 
-`version: full` is required for separate native capability files. Simpler target modes may emit only the main instruction file.
+`version: full` is required for separate native capability files. Simpler
+target modes may emit only the main instruction file.
 
 ## Step 5: Validate Before Writing
 
@@ -257,7 +289,8 @@ prs compile --dry-run
 prs diff --all --full
 ```
 
-Stop if validation fails or the full diff omits existing business rules. Resolve source errors first. Do not use `--force` as an error bypass.
+Stop if validation fails or the full diff omits existing business rules.
+Resolve source errors first. Do not use `--force` as an error bypass.
 
 ## Step 6: Take Over Existing Output Safely
 
@@ -279,7 +312,10 @@ for path in AGENTS.md CLAUDE.md .claude .github; do
 done
 ```
 
-Copy only paths that exist. Keep this local backup out of the commit. The backup covers user-owned main instructions and any existing native capability directories. Record the pre-adoption commit for a complete rollback after merge:
+Copy only paths that exist. Keep this local backup out of the commit. The
+backup covers user-owned main instructions and any existing native capability
+directories. Record the pre-adoption commit for a complete rollback after
+merge:
 
 ```bash
 git rev-parse HEAD > .promptscript-migration-backup/pre-adoption-commit
@@ -293,7 +329,8 @@ prs compile --dry-run
 prs diff --all --full
 ```
 
-Approve every conflict path and confirm the PromptScript source preserves all required policy. Then perform one controlled takeover:
+Approve every conflict path and confirm the PromptScript source preserves all
+required policy. Then perform one controlled takeover:
 
 ```bash
 prs compile --force
@@ -309,11 +346,16 @@ git diff -- .
 prs diff --all --full
 ```
 
-Run this before staging migration content. `--intent-to-add` makes new files visible to `git diff` without staging their content. Expected final `prs diff --all --full` result: no drift. Expected Git status and diff: only approved PromptScript sources, configuration, and generated target files.
+Run this before staging migration content. `--intent-to-add` makes new files
+visible to `git diff` without staging their content. Expected final
+`prs diff --all --full` result: no drift. Expected Git status and diff: only
+approved PromptScript sources, configuration, and generated target files.
 
 ## Step 7: Inspect Generated Artifacts
 
-Exact native paths depend on target capabilities and target mode. This configuration generates main instructions plus supported capability files, including:
+Exact native paths depend on target capabilities and target mode. This
+configuration generates main instructions plus supported capability files,
+including:
 
 ```text
 AGENTS.md
@@ -329,7 +371,9 @@ CLAUDE.md
 .github/skills/payment-security/SKILL.md
 ```
 
-`CLAUDE.md` is Claude Code's main instruction file. GitHub full mode also generates top-level `AGENTS.md` as its agent index. PromptScript can emit its built-in skill beside project skills.
+`CLAUDE.md` is Claude Code's main instruction file. GitHub full mode also
+generates top-level `AGENTS.md` as its agent index. PromptScript can emit its
+built-in skill beside project skills.
 
 Inspect main instructions for these resolved rules:
 
@@ -345,7 +389,8 @@ Don't change retry or idempotency behavior without integration tests
 GitHub normalizes negative restrictions from `Never` to `Don't`. Also verify:
 
 - `Minimum 80% coverage` is absent.
-- `Test approved, declined, timeout, and retry paths` is absent from the replaced testing field.
+- `Test approved, declined, timeout, and retry paths` is absent from the
+  replaced testing field.
 - `{{provider}}`, `{{maxRetries}}`, and default provider `Stripe` are absent.
 - Organization Git and operations standards remain.
 - Payment security and reliability standards remain.
@@ -356,7 +401,8 @@ GitHub normalizes negative restrictions from `Never` to `Don't`. Also verify:
 
 ## Step 8: Add CI Drift Protection
 
-Commit generated output so reviewers can inspect platform-specific changes. Add `.github/workflows/promptscript.yml`:
+Commit generated output so reviewers can inspect platform-specific changes.
+Add `.github/workflows/promptscript.yml`:
 
 ```yaml
 name: PromptScript
@@ -383,19 +429,30 @@ jobs:
       - run: test -z "$(git status --porcelain --untracked-files=all --ignored=matching -- AGENTS.md CLAUDE.md .claude .github)"
 ```
 
-The final step catches modified, deleted, untracked, and ignored generated files. Generated outputs are part of the repository and must stay tracked: never list them in `.gitignore`, because a plain `git status` check is blind to ignored paths and their drift would go unnoticed. `--ignored=matching` plus the generated-path list closes that hole - a clone that ignores a generated output surfaces it as `!!` and fails the build instead of hiding the drift. Extend the path list when you add targets. Update the pinned CLI version through the same reviewed dependency process as other build tools.
+The final step catches modified, deleted, untracked, and ignored generated
+files. Generated outputs are part of the repository and must stay tracked:
+never list them in `.gitignore`, because a plain `git status` check is blind to
+ignored paths and their drift would go unnoticed. `--ignored=matching` plus the
+generated-path list closes that hole - a clone that ignores a generated output
+surfaces it as `!!` and fails the build instead of hiding the drift. Extend the
+path list when you add targets. Update the pinned CLI version through the same
+reviewed dependency process as other build tools.
 
-`prs diff --all --full` also reads generated files from disk regardless of ignore rules, but it exits 0 even when drift is present, so treat it as a local review aid - not the CI gate.
+`prs diff --all --full` also reads generated files from disk regardless of
+ignore rules, but it exits 0 even when drift is present, so treat it as a local
+review aid - not the CI gate.
 
 ## Step 9: Roll Out
 
 Use a small rollout before organization-wide adoption:
 
 1. Merge the checkout service first.
-1. Ask payment and platform owners to review generated Claude and GitHub files.
-1. Track compile failures, drift failures, review defects, and developer feedback for one release cycle.
-1. Reuse `payment-policy.prs` in one additional payment service.
-1. Promote the organization base only after both services produce equivalent policy and stable CI.
+2. Ask payment and platform owners to review generated Claude and GitHub files.
+3. Track compile failures, drift failures, review defects, and developer
+   feedback for one release cycle.
+4. Reuse `payment-policy.prs` in one additional payment service.
+5. Promote the organization base only after both services produce equivalent
+   policy and stable CI.
 
 Operational success signals:
 
@@ -407,7 +464,8 @@ Operational success signals:
 
 ## Rollback
 
-Before the adoption commit, preserve current output and restore the complete pre-adoption target set:
+Before the adoption commit, preserve current output and restore the complete
+pre-adoption target set:
 
 ```bash
 rollback_dir=".promptscript-rollback-output-$(date +%Y%m%d%H%M%S)"
@@ -423,9 +481,12 @@ for path in AGENTS.md CLAUDE.md .claude .github; do
 done
 ```
 
-This removes newly generated capability files from active target paths while preserving them in a timestamped local directory. Confirm no user work was added under `.claude/` or `.github/` after the backup before running it.
+This removes newly generated capability files from active target paths while
+preserving them in a timestamped local directory. Confirm no user work was
+added under `.claude/` or `.github/` after the backup before running it.
 
-After the adoption commit, revert that complete commit instead of restoring individual generated paths:
+After the adoption commit, revert that complete commit instead of restoring
+individual generated paths:
 
 ```bash
 git log --oneline -- .promptscript/project.prs
@@ -433,20 +494,25 @@ git revert <adoption-commit>
 git status --short
 ```
 
-The revert restores modified files and removes generated files introduced by the adoption commit. Verify restored target files against the backup. Compare the adoption commit's parent with the recorded pre-adoption commit if adoption was split across multiple commits.
+The revert restores modified files and removes generated files introduced by
+the adoption commit. Verify restored target files against the backup. Compare
+the adoption commit's parent with the recorded pre-adoption commit if adoption
+was split across multiple commits.
 
-Then fix PromptScript source, rerun the dry run and full diff, and repeat the controlled takeover. Do not delete target files, disable a target, or keep `output.overwrite: true` merely to hide an ownership or parity problem.
+Then fix PromptScript source, rerun the dry run and full diff, and repeat the
+controlled takeover. Do not delete target files, disable a target, or keep
+`output.overwrite: true` merely to hide an ownership or parity problem.
 
 ## Production Checklist
 
-- Source files use syntax `1.5.0`.
-- Composition order has a written reason.
-- Replacement values are asserted by reviewers or tests.
-- Existing target files have recoverable backups.
-- `prs validate --strict` passes.
-- `prs compile --dry-run` shows only expected paths.
-- `prs diff --all --full` is empty after compile.
-- Git diff contains only approved source and generated changes.
-- CI reproduces output and fails on drift.
-- Generated outputs are tracked, never gitignored.
-- Payment and platform owners approve rollout and rollback.
+- [ ] Source files use syntax `1.5.0`.
+- [ ] Composition order has a written reason.
+- [ ] Replacement values are asserted by reviewers or tests.
+- [ ] Existing target files have recoverable backups.
+- [ ] `prs validate --strict` passes.
+- [ ] `prs compile --dry-run` shows only expected paths.
+- [ ] `prs diff --all --full` is empty after compile.
+- [ ] Git diff contains only approved source and generated changes.
+- [ ] CI reproduces output and fails on drift.
+- [ ] Generated outputs are tracked, never gitignored.
+- [ ] Payment and platform owners approve rollout and rollback.

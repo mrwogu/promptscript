@@ -7,10 +7,10 @@ This document describes the Feature Coverage Matrix and testing mechanism for Pr
 The Feature Coverage Matrix is a specification that tracks:
 
 1. **Tool Capabilities** - What features each classified AI target supports
-1. **Formatter Implementation** - Which features our formatters implement
-1. **Coverage Gaps** - Features supported by tools but not yet implemented
+2. **Formatter Implementation** - Which features our formatters implement
+3. **Coverage Gaps** - Features supported by tools but not yet implemented
 
-```
+```mermaid
 flowchart TB
   subgraph "Feature Coverage System"
     FM[Feature Matrix] --> |Defines| Features[Feature Specs]
@@ -46,7 +46,11 @@ type FeatureStatus =
   | 'partial'; // Partially implemented
 ```
 
-The target catalog contains 50 formatters. The matrix currently classifies 37 of them. A missing entry means the target has not been classified for that feature, not that the feature is unsupported. The formatter registry and generated [platform matrix](https://getpromptscript.dev/reference/formatters/index.md) remain the source of truth for target availability.
+The target catalog contains 50 formatters. The matrix currently classifies 37 of them. A missing
+entry means the target has not been classified for that feature, not that the feature is
+unsupported. The formatter registry and generated
+[platform matrix](https://getpromptscript.dev/reference/formatters/index.md) remain the source of truth for target
+availability.
 
 ### Categories
 
@@ -121,27 +125,29 @@ pnpm nx test formatters
 
 Feature coverage tests verify that formatters correctly implement the features defined in the matrix:
 
-```text
+```
 packages/formatters/src/__tests__/feature-coverage.spec.ts
 ```
 
 ### Test Categories
 
 1. **Matrix Integrity** - Validates the matrix structure
-1. Unique feature IDs
-1. Required fields present
-1. Valid status values
-1. **Coverage Summary** - Tests coverage calculation
-1. Valid coverage for each tool
-1. Coverage percentages are accurate
-1. **Feature Implementation** - Tests actual formatter output
-1. `markdown-output` - Valid markdown produced
-1. `code-blocks` - Fenced code blocks preserved
-1. `mermaid-diagrams` - Mermaid diagrams preserved
-1. `yaml-frontmatter` - Correct frontmatter generated
-1. `glob-patterns` - Glob patterns in output
-1. `workflows` - Workflow files generated
-1. `character-limit` - Warning on limit exceeded
+   - Unique feature IDs
+   - Required fields present
+   - Valid status values
+
+2. **Coverage Summary** - Tests coverage calculation
+   - Valid coverage for each tool
+   - Coverage percentages are accurate
+
+3. **Feature Implementation** - Tests actual formatter output
+   - `markdown-output` - Valid markdown produced
+   - `code-blocks` - Fenced code blocks preserved
+   - `mermaid-diagrams` - Mermaid diagrams preserved
+   - `yaml-frontmatter` - Correct frontmatter generated
+   - `glob-patterns` - Glob patterns in output
+   - `workflows` - Workflow files generated
+   - `character-limit` - Warning on limit exceeded
 
 ## Adding a New Feature
 
@@ -149,58 +155,58 @@ When adding a new feature to the matrix:
 
 1. **Define in Matrix**
 
-```typescript
-// feature-matrix.ts
-{
-  id: 'new-feature',
-  name: 'New Feature',
-  description: 'Description of the feature',
-  category: 'output-format',
-  tools: {
-    github: 'not-supported',
-    cursor: 'supported',
-    claude: 'not-supported',
-    antigravity: 'planned',
-  },
-  testStrategy: 'How to verify this feature',
-}
-```
+   ```typescript
+   // feature-matrix.ts
+   {
+     id: 'new-feature',
+     name: 'New Feature',
+     description: 'Description of the feature',
+     category: 'output-format',
+     tools: {
+       github: 'not-supported',
+       cursor: 'supported',
+       claude: 'not-supported',
+       antigravity: 'planned',
+     },
+     testStrategy: 'How to verify this feature',
+   }
+   ```
 
-1. **Add Test**
+2. **Add Test**
 
-```typescript
-// feature-coverage.spec.ts
-describe('new-feature', () => {
-  it.each(['github', 'cursor', 'claude', 'antigravity'] as ToolName[])(
-    '%s should handle new feature correctly',
-    (tool) => {
-      if (!toolSupportsFeature(tool, 'new-feature')) return;
+   ```typescript
+   // feature-coverage.spec.ts
+   describe('new-feature', () => {
+     it.each(['github', 'cursor', 'claude', 'antigravity'] as ToolName[])(
+       '%s should handle new feature correctly',
+       (tool) => {
+         if (!toolSupportsFeature(tool, 'new-feature')) return;
 
-      const formatter = formatters.get(tool)!;
-      const result = formatter.format(createTestAST());
+         const formatter = formatters.get(tool)!;
+         const result = formatter.format(createTestAST());
 
-      // Verify feature is correctly implemented
-      expect(result.content).toContain('expected content');
-    }
-  );
-});
-```
+         // Verify feature is correctly implemented
+         expect(result.content).toContain('expected content');
+       }
+     );
+   });
+   ```
 
-1. **Implement Feature**
+3. **Implement Feature**
 
-Add implementation to the relevant formatter(s).
+   Add implementation to the relevant formatter(s).
 
-1. **Update Status**
+4. **Update Status**
 
-Change status from `'planned'` to `'supported'` once implemented.
+   Change status from `'planned'` to `'supported'` once implemented.
 
 ## Best Practices
 
 1. **Keep Matrix Updated** - When implementing new features, update the matrix
-1. **Test All Statuses** - Tests should handle all feature statuses appropriately
-1. **Document Gaps** - Use `'planned'` status to track intended features
-1. **Add Test Strategies** - Help future developers understand how to verify features
-1. **Include Docs URLs** - Link to official tool documentation for reference
+2. **Test All Statuses** - Tests should handle all feature statuses appropriately
+3. **Document Gaps** - Use `'planned'` status to track intended features
+4. **Add Test Strategies** - Help future developers understand how to verify features
+5. **Include Docs URLs** - Link to official tool documentation for reference
 
 ## API Reference
 

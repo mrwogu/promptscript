@@ -2,13 +2,13 @@
 
 Skill composition lets you build complex skills from multiple sub-skill files. Each sub-skill is a standard `.prs` file that can be independently tested, compiled, and owned by different teams.
 
-Try it interactively
-
+:::tip[Try it interactively]
 Open the [PromptScript Playground](https://getpromptscript.dev/playground/) and load the **Skill Composition** example from the gallery (Examples → Advanced) to experiment with the multi-file ops/triage/code-fix layout described below without leaving your browser.
+:::
 
 Use `@use` directives inside a `@skills` block to import sub-skills as ordered phases:
 
-```
+```promptscript
 @meta {
   id: "ops"
   syntax: "1.1.0"
@@ -28,6 +28,12 @@ Use `@use` directives inside a `@skills` block to import sub-skills as ordered p
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhmaOPLES4AT3YZCs+QEYKBgAwrWAXzFjucANbQocYasGK4s0eImCp8RtQhoWBBsuiAACtTMUgCujEFsglj+GADmMIJgzNSCjFDM0VKCcDDUAG4QjPCmXjlsHOyhKiDONQCa+YIY1OlCNFGx8eJJEKnpWYw48EnYWRSCAGLMUHkA7omTgmg4GMWOAEYwqy1eEOJZPtRzAMorEFgTggdYKzCcgiQYrNEYUJ2shX4EiQouk9jsYIUEix2EQsBRjk1qoILJ5uNFioIKAB6LbguBYyY-XAAWjgjE+zjRGOxuN2WOGowAFMVSiU7upQn47hUfvIAJSU9HpGnbOksHzEyCETqODDRLDMKViMwgMx0dDYPCIEC0+AEmBEnCk8msKi0EAMaH1LD4ADEgiu0TQ5AgEKKzHW6SIpHI6Wo0VYjkm3TmADlmFhNl1I4rPd5mIxonwtIM6H9CqwI51BN0flHGDZRvDWLx+EIPBJpKFdfjCVASWSKc1PBotDo5CADABWCgmZsSEgQQinWRJaIwZVWOACf5dKSOCu1HyyZDyMJQDCVHBLC5FGdSOfyAC6zg409OKRXa43W53JT3nwP1Ckx8nJe60-8cWCgacnmJHbrpuMDblAu4fsM35sKYKpqhquD4DW9LJGkZr0EwdScDa2r2o6zpQK6hRwB6uBesQZCwDmAZBiUMBhlmmDUDGYBxlICZJlh2A-mmj6CJmkZCLmvyYAWRZWHwAh-pWMgdkhDJpEirYCO2+gUD2fbOIOw6sKO-oTp4jGkG4UleCybJYOoAD8sifheggALwdt6FETv2yJvtY+5zguzjijAV7hDeIF3tk06PoeIAnp4Z5BKwl6CKugXAaBu5hbOz6vuYVgQV+gw+f+gFBSl945RUgwwaq6o6pqiGinqfmSkOaEWhhMJcDhDpOi6brEXGzm+lRv7BnRgjhpGjHMax7HJgIqbpnxWaCQawmboWqHiWWJlVrJdX4g1SpuUp2ihN2vZIlpI6JHpHlpU+84mX5AVAbeYH3rdEVRRIMUXk9RUhQ+6UvpFHmlVBv6LgB17Jf9oPlc2sFHgwWHUOo+D9ZQNDoaytA-vgeiqkAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 The resolver flattens all sub-skills into a single skill with labeled phase sections, unioned `allowedTools`, concatenated references, and `composedFrom` metadata tracking provenance.
 
 ## Why Composition?
@@ -46,7 +52,7 @@ A sub-skill is a standard `.prs` file with a `@skills` block. It can also includ
 
 ### Minimal Sub-Skill
 
-```
+```promptscript
 # phases/health-scan.prs
 @meta {
   id: "health-scan"
@@ -64,9 +70,15 @@ A sub-skill is a standard `.prs` file with a `@skills` block. It can also includ
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEaODHHgB6HDAxRcAWjiMMrKrQA6rAAIkYWDL2CrevCABNEvZSHGSZchef284AT3YZCp8wEYKXgAx3WAL6qqmpwANbQUHC69pZSOLLyrKZ6rAYGRvCM1BBoWBBs7iAASgCuaQCyAMIACrxxuLyM4oxh0RBpmNSSsFD+6bw9zADuMEYAKszMUabI5iSMaAD6SyRsEFjMOawA5ivNMK1Li6XmdGYgC8ur65vbe8ctYaswa9SO5gC69gYs7JxYIp2EA-dJlNI9eoSeJNJ7tToYbpQXoUXjFGBoLZYBxYailRhYUrUMa8SCsIwdHZwCig4H9XhBQIgAKfBgA974IikcgwJT0EAANxgtAKrHwHmZQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Sub-Skill with Context Blocks
 
-```
+```promptscript
 # phases/triage.prs
 @meta {
   id: "triage"
@@ -100,13 +112,19 @@ A sub-skill is a standard `.prs` file with a `@skills` block. It can also includ
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEaODHHgB6LNQgYA5jCq0AOqwACJGFgy9gi3rwgATRL3khxkmce284AT3YZCh4wEYKLgAwXWOzNVJxDWl46VjAAbjASWNaGcKasUrwAvEYgGFBQnjoAvoo5rIpKANaszADusHoympa41PA4zFB6-tVBOoxoAK4A+oyREIxphgCcHm28qiTM1Na9-YNQIwCsljoR1NPdvhxzEFgDQ7xOY9m5igV1sRKM+2xwrToAtCkAcmERvPAL2DC8pXsNTpYT6hfScRi-MAbEi8bC8WBCYEAJl0rD0MDQnHR7F4jBwMEYhTgmV4z2Mb3C1FxUCEcAgYGsIUpe0ZOAgUnxVNwGC8wGAwmZUSyWV4tXqjT0njyBTghWgUHugR0pmkMACq146LgfQgaFurEcIAAwjS4HSGbC0bwpBtOmhePi0rheJA0RB4vcAEaMgURFkk9psDjsQ0WEAanQm2n0xlpKAu916d1SOAUXgAcVt9u9IWooIhdFF+K8Od9kWsFAjvAA8qwoIz3YwoJ10Qm3R7YcDprDPcxwpp+e9y8L4e8oJXxmGSXksiAsgBdBiccTWfBEUjkWQ0eggSl0tj4JxzoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 When this sub-skill is composed, its `@knowledge` and `@restrictions` appear under the phase's section header in the flattened output.
 
 ## `@use` Syntax Inside Skills
 
 All existing `@use` features work inside skill blocks:
 
-```
+```promptscript
 @skills {
   ops: {
     description: "Production operations"
@@ -136,7 +154,7 @@ Phases are resolved in declaration order (top to bottom). This order is determin
 
 The resolver produces a single skill by concatenating:
 
-```text
+```
 [Parent content - orchestration instructions]
 
 ---
@@ -196,8 +214,8 @@ Phase names come from the alias (if `@use ... as alias`) or the skill name from 
 When a sub-skill file contains multiple skill definitions, the resolver picks:
 
 1. **Exact name match** — filename (without extension) matches a skill name
-1. **First skill** — no name match, use the first defined skill
-1. **Error** — empty or missing `@skills` block
+2. **First skill** — no name match, use the first defined skill
+3. **Error** — empty or missing `@skills` block
 
 ## Limits
 
@@ -223,7 +241,7 @@ prs validate --strict
 
 ### Project Structure
 
-```text
+```
 .promptscript/
   project.prs
   skills/
@@ -236,7 +254,7 @@ prs validate --strict
 
 ### Parent Skill (`ops.prs`)
 
-```
+```promptscript
 @meta {
   id: "ops"
   syntax: "1.1.0"
@@ -264,11 +282,17 @@ prs validate --strict
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhmaOPLES4AT3YZCs+QEYKBgAwrWAXzFjucANbQocYasGK4s0eImCp8RtQhoWBBsuiAACtTMUgCujEFsglj+GADmMIJgzNSCjFDM0VKCcDDUAG4QjPCmXoLRxdQAkqylzIwYAEawsknRMM4SLOycWKEqIP1eAJr5ghjU6UI0UbHx4kkQqelZjDjwSdhZFJaeNQBizFB5AO6Ju4JoOBjFju0w15LiWT7UiBMSBoIAErRcS7DBQXA5XaMGyODB+ZhwOGXIolcqVZQnLwAJgoggAKsk0rNWIVck84BAwOoMhBSXSUpiahIAMx4gCCaHINIw0SwzBI2BghUghHggiuu3mRQwYD6rD+ggAylcIFgdoJXlgrjBOIJBaxouDBAAKOkcajwoKlGAAShJZMi4hNIOwHFJwvtJCi8uZmqewpc4kGHEIWCOWLG1UEFk83Dq6QoAHoHgG4EmwRCcABaOBtBVxhOCZOp55J9abE3FG3+LDqUJ+NUVcHyW3OePFYspx5llg+bOi2ZwvnMUViMwgMx0dDYPCIECl+AZmDg3C5-NUWggBgh4b4ADEyuiXKgEEDcGYt3SRFI5HS1BBjilMDxADlmFh7nNP6Or95WtEfBaKsdAOoIrAfrMgjzMamAwpsEa8PwQgeBI0ihIu6aZmueYYAq4yeBoWg6HIIAGAArBQJgERIJAQIQdLdA+8qxtYAiknMUiOKhOQ+rIyDyGEUDwjAOAXN8RTsVInHyAAus4HBwEErApPxgnCZUYlQBJSl4dJ1BSHJ45WPMSn+HEwSsNxzjZqRQkiVpEmmesFlsKYE5TjOuD4Jh5ZEi+ND0EwbDulgB5HieZ6FBef43mQsDQY+gjPm+kGYNQP5gH+UgAUBAggWBEGfkIMFQF+8FpIhfACE4njoaRvkVmk0ZEQIJH6BQlHUc4dEMawTG9M46WkG4tU1NWJRquoAD8shmQyggALykXFd7RrGrG6RxBnWZ4fYwGp4QaaJ4klJJekySA8meIpymqYIAlHQ5p3ZFt+mGVdxmsNwznmasu0SLZ6nPdpZ2-RUqzuZO04LrOPk9ku+0DvRm5BbuXDzoeSrHuQUVFJeuDXsQ8X3klKWCO+n7pZl2W5cM2CWaBengZBJUrmVcE2AhVjVShzj1fIvlI2ONFFJobWhBRVHRr1jGJMxX1sRdO1jbxPiHfZmkved20fddEi3QyGvHY5Z1vZd12seDrlWarQNPVroPZNbkMER5skMMM1DqPgq2UIF24gDWlJsPgeiTkAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Sub-Skills
 
 **`phases/health-scan.prs`** — runs health checks with dedicated MCP tools:
 
-```
+```promptscript
 @meta { id: "health-scan" syntax: "1.1.0" }
 
 @knowledge {
@@ -292,9 +316,15 @@ prs validate --strict
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEDhgYouALRxGGVjMFwAnuwyFJMgIwUTABk0BfKRtbcA1q2YB3WGIDmMYTcHSQMgNZfAAl5RRxBRjlGe0FOMTRmCHY4RB9BJUEAejkFXEEwZmpBYIAVUoAFLRhqADcIRnh0zKzqeTFtAqLBAGkAVwAjGtZ+eEE2jDFk+Dhm7L4saga4LuKK6mYFuT6V1WoMNGT3dID-f1ZrW244e2goFeB03PCVNVZJR6DfQTF4RiW0FgIGxDCAAEp9IIAWQAwlVnvkojAYitkoJMPsoLAoIFvoIFFAXDAxKVmMx7pJkDISIw0AB9OkkNgQLBFI4MpExOm0voyOh+Gn0xnM1lLVjuDnReyMmBM6jaGQAXXSvhY7E4WFBpxV3whQQJggREU59lRQQxBJgUAogjBMES1CwWkWfUYWD6bTEBWSU3Fsy+eOcLIicBq9UaglYpBg-LgAndcH56i9bTgiVYocEQL4FB12vOvkulhAlkVDA18vwRFI5BgVFoIAYtRqcGBrHwRhLQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 **`phases/triage.prs`** — classifies findings with parameterized severity:
 
-```
+```promptscript
 @meta {
   id: "triage"
   syntax: "1.1.0"
@@ -317,9 +347,15 @@ prs validate --strict
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgs1CBgDmMeWIlwAnuwyFZ8gIwUTABg3jBmaqTizgguDABuMJVm2y4iiKxWCALxyIBhQUPKCAL5iMaxi3NTwvoxYEGxwwpqCALQhAHKu7oLwjGHYMIIA7hC4zACuWCUu0pyMlWDUzCSC2IKwGD6CAEySrFIwaJwT7IKMODCMANZwlhJ58oVu1HNQg3AQYNpORR7HOBAqCzu4GOLAwM7btdpRUYK4SXA4zFBSlnEEnAltAoJlRFZfKoYA5shIJnBGEo0Gk2IYQABhPZwA5HXrjQQqLr1NCCBZhXCCSDjPwqTIAI2OT3cLzWEjmbA47HRGhAcPZWP2h2OYSgVL8UlpcAoggA4sTSYyTtQWu06B8FuIlcyzhR+RIAPKsKDHPyMKD1Cbimn+TJ9Zg7DD05huYSPU4vN79IpQPVWCS8tlxKIgKIAXQYnEU2nwRFI5BgVFoIAY2wObHwRlDQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 **`phases/code-fix.prs`** — applies automated fixes with restricted tools:
 
-```
+```promptscript
 @meta { id: "code-fix" syntax: "1.1.0" }
 
 @restrictions {
@@ -342,6 +378,12 @@ prs validate --strict
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJszEwAtJEIzBcAJ7sMhSTICMFAwAZVAXymsL3avCzUIjLBDZxhFwYIXSQAORgA3GGpBNABXOBxBMQgbRyh1QSxmQRIMCFZBACNqDFZGHBl3T28-QOCSOQgwBMhYV2ZQrDhxGEScVowwMBhHGDE1IP8HVujYpOp1QtZzS1ZuOABraChXYCKWeSUIHTcMjyj4Rns0JzZdEAAZZkZsVo2YOkEjmFusnLycR4B3ew5BZUez1eAAUAEpTfaCDBQKDML59AAqzGYK0kyBkoJeYhkjxkAFFolgcd4AEIYCLEmQAcRsaBkAF0ih4WOxOFhzoUQEz9gAxZjBF75J6-BzQ-7paKsADmiG5HgMgiuNz+uFaNlg-lyWDUDWojDuchgcsEACYKIIAMI2V5CbrYUI2N65fLGgDM5oAgmhyAlVeKVHtIQAWc2g0IZDhwJrGgCs5qtLz+QjCMMENgAjqFbIIvhBcG1WpBWJKpVDXCyOIQiYHvJyijNTCBTPSGGyJvgiKRyDAqLQQAwys02Pg9E2gA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 After `prs compile`, the `/ops` skill is available in all your AI agents with all phases flattened, tools unioned, and restrictions preserved per phase.
 

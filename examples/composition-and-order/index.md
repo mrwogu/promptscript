@@ -4,7 +4,7 @@ Goal: predict final values when several layers modify the same block.
 
 ## Files
 
-```
+```promptscript
 # base.prs
 @meta { id: "base" syntax: "1.5.0" }
 @standards {
@@ -58,6 +58,7 @@ prs validate --strict
 prs compile --dry-run
 ```
 
-Common failure: moving `@override` before target creation. Override targets must exist when operation runs.
+Common failure: moving `@override` before target creation. Override targets
+must exist when operation runs.
 
 See [Composition and Precedence](https://getpromptscript.dev/reference/language/composition/index.md).

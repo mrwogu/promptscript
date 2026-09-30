@@ -1,8 +1,9 @@
 # Agents
 
-The `@agents` block defines specialized AI workers as a core part of project configuration. Each agent can own a role, prompt, model, tool policy, skill set, and MCP access.
+The `@agents` block defines specialized AI workers as a core part of project configuration. Each
+agent can own a role, prompt, model, tool policy, skill set, and MCP access.
 
-```
+```promptscript
 @meta {
   id: "agent-team"
   syntax: "1.4.0"
@@ -30,30 +31,58 @@ The `@agents` block defines specialized AI workers as a core part of project con
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMAc05YAtB1LyxEuAE92GQrPkBGCgBYKABi2sAvmLHclKuMO2CWUmKuowAbhAwAO4w1LKi4hKC3nCM1BBoWBBsxiAASgFBwZ44GKzKUp7M3oIARjBgzH6CfNTKttGCWMzMUHCyyPKZGFLydHIgAOJ+aP2DQ1DMZePyAEIYcDjyALoeEiQlMFBpcGys-I3RcADW0O2d8nAwjACuCVi6vlkhq+u1jGgAymH+YR2CLogCBwOC3HxYagYRgnMJvKISFjsFRpLQgd4STKBELNHAwTz3PzsGIQMBgCgYwSZNDVLDFah+RhYA6ggbXO4PXQDfJFJGQ6F0kFg+CCYIQXCCSCwQR+MBhTiMeAUhGDNEeBysDzeMq3RTKcLuFWxeKJZKpQYASVYfzgyUU2HxYAw0AgBWa8Cwbh5Mtu7AgfEEYWo1TgRwkLTaAKBPT6IAG8gAolJxbMQAslqmRjAxiA1iq0GESEKUqwALJbNLQxVJJPi0PolV8lGDABirqKweYdMYGFu1wG-vIMD4xNw+LgJAwUFgtslEEI3NYHd9kuYd2uRX8U+k2BLFIbEg1dhAdhWDBU1F0+CIpCHVFocZAf1oJfwJhPQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Imported Agents and Namespaces
 
-An aliased `@use` qualifies every imported agent with the alias. This lets multiple fragments define the same local agent name without overwriting one another:
+An aliased `@use` qualifies every imported agent with the alias. This lets multiple fragments
+define the same local agent name without overwriting one another:
 
-```
+```promptscript
 @use ./frontend-team as frontend
 @use ./backend-team as backend
 ```
 
-If both fragments define `reviewer`, the resolved names are `frontend.reviewer` and `backend.reviewer`. An unaliased import keeps its original name when that name is unique:
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODsKAHpVNg5PAFoOUjFlavZOb19S8oqAIwxGAGt2hpgmjGU+wfaQfLp0bDxEcFc2+saSKloQBhZVrB5eAGU3NHIIaVl5W14iUnI7ag9lHBhqGApeADlmLHsMal+zDAChevHEzEYbi0IiwEDYdDEnl4rB+Yl4bwwUD+gw072KQhEvECVhCKWWNWG6zywTgCREyXCIHSWVyIDiJAghAgrDCWEeMB8hV8cBEnn+4mUxOCLCkYWQEQAClB+jAcMwoFJqLJReJxREALpxDgi7nqOWK5WMVXqzXajBi6jeECGgrFN4i6gQRiwtiSuJ1RlKlVqjWvdHwPlen2sPL5GZzECYXD4SZDNajDY0ehMClcJZ8Y6nKDnGRyEF2W7RB5PXgvN4fb6-TAAwzA67gyHQ7Bw1gI+0yFG-UQYrGYHHqPG+AkBOIQUKM1OUjPU+KJBlpTI5Fccrk8hT8wXFEX98V+kkymDmkBBq0h23Hh1Ol3BY2w1hm3jy6+W62hrUP3VHQNQ9fHdSNvR7M9ggDC1gxtMMwM9CC2FjGZ9QYTg+UcfBK3uTZswAN1eOAe3wVIZiAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
-```
+If both fragments define `reviewer`, the resolved names are `frontend.reviewer` and
+`backend.reviewer`. An unaliased import keeps its original name when that name is unique:
+
+```promptscript
 @use ./shared-reviewer
 ```
 
-The resulting agent remains `reviewer`. If an unaliased import conflicts with a local or another imported definition, compilation stops with a diagnostic that lists every source, import path, namespace, and the recommended alias or rename action. Definitions are never silently overwritten.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODsKAHo4HAxqaQBaOoA3CBhzGGoQfLp0bDxEEGrahubW9uoqWhAGFnZOLB5eAGU3NHJWmTkFHDsiUnI7ag9lHbqKXgA5Zix7WpvmMG27cWZGNy0RLAg2OjFPXlY1zEvDqGCgt0YAGsNDAKMUhCJeIErCEUoManVxI0YC02h08sE4AkRMlwiB0llciA4iQIIQIKwwlgjjAfIVfHARJ5auJlMjgiwpGFkBEAApQDCMGA4ZhQKTUWRc8Q8iIAXTiHE5DPUwrFEqlMrlHUVGG51G8IHVBWKdU51AgjC+bD5cXqZPFkulsvlIPgzIdTtYeXyXVVDHm1Ec+D20VhNHoICaHTg31Y+FSXSAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
-Inheritance applies the same rule: a child cannot redefine a parent agent with different content. Identical definitions are allowed.
+The resulting agent remains `reviewer`. If an unaliased import conflicts with a local or another
+imported definition, compilation stops with a diagnostic that lists every source, import path,
+namespace, and the recommended alias or rename action. Definitions are never silently overwritten.
 
-Qualified names are mapped consistently for native output. Dots become hyphens, so `frontend.reviewer` becomes `frontend-reviewer` in filenames and native identifiers. If two qualified names map to the same native name, a deterministic numeric suffix keeps the output collision-free. Resolved programs expose this information through `agentProvenance`.
+Inheritance applies the same rule: a child cannot redefine a parent agent with different content.
+Identical definitions are allowed.
 
-Nested aliases retain the full namespace. If `team.prs` imports `inner-team.prs` as `inner`, then an outer import as `frontend` resolves the inner team's `reviewer` agent to `frontend.inner.reviewer`:
+Qualified names are mapped consistently for native output. Dots become hyphens, so
+`frontend.reviewer` becomes `frontend-reviewer` in filenames and native identifiers. If two
+qualified names map to the same native name, a deterministic numeric suffix keeps the output
+collision-free. Resolved programs expose this information through `agentProvenance`.
 
-```
+Nested aliases retain the full namespace. If `team.prs` imports `inner-team.prs` as `inner`, then
+an outer import as `frontend` resolves the inner team's `reviewer` agent to
+`frontend.inner.reviewer`:
+
+```promptscript
 # team.prs
 @use ./inner-team as inner
 
@@ -61,7 +90,16 @@ Nested aliases retain the full namespace. If `team.prs` imports `inner-team.prs`
 @use ./team as frontend
 ```
 
-Known agent references are rewritten with the same namespace. For example, an imported definition that contains `agent: "reviewer"` or a handoff entry targeting `"reviewer"` points to `frontend.inner.reviewer` after resolution. Native output then uses `frontend-inner-reviewer` consistently for both the agent file and handoff target.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4OUipaH343ODsKAHoIVlYYagBaUpIxZUbm6iLWPhpmACsYRixyuErq2rqOrpVXdk5xEHy6dGw8RBAelvaYMpp6JjYOLh2+AGU3NHIIaVl5W14iUnI7ag9lHBaYCl4ADlmFh7BhqKDmGAFL9eOJmIw3FoRFgIGw6GJPLxWCCxLxqIcoGDGABrDT-SpCES8QJWEIpXZNfYdPLBOAJETJcIgdJZXIgOIkCCERphLBfGA+Qq+OAiTzg8TKWnBFhSMLICIABSgGEYMBwzCgUmosjl4gVEQAunEOLLGup1VqdXqDUaWqaMPLqN4QNaCpUCbLqBBxmjWEq4q1udrdfrDcb8fBxSHUWw8vk1hsQJhcPgOpMQAwWMsLiBrrd7o85DC7G9op9vrxfgSAcDQZgIYZoS94YjkdgwxjPTIcaDRASMETMKTyRRKf4aXEIKFuSyBXT2YkuWlMjlWbwhSLWGKJVLKrLhwqI3TVTBHSAYy74+6L16fX7grbUawHbwNQ-nTjN0TVfc1vStM9fEDZNQzYa9gijJ1Y1dBNoODWDWHTNZLQYThxUcfA6w+AsGAANxaOAw3wVI1iAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+Known agent references are rewritten with the same namespace. For example, an imported definition
+that contains `agent: "reviewer"` or a handoff entry targeting `"reviewer"` points to
+`frontend.inner.reviewer` after resolution. Native output then uses
+`frontend-inner-reviewer` consistently for both the agent file and handoff target.
 
 ## Agent Properties
 
@@ -81,11 +119,15 @@ Known agent references are rewritten with the same namespace. For example, an im
 | `sandboxMode`         | No       | Selects target-native sandbox policy                  |
 | `nicknameCandidates`  | No       | Provides target-native display names                  |
 
-Validators check supported enum values and forbidden fields before formatters generate output. Target-specific fields are emitted only where the native agent format supports them.
+Validators check supported enum values and forbidden fields before formatters generate output.
+Target-specific fields are emitted only where the native agent format supports them.
 
 ## Field Support Matrix
 
-Every canonical `@agents` field has an explicit status per native target. The matrix is machine-readable in `@promptscript/core` (`agent-capabilities.ts`) and drives the compiler diagnostics, so the table below cannot drift from what formatters actually emit:
+Every canonical `@agents` field has an explicit status per native target. The
+matrix is machine-readable in `@promptscript/core`
+(`agent-capabilities.ts`) and drives the compiler diagnostics, so the table
+below cannot drift from what formatters actually emit:
 
 - **emitted** - written to the native agent file under the same name
 - **transformed** - written under a target-native name or representation
@@ -112,9 +154,21 @@ Every canonical `@agents` field has an explicit status per native target. The ma
 | `background`          | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
 | `isolation`           | -           | emitted | -       | -       | -           | -        | -       | -       | emitted |
 
-GitHub transformation examples: `tools` maps PromptScript and Claude Code tool names to Copilot aliases (`Grep` and `Glob` both become `search`), and `model` uses Copilot model names (`sonnet` becomes the newest Sonnet release, such as `Claude Sonnet 5`). Other targets keep the `model` field name but also get their native model names, see [Models](#models). Codex transformation examples: `content` becomes `developer_instructions`, `reasoningEffort` becomes `model_reasoning_effort`, and `skills` becomes the `skills.config` array.
+GitHub transformation examples: `tools` maps PromptScript and Claude Code tool
+names to Copilot aliases (`Grep` and `Glob` both become `search`), and `model`
+uses Copilot model names (`sonnet` becomes the newest Sonnet release, such as
+`Claude Sonnet 5`). Other targets keep the `model` field name but also get
+their native model names, see [Models](#models).
+Codex transformation examples: `content` becomes `developer_instructions`,
+`reasoningEffort` becomes `model_reasoning_effort`, and `skills` becomes the
+`skills.config` array.
 
-Every other target has no native agent output: the whole `@agents` block is omitted and reported with a `PS4003` warning instead of being dropped silently. The same diagnostic fires per field when a native target cannot represent authored data (for example `tools` on Cursor, or `skills` on GitHub), naming the agent, the field, the target, and which targets do support the field.
+Every other target has no native agent output: the whole `@agents` block is
+omitted and reported with a `PS4003` warning instead of being dropped
+silently. The same diagnostic fires per field when a native target cannot
+represent authored data (for example `tools` on Cursor, or `skills` on
+GitHub), naming the agent, the field, the target, and which targets do
+support the field.
 
 ## Native Output
 
@@ -132,28 +186,42 @@ Targets with native agent systems receive dedicated files. Common examples:
 | Amp            | `.agents/agents/<name>.md`                                     |
 | Grok Build     | `.claude/agents/<name>.md` (delegated to the Claude formatter) |
 
-Targets without a native agent contract still receive project instructions through their primary output. Check [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) before depending on target-specific fields.
+Targets without a native agent contract still receive project instructions through their primary
+output. Check [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) before depending on target-specific fields.
 
 ## Models
 
-`model` and `specModel` values resolve against a built-in model catalog, and each target gets the model name it expects. Claude Code keeps floating aliases such as `sonnet`, GitHub Copilot gets display names such as `Claude Sonnet 5`, and Factory AI, Codex, and Cursor get model ids. The floating aliases `opus`, `sonnet`, `haiku`, and `fable` follow the newest release of their family in the catalog. Names the catalog does not know are written unchanged, unless the target spells them its own way: GitHub Copilot writes `auto` as `Auto`.
+`model` and `specModel` values resolve against a built-in model catalog, and
+each target gets the model name it expects. Claude Code keeps floating aliases
+such as `sonnet`, GitHub Copilot gets display names such as `Claude Sonnet 5`,
+and Factory AI, Codex, and Cursor get model ids. The floating aliases `opus`,
+`sonnet`, `haiku`, and `fable` follow the newest release of their family in
+the catalog. Names the catalog does not know are written unchanged, unless
+the target spells them its own way: GitHub Copilot writes `auto` as `Auto`.
 
-A target that cannot run the model's provider, such as Codex with a Claude model, omits the field and reports `PS4004` during compilation. The same happens to a name with a line break or control character.
+A target that cannot run the model's provider, such as Codex with a Claude
+model, omits the field and reports `PS4004` during compilation. The same
+happens to a name with a line break or control character.
 
-PS041 reports agents pinned to deprecated or retired models, with the suggested replacement. When `models.supported` lists the models your instructions are written and tested for, PS041 also reports agents pinned to other models:
+PS041 reports agents pinned to deprecated or retired models, with the suggested
+replacement. When `models.supported` lists the models your instructions are
+written and tested for, PS041 also reports agents pinned to other models:
 
 ```yaml
 models:
   supported: [opus, sonnet, gpt-5.3-codex]
 ```
 
-The [Model Catalog](https://getpromptscript.dev/reference/models/index.md) lists every built-in model, the current release behind each floating alias, and what each target writes. See [Configuration: models](https://getpromptscript.dev/reference/config/#models) for adding models that are not in the built-in catalog yet.
+The [Model Catalog](https://getpromptscript.dev/reference/models/index.md) lists every built-in model, the
+current release behind each floating alias, and what each target writes. See
+[Configuration: models](https://getpromptscript.dev/reference/config/index.md#models) for adding models that
+are not in the built-in catalog yet.
 
 ## Agents and Skills
 
 Agents reference reusable skills by name:
 
-```
+```promptscript
 @skills {
   database-safety: {
     description: "Database change safety checks"
@@ -170,13 +238,20 @@ Agents reference reusable skills by name:
 }
 ```
 
-This separates reusable knowledge from agent orchestration. Multiple agents can use the same skill, and formatters choose the target-native representation.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq15xbAwAIww4GABaOAwwYUcw6uDgqThGagg0LAg2FJAAEXqmlp0cDFZ1Ow6urEdFmEZSuDz+nTYOdimAJRgANwgYc14SCBdsCdY4Ol5XKCgm3d4GmCW12Y1HeUGYuwgK3eyxkdRE9mo8Bg1EuzzYFAOvEKBSKvg0nFMvD690eanGbFaiOut2RvTiA3gw1G5NY5yuNzucMazTsDyeLP2IHpsnKXzgYWQES58za626EQAusKWOwCWzqXcaMw0MwWjI+WSXsp-mBgXYpORmI4tFgMUKatj8iB8gqGATqI58ERSOQYFRaCAGJdkXAXvhUs6gA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+This separates reusable knowledge from agent orchestration. Multiple agents can use the same skill,
+and formatters choose the target-native representation.
 
 ## Agents and MCP Servers
 
 Define project MCP servers once, then reference them from agents:
 
-```
+```promptscript
 @mcpServers {
   issue-tracker: {
     transport: "stdio"
@@ -193,7 +268,14 @@ Define project MCP servers once, then reference them from agents:
 }
 ```
 
-Agent-level MCP references only apply to targets whose native agent format supports them. Other targets continue using project-level MCP configuration.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH0FGNABlGGoAN0rlQKtjODg3GABaLDVGAGtKsPrg4I6MVjg0ZmosFJA4LHEIZjyBnWYSEmHQ3mQI1mYpCLpwkAoAeixmZig4Y6Vm+AoSACs4CIBdOMKCot8NTlNefvsrnEbkYWFaFlYvX+cWCUjgjGoEDQWHmrCmADUMFAIOJsHZzOMumJ1BgICMsIDdiCKdQYABHNwQWlaUyLAYkUoVaq1MJbEA3FrtTo9aivGHLdi-KYAJRgEjEoIgNV4tIZTJgLOU614NURYEcCsYMGRwyNOkRHERGAobI++RA+ReDF+1Ec+CIpHIMCotBADF1cFR+FSDqAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+Agent-level MCP references only apply to targets whose native agent format supports them. Other
+targets continue using project-level MCP configuration.
 
 ## Target Versions
 
@@ -216,19 +298,31 @@ targets:
       version: full
 ```
 
-Codex also emits agent TOML files in `multifile` mode. Compiling a version that cannot emit agents reports `PS4003` for the whole block instead of dropping it silently.
+Codex also emits agent TOML files in `multifile` mode. Compiling a version
+that cannot emit agents reports `PS4003` for the whole block instead of
+dropping it silently.
 
 ## Global Installs
 
-`output.baseDir` (or `prs compile --output`) can point at a global root such as `${HOME}`. To install only generated resources without unrelated root instruction files, select resource kinds:
+`output.baseDir` (or `prs compile --output`) can point at a global root such
+as `${HOME}`. To install only generated resources without unrelated root
+instruction files, select resource kinds:
 
 ```bash
 prs compile --output "$HOME" --resources agents,skills
 ```
 
-Valid kinds are `agents`, `skills`, `commands`, `mcp`, `hooks`, `plugins`, and `main`. Without `main`, root instruction files such as `CLAUDE.md` or `AGENTS.md` are omitted, so a global compile produces only directories like `.claude/skills/`, `.claude/agents/`, or `.factory/droids/`. The same selection can be pinned in config with `output.resources`.
+Valid kinds are `agents`, `skills`, `commands`, `mcp`, `hooks`, `plugins`,
+and `main`. Without `main`, root instruction files such as `CLAUDE.md` or
+`AGENTS.md` are omitted, so a global compile produces only directories like
+`.claude/skills/`, `.claude/agents/`, or `.factory/droids/`. The same
+selection can be pinned in config with `output.resources`.
 
-Global output is guarded: compiling into the home directory without a resource selection prints a warning first, and protected personal override files (`~/.factory/AGENTS.md` today) are refused outright. Resource-only runs skip managed cleanup so unselected files are never treated as obsolete and deleted; run a full compile to prune stale generated files.
+Global output is guarded: compiling into the home directory without a
+resource selection prints a warning first, and protected personal override
+files (`~/.factory/AGENTS.md` today) are refused outright. Resource-only runs
+skip managed cleanup so unselected files are never treated as obsolete and
+deleted; run a full compile to prune stale generated files.
 
 ## Design Guidelines
 
@@ -241,7 +335,7 @@ Global output is guarded: compiling into the home directory without a resource s
 
 ## Related Documentation
 
-- [Language Reference: `@agents`](https://getpromptscript.dev/reference/language/#agents)
+- [Language Reference: `@agents`](https://getpromptscript.dev/reference/language/index.md#agents)
 - [Agents Example](https://getpromptscript.dev/examples/agents/index.md)
 - [Skills and Resources](https://getpromptscript.dev/features/skills/index.md)
 - [MCP and Plugins](https://getpromptscript.dev/features/integrations/index.md)

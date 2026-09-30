@@ -12,7 +12,7 @@ Both blocks require PromptScript syntax `1.4.0`.
 
 Define local stdio servers:
 
-```
+```promptscript
 @mcpServers {
   repository-tools: {
     transport: "stdio"
@@ -22,9 +22,15 @@ Define local stdio servers:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH0FGNABlGGoAN0rlQKteahg0ZjgTZmpHAFosZmYoODD64OCsNVY4FuosFJA4LHEIZjyRnWYSEgxPMOQI1mYpCLpwkAoAel7+uDOmlrbezq6SUooSACs4CIBdONGIIXcWAAsoNeABmbKQ3INQoFED5L4MThjRz4IikcgwKi0EAMGq0JasfCpeFAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Define remote HTTP or SSE servers:
 
-```
+```promptscript
 @mcpServers {
   knowledge-base: {
     transport: "http"
@@ -35,6 +41,12 @@ Define remote HTTP or SSE servers:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH0FGNABlGGoAN0rlQKteAGtWC1hxdRgAWgAjDDgYMPrg4Kw1Vjg0ZmosFJAcLCw0POHeN2ooWfnFuEQAel2SUooiUnIYCl1djDQIZeGcGAlawbiVgA1OgGEoCE4Z8JANGYZFMjGoEDQWDuwUKDVh+RA+QAugw-tRHPgTtFzjR6CAarQIGx8KlEUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### MCP Properties
 
@@ -50,17 +62,20 @@ Define remote HTTP or SSE servers:
 | `disabledTools` | Disable selected tools                           |
 | `timeoutMs`     | Configure startup or request timeout             |
 
-Target formatters translate these properties into native MCP configuration. File paths and supported fields vary by platform. See the [formatter capability matrix](https://getpromptscript.dev/reference/formatters/#mcp-hooks-plugins-support).
+Target formatters translate these properties into native MCP configuration. File paths and supported
+fields vary by platform. See the [formatter capability matrix](https://getpromptscript.dev/reference/formatters/index.md#mcp--hooks--plugins-support).
 
 ## Credential Handling
 
-Do not store tokens in `.prs` files or generated MCP configuration. Provide credentials through the target platform's runtime environment or native secret management. Generated MCP files are platform-specific, so review output for every enabled target before enabling a server in production.
+Do not store tokens in `.prs` files or generated MCP configuration. Provide credentials through the
+target platform's runtime environment or native secret management. Generated MCP files are
+platform-specific, so review output for every enabled target before enabling a server in production.
 
 ## Agent-Level Access
 
 Agents reference top-level servers by name:
 
-```
+```promptscript
 @agents {
   incident-responder: {
     description: "Investigate incidents using observability data"
@@ -70,13 +85,19 @@ Agents reference top-level servers by name:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34NTlNeQKtrRggpdgBaang0NilqMMrg4Kk4RmoINCwINhSQAElWADd4IfVsOwhWGrrytzhF9UMAIzgYakmMLegTR15xbAw8rt4SRjQAZT3p2jDkCOYdp8PjrEcIunCICUcDcMHqWDUjAA1nsIgBdOLBFjsMqjADCzCgsEYWF4MEmtU4jBgAMJ7AgYFOEDIGBxAIwnnsTUwTV4TSE4gg2GGrAoV14hQKIHycIYZWojnwRFI5BgVFoIAYz3WbHwqWFQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Platforms without agent-level MCP fields continue using project-level server configuration.
 
 ## Plugins
 
 Plugins group related capabilities:
 
-```
+```promptscript
 @plugins {
   security-suite: {
     description: "Security review capabilities"
@@ -88,6 +109,12 @@ Plugins group related capabilities:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH35yN3UIVmVAq1kYRjdqE0cAWjg3Exgw6uDgqThGRrQsCDYUkABlOoam3moYADcIGHMdDEwAI2gTJbg8nt55mFoR1jH07Jy9nrgAa2goODDkCLgpxqwWucXliLpwkFwc2wzRIzCkUAiAF04sEcMxmDdHrxniB5hgoBBxNgYM11JwjtjxM1ILBdiBoTVgiRGGhJtRDrQnhF5m4oKwCZsMR9mliROsMK8oXFCgUQPlIQxOFhqI58ERSOQYFRaCAGAy4Cd8KkxUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 | Property      | Purpose                       |
 | ------------- | ----------------------------- |
 | `description` | Human-readable bundle purpose |
@@ -96,23 +123,25 @@ Plugins group related capabilities:
 | `hooks`       | Referenced lifecycle hook IDs |
 | `mcpServers`  | Referenced MCP server names   |
 
-Current plugin output exists for Factory, Cursor, Codex, and Grok target families. Plugin contracts are platform-specific, so target support must be checked before using a generated manifest. Marketplace discovery, installation, and publishing remain outside compiler scope.
+Current plugin output exists for Factory, Cursor, Codex, and Grok target families. Plugin contracts
+are platform-specific, so target support must be checked before using a generated manifest.
+Marketplace discovery, installation, and publishing remain outside compiler scope.
 
 ## Enterprise Policy
 
 Recommended controls:
 
 1. Keep MCP and plugin definitions in reviewed source.
-1. Provide credentials through the target runtime rather than source files.
-1. Restrict MCP domains and executable paths in organization policy.
-1. Pin imported capability bundles through `promptscript.lock`.
-1. Review generated configuration changes in pull requests.
-1. Run strict validation and security scanning in CI.
+2. Provide credentials through the target runtime rather than source files.
+3. Restrict MCP domains and executable paths in organization policy.
+4. Pin imported capability bundles through `promptscript.lock`.
+5. Review generated configuration changes in pull requests.
+6. Run strict validation and security scanning in CI.
 
 ## Related Documentation
 
 - [Agents](https://getpromptscript.dev/features/agents/index.md)
 - [Hooks and Workflows](https://getpromptscript.dev/features/automation/index.md)
-- [Language Reference: `@mcpServers`](https://getpromptscript.dev/reference/language/#mcpservers)
-- [Language Reference: `@plugins`](https://getpromptscript.dev/reference/language/#plugins)
-- [Configuration Reference](https://getpromptscript.dev/reference/config/#mcp-hooks-plugins-support)
+- [Language Reference: `@mcpServers`](https://getpromptscript.dev/reference/language/index.md#mcpservers)
+- [Language Reference: `@plugins`](https://getpromptscript.dev/reference/language/index.md#plugins)
+- [Configuration Reference](https://getpromptscript.dev/reference/config/index.md#mcp-hooks-and-plugins-support)

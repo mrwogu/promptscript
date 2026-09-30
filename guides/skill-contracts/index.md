@@ -86,5 +86,5 @@ The PS017 validation rule checks contract definitions:
 ## See Also
 
 - [Local Skills](https://getpromptscript.dev/guides/local-skills/index.md) - Managing skills in your project
-- [Parameterized Skills](https://getpromptscript.dev/guides/local-skills/#parameterized-skills) - Making skills configurable with `{{var}}` templates
+- [Parameterized Skills](https://getpromptscript.dev/guides/local-skills/index.md#parameterized-skills) - Making skills configurable with `{{var}}` templates
 - [Shared Resources](https://getpromptscript.dev/guides/shared-resources/index.md) - Share files across all skills

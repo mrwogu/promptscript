@@ -2,7 +2,7 @@
 
 Goal: customize human-readable headings while preserving native file contracts.
 
-```
+```promptscript
 @meta {
   id: "localized-service"
   syntax: "1.5.0"
@@ -27,6 +27,12 @@ Goal: customize human-readable headings while preserving native file contracts.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgozRhigQAXjCkBaODGoA3CIxjyxEuAE92GQrPkBGCgFYKABlOsAvmLHdpnLAgsC2EzQW4cGAwpPTkQAGU9Q2NBAElWOCxqAFdGQLY4DzDTEA8JAE1mbMEMahhBAHdmagBrCFYAc0E2QVx6xkjGFqqsQV0DIxgKYtLZsW9WX0yMVilaqThQ8XDI6Nj5AFFO9pg9dq74gVX1wtLtiKiY6kEOoK0WEhIgzfkAYWZPkFBAAFZiqRgWMo7R6xKRKbJ8az5cTyAAi8MRAmRILBRkhdzCLBismQ8gAqroxlkjKMACoWNAweKMagQNBYeQAXTCrywsmAgjAzRI2DsTDY+gCEDYKnkggWEjhjARAWw0tY-MEktZYAsAEEwBxqLIstl6gtPCBPJyGAFqBZ8ERSOQpjR6CBtXB1fh7FagA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Expected Behavior
 
 - Markdown section titles use supplied labels.
@@ -42,6 +48,7 @@ prs validate --strict
 prs compile --dry-run
 ```
 
-Inspect every configured target because available human-readable sections vary by formatter.
+Inspect every configured target because available human-readable sections vary
+by formatter.
 
 See [Section Headers](https://getpromptscript.dev/reference/language/section-headers/index.md).

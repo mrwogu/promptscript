@@ -3,18 +3,20 @@
 PromptScript supports three automation layers:
 
 1. `@hooks` runs commands during target-native agent lifecycle events.
-1. `@workflows` packages repeatable agent procedures.
-1. `prs hooks install` recompiles PromptScript when source files change and protects generated files.
+2. `@workflows` packages repeatable agent procedures.
+3. `prs hooks install` recompiles PromptScript when source files change and protects generated files.
 
 These layers solve different problems and can be used together.
 
-Both `@hooks` and `@workflows` use canonical object bodies. See [Block Shapes](https://getpromptscript.dev/reference/block-shapes/index.md) for their shape diagnostics, merge behavior, and complete examples.
+Both `@hooks` and `@workflows` use canonical object bodies. See
+[Block Shapes](https://getpromptscript.dev/reference/block-shapes/index.md) for their shape diagnostics,
+merge behavior, and complete examples.
 
 ## Lifecycle Hooks
 
 The `@hooks` block requires syntax `1.4.0`:
 
-```
+```promptscript
 @hooks {
   validate-types: {
     event: "post-tool-use"
@@ -35,9 +37,10 @@ The `@hooks` block requires syntax `1.4.0`:
 
 ### Target-specific behavior
 
-Keep a portable executable as the default, then override only the fields that differ on a host. A target can replace the executable with its own `command`:
+Keep a portable executable as the default, then override only the fields that
+differ on a host. A target can replace the executable with its own `command`:
 
-```
+```promptscript
 @hooks {
   terminal-policy: {
     event: "pre-terminal-command"
@@ -57,7 +60,19 @@ Keep a portable executable as the default, then override only the fields that di
 }
 ```
 
-Supported override fields are `event`, `command`, `script`, `matcher`, `timeoutMs`, `statusMessage`, `continueOnFailure`, `enabled`, and `cwd`. Defining one of `command` or `script` replaces the base executable for that target only. Defining neither inherits the base executable, while defining both is rejected. Target commands and scripts use the same interpolation, path, interpreter, and argument validation as the base hook. A disabled target override emits no hook.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34cZmYAa2VAqwUYahIIVgwoAFo0ZigIRkcw6uDgmAA3TiwUkBoYFo56xuaW3RIMTzz+nWYSRc8w5AjWZikIunCQKlcyU0ZqCDQsAHo4S+vTW8YcGEZyqbqGpqgKEgAVnAIgBdOLBETUdTCOC9cH9MAYRhYZjUHq8PqrfoLJahXg7EB7A4gI4RU7rG4PK43e6PSkvN4fFqI5Goxz-IGHY4tFpwLBXZG8Ej7GCg+HBQo1VaDB4iuFSrGLLCvOpjRhuPnrAD60x+zR1ZSgKyxkqxvHUJhwbgARvKzQMmtbYHjEVA4KKFRL4abeJL8iB8iCGCM0fgiKRyDBTvQQMNaBA2PhUgGgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+Supported override fields are `event`, `command`, `script`, `matcher`,
+`timeoutMs`, `statusMessage`, `continueOnFailure`, `enabled`, and `cwd`.
+Defining one of `command` or `script` replaces the base executable for that
+target only. Defining neither inherits the base executable, while defining both
+is rejected. Target commands and scripts use the same interpolation, path,
+interpreter, and argument validation as the base hook. A disabled target
+override emits no hook.
 
 ### Portable Events
 
@@ -72,7 +87,9 @@ Supported override fields are `event`, `command`, `script`, `matcher`, `timeoutM
 | `notification`         | React to target notifications        |
 | `stop`                 | Run final checks when an agent stops |
 
-Formatters map portable event names to target-native hook systems. Nine built-in targets emit project-level lifecycle hooks, with a separate compatible VS Code Agent output when requested.
+Formatters map portable event names to target-native hook systems. Nine
+built-in targets emit project-level lifecycle hooks, with a separate compatible
+VS Code Agent output when requested.
 
 | Target         | Generated hook file                      | Notes                                      |
 | -------------- | ---------------------------------------- | ------------------------------------------ |
@@ -87,32 +104,65 @@ Formatters map portable event names to target-native hook systems. Nine built-in
 | OpenCode       | `.opencode/plugins/promptscript.ts`      | Generated plugin, tool events only         |
 | VS Code Agent  | `.github/hooks/promptscript-vscode.json` | PascalCase events, matcher ignored         |
 
-Hooks are emitted only in target versions listed by the capability matrix: GitHub, Factory, Gemini, Windsurf, Codex, and OpenCode support `multifile` and `full`; Claude, Cursor, and Grok support only `full`. `simple` mode reports `PS4002` when hooks are enabled because it cannot emit additional files. Target adapters also report `PS4002` when an event, matcher, `statusMessage`, or `continueOnFailure` value has no native equivalent.
+Hooks are emitted only in target versions listed by the capability matrix:
+GitHub, Factory, Gemini, Windsurf, Codex, and OpenCode support `multifile` and
+`full`; Claude, Cursor, and Grok support only `full`. `simple` mode reports
+`PS4002` when hooks are enabled because it cannot emit additional files. Target
+adapters also report `PS4002` when an event, matcher, `statusMessage`, or
+`continueOnFailure` value has no native equivalent.
 
-`pre-terminal-command` supplies deterministic native defaults instead of requiring one portable matcher to use several host vocabularies. A target override can replace the default through `matcher` when a host exposes a different terminal tool name.
+`pre-terminal-command` supplies deterministic native defaults instead of
+requiring one portable matcher to use several host vocabularies. A target
+override can replace the default through `matcher` when a host exposes a
+different terminal tool name.
 
-Every native adapter adds a trailing `# promptscript-generated:<hook-id>` shell comment to generated commands. PromptScript uses this marker to replace or remove only its entries when a native JSON hook file also contains user settings or hooks. Unmarked entries and top-level user settings remain untouched.
+Every native adapter adds a trailing
+`# promptscript-generated:<hook-id>` shell comment to generated commands.
+PromptScript uses this marker to replace or remove only its entries when a
+native JSON hook file also contains user settings or hooks. Unmarked entries
+and top-level user settings remain untouched.
 
-VS Code Agent Hooks are separate from GitHub Copilot CLI and cloud-agent hooks. PromptScript emits the VS Code file only when a hook contains a `vscode` target override. VS Code uses PascalCase events and currently ignores matcher values, so commands that need exact tool filtering must inspect `tool_name` and `tool_input` themselves. VS Code uses camelCase fields such as `tool_input.filePath`, unlike Claude Code's `tool_input.file_path`.
+VS Code Agent Hooks are separate from GitHub Copilot CLI and cloud-agent hooks.
+PromptScript emits the VS Code file only when a hook contains a `vscode`
+target override. VS Code uses PascalCase events and currently ignores matcher
+values, so commands that need exact tool filtering must inspect `tool_name` and
+`tool_input` themselves. VS Code uses camelCase fields such as
+`tool_input.filePath`, unlike Claude Code's `tool_input.file_path`.
 
 ### OpenCode Plugin Coverage
 
-OpenCode has no JSON hook contract, so PromptScript generates a project-local plugin at `.opencode/plugins/promptscript.ts` instead. The plugin maps `pre-tool-use` to `tool.execute.before` and `post-tool-use` to `tool.execute.after`, filters by matcher, resolves the project root from the OpenCode plugin context, enforces `timeoutMs` with a 30-second default, and passes a byte-bounded JSON payload on stdin with the tool name, arguments, session ID, call ID, and timestamp (plus the tool result on `post-tool-use`). Hook commands start asynchronously, so they do not delay tool execution. Timeouts terminate a command with `SIGTERM`, then `SIGKILL` after a grace period. Recompilation rewrites only the PromptScript-owned plugin file, never sibling user plugins.
+OpenCode has no JSON hook contract, so PromptScript generates a project-local
+plugin at `.opencode/plugins/promptscript.ts` instead. The plugin maps
+`pre-tool-use` to `tool.execute.before` and `post-tool-use` to
+`tool.execute.after`, filters by matcher, resolves the project root from the
+OpenCode plugin context, enforces `timeoutMs` with a 30-second default, and
+passes a byte-bounded JSON payload on stdin with the tool name, arguments,
+session ID, call ID, and timestamp (plus the tool result on `post-tool-use`).
+Hook commands start asynchronously, so they do not delay tool execution.
+Timeouts terminate a command with `SIGTERM`, then `SIGKILL` after a grace
+period. Recompilation rewrites only the PromptScript-owned plugin file, never
+sibling user plugins.
 
-OpenCode plugin coverage has audited limits that PromptScript does not claim beyond:
+OpenCode plugin coverage has audited limits that PromptScript does not claim
+beyond:
 
 - MCP tool calls may not trigger tool execution hooks.
 - Some subagent paths have missed plugin hooks in reported versions.
-- Failed tool calls have no dedicated `tool.execute.error` event, so a hook cannot observe failures through the post event.
-- Tool hook input exposes no model or agent context. Generated payloads omit those unavailable fields and compilation reports `PS4002`.
-- Only `pre-tool-use` and `post-tool-use` are emitted; session, setup, subagent, notification, stop, and terminal command events are reported with `PS4002` and omitted.
-- OpenCode tool names are lowercase (`edit`, `write`, `bash`), so matchers authored for Claude-style names need a target override.
+- Failed tool calls have no dedicated `tool.execute.error` event, so a hook
+  cannot observe failures through the post event.
+- Tool hook input exposes no model or agent context. Generated payloads omit
+  those unavailable fields and compilation reports `PS4002`.
+- Only `pre-tool-use` and `post-tool-use` are emitted; session, setup,
+  subagent, notification, stop, and terminal command events are reported with
+  `PS4002` and omitted.
+- OpenCode tool names are lowercase (`edit`, `write`, `bash`), so matchers
+  authored for Claude-style names need a target override.
 
 ### Portable Repository Scripts
 
 Use `script` when one checked-in program should run across every native target:
 
-```
+```promptscript
 script: {
   path: ".promptscript/scripts/validate.py"
   interpreter: "python3"
@@ -126,12 +176,15 @@ Each hook requires exactly one of `command` or `script`. A portable script:
 - Must be under `.promptscript/scripts/` and use forward slashes.
 - Must exist as a regular file when compiled.
 - Cannot escape the scripts directory through `..` traversal or a symlink.
-- Uses an explicit interpreter: `python3`, `python`, `node`, `deno`, `bun`, `ruby`, `php`, `perl`, `bash`, `sh`, `zsh`, `pwsh`, or `powershell`.
-- Preserves every value in `args` as one argument, including spaces and shell metacharacters.
+- Uses an explicit interpreter: `python3`, `python`, `node`, `deno`, `bun`,
+  `ruby`, `php`, `perl`, `bash`, `sh`, `zsh`, `pwsh`, or `powershell`.
+- Preserves every value in `args` as one argument, including spaces and shell
+  metacharacters.
 
-A target override can select a different repository script while retaining the base event and other options:
+A target override can select a different repository script while retaining the
+base event and other options:
 
-```
+```promptscript
 targets: {
   github: {
     script: {
@@ -143,25 +196,30 @@ targets: {
 }
 ```
 
-Enabled target-only scripts are checked by both Node and browser compilers. Scripts attached only to disabled target overrides are not required or emitted.
+Enabled target-only scripts are checked by both Node and browser compilers.
+Scripts attached only to disabled target overrides are not required or emitted.
 
-The Node compiler validates the real filesystem. The browser compiler performs the equivalent check against its virtual filesystem. For entries outside `.promptscript/` at a custom depth, pass the explicit `projectRoot` compiler option.
+The Node compiler validates the real filesystem. The browser compiler performs
+the equivalent check against its virtual filesystem. For entries outside
+`.promptscript/` at a custom depth, pass the explicit `projectRoot` compiler
+option.
 
 Existing command arrays remain supported:
 
-```
+```promptscript
 command: ["python3", ".promptscript/scripts/validate.py", "--strict"]
 cwd: "project"
 ```
 
-To migrate a target-specific command, remove project-root variables and shell wrappers from source:
+To migrate a target-specific command, remove project-root variables and shell
+wrappers from source:
 
 ```text
 # Before: target-specific and rejected by current interpolation checks
 command: ["python3", "${FACTORY_PROJECT_DIR}/.promptscript/scripts/validate.py", "--strict"]
 ```
 
-```
+```promptscript
 # After: one portable resource for every native target
 script: {
   path: ".promptscript/scripts/validate.py"
@@ -171,9 +229,18 @@ script: {
 cwd: "project"
 ```
 
-`cwd: "project"` makes the project-root requirement explicit. A value such as `cwd: "tools/hooks"` resolves from project root. The location of the generated hook configuration does not determine command working directory.
+`cwd: "project"` makes the project-root requirement explicit. A value such as
+`cwd: "tools/hooks"` resolves from project root. The location of the generated
+hook configuration does not determine command working directory.
 
-Shell interpolation is rejected in source. Target adapters preserve source argument boundaries when a platform requires one command string. Factory shell-quotes command arguments, while GitHub emits separate `bash` and `powershell` commands. Commit shared hook programs under `.promptscript/scripts/`, rather than duplicating them under target directories, and review inherited hooks as executable policy. Prefer `script` for repository-local programs because target adapters can resolve the script path independently from the agent session directory.
+Shell interpolation is rejected in source. Target adapters preserve source
+argument boundaries when a platform requires one command string. Factory
+shell-quotes command arguments, while GitHub emits separate `bash` and
+`powershell` commands. Commit shared hook programs under
+`.promptscript/scripts/`, rather than duplicating them under target
+directories, and review inherited hooks as executable policy. Prefer `script`
+for repository-local programs because target adapters can resolve the script
+path independently from the agent session directory.
 
 ### Project-Root Strategy by Target
 
@@ -189,15 +256,23 @@ Shell interpolation is rejected in source. Target adapters preserve source argum
 | Grok Build     | `GROK_WORKSPACE_ROOT`           | Requires a non-empty root before invoking the script                     |
 | OpenCode       | Plugin context                  | Generated plugin resolves the worktree or working dir and spawns from it |
 
-Cursor and Codex require the project to be a Git worktree because their native hook contracts do not expose a stable project-root variable.
+Cursor and Codex require the project to be a Git worktree because their native
+hook contracts do not expose a stable project-root variable.
 
-Payload `cwd` describes where an event occurred. It does not configure the working directory of the hook command. `GITHUB_WORKSPACE` belongs to GitHub Actions and is not a portable GitHub Copilot hook variable.
+Payload `cwd` describes where an event occurred. It does not configure the
+working directory of the hook command. `GITHUB_WORKSPACE` belongs to GitHub
+Actions and is not a portable GitHub Copilot hook variable.
 
 ### Shell and Failure Behavior
 
-The `cd` wrapper emitted for Claude Code and Factory Droid targets a POSIX shell. Claude Code and Factory Droid hook payloads assume a POSIX environment. For Windows coverage, prefer the GitHub Copilot target: its native `cwd` field and separate `bash` and `powershell` payloads are cross-shell.
+The `cd` wrapper emitted for Claude Code and Factory Droid targets a POSIX
+shell. Claude Code and Factory Droid hook payloads assume a POSIX environment.
+For Windows coverage, prefer the GitHub Copilot target: its native `cwd` field
+and separate `bash` and `powershell` payloads are cross-shell.
 
-Environment-root wrappers check their required variable before `cd`, the interpreter, or a project-relative command can run. An unset or empty variable writes a target-specific error to stderr and exits non-zero:
+Environment-root wrappers check their required variable before `cd`, the
+interpreter, or a project-relative command can run. An unset or empty variable
+writes a target-specific error to stderr and exits non-zero:
 
 ```sh
 if [ -z "${FACTORY_PROJECT_DIR:-}" ]; then
@@ -207,7 +282,10 @@ if [ -z "${FACTORY_PROJECT_DIR:-}" ]; then
 fi
 ```
 
-Cursor and Codex wrappers similarly reject a failed, empty, or whitespace-only `git rev-parse --show-toplevel` result. Codex Windows output checks `$LASTEXITCODE` and `[string]::IsNullOrWhiteSpace` before `Set-Location` or the interpreter:
+Cursor and Codex wrappers similarly reject a failed, empty, or whitespace-only
+`git rev-parse --show-toplevel` result. Codex Windows output checks
+`$LASTEXITCODE` and `[string]::IsNullOrWhiteSpace` before `Set-Location` or the
+interpreter:
 
 ```powershell
 $promptscriptProjectRoot = git rev-parse --show-toplevel 2>$null
@@ -222,15 +300,26 @@ if (
 }
 ```
 
-The same guards apply to a `command` array when it declares `cwd`. A command without `cwd` remains target-native and does not perform an unnecessary root lookup. No root strategy falls back to `$PWD`, `pwd`, or the process working directory.
+The same guards apply to a `command` array when it declares `cwd`. A command
+without `cwd` remains target-native and does not perform an unnecessary root
+lookup. No root strategy falls back to `$PWD`, `pwd`, or the process working
+directory.
 
-GitHub Copilot and Windsurf retain their native cwd fields. VS Code retains its workspace cwd field. PromptScript reports `PS4002` because it cannot independently verify that the host supplied the requested repository cwd. A host that cannot supply that cwd must reject or skip the hook, not execute it from another directory.
+GitHub Copilot and Windsurf retain their native cwd fields. VS Code retains its
+workspace cwd field. PromptScript reports `PS4002` because it cannot
+independently verify that the host supplied the requested repository cwd. A
+host that cannot supply that cwd must reject or skip the hook, not execute it
+from another directory.
 
-On Windows, GitHub, Codex, and Windsurf emit PowerShell-safe commands. The `python3` interpreter maps to `py -3`. Unix-only shell interpreters (`bash`, `sh`, and `zsh`) cause an actionable compatibility warning instead of a silently incomplete Windows command.
+On Windows, GitHub, Codex, and Windsurf emit PowerShell-safe commands. The
+`python3` interpreter maps to `py -3`. Unix-only shell interpreters (`bash`,
+`sh`, and `zsh`) cause an actionable compatibility warning instead of a
+silently incomplete Windows command.
 
 ### Hook Capability Matrix
 
-All 50 built-in targets have an explicit lifecycle-hook classification. `All` means all eight portable events; `watch` means `prs compile --watch`.
+All 50 built-in targets have an explicit lifecycle-hook classification. `All`
+means all eight portable events; `watch` means `prs compile --watch`.
 
 | Target         | Status       | Config path                         | Portable events                                  | Command format                 | Timeout       | Project root               | Fallback                  |
 | -------------- | ------------ | ----------------------------------- | ------------------------------------------------ | ------------------------------ | ------------- | -------------------------- | ------------------------- |
@@ -285,11 +374,17 @@ All 50 built-in targets have an explicit lifecycle-hook classification. `All` me
 | `forgecode`    | Unsupported  | -                                   | -                                                | -                              | -             | -                          | watch                     |
 | `hermes`       | Unsupported  | -                                   | -                                                | -                              | -             | -                          | watch                     |
 
-Plugin-only and custom-agent APIs are not emitted as universal project hooks because they require runtime plugin code or selecting a non-default agent. Every non-native target and every unsupported output mode reports `PS4002` with the target-specific fallback. PromptScript never silently omits an enabled `@hooks` block.
+Plugin-only and custom-agent APIs are not emitted as universal project hooks
+because they require runtime plugin code or selecting a non-default agent.
+Every non-native target and every unsupported output mode reports `PS4002` with
+the target-specific fallback. PromptScript never silently omits an enabled
+`@hooks` block.
 
 ### Terminal command semantics
 
-Use `pre-terminal-command` when the hook intends to observe terminal commands. PromptScript selects a deterministic native matcher or event and reports `PS4002` whenever the host contract is best effort or unsupported:
+Use `pre-terminal-command` when the hook intends to observe terminal commands.
+PromptScript selects a deterministic native matcher or event and reports
+`PS4002` whenever the host contract is best effort or unsupported:
 
 | Host                     | Terminal coverage               | Native tool or event                                 |
 | ------------------------ | ------------------------------- | ---------------------------------------------------- |
@@ -304,9 +399,17 @@ Use `pre-terminal-command` when the hook intends to observe terminal commands. P
 | Grok Build               | Unsupported (`PS4002`, omitted) | No audited terminal contract                         |
 | OpenCode                 | Unsupported (`PS4002`, omitted) | Plugin hooks cover tool calls, not terminal commands |
 
-Claude, Factory, Codex, Cursor, Gemini, and VS Code map the event to their pre-tool event with the matcher shown above. Windsurf emits only `pre_run_command`, not all pre-tool events. A target override can set `matcher` to a different native tool name. VS Code retains `run_in_terminal` for readability, but the host currently ignores matcher values, so the command must inspect `tool_name` and `tool_input`.
+Claude, Factory, Codex, Cursor, Gemini, and VS Code map the event to their
+pre-tool event with the matcher shown above. Windsurf emits only
+`pre_run_command`, not all pre-tool events. A target override can set `matcher`
+to a different native tool name. VS Code retains `run_in_terminal` for
+readability, but the host currently ignores matcher values, so the command
+must inspect `tool_name` and `tool_input`.
 
-If a host does not guarantee the desired terminal path, use `prs compile --watch` for regeneration or filter the hook payload inside a script. A `pre-tool-use` hook with a broad matcher does not claim universal terminal coverage.
+If a host does not guarantee the desired terminal path, use `prs compile
+--watch` for regeneration or filter the hook payload inside a script. A
+`pre-tool-use` hook with a broad matcher does not claim universal terminal
+coverage.
 
 Contract references:
 
@@ -345,7 +448,7 @@ The GitHub repository hook uses its native working-directory field:
 
 Workflows describe repeatable multi-step procedures:
 
-```
+```promptscript
 @workflows {
   release: {
     description: "Prepare a validated release"
@@ -360,9 +463,18 @@ Workflows describe repeatable multi-step procedures:
 }
 ```
 
-Targets with native workflow discovery receive dedicated files, such as `.claude/workflows/<name>.md`. Other targets retain workflow guidance through their instruction output when supported by the formatter.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH35zZmoAazAoC2VAq15qGFgMOBgwuuDgqThGagg0LAg2FJAABUbMRrFeADcMKAhxbGkGppgWmDzOnTYOdhHYkDjt9N4AJRgZiBhzHRwMVnUDOAhWRjtbe0ar92VG5tax06ACYKOcPCoyiRsINHnReAt2K91PCsI40HZGDgYIxynB4Q8ZBw4KYgcEAMxggBq80Wy14T1YMDUHBk42YZCwAGVev0sIY3Fg0IKybwACxg8YwSZ2f7rVq8VjMYmirLnGAARzc8H5GDQNGYcygvAARjAwGU7MKTQs4DhkUDDlteIUCiB8gBdBicLDURz4IikcgwKi0EAMGbMl5sfCpd1AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
-Use workflows for procedures that agents should follow. Use lifecycle hooks for commands that must run at a specific event.
+Targets with native workflow discovery receive dedicated files, such as
+`.claude/workflows/<name>.md`. Other targets retain workflow guidance through their instruction
+output when supported by the formatter.
+
+Use workflows for procedures that agents should follow. Use lifecycle hooks for commands that must
+run at a specific event.
 
 ## Source Compilation Hooks
 
@@ -379,13 +491,20 @@ Installed hooks:
 - Prevent direct edits to generated instruction files.
 - Redirect agents to the source `.prs` file.
 
-This CLI feature is separate from the language-level `@hooks` block. For Copilot, `.github/hooks/promptscript-vscode.json` configures VS Code Agent Hooks; it is not the GitHub repository hook file generated from `@hooks`. Factory CLI installation uses `.factory/hooks.json` and migrates unambiguous legacy entries from `.factory/settings.json`. Factory compilation performs the same migration when the canonical file is absent. Use `prs compile --dry-run` to preview the change or `--no-migrate-factory-hooks` to retain warning-only behavior.
+This CLI feature is separate from the language-level `@hooks` block.
+For Copilot, `.github/hooks/promptscript-vscode.json` configures VS Code Agent
+Hooks; it is not the GitHub repository hook file generated from `@hooks`.
+Factory CLI installation uses `.factory/hooks.json` and migrates unambiguous
+legacy entries from `.factory/settings.json`. Factory compilation performs the
+same migration when the canonical file is absent. Use `prs compile --dry-run`
+to preview the change or `--no-migrate-factory-hooks` to retain warning-only
+behavior.
 
 ## Commands and Workflows
 
 Use `@shortcuts` for user-invoked actions:
 
-```
+```promptscript
 @shortcuts {
   "/release": {
     prompt: true
@@ -394,6 +513,12 @@ Use `@shortcuts` for user-invoked actions:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344HGZqLEY3U15Aq3CQAHpqGFgMOBgIsLrg4JpmMiwwrGo3TvrgqThGagg0LAg2FJAAJQ9eFraO3nNygGswKAs83p02DnZlgDFmKCPzBRw7TZh2u13qA-uxT1ksZjQvAARjAwOU7Gg3ECoEocBBWOoKCdeIUCiB8gBdBicEaOfBEUjkGBUWggBgANxgtEWrHwqXRQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Recommended model:
 
@@ -434,7 +559,7 @@ Build profiles support nested `AGENTS.md` and platform-specific output inside mo
 
 - [AI Tool Hooks](https://getpromptscript.dev/guides/hooks/index.md)
 - [CLI Reference](https://getpromptscript.dev/reference/cli/index.md)
-- [Configuration: Build Profiles](https://getpromptscript.dev/reference/config/#builds)
-- [Language Reference: `@hooks`](https://getpromptscript.dev/reference/language/#hooks)
-- [Language Reference: `@workflows`](https://getpromptscript.dev/reference/language/#workflows)
+- [Configuration: Build Profiles](https://getpromptscript.dev/reference/config/index.md#builds)
+- [Language Reference: `@hooks`](https://getpromptscript.dev/reference/language/index.md#hooks)
+- [Language Reference: `@workflows`](https://getpromptscript.dev/reference/language/index.md#workflows)
 - [MCP Servers and Plugins](https://getpromptscript.dev/features/integrations/index.md)

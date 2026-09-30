@@ -2,7 +2,7 @@
 
 Goal: choose operation matching change intent.
 
-```
+```promptscript
 @meta { id: "merge-vs-replace" syntax: "1.5.0" }
 
 @standards {
@@ -27,6 +27,12 @@ Goal: choose operation matching change intent.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEH2oBzGAFoAbnCXUY5DIxgzBcAJ7sMhSTICMFAKwUADPoC+U1i+5wBrMRmpi4wl0FBDg8IVnlJZBkAVTgYQQApeCwZAF1AwSgwrDCIwSiQWPiAUQBlABlstIyWFRhqDEVJERIwiBIAVxJJAA47QU00ZmoscxAOQhSQQWdWWZcAYkEAQTExQTZ4zQBHDohNPnYKNyIOLwNPb19-YAyQnPDImQAlGF39+OyYeQactmDknBqnMXItBABhZhkbAQABG0AgWEMAy0UB0MEOWEEYGGG1Y8TEH0YWMgMCgYmOrG4p046w8GC8Pj8AVYQSy7FyAEInoU4oIAEIQKF6EDpEGuVhLZZYKEQRgo7S6THY3GbQRECChcKCfEeGDrFQYKAdGCU7jMOrUajieL0xnXCi1eqNU2tVjtLosoIATmsLkcIEcqQYnCw1EM+CIpHIppo9BAlrgQtY+AsgaAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Resolved result:
 
 ```text
@@ -50,6 +56,7 @@ prs validate --strict
 prs compile --dry-run
 ```
 
-Common failure: using `@override` for missing path. Add target in base, import, or local block before replacement.
+Common failure: using `@override` for missing path. Add target in base, import,
+or local block before replacement.
 
 See [Merge and Replacement](https://getpromptscript.dev/reference/language/merge-and-replacement/index.md).

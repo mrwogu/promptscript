@@ -4,35 +4,54 @@ Complete reference for the PromptScript command-line interface.
 
 ## Installation
 
+::::tabs
+:::tab[npm]
+
 ```bash
 npm install -g @promptscript/cli
 ```
+
+:::
+:::tab[pnpm]
 
 ```bash
 pnpm add -g @promptscript/cli
 ```
 
+:::
+:::tab[yarn]
+
 ```bash
 yarn global add @promptscript/cli
 ```
+
+:::
+:::tab[Deno]
 
 ```bash
 deno install -g --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run npm:@promptscript/cli
 ```
 
 Requires a Deno-capable CLI release (1.20.0 or later) and Deno 2.9+.
+:::
+::::
 
 ## Running under Deno
 
-Beside the global install above, the CLI runs on Deno 2.9 or later in two other ways: straight from a project-local install, and as a compiled standalone binary.
+Beside the global install above, the CLI runs on Deno 2.9 or later in two
+other ways: straight from a project-local install, and as a compiled
+standalone binary.
 
-Inside a project that has `@promptscript/cli` in its dependencies, point Deno at the installed bin shim:
+Inside a project that has `@promptscript/cli` in its dependencies, point Deno
+at the installed bin shim:
 
 ```bash
 deno run --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run node_modules/@promptscript/cli/bin/prs.js init
 ```
 
-An `npm:@promptscript/cli` specifier resolves the published registry release instead of the version installed in `node_modules`, so use the path above whenever the project's own dependency is what should run.
+An `npm:@promptscript/cli` specifier resolves the published registry release
+instead of the version installed in `node_modules`, so use the path above
+whenever the project's own dependency is what should run.
 
 Compile a self-contained binary that needs no runtime installed:
 
@@ -41,7 +60,8 @@ deno compile --allow-env --allow-sys --allow-read --allow-write --allow-net --al
 ./prs --version
 ```
 
-Add `--target x86_64-unknown-linux-gnu` (or `aarch64-unknown-linux-gnu`, `x86_64-pc-windows-msvc`) to cross-compile for another platform.
+Add `--target x86_64-unknown-linux-gnu` (or `aarch64-unknown-linux-gnu`,
+`x86_64-pc-windows-msvc`) to cross-compile for another platform.
 
 The permission flags cover everything the CLI does:
 
@@ -54,8 +74,11 @@ The permission flags cover everything the CLI does:
 
 Notes:
 
-- All commands work under Deno, including `compile --watch`, registry operations over git, and the managed-output cleanup.
-- The cleanup re-executes the CLI through a hidden worker command: under `deno run` the worker gets read and write access scoped to the output directory, and a compiled binary re-executes itself.
+- All commands work under Deno, including `compile --watch`, registry
+  operations over git, and the managed-output cleanup.
+- The cleanup re-executes the CLI through a hidden worker command: under
+  `deno run` the worker gets read and write access scoped to the output
+  directory, and a compiled binary re-executes itself.
 - Telemetry reports `runtime: deno`; `DO_NOT_TRACK=1` keeps it disabled.
 - Node.js 20+ remains fully supported with unchanged behavior.
 
@@ -83,9 +106,14 @@ prs telemetry enable
 prs telemetry disable
 ```
 
-`status` displays the effective setting, active vetoes, collector endpoint, queued record count, spool size, and latest delivery status. `enable` and `disable` update `~/.promptscript/config.yaml` atomically while preserving YAML comments.
+`status` displays the effective setting, active vetoes, collector endpoint,
+queued record count, spool size, and latest delivery status. `enable` and
+`disable` update `~/.promptscript/config.yaml` atomically while preserving YAML
+comments.
 
-Project config, `DO_NOT_TRACK`, and `PROMPTSCRIPT_TELEMETRY=false` remain hard vetoes even after `prs telemetry enable`. Telemetry management commands do not create telemetry events. See [Anonymous Usage Telemetry](https://getpromptscript.dev/reference/telemetry/index.md).
+Project config, `DO_NOT_TRACK`, and `PROMPTSCRIPT_TELEMETRY=false` remain hard
+vetoes even after `prs telemetry enable`. Telemetry management commands do not
+create telemetry events. See [Anonymous Usage Telemetry](https://getpromptscript.dev/reference/telemetry/index.md).
 
 ### prs init
 
@@ -151,9 +179,13 @@ The `init` command automatically detects:
 - **Existing AI tools** from dedicated configuration files and directories
 - **Prettier configuration** (`.prettierrc`, `.prettierrc.json`, `.prettierrc.yaml`, `.prettierrc.yml`)
 
-Detection never treats `.github/` or `AGENTS.md` alone as proof that a specific AI tool is in use. Detected tools are preselected in interactive mode. Other registered targets remain available but unchecked. `prs init --yes` requires `--targets`, detected tools, or targets configured in user defaults. It never invents GitHub, Claude, or Cursor defaults.
+Detection never treats `.github/` or `AGENTS.md` alone as proof that a specific AI tool is in use.
+Detected tools are preselected in interactive mode. Other registered targets remain available but
+unchecked. `prs init --yes` requires `--targets`, detected tools, or targets configured in user
+defaults. It never invents GitHub, Claude, or Cursor defaults.
 
-`--interactive` and `--yes` are mutually exclusive. When `--team` is provided (or configured as a user default for `--yes`), its value is written to the generated `@meta.team` field.
+`--interactive` and `--yes` are mutually exclusive. When `--team` is provided (or configured as a
+user default for `--yes`), its value is written to the generated `@meta.team` field.
 
 **Prettier Integration:**
 
@@ -176,11 +208,16 @@ If no Prettier configuration is found:
 - Native skill copies for explicitly selected targets that support skills
 - Hook settings for selected targets, unless `--no-hooks` or `--dry-run` is used
 
-When interactive `prs init` uses AI-assisted migration, it copies the migration prompt to the clipboard and shows the next steps: start the AI agent, paste the prompt, let it migrate the instructions, review the generated files, then validate and compile. If clipboard copying fails, the prompt is printed in the terminal for manual copying.
+When interactive `prs init` uses AI-assisted migration, it copies the migration prompt to the
+clipboard and shows the next steps: start the AI agent, paste the prompt, let it migrate the
+instructions, review the generated files, then validate and compile. If clipboard copying fails,
+the prompt is printed in the terminal for manual copying.
 
-Initialization performs conflict checks before writing. User-owned files are not overwritten unless `--force` or `--backup` explicitly authorizes replacement. Writes use temporary files and rollback completed writes after failures.
+Initialization performs conflict checks before writing. User-owned files are not overwritten
+unless `--force` or `--backup` explicitly authorizes replacement. Writes use temporary files and
+rollback completed writes after failures.
 
-______________________________________________________________________
+---
 
 ### prs migrate
 
@@ -207,28 +244,37 @@ prs migrate --llm --files CLAUDE.md AGENTS.md
 prs migrate --static --dry-run
 ```
 
-`prs migrate` prompts for static or AI-assisted migration. `--static` and `--llm` select a non-interactive strategy and cannot be combined.
+`prs migrate` prompts for static or AI-assisted migration. `--static` and `--llm` select a
+non-interactive strategy and cannot be combined.
 
 For an initialized project:
 
 - `promptscript.yaml` remains byte-for-byte unchanged.
 - Static output is written under `.promptscript/migrated/`.
-- Every effective top-level or build-profile entry gains one idempotent `@use` for the migrated project.
+- Every effective top-level or build-profile entry gains one idempotent `@use` for the migrated
+  project.
 - AI-assisted mode writes `.promptscript/migration-prompt.md` and installs the PromptScript skill.
 - Existing instruction files remain unchanged.
 - No hooks are installed.
 
-No detected candidates means success with zero writes. An empty interactive selection cancels successfully with zero writes. Unknown `--files`, unreadable inputs, or conflicting outputs fail before any project file is changed. Human-readable output uses stderr. Explicit `--llm` writes the generated prompt to stdout for shell pipelines.
+No detected candidates means success with zero writes. An empty interactive selection cancels
+successfully with zero writes. Unknown `--files`, unreadable inputs, or conflicting outputs fail
+before any project file is changed. Human-readable output uses stderr. Explicit `--llm` writes the
+generated prompt to stdout for shell pipelines.
 
 ### prs upgrade
 
-Upgrade `.prs` files under `.promptscript/` to the latest supported syntax version. The command parses every discovered file before writing, so parse errors, malformed versions, and versions newer than the installed CLI abort the upgrade before any file changes. Symbolic links are skipped.
+Upgrade `.prs` files under `.promptscript/` to the latest supported syntax
+version. The command parses every discovered file before writing, so parse
+errors, malformed versions, and versions newer than the installed CLI abort the
+upgrade before any file changes. Symbolic links are skipped.
 
 ```bash
 prs upgrade [--dry-run]
 ```
 
-Use `--dry-run` to preview changes without writing files. Each normal file write uses atomic replacement and preserves file permissions.
+Use `--dry-run` to preview changes without writing files. Each normal file
+write uses atomic replacement and preserves file permissions.
 
 ### prs hooks
 
@@ -238,7 +284,9 @@ Install or uninstall PromptScript integrations for supported AI tools.
 prs hooks <install|uninstall> [tool]
 ```
 
-Omit `[tool]` to operate on all detected tools. `--all` makes that auto-detected behavior explicit. Supported tool names are `claude`, `gemini`, `copilot`, `cursor`, `windsurf`, `factory`, and `cline`.
+Omit `[tool]` to operate on all detected tools. `--all` makes that auto-detected behavior
+explicit. Supported tool names are `claude`, `gemini`, `copilot`, `cursor`, `windsurf`,
+`factory`, and `cline`.
 
 ```bash
 prs hooks install
@@ -246,9 +294,10 @@ prs hooks install claude
 prs hooks uninstall cursor
 ```
 
-Installed integrations run compilation after supported AI tool edit events and protect generated files from direct tool writes. Use `prs compile --watch` for changes from a general-purpose editor.
+Installed integrations run compilation after supported AI tool edit events and protect generated
+files from direct tool writes. Use `prs compile --watch` for changes from a general-purpose editor.
 
-______________________________________________________________________
+---
 
 ### prs compile
 
@@ -283,27 +332,60 @@ prs compile [options]
 
 `--all-builds` and `--build` are mutually exclusive. `--all-builds` compiles every named profile in `config.builds` in sorted key order, reports failures per profile, and uses one watcher for the full build set when combined with `--watch`.
 
-Compilation fails with exit code 1 when the run resolves zero targets: `config.targets` is missing or empty, the selected build profile lists no targets, or every matching target is `enabled: false`. The error names the config key to change and, for builds-only projects, lists the profiles that can be compiled with `--build` or `--all-builds`.
+Compilation fails with exit code 1 when the run resolves zero targets: `config.targets` is missing or
+empty, the selected build profile lists no targets, or every matching target is `enabled: false`. The
+error names the config key to change and, for builds-only projects, lists the profiles that can be
+compiled with `--build` or `--all-builds`.
 
 Paths passed through `--config`, `--registry`, and `--output` are resolved relative to `--cwd` (or the current project directory). Watch mode honors the configured `watch.include`, `watch.exclude`, `watch.debounce`, and `watch.clearScreen` settings. Added, changed, and removed matching files all trigger compilation, and rebuilds are serialized.
 
-Watch mode also tracks resolved dependencies - imported files, local skills, and the loaded configuration - even when they sit outside `watch.include`. The dependency set is refreshed after every rebuild: newly resolved files start being watched, and files that are no longer dependencies stop being watched unless `watch.include` covers them explicitly. Removing an `@use` therefore stops rebuilds triggered by the dropped file, and adding one starts them without a restart.
+Watch mode also tracks resolved dependencies - imported files, local skills, and the loaded
+configuration - even when they sit outside `watch.include`. The dependency set is refreshed after
+every rebuild: newly resolved files start being watched, and files that are no longer dependencies
+stop being watched unless `watch.include` covers them explicitly. Removing an `@use` therefore stops
+rebuilds triggered by the dropped file, and adding one starts them without a restart.
 
 The `output.overwrite` setting provides the configuration equivalent of `--force`. A configured `output.header` is added to generated Markdown after PromptScript metadata (and after YAML frontmatter when present) so generated-file detection and frontmatter remain valid.
 
-In non-interactive mode without `--force`, `prs compile` preflights every planned output for ownership and overwrite conflicts. One conflicting user-owned file aborts that complete write set, so earlier outputs are not partially updated. Interactive mode processes outputs in order and prompts on conflicts, so accepted earlier writes can remain when a later path is skipped. Use `--dry-run` to inspect the full plan. Use `--force` or `output.overwrite: true` only after reviewing every conflicting path.
+In non-interactive mode without `--force`, `prs compile` preflights every
+planned output for ownership and overwrite conflicts. One conflicting
+user-owned file aborts that complete write set, so earlier outputs are not
+partially updated. Interactive mode processes outputs in order and prompts on
+conflicts, so accepted earlier writes can remain when a later path is skipped.
+Use `--dry-run` to inspect the full plan. Use `--force` or
+`output.overwrite: true` only after reviewing every conflicting path.
 
-Before anything is written, every enabled target contributes its files to a single output plan, so two targets that resolve to the same path are reconciled once instead of racing on disk:
+Before anything is written, every enabled target contributes its files to a single output plan, so
+two targets that resolve to the same path are reconciled once instead of racing on disk:
 
 - Identical content and write settings are merged silently and reported only under `--debug`.
-- Differing content reports `PS4001`. A formatter output replaces an earlier one; a resource or the auto-injected PromptScript skill preserves the file that is already planned, so a hand-written skill always wins over the bundled one.
-- Paths are compared case-insensitively and Unicode-normalized (NFC) on every platform, so `.agents/skills/Review/SKILL.md` and `.agents/skills/review/SKILL.md` collide on Linux too, and the plan stays identical across macOS, Windows, and Linux.
+- Differing content reports `PS4001`. A formatter output replaces an earlier one; a resource or the
+  auto-injected PromptScript skill preserves the file that is already planned, so a hand-written
+  skill always wins over the bundled one.
+- Paths are compared case-insensitively and Unicode-normalized (NFC) on every platform, so
+  `.agents/skills/Review/SKILL.md` and `.agents/skills/review/SKILL.md` collide on Linux too, and
+  the plan stays identical across macOS, Windows, and Linux.
 
-`--strict` is a separate and earlier check: it fails the run when two configured targets declare the same main output path, before any compilation happens.
+`--strict` is a separate and earlier check: it fails the run when two configured targets declare the
+same main output path, before any compilation happens.
 
-When compiling the Factory target and `.factory/hooks.json` is absent, `prs compile` migrates unambiguous hooks from `.factory/settings.json` before writing generated output. `--dry-run` reports the planned canonical and legacy file changes without writing. `--no-migrate-factory-hooks` keeps the legacy file unchanged and reports `PS4002` instead. Unknown events, malformed entries, and mixed ownership abort migration without a partial write.
+When compiling the Factory target and `.factory/hooks.json` is absent,
+`prs compile` migrates unambiguous hooks from `.factory/settings.json` before
+writing generated output. `--dry-run` reports the planned canonical and legacy
+file changes without writing. `--no-migrate-factory-hooks` keeps the legacy
+file unchanged and reports `PS4002` instead. Unknown events, malformed entries,
+and mixed ownership abort migration without a partial write.
 
-`--resources <items>` compiles only the named resource kinds: `agents`, `skills`, `commands`, `mcp`, `hooks`, `plugins`, and `main`. Multiple kinds are comma-separated and the flag overrides `output.resources` in the config. A selection without `main` omits root instruction files (and rule, workflow, and local-memory outputs), so a global install can generate only `.claude/agents/`, `.factory/droids/`, or skill directories. Resource-only runs skip managed cleanup, because cleanup would classify every unselected file as obsolete; run a full compile to prune stale generated files. Writing into the home directory without a resource selection prints a warning, and protected personal files such as `~/.factory/AGENTS.md` are refused outright.
+`--resources <items>` compiles only the named resource kinds: `agents`,
+`skills`, `commands`, `mcp`, `hooks`, `plugins`, and `main`. Multiple kinds are
+comma-separated and the flag overrides `output.resources` in the config. A
+selection without `main` omits root instruction files (and rule, workflow, and
+local-memory outputs), so a global install can generate only
+`.claude/agents/`, `.factory/droids/`, or skill directories. Resource-only
+runs skip managed cleanup, because cleanup would classify every unselected
+file as obsolete; run a full compile to prune stale generated files. Writing
+into the home directory without a resource selection prints a warning, and
+protected personal files such as `~/.factory/AGENTS.md` are refused outright.
 
 **Examples:**
 
@@ -345,9 +427,9 @@ prs compile --verbose
 prs compile --debug
 ```
 
-Automatic compilation with hooks
-
+:::tip[Automatic compilation with hooks]
 Instead of running `prs compile --watch` in a terminal, you can let your AI tool trigger compilation automatically. Run `prs hooks install` once to wire `prs compile` into your tool's native hook system — no manual watch process needed. See the [Hooks Guide](https://getpromptscript.dev/guides/hooks/index.md) for details.
+:::
 
 **Common Targets:**
 
@@ -377,7 +459,8 @@ This is a shortcut for:
 prs compile --build <name>
 ```
 
-Build profiles are useful when a project needs extra generated artifacts for a subpackage, plugin, or library folder.
+Build profiles are useful when a project needs extra generated artifacts for a
+subpackage, plugin, or library folder.
 
 ```yaml
 builds:
@@ -396,9 +479,11 @@ builds:
 prs build logstrip-factory
 ```
 
-The command accepts the applicable compile options from `prs compile`, including `--target`, `--format`, `--output`, `--resources`, `--dry-run`, `--config`, `--force`, `--strict`, `--ignore-hashes`, `--registry`, `--watch`, and `--cwd`.
+The command accepts the applicable compile options from `prs compile`, including
+`--target`, `--format`, `--output`, `--resources`, `--dry-run`, `--config`,
+`--force`, `--strict`, `--ignore-hashes`, `--registry`, `--watch`, and `--cwd`.
 
-______________________________________________________________________
+---
 
 ### prs validate
 
@@ -442,7 +527,7 @@ prs validate --format json
 | 1    | Validation errors found                   |
 | 2    | Validation warnings found (with --strict) |
 
-______________________________________________________________________
+---
 
 ### prs inspect
 
@@ -482,7 +567,8 @@ prs inspect code-review --format json
 
 ### prs explain
 
-Explain source and composition provenance for any resolved block, field, nested value, list entry, or text fragment.
+Explain source and composition provenance for any resolved block, field, nested
+value, list entry, or text fragment.
 
 ```bash
 prs explain <path> [options]
@@ -508,7 +594,8 @@ prs explain standards.code.frameworks[0]
 prs explain identity.text[0] --format json
 ```
 
-Text and JSON output use paths relative to the project root by default. Use `--absolute-paths` only when consumers require host filesystem paths.
+Text and JSON output use paths relative to the project root by default. Use
+`--absolute-paths` only when consumers require host filesystem paths.
 
 JSON output has this shape:
 
@@ -544,7 +631,8 @@ JSON output has this shape:
 }
 ```
 
-Each entry reports `kind` as `block`, `field`, `value`, `list`, `text`, or `inline-use`, and `history` lists the operations that produced the final value in application order:
+Each entry reports `kind` as `block`, `field`, `value`, `list`, `text`, or `inline-use`, and
+`history` lists the operations that produced the final value in application order:
 
 | Field       | Description                                                                                 |
 | ----------- | ------------------------------------------------------------------------------------------- |
@@ -558,9 +646,11 @@ Each entry reports `kind` as `block`, `field`, `value`, `list`, `text`, or `inli
 | `chain`     | Import links traversed to reach the source, outermost first                                 |
 | `trace`     | Nested provenance of a composed value, such as a skill body pulled in by a composition step |
 
-`prs explain` exits with status 0 when the path resolves and diagnostics are warnings only. It exits nonzero for a missing path, configuration failure, resolution failure, or any fatal partial-resolution diagnostic.
+`prs explain` exits with status 0 when the path resolves and diagnostics are
+warnings only. It exits nonzero for a missing path, configuration failure,
+resolution failure, or any fatal partial-resolution diagnostic.
 
-______________________________________________________________________
+---
 
 ### prs diff
 
@@ -603,11 +693,24 @@ prs diff --format json
 prs diff --format json --include-content
 ```
 
-JSON reports use the versioned [diff schema](https://getpromptscript.dev/schema/diff/v1.json). Content is omitted by default; each output change includes a deterministic `sha256-<hex>` hash after generation markers are removed. Change entries include target, output path, source provenance, change kind, ownership, and target compatibility warnings. `unsupported` repeats unsupported entries from `changes` for direct automation. `success: false` with `errors` means compilation or report generation failed; `success: true` with `hasChanges: true` is a valid diff report. The command exits 1 for errors and 0 for valid reports, including reports with changes.
+JSON reports use the versioned
+[diff schema](https://getpromptscript.dev/schema/diff/v1.json). Content is omitted by default;
+each output change includes a deterministic `sha256-<hex>` hash after generation markers are
+removed. Change entries include target, output path, source provenance, change kind, ownership,
+and target compatibility warnings. `unsupported` repeats unsupported entries from `changes` for
+direct automation. `success: false` with `errors` means compilation or report generation failed;
+`success: true` with `hasChanges: true` is a valid diff report. The command exits 1 for errors and
+0 for valid reports, including reports with changes.
 
-Generated output paths use `builds.<name>.output` for `--build`, with `output.baseDir` as the fallback. The JSON report uses the same formatter output, configured header, and Prettier post-format pass as `prs compile`; `prs diff` uses the complete configured target for `--target`, including version, convention, output path, and skill settings. It never writes generated files, registry checkouts, cache metadata, lockfiles, or temporary files. Git registries must already be available through vendor mode or a valid local cache; otherwise diff fails with an actionable error instead of fetching them.
+Generated output paths use `builds.<name>.output` for `--build`, with `output.baseDir` as the
+fallback. The JSON report uses the same formatter output, configured header, and Prettier
+post-format pass as `prs compile`; `prs diff` uses the complete configured target for `--target`,
+including version, convention, output path, and skill settings. It never writes generated files,
+registry checkouts, cache metadata, lockfiles, or temporary files. Git registries must already be
+available through vendor mode or a valid local cache; otherwise diff fails with an actionable error
+instead of fetching them.
 
-______________________________________________________________________
+---
 
 ### prs pull
 
@@ -653,15 +756,20 @@ prs pull --commit abc123
 prs pull --refresh
 ```
 
-Git Registry Options
+:::note[Git Registry Options]
+The `--branch`, `--tag`, and `--commit` options are mutually exclusive. These options and
+`--refresh` only apply to Git registries.
+For local or HTTP registries, these options are ignored.
+:::
 
-The `--branch`, `--tag`, and `--commit` options are mutually exclusive. These options and `--refresh` only apply to Git registries. For local or HTTP registries, these options are ignored.
-
-______________________________________________________________________
+---
 
 ### prs check
 
-Check the effective configuration, every top-level or build-profile entry file, lockfile, registry, imports, inheritance, and PromptScript validation without generating output. Configuration and validation warnings do not fail the command, while health-check errors exit with status 1.
+Check the effective configuration, every top-level or build-profile entry file, lockfile, registry,
+imports, inheritance, and PromptScript validation without generating output. Configuration and
+validation warnings do not fail the command, while health-check errors exit
+with status 1.
 
 ```bash
 prs check [options]
@@ -674,7 +782,7 @@ prs check [options]
 prs check
 ```
 
-______________________________________________________________________
+---
 
 ### prs serve
 
@@ -712,10 +820,10 @@ prs serve --read-only
 **How it works:**
 
 1. Run `prs serve` in your project directory
-1. The CLI prints a playground URL: `https://getpromptscript.dev/playground/?server=127.0.0.1:3000`
-1. Open the URL - the playground loads your local `.prs` files
-1. Edit in the playground or your editor - changes sync both ways via WebSocket
-1. The playground reads your `promptscript.yaml` and applies your project configuration (enabled targets, formatting settings)
+2. The CLI prints a playground URL: `https://getpromptscript.dev/playground/?server=127.0.0.1:3000`
+3. Open the URL - the playground loads your local `.prs` files
+4. Edit in the playground or your editor - changes sync both ways via WebSocket
+5. The playground reads your `promptscript.yaml` and applies your project configuration (enabled targets, formatting settings)
 
 **File discovery:** The server scans only the source directory (`.promptscript/` by default, or the directory from `input.entry` in your `promptscript.yaml`) and config files - not the entire repository.
 
@@ -729,15 +837,15 @@ prs serve --read-only
 | `/api/files/*` | GET/PUT/POST/DELETE | Read, update, create, delete files                        |
 | `/ws`          | WebSocket           | Real-time file change events                              |
 
-Privacy
-
+:::note[Privacy]
 All compilation happens locally in your browser - no data is sent to any external server. The `prs serve` command only serves files to the playground running in your browser.
+:::
 
-Security
-
+:::note[Security]
 The server only accepts requests from `https://getpromptscript.dev` by default (CORS). Use `--cors-origin` to allow other origins. Use `--read-only` to prevent file modifications.
+:::
 
-______________________________________________________________________
+---
 
 ### prs import
 
@@ -778,7 +886,7 @@ prs import CLAUDE.md --output ./my-prompts
 
 The command refuses to replace an existing `imported.prs` unless `--force` is provided.
 
-______________________________________________________________________
+---
 
 ### prs registry
 
@@ -890,7 +998,8 @@ prs registry publish --tag v1.0.0
 prs registry publish --force
 ```
 
-The registry path must be the root of its Git repository. Dry runs do not modify the manifest or Git working tree.
+The registry path must be the root of its Git repository. Dry runs do not modify the manifest
+or Git working tree.
 
 #### prs registry list
 
@@ -922,7 +1031,7 @@ prs registry list --format json
 
 **Example output:**
 
-```text
+```
   @company  →  github.com/acme/promptscript-base  (project)
   @team     →  github.com/acme/team-frontend      (project)
   @shared   →  github.com/acme/shared-libs        (global)
@@ -959,7 +1068,7 @@ prs registry add @company github.com/acme/promptscript-base
 prs registry add @company github.com/acme/promptscript-base --global
 ```
 
-______________________________________________________________________
+---
 
 ### prs lock
 
@@ -986,9 +1095,10 @@ prs lock
 prs lock --dry-run
 ```
 
-`prs lock` fails without writing when a remote dependency cannot be resolved. Commit `promptscript.lock` to version control.
+`prs lock` fails without writing when a remote dependency cannot be resolved. Commit
+`promptscript.lock` to version control.
 
-______________________________________________________________________
+---
 
 ### prs update
 
@@ -1023,7 +1133,7 @@ prs update github.com/acme/promptscript-base
 prs update --dry-run
 ```
 
-______________________________________________________________________
+---
 
 ### prs skills
 
@@ -1076,7 +1186,11 @@ Before writing project files, `prs skills add` clones the target ref into a temp
 - Body length sanity check (warning at >500 lines)
 - Markdown references stay inside the skill directory and resolve to existing files
 
-Plain `http://` sources are rejected to prevent MITM. Use `https://`, `git@`, or `github.com/...` form. The fetched commit's integrity hash is written to `promptscript.lock`. For SSH input, the lockfile retains the SSH clone URL so later skill updates do not require HTTPS access. `--skip-validation` skips only SKILL.md frontmatter checks. Remote access, cloning, commit pinning, file existence checks, and integrity hashing still run. The `.prs` file and lockfile are written transactionally from the command user's perspective. If the lockfile write fails after the `.prs` file changes, the original contents are restored when the lockfile still contains the command's update. Concurrent lockfile changes are left untouched and reported as rollback conflicts. If restoration also fails, the error reports the rollback failure. Concurrent runs are serialized through a `.promptscript-skills-add.lock` file in the project root. A second run fails fast instead of interleaving writes. A lock is reclaimed when its owning process is gone or when it is older than 30 minutes, so a recycled process ID cannot block the command permanently. Add `.promptscript-skills-add.lock` to `.gitignore`.
+Plain `http://` sources are rejected to prevent MITM. Use `https://`, `git@`, or `github.com/...` form. The fetched commit's integrity hash is written to `promptscript.lock`.
+For SSH input, the lockfile retains the SSH clone URL so later skill updates do not require HTTPS access.
+`--skip-validation` skips only SKILL.md frontmatter checks. Remote access, cloning, commit pinning, file existence checks, and integrity hashing still run.
+The `.prs` file and lockfile are written transactionally from the command user's perspective. If the lockfile write fails after the `.prs` file changes, the original contents are restored when the lockfile still contains the command's update. Concurrent lockfile changes are left untouched and reported as rollback conflicts. If restoration also fails, the error reports the rollback failure.
+Concurrent runs are serialized through a `.promptscript-skills-add.lock` file in the project root. A second run fails fast instead of interleaving writes. A lock is reclaimed when its owning process is gone or when it is older than 30 minutes, so a recycled process ID cannot block the command permanently. Add `.promptscript-skills-add.lock` to `.gitignore`.
 
 **Examples:**
 
@@ -1114,7 +1228,8 @@ prs skills add ~/Downloads/skills/my-skill --copy --force
 
 #### prs skills remove
 
-Remove a skill from the project. Removes the matching `@use` line and its lock entry. Partial names must match exactly one imported skill. For a local skill installed with `--copy`, the directory under `.promptscript/skills/` is left in place - delete it manually if the skill is no longer needed.
+Remove a skill from the project. Removes the matching `@use` line and its lock entry.
+Partial names must match exactly one imported skill. For a local skill installed with `--copy`, the directory under `.promptscript/skills/` is left in place - delete it manually if the skill is no longer needed.
 
 ```bash
 prs skills remove <name> [options]
@@ -1200,7 +1315,7 @@ prs skills update --dry-run
 prs skills update --strict
 ```
 
-______________________________________________________________________
+---
 
 ### prs vendor
 
@@ -1234,7 +1349,7 @@ Exits with code 1 if vendor is out of sync. Use in CI before compiling:
 prs vendor check && prs compile
 ```
 
-______________________________________________________________________
+---
 
 ### prs resolve
 
@@ -1271,7 +1386,7 @@ prs resolve @company/security --format json
 
 **Example output:**
 
-```text
+```
   Import:   @company/security
   Type:     native .prs
   Alias:    @company
@@ -1284,11 +1399,13 @@ prs resolve @company/security --format json
   Exists:   yes
 ```
 
-______________________________________________________________________
+---
 
 ### prs update-check
 
-Check npm for CLI updates, bypassing the automatic check's 24-hour cache. Network errors and malformed registry responses exit with status 1. Set `PROMPTSCRIPT_NO_UPDATE_CHECK` to disable the request.
+Check npm for CLI updates, bypassing the automatic check's 24-hour cache. Network
+errors and malformed registry responses exit with status 1. Set
+`PROMPTSCRIPT_NO_UPDATE_CHECK` to disable the request.
 
 ```bash
 prs update-check
@@ -1301,7 +1418,7 @@ prs update-check
 prs update-check
 ```
 
-______________________________________________________________________
+---
 
 ## Configuration File
 

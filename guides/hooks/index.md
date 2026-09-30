@@ -2,17 +2,39 @@
 
 PromptScript hooks integrate directly with supported AI coding tool event systems.
 
-This guide covers `prs hooks install`, which installs PromptScript auto-compilation and generated-file protection. Language-level `@hooks` are compiled separately to project lifecycle policy files for Claude, Codex, Cursor, Factory, Gemini, GitHub, Grok, and Windsurf. Copilot `.github/hooks/promptscript-vscode.json` below is the VS Code Agent installer contract, not the GitHub repository hook contract.
+This guide covers `prs hooks install`, which installs PromptScript
+auto-compilation and generated-file protection. Language-level `@hooks` are
+compiled separately to project lifecycle policy files for Claude, Codex,
+Cursor, Factory, Gemini, GitHub, Grok, and Windsurf. Copilot
+`.github/hooks/promptscript-vscode.json` below is the VS Code Agent installer
+contract, not the GitHub repository hook contract.
 
 Notes for compiled `@hooks` output:
 
-- **Legacy Factory settings** - before 1.16, `@hooks` could land in `.factory/settings.json`. When `.factory/hooks.json` is absent, `prs compile` moves unambiguous hooks to the canonical file and preserves unrelated settings. Migration is all-or-nothing for unknown events, malformed entries, and mixed ownership. Use `--dry-run` to preview both file changes, or `--no-migrate-factory-hooks` to retain warning-only `PS4002` behavior.
-- **Matcher portability** - `matcher` filters by target-native tool names (Factory `Execute`, GitHub Copilot tool names, Claude `Edit|Write`). A matcher that works on one target may match nothing on another. See [@hooks](https://getpromptscript.dev/reference/language/#hooks).
-- **Terminal commands** - use `pre-terminal-command` instead of a broad `pre-tool-use` matcher. PromptScript supplies audited native tool defaults, allows `targets.<name>.matcher` overrides, and reports `PS4002` for best-effort or unsupported host coverage. See [Terminal command semantics](https://getpromptscript.dev/features/automation/#terminal-command-semantics).
-- **Cleanup** - removing `@hooks` deletes the obsolete generated hook file once every command in it carries the PromptScript ownership marker, and prunes managed directories left empty (such as `.github/hooks/`).
-- **Working directory** - for repository-local lifecycle commands, set `cwd: "project"` in the language-level hook and keep shared scripts under `.promptscript/scripts/`. Generated hook file location does not set command working directory. Environment and Git-root wrappers exit before resource execution when the required root is unavailable; they never fall back to process cwd. See [Hooks and Workflows](https://getpromptscript.dev/features/automation/#project-root-strategy-by-target) for target behavior, generated Factory and GitHub examples, and the complete capability matrix.
+- **Legacy Factory settings** - before 1.16, `@hooks` could land in `.factory/settings.json`.
+  When `.factory/hooks.json` is absent, `prs compile` moves unambiguous hooks to the canonical
+  file and preserves unrelated settings. Migration is all-or-nothing for unknown events,
+  malformed entries, and mixed ownership. Use `--dry-run` to preview both file changes, or
+  `--no-migrate-factory-hooks` to retain warning-only `PS4002` behavior.
+- **Matcher portability** - `matcher` filters by target-native tool names (Factory `Execute`,
+  GitHub Copilot tool names, Claude `Edit|Write`). A matcher that works on one target may match
+  nothing on another. See [@hooks](https://getpromptscript.dev/reference/language/index.md#hooks).
+- **Terminal commands** - use `pre-terminal-command` instead of a broad
+  `pre-tool-use` matcher. PromptScript supplies audited native tool defaults,
+  allows `targets.<name>.matcher` overrides, and reports `PS4002` for
+  best-effort or unsupported host coverage. See
+  [Terminal command semantics](https://getpromptscript.dev/features/automation/index.md#terminal-command-semantics).
+- **Cleanup** - removing `@hooks` deletes the obsolete generated hook file once every command in
+  it carries the PromptScript ownership marker, and prunes managed directories left empty (such as
+  `.github/hooks/`).
+- **Working directory** - for repository-local lifecycle commands, set `cwd: "project"` in the
+  language-level hook and keep shared scripts under `.promptscript/scripts/`. Generated hook file
+  location does not set command working directory. Environment and Git-root wrappers exit before
+  resource execution when the required root is unavailable; they never fall back to process cwd. See
+  [Hooks and Workflows](https://getpromptscript.dev/features/automation/index.md#project-root-strategy-by-target) for target
+  behavior, generated Factory and GitHub examples, and the complete capability matrix.
 
-```
+```promptscript
 @hooks {
   validate: {
     event: "post-tool-use"
@@ -26,14 +48,17 @@ Notes for compiled `@hooks` output:
 }
 ```
 
-Compilation fails if the script is missing, is not a regular file, or escapes `.promptscript/scripts/` through traversal or a symlink. Targets and output modes without native project hooks report `PS4002` and an actionable fallback instead of silently omitting the hook.
+Compilation fails if the script is missing, is not a regular file, or escapes
+`.promptscript/scripts/` through traversal or a symlink. Targets and output
+modes without native project hooks report `PS4002` and an actionable fallback
+instead of silently omitting the hook.
 
 There are two complementary behaviours:
 
 - **Auto-compilation** - when the AI tool writes a `.prs` file, `post-edit` runs `prs compile`.
 - **Output protection** - when an AI agent tries to edit a generated file directly, `pre-edit` blocks the write and explains that the file is managed by PromptScript.
 
-```
+```mermaid
 flowchart LR
     dev["AI tool edits\n.prs file"]
     tool["AI tool fires\npost-edit hook"]
@@ -81,7 +106,11 @@ If a tool is not detected, specify its name explicitly.
 
 Tools without a native hook system can use `prs compile --watch` as a fallback - see [Fallback: watch mode](#fallback-watch-mode).
 
-VS Code Copilot Agent Hooks are distinct from GitHub Copilot CLI and cloud agent hooks. They use the same `.github/hooks/` workspace location but a separate file, PascalCase events, camelCase tool input fields, and currently ignore matcher values. Use a `vscode` target override and filter `tool_name` inside the command when exact tool matching is required.
+VS Code Copilot Agent Hooks are distinct from GitHub Copilot CLI and cloud
+agent hooks. They use the same `.github/hooks/` workspace location but a
+separate file, PascalCase events, camelCase tool input fields, and currently
+ignore matcher values. Use a `vscode` target override and filter `tool_name`
+inside the command when exact tool matching is required.
 
 ## How It Works
 
@@ -91,26 +120,28 @@ When an AI agent attempts to edit any file that contains a PromptScript generati
 
 Example stderr output:
 
-```text
+```
 CLAUDE.md is generated by PromptScript. Edit .promptscript/project.prs instead,
 then run `prs compile` (or let the post-edit hook do it automatically).
 ```
 
 Generated files carry one of PromptScript's marker formats near the top:
 
-```text
+```
 <!-- PromptScript | source: .promptscript/project.prs | target: claude -->
 # promptscript-generated: project
 > Auto-generated by PromptScript
 ```
 
-The hook scans the first 50 lines. If the file does not exist or has no recognized marker, the edit is allowed.
+The hook scans the first 50 lines. If the file does not exist or has no recognized marker, the edit
+is allowed.
 
 ### post-edit: auto-compilation
 
-When a supported AI tool writes a `.prs` file, `prs hook post-edit` runs `prs compile`. Compilation errors are written to stderr.
+When a supported AI tool writes a `.prs` file, `prs hook post-edit` runs `prs compile`. Compilation
+errors are written to stderr.
 
-```
+```mermaid
 sequenceDiagram
     participant Agent
     participant Hook as prs hook post-edit
@@ -126,7 +157,9 @@ sequenceDiagram
 
 ## Generated Configuration
 
-Use `prs hooks install [tool]` instead of copying hook payloads manually. PromptScript merges the current tool-specific event names, command shapes, timeout units, and settings paths shown above. Review the generated configuration before committing it.
+Use `prs hooks install [tool]` instead of copying hook payloads manually. PromptScript merges the
+current tool-specific event names, command shapes, timeout units, and settings paths shown above.
+Review the generated configuration before committing it.
 
 ## Fallback: Watch Mode
 
@@ -136,9 +169,11 @@ For AI tools that do not support hooks, run `prs compile --watch` in a terminal 
 prs compile --watch
 ```
 
-This does not provide the output-protection behaviour of `pre-edit`. Keep generated files writable so watch mode can replace them, and rely on generation markers plus code review to prevent manual edits.
+This does not provide the output-protection behaviour of `pre-edit`. Keep generated files writable
+so watch mode can replace them, and rely on generation markers plus code review to prevent manual
+edits.
 
-See [`prs compile`](https://getpromptscript.dev/reference/cli/#prs-compile) for full watch options.
+See [`prs compile`](https://getpromptscript.dev/reference/cli/index.md#prs-compile) for full watch options.
 
 ## Troubleshooting
 
@@ -168,7 +203,9 @@ Check that the compiler is writing the marker. Run `prs compile` and inspect the
 
 ### Hook compilation is temporarily skipped
 
-Hook-triggered compilation uses a short-lived mutex under `/tmp` to prevent overlapping runs. A stale mutex expires automatically after 30 seconds. The `prs lock` command manages registry dependency resolution and does not clear this hook mutex.
+Hook-triggered compilation uses a short-lived mutex under `/tmp` to prevent overlapping runs. A
+stale mutex expires automatically after 30 seconds. The `prs lock` command manages registry
+dependency resolution and does not clear this hook mutex.
 
 ### Uninstalling hooks
 

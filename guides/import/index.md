@@ -5,13 +5,14 @@ The `prs import` command converts existing AI instruction files into PromptScrip
 ## Supported Formats
 
 | Source Format    | File                               |
-| ---------------- | ---------------------------------- |
+| :--------------- | :--------------------------------- |
 | Claude Code      | `CLAUDE.md`                        |
 | GitHub Copilot   | `.github/copilot-instructions.md`  |
 | Cursor           | `.cursorrules`, `.cursor/rules.md` |
 | Generic Markdown | Any `.md` file                     |
 
-Modern Cursor `.cursor/rules/*.mdc` files are not auto-detected. Import one with `--format cursor`, then manually map its frontmatter globs to named `@guards` entries:
+Modern Cursor `.cursor/rules/*.mdc` files are not auto-detected. Import one with
+`--format cursor`, then manually map its frontmatter globs to named `@guards` entries:
 
 ```bash
 prs import .cursor/rules/project.mdc --format cursor
@@ -36,10 +37,10 @@ prs import CLAUDE.md --output ./my-project
 ## How It Works
 
 1. **Detect Format** - Automatically identifies the source format from the filename
-1. **Parse Sections** - Extracts markdown headings and content blocks
-1. **Classify** - Heuristically maps sections to PromptScript blocks (`@identity`, `@standards`, `@restrictions`, `@knowledge`, `@context`)
-1. **Score** - Assigns a confidence score (0-100%) to each classification
-1. **Emit** - Generates `.prs` output with `# REVIEW:` comments on low-confidence sections
+2. **Parse Sections** - Extracts markdown headings and content blocks
+3. **Classify** - Heuristically maps sections to PromptScript blocks (`@identity`, `@standards`, `@restrictions`, `@knowledge`, `@context`)
+4. **Score** - Assigns a confidence score (0-100%) to each classification
+5. **Emit** - Generates `.prs` output with `# REVIEW:` comments on low-confidence sections
 
 ## Confidence Scoring
 
@@ -47,13 +48,13 @@ Each section receives a confidence score:
 
 - **HIGH (>80%)** - Strong pattern match (e.g., "You are..." maps to `@identity`)
 - **MEDIUM (50-80%)** - Ambiguous patterns requiring review
-- **LOW (\<50%)** - No clear match, classified as `@context`
+- **LOW (<50%)** - No clear match, classified as `@context`
 
 Sections below HIGH confidence include `# REVIEW:` comments in the generated output. Always review the imported file before using it in production.
 
 ## CLI Options
 
-```text
+```
 prs import <file> [options]
 
 Options:
@@ -70,10 +71,10 @@ The `--validate` flag parses the generated `.prs` output with the PromptScript p
 ## After Import
 
 1. Review the generated `imported.prs` file
-1. Check `# REVIEW:` comments and adjust block classifications
-1. Add `@meta` fields (team, description) as needed
-1. Set up `promptscript.yaml` with your compilation targets
-1. Run `prs compile` to generate output for your AI tools
+2. Check `# REVIEW:` comments and adjust block classifications
+3. Add `@meta` fields (team, description) as needed
+4. Set up `promptscript.yaml` with your compilation targets
+5. Run `prs compile` to generate output for your AI tools
 
 ## Programmatic Usage
 

@@ -4,7 +4,7 @@ The simplest possible PromptScript setup for a single project.
 
 ## Project Structure
 
-```text
+```
 my-project/
 ├── .promptscript/
 │   └── project.prs
@@ -18,7 +18,7 @@ my-project/
 
 ### .promptscript/project.prs
 
-```
+```promptscript
 @meta {
   id: "minimal-example"
   syntax: "1.5.0"
@@ -50,6 +50,12 @@ my-project/
   "/test": "Write unit tests"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSEVhBIYoAWiKlyMeWIlwAnuwyFZ8gIwUArBQAMe1gF8xY7tM5YIWQ8P1yQPUDxQQBNZgBXQQxqGGjBHBgoNDAIqEEWKSUAc2i4OAg4AXZBMGZqQVxCwRpmACsYRiwKfwAxZkYIuEE2DNgMVjpBWIwpDAAjWAzmKRgWkKDHF1Y3FnYiLD8FwJ3-ABUcauqhPcM0GABlRmoINE3ahqbBLpzBEhmYanFx+HvqDCaEEY8HmEkWwWWbiKAzG1Ck3VEIUyMFkyH8YJAAFU4HFUqxAWw1DVqMxsv8SIpWLkioZYPI6OiAgARDoRPglNARSZAwQAQQACgBJboAd28OEEACkLizGI4JABdMSQ1jcOA4cpYTpYBH+eQAekSyXk5hAFw1IsEIpw2EEhkiGQGCSSaCt4vlAX1sQAbhAYCKTQEAEowX3+6azUrlQQARwiam8vkKcAi8A9Bo4RUD8gA6jcOM9lJtMzqliAnAqGJ5qIZ8FoyJQaPQQN7PgU2PgLOWgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### promptscript.yaml
 
@@ -97,6 +103,8 @@ Current configuration emits GitHub output only:
 
 `.github/copilot-instructions.md`:
 
+<!-- output:github for="minimal-example" -->
+
 ```markdown
 # GitHub Copilot Instructions
 
@@ -122,6 +130,8 @@ This is a TypeScript project using modern best practices.
 - /review: Review code for quality issues
 - /test: Write unit tests
 ```
+
+<!-- /output -->
 
 ## Adding More Targets
 
@@ -152,6 +162,6 @@ prs compile
 
 ## Next Steps
 
-- Add more detailed [standards](https://getpromptscript.dev/reference/language/#standards)
-- Add [restrictions](https://getpromptscript.dev/reference/language/#restrictions) for safety
+- Add more detailed [standards](https://getpromptscript.dev/reference/language/index.md#standards)
+- Add [restrictions](https://getpromptscript.dev/reference/language/index.md#restrictions) for safety
 - Consider [team setup](https://getpromptscript.dev/examples/team-setup/index.md) for multiple projects

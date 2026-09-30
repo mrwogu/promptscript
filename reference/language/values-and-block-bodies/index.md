@@ -1,6 +1,7 @@
 # Values and Block Bodies
 
-PromptScript preserves body entries in source order. Every built-in block has one canonical body shape.
+PromptScript preserves body entries in source order. Every built-in block has
+one canonical body shape.
 
 ## Four Shapes
 
@@ -11,7 +12,7 @@ PromptScript preserves body entries in source order. Every built-in block has on
 | `array`  | Dash-list entries                     | `@restrictions`                              |
 | `mixed`  | Properties plus prose or list entries | `@context`                                   |
 
-```
+```promptscript
 @meta { id: "body-shapes" syntax: "1.5.0" }
 
 @identity {
@@ -37,11 +38,19 @@ PromptScript preserves body entries in source order. Every built-in block has on
 }
 ```
 
-An array used as a property value does not make its parent block an array body. `@standards` above remains an object body.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEACNmYgJ4BaODgxp4MwXEXsMhSTICMFAKwUADNoC+U1ve7jOWCFkXD7g6SBl-W3gCazACughjUMOGCjBEwYCFQgiQYEPppMNQUXj5+vqx2DqzcLOxEWJ4BgtQh7BB8RiAAcgowFABWcIIATJYA1P45ef7eACo4EF1wmQBuEIxRNMwLcNNdjDgwjADWoRWRAI4h8Fhw2VXD+YWOcAKsYhFiXcA5LGIwksgyAKrTOljUeYVUaKTQAZUYgLQWBkdB8vyirFIMDEgiIaGY1FOMgAuvZrsVIrdAYxXGxnjllD4mjAZpk0YQMX9ppD+HB-DYQDYcQwXNRFPgiKRyG0aPQQHTaBA2PhjFygA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+An array used as a property value does not make its parent block an array body.
+`@standards` above remains an object body.
 
 ## Compatibility and PS038
 
-Legacy forms remain parseable when current consumers have defined behavior. PS038 warns when a form can lose data or compile differently by target.
+Legacy forms remain parseable when current consumers have defined behavior.
+PS038 warns when a form can lose data or compile differently by target.
 
 Common remediation:
 
@@ -52,7 +61,7 @@ Common remediation:
 | Text used where named entries are required | Canonical object body               |
 | Mixed body with formatter-dependent fields | Separate portable fields from prose |
 
-```
+```promptscript
 @meta { id: "canonical-shortcut" syntax: "1.5.0" }
 
 @shortcuts {
@@ -65,10 +74,17 @@ Common remediation:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJhlZsIjDFAC0cHM2pZGAVywzBcAJ7sMhSTICMFAKwUADAYC+U1q+7rN2vXGGvB0iAA9NQwAG4QMADuMpLA-gGCYvCM1BBoWBBsFiAASuGRUYK61KHsxThyAObwMgkBLOycWDl1IPWJ+RHRxZqhjFis8HB0hjAlEFhGo3JighxwWHAUHW11rAEurE4gTgC6DM3URvhEpOQwVLQgDGEwtFms+Ja7QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Run strict validation before release:
 
 ```bash
 prs validate --strict
 ```
 
-See [Block Shapes](https://getpromptscript.dev/reference/block-shapes/index.md) for the complete built-in matrix and merge behavior.
+See [Block Shapes](https://getpromptscript.dev/reference/block-shapes/index.md) for the complete built-in matrix and
+merge behavior.

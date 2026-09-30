@@ -1,111 +1,207 @@
 # Supported Formatters
 
-PromptScript compiles one agent platform definition to native files for **50 AI coding agent targets**.
+<p class="formatter-page__subtitle">PromptScript compiles one agent platform definition to native files for <strong>50 AI coding agent targets</strong>.</p>
 
-9 Rich native
+<div class="formatter-tiers">
+  <div class="formatter-tier-badge formatter-tier-badge--custom">
+    <span class="formatter-tier-badge__count">9</span>
+    <span class="formatter-tier-badge__label">Rich native</span>
+  </div>
+  <div class="formatter-tier-badge formatter-tier-badge--t1">
+    <span class="formatter-tier-badge__count">11</span>
+    <span class="formatter-tier-badge__label">AGENTS.md</span>
+  </div>
+  <div class="formatter-tier-badge formatter-tier-badge--t2">
+    <span class="formatter-tier-badge__count">30</span>
+    <span class="formatter-tier-badge__label">Markdown</span>
+  </div>
+</div>
 
-11 AGENTS.md
-
-30 Markdown
-
-PromptScript treats instructions, skills, agents, commands, MCP servers, hooks, workflows, and plugins as platform capabilities. See [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) for the platform-family model.
+PromptScript treats instructions, skills, agents, commands, MCP servers, hooks, workflows, and
+plugins as platform capabilities. See [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) for
+the platform-family model.
 
 ## Rich Native Formatters
 
 Hand-crafted output logic for agents with unique file formats, skills, agents, and commands.
 
-\[Claude Code Custom
+<div class="formatter-cards">
 
-`CLAUDE.md`
+<a href="claude/" class="formatter-card">
+  <div class="formatter-card__header">
+    <span class="formatter-card__name">Claude Code</span>
+    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
+  </div>
+  <code class="formatter-card__output">CLAUDE.md</code>
+  <div class="formatter-card__features">
+    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Local</span>
+  </div>
+</a>
 
-Skills Agents Commands Local\](https://getpromptscript.dev/reference/formatters/claude/index.md) \[GitHub Copilot Custom
+<a href="github/" class="formatter-card">
+  <div class="formatter-card__header">
+    <span class="formatter-card__name">GitHub Copilot</span>
+    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
+  </div>
+  <code class="formatter-card__output">.github/copilot-instructions.md</code>
+  <div class="formatter-card__features">
+    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Prompts</span>
+  </div>
+</a>
 
-`.github/copilot-instructions.md`
+<a href="cursor/" class="formatter-card">
+  <div class="formatter-card__header">
+    <span class="formatter-card__name">Cursor</span>
+    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
+  </div>
+  <code class="formatter-card__output">.cursor/rules/project.mdc</code>
+  <div class="formatter-card__features">
+    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
+    <span class="formatter-card__tag formatter-card__tag--special">MDC Format</span>
+  </div>
+</a>
 
-Skills Prompts\](https://getpromptscript.dev/reference/formatters/github/index.md) \[Cursor Custom
+<a href="antigravity/" class="formatter-card">
+  <div class="formatter-card__header">
+    <span class="formatter-card__name">Antigravity</span>
+    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
+  </div>
+  <code class="formatter-card__output">.agent/rules/project.md</code>
+  <div class="formatter-card__features">
+    <span class="formatter-card__tag formatter-card__tag--special">Workflows</span>
+    <span class="formatter-card__tag formatter-card__tag--special">Activation Types</span>
+  </div>
+</a>
 
-`.cursor/rules/project.mdc`
+<a href="factory/" class="formatter-card">
+  <div class="formatter-card__header">
+    <span class="formatter-card__name">Factory AI</span>
+    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
+  </div>
+  <code class="formatter-card__output">AGENTS.md</code>
+  <div class="formatter-card__features">
+    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
+  </div>
+</a>
 
-Commands MDC Format\](https://getpromptscript.dev/reference/formatters/cursor/index.md) \[Antigravity Custom
+<a href="gemini/" class="formatter-card">
+  <div class="formatter-card__header">
+    <span class="formatter-card__name">Gemini CLI</span>
+    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
+  </div>
+  <code class="formatter-card__output">GEMINI.md</code>
+  <div class="formatter-card__features">
+    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
+  </div>
+</a>
 
-`.agent/rules/project.md`
+<a href="opencode/" class="formatter-card">
+  <div class="formatter-card__header">
+    <span class="formatter-card__name">OpenCode</span>
+    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
+  </div>
+  <code class="formatter-card__output">OPENCODE.md</code>
+  <div class="formatter-card__features">
+    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
+  </div>
+</a>
 
-Workflows Activation Types\](https://getpromptscript.dev/reference/formatters/antigravity/index.md) \[Factory AI Custom
+<a href="../../features/target-platforms/#rich-native-formatters" class="formatter-card">
+  <div class="formatter-card__header">
+    <span class="formatter-card__name">Codex</span>
+    <span class="formatter-card__tier formatter-card__tier--custom">Native</span>
+  </div>
+  <code class="formatter-card__output">AGENTS.md + .codex/</code>
+  <div class="formatter-card__features">
+    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
+    <span class="formatter-card__tag formatter-card__tag--special">TOML</span>
+  </div>
+</a>
 
-`AGENTS.md`
+<a href="../../features/target-platforms/#rich-native-formatters" class="formatter-card">
+  <div class="formatter-card__header">
+    <span class="formatter-card__name">Grok</span>
+    <span class="formatter-card__tier formatter-card__tier--custom">Native</span>
+  </div>
+  <code class="formatter-card__output">AGENTS.md</code>
+  <div class="formatter-card__features">
+    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
+  </div>
+</a>
 
-Skills Agents Commands\](https://getpromptscript.dev/reference/formatters/factory/index.md) \[Gemini CLI Custom
-
-`GEMINI.md`
-
-Skills Commands\](https://getpromptscript.dev/reference/formatters/gemini/index.md) \[OpenCode Custom
-
-`OPENCODE.md`
-
-Skills Agents Commands\](https://getpromptscript.dev/reference/formatters/opencode/index.md) \[Codex Native
-
-`AGENTS.md + .codex/`
-
-Skills Agents TOML\](https://getpromptscript.dev/features/target-platforms/#rich-native-formatters) \[Grok Native
-
-`AGENTS.md`
-
-Skills Agents Commands\](https://getpromptscript.dev/features/target-platforms/#rich-native-formatters)
+</div>
 
 ## All Formatters
 
-| Formatter                                                                            | Tier   | Output File                       | Skills | Agents | Local | Commands |
-| ------------------------------------------------------------------------------------ | ------ | --------------------------------- | ------ | ------ | ----- | -------- |
-| [Antigravity](https://getpromptscript.dev/reference/formatters/antigravity/index.md) | Custom | `.agent/rules/project.md`         | No     | No     | No    | Yes      |
-| [Claude Code](https://getpromptscript.dev/reference/formatters/claude/index.md)      | Custom | `CLAUDE.md`                       | Yes    | Yes    | Yes   | Yes      |
-| [Cursor](https://getpromptscript.dev/reference/formatters/cursor/index.md)           | Custom | `.cursor/rules/project.mdc`       | Yes    | Yes    | No    | Yes      |
-| [Factory AI](https://getpromptscript.dev/reference/formatters/factory/index.md)      | Custom | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
-| [Gemini CLI](https://getpromptscript.dev/reference/formatters/gemini/index.md)       | Custom | `GEMINI.md`                       | Yes    | No     | No    | Yes      |
-| [GitHub Copilot](https://getpromptscript.dev/reference/formatters/github/index.md)   | Custom | `.github/copilot-instructions.md` | Yes    | Yes    | No    | Yes      |
-| [OpenCode](https://getpromptscript.dev/reference/formatters/opencode/index.md)       | Custom | `OPENCODE.md`                     | Yes    | Yes    | No    | Yes      |
-| Cline                                                                                | Tier 1 | `.clinerules`                     | No     | No     | No    | No       |
-| Codex                                                                                | Tier 1 | `AGENTS.md`                       | Yes    | Yes    | No    | No       |
-| Continue                                                                             | Tier 1 | `.continue/rules/project.md`      | No     | No     | No    | No       |
-| Roo Code                                                                             | Tier 1 | `.roorules`                       | No     | No     | No    | No       |
-| Windsurf                                                                             | Tier 1 | `.windsurf/rules/project.md`      | Yes    | No     | No    | No       |
-| Amp                                                                                  | Tier 2 | `AGENTS.md`                       | Yes    | Yes    | No    | No       |
-| Augment                                                                              | Tier 2 | `.augment/rules/project.md`       | No     | Yes    | No    | No       |
-| Goose                                                                                | Tier 2 | `.goosehints`                     | Yes    | No     | No    | No       |
-| Junie                                                                                | Tier 2 | `.junie/guidelines.md`            | Yes    | No     | No    | No       |
-| Kilo Code                                                                            | Tier 2 | `.kilocode/rules/project.md`      | Yes    | No     | No    | No       |
-| Kiro CLI                                                                             | Tier 2 | `.kiro/steering/project.md`       | Yes    | No     | No    | No       |
-| Trae                                                                                 | Tier 2 | `.trae/rules/project_rules.md`    | Yes    | No     | No    | No       |
-| Adal                                                                                 | Tier 3 | `.adal/rules/project.md`          | Yes    | No     | No    | No       |
-| Aider                                                                                | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Amazon Q                                                                             | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| CodeBuddy                                                                            | Tier 3 | `.codebuddy/rules/project.md`     | Yes    | No     | No    | No       |
-| Command Code                                                                         | Tier 3 | `.commandcode/rules/project.md`   | Yes    | No     | No    | Yes      |
-| Cortex                                                                               | Tier 3 | `.cortex/rules/project.md`        | Yes    | No     | No    | No       |
-| Crush                                                                                | Tier 3 | `AGENTS.md`                       | Yes    | No     | No    | No       |
-| Deep Agents                                                                          | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Devin                                                                                | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| ForgeCode                                                                            | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| GitLab Duo                                                                           | Tier 3 | `AGENTS.md`                       | Yes    | No     | No    | No       |
-| Grok                                                                                 | Tier 3 | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
-| Hermes Agent                                                                         | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| iFlow                                                                                | Tier 3 | `.iflow/rules/project.md`         | Yes    | No     | No    | No       |
-| Jules                                                                                | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Kimi                                                                                 | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Kode                                                                                 | Tier 3 | `.kode/rules/project.md`          | Yes    | No     | No    | No       |
-| MCPJam                                                                               | Tier 3 | `.mcpjam/rules/project.md`        | Yes    | No     | No    | No       |
-| Mimo                                                                                 | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Mistral Vibe                                                                         | Tier 3 | `.vibe/rules/project.md`          | Yes    | No     | No    | No       |
-| Mux                                                                                  | Tier 3 | `.mux/rules/project.md`           | No     | No     | No    | No       |
-| Neovate                                                                              | Tier 3 | `.neovate/rules/project.md`       | No     | No     | No    | No       |
-| OpenClaw                                                                             | Tier 3 | `INSTRUCTIONS.md`                 | Yes    | No     | No    | No       |
-| OpenHands                                                                            | Tier 3 | `.openhands/rules/project.md`     | Yes    | No     | No    | No       |
-| Pi                                                                                   | Tier 3 | `.pi/rules/project.md`            | Yes    | No     | No    | No       |
-| Pochi                                                                                | Tier 3 | `.pochi/rules/project.md`         | Yes    | No     | No    | No       |
-| Qoder                                                                                | Tier 3 | `.qoder/rules/project.md`         | No     | No     | No    | No       |
-| Qwen Code                                                                            | Tier 3 | `.qwen/rules/project.md`          | Yes    | No     | No    | No       |
-| Warp                                                                                 | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Zed                                                                                  | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
-| Zencoder                                                                             | Tier 3 | `.zencoder/rules/project.md`      | Yes    | No     | No    | No       |
+<!-- generated:start:formatter-table -->
+<!-- Auto-generated by `pnpm docs:formatters`. Do not edit manually. -->
+
+| Formatter                       | Tier   | Output File                       | Skills | Agents | Local | Commands |
+| ------------------------------- | ------ | --------------------------------- | ------ | ------ | ----- | -------- |
+| [Antigravity](https://getpromptscript.dev/reference/formatters/antigravity/index.md)   | Custom | `.agent/rules/project.md`         | No     | No     | No    | Yes      |
+| [Claude Code](https://getpromptscript.dev/reference/formatters/claude/index.md)        | Custom | `CLAUDE.md`                       | Yes    | Yes    | Yes   | Yes      |
+| [Cursor](https://getpromptscript.dev/reference/formatters/cursor/index.md)             | Custom | `.cursor/rules/project.mdc`       | Yes    | Yes    | No    | Yes      |
+| [Factory AI](https://getpromptscript.dev/reference/formatters/factory/index.md)        | Custom | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
+| [Gemini CLI](https://getpromptscript.dev/reference/formatters/gemini/index.md)         | Custom | `GEMINI.md`                       | Yes    | No     | No    | Yes      |
+| [GitHub Copilot](https://getpromptscript.dev/reference/formatters/github/index.md)     | Custom | `.github/copilot-instructions.md` | Yes    | Yes    | No    | Yes      |
+| [OpenCode](https://getpromptscript.dev/reference/formatters/opencode/index.md)         | Custom | `OPENCODE.md`                     | Yes    | Yes    | No    | Yes      |
+| [Cline](https://getpromptscript.dev/reference/formatters/cline/index.md)               | Tier 1 | `.clinerules`                     | No     | No     | No    | No       |
+| [Codex](https://getpromptscript.dev/reference/formatters/codex/index.md)               | Tier 1 | `AGENTS.md`                       | Yes    | Yes    | No    | No       |
+| [Continue](https://getpromptscript.dev/reference/formatters/continue/index.md)         | Tier 1 | `.continue/rules/project.md`      | No     | No     | No    | No       |
+| [Roo Code](https://getpromptscript.dev/reference/formatters/roo/index.md)              | Tier 1 | `.roorules`                       | No     | No     | No    | No       |
+| [Windsurf](https://getpromptscript.dev/reference/formatters/windsurf/index.md)         | Tier 1 | `.windsurf/rules/project.md`      | Yes    | No     | No    | No       |
+| [Amp](https://getpromptscript.dev/reference/formatters/amp/index.md)                   | Tier 2 | `AGENTS.md`                       | Yes    | Yes    | No    | No       |
+| [Augment](https://getpromptscript.dev/reference/formatters/augment/index.md)           | Tier 2 | `.augment/rules/project.md`       | No     | Yes    | No    | No       |
+| [Goose](https://getpromptscript.dev/reference/formatters/goose/index.md)               | Tier 2 | `.goosehints`                     | Yes    | No     | No    | No       |
+| [Junie](https://getpromptscript.dev/reference/formatters/junie/index.md)               | Tier 2 | `.junie/guidelines.md`            | Yes    | No     | No    | No       |
+| [Kilo Code](https://getpromptscript.dev/reference/formatters/kilo/index.md)            | Tier 2 | `.kilocode/rules/project.md`      | Yes    | No     | No    | No       |
+| [Kiro CLI](https://getpromptscript.dev/reference/formatters/kiro/index.md)             | Tier 2 | `.kiro/steering/project.md`       | Yes    | No     | No    | No       |
+| [Trae](https://getpromptscript.dev/reference/formatters/trae/index.md)                 | Tier 2 | `.trae/rules/project_rules.md`    | Yes    | No     | No    | No       |
+| [Adal](https://getpromptscript.dev/reference/formatters/adal/index.md)                 | Tier 3 | `.adal/rules/project.md`          | Yes    | No     | No    | No       |
+| [Aider](https://getpromptscript.dev/reference/formatters/aider/index.md)               | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| [Amazon Q](https://getpromptscript.dev/reference/formatters/amazon-q/index.md)         | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| [CodeBuddy](https://getpromptscript.dev/reference/formatters/codebuddy/index.md)       | Tier 3 | `.codebuddy/rules/project.md`     | Yes    | No     | No    | No       |
+| [Command Code](https://getpromptscript.dev/reference/formatters/command-code/index.md) | Tier 3 | `.commandcode/rules/project.md`   | Yes    | No     | No    | Yes      |
+| [Cortex](https://getpromptscript.dev/reference/formatters/cortex/index.md)             | Tier 3 | `.cortex/rules/project.md`        | Yes    | No     | No    | No       |
+| [Crush](https://getpromptscript.dev/reference/formatters/crush/index.md)               | Tier 3 | `AGENTS.md`                       | Yes    | No     | No    | No       |
+| [Deep Agents](https://getpromptscript.dev/reference/formatters/deep-agents/index.md)   | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| [Devin](https://getpromptscript.dev/reference/formatters/devin/index.md)               | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| [ForgeCode](https://getpromptscript.dev/reference/formatters/forgecode/index.md)       | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| [GitLab Duo](https://getpromptscript.dev/reference/formatters/gitlab-duo/index.md)     | Tier 3 | `AGENTS.md`                       | Yes    | No     | No    | No       |
+| [Grok](https://getpromptscript.dev/reference/formatters/grok/index.md)                 | Tier 3 | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
+| [Hermes Agent](https://getpromptscript.dev/reference/formatters/hermes/index.md)       | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| [iFlow](https://getpromptscript.dev/reference/formatters/iflow/index.md)               | Tier 3 | `.iflow/rules/project.md`         | Yes    | No     | No    | No       |
+| [Jules](https://getpromptscript.dev/reference/formatters/jules/index.md)               | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| [Kimi](https://getpromptscript.dev/reference/formatters/kimi/index.md)                 | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| [Kode](https://getpromptscript.dev/reference/formatters/kode/index.md)                 | Tier 3 | `.kode/rules/project.md`          | Yes    | No     | No    | No       |
+| [MCPJam](https://getpromptscript.dev/reference/formatters/mcpjam/index.md)             | Tier 3 | `.mcpjam/rules/project.md`        | Yes    | No     | No    | No       |
+| [Mimo](https://getpromptscript.dev/reference/formatters/mimo/index.md)                 | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| [Mistral Vibe](https://getpromptscript.dev/reference/formatters/mistral-vibe/index.md) | Tier 3 | `.vibe/rules/project.md`          | Yes    | No     | No    | No       |
+| [Mux](https://getpromptscript.dev/reference/formatters/mux/index.md)                   | Tier 3 | `.mux/rules/project.md`           | No     | No     | No    | No       |
+| [Neovate](https://getpromptscript.dev/reference/formatters/neovate/index.md)           | Tier 3 | `.neovate/rules/project.md`       | No     | No     | No    | No       |
+| [OpenClaw](https://getpromptscript.dev/reference/formatters/openclaw/index.md)         | Tier 3 | `INSTRUCTIONS.md`                 | Yes    | No     | No    | No       |
+| [OpenHands](https://getpromptscript.dev/reference/formatters/openhands/index.md)       | Tier 3 | `.openhands/rules/project.md`     | Yes    | No     | No    | No       |
+| [Pi](https://getpromptscript.dev/reference/formatters/pi/index.md)                     | Tier 3 | `.pi/rules/project.md`            | Yes    | No     | No    | No       |
+| [Pochi](https://getpromptscript.dev/reference/formatters/pochi/index.md)               | Tier 3 | `.pochi/rules/project.md`         | Yes    | No     | No    | No       |
+| [Qoder](https://getpromptscript.dev/reference/formatters/qoder/index.md)               | Tier 3 | `.qoder/rules/project.md`         | No     | No     | No    | No       |
+| [Qwen Code](https://getpromptscript.dev/reference/formatters/qwen-code/index.md)       | Tier 3 | `.qwen/rules/project.md`          | Yes    | No     | No    | No       |
+| [Warp](https://getpromptscript.dev/reference/formatters/warp/index.md)                 | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| [Zed](https://getpromptscript.dev/reference/formatters/zed/index.md)                   | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
+| [Zencoder](https://getpromptscript.dev/reference/formatters/zencoder/index.md)         | Tier 3 | `.zencoder/rules/project.md`      | Yes    | No     | No    | No       |
+
+<!-- generated:end:formatter-table -->
 
 ## MCP / Hooks / Plugins Support
 
@@ -132,17 +228,23 @@ PromptScript emits `@mcpServers`, `@hooks`, and `@plugins` blocks (syntax 1.4.0+
 | Zed            | `.zed/settings.json`             | -                                 | -                       |
 | Crush          | `.crush/mcp.json`                | -                                 | -                       |
 
-Hook files require `multifile` or `full` mode. In `simple` mode, formatters preserve single-file output and report a compatibility warning. Cursor emits hook files only in `full` mode and reports `PS4002` in its other modes.
+Hook files require `multifile` or `full` mode. In `simple` mode, formatters
+preserve single-file output and report a compatibility warning. Cursor emits
+hook files only in `full` mode and reports `PS4002` in its other modes.
 
 Agent-level `mcpServers` references are emitted by Claude Code, Cursor, and Factory Droid.
 
 ## Shared Markdown Formatters
 
-Shared Markdown targets use `MarkdownInstructionFormatter` for consistent instructions, skills, commands, and agents where enabled. Each target keeps its own output path, capability flags, and native directory conventions.
+Shared Markdown targets use `MarkdownInstructionFormatter` for consistent instructions, skills,
+commands, and agents where enabled. Each target keeps its own output path, capability flags, and
+native directory conventions.
 
 ### Hermes Agent
 
-Hermes Agent uses the project-local `AGENTS.md` workspace instruction contract. See the official [context-files documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files) and [skills documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills).
+Hermes Agent uses the project-local `AGENTS.md` workspace instruction
+contract. See the official [context-files documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files)
+and [skills documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills).
 
 Hermes output mapping:
 
@@ -152,11 +254,16 @@ Hermes output mapping:
 - Unsupported: skills, agents, commands, workflows, prompts, scoped rules, local files, hooks, MCP servers, and plugins
 - Unsupported blocks are omitted with non-fatal `PS4002` warnings carrying source locations
 
-PromptScript does not invent `.hermes.md` or unverified native Hermes directories and files.
+PromptScript does not invent `.hermes.md` or unverified native Hermes
+directories and files.
 
 ### GitLab Duo
 
-GitLab Duo uses the root `AGENTS.md` instruction contract (GA in GitLab 18.8) and reads Agent Skills from `skills/<name>/SKILL.md` at the repository root (GitLab 18.10+). The GitLab UI surfaces the instructions from GitLab 18.11. See the official [AGENTS.md documentation](https://docs.gitlab.com/user/duo_agent_platform/customize/agents_md/).
+GitLab Duo uses the root `AGENTS.md` instruction contract (GA in GitLab 18.8)
+and reads Agent Skills from `skills/<name>/SKILL.md` at the repository root
+(GitLab 18.10+). The GitLab UI surfaces the instructions from GitLab 18.11.
+See the official
+[AGENTS.md documentation](https://docs.gitlab.com/user/duo_agent_platform/customize/agents_md/).
 
 GitLab Duo output mapping:
 

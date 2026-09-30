@@ -1,6 +1,7 @@
 # Agents Example
 
-This example demonstrates how to define AI subagents using the `@agents` block in PromptScript. Rich target formatters compile them to platform-native agent files.
+This example demonstrates how to define AI subagents using the `@agents` block in PromptScript.
+Rich target formatters compile them to platform-native agent files.
 
 ## Overview
 
@@ -15,7 +16,7 @@ Benefits of using subagents:
 
 ## Complete Example
 
-```
+```promptscript
 @meta {
   id: "my-project"
   syntax: "1.4.0"
@@ -143,6 +144,12 @@ Benefits of using subagents:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAWCgAZdrAL5ix3aZywQsi4Xrkhd-uKCAJrMAK6CGNQwggDuzNQA1hCsAOaCbJGCACqKaDAAyozUEGhYgiQQxcxwMNQAblXwgmqa2hS+AfZOrC4Yqe5wPkEsUjDK0Y0wsXWyokESY3DFpR5spiAAooT51OWjMZMQ04Jw+YwQGFAQcFgUggAK1MwY2hD1MFDeR9NDB4JgBKCACOYSunkUdFOWjCJS8UIwrCkFQwKQEKQwACNoBCOoEJBIsMxmFA4LJkPIAEowDBSeRQ+QAcWiaHpfkZUGYmLZ8gAQhg4Dh5ABdXwSEjMMZQDZwNisfj2AmCFjsdwbLoLAmhCJRGJCWqsCBA-4-GbUQScOCwlLpHAQVI4U4CJFRKRDZhgZWSmKg8FeSJI6GMa1eDq9TUSADqOE4klY9WYiRgMjFBIsgkpYXEqU8gikEDAnqJ0MOWncypwiIGcFTEgATPcAGLMYPu8QS-OQZMA6DwWuCADM915MBz4lNkhIfHz2E+imcEYzMCmsQrWkS11uiH7ykEAGFvZI-rAogHkdFaVjYDvBI2s282ENEcj6lFLpjYE-onFPlBlKxSGTG8ADlmDzMJyCqWdkQOG8nmYXYLWoZ5zUrJFrjSECwKINAam7Wpin4d1zQAQQeABJQQk0UGtF13cjWDQMJylfa4pGwI1xAgMhYD4VU6TowRGWJZEOFuL0PmofoYDgupAWoEhEUYGIVTgNwpLWVgnykKRojgWoBP7eDGjGAEYGTTFXkSDJqFSREIAAL27TFvBoI04UUbdBL3OEoKgI8rWaAAKEgwnEyBCAAShvSMokNNIhiCwVwigZEIuiwSCjCVJq00xLVPUyc1EaNIMv7BjGCgMJTLOLQCyqC1iB45oPUEHBmFXYsIoCsJ4DDJUunxQQel8MZMWygZqDmVMlhWMpOI2AARGBxpym1TnOS5N3KeSkJQuAoTEnbUSqvSEUDLMcK0DhkUxGBK0aBI8VTIkSTJQQKRAalaR5LZ8x0EAGRAflBV+5kYFZQH2U5bkQFFTUO0+DYUhjOFFQJXZKn0ziAFlvQ2V5lLKTZ-prIaJBVDh2HVfxya1cJIm-RFGt2coxomuoNrq8EHPWlJBGeZh9gwMK9QAr41LgMN+2jWMUgTJMU0XdM9wwMpYRiOoUIqeA4Gks8nSswQsCk5T+wbQRyLGdgC2+CHnikMIH3EW4IdopUJCHS3ZSgWdjZjAETo1wROUYDi2H7axLeavjykqQ1FP8iL+wAVnuAA1OpbdOElmM4uIEkSWj+2W1ax3SNRlP0ryPcEXcSPFxQnL2oE+H06Sn0DTlUndj3dz3GNGGs6JlPYL1TMYNDqxvZsFINo62ryIWY1qXulXrnSnQ00cGvZ9Ju-Lm8GNq7RBFfEorxiW5Z2LxdZ4tV5HRuQKoWKtwa77jNiWF0WWd9gDNI3k2CZTgylTgQVwnsdauAYgzlSKwGoNwbwFE2pARg48YjJ0EtkeAHg0iRDQGoR+cFJjuHziPZgU5ODsTyguWuzZWwZHEBFaBAcsxjGoF8Pm+lepQgQeUGBpxFBkCJCQKWqZBq+BGkEGhGBlDLGODbLcwwlSzRKPNdYfhFrYCEIiK4NEbgszqDtIEBQACKAAZEEvUSjwChLye0ZibHeAQnUcOWlzrIlkXGNSDosDiLpq9Uk5I+QCiFFDKkNI6QRJAJGOEMk4apkRtKPwspWDygBqmSmao-AalrtqRmeo8w6NOBcMh4kT5bUcnzcQ5irHPkEA41ITi6jeD0RLG40tFyyy4vGRMyYP5KnTAAVSRHUa+gZBHePaQYoY0RQQQGiLHc29w4meE1oWKoijyh1OsVnPsi4vbDNqI0xxzivRTgaRhGIQTEqYmBJFOIMZxBqzUG5Wckd7gN30c3BpVpLklGbnpMIUB-Gp3uE8eA5ZIBIhtMeGknD5zhlrgAaRgK5U2Hgq6DIJLuNZHAMjzUqE5ZEuzQT7KGLETwjo3mc0gKC8ZN5jl6kIc8d5BL+ipGiHZPKBt1DMBSGvXFltWCVWqipShschg4V9ikdaLBmqEBDswHMjAZ4JEUuUYFoKhi7QvOxbE1wvAkOYCA4pAhlC6XeLGChVCXS0ORR7e+NJJ4Bn0ZLHFEhdzbHIKicQgjyXUDaayl4k8byLRbGEWOAY2k8JEZxIVXrBAAAl7Q4GuH4qi6KeywoSsgjm4l5SEHKK7NAQxLIGSYeajAdCPYkSgLEDANELRaWDoG44X4NloO2QbFgtxlAwELNda1-UCSSKCNIxYmIJhRNmCogkajVgLT8NsGEBL9XKDYF8atFafQ2I7fcZlTzYwzN5vg7xQIBjyg0utFkCR-HPU1LckJwMwm-W+tE+GqibhXE5DMKQ2RiTBI+vIfFCSgYk08CKJJ3oUnyErBARIYR0YSExs-XG+M-BSDYFgEicBEgoa9KqamuTab9gKbqLIsjd1uoluUKluABZRM3awbdhNdb3FXcGAlBRNgWM2HubIezbFDGLIiOAZo9m3ATZETE4QBEB1kV02uPTIj4e7GJxuzdZGesEOmK2ZCwDeFiHaV1AgPzNEpn6-2pZYCvjHrIlZggwMWk2WUsevH+OCeEx2uI1KCFvIvgS+lHBaD9i9pCg0Wr4Agv8cqE8iK-OMeycW2tSoClh3SULCokps5Kctp6AUitjZgXIsBXjlJshQmGQ8RaJFsibChItPjmwGtQlbrlozpSYyKShDK6zuBsCCEUAzLd3gHqllpJERgVdxGanHRIHoDgQAOGFAwdwQb8BEFIOQGAVBaCAxAJJNSbB8BmBW0AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Configuration Options
 
 ### Required Fields
@@ -170,7 +177,8 @@ Benefits of using subagents:
 
 ### Model Options
 
-Write one model value, and PromptScript maps it to the model name each target expects through the [model catalog](https://getpromptscript.dev/reference/models/index.md):
+Write one model value, and PromptScript maps it to the model name each target
+expects through the [model catalog](https://getpromptscript.dev/reference/models/index.md):
 
 | Value                                | Meaning                                                       |
 | ------------------------------------ | ------------------------------------------------------------- |
@@ -179,11 +187,21 @@ Write one model value, and PromptScript maps it to the model name each target ex
 | `inherit`                            | Use same model as main conversation                           |
 | Any other name                       | Written unchanged, unless the target has its own spelling     |
 
-**GitHub Copilot:** Catalog models become Copilot model names, so `claude-sonnet-4-5` becomes `Claude Sonnet 4.5` and `sonnet` becomes the newest Sonnet release. `inherit` is omitted, and `auto` becomes `Auto`. Other names pass through unchanged, so any name from your Copilot model picker works.
+**GitHub Copilot:** Catalog models become Copilot model names, so
+`claude-sonnet-4-5` becomes `Claude Sonnet 4.5` and `sonnet` becomes the
+newest Sonnet release. `inherit` is omitted, and `auto` becomes `Auto`.
+Other names pass through unchanged, so any name from your Copilot model
+picker works.
 
-**Claude Code:** Floating aliases and `inherit` stay as written. Pinned Claude releases become API ids, such as `claude-sonnet-4-5-20250929`. Models from other providers are omitted with a `PS4004` warning.
+**Claude Code:** Floating aliases and `inherit` stay as written. Pinned Claude
+releases become API ids, such as `claude-sonnet-4-5-20250929`. Models from
+other providers are omitted with a `PS4004` warning.
 
-**Factory AI, Codex, and Cursor:** Catalog models become model ids. Codex runs only OpenAI models, so it omits models from other providers with a `PS4004` warning. Factory AI and Cursor write `inherit`, Codex omits it. The [Model Catalog](https://getpromptscript.dev/reference/models/#target-model-names) shows what each target writes.
+**Factory AI, Codex, and Cursor:** Catalog models become model ids. Codex runs
+only OpenAI models, so it omits models from other providers with a `PS4004`
+warning. Factory AI and Cursor write `inherit`, Codex omits it. The
+[Model Catalog](https://getpromptscript.dev/reference/models/index.md#target-model-names) shows what each
+target writes.
 
 ### Permission Modes (Claude only)
 
@@ -198,6 +216,9 @@ Write one model value, and PromptScript maps it to the model name each target ex
 ## Compiled Output
 
 With `version: full`, agents are generated as separate files:
+
+::::tabs
+:::tab[GitHub Copilot]
 
 `.github/agents/code-reviewer.md`
 
@@ -217,8 +238,7 @@ When invoked:
    ...
 ```
 
-GitHub Copilot Mappings
-
+:::::note[GitHub Copilot Mappings]
 PromptScript automatically maps tool and model names to GitHub Copilot's format:
 
 **Tools:**
@@ -240,11 +260,17 @@ PromptScript automatically maps tool and model names to GitHub Copilot's format:
 | `sonnet`, `opus`, `haiku`, `fable` | Display name of the newest release in the family |
 | `sonnet-4.5`                       | `Claude Sonnet 4.5`                              |
 | `gpt-5.3-codex`                    | `GPT-5.3-Codex`                                  |
-| `inherit`                          | *(omitted)*                                      |
+| `inherit`                          | _(omitted)_                                      |
 
-The [Model Catalog](https://getpromptscript.dev/reference/models/#floating-aliases) lists the current release behind each floating alias.
+The [Model Catalog](https://getpromptscript.dev/reference/models/index.md#floating-aliases) lists the
+current release behind each floating alias.
 
-Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` cannot be represented in GitHub output: each one is reported with a `PS4003` compatibility warning and omitted.
+Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` cannot be
+represented in GitHub output: each one is reported with a `PS4003` compatibility warning
+and omitted.
+:::::
+:::
+:::tab[Claude Code]
 
 `.claude/agents/code-reviewer.md`
 
@@ -279,11 +305,14 @@ permissionMode: dontAsk
 You are a database analyst with read-only access...
 ```
 
+:::
+::::
+
 ## Using with Skills and MCP Servers
 
 Agents can reference reusable skills and project MCP servers:
 
-```
+```promptscript
 @skills {
   error-handling: {
     description: "Error handling patterns"
@@ -309,6 +338,12 @@ Agents can reference reusable skills and project MCP servers:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq14YaldqAFocDE8oCFZ1MOrg4Kk4RmoINCwINhSQAFF65mpeFraO9XtsDmpWODzenTYOdgnYkDjtgEEocydlNzg7LGpHRsZsRhxeACMoZkZSuAo-4-CRyBcUKBSKvhIjDQAGU6gA3OpVOJKOBuGCNO4Yb51boAzEbNCzLATOBYcRjLa9XQkVqhXjICKsZhSCJ0QEUAD0WGYzEqHJRaN+JAAVpsQABdEE+UHFDScUy8Hq8KRvNzqdQ4xUA-qDYajcaAgAiMFVyzgaBgjAgGHapMpwTKFTgYQZBBmTQW4nanQikpqwUhMPhiJdEQF6Mx2OovoBLHY8omAE13GJqHZWrVCBbqFhlSa1RrqBRKaD8iB8uKGPL7vgiKRyDAqLQQAwEbQxqx8Kly0A" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 The full content of each skill is injected into the subagent's context at startup.
 
@@ -347,13 +382,18 @@ targets:
 | Amp            | `.agents/agents/<name>.md`   | Description and content                                              |
 | Grok Build     | `.claude/agents/<name>.md`   | Full Claude contract through delegation                              |
 
-Fields a target cannot represent are reported with `PS4003` compatibility warnings (agent name, field, target, and the targets that do support the field) instead of being dropped silently. See the [Field Support Matrix](https://getpromptscript.dev/features/agents/#field-support-matrix) for the authoritative per-target statuses.
+Fields a target cannot represent are reported with `PS4003` compatibility
+warnings (agent name, field, target, and the targets that do support the
+field) instead of being dropped silently. See the
+[Field Support Matrix](https://getpromptscript.dev/features/agents/index.md#field-support-matrix) for the
+authoritative per-target statuses.
 
-Project lifecycle hooks are defined separately through `@hooks`. Agents can reference shared capabilities from `@skills` and `@mcpServers`.
+Project lifecycle hooks are defined separately through `@hooks`. Agents can reference shared
+capabilities from `@skills` and `@mcpServers`.
 
 ## See Also
 
-- [Language Reference - @agents](https://getpromptscript.dev/reference/language/#agents)
+- [Language Reference - @agents](https://getpromptscript.dev/reference/language/index.md#agents)
 - [Agent Platform - Agents](https://getpromptscript.dev/features/agents/index.md)
 - [Model Catalog](https://getpromptscript.dev/reference/models/index.md)
 - [Skills & Local Example](https://getpromptscript.dev/examples/skills-and-local/index.md)

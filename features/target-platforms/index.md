@@ -1,6 +1,8 @@
 # Target Platforms
 
-PromptScript includes 50 built-in output targets. All targets receive project instructions. Rich formatters additionally emit native skills, agents, commands, MCP configuration, hooks, workflows, or plugin manifests when their platform supports those concepts.
+PromptScript includes 50 built-in output targets. All targets receive project instructions. Rich
+formatters additionally emit native skills, agents, commands, MCP configuration, hooks, workflows,
+or plugin manifests when their platform supports those concepts.
 
 ## Platform Families
 
@@ -142,7 +144,8 @@ Target support is explicit and varies by native platform contract:
 | Workflows    | Native workflow files                             |
 | Plugins      | Native plugin manifests where implemented         |
 
-Use the [formatter matrix](https://getpromptscript.dev/reference/formatters/index.md) for exact output paths and capability support.
+Use the [formatter matrix](https://getpromptscript.dev/reference/formatters/index.md) for exact output paths and capability
+support.
 
 ## Scoped Monorepo Output
 
@@ -177,18 +180,24 @@ prs compile --all-builds
 Portable PromptScript source does not force every platform into one schema. Instead:
 
 1. Shared concepts remain platform-neutral.
-1. Validators check field shape and target options.
-1. Formatters emit native files for supported capabilities.
-1. Unsupported target-specific behavior reports an actionable compatibility warning.
-1. Main instruction output remains available across all targets.
+2. Validators check field shape and target options.
+3. Formatters emit native files for supported capabilities.
+4. Unsupported target-specific behavior reports an actionable compatibility warning.
+5. Main instruction output remains available across all targets.
 
-Lifecycle hooks have an exhaustive 50-target capability registry. Native project hooks are currently emitted for Claude, Codex, Cursor, Factory, Gemini, GitHub, Grok, and Windsurf. Plugin-only, custom-agent-scoped, unsupported, and incompatible output modes report `PS4002` rather than silently omitting enabled hooks. See the [hook capability matrix](https://getpromptscript.dev/features/automation/#hook-capability-matrix).
+Lifecycle hooks have an exhaustive 50-target capability registry. Native
+project hooks are currently emitted for Claude, Codex, Cursor, Factory, Gemini,
+GitHub, Grok, and Windsurf. Plugin-only, custom-agent-scoped, unsupported, and
+incompatible output modes report `PS4002` rather than silently omitting enabled
+hooks. See the [hook capability matrix](https://getpromptscript.dev/features/automation/index.md#hook-capability-matrix).
 
-Review generated output and compatibility warnings when adopting a new target or target version.
+Review generated output and compatibility warnings when adopting a new target
+or target version.
 
 ### Hermes Agent
 
-Hermes Agent discovers project-local `AGENTS.md` files as workspace instructions. See the official [context-files documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files).
+Hermes Agent discovers project-local `AGENTS.md` files as workspace
+instructions. See the official [context-files documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files).
 
 | PromptScript capability                  | Hermes output | Contract                                                                                                                                                           |
 | ---------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -199,11 +208,19 @@ Hermes Agent discovers project-local `AGENTS.md` files as workspace instructions
 | Scoped rules (`@guards`) and local files | None          | No verified project-local native contract                                                                                                                          |
 | Hooks, MCP servers, plugins              | None          | No verified project-local native contract; `PS4002` compatibility warnings include source locations                                                                |
 
-PromptScript does not create `.hermes.md`, native skill directories, agent files, command files, workflow files, prompt files, hook files, MCP configuration, or plugin manifests. Unsupported blocks are omitted with actionable non-fatal compatibility warnings. Move required guidance into supported `AGENTS.md` instruction blocks.
+PromptScript does not create `.hermes.md`, native skill directories, agent
+files, command files, workflow files, prompt files, hook files, MCP
+configuration, or plugin manifests.
+Unsupported blocks are omitted with actionable non-fatal compatibility
+warnings. Move required guidance into supported `AGENTS.md` instruction
+blocks.
 
 ### GitLab Duo
 
-GitLab Duo reads the root `AGENTS.md` file (GA in GitLab 18.8) and Agent Skills from `skills/<name>/SKILL.md` at the repository root (GitLab 18.10+). The GitLab UI surfaces the instructions from GitLab 18.11. See the official [AGENTS.md documentation](https://docs.gitlab.com/user/duo_agent_platform/customize/agents_md/).
+GitLab Duo reads the root `AGENTS.md` file (GA in GitLab 18.8) and Agent Skills
+from `skills/<name>/SKILL.md` at the repository root (GitLab 18.10+). The
+GitLab UI surfaces the instructions from GitLab 18.11. See the official
+[AGENTS.md documentation](https://docs.gitlab.com/user/duo_agent_platform/customize/agents_md/).
 
 | PromptScript capability                  | GitLab Duo output | Contract                                                                                            |
 | ---------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------- |
@@ -217,7 +234,7 @@ GitLab Duo reads the root `AGENTS.md` file (GA in GitLab 18.8) and Agent Skills 
 ## Related Documentation
 
 - [Supported Formatters](https://getpromptscript.dev/reference/formatters/index.md)
-- [Configuration: Targets](https://getpromptscript.dev/reference/config/#targets)
+- [Configuration: Targets](https://getpromptscript.dev/reference/config/index.md#targets)
 - [Agents](https://getpromptscript.dev/features/agents/index.md)
 - [Skills and Resources](https://getpromptscript.dev/features/skills/index.md)
 - [MCP Servers and Plugins](https://getpromptscript.dev/features/integrations/index.md)

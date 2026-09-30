@@ -2,9 +2,12 @@
 
 This guide helps you migrate existing AI instructions to PromptScript.
 
-Upgrading an existing PromptScript project?
+:::note[Upgrading an existing PromptScript project?]
 
-This guide converts third-party instruction files into PromptScript. Existing PromptScript 1.15 projects should use [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/index.md).
+This guide converts third-party instruction files into PromptScript.
+Existing PromptScript 1.15 projects should use
+[Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/index.md).
+:::
 
 ## Choose a Migration Command
 
@@ -15,13 +18,14 @@ This guide converts third-party instruction files into PromptScript. Existing Pr
 | Convert one known file                    | `prs import <file> --dry-run`    |
 | Upgrade existing `.prs` syntax            | `prs upgrade --dry-run`          |
 
-Prefer `prs migrate` for project adoption. Use `prs import` as a lower-level single-file tool.
+Prefer `prs migrate` for project adoption. Use `prs import` as a lower-level
+single-file tool.
 
 ## Overview
 
 PromptScript can consolidate instructions from multiple sources:
 
-```
+```mermaid
 flowchart LR
     subgraph Sources["Existing Files"]
         A[".github/copilot-instructions.md"]
@@ -128,7 +132,7 @@ prs init
 
 ### Create Base Structure
 
-```
+```promptscript
 # .promptscript/project.prs
 @meta {
   id: "checkout-service"
@@ -142,12 +146,18 @@ prs init
 
 ### Identity Block
 
+::::tabs
+:::tab[Before (Markdown)]
+
 ```markdown
 You are a senior developer working on the checkout service.
 Focus on clean, maintainable code.
 ```
 
-```
+:::
+:::tab[After (PromptScript)]
+
+```promptscript
 @identity {
   """
   You are a senior developer working on the checkout service.
@@ -156,7 +166,19 @@ Focus on clean, maintainable code.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34IKXYTR15Aq3CQWLqagE13MWo7UThOCGZqXikANxgoZjQYXvMegGsIVnVDGxw7RkXGSfcsWTH+iEYYCjiAMWZGNzMrRlgMVjpeEgwZkRmMACNYHWYpfZr6vPyQfIAugxOFhqI58ERSOQ9jR6CBBrRuqx8Kl-kA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+:::
+::::
+
 ### Context Block
+
+::::tabs
+:::tab[Before (Markdown)]
 
 ```markdown
 ## Tech Stack
@@ -167,7 +189,10 @@ Focus on clean, maintainable code.
 - Redis for caching
 ```
 
-```
+:::
+:::tab[After (PromptScript)]
+
+```promptscript
 @context {
   stack: {
     runtime: "Node.js 20"
@@ -183,7 +208,19 @@ Focus on clean, maintainable code.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34WdiIsXkCrWRFGAGswquDg6g8sCCEUkAA5ZikKACtlACZckDjgqAxWdTcNGC6AFUc0GABlRmoINCw85t5xbAwAIww4BfCQAAVmOCwXdYBFABk95sYMRhwLiIAlaSUb0KrDisXG42qi2+Om+9XcFXO1AAbhBGHYcNNxLBlJhHFoKjRmGi4HAIDM4pjDNQpNReCRpvN8SpmLTbLwYABaXRCaho+xTLBgFkkCig8F5fIgfIAXQYnCw1Ec+CIpHIMCotBADCRMFoEDY+FSUqAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+:::
+::::
+
 ### Standards Block
+
+::::tabs
+:::tab[Before (Markdown)]
 
 ```markdown
 ## Coding Standards
@@ -194,7 +231,10 @@ Focus on clean, maintainable code.
 - Use ESLint and Prettier
 ```
 
-```
+:::
+:::tab[After (PromptScript)]
+
+```promptscript
 @standards {
   code: [
     "Use functional programming style",
@@ -205,7 +245,19 @@ Focus on clean, maintainable code.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344EU8ManFlQKsdZikw5DjgiIBVODswD0YsCDYMKHtXF1ISCFZ1WSxHGJA6ZvCQAHVqEzsOUuUwZmoxKEGWKV4ACgAObIBSOoA3GDV1GABKCPnalpAAEWZGNy0sezcACMoBBGLwAIIABQAkspzCYcLwAFIAZS+jBeCzaHV4AFEUQAZcb-DCeXiQ6jCXp3PLBAC6PnyIHydIYnCw1Ec+CIpHIMCotDmIFutD6rHwqWZQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+:::
+::::
+
 ### Restrictions Block
+
+::::tabs
+:::tab[Before (Markdown)]
 
 ```markdown
 ## Don'ts
@@ -215,7 +267,10 @@ Focus on clean, maintainable code.
 - Never bypass code review
 ```
 
-```
+:::
+:::tab[After (PromptScript)]
+
+```promptscript
 @restrictions {
   - "Never commit secrets or credentials"
   - "Don't use var, use const or let"
@@ -223,7 +278,19 @@ Focus on clean, maintainable code.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH35qeCxqCEYsCDZlQKteAFpwkAA5GAA3GGodZhISE1kYRlLTQx6R6U5qjCg4PODmiIARNgByLF43ODsOjGo6LZ3e1jhN5h7YLAWmlvaunoAjR0w4ZRYpXlKOiBhzPPyIHyAF0GNNqI58ERSOQYFRaCAGA84DVWPhUkCgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+:::
+::::
+
 ### Shortcuts Block
+
+::::tabs
+:::tab[Before (Markdown)]
 
 ```markdown
 ## Commands
@@ -233,7 +300,10 @@ Focus on clean, maintainable code.
 - /build - Build for production
 ```
 
-```
+:::
+:::tab[After (PromptScript)]
+
+```promptscript
 @shortcuts {
   "/test": "Run the test suite with coverage"
   "/lint": "Run ESLint and fix issues"
@@ -241,7 +311,19 @@ Focus on clean, maintainable code.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344HGZqLEY3U15Aq3CQAHoOOCwIlJAAJQ8FHDsWrFk3EztzExwdZgA3GDV1GDzgiMaoCHZ2hu6rAFEAZQAZNcGMTxUIQmM4ODd4RYbGgCNhqG8kBoAhZ5kwcvtXcTcjCwECMUnIzEcWjaIB8+RA+QAugxOFhqI58ERSOQYFRaCAGDNaCDWPhUvCgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+:::
+::::
+
 ### Knowledge Block
+
+::::tabs
+:::tab[Before (Markdown)]
 
 ```markdown
 ## API Reference
@@ -257,7 +339,10 @@ Focus on clean, maintainable code.
 - POST /orders
 ```
 
-```
+:::
+:::tab[After (PromptScript)]
+
+```promptscript
 @knowledge {
   """
   ## API Reference
@@ -273,9 +358,21 @@ Focus on clean, maintainable code.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34Aa1YLWHF1O0CrcJBYhrruPgBBAAUASV4AJRgwGGpORhgi5pbeVrdbdghGbAg2OIBaXnaAeQBlABVeAHoMaZw9qGZ1CFYVta3dg6OTs-csMeCWvnXqKVorgHEAUVuzE+g2UqwAMkosIZgd86qsNjt9kCvqDeABhIbYOzIwZxRp5fIgfIAXQYnCw1Ec+CIpHIMCotBADAAbiDFqx8KkiUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+:::
+::::
+
 ## Step 4: Complete Migration
 
 ### Full Example
+
+::::tabs
+:::tab[Before (CLAUDE.md)]
 
 ```markdown
 # Checkout Service
@@ -312,7 +409,10 @@ You are a senior developer working on the checkout service.
 - POST /orders
 ```
 
-```
+:::
+:::tab[After (project.prs)]
+
+```promptscript
 @meta {
   id: "checkout-service"
   syntax: "1.0.0"
@@ -361,6 +461,15 @@ You are a senior developer working on the checkout service.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaODGoA3CIxjyxEuAE92GQrPkBGCgAYnJ1gF8xY7tM5YIWc2FTORATUPFBAE11QQxqGFjBHVYIZmpBKRg9GChmNF1BAHc05QhWAHNBNkFcBMZFFXUsJN0DIwpgsNcPVi8WdiJm0Qi4ARVZYYkJajV2CD5bEAA5ZkyKACs4QQAmR1cpwSgMCrUMcphFgBVzfIBlRmoINCx9qalsDAAjDB1FgAVmKNyvFbgBFAAyrx6PS8o2O72oUi2k0ELEysmQwQk8gAqjpBGBZow-GwMFBBDRmMDSCQypVRuZYPI6FiQgB1R4cGrwLBbMBpWJQclohIACgAHI4AKSo5jZahnGAASmZrPkABFmIw1Hx2BS1J8oIZBABBP4ASS2hX8OEEAClbprGK8ALpiGGsbjxUaPYmpVjI4KaEJLLIFFgkWnNHQPfhwV7BjVsADkzTU+L0cW6nk9cBwaSw2t5QQi8gA9BxRvJFgAlWY1RTc0ZJNT+YzhbEgMtG9jVkJ18QAUVu4LKL3CHu4ylYzEKsCk5xLna6EQAxKvTRbBDWYGBdJwjDmJOuNwB5RG6eMRYMAcUHl0EZbSmVogmDo+bz8vQcEf1PtwfJ8L1fYMAGF4mwBIv2oTpQjg90QDcF0GF8ahzHwIhSHIGAqFoEAGHlOB-XwOxEKAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+:::
+::::
+
 ## Step 5: Configure and Compile
 
 ### Update Configuration
@@ -384,7 +493,11 @@ targets:
 
 ### Compile and Compare
 
-Before PromptScript takes ownership of existing instruction files, create a recoverable baseline. Tracked files are recoverable from the migration branch. Back up any untracked or ignored instruction files outside configured output paths, or copy them into a local migration-backup directory that will not be committed.
+Before PromptScript takes ownership of existing instruction files, create a
+recoverable baseline. Tracked files are recoverable from the migration branch.
+Back up any untracked or ignored instruction files outside configured output
+paths, or copy them into a local migration-backup directory that will not be
+committed.
 
 ```bash
 # Confirm every planned output and ownership conflict.
@@ -394,7 +507,10 @@ prs compile --dry-run
 prs diff --all --full
 ```
 
-Review source parity, target-specific omissions, file modes, and every conflict path. Do not delete an existing configured target merely to bypass ownership protection. When all planned outputs and backups are approved, perform one controlled takeover:
+Review source parity, target-specific omissions, file modes, and every conflict
+path. Do not delete an existing configured target merely to bypass ownership
+protection. When all planned outputs and backups are approved, perform one
+controlled takeover:
 
 ```bash
 prs validate --strict
@@ -403,7 +519,9 @@ git diff -- .
 prs diff --all --full
 ```
 
-The final PromptScript diff must be empty. The Git diff must contain only approved generated replacements and migration source or configuration. Restore from version control or backup if the result loses user-owned content.
+The final PromptScript diff must be empty. The Git diff must contain only
+approved generated replacements and migration source or configuration. Restore
+from version control or backup if the result loses user-owned content.
 
 ## Step 6: Update Git
 
@@ -415,7 +533,10 @@ git add .github/copilot-instructions.md CLAUDE.md .cursor/rules/project.mdc
 git commit -m "chore: migrate AI instructions to PromptScript"
 ```
 
-This lets CI detect drift between PromptScript sources and generated outputs. If your team prefers to generate outputs locally, adopt one consistent ignored-output workflow only after the controlled compile above has created and verified every configured target:
+This lets CI detect drift between PromptScript sources and generated outputs. If your team prefers
+to generate outputs locally, adopt one consistent ignored-output workflow only
+after the controlled compile above has created and verified every configured
+target:
 
 ```bash
 printf '%s\n' \
@@ -427,7 +548,9 @@ git add .gitignore .promptscript/ promptscript.yaml
 git commit -m "chore: migrate AI instructions to PromptScript"
 ```
 
-`git rm --cached` stops tracking these files but keeps the verified working-tree copies. It is not a workaround for overwrite conflicts and must not run before the takeover review.
+`git rm --cached` stops tracking these files but keeps the verified working-tree
+copies. It is not a workaround for overwrite conflicts and must not run before
+the takeover review.
 
 ## Migration Patterns
 
@@ -435,7 +558,7 @@ git commit -m "chore: migrate AI instructions to PromptScript"
 
 If you have different instructions in different files:
 
-```
+```promptscript
 @meta {
   id: "my-project"
   syntax: "1.0.0"
@@ -461,11 +584,17 @@ If you have different instructions in different files:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWIDEggGLVmJQSzTRmWZQhWOCxqAFdtCDY4ChIpMW5pTiwILEVhPTkQXWzxQQBhNg52QTAPLwBxVIAJMIAjAuZfKH9JYNCIlOiKHsyc2wdWZzdygoAZAEEAVQARAFFY+NZuFnYiLAy8-tyJQrWSss8CqAwwqRg2kPDI7t6t7IexQeH3I4pGMNpmanDYOASQhhWFIMNQpHBNhIXAAlMJ-UqjfKfODfHoUJ4gOwAXQYyWoinwRFI5BgVFoIAYADcYLQoqx8GZMUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Extracting Common Patterns
 
 If you have similar instructions across projects, extract to registry:
 
-```
+```promptscript
 # registry/@company/base.prs
 @meta {
   id: "@company/base"
@@ -481,9 +610,15 @@ If you have similar instructions across projects, extract to registry:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAE1MAOYQ4WagE8A9AAEWZDKykAjDHBhVaAHVbSSMLBl7BtvXhAAmiXppCzm8xZJVqbJ3nHHsMhKzYCMFAAMQa6sAL7a2tKiCuYY1OZwRm58AML2JGzuBqxxCXAUhdoRrFECotQQjFgQbEnGrKZpGVnlYlU1dYUUxSBhALoMnGLi+ESk5Oo09CAAbjC0taz4fn1AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Then inherit:
 
-```
+```promptscript
 # Project file
 @inherit @company/base
 
@@ -492,11 +627,17 @@ Then inherit:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4ABVcAKxhGLBV9H34IVhwYahMBXUxWRwB6ACMMOBgi3xZ2IhrAq15SiqqsAFo4NCqISEYdNg5CLB98kHy6dGw8RBB+DowuvoGYKloQBlGOLlO+AGU3NHIIaVl5W14RFI5Ds1A8yma1FuvAAcswaphqDVmGAFM1eOJmIw3FoRFgIGw6GJPLxWPCxLwoRgoPYMIwANYaW71IQiXiTYIQULhM4XK79QZ5YJwBIiZI89JZXIgOIkCCERphLBgoYFepwESeDDUcTKDkbKRhZAREpQOkwHDMKBSaiyTXibXeEAAXTiHA1jXURpNZsYFqtNrtlwdOoirrVvihGta1QJrD1cXmPNN5st1palPgyogsbYeT2+WdDE4ysc+CB0VuNHoIAAbi04HH8Kl9kA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Handling Tool-Specific Content
 
 Some content may be specific to certain tools:
 
-```
+```promptscript
 # Most content is shared
 @identity {
   """
@@ -511,11 +652,20 @@ Some content may be specific to certain tools:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AWWY4LB02Dm0lWRwMamkffggpdhNHXkCrcJBY-t6AZQammTbOLE6KGbiBvMLWYt4AFWZmKABaODQYRghIRl4SCHUcStYYaTFxACs3Cq0sZYBhNjgJ6l4HiFZ1e0apGUYGYXwAbo0INgIO8Wpg1CRlD1glh1lAAPxhThuEgACgiLDQ0GYzxAdD6jCgGDcUgi5IJblooIiAEofPkQPkALoMSbURz4IikcgwKi0MkgMEwWgw1j4VKcoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Advanced Block Migration
 
-### [@skills](https://github.com/skills "GitHub User: skills") Block
+### @skills Block
 
 Skills define reusable capabilities for AI agents:
+
+::::tabs
+:::tab[Before (CLAUDE.md)]
 
 ```markdown
 ## Skills
@@ -537,7 +687,10 @@ Steps to deploy:
 3. Deploy to staging
 ```
 
-```
+:::
+:::tab[After (PromptScript)]
+
+```promptscript
 @skills {
   code-review: {
     description: "Review code for quality and best practices"
@@ -561,9 +714,21 @@ Steps to deploy:
 }
 ```
 
-### [@agents](https://github.com/agents "GitHub User: agents") Block
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCpOEZqCDQsCDYUkAAlFrbzWqkVZmpeAEc3DCgTRzFPXgAjeCx7NUZhxng87tr2Tiwx2JA4i4B1HE5eJtb2iFZ1WZhEB+66V4AGEXoxSvNFlhHGg7HAMGBhI4AcEAEwUXgANRgAzAmxxrkWOAwnnW3xRvAAzBiAKKsOBuJoKfbKIhKLAAu7nXiFVhxKTkZiOLQ3Xhdbq9fqDYajcIgAAiMEFm1sYjQ5AgjGwIz59xqwRYV3Yt3ueouwUVypFh2YpzgcH++sBGIAQm5oDJVTRmAArGDHCno3jjDzMuCmCnU3iWqBChTycMaL7qTmm7m8-IgfIAXQY12ojnwRFI5BgVFoIAYzRxcB1+FSWaAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+:::
+::::
+
+### @agents Block
 
 Define specialized AI subagents:
+
+::::tabs
+:::tab[Before (AGENTS.md)]
 
 ```markdown
 # Code Reviewer
@@ -577,7 +742,10 @@ Instructions:
 Review code checking for type safety and error handling.
 ```
 
-```
+:::
+:::tab[After (PromptScript)]
+
+```promptscript
 @agents {
   code-reviewer: {
     description: "Reviews code for quality and best practices"
@@ -593,9 +761,21 @@ Review code checking for type safety and error handling.
 }
 ```
 
-### [@local](https://github.com/local "GitHub User: local") Block
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34NTlNeQKsdZikAWmoYADcIGHMYajDK4OCpOEZqCDQsCDYUkAAlJpbzZRYpFWZqXgBHNwwoE0cxT14AI3gsezVGYcZ4PO6FZmYoODDkCMmJCLpwkABxBrQXt4AhDDgOAiAF04sESDUYFAxnJWKxhBduix2GUxrEQGDupNmq1qvNGDgYIwANYQVjqBYdTHBWq8AAqjjQdjgGDAwkc1N4tIAotRXEscBhPBtyZzaXSDtVGu1Spj0YjCgUQPlgQwytRHPgiKRyDAqLQQAxpbQRqx8KllUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+:::
+::::
+
+### @local Block
 
 Private instructions not committed to version control:
+
+::::tabs
+:::tab[Before (CLAUDE.local.md)]
 
 ```markdown
 # Local Development
@@ -605,7 +785,10 @@ Private instructions not committed to version control:
 - Use staging database
 ```
 
-```
+:::
+:::tab[After (PromptScript)]
+
+```promptscript
 @local {
   apiEndpoint: "http://localhost:8080"
   debugMode: true
@@ -618,9 +801,21 @@ Private instructions not committed to version control:
 }
 ```
 
-### [@guards](https://github.com/guards "GitHub User: guards") Block with Globs
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34oZkYMKF5AqzE0CABRTzRmCHYUkBwsLDREAHpe0vKoHGY4LEQADmypvOCpACM3dQBZZikwrGo3GCKa2JBZ3gAZMoreKQA3GFK0LSxeVmYOOEQ4gFpeAFU4OzGNVvU52wGHmGB+KmY1AU8CwAPevFWjAA1rwiBxqKwzj9qBcIIx4HF9nl8iB8gBdBicTaOfBEUjkGBUWggBhXWgQNj4VKkoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+:::
+::::
+
+### @guards Block with Globs
 
 File-specific rules using glob patterns:
+
+::::tabs
+:::tab[Before (.github/instructions/)]
 
 ```markdown
 ---
@@ -632,7 +827,10 @@ applyTo: src/components/**/*.tsx
 Use functional components with TypeScript.
 ```
 
-```
+:::
+:::tab[After (PromptScript)]
+
+```promptscript
 @guards {
   globs: ["src/components/**/*.tsx"]
 
@@ -645,9 +843,21 @@ Use functional components with TypeScript.
 }
 ```
 
-### [@guards](https://github.com/guards "GitHub User: guards") Named Entries
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH351NwxqcWVAq151KGYAIzgw5Ai4akYAel00Nk5TToAqQaGKU0IIgF0imtiQPOCAYWYyPu0AcTcIKSgIVnhEOIBaXgBVODswD0YsCDYMKB0V3v32OGPeAElWRig3KV4ABVHGgYABlRjUCBoLAKEHwD4AQUkvA8JgU8FMcTmeXyIHykwY-WojnwRFI5BgVFoIAYADcYLQ7qx8Kl8UA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+:::
+::::
+
+### @guards Named Entries
 
 For projects with multiple `.github/instructions/*.instructions.md` files — each with different `applyTo` patterns — use named entries in `@guards` to preserve the one-file-per-rule-set structure:
+
+::::tabs
+:::tab[Before (.github/instructions/)]
 
 ```markdown
 ---
@@ -660,7 +870,10 @@ Use OnPush change detection for all components.
 Always implement OnDestroy for cleanup.
 ```
 
-```
+:::
+:::tab[After (PromptScript)]
+
+```promptscript
 @meta { id: "named-guards-migration" syntax: "1.0.0" }
 
 @guards {
@@ -675,11 +888,23 @@ Always implement OnDestroy for cleanup.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEK1IwxAWgDmAVwzUxcRSQjLq2CGxmC4AT3YZCkmQEYKABkcmAvlNbvuajVuHvBghisalAaiixkbJxYcJLA-gGBaORmACrMksgyGMlwAPQYYrqseQBUpWUUMTIAugkBYvCM1BBoWEasNiAAgsGqodSCEWhR7EPMYhDBpgKsYj5wMvXj7NFdSyDLAKpwMIIA8qwACqpwOEM4Qcp7jRyM7WyCYMyDGFBQ45Gs0XAUy91QADuGDMcFEZFgfDGhwAIvAsNRmGYni8hrAgqo0H9WIlpJt8Qk3KwXCAXDUGNFqGZ8ERSOQYFRaCAGAA3GC0Dr4WykoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+:::
+::::
+
 Each named entry generates a separate `.github/instructions/<name>.instructions.md` file with the corresponding `applyTo` frontmatter. This is the recommended approach when migrating multiple instruction files — `prs import` can detect and convert these files automatically.
 
-### [@params](https://github.com/params "GitHub User: params") Block
+### @params Block
 
 Configurable parameters with types:
+
+::::tabs
+:::tab[Before (Markdown)]
 
 ```markdown
 ## Configuration
@@ -689,7 +914,10 @@ Configurable parameters with types:
 - Strict mode: on/off
 ```
 
-```
+:::
+:::tab[After (PromptScript)]
+
+```promptscript
 @params {
   verbosity: range(1..5) = 3
   format?: enum("json", "text", "markdown") = "text"
@@ -697,11 +925,20 @@ Configurable parameters with types:
 }
 ```
 
-### [@extend](https://github.com/extend "GitHub User: extend") Block
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH35MNRJlQKteADcYagAjZjgTRzC1VnUYAAp0zIBKXgBeXgBmOLBmahJsAH4wzjcSLoiAKzlWCLpwkA5CLE3t6eoAa3ELDZAB4Yjd-ZA4uCxqCEYsMMbmWAwrYbAMKDgMB8+RA+QAugxOE9HPgiKRyDAqLQQAxarQIGx8KlQUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+:::
+::::
+
+### @extend Block
 
 Modify inherited blocks at specific paths:
 
-```
+```promptscript
 @inherit @company/base
 
 # Add to existing identity
@@ -724,13 +961,21 @@ Modify inherited blocks at specific paths:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34IVhwYahMBXUxWRwB6ACMMOBgi1j4AQUkFeSIlLFL1EM5BrEdiog5PEfYTR15Aq3CQWNXl7vETCDYMKF4iNArB1uteACUYDEYsXikANxgoZjQtLAo4tbzC1h8+AFlmFswAtWPAODI4CJPBhqOI4JNCNNIdDxLD4RQWFIKBwoUNFnFVKQYOZmNQANYpED3EzgvLBFiPNTqGBhACcuQK7S6PSw8mo4MqNx2rGUsLUE18U04MgFUKFgzYyiWwQAtCsAKqnMAeYW7fY1NijMysKATdZqlYAOXkjCgLTgquarRkhrB7AR63yIHydHQ2DwiBA-BqGDqTRaMCotBADBY7FGPF4AGU3GhyBBpLJ5LYDlFyHZqB5lOUBRReDbbphqLdmGAFOU7sxGG43tgRXQxDNWMxbqIBXt7NdyRoo8UhCICcsIKEViHmGQww1nW0LfFEskVuksrk1yQIIRSmEsEW2lzfFCw2i4cq4ljWbxkBEAAr2xgwHDMKBSaiyVHoiIAF04lxQZWHUMInxAV9rg-L8fz-K8AJAYDz34OUTwgPVRSnS0XzfODvwqXgMIVEVvh9QCGFGahHHwIhSALaN6GpCo4BFfBUh9IA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Choose modification syntax by migration intent:
 
 - Keep `@extend` when old and new values should merge or append.
-- Keep `field!` as a compatibility form for replacing one direct regular field inside `@extend`.
-- Use `@override` with syntax `1.5.0` when one complete existing block or nested value must replace the previous value.
+- Keep `field!` as a compatibility form for replacing one direct regular
+  field inside `@extend`.
+- Use `@override` with syntax `1.5.0` when one complete existing block or
+  nested value must replace the previous value.
 
-```
+```promptscript
 @meta { id: "migrated-project" syntax: "1.5.0" }
 
 @standards {
@@ -742,24 +987,31 @@ Choose modification syntax by migration intent:
 }
 ```
 
-Unlike `field!`, `@override` requires the complete target path to exist. It cannot bypass sealed skill properties.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQgBzathhiAtDWYArGIywzBcAJ7sMhSTICMFAKwUADPoC+U1i+5wBrMRmpi4wl0FBDg8IVnlJZBkAVTgYQQApeD0QOmkQWPiAWWZGHAwZAF0XZ1dWbmYANxhqanF4jwwvHz8KEKww+QDWIKiMuMEANQh2opKQR0KGTixqQ3wiUnIYKlpUkGraCDZ8CwmgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+Unlike `field!`, `@override` requires the complete target path to exist. It
+cannot bypass sealed skill properties.
 
 ## Validation Checklist
 
 After migration, verify:
 
-- `prs validate` passes without errors
-- `prs compile` generates all targets
-- Generated files match expected content
-- No duplicate or conflicting instructions
-- All custom commands work in each tool
-- Team members can compile locally
+- [ ] `prs validate` passes without errors
+- [ ] `prs compile` generates all targets
+- [ ] Generated files match expected content
+- [ ] No duplicate or conflicting instructions
+- [ ] All custom commands work in each tool
+- [ ] Team members can compile locally
 
 ## Common Issues
 
 ### Missing Metadata
 
-```text
+```
 Error: @meta block is required
 ```
 
@@ -767,7 +1019,7 @@ Add required `@meta` block with `id` and `syntax`.
 
 ### Invalid Syntax
 
-```text
+```
 Error: Unexpected token at line 15
 ```
 
@@ -781,7 +1033,7 @@ Check PromptScript syntax, especially:
 
 Multiline strings cannot be loose inside objects:
 
-```
+```promptscript
 # ❌ Invalid
 @standards {
   code: {
@@ -808,12 +1060,13 @@ Multiline strings cannot be loose inside objects:
 If compiled output is missing content:
 
 1. Check block names are correct
-1. Verify no syntax errors in blocks
-1. Use `--verbose` flag for debugging
+2. Verify no syntax errors in blocks
+3. Use `--verbose` flag for debugging
 
 ## AI-Assisted Migration
 
-For automated migration using AI assistants, PromptScript installs its bundled `promptscript` skill, which includes migration guidance.
+For automated migration using AI assistants, PromptScript installs its bundled `promptscript`
+skill, which includes migration guidance.
 
 ### Using the PromptScript Skill
 
@@ -838,9 +1091,9 @@ Use Composer with migration context or reference the PromptScript migration docu
 ### What the AI Will Do
 
 1. **Discover** existing instruction files (CLAUDE.md, .cursorrules, copilot-instructions.md)
-1. **Analyze** content and classify into PromptScript blocks
-1. **Generate** properly structured PromptScript files
-1. **Validate** the output with `prs validate`
+2. **Analyze** content and classify into PromptScript blocks
+3. **Generate** properly structured PromptScript files
+4. **Validate** the output with `prs validate`
 
 ### Best Practices for AI Migration
 
@@ -851,6 +1104,6 @@ For detailed guidelines on AI-assisted migration, including content mapping patt
 After migration:
 
 1. [Set up inheritance](https://getpromptscript.dev/guides/inheritance/index.md) if you have multiple projects
-1. [Organize multi-file setup](https://getpromptscript.dev/guides/multi-file/index.md) for complex projects
-1. [Configure CI/CD](https://getpromptscript.dev/guides/enterprise/#cicd-integration) for validation
-1. Train team on PromptScript workflow
+2. [Organize multi-file setup](https://getpromptscript.dev/guides/multi-file/index.md) for complex projects
+3. [Configure CI/CD](https://getpromptscript.dev/guides/enterprise/index.md#cicd-integration) for validation
+4. Train team on PromptScript workflow

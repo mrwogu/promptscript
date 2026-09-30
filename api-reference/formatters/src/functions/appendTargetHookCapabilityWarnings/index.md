@@ -1,0 +1,33 @@
+# appendTargetHookCapabilityWarnings()
+
+[**PromptScript API**](https://getpromptscript.dev/api-reference/index.md)
+
+***
+
+# Function: appendTargetHookCapabilityWarnings()
+
+> **appendTargetHookCapabilityWarnings**(`output`, `ast`, `target`, `version`): [`FormatterOutput`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterOutput/index.md)
+
+Defined in: [formatters/src/hook-capability-warnings.ts:50](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-capability-warnings.ts#L50)
+
+## Parameters
+
+### output
+
+[`FormatterOutput`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterOutput/index.md)
+
+### ast
+
+[`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md)
+
+### target
+
+`string`
+
+### version
+
+`string`
+
+## Returns
+
+[`FormatterOutput`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterOutput/index.md)

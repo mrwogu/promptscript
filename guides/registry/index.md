@@ -79,7 +79,7 @@ No Git host handy? A local registry works for the rest of this walkthrough - ski
 
 Reference configurations by their namespace and file name. The starter registry already ships `@core/quality`, so this resolves out of the box:
 
-```
+```promptscript
 # .promptscript/project.prs
 @meta {
   id: "my-project"
@@ -89,6 +89,12 @@ Reference configurations by their namespace and file name. The starter registry 
 @use @core/quality
 @use @core/security
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1UgSATwC0shUsuHeca+wyFzlgIwUArBQADM6sAL7q6hoArnAwvBos1DBSAI7RGFAQWNZRsfGJzMlScYzR4jkgYQC6DJxY1Nb4RKTkMCogDABuMLQQbPg+VUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### 5. Validate and Compile
 
@@ -125,9 +131,9 @@ prs init
 It will:
 
 1. Detect your tech stack (React, Node, Python, etc.)
-1. Offer to connect to a Git or local registry
-1. Suggest relevant configurations from your registry's catalog
-1. Generate your `promptscript.yaml` and `.promptscript/project.prs`
+2. Offer to connect to a Git or local registry
+3. Suggest relevant configurations from your registry's catalog
+4. Generate your `promptscript.yaml` and `.promptscript/project.prs`
 
 You can also set a default registry via [user-level config](https://getpromptscript.dev/guides/user-config/index.md) so `prs init --yes` automatically uses it.
 
@@ -138,7 +144,7 @@ When your registry catalogs Layer 2 / Layer 3 [skill overlays](https://getprompt
 Detection works two ways:
 
 1. **Manifest `extends` field** — when a skill entry in `registry-manifest.yaml` declares `extends: <base-skill-id>`, the suggestion engine treats it as an overlay of that base.
-1. **Inline `@extend` scan** — when no manifest hint exists, the engine scans the suggested skill's `.prs` source for `@use … as <alias>` plus `@extend <alias>.skills.<name>` and resolves the base skill via the alias map.
+2. **Inline `@extend` scan** — when no manifest hint exists, the engine scans the suggested skill's `.prs` source for `@use … as <alias>` plus `@extend <alias>.skills.<name>` and resolves the base skill via the alias map.
 
 When an overlay is detected and **both** the overlay and its base were suggested, the base is removed from the choices. The overlay choice is annotated inline:
 
@@ -166,15 +172,21 @@ See [Skill Overlays](https://getpromptscript.dev/guides/skill-overlays/index.md)
 
 ### Pattern 1: Inherit the Base
 
-```
+```promptscript
 @meta { id: "base-project" syntax: "1.5.0" }
 
 @inherit @core/base
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEACMMcGAFoazAFYxGWGYLgBPdhkKSZARgoBWCgAYdAXymtH3CKxwxqELIO4tqMAHp5RRA7AF0GTixqPXwiUnIYKloQBgA3DzgINnxTUKA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Pattern 2: Mix in Shared Standards
 
-```
+```promptscript
 @meta { id: "secure-project" syntax: "1.5.0" }
 
 @inherit @core/base
@@ -182,23 +194,35 @@ See [Skill Overlays](https://getpromptscript.dev/guides/skill-overlays/index.md)
 @use @core/security
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBiMArtRgBaGswBW8rDMFwAnuwyFJMgIwUArBQAMugL5TWT7hFY4Y1CFkHcWygHoAIww5FwU5X38YAIBHBQwob31wyL9mQLlFLyx9EHsAXQZOLGo8xAJiMkoaehAAN084CDZ8M3ygA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Pattern 3: Use a Mixin Directly
 
-```
+```promptscript
 @meta { id: "security-review" syntax: "1.5.0" }
 
 @use @core/security
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBiMArtQhYAngFpqMAG4QYAdxmC4q9hkKSZARgoBWCgAYjAXyms33BXMHcWWgPRyispqIM4AugycWNSq+ESk5DBUtCAM2jC0EGz4VmFAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## How Git Registry Resolution Works
 
 When you configure a Git registry, the CLI handles everything automatically:
 
 1. **On first use:** The registry is cloned to `~/.promptscript/.cache/git/<hash>/`
-1. **On subsequent uses:** The cached version is used if not stale (default: 1 hour TTL)
-1. **On cache expiry:** The registry is updated with `git fetch`
+2. **On subsequent uses:** The cached version is used if not stale (default: 1 hour TTL)
+3. **On cache expiry:** The registry is updated with `git fetch`
 
-```text
+```
 prs init --yes
     ↓
 Creates config with registry.git.url
@@ -234,7 +258,8 @@ prs pull --refresh  # Force re-clone the registry
 
 ### Large Repositories and Timeouts
 
-Every Git operation (clone, fetch, ls-remote) has a 60-second timeout by default. Two knobs raise it when a registry lives in a big repository:
+Every Git operation (clone, fetch, ls-remote) has a 60-second timeout by default.
+Two knobs raise it when a registry lives in a big repository:
 
 ```yaml
 # Per registry entry (registries aliases)
@@ -259,7 +284,11 @@ export PROMPTSCRIPT_GIT_TIMEOUT=600000
 
 Timeout errors name both knobs in their message.
 
-Registry imports also use partial sparse clones (`--depth 1 --filter=blob:none --sparse` plus `sparse-checkout`), which materialize a reduced sparse subset around the imported directory. A 73 MB monorepo where a full clone times out usually resolves in about a second. If the server does not support partial clones, PromptScript falls back to a plain shallow clone automatically.
+Registry imports also use partial sparse clones (`--depth 1 --filter=blob:none
+--sparse` plus `sparse-checkout`), which materialize a reduced sparse subset
+around the imported directory. A 73 MB monorepo where a full clone times out
+usually resolves in about a second. If the server does not support partial
+clones, PromptScript falls back to a plain shallow clone automatically.
 
 ## Version Pinning
 
@@ -273,11 +302,11 @@ registry:
 
 Or in `.prs` files:
 
-```
+```promptscript
 @inherit @stacks/react@1.0.0
 ```
 
-______________________________________________________________________
+---
 
 ## Creating a Registry
 
@@ -310,7 +339,7 @@ prs registry init my-registry --no-seed
 
 ### Registry Structure
 
-```text
+```
 my-registry/
 ├── registry-manifest.yaml    # Catalog of all configurations
 ├── @core/
@@ -466,8 +495,8 @@ prs registry publish ./my-registry
 This will:
 
 1. Validate the registry (use `--force` to skip)
-1. Update `meta.lastUpdated` in the manifest
-1. Stage, commit, and push changes
+2. Update `meta.lastUpdated` in the manifest
+3. Stage, commit, and push changes
 
 Options:
 
@@ -498,14 +527,14 @@ jobs:
       - run: prs registry validate --strict
 ```
 
-______________________________________________________________________
+---
 
 ## Next Steps
 
 - [Enterprise Setup](https://getpromptscript.dev/guides/enterprise/index.md) - Scale PromptScript across your organization
 - [CI/CD Integration](https://getpromptscript.dev/guides/ci/index.md) - Automate validation and compilation in your pipeline
 
-______________________________________________________________________
+---
 
 ## Registry Aliases
 
@@ -529,8 +558,8 @@ Use any scoped name as the key. The value is a bare Git host path - no `https://
 Aliases are merged from three sources in priority order (highest first):
 
 1. **Project** - `promptscript.yaml` in the repo (team-specific overrides)
-1. **User** - `~/.promptscript/config.yaml` (developer preferences)
-1. **System** - `/etc/promptscript/config.yaml` (IT-provisioned defaults)
+2. **User** - `~/.promptscript/config.yaml` (developer preferences)
+3. **System** - `/etc/promptscript/config.yaml` (IT-provisioned defaults)
 
 Project aliases win over user aliases, which win over system aliases. This lets IT provision company-wide aliases while still allowing projects to override specific ones.
 
@@ -538,7 +567,7 @@ Project aliases win over user aliases, which win over system aliases. This lets 
 
 Once configured, use the alias as the scope prefix in any import:
 
-```
+```promptscript
 @meta { id: "my-project" syntax: "1.5.0" }
 
 # Resolves to github.com/acme/promptscript-base/@org/base.prs
@@ -548,7 +577,13 @@ Once configured, use the alias as the scope prefix in any import:
 @use @team/@stacks/react
 ```
 
-______________________________________________________________________
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prOwGJBAJXjMoAN3iCszQQHMIXABXACMKFhIAegxGPijlMiw4RmoINCwFUIw4GCjuZmp-KOzcqlo7bghWHBg0rEFuSMxWOXzC4tKYO0cXN09vXwCgnDCI5mjY+I5SBTBqNg5WMXy4AUYAazgo6hhYrHK4SuDcxpno7jXYrZ29jRBrOnRsPEQQJomWtoKikpyYQ4gBgsdicLD4JwAZWCaHIEBgYm0flwMEERFI5FR1GCrDgglquwoggAcswGphqA1mGAfLVBGJmIxgnw9FgIGw6IIMMtBKwyVzBLsMFBBJhNhh-ADKnwBMI7IJRBJpO9mtzvh0-rkZPLtLoBAZlSZzFYQDqSBBCNVJFhsd1WLZWJcBMsMNQxHjgDqWGIYJJkDIAApQWIwHDuH3UbTOsSusQyAC6Oo4a2q-j9geDjFD4bqUe5MbdCbsDu4uzWaQ07NxctYCoUyqDIbDUAjgvgNoglbY2vtDyeIEwuB451W6xuQo0gOBizBEME0NhUHhiLgyLp6LIsEFOLxBIBJP5FKpNJR9MZzLB2CrnPzvP5QiFIrFGwlUsdMqEntrisM7xHTuubYJ00U1vx0PQDWMMxLB7BVzUtVhrVtYtKiuF03Q9L1mB9dMQEbLNm1bNCCzjEBE2-ZM2VYNNBH9PDM2zFtc2I2Mi3tSoyw7Ltqy-OsGwYwjc04is2W7UDrAeeMGDBag5HwDdMSnEAvFoKt8CMB4gA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+---
 
 ## Go-Style URL Imports
 
@@ -556,7 +591,7 @@ Beyond registry aliases, PromptScript supports Go-module-style bare URL imports.
 
 ### Basic URL Import
 
-```
+```promptscript
 @meta { id: "my-project" syntax: "1.5.0" }
 
 # Import directly from a public GitHub repo
@@ -566,11 +601,17 @@ Beyond registry aliases, PromptScript supports Go-module-style bare URL imports.
 @use gitlab.com/myorg/prompts/@stacks/python
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prOwGJBASTLNqWQWIjV1WKHKCYNTMJIJCaACuAEZQEIyCAOIQWAASMYK+aMx23JFwMIIA5ik4MRQsJAD0GIx8VXA4GL5iCnACrGLNYnBV3MEYRXzsvQWMkdQpcnaOLm4eQSFhGKyByZ44zO25+YUl-hjRFaFV8u5FVcpkWL3c7bUA1r1ocrhsINZ06Nh4iCD7ZSOlRqdRgDSaLTaHS61B6fQGQ04Nwa6gmUyotBADBY7CR+CcAGVImhyBAYGJtMxBLhCkRSORCtRIqw4IIcDBfBRBAA5ZieTALZhgansrzMcbDARYCBsOjhTqCVh88KZGAYKCCTCMB6DGAUXJ8ATCOyCUQSaT-UrlYG1eqNZrkqErGFw-rUQaS0aoyZYaYgE3aXQCAwWkzmKz+1imkgQQgQViSLBMmB2WysO7Q7qs4ABlhiGCSZAyAAKUFqME2UHz1G0mdhMgAugGOO140VCyWy4wK8wqxza87uo3U7lfO1JhoZSzjVHBAoLaXy5Xq6rx-FpWwZKmPl8QJhcPh9mWgScztQLlc0MiM49nq9NqwMfQmGwOFw-oTiaTyZSRbTiGQsCZMyrLspyPLKgKnhCn+YoSki2BTnKzqKsqQi+OqmqPLq+rpoaQg5rO4iGJaBwntUZ4XksV63Pc2p3m89iRqaOh6CGxhmJYW6zjGcYJtSyYjum9ydFmM6mnmBaCEWICLt2y79iJLrDrOLbSqw7bSZ2S69iuSlDiATasGm3Bjkm65TtmAbztp8m6f2ZkThuTHbtYDYMEi1ByPgdKAXqNDPgAbhycBTvgRgfEAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Version Pinning in URL Imports
 
 Append a version specifier with `@`:
 
-```
+```promptscript
 # Pin to an exact tag
 @use github.com/acme/shared-standards/@org/base@1.2.0
 
@@ -580,6 +621,12 @@ Append a version specifier with `@`:
 # Pin to a branch
 @use github.com/acme/shared-standards/@org/base@main
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4ABQgbeQwrIgxGLAUNH343ODt1Exw3ACMKXQB6WqE+uBwMamkAWjgRTzHxOD7+Zmp1Pq6MVv50gCYcotZS8oVK2RgSADcYal41VnU7AAoobHh6zCxGHGtedMIASiaLTaHW6vWYJAGjCGIzGk2mVXEcwWSxWaw2MH4AD10tk9qxirwyhUxLwurdPoDWrx2rhQf1BjBhqNxuIpjNEdR5otlqt1psSBhyiB8nR0Ng8IgQDTOj16VDGTCWWyEUjuai+RidjkqLQQAwWOxOFgeLwAMpuNDkCDSWTyWy8GrROzUDzKHBXGAUXgAOWYbzG9WYYAU7t44mYjDcWhEWAgbDoYk8vFYfpJ4wwUHstQA1hpPU0hCJeIErCEUlKQbLwZDocy4ezVSjeeithRdrkQHE4AkRMlwiB0lkO3ESBBCOUwlgXTAfIVfPDZpzlCXgiwpGFkBESs9GDAcMwoFJrguOd4QABdOIcabldQbrc7vcHo+yBuciKXgpNcbTagQOpxqwy5xBM-bbrUT6HlcNyvH+AFsHk+TCqKIDvBKFa0lWEIMkysKsiejY8mimzYtquI0PQTBsBwXCSnw5qWlA1oyHIIZ2I65DOq6vDuuMXq+v61CBsG9rhpG0bYIBCYIsmqaiOmmaYIwub3BQBb+MWcQQKE-bSnS1Y4Yq9YqkuarNiROJ7J2pbdokfZpJkVkjmOE4KNOs5NARS6aaWa4wPeIDgbu+5Qceb5np+wTXrGdwBUFkEvl5EUeb4P5Tv+sZsMBpagQ+EEhS+aVwZl+LWUhIpirg+B6VhNYKnW+HhciREaoIgqsDqlEGjRxp0WaFpWjarH2hxsA3NxvGej6qaYEJhgiaGYlRkaknxomMgpvU8kwBmWbKXmam+IWARaTpEQ1WC2HyrhSpJc16otgK5R5MEtm9uWg5OaWo7jqwk7uV+85NT5q7MOuvCboFj4FdBSUflery3nF0PPrD4Xw4D-BFRlgHZcEuVQ-lqPXNj8GlbOwrngwRrUI4+CjZ6FF6iAly0IB+CpMKQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 | Specifier | Meaning                               |
 | --------- | ------------------------------------- |
@@ -596,7 +643,7 @@ Append a version specifier with `@`:
 | Full URL      | `@use github.com/acme/security`        | One-off external imports           |
 | Versioned URL | `@use github.com/acme/security@^1.0.0` | Reproducible external dependencies |
 
-______________________________________________________________________
+---
 
 ## Auto-Discovery
 
@@ -613,20 +660,26 @@ When you import a repository that does not contain `.prs` files, PromptScript lo
 
 ### Example: Importing an Open-Source Skill Library
 
-```
+```promptscript
 @meta { id: "my-project" syntax: "1.5.0" }
 
 # This repo has a SKILL.md but no .prs files - auto-discovered
 @use github.com/some-org/claude-skills/skills/tdd-workflow
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prOwGJBAFRwQ4g6jDTNBODB5CAMoA0gCSADIRFCRiggBGAK5Ygqy+VLSCkLAeCoIYycwKYu4sAG4wXmJ23IlwMIIA5hC4ifEULCQA9HDMfArM1I1djFAFYjAKcADW0FBwPbNQ811YYmIKAO6D02BQzJsg1nTo2HiIIM2t7Z09fZODw6PjkzNzC2-LC2sb29S7+02GXoTDYHC4FycQUSaHIEBgcV6glwDSIpHIDWoiVYHhwlRgFEEADlmClMNQUswwMi8YIxMxGIk+HosBA2HR8qw4mkUkIvBgoIJMIxphhGgSanwBMI7IJRBJpJcWjg2h0+nd+o8RmNEhMpksVp8Vj8tjs9gcZLLtLoBAZFSZzFYQFaSBBCBBWJIsFiYHZbKxuHABFyMNQxB5gFaWBNJMgZAAFMaMGA4ZhQCbUbTBsSh6ogAC6Vo4QY9jVjCaTKbTGazGBDYZkhdY-u4XiD1AgGjZOJlrDleQrGGTqfTlU88G9ndZbEtzaO+YYnG9cnwaLIlBoIIqtG7+CMRyAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 PromptScript fetches the repository, detects the `SKILL.md`, and synthesizes a virtual `.prs` fragment that you can merge into your project just like any other import.
 
-Zero Config Required
-
+:::tip[Zero Config Required]
 Auto-discovery works without any setup in the remote repo. The remote maintainer does not need to know about PromptScript.
+:::
 
-______________________________________________________________________
+---
 
 ## Lockfile
 
@@ -639,11 +692,13 @@ prs lock            # Create or update promptscript.lock
 prs lock --dry-run  # Show what would change without writing
 ```
 
-Compilation never rewrites the lockfile. Run `prs lock` after adding or changing remote imports, then commit the result.
+Compilation never rewrites the lockfile. Run `prs lock` after adding or changing
+remote imports, then commit the result.
 
 ### Lockfile Format
 
-Actual `prs lock` output for a project configured with `registry.git.url: https://github.com/acme/promptscript-base.git`:
+Actual `prs lock` output for a project configured with
+`registry.git.url: https://github.com/acme/promptscript-base.git`:
 
 ```yaml
 # promptscript.lock - written by `prs lock`
@@ -655,7 +710,9 @@ dependencies:
     integrity: sha256-pending
 ```
 
-For a default Git registry, the dependency key preserves the configured URL. `version` records the requested ref, while `commit` records the resolved 40-character commit SHA.
+For a default Git registry, the dependency key preserves the configured URL.
+`version` records the requested ref, while `commit` records the resolved
+40-character commit SHA.
 
 Projects whose skills pull registry reference files (via `@skills.references`) also get a `references` map. The shape below is illustrative - the key and hash values come from your own locked content - but the field types are exact:
 
@@ -671,7 +728,13 @@ references:
 
 ### Integrity Hashes
 
-The `dependencies` map pins each remote repository to an exact commit. Registry-sourced files listed by `@skills.references` are recorded separately in the top-level `references` map using the repository URL, relative path, and locked version as the key. This applies to aliased imports and the default Git registry. During compilation and validation, these SHA-256 hashes are verified against the actual file contents. If a reference has been modified since it was locked, a reference integrity error is raised.
+The `dependencies` map pins each remote repository to an exact commit.
+Registry-sourced files listed by `@skills.references` are recorded separately in
+the top-level `references` map using the repository URL, relative path, and
+locked version as the key. This applies to aliased imports and the default Git
+registry. During compilation and validation, these SHA-256
+hashes are verified against the actual file contents. If a reference has been
+modified since it was locked, a reference integrity error is raised.
 
 This protects against:
 
@@ -686,9 +749,9 @@ prs compile --ignore-hashes
 prs validate --ignore-hashes
 ```
 
-Warning
-
+:::caution
 Never use `--ignore-hashes` in CI pipelines. Hash verification is a critical security check for production builds.
+:::
 
 ### Committing the Lockfile
 
@@ -711,7 +774,7 @@ prs update
 prs update --dry-run
 ```
 
-______________________________________________________________________
+---
 
 ## Vendor Mode
 
@@ -735,7 +798,7 @@ Vendor commands reject a symbolic link or filesystem escape in the `.promptscrip
 
 ### Vendor Directory Structure
 
-```text
+```
 .promptscript/
 └── vendor/
     ├── github.com/
@@ -765,7 +828,7 @@ Vendor commands reject a symbolic link or filesystem escape in the `.promptscrip
 
 Commit the vendor directory to your repository for fully self-contained, network-free builds. Regenerating it requires network access to the locked repositories.
 
-______________________________________________________________________
+---
 
 ## Private Repositories
 
@@ -780,9 +843,15 @@ registries:
 
 Or in URL imports:
 
-```
+```promptscript
 @use git@github.com:acme/private-skills/@fragments/security
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODt1E34K3DcAIwpdRAxGIQB6GggAN2wYAFo4AGtoKDhW-lUNLVNWssY3ahNHEHy6dGw8RBBqqpMcOobmEiaWmHaF7o5+oagRsYnNTmnZ+cWqWhAGFnZHnl4AZTcaHIEGksnktl4RFI5Ds1A8yhwMGoMAovAAcswsPYMNQscwwApEbxxMw5lNsBA2HQxJ5eKxMWJeMiMFBsYwBhoUcUhCJeIErCEUltKtU9vVGs02h0Ln1BsNRuM1A92KNngssI48sE4AkRMlwiB0llciA4iQIIQIKwwlg4TAfIVfHARJ4ceJlPzgiwpGFkBEAApQZowHDMKBSaiyF3iN0RAC6cQ4zqt6l9AaDjBDYYjUYwruo3hACYKxWRzoWjCwlNYHrivQNgeDofDSKZ8FtEEr1by+WWcYYj2oS02UOiKJo9BAnSRcGr+FSyyAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Ensure your SSH key is added to `ssh-agent` or configured in `~/.ssh/config`.
 

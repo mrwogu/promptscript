@@ -2,97 +2,164 @@
 
 > Prompt-as-Code for Enterprise AI. Standardize, audit, and deploy instructions across any AI coding assistant.
 
-PromptScript is an agent platform configuration language. It defines
-instructions, skills, agents, MCP servers, plugins, hooks, workflows,
-and policies once, then compiles native output for 50 AI coding agent
-targets.
+PromptScript is an agent platform configuration language. It defines instructions, skills, agents, MCP servers, plugins, hooks, workflows, and policies once, then compiles native output for 50 AI coding agent targets.
 
+Every page below is plain Markdown. The whole documentation in one file: https://getpromptscript.dev/llms-full.txt
 
-## Getting Started
+## Start
 
-- [Getting Started](https://getpromptscript.dev/getting-started/index.md)
-- [Tutorial](https://getpromptscript.dev/tutorial/index.md)
-- [Real-Life Tutorial: Checkout Service](https://getpromptscript.dev/examples/real-life-checkout-service/index.md): End-to-end production checkout service rollout
+- [Getting Started](https://getpromptscript.dev/getting-started/index.md): Install the PromptScript CLI, create your first .prs file, and compile native instructions for Claude Code, GitHub Copilot, Cursor, and 47 more AI coding agents.
+- [Enterprise Tutorial: Building Layered AI Infrastructure](https://getpromptscript.dev/tutorial/index.md): Step-by-step enterprise tutorial: build organization, team, and project layers in PromptScript and compile them to native AI agent configuration.
+- [Real-Life Tutorial: Checkout Service](https://getpromptscript.dev/examples/real-life-checkout-service/index.md): Roll out PromptScript in a production checkout service with shared policy, payment-specific rules, native agents, CI drift checks, safe takeover, and rollback.
+- [PromptScript vs Manual Configuration](https://getpromptscript.dev/guides/vs-manual/index.md): Compare managing AI instructions manually vs with PromptScript
+- [FAQ & Troubleshooting](https://getpromptscript.dev/guides/faq/index.md): Answers to common PromptScript questions: supported AI tools, installation, inheritance, private registries, CI/CD, and common errors.
+
+## Migrate
+
+- [Importing Existing AI Instructions](https://getpromptscript.dev/guides/import/index.md): Convert CLAUDE.md, GitHub Copilot, Cursor, and other AI instruction files into PromptScript
+- [Migration Guide](https://getpromptscript.dev/guides/migration/index.md): Migrate existing CLAUDE.md, Copilot, and Cursor instructions to PromptScript step by step, then compile them back to every AI tool.
+- [AI Migration Best Practices](https://getpromptscript.dev/guides/ai-migration-best-practices/index.md): Guidelines for AI models performing PromptScript migration
+- [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/index.md): Safe upgrade workflow for PromptScript syntax, block shapes, replacement operations, and Factory hooks
 
 ## Agent Platform
 
-- [Overview](https://getpromptscript.dev/features/index.md): Agent platform concepts and complete feature model
-- [Agents](https://getpromptscript.dev/features/agents/index.md): Native agents, tools, skills, and MCP access
-- [Skills and Resources](https://getpromptscript.dev/features/skills/index.md): Portable skills, resources, scripts, and contracts
-- [MCP Servers and Plugins](https://getpromptscript.dev/features/integrations/index.md): MCP servers and plugin bundles
-- [Hooks and Workflows](https://getpromptscript.dev/features/automation/index.md): Lifecycle hooks, workflows, and build automation
-- [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md): All 50 target platforms and output families
+- [Agent Platform](https://getpromptscript.dev/features/index.md): Define instructions, skills, agents, tools, integrations, and automation once, then compile them to native AI coding agent formats.
+- [Agents](https://getpromptscript.dev/features/agents/index.md): Define specialized AI agents once and compile them to native platform-specific agent formats.
+- [Skills and Resources](https://getpromptscript.dev/features/skills/index.md): Build portable AI skills with instructions, contracts, references, scripts, assets, and target-native output.
+- [MCP Servers and Plugins](https://getpromptscript.dev/features/integrations/index.md): Configure project MCP servers and bundle reusable agent capabilities with PromptScript plugins.
+- [Hooks and Workflows](https://getpromptscript.dev/features/automation/index.md): Define portable agent lifecycle hooks, reusable workflows, and repository compilation automation.
+- [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md): Configure 50 built-in AI coding agent targets and choose native output modes for instructions, skills, agents, integrations, and automation.
+- [AI Tool Hooks](https://getpromptscript.dev/guides/hooks/index.md): Auto-compile .prs files and protect generated outputs using native AI tool hooks
+- [Examples (Few-Shot Prompting)](https://getpromptscript.dev/guides/examples/index.md): Teach AI assistants with structured input/output examples using @examples
+
+## Skills
+
+- [Building Skills](https://getpromptscript.dev/guides/building-skills/index.md): Create custom skills for PromptScript - from simple instructions to parameterized skills with resource files
+- [Skill Composition](https://getpromptscript.dev/guides/skill-composition/index.md): Compose complex skills from sub-skill files in PromptScript. Each phase gets its own context, tools, and security boundaries.
+- [Skill Overlays Guide](https://getpromptscript.dev/guides/skill-overlays/index.md): Extending and customizing skills across registry layers with @extend
+- [Local Skills](https://getpromptscript.dev/guides/local-skills/index.md): Install and manage skills directly in your project without a registry
+- [Skill Contracts](https://getpromptscript.dev/guides/skill-contracts/index.md): Define inputs and outputs for skills to create clear interfaces
+- [Shared Resources](https://getpromptscript.dev/guides/shared-resources/index.md): Share files across all skills using the .promptscript/shared/ directory
+- [Using npx skills with PromptScript](https://getpromptscript.dev/guides/npx-skills/index.md): Install open-source skills from GitHub repositories and use them with PromptScript
+
+## Compose and Reuse
+
+- [Guides](https://getpromptscript.dev/guides/index.md): Guides for composing and reusing PromptScript: inheritance, multi-file projects, Markdown imports, and shared registries.
+- [Inheritance Guide](https://getpromptscript.dev/guides/inheritance/index.md): Build scalable AI instruction hierarchies with PromptScript @inherit: organization, team, and project layers with predictable merges.
+- [Multi-File Organization](https://getpromptscript.dev/guides/multi-file/index.md): Organize large PromptScript projects across many .prs files with @use imports, fragments, and a clear directory layout.
+- [Markdown Imports](https://getpromptscript.dev/guides/markdown-imports/index.md): Import skills directly from .md files with @use in PromptScript. No extra tools needed.
+- [Build Your Registry](https://getpromptscript.dev/guides/registry/index.md): Learn how to create and manage PromptScript registries for your organization, with self-service registry commands and decentralized architecture.
+
+## Scale to Organization
+
+- [Enterprise Setup](https://getpromptscript.dev/guides/enterprise/index.md): Roll out PromptScript across an organization: shared registries, layered inheritance, policies, and governed AI instructions per team.
+- [Policy Engine](https://getpromptscript.dev/guides/policy-engine/index.md): Enforce declarative organization policies on skill extensions during validation
+- [Guard Dependencies](https://getpromptscript.dev/guides/guard-dependencies/index.md): Inject shared guard context using requires in @guards
+- [Security Guide](https://getpromptscript.dev/guides/security/index.md): Security considerations for PromptScript templates and inheritance
+- [CI/CD Integration](https://getpromptscript.dev/guides/ci/index.md): Validate PromptScript in CI/CD: run prs validate and compile checks in GitHub Actions, GitLab CI, and other pipelines.
+- [Docker](https://getpromptscript.dev/guides/docker/index.md): Run the PromptScript CLI in Docker: image tags, volume mounts, environment variables, and validate or compile commands in containers.
+- [User-Level Configuration](https://getpromptscript.dev/guides/user-config/index.md): Configure default PromptScript settings for your developer environment
+
+## Targets
+
+- [Supported Formatters](https://getpromptscript.dev/reference/formatters/index.md): All 50 AI coding agent targets supported by PromptScript, with output paths, skills, agents, commands, MCP, and hooks support.
+- [Antigravity Formatter](https://getpromptscript.dev/reference/formatters/antigravity/index.md): Generate Antigravity config from PromptScript: rules with activation types, workflows, skills, and MCP servers.
+- [Claude Code Formatter](https://getpromptscript.dev/reference/formatters/claude/index.md): Generate Claude Code config from PromptScript: CLAUDE.md, .claude/skills, subagents, commands, CLAUDE.local.md, MCP servers, and hooks.
+- [Cursor Formatter](https://getpromptscript.dev/reference/formatters/cursor/index.md): Generate Cursor rules from PromptScript: .cursor/rules MDC files with frontmatter, commands, skills, MCP servers, and hooks.
+- [Factory AI Formatter](https://getpromptscript.dev/reference/formatters/factory/index.md): Generate Factory AI config from PromptScript: AGENTS.md, droids, skills, commands, MCP servers, and hooks.
+- [Gemini CLI Formatter](https://getpromptscript.dev/reference/formatters/gemini/index.md): Generate Gemini CLI config from PromptScript: GEMINI.md, custom commands, skills, MCP servers, and hooks.
+- [GitHub Copilot Formatter](https://getpromptscript.dev/reference/formatters/github/index.md): Generate GitHub Copilot config from PromptScript: copilot-instructions.md, path instructions, prompts, skills, agents, and MCP.
+- [OpenCode Formatter](https://getpromptscript.dev/reference/formatters/opencode/index.md): Generate OpenCode config from PromptScript: OPENCODE.md, commands, skills, agents, MCP servers, and native plugin hooks.
+- [Adal Formatter](https://getpromptscript.dev/reference/formatters/adal/index.md): Generate Adal config from PromptScript: .adal/rules/project.md and skills. Output files, versions, and supported features.
+- [Aider Formatter](https://getpromptscript.dev/reference/formatters/aider/index.md): Generate Aider config from PromptScript: AGENTS.md. Output files, versions, and supported features.
+- [Amazon Q Formatter](https://getpromptscript.dev/reference/formatters/amazon-q/index.md): Generate Amazon Q config from PromptScript: AGENTS.md. Output files, versions, and supported features.
+- [Amp Formatter](https://getpromptscript.dev/reference/formatters/amp/index.md): Generate Amp config from PromptScript: AGENTS.md, skills, and agents. Output files, versions, and supported features.
+- [Augment Formatter](https://getpromptscript.dev/reference/formatters/augment/index.md): Generate Augment config from PromptScript: .augment/rules/project.md and agents. Output files, versions, and supported features.
+- [Cline Formatter](https://getpromptscript.dev/reference/formatters/cline/index.md): Generate Cline config from PromptScript: .clinerules and MCP servers. Output files, versions, and supported features.
+- [CodeBuddy Formatter](https://getpromptscript.dev/reference/formatters/codebuddy/index.md): Generate CodeBuddy config from PromptScript: .codebuddy/rules/project.md and skills. Output files, versions, and supported features.
+- [Codex Formatter](https://getpromptscript.dev/reference/formatters/codex/index.md): Generate Codex config from PromptScript: AGENTS.md, skills, agents, MCP servers, and hooks. Output files, versions, and supported features.
+- [Command Code Formatter](https://getpromptscript.dev/reference/formatters/command-code/index.md): Generate Command Code config from PromptScript: .commandcode/rules/project.md, skills, and commands. Output files, versions, and supported features.
+- [Continue Formatter](https://getpromptscript.dev/reference/formatters/continue/index.md): Generate Continue config from PromptScript: .continue/rules/project.md and MCP servers. Output files, versions, and supported features.
+- [Cortex Formatter](https://getpromptscript.dev/reference/formatters/cortex/index.md): Generate Cortex config from PromptScript: .cortex/rules/project.md and skills. Output files, versions, and supported features.
+- [Crush Formatter](https://getpromptscript.dev/reference/formatters/crush/index.md): Generate Crush config from PromptScript: AGENTS.md, skills, and MCP servers. Output files, versions, and supported features.
+- [Deep Agents Formatter](https://getpromptscript.dev/reference/formatters/deep-agents/index.md): Generate Deep Agents config from PromptScript: AGENTS.md. Output files, versions, and supported features.
+- [Devin Formatter](https://getpromptscript.dev/reference/formatters/devin/index.md): Generate Devin config from PromptScript: AGENTS.md. Output files, versions, and supported features.
+- [ForgeCode Formatter](https://getpromptscript.dev/reference/formatters/forgecode/index.md): Generate ForgeCode config from PromptScript: AGENTS.md. Output files, versions, and supported features.
+- [GitLab Duo Formatter](https://getpromptscript.dev/reference/formatters/gitlab-duo/index.md): Generate GitLab Duo config from PromptScript: AGENTS.md and skills. Output files, versions, and supported features.
+- [Goose Formatter](https://getpromptscript.dev/reference/formatters/goose/index.md): Generate Goose config from PromptScript: .goosehints, skills, and MCP servers. Output files, versions, and supported features.
+- [Grok Formatter](https://getpromptscript.dev/reference/formatters/grok/index.md): Generate Grok config from PromptScript: AGENTS.md, skills, agents, commands, MCP servers, and hooks. Output files, versions, and supported features.
+- [Hermes Agent Formatter](https://getpromptscript.dev/reference/formatters/hermes/index.md): Generate Hermes Agent config from PromptScript: AGENTS.md. Output files, versions, and supported features.
+- [iFlow Formatter](https://getpromptscript.dev/reference/formatters/iflow/index.md): Generate iFlow config from PromptScript: .iflow/rules/project.md and skills. Output files, versions, and supported features.
+- [Jules Formatter](https://getpromptscript.dev/reference/formatters/jules/index.md): Generate Jules config from PromptScript: AGENTS.md. Output files, versions, and supported features.
+- [Junie Formatter](https://getpromptscript.dev/reference/formatters/junie/index.md): Generate Junie config from PromptScript: .junie/guidelines.md and skills. Output files, versions, and supported features.
+- [Kilo Code Formatter](https://getpromptscript.dev/reference/formatters/kilo/index.md): Generate Kilo Code config from PromptScript: .kilocode/rules/project.md, skills, and MCP servers. Output files, versions, and supported features.
+- [Kimi Formatter](https://getpromptscript.dev/reference/formatters/kimi/index.md): Generate Kimi config from PromptScript: AGENTS.md. Output files, versions, and supported features.
+- [Kiro CLI Formatter](https://getpromptscript.dev/reference/formatters/kiro/index.md): Generate Kiro CLI config from PromptScript: .kiro/steering/project.md and skills. Output files, versions, and supported features.
+- [Kode Formatter](https://getpromptscript.dev/reference/formatters/kode/index.md): Generate Kode config from PromptScript: .kode/rules/project.md and skills. Output files, versions, and supported features.
+- [MCPJam Formatter](https://getpromptscript.dev/reference/formatters/mcpjam/index.md): Generate MCPJam config from PromptScript: .mcpjam/rules/project.md and skills. Output files, versions, and supported features.
+- [Mimo Formatter](https://getpromptscript.dev/reference/formatters/mimo/index.md): Generate Mimo config from PromptScript: AGENTS.md. Output files, versions, and supported features.
+- [Mistral Vibe Formatter](https://getpromptscript.dev/reference/formatters/mistral-vibe/index.md): Generate Mistral Vibe config from PromptScript: .vibe/rules/project.md and skills. Output files, versions, and supported features.
+- [Mux Formatter](https://getpromptscript.dev/reference/formatters/mux/index.md): Generate Mux config from PromptScript: .mux/rules/project.md. Output files, versions, and supported features.
+- [Neovate Formatter](https://getpromptscript.dev/reference/formatters/neovate/index.md): Generate Neovate config from PromptScript: .neovate/rules/project.md. Output files, versions, and supported features.
+- [OpenClaw Formatter](https://getpromptscript.dev/reference/formatters/openclaw/index.md): Generate OpenClaw config from PromptScript: INSTRUCTIONS.md and skills. Output files, versions, and supported features.
+- [OpenHands Formatter](https://getpromptscript.dev/reference/formatters/openhands/index.md): Generate OpenHands config from PromptScript: .openhands/rules/project.md, skills, and MCP servers. Output files, versions, and supported features.
+- [Pi Formatter](https://getpromptscript.dev/reference/formatters/pi/index.md): Generate Pi config from PromptScript: .pi/rules/project.md and skills. Output files, versions, and supported features.
+- [Pochi Formatter](https://getpromptscript.dev/reference/formatters/pochi/index.md): Generate Pochi config from PromptScript: .pochi/rules/project.md and skills. Output files, versions, and supported features.
+- [Qoder Formatter](https://getpromptscript.dev/reference/formatters/qoder/index.md): Generate Qoder config from PromptScript: .qoder/rules/project.md. Output files, versions, and supported features.
+- [Qwen Code Formatter](https://getpromptscript.dev/reference/formatters/qwen-code/index.md): Generate Qwen Code config from PromptScript: .qwen/rules/project.md, skills, and MCP servers. Output files, versions, and supported features.
+- [Roo Code Formatter](https://getpromptscript.dev/reference/formatters/roo/index.md): Generate Roo Code config from PromptScript: .roorules and MCP servers. Output files, versions, and supported features.
+- [Trae Formatter](https://getpromptscript.dev/reference/formatters/trae/index.md): Generate Trae config from PromptScript: .trae/rules/project_rules.md and skills. Output files, versions, and supported features.
+- [Warp Formatter](https://getpromptscript.dev/reference/formatters/warp/index.md): Generate Warp config from PromptScript: AGENTS.md. Output files, versions, and supported features.
+- [Windsurf Formatter](https://getpromptscript.dev/reference/formatters/windsurf/index.md): Generate Windsurf config from PromptScript: .windsurf/rules/project.md, skills, MCP servers, and hooks. Output files, versions, and supported features.
+- [Zed Formatter](https://getpromptscript.dev/reference/formatters/zed/index.md): Generate Zed config from PromptScript: AGENTS.md and MCP servers. Output files, versions, and supported features.
+- [Zencoder Formatter](https://getpromptscript.dev/reference/formatters/zencoder/index.md): Generate Zencoder config from PromptScript: .zencoder/rules/project.md and skills. Output files, versions, and supported features.
 
 ## Reference
 
-- [Overview](https://getpromptscript.dev/reference/language/index.md): Complete PromptScript language specification
-- [File Anatomy](https://getpromptscript.dev/reference/language/file-anatomy/index.md): Complete PromptScript file structure
-- [Values and Block Bodies](https://getpromptscript.dev/reference/language/values-and-block-bodies/index.md): Canonical block body shapes and PS038
-- [Composition and Precedence](https://getpromptscript.dev/reference/language/composition/index.md): Inheritance and import precedence
-- [Execution Order](https://getpromptscript.dev/reference/language/execution-order/index.md): Declaration-order resolution
-- [Merge and Replacement](https://getpromptscript.dev/reference/language/merge-and-replacement/index.md): Extend and override semantics
-- [Section Headers](https://getpromptscript.dev/reference/language/section-headers/index.md): Generated section header overrides
-- [Versions and Diagnostics](https://getpromptscript.dev/reference/language/versions-and-diagnostics/index.md): Syntax versions and diagnostics
-- [Block Shapes](https://getpromptscript.dev/reference/block-shapes/index.md): Complete built-in block shape matrix
-- [Overview](https://getpromptscript.dev/reference/cli/index.md): CLI commands and options
-- [Hook Management](https://getpromptscript.dev/reference/cli/hooks/index.md): AI tool hook installation and removal
-- [Hook Runtime](https://getpromptscript.dev/reference/cli/hook/index.md): Low-level hook runtime contract
-- [Configuration](https://getpromptscript.dev/reference/config/index.md): Configuration file format
-- [Model Catalog](https://getpromptscript.dev/reference/models/index.md): Built-in model catalog, floating aliases, and target model names
-
-## Target Platforms
-
-- [Platform Matrix](https://getpromptscript.dev/reference/formatters/index.md): All 50 supported AI agent targets
-- [Claude Code](https://getpromptscript.dev/reference/formatters/claude/index.md): Claude Code output format, skills, agents, local files
-- [GitHub Copilot](https://getpromptscript.dev/reference/formatters/github/index.md): GitHub Copilot output format, instructions, prompts, skills
-- [Cursor](https://getpromptscript.dev/reference/formatters/cursor/index.md): Cursor output format, MDC frontmatter, commands
-- [Antigravity](https://getpromptscript.dev/reference/formatters/antigravity/index.md): Antigravity output format, workflows, activation types
-- [Factory AI](https://getpromptscript.dev/reference/formatters/factory/index.md): Factory AI output format, droids, skills
-- [Gemini CLI](https://getpromptscript.dev/reference/formatters/gemini/index.md): Gemini CLI output format, commands, skills
-- [OpenCode](https://getpromptscript.dev/reference/formatters/opencode/index.md): OpenCode output format, commands, skills, agents
-
-## Composition and Governance
-
-- [Inheritance](https://getpromptscript.dev/guides/inheritance/index.md): PromptScript inheritance system
-- [Multi-File Organization](https://getpromptscript.dev/guides/multi-file/index.md): Multi-file organization
-- [Building Skills](https://getpromptscript.dev/guides/building-skills/index.md): Reusable skill authoring and resources
-- [Skill Composition](https://getpromptscript.dev/guides/skill-composition/index.md): Skill inheritance and composition
-- [Skill Contracts](https://getpromptscript.dev/guides/skill-contracts/index.md): Skill contracts and compatibility
-- [Skill Overlays](https://getpromptscript.dev/guides/skill-overlays/index.md): Skill overlays and conflict handling
-- [Build Your Registry](https://getpromptscript.dev/guides/registry/index.md): Building a PromptScript registry
-- [Policy Engine](https://getpromptscript.dev/guides/policy-engine/index.md): Organization policy enforcement
-- [Security](https://getpromptscript.dev/guides/security/index.md): Security controls and best practices
-- [CI/CD Integration](https://getpromptscript.dev/guides/ci/index.md): CI/CD integration
-- [Enterprise Setup](https://getpromptscript.dev/guides/enterprise/index.md): Enterprise setup
-
-## Migration and Operations
-
-- [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/index.md): Upgrade PromptScript 1.15 projects to 1.16
-- [Migration](https://getpromptscript.dev/guides/migration/index.md): Migration guide
-- [AI Tool Hooks](https://getpromptscript.dev/guides/hooks/index.md): Automatic source compilation hooks
-- [Importing Instructions](https://getpromptscript.dev/guides/import/index.md): Import existing agent instructions
-- [Formatter Architecture](https://getpromptscript.dev/guides/formatter-architecture/index.md): Internal architecture of formatters
+- [Reference](https://getpromptscript.dev/reference/index.md): PromptScript reference: language specification, block shapes, CLI commands, configuration file, model catalog, and telemetry.
+- [Language Reference](https://getpromptscript.dev/reference/language/index.md): Complete PromptScript language specification: file structure, blocks, values, inheritance, imports, extensions, and diagnostics.
+- [File Anatomy](https://getpromptscript.dev/reference/language/file-anatomy/index.md): Complete PromptScript 1.6 file structure and recommended declaration order
+- [Values and Block Bodies](https://getpromptscript.dev/reference/language/values-and-block-bodies/index.md): PromptScript values, canonical block shapes, compatibility forms, and PS038
+- [Composition and Precedence](https://getpromptscript.dev/reference/language/composition/index.md): Normative inheritance, import, and local composition precedence
+- [Execution Order](https://getpromptscript.dev/reference/language/execution-order/index.md): PromptScript 1.6 declaration order and deterministic resolution
+- [Merge and Replacement](https://getpromptscript.dev/reference/language/merge-and-replacement/index.md): Choose between @extend, field replacement, and @override
+- [Section Headers](https://getpromptscript.dev/reference/language/section-headers/index.md): Customize generated human-readable section titles with @header
+- [Versions and Diagnostics](https://getpromptscript.dev/reference/language/versions-and-diagnostics/index.md): PromptScript syntax versions, upgrade commands, and release validation
+- [Block Shapes](https://getpromptscript.dev/reference/block-shapes/index.md): Canonical content shapes, compatibility forms, merge rules, and formatter behavior for every built-in PromptScript block
+- [CLI Reference](https://getpromptscript.dev/reference/cli/index.md): Reference for every prs CLI command: init, compile, validate, diff, import, skills, registry, hooks, and their options.
+- [prs hooks](https://getpromptscript.dev/reference/cli/hooks/index.md): CLI reference for the prs hooks command (install and uninstall)
+- [prs hook](https://getpromptscript.dev/reference/cli/hook/index.md): CLI reference for the prs hook command (pre-edit and post-edit actions)
+- [Configuration](https://getpromptscript.dev/reference/config/index.md): Reference for promptscript.yaml: targets, output versions, registries, inputs, validation, formatting, and other project settings.
+- [Model Catalog](https://getpromptscript.dev/reference/models/index.md): Built-in model profiles, floating aliases, and the model name each target writes.
+- [Anonymous Usage Telemetry](https://getpromptscript.dev/reference/telemetry/index.md): Fields, delivery behavior, and controls for PromptScript telemetry
 
 ## Examples
 
-- [Minimal](https://getpromptscript.dev/examples/minimal/index.md): Minimal project setup
-- [Composition and Order](https://getpromptscript.dev/examples/composition-and-order/index.md): Composition precedence and declaration order
-- [Merge vs Replace](https://getpromptscript.dev/examples/merge-vs-replace/index.md): Extend, field replacement, and override
-- [Fix Block Shapes](https://getpromptscript.dev/examples/fix-block-shapes/index.md): PS038 block shape remediation
-- [Custom Section Headers](https://getpromptscript.dev/examples/custom-section-headers/index.md): Generated section title overrides
-- [Portable Hooks](https://getpromptscript.dev/examples/portable-hooks/index.md): Portable lifecycle hook policy
-- [Migrate Factory Hooks](https://getpromptscript.dev/examples/migrate-factory-hooks/index.md): Legacy Factory hook migration
-- [Team Setup](https://getpromptscript.dev/examples/team-setup/index.md): Team configuration
-- [Enterprise](https://getpromptscript.dev/examples/enterprise/index.md): Enterprise example
-- [Skills & Local](https://getpromptscript.dev/examples/skills-and-local/index.md): Skills and local overrides
-- [Agents](https://getpromptscript.dev/examples/agents/index.md): Agent configuration
-- [Agent Platform](https://getpromptscript.dev/examples/agent-platform/index.md): Complete agent platform configuration
-- [Git Registry](https://getpromptscript.dev/examples/git-registry/index.md): Git registry and lockfile workflow
+- [Examples](https://getpromptscript.dev/examples/index.md): Runnable PromptScript examples: minimal setup, composition, hooks, agents, skills, team and enterprise layouts, and Git registries.
+- [Minimal Example](https://getpromptscript.dev/examples/minimal/index.md): The smallest working PromptScript project: one .prs file compiled to GitHub Copilot instructions, then extended to Claude Code and Cursor.
+- [Composition and Order](https://getpromptscript.dev/examples/composition-and-order/index.md): Resolve inheritance, imports, local blocks, extension, and replacement step by step
+- [Merge vs Replace](https://getpromptscript.dev/examples/merge-vs-replace/index.md): Runnable comparison of @extend, field replacement, and @override
+- [Fix Block Shape Warnings](https://getpromptscript.dev/examples/fix-block-shapes/index.md): Diagnose PS038 and migrate target-dependent block bodies to canonical forms
+- [Custom Section Headers](https://getpromptscript.dev/examples/custom-section-headers/index.md): Localize generated headings without changing target-native schemas
+- [Portable Hooks](https://getpromptscript.dev/examples/portable-hooks/index.md): Repository-local lifecycle policy with scripts, project cwd, terminal events, and target overrides
+- [Migrate Factory Hooks](https://getpromptscript.dev/examples/migrate-factory-hooks/index.md): Safely move PromptScript-owned Factory hooks from legacy settings to the canonical hook file
+- [Agent Platform Examples](https://getpromptscript.dev/examples/agent-platform/index.md): Runnable examples for agent integrations, automation, plugins, field replacement, portable skills, and monorepo builds.
+- [Agents Example](https://getpromptscript.dev/examples/agents/index.md): Learn how to define portable AI agents and compile them to native agent formats.
+- [Team Setup Example](https://getpromptscript.dev/examples/team-setup/index.md): Share one team PromptScript configuration across many projects with inheritance, and keep per-project overrides small.
+- [Enterprise Example](https://getpromptscript.dev/examples/enterprise/index.md): Full enterprise PromptScript setup: organization base, compliance and security layers, design system, and governed project configs.
+- [Skills & Local Memory](https://getpromptscript.dev/examples/skills-and-local/index.md): Advanced features for AI tool skills and private instructions
+- [Git Registry](https://getpromptscript.dev/examples/git-registry/index.md): Use a Git repository as a PromptScript registry to share base configs, skills, and guards across projects and teams.
+
+## Contributing
+
+- [Formatter Architecture](https://getpromptscript.dev/guides/formatter-architecture/index.md): Internal architecture of PromptScript formatters and shared extraction patterns
+- [Testing Documentation](https://getpromptscript.dev/testing/index.md): How PromptScript is tested: golden files, parity matrix, and feature coverage tests that keep formatter output consistent.
+- [Parity Testing](https://getpromptscript.dev/testing/parity-testing/index.md): Documentation for the parity testing mechanism for PromptScript formatters, including golden files and the parity matrix.
+- [Feature Coverage Testing](https://getpromptscript.dev/testing/feature-coverage/index.md): Documentation for the Feature Coverage Matrix and testing mechanism for PromptScript formatters.
 
 ## Optional
 
-- [FAQ](https://getpromptscript.dev/guides/faq/index.md): Frequently asked questions
-- [Comparison](https://getpromptscript.dev/guides/vs-manual/index.md): Comparison with manual configuration
-- [Parity Testing](https://getpromptscript.dev/testing/parity-testing/index.md): Formatter parity testing
-- [Feature Coverage](https://getpromptscript.dev/testing/feature-coverage/index.md): Feature coverage matrix
-
+- [API Reference](https://getpromptscript.dev/api-reference/): TypeDoc reference for the PromptScript packages
+- [Playground](https://getpromptscript.dev/playground/): compile .prs files in the browser
+- [Source code](https://github.com/mrwogu/promptscript): GitHub repository
+- [npm packages](https://www.npmjs.com/org/promptscript): @promptscript/cli and libraries

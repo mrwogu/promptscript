@@ -1,6 +1,8 @@
 # Building Skills
 
-`metadata` values must be YAML strings. Quote numeric and boolean values, for example `version: "16"` instead of `version: 16`. Invalid values produce a diagnostic with the `SKILL.md` path and line.
+`metadata` values must be YAML strings. Quote numeric and boolean values, for example
+`version: "16"` instead of `version: 16`. Invalid values produce a diagnostic with the
+`SKILL.md` path and line.
 
 Skills are reusable units of AI instructions. Each skill is a directory with a `SKILL.md` file and optional resource files. PromptScript compiles them to all your AI coding agents.
 
@@ -8,7 +10,7 @@ Skills are reusable units of AI instructions. Each skill is a directory with a `
 
 A skill only needs a `SKILL.md` file:
 
-```text
+```
 .promptscript/skills/
 └── my-skill/
     └── SKILL.md
@@ -26,13 +28,19 @@ Explain what the skill should do, step by step.
 
 Reference it in your `.prs` file:
 
-```
+```promptscript
 @skills {
   my-skill: {
     description: "Short description of what this skill does"
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq14SRwBaMoqw6uDgqThGagg0LAg2FJAAZRxmaixeDq6evqNmMF5zHGwFHCVZcqgoSeZ4PODCgpB8gF0GTixqR3wiUnIYKloQBgA3GFp+1nxU46A" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 That's it. Run `prs compile` and the skill is available in all your AI agents.
 
@@ -49,21 +57,23 @@ description: Security-focused code review
 Instructions here...
 ```
 
-| Property        | Type     | Default  | Description                                                                                                  |
-| --------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| `name`          | string   | required | Skill identifier (matches directory name)                                                                    |
-| `description`   | string   | required | What the skill does                                                                                          |
-| `license`       | string   | -        | License for the skill                                                                                        |
-| `compatibility` | string   | -        | Runtime requirements or compatible tools                                                                     |
-| `metadata`      | object   | -        | Additional string metadata                                                                                   |
-| `allowed-tools` | string[] | -        | Tools the skill may use                                                                                      |
-| `params`        | object   | -        | Parameter definitions for `{{variable}}` templates                                                           |
-| `references`    | string[] | -        | File paths to attach to the skill's context (see below)                                                      |
-| `scripts`       | string[] | -        | Executable helper paths to attach to the skill                                                               |
+| Property        | Type     | Default  | Description                                                         |
+| --------------- | -------- | -------- | ------------------------------------------------------------------- |
+| `name`          | string   | required | Skill identifier (matches directory name)                           |
+| `description`   | string   | required | What the skill does                                                 |
+| `license`       | string   | -        | License for the skill                                               |
+| `compatibility` | string   | -        | Runtime requirements or compatible tools                            |
+| `metadata`      | object   | -        | Additional string metadata                                          |
+| `allowed-tools` | string[] | -        | Tools the skill may use                                             |
+| `params`        | object   | -        | Parameter definitions for `{{variable}}` templates                  |
+| `references`    | string[] | -        | File paths to attach to the skill's context (see below)             |
+| `scripts`       | string[] | -        | Executable helper paths to attach to the skill                      |
 | `inputs`        | object   | -        | Runtime input contract (see [Skill Contracts](https://getpromptscript.dev/guides/skill-contracts/index.md))  |
 | `outputs`       | object   | -        | Runtime output contract (see [Skill Contracts](https://getpromptscript.dev/guides/skill-contracts/index.md)) |
 
-Frontmatter is parsed as constrained YAML. Malformed YAML, aliases, anchors, explicit tags, and oversized values are rejected with a source location. Unknown fields remain available through frontmatter pass-through when a formatter supports them.
+Frontmatter is parsed as constrained YAML. Malformed YAML, aliases, anchors, explicit tags, and
+oversized values are rejected with a source location. Unknown fields remain available through
+frontmatter pass-through when a formatter supports them.
 
 ### Frontmatter limits
 
@@ -97,7 +107,7 @@ Formatters emit referenced files alongside `SKILL.md` in the output directory. A
 
 You can also declare references in your `.prs` file using the `references` property on a skill definition:
 
-```
+```promptscript
 @skills {
   architecture-review: {
     description: "Review architecture decisions"
@@ -115,7 +125,7 @@ The validator checks that referenced files use allowed extensions (PS025) and do
 
 Properties like `userInvocable`, `disableModelInvocation`, `context`, and `agent` control how AI agents handle the skill. These are set in your `.prs` file. `allowedTools` can be set in `.prs`; native `SKILL.md` files use the Agent Skills `allowed-tools` frontmatter field:
 
-```
+```promptscript
 @skills {
   code-review: {
     description: "Security-focused code review"
@@ -127,6 +137,12 @@ Properties like `userInvocable`, `disableModelInvocation`, `context`, and `agent
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCpOEZqCDQsCDYUkABlGEY3AaxHerBmabhpWqleJtb2vO7eNxXqAElWZqWMACNYMKxqNxg44JZ2IiwxxepSne6NTlfwkHUnBgaig9TQMzQzBWX2CGCgUAs0gAKsxmJUwsgIgAlGASCJ0f4AcSaaHx-wAQhg4DgIgBdOKFAogfK0hi-aiOfBEUjkGBUWggBjNYFwEasfCpZlAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 | Property                 | Type     | Default | Supported by                     |
 | ------------------------ | -------- | ------- | -------------------------------- |
 | `userInvocable`          | boolean  | `false` | Claude, Factory                  |
@@ -136,7 +152,8 @@ Properties like `userInvocable`, `disableModelInvocation`, `context`, and `agent
 | `model`                  | string   | -       | Claude, Grok                     |
 | `allowedTools`           | string[] | -       | Claude, Factory                  |
 
-`model` takes the same values as agent `model` and is mapped through the [model catalog](https://getpromptscript.dev/reference/models/index.md).
+`model` takes the same values as agent `model` and is mapped through the
+[model catalog](https://getpromptscript.dev/reference/models/index.md).
 
 ## Writing Good Instructions
 
@@ -186,7 +203,7 @@ Skills work best when they have clear sections that tell the AI exactly what to 
 
 Place files alongside `SKILL.md` to include data, scripts, or templates:
 
-```text
+```
 .promptscript/skills/ui-design/
 ├── SKILL.md
 ├── data/
@@ -201,7 +218,7 @@ Place files alongside `SKILL.md` to include data, scripts, or templates:
 
 All files are copied to every compilation target:
 
-```text
+```
 .claude/skills/ui-design/SKILL.md
 .claude/skills/ui-design/data/colors.csv
 .claude/skills/ui-design/scripts/search.py
@@ -240,7 +257,7 @@ And list available data files:
 
 Add a `.skillignore` file to any skill directory for custom exclusion rules (gitignore syntax):
 
-```text
+```gitignore
 # .promptscript/skills/my-skill/.skillignore
 *.log
 tmp/
@@ -274,7 +291,7 @@ Target {{coverage}}% code coverage.
 
 Pass values in the `.prs` file:
 
-```
+```promptscript
 @skills {
   test-generator: {
     language: "python"
@@ -283,6 +300,12 @@ Pass values in the `.prs` file:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqwV4LABadU4YNSxmajDq4OCoDFZ1Nw0YFJA0R1w2PO6VNSFzdtKRsY44LCnulgA3FqGwgE5cmsKCkHyAXQZOLGpHfCJSchgqWhAGbdoINnxU06A" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Parameter types
 
@@ -329,7 +352,7 @@ See [Skill Contracts](https://getpromptscript.dev/guides/skill-contracts/index.m
 
 Declare that one skill requires another:
 
-```
+```promptscript
 @skills {
   lint-check: {
     description: "Run linting"
@@ -341,6 +364,12 @@ Declare that one skill requires another:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq14oCHYAWkYcGEZSsOrg4Kk4RmoINCwINhSQACUPWvqh1nU84MLWOLA3KCgG6hgANwgYcw647vg+gaGR8JAAYWZo4TsWKV5Nnb35rs2ARzcITbgw5AidUazVapQiAF04ot8iB8uCGJwsNRHPgiKRyDAqLQQAwtjBaMNWPhUrCgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 PromptScript validates that required skills exist and have no circular dependencies.
 
@@ -374,7 +403,7 @@ This checks:
 
 Open your AI coding agent and invoke the skill. For user-invocable skills in Claude Code:
 
-```text
+```
 /my-skill
 ```
 
@@ -384,7 +413,7 @@ Open your AI coding agent and invoke the skill. For user-invocable skills in Cla
 
 Once your skill is in a public Git repository, others can import it directly using `@use` — no installer needed:
 
-```text
+```
 @use github.com/your-org/your-skills/my-skill@1.0.0
 ```
 
@@ -404,7 +433,7 @@ npx skills add your-org/your-skills \
 
 Add skills to your PromptScript registry as part of a package:
 
-```text
+```
 my-registry/
 └── @company/
     └── skills/
@@ -420,7 +449,7 @@ See [Build Your Registry](https://getpromptscript.dev/guides/registry/index.md) 
 
 ### Simple commit skill
 
-```text
+```
 .promptscript/skills/commit/
 └── SKILL.md
 ```
@@ -442,7 +471,7 @@ When creating commits:
 
 Reference in `.prs` with behavior properties:
 
-```
+```promptscript
 @skills {
   commit: {
     description: "Create well-structured git commits"
@@ -451,9 +480,15 @@ Reference in `.prs` with behavior properties:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mEhITMOrg4Kk4RmoINCwINhSQAGFqGGw7cxgoKABaOCxqN0YsN2GZdRNa+pM4PJbeNzgYagBJVgA3ZkYMACNYMLm3GDjCgpB8gF0GTjnHfCJSchgVFoIAYp0OcF6rHwqVeQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Review skill with checklist
 
-```text
+```
 .promptscript/skills/review/
 ├── SKILL.md
 └── checklist.md
@@ -478,7 +513,7 @@ Summarize findings at the end.
 
 Reference in `.prs` with behavior properties:
 
-```
+```promptscript
 @skills {
   review: {
     description: "Code review with checklist"
@@ -488,9 +523,15 @@ Reference in `.prs` with behavior properties:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq15qGAA3CBhzMOrg4Kk4RmoINCwINhSQAGFmKVqGpvNecxMcHRwYRlKoJSw89t43OBhqAElWeuZGDAAjWDCsajcYOOCMKCgLaQAVZmZKsOQIgCUYCQidHCIAA4nU0BEALpxQoFED5SEMThXRz4IikcgwKi0EAMeq7OADVj4VLwoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Data-driven skill with scripts
 
-```text
+```
 .promptscript/skills/stack-advisor/
 ├── SKILL.md
 ├── data/

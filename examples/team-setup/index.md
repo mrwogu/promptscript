@@ -4,7 +4,7 @@ Configuration for multiple projects sharing a team base.
 
 ## Project Structure
 
-```text
+```
 workspace/
 ├── registry/
 │   └── @team/
@@ -25,9 +25,9 @@ workspace/
 
 ## Shared Configuration
 
-### registry/[team/frontend.prs](https://github.com/team/frontend.prs "GitHub Repository: team/frontend.prs")
+### registry/@team/frontend.prs
 
-```
+```promptscript
 @meta {
   id: "@team/frontend"
   syntax: "1.0.0"
@@ -94,11 +94,17 @@ workspace/
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUgHow1Nh1ZT5YiXACe7DIVnyAjBQAMVneMFKSpkADF17TtpBiAvmLHdpTiwILH1hXTkvKIiATWYAV0EMahgkwTUND0EpGAA3GChmNBhqQTZ7HFTXTK17GFIKWITBACN46ClBEmYc6lY6JMZGeDgIFthBAHcYFqS0cghGbAg2OEa7HWjWX1Z-FndCLHCN6K87AGJzwQAVGEYcQQBlAUYAaz87AFpBACV6xiOZgAHFMQg9rvpio9GNQIGgsBFvgA1EKpMDMUo5fKFNB8dhJWptDoQVgAc0RNww0EmJKkAGFHo90hjBHBQlASeSvr9-kcAIrxEphdGlOAlfKigQcCkojhswQAahu8GCZMEABkxtRksKWXKsHAPhJLoIAILUe6ogHxFJGwTfZz1LA2mCfFoYMWddFQXqsrDUeLW23cx44ZIwTosMhsIKCDktbXUMIACm4UcwrH0ynaAEoKaaAAoASUEjA5sdJnBKy3KGRIggA8sVWIWS3BioxDSdNj4Ptw2RgtMkpHBjhIWDlZMgIhJ5ABVMU3SEwaGw+HM0oYKBQUs9GDyOgzyIFlJgErpeKsAErVhbwQ0Zik7UkEicv36WAHo-zxdgS-Xtg73TGN2FHGlcEEHBmGYV5DRAQ87FnEA-gwAFBAFIUN1ZcVzwHDgBgALXiAdahFUty3xPD9zOCQAF07X1Tkp2-EAF1SWUVSSUd9XSZ8YEmDF3ngliAFkqSMElBCBSwAFJdxyXcJQwSsv0QyIAHVYQ4QRLxCAlOhJDgnxrcR9TgiJ6N2OxUOGOBRhaaAQn0Zi1PkZxmG3ZhJkEdS6VNABxQQACYKDMM1TUEUl2hyDlWHgVSJCQ00hhGMZHNCOo2TfFIAEd2hSTwLN7KzuBSNlYQA1hR1Ebl5AAOTyc9iNSMsPVHYC4tA2wJG+erGtKZqCTCUJilBXAEiOAArYjgkgJZgjYbr7UiU0oEmDB9FHMMtAmQoMCkN9B06Ep1ElbB4po5a+olSDhwnVJW0EOcfnVcztj7OAoOoLBGHiA0x0iZQOqCeQnDpFJzrSOLvJQtDgfxcCHjMpb5GUKCYNByJwadVIhF+tlmHrWGjnRoSIlR-VMfkTTUUy-7iLfDj5SO5UsrVTUEx1FGQGUDAzDMfQqeQvIIH4+S0RZGzUocjlQlsbwQG8WiGCCJN8CIUhyBgKhaHgkAJVGNh8DMRWgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Project Configurations
 
 ### project-a/.promptscript/project.prs
 
-```
+```promptscript
 @meta {
   id: "customer-dashboard"
   syntax: "1.5.0"
@@ -152,6 +158,12 @@ workspace/
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMArnCzM+1ALRSMcHACNmGalPliJcAJ7sMhWfICMFAKwUADCdYBfMWIDEggJLiQiQKUFgQ6pCwgnD8Cmh0gubMCoIA7ilQUpKsODDUEFiCYNSqghykiGLcELn5hYLcFSQA9CVsHKzGrNUs7ERFouKCNMwAVjCMWLYgAMJKKmqCACLaegZG7hLUMGjMcIXM1OYzAOaFOAq6FCytt5is5i2MC6r5mmv6hsYg3sMmv1+wx8fgAgvoFFg-hIAMowKBgdSxagANwgjBggi0Oi+RmKR0EL2Ub1o5WYghIGFYGFOmNwMAg1EEGEYLAU7DgdFMgjRMDSgiOUnynOZXXK1BZAGsYjgIGg+ByKNDBCDBABpGDmQQAMRg2AUOzgyvUglBrJS7Bi-HCrFOcFF2RoMDA+U4GKNwxNAHkjPlBLLiccHeKpbVTtyTTD4ntqEVwoxJfwKVSaTAFVDPYIAHLMcKQRjYCBsEY7F07Vju7kA9xeHqsbiS1jMNKwKS04RVwFbFVggAK-kEAFEuntalgPdyAELaTEAVQASgAZWQ4LBYNBwRAtFoYNAQG6qB7mA+tFF2ZUgsHm9kZiQmgDig4AKoId9fLQ+kyy2ZahQJoB6d6CL2s4vm+P5FCas5oFoHDMu+Gbcpegg+kKtARoIj5gYKwqCCai4QMoAq+uhmZYa+OG0C0iDSHhmFJpRWL8BgAEXqqUZoDGt50eRLTxom450QRRH8fwgF0b2XowmBomCSasw7NgdLogJnbVp4fzcDoRxYC8glDBI8gtJR8gzAAEvCaDpBcxFoeoOxQEp2RgOyUxFtSUCFOY3ZGd+FpQkgcggBZUBWWkNl+TeybUrS6Y1iAHh0Og2B4IgIBNHqrTtP0XRULQIAMH0nRYPgfgceQEAwNkcDkvSghEKQ5CYtQ7L2nkOwUNmuYjIYRTMGA5R5FizAvOmhZsIkVLZE2RRCIpUA9QmqZKvWfACB2wzSDMGWkG0pQ5T83IWFYNhBQ4zhuECEgkBAhC1LIWAtTAYi1lpAhdN89oGYSzBCrIyDyL2jkYjgzBZH6yhTd88gALrchwyhhv9gPAzAoPg0ykMfZsIBwxp9aGo96LhGwX0YSjLJo2DaGCITBRuWw8UeDDDCcI95j4A1ZCUDQ9AgCiwrufgdgJUAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### project-a/promptscript.yaml
 
 ```yaml
@@ -175,7 +187,7 @@ targets:
 
 ### project-b/.promptscript/project.prs
 
-```
+```promptscript
 @meta {
   id: "admin-portal"
   syntax: "1.5.0"
@@ -222,6 +234,12 @@ targets:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMUkhFYBaNM2oCo8sRLgBPdhkKz5ARgoBWCgAZdrAL5ixAYkEBJcUJIBXKFgQqpCwgnD8vmh0ggbMvoIA7nFQUpKsODDUEFiCYNTMJIIcpIhi3CoZWTncxSQA9HlsHKxSLqzcLOxEOaLigjTMAFYwjFhmIACCSiqCAAqa2g4S1DAacNmaBuMA5tk4vgBGFCz1J5isBnWKymoaWhg6IG0Suk9Pfa7uEwdxWM+eXWorAegmuMzu2lymkEJAwwN2rG2gkYvjgWAKmTg0U0UkxdD0oJaYQMaJghU6kG2vmo2AgbAo-0+ggA0jADIIAGIwbDU+D-VSCADCqPRfGoMLhGG2ZM4fz6AoA8tRceKBox4OtEQSBQBlEkcclsSnU2lsbWCCbAqAGQKMOCCKQYOA4H4YZUE14OZysMrdTipNFwx3K+29fQjanZLbCAkSDC+XCyiCMU2scY6nUKwQrACOvggK1a7wkcYTOE0EAAXqnxgAlZiwVQHJ0wVIACjBrGicEiEOiADcIDAEpkAJRLEvxqTZAAyzG2CO2slz+cLBO93rKKzRWVGdNYofN8gmUASGBJyIyjAA1oJUZl+pllHB1mx7QcYGBNDBQXu3xOBXkOckQeKBQWmbw-wPKFxSnbIvTabhnQWFEsEPPp5CuCD5HGAAJGAoDQRI9nAm5cl8VgoIeKMJ0wlYIRwuQQAAcU4TJsB-eiFjgL0QEcOh0GwPBEBAGpuXqRouhaKhaBABhOmaLB8HcHVeygIcA2YIoMkEIhSHITiKPtSoYAoQQADlmByTAtEEZgwG0n8pGYFE+GMQI2GiINBFYKzQWzbkwMwG8pVMso+AEGM+mkcYxNIBp8ikosCUMYxTCYywbHsYsYQgQgVFkLBqF8GAxG9JCBBaN0pHQiQWFxWRkHkWYoAwdVyxSB9Ayq90QAAXQJDg0RUJdBCakAWramAOpVMJKuDIsBqcLd4CK5MPOgsNBEAibWvahtZu3NaoN4xw+oYWVqAMfA9LISgaHoEB+0xfd8HMPigA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### project-b/promptscript.yaml
 
 ```yaml
@@ -242,7 +260,7 @@ targets:
 
 ## Inheritance Visualization
 
-```
+```mermaid
 flowchart TD
     A["@team/frontend<br/>Team base configuration"] --> B["customer-dashboard<br/>Project A"]
     A --> C["admin-portal<br/>Project B"]
@@ -266,7 +284,8 @@ cd project-a && prs compile
 cd ../project-b && prs compile
 ```
 
-Or use a script. It skips directories that are not yet initialized, so a new `project-c/` without a `promptscript.yaml` does not break the loop:
+Or use a script. It skips directories that are not yet initialized, so a new
+`project-c/` without a `promptscript.yaml` does not break the loop:
 
 ```bash
 #!/bin/bash
@@ -282,7 +301,8 @@ done
 
 ### Validate
 
-Validation runs per project, because each project owns its own `promptscript.yaml` and `promptscript.lock`:
+Validation runs per project, because each project owns its own
+`promptscript.yaml` and `promptscript.lock`:
 
 ```bash
 cd project-a && prs validate --strict
@@ -294,14 +314,15 @@ cd ../project-b && prs validate --strict
 When you update `@team/frontend`:
 
 1. Tag the registry change (for example `v1.2.0`) and review it like any other code
-1. Notify team members
-1. Each project recompiles to get updates
+2. Notify team members
+3. Each project recompiles to get updates
 
 ## CI/CD Integration
 
 ### GitHub Actions
 
-Each project owns its own `promptscript.yaml`, so CI runs per project. Path filters keep jobs scoped, and `working-directory` points each job at its project:
+Each project owns its own `promptscript.yaml`, so CI runs per project. Path filters keep jobs
+scoped, and `working-directory` points each job at its project:
 
 ```yaml
 # .github/workflows/promptscript.yml
@@ -353,23 +374,23 @@ jobs:
 ### Team Config
 
 1. Keep team config focused on shared patterns
-1. Don't include project-specific details
-1. Version and changelog team updates
-1. Document breaking changes
+2. Don't include project-specific details
+3. Version and changelog team updates
+4. Document breaking changes
 
 ### Project Config
 
 1. Override only what's needed
-1. Add project-specific context
-1. Include relevant API documentation
-1. Keep shortcuts relevant to the project
+2. Add project-specific context
+3. Include relevant API documentation
+4. Keep shortcuts relevant to the project
 
 ### Registry Management
 
 1. Use a separate repository for the registry
-1. Review changes before merging
-1. Tag releases for version tracking
-1. Communicate updates to team
+2. Review changes before merging
+3. Tag releases for version tracking
+4. Communicate updates to team
 
 ## Next Steps
 

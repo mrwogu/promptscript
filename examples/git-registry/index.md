@@ -172,9 +172,9 @@ registry:
 | Bitbucket Server | HTTP Access Token     | Repository read   |
 | Azure DevOps     | Personal Access Token | Code (Read)       |
 
-Environment Variable Naming
-
+:::tip[Environment Variable Naming]
 The `tokenEnvVar` field accepts any environment variable name. Use a name that makes sense for your organization, such as `REGISTRY_TOKEN`, `GITLAB_TOKEN`, or `GIT_REGISTRY_PAT`.
+:::
 
 ## Version Pinning
 
@@ -191,7 +191,7 @@ registry:
 
 You can also pin specific imports to versions:
 
-```
+```promptscript
 @meta {
   id: "my-project"
   syntax: "1.0.0"
@@ -208,7 +208,7 @@ You can also pin specific imports to versions:
 
 Recommended structure for a Git registry:
 
-```text
+```
 promptscript-registry/
 ├── README.md
 ├── CHANGELOG.md
@@ -312,56 +312,89 @@ promptscript:
       - promptscript.yaml
 ```
 
-Self-Hosted GitLab CI
-
+:::note[Self-Hosted GitLab CI]
 For self-hosted GitLab, you can use the built-in `CI_JOB_TOKEN` for repositories within the same GitLab instance:
+:::
 
-````text
-```yaml
-variables:
-  GITLAB_TOKEN: $CI_JOB_TOKEN
-````
+    ```yaml
+    variables:
+      GITLAB_TOKEN: $CI_JOB_TOKEN
+    ```
 
-For cross-instance access, use a Project Access Token or Deploy Token stored in CI/CD variables.
-
-```
+    For cross-instance access, use a Project Access Token or Deploy Token stored in CI/CD variables.
 
 ## Complete Example
 
 ### Registry Files
 
-**[org/base.prs](https://github.com/org/base.prs "GitHub Repository: org/base.prs")**
+**@org/base.prs**
 
-```
+```promptscript
+@meta {
+  id: "@org/base"
+  syntax: "1.0.0"
+  org: "ACME Corp"
+}
 
-@meta { id: "@org/base" syntax: "1.0.0" org: "ACME Corp" }
+@identity {
+  """
+  You are an AI assistant at ACME Corp.
+  Follow our coding standards and best practices.
+  """
+}
 
-@identity { """ You are an AI assistant at ACME Corp. Follow our coding standards and best practices. """ }
-
-@standards { code: [ "Code review required for all changes", "Tests required for all code" ] git: [ "Use conventional commits format" ] }
+@standards {
+  code: [
+    "Code review required for all changes",
+    "Tests required for all code"
+  ]
+  git: [
+    "Use conventional commits format"
+  ]
+}
 
 @restrictions {
-
-- "Never commit secrets"
-- "Always follow security policies" }
-
+  - "Never commit secrets"
+  - "Always follow security policies"
+}
 ```
 
-**[teams/frontend.prs](https://github.com/teams/frontend.prs "GitHub Repository: teams/frontend.prs")**
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuzagHMA9ACMMcGPLES4AT3YZCs+QEYKABmu7xgpcrMgAggGEAsgFFBbpWjsAXzExbmlOLAgsA2E9ORBdBPsATWYAV0EMahhM8RcASUy4OAg4AXZMrEF3b19-CjiAMWYoKGYAdwc06kEWKQhWZUEyjFYpLKk4XKlBdXgqmgxGSMZ4BvtEoJDWbhGxianRez6YWWQ4iXk-KRzsgDcIGE7sgEc0iGyZsCVM1t6cUbKeDyOgXeIAFXmU1e70+gm+PQwfxOdgkAF04soomcwfIAKraXpsO4RCBsJFEkgkKJTBEkbCowQY1jBVihbJlagQZZk1iHOIAWniADkYCSeiwqVFhjBGNksHBGUL5C4oO0MAZaS02p1tIxulEYmgWtzHoqkoEQIE0QwItQDPgiKRyDAqLQQAxxSU2PhzFagA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
-```
+**@teams/frontend.prs**
 
-@meta { id: "@teams/frontend" syntax: "1.0.0" }
+```promptscript
+@meta {
+  id: "@teams/frontend"
+  syntax: "1.0.0"
+}
 
 # In a multi-file setup, you would inherit:
-
 @inherit @org/base
 
-@identity { """ You are a frontend development expert. Expertise: React, TypeScript, TailwindCSS """ }
+@identity {
+  """
+  You are a frontend development expert.
+  Expertise: React, TypeScript, TailwindCSS
+  """
+}
 
-@context { framework: "React 18" language: "TypeScript 5" styling: "TailwindCSS" }
+@context {
+  framework: "React 18"
+  language: "TypeScript 5"
+  styling: "TailwindCSS"
+}
+```
 
-````
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUnAD0Yamw6sp8sRLgBPdhkKz5ARgoAGa7tYBfMWIDEggJLihJAK5QsEAFpIWEE4fm80OkEDZm9BAHdYqClJVhwYaggsRDFuCDSMrMFuZmoAcxUAIwwwp1Y8qU5-LANhPTkQXU7xQQBNWMEMahhBwXVNThTGgDcYKGY0PnZBIjQMrAp2gFFCNep-MNkAJRgMRiwogBUDNYBlRky0C8FLjGh4-KkAYVvb9q67I5WLkWOwiFg2j11KQYIlqABrMwgE5nCHmAAcdgkUAwrDK3gwZRgSOudweECeggArFjQi0oPkyiS3lAPtofn9uvYQPY6OhsHhEApShVqmEqLQQAxQVosPhXLcIuQIDAUnBmIJcCMiKRyCNqN5WHBBOlhhRBAA5ZgQzD7QTMMCa9KCKTMRjeJYCfxsKK4lKsa2jYYYKCCTCMeGEmCbep8ASQiTSJElcpVGowWmGYymDqWKm2boSEgQQj5WRYA0Zhy5OACbRDKTG0Q9FiNWTIeQABRxjBgOGYyQydL9DfkAF12hxa4z212e32B41qMP69QdCAJ9X6sNa5lzhA2E32gEOt2zgvB8udxWIPu2ICeWOGE1qAZ8DqyJQaPQQLNaAfWHwcweSAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Project Configuration
 
@@ -391,11 +424,11 @@ targets:
   - github
   - claude
   - cursor
-````
+```
 
 **.promptscript/project.prs**
 
-```
+```promptscript
 @meta {
   id: "customer-portal"
   syntax: "1.0.0"
@@ -448,7 +481,7 @@ targets:
 
 ### 2. Use Aliases in .prs Files
 
-```
+```promptscript
 @meta {
   id: "customer-portal"
   syntax: "1.0.0"
@@ -472,13 +505,13 @@ prs compile
 
 PromptScript expands `@company` to `github.com/acme/promptscript-base`, clones (or uses cache), resolves the file path, and compiles.
 
-______________________________________________________________________
+---
 
 ## URL Import Example
 
 URL imports work without any alias configuration:
 
-```
+```promptscript
 @meta {
   id: "my-project"
   syntax: "1.0.0"
@@ -494,13 +527,19 @@ URL imports work without any alias configuration:
 @use github.com/acme/shared-standards/stacks/typescript@1.0.0
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWIDEggCIRqWrIICqAJQAZSTJmam9AFAJBVmZBDCgIDDgomBgpVLFuAFc4GEEAcwhcTIAjChYSAHoMRj4KuBwMTyllOAFWKUapOAqwagw8vnZunMZM6kLFR1YXAHk0ThbmMcZcuABraChYzKxmZSkIOBYANxgmwV7mEkEAZQBpAEkAgIoSKQzs3IKi0vK6q5gylCeQqjCgGEyaRaGygUGGMLhFSwUmaAHdQmswFBmKipi4AGpnOAQNipXyBYJoUI6VhZHL5Qo4EplK5VGowOoNJotNodahdOoCRhrbpYRTzI7jNBYbgWayWEB2OjobB4RAgb5M36s6q1eqNVI8jDtTrdXr9QZYYZaMYTKi0EAMFjsThYfAuG6ZNDkCBkuAxXC5Iikci5aiZVhJHBnGAUQQAOWY3kwYUEzDAgkDgikzFGluwJNYdFi7SiSdigk8cUEmGF-VjGT4AmEekkMjkGsZzL+uo5+u5rWNfIF5oGruto3GYts+kMAhMHYsAFYbCBWyQIIQIKxZFhwzAxA5aYOTfykqJxIIWGlZMh5AAFcErHDMKBpaiCE-D+QAXVbHFabc8lvB8nxgF83zOT9eU6X9DwyTxWnGbRC3PVtlA7R9qnA1930reA9wgFC2FsOxFWVEBMFwfBNW7Vl-T4IFqBBMEIShdZNnhTikRRZR0WoTFsVRe16CYNgOC4dUPS9H0-QDaNBGDMhYErCMoxjONE2TRpvHTTMFJzPNXQLNhiyHMtvCEKstlrNZ6woRt+CEC8JGkUxOx+FlKgYwFgVBcFIUBDjYS4kKeLRDEsRxGdPznYx3OXVd103bdd33eDjxgs8W0va8YBAkAsOfXCoK-WCQD-S8AKwICCqKnDII-Mr+Tg+wEII5CarYNDLww0DsIgvDEMI4jWFI8iVWo9VaO1Spe05A1mmagVB2FUVxXgRgpRlOUrBEx0xJdSSQGk714jk-Sg2IZSwzUwRo08TTyxTXSMyzQzMnzLqixLKQLIraya2qOy8gbWkm2c1s3I7GavLZPUuUNZbhiFEUkQ2yUIGlWU9ssGKDCMBdzAoFc8bXS8Ny3HdM3StrMqHU0cokPK6rAwbSqy94Kv-AjasEO9CrZkqms51qj24YbOtQpnBD6wWBuF-CkKI77xrsH8GFdahFHwJTQ32hhTloQt8DMRUgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Debug the resolution chain with:
 
 ```bash
 prs resolve github.com/acme/shared-standards/@fragments/security
 ```
 
-______________________________________________________________________
+---
 
 ## Lockfile Workflow
 
@@ -537,7 +576,7 @@ git commit -m "chore(deps): update PromptScript dependencies"
 prs lock --dry-run
 ```
 
-______________________________________________________________________
+---
 
 ## CI Pipeline Example with Vendor
 
@@ -616,37 +655,37 @@ promptscript:
       - promptscript.lock
 ```
 
-______________________________________________________________________
+---
 
 ## Troubleshooting
 
 ### Authentication Failed
 
-```text
+```
 Error: Git authentication failed
 ```
 
 **Solutions:**
 
 1. Check your token environment variable is set: `echo $GITLAB_TOKEN` (or your configured `tokenEnvVar`)
-1. Verify token has the required scope:
-1. GitHub: `repo` scope
-1. GitLab: `read_repository` scope
-1. Gitea: `read:repository` scope
-1. For SSH, ensure key is added: `ssh-add -l`
-1. For self-hosted servers, verify the URL is correct and accessible from your network
+2. Verify token has the required scope:
+   - GitHub: `repo` scope
+   - GitLab: `read_repository` scope
+   - Gitea: `read:repository` scope
+3. For SSH, ensure key is added: `ssh-add -l`
+4. For self-hosted servers, verify the URL is correct and accessible from your network
 
 ### Ref Not Found
 
-```text
+```
 Error: Git ref not found: v2.0.0
 ```
 
 **Solutions:**
 
 1. List available tags: `git ls-remote --tags <url>`
-1. Use existing branch/tag
-1. Check for typos in version
+2. Use existing branch/tag
+3. Check for typos in version
 
 ### Cache Issues
 
@@ -658,7 +697,7 @@ prs pull --refresh
 ## Best Practices
 
 1. **Version your registry** - Use semantic versioning with Git tags
-1. **Pin production versions** - Don't use `main` in production
-1. **Document changes** - Maintain a CHANGELOG.md
-1. **Test before releasing** - Validate all .prs files before tagging
-1. **Use short TTL in dev** - Faster iteration with `ttl: 60000`
+2. **Pin production versions** - Don't use `main` in production
+3. **Document changes** - Maintain a CHANGELOG.md
+4. **Test before releasing** - Validate all .prs files before tagging
+5. **Use short TTL in dev** - Faster iteration with `ttl: 60000`

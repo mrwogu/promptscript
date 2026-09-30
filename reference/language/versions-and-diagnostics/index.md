@@ -1,6 +1,7 @@
 # Versions and Diagnostics
 
-`@meta.syntax` declares language syntax, not package, policy, registry, or organization version.
+`@meta.syntax` declares language syntax, not package, policy, registry, or
+organization version.
 
 ## Syntax Versions
 
@@ -13,9 +14,15 @@
 | `1.4.0` | Hooks, MCP servers, and plugins                                                                        |
 | `1.5.0` | Contextual section headers, atomic `@override`, declaration-order operations, unquoted `${VAR}` values |
 
-Use the minimum required version for reusable published fragments. Use current syntax for new project entry files.
+Use the minimum required version for reusable published fragments. Use current
+syntax for new project entry files.
 
-Operation semantics follow the complete reachable composition graph. An inherited, imported, inline-composed, or extension-carried source declaring `1.5.0` enables declaration order for the graph even when the entry file declares an older version. Inline `@use` declarations inside `@extend` bodies are included. PS018 reports that mixed-version requirement; it does not reject the composition.
+Operation semantics follow the complete reachable composition graph. An
+inherited, imported, inline-composed, or extension-carried source declaring
+`1.5.0` enables declaration order for the graph even when the entry file
+declares an older version. Inline `@use` declarations inside `@extend` bodies
+are included. PS018 reports that mixed-version requirement; it does not reject
+the composition.
 
 ## Upgrade Commands
 
@@ -33,11 +40,21 @@ prs validate --strict
 prs compile --dry-run
 ```
 
-`prs upgrade` parses every discovered file before writing, so an initial parse failure aborts the complete plan. Each file then uses atomic replacement and preserves permissions. Multi-file upgrade is not transactional: a write-time failure in a later file does not roll back files already replaced. Symlinks are skipped. Run upgrades on a clean version-control branch.
+`prs upgrade` parses every discovered file before writing, so an initial parse
+failure aborts the complete plan. Each file then uses atomic replacement and
+preserves permissions. Multi-file upgrade is not transactional: a write-time
+failure in a later file does not roll back files already replaced. Symlinks are
+skipped. Run upgrades on a clean version-control branch.
 
 ## Model Versions
 
-`@meta.syntax` does not track AI models. Agent and skill `model` values resolve against the model catalog configured under [`models`](https://getpromptscript.dev/reference/config/#models). Floating aliases such as `sonnet` follow the newest release in the catalog, and the [Model Catalog](https://getpromptscript.dev/reference/models/index.md) lists every built-in model. PS041 reports pinned models that are deprecated or retired, together with their replacement, models outside `models.supported`, and inconsistent `models.profiles` entries.
+`@meta.syntax` does not track AI models. Agent and skill `model` values resolve
+against the model catalog configured under [`models`](https://getpromptscript.dev/reference/config/index.md#models).
+Floating aliases such as `sonnet` follow the newest release in the catalog,
+and the [Model Catalog](https://getpromptscript.dev/reference/models/index.md) lists every built-in model.
+PS041 reports pinned models that are deprecated or retired, together with
+their replacement, models outside `models.supported`, and inconsistent
+`models.profiles` entries.
 
 ## Key Diagnostics
 
@@ -60,6 +77,8 @@ prs compile --dry-run
 prs diff --all
 ```
 
-Commit syntax upgrades, lockfile changes, source changes, and reviewed generated outputs together according to repository policy.
+Commit syntax upgrades, lockfile changes, source changes, and reviewed generated
+outputs together according to repository policy.
 
-See [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/index.md) for release-specific migration steps.
+See [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/index.md) for release-specific
+migration steps.

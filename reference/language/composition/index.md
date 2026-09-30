@@ -3,7 +3,7 @@
 Composition uses two layers of rules:
 
 1. Each operation has a merge policy.
-1. Syntax `1.5.0` applies operations in declaration order.
+2. Syntax `1.5.0` applies operations in declaration order.
 
 ## Normative Precedence
 
@@ -15,15 +15,25 @@ Composition uses two layers of rules:
 | `@extend`   | Merge using target shape policy  | Invalid incompatible extension   |
 | `@override` | Replace complete existing target | Replace complete existing target |
 
-For multiple `@use` declarations, each later import becomes the new source. Its same-shape values win against the accumulated target.
+For multiple `@use` declarations, each later import becomes the new source.
+Its same-shape values win against the accumulated target.
 
-A field keeps the position of its first declaration. Later operations change its value, not its place, and fields that a later layer introduces are appended in declaration order. Resolved output therefore stays stable when an inherited or imported field is redefined.
+A field keeps the position of its first declaration. Later operations change its
+value, not its place, and fields that a later layer introduces are appended in
+declaration order. Resolved output therefore stays stable when an inherited or
+imported field is redefined.
 
-The operation mode comes from the effective composed graph. A `1.5.0` source or ordered operation in inherited, imported, inline-composed, or extension-carried content enables declaration order for the whole graph. Inline `@use` declarations inside an `@extend` body are part of that graph. Lower-version entry files still resolve, while PS018 reports the source requirement and recommends an upgrade. Graphs without ordered sources retain legacy phase ordering.
+The operation mode comes from the effective composed graph. A `1.5.0` source
+or ordered operation in inherited, imported, inline-composed, or
+extension-carried content enables declaration order for the whole graph.
+Inline `@use` declarations inside an `@extend` body are part of that graph.
+Lower-version entry files still resolve, while PS018 reports the source
+requirement and recommends an upgrade. Graphs without ordered sources retain
+legacy phase ordering.
 
 ## Resolved Example
 
-```
+```promptscript
 # base.prs
 @meta { id: "base" syntax: "1.5.0" }
 @standards {
@@ -57,7 +67,8 @@ review: ["Require approval"]
 local: ["Run smoke tests"]
 ```
 
-`quality` supplies `coverage: 90` during import. Later `@override` replaces it with `95`.
+`quality` supplies `coverage: 90` during import. Later `@override` replaces it
+with `95`.
 
 ## Enterprise Guidance
 
@@ -68,4 +79,5 @@ local: ["Run smoke tests"]
 - Validate resolved output, not only source files.
 - Pin remote imports and commit `promptscript.lock`.
 
-See [Execution Order](https://getpromptscript.dev/reference/language/execution-order/index.md) for operation timing and [Merge and Replacement](https://getpromptscript.dev/reference/language/merge-and-replacement/index.md) for modification choices.
+See [Execution Order](https://getpromptscript.dev/reference/language/execution-order/index.md) for operation timing and
+[Merge and Replacement](https://getpromptscript.dev/reference/language/merge-and-replacement/index.md) for modification choices.

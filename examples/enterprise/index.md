@@ -4,7 +4,7 @@ Complete enterprise PromptScript deployment with central governance.
 
 ## Architecture
 
-```
+```mermaid
 flowchart TB
     subgraph Central["Central Registry (GitHub)"]
         org["@acme/base<br/>Organization standards"]
@@ -49,7 +49,7 @@ flowchart TB
 
 ### Repository Structure
 
-```text
+```
 acme-promptscript-registry/
 ├── README.md
 ├── CHANGELOG.md
@@ -79,9 +79,9 @@ acme-promptscript-registry/
     └── ci-cd.prs
 ```
 
-### [acme/base.prs](https://github.com/acme/base.prs "GitHub Repository: acme/base.prs")
+### @acme/base.prs
 
-```
+```promptscript
 @meta {
   id: "@acme/base"
   syntax: "1.0.0"
@@ -142,9 +142,15 @@ acme-promptscript-registry/
 }
 ```
 
-### [acme/security.prs](https://github.com/acme/security.prs "GitHub Repository: acme/security.prs")
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0AIwxwY8sRLgBPdhkKz5ARgoAGKzvGDm1AOamQAQQDCAWQCig9w7QHbAg2WwBfMTFuaU4sCCx9YV05EB1UuwBNZgBXQQxqGDzxVwBJQRYpCFZHPLg4CDgBdjysQQ8fPwCguLYKSLsAYgHOgsEANQwobPh+iQBaQQAqRYBFbMn4xIAxCFosZdkAdWp4wppmKWzGHtY5gowpRIrtOwXlgGUYRmyThLaoADuGH0cAOgk+31+iQaglYzFazDQN0myTeiwAqlpqIItsxvqDFrJ-Kx6lIYNjcIVOFJBNksailosACowUiCAAKUGB5LBx1O5QuhXhOHJcHKGHEJAwVQEVVmgiG4KaUnyUjg8txUCgzABbS8vm81SqMHJVRq72VqrFADcAMw2OwAChwWCwaDgiBUKgBEAA1hAKEo+BQWCQVJxHMbTdU5o0JSrqGqAJTJNLhfrcOOsBNqpJ2Z6yZDJCTyfxkwQFa0QGC6goAR2yuxgNJ9uEEJCqEBI2RIggATHk0OdraL5HRiykACJ4nuxPJawRobJqKAQRhtdkldUgcd2EtuKQ0qqr1iFUN8dhisAOAVkWCEQTayOMMcT+R8jiCDiNK83yZQAVy0dAAOSwAFIBRHagMEcGAU3SCQAF15UjLBCzfEBMTPNgR3YEJWEmW8OywX9qClLBXz3FIACFoNYRgcFhUgzVkBI0BgFQmRKdwAGlvCZOYyTgRgTiRfDKIkfd3ggRxTxpc94jFetGwKKRbCQ+UyXIZh9AvNDBCLKj5ENKtqDYPSPUEMlrToQQ40japbPONSdww9kzMua58IrGAGybMUOFIOZYAeIoaS0SFNkHYcUQQwRkNYCJWCiApGhOLy2DFURXhSAA5GAoKI+I7K+AoSNskTm1iCBJjgWyb1cTdBF9GAQXUwQFnkfLCrUfRMDqQDCkratdWvbFnKuG5yhwCVYO3BkuoK8krJgbTElbHAclafr6mqPwShUdxJ3azqQG65aZLhUYIp+KLhIlU9sUgbMzXmnLFsKulCi0gpGGwZsVvY7NOEYasxQ25q4QBcR3DGbw3vmPKluxRoHEKTcyiqR9mEcN6kqiOBNuoLBvhIvN9xULMc23FwACUCpGvJHGlElWnaXwqatdr5Epr5boSeQXAhfnEmGmtuZAFR2OoMBBZSdlyTGqV6KGhnxfSMIQDCRCGFiah9HwIhSHIGAqFoHcQCg+o2HwMwtaAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
-```
+### @acme/security.prs
+
+```promptscript
 @meta {
   id: "@acme/security"
   syntax: "1.0.0"
@@ -229,9 +235,15 @@ acme-promptscript-registry/
 }
 ```
 
-### [acme/compliance.prs](https://github.com/acme/compliance.prs "GitHub Repository: acme/compliance.prs")
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0cGIwCu1CFgCe8sRLh72GQrPkBGCgAY7h1gF8xY7tM5Zde4UbkhDAPFBAEE0ch8QgGEAWQBRQXUtHX1EgVYpDGopOEEsZkEMKChBFikYCj8AZQ1tb0lcmAA3GGo9NhgAclzqeDQ2OAgAI2hvSuDAxxdWNzh0zOzc0WCMTVxPCEZsCDZZZD8JeQBVdUEAeRC1nEEAJjtBFXOASQARKPk6A-8YgDEQwV6AEdNBBelJBAAKAAqZyhAAVBMxqIIAOowIaXXCsACUHy+8hqcEGbDyED4zDWsgAzAA2Wy2RIaNg5PHBQ4gOKsDBDWAAmBgXpwa75ADWnABzAEXjYjgkAF1XCsrkiIAAvba7QT7Nn+ABKACFooIAO66a4hQ1RQREDisYl21kSdlhCKCWAYOaCGgQJrQGAAcxgXp0rEYEHIMEdTvklykujdzH9-ogrH9fOBoJgUllggVM2CmQEcOoko00tYe3xHNDbTQWEK9cF9dNuFCcSqAFobgBWGlR9mcxi1+spvLUDB2+Mt65QgAyVUENip-e+HpFgjhTyeknERRKFKwaDWcBX8h+zGKzGNgkLQkYUA9g0gW3LgjASL5tvLObzfnKaE4cpQwgeBKx1eQXgwaAfCaTQoFYVpuVGVI4C2VhWBTf1TxAKIUk2IpBFg+DEJGKBdBA3IeWYRh13-KBmD0Ph2GwgAJCB-WuIiEPHUjyNAt8IEIE0zVHAB2G8MD0E8QE+cCQBiLMIE0EhCLg7ikLIrx+MgITp1HKkGUyKSf0VYwNF6LA4DAp1-CqfJeh3QQWI9HAICiJE0EEAA1VYoCwbDdUlbAg2aVofAATkMyTpNkmz5AAOVC5E5iRIMkgs3JRzKSMgnlMRpjcJsdEYcslj8Dt-ESlpkvsoNMCJY0kRyRzyCg8QOEIfzcsECqEqShM03UScvBaCSBEheq4EaxY6DyZgxTtWbNyeXFut6kAqtaQRNFOGIXm7RFkSqFiQisN8PySOpUiPah+nUaTysq-q4zgbleTnBdGFaLxn2CwjWggX7vzWp7qu205miKCFsUOxIyWgLJtrtDAwCDMBNFDUqc3WzbkSwagdvrHatpTI9mzNA9CKKaQNRmEG+rBog7rSgQaLHJR4BakspE0Eqdjpx6YygY1ovBuqslIfgAdVLNBGBAHOYhVgCiqABFWdSjYF9OFp1bBZAEJhdFppqcLIMJ3BV6MK8GWBN5TRyGYDAWXpg2jakyQyFgJjGz+siSHI1NzuREJNwe5xFW4EVleNWApEDXwJgCZO-AAYlTwQamSepdXgClqC+k98wkCqs6unwAHEQXKMiEKswQcCwQ8rJUFRTRFCAKCUPgKBYEg1FqFIDGCCqnmAoD61zuB+jtGBZEb5vEFb9vO+7io+5UFMwwnjtBRn9RHrLofBChccU0w+em7QFuVHdahWC75R1+YfvLqHx79U0NN9Qpdg9EvxerccBKDFCWBCvcX4qDXqZQQ6dBDuTMCVIuh9B71ChDAUgsg37eEUE-CBJBHpj23p4Jykpa5z0EAAaisB2AAHPSDsVQ4hRA7NEeIh8Hw0VkKnbB+gOw4BgFANAfhJhBAKqwbgQokRYC0JZRO7IVC4F6NgDsJBmA13kJYEALFBGeSHBgjghQ8g4GUfWNRGjuryBUFxDsjABE0U0f4KI9j1zvmRH3NR4guIkWQhRHMVi34wFseonKWjc6+hgNebKwdGTZ1SBAIkmh4BTBAE4OUDBPBtHwEQUgEYqC0BkiAaq9p8BWFSUAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
-```
+### @acme/compliance.prs
+
+```promptscript
 @meta {
   id: "@acme/compliance"
   syntax: "1.2.0"
@@ -300,11 +312,18 @@ acme-promptscript-registry/
 }
 ```
 
-### [acme/design-system.prs](https://github.com/acme/design-system.prs "GitHub Repository: acme/design-system.prs")
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0LMlAgZWjGPLES4AT3YZCs+QEYKAJgoAGfawC+Ysd2mcsELEeEG5EH0g8UEAUVY4AFdqGEEWKTi+fjhBAEEAYQBZMPjmDS0dONiARyiIWL52OAoAgHU4jFjBAGUAeQzBG0EAFSM0OIBJQcFtKUEAcQARAAUAJTyC7Sxa0OCnV1Z3OAFWKSapVNFQuGZGG1lkAIl5ABlmAHMHiFYHwVLy2PGAdx8cQUsgiMMCa734XggbHkdGugR6pAG1AAtDRmMwwKMolIfIIoI84NDYfI0oxdHBUix2NRmFBBFIzlEqhxxmMwQA3CAwb4wcZlJocahQIyE0I3EAZHDaB5JbQYaVM2T0xiMrw8uijNCotlqwQcHY8pwSAC6blCDykNEuRJAaU1Qrp2CEJBeEGdAC9sJCtiAYaLAhEwMxqLpBGgYmhmHA4ppnQJvFCfdaMmwo+xBCRZfKvGCyhUDYm-fIWlFNUGsO8IA8cOWsMxBDBqBhorERRIxREMAAjWAOgShstd6A+YUFtuBABCsSU-1YzG8kEYnrYgl+uBeggA7N0cMwYgSQsbTRI0IwIFbCza7ZzUrXQxgjEzBFHqByyYI2ELW235AA5GDa6gn1rZowCiKBaRmNIfy-dsdGofp43ED48ykQ1BBNFxTW4WIdmoCBGEQo4AiRQI-wA0NqTJVJ9j7TsYCMNhxh2bAeVDcNIz0A9BBI39-wbMEBHXGihDxV5+NwbRBFYGAqKaEdiMCNIoG+e9qIZR9hIos54DgF43iUbwOW8eA0J4m1lNUrSOUSXshGiTsACsZPLPCqywVI+EYSVWAgOASH3BTePIrBG0iMB+M029Z1YJEME1altXGWJnhTDYsIAa1nb5YCkaV-DWIJCoCABiYrBGTJYikEOZ4F3YMTK2UISIq8hChDGYBygWRqywNA4EQFQ1HyVrtF0CglD4Ch1AUqZHXKqAm10hcl1YbqsF6-rBt+dKIHG5QYCm-IVGEpFGAW8kIGWxCFJmPC2SUPwOs0RgjDWjaBpUCaDvUFQaAge6XqPQRSsEWa+wyc6lvwlagZIgAqOGZiibt8IR2QsiadL+D09MWLwjAoDgdUwxRxg6TOAkmsEBHBnYBtWAJtHBFpgUGdpdQSCiHzF0I9VoqRVNdMMvQqYR5NWEgRJ2C0KAmfHKJdOk8lbPVZUdnyfiXkDBSEZq3D8OZJmZmGdVIAZnQZZV+IvghAnKZKsqapStnqpgXNKi8e2qbCABVWRpnmRYRqq5CvgUjICcuoMfIwWQMgySCg80Ubijdz4DSpgAJEEoFwRdYlkTPBkgtIVxwBtGivRduxFsV1hcEBnCNBgvHg-AiARSgaHoEAAN0th8EsRugA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
-The design system is a shared capability, so its skills are authored once in the central registry and consumed by every frontend project:
+### @acme/design-system.prs
 
-```
+The design system is a shared capability, so its skills are authored once in the
+central registry and consumed by every frontend project:
+
+```promptscript
 @meta {
   id: "@acme/design-system"
   syntax: "1.5.0"
@@ -349,9 +368,15 @@ The design system is a shared capability, so its skills are authored once in the
 }
 ```
 
-### [frontend/base.prs](https://github.com/frontend/base.prs "GitHub Repository: frontend/base.prs")
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0U+BADmrALRwAnnA4l5YiQfYZCs+QEYKAVgoAGU+MEdSNkABEN2wQBlQ2M4NwBfMTFuaU4sCCx9YTM5EFM09wBNZgBXQQAjHOgpQRy4GGpJdgqwJXhBAHcEnA8cGEFFZRgVIsF1OC1xAyMYEgoUgGE2OBy+QRYyNji4QQxWEqxmAGtOOABuQVYYADcKwTBmai3W0fH3dIio1m44LegoFdF3BbQl9h1qCcIDAGrIvhIJP1GNQIGh4mxvAAlIEg87UNgcdbzHBrTT1DCaDAQVhGDpKVS9H5-LCrLGbHbiFjsahKLBhDIQ1ZQKDMBowKQAFWYzA+smQ8mRGCk8joqQA4oC0DLUgAhDBwHDyAC6KQkTMxWG8D3cnORx2BDWxuP582YiyO7BWaxKRn0sCdhOJpNw7X6g0Ew2MiCenIk9kEAFVymSuj0ILb7csqiMpYJmGBDqiSBgrjklSaIQAmChBRKwVronKaFqdVR+7Q6em7WVHU6VFmW44YKA5eC6iEAZhLADEoATBDjqFIWOoSiwebRZXBMIxiZpZZdzhiAxAAF59gsSAAsJYmbUY1yUjHgA3y0AS+lkAHUJgBBOWCYu2QSv1+ynb6PkzA5lIsoXIwZRplOFT9hITiCMivzUDS5oitgEDTAUSTlG2D6NM05zQO0zqCFAxIwP2DwcoIkSsCkTa6CQWgsvCrBgv2UIwnCGFsakACyzHYMRggrlsBLtGA6IkIIHYBmW9SbDGdb+LoDHsv23Y8nygrCqKgjiiAkrSiAsryAqMBKiZqrqpqIA6gW+pxEaaTUZyAmaCx7RLCJShiXiqw0kI8R8MGdGHoI4YADIQKSsnzpccBLiua6yiRFzsDu+4rMSNw+Re4mwZ+JZ8RgaCCDASgtLJXY9u0ik+pmObwDS9biAxhVDghFljteMkYJ23a9isTS4B42ycDJMBgBUnDXmE4UnghOTiOaMzdpNHk3jxHjNfNoaCPBiGXChg31CNLSsMwgjZlgjA4GuY0MqsKxHA0jbjeINDML8cDdntEJUSktHhCA4RagwcTUPo+BEKQ5AwFQtAmSAbYDGw+C2KDQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
-```
+### @frontend/base.prs
+
+```promptscript
 @meta {
   id: "@frontend/base"
   syntax: "1.5.0"
@@ -467,11 +492,17 @@ The design system is a shared capability, so its skills are authored once in the
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuYamw6spAegBGGODHliJcAJ7sMhWfICMFAKwUADPvGCOpCyABiy9pymCAClDYYMzUJE4AvmJiAMSCAJLiQiQArlBYEAC0kLCCulgpaHSCRswpggDuZVB+EKw4MNQQWIIYaoIpuohi3HUNTS3cGIx8Wjp6rNydMIJDIzDquowpA0Y907PDoyxkUBBtjBM90pwZWEbCBnIg+jfOAJplrdQzQkoqvoJSMABuMFDMNCNVotACCAGEALIAUQo0WcMTi0MIQOoGV08IkmUEkOY32o4gAUhgfhgAMqMJpoLDqAAqRiBFKpWCu2IASjBhi0YCxjHAOOFnNiAOowTSCVEhMIHGaAjIkCAAL2wEDYrMEoMYhzgcAgmmgzQuAApheDQQBxQQAJgolg1oIAlOqACLwCAAc3EfIFcCut0i8O4LB8hBaomc-ruEkRgi8H3agWCoRIgjJAkYAGtMYJsQAqXNeUgwKrUDP52QcrmCSwADnV+YAMm13SkMO6YOXBPTGZSINTBDZ67mAEIpaBSTsANWaM0HQsE+bTRj2rHdndpGGgFTqUnBZLJggA1Jt5upvrrPZksMwM5xffPFwIOJ3K4wWgBFFKNC7HgBanQENQh1peAMlXKcZ35I8u1Aup3UEBs9WoDBqB-AIgiMComndHAWQfXNwWYMg2FOOBOzmUYx0EI04BwFCYD8c8PS9Ix+RgEgnVYK4Y1BahGBwGc3xWI55w8TkCheTJtF0PwQhqYF+WoFIhJedVIQgSlmGybxVCkOBBClQQgmodtWjQNB7yxHE8TSGYwAYxoVTYAzQjyOimlXdVQX8eJBEYPZTkEdtWEcjJnPeFMAHkgVYbz4mzGMAGkYAuDk4DKPj4GzbFXQvcQyVYgVZFwrALMQdQzzdT0KC2GAKB2dVCOIkL2AQpCUKMYqsFKuByvUMcavmeqiPVOMfHaYUIAzCAup6vrt2mwa+GGkh1HecapD9G5trEKIuMmfk2ikFC9MuZwWG+WRkCuCR5AAVV0QRXxaWtjyUIsSyzEA6Bu65uxgJk+xaOo8iwJo30EEg8T0b7fvkDwUlYN9VVYDAoD8oi0BI9h9O3XBBBwZgb30o6MeI3Uwq42HnFukBnsET9vxc6g8kaP4WcOjhin-Q72kM-yIFOeQfppv7Nygbc1D3A88ZwE9RiYy9r1vVhfSjQQAF1s0lZMZSuuGQESZp9nRzREakXIAB5rXsexEuHILFT7IFNupiRaf8RpMmUFIOAx748nIZowPdYWDYbcF-EEa2bRsOBig8eJnWj6tbZIePBHBBsD2t+xbScCQtf2iRhm1XV9T2c59dF+RTQta1bXtMmg5lMOa5AUFfaI7AGJcWDV0qZo5bMGBMhYVS3fd+RITaVt0Y4fk4MEF4AEcxxeWTXJCioDPE4S1ZF93rjJQosbRQRbyMTRmBOwRUZ+D0nKSdo4EpGBOGXzl8QPg3oVV4SMYAhZsGMGOgWikxCMsfSJA2htnYkLdWRcrgLxDtXI+91WDND7vyXGQ9BDThQdRGs9gACkGN2ZwKdJPWmiQODumQpTbBWBcH4xAovAeiFNDIVQm3dBIBoRWmhEwlhctEyYWwrhZmBMMDmQuJgXAasrhFz2j0F4ikNKU30uGKy8gAByvxgQbH8jofSOwsYtWYQXHM1x9Hsw6I9NoFxzhAkHrgMoLQpDMGWHwUwlMrHYj0QYlmzFQivC1PAcuBpzifzXhAF4PjLHqwCSAWxClppoCMjfKQcF1CNGUBzJ8WUkk2KCdI6gUgLozDumyBs+lXLBkgPBUkUAvyKPnIEuxGw6grhmPyZc8BqIbA3FuHcVDdqBloqELAyxmFnVpuoMx2MWRIGuP6UW4IXg91aHfYsT1OQQ0WRY1xOBuii2xP9QG-Y6gcGoGAYYdlXI0EBJZd22I7qYJaCgl5Vk0yhCvkTDMoM-m-WxJqMueookXGDLqfET8XmRmzPIdQhMbzyHcBs8Srw-IASInsqsKLAWy2EU4La6gUFotWTtUWwoBgzC+fYuCpyj7YgIaBKRiMsFfJBTBdh8FOHcIuIZa5MB6FP25f4ZQqJIZeOmgPeRNzVZbTWaSjAlhLBrBWfIDkD9dmGVLhEiFlcLgQB1K0klEYQDqElBSrVvxBY70MjraUSMZgmrgGau4EQQARDoOgbAeBEAKFqmMXQVBaDfSYPGLA+A4gn3MgFPw6UXANEEEQUg5AZhKVVgTRodVBC6OYC0TA59mBgGTTMTx3jThP2KKTVghbtmbPRpgTMcC4STD4AIOZkgZDXAogsaSMMrjGFMOYa41g7COHVgqQgdRZBgy-OMg6gFjrlK0VcSp+sQCJkOITeSBSjonXkEXCQKDGWCGutuoIu7mD7tBoe8px6l3cDUWDDRKN13tKvfcvd+JP7qORmqT13rfUgHkQGoNp4lgrENGG+gkbxrRsDbG0+Ca8jMHLam4guxM2I30v0PNBai0oRaKWzDlaUgJJra0do9bwGfzRhKYYGY209E7UIbRPb3D9sWDyGD5wrEjoEGOqwtgHBWJnXOlwSkJh7W4LzVdp1OObovfIHdMBf0KRXUekAJ6mHnsvepzTB61A6eUao0C4NNHduSUZ29f7X1WZRpEEDfrcA8GDWYvYMo4MRpAacGNqZUOC0TRh3AMw004eXnhnNLwKD5obcW0jZbwtfC8ZR6tlNa20YbUIJtTHW3tnbbwfgHGrjSG455zG3mXWCZMMJ9wE7xPTogLO1g86ZPPoUydT9EgVOGevRp+zWmH2uz02e1cW67N3u64+3Tz7HPvrYL16xanBvGf-W+wDVNdreo1gwU4qF8CRYzb5hg7NdRsHwJYb1QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Project Configuration
 
 ### Example Project
 
-```
+```promptscript
 # checkout-app/promptscript/project.prs
 @meta {
   id: "checkout-app"
@@ -558,7 +589,19 @@ The design system is a shared capability, so its skills are authored once in the
 }
 ```
 
-The single `@use @acme/design-system` line is the whole project-level usage. It composes the shared `component-review` and `token-migration` skills into `checkout-app`. Projects receive a Design Systems update only after refreshing their reviewed registry pin and recompiling; compilation alone keeps the cached or lockfile-pinned revision. See [Updating Dependencies](https://getpromptscript.dev/guides/registry/#updating-dependencies) for the scoped `prs update` workflow. Agents in consuming projects can then reference the skills by name without re-authoring them per repository.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOGIwDWzAK5YAtBjRoA9DWZkscRtQhosC6swBWQrFVoAdVgAESMLBl7BTvXhAAmiXsaaCR4qTLTv7vHAAnuwYhK7uAIwUAKwUAAz+rAC+pqZ8AJKsvDYkYlBYEJKQsIFWYmh0vEHivADu4lBOjqyC6li8YDoknTrsnM0ARhhwMIimZhCtMO28Zl1sHKxOcsOjaax8AAr5UIE4GNQwzU7wEADmrJLBcBw9cMLQUHAtWMy8uBAvivqMWOPmMSjOYYRiWOSnOAXK43O4bMwsfqEDp2bK8H4GCIgADCnlEEl4AEFZFAIIxsBA2EkHEc0MwoW9qEEsecILgxIMKCwSHJQeCBEJ8T5ZNSPjBSFjsUpLNRGDBRYonGI-gB5OqsGZYgBSGA1vAAyiQ2ThRRwBAAZcUuNwgLXMHDZAAizHlIA2Dn8brdaO4fBVADcZv6IDA6u7eABZfKFa4cND8PHeTpQZh1TrMahE7ERgCivBgkm5Mrl6Kg2DAGZIFACAAldU5YC9ydQOkdg6GqnAcBo0FNzlVMEFLOwqvX+GxINQSBS2NXWAFfbwANIwIK8LIcc7UGesODhyS8LYYIecf4GrDqNAwXg52DDlQBA-67uyPuuZ8aHOsVl6wlbDKPrwAAqYSuIS-oYGW26AYSrCQUEhSMHA74wOc968AA1JGECEJgGpQOGi6ErK3ZmlgYhHPu2FqMwxR9EszQABQRswSqlAAYscMw7gAlIBz6HMc+wwFAUCuGYfIwHIRYzHK1yCKJgGcdgFHXmAZbnMhvDmhgYisAIjqHMIUBBAEnpJKk87mEQDGBNYyyHE4Lyog4g73q4LkOOiOjBqc1BYvqF4aK6ASuYwEBSmQpK6nKrgXmI8pog4GqBtQgUZjA2KOYZ1hxdQCUBJZlkTMIrCprATjnNennmd6DhEf+N7LHSUwPlZ9WLllLYGkGZLXoxzaGJJXJKHxaIHgA4jmQG8NJhwdJNVj8BRRzsPw82AVsACqM1zS2chsjAJBwHIiDOLwB5bWgTjYNeh0kIBjo5ua015ntWj3SdZ3NAeABKR3MIGjhwu1vC+nwuKCkm+q9SWA2JhIFDDdyY0OAeWwqvqu0Cl4EhyLc80XeurBshAkEQAAXteONCptO2zTT3inc4+Mvr235EzDHRdj2fZ09jCNaN9CjHuh6M6HKcDfKLp6bZjAtQ3jwvcuQVjXgekWqxwvAZn5hF8Mp5FHLw7EaXuoMHozEjSCSBaDmBtuHseryoduhRUuNCaK1IRA0PAWkqhqhakiIXu41ggFWz4YCTiQYExxAU6dFMMV86Di45tQOiZlKkJUdihK-UBAD6OYRlsQEAJquF1HQHC8ZXA0d5towaNYZFs-4AHITcXW1d4SABqhIZOahIAEIvTXupldzL4fO8GBOE4RxS5thKV7mXcl092LmhkXc5o6rhHiea1gBg0DHIBB+Dzm28qr9lel79v2P64GR3DrBLMGAdnMCIMyXoLLwi7BmLAjAJDOSAdJQWxQUxhiQDaGsIl4x1GNGHIUyZUyOCikdU8O5RTuBFmfCOSD3AoKgGgjBgVLzXjcqeF2W5CF1RtKzXm353BYkodQ3A+wOHnHWlASBZZ3bzlYcQwaXDkGoPqBgwavBpxwSqveCyIBkh0HQNgPAiAQDzHogMVYIwYBGHoEwRYp4eAGgqOQEMzQ4DvFwNeIgpBVa8HyruXgbQTG8C7swDomBuq-w+IIXgTgAFiHvDuUcyxeCzxyO48UexMAiAwFVOcFgrA2E8s4LE+iLHLCMesVhwRQjhBtNEOIiRWFGkIFMPKBUUgTAJg5agTlbABBYKcVwyB3BbDLHKHAzAmgzDsvWRy7gAC6AQOC3DfLwXpIB+mghgEMkZmYWk3TaVM0wlkzCryCn8SknjPIHj6QM1Zwy-KJNuOoI5VJvTJHUZokAmBcD4AkmCKSkJoTXCCLcI6piQAMEREsLAVj9Q2NJEJBxITnHEDwe4vSLxvEUF8f49EhNglOLCREqJYiYnNHiTYI4kFMWpPSRMSw1gOlolyTaT54IfmXD+QCh6JSQjWHKVEWICRRS1PqR8fKiU9mbMctAtEXSxgLPOSstZ1yxXbJANMtEszCjfh6bKwZVzRmKqcDspp5gDl3LERK1uWrLnrJuYcsRajkiTIYKeJk+AXF4KBQwVKUI2D4EiOooAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+The single `@use @acme/design-system` line is the whole project-level usage. It
+composes the shared `component-review` and `token-migration` skills into
+`checkout-app`. Projects receive a Design Systems update only after refreshing
+their reviewed registry pin and recompiling; compilation alone keeps the cached
+or lockfile-pinned revision. See [Updating Dependencies](https://getpromptscript.dev/guides/registry/index.md#updating-dependencies)
+for the scoped `prs update` workflow. Agents in consuming projects can then
+reference the skills by name without re-authoring them per repository.
 
 ### Project Config
 
@@ -598,7 +641,7 @@ watch:
 
 ### CODEOWNERS
 
-```text
+```
 # Registry CODEOWNERS
 * @acme/platform-team
 
@@ -768,25 +811,25 @@ metrics:
 
 ## Best Practices Summary
 
-Organization Base
-
+:::tip[Organization Base]
 Keep `@acme/base` focused on universal policies that apply everywhere.
+:::
 
-Security Integration
-
+:::tip[Security Integration]
 Always `@use @acme/security` in team bases, never skip security.
+:::
 
-Version Management
-
+:::tip[Version Management]
 Tag registry releases and pin versions in production projects.
+:::
 
-Breaking Changes
-
+:::caution[Breaking Changes]
 Major version bumps require migration guides and team notification.
+:::
 
-Review Process
-
+:::caution[Review Process]
 All registry changes need appropriate CODEOWNER approval.
+:::
 
 ## Rollout Timeline
 

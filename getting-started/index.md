@@ -4,37 +4,49 @@ Start treating your AI instructions as managed infrastructure.
 
 ## Choose Your Path
 
-| Starting point             | Next step                                                                                                 |
-| -------------------------- | --------------------------------------------------------------------------------------------------------- |
-| New repository             | Continue with [Installation](#installation) and [Interactive Initialization](#interactive-initialization) |
-| In a hurry                 | Skip the demo and go to [Quick Start: New Projects](#quick-start-new-projects)                            |
-| Existing instruction files | Use [Quick Start: Migrating Existing Projects](#quick-start-migrating-existing-projects)                  |
-| PromptScript 1.15 project  | Follow [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/index.md)           |
-| Need language semantics    | Open [Language Reference](https://getpromptscript.dev/reference/language/index.md)                        |
+| Starting point | Next step |
+| -------------- | --------- |
+| New repository | Continue with [Installation](#installation) and [Interactive Initialization](#interactive-initialization) |
+| In a hurry | Skip the demo and go to [Quick Start: New Projects](#quick-start-new-projects) |
+| Existing instruction files | Use [Quick Start: Migrating Existing Projects](#quick-start-migrating-existing-projects) |
+| PromptScript 1.15 project | Follow [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/index.md) |
+| Need language semantics | Open [Language Reference](https://getpromptscript.dev/reference/language/index.md) |
 
-New projects should reach a validated compile before adding registries, enterprise policy, or target-specific customization.
+New projects should reach a validated compile before adding registries,
+enterprise policy, or target-specific customization.
 
 ## Installation
 
 Install the CLI toolchain to compile, validate, and manage your PromptScript files.
 
+::::tabs
+:::tab[npm]
+
 ```bash
 npm install -g @promptscript/cli
 ```
+:::
+:::tab[pnpm]
 
 ```bash
 pnpm add -g @promptscript/cli
 ```
+:::
+:::tab[yarn]
 
 ```bash
 yarn global add @promptscript/cli
 ```
+:::
+:::tab[Deno]
 
 ```bash
 deno install -g --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run npm:@promptscript/cli
 ```
 
 Requires a Deno-capable CLI release (1.20.0 or later) and Deno 2.9+.
+:::
+::::
 
 Verify installation:
 
@@ -42,48 +54,66 @@ Verify installation:
 prs --version
 ```
 
-The CLI also runs under Deno and can be compiled into a standalone binary with no runtime dependencies. See the [CLI reference](https://getpromptscript.dev/reference/cli/#running-under-deno) for the full Deno guide.
+The CLI also runs under Deno and can be compiled into a standalone binary
+with no runtime dependencies. See the
+[CLI reference](https://getpromptscript.dev/reference/cli/index.md#running-under-deno) for the full Deno guide.
 
 ## Interactive Initialization
 
 PromptScript guides you through setup with an interactive initializer that auto-detects your tech stack and helps you inherit standards from your organization's registry.
 
-Terminal ↻ Replay
-
+<!-- prettier-ignore -->
+<div class="init-demo" id="init-demo">
+<div class="init-demo__wrapper">
+<div class="init-demo__terminal">
+<div class="init-demo__header">
+<span class="init-demo__dot init-demo__dot--red"></span>
+<span class="init-demo__dot init-demo__dot--yellow"></span>
+<span class="init-demo__dot init-demo__dot--green"></span>
+<span class="init-demo__title">Terminal</span>
+<button class="init-demo__replay" title="Replay animation">↻ Replay</button>
+</div>
+<div class="init-demo__output"></div>
+</div>
+<div class="init-demo__generated">
+<div class="init-demo__generated-header">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 7L9 19l-5.5-5.5l1.41-1.41L9 16.17L19.59 5.59z"/></svg>
 Generated Files
+</div>
+<div class="init-demo__files-grid">
+<div class="init-demo__file-preview">
+<div class="init-demo__file-preview-header">promptscript.yaml</div>
+<pre class="init-demo__file-preview-content"><span class="key">id:</span> <span class="str">my-app</span>
+<span class="key">syntax:</span> <span class="str">"1.5.0"</span>
 
-promptscript.yaml
+<span class="key">targets:</span>
+  - <span class="str">github</span>
+  - <span class="str">claude</span>
+  - <span class="str">cursor</span>
 
-```
-id: my-app
-syntax: "1.5.0"
-
-targets:
-  - github
-  - claude
-  - cursor
-
-validation:
-  rules:
-    empty-block: warning
-```
-
-.promptscript/project.prs
-
-```
-@meta {
-  id: "my-app"
-  syntax: "1.5.0"
+<span class="key">validation:</span>
+  <span class="key">rules:</span>
+    <span class="key">empty-block:</span> <span class="str">warning</span></pre>
+</div>
+<div class="init-demo__file-preview">
+<div class="init-demo__file-preview-header">.promptscript/project.prs</div>
+<pre class="init-demo__file-preview-content"><span class="kw">@meta</span> {
+  <span class="key">id:</span> <span class="str">"my-app"</span>
+  <span class="key">syntax:</span> <span class="str">"1.5.0"</span>
 }
 
-@inherit @company/react-app
+<span class="kw">@inherit</span> <span class="str">@company/react-app</span>
 
-@context {
-  framework: "React 18"
-  language: "TypeScript"
-  testing: "Vitest"
-}
-```
+<span class="kw">@context</span> {
+  <span class="key">framework:</span> <span class="str">"React 18"</span>
+  <span class="key">language:</span> <span class="str">"TypeScript"</span>
+  <span class="key">testing:</span> <span class="str">"Vitest"</span>
+}</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 
 **Key features:**
 
@@ -96,7 +126,8 @@ validation:
 
 ### 1. Initialize Your Repository
 
-Run the init command at the root of your project (where `package.json` or equivalent resides). PromptScript will auto-detect your tech stack (TypeScript, Python, etc.) to generate relevant initial prompts.
+Run the init command at the root of your project (where `package.json` or equivalent resides).
+PromptScript will auto-detect your tech stack (TypeScript, Python, etc.) to generate relevant initial prompts.
 
 ```bash
 prs init
@@ -107,19 +138,21 @@ This creates the scaffolding for your AI infrastructure:
 - `promptscript.yaml` - **Compiler Configuration** (minimal, comment-free YAML)
 - `.promptscript/project.prs` - **Source of Truth** (your rules, identity, and skills)
 
-Detected AI tools are preselected. If none are detected, choose targets interactively. For non-interactive setup, pass targets explicitly:
+Detected AI tools are preselected. If none are detected, choose targets interactively. For
+non-interactive setup, pass targets explicitly:
 
 ```bash
 prs init --yes --targets claude factory
 ```
 
-PromptScript does not infer Copilot from `.github/workflows` and does not assign `AGENTS.md` to a specific tool.
+PromptScript does not infer Copilot from `.github/workflows` and does not assign `AGENTS.md` to a
+specific tool.
 
 ### 2. Define Your Policy
 
 Open `.promptscript/project.prs` and customize:
 
-```
+```promptscript
 @meta {
   id: "my-project"
   syntax: "1.5.0"
@@ -167,11 +200,17 @@ Open `.promptscript/project.prs` and customize:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoBWCgAZdrAL5ix3aZywQsi4Xrkhd-uKCAJrMAK6CGNQwggDuzNQA1hCsAOaCbJGCAEowGNqRaOQQjNgQbBS+ACpaOIJwAoyJslWKaDAAyozUEGhYdDl5BWYAHAMAap4wvgH2TqwuDRisUlFScD5BLFIwssi+EvIAqnAxYGGs2uWsGFCCaqnUpCQp6Q2KsPJ0B34ACtFgGDUQQ4ZjMRIbZZSQQsMjMOCea73bAcaisOBfH7yADqPQ4gg4DQ2YASkSgd2200CEgAumJ5otQdQsIwwlgNqIggBiQQdCBkWD1LA9NKCQBJhIIpMxWXwjB5MmwoIoZiAAPTRABuEBgsXkphAuS1OphzB2ghJwIAjmFbp5vFDBAAjeBYe5PK6MeD2Xw8gDyjs0BVinjqajIWFkwrCMQlqU4QOw8DdzHD5ugXqC8lVhJ0SE2EgkYb6keo0Z+Ozg3V68tY+txU0EF08BJdGOpBZY7Hc+tmQQLgnr+KbrpzGzCCLSiB+EmUgkmOciG1wMQXpdYrCB08Es5qDVeggAMhBHU9qN4LSa4Rv2Bi+wXZwBBJ-IrCo8QACgf1CeaRgAwf2j-nApzMgAlFi-iQb4DKZmqAL5FgCR6vmBZFhGBKltMd4VlWfTXPqHRhKkcYNII8HaAk+78moGowLK7L2P2nYcOwPZQXeEgPjcSoAF4rjgMSUpEKz1ERJGuuRiEiuk1HUMwtH0cSpLOq+QKCCQGApAIKQYI60B2pUHGCP88BArRTowDgGBaqSDpEOQmniEMdTRLCso7NCjBWb+hn9rM7bzA4IAODSDDuGe+BEKQ5AwFQtAgAwtG0Nc+BmMFQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### 3. Define Agent Capabilities
 
 Add reusable skills, specialist agents, tool integrations, and automation to the same source:
 
-```
+```promptscript
 @skills {
   code-review: {
     description: "Review code changes before merge"
@@ -212,11 +251,20 @@ Add reusable skills, specialist agents, tool integrations, and automation to the
 }
 ```
 
-PromptScript compiles each capability where the configured target supports it. See [Agent Platform](https://getpromptscript.dev/features/index.md) and the [feature coverage matrix](https://getpromptscript.dev/testing/feature-coverage/index.md) for target-specific support.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCpOEZqCDQsCDYUkAAlFrbzWqkdHAxWdQMAIxgwZibeIWplvO6xKCgLaQAVZmZKsOQIyYkIunCQAHEmtAengCEMOBwIgF04sEWOxOFgxpNWu1atQmowsKx4HBHnAYIw3AMsI5Hhw4KZHosZCQMBBEqSMCtoCZHBR9rxCgUir4SIw0ABlGDUZqcqpxJRwNwwepYNSMUqczpAhRqVhwNCbcFPPHiEZ04HMEjEzzXCKsOowD4RCgAeiwF0qxv5grgFBIACs4AC4gyGcUNGDeTUmlDzBLeF1ur1+oNhqMnpDpvY3EdeE0AI7W0xq2TlI5wHVMfWNKbtJ01YIs9mc7m0DNWoUijBizl5g4gjjsCE5ma2HQYpraFVgMBidQk2VYMTwiDc2MwBMQJpaUy0kDOnyu3w4C6lT3BZoYKAQcTYCuONDwSX53gtMFjeV44Xm+puVHJ4lYRg4P0RACiKqwAB8AOqYg1z49dC1UJeBuEA0FYNASENEBqA8GCsQPJ80VKWt6QXJl+HMTZSjAY5zDXMdYB+GAjwOIMBiGEZWDGAAFN4MC2UQNy3HcOBkJpiLvAC6zYBtFVuDx7FcO00UHBNN2pXg+1xMRPGEmBMC2TiYBI7Z-DYjBZ3nAoQHyf4GDBahHHwIhSHIGAqFoEAGBLOBqPwVI9KAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+PromptScript compiles each capability where the configured target supports it. See
+[Agent Platform](https://getpromptscript.dev/features/index.md) and the
+[feature coverage matrix](https://getpromptscript.dev/testing/feature-coverage/index.md) for target-specific support.
 
 ### 4. Validate and Compile to Native Formats
 
-Check the definition before anything is written. Strict mode turns warnings into errors, so broken references and policy violations surface here instead of in generated files:
+Check the definition before anything is written. Strict mode turns warnings into errors, so
+broken references and policy violations surface here instead of in generated files:
 
 ```bash
 prs validate --strict
@@ -228,7 +276,9 @@ Transform your universal `.prs` definition into platform-specific optimization f
 prs compile
 ```
 
-Generated paths depend on the targets selected during `prs init` or declared in `promptscript.yaml`. When GitHub, Claude, and Cursor are configured, their default primary outputs are:
+Generated paths depend on the targets selected during `prs init` or declared in
+`promptscript.yaml`. When GitHub, Claude, and Cursor are configured, their
+default primary outputs are:
 
 - `.github/copilot-instructions.md` (for GitHub Copilot)
 - `CLAUDE.md` (for Claude Code)
@@ -236,7 +286,9 @@ Generated paths depend on the targets selected during `prs init` or declared in 
 
 #### Bundled PromptScript Skill
 
-When you compile, PromptScript automatically includes a language skill for targets whose formatter exposes a bundled-skill output path. This skill teaches supported AI coding agents how to read, write, and troubleshoot `.prs` files.
+When you compile, PromptScript automatically includes a language skill for targets whose formatter
+exposes a bundled-skill output path. This skill teaches supported AI coding agents how to read,
+write, and troubleshoot `.prs` files.
 
 To disable this behavior, add to `promptscript.yaml`:
 
@@ -246,7 +298,8 @@ includePromptScriptSkill: false
 
 ### 5. Commit to Git
 
-Review the generated diff, then commit your configuration and the generated files explicitly. Your AI context is now version-controlled infrastructure.
+Review the generated diff, then commit your configuration and the generated files explicitly.
+Your AI context is now version-controlled infrastructure.
 
 ```bash
 git status
@@ -259,7 +312,21 @@ git commit -m "chore: initialize promptscript infrastructure"
 
 Already have `CLAUDE.md`, `.cursorrules`, or `copilot-instructions.md`? Use AI-assisted migration to convert your existing instructions to PromptScript.
 
-Terminal ↻ Replay
+<!-- prettier-ignore -->
+<div class="init-demo" id="migrate-demo">
+<div class="init-demo__wrapper">
+<div class="init-demo__terminal">
+<div class="init-demo__header">
+<span class="init-demo__dot init-demo__dot--red"></span>
+<span class="init-demo__dot init-demo__dot--yellow"></span>
+<span class="init-demo__dot init-demo__dot--green"></span>
+<span class="init-demo__title">Terminal</span>
+<button class="init-demo__replay" title="Replay animation">↻ Replay</button>
+</div>
+<div class="init-demo__output"></div>
+</div>
+</div>
+</div>
 
 **Key features:**
 
@@ -285,7 +352,10 @@ This creates:
 
 Your existing AI instruction files remain untouched.
 
-When `promptscript.yaml` already exists, static migration preserves it byte-for-byte, writes imported modules under `.promptscript/migrated/`, and adds one idempotent `@use` to every effective top-level or build-profile entry. No candidates means no writes. Run `prs migrate --static --dry-run` to preview every path first.
+When `promptscript.yaml` already exists, static migration preserves it byte-for-byte, writes
+imported modules under `.promptscript/migrated/`, and adds one idempotent `@use` to every effective
+top-level or build-profile entry. No candidates means no writes. Run
+`prs migrate --static --dry-run` to preview every path first.
 
 For AI-assisted migration, generate a migration prompt and install the PromptScript skill:
 
@@ -293,11 +363,19 @@ For AI-assisted migration, generate a migration prompt and install the PromptScr
 prs migrate --llm
 ```
 
-AI-assisted migration writes `.promptscript/migration-prompt.md` without changing existing PromptScript sources. In non-interactive mode, the prompt is also emitted to stdout. When AI-assisted migration is selected during `prs init`, the prompt is copied to the clipboard. Start the AI agent in the project, paste the prompt, let it migrate the instructions, then review the generated files and run `prs validate --strict` followed by `prs compile`. If copying fails, copy the prompt from the terminal output instead.
+AI-assisted migration writes `.promptscript/migration-prompt.md` without changing existing
+PromptScript sources. In non-interactive mode, the prompt is also emitted to stdout.
+When AI-assisted migration is selected during `prs init`, the prompt is copied to the clipboard.
+Start the AI agent in the project, paste the prompt, let it migrate the instructions, then review
+the generated files and run `prs validate --strict` followed by `prs compile`. If copying fails,
+copy the prompt from the terminal output instead.
 
 ### 2. Invoke the Migration Skill
 
 Use your AI assistant to migrate existing content. The migration skill analyzes your files and generates proper PromptScript.
+
+::::tabs
+:::tab[Claude Code]
 
 ```bash
 # Use the PromptScript skill
@@ -306,36 +384,47 @@ Use your AI assistant to migrate existing content. The migration skill analyzes 
 # Or describe what you want
 "Migrate my existing CLAUDE.md to PromptScript"
 ```
+:::
+:::tab[GitHub Copilot]
 
-```text
+```
 @workspace Use the promptscript skill to migrate my existing instructions
 ```
+:::
+:::tab[Cursor]
 
 ```bash
 "Use the PromptScript skill to migrate my existing instructions"
 ```
+:::
+:::tab[Antigravity]
 
-```text
+```
 "Migrate my existing AI instructions to PromptScript"
 ```
+:::
+::::
 
 ### 3. What the AI Will Do
 
 The migration skill guides the AI through a structured process:
 
 1. **Discover** - Find all existing instruction files:
-1. `CLAUDE.md`, `CLAUDE.local.md`
-1. `.cursorrules`, `.cursor/rules/*.mdc`
-1. `.github/copilot-instructions.md`
-1. `AGENTS.md`
-1. **Analyze** - Read and classify content by type:
-1. "You are..." → `@identity`
-1. Tech stack info → `@context`
-1. "Always/Should..." → `@standards`
-1. "Never/Don't..." → `@restrictions`
-1. `/commands` → `@shortcuts`
-1. **Generate** - Create properly structured `.prs` files
-1. **Validate** - Run `prs validate` to check syntax
+   - `CLAUDE.md`, `CLAUDE.local.md`
+   - `.cursorrules`, `.cursor/rules/*.mdc`
+   - `.github/copilot-instructions.md`
+   - `AGENTS.md`
+
+2. **Analyze** - Read and classify content by type:
+   - "You are..." → `@identity`
+   - Tech stack info → `@context`
+   - "Always/Should..." → `@standards`
+   - "Never/Don't..." → `@restrictions`
+   - `/commands` → `@shortcuts`
+
+3. **Generate** - Create properly structured `.prs` files
+
+4. **Validate** - Run `prs validate` to check syntax
 
 ### 4. Review and Refine
 
@@ -351,7 +440,9 @@ prs diff --all --full
 
 ### 5. Compile and Replace
 
-Make sure tracked files are committed and untracked or ignored instruction files are backed up. After every conflict path and planned output is approved, perform one controlled takeover:
+Make sure tracked files are committed and untracked or ignored instruction
+files are backed up. After every conflict path and planned output is approved,
+perform one controlled takeover:
 
 ```bash
 prs compile --force
@@ -359,17 +450,21 @@ git diff -- .
 prs diff --all --full
 ```
 
-The Git diff must contain only approved source, configuration, and generated replacements. The final PromptScript diff must be empty.
+The Git diff must contain only approved source, configuration, and generated
+replacements. The final PromptScript diff must be empty.
 
 ### 6. Clean Up (Optional)
 
-Do not remove files configured as PromptScript target outputs. Archive only obsolete instruction sources that are not configured outputs and whose content is preserved in `.prs` files.
+Do not remove files configured as PromptScript target outputs. Archive only
+obsolete instruction sources that are not configured outputs and whose content
+is preserved in `.prs` files.
 
-Keep Original Files During Transition
-
+:::tip[Keep Original Files During Transition]
 You don't have to delete original files immediately. Run both systems in parallel until you're confident the migration is complete.
 
-See the [Migration Guide](https://getpromptscript.dev/guides/migration/index.md) for backup, takeover, tracking, and rollback details.
+See the [Migration Guide](https://getpromptscript.dev/guides/migration/index.md) for backup, takeover, tracking,
+and rollback details.
+:::
 
 ### Migration Example
 
@@ -396,7 +491,7 @@ You are a Python developer working on a FastAPI service.
 
 **After** (.promptscript/project.prs):
 
-```
+```promptscript
 @meta {
   id: "api-service"
   syntax: "1.5.0"
@@ -427,6 +522,12 @@ You are a Python developer working on a FastAPI service.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMaCAFo4MagDcIjGPLES4AT3YZCs+QEYKAVgoAGPawC+Ysd2mcsELIeH65IHqB4oIAmswAroIY1DDRggAKhrhsglIwGjBQzGjqggDuzNQA1hCsAOaCqUIAYhhwWACCCQCSgmqa2jAU-kGOLqxuLOxEWH4hUBgVERjl8LLIaMk4bAC6-tQR7BB85iBJKeIAzBQWFo4SYNSkMIUlcAtg9QJK6yFS2BgARvUwewnMBrlWIAZQAigAZfquVjcBpTD7UKRwcYSFjpBb+CTyADq1G8cR8uUEODKWBRYCK0SgUEEYC2jC8bDg8joWICAFU1NEjKxGAB6DD5DDeOlUlr8gDyVVy1yZrBZwQkbwGbliDXxjIgzNRgmUAQAImwAORjFgkEiiiicDR06DwfogJyrBieaiGfBEUjkbo0eggTK0bWsfAWJ1AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 For detailed migration guidance, see:
 
 - [Migration Guide](https://getpromptscript.dev/guides/migration/index.md) - Complete manual migration reference
@@ -436,7 +537,7 @@ For detailed migration guidance, see:
 
 After initialization, your project will have:
 
-```text
+```
 your-project/
 ├── .promptscript/
 │   └── project.prs                    # Your instructions
@@ -488,9 +589,10 @@ registry:
   # Or remote: https://github.com/your-org/promptscript-registry
 ```
 
-Output Versions
-
-Use `version: multifile` or `version: full` to generate separate prompt/command files. Without it, shortcuts with `prompt: true` will only appear in the main file.
+:::tip[Output Versions]
+Use `version: multifile` or `version: full` to generate separate prompt/command files.
+Without it, shortcuts with `prompt: true` will only appear in the main file.
+:::
 
 ### Version Support
 
@@ -532,12 +634,13 @@ targets:
 
 PromptScript has two separate hook systems:
 
-| System              | Purpose                                                         |
-| ------------------- | --------------------------------------------------------------- |
-| `@hooks` in `.prs`  | Compile portable lifecycle policy into target-native hook files |
-| `prs hooks install` | Recompile `.prs` after AI edits and protect generated files     |
+| System | Purpose |
+| ------ | ------- |
+| `@hooks` in `.prs` | Compile portable lifecycle policy into target-native hook files |
+| `prs hooks install` | Recompile `.prs` after AI edits and protect generated files |
 
-`prs init` installs hooks for supported detected targets by default. Pass `--no-hooks` during initialization to skip them.
+`prs init` installs hooks for supported detected targets by default. Pass `--no-hooks` during
+initialization to skip them.
 
 Use the hook command to reinstall hooks, add hooks after initialization, or target one tool:
 
@@ -556,24 +659,56 @@ Supported tools: Claude Code, Factory AI, Cursor, Windsurf, Cline, Copilot, Gemi
 
 For tools that do not support hooks, use `prs compile --watch` as an alternative.
 
-See [Hooks and Workflows](https://getpromptscript.dev/features/automation/index.md) for lifecycle policy and the [Hooks Guide](https://getpromptscript.dev/guides/hooks/index.md) for source recompilation, output protection, and troubleshooting.
+See [Hooks and Workflows](https://getpromptscript.dev/features/automation/index.md) for lifecycle policy and the
+[Hooks Guide](https://getpromptscript.dev/guides/hooks/index.md) for source recompilation, output protection, and
+troubleshooting.
 
 ## What's Next?
 
-\[### Enterprise Tutorial
+<div class="ref-list">
 
-After your first compile, build an organization, team, and project hierarchy.
+<a href="../tutorial/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--purple">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9zm6.82 6L12 12.72L5.18 9L12 5.28zM17 16l-5 2.72L7 16v-3.27l5 2.72l5-2.72z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Enterprise Tutorial</h3>
+    <p>After your first compile, build an organization, team, and project hierarchy.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
 
-→\](https://getpromptscript.dev/tutorial/index.md) \[### Language Reference
+<a href="../reference/language/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--blue">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5zM9 13v2h6v-2zm0 4v2h6v-2z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Language Reference</h3>
+    <p>Learn the full PromptScript syntax - blocks, directives, and inheritance.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
 
-Learn the full PromptScript syntax - blocks, directives, and inheritance.
+<a href="../reference/cli/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--cyan">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M20 19V7H4v12h16m0-16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16m-7 14v-2h5v2h-5m-3.42-4L5.57 9H8.4l3.3 3.3c.39.39.39 1.03 0 1.42L8.42 17H5.59l4-4z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>CLI Reference</h3>
+    <p>Explore all CLI commands - compile, validate, pull, and more.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
 
-→\](https://getpromptscript.dev/reference/language/index.md) \[### CLI Reference
+<a href="../examples/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--green">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h8v8H3zm2 2v4h4V5zm8-2h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm13 2h-2v-2h2v-2h-2v2h-2v-2h-2v2h2v2h-2v2h2v-2h2v2h2v2h2v-2h-2z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Examples</h3>
+    <p>Browse real-world configuration examples for various use cases.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
 
-Explore all CLI commands - compile, validate, pull, and more.
-
-→\](https://getpromptscript.dev/reference/cli/index.md) \[### Examples
-
-Browse real-world configuration examples for various use cases.
-
-→\](https://getpromptscript.dev/examples/index.md)
+</div>

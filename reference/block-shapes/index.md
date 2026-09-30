@@ -1,6 +1,7 @@
 # Block Shapes
 
-Every block uses one ordered body model. The parser classifies that body as one of four canonical shapes:
+Every block uses one ordered body model. The parser classifies that body as one
+of four canonical shapes:
 
 | Shape    | Source entries                              | Typical use                         |
 | -------- | ------------------------------------------- | ----------------------------------- |
@@ -9,9 +10,10 @@ Every block uses one ordered body model. The parser classifies that body as one 
 | `array`  | Dash-list entries                           | Restrictions and other flat lists   |
 | `mixed`  | More than one content category              | Structured fields plus prose        |
 
-Dash-list syntax is the surface form of `array`, not a fifth shape. Arrays used as field values remain part of an `object` body:
+Dash-list syntax is the surface form of `array`, not a fifth shape. Arrays used
+as field values remain part of an `object` body:
 
-```
+```promptscript
 @restrictions {
   - "Never expose secrets"
 }
@@ -21,9 +23,17 @@ Dash-list syntax is the surface form of `array`, not a fifth shape. Arrays used 
 }
 ```
 
-The first block has an `array` body. The second has an `object` body whose `code` field contains an array value.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH35qeCxqCEYsCDZlQKteAFpwkAA5GAA3GGpeIjRmODtBxlLTPMLWYrgRTwxqcTq4likw5AiAVUHZcsqsXgAVRzQYAGURiDQsCLoWzbtWUmlewn7qMZAAXR98kHyPhk45Uc+CIpHIMCotBADC6tBqrHwqV+QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
-`@header` entries are presentation metadata and do not change body shape. Ordinary `header` and `headers` fields remain domain properties.
+The first block has an `array` body. The second has an `object` body whose
+`code` field contains an array value.
+
+`@header` entries are presentation metadata and do not change body shape.
+Ordinary `header` and `headers` fields remain domain properties.
 
 ## Built-in Block Matrix
 
@@ -48,13 +58,18 @@ The first block has an `array` body. The second has an `object` body whose `code
 | `@prompts`      | `object`  | None                              | Reserved internal registry. Do not author it in project files.                      |
 | `@examples`     | `object`  | None                              | Each field is a named input/output example.                                         |
 
-Supported compatibility means the parser and current consumers retain defined behavior. PS038 warns when a legacy shape can omit data or vary by formatter. Unsupported built-in shapes are errors. Custom blocks remain open-world and do not require a registry entry.
+Supported compatibility means the parser and current consumers retain defined
+behavior. PS038 warns when a legacy shape can omit data or vary by formatter.
+Unsupported built-in shapes are errors. Custom blocks remain open-world and do
+not require a registry entry.
 
 ## Compile-ready Canonical Example
 
-This single source covers every project-authorable built-in block. Documentation validation parses, validates, and compiles it for Claude, GitHub, and Cursor.
+This single source covers every project-authorable built-in block.
+Documentation validation parses, validates, and compiles it for Claude,
+GitHub, and Cursor.
 
-```
+```promptscript
 @meta {
   id: "canonical-block-shapes"
   syntax: "1.5.0"
@@ -187,11 +202,18 @@ This single source covers every project-authorable built-in block. Documentation
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMMrNhEYYoAWgBGUZowDW6uDgxp48sRLgBPdhkKz5ARgoBWCgAZzrAL5ix3aU4sCCwrYQs5EHMo8UEATWYAV0EMahgUwVU0sESoQQAVK1MAZUZqCDQsQRIMCFs6mGoKCOivX1Z-FnYiKtFYmmYAKxhGLAcQYuNTQQAlGDBGzkYYLwlqRPYIPnGAOWYpGApBuEEAJncAai8WqNuI-JwIE4Hh0cEDkjY4LGpseEzFMpVHkAArUZhkLClcqVQTaXR6OH7CDwZqxVoxdr+b6KKSpKQnPoSFgHWTIeQAVTg6W+5TehRKZQqWHkdEiVPSrFIMCkgiIaGY1CwcHkAF0IhxvnUAOZkynUwQANRC8BZIDZ8gAYswoDoAO6CACC1F+rGlMDZhtGlrg1KFYrEWNY3DStJUwS+4Vi6kiOxgADdGnzCAKFdSyvwRTEJD75H7A9RBHA9BVBGkAI6JCBpXn+tTSbAQNhtPzOvRKPWwKTmr0SDERADEDdm80WrGWpYkAGkYDA0IJzaxGn9eXVaYlRkXWCd89Kh7y9SEcIIwRDKtDmUmktRlmi63dMaXuEZBVhGIlhbXIgB6NL+lF6+TjOb3mAGknpTP50KrG+StWyESEjvPATKVFOz4bII-5RhExJsBw7DjK0sTAbMUG4OkLBkLAHDQaqSZZnhuJpn2p6CGAtRQIkrp7sB9axO0TrcNhNSsASV7yNeoSmIwOAjHoT5XhIBxwGBHqsOMADC-H6NBRRmNGwFdIhYyRChaESDMGH8QUCkbrC2FoNAQaLrgSRVDAJAhMEZoUSZcB0fuGmCExR7Sok+KEhE0o6JocByiAABUQXXkFFDCqykQhWFEVwIQDo+EemC-CQ3mxG6oxDrasimuaAAUziuAAlIIAC8ggAMwRBZaAXgA-LInCJCQ+XyBwhBqhqIDHMWIClRV7U9CWHTOsm0BQOlawBg+gFwSBYkwhJz4zW+mT7Fhxhmop80qUEyF3KhwEAJLTrxVQsCaIxYNlcBsjBbIkeGNEhFYTnqYdEhuaN3A6MCnEHhEHLQbpf1qCBgY6GgfDsEaILHXRDHMRgg6XkBd4Po0c1HaJ4kQZEL4PicH6ZFt5qwUdWDMDqAWCOSIBzBgUhRfIADiaRoIlaF7UhH2-mhhNrXxijmryJMkRz5EYJObAYNo6SQOxMqOfNDFfY6R56oKehgPqU2kbAGDUtjaG40t+PyGCfapOkQhpIb1L8+t3S82rmnaeIeZQAWEkpOxhEkDU5QAF7pPbMBG5tIuoqrgOMRrP04NTej617PswOoPHwCbwEBvtkQ0BnVM6uoiSO0p8GB7igVoKw0MsyA6wdOqkRZ3xAlc65Cf+CQjBoMUjQJvrYMaMXk05xIPyKHAApCuM3xSEWTusdXdPyEoBwNxQ3HU5N1692ghiD40FAkMcnfff45CJNKY5Xl+3uhBPC142w4wAIqeY-YRjxTaHjbqWm9MMZvk7hIJOzAU6BTTniDgmcFJRnFEdA+A9qBD0CiPTOu9EEREvs6IgpByD-HRpwbkz8zbMgtiAYGQhC6MCeJybkTs6h1TUvILo3xBCEHKoIHQTMOS0HysVJ2tULzjA4VUMujQTgVT4VIARcAhG-iYiAbwooGBBGoFYfABCcKHBoPQEAQ8pz4EcKooAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Shortcut Entry Shapes
 
-The `@shortcuts` and `@commands` bodies are objects. Their values have three supported forms:
+The `@shortcuts` and `@commands` bodies are objects. Their values have three
+supported forms:
 
-```
+```promptscript
 @shortcuts {
   # Supported scalar documentation entry
   "/review": "Review code quality"
@@ -211,7 +233,17 @@ The `@shortcuts` and `@commands` bodies are objects. Their values have three sup
 }
 ```
 
-A multiline scalar can become a native command file on one target and plain documentation on another. PS038 warns and suggests an explicit `content` object. Existing scalar and multiline forms remain compatible. Some targets require extra fields such as GitHub's `prompt: true`; consult the [formatter matrix](https://getpromptscript.dev/reference/formatters/index.md) for target-specific output.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344HGZqLEY3U15Aq14+AGU3NDRyjhk4RgwoDGpecWYqrREsCCNOLGpHOIiAemoYADcIGHMIlJAAJWXV8x1mKV4ARzcekxmQIvqmlraK6V5YdQxGR14SNygxqAhWO0m0145hMOAUfXUwgAtFI0JwpNp3Fg0NVZiA5hw4Fgoc9XpdNrErvVglsPAp4DUMJ5eIt7lgVBhoG5FnAKGjCddgnwAMJUtgQbpQXhEGBVEQAI1gwvY0zRGIpG1qcWCUi61AgaDGbE2pJsFLgeWCwRY7EmBKuRKNRt15KxyipMlp7QZTJZbOJ4Qtht4hQKIHyAF0GIDHPgiKRyDAqLQQAwljBaONWPhUv6gA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+A multiline scalar can become a native command file on one target and plain
+documentation on another. PS038 warns and suggests an explicit `content`
+object. Existing scalar and multiline forms remain compatible. Some targets
+require extra fields such as GitHub's `prompt: true`; consult the
+[formatter matrix](https://getpromptscript.dev/reference/formatters/index.md) for target-specific output.
 
 ## Merge Behavior
 
@@ -224,9 +256,16 @@ Merge behavior follows shape, then operation policy:
 | `array`  | Concatenate unique values in source order.                         |
 | `mixed`  | Merge text, fields, and list items independently.                  |
 
-For `@inherit`, the parent is the base and the child wins field conflicts and irreconcilable shape mismatches. For `@use`, imported source values win same-shape field conflicts, while the target body wins an irreconcilable shape mismatch. Text and mixed bodies compose their text, while object and mixed bodies compose their fields instead of selecting one complete body. Later root extensions apply after inheritance and imports. Inline `@use` entries remain in canonical source order until the resolver consumes them.
+For `@inherit`, the parent is the base and the child wins field conflicts and
+irreconcilable shape mismatches. For `@use`, imported source values win
+same-shape field conflicts, while the target body wins an irreconcilable shape
+mismatch. Text and mixed bodies compose their text, while object and mixed
+bodies compose their fields instead of selecting one complete body. Later root
+extensions apply after inheritance and imports. Inline `@use` entries remain in
+canonical source order until the resolver consumes them.
 
-When shapes differ, do not rely on accidental field conversion. Migrate both layers to the block's canonical shape before composing them.
+When shapes differ, do not rely on accidental field conversion. Migrate both
+layers to the block's canonical shape before composing them.
 
 ## Diagnostics
 
@@ -234,15 +273,24 @@ PS038 reports:
 
 - An error when a built-in block uses an unsupported body shape.
 - A warning when a supported legacy shape can change or omit formatter output.
-- A warning when a shortcut uses a multiline scalar instead of explicit `content`.
-- An error when shortcut names collide, cannot form a safe file name, or use an unsupported value, `description`, or `content` type.
+- A warning when a shortcut uses a multiline scalar instead of explicit
+  `content`.
+- An error when shortcut names collide, cannot form a safe file name, or use an
+  unsupported value, `description`, or `content` type.
 
-Each message includes the observed shape, expected shape, and a minimal replacement. The rule ignores custom block names:
+Each message includes the observed shape, expected shape, and a minimal
+replacement. The rule ignores custom block names:
 
-```
+```promptscript
 @team-domain {
   - "Custom array content remains valid"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34OUgBacWYSDAgrQKteMvCQAGE3OCwqsWo1Rx02Dm1qGGra5QA3DCgIbxAffJB8gF0GTixqR3wiUnIYKloQBnGYWgg2fFTFoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Use `prs validate --strict` to include shape warnings in CI.
