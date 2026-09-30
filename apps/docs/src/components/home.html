@@ -4,10 +4,9 @@
       <div class="home-eyebrow">Prompts as code for AI coding agents</div>
       <h1>Write your AI rules once.<br /><span>Every agent follows them.</span></h1>
       <p class="home-hero__lead">
-        Stop copy-pasting CLAUDE.md, Cursor rules, and Copilot instructions across repositories.
-        Define instructions, skills, agents, MCP servers, and hooks in <code>.prs</code> sources
-        inherited like code, scan them for prompt injection, and compile native files for 50 AI
-        coding agents.
+        PromptScript is an open-source compiler for AI coding agent rules. Write instructions,
+        skills, agents, and MCP servers once, inherit them like code, and get native files for 50
+        tools.
       </p>
       <div class="home-hero__actions">
         <a href="getting-started/" class="home-button home-button--primary">Get started</a>
@@ -17,6 +16,7 @@
         <code>npm install -g @promptscript/cli</code>
         <span>Open source · MIT · Git-native · CI-ready</span>
       </div>
+      <!-- proof -->
     </div>
     <div class="home-hero__visual">
       <div class="home-converge__source">
@@ -649,89 +649,6 @@
       </div>
     </div>
   </section>
-  <section class="home-section home-native" id="native-output">
-    <div class="home-native__copy">
-      <div class="home-eyebrow">Native, not lowest common denominator</div>
-      <h2>Every platform gets the files it expects</h2>
-      <p>
-        PromptScript preserves one source model while formatters map supported capabilities to
-        native instructions, agents, skills, commands, hooks, and integrations.
-      </p>
-      <ul class="home-check-list">
-        <li>Rich target-specific output where supported</li>
-        <li>Deterministic diffs ready for code review</li>
-        <li>No runtime proxy between developers and their tools</li>
-        <li>New targets without rewriting source configuration</li>
-      </ul>
-      <a href="reference/formatters/" class="home-text-link"
-        >Explore all 50 target formats <span>→</span></a
-      >
-    </div>
-    <div class="home-native__files">
-      <div class="home-target-card">
-        <div><strong>Claude Code</strong><span>full native output</span></div>
-        <code>CLAUDE.md</code>
-        <code>.claude/agents/reviewer.md</code>
-        <code>.claude/skills/security-review/SKILL.md</code>
-        <code>.claude/settings.json</code>
-      </div>
-      <div class="home-target-card">
-        <div><strong>GitHub Copilot</strong><span>full native output</span></div>
-        <code>.github/copilot-instructions.md</code>
-        <code>.github/agents/reviewer.md</code>
-        <code>.github/skills/security-review/SKILL.md</code>
-        <code>.github/prompts/review.prompt.md</code>
-      </div>
-      <div class="home-target-card">
-        <div><strong>Factory AI</strong><span>full native output</span></div>
-        <code>AGENTS.md</code>
-        <code>.factory/droids/reviewer.md</code>
-        <code>.factory/skills/security-review/SKILL.md</code>
-      </div>
-    </div>
-  </section>
-  <section class="home-section home-section--capabilities">
-    <div class="home-section__intro">
-      <div class="home-eyebrow">One language, complete platform</div>
-      <h2>More than instruction files</h2>
-      <p>
-        Model the complete operating environment for AI coding agents, then let each formatter emit
-        the richest native representation its platform supports.
-      </p>
-    </div>
-    <div class="home-capability-grid">
-      <a href="reference/language/#identity" class="home-capability">
-        <span class="home-capability__token">@identity</span>
-        <h3>Instructions and policy</h3>
-        <p>Project context, standards, restrictions, examples, and path-specific rules.</p>
-      </a>
-      <a href="features/skills/" class="home-capability">
-        <span class="home-capability__token">@skills</span>
-        <h3>Portable skills</h3>
-        <p>Reusable capabilities with resources, scripts, dependencies, and typed contracts.</p>
-      </a>
-      <a href="features/agents/" class="home-capability">
-        <span class="home-capability__token">@agents</span>
-        <h3>Specialized agents</h3>
-        <p>Roles, models, tool policies, skills, permissions, and MCP access.</p>
-      </a>
-      <a href="features/integrations/" class="home-capability">
-        <span class="home-capability__token">@mcpServers</span>
-        <h3>Tools and integrations</h3>
-        <p>MCP servers and reusable plugins defined once at project level.</p>
-      </a>
-      <a href="features/automation/" class="home-capability">
-        <span class="home-capability__token">@hooks</span>
-        <h3>Automation</h3>
-        <p>Lifecycle hooks, repeatable workflows, and scoped monorepo builds.</p>
-      </a>
-      <a href="guides/policy-engine/" class="home-capability">
-        <span class="home-capability__token">policies</span>
-        <h3>Governance</h3>
-        <p>Inheritance boundaries, protected properties, registry controls, and CI validation.</p>
-      </a>
-    </div>
-  </section>
   <section class="home-scale">
     <div class="home-scale__copy">
       <div class="home-eyebrow">Built for one repo or an organization</div>
@@ -952,6 +869,71 @@ server for our issue tracker</code></pre>
         <a href="/playground/" class="home-button home-button--primary">Open playground</a>
         <a href="examples/" class="home-text-link">Browse examples <span>→</span></a>
       </div>
+    </div>
+  </section>
+  <section class="home-section" id="trust">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">Ready for security review</div>
+      <h2>Nothing runs between your team and its tools</h2>
+      <p>
+        PromptScript is a compiler, not a service. It reads your sources and writes files you review
+        and commit, like any other build step.
+      </p>
+    </div>
+    <div class="home-capability-grid">
+      <a href="guides/ci/" class="home-capability">
+        <span class="home-capability__token">local</span>
+        <h3>Runs on your machine and CI</h3>
+        <p>
+          Compiling needs no hosted service and no proxy. The output is plain files in your
+          repository.
+        </p>
+      </a>
+      <a href="reference/telemetry/" class="home-capability">
+        <span class="home-capability__token">privacy</span>
+        <h3>Your prompts stay yours</h3>
+        <p>
+          Anonymous usage telemetry never includes source, prompts, or file paths. Turn it off with
+          <code>prs telemetry disable</code>.
+        </p>
+      </a>
+      <a href="guides/registry/" class="home-capability">
+        <span class="home-capability__token">supply chain</span>
+        <h3>Pinned and reproducible</h3>
+        <p>
+          Imports are locked by commit and sha256 hash. <code>prs vendor sync</code> supports
+          offline and air-gapped builds.
+        </p>
+      </a>
+      <a href="guides/security/" class="home-capability">
+        <span class="home-capability__token">scanning</span>
+        <h3>Security checks in every build</h3>
+        <p>Prompt injection, encoded payloads, and suspicious links fail validation in CI.</p>
+      </a>
+      <a
+        href="https://github.com/mrwogu/promptscript/blob/main/SECURITY.md"
+        class="home-capability"
+      >
+        <span class="home-capability__token">disclosure</span>
+        <h3>Private vulnerability reports</h3>
+        <p>Report issues through GitHub Security Advisories. The 1.x line gets security fixes.</p>
+      </a>
+      <a href="https://github.com/mrwogu/promptscript/blob/main/LICENSE" class="home-capability">
+        <span class="home-capability__token">license</span>
+        <h3>MIT and open source</h3>
+        <p>
+          Read, fork, and audit every line. Versioned releases with a public changelog on GitHub.
+        </p>
+      </a>
+    </div>
+  </section>
+  <section class="home-section home-faq" id="faq">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">FAQ</div>
+      <h2>Questions teams ask first</h2>
+    </div>
+    <div class="home-faq__list">
+      <!-- faq -->
     </div>
   </section>
   <section class="home-final-cta">
