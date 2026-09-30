@@ -3,6 +3,8 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 // Raw HTML on purpose: Markdown would split the <pre> code windows on blank
 // lines and turn quotes into smart quotes.
 import home from '../components/home.html?raw';
+import cli from '../../../../packages/cli/package.json';
+import { homeJsonLd } from '../seo';
 ---
 
 <StarlightPage
@@ -15,6 +17,8 @@ import home from '../components/home.html?raw';
     editUrl: false,
     lastUpdated: false,
     head: [
+      { tag: 'meta', attrs: { property: 'og:type', content: 'website' } },
+      homeJsonLd(cli.version),
       {
         tag: 'meta',
         attrs: {

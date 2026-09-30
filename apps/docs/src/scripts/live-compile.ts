@@ -119,6 +119,7 @@ function renderResult(panel: HTMLElement, summary: CompileSummary): void {
   const tabs = element('div', 'ps-compile-tabs');
   tabs.setAttribute('role', 'tablist');
   const body = element('div', 'ps-compile-body');
+  body.setAttribute('role', 'tabpanel');
   const buttons = LIVE_TARGETS.map(({ name, label }, index) => {
     const tab = element('button', 'ps-compile-tab', label);
     tab.type = 'button';

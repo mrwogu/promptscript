@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The MkDocs site published /sitemap.xml. Kept so search consoles that still
+     point here find the Astro sitemap. -->
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap><loc>https://getpromptscript.dev/sitemap-0.xml</loc></sitemap>
+</sitemapindex>

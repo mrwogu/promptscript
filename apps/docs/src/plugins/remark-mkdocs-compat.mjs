@@ -1,6 +1,6 @@
 // Keeps docs/ sources readable on GitHub and in editors while Starlight
 // renders them: relative `.md` links, a body H1 and `::::tabs` blocks.
-import { dirname, relative, resolve } from 'node:path';
+import { posix, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const DOCS_DIR = fileURLToPath(new URL('../../../../docs', import.meta.url));
@@ -13,17 +13,19 @@ export function docIdFromEntry(entry) {
   return path.replace(/\/index$/, '');
 }
 
-export function rewriteDocLink(url, filePath) {
+/** Link from the page at `pagePath` (relative to docs/) to its Starlight URL. */
+export function rewriteDocLinkFrom(url, pagePath) {
   const match = /^([^:#?]+\.md)(#.*)?$/.exec(url);
   if (!match || url.startsWith('/')) return url;
-  const target = resolve(dirname(filePath), decodeURI(match[1]));
-  const rel = relative(DOCS_DIR, target).replaceAll('\\', '/');
+  const rel = posix.normalize(posix.join(posix.dirname(pagePath), decodeURI(match[1])));
   const hash = match[2] ?? '';
-  if (rel.startsWith('..')) {
-    return REPO_BLOB + relative(resolve(DOCS_DIR, '..'), target).replaceAll('\\', '/') + hash;
-  }
+  if (rel.startsWith('..')) return REPO_BLOB + posix.normalize(`docs/${rel}`) + hash;
   const id = docIdFromEntry(rel);
   return (id === 'index' ? '/' : `/${id}/`) + hash;
+}
+
+export function rewriteDocLink(url, filePath) {
+  return rewriteDocLinkFrom(url, relative(DOCS_DIR, filePath).replaceAll('\\', '/'));
 }
 
 function walk(node, fn) {

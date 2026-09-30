@@ -48,4 +48,4 @@ User-agent: CCBot
 Allow: /
 
 # Sitemap
-Sitemap: https://getpromptscript.dev/sitemap.xml
+Sitemap: https://getpromptscript.dev/sitemap-index.xml
