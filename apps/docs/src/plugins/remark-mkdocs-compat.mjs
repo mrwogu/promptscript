@@ -17,10 +17,10 @@ export function rewriteDocLink(url, filePath) {
   const match = /^([^:#?]+\.md)(#.*)?$/.exec(url);
   if (!match || url.startsWith('/')) return url;
   const target = resolve(dirname(filePath), decodeURI(match[1]));
-  const rel = relative(DOCS_DIR, target).split('\\').join('/');
+  const rel = relative(DOCS_DIR, target).replaceAll('\\', '/');
   const hash = match[2] ?? '';
   if (rel.startsWith('..')) {
-    return REPO_BLOB + relative(resolve(DOCS_DIR, '..'), target).split('\\').join('/') + hash;
+    return REPO_BLOB + relative(resolve(DOCS_DIR, '..'), target).replaceAll('\\', '/') + hash;
   }
   const id = docIdFromEntry(rel);
   return (id === 'index' ? '/' : `/${id}/`) + hash;
@@ -71,7 +71,7 @@ export function remarkMkdocsCompat() {
   return (tree, file) => {
     // starlight-links-validator maps files to pages via src/content/docs.
     // Sources live in docs/, so hand it the page slug explicitly.
-    const rel = file.path ? relative(DOCS_DIR, file.path).split('\\').join('/') : '';
+    const rel = file.path ? relative(DOCS_DIR, file.path).replaceAll('\\', '/') : '';
     const id = rel && !rel.startsWith('..') ? docIdFromEntry(rel) : undefined;
     if (id && id !== 'index' && file.data.astro?.frontmatter) {
       file.data.astro.frontmatter.slug = id;
