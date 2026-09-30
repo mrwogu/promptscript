@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { usePlaygroundStore } from '../store';
 import { useUrlState } from '../hooks/useUrlState';
-import { VERSION, GITHUB_URL } from '../constants';
+import { VERSION, GITHUB_URL, DOCS_URL, DOCS_LINKS } from '../constants';
 
 export function Header() {
   const isCompiling = usePlaygroundStore((s) => s.isCompiling);
@@ -34,11 +34,24 @@ export function Header() {
   return (
     <header className="flex items-center justify-between px-4 py-2 bg-ps-surface border-b border-ps-border">
       <div className="flex items-center gap-4">
-        <h1 className="text-lg font-semibold flex items-center gap-2">
-          <span className="text-ps-primary">PRS</span>
-          <span>PromptScript Playground</span>
-        </h1>
+        <a
+          href={DOCS_URL}
+          className="flex items-center gap-2 text-lg font-semibold hover:text-white"
+          title="Back to PromptScript docs"
+        >
+          <img src={`${DOCS_URL}assets/images/logo.svg`} alt="" className="w-6 h-6" />
+          <span>PromptScript</span>
+        </a>
+        <span className="text-gray-600">/</span>
+        <h1 className="text-lg font-semibold text-ps-primary">Playground</h1>
         <span className="text-xs text-gray-500">v{VERSION}</span>
+        <nav aria-label="Documentation" className="hidden lg:flex items-center gap-4 ml-4 text-sm">
+          {DOCS_LINKS.map((link) => (
+            <a key={link.href} href={link.href} className="text-gray-400 hover:text-white">
+              {link.label}
+            </a>
+          ))}
+        </nav>
       </div>
 
       <div className="flex items-center gap-4">

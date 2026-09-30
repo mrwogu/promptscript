@@ -60,3 +60,18 @@ describe('Header compilation status', () => {
     expect(screen.queryByText('1 warning')).toBeNull();
   });
 });
+
+describe('Header navigation', () => {
+  it('links back to the docs home and the main docs sections', () => {
+    render(<Header />);
+
+    expect(screen.getByTitle('Back to PromptScript docs')).toHaveAttribute(
+      'href',
+      'https://getpromptscript.dev/'
+    );
+    expect(screen.getByRole('link', { name: 'Get Started' })).toHaveAttribute(
+      'href',
+      'https://getpromptscript.dev/getting-started/'
+    );
+  });
+});
