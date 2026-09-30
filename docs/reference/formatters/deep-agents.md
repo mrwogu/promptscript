@@ -1,6 +1,6 @@
 ---
 title: Deep Agents Formatter
-description: PromptScript output format for Deep Agents
+description: 'Generate Deep Agents config from PromptScript: AGENTS.md. Output files, versions, and supported features.'
 sidebar:
   label: Deep Agents
 ---
@@ -26,7 +26,7 @@ targets:
       version: simple
 ```
 
-## Overview
+## At a Glance
 
 | Property        | Value       |
 | --------------- | ----------- |

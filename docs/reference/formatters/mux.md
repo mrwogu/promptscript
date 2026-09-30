@@ -1,6 +1,6 @@
 ---
 title: Mux Formatter
-description: PromptScript output format for Mux
+description: 'Generate Mux config from PromptScript: .mux/rules/project.md. Output files, versions, and supported features.'
 sidebar:
   label: Mux
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                   |
 | ----------------- | ----------------------- |

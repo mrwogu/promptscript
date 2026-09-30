@@ -1,6 +1,6 @@
 ---
 title: Kilo Code Formatter
-description: PromptScript output format for Kilo Code
+description: 'Generate Kilo Code config from PromptScript: .kilocode/rules/project.md, skills, and MCP servers. Output files, versions, and supported features.'
 sidebar:
   label: Kilo Code
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                    |
 | ----------------- | ---------------------------------------- |

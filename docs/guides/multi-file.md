@@ -1,6 +1,6 @@
 ---
 title: Multi-File Organization
-description: How to organize PromptScript files for complex projects
+description: Organize large PromptScript projects across many .prs files with @use imports, fragments, and a clear directory layout.
 ---
 
 # Multi-File Organization

@@ -1,6 +1,6 @@
 ---
 title: Amp Formatter
-description: PromptScript output format for Amp
+description: 'Generate Amp config from PromptScript: AGENTS.md, skills, and agents. Output files, versions, and supported features.'
 sidebar:
   label: Amp
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property        | Value                                  |
 | --------------- | -------------------------------------- |

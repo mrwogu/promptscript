@@ -1,6 +1,6 @@
 ---
 title: Zed Formatter
-description: PromptScript output format for Zed
+description: 'Generate Zed config from PromptScript: AGENTS.md and MCP servers. Output files, versions, and supported features.'
 sidebar:
   label: Zed
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value       |
 | ----------------- | ----------- |

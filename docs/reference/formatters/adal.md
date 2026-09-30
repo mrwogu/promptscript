@@ -1,6 +1,6 @@
 ---
 title: Adal Formatter
-description: PromptScript output format for Adal
+description: 'Generate Adal config from PromptScript: .adal/rules/project.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: Adal
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                |
 | ----------------- | ------------------------------------ |

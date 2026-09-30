@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Quick start guide for PromptScript - The Prompt-as-Code for AI Instructions
+description: Install the PromptScript CLI, create your first .prs file, and compile native instructions for Claude Code, GitHub Copilot, Cursor, and 47 more AI coding agents.
 ---
 
 # Getting Started

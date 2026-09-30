@@ -1,6 +1,6 @@
 ---
 title: Neovate Formatter
-description: PromptScript output format for Neovate
+description: 'Generate Neovate config from PromptScript: .neovate/rules/project.md. Output files, versions, and supported features.'
 sidebar:
   label: Neovate
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                       |
 | ----------------- | --------------------------- |

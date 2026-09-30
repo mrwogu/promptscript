@@ -1,6 +1,6 @@
 ---
 title: Enterprise Setup
-description: Deploying PromptScript across your organization
+description: 'Roll out PromptScript across an organization: shared registries, layered inheritance, policies, and governed AI instructions per team.'
 ---
 
 # Enterprise Setup

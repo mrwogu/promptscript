@@ -1,6 +1,6 @@
 ---
 title: Inheritance Guide
-description: Building scalable instruction hierarchies with PromptScript
+description: 'Build scalable AI instruction hierarchies with PromptScript @inherit: organization, team, and project layers with predictable merges.'
 ---
 
 # Inheritance Guide

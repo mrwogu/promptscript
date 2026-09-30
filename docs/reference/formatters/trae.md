@@ -1,6 +1,6 @@
 ---
 title: Trae Formatter
-description: PromptScript output format for Trae
+description: 'Generate Trae config from PromptScript: .trae/rules/project_rules.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: Trae
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                |
 | ----------------- | ------------------------------------ |

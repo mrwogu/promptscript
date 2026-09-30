@@ -1,6 +1,6 @@
 ---
 title: Continue Formatter
-description: PromptScript output format for Continue
+description: 'Generate Continue config from PromptScript: .continue/rules/project.md and MCP servers. Output files, versions, and supported features.'
 sidebar:
   label: Continue
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                        |
 | ----------------- | ---------------------------- |

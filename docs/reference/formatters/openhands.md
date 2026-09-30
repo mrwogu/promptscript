@@ -1,6 +1,6 @@
 ---
 title: OpenHands Formatter
-description: PromptScript output format for OpenHands
+description: 'Generate OpenHands config from PromptScript: .openhands/rules/project.md, skills, and MCP servers. Output files, versions, and supported features.'
 sidebar:
   label: OpenHands
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                     |
 | ----------------- | ----------------------------------------- |

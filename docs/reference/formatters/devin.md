@@ -1,6 +1,6 @@
 ---
 title: Devin Formatter
-description: PromptScript output format for Devin
+description: 'Generate Devin config from PromptScript: AGENTS.md. Output files, versions, and supported features.'
 sidebar:
   label: Devin
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property        | Value       |
 | --------------- | ----------- |

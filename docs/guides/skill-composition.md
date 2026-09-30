@@ -1,6 +1,6 @@
 ---
 title: Skill Composition
-description: Compose complex skills from multiple sub-skill files — each phase gets its own context, tools, and security boundaries
+description: Compose complex skills from sub-skill files in PromptScript. Each phase gets its own context, tools, and security boundaries.
 ---
 
 # Skill Composition

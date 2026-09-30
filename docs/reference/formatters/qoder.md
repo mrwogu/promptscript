@@ -1,6 +1,6 @@
 ---
 title: Qoder Formatter
-description: PromptScript output format for Qoder
+description: 'Generate Qoder config from PromptScript: .qoder/rules/project.md. Output files, versions, and supported features.'
 sidebar:
   label: Qoder
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                     |
 | ----------------- | ------------------------- |

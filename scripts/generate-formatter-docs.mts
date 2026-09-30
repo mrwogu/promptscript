@@ -499,6 +499,20 @@ function generateIntegrations(f: FormatterInfo): string {
   return lines.join('\n');
 }
 
+/** Search snippet for a target page: the main file plus what else the target gets. */
+function targetDescription(f: FormatterInfo): string {
+  const parts = [
+    f.outputPath,
+    f.hasSkills && 'skills',
+    f.hasAgents && 'agents',
+    f.hasCommands && 'commands',
+    f.mcpConfigPath && 'MCP servers',
+    f.hookConfigPath && 'hooks',
+  ].filter((part): part is string => typeof part === 'string');
+  const list = new Intl.ListFormat('en', { type: 'conjunction' }).format(parts);
+  return `Generate ${f.displayName} config from PromptScript: ${list}. Output files, versions, and supported features.`;
+}
+
 /** Full page for a target without a hand-written page. */
 function generateTargetPage(f: FormatterInfo): string {
   const enabled = f.defaultEnabled
@@ -508,7 +522,7 @@ function generateTargetPage(f: FormatterInfo): string {
   return [
     '---',
     `title: ${f.displayName} Formatter`,
-    `description: PromptScript output format for ${f.displayName}`,
+    `description: ${JSON.stringify(targetDescription(f))}`,
     'sidebar:',
     `  label: ${f.displayName}`,
     '---',
@@ -534,7 +548,7 @@ function generateTargetPage(f: FormatterInfo): string {
     `      version: ${f.defaultVersion}`,
     '```',
     '',
-    '## Overview',
+    '## At a Glance',
     '',
     generateOverview(f),
     '',

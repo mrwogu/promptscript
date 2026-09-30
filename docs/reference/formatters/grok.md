@@ -1,6 +1,6 @@
 ---
 title: Grok Formatter
-description: PromptScript output format for Grok
+description: 'Generate Grok config from PromptScript: AGENTS.md, skills, agents, commands, MCP servers, and hooks. Output files, versions, and supported features.'
 sidebar:
   label: Grok
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                  |
 | ----------------- | -------------------------------------- |

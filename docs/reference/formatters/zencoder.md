@@ -1,6 +1,6 @@
 ---
 title: Zencoder Formatter
-description: PromptScript output format for Zencoder
+description: 'Generate Zencoder config from PromptScript: .zencoder/rules/project.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: Zencoder
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                    |
 | ----------------- | ---------------------------------------- |

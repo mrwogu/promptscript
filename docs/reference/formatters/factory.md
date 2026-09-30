@@ -1,6 +1,6 @@
 ---
 title: Factory AI Formatter
-description: PromptScript output format for Factory AI
+description: 'Generate Factory AI config from PromptScript: AGENTS.md, droids, skills, commands, MCP servers, and hooks.'
 sidebar:
   label: Factory AI
   order: 1

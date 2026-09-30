@@ -1,6 +1,6 @@
 ---
 title: CLI Reference
-description: PromptScript CLI commands and options
+description: 'Reference for every prs CLI command: init, compile, validate, diff, import, skills, registry, hooks, and their options.'
 ---
 
 # CLI Reference

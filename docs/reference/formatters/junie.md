@@ -1,6 +1,6 @@
 ---
 title: Junie Formatter
-description: PromptScript output format for Junie
+description: 'Generate Junie config from PromptScript: .junie/guidelines.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: Junie
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                 |
 | ----------------- | ------------------------------------- |

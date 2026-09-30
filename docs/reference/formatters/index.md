@@ -1,6 +1,6 @@
 ---
 title: Supported Formatters
-description: All 50 AI agent targets supported by PromptScript
+description: All 50 AI coding agent targets supported by PromptScript, with output paths, skills, agents, commands, MCP, and hooks support.
 sidebar:
   label: Platform Matrix
   order: 0

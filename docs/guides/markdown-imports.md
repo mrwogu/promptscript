@@ -1,6 +1,6 @@
 ---
 title: Markdown Imports
-description: Import skills directly from .md files using @use — no external tools needed
+description: Import skills directly from .md files with @use in PromptScript. No extra tools needed.
 ---
 
 # Markdown Imports

@@ -1,6 +1,6 @@
 ---
 title: Command Code Formatter
-description: PromptScript output format for Command Code
+description: 'Generate Command Code config from PromptScript: .commandcode/rules/project.md, skills, and commands. Output files, versions, and supported features.'
 sidebar:
   label: Command Code
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                       |
 | ----------------- | ------------------------------------------- |

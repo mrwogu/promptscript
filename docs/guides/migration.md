@@ -1,6 +1,6 @@
 ---
 title: Migration Guide
-description: Migrating existing AI instructions to PromptScript
+description: Migrate existing CLAUDE.md, Copilot, and Cursor instructions to PromptScript step by step, then compile them back to every AI tool.
 ---
 
 # Migration Guide

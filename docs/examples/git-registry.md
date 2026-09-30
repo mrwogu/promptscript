@@ -1,6 +1,6 @@
 ---
 title: Git Registry
-description: Using Git repositories as PromptScript registries
+description: Use a Git repository as a PromptScript registry to share base configs, skills, and guards across projects and teams.
 ---
 
 # Git Registry

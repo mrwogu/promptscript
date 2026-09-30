@@ -1,6 +1,6 @@
 ---
 title: Qwen Code Formatter
-description: PromptScript output format for Qwen Code
+description: 'Generate Qwen Code config from PromptScript: .qwen/rules/project.md, skills, and MCP servers. Output files, versions, and supported features.'
 sidebar:
   label: Qwen Code
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                |
 | ----------------- | ------------------------------------ |

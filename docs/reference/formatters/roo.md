@@ -1,6 +1,6 @@
 ---
 title: Roo Code Formatter
-description: PromptScript output format for Roo Code
+description: 'Generate Roo Code config from PromptScript: .roorules and MCP servers. Output files, versions, and supported features.'
 sidebar:
   label: Roo Code
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property        | Value       |
 | --------------- | ----------- |

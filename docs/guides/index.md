@@ -1,6 +1,6 @@
 ---
 title: Guides
-description: PromptScript guides and best practices
+description: 'Guides for composing and reusing PromptScript: inheritance, multi-file projects, Markdown imports, and shared registries.'
 ---
 
 # Guides

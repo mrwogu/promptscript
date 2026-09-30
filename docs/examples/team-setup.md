@@ -1,6 +1,6 @@
 ---
 title: Team Setup Example
-description: Multi-project setup with shared team configuration
+description: Share one team PromptScript configuration across many projects with inheritance, and keep per-project overrides small.
 ---
 
 # Team Setup Example

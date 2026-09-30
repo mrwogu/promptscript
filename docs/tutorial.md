@@ -1,6 +1,6 @@
 ---
 title: 'Enterprise Tutorial: Building Layered AI Infrastructure'
-description: Enterprise tutorial for organization, team, and project layers
+description: 'Step-by-step enterprise tutorial: build organization, team, and project layers in PromptScript and compile them to native AI agent configuration.'
 ---
 
 # Enterprise Tutorial: Building Layered AI Infrastructure

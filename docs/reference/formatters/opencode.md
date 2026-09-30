@@ -1,6 +1,6 @@
 ---
 title: OpenCode Formatter
-description: PromptScript output format for OpenCode
+description: 'Generate OpenCode config from PromptScript: OPENCODE.md, commands, skills, agents, MCP servers, and native plugin hooks.'
 sidebar:
   label: OpenCode
   order: 1
