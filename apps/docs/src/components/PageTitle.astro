@@ -1,8 +1,65 @@
 ---
 import Default from '@astrojs/starlight/components/PageTitle.astro';
+import { markdownUrl } from '../llms';
 
 // Splash pages (the homepage) render their own hero heading.
-const isSplash = Astro.locals.starlightRoute.entry.data.template === 'splash';
+const { entry } = Astro.locals.starlightRoute;
+const isSplash = entry.data.template === 'splash';
+// TypeDoc pages have no Markdown copy.
+const markdown = entry.id.startsWith('api-reference') ? undefined : markdownUrl(entry.id);
 ---
 
 {!isSplash && <Default />}
+{
+  !isSplash && markdown && (
+    <div class="ps-page-actions">
+      <button type="button" data-copy-page={markdown}>
+        Copy page
+      </button>
+      <a href={markdown}>View as Markdown</a>
+    </div>
+  )
+}
+
+<script>
+  // Copies the Markdown source, ready to paste into an AI chat or an agent prompt.
+  document.querySelectorAll<HTMLButtonElement>('[data-copy-page]').forEach((button) => {
+    const label = button.textContent;
+    button.addEventListener('click', async () => {
+      try {
+        const url = new URL(button.dataset.copyPage ?? '').pathname;
+        const response = await fetch(url);
+        await navigator.clipboard.writeText(await response.text());
+        button.textContent = 'Copied';
+      } catch {
+        button.textContent = 'Copy failed';
+      }
+      setTimeout(() => (button.textContent = label), 2000);
+    });
+  });
+</script>
+
+<style>
+  .ps-page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  .ps-page-actions > * {
+    padding: 0.1875rem 0.625rem;
+    color: var(--sl-color-gray-2);
+    background: none;
+    border: 1px solid var(--sl-color-hairline-shade);
+    border-radius: 999px;
+    font: inherit;
+    font-size: var(--sl-text-xs);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .ps-page-actions > *:hover {
+    color: var(--sl-color-text-accent);
+    border-color: var(--sl-color-text-accent);
+  }
+</style>
