@@ -1,0 +1,172 @@
+<!doctype html>
+<!--
+  Source of public/assets/images/og-image.png (1200x630).
+  To regenerate, open this file in a browser at 1200x630 and take a screenshot,
+  for example with Playwright: page.setViewportSize({ width: 1200, height: 630 }).
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        width: 1200px;
+        height: 630px;
+        margin: 0;
+        overflow: hidden;
+        color: #f8fafc;
+        background:
+          radial-gradient(circle at 15% 10%, rgba(109, 40, 217, 0.35), transparent 45%),
+          radial-gradient(circle at 90% 95%, rgba(8, 145, 178, 0.28), transparent 45%), #0b1220;
+        font-family:
+          Inter,
+          'Segoe UI',
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+      .wrap {
+        display: grid;
+        grid-template-columns: 1.05fr 1fr;
+        gap: 48px;
+        align-items: center;
+        height: 100%;
+        padding: 64px 72px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 30px;
+        font-weight: 750;
+      }
+      .brand img {
+        width: 56px;
+        height: 56px;
+      }
+      h1 {
+        margin: 36px 0 20px;
+        font-size: 62px;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+      }
+      h1 span {
+        background: linear-gradient(112deg, #c4b5fd, #60a5fa 60%, #22d3ee);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      p {
+        margin: 0;
+        color: #9aa9bf;
+        font-size: 24px;
+        line-height: 1.4;
+      }
+      .visual {
+        display: grid;
+        grid-template-columns: 170px 1fr;
+        gap: 22px;
+        align-items: center;
+      }
+      .chain {
+        display: grid;
+        gap: 18px;
+        padding: 18px 14px;
+        text-align: center;
+        background:
+          linear-gradient(#0f172a, #0f172a) padding-box,
+          linear-gradient(135deg, #6d28d9, #2563eb, #0891b2) border-box;
+        border: 2px solid transparent;
+        border-radius: 18px;
+      }
+      .chain div {
+        padding: 8px 6px;
+        background: rgba(139, 92, 246, 0.16);
+        border-radius: 9px;
+        font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .chain small {
+        display: block;
+        margin-top: 2px;
+        color: #9aa9bf;
+        font-family: Inter, system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .files {
+        display: grid;
+        gap: 12px;
+      }
+      .file {
+        padding: 12px 14px;
+        background: #0f172a;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-left: 4px solid var(--c);
+        border-radius: 12px;
+      }
+      .file strong {
+        font-size: 17px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 8px;
+      }
+      .chips b {
+        padding: 2px 8px;
+        color: #a7f3d0;
+        background: #064e3b;
+        border-radius: 999px;
+        font-size: 12px;
+      }
+      .more {
+        color: #9aa9bf;
+        font-size: 15px;
+        font-weight: 700;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div>
+        <div class="brand"><img src="../public/assets/images/logo.svg" alt="" />PromptScript</div>
+        <h1>Write your AI rules once.<br /><span>Every agent follows them.</span></h1>
+        <p>Open-source compiler for AI coding agent rules. Native files for 50 tools.</p>
+      </div>
+      <div class="visual">
+        <div class="chain">
+          <div>@company/base<small>organization</small></div>
+          <div>@team/web<small>team</small></div>
+          <div>project.prs<small>this repo</small></div>
+        </div>
+        <div class="files">
+          <div class="file" style="--c: #d97757">
+            <strong>Claude Code</strong>
+            <div class="chips">
+              <b>instructions</b><b>skills</b><b>agents</b><b>MCP</b><b>hooks</b>
+            </div>
+          </div>
+          <div class="file" style="--c: #8957e5">
+            <strong>GitHub Copilot</strong>
+            <div class="chips">
+              <b>instructions</b><b>skills</b><b>agents</b><b>MCP</b><b>hooks</b>
+            </div>
+          </div>
+          <div class="file" style="--c: #10a37f">
+            <strong>Codex</strong>
+            <div class="chips">
+              <b>instructions</b><b>skills</b><b>agents</b><b>MCP</b><b>hooks</b><b>plugins</b>
+            </div>
+          </div>
+          <div class="more">+ 47 more targets</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
