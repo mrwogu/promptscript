@@ -4,14 +4,21 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 // lines and turn quotes into smart quotes.
 import home from '../components/home.html?raw';
 import cli from '../../../../packages/cli/package.json';
-import { homeJsonLd } from '../seo';
+import { faqJsonLd, homeJsonLd } from '../seo';
+import { HOME_FAQ, faqHtml } from '../faq';
+import { projectStats, statsLine } from '../stats';
+
+const proof = statsLine(await projectStats());
+const html = home
+  .replace('<!-- proof -->', proof ? `<p class="home-proof-line">${proof}</p>` : '')
+  .replace('<!-- faq -->', faqHtml(HOME_FAQ));
 ---
 
 <StarlightPage
   frontmatter={{
-    title: 'Agent Platform Configuration as Code',
+    title: 'One Source for Claude, Copilot and Cursor Rules',
     description:
-      'Define AI instructions, skills, agents, MCP servers, hooks, workflows, and policies once. Compile native configuration for 50 AI coding agent platforms.',
+      'PromptScript is an open-source compiler for AI coding agent rules. Write instructions, skills, agents, and MCP servers once and get native files for 50 tools.',
     template: 'splash',
     tableOfContents: false,
     editUrl: false,
@@ -19,18 +26,19 @@ import { homeJsonLd } from '../seo';
     head: [
       { tag: 'meta', attrs: { property: 'og:type', content: 'website' } },
       homeJsonLd(cli.version),
+      faqJsonLd(HOME_FAQ),
       {
         tag: 'meta',
         attrs: {
           name: 'keywords',
           content:
-            'PromptScript, agent platform, configuration as code, AI instructions, AI agents, AI skills, MCP servers, GitHub Copilot, Claude Code, Cursor, Factory AI, Codex, AI governance, PromptOps',
+            'PromptScript, CLAUDE.md, AGENTS.md, Cursor rules, copilot-instructions.md, AI coding agent rules, prompts as code, AI skills, MCP servers, Claude Code, GitHub Copilot, Codex, Gemini CLI, AI governance',
         },
       },
     ],
   }}
 >
-  <Fragment set:html={home} />
+  <Fragment set:html={html} />
   <script>
     import { initHomeMotion } from '../scripts/home-motion';
     initHomeMotion();

@@ -1333,7 +1333,6 @@ pre.init-demo__file-preview-content {
 }
 
 .sl-markdown-content .home-section__intro h2,
-.sl-markdown-content .home-native h2,
 .sl-markdown-content .home-scale h2,
 .sl-markdown-content .home-proof h2,
 .sl-markdown-content .home-final-cta h2 {
@@ -1346,7 +1345,6 @@ pre.init-demo__file-preview-content {
 }
 
 .sl-markdown-content .home-section__intro p,
-.sl-markdown-content .home-native__copy > p,
 .sl-markdown-content .home-scale__copy > p,
 .sl-markdown-content .home-proof__copy > p,
 .sl-markdown-content .home-final-cta p {
@@ -1534,19 +1532,6 @@ pre.init-demo__file-preview-content {
 .home-code-error {
   color: #f87171;
   font-weight: 700;
-}
-
-.home-native {
-  display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(480px, 1.2fr);
-  align-items: center;
-  gap: 3.75rem;
-  padding-top: 4.375rem;
-  padding-bottom: 4.375rem;
-}
-
-.home-native__copy {
-  max-width: 510px;
 }
 
 .home-check-list,
@@ -1958,13 +1943,11 @@ pre.init-demo__file-preview-content {
     margin: 0 auto;
   }
 
-  .home-native,
   .home-scale {
     grid-template-columns: 1fr;
     gap: 3.75rem;
   }
 
-  .home-native__copy,
   .home-scale__copy {
     max-width: 720px;
   }
@@ -2005,13 +1988,6 @@ pre.init-demo__file-preview-content {
   .home-compare__arrow {
     justify-self: center;
     transform: rotate(90deg);
-  }
-
-  .home-native {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-    padding-top: 3.125rem;
-    padding-bottom: 3.125rem;
   }
 
   .home-target-card {
@@ -2745,4 +2721,53 @@ pre.init-demo__file-preview-content {
 
 #models .home-code-window {
   align-self: center;
+}
+
+/* Hero headline, proof line, FAQ */
+
+.sl-markdown-content .home-hero h1,
+.sl-markdown-content .home-page h2 {
+  text-wrap: balance;
+}
+
+.sl-markdown-content .home-proof-line {
+  margin: 0.875rem 0 0;
+  color: var(--home-ink);
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.home-faq__list {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.sl-markdown-content .home-faq__item {
+  margin: 0;
+  padding: 0;
+  background: var(--home-panel);
+  border: 1px solid var(--home-line);
+  border-radius: 0.875rem;
+}
+
+.sl-markdown-content .home-faq__item summary {
+  padding: 1rem 1.25rem;
+  color: var(--home-ink);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.sl-markdown-content .home-faq__item[open] summary {
+  padding-bottom: 0.5rem;
+}
+
+.sl-markdown-content .home-faq__item p {
+  margin: 0;
+  padding: 0 1.25rem 1.125rem;
+  color: var(--home-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
