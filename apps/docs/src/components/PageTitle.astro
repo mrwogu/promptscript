@@ -29,6 +29,7 @@ const markdown = entry.id.startsWith('api-reference') ? undefined : markdownUrl(
       try {
         const url = new URL(button.dataset.copyPage ?? '').pathname;
         const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         await navigator.clipboard.writeText(await response.text());
         button.textContent = 'Copied';
       } catch {

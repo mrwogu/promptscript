@@ -7,7 +7,10 @@ vi.mock('@astrojs/starlight/route-data', () => ({
 const { onRequest } = await import('./route-middleware');
 
 interface TestRoute {
-  entry: { id: string; data: { title: string; description?: string; lastUpdated?: boolean } };
+  entry: {
+    id: string;
+    data: { title: string; description?: string; lastUpdated?: boolean; prev?: boolean };
+  };
   sidebar: unknown[];
   head: { tag: string; attrs?: Record<string, string>; content?: string }[];
   editUrl?: URL;
@@ -15,9 +18,10 @@ interface TestRoute {
   pagination?: { prev?: unknown; next?: unknown };
 }
 
-function run(pathname: string, id: string): TestRoute {
+function run(pathname: string, id: string, prev?: boolean): TestRoute {
   const route: TestRoute = {
-    entry: { id, data: { title: 'Page', description: 'About' } },
+    entry: { id, data: { title: 'Page', description: 'About', prev } },
+    pagination: { prev: 'from frontmatter' },
     sidebar: [
       {
         type: 'group',
@@ -38,6 +42,12 @@ function run(pathname: string, id: string): TestRoute {
 }
 
 describe('route middleware', () => {
+  it('keeps pagination set in frontmatter', () => {
+    const route = run('/tutorial/', 'tutorial', false);
+
+    expect(route.pagination).toEqual({ prev: 'from frontmatter' });
+  });
+
   it('filters the sidebar and adds Markdown link, date and JSON-LD to docs pages', () => {
     const route = run('/tutorial/', 'tutorial');
 
