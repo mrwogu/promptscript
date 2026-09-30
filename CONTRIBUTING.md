@@ -56,6 +56,7 @@ promptscript/
 │   ├── playground/     # Web-based playground UI (private)
 │   ├── server/         # Local dev server for playground (private)
 │   └── cli/            # CLI application
+├── apps/docs/          # Docs site (Astro Starlight, reads docs/)
 ├── docs/               # Documentation
 └── examples/           # Example projects
 ```
@@ -257,6 +258,26 @@ describe('parseVersion', () => {
 - Add JSDoc comments to public APIs
 - Include examples for complex functionality
 - Update CHANGELOG.md following Keep a Changelog format
+
+### Docs Site
+
+Pages are Markdown files in `docs/`. The site in `apps/docs` (Astro
+Starlight) reads them from there, the sidebar is set in
+`apps/docs/astro.config.mjs`.
+
+```bash
+pnpm docs:serve   # local dev server
+pnpm docs:build   # full build, fails on broken internal links
+```
+
+- Use `:::note`, `:::tip`, `:::caution` for callouts and `::::tabs` with
+  `:::tab[Label]` for tabs. Relative `.md` links work as usual.
+- Target pages in `docs/reference/formatters/` come from `pnpm docs:formatters`.
+  Only the seven hand written pages (Claude Code, GitHub Copilot, Cursor,
+  Antigravity, Factory AI, Gemini CLI, OpenCode) are edited by hand, and only
+  outside the generated markers.
+- Snippets with a "Try in Playground" badge (`pnpm playground:links`) also get
+  a "Compile here" button that compiles them in the browser.
 
 ## Updating the Model Catalog
 
