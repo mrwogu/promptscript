@@ -19,6 +19,12 @@
   --md-code-hl-keyword-color: #7c3aed;
   --md-code-hl-function-color: #2563eb;
   --md-code-hl-comment-color: #6b7280;
+
+  /* Header tabs (src/components/Header.astro). The header grows by one tab
+     row, so the logo and the mobile menu button stay sized to the first row. */
+  --ps-nav-base: 3.5rem;
+  --ps-tabs-height: 2.5rem;
+  --sl-nav-height: calc(var(--ps-nav-base) + var(--ps-tabs-height));
 }
 
 :root[data-theme='dark'] {
@@ -30,10 +36,6 @@
   --sl-color-accent-low: #ede9fe;
   --sl-color-accent: #6d28d9;
   --sl-color-accent-high: #3b0764;
-}
-
-.site-title img {
-  height: 2rem;
 }
 
 /* ::::tabs blocks rendered by remark-mkdocs-compat (CSS only, no JS) */
@@ -167,13 +169,7 @@
   color: var(--sl-color-red-high);
 }
 
-/* Header tabs (src/components/Header.astro). The header grows by one tab row,
-   so the logo and the mobile menu button stay sized to the first row. */
-:root {
-  --ps-nav-base: 3.5rem;
-  --ps-tabs-height: 2.5rem;
-  --sl-nav-height: calc(var(--ps-nav-base) + var(--ps-tabs-height));
-}
+/* Header tabs, see the variables at the top */
 @media (min-width: 50rem) {
   :root {
     --ps-nav-base: 4rem;
