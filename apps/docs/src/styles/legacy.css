@@ -2357,7 +2357,6 @@ pre.init-demo__file-preview-content {
   padding-right: 2.25rem;
   color: var(--home-ink);
   white-space: nowrap;
-  animation: home-marquee 70s linear infinite;
 }
 
 .home-marquee:hover .home-marquee__track {
@@ -2447,6 +2446,10 @@ pre.init-demo__file-preview-content {
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .home-marquee__track {
+    animation: home-marquee 70s linear infinite;
+  }
+
   .home-hero__visual::before {
     animation: home-drift 14s ease-in-out infinite;
   }
