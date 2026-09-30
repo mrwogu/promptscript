@@ -5,8 +5,9 @@
       <h1>Write your AI rules once.<br /><span>Every agent follows them.</span></h1>
       <p class="home-hero__lead">
         Stop copy-pasting CLAUDE.md, Cursor rules, and Copilot instructions across repositories.
-        PromptScript turns them into versioned code: inherited from your organization, scanned for
-        prompt injection, and compiled to native files for 50 AI coding agents.
+        Define instructions, skills, agents, MCP servers, and hooks in <code>.prs</code> sources
+        inherited like code, scan them for prompt injection, and compile native files for 50 AI
+        coding agents.
       </p>
       <div class="home-hero__actions">
         <a href="getting-started/" class="home-button home-button--primary">Get started</a>
@@ -20,12 +21,16 @@
     <div
       class="home-hero__visual"
       role="img"
-      aria-label="You edit one project.prs file. PromptScript generates CLAUDE.md, Copilot instructions, Cursor rules, AGENTS.md, GEMINI.md, Windsurf rules, and 44 more targets."
+      aria-label="You edit PromptScript sources inherited like code: company base, team layer, and project. PromptScript generates native instructions, skills, agents, MCP servers, hooks, and plugins for Claude Code, GitHub Copilot, Codex, Factory AI, Gemini CLI, Windsurf, and 44 more targets."
     >
       <div class="home-converge__source">
         <img src="/assets/images/logo.svg" alt="" width="48" height="48" />
-        <code>project.prs</code>
-        <span>The only file you edit</span>
+        <ol class="home-converge__chain">
+          <li><code>@company/base</code><span>organization</span></li>
+          <li><code>@team/web</code><span>team</span></li>
+          <li><code>project.prs</code><span>this repo</span></li>
+        </ol>
+        <p>Your sources, inherited like code</p>
       </div>
       <div class="home-converge__lines" aria-hidden="true">
         <svg viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -39,23 +44,32 @@
       </div>
       <ul class="home-converge__files">
         <li style="--sx: -190px; --sy: 40px; --sr: -10deg; --c: #d97757">
-          <i></i><code>CLAUDE.md</code><span>Claude Code</span><em>generated</em>
+          <i></i><strong>Claude Code</strong><code>CLAUDE.md</code>
+          <span><b>instructions</b><b>skills</b><b>agents</b><b>MCP</b><b>hooks</b></span>
         </li>
         <li style="--sx: -70px; --sy: 95px; --sr: 7deg; --c: #8957e5">
-          <i></i><code>.github/copilot-instructions.md</code><span>GitHub Copilot</span
-          ><em>generated</em>
+          <i></i><strong>GitHub Copilot</strong><code>.github/copilot-instructions.md</code>
+          <span><b>instructions</b><b>skills</b><b>agents</b><b>MCP</b><b>hooks</b></span>
         </li>
-        <li style="--sx: -230px; --sy: -15px; --sr: 5deg; --c: #64748b">
-          <i></i><code>.cursor/rules/project.mdc</code><span>Cursor</span><em>generated</em>
+        <li style="--sx: -230px; --sy: -15px; --sr: 5deg; --c: #10a37f">
+          <i></i><strong>Codex</strong><code>AGENTS.md</code>
+          <span
+            ><b>instructions</b><b>skills</b><b>agents</b><b>MCP</b><b>hooks</b><b>plugins</b></span
+          >
         </li>
-        <li style="--sx: -120px; --sy: -75px; --sr: -6deg; --c: #10a37f">
-          <i></i><code>AGENTS.md</code><span>Codex</span><em>generated</em>
+        <li style="--sx: -120px; --sy: -75px; --sr: -6deg; --c: #0891b2">
+          <i></i><strong>Factory AI</strong><code>.factory/droids/</code>
+          <span
+            ><b>instructions</b><b>skills</b><b>droids</b><b>MCP</b><b>hooks</b><b>plugins</b></span
+          >
         </li>
         <li style="--sx: -40px; --sy: -125px; --sr: 9deg; --c: #4285f4">
-          <i></i><code>GEMINI.md</code><span>Gemini CLI</span><em>generated</em>
+          <i></i><strong>Gemini CLI</strong><code>GEMINI.md</code>
+          <span><b>instructions</b><b>skills</b><b>MCP</b><b>hooks</b></span>
         </li>
         <li style="--sx: -210px; --sy: -160px; --sr: -4deg; --c: #0ea5a4">
-          <i></i><code>.windsurf/rules/project.md</code><span>Windsurf</span><em>generated</em>
+          <i></i><strong>Windsurf</strong><code>.windsurf/rules/</code>
+          <span><b>instructions</b><b>skills</b><b>MCP</b><b>hooks</b></span>
         </li>
       </ul>
       <p class="home-converge__more">+ 44 more targets, written for you</p>
@@ -122,7 +136,7 @@
       <div class="home-compare__col home-compare__col--with">
         <h3>With PromptScript</h3>
         <ul class="home-check-list">
-          <li>One <code>.prs</code> source, native output for 50 agents</li>
+          <li><code>.prs</code> sources inherited like code, native output for 50 agents</li>
           <li>Company standards inherited by every repository, not copied</li>
           <li>Changes reviewed in Git and validated in CI</li>
           <li>Built-in security scanner for every prompt and imported skill</li>
@@ -133,7 +147,7 @@
     <div class="home-stats">
       <div>
         <strong data-count="50">50</strong>
-        <span>AI coding agents from one source</span>
+        <span>AI coding agents from the same sources</span>
       </div>
       <div>
         <strong data-count="40" data-suffix="+">40+</strong>
