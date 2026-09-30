@@ -123,6 +123,20 @@ describe('cardsToMarkdown', () => {
     );
   });
 
+  it('leaves code examples untouched', () => {
+    const body = [
+      '```html',
+      '<div class="ref-list">',
+      '<strong>kept</strong>',
+      '</div>',
+      '```',
+      '',
+      'Inline `<strong>kept</strong>` too.',
+    ].join('\n');
+
+    expect(cardsToMarkdown(body, 'guides')).toBe(body);
+  });
+
   it('drops demo terminals with all nested markup', () => {
     const body = [
       'Before.',

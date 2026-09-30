@@ -60,11 +60,36 @@ function dropDiv(body: string, className: string): string {
   return kept.join('\n');
 }
 
+/** Applies `transform` to the text between fenced code blocks, fences stay as written. */
+function outsideFences(body: string, transform: (part: string) => string): string {
+  const parts: string[] = [];
+  let chunk: string[] = [];
+  let inFence = false;
+  const flush = (convert: boolean): void => {
+    if (chunk.length > 0) parts.push(convert ? transform(chunk.join('\n')) : chunk.join('\n'));
+    chunk = [];
+  };
+  for (const line of body.split('\n')) {
+    const isFence = line.trimStart().startsWith('```');
+    if (isFence && !inFence) flush(true);
+    chunk.push(line);
+    if (isFence && inFence) flush(false);
+    if (isFence) inFence = !inFence;
+  }
+  flush(!inFence);
+  return parts.join('\n');
+}
+
 /**
  * Hub pages use HTML cards for readers. Agents get the same links as a plain
- * list, without icons, demo terminals, or wrapper markup.
+ * list, without icons, demo terminals, or wrapper markup. Code examples are
+ * left alone.
  */
 export function cardsToMarkdown(body: string, pageId: string): string {
+  return outsideFences(body, (part) => convertCards(part, pageId));
+}
+
+function convertCards(body: string, pageId: string): string {
   const pageUrl = pageId === 'index' ? `${SITE}/` : `${SITE}/${pageId}/`;
   let result = body.replaceAll(
     /<a href="([^"]+)" class="(?:ref-item|formatter-card)">([\s\S]*?)<\/a>/g,
@@ -93,8 +118,9 @@ export function cardsToMarkdown(body: string, pageId: string): string {
       /^(?:<div class="(?:ref-list|formatter-cards)">|<\/div>|<!-- prettier-ignore -->)$\n?/gm,
       ''
     )
-    .replaceAll(/^<p class="[^"]*">(.*)<\/p>$/gm, '$1')
-    .replaceAll(/<\/?strong>/g, '**')
+    .replaceAll(/^<p class="[^"]*">(.*)<\/p>$/gm, (_p, inner: string) =>
+      inner.replaceAll(/<\/?strong>/g, '**')
+    )
     .replaceAll(/^(- \[.*)\n\n(?=- \[)/gm, '$1\n')
     .replaceAll(/\n{3,}/g, '\n\n');
 }
