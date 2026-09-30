@@ -346,6 +346,77 @@
       </div>
     </div>
   </section>
+  <section class="home-section" id="skills">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">prs skills</div>
+      <h2>Install skills like packages</h2>
+      <p>
+        Pull a skill from any Git repository or local folder. PromptScript validates it, pins the
+        exact commit, and compiles it into the skill folder of every agent you use.
+      </p>
+    </div>
+    <div class="home-compose__layout">
+      <div class="home-code-window" data-typing>
+        <div class="home-window-bar">
+          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>terminal</span>
+          <span class="home-window-status">output</span>
+        </div>
+        <pre><code><span class="home-code-comment">$</span> prs skills add <span class="home-code-reference">github.com/anthropics/skills/skills/pdf</span>
+<span class="home-code-string">✔ Skill added</span>
+&#32;&#32;✓ <span class="home-code-keyword">@use</span> <span class="home-code-reference">github.com/anthropics/skills/skills/pdf</span>
+&#32;&#32;&#32;&#32;Lockfile updated: promptscript.lock
+
+<span class="home-code-comment">$</span> prs compile
+&#32;&#32;✓ .claude/skills/pdf/SKILL.md
+&#32;&#32;✓ .github/skills/pdf/SKILL.md
+&#32;&#32;✓ .github/skills/pdf/scripts/fill_fillable_fields.py
+&#32;&#32;✓ .factory/skills/pdf/SKILL.md
+<span class="home-code-string">✔ Compilation successful</span></code></pre>
+      </div>
+      <div class="home-compose__ops">
+        <a href="reference/cli/#prs-skills-add" class="home-compose__op">
+          <span class="home-compose__op-token">add</span>
+          <div>
+            <h3>From any Git repo or folder</h3>
+            <p>
+              HTTPS, SSH, or a local path. SKILL.md is checked against the Agent Skills spec before
+              anything is written.
+            </p>
+          </div>
+        </a>
+        <a href="reference/cli/#prs-skills-add" class="home-compose__op">
+          <span class="home-compose__op-token">lock</span>
+          <div>
+            <h3>Pinned and verified</h3>
+            <p>
+              The commit and a sha256 integrity hash go to <code>promptscript.lock</code>. Plain
+              HTTP sources are rejected.
+            </p>
+          </div>
+        </a>
+        <a href="features/skills/" class="home-compose__op">
+          <span class="home-compose__op-token">compile</span>
+          <div>
+            <h3>Native in every agent</h3>
+            <p>
+              One skill, with its scripts and resources, lands in each agent's own skill folder.
+            </p>
+          </div>
+        </a>
+        <a href="reference/cli/#prs-skills" class="home-compose__op">
+          <span class="home-compose__op-token">update</span>
+          <div>
+            <h3>Update or remove in one command</h3>
+            <p>
+              <code>prs skills update</code> refreshes lock entries, <code>prs skills remove</code>
+              drops the import and its lock entry.
+            </p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
   <section class="home-section">
     <div class="home-section__intro">
       <div class="home-eyebrow">Skill composition</div>
