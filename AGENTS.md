@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- PromptScript 2026-08-06T10:43:22.131Z | source: .promptscript/project.prs | target: factory - do not edit -->
+<!-- PromptScript 2026-09-30T14:16:51.158Z | source: .promptscript/project.prs | target: factory - do not edit -->
 
 ## Project
 
@@ -104,7 +104,7 @@ flowchart TB
 
 ### Syntax Highlighting
 
-- keepInSync: when adding or changing block keywords (e.g. @knowledge, @guards), always update ALL THREE syntax highlighters: (1) Pygments lexer: docs_extensions/promptscript_lexer.py, (2) VS Code TextMate grammar: apps/vscode/syntaxes/promptscript.tmLanguage.json, (3) Playground Monaco language: packages/playground/src/utils/prs-language.ts
+- keepInSync: when adding or changing block keywords (e.g. @knowledge, @guards), always update BOTH syntax highlighters: (1) TextMate grammar: apps/vscode/syntaxes/promptscript.tmLanguage.json (VS Code and the docs site via Shiki), (2) Playground Monaco language: packages/playground/src/utils/prs-language.ts
 
 ### Workflow
 

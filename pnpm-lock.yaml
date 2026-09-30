@@ -103,6 +103,9 @@ importers:
       prettier:
         specifier: ~3.9.9
         version: 3.9.9
+      shiki:
+        specifier: ^4.4.3
+        version: 4.4.3
       ts-json-schema-generator:
         specifier: ^2.9.0
         version: 2.9.0
