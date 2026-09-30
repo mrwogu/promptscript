@@ -7,6 +7,23 @@ description: 'Reference for every prs CLI command: init, compile, validate, diff
 
 Complete reference for the PromptScript command-line interface.
 
+## Commands at a Glance
+
+| Task                          | Command                                                                                                        |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Start a project               | [`prs init`](#prs-init)                                                                                        |
+| Bring existing instructions   | [`prs import`](#prs-import), [`prs migrate`](#prs-migrate)                                                     |
+| Generate native files         | [`prs compile`](#prs-compile), [`prs build`](#prs-build)                                                       |
+| Check before commit or in CI  | [`prs validate`](#prs-validate), [`prs check`](#prs-check), [`prs diff`](#prs-diff)                            |
+| Understand the result         | [`prs explain`](#prs-explain), [`prs inspect`](#prs-inspect), [`prs resolve`](#prs-resolve)                    |
+| Share and pin dependencies    | [`prs registry`](#prs-registry), [`prs pull`](#prs-pull), [`prs lock`](#prs-lock), [`prs update`](#prs-update) |
+| Work offline                  | [`prs vendor`](#prs-vendor)                                                                                    |
+| Manage skills                 | [`prs skills`](#prs-skills)                                                                                    |
+| Connect AI tool hooks         | [`prs hooks`](#prs-hooks), [`prs hook`](cli/hook.md)                                                           |
+| Edit in the online playground | [`prs serve`](#prs-serve)                                                                                      |
+| Keep up to date               | [`prs upgrade`](#prs-upgrade), [`prs update-check`](#prs-update-check)                                         |
+| Control telemetry             | [`prs telemetry`](#prs-telemetry)                                                                              |
+
 ## Installation
 
 ::::tabs
