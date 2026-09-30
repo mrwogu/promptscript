@@ -1,6 +1,11 @@
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { docIdFromEntry, remarkMkdocsCompat, rewriteDocLink } from './remark-mkdocs-compat.mjs';
+import {
+  docIdFromEntry,
+  remarkMkdocsCompat,
+  rewriteDocLink,
+  rewriteDocLinkFrom,
+} from './remark-mkdocs-compat.mjs';
 
 const DOCS = resolve(__dirname, '../../../../docs');
 
@@ -10,6 +15,17 @@ describe('docIdFromEntry', () => {
     expect(docIdFromEntry('guides/index.md')).toBe('guides');
     expect(docIdFromEntry('api-reference/core/src/README.md')).toBe('api-reference/core/src');
     expect(docIdFromEntry('reference/cli/hooks.md')).toBe('reference/cli/hooks');
+  });
+});
+
+describe('rewriteDocLinkFrom', () => {
+  it('resolves links from a docs-relative page path', () => {
+    expect(rewriteDocLinkFrom('../reference/cli.md#deno', 'guides/ci.md')).toBe(
+      '/reference/cli/#deno'
+    );
+    expect(rewriteDocLinkFrom('../../SECURITY.md', 'guides/ci.md')).toBe(
+      'https://github.com/mrwogu/promptscript/blob/main/SECURITY.md'
+    );
   });
 });
 
