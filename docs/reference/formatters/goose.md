@@ -1,6 +1,6 @@
 ---
 title: Goose Formatter
-description: PromptScript output format for Goose
+description: 'Generate Goose config from PromptScript: .goosehints, skills, and MCP servers. Output files, versions, and supported features.'
 sidebar:
   label: Goose
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property        | Value                                 |
 | --------------- | ------------------------------------- |

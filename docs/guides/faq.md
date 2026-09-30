@@ -1,6 +1,6 @@
 ---
 title: FAQ & Troubleshooting
-description: Frequently asked questions about PromptScript
+description: 'Answers to common PromptScript questions: supported AI tools, installation, inheritance, private registries, CI/CD, and common errors.'
 ---
 
 # FAQ & Troubleshooting

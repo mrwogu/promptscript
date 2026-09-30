@@ -1,6 +1,6 @@
 ---
 title: Reference
-description: PromptScript reference documentation
+description: 'PromptScript reference: language specification, block shapes, CLI commands, configuration file, model catalog, and telemetry.'
 ---
 
 # Reference

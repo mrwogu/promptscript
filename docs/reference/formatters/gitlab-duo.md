@@ -1,6 +1,6 @@
 ---
 title: GitLab Duo Formatter
-description: PromptScript output format for GitLab Duo
+description: 'Generate GitLab Duo config from PromptScript: AGENTS.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: GitLab Duo
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property        | Value                          |
 | --------------- | ------------------------------ |

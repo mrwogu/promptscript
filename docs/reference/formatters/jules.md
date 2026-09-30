@@ -1,6 +1,6 @@
 ---
 title: Jules Formatter
-description: PromptScript output format for Jules
+description: 'Generate Jules config from PromptScript: AGENTS.md. Output files, versions, and supported features.'
 sidebar:
   label: Jules
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property        | Value       |
 | --------------- | ----------- |

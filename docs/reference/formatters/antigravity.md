@@ -1,6 +1,6 @@
 ---
 title: Antigravity Formatter
-description: PromptScript output format for Antigravity
+description: 'Generate Antigravity config from PromptScript: rules with activation types, workflows, skills, and MCP servers.'
 sidebar:
   label: Antigravity
   order: 1

@@ -1,6 +1,6 @@
 ---
 title: OpenClaw Formatter
-description: PromptScript output format for OpenClaw
+description: 'Generate OpenClaw config from PromptScript: INSTRUCTIONS.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: OpenClaw
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                    |
 | ----------------- | ---------------------------------------- |

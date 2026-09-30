@@ -1,6 +1,6 @@
 ---
 title: CodeBuddy Formatter
-description: PromptScript output format for CodeBuddy
+description: 'Generate CodeBuddy config from PromptScript: .codebuddy/rules/project.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: CodeBuddy
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                     |
 | ----------------- | ----------------------------------------- |

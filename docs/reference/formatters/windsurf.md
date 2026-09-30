@@ -1,6 +1,6 @@
 ---
 title: Windsurf Formatter
-description: PromptScript output format for Windsurf
+description: 'Generate Windsurf config from PromptScript: .windsurf/rules/project.md, skills, MCP servers, and hooks. Output files, versions, and supported features.'
 sidebar:
   label: Windsurf
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                    |
 | ----------------- | ---------------------------------------- |

@@ -1,6 +1,6 @@
 ---
 title: Kode Formatter
-description: PromptScript output format for Kode
+description: 'Generate Kode config from PromptScript: .kode/rules/project.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: Kode
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                |
 | ----------------- | ------------------------------------ |

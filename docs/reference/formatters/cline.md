@@ -1,6 +1,6 @@
 ---
 title: Cline Formatter
-description: PromptScript output format for Cline
+description: 'Generate Cline config from PromptScript: .clinerules and MCP servers. Output files, versions, and supported features.'
 sidebar:
   label: Cline
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property        | Value         |
 | --------------- | ------------- |

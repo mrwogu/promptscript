@@ -1,6 +1,6 @@
 ---
 title: Cursor Formatter
-description: PromptScript output format for Cursor
+description: 'Generate Cursor rules from PromptScript: .cursor/rules MDC files with frontmatter, commands, skills, MCP servers, and hooks.'
 sidebar:
   label: Cursor
   order: 1

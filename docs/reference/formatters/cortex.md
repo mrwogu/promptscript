@@ -1,6 +1,6 @@
 ---
 title: Cortex Formatter
-description: PromptScript output format for Cortex
+description: 'Generate Cortex config from PromptScript: .cortex/rules/project.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: Cortex
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                  |
 | ----------------- | -------------------------------------- |

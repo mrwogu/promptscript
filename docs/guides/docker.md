@@ -1,6 +1,6 @@
 ---
 title: Docker
-description: Running PromptScript CLI in Docker containers
+description: 'Run the PromptScript CLI in Docker: image tags, volume mounts, environment variables, and validate or compile commands in containers.'
 ---
 
 # Docker

@@ -1,6 +1,6 @@
 ---
 title: Pochi Formatter
-description: PromptScript output format for Pochi
+description: 'Generate Pochi config from PromptScript: .pochi/rules/project.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: Pochi
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                 |
 | ----------------- | ------------------------------------- |

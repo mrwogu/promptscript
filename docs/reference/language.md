@@ -1,6 +1,6 @@
 ---
 title: Language Reference
-description: Complete PromptScript language specification
+description: 'Complete PromptScript language specification: file structure, blocks, values, inheritance, imports, extensions, and diagnostics.'
 ---
 
 # Language Reference

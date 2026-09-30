@@ -1,6 +1,6 @@
 ---
 title: ForgeCode Formatter
-description: PromptScript output format for ForgeCode
+description: 'Generate ForgeCode config from PromptScript: AGENTS.md. Output files, versions, and supported features.'
 sidebar:
   label: ForgeCode
 ---
@@ -26,7 +26,7 @@ targets:
       version: simple
 ```
 
-## Overview
+## At a Glance
 
 | Property        | Value       |
 | --------------- | ----------- |

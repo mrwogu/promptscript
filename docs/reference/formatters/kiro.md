@@ -1,6 +1,6 @@
 ---
 title: Kiro CLI Formatter
-description: PromptScript output format for Kiro CLI
+description: 'Generate Kiro CLI config from PromptScript: .kiro/steering/project.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: Kiro CLI
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                |
 | ----------------- | ------------------------------------ |

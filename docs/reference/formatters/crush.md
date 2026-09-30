@@ -1,6 +1,6 @@
 ---
 title: Crush Formatter
-description: PromptScript output format for Crush
+description: 'Generate Crush config from PromptScript: AGENTS.md, skills, and MCP servers. Output files, versions, and supported features.'
 sidebar:
   label: Crush
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                 |
 | ----------------- | ------------------------------------- |

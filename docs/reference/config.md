@@ -1,6 +1,6 @@
 ---
 title: Configuration
-description: PromptScript configuration file reference
+description: 'Reference for promptscript.yaml: targets, output versions, registries, inputs, validation, formatting, and other project settings.'
 ---
 
 # Configuration

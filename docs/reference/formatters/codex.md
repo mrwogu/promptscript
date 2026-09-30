@@ -1,6 +1,6 @@
 ---
 title: Codex Formatter
-description: PromptScript output format for Codex
+description: 'Generate Codex config from PromptScript: AGENTS.md, skills, agents, MCP servers, and hooks. Output files, versions, and supported features.'
 sidebar:
   label: Codex
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                  |
 | ----------------- | -------------------------------------- |

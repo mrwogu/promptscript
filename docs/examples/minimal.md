@@ -1,6 +1,6 @@
 ---
 title: Minimal Example
-description: The simplest PromptScript configuration
+description: 'The smallest working PromptScript project: one .prs file compiled to GitHub Copilot instructions, then extended to Claude Code and Cursor.'
 ---
 
 # Minimal Example

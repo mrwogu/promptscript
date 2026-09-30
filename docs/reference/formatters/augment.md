@@ -1,6 +1,6 @@
 ---
 title: Augment Formatter
-description: PromptScript output format for Augment
+description: 'Generate Augment config from PromptScript: .augment/rules/project.md and agents. Output files, versions, and supported features.'
 sidebar:
   label: Augment
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                             |
 | ----------------- | --------------------------------- |

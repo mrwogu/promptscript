@@ -1,6 +1,6 @@
 ---
 title: Gemini CLI Formatter
-description: PromptScript output format for Gemini CLI
+description: 'Generate Gemini CLI config from PromptScript: GEMINI.md, custom commands, skills, MCP servers, and hooks.'
 sidebar:
   label: Gemini CLI
   order: 1

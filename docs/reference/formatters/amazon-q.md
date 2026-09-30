@@ -1,6 +1,6 @@
 ---
 title: Amazon Q Formatter
-description: PromptScript output format for Amazon Q
+description: 'Generate Amazon Q config from PromptScript: AGENTS.md. Output files, versions, and supported features.'
 sidebar:
   label: Amazon Q
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property        | Value       |
 | --------------- | ----------- |

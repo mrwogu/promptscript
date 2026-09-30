@@ -1,6 +1,6 @@
 ---
 title: Enterprise Example
-description: Full enterprise deployment with governance
+description: 'Full enterprise PromptScript setup: organization base, compliance and security layers, design system, and governed project configs.'
 ---
 
 # Enterprise Example

@@ -1,6 +1,6 @@
 ---
 title: Testing Documentation
-description: PromptScript testing mechanisms and quality assurance
+description: 'How PromptScript is tested: golden files, parity matrix, and feature coverage tests that keep formatter output consistent.'
 ---
 
 # Testing Documentation

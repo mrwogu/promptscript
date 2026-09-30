@@ -1,6 +1,6 @@
 ---
 title: CI/CD Integration
-description: Integrating PromptScript validation into CI/CD pipelines
+description: 'Validate PromptScript in CI/CD: run prs validate and compile checks in GitHub Actions, GitLab CI, and other pipelines.'
 ---
 
 # CI/CD Integration

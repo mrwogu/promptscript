@@ -1,6 +1,6 @@
 ---
 title: Hermes Agent Formatter
-description: PromptScript output format for Hermes Agent
+description: 'Generate Hermes Agent config from PromptScript: AGENTS.md. Output files, versions, and supported features.'
 sidebar:
   label: Hermes Agent
 ---
@@ -26,7 +26,7 @@ targets:
       version: simple
 ```
 
-## Overview
+## At a Glance
 
 | Property        | Value       |
 | --------------- | ----------- |

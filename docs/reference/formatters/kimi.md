@@ -1,6 +1,6 @@
 ---
 title: Kimi Formatter
-description: PromptScript output format for Kimi
+description: 'Generate Kimi config from PromptScript: AGENTS.md. Output files, versions, and supported features.'
 sidebar:
   label: Kimi
 ---
@@ -26,7 +26,7 @@ targets:
       version: simple
 ```
 
-## Overview
+## At a Glance
 
 | Property        | Value       |
 | --------------- | ----------- |

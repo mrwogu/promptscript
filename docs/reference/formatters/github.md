@@ -1,6 +1,6 @@
 ---
 title: GitHub Copilot Formatter
-description: PromptScript output format for GitHub Copilot
+description: 'Generate GitHub Copilot config from PromptScript: copilot-instructions.md, path instructions, prompts, skills, agents, and MCP.'
 sidebar:
   label: GitHub Copilot
   order: 1

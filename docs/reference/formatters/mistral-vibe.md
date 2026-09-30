@@ -1,6 +1,6 @@
 ---
 title: Mistral Vibe Formatter
-description: PromptScript output format for Mistral Vibe
+description: 'Generate Mistral Vibe config from PromptScript: .vibe/rules/project.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: Mistral Vibe
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                |
 | ----------------- | ------------------------------------ |

@@ -1,6 +1,6 @@
 ---
 title: Pi Formatter
-description: PromptScript output format for Pi
+description: 'Generate Pi config from PromptScript: .pi/rules/project.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: Pi
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                              |
 | ----------------- | ---------------------------------- |

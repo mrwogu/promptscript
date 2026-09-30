@@ -1,6 +1,6 @@
 ---
 title: Warp Formatter
-description: PromptScript output format for Warp
+description: 'Generate Warp config from PromptScript: AGENTS.md. Output files, versions, and supported features.'
 sidebar:
   label: Warp
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property        | Value       |
 | --------------- | ----------- |

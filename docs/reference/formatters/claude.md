@@ -1,6 +1,6 @@
 ---
 title: Claude Code Formatter
-description: PromptScript output format for Claude Code
+description: 'Generate Claude Code config from PromptScript: CLAUDE.md, .claude/skills, subagents, commands, CLAUDE.local.md, MCP servers, and hooks.'
 sidebar:
   label: Claude Code
   order: 1

@@ -1,6 +1,6 @@
 ---
 title: Examples
-description: PromptScript configuration examples
+description: 'Runnable PromptScript examples: minimal setup, composition, hooks, agents, skills, team and enterprise layouts, and Git registries.'
 ---
 
 # Examples

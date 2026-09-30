@@ -1,6 +1,6 @@
 ---
 title: MCPJam Formatter
-description: PromptScript output format for MCPJam
+description: 'Generate MCPJam config from PromptScript: .mcpjam/rules/project.md and skills. Output files, versions, and supported features.'
 sidebar:
   label: MCPJam
 ---
@@ -26,7 +26,7 @@ targets:
       version: full
 ```
 
-## Overview
+## At a Glance
 
 | Property          | Value                                  |
 | ----------------- | -------------------------------------- |
