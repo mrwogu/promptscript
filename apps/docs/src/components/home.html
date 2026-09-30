@@ -472,6 +472,87 @@
       </div>
     </div>
   </section>
+  <section class="home-section" id="plugins">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">Agents, MCP servers, and plugins</div>
+      <h2>Build agent plugins once, ship everywhere</h2>
+      <p>
+        Describe MCP servers, specialized agents, and the plugin that bundles them in one file. Each
+        target gets its own native MCP config, agent files, and plugin manifest.
+      </p>
+    </div>
+    <div class="home-compose__layout">
+      <div class="home-code-window">
+        <div class="home-window-bar">
+          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>incident.prs</span>
+          <span class="home-window-status">source</span>
+        </div>
+        <pre><code><span class="home-code-keyword">@mcpServers</span> {
+&#32;&#32;observability: {
+&#32;&#32;&#32;&#32;transport: <span class="home-code-string">"http"</span>
+&#32;&#32;&#32;&#32;url: <span class="home-code-reference">"https://mcp.example.com/api"</span>
+&#32;&#32;}
+}
+
+<span class="home-code-keyword">@agents</span> {
+&#32;&#32;incident-responder: {
+&#32;&#32;&#32;&#32;description: <span class="home-code-string">"Investigate incidents"</span>
+&#32;&#32;&#32;&#32;mcpServers: [<span class="home-code-string">"observability"</span>]
+&#32;&#32;&#32;&#32;skills: [<span class="home-code-string">"triage"</span>]
+&#32;&#32;}
+}
+
+<span class="home-code-keyword">@plugins</span> {
+&#32;&#32;incident-suite: {
+&#32;&#32;&#32;&#32;version: <span class="home-code-string">"1.0.0"</span>
+&#32;&#32;&#32;&#32;skills: [<span class="home-code-string">"triage"</span>]
+&#32;&#32;&#32;&#32;mcpServers: [<span class="home-code-string">"observability"</span>]
+&#32;&#32;}
+}</code></pre>
+      </div>
+      <div class="home-native__files">
+        <div class="home-target-card">
+          <div><strong>Claude Code</strong><span>MCP, agent, skill</span></div>
+          <code>.mcp.json</code>
+          <code>.claude/agents/incident-responder.md</code>
+          <code>.claude/skills/triage/SKILL.md</code>
+        </div>
+        <div class="home-target-card">
+          <div><strong>Factory AI</strong><span>MCP, droid, plugin</span></div>
+          <code>.factory/mcp.json</code>
+          <code>.factory/droids/incident-responder.md</code>
+          <code>.factory/plugins.json</code>
+        </div>
+        <div class="home-target-card">
+          <div><strong>Codex</strong><span>MCP, agent, plugin</span></div>
+          <code>.codex/mcp.json</code>
+          <code>.codex/agents/incident-responder.toml</code>
+          <code>.codex/plugins.json</code>
+        </div>
+        <div class="home-target-card">
+          <div><strong>GitHub Copilot</strong><span>MCP, agent, skill</span></div>
+          <code>.vscode/mcp.json</code>
+          <code>.github/agents/incident-responder.md</code>
+          <code>.github/skills/triage/SKILL.md</code>
+        </div>
+      </div>
+    </div>
+    <ul class="home-check-list home-plugins__notes">
+      <li>stdio, HTTP, and SSE servers, with tool allow and deny lists</li>
+      <li>Agents get only the MCP servers and skills you give them</li>
+      <li>
+        When a target cannot express a field, the compiler warns (PS4003) instead of dropping it
+        silently
+      </li>
+    </ul>
+    <p class="home-plugins__links">
+      <a href="features/agents/" class="home-text-link">Agents guide <span>→</span></a>
+      <a href="features/integrations/" class="home-text-link"
+        >MCP servers and plugins <span>→</span></a
+      >
+    </p>
+  </section>
   <section class="home-section home-native" id="native-output">
     <div class="home-native__copy">
       <div class="home-eyebrow">Native, not lowest common denominator</div>
