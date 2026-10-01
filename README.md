@@ -3,10 +3,11 @@
 
 # PromptScript
 
-**Agent platform configuration as code**
+**Write your AI rules once. Every agent follows them.**
 
-_Define instructions, skills, agents, MCP servers, hooks, workflows, and policies once. Compile
-native configuration for 50 AI coding platforms._
+_One source for Claude Code, GitHub Copilot, Cursor, and 47 more tools. Define instructions,
+skills, agents, MCP servers, hooks, and policies once, inherit them like code, and compile native
+files for every tool._
 
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/mrwogu/promptscript/graph/badge.svg?token=MPUCPQLVWR)](https://codecov.io/github/mrwogu/promptscript)
@@ -28,7 +29,7 @@ native configuration for 50 AI coding platforms._
 
 ## What is PromptScript?
 
-PromptScript is an open-source language and compiler for AI agent configuration. `.prs` sources
+PromptScript is an open-source compiler for AI coding agent rules. `.prs` sources
 define instructions, project standards, restrictions, skills, agents, MCP servers, hooks, and
 workflows, while `promptscript.yaml` configures targets and extension-compliance policies. The
 compiler turns them into the native files each AI tool already knows: `CLAUDE.md` for Claude Code,
@@ -76,6 +77,8 @@ source. See the [full comparison](https://getpromptscript.dev/guides/vs-manual/)
 - [One Language, Complete Platform](#one-language-complete-platform)
 - [Compose Instead of Copying](#compose-instead-of-copying)
 - [Portable Skills, Native Agents](#portable-skills-native-agents)
+- [Name a Model Once](#name-a-model-once)
+- [Built-In Security Scanner](#built-in-security-scanner)
 - [50 Built-In Targets](#50-built-in-targets)
 - [Built for Repositories and Organizations](#built-for-repositories-and-organizations)
 - [Adopt Without a Rewrite](#adopt-without-a-rewrite)
@@ -322,6 +325,78 @@ PromptScript validates Agent Skills metadata, resolves dependencies and resource
 native skill path for each selected platform. Agents can reference those skills and receive
 target-native model, reasoning, sandbox, tool, permission, and MCP settings.
 
+## Name a Model Once
+
+Each tool spells model names differently. Write an alias like `opus` or a full model id, and
+PromptScript writes the name each target expects:
+
+```promptscript
+@meta {
+  id: "checkout-service"
+  syntax: "1.5.0"
+}
+
+@agents {
+  reviewer: {
+    description: "Review pull requests"
+    model: "opus"
+    content: "Review changed code, tests, and operational impact."
+  }
+}
+```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaODGoA3CIxjyxEuAE92GQrPkBGCgFYKABhOsAvmLHcMAc04sOGFTQWoYAxgAd11ZUXEJQSl4RmoINCwINlsQACUIiGjBNDUoKDCYAEc1eCD3RMESZmSoHOYSuHrElnZAnPzIqMFGHAxWAKlh5pg6QQ44INmxyfbdbCzWDHKIMgxGLAour08QDwBdBkDqc3wiUnIYKloQBj1dOA38O1OgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+| Target         | Writes                         |
+| :------------- | :----------------------------- |
+| Claude Code    | `opus`                         |
+| GitHub Copilot | `Claude Opus 5.5`              |
+| Factory AI     | `claude-opus-5-5`              |
+| Cursor         | `claude-opus-5-5`              |
+| Codex          | omitted, with a PS4004 warning |
+
+When a target cannot run the model, the compiler warns instead of writing a value the tool would
+reject. Claude Code picks the release for an alias itself. Other targets get the current release
+from the catalog and move on when you upgrade PromptScript and compile again. See the
+[model catalog and aliases](https://getpromptscript.dev/reference/models/).
+
+## Built-In Security Scanner
+
+Instruction files and imported skills are a prompt injection surface. `prs validate` scans every
+instruction, skill, and imported file before anything is written. Encoded payloads are decoded
+first, so hiding an attack in hex or Base64 does not get it through:
+
+```text
+$ prs validate --strict
+✖ Validation failed
+✗ Blocked pattern detected:
+  ignore\s+(all\s+)?previous\s+instructions
+  at project.prs:8:1
+✗ PS012: Malicious content detected
+  in raw hex (spaced): Prompt injection
+  Decoded: "IGNORE SAFETY RULES"
+  at project.prs:16:14
+✗ PS010: URL shortener detected:
+  http://bit.ly/deploy-help
+  at project.prs:16:14
+```
+
+| Rule  | Catches                                                                        |
+| :---- | :----------------------------------------------------------------------------- |
+| PS005 | Injection phrases like "ignore previous instructions"                          |
+| PS011 | Fake authority overrides and "bypass all safety" instructions                  |
+| PS012 | Payloads hidden in Base64, hex, URL encoding, HTML entities, ROT13, and 4 more |
+| PS013 | Path traversal in `@use` declarations                                          |
+| PS014 | Right-to-left overrides, zero-width characters, and homoglyphs                 |
+| PS010 | Plain HTTP links, link shorteners, and credentials in URLs                     |
+
+Run it in CI with `prs validate --strict` so a poisoned skill fails the build, not the agent. See
+the [security guide](https://getpromptscript.dev/guides/security/).
+
 ## 50 Built-In Targets
 
 PromptScript ships 50 output targets:
@@ -338,6 +413,11 @@ See exact output paths and feature support in the
 
 ## Built for Repositories and Organizations
 
+- **Runs locally** - PromptScript is a compiler, not a service. No hosted backend and no proxy
+  between your team and its tools, the output is plain files you review and commit.
+- **Your prompts stay yours** - anonymous usage telemetry never includes source, prompts, or file
+  paths. Turn it off with `prs telemetry disable` or `DO_NOT_TRACK=1`. See
+  [what is collected](https://getpromptscript.dev/reference/telemetry/).
 - **Git-native governance** - review source and deterministic generated diffs in pull requests.
 - **Private registries** - share versioned standards through local, HTTP, or Git registries with
   SSH and token-based authentication.
@@ -384,16 +464,19 @@ with `includePromptScriptSkill: false`.
 
 ## Documentation
 
-| Resource                                                                         | Description                                                 |
-| :------------------------------------------------------------------------------- | :---------------------------------------------------------- |
-| [Getting Started](https://getpromptscript.dev/getting-started/)                  | First project from initialization to native output          |
-| [Agent Platform](https://getpromptscript.dev/features/)                          | Skills, agents, MCP, plugins, hooks, workflows, and targets |
-| [Language Reference](https://getpromptscript.dev/reference/language/)            | Complete PromptScript syntax                                |
-| [CLI Reference](https://getpromptscript.dev/reference/cli/)                      | Commands and options                                        |
-| [Configuration Reference](https://getpromptscript.dev/reference/config/)         | Targets, registries, builds, policies, and formatting       |
-| [Anonymous Usage Telemetry](https://getpromptscript.dev/reference/telemetry/)    | Collected fields, delivery, and opt-out controls            |
-| [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/) | Syntax, block shape, and hook migration guide               |
-| [Enterprise Guide](https://getpromptscript.dev/guides/enterprise/)               | Organization-wide adoption and governance                   |
+| Resource                                                                      | Description                                                 |
+| :---------------------------------------------------------------------------- | :---------------------------------------------------------- |
+| [Getting Started](https://getpromptscript.dev/getting-started/)               | First project from initialization to native output          |
+| [Agent Platform](https://getpromptscript.dev/features/)                       | Skills, agents, MCP, plugins, hooks, workflows, and targets |
+| [Language Reference](https://getpromptscript.dev/reference/language/)         | Complete PromptScript syntax                                |
+| [CLI Reference](https://getpromptscript.dev/reference/cli/)                   | Commands and options                                        |
+| [Configuration Reference](https://getpromptscript.dev/reference/config/)      | Targets, registries, builds, policies, and formatting       |
+| [Security Guide](https://getpromptscript.dev/guides/security/)                | Validation rules, injection detection, and safe registries  |
+| [Model Catalog](https://getpromptscript.dev/reference/models/)                | Model aliases and per-target model names                    |
+| [Anonymous Usage Telemetry](https://getpromptscript.dev/reference/telemetry/) | Collected fields, delivery, and opt-out controls            |
+| [Glossary](https://getpromptscript.dev/glossary/)                             | Every PromptScript term in one place                        |
+| [FAQ](https://getpromptscript.dev/guides/faq/)                                | Common questions about adoption, targets, and security      |
+| [Enterprise Guide](https://getpromptscript.dev/guides/enterprise/)            | Organization-wide adoption and governance                   |
 
 ## Contributing
 
