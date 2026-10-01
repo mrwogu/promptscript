@@ -425,9 +425,9 @@ requires Git registries to already exist in vendor mode or a valid local cache.
 
 ## Built-In Security Scanner
 
-`prs validate` scans every instruction, skill, and imported file for prompt injection before
-anything is written. Encoded payloads are decoded first, so an attack hidden in hex or Base64 does
-not get through:
+`prs validate` scans the instructions and skills in your entry file and everything it imports for
+prompt injection, before anything is written. Encoded payloads are decoded first, so an attack
+hidden in hex or Base64 does not get through:
 
 ```text
 $ prs validate --strict
@@ -447,13 +447,14 @@ $ prs validate --strict
 | Rule  | Catches                                                                        |
 | :---- | :----------------------------------------------------------------------------- |
 | PS005 | Injection phrases like "ignore previous instructions"                          |
-| PS011 | Fake authority overrides and "bypass all safety" instructions                  |
+| PS011 | Fake authority overrides and "bypass all safety checks" instructions           |
 | PS012 | Payloads hidden in Base64, hex, URL encoding, HTML entities, ROT13, and 4 more |
 | PS013 | Path traversal in `@use` declarations                                          |
 | PS014 | Right-to-left overrides, zero-width characters, and homoglyphs                 |
 | PS010 | Plain HTTP links, link shorteners, and credentials in URLs                     |
 
-Run `prs validate --strict` in CI so a poisoned skill fails the build, not the agent. See the
+`--strict` turns warnings into errors. Run `prs validate --strict` in CI so a poisoned skill fails
+the build, not the agent. See the
 [security guide](https://getpromptscript.dev/guides/security/).
 
 ## CLI Commands
