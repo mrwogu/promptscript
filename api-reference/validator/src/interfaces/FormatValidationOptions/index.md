@@ -6,7 +6,7 @@
 
 # Interface: FormatValidationOptions
 
-Defined in: [validator/src/format.ts:6](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/format.ts#L6)
+Defined in: [validator/src/format.ts:6](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/format.ts#L6)
 
 Options for formatting validation messages.
 
@@ -16,7 +16,7 @@ Options for formatting validation messages.
 
 > `optional` **color?**: `boolean`
 
-Defined in: [validator/src/format.ts:8](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/format.ts#L8)
+Defined in: [validator/src/format.ts:8](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/format.ts#L8)
 
 Include color codes (ANSI)
 
@@ -26,7 +26,7 @@ Include color codes (ANSI)
 
 > `optional` **includeRuleId?**: `boolean`
 
-Defined in: [validator/src/format.ts:10](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/format.ts#L10)
+Defined in: [validator/src/format.ts:10](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/format.ts#L10)
 
 Include rule ID in output
 
@@ -36,6 +36,6 @@ Include rule ID in output
 
 > `optional` **includeSuggestions?**: `boolean`
 
-Defined in: [validator/src/format.ts:12](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/format.ts#L12)
+Defined in: [validator/src/format.ts:12](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/format.ts#L12)
 
 Include suggestions

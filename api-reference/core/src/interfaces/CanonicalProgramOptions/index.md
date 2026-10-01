@@ -6,7 +6,7 @@
 
 # Interface: CanonicalProgramOptions
 
-Defined in: [core/src/canonical-ast.ts:56](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/canonical-ast.ts#L56)
+Defined in: [core/src/canonical-ast.ts:56](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/canonical-ast.ts#L56)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [core/src/canonical-ast.ts:56](https://github.com/mrwogu/promptscrip
 
 > `readonly` `optional` **agentProvenance?**: readonly `object`[]
 
-Defined in: [core/src/canonical-ast.ts:59](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/canonical-ast.ts#L59)
+Defined in: [core/src/canonical-ast.ts:59](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/canonical-ast.ts#L59)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [core/src/canonical-ast.ts:59](https://github.com/mrwogu/promptscrip
 
 > `readonly` **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/canonical-ast.ts:61](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/canonical-ast.ts#L61)
+Defined in: [core/src/canonical-ast.ts:61](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/canonical-ast.ts#L61)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [core/src/canonical-ast.ts:61](https://github.com/mrwogu/promptscrip
 
 > `readonly` `optional` **meta?**: `object`
 
-Defined in: [core/src/canonical-ast.ts:57](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/canonical-ast.ts#L57)
+Defined in: [core/src/canonical-ast.ts:57](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/canonical-ast.ts#L57)
 
 #### fields
 
@@ -90,7 +90,7 @@ Node type discriminator
 
 > `readonly` **operations**: readonly [`ProgramOperation`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ProgramOperation/index.md)[]
 
-Defined in: [core/src/canonical-ast.ts:58](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/canonical-ast.ts#L58)
+Defined in: [core/src/canonical-ast.ts:58](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/canonical-ast.ts#L58)
 
 ***
 
@@ -98,4 +98,4 @@ Defined in: [core/src/canonical-ast.ts:58](https://github.com/mrwogu/promptscrip
 
 > `readonly` `optional` **syntaxFeatures?**: readonly `object`[]
 
-Defined in: [core/src/canonical-ast.ts:60](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/canonical-ast.ts#L60)
+Defined in: [core/src/canonical-ast.ts:60](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/canonical-ast.ts#L60)

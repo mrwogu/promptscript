@@ -6,20 +6,22 @@
 
 # Getting Started
 
-Start treating your AI instructions as managed infrastructure.
+Install the `prs` CLI, describe your AI rules in `.prs` files, and compile them into the
+files each AI coding tool reads, such as `CLAUDE.md` or `.github/copilot-instructions.md`.
 
 ## Choose Your Path
 
-| Starting point | Next step |
-| -------------- | --------- |
-| New repository | Continue with [Installation](#installation) and [Interactive Initialization](#interactive-initialization) |
-| In a hurry | Skip the demo and go to [Quick Start: New Projects](#quick-start-new-projects) |
-| Existing instruction files | Use [Quick Start: Migrating Existing Projects](#quick-start-migrating-existing-projects) |
-| PromptScript 1.15 project | Follow [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/index.md) |
-| Need language semantics | Open [Language Reference](https://getpromptscript.dev/reference/language/index.md) |
+| Your situation                             | Go to                                                                          |
+| ------------------------------------------ | ------------------------------------------------------------------------------ |
+| New to PromptScript, new or empty project  | [Installation](#installation), then [Quick Start: New Projects](#quick-start-new-projects) |
+| You already have `CLAUDE.md`, `AGENTS.md`, Copilot or Cursor rules | [Quick Start: Migrating Existing Projects](#quick-start-migrating-existing-projects) |
+| You want to try it without installing      | [Playground](/playground/)                                                     |
+| You use PromptScript 1.15                  | [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/index.md)                         |
+| You look up syntax                         | [Language Reference](https://getpromptscript.dev/reference/language/index.md)                                    |
 
-New projects should reach a validated compile before adding registries,
-enterprise policy, or target-specific customization.
+New words like target, block, or registry are explained in the [Glossary](https://getpromptscript.dev/glossary/index.md).
+Reach a validated compile first, then add registries, enterprise policy, or target-specific
+customization.
 
 ## Installation
 
@@ -67,59 +69,6 @@ with no runtime dependencies. See the
 ## Interactive Initialization
 
 PromptScript guides you through setup with an interactive initializer that auto-detects your tech stack and helps you inherit standards from your organization's registry.
-
-<!-- prettier-ignore -->
-<div class="init-demo" id="init-demo">
-<div class="init-demo__wrapper">
-<div class="init-demo__terminal">
-<div class="init-demo__header">
-<span class="init-demo__dot init-demo__dot--red"></span>
-<span class="init-demo__dot init-demo__dot--yellow"></span>
-<span class="init-demo__dot init-demo__dot--green"></span>
-<span class="init-demo__title">Terminal</span>
-<button class="init-demo__replay" title="Replay animation">↻ Replay</button>
-</div>
-<div class="init-demo__output"></div>
-</div>
-<div class="init-demo__generated">
-<div class="init-demo__generated-header">
-<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 7L9 19l-5.5-5.5l1.41-1.41L9 16.17L19.59 5.59z"/></svg>
-Generated Files
-</div>
-<div class="init-demo__files-grid">
-<div class="init-demo__file-preview">
-<div class="init-demo__file-preview-header">promptscript.yaml</div>
-<pre class="init-demo__file-preview-content"><span class="key">id:</span> <span class="str">my-app</span>
-<span class="key">syntax:</span> <span class="str">"1.5.0"</span>
-
-<span class="key">targets:</span>
-  - <span class="str">github</span>
-  - <span class="str">claude</span>
-  - <span class="str">cursor</span>
-
-<span class="key">validation:</span>
-  <span class="key">rules:</span>
-    <span class="key">empty-block:</span> <span class="str">warning</span></pre>
-</div>
-<div class="init-demo__file-preview">
-<div class="init-demo__file-preview-header">.promptscript/project.prs</div>
-<pre class="init-demo__file-preview-content"><span class="kw">@meta</span> {
-  <span class="key">id:</span> <span class="str">"my-app"</span>
-  <span class="key">syntax:</span> <span class="str">"1.5.0"</span>
-}
-
-<span class="kw">@inherit</span> <span class="str">@company/react-app</span>
-
-<span class="kw">@context</span> {
-  <span class="key">framework:</span> <span class="str">"React 18"</span>
-  <span class="key">language:</span> <span class="str">"TypeScript"</span>
-  <span class="key">testing:</span> <span class="str">"Vitest"</span>
-}</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
 
 **Key features:**
 
@@ -317,22 +266,6 @@ git commit -m "chore: initialize promptscript infrastructure"
 ## Quick Start: Migrating Existing Projects
 
 Already have `CLAUDE.md`, `.cursorrules`, or `copilot-instructions.md`? Use AI-assisted migration to convert your existing instructions to PromptScript.
-
-<!-- prettier-ignore -->
-<div class="init-demo" id="migrate-demo">
-<div class="init-demo__wrapper">
-<div class="init-demo__terminal">
-<div class="init-demo__header">
-<span class="init-demo__dot init-demo__dot--red"></span>
-<span class="init-demo__dot init-demo__dot--yellow"></span>
-<span class="init-demo__dot init-demo__dot--green"></span>
-<span class="init-demo__title">Terminal</span>
-<button class="init-demo__replay" title="Replay animation">↻ Replay</button>
-</div>
-<div class="init-demo__output"></div>
-</div>
-</div>
-</div>
 
 **Key features:**
 
@@ -671,53 +604,139 @@ troubleshooting.
 
 ## What's Next?
 
-<div class="ref-list">
+- [Tutorial: Team Layers](https://getpromptscript.dev/tutorial/index.md): After your first compile, build an organization, team, and project hierarchy.
+- [Language Reference](https://getpromptscript.dev/reference/language/index.md): Learn the full PromptScript syntax - blocks, directives, and inheritance.
+- [CLI Reference](https://getpromptscript.dev/reference/cli/index.md): Explore all CLI commands - compile, validate, pull, and more.
+- [Examples](https://getpromptscript.dev/examples/index.md): Browse real-world configuration examples for various use cases.
 
-<a href="../tutorial/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--purple">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9zm6.82 6L12 12.72L5.18 9L12 5.28zM17 16l-5 2.72L7 16v-3.27l5 2.72l5-2.72z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Enterprise Tutorial</h3>
-    <p>After your first compile, build an organization, team, and project hierarchy.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
+
+
+---
+
+# PromptScript vs Manual Configuration
+
+## The Manual Approach
+
+Without PromptScript, teams maintain separate configuration files for each AI tool in every repository. Even with just 2-3 tools, this quickly becomes unmanageable across many repos:
+
+::::tabs
+:::tab[Files to maintain (per repo)]
+
+```
+.github/copilot-instructions.md   # GitHub Copilot
+CLAUDE.md                          # Claude Code
+.cursor/rules/project.mdc         # Cursor
+AGENTS.md                          # Codex / Factory AI
+GEMINI.md                          # Gemini CLI
+... one file per tool
+```
+
+:::
+:::tab[Problems]
+
+| Problem                       | Impact                                                          |
+| ----------------------------- | --------------------------------------------------------------- |
+| **No single source of truth** | Instructions drift between tools                                |
+| **No validation**             | Errors go undetected until runtime                              |
+| **No inheritance**            | Copy-paste across repos                                         |
+| **No audit trail**            | Who changed what and when?                                      |
+| **Manual updates**            | One policy change = PRs in every repo, for every tool           |
+| **Vendor lock-in**            | Switching tools means rewriting instructions, READMEs, and docs |
+| :::                           |
+| ::::                          |
+
+## The PromptScript Approach
+
+With PromptScript, you write one `.prs` file and compile to all 50 targets:
+
+::::tabs
+:::tab[Single source file]
+
+```promptscript
+@meta { id: "my-project" syntax: "1.5.0" }
+
+@inherit @company/backend-standards
+
+@identity {
+  """
+  You are an expert developer working on the API service.
+  """
+}
+
+@standards {
+  code: { languages: ["TypeScript"], testing: ["Vitest"] }
+}
+
+@restrictions {
+  - "Never expose API keys"
+  - "Always validate input"
+}
+```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prO9wiscMahCyDuLMhlZyA9ABGGIwA1pxiCnACrGIY1GJwdg7inFjucsJ2gtIgMvmsOQCazACugvEwFYVEaK4eYjAAbjBQzHXUggDuzNShTgDmgmyCuFUAggAKAJLark0QjDAU2bn5eay29qzc0b5xCXBZhYIsjZIiUL4DpRgD8JLIMgAqcnUAyoxuaJogALp0UbwdKsAaPGQANXcwJkf0EWy2DmowLcGggbCOwFWClyADlmq5BLVmHAJjNBOE5EkNjkcTJxlAuhgqYImhgoOJsFUnGhSr87NYQNY6OhsHhECAvMwfH4giFwrEojEDokqLQQAwWOw0vgAMSCd6lNDkCAwMTaZijFxE4hkWCCailVhHFzIiiCXHMDyYageZhgK1VMTMRilPh6dJsQH7QSsL0VB0wdmCTBhO7LBx8ATHHLiQyS7yYWXBMIRJX7eKJAo5HR6Ay5EzmKw0wQkCCEJySLCOmAChx7WKVzGrM4wcEgSZXJY4ZhQRqdAcq2GrDjRQbjychGAzueExeV5ebJEoxaR505wR0idT7ez+eJ6Kos8FQXWAEEdjUOT4IikcjLGh6BAFpaHRVh8CMIUgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
+<!-- playground-link-end -->
 
-<a href="../reference/language/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--blue">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5zM9 13v2h6v-2zm0 4v2h6v-2z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Language Reference</h3>
-    <p>Learn the full PromptScript syntax - blocks, directives, and inheritance.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
+:::
+::::
 
-<a href="../reference/cli/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--cyan">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M20 19V7H4v12h16m0-16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16m-7 14v-2h5v2h-5m-3.42-4L5.57 9H8.4l3.3 3.3c.39.39.39 1.03 0 1.42L8.42 17H5.59l4-4z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>CLI Reference</h3>
-    <p>Explore all CLI commands - compile, validate, pull, and more.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
+::::tabs
+:::tab[One command]
 
-<a href="../examples/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--green">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h8v8H3zm2 2v4h4V5zm8-2h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm13 2h-2v-2h2v-2h-2v2h-2v-2h-2v2h2v2h-2v2h2v-2h2v2h2v2h2v-2h-2z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Examples</h3>
-    <p>Browse real-world configuration examples for various use cases.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
+```bash
+prs compile
+```
 
-</div>
+Generates all output files automatically:
+
+```
+.github/copilot-instructions.md
+CLAUDE.md
+.cursor/rules/project.mdc
+.windsurf/rules/project.md
+.clinerules
+AGENTS.md
+GEMINI.md
+... all configured targets
+```
+
+:::
+:::tab[Benefits]
+
+| Benefit                      | How                                                               |
+| ---------------------------- | ----------------------------------------------------------------- |
+| **Single source of truth**   | One `.prs` file, up to 50 target outputs                          |
+| **Compile-time validation**  | Errors caught before deployment                                   |
+| **Hierarchical inheritance** | Org → Team → Project                                              |
+| **Full audit trail**         | Git history on `.prs` files                                       |
+| **Controlled updates**       | Change registry, then run `prs update` and recompile in each repo |
+| **Tool-agnostic**            | Switch tools without rewriting                                    |
+| :::                          |
+| ::::                         |
+
+## Side-by-Side Comparison
+
+| Aspect          | Manual                | PromptScript                                  |
+| --------------- | --------------------- | --------------------------------------------- |
+| Files per repo  | 5-50                  | 2 source files plus generated outputs         |
+| Update a policy | 100+ manual edits     | Registry update, dependency update, recompile |
+| Add new tool    | Write new file format | `prs compile`                                 |
+| Validation      | None                  | Compile-time + CI/CD                          |
+| Inheritance     | Copy-paste            | `@inherit` / `@use`                           |
+| Consistency     | Hope for the best     | Validated in CI                               |
+| Onboarding time | Hours per tool        | Minutes                                       |
+
+## Getting Started
+
+Ready to switch? See the [Migration Guide](https://getpromptscript.dev/guides/migration/index.md) to convert existing configs, or start fresh with the [Getting Started guide](https://getpromptscript.dev/getting-started/index.md).
+
+Evaluating for a team or organization? Also see:
+
+- [Target Platform Matrix](https://getpromptscript.dev/reference/formatters/index.md) - exact output paths per tool
+- [CI/CD Integration](https://getpromptscript.dev/guides/ci/index.md) - validation and drift detection in your pipeline
+- [Enterprise Setup](https://getpromptscript.dev/guides/enterprise/index.md) - registry, policies, and governance across repositories
 
 ---
 
@@ -1641,130 +1660,213 @@ controlled takeover. Do not delete target files, disable a target, or keep
 
 ---
 
-# PromptScript vs Manual Configuration
+# Glossary
 
-## The Manual Approach
+Short definitions of the words used across this documentation. Each term links to the page
+that explains it in full.
 
-Without PromptScript, teams maintain separate configuration files for each AI tool in every repository. Even with just 2-3 tools, this quickly becomes unmanageable across many repos:
+## Files and Build
 
-::::tabs
-:::tab[Files to maintain (per repo)]
+### PromptScript
 
-```
-.github/copilot-instructions.md   # GitHub Copilot
-CLAUDE.md                          # Claude Code
-.cursor/rules/project.mdc         # Cursor
-AGENTS.md                          # Codex / Factory AI
-GEMINI.md                          # Gemini CLI
-... one file per tool
-```
+A language and a compiler for AI coding agent configuration. You describe instructions,
+skills, agents, and tool integrations once, and the compiler writes the files each AI tool
+reads. See [Getting Started](https://getpromptscript.dev/getting-started/index.md).
 
-:::
-:::tab[Problems]
+### `.prs` file
 
-| Problem                       | Impact                                                          |
-| ----------------------------- | --------------------------------------------------------------- |
-| **No single source of truth** | Instructions drift between tools                                |
-| **No validation**             | Errors go undetected until runtime                              |
-| **No inheritance**            | Copy-paste across repos                                         |
-| **No audit trail**            | Who changed what and when?                                      |
-| **Manual updates**            | One policy change = PRs in every repo, for every tool           |
-| **Vendor lock-in**            | Switching tools means rewriting instructions, READMEs, and docs |
-| :::                           |
-| ::::                          |
+A PromptScript source file. A project usually keeps them in `.promptscript/`, with
+`project.prs` as the entry file. One project can use many `.prs` files that import and
+inherit each other. See [Multi-File Organization](https://getpromptscript.dev/guides/multi-file/index.md).
 
-## The PromptScript Approach
+### `promptscript.yaml`
 
-With PromptScript, you write one `.prs` file and compile to all 50 targets:
+The project configuration file. It lists the entry file, the targets to compile, the
+registry, validation rules, and policies. See [Configuration](https://getpromptscript.dev/reference/config/index.md).
 
-::::tabs
-:::tab[Single source file]
+### Block
 
-```promptscript
-@meta { id: "my-project" syntax: "1.5.0" }
+A named section of a `.prs` file that starts with `@`, for example `@identity`,
+`@standards`, `@skills`, or `@mcpServers`. Every block has a fixed shape. See
+[Block Shapes](https://getpromptscript.dev/reference/block-shapes/index.md) and the [Language Reference](https://getpromptscript.dev/reference/language/index.md).
 
-@inherit @company/backend-standards
+### Target
 
-@identity {
-  """
-  You are an expert developer working on the API service.
-  """
-}
+One AI tool that PromptScript compiles for, such as `claude`, `github`, `cursor`, or
+`codex`. There are 50 built-in targets. See [Supported Formatters](https://getpromptscript.dev/reference/formatters/index.md).
 
-@standards {
-  code: { languages: ["TypeScript"], testing: ["Vitest"] }
-}
+### Formatter
 
-@restrictions {
-  - "Never expose API keys"
-  - "Always validate input"
-}
-```
+The part of the compiler that writes the files for one target. It maps each block to the
+native format of that tool. See [Formatter Architecture](https://getpromptscript.dev/guides/formatter-architecture/index.md).
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prO9wiscMahCyDuLMhlZyA9ABGGIwA1pxiCnACrGIY1GJwdg7inFjucsJ2gtIgMvmsOQCazACugvEwFYVEaK4eYjAAbjBQzHXUggDuzNShTgDmgmyCuFUAggAKAJLark0QjDAU2bn5eay29qzc0b5xCXBZhYIsjZIiUL4DpRgD8JLIMgAqcnUAyoxuaJogALp0UbwdKsAaPGQANXcwJkf0EWy2DmowLcGggbCOwFWClyADlmq5BLVmHAJjNBOE5EkNjkcTJxlAuhgqYImhgoOJsFUnGhSr87NYQNY6OhsHhECAvMwfH4giFwrEojEDokqLQQAwWOw0vgAMSCd6lNDkCAwMTaZijFxE4hkWCCailVhHFzIiiCXHMDyYageZhgK1VMTMRilPh6dJsQH7QSsL0VB0wdmCTBhO7LBx8ATHHLiQyS7yYWXBMIRJX7eKJAo5HR6Ay5EzmKw0wQkCCEJySLCOmAChx7WKVzGrM4wcEgSZXJY4ZhQRqdAcq2GrDjRQbjychGAzueExeV5ebJEoxaR505wR0idT7ez+eJ6Kos8FQXWAEEdjUOT4IikcjLGh6BAFpaHRVh8CMIUgA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
+### Target version (mode)
 
-:::
-::::
+How much a target writes. `simple` writes the main instruction file, `multifile` adds
+rules, commands, or skills, and `full` writes the richest output, including agents and
+integrations where the tool supports them. See [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md).
 
-::::tabs
-:::tab[One command]
+### Compile
 
-```bash
-prs compile
-```
+Turning `.prs` sources into native files with `prs compile`. The output is deterministic,
+so the same source always gives the same files. See [CLI Reference](https://getpromptscript.dev/reference/cli/index.md#prs-compile).
 
-Generates all output files automatically:
+### Validate
 
-```
-.github/copilot-instructions.md
-CLAUDE.md
-.cursor/rules/project.mdc
-.windsurf/rules/project.md
-.clinerules
-AGENTS.md
-GEMINI.md
-... all configured targets
-```
+Checking sources with `prs validate` without writing output: syntax, block shapes,
+references, policies, and the security scan. See [CLI Reference](https://getpromptscript.dev/reference/cli/index.md#prs-validate).
 
-:::
-:::tab[Benefits]
+### Syntax version
 
-| Benefit                      | How                                                               |
-| ---------------------------- | ----------------------------------------------------------------- |
-| **Single source of truth**   | One `.prs` file, up to 50 target outputs                          |
-| **Compile-time validation**  | Errors caught before deployment                                   |
-| **Hierarchical inheritance** | Org → Team → Project                                              |
-| **Full audit trail**         | Git history on `.prs` files                                       |
-| **Controlled updates**       | Change registry, then run `prs update` and recompile in each repo |
-| **Tool-agnostic**            | Switch tools without rewriting                                    |
-| :::                          |
-| ::::                         |
+The `syntax` field in `@meta`. It tells the compiler which language features the file
+uses. `prs upgrade` moves files to the newest version. See
+[Versions and Diagnostics](https://getpromptscript.dev/reference/language/versions-and-diagnostics/index.md).
 
-## Side-by-Side Comparison
+### Diagnostic code
 
-| Aspect          | Manual                | PromptScript                                  |
-| --------------- | --------------------- | --------------------------------------------- |
-| Files per repo  | 5-50                  | 2 source files plus generated outputs         |
-| Update a policy | 100+ manual edits     | Registry update, dependency update, recompile |
-| Add new tool    | Write new file format | `prs compile`                                 |
-| Validation      | None                  | Compile-time + CI/CD                          |
-| Inheritance     | Copy-paste            | `@inherit` / `@use`                           |
-| Consistency     | Hope for the best     | Validated in CI                               |
-| Onboarding time | Hours per tool        | Minutes                                       |
+A code such as `PS005` or `PS012` on a validation message. The code identifies the rule, so
+you can search for it. See [FAQ & Troubleshooting](https://getpromptscript.dev/guides/faq/index.md).
 
-## Getting Started
+## Reuse and Composition
 
-Ready to switch? See the [Migration Guide](https://getpromptscript.dev/guides/migration/index.md) to convert existing configs, or start fresh with the [Getting Started guide](https://getpromptscript.dev/getting-started/index.md).
+### Inheritance (`@inherit`)
 
-Evaluating for a team or organization? Also see:
+One `.prs` file builds on another, for example a project on a team layer and the team
+layer on an organization layer. A file has at most one `@inherit`. Parameters can be passed
+to the parent. See [Inheritance](https://getpromptscript.dev/guides/inheritance/index.md).
 
-- [Target Platform Matrix](https://getpromptscript.dev/reference/formatters/index.md) - exact output paths per tool
-- [CI/CD Integration](https://getpromptscript.dev/guides/ci/index.md) - validation and drift detection in your pipeline
-- [Enterprise Setup](https://getpromptscript.dev/guides/enterprise/index.md) - registry, policies, and governance across repositories
+### Import (`@use`)
+
+Merges a fragment into the current file, like a mixin. A file can have many `@use`
+lines, and an alias makes the fragment available to `@extend`. See
+[Composition and Precedence](https://getpromptscript.dev/reference/language/composition/index.md).
+
+### Parameters
+
+Values a parent or fragment accepts, declared in `@meta { params: ... }` and passed as
+`@inherit @stacks/react-app(projectName: "Checkout")`. See
+[Inheritance](https://getpromptscript.dev/guides/inheritance/index.md).
+
+### `@extend`
+
+Changes an inherited or imported block in place: adds fields, appends to lists, or
+replaces values. See [Merge and Replacement](https://getpromptscript.dev/reference/language/merge-and-replacement/index.md).
+
+### `@override`
+
+Replaces a whole existing value instead of merging into it. See
+[Merge and Replacement](https://getpromptscript.dev/reference/language/merge-and-replacement/index.md).
+
+### Overlay
+
+A higher layer that uses `@extend` to customize something a lower layer defined, most
+often a skill. See [Skill Overlays](https://getpromptscript.dev/guides/skill-overlays/index.md).
+
+### Sealed property
+
+A skill property that higher layers cannot override, set with `sealed`. See
+[Skill Overlays](https://getpromptscript.dev/guides/skill-overlays/index.md).
+
+### Markdown import
+
+Using existing Markdown files, such as a `SKILL.md`, as PromptScript sources. See
+[Markdown Imports](https://getpromptscript.dev/guides/markdown-imports/index.md).
+
+## Agent Capabilities
+
+### Instructions
+
+The rules an AI agent follows, written in blocks such as `@identity`, `@context`,
+`@standards`, and `@restrictions`. See [Agent Platform](https://getpromptscript.dev/features/index.md).
+
+### Skill
+
+A reusable capability package: instructions plus optional references, scripts, assets,
+and input and output contracts. Targets that support skills get them as native skill files.
+See [Skills and Resources](https://getpromptscript.dev/features/skills/index.md).
+
+### Skill composition
+
+Building a skill from other skills and shared parts instead of copying text. See
+[Skill Composition](https://getpromptscript.dev/guides/skill-composition/index.md).
+
+### Skill contract
+
+The declared inputs and outputs of a skill. See [Skill Contracts](https://getpromptscript.dev/guides/skill-contracts/index.md).
+
+### Agent (subagent)
+
+A specialized assistant with its own instructions, tools, model, skills, and MCP access,
+defined in `@agents`. See [Agents](https://getpromptscript.dev/features/agents/index.md).
+
+### MCP server
+
+A Model Context Protocol server that gives an agent extra tools, defined in `@mcpServers`
+and written to each target's native MCP configuration. See
+[MCP Servers and Plugins](https://getpromptscript.dev/features/integrations/index.md).
+
+### Plugin
+
+A bundle of skills, agents, hooks, and MCP servers that installs as one unit, defined in
+`@plugins`. See [MCP Servers and Plugins](https://getpromptscript.dev/features/integrations/index.md).
+
+### Hook
+
+A command that runs on an AI tool event, for example after the agent edits a file. Defined
+in `@hooks`. See [Hooks and Workflows](https://getpromptscript.dev/features/automation/index.md) and [AI Tool Hooks](https://getpromptscript.dev/guides/hooks/index.md).
+
+### Workflow
+
+A named, repeatable procedure defined in `@workflows`. See
+[Hooks and Workflows](https://getpromptscript.dev/features/automation/index.md).
+
+### Shortcut
+
+A user command, like a slash command, defined in `@shortcuts`. See the
+[Language Reference](https://getpromptscript.dev/reference/language/index.md).
+
+### Guard
+
+Rules in `@guards` that apply to matching files only, for example `**/*.ts`. Guards can
+require other guards. See [Guard Dependencies](https://getpromptscript.dev/guides/guard-dependencies/index.md).
+
+### Model profile
+
+A catalog entry that maps one model name to the name each target expects. See
+[Model Catalog](https://getpromptscript.dev/reference/models/index.md).
+
+## Teams and Organization
+
+### Registry
+
+A shared collection of `.prs` files, usually a Git repository, that projects inherit
+from. Create one with `prs registry init` and publish with `prs registry publish`. See
+[Build Your Registry](https://getpromptscript.dev/guides/registry/index.md).
+
+### Namespace
+
+The `@name` prefix of a registry path, such as `@company/base`. See
+[Build Your Registry](https://getpromptscript.dev/guides/registry/index.md).
+
+### Lockfile (`promptscript.lock`)
+
+Records the exact commit and hash of every remote import, so builds are reproducible.
+Written by `prs lock`. See [Build Your Registry](https://getpromptscript.dev/guides/registry/index.md).
+
+### Vendor directory
+
+A local copy of all locked dependencies in `.promptscript/vendor/`, made by
+`prs vendor sync`, for offline and air-gapped builds. See [Build Your Registry](https://getpromptscript.dev/guides/registry/index.md).
+
+### Policy
+
+A rule in `promptscript.yaml` that limits how layers may change each other, for example
+which properties a project may override. See [Policy Engine](https://getpromptscript.dev/guides/policy-engine/index.md).
+
+### Security scan
+
+Part of `prs validate` that looks for prompt injection, hidden encoded payloads, and
+suspicious URLs in every source and import. See [Security](https://getpromptscript.dev/guides/security/index.md).
 
 ---
 
@@ -1772,15 +1874,41 @@ Evaluating for a team or organization? Also see:
 
 ## What is PromptScript?
 
-PromptScript is an agent platform configuration language and toolchain. You define instructions,
-skills, agents, integrations, automation, and policy once, then compile native output for 50 AI
-coding agent targets.
+PromptScript is an open-source compiler for AI coding agent configuration. You write
+instructions, skills, agents, MCP servers, hooks, and plugins in `.prs` files, and it generates
+the native files for 50 tools, such as `CLAUDE.md`, `.github/copilot-instructions.md`, and
+Cursor rules. New to the terms? See the [Glossary](https://getpromptscript.dev/glossary/index.md).
 
 ## How many AI tools are supported?
 
 PromptScript currently compiles to **50 AI coding agent targets**. See the full list in
 [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) or the
 [formatter matrix](https://getpromptscript.dev/reference/formatters/index.md).
+
+## How is it different from a shared AGENTS.md file?
+
+`AGENTS.md` is one file that some tools read. PromptScript is the source behind it. It adds
+inheritance across repositories, parameters, skills, agents, MCP servers, validation, and a
+security scan, and it writes `AGENTS.md` together with the formats of every other tool.
+
+## Can I start from the instruction files I already have?
+
+Yes. `prs import` converts an existing `CLAUDE.md`, Copilot, Cursor, or `AGENTS.md` file,
+`prs migrate` imports a whole project, and the built-in `promptscript` skill lets your AI
+agent do the migration for you. See [Import Existing Instructions](https://getpromptscript.dev/guides/import/index.md) and the
+[Migration Guide](https://getpromptscript.dev/guides/migration/index.md).
+
+## Does PromptScript send my prompts anywhere?
+
+No. Compilation runs on your machine or in your CI. Anonymous usage telemetry is on by
+default and never includes source, prompts, compiled output, file paths, or project names.
+Turn it off with `prs telemetry disable` or `DO_NOT_TRACK=1`. See
+[Telemetry](https://getpromptscript.dev/reference/telemetry/index.md).
+
+## Is PromptScript free?
+
+Yes. PromptScript is open source under the MIT license. The CLI is published on npm as
+`@promptscript/cli`.
 
 ## How do I install PromptScript?
 
@@ -8368,119 +8496,18 @@ delivery:
 - [Hooks and Workflows](https://getpromptscript.dev/features/automation/index.md)
 - [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md)
 
-<div class="ref-list">
+- [Registry](https://getpromptscript.dev/guides/registry/index.md): Create, manage, and share PromptScript registries for your organization.
+- [Inheritance](https://getpromptscript.dev/guides/inheritance/index.md): Build scalable instruction hierarchies with inheritance patterns.
+- [Multi-File Organization](https://getpromptscript.dev/guides/multi-file/index.md): Organize your PromptScript files for complex projects with imports and fragments.
+- [Using npx skills](https://getpromptscript.dev/guides/npx-skills/index.md): Install open-source skills from GitHub repositories with npx skills and compile them to all your AI agents.
+- [Building Skills](https://getpromptscript.dev/guides/building-skills/index.md): Create custom skills from scratch - SKILL.md format, parameters, resource files, contracts, and publishing.
+- [Local Skills](https://getpromptscript.dev/guides/local-skills/index.md): Full reference for local skills - resolution order, resource files, parameterized skills, and dependencies.
+- [CI/CD Integration](https://getpromptscript.dev/guides/ci/index.md): Validate and test PromptScript files in your CI pipeline with GitHub Actions.
+- [Enterprise Setup](https://getpromptscript.dev/guides/enterprise/index.md): Deploy PromptScript across your organization with private registries and governance.
+- [Migration](https://getpromptscript.dev/guides/migration/index.md): Migrate existing AI instructions from CLAUDE.md, .cursorrules, and other formats.
+- [Security](https://getpromptscript.dev/guides/security/index.md): Security considerations for templates, external stacks, and best practices.
 
-<a href="registry/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--purple">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3m5 15h-2v-6H9v6H7v-7.81l5-4.5l5 4.5V18Z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Registry</h3>
-    <p>Create, manage, and share PromptScript registries for your organization.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
 
-<a href="inheritance/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--blue">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a3 3 0 0 1 3 3c0 1.4-.95 2.57-2.25 2.9V10h2.75a2.5 2.5 0 0 1 2.5 2.5v1.59c1.29.34 2.25 1.5 2.25 2.91a3 3 0 0 1-3 3a3 3 0 0 1-3-3c0-1.4.95-2.57 2.25-2.9V12.5a.5.5 0 0 0-.5-.5h-6.5a.5.5 0 0 0-.5.5v1.59c1.3.33 2.25 1.5 2.25 2.91a3 3 0 0 1-3 3a3 3 0 0 1-3-3c0-1.4.95-2.57 2.25-2.9V12.5A2.5 2.5 0 0 1 8.5 10h2.75V7.9A3 3 0 0 1 9 5a3 3 0 0 1 3-3z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Inheritance</h3>
-    <p>Build scalable instruction hierarchies with inheritance patterns.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="multi-file/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--cyan">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M15 4H5v16h14V8h-4V4M5 2h12l4 4v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2m4 14h8v2H9v-2m0-4h8v2H9v-2m0-4h4v2H9V8z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Multi-File Organization</h3>
-    <p>Organize your PromptScript files for complex projects with imports and fragments.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="npx-skills/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--teal">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M8 16h8v2H8zm0-4h8v2H8zm6-10H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Using npx skills</h3>
-    <p>Install open-source skills from GitHub repositories with <code>npx skills</code> and compile them to all your AI agents.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="building-skills/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--purple">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Building Skills</h3>
-    <p>Create custom skills from scratch - SKILL.md format, parameters, resource files, contracts, and publishing.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="local-skills/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--cyan">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2m-6 10H6v-2h8v2m4-4H6v-2h12v2Z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Local Skills</h3>
-    <p>Full reference for local skills - resolution order, resource files, parameterized skills, and dependencies.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="ci/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--green">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m-1 5v6l5.25 3.15l.75-1.23l-4.5-2.67V7z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>CI/CD Integration</h3>
-    <p>Validate and test PromptScript files in your CI pipeline with GitHub Actions.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="enterprise/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--amber">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M18 15h-2v2h2m0-6h-2v2h2m2 6h-8v-2h2v-2h-2v-2h2v-2h-2V9h8M10 7H8V5h2m0 6H8V9h2m0 6H8v-2h2m0 6H8v-2h2M6 7H4V5h2m0 6H4V9h2m0 6H4v-2h2m0 6H4v-2h2m6-10V3H2v18h20V7z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Enterprise Setup</h3>
-    <p>Deploy PromptScript across your organization with private registries and governance.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="migration/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--orange">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Migration</h3>
-    <p>Migrate existing AI instructions from CLAUDE.md, .cursorrules, and other formats.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="security/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--red">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12c5.16-1.26 9-6.45 9-12V5l-9-4m0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Security</h3>
-    <p>Security considerations for templates, external stacks, and best practices.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-</div>
 
 ---
 
@@ -14845,22 +14872,7 @@ When running `prs init --yes`:
 
 # Supported Formatters
 
-<p class="formatter-page__subtitle">PromptScript compiles one agent platform definition to native files for <strong>50 AI coding agent targets</strong>.</p>
-
-<div class="formatter-tiers">
-  <div class="formatter-tier-badge formatter-tier-badge--custom">
-    <span class="formatter-tier-badge__count">9</span>
-    <span class="formatter-tier-badge__label">Rich native</span>
-  </div>
-  <div class="formatter-tier-badge formatter-tier-badge--t1">
-    <span class="formatter-tier-badge__count">11</span>
-    <span class="formatter-tier-badge__label">AGENTS.md</span>
-  </div>
-  <div class="formatter-tier-badge formatter-tier-badge--t2">
-    <span class="formatter-tier-badge__count">30</span>
-    <span class="formatter-tier-badge__label">Markdown</span>
-  </div>
-</div>
+PromptScript compiles one agent platform definition to native files for **50 AI coding agent targets**.
 
 PromptScript treats instructions, skills, agents, commands, MCP servers, hooks, workflows, and
 plugins as platform capabilities. See [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) for
@@ -14870,123 +14882,15 @@ the platform-family model.
 
 Hand-crafted output logic for agents with unique file formats, skills, agents, and commands.
 
-<div class="formatter-cards">
-
-<a href="claude/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Claude Code</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">CLAUDE.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Local</span>
-  </div>
-</a>
-
-<a href="github/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">GitHub Copilot</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">.github/copilot-instructions.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Prompts</span>
-  </div>
-</a>
-
-<a href="cursor/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Cursor</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">.cursor/rules/project.mdc</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
-    <span class="formatter-card__tag formatter-card__tag--special">MDC Format</span>
-  </div>
-</a>
-
-<a href="antigravity/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Antigravity</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">.agent/rules/project.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--special">Workflows</span>
-    <span class="formatter-card__tag formatter-card__tag--special">Activation Types</span>
-  </div>
-</a>
-
-<a href="factory/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Factory AI</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">AGENTS.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
-  </div>
-</a>
-
-<a href="gemini/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Gemini CLI</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">GEMINI.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
-  </div>
-</a>
-
-<a href="opencode/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">OpenCode</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">OPENCODE.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
-  </div>
-</a>
-
-<a href="../../features/target-platforms/#rich-native-formatters" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Codex</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Native</span>
-  </div>
-  <code class="formatter-card__output">AGENTS.md + .codex/</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
-    <span class="formatter-card__tag formatter-card__tag--special">TOML</span>
-  </div>
-</a>
-
-<a href="../../features/target-platforms/#rich-native-formatters" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Grok</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Native</span>
-  </div>
-  <code class="formatter-card__output">AGENTS.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
-  </div>
-</a>
-
-</div>
+- [Claude Code](https://getpromptscript.dev/reference/formatters/claude/index.md): `CLAUDE.md` - Skills, Agents, Commands, Local
+- [GitHub Copilot](https://getpromptscript.dev/reference/formatters/github/index.md): `.github/copilot-instructions.md` - Skills, Prompts
+- [Cursor](https://getpromptscript.dev/reference/formatters/cursor/index.md): `.cursor/rules/project.mdc` - Commands, MDC Format
+- [Antigravity](https://getpromptscript.dev/reference/formatters/antigravity/index.md): `.agent/rules/project.md` - Workflows, Activation Types
+- [Factory AI](https://getpromptscript.dev/reference/formatters/factory/index.md): `AGENTS.md` - Skills, Agents, Commands
+- [Gemini CLI](https://getpromptscript.dev/reference/formatters/gemini/index.md): `GEMINI.md` - Skills, Commands
+- [OpenCode](https://getpromptscript.dev/reference/formatters/opencode/index.md): `OPENCODE.md` - Skills, Agents, Commands
+- [Codex](https://getpromptscript.dev/reference/formatters/codex/index.md): `AGENTS.md + .codex/` - Skills, Agents, TOML
+- [Grok](https://getpromptscript.dev/reference/formatters/grok/index.md): `AGENTS.md` - Skills, Agents, Commands
 
 ## All Formatters
 
@@ -20203,75 +20107,14 @@ Complete reference documentation for PromptScript.
 | Resolve syntax warnings             | [Versions and Diagnostics](https://getpromptscript.dev/reference/language/versions-and-diagnostics/index.md) |
 | Browse every block and grammar rule | [Complete Language Reference](https://getpromptscript.dev/reference/language/index.md)                       |
 
-<div class="ref-list">
+- [Agent Platform](https://getpromptscript.dev/features/index.md): Core features for instructions, skills, agents, MCP servers, plugins, hooks, workflows, and target delivery.
+- [Language Reference](https://getpromptscript.dev/reference/language/index.md): Full specification of the PromptScript language syntax - blocks, directives, inheritance, and more.
+- [CLI Reference](https://getpromptscript.dev/reference/cli/index.md): All commands and options for the PromptScript CLI - compile, validate, pull, and more.
+- [Configuration](https://getpromptscript.dev/reference/config/index.md): Configuration file format and options - targets, registry, validation, and output settings.
+- [Model Catalog](https://getpromptscript.dev/reference/models/index.md): Built-in model profiles, floating aliases, and the model name each target writes.
+- [Formatters](https://getpromptscript.dev/reference/formatters/index.md): All 50 supported AI agent targets - output paths, features, quirks, and examples.
 
-<a href="../features/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--purple">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a5 5 0 0 1 5 5v1h1a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4h1V7a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3v1h6V7a3 3 0 0 0-3-3m-4 8a2 2 0 1 0 0 4a2 2 0 0 0 0-4m8 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4m-7 6v2h6v-2H9z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Agent Platform</h3>
-    <p>Core features for instructions, skills, agents, MCP servers, plugins, hooks, workflows, and target delivery.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
 
-<a href="language/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--purple">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5zM9 13v2h6v-2zm0 4v2h6v-2z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Language Reference</h3>
-    <p>Full specification of the PromptScript language syntax - blocks, directives, inheritance, and more.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="cli/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--cyan">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M20 19V7H4v12h16m0-16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16m-7 14v-2h5v2h-5m-3.42-4L5.57 9H8.4l3.3 3.3c.39.39.39 1.03 0 1.42L8.42 17H5.59l4-4z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>CLI Reference</h3>
-    <p>All commands and options for the PromptScript CLI - compile, validate, pull, and more.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="config/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--amber">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5a3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Configuration</h3>
-    <p>Configuration file format and options - targets, registry, validation, and output settings.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="models/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--blue">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3 5h18v2H3zm0 6h18v2H3zm0 6h12v2H3z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Model Catalog</h3>
-    <p>Built-in model profiles, floating aliases, and the model name each target writes.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="formatters/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--green">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M17 7h-4v2h4c1.65 0 3 1.35 3 3s-1.35 3-3 3h-4v2h4c2.76 0 5-2.24 5-5s-2.24-5-5-5zm-6 8H7c-1.65 0-3-1.35-3-3s1.35-3 3-3h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-2zm-3-4h8v2H8z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Formatters</h3>
-    <p>All 50 supported AI agent targets - output paths, features, quirks, and examples.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-</div>
 
 ---
 
@@ -20599,7 +20442,6 @@ When you provide an alias, imported blocks are also stored with a prefix for use
 </a>
 <!-- playground-link-end -->
 
-<!-- prettier-ignore -->
 :::tip[When to Use Alias]
 
 - **Without alias**: Simple include/mixin behavior - blocks are merged directly
@@ -23682,6 +23524,23 @@ Use `prs validate --strict` to include shape warnings in CI.
 # CLI Reference
 
 Complete reference for the PromptScript command-line interface.
+
+## Commands at a Glance
+
+| Task                          | Command                                                                                                        |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Start a project               | [`prs init`](#prs-init)                                                                                        |
+| Bring existing instructions   | [`prs import`](#prs-import), [`prs migrate`](#prs-migrate)                                                     |
+| Generate native files         | [`prs compile`](#prs-compile), [`prs build`](#prs-build)                                                       |
+| Check before commit or in CI  | [`prs validate`](#prs-validate), [`prs check`](#prs-check), [`prs diff`](#prs-diff)                            |
+| Understand the result         | [`prs explain`](#prs-explain), [`prs inspect`](#prs-inspect), [`prs resolve`](#prs-resolve)                    |
+| Share and pin dependencies    | [`prs registry`](#prs-registry), [`prs pull`](#prs-pull), [`prs lock`](#prs-lock), [`prs update`](#prs-update) |
+| Work offline                  | [`prs vendor`](#prs-vendor)                                                                                    |
+| Manage skills                 | [`prs skills`](#prs-skills)                                                                                    |
+| Connect AI tool hooks         | [`prs hooks`](#prs-hooks), [`prs hook`](https://getpromptscript.dev/reference/cli/hook/index.md)                                                           |
+| Edit in the online playground | [`prs serve`](#prs-serve)                                                                                      |
+| Keep up to date               | [`prs upgrade`](#prs-upgrade), [`prs update-check`](#prs-update-check)                                         |
+| Control telemetry             | [`prs telemetry`](#prs-telemetry)                                                                              |
 
 ## Installation
 
@@ -27266,97 +27125,14 @@ Real-world PromptScript configuration examples.
 
 ## Complete Examples
 
-<div class="ref-list">
-
-<a href="real-life-checkout-service/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--green">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M7 4V2h10v2h3a1 1 0 0 1 1 1v4H3V5a1 1 0 0 1 1-1zm14 7v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8h7v2h4v-2z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Real-Life Checkout Service</h3>
-    <p>End-to-end production rollout with composition, native agents, safe takeover, CI drift checks, and rollback.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="minimal/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--green">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Minimal</h3>
-    <p>The simplest possible PromptScript configuration - just the essentials.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="team-setup/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--blue">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17v2H2v-2s0-4 7-4s7 4 7 4m-3.5-9.5A3.5 3.5 0 1 0 9 11a3.5 3.5 0 0 0 3.5-3.5m3.44 5.5A5.32 5.32 0 0 1 18 17v2h4v-2s0-3.63-6.06-4M15 4a3.39 3.39 0 0 0-1.93.59a5 5 0 0 1 0 5.82A3.39 3.39 0 0 0 15 11a3.5 3.5 0 0 0 0-7z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Team Setup</h3>
-    <p>Multi-project setup with shared team configuration and standards.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="enterprise/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--amber">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M18 15h-2v2h2m0-6h-2v2h2m2 6h-8v-2h2v-2h-2v-2h2v-2h-2V9h8M10 7H8V5h2m0 6H8V9h2m0 6H8v-2h2m0 6H8v-2h2M6 7H4V5h2m0 6H4V9h2m0 6H4v-2h2m0 6H4v-2h2m6-10V3H2v18h20V7z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Enterprise</h3>
-    <p>Full enterprise deployment with governance, private registries, and compliance.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="skills-and-local/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--purple">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2M7.5 13A2.5 2.5 0 0 0 5 15.5A2.5 2.5 0 0 0 7.5 18a2.5 2.5 0 0 0 2.5-2.5A2.5 2.5 0 0 0 7.5 13m9 0a2.5 2.5 0 0 0-2.5 2.5a2.5 2.5 0 0 0 2.5 2.5a2.5 2.5 0 0 0 2.5-2.5a2.5 2.5 0 0 0-2.5-2.5z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Skills & Local</h3>
-    <p>Advanced AI skills and private local memory for specialized workflows.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="agent-platform/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--green">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6zM10 6h4v2h-4zm-4 4h2v4H6zm10 0h2v4h-2zm-6 6h4v2h-4z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Agent Platform</h3>
-    <p>Runnable examples for MCP, hooks, workflows, plugins, field replacement, skills, and build profiles.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="agents/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--cyan">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M17.753 14a2.25 2.25 0 0 1 2.25 2.25v.904A3.75 3.75 0 0 1 18.696 20c-1.565 1.344-3.806 2-6.696 2s-5.128-.656-6.69-2a3.75 3.75 0 0 1-1.306-2.843v-.907A2.25 2.25 0 0 1 6.254 14zM12 2a5 5 0 1 1 0 10a5 5 0 0 1 0-10z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Agents</h3>
-    <p>Define portable AI subagents with custom tools, models, skills, and MCP access.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="git-registry/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--orange">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M2.6 10.59L8.38 4.8l1.69 1.7c-.24.85.15 1.78.93 2.23v5.54c-.6.34-1 .99-1 1.73a2 2 0 0 0 2 2a2 2 0 0 0 2-2c0-.74-.4-1.39-1-1.73V9.41l2.07 2.09c-.07.15-.07.32-.07.5a2 2 0 0 0 2 2a2 2 0 0 0 2-2a2 2 0 0 0-2-2c-.18 0-.35 0-.5.07L13.93 8.5a1.99 1.99 0 0 0-1.15-2.34c-.12-.05-.25-.08-.38-.12L11.03 4.8 11.35 4.47c.39-.39 1.02-.39 1.41 0l8.59 8.59c.39.39.39 1.02 0 1.41l-8.59 8.59c-.39.39-1.02.39-1.41 0l-8.59-8.59c-.39-.39-.39-1.02 0-1.41z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Git Registry</h3>
-    <p>Use Git repositories as shared registries with version control and authentication.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-</div>
+- [Real-Life Checkout Service](https://getpromptscript.dev/examples/real-life-checkout-service/index.md): End-to-end production rollout with composition, native agents, safe takeover, CI drift checks, and rollback.
+- [Minimal](https://getpromptscript.dev/examples/minimal/index.md): The simplest possible PromptScript configuration - just the essentials.
+- [Team Setup](https://getpromptscript.dev/examples/team-setup/index.md): Multi-project setup with shared team configuration and standards.
+- [Enterprise](https://getpromptscript.dev/examples/enterprise/index.md): Full enterprise deployment with governance, private registries, and compliance.
+- [Skills & Local](https://getpromptscript.dev/examples/skills-and-local/index.md): Advanced AI skills and private local memory for specialized workflows.
+- [Agent Platform](https://getpromptscript.dev/examples/agent-platform/index.md): Runnable examples for MCP, hooks, workflows, plugins, field replacement, skills, and build profiles.
+- [Agents](https://getpromptscript.dev/examples/agents/index.md): Define portable AI subagents with custom tools, models, skills, and MCP access.
+- [Git Registry](https://getpromptscript.dev/examples/git-registry/index.md): Use Git repositories as shared registries with version control and authentication.
 
 ## Quick Examples
 
@@ -31751,31 +31527,8 @@ flowchart TB
 
 ## Testing Mechanisms
 
-<div class="ref-list">
-
-<a href="parity-testing/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--blue">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 0 1-1.414 0l-7-7a1 1 0 0 1 0-1.414l7-7A1 1 0 0 1 12 3m0 2.414L5.414 12L12 18.586L18.586 12z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Parity Testing</h3>
-    <p>Ensures consistent output across all formatters using specification-based and reference-based testing.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="feature-coverage/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--green">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M21 7L9 19l-5.5-5.5l1.41-1.41L9 16.17L19.59 5.59z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Feature Coverage</h3>
-    <p>Tracks which features each AI tool supports and which our formatters implement.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-</div>
+- [Parity Testing](https://getpromptscript.dev/testing/parity-testing/index.md): Ensures consistent output across all formatters using specification-based and reference-based testing.
+- [Feature Coverage](https://getpromptscript.dev/testing/feature-coverage/index.md): Tracks which features each AI tool supports and which our formatters implement.
 
 ## Quick Reference
 

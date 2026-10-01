@@ -6,7 +6,7 @@
 
 # Interface: SectionContract
 
-Defined in: [core/src/section-registry.ts:7](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/section-registry.ts#L7)
+Defined in: [core/src/section-registry.ts:7](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/section-registry.ts#L7)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [core/src/section-registry.ts:7](https://github.com/mrwogu/promptscr
 
 > `readonly` **defaultTitle**: `string`
 
-Defined in: [core/src/section-registry.ts:9](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/section-registry.ts#L9)
+Defined in: [core/src/section-registry.ts:9](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/section-registry.ts#L9)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [core/src/section-registry.ts:9](https://github.com/mrwogu/promptscr
 
 > `readonly` **description**: `string`
 
-Defined in: [core/src/section-registry.ts:10](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/section-registry.ts#L10)
+Defined in: [core/src/section-registry.ts:10](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/section-registry.ts#L10)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [core/src/section-registry.ts:10](https://github.com/mrwogu/promptsc
 
 > `readonly` **fallbackOwners**: readonly `string`[]
 
-Defined in: [core/src/section-registry.ts:14](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/section-registry.ts#L14)
+Defined in: [core/src/section-registry.ts:14](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/section-registry.ts#L14)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [core/src/section-registry.ts:14](https://github.com/mrwogu/promptsc
 
 > `readonly` **formatterAliases**: readonly `string`[]
 
-Defined in: [core/src/section-registry.ts:18](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/section-registry.ts#L18)
+Defined in: [core/src/section-registry.ts:18](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/section-registry.ts#L18)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [core/src/section-registry.ts:18](https://github.com/mrwogu/promptsc
 
 > `readonly` **id**: `string`
 
-Defined in: [core/src/section-registry.ts:8](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/section-registry.ts#L8)
+Defined in: [core/src/section-registry.ts:8](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/section-registry.ts#L8)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [core/src/section-registry.ts:8](https://github.com/mrwogu/promptscr
 
 > `readonly` **legacyHeadingFallback**: `boolean`
 
-Defined in: [core/src/section-registry.ts:17](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/section-registry.ts#L17)
+Defined in: [core/src/section-registry.ts:17](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/section-registry.ts#L17)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [core/src/section-registry.ts:17](https://github.com/mrwogu/promptsc
 
 > `readonly` **primaryForBlocks**: readonly `string`[]
 
-Defined in: [core/src/section-registry.ts:12](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/section-registry.ts#L12)
+Defined in: [core/src/section-registry.ts:12](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/section-registry.ts#L12)
 
 Blocks whose keyless
 
@@ -76,7 +76,7 @@ directive names this section.
 
 > `readonly` **primaryOwner**: `string`
 
-Defined in: [core/src/section-registry.ts:13](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/section-registry.ts#L13)
+Defined in: [core/src/section-registry.ts:13](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/section-registry.ts#L13)
 
 ***
 
@@ -84,7 +84,7 @@ Defined in: [core/src/section-registry.ts:13](https://github.com/mrwogu/promptsc
 
 > `readonly` **required**: `boolean`
 
-Defined in: [core/src/section-registry.ts:16](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/section-registry.ts#L16)
+Defined in: [core/src/section-registry.ts:16](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/section-registry.ts#L16)
 
 ***
 
@@ -92,4 +92,4 @@ Defined in: [core/src/section-registry.ts:16](https://github.com/mrwogu/promptsc
 
 > `readonly` **sourceBlocks**: readonly `string`[]
 
-Defined in: [core/src/section-registry.ts:15](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/section-registry.ts#L15)
+Defined in: [core/src/section-registry.ts:15](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/section-registry.ts#L15)

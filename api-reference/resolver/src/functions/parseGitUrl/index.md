@@ -8,7 +8,7 @@
 
 > **parseGitUrl**(`url`): [`ParsedGitUrl`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/ParsedGitUrl/index.md) \| `null`
 
-Defined in: [resolver/src/git-url-utils.ts:121](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-url-utils.ts#L121)
+Defined in: [resolver/src/git-url-utils.ts:121](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-url-utils.ts#L121)
 
 Parse a Git URL into its components.
 

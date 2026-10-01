@@ -6,7 +6,7 @@
 
 # Interface: TargetModel
 
-Defined in: [core/src/model-catalog.ts:564](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/model-catalog.ts#L564)
+Defined in: [core/src/model-catalog.ts:564](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-catalog.ts#L564)
 
 A model reference mapped to one target.
 
@@ -16,7 +16,7 @@ A model reference mapped to one target.
 
 > `readonly` `optional` **issue?**: [`TargetModelIssue`](https://getpromptscript.dev/api-reference/core/src/type-aliases/TargetModelIssue/index.md)
 
-Defined in: [core/src/model-catalog.ts:568](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/model-catalog.ts#L568)
+Defined in: [core/src/model-catalog.ts:568](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-catalog.ts#L568)
 
 Why the value was omitted or written unchanged
 
@@ -26,7 +26,7 @@ Why the value was omitted or written unchanged
 
 > `readonly` `optional` **profile?**: [`ModelProfile`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelProfile/index.md)
 
-Defined in: [core/src/model-catalog.ts:570](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/model-catalog.ts#L570)
+Defined in: [core/src/model-catalog.ts:570](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-catalog.ts#L570)
 
 Catalog profile behind the reference
 
@@ -36,6 +36,6 @@ Catalog profile behind the reference
 
 > `readonly` `optional` **value?**: `string`
 
-Defined in: [core/src/model-catalog.ts:566](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/model-catalog.ts#L566)
+Defined in: [core/src/model-catalog.ts:566](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-catalog.ts#L566)
 
 Native value to write, or undefined to omit the field

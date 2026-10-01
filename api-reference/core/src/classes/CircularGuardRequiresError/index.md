@@ -6,7 +6,7 @@
 
 # Class: CircularGuardRequiresError
 
-Defined in: [core/src/errors/resolve.ts:55](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/resolve.ts#L55)
+Defined in: [core/src/errors/resolve.ts:55](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/resolve.ts#L55)
 
 Circular dependency detected in guard requires chain.
 
@@ -20,7 +20,7 @@ Circular dependency detected in guard requires chain.
 
 > **new CircularGuardRequiresError**(`chain`, `location?`): `CircularGuardRequiresError`
 
-Defined in: [core/src/errors/resolve.ts:57](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/resolve.ts#L57)
+Defined in: [core/src/errors/resolve.ts:57](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/resolve.ts#L57)
 
 #### Parameters
 
@@ -46,7 +46,7 @@ Defined in: [core/src/errors/resolve.ts:57](https://github.com/mrwogu/promptscri
 
 > `readonly` `optional` **cause?**: `Error`
 
-Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L56)
+Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L56)
 
 Original error if wrapping another error
 
@@ -60,7 +60,7 @@ Original error if wrapping another error
 
 > `readonly` **chain**: `string`[]
 
-Defined in: [core/src/errors/resolve.ts:56](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/resolve.ts#L56)
+Defined in: [core/src/errors/resolve.ts:56](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/resolve.ts#L56)
 
 ***
 
@@ -68,7 +68,7 @@ Defined in: [core/src/errors/resolve.ts:56](https://github.com/mrwogu/promptscri
 
 > `readonly` **code**: `string`
 
-Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L52)
+Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L52)
 
 Error code
 
@@ -82,7 +82,7 @@ Error code
 
 > `readonly` `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L54)
+Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L54)
 
 Source location where error occurred
 
@@ -96,7 +96,7 @@ Source location where error occurred
 
 > **format**(): `string`
 
-Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L79)
+Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L79)
 
 Format error for display.
 
@@ -114,7 +114,7 @@ Format error for display.
 
 > **toJSON**(): `Record`\<`string`, `unknown`\>
 
-Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L92)
+Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L92)
 
 Convert to JSON-serializable object.
 

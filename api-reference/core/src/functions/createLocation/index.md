@@ -8,7 +8,7 @@
 
 > **createLocation**(`file`, `line`, `column`, `offset?`): [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/utils/diagnostic.ts:166](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/utils/diagnostic.ts#L166)
+Defined in: [core/src/utils/diagnostic.ts:166](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/utils/diagnostic.ts#L166)
 
 Create a SourceLocation object.
 

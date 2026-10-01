@@ -8,7 +8,7 @@
 
 > `const` **TARGET\_DEFINITIONS**: `object`
 
-Defined in: [core/src/target-catalog.ts:756](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/target-catalog.ts#L756)
+Defined in: [core/src/target-catalog.ts:756](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/target-catalog.ts#L756)
 
 Complete target definitions with version, section, feature, hook, and
 resource capabilities attached to the compatibility catalog.

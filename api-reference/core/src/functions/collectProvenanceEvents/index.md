@@ -8,7 +8,7 @@
 
 > **collectProvenanceEvents**(`body`, `targetPath`, `operation`, `source`, `action`, `strategy?`, `options?`): [`ProvenanceEvent`](https://getpromptscript.dev/api-reference/core/src/interfaces/ProvenanceEvent/index.md)[]
 
-Defined in: [core/src/provenance.ts:420](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/provenance.ts#L420)
+Defined in: [core/src/provenance.ts:420](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/provenance.ts#L420)
 
 Create operation events for an extension or replacement body.
 

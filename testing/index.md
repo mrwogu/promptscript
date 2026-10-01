@@ -17,31 +17,8 @@ flowchart TB
 
 ## Testing Mechanisms
 
-<div class="ref-list">
-
-<a href="parity-testing/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--blue">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 0 1-1.414 0l-7-7a1 1 0 0 1 0-1.414l7-7A1 1 0 0 1 12 3m0 2.414L5.414 12L12 18.586L18.586 12z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Parity Testing</h3>
-    <p>Ensures consistent output across all formatters using specification-based and reference-based testing.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-<a href="feature-coverage/" class="ref-item">
-  <div class="ref-item__icon ref-item__icon--green">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M21 7L9 19l-5.5-5.5l1.41-1.41L9 16.17L19.59 5.59z"/></svg>
-  </div>
-  <div class="ref-item__content">
-    <h3>Feature Coverage</h3>
-    <p>Tracks which features each AI tool supports and which our formatters implement.</p>
-  </div>
-  <div class="ref-item__arrow">→</div>
-</a>
-
-</div>
+- [Parity Testing](https://getpromptscript.dev/testing/parity-testing/index.md): Ensures consistent output across all formatters using specification-based and reference-based testing.
+- [Feature Coverage](https://getpromptscript.dev/testing/feature-coverage/index.md): Tracks which features each AI tool supports and which our formatters implement.
 
 ## Quick Reference
 

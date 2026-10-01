@@ -6,7 +6,7 @@
 
 # Interface: TargetCapabilitySeed
 
-Defined in: [core/src/target-capabilities.ts:1434](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/target-capabilities.ts#L1434)
+Defined in: [core/src/target-capabilities.ts:1434](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/target-capabilities.ts#L1434)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [core/src/target-capabilities.ts:1434](https://github.com/mrwogu/pro
 
 > `readonly` **features**: `object`
 
-Defined in: [core/src/target-capabilities.ts:1437](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/target-capabilities.ts#L1437)
+Defined in: [core/src/target-capabilities.ts:1437](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/target-capabilities.ts#L1437)
 
 #### defaultVersion
 
@@ -38,7 +38,7 @@ Defined in: [core/src/target-capabilities.ts:1437](https://github.com/mrwogu/pro
 
 > `readonly` **outputPath**: `string`
 
-Defined in: [core/src/target-capabilities.ts:1435](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/target-capabilities.ts#L1435)
+Defined in: [core/src/target-capabilities.ts:1435](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/target-capabilities.ts#L1435)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [core/src/target-capabilities.ts:1435](https://github.com/mrwogu/pro
 
 > `readonly` **skillPath**: `object`
 
-Defined in: [core/src/target-capabilities.ts:1436](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/target-capabilities.ts#L1436)
+Defined in: [core/src/target-capabilities.ts:1436](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/target-capabilities.ts#L1436)
 
 #### basePath
 

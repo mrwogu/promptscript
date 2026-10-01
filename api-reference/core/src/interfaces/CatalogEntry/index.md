@@ -6,7 +6,7 @@
 
 # Interface: CatalogEntry
 
-Defined in: [core/src/types/manifest.ts:63](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L63)
+Defined in: [core/src/types/manifest.ts:63](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L63)
 
 A single entry in the registry catalog.
 
@@ -16,7 +16,7 @@ A single entry in the registry catalog.
 
 > **dependencies**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:77](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L77)
+Defined in: [core/src/types/manifest.ts:77](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L77)
 
 Dependencies on other catalog entries
 
@@ -26,7 +26,7 @@ Dependencies on other catalog entries
 
 > **description**: `string`
 
-Defined in: [core/src/types/manifest.ts:71](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L71)
+Defined in: [core/src/types/manifest.ts:71](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L71)
 
 Description of what this configuration provides
 
@@ -36,7 +36,7 @@ Description of what this configuration provides
 
 > `optional` **detectionHints?**: [`DetectionHints`](https://getpromptscript.dev/api-reference/core/src/interfaces/DetectionHints/index.md)
 
-Defined in: [core/src/types/manifest.ts:79](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L79)
+Defined in: [core/src/types/manifest.ts:79](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L79)
 
 Detection hints for auto-suggestion
 
@@ -46,7 +46,7 @@ Detection hints for auto-suggestion
 
 > `optional` **extends?**: `string`
 
-Defined in: [core/src/types/manifest.ts:83](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L83)
+Defined in: [core/src/types/manifest.ts:83](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L83)
 
 Registry path of the base skill this entry extends (for overlay detection)
 
@@ -56,7 +56,7 @@ Registry path of the base skill this entry extends (for overlay detection)
 
 > **id**: `string`
 
-Defined in: [core/src/types/manifest.ts:65](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L65)
+Defined in: [core/src/types/manifest.ts:65](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L65)
 
 Unique identifier (e.g., "@stacks/react")
 
@@ -66,7 +66,7 @@ Unique identifier (e.g., "@stacks/react")
 
 > **name**: `string`
 
-Defined in: [core/src/types/manifest.ts:69](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L69)
+Defined in: [core/src/types/manifest.ts:69](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L69)
 
 Human-readable name
 
@@ -76,7 +76,7 @@ Human-readable name
 
 > **path**: `string`
 
-Defined in: [core/src/types/manifest.ts:67](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L67)
+Defined in: [core/src/types/manifest.ts:67](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L67)
 
 Path to the .prs file relative to registry root
 
@@ -86,7 +86,7 @@ Path to the .prs file relative to registry root
 
 > `optional` **source?**: [`SourceAttribution`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceAttribution/index.md)
 
-Defined in: [core/src/types/manifest.ts:81](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L81)
+Defined in: [core/src/types/manifest.ts:81](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L81)
 
 Source attribution for migrated content
 
@@ -96,7 +96,7 @@ Source attribution for migrated content
 
 > **tags**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:73](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L73)
+Defined in: [core/src/types/manifest.ts:73](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L73)
 
 Searchable tags
 
@@ -106,6 +106,6 @@ Searchable tags
 
 > **targets**: [`ManifestTarget`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ManifestTarget/index.md)[]
 
-Defined in: [core/src/types/manifest.ts:75](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L75)
+Defined in: [core/src/types/manifest.ts:75](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L75)
 
 Supported output targets

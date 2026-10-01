@@ -6,7 +6,7 @@
 
 # Interface: OpenCodeHookRule
 
-Defined in: [formatters/src/hook-adapters.ts:1081](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L1081)
+Defined in: [formatters/src/hook-adapters.ts:1081](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L1081)
 
 Serialized hook rule embedded in the generated OpenCode plugin.
 
@@ -16,7 +16,7 @@ Serialized hook rule embedded in the generated OpenCode plugin.
 
 > **command**: `string`[]
 
-Defined in: [formatters/src/hook-adapters.ts:1085](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L1085)
+Defined in: [formatters/src/hook-adapters.ts:1085](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L1085)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [formatters/src/hook-adapters.ts:1085](https://github.com/mrwogu/pro
 
 > `optional` **cwd?**: `string`
 
-Defined in: [formatters/src/hook-adapters.ts:1086](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L1086)
+Defined in: [formatters/src/hook-adapters.ts:1086](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L1086)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [formatters/src/hook-adapters.ts:1086](https://github.com/mrwogu/pro
 
 > **event**: `"tool.execute.before"` \| `"tool.execute.after"`
 
-Defined in: [formatters/src/hook-adapters.ts:1083](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L1083)
+Defined in: [formatters/src/hook-adapters.ts:1083](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L1083)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [formatters/src/hook-adapters.ts:1083](https://github.com/mrwogu/pro
 
 > **id**: `string`
 
-Defined in: [formatters/src/hook-adapters.ts:1082](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L1082)
+Defined in: [formatters/src/hook-adapters.ts:1082](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L1082)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [formatters/src/hook-adapters.ts:1082](https://github.com/mrwogu/pro
 
 > `optional` **matcher?**: `string`
 
-Defined in: [formatters/src/hook-adapters.ts:1084](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L1084)
+Defined in: [formatters/src/hook-adapters.ts:1084](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L1084)
 
 ***
 
@@ -56,4 +56,4 @@ Defined in: [formatters/src/hook-adapters.ts:1084](https://github.com/mrwogu/pro
 
 > `optional` **timeoutMs?**: `number`
 
-Defined in: [formatters/src/hook-adapters.ts:1087](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L1087)
+Defined in: [formatters/src/hook-adapters.ts:1087](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L1087)

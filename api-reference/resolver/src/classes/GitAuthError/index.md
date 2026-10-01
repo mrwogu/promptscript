@@ -6,7 +6,7 @@
 
 # Class: GitAuthError
 
-Defined in: [resolver/src/git-registry.ts:143](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L143)
+Defined in: [resolver/src/git-registry.ts:143](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L143)
 
 Git authentication error.
 
@@ -20,7 +20,7 @@ Git authentication error.
 
 > **new GitAuthError**(`message`, `url`, `cause?`): `GitAuthError`
 
-Defined in: [resolver/src/git-registry.ts:146](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L146)
+Defined in: [resolver/src/git-registry.ts:146](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L146)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [resolver/src/git-registry.ts:146](https://github.com/mrwogu/prompts
 
 > `readonly` `optional` **cause?**: `Error`
 
-Defined in: [resolver/src/git-registry.ts:144](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L144)
+Defined in: [resolver/src/git-registry.ts:144](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L144)
 
 #### Overrides
 
@@ -62,4 +62,4 @@ Defined in: [resolver/src/git-registry.ts:144](https://github.com/mrwogu/prompts
 
 > `readonly` **url**: `string`
 
-Defined in: [resolver/src/git-registry.ts:148](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L148)
+Defined in: [resolver/src/git-registry.ts:148](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L148)

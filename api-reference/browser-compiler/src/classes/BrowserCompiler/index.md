@@ -6,7 +6,7 @@
 
 # Class: BrowserCompiler
 
-Defined in: [browser-compiler/src/compiler.ts:158](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/compiler.ts#L158)
+Defined in: [browser-compiler/src/compiler.ts:158](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/compiler.ts#L158)
 
 Browser-compatible compiler for PromptScript.
 
@@ -16,7 +16,7 @@ Browser-compatible compiler for PromptScript.
 
 > **new BrowserCompiler**(`options`): `BrowserCompiler`
 
-Defined in: [browser-compiler/src/compiler.ts:168](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/compiler.ts#L168)
+Defined in: [browser-compiler/src/compiler.ts:168](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/compiler.ts#L168)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [browser-compiler/src/compiler.ts:168](https://github.com/mrwogu/pro
 
 > **clearCache**(): `void`
 
-Defined in: [browser-compiler/src/compiler.ts:441](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/compiler.ts#L441)
+Defined in: [browser-compiler/src/compiler.ts:441](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/compiler.ts#L441)
 
 Clear the resolution cache.
 
@@ -48,7 +48,7 @@ Clear the resolution cache.
 
 > **compile**(`entryPath`): `Promise`\<[`CompileResult`](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/CompileResult/index.md)\>
 
-Defined in: [browser-compiler/src/compiler.ts:199](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/compiler.ts#L199)
+Defined in: [browser-compiler/src/compiler.ts:199](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/compiler.ts#L199)
 
 Compile a PromptScript file through the full pipeline.
 
@@ -72,7 +72,7 @@ Compilation result with outputs, errors, and stats
 
 > **getFormatters**(): readonly [`Formatter`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/Formatter/index.md)[]
 
-Defined in: [browser-compiler/src/compiler.ts:434](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/compiler.ts#L434)
+Defined in: [browser-compiler/src/compiler.ts:434](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/compiler.ts#L434)
 
 Get the configured formatters.
 

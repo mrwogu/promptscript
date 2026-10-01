@@ -6,7 +6,7 @@
 
 # Interface: Program
 
-Defined in: [core/src/types/ast.ts:108](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L108)
+Defined in: [core/src/types/ast.ts:108](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L108)
 
 Root AST node representing a complete PromptScript file.
 
@@ -20,7 +20,7 @@ Root AST node representing a complete PromptScript file.
 
 > `optional` **agentProvenance?**: [`AgentProvenance`](https://getpromptscript.dev/api-reference/core/src/interfaces/AgentProvenance/index.md)[]
 
-Defined in: [core/src/types/ast.ts:123](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L123)
+Defined in: [core/src/types/ast.ts:123](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L123)
 
 Resolved agent names and their source/import provenance
 
@@ -30,7 +30,7 @@ Resolved agent names and their source/import provenance
 
 > **blocks**: [`Block`](https://getpromptscript.dev/api-reference/core/src/interfaces/Block/index.md)[]
 
-Defined in: [core/src/types/ast.ts:117](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L117)
+Defined in: [core/src/types/ast.ts:117](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L117)
 
 Content blocks (@identity, @context, etc.)
 
@@ -40,7 +40,7 @@ Content blocks (@identity, @context, etc.)
 
 > **extends**: [`ExtendBlock`](https://getpromptscript.dev/api-reference/core/src/interfaces/ExtendBlock/index.md)[]
 
-Defined in: [core/src/types/ast.ts:119](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L119)
+Defined in: [core/src/types/ast.ts:119](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L119)
 
 Extension blocks (@extend)
 
@@ -50,7 +50,7 @@ Extension blocks (@extend)
 
 > `optional` **inherit?**: [`InheritDeclaration`](https://getpromptscript.dev/api-reference/core/src/interfaces/InheritDeclaration/index.md)
 
-Defined in: [core/src/types/ast.ts:113](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L113)
+Defined in: [core/src/types/ast.ts:113](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L113)
 
 Inheritance declaration (@inherit)
 
@@ -60,7 +60,7 @@ Inheritance declaration (@inherit)
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -74,7 +74,7 @@ Source location
 
 > `optional` **meta?**: [`MetaBlock`](https://getpromptscript.dev/api-reference/core/src/interfaces/MetaBlock/index.md)
 
-Defined in: [core/src/types/ast.ts:111](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L111)
+Defined in: [core/src/types/ast.ts:111](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L111)
 
 Metadata block (@meta)
 
@@ -84,7 +84,7 @@ Metadata block (@meta)
 
 > `optional` **overrides?**: [`OverrideBlock`](https://getpromptscript.dev/api-reference/core/src/interfaces/OverrideBlock/index.md)[]
 
-Defined in: [core/src/types/ast.ts:121](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L121)
+Defined in: [core/src/types/ast.ts:121](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L121)
 
 Explicit replacement blocks (@override)
 
@@ -94,7 +94,7 @@ Explicit replacement blocks (@override)
 
 > `optional` **syntaxFeatures?**: [`SyntaxFeatureUsage`](https://getpromptscript.dev/api-reference/core/src/interfaces/SyntaxFeatureUsage/index.md)[]
 
-Defined in: [core/src/types/ast.ts:125](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L125)
+Defined in: [core/src/types/ast.ts:125](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L125)
 
 Versioned syntax features retained after destructive resolution passes
 
@@ -104,7 +104,7 @@ Versioned syntax features retained after destructive resolution passes
 
 > `readonly` **type**: `"Program"`
 
-Defined in: [core/src/types/ast.ts:109](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L109)
+Defined in: [core/src/types/ast.ts:109](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L109)
 
 Node type discriminator
 
@@ -118,6 +118,6 @@ Node type discriminator
 
 > **uses**: [`UseDeclaration`](https://getpromptscript.dev/api-reference/core/src/interfaces/UseDeclaration/index.md)[]
 
-Defined in: [core/src/types/ast.ts:115](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L115)
+Defined in: [core/src/types/ast.ts:115](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L115)
 
 Import declarations (@use)

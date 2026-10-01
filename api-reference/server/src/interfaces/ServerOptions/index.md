@@ -6,7 +6,7 @@
 
 # Interface: ServerOptions
 
-Defined in: [server/src/types.ts:1](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/server/src/types.ts#L1)
+Defined in: [server/src/types.ts:1](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/server/src/types.ts#L1)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [server/src/types.ts:1](https://github.com/mrwogu/promptscript/blob/
 
 > **corsOrigin**: `string`
 
-Defined in: [server/src/types.ts:11](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/server/src/types.ts#L11)
+Defined in: [server/src/types.ts:11](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/server/src/types.ts#L11)
 
 Allowed CORS origin
 
@@ -24,7 +24,7 @@ Allowed CORS origin
 
 > **host**: `string`
 
-Defined in: [server/src/types.ts:5](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/server/src/types.ts#L5)
+Defined in: [server/src/types.ts:5](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/server/src/types.ts#L5)
 
 Host to bind to
 
@@ -34,7 +34,7 @@ Host to bind to
 
 > **port**: `number`
 
-Defined in: [server/src/types.ts:3](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/server/src/types.ts#L3)
+Defined in: [server/src/types.ts:3](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/server/src/types.ts#L3)
 
 Port to listen on
 
@@ -44,7 +44,7 @@ Port to listen on
 
 > **readOnly**: `boolean`
 
-Defined in: [server/src/types.ts:9](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/server/src/types.ts#L9)
+Defined in: [server/src/types.ts:9](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/server/src/types.ts#L9)
 
 Read-only mode
 
@@ -54,6 +54,6 @@ Read-only mode
 
 > **workspace**: `string`
 
-Defined in: [server/src/types.ts:7](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/server/src/types.ts#L7)
+Defined in: [server/src/types.ts:7](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/server/src/types.ts#L7)
 
 Workspace root directory

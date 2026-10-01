@@ -8,7 +8,7 @@
 
 > **isPlainObject**(`val`): `val is Record<string, unknown>`
 
-Defined in: [core/src/utils/merge.ts:176](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/utils/merge.ts#L176)
+Defined in: [core/src/utils/merge.ts:176](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/utils/merge.ts#L176)
 
 Type guard for plain objects.
 

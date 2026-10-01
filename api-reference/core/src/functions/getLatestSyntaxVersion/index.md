@@ -8,7 +8,7 @@
 
 > **getLatestSyntaxVersion**(): `string`
 
-Defined in: [core/src/syntax-versions.ts:175](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/syntax-versions.ts#L175)
+Defined in: [core/src/syntax-versions.ts:175](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/syntax-versions.ts#L175)
 
 Get the latest known syntax version.
 

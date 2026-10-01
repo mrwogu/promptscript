@@ -8,7 +8,7 @@
 
 > **isRuleExcludedForLocation**(`rule`, `loc`, `config`): `boolean`
 
-Defined in: [validator/src/import-exclusions.ts:154](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/import-exclusions.ts#L154)
+Defined in: [validator/src/import-exclusions.ts:154](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/import-exclusions.ts#L154)
 
 Check whether a rule is excluded for the given source location.
 

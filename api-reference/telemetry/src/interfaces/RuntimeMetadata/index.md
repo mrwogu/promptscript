@@ -6,7 +6,7 @@
 
 # Interface: RuntimeMetadata
 
-Defined in: [telemetry/src/types.ts:26](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/telemetry/src/types.ts#L26)
+Defined in: [telemetry/src/types.ts:26](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/telemetry/src/types.ts#L26)
 
 ## Extended by
 
@@ -19,7 +19,7 @@ Defined in: [telemetry/src/types.ts:26](https://github.com/mrwogu/promptscript/b
 
 > **app\_version**: `string`
 
-Defined in: [telemetry/src/types.ts:27](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/telemetry/src/types.ts#L27)
+Defined in: [telemetry/src/types.ts:27](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/telemetry/src/types.ts#L27)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: [telemetry/src/types.ts:27](https://github.com/mrwogu/promptscript/b
 
 > **arch**: `"other"` \| `"arm64"` \| `"x86_64"`
 
-Defined in: [telemetry/src/types.ts:30](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/telemetry/src/types.ts#L30)
+Defined in: [telemetry/src/types.ts:30](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/telemetry/src/types.ts#L30)
 
 ***
 
@@ -35,7 +35,7 @@ Defined in: [telemetry/src/types.ts:30](https://github.com/mrwogu/promptscript/b
 
 > **os**: `"windows"` \| `"darwin"` \| `"linux"` \| `"other"`
 
-Defined in: [telemetry/src/types.ts:29](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/telemetry/src/types.ts#L29)
+Defined in: [telemetry/src/types.ts:29](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/telemetry/src/types.ts#L29)
 
 ***
 
@@ -43,4 +43,4 @@ Defined in: [telemetry/src/types.ts:29](https://github.com/mrwogu/promptscript/b
 
 > **runtime\_version**: `string`
 
-Defined in: [telemetry/src/types.ts:28](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/telemetry/src/types.ts#L28)
+Defined in: [telemetry/src/types.ts:28](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/telemetry/src/types.ts#L28)

@@ -6,7 +6,7 @@
 
 # Interface: SpoolInfo
 
-Defined in: [telemetry/src/types.ts:73](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/telemetry/src/types.ts#L73)
+Defined in: [telemetry/src/types.ts:73](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/telemetry/src/types.ts#L73)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [telemetry/src/types.ts:73](https://github.com/mrwogu/promptscript/b
 
 > **bytes**: `number`
 
-Defined in: [telemetry/src/types.ts:75](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/telemetry/src/types.ts#L75)
+Defined in: [telemetry/src/types.ts:75](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/telemetry/src/types.ts#L75)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [telemetry/src/types.ts:75](https://github.com/mrwogu/promptscript/b
 
 > **records**: `number`
 
-Defined in: [telemetry/src/types.ts:74](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/telemetry/src/types.ts#L74)
+Defined in: [telemetry/src/types.ts:74](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/telemetry/src/types.ts#L74)

@@ -6,7 +6,7 @@
 
 # Interface: UseDeclaration
 
-Defined in: [core/src/types/ast.ts:210](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L210)
+Defined in: [core/src/types/ast.ts:210](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L210)
 
 Import declaration for reusable fragments.
 
@@ -28,7 +28,7 @@ Import declaration for reusable fragments.
 
 > `optional` **alias?**: `string`
 
-Defined in: [core/src/types/ast.ts:215](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L215)
+Defined in: [core/src/types/ast.ts:215](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L215)
 
 Optional alias
 
@@ -38,7 +38,7 @@ Optional alias
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -52,7 +52,7 @@ Source location
 
 > `optional` **outputDir?**: `string`
 
-Defined in: [core/src/types/ast.ts:223](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L223)
+Defined in: [core/src/types/ast.ts:223](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L223)
 
 Optional inline output directory (e.g. `@use foo into skills/seo`).
 Stored as a forward-slash relative path. When present this overrides
@@ -64,7 +64,7 @@ the global `skillTargets` configuration for this import only.
 
 > `optional` **params?**: [`ParamArgument`](https://getpromptscript.dev/api-reference/core/src/interfaces/ParamArgument/index.md)[]
 
-Defined in: [core/src/types/ast.ts:217](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L217)
+Defined in: [core/src/types/ast.ts:217](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L217)
 
 Template parameters (for parameterized imports)
 
@@ -74,7 +74,7 @@ Template parameters (for parameterized imports)
 
 > **path**: [`PathReference`](https://getpromptscript.dev/api-reference/core/src/interfaces/PathReference/index.md)
 
-Defined in: [core/src/types/ast.ts:213](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L213)
+Defined in: [core/src/types/ast.ts:213](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L213)
 
 Path to imported file
 
@@ -84,7 +84,7 @@ Path to imported file
 
 > `readonly` **type**: `"UseDeclaration"`
 
-Defined in: [core/src/types/ast.ts:211](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L211)
+Defined in: [core/src/types/ast.ts:211](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L211)
 
 Node type discriminator
 

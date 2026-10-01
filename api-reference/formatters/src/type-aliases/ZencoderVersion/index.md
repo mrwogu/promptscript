@@ -8,4 +8,4 @@
 
 > **ZencoderVersion** = `"simple"` \| `"multifile"` \| `"full"`
 
-Defined in: [formatters/src/formatters/zencoder.ts:6](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/formatters/zencoder.ts#L6)
+Defined in: [formatters/src/formatters/zencoder.ts:6](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/formatters/zencoder.ts#L6)

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" class="astro-o2zr3uo2"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Agent Platform Configuration as Code | PromptScript</title><link rel="canonical" href="https://getpromptscript.dev/"/><link rel="sitemap" href="/sitemap-index.xml"/><script src="/init-demo.js" defer></script><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://getpromptscript.dev/#website","name":"PromptScript","url":"https://getpromptscript.dev/","description":"Prompt-as-Code for Enterprise AI. Standardize, audit, and deploy instructions across any AI coding assistant.","inLanguage":"en","publisher":{"@type":"Organization","name":"PromptScript","url":"https://getpromptscript.dev/","logo":"https://getpromptscript.dev/assets/images/logo.svg","sameAs":["https://github.com/mrwogu/promptscript","https://www.npmjs.com/org/promptscript"]}},{"@type":"SoftwareApplication","name":"PromptScript","description":"Compiler and CLI that turns .prs files into native instructions, skills, agents, MCP config, and hooks for 50 AI coding agents.","url":"https://getpromptscript.dev/","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Linux, Windows","softwareVersion":"1.21.0","license":"https://opensource.org/licenses/MIT","downloadUrl":"https://www.npmjs.com/package/@promptscript/cli","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"sameAs":["https://github.com/mrwogu/promptscript"]}]}</script><link rel="shortcut icon" href="/assets/images/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.3.5"/><meta name="generator" content="Starlight v0.42.4"/><meta property="og:title" content="Agent Platform Configuration as Code"/><meta property="og:url" content="https://getpromptscript.dev/"/><meta property="og:locale" content="en"/><meta property="og:description" content="Define AI instructions, skills, agents, MCP servers, hooks, workflows, and policies once. Compile native configuration for 50 AI coding agent platforms."/><meta property="og:site_name" content="PromptScript"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="Define AI instructions, skills, agents, MCP servers, hooks, workflows, and policies once. Compile native configuration for 50 AI coding agent platforms."/><meta property="og:image" content="https://getpromptscript.dev/assets/images/og-image.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://getpromptscript.dev/assets/images/og-image.png"/><meta property="og:type" content="website"/><meta name="keywords" content="PromptScript, agent platform, configuration as code, AI instructions, AI agents, AI skills, MCP servers, GitHub Copilot, Claude Code, Cursor, Factory AI, Codex, AI governance, PromptOps"/><script>
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" class="astro-o2zr3uo2"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>One Source for Claude, Copilot and Cursor Rules | PromptScript</title><link rel="canonical" href="https://getpromptscript.dev/"/><link rel="sitemap" href="/sitemap-index.xml"/><script src="/init-demo.js" defer></script><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://getpromptscript.dev/#website","name":"PromptScript","url":"https://getpromptscript.dev/","description":"Open-source compiler for AI coding agent rules. Write instructions, skills, agents, and MCP servers once and get native files for 50 tools.","inLanguage":"en","publisher":{"@type":"Organization","name":"PromptScript","url":"https://getpromptscript.dev/","logo":"https://getpromptscript.dev/assets/images/logo.svg","sameAs":["https://github.com/mrwogu/promptscript","https://www.npmjs.com/org/promptscript"]}},{"@type":"SoftwareApplication","name":"PromptScript","description":"Compiler and CLI that turns .prs files into native instructions, skills, agents, MCP config, and hooks for 50 AI coding agents.","url":"https://getpromptscript.dev/","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Linux, Windows","softwareVersion":"1.21.0","license":"https://opensource.org/licenses/MIT","downloadUrl":"https://www.npmjs.com/package/@promptscript/cli","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Wojciech Guziak","url":"https://github.com/mrwogu","sameAs":["https://www.linkedin.com/in/wojciechguziak/"]},"sameAs":["https://github.com/mrwogu/promptscript"]}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is PromptScript?","acceptedAnswer":{"@type":"Answer","text":"PromptScript is an open-source compiler for AI coding agent configuration. You write instructions, skills, agents, MCP servers, hooks, and plugins in .prs files, and it generates the native files for 50 tools, such as CLAUDE.md, .github/copilot-instructions.md, and Cursor rules."}},{"@type":"Question","name":"Which AI coding tools does it support?","acceptedAnswer":{"@type":"Answer","text":"It compiles to 50 targets, including Claude Code, GitHub Copilot, Cursor, Codex, Gemini CLI, Windsurf, Factory AI, and OpenCode. Each target gets the file layout and format that tool reads."}},{"@type":"Question","name":"How is it different from a shared AGENTS.md file?","acceptedAnswer":{"@type":"Answer","text":"AGENTS.md is one file that some tools read. PromptScript is the source behind it: it adds inheritance across repositories, parameters, skills, agents, MCP servers, validation, and a security scan, and it writes AGENTS.md together with the formats of every other tool."}},{"@type":"Question","name":"Can I start from the instruction files I already have?","acceptedAnswer":{"@type":"Answer","text":"Yes. prs import converts an existing CLAUDE.md, Copilot, Cursor, or AGENTS.md file, prs migrate imports a whole project, and the built-in promptscript skill lets your AI agent do the migration for you."}},{"@type":"Question","name":"How do teams share one configuration?","acceptedAnswer":{"@type":"Answer","text":"Publish a Git registry with prs registry init and prs registry publish, then inherit it in every project with @inherit. Remote imports are pinned by commit and sha256 hash in promptscript.lock, and prs vendor sync copies them for offline builds."}},{"@type":"Question","name":"Does PromptScript send my prompts anywhere?","acceptedAnswer":{"@type":"Answer","text":"No. Compilation runs on your machine or in your CI. Anonymous usage telemetry is on by default and never includes source, prompts, compiled output, file paths, or project names. Turn it off with prs telemetry disable or DO_NOT_TRACK=1."}},{"@type":"Question","name":"Is PromptScript free?","acceptedAnswer":{"@type":"Answer","text":"Yes. PromptScript is open source under the MIT license. The CLI is published on npm as @promptscript/cli."}}]}]}</script><link rel="shortcut icon" href="/assets/images/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.3.5"/><meta name="generator" content="Starlight v0.42.4"/><meta property="og:title" content="One Source for Claude, Copilot and Cursor Rules"/><meta property="og:url" content="https://getpromptscript.dev/"/><meta property="og:locale" content="en"/><meta property="og:description" content="PromptScript is an open-source compiler for AI coding agent rules. Write instructions, skills, agents, and MCP servers once and get native files for 50 tools."/><meta property="og:site_name" content="PromptScript"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="PromptScript is an open-source compiler for AI coding agent rules. Write instructions, skills, agents, and MCP servers once and get native files for 50 tools."/><meta property="og:image" content="https://getpromptscript.dev/assets/images/og-image.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://getpromptscript.dev/assets/images/og-image.png"/><meta property="og:type" content="website"/><meta name="keywords" content="PromptScript, CLAUDE.md, AGENTS.md, Cursor rules, copilot-instructions.md, AI coding agent rules, prompts as code, AI skills, MCP servers, Claude Code, GitHub Copilot, Codex, Gemini CLI, AI governance"/><script>
 	window.StarlightThemeProvider = (() => {
 		const storedTheme =
 			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
@@ -24,7 +24,7 @@
 			},
 		};
 	})();
-</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/_astro/middleware.7OQ-c0_T.css"><script type="module" src="/_astro/page.Df9QzTQS.js"></script></head><body class="astro-o2zr3uo2"><a class="sl-skip-link astro-ykqaqji2" href="#_top">Skip to content</a><div class="page sl-flex astro-2sgsbnsp"><header class="header astro-2sgsbnsp"><div class="ps-header"><div class="ps-header__main"><div class="header astro-5tc3rkkl"><div class="title-wrapper sl-flex astro-5tc3rkkl"><a href="/" class="site-title sl-flex astro-gfbmur5v"><img class="astro-gfbmur5v" alt src="/_astro/logo.uBmWggjC.svg" width="256" height="256"><span class="astro-gfbmur5v" translate="no">PromptScript</span></a></div><div class="sl-flex print:hidden astro-5tc3rkkl"><site-search class="astro-5tc3rkkl astro-xpggcgcd" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-xpggcgcd"><svg aria-hidden="true" class="astro-xpggcgcd astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-xpggcgcd" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-xpggcgcd" style="display: none;"><kbd class="astro-xpggcgcd">Ctrl</kbd><kbd class="astro-xpggcgcd">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-xpggcgcd"><div class="dialog-frame sl-flex astro-xpggcgcd"><button data-close-modal class="sl-flex md:sl-hidden astro-xpggcgcd">Cancel</button><div class="search-container astro-xpggcgcd"><div id="starlight__search" class="astro-xpggcgcd"></div></div></div></dialog></site-search><script>
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/_astro/middleware.Cm7QRtA6.css"><script type="module" src="/_astro/page.BlhBxHwb.js"></script></head><body class="astro-o2zr3uo2"><a class="sl-skip-link astro-ykqaqji2" href="#_top">Skip to content</a><div class="page sl-flex astro-2sgsbnsp"><header class="header astro-2sgsbnsp"><div class="ps-header"><div class="ps-header__main"><div class="header astro-5tc3rkkl"><div class="title-wrapper sl-flex astro-5tc3rkkl"><a href="/" class="site-title sl-flex astro-gfbmur5v"><img class="astro-gfbmur5v" alt src="/_astro/logo.uBmWggjC.svg" width="256" height="256"><span class="astro-gfbmur5v" translate="no">PromptScript</span></a></div><div class="sl-flex print:hidden astro-5tc3rkkl"><site-search class="astro-5tc3rkkl astro-xpggcgcd" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-xpggcgcd"><svg aria-hidden="true" class="astro-xpggcgcd astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-xpggcgcd" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-xpggcgcd" style="display: none;"><kbd class="astro-xpggcgcd">Ctrl</kbd><kbd class="astro-xpggcgcd">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-xpggcgcd"><div class="dialog-frame sl-flex astro-xpggcgcd"><button data-close-modal class="sl-flex md:sl-hidden astro-xpggcgcd">Cancel</button><div class="search-container astro-xpggcgcd"><div id="starlight__search" class="astro-xpggcgcd"></div></div></div></dialog></site-search><script>
 	(() => {
 		const openBtn = document.querySelector('button[data-open-modal]');
 		const shortcut = openBtn?.querySelector('kbd');
@@ -36,131 +36,218 @@
 		}
 		shortcut.style.display = '';
 	})();
-</script><script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.BuGLwjLu.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-5tc3rkkl"><div class="sl-flex social-icons astro-5tc3rkkl"><a href="https://github.com/mrwogu/promptscript" rel="me" class="sl-flex astro-ubhhazsu"><span class="sr-only astro-ubhhazsu">GitHub</span><svg aria-hidden="true" class="astro-ubhhazsu astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><a href="https://www.npmjs.com/org/promptscript" rel="me" class="sl-flex astro-ubhhazsu"><span class="sr-only astro-ubhhazsu">npm</span><svg aria-hidden="true" class="astro-ubhhazsu astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M1.76 0h20.48a1.76 1.76 0 0 1 1.76 1.76v20.48a1.76 1.76 0 0 1-1.76 1.76H1.76A1.76 1.76 0 0 1 0 22.24V1.76A1.76 1.76 0 0 1 1.76 0zM5.11 19.16h6.93V8.8h3.47v10.36h3.47V5.34H5.13v13.82z"></path></svg></a></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-kkwovbcg"><span class="sr-only astro-kkwovbcg">Select theme</span><svg aria-hidden="true" class="icon label-icon astro-kkwovbcg astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-kkwovbcg"><option value="dark" class="astro-kkwovbcg">Dark</option><option value="light" class="astro-kkwovbcg">Light</option><option value="auto" selected class="astro-kkwovbcg">Auto</option></select><svg aria-hidden="true" class="icon caret astro-kkwovbcg astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+</script><script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.BuGLwjLu.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-5tc3rkkl"><div class="sl-flex social-icons astro-5tc3rkkl"><a class="ps-stars astro-o2gh7vpa" href="https://github.com/mrwogu/promptscript"><span aria-hidden="true" class="astro-o2gh7vpa">★</span> 384<span class="sr-only astro-o2gh7vpa">GitHub stars</span></a><a href="https://github.com/mrwogu/promptscript" rel="me" class="sl-flex astro-ubhhazsu"><span class="sr-only astro-ubhhazsu">GitHub</span><svg aria-hidden="true" class="astro-ubhhazsu astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><a href="https://www.npmjs.com/org/promptscript" rel="me" class="sl-flex astro-ubhhazsu"><span class="sr-only astro-ubhhazsu">npm</span><svg aria-hidden="true" class="astro-ubhhazsu astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M1.76 0h20.48a1.76 1.76 0 0 1 1.76 1.76v20.48a1.76 1.76 0 0 1-1.76 1.76H1.76A1.76 1.76 0 0 1 0 22.24V1.76A1.76 1.76 0 0 1 1.76 0zM5.11 19.16h6.93V8.8h3.47v10.36h3.47V5.34H5.13v13.82z"></path></svg></a></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-kkwovbcg"><span class="sr-only astro-kkwovbcg">Select theme</span><svg aria-hidden="true" class="icon label-icon astro-kkwovbcg astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-kkwovbcg"><option value="dark" class="astro-kkwovbcg">Dark</option><option value="light" class="astro-kkwovbcg">Light</option><option value="auto" selected class="astro-kkwovbcg">Auto</option></select><svg aria-hidden="true" class="icon caret astro-kkwovbcg astro-m643akbo" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
 	StarlightThemeProvider.updatePickers();
-</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></div><nav class="ps-tabs-nav" aria-label="Documentation sections"><ul><li><a href="/getting-started/">Get Started</a></li><li><a href="/features/">Guides</a></li><li><a href="/reference/formatters/">Targets</a></li><li><a href="/reference/">Reference</a></li><li><a href="/examples/">Examples</a></li><li><a href="/guides/formatter-architecture/">Contributing</a></li><li><a href="/playground/">Playground</a></li><li><a href="https://github.com/mrwogu/promptscript/releases" rel="noopener" target="_blank">Changelog</a></li></ul></nav></div></header><div class="main-frame astro-2sgsbnsp"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-3g3uotfp"><div class="main-pane astro-3g3uotfp"><main data-pagefind-body class="astro-o2zr3uo2" lang="en" dir="ltr"><div class="content-panel astro-d7skw62l"><div class="sl-container astro-d7skw62l"></div></div><div class="content-panel astro-d7skw62l"><div class="sl-container astro-d7skw62l"><div class="sl-markdown-content"><div class="home-page">
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></div><nav class="ps-tabs-nav" aria-label="Documentation sections"><ul><li><a href="/getting-started/">Get Started</a></li><li><a href="/features/">Guides</a></li><li><a href="/reference/formatters/">Targets</a></li><li><a href="/reference/">Reference</a></li><li><a href="/examples/">Examples</a></li><li><a href="/guides/formatter-architecture/">Contributing</a></li><li><a href="/playground/">Playground</a></li><li><a href="https://github.com/mrwogu/promptscript/releases" rel="noopener" target="_blank">Changelog</a></li></ul></nav></div></header><div class="main-frame astro-2sgsbnsp"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-3g3uotfp"><div class="main-pane astro-3g3uotfp"><main data-pagefind-body class="astro-o2zr3uo2" lang="en" dir="ltr"><div class="content-panel astro-d7skw62l"><div class="sl-container astro-d7skw62l"><script type="module">document.querySelectorAll(`[data-copy-page]`).forEach(e=>{let t=e.textContent;e.addEventListener(`click`,async()=>{try{let t=new URL(e.dataset.copyPage??``).pathname,n=await fetch(t);if(!n.ok)throw Error(`HTTP ${n.status}`);await navigator.clipboard.writeText(await n.text()),e.textContent=`Copied`}catch{e.textContent=`Copy failed`}setTimeout(()=>e.textContent=t,2e3)})});</script></div></div><div class="content-panel astro-d7skw62l"><div class="sl-container astro-d7skw62l"><div class="sl-markdown-content"><div class="home-page">
   <section class="home-hero">
     <div class="home-hero__copy">
-      <div class="home-eyebrow">Agent platform configuration as code</div>
-      <h1>Define your agent platform once.<br /><span>Compile it everywhere.</span></h1>
+      <div class="home-eyebrow">Prompts as code for AI coding agents</div>
+      <h1>Write your AI rules once.<br /><span>Every agent follows them.</span></h1>
       <p class="home-hero__lead">
-        One composable source for instructions, skills, agents, MCP servers, hooks, workflows, and
-        policies. Inherit it across teams and compile native configuration for 50 AI coding
-        platforms.
+        PromptScript is an open-source compiler for AI coding agent rules. Write instructions,
+        skills, agents, and MCP servers once, inherit them like code, and get native files for 50
+        tools.
       </p>
       <div class="home-hero__actions">
         <a href="getting-started/" class="home-button home-button--primary">Get started</a>
-        <a href="#native-output" class="home-button home-button--secondary">See native output</a>
+        <a href="/playground/" class="home-button home-button--secondary">Try it in the browser</a>
       </div>
       <div class="home-install" aria-label="Install PromptScript CLI">
         <code>npm install -g @promptscript/cli</code>
-        <span>Open source · Git-native · CI-ready</span>
+        <span>Open source · MIT · Git-native · CI-ready</span>
       </div>
+      <p class="home-proof-line">★ 384 GitHub stars · 2.9k npm downloads last month</p>
     </div>
-    <div
-      class="home-hero__visual"
-      aria-label="PromptScript source compiled to native platform files"
-    >
-      <div class="home-code-window">
-        <div class="home-window-bar">
-          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-          <span>project.prs</span>
-          <span class="home-window-status">source</span>
-        </div>
-        <pre><code><span class="home-code-keyword">@inherit</span> <span class="home-code-reference">@company/platform</span>
-<span class="home-code-keyword">@identity</span> {
-&#32;&#32;<span class="home-code-string">"Checkout service"</span>
-}
-<span class="home-code-keyword">@skills</span> {
-&#32;&#32;security-review: {
-&#32;&#32;&#32;&#32;description: <span class="home-code-string">"Review code"</span>
-&#32;&#32;}
-}
-<span class="home-code-keyword">@agents</span> {
-&#32;&#32;reviewer: {
-&#32;&#32;&#32;&#32;skills: [<span class="home-code-string">"security-review"</span>]
-&#32;&#32;&#32;&#32;mcpServers: [<span class="home-code-string">"issues"</span>]
-&#32;&#32;}
-}
-<span class="home-code-keyword">@hooks</span> {
-&#32;&#32;validate: {
-&#32;&#32;&#32;&#32;event: <span class="home-code-string">"post-tool-use"</span>
-&#32;&#32;}
-}</code></pre>
+    <div class="home-hero__visual">
+      <div class="home-converge__source">
+        <img src="/assets/images/logo.svg" alt="" width="48" height="48" />
+        <ol class="home-converge__chain">
+          <li><code>@company/base</code><span>organization</span></li>
+          <li><code>@team/web</code><span>team</span></li>
+          <li><code>project.prs</code><span>this repo</span></li>
+        </ol>
+        <p>Your sources, inherited like code</p>
       </div>
-      <div class="home-compile-arrow" aria-hidden="true"><i></i></div>
-      <div class="home-output-file home-output-file--claude">
-        <span>Claude Code</span>
-        <code>CLAUDE.md</code>
+      <div class="home-converge__lines" aria-hidden="true">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M0 50 C 55 50, 45 8.33, 100 8.33" />
+          <path d="M0 50 C 55 50, 45 25, 100 25" />
+          <path d="M0 50 C 55 50, 45 41.67, 100 41.67" />
+          <path d="M0 50 C 55 50, 45 58.33, 100 58.33" />
+          <path d="M0 50 C 55 50, 45 75, 100 75" />
+          <path d="M0 50 C 55 50, 45 91.67, 100 91.67" />
+        </svg>
       </div>
-      <div class="home-compile-arrow" aria-hidden="true"><i></i></div>
-      <div class="home-output-file home-output-file--github">
-        <span>GitHub Copilot</span>
-        <code>.github/agents/reviewer.md</code>
-      </div>
-      <div class="home-compile-arrow" aria-hidden="true"><i></i></div>
-      <div class="home-output-file home-output-file--factory">
-        <span>Factory AI</span>
-        <code>.factory/skills/security-review/</code>
-      </div>
-      <div class="home-compile-arrow" aria-hidden="true"><i></i></div>
-      <div class="home-output-file home-output-file--cursor">
-        <span>Cursor</span>
-        <code>.cursor/rules/project.mdc</code>
-      </div>
-      <div class="home-output-more">+ 46 targets</div>
+      <ul class="home-converge__files">
+        <li style="--sx: -190px; --sy: 40px; --sr: -10deg; --c: #d97757">
+          <i></i><strong>Claude Code</strong><code>CLAUDE.md</code>
+          <span><b>instructions</b><b>skills</b><b>agents</b><b>MCP</b><b>hooks</b></span>
+        </li>
+        <li style="--sx: -70px; --sy: 95px; --sr: 7deg; --c: #8957e5">
+          <i></i><strong>GitHub Copilot</strong><code>.github/copilot-instructions.md</code>
+          <span><b>instructions</b><b>skills</b><b>agents</b><b>MCP</b><b>hooks</b></span>
+        </li>
+        <li style="--sx: -230px; --sy: -15px; --sr: 5deg; --c: #10a37f">
+          <i></i><strong>Codex</strong><code>AGENTS.md</code>
+          <span
+            ><b>instructions</b><b>skills</b><b>agents</b><b>MCP</b><b>hooks</b><b>plugins</b></span
+          >
+        </li>
+        <li style="--sx: -120px; --sy: -75px; --sr: -6deg; --c: #0891b2">
+          <i></i><strong>Factory AI</strong><code>.factory/droids/</code>
+          <span
+            ><b>instructions</b><b>skills</b><b>droids</b><b>MCP</b><b>hooks</b><b>plugins</b></span
+          >
+        </li>
+        <li style="--sx: -40px; --sy: -125px; --sr: 9deg; --c: #4285f4">
+          <i></i><strong>Gemini CLI</strong><code>GEMINI.md</code>
+          <span><b>instructions</b><b>skills</b><b>MCP</b><b>hooks</b></span>
+        </li>
+        <li style="--sx: -210px; --sy: -160px; --sr: -4deg; --c: #0ea5a4">
+          <i></i><strong>Windsurf</strong><code>.windsurf/rules/</code>
+          <span><b>instructions</b><b>skills</b><b>MCP</b><b>hooks</b></span>
+        </li>
+      </ul>
+      <p class="home-converge__more">+ 44 more targets, written for you</p>
     </div>
   </section>
-  <div class="home-platforms" aria-label="Supported platforms">
-    <span class="home-platforms__label">Native output for</span>
-    <span>Claude Code</span>
-    <span>GitHub Copilot</span>
-    <span>Cursor</span>
-    <span>Codex</span>
-    <span>Factory AI</span>
-    <span>Gemini CLI</span>
-    <span>OpenCode</span>
-    <a href="reference/formatters/">and 43 more</a>
+  <div class="home-platforms">
+    <span class="home-platforms__label">Native output for 50 AI coding agents</span>
+    <div class="home-marquee">
+      <div class="home-marquee__track">
+        <span>Claude Code</span><span>GitHub Copilot</span><span>Cursor</span><span>Codex</span
+        ><span>Gemini CLI</span><span>Windsurf</span><span>Factory AI</span><span>OpenCode</span
+        ><span>Cline</span><span>Roo Code</span><span>Kilo Code</span><span>Amazon Q</span
+        ><span>Junie</span><span>Zed</span><span>Aider</span><span>Continue</span><span>Goose</span
+        ><span>Devin</span><span>Jules</span><span>Kiro CLI</span><span>Warp</span><span>Trae</span
+        ><span>Amp</span><span>Augment</span><span>Antigravity</span><span>GitLab Duo</span
+        ><span>Qwen Code</span><span>Mistral Vibe</span><span>Grok</span><span>Kimi</span
+        ><span>OpenHands</span><span>Crush</span><span>Qoder</span><span>CodeBuddy</span
+        ><span>Command Code</span><span>Cortex</span><span>Deep Agents</span><span>ForgeCode</span
+        ><span>Hermes Agent</span><span>iFlow</span><span>Kode</span><span>MCPJam</span
+        ><span>Mimo</span><span>Mux</span><span>Neovate</span><span>OpenClaw</span><span>Pi</span
+        ><span>Pochi</span><span>Zencoder</span><span>Adal</span>
+      </div>
+      <div class="home-marquee__track" aria-hidden="true">
+        <span>Claude Code</span><span>GitHub Copilot</span><span>Cursor</span><span>Codex</span
+        ><span>Gemini CLI</span><span>Windsurf</span><span>Factory AI</span><span>OpenCode</span
+        ><span>Cline</span><span>Roo Code</span><span>Kilo Code</span><span>Amazon Q</span
+        ><span>Junie</span><span>Zed</span><span>Aider</span><span>Continue</span><span>Goose</span
+        ><span>Devin</span><span>Jules</span><span>Kiro CLI</span><span>Warp</span><span>Trae</span
+        ><span>Amp</span><span>Augment</span><span>Antigravity</span><span>GitLab Duo</span
+        ><span>Qwen Code</span><span>Mistral Vibe</span><span>Grok</span><span>Kimi</span
+        ><span>OpenHands</span><span>Crush</span><span>Qoder</span><span>CodeBuddy</span
+        ><span>Command Code</span><span>Cortex</span><span>Deep Agents</span><span>ForgeCode</span
+        ><span>Hermes Agent</span><span>iFlow</span><span>Kode</span><span>MCPJam</span
+        ><span>Mimo</span><span>Mux</span><span>Neovate</span><span>OpenClaw</span><span>Pi</span
+        ><span>Pochi</span><span>Zencoder</span><span>Adal</span>
+      </div>
+    </div>
+    <a href="reference/formatters/">See all targets →</a>
   </div>
-  <section class="home-section home-section--capabilities">
+  <section class="home-section">
     <div class="home-section__intro">
-      <div class="home-eyebrow">One language, complete platform</div>
-      <h2>More than instruction files</h2>
+      <div class="home-eyebrow">The problem</div>
+      <h2>AI instructions do not scale by copy-paste</h2>
       <p>
-        Model the complete operating environment for AI coding agents, then let each formatter emit
-        the richest native representation its platform supports.
+        Every AI tool wants its own file. Every repository keeps its own copy. Soon nobody knows
+        which rules the agents actually follow.
       </p>
     </div>
+    <div class="home-compare">
+      <div class="home-compare__col">
+        <h3>Without PromptScript</h3>
+        <ul class="home-check-list home-check-list--cross">
+          <li>
+            A different file for every tool: <code>CLAUDE.md</code>, <code>.cursor/rules</code>,
+            <code>copilot-instructions.md</code>, <code>AGENTS.md</code>
+          </li>
+          <li>Copies drift apart across dozens of repositories</li>
+          <li>Company standards live in a wiki the agents never read</li>
+          <li>Third-party skills can carry hidden prompt injection</li>
+          <li>Switching AI tools means rewriting everything</li>
+        </ul>
+      </div>
+      <div class="home-compare__arrow" aria-hidden="true">→</div>
+      <div class="home-compare__col home-compare__col--with">
+        <h3>With PromptScript</h3>
+        <ul class="home-check-list">
+          <li><code>.prs</code> sources inherited like code, native output for 50 agents</li>
+          <li>Company standards inherited by every repository, not copied</li>
+          <li>Changes reviewed in Git and validated in CI</li>
+          <li>Built-in security scanner for every prompt and imported skill</li>
+          <li>Add or switch tools by editing one target list</li>
+        </ul>
+      </div>
+    </div>
+    <div class="home-stats">
+      <div>
+        <strong data-count="50">50</strong>
+        <span>AI coding agents from the same sources</span>
+      </div>
+      <div>
+        <strong data-count="40" data-suffix="+">40+</strong>
+        <span>validation rules on every build</span>
+      </div>
+      <div>
+        <strong data-count="9">9</strong>
+        <span>encodings decoded by the security scanner</span>
+      </div>
+      <div>
+        <strong>0</strong>
+        <span>runtime proxies between you and your tools</span>
+      </div>
+    </div>
+  </section>
+  <section class="home-section">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">Why teams use it</div>
+      <h2>Less copy-paste. More control.</h2>
+    </div>
     <div class="home-capability-grid">
-      <a href="reference/language/#identity" class="home-capability">
-        <span class="home-capability__token">@identity</span>
-        <h3>Instructions and policy</h3>
-        <p>Project context, standards, restrictions, examples, and path-specific rules.</p>
+      <a href="reference/formatters/" class="home-capability">
+        <span class="home-capability__token">consistency</span>
+        <h3>Every agent, same rules</h3>
+        <p>
+          Claude Code, Copilot, Cursor, and the rest read the same standards, each in the format it
+          expects.
+        </p>
       </a>
-      <a href="features/skills/" class="home-capability">
-        <span class="home-capability__token">@skills</span>
-        <h3>Portable skills</h3>
-        <p>Reusable capabilities with resources, scripts, dependencies, and typed contracts.</p>
-      </a>
-      <a href="features/agents/" class="home-capability">
-        <span class="home-capability__token">@agents</span>
-        <h3>Specialized agents</h3>
-        <p>Roles, models, tool policies, skills, permissions, and MCP access.</p>
-      </a>
-      <a href="features/integrations/" class="home-capability">
-        <span class="home-capability__token">@mcpServers</span>
-        <h3>Tools and integrations</h3>
-        <p>MCP servers and reusable plugins defined once at project level.</p>
-      </a>
-      <a href="features/automation/" class="home-capability">
-        <span class="home-capability__token">@hooks</span>
-        <h3>Automation</h3>
-        <p>Lifecycle hooks, repeatable workflows, and scoped monorepo builds.</p>
+      <a href="guides/security/" class="home-capability">
+        <span class="home-capability__token">security</span>
+        <h3>Prompts scanned before they ship</h3>
+        <p>
+          Catches prompt injection, authority overrides, encoded payloads, and invisible Unicode in
+          your files and in imported skills.
+        </p>
       </a>
       <a href="guides/policy-engine/" class="home-capability">
-        <span class="home-capability__token">policies</span>
-        <h3>Governance</h3>
-        <p>Inheritance boundaries, protected properties, registry controls, and CI validation.</p>
+        <span class="home-capability__token">governance</span>
+        <h3>Policy that teams cannot skip</h3>
+        <p>
+          Organization rules flow down to every team and project. Sealed properties and policies
+          keep them in place.
+        </p>
+      </a>
+      <a href="features/target-platforms/" class="home-capability">
+        <span class="home-capability__token">portability</span>
+        <h3>No lock-in to one AI tool</h3>
+        <p>Add, drop, or mix agents by changing the target list. Your source stays the same.</p>
+      </a>
+      <a href="guides/skill-composition/" class="home-capability">
+        <span class="home-capability__token">reuse</span>
+        <h3>Skills built like software</h3>
+        <p>
+          Compose skills from phases, pass parameters, define contracts, and share them through a
+          Git registry.
+        </p>
+      </a>
+      <a href="guides/import/" class="home-capability">
+        <span class="home-capability__token">adoption</span>
+        <h3>Start from the files you have</h3>
+        <p>
+          <code>prs import</code> converts existing CLAUDE.md, Copilot, Cursor, and AGENTS.md files.
+        </p>
       </a>
     </div>
   </section>
@@ -169,8 +256,9 @@
       <div class="home-eyebrow">Prompts as code</div>
       <h2>Inherit, compose, and extend</h2>
       <p>
-        Configuration is composable source, not copied text. Inherit a shared base, mix in reusable
-        fragments, and override only what changes - with deterministic, reviewable merges.
+        Configuration is composable source, not copied text. Inherit a shared base, pass it
+        arguments like a function, mix in reusable fragments, and override only what changes - with
+        deterministic, reviewable merges.
       </p>
     </div>
     <div class="home-compose__layout">
@@ -180,12 +268,12 @@
           <span>project.prs</span>
           <span class="home-window-status">source</span>
         </div>
-        <pre><code><span class="home-code-comment"># IS-A: inherit the organization base</span>
-<span class="home-code-keyword">@inherit</span> <span class="home-code-reference">@company/platform</span>
+        <pre><code><span class="home-code-comment"># IS-A: inherit a base, with arguments</span>
+<span class="home-code-keyword">@inherit</span> <span class="home-code-reference">@stacks/react-app</span>(projectName: <span class="home-code-string">"Checkout"</span>, port: 8080)
 
 <span class="home-code-comment"># HAS-A: compose reusable fragments</span>
 <span class="home-code-keyword">@use</span> <span class="home-code-reference">@core/security</span>
-<span class="home-code-keyword">@use</span> <span class="home-code-reference">@fragments/testing</span>
+<span class="home-code-keyword">@use</span> <span class="home-code-reference">./fragments/testing</span>(framework: <span class="home-code-string">"vitest"</span>)
 
 <span class="home-code-comment"># override only what changes</span>
 <span class="home-code-keyword">@extend</span> standards.code {
@@ -217,6 +305,16 @@
             </p>
           </div>
         </a>
+        <a href="guides/inheritance/#passing-parameters" class="home-compose__op">
+          <span class="home-compose__op-token">params</span>
+          <div>
+            <h3>Pass arguments like functions</h3>
+            <p>
+              A base declares typed parameters with defaults, like
+              <code>port: number = 3000</code>, and uses them as <code>{{projectName}}</code>.
+            </p>
+          </div>
+        </a>
         <a href="guides/inheritance/#using-extend" class="home-compose__op">
           <span class="home-compose__op-token">@extend</span>
           <div>
@@ -230,83 +328,364 @@
       </div>
     </div>
   </section>
-  <section class="home-section home-section--steps">
+  <section class="home-section home-section--dark" id="security">
     <div class="home-section__intro">
-      <div class="home-eyebrow">A deterministic toolchain</div>
-      <h2>From intent to native files</h2>
+      <div class="home-eyebrow">Built-in security scanner</div>
+      <h2>Stop prompt injection before it ships</h2>
       <p>
-        PromptScript brings compiler guarantees to agent configuration without hiding
-        platform-specific capabilities.
+        <code>prs validate</code> scans every instruction, skill, and imported file. Encoded
+        payloads are decoded first, so hiding an attack in hex or Base64 does not get it through.
       </p>
     </div>
-    <div class="home-step-grid">
-      <div class="home-step">
-        <span class="home-step__number">01</span>
-        <h3>Define</h3>
-        <p>
-          Compose organization, team, and project configuration from versioned
-          <code>.prs</code> sources.
-        </p>
-        <code class="home-step__command">@inherit @company/platform</code>
+    <div class="home-compose__layout">
+      <div class="home-code-window" data-typing>
+        <div class="home-window-bar">
+          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>terminal</span>
+          <span class="home-window-status">output</span>
+        </div>
+        <pre><code><span class="home-code-comment">$</span> prs validate --strict
+<span class="home-code-error">✖ Validation failed</span>
+
+<span class="home-code-error">✗</span> Blocked pattern detected:
+&#32;&#32;ignore\s+(all\s+)?previous\s+instructions
+&#32;&#32;<span class="home-code-comment">at project.prs:8:1</span>
+
+<span class="home-code-error">✗</span> PS012: Malicious content detected
+&#32;&#32;in raw hex (spaced): Prompt injection
+&#32;&#32;Decoded: <span class="home-code-string">"IGNORE SAFETY RULES"</span>
+&#32;&#32;<span class="home-code-comment">at project.prs:16:14</span>
+
+<span class="home-code-error">✗</span> PS010: URL shortener detected:
+&#32;&#32;<span class="home-code-reference">http://bit.ly/deploy-help</span>
+&#32;&#32;<span class="home-code-comment">at project.prs:16:14</span></code></pre>
       </div>
-      <div class="home-step">
-        <span class="home-step__number">02</span>
-        <h3>Validate</h3>
-        <p>
-          Catch syntax, broken references, policy violations, and unsafe referenced content before
-          deployment.
-        </p>
-        <code class="home-step__command">prs validate --strict</code>
-      </div>
-      <div class="home-step">
-        <span class="home-step__number">03</span>
-        <h3>Compile</h3>
-        <p>
-          Generate deterministic, reviewable files that every selected agent platform understands
-          natively.
-        </p>
-        <code class="home-step__command">prs compile</code>
+      <div class="home-compose__ops">
+        <a href="guides/security/#security-rules" class="home-compose__op">
+          <span class="home-compose__op-token">PS005</span>
+          <div>
+            <h3>Injection and overrides</h3>
+            <p>
+              Phrases like "ignore previous instructions" and fake authority overrides fail the
+              build.
+            </p>
+          </div>
+        </a>
+        <a href="guides/security/#obfuscation-detection-ps012" class="home-compose__op">
+          <span class="home-compose__op-token">PS012</span>
+          <div>
+            <h3>Encoded payloads</h3>
+            <p>
+              Base64, hex, URL encoding, HTML entities, ROT13, and more are decoded and checked.
+            </p>
+          </div>
+        </a>
+        <a href="guides/security/#security-rules" class="home-compose__op">
+          <span class="home-compose__op-token">PS014</span>
+          <div>
+            <h3>Invisible Unicode</h3>
+            <p>Right-to-left overrides, zero-width characters, and homoglyphs.</p>
+          </div>
+        </a>
+        <a href="guides/security/#security-rules" class="home-compose__op">
+          <span class="home-compose__op-token">PS010</span>
+          <div>
+            <h3>Suspicious links</h3>
+            <p>Plain HTTP, link shorteners, and credentials in URLs.</p>
+          </div>
+        </a>
       </div>
     </div>
   </section>
-  <section class="home-section home-native" id="native-output">
-    <div class="home-native__copy">
-      <div class="home-eyebrow">Native, not lowest common denominator</div>
-      <h2>Every platform gets the files it expects</h2>
+  <section class="home-section" id="skills">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">prs skills</div>
+      <h2>Install skills like packages</h2>
       <p>
-        PromptScript preserves one source model while formatters map supported capabilities to
-        native instructions, agents, skills, commands, hooks, and integrations.
+        Pull a skill from any Git repository or local folder. PromptScript validates it, pins the
+        exact commit, and compiles it into the skill folder of every agent you use.
       </p>
-      <ul class="home-check-list">
-        <li>Rich target-specific output where supported</li>
-        <li>Deterministic diffs ready for code review</li>
-        <li>No runtime proxy between developers and their tools</li>
-        <li>New targets without rewriting source configuration</li>
-      </ul>
-      <a href="reference/formatters/" class="home-text-link"
-        >Explore all 50 target formats <span>→</span></a
-      >
     </div>
-    <div class="home-native__files">
-      <div class="home-target-card">
-        <div><strong>Claude Code</strong><span>full native output</span></div>
-        <code>CLAUDE.md</code>
-        <code>.claude/agents/reviewer.md</code>
-        <code>.claude/skills/security-review/SKILL.md</code>
-        <code>.claude/settings.json</code>
+    <div class="home-compose__layout">
+      <div class="home-code-window" data-typing>
+        <div class="home-window-bar">
+          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>terminal</span>
+          <span class="home-window-status">output</span>
+        </div>
+        <pre><code><span class="home-code-comment">$</span> prs skills add <span class="home-code-reference">github.com/anthropics/skills/skills/pdf</span>
+<span class="home-code-string">✔ Skill added</span>
+&#32;&#32;✓ <span class="home-code-keyword">@use</span> <span class="home-code-reference">github.com/anthropics/skills/skills/pdf</span>
+&#32;&#32;&#32;&#32;Lockfile updated: promptscript.lock
+
+<span class="home-code-comment">$</span> prs compile
+&#32;&#32;✓ .claude/skills/pdf/SKILL.md
+&#32;&#32;✓ .github/skills/pdf/SKILL.md
+&#32;&#32;✓ .github/skills/pdf/scripts/fill_fillable_fields.py
+&#32;&#32;✓ .factory/skills/pdf/SKILL.md
+<span class="home-code-string">✔ Compilation successful</span></code></pre>
       </div>
-      <div class="home-target-card">
-        <div><strong>GitHub Copilot</strong><span>full native output</span></div>
-        <code>.github/copilot-instructions.md</code>
-        <code>.github/agents/reviewer.md</code>
-        <code>.github/skills/security-review/SKILL.md</code>
-        <code>.github/prompts/review.prompt.md</code>
+      <div class="home-compose__ops">
+        <a href="reference/cli/#prs-skills-add" class="home-compose__op">
+          <span class="home-compose__op-token">add</span>
+          <div>
+            <h3>From any Git repo or folder</h3>
+            <p>
+              HTTPS, SSH, or a local path. SKILL.md is checked against the Agent Skills spec before
+              anything is written.
+            </p>
+          </div>
+        </a>
+        <a href="reference/cli/#prs-skills-add" class="home-compose__op">
+          <span class="home-compose__op-token">lock</span>
+          <div>
+            <h3>Pinned and verified</h3>
+            <p>
+              The commit and a sha256 integrity hash go to <code>promptscript.lock</code>. Plain
+              HTTP sources are rejected.
+            </p>
+          </div>
+        </a>
+        <a href="features/skills/" class="home-compose__op">
+          <span class="home-compose__op-token">compile</span>
+          <div>
+            <h3>Native in every agent</h3>
+            <p>
+              One skill, with its scripts and resources, lands in each agent's own skill folder.
+            </p>
+          </div>
+        </a>
+        <a href="reference/cli/#prs-skills" class="home-compose__op">
+          <span class="home-compose__op-token">update</span>
+          <div>
+            <h3>Update or remove in one command</h3>
+            <p>
+              <code>prs skills update</code> refreshes lock entries, <code>prs skills remove</code>
+              drops the import and its lock entry.
+            </p>
+          </div>
+        </a>
       </div>
-      <div class="home-target-card">
-        <div><strong>Factory AI</strong><span>full native output</span></div>
-        <code>AGENTS.md</code>
-        <code>.factory/droids/reviewer.md</code>
-        <code>.factory/skills/security-review/SKILL.md</code>
+    </div>
+  </section>
+  <section class="home-section">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">Skill composition</div>
+      <h2>Build big skills from small, owned pieces</h2>
+      <p>
+        Split a complex skill into phases. Each phase is its own <code>.prs</code> file with its own
+        context, parameters, and allowed tools, so different teams can own different parts.
+      </p>
+    </div>
+    <div class="home-compose__layout">
+      <div class="home-code-window">
+        <div class="home-window-bar">
+          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>ops.prs</span>
+          <span class="home-window-status">source</span>
+        </div>
+        <pre><code><span class="home-code-keyword">@skills</span> {
+&#32;&#32;ops: {
+&#32;&#32;&#32;&#32;description: <span class="home-code-string">"Production operations"</span>
+
+&#32;&#32;&#32;&#32;<span class="home-code-comment"># every phase is a separate .prs file</span>
+&#32;&#32;&#32;&#32;<span class="home-code-keyword">@use</span> <span class="home-code-reference">./phases/health-scan</span>
+&#32;&#32;&#32;&#32;<span class="home-code-keyword">@use</span> <span class="home-code-reference">./phases/triage</span>(severity: <span class="home-code-string">"critical"</span>)
+&#32;&#32;&#32;&#32;<span class="home-code-keyword">@use</span> <span class="home-code-reference">./phases/code-fix</span> as autofix
+
+&#32;&#32;&#32;&#32;<span class="home-code-comment"># shared phases from the Git registry</span>
+&#32;&#32;&#32;&#32;<span class="home-code-keyword">@use</span> <span class="home-code-reference">@shared/phases/monitoring</span>
+&#32;&#32;}
+}</code></pre>
+      </div>
+      <div class="home-compose__ops">
+        <a href="guides/skill-composition/" class="home-compose__op">
+          <span class="home-compose__op-token">@use</span>
+          <div>
+            <h3>Phases with boundaries</h3>
+            <p>Each phase brings its own instructions and declares only the tools it needs.</p>
+          </div>
+        </a>
+        <a href="guides/skill-contracts/" class="home-compose__op">
+          <span class="home-compose__op-token">contracts</span>
+          <div>
+            <h3>Typed inputs and outputs</h3>
+            <p>Skills declare what they take and return, so they plug together cleanly.</p>
+          </div>
+        </a>
+        <a href="guides/skill-overlays/" class="home-compose__op">
+          <span class="home-compose__op-token">@extend</span>
+          <div>
+            <h3>Extend without forking</h3>
+            <p>Teams layer changes on a shared skill. Sealed properties stay locked.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+  <section class="home-section" id="plugins">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">Agents, MCP servers, and plugins</div>
+      <h2>Build agent plugins once, ship everywhere</h2>
+      <p>
+        Describe MCP servers, specialized agents, and the plugin that bundles them in one file. Each
+        target gets its own native MCP config, agent files, and plugin manifest.
+      </p>
+    </div>
+    <div class="home-compose__layout">
+      <div class="home-code-window">
+        <div class="home-window-bar">
+          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>incident.prs</span>
+          <span class="home-window-status">source</span>
+        </div>
+        <pre><code><span class="home-code-keyword">@skills</span> {
+&#32;&#32;triage: {
+&#32;&#32;&#32;&#32;description: <span class="home-code-string">"Classify incidents by severity"</span>
+&#32;&#32;}
+}
+
+<span class="home-code-keyword">@mcpServers</span> {
+&#32;&#32;observability: {
+&#32;&#32;&#32;&#32;transport: <span class="home-code-string">"http"</span>
+&#32;&#32;&#32;&#32;url: <span class="home-code-reference">"https://mcp.example.com/api"</span>
+&#32;&#32;}
+}
+
+<span class="home-code-keyword">@agents</span> {
+&#32;&#32;incident-responder: {
+&#32;&#32;&#32;&#32;description: <span class="home-code-string">"Investigate incidents"</span>
+&#32;&#32;&#32;&#32;mcpServers: [<span class="home-code-string">"observability"</span>]
+&#32;&#32;&#32;&#32;skills: [<span class="home-code-string">"triage"</span>]
+&#32;&#32;}
+}
+
+<span class="home-code-keyword">@plugins</span> {
+&#32;&#32;incident-suite: {
+&#32;&#32;&#32;&#32;version: <span class="home-code-string">"1.0.0"</span>
+&#32;&#32;&#32;&#32;skills: [<span class="home-code-string">"triage"</span>]
+&#32;&#32;&#32;&#32;mcpServers: [<span class="home-code-string">"observability"</span>]
+&#32;&#32;}
+}</code></pre>
+      </div>
+      <div class="home-native__files">
+        <div class="home-target-card">
+          <div><strong>Claude Code</strong><span>MCP, agent, skill</span></div>
+          <code>.mcp.json</code>
+          <code>.claude/agents/incident-responder.md</code>
+          <code>.claude/skills/triage/SKILL.md</code>
+        </div>
+        <div class="home-target-card">
+          <div><strong>Factory AI</strong><span>MCP, droid, plugin</span></div>
+          <code>.factory/mcp.json</code>
+          <code>.factory/droids/incident-responder.md</code>
+          <code>.factory/plugins.json</code>
+        </div>
+        <div class="home-target-card">
+          <div><strong>Codex</strong><span>MCP, agent, plugin</span></div>
+          <code>.codex/mcp.json</code>
+          <code>.codex/agents/incident-responder.toml</code>
+          <code>.codex/plugins.json</code>
+        </div>
+        <div class="home-target-card">
+          <div><strong>GitHub Copilot</strong><span>MCP, agent, skill</span></div>
+          <code>.vscode/mcp.json</code>
+          <code>.github/agents/incident-responder.md</code>
+          <code>.github/skills/triage/SKILL.md</code>
+        </div>
+      </div>
+    </div>
+    <div class="home-stats home-plugins__stats">
+      <div>
+        <strong data-count="34">34</strong>
+        <span>lines of <code>.prs</code>, like the one above</span>
+      </div>
+      <div>
+        <strong data-count="17">17</strong>
+        <span>native files written by <code>prs compile</code></span>
+      </div>
+      <div>
+        <strong data-count="3">3</strong>
+        <span>formats: Markdown, JSON, and TOML</span>
+      </div>
+      <div>
+        <strong data-count="4">4</strong>
+        <span>tools: Claude Code, Copilot, Codex, Factory AI</span>
+      </div>
+    </div>
+    <ul class="home-check-list home-plugins__notes">
+      <li>stdio, HTTP, and SSE servers, with tool allow and deny lists</li>
+      <li>Agents get only the MCP servers and skills you give them</li>
+      <li>
+        When a target cannot express a field, the compiler warns (PS4003) instead of dropping it
+        silently
+      </li>
+    </ul>
+    <p class="home-plugins__links">
+      <a href="features/agents/" class="home-text-link">Agents guide <span>→</span></a>
+      <a href="features/integrations/" class="home-text-link"
+        >MCP servers and plugins <span>→</span></a
+      >
+    </p>
+  </section>
+  <section class="home-section" id="models">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">Model mapping</div>
+      <h2>Name a model once. Every tool gets its own spelling.</h2>
+      <p>
+        Each tool names models differently. Write <code>opus</code> or a full model id and
+        PromptScript writes the name each target expects. When a target cannot run that model, the
+        compiler warns (PS4004).
+      </p>
+    </div>
+    <div class="home-compose__layout">
+      <div class="home-code-window">
+        <div class="home-window-bar">
+          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>project.prs</span>
+          <span class="home-window-status">source</span>
+        </div>
+        <pre><code><span class="home-code-keyword">@agents</span> {
+&#32;&#32;reviewer: {
+&#32;&#32;&#32;&#32;description: <span class="home-code-string">"Review pull requests"</span>
+&#32;&#32;&#32;&#32;model: <span class="home-code-string">"opus"</span>
+&#32;&#32;}
+}</code></pre>
+      </div>
+      <div class="home-models-wrap">
+        <table class="home-models">
+          <thead>
+            <tr>
+              <th>Target</th>
+              <th>Writes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Claude Code</td>
+              <td><code>opus</code></td>
+            </tr>
+            <tr>
+              <td>GitHub Copilot</td>
+              <td><code>Claude Opus 5.5</code></td>
+            </tr>
+            <tr>
+              <td>Factory AI</td>
+              <td><code>claude-opus-5-5</code></td>
+            </tr>
+            <tr>
+              <td>Cursor</td>
+              <td><code>claude-opus-5-5</code></td>
+            </tr>
+            <tr>
+              <td>Codex</td>
+              <td><span class="home-models__warn">omitted, PS4004 warning</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <a href="reference/models/" class="home-text-link"
+          >Model catalog and aliases <span>→</span></a
+        >
       </div>
     </div>
   </section>
@@ -318,6 +697,12 @@
         Keep shared standards in Git, inherit them through explicit layers, pin remote dependencies,
         and enforce the result in CI.
       </p>
+      <ul class="home-scale__cmds">
+        <li><code>prs registry init</code><span>create a registry repository</span></li>
+        <li><code>prs registry publish</code><span>publish it to your Git remote</span></li>
+        <li><code>@inherit @company/platform</code><span>use it in every project</span></li>
+        <li><code>prs vendor sync</code><span>vendor it for offline builds</span></li>
+      </ul>
       <div class="home-scale__links">
         <a href="guides/enterprise/">Enterprise setup</a>
         <a href="guides/registry/">Git registry</a>
@@ -395,6 +780,71 @@
       </div>
     </div>
   </section>
+  <section class="home-section" id="ai-skill">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">Built-in promptscript skill</div>
+      <h2>Your AI agent already knows PromptScript</h2>
+      <p>
+        Every compile ships a language skill to each agent that supports skills. Ask in plain words
+        and the agent writes the <code>.prs</code> for you: migrations, new skills, agents, or MCP
+        servers.
+      </p>
+    </div>
+    <div class="home-compose__layout">
+      <div class="home-code-window" data-typing>
+        <div class="home-window-bar">
+          <span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>terminal</span>
+          <span class="home-window-status">output</span>
+        </div>
+        <pre><code><span class="home-code-comment">$</span> prs compile
+&#32;&#32;✓ .claude/skills/promptscript/SKILL.md
+&#32;&#32;✓ .github/skills/promptscript/SKILL.md
+&#32;&#32;✓ .factory/skills/promptscript/SKILL.md
+&#32;&#32;✓ .agents/skills/promptscript/SKILL.md
+<span class="home-code-string">✔ Compilation successful</span>
+
+<span class="home-code-comment"># then, in Claude Code:</span>
+<span class="home-code-keyword">/promptscript</span> migrate our CLAUDE.md and Cursor rules
+
+<span class="home-code-comment"># or in Copilot Chat:</span>
+Use the promptscript skill to add an MCP
+server for our issue tracker</code></pre>
+      </div>
+      <div class="home-compose__ops">
+        <a href="reference/config/#includepromptscriptskill" class="home-compose__op">
+          <span class="home-compose__op-token">skill</span>
+          <div>
+            <h3>Always in the box</h3>
+            <p>
+              On by default. The skill covers every block, the CLI, and validation errors, and it
+              ships with the version you compile.
+            </p>
+          </div>
+        </a>
+        <a href="getting-started/#quick-start-migrating-existing-projects" class="home-compose__op">
+          <span class="home-compose__op-token">migrate</span>
+          <div>
+            <h3>Migration done by your agent</h3>
+            <p>
+              <code>prs migrate --llm</code> prepares the prompt, the agent converts your existing
+              files. <code>prs migrate --static</code> imports them without AI.
+            </p>
+          </div>
+        </a>
+        <a href="reference/cli/#prs-validate" class="home-compose__op">
+          <span class="home-compose__op-token">check</span>
+          <div>
+            <h3>Checked by the compiler</h3>
+            <p>
+              Whatever the agent writes goes through <code>prs validate --strict</code> and
+              <code>prs compile</code>, like code from a teammate.
+            </p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
   <section class="home-section home-section--adopt">
     <div class="home-section__intro">
       <div class="home-eyebrow">Adopt without a rewrite</div>
@@ -461,6 +911,77 @@
       </div>
     </div>
   </section>
+  <section class="home-section" id="trust">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">Ready for security review</div>
+      <h2>Nothing runs between your team and its tools</h2>
+      <p>
+        PromptScript is a compiler, not a service. It reads your sources and writes files you review
+        and commit, like any other build step.
+      </p>
+    </div>
+    <div class="home-capability-grid">
+      <a href="guides/ci/" class="home-capability">
+        <span class="home-capability__token">local</span>
+        <h3>Runs on your machine and CI</h3>
+        <p>
+          Compiling needs no hosted service and no proxy. The output is plain files in your
+          repository.
+        </p>
+      </a>
+      <a href="reference/telemetry/" class="home-capability">
+        <span class="home-capability__token">privacy</span>
+        <h3>Your prompts stay yours</h3>
+        <p>
+          Anonymous usage telemetry never includes source, prompts, or file paths. Turn it off with
+          <code>prs telemetry disable</code>.
+        </p>
+      </a>
+      <a href="guides/registry/" class="home-capability">
+        <span class="home-capability__token">supply chain</span>
+        <h3>Pinned and reproducible</h3>
+        <p>
+          Imports are locked by commit and sha256 hash. <code>prs vendor sync</code> supports
+          offline and air-gapped builds.
+        </p>
+      </a>
+      <a href="guides/security/" class="home-capability">
+        <span class="home-capability__token">scanning</span>
+        <h3>Security checks in every build</h3>
+        <p>Prompt injection, encoded payloads, and suspicious links fail validation in CI.</p>
+      </a>
+      <a
+        href="https://github.com/mrwogu/promptscript/blob/main/SECURITY.md"
+        class="home-capability"
+      >
+        <span class="home-capability__token">disclosure</span>
+        <h3>Private vulnerability reports</h3>
+        <p>Report issues through GitHub Security Advisories. The 1.x line gets security fixes.</p>
+      </a>
+      <a href="https://github.com/mrwogu/promptscript/blob/main/LICENSE" class="home-capability">
+        <span class="home-capability__token">license</span>
+        <h3>MIT and open source</h3>
+        <p>
+          Read, fork, and audit every line. Versioned releases with a public changelog on GitHub.
+        </p>
+      </a>
+    </div>
+  </section>
+  <section class="home-section home-faq" id="faq">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">FAQ</div>
+      <h2>Questions teams ask first</h2>
+    </div>
+    <div class="home-faq__list">
+      <details class="home-faq__item"><summary>What is PromptScript?</summary><p>PromptScript is an open-source compiler for AI coding agent configuration. You write instructions, skills, agents, MCP servers, hooks, and plugins in .prs files, and it generates the native files for 50 tools, such as CLAUDE.md, .github/copilot-instructions.md, and Cursor rules.</p></details>
+<details class="home-faq__item"><summary>Which AI coding tools does it support?</summary><p>It compiles to 50 targets, including Claude Code, GitHub Copilot, Cursor, Codex, Gemini CLI, Windsurf, Factory AI, and OpenCode. Each target gets the file layout and format that tool reads.</p></details>
+<details class="home-faq__item"><summary>How is it different from a shared AGENTS.md file?</summary><p>AGENTS.md is one file that some tools read. PromptScript is the source behind it: it adds inheritance across repositories, parameters, skills, agents, MCP servers, validation, and a security scan, and it writes AGENTS.md together with the formats of every other tool.</p></details>
+<details class="home-faq__item"><summary>Can I start from the instruction files I already have?</summary><p>Yes. prs import converts an existing CLAUDE.md, Copilot, Cursor, or AGENTS.md file, prs migrate imports a whole project, and the built-in promptscript skill lets your AI agent do the migration for you.</p></details>
+<details class="home-faq__item"><summary>How do teams share one configuration?</summary><p>Publish a Git registry with prs registry init and prs registry publish, then inherit it in every project with @inherit. Remote imports are pinned by commit and sha256 hash in promptscript.lock, and prs vendor sync copies them for offline builds.</p></details>
+<details class="home-faq__item"><summary>Does PromptScript send my prompts anywhere?</summary><p>No. Compilation runs on your machine or in your CI. Anonymous usage telemetry is on by default and never includes source, prompts, compiled output, file paths, or project names. Turn it off with prs telemetry disable or DO_NOT_TRACK=1.</p></details>
+<details class="home-faq__item"><summary>Is PromptScript free?</summary><p>Yes. PromptScript is open source under the MIT license. The CLI is published on npm as @promptscript/cli.</p></details>
+    </div>
+  </section>
   <section class="home-final-cta">
     <div>
       <div class="home-eyebrow">One source of truth</div>
@@ -475,4 +996,6 @@
     </div>
   </section>
 </div>
-</div><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.BvICrDgu.js"></script><footer class="sl-flex astro-mjt2db7c"><div class="meta sl-flex astro-mjt2db7c"></div><div class="pagination-links print:hidden astro-g5te5pxn" dir="ltr"></div></footer></div></div></main></div></div></div></div></body></html>
+<script type="module">var e=[`.home-section__intro`,`.home-compare__col`,`.home-compare__arrow`,`.home-stats > div`,`.home-capability`,`.home-compose__op`,`.home-section .home-code-window`,`.home-target-card`,`.home-plugins__notes li`,`.home-models-wrap`,`.home-faq__item`,`.home-scale`,`.home-path-card`,`.home-proof`,`.home-final-cta`].join(`,`),t=80,n=110,r=1200;function i(e){return e.split(`
+`).map(e=>`<span class="home-line">${e}</span>`).join(`
+`)}function a(e,t){return Math.round(t*(1-(1-Math.min(Math.max(e,0),1))**3))}function o(e){let t=Number(e.dataset.count),n=e.dataset.suffix??``,i=performance.now(),o=s=>{let c=(s-i)/r;e.textContent=`${a(c,t)}${n}`,c<1&&requestAnimationFrame(o)};requestAnimationFrame(o)}function s(e){e.querySelectorAll(`.home-line`).forEach((e,t)=>{setTimeout(()=>e.classList.add(`is-visible`),t*n)})}function c(e){e.classList.add(`is-visible`),e.querySelectorAll(`[data-count]`).forEach(o);let t=e.matches(`[data-typing]`)?e.querySelector(`code`):null;t&&s(t)}function l(){let n=document.querySelector(`.home-page`);if(!n||!(`IntersectionObserver`in window)||window.matchMedia(`(prefers-reduced-motion: reduce)`).matches)return;n.querySelectorAll(`[data-typing] code`).forEach(e=>{e.innerHTML=i(e.innerHTML)}),n.classList.add(`is-animated`);let r=new IntersectionObserver(e=>{e.filter(e=>e.isIntersecting).forEach((e,n)=>{r.unobserve(e.target),setTimeout(()=>c(e.target),n*t)})},{rootMargin:`0px 0px -10% 0px`});n.querySelectorAll(e).forEach(e=>{e.classList.add(`home-reveal`),r.observe(e)}),n.querySelectorAll(`.home-capability, .home-compose__op`).forEach(e=>{e.addEventListener(`pointermove`,t=>{let n=e.getBoundingClientRect();e.style.setProperty(`--mx`,`${t.clientX-n.left}px`),e.style.setProperty(`--my`,`${t.clientY-n.top}px`)})})}l();</script></div><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.BvICrDgu.js"></script><footer class="sl-flex astro-mjt2db7c"><div class="meta sl-flex astro-mjt2db7c"></div><div class="pagination-links print:hidden astro-g5te5pxn" dir="ltr"></div></footer><div class="ps-footer astro-jo6i4kqk"><p class="ps-footer__love astro-jo6i4kqk">Loved by a growing community of developers and AI enthusiasts around the world.</p><p class="astro-jo6i4kqk">Created by <a href="https://github.com/mrwogu" rel="author" class="astro-jo6i4kqk">Wojciech Guziak</a> - Released under the <a href="https://github.com/mrwogu/promptscript/blob/main/LICENSE" class="astro-jo6i4kqk">MIT License</a></p><p class="ps-footer__links astro-jo6i4kqk"><a href="https://github.com/mrwogu/promptscript" class="astro-jo6i4kqk">GitHub</a><a href="https://www.linkedin.com/in/wojciechguziak/" rel="author" class="astro-jo6i4kqk">LinkedIn</a><a href="https://www.npmjs.com/org/promptscript" class="astro-jo6i4kqk">npm</a><a href="https://github.com/mrwogu/promptscript/releases" class="astro-jo6i4kqk">Changelog</a><a href="/playground/" class="astro-jo6i4kqk">Playground</a></p></div></div></div></main></div></div></div></div></body></html>

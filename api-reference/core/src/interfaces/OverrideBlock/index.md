@@ -6,7 +6,7 @@
 
 # Interface: OverrideBlock
 
-Defined in: [core/src/types/ast.ts:372](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L372)
+Defined in: [core/src/types/ast.ts:372](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L372)
 
 Explicit replacement of an existing block or nested value.
 
@@ -20,7 +20,7 @@ Explicit replacement of an existing block or nested value.
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -34,7 +34,7 @@ Source location
 
 > **replacement**: [`OverrideReplacement`](https://getpromptscript.dev/api-reference/core/src/type-aliases/OverrideReplacement/index.md)
 
-Defined in: [core/src/types/ast.ts:377](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L377)
+Defined in: [core/src/types/ast.ts:377](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L377)
 
 Complete replacement value
 
@@ -44,7 +44,7 @@ Complete replacement value
 
 > **targetPath**: `string`
 
-Defined in: [core/src/types/ast.ts:375](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L375)
+Defined in: [core/src/types/ast.ts:375](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L375)
 
 Dot-separated path to an existing target
 
@@ -54,7 +54,7 @@ Dot-separated path to an existing target
 
 > `readonly` **type**: `"OverrideBlock"`
 
-Defined in: [core/src/types/ast.ts:373](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L373)
+Defined in: [core/src/types/ast.ts:373](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L373)
 
 Node type discriminator
 

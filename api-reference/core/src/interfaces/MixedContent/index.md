@@ -6,7 +6,7 @@
 
 # Interface: MixedContent
 
-Defined in: [core/src/types/ast.ts:439](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L439)
+Defined in: [core/src/types/ast.ts:439](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L439)
 
 Mixed content with both text and properties.
 
@@ -20,7 +20,7 @@ Mixed content with both text and properties.
 
 > `optional` **inlineUses?**: [`InlineUseDeclaration`](https://getpromptscript.dev/api-reference/core/src/interfaces/InlineUseDeclaration/index.md)[]
 
-Defined in: [core/src/types/ast.ts:448](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L448)
+Defined in: [core/src/types/ast.ts:448](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L448)
 
 Inline
 
@@ -34,7 +34,7 @@ declarations (consumed by resolver, ephemeral)
 
 > `optional` **listItems?**: [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)[]
 
-Defined in: [core/src/types/ast.ts:446](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L446)
+Defined in: [core/src/types/ast.ts:446](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L446)
 
 Dash-list entries interleaved with text or properties
 
@@ -44,7 +44,7 @@ Dash-list entries interleaved with text or properties
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -58,7 +58,7 @@ Source location
 
 > **properties**: `Record`\<`string`, [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)\>
 
-Defined in: [core/src/types/ast.ts:444](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L444)
+Defined in: [core/src/types/ast.ts:444](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L444)
 
 Properties
 
@@ -68,7 +68,7 @@ Properties
 
 > `optional` **text?**: [`TextContent`](https://getpromptscript.dev/api-reference/core/src/interfaces/TextContent/index.md)
 
-Defined in: [core/src/types/ast.ts:442](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L442)
+Defined in: [core/src/types/ast.ts:442](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L442)
 
 Optional text content
 
@@ -78,7 +78,7 @@ Optional text content
 
 > `readonly` **type**: `"MixedContent"`
 
-Defined in: [core/src/types/ast.ts:440](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L440)
+Defined in: [core/src/types/ast.ts:440](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L440)
 
 Node type discriminator
 

@@ -8,7 +8,7 @@
 
 > **createParser**(): [`PromptScriptParser`](https://getpromptscript.dev/api-reference/parser/src/classes/PromptScriptParser/index.md)
 
-Defined in: [parser/src/grammar/parser.ts:566](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/parser/src/grammar/parser.ts#L566)
+Defined in: [parser/src/grammar/parser.ts:566](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/parser/src/grammar/parser.ts#L566)
 
 Create an isolated parser instance for one parse request.
 

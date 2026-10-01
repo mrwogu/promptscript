@@ -6,7 +6,7 @@
 
 # Interface: LoaderOptions
 
-Defined in: [resolver/src/loader.ts:56](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L56)
+Defined in: [resolver/src/loader.ts:56](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L56)
 
 Options for the file loader.
 
@@ -20,7 +20,7 @@ Options for the file loader.
 
 > `optional` **localPath?**: `string`
 
-Defined in: [resolver/src/loader.ts:60](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L60)
+Defined in: [resolver/src/loader.ts:60](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L60)
 
 Base path for local/relative file resolution (defaults to projectRoot, then cwd)
 
@@ -30,7 +30,7 @@ Base path for local/relative file resolution (defaults to projectRoot, then cwd)
 
 > `optional` **lockfile?**: [`Lockfile`](https://getpromptscript.dev/api-reference/core/src/interfaces/Lockfile/index.md)
 
-Defined in: [resolver/src/loader.ts:68](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L68)
+Defined in: [resolver/src/loader.ts:68](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L68)
 
 Lockfile for pinning remote dependencies
 
@@ -40,7 +40,7 @@ Lockfile for pinning remote dependencies
 
 > `optional` **projectRoot?**: `string`
 
-Defined in: [resolver/src/loader.ts:62](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L62)
+Defined in: [resolver/src/loader.ts:62](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L62)
 
 Project root used as the traversal safety boundary
 
@@ -50,7 +50,7 @@ Project root used as the traversal safety boundary
 
 > `optional` **registries?**: [`RegistriesConfig`](https://getpromptscript.dev/api-reference/core/src/type-aliases/RegistriesConfig/index.md)
 
-Defined in: [resolver/src/loader.ts:66](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L66)
+Defined in: [resolver/src/loader.ts:66](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L66)
 
 Registry alias configuration for remote imports
 
@@ -60,7 +60,7 @@ Registry alias configuration for remote imports
 
 > `optional` **registry?**: [`Registry`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/Registry/index.md)
 
-Defined in: [resolver/src/loader.ts:64](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L64)
+Defined in: [resolver/src/loader.ts:64](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L64)
 
 Optional Registry implementation for file fetching
 
@@ -70,6 +70,6 @@ Optional Registry implementation for file fetching
 
 > **registryPath**: `string`
 
-Defined in: [resolver/src/loader.ts:58](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L58)
+Defined in: [resolver/src/loader.ts:58](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L58)
 
 Base path for registry lookups (@namespace/...)

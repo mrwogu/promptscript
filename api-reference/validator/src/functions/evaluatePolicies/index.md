@@ -8,7 +8,7 @@
 
 > **evaluatePolicies**(`policies`, `ast`): [`PolicyViolation`](https://getpromptscript.dev/api-reference/core/src/interfaces/PolicyViolation/index.md)[]
 
-Defined in: [validator/src/policy/evaluator.ts:219](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/policy/evaluator.ts#L219)
+Defined in: [validator/src/policy/evaluator.ts:219](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/policy/evaluator.ts#L219)
 
 Evaluate a list of policy definitions against a resolved AST.
 

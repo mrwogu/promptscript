@@ -6,7 +6,7 @@
 
 # Class: FormatterRegistry
 
-Defined in: [formatters/src/registry.ts:11](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/registry.ts#L11)
+Defined in: [formatters/src/registry.ts:11](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/registry.ts#L11)
 
 Registry for formatter implementations.
 Allows dynamic registration and discovery of formatters.
@@ -31,7 +31,7 @@ is enforced at both compile time (via the `FormatterClass` type) and runtime.
 
 > `static` **clear**(): `void`
 
-Defined in: [formatters/src/registry.ts:96](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/registry.ts#L96)
+Defined in: [formatters/src/registry.ts:96](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/registry.ts#L96)
 
 Clear all registered formatters (useful for testing).
 
@@ -45,7 +45,7 @@ Clear all registered formatters (useful for testing).
 
 > `static` **get**(`name`): [`Formatter`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/Formatter/index.md) \| `undefined`
 
-Defined in: [formatters/src/registry.ts:56](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/registry.ts#L56)
+Defined in: [formatters/src/registry.ts:56](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/registry.ts#L56)
 
 Get a formatter instance by name.
 
@@ -69,7 +69,7 @@ Formatter instance or undefined if not found
 
 > `static` **getAll**(): [`Formatter`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/Formatter/index.md)[]
 
-Defined in: [formatters/src/registry.ts:65](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/registry.ts#L65)
+Defined in: [formatters/src/registry.ts:65](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/registry.ts#L65)
 
 Get all registered formatters.
 
@@ -85,7 +85,7 @@ Array of formatter instances
 
 > `static` **has**(`name`): `boolean`
 
-Defined in: [formatters/src/registry.ts:81](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/registry.ts#L81)
+Defined in: [formatters/src/registry.ts:81](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/registry.ts#L81)
 
 Check if a formatter is registered.
 
@@ -107,7 +107,7 @@ Formatter identifier
 
 > `static` **list**(): `string`[]
 
-Defined in: [formatters/src/registry.ts:73](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/registry.ts#L73)
+Defined in: [formatters/src/registry.ts:73](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/registry.ts#L73)
 
 List all registered formatter names.
 
@@ -125,7 +125,7 @@ Array of formatter identifiers
 
 > `static` **register**(`name`, `FormatterCtor`): `void`
 
-Defined in: [formatters/src/registry.ts:25](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/registry.ts#L25)
+Defined in: [formatters/src/registry.ts:25](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/registry.ts#L25)
 
 Register a formatter class.
 
@@ -162,7 +162,7 @@ Error if the class lacks a static getSupportedVersions() method
 
 > `static` **register**(`name`, `factory`): `void`
 
-Defined in: [formatters/src/registry.ts:35](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/registry.ts#L35)
+Defined in: [formatters/src/registry.ts:35](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/registry.ts#L35)
 
 Register a formatter factory function.
 
@@ -198,7 +198,7 @@ Use the class-based overload to enforce getSupportedVersions()
 
 > `static` **unregister**(`name`): `boolean`
 
-Defined in: [formatters/src/registry.ts:89](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/registry.ts#L89)
+Defined in: [formatters/src/registry.ts:89](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/registry.ts#L89)
 
 Unregister a formatter (useful for testing).
 

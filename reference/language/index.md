@@ -322,7 +322,6 @@ When you provide an alias, imported blocks are also stored with a prefix for use
 </a>
 <!-- playground-link-end -->
 
-<!-- prettier-ignore -->
 :::tip[When to Use Alias]
 
 - **Without alias**: Simple include/mixin behavior - blocks are merged directly

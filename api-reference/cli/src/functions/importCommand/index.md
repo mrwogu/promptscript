@@ -8,7 +8,7 @@
 
 > **importCommand**(`file`, `options`): `Promise`\<`void`\>
 
-Defined in: [cli/src/commands/import.ts:85](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/commands/import.ts#L85)
+Defined in: [cli/src/commands/import.ts:85](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/commands/import.ts#L85)
 
 ## Parameters
 

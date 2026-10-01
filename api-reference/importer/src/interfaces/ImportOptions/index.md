@@ -6,7 +6,7 @@
 
 # Interface: ImportOptions
 
-Defined in: [importer/src/importer.ts:8](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/importer/src/importer.ts#L8)
+Defined in: [importer/src/importer.ts:8](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/importer/src/importer.ts#L8)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [importer/src/importer.ts:8](https://github.com/mrwogu/promptscript/
 
 > `optional` **dryRun?**: `boolean`
 
-Defined in: [importer/src/importer.ts:10](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/importer/src/importer.ts#L10)
+Defined in: [importer/src/importer.ts:10](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/importer/src/importer.ts#L10)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [importer/src/importer.ts:10](https://github.com/mrwogu/promptscript
 
 > `optional` **format?**: [`DetectedFormat`](https://getpromptscript.dev/api-reference/importer/src/type-aliases/DetectedFormat/index.md)
 
-Defined in: [importer/src/importer.ts:9](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/importer/src/importer.ts#L9)
+Defined in: [importer/src/importer.ts:9](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/importer/src/importer.ts#L9)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [importer/src/importer.ts:9](https://github.com/mrwogu/promptscript/
 
 > `optional` **outputDir?**: `string`
 
-Defined in: [importer/src/importer.ts:11](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/importer/src/importer.ts#L11)
+Defined in: [importer/src/importer.ts:11](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/importer/src/importer.ts#L11)

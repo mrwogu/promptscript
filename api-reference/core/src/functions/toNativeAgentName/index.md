@@ -8,7 +8,7 @@
 
 > **toNativeAgentName**(`name`): `string`
 
-Defined in: [core/src/agent-names.ts:46](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/agent-names.ts#L46)
+Defined in: [core/src/agent-names.ts:46](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/agent-names.ts#L46)
 
 Convert a PromptScript agent name into a portable native identifier.
 

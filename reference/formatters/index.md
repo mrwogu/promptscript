@@ -1,21 +1,6 @@
 # Supported Formatters
 
-<p class="formatter-page__subtitle">PromptScript compiles one agent platform definition to native files for <strong>50 AI coding agent targets</strong>.</p>
-
-<div class="formatter-tiers">
-  <div class="formatter-tier-badge formatter-tier-badge--custom">
-    <span class="formatter-tier-badge__count">9</span>
-    <span class="formatter-tier-badge__label">Rich native</span>
-  </div>
-  <div class="formatter-tier-badge formatter-tier-badge--t1">
-    <span class="formatter-tier-badge__count">11</span>
-    <span class="formatter-tier-badge__label">AGENTS.md</span>
-  </div>
-  <div class="formatter-tier-badge formatter-tier-badge--t2">
-    <span class="formatter-tier-badge__count">30</span>
-    <span class="formatter-tier-badge__label">Markdown</span>
-  </div>
-</div>
+PromptScript compiles one agent platform definition to native files for **50 AI coding agent targets**.
 
 PromptScript treats instructions, skills, agents, commands, MCP servers, hooks, workflows, and
 plugins as platform capabilities. See [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) for
@@ -25,123 +10,15 @@ the platform-family model.
 
 Hand-crafted output logic for agents with unique file formats, skills, agents, and commands.
 
-<div class="formatter-cards">
-
-<a href="claude/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Claude Code</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">CLAUDE.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Local</span>
-  </div>
-</a>
-
-<a href="github/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">GitHub Copilot</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">.github/copilot-instructions.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Prompts</span>
-  </div>
-</a>
-
-<a href="cursor/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Cursor</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">.cursor/rules/project.mdc</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
-    <span class="formatter-card__tag formatter-card__tag--special">MDC Format</span>
-  </div>
-</a>
-
-<a href="antigravity/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Antigravity</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">.agent/rules/project.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--special">Workflows</span>
-    <span class="formatter-card__tag formatter-card__tag--special">Activation Types</span>
-  </div>
-</a>
-
-<a href="factory/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Factory AI</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">AGENTS.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
-  </div>
-</a>
-
-<a href="gemini/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Gemini CLI</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">GEMINI.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
-  </div>
-</a>
-
-<a href="opencode/" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">OpenCode</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Custom</span>
-  </div>
-  <code class="formatter-card__output">OPENCODE.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
-  </div>
-</a>
-
-<a href="../../features/target-platforms/#rich-native-formatters" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Codex</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Native</span>
-  </div>
-  <code class="formatter-card__output">AGENTS.md + .codex/</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
-    <span class="formatter-card__tag formatter-card__tag--special">TOML</span>
-  </div>
-</a>
-
-<a href="../../features/target-platforms/#rich-native-formatters" class="formatter-card">
-  <div class="formatter-card__header">
-    <span class="formatter-card__name">Grok</span>
-    <span class="formatter-card__tier formatter-card__tier--custom">Native</span>
-  </div>
-  <code class="formatter-card__output">AGENTS.md</code>
-  <div class="formatter-card__features">
-    <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
-  </div>
-</a>
-
-</div>
+- [Claude Code](https://getpromptscript.dev/reference/formatters/claude/index.md): `CLAUDE.md` - Skills, Agents, Commands, Local
+- [GitHub Copilot](https://getpromptscript.dev/reference/formatters/github/index.md): `.github/copilot-instructions.md` - Skills, Prompts
+- [Cursor](https://getpromptscript.dev/reference/formatters/cursor/index.md): `.cursor/rules/project.mdc` - Commands, MDC Format
+- [Antigravity](https://getpromptscript.dev/reference/formatters/antigravity/index.md): `.agent/rules/project.md` - Workflows, Activation Types
+- [Factory AI](https://getpromptscript.dev/reference/formatters/factory/index.md): `AGENTS.md` - Skills, Agents, Commands
+- [Gemini CLI](https://getpromptscript.dev/reference/formatters/gemini/index.md): `GEMINI.md` - Skills, Commands
+- [OpenCode](https://getpromptscript.dev/reference/formatters/opencode/index.md): `OPENCODE.md` - Skills, Agents, Commands
+- [Codex](https://getpromptscript.dev/reference/formatters/codex/index.md): `AGENTS.md + .codex/` - Skills, Agents, TOML
+- [Grok](https://getpromptscript.dev/reference/formatters/grok/index.md): `AGENTS.md` - Skills, Agents, Commands
 
 ## All Formatters
 

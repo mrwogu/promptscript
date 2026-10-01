@@ -8,7 +8,7 @@
 
 > **parseFile**(`filePath`, `options?`): [`ParseResult`](https://getpromptscript.dev/api-reference/parser/src/interfaces/ParseResult/index.md)
 
-Defined in: [parser/src/parse.ts:252](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/parser/src/parse.ts#L252)
+Defined in: [parser/src/parse.ts:252](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/parser/src/parse.ts#L252)
 
 Parse a PromptScript file from disk.
 

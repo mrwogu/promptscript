@@ -6,7 +6,7 @@
 
 # Interface: GitAuthOptions
 
-Defined in: [resolver/src/git-registry.ts:81](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L81)
+Defined in: [resolver/src/git-registry.ts:81](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L81)
 
 Authentication options for Git registry.
 
@@ -16,7 +16,7 @@ Authentication options for Git registry.
 
 > `optional` **sshKeyPath?**: `string`
 
-Defined in: [resolver/src/git-registry.ts:89](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L89)
+Defined in: [resolver/src/git-registry.ts:89](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L89)
 
 Path to SSH key (for SSH auth, defaults to ~/.ssh/id_rsa)
 
@@ -26,7 +26,7 @@ Path to SSH key (for SSH auth, defaults to ~/.ssh/id_rsa)
 
 > `optional` **token?**: `string`
 
-Defined in: [resolver/src/git-registry.ts:85](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L85)
+Defined in: [resolver/src/git-registry.ts:85](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L85)
 
 Personal access token (for token auth)
 
@@ -36,7 +36,7 @@ Personal access token (for token auth)
 
 > `optional` **tokenEnvVar?**: `string`
 
-Defined in: [resolver/src/git-registry.ts:87](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L87)
+Defined in: [resolver/src/git-registry.ts:87](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L87)
 
 Environment variable containing the token
 
@@ -46,6 +46,6 @@ Environment variable containing the token
 
 > **type**: `"token"` \| `"ssh"`
 
-Defined in: [resolver/src/git-registry.ts:83](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L83)
+Defined in: [resolver/src/git-registry.ts:83](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L83)
 
 Authentication type

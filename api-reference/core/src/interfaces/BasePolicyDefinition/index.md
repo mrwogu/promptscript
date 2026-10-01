@@ -6,7 +6,7 @@
 
 # Interface: BasePolicyDefinition
 
-Defined in: [core/src/types/policy.ts:14](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/policy.ts#L14)
+Defined in: [core/src/types/policy.ts:14](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/policy.ts#L14)
 
 Base policy definition shared by all kinds.
 
@@ -22,7 +22,7 @@ Base policy definition shared by all kinds.
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/policy.ts:18](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/policy.ts#L18)
+Defined in: [core/src/types/policy.ts:18](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/policy.ts#L18)
 
 Human-readable description
 
@@ -32,7 +32,7 @@ Human-readable description
 
 > **kind**: [`PolicyKind`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicyKind/index.md)
 
-Defined in: [core/src/types/policy.ts:20](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/policy.ts#L20)
+Defined in: [core/src/types/policy.ts:20](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/policy.ts#L20)
 
 Policy kind discriminator
 
@@ -42,7 +42,7 @@ Policy kind discriminator
 
 > **name**: `string`
 
-Defined in: [core/src/types/policy.ts:16](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/policy.ts#L16)
+Defined in: [core/src/types/policy.ts:16](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/policy.ts#L16)
 
 Unique policy name within the config
 
@@ -52,6 +52,6 @@ Unique policy name within the config
 
 > **severity**: [`PolicySeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicySeverity/index.md)
 
-Defined in: [core/src/types/policy.ts:22](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/policy.ts#L22)
+Defined in: [core/src/types/policy.ts:22](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/policy.ts#L22)
 
 Violation severity

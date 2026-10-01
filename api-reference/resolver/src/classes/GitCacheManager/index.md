@@ -6,7 +6,7 @@
 
 # Class: GitCacheManager
 
-Defined in: [resolver/src/git-cache-manager.ts:84](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-cache-manager.ts#L84)
+Defined in: [resolver/src/git-cache-manager.ts:84](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-cache-manager.ts#L84)
 
 Manager for Git repository cache.
 
@@ -16,7 +16,7 @@ Manager for Git repository cache.
 
 > **new GitCacheManager**(`options?`): `GitCacheManager`
 
-Defined in: [resolver/src/git-cache-manager.ts:88](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-cache-manager.ts#L88)
+Defined in: [resolver/src/git-cache-manager.ts:88](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-cache-manager.ts#L88)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [resolver/src/git-cache-manager.ts:88](https://github.com/mrwogu/pro
 
 > **cleanupStale**(): `Promise`\<`number`\>
 
-Defined in: [resolver/src/git-cache-manager.ts:249](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-cache-manager.ts#L249)
+Defined in: [resolver/src/git-cache-manager.ts:249](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-cache-manager.ts#L249)
 
 Remove all stale cache entries.
 
@@ -50,7 +50,7 @@ Number of entries removed
 
 > **clear**(): `Promise`\<`void`\>
 
-Defined in: [resolver/src/git-cache-manager.ts:263](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-cache-manager.ts#L263)
+Defined in: [resolver/src/git-cache-manager.ts:263](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-cache-manager.ts#L263)
 
 Remove all cache entries.
 
@@ -64,7 +64,7 @@ Remove all cache entries.
 
 > **get**(`url`, `ref`): `Promise`\<[`CacheEntry`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/CacheEntry/index.md) \| `null`\>
 
-Defined in: [resolver/src/git-cache-manager.ts:124](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-cache-manager.ts#L124)
+Defined in: [resolver/src/git-cache-manager.ts:124](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-cache-manager.ts#L124)
 
 Get a cache entry if it exists.
 
@@ -94,7 +94,7 @@ Cache entry or null if not found
 
 > **getCachePath**(`url`, `ref`): `string`
 
-Defined in: [resolver/src/git-cache-manager.ts:100](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-cache-manager.ts#L100)
+Defined in: [resolver/src/git-cache-manager.ts:100](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-cache-manager.ts#L100)
 
 Get the cache directory for a given URL and ref.
 
@@ -124,7 +124,7 @@ Path to the cache directory
 
 > **getSize**(): `Promise`\<`number`\>
 
-Defined in: [resolver/src/git-cache-manager.ts:274](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-cache-manager.ts#L274)
+Defined in: [resolver/src/git-cache-manager.ts:274](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-cache-manager.ts#L274)
 
 Get the total size of the cache in bytes.
 
@@ -140,7 +140,7 @@ Total cache size in bytes
 
 > **isValid**(`url`, `ref`): `Promise`\<`boolean`\>
 
-Defined in: [resolver/src/git-cache-manager.ts:112](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-cache-manager.ts#L112)
+Defined in: [resolver/src/git-cache-manager.ts:112](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-cache-manager.ts#L112)
 
 Check if a cache entry exists and is not stale.
 
@@ -170,7 +170,7 @@ True if cache is valid (exists and not stale)
 
 > **list**(): `Promise`\<[`CacheEntry`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/CacheEntry/index.md)[]\>
 
-Defined in: [resolver/src/git-cache-manager.ts:219](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-cache-manager.ts#L219)
+Defined in: [resolver/src/git-cache-manager.ts:219](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-cache-manager.ts#L219)
 
 List all cache entries.
 
@@ -186,7 +186,7 @@ Array of cache entries
 
 > **remove**(`url`, `ref`): `Promise`\<`void`\>
 
-Defined in: [resolver/src/git-cache-manager.ts:206](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-cache-manager.ts#L206)
+Defined in: [resolver/src/git-cache-manager.ts:206](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-cache-manager.ts#L206)
 
 Remove a cache entry.
 
@@ -214,7 +214,7 @@ Git ref (branch/tag/commit)
 
 > **set**(`url`, `ref`, `commitHash`): `Promise`\<`string`\>
 
-Defined in: [resolver/src/git-cache-manager.ts:153](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-cache-manager.ts#L153)
+Defined in: [resolver/src/git-cache-manager.ts:153](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-cache-manager.ts#L153)
 
 Create or update a cache entry.
 
@@ -250,7 +250,7 @@ Path to the cache directory
 
 > **touch**(`url`, `ref`, `commitHash?`): `Promise`\<`void`\>
 
-Defined in: [resolver/src/git-cache-manager.ts:184](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-cache-manager.ts#L184)
+Defined in: [resolver/src/git-cache-manager.ts:184](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-cache-manager.ts#L184)
 
 Update the lastUpdated timestamp for an existing cache entry.
 

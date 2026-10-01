@@ -8,7 +8,7 @@
 
 > **qualifyAgentProperties**(`content`, `namespace`, `source`, `importPath`, `importLocation`): `object`
 
-Defined in: [core/src/agent-names.ts:199](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/agent-names.ts#L199)
+Defined in: [core/src/agent-names.ts:199](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/agent-names.ts#L199)
 
 Replace agent property names with an import-qualified namespace.
 

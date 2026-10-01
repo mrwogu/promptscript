@@ -6,7 +6,7 @@
 
 # Interface: PrettierMarkdownOptions
 
-Defined in: [core/src/types/prettier.ts:5](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/prettier.ts#L5)
+Defined in: [core/src/types/prettier.ts:5](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/prettier.ts#L5)
 
 Prettier markdown formatting options.
 These options control how markdown output is formatted.
@@ -17,7 +17,7 @@ These options control how markdown output is formatted.
 
 > `optional` **printWidth?**: `number`
 
-Defined in: [core/src/types/prettier.ts:25](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/prettier.ts#L25)
+Defined in: [core/src/types/prettier.ts:25](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/prettier.ts#L25)
 
 Maximum line width for prose wrapping.
 
@@ -33,7 +33,7 @@ Maximum line width for prose wrapping.
 
 > `optional` **proseWrap?**: `"always"` \| `"never"` \| `"preserve"`
 
-Defined in: [core/src/types/prettier.ts:13](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/prettier.ts#L13)
+Defined in: [core/src/types/prettier.ts:13](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/prettier.ts#L13)
 
 How to wrap prose.
 - 'always': Wrap prose at printWidth
@@ -52,7 +52,7 @@ How to wrap prose.
 
 > `optional` **tabWidth?**: `number`
 
-Defined in: [core/src/types/prettier.ts:19](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/prettier.ts#L19)
+Defined in: [core/src/types/prettier.ts:19](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/prettier.ts#L19)
 
 Number of spaces per indentation level.
 

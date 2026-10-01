@@ -6,7 +6,7 @@
 
 # Interface: BlockBodyOptions
 
-Defined in: [core/src/canonical-ast.ts:51](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/canonical-ast.ts#L51)
+Defined in: [core/src/canonical-ast.ts:51](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/canonical-ast.ts#L51)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [core/src/canonical-ast.ts:51](https://github.com/mrwogu/promptscrip
 
 > `readonly` `optional` **projection?**: `"TextContent"` \| `"ObjectContent"` \| `"ArrayContent"` \| `"MixedContent"`
 
-Defined in: [core/src/canonical-ast.ts:52](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/canonical-ast.ts#L52)
+Defined in: [core/src/canonical-ast.ts:52](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/canonical-ast.ts#L52)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [core/src/canonical-ast.ts:52](https://github.com/mrwogu/promptscrip
 
 > `readonly` `optional` **text?**: `object`
 
-Defined in: [core/src/canonical-ast.ts:53](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/canonical-ast.ts#L53)
+Defined in: [core/src/canonical-ast.ts:53](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/canonical-ast.ts#L53)
 
 #### loc
 

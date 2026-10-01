@@ -6,7 +6,7 @@
 
 # Interface: FileWatchEvent
 
-Defined in: [server/src/watcher.ts:4](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/server/src/watcher.ts#L4)
+Defined in: [server/src/watcher.ts:4](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/server/src/watcher.ts#L4)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [server/src/watcher.ts:4](https://github.com/mrwogu/promptscript/blo
 
 > **path**: `string`
 
-Defined in: [server/src/watcher.ts:6](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/server/src/watcher.ts#L6)
+Defined in: [server/src/watcher.ts:6](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/server/src/watcher.ts#L6)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [server/src/watcher.ts:6](https://github.com/mrwogu/promptscript/blo
 
 > **type**: `"file:changed"` \| `"file:created"` \| `"file:deleted"`
 
-Defined in: [server/src/watcher.ts:5](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/server/src/watcher.ts#L5)
+Defined in: [server/src/watcher.ts:5](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/server/src/watcher.ts#L5)

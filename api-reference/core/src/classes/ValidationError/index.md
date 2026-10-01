@@ -6,7 +6,7 @@
 
 # Class: ValidationError
 
-Defined in: [core/src/errors/validate.ts:12](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/validate.ts#L12)
+Defined in: [core/src/errors/validate.ts:12](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/validate.ts#L12)
 
 Error during validation phase.
 
@@ -20,7 +20,7 @@ Error during validation phase.
 
 > **new ValidationError**(`message`, `ruleId`, `options?`): `ValidationError`
 
-Defined in: [core/src/errors/validate.ts:20](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/validate.ts#L20)
+Defined in: [core/src/errors/validate.ts:20](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/validate.ts#L20)
 
 #### Parameters
 
@@ -60,7 +60,7 @@ Defined in: [core/src/errors/validate.ts:20](https://github.com/mrwogu/promptscr
 
 > `readonly` `optional` **cause?**: `Error`
 
-Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L56)
+Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L56)
 
 Original error if wrapping another error
 
@@ -74,7 +74,7 @@ Original error if wrapping another error
 
 > `readonly` **code**: `string`
 
-Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L52)
+Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L52)
 
 Error code
 
@@ -88,7 +88,7 @@ Error code
 
 > `readonly` `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L54)
+Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L54)
 
 Source location where error occurred
 
@@ -102,7 +102,7 @@ Source location where error occurred
 
 > `readonly` **ruleId**: `string`
 
-Defined in: [core/src/errors/validate.ts:14](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/validate.ts#L14)
+Defined in: [core/src/errors/validate.ts:14](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/validate.ts#L14)
 
 Validation rule ID
 
@@ -112,7 +112,7 @@ Validation rule ID
 
 > `readonly` **severity**: [`Severity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Severity/index.md)
 
-Defined in: [core/src/errors/validate.ts:16](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/validate.ts#L16)
+Defined in: [core/src/errors/validate.ts:16](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/validate.ts#L16)
 
 Severity level
 
@@ -122,7 +122,7 @@ Severity level
 
 > `readonly` `optional` **suggestion?**: `string`
 
-Defined in: [core/src/errors/validate.ts:18](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/validate.ts#L18)
+Defined in: [core/src/errors/validate.ts:18](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/validate.ts#L18)
 
 Suggestion for fixing
 
@@ -132,7 +132,7 @@ Suggestion for fixing
 
 > **format**(): `string`
 
-Defined in: [core/src/errors/validate.ts:38](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/validate.ts#L38)
+Defined in: [core/src/errors/validate.ts:38](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/validate.ts#L38)
 
 Format error for display.
 
@@ -150,7 +150,7 @@ Format error for display.
 
 > **toJSON**(): `Record`\<`string`, `unknown`\>
 
-Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L92)
+Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L92)
 
 Convert to JSON-serializable object.
 

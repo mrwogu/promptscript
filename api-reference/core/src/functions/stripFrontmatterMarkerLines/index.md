@@ -8,7 +8,7 @@
 
 > **stripFrontmatterMarkerLines**(`frontmatter`): `string`
 
-Defined in: [core/src/utils/markers.ts:62](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/utils/markers.ts#L62)
+Defined in: [core/src/utils/markers.ts:62](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/utils/markers.ts#L62)
 
 Remove PromptScript YAML marker lines from raw YAML frontmatter.
 

@@ -6,7 +6,7 @@
 
 # Interface: OutputPlan
 
-Defined in: [core/src/output-plan.ts:95](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L95)
+Defined in: [core/src/output-plan.ts:95](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L95)
 
 Shared, filesystem-independent output plan.
 
@@ -20,7 +20,7 @@ consumer sees the plan.
 
 > **collisions**: [`OutputPlanCollision`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputPlanCollision/index.md)[]
 
-Defined in: [core/src/output-plan.ts:103](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L103)
+Defined in: [core/src/output-plan.ts:103](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L103)
 
 All collisions, in candidate traversal order.
 
@@ -30,7 +30,7 @@ All collisions, in candidate traversal order.
 
 > **files**: [`OutputPlanFile`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputPlanFile/index.md)[]
 
-Defined in: [core/src/output-plan.ts:97](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L97)
+Defined in: [core/src/output-plan.ts:97](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L97)
 
 Selected normalized files.
 
@@ -40,7 +40,7 @@ Selected normalized files.
 
 > **injected**: [`OutputPlanFile`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputPlanFile/index.md)[]
 
-Defined in: [core/src/output-plan.ts:109](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L109)
+Defined in: [core/src/output-plan.ts:109](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L109)
 
 Selected auto-injected files.
 
@@ -50,7 +50,7 @@ Selected auto-injected files.
 
 > **managedOutputDirectories**: `string`[]
 
-Defined in: [core/src/output-plan.ts:111](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L111)
+Defined in: [core/src/output-plan.ts:111](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L111)
 
 Convenience aliases for managed path consumers.
 
@@ -60,7 +60,7 @@ Convenience aliases for managed path consumers.
 
 > **managedOutputFiles**: `string`[]
 
-Defined in: [core/src/output-plan.ts:112](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L112)
+Defined in: [core/src/output-plan.ts:112](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L112)
 
 ***
 
@@ -68,7 +68,7 @@ Defined in: [core/src/output-plan.ts:112](https://github.com/mrwogu/promptscript
 
 > **managedPaths**: [`OutputPlanManagedPaths`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputPlanManagedPaths/index.md)
 
-Defined in: [core/src/output-plan.ts:105](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L105)
+Defined in: [core/src/output-plan.ts:105](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L105)
 
 Managed paths declared by selected files.
 
@@ -78,7 +78,7 @@ Managed paths declared by selected files.
 
 > **outputs**: `Map`\<`string`, [`OutputPlanFile`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputPlanFile/index.md)\>
 
-Defined in: [core/src/output-plan.ts:99](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L99)
+Defined in: [core/src/output-plan.ts:99](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L99)
 
 Selected files indexed by normalized path.
 
@@ -88,7 +88,7 @@ Selected files indexed by normalized path.
 
 > **owners**: `Map`\<`string`, `string`\>
 
-Defined in: [core/src/output-plan.ts:101](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L101)
+Defined in: [core/src/output-plan.ts:101](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L101)
 
 Selected owner indexed by normalized path.
 
@@ -98,6 +98,6 @@ Selected owner indexed by normalized path.
 
 > **resources**: [`OutputPlanFile`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputPlanFile/index.md)[]
 
-Defined in: [core/src/output-plan.ts:107](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L107)
+Defined in: [core/src/output-plan.ts:107](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L107)
 
 Selected nested resources.

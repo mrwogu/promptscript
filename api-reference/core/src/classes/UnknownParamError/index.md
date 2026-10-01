@@ -6,7 +6,7 @@
 
 # Class: UnknownParamError
 
-Defined in: [core/src/errors/template.ts:40](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/template.ts#L40)
+Defined in: [core/src/errors/template.ts:40](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/template.ts#L40)
 
 Error thrown when an unknown parameter is provided to a template.
 
@@ -27,7 +27,7 @@ Error thrown when an unknown parameter is provided to a template.
 
 > **new UnknownParamError**(`paramName`, `templatePath`, `availableParams`, `options?`): `UnknownParamError`
 
-Defined in: [core/src/errors/template.ts:48](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/template.ts#L48)
+Defined in: [core/src/errors/template.ts:48](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/template.ts#L48)
 
 #### Parameters
 
@@ -63,7 +63,7 @@ Defined in: [core/src/errors/template.ts:48](https://github.com/mrwogu/promptscr
 
 > `readonly` **availableParams**: `string`[]
 
-Defined in: [core/src/errors/template.ts:46](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/template.ts#L46)
+Defined in: [core/src/errors/template.ts:46](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/template.ts#L46)
 
 Available parameter names
 
@@ -73,7 +73,7 @@ Available parameter names
 
 > `readonly` `optional` **cause?**: `Error`
 
-Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L56)
+Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L56)
 
 Original error if wrapping another error
 
@@ -87,7 +87,7 @@ Original error if wrapping another error
 
 > `readonly` **code**: `string`
 
-Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L52)
+Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L52)
 
 Error code
 
@@ -101,7 +101,7 @@ Error code
 
 > `readonly` `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L54)
+Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L54)
 
 Source location where error occurred
 
@@ -115,7 +115,7 @@ Source location where error occurred
 
 > `readonly` **paramName**: `string`
 
-Defined in: [core/src/errors/template.ts:42](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/template.ts#L42)
+Defined in: [core/src/errors/template.ts:42](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/template.ts#L42)
 
 Name of the unknown parameter
 
@@ -125,7 +125,7 @@ Name of the unknown parameter
 
 > `readonly` **templatePath**: `string`
 
-Defined in: [core/src/errors/template.ts:44](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/template.ts#L44)
+Defined in: [core/src/errors/template.ts:44](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/template.ts#L44)
 
 Path of the template file
 
@@ -135,7 +135,7 @@ Path of the template file
 
 > **format**(): `string`
 
-Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L79)
+Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L79)
 
 Format error for display.
 
@@ -153,7 +153,7 @@ Format error for display.
 
 > **toJSON**(): `Record`\<`string`, `unknown`\>
 
-Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/errors/base.ts#L92)
+Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/errors/base.ts#L92)
 
 Convert to JSON-serializable object.
 

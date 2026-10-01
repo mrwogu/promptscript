@@ -6,7 +6,7 @@
 
 # Interface: PathReference
 
-Defined in: [core/src/types/ast.ts:256](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L256)
+Defined in: [core/src/types/ast.ts:256](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L256)
 
 Reference to another PromptScript file.
 
@@ -25,7 +25,7 @@ Formats:
 
 > **isRelative**: `boolean`
 
-Defined in: [core/src/types/ast.ts:267](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L267)
+Defined in: [core/src/types/ast.ts:267](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L267)
 
 Whether this is a relative path
 
@@ -35,7 +35,7 @@ Whether this is a relative path
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -49,7 +49,7 @@ Source location
 
 > `optional` **namespace?**: `string`
 
-Defined in: [core/src/types/ast.ts:261](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L261)
+Defined in: [core/src/types/ast.ts:261](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L261)
 
 Namespace (e.g., "core" from "@core/...")
 
@@ -59,7 +59,7 @@ Namespace (e.g., "core" from "@core/...")
 
 > **raw**: `string`
 
-Defined in: [core/src/types/ast.ts:259](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L259)
+Defined in: [core/src/types/ast.ts:259](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L259)
 
 Original string representation
 
@@ -69,7 +69,7 @@ Original string representation
 
 > **segments**: `string`[]
 
-Defined in: [core/src/types/ast.ts:263](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L263)
+Defined in: [core/src/types/ast.ts:263](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L263)
 
 Path segments
 
@@ -79,7 +79,7 @@ Path segments
 
 > `readonly` **type**: `"PathReference"`
 
-Defined in: [core/src/types/ast.ts:257](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L257)
+Defined in: [core/src/types/ast.ts:257](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L257)
 
 Node type discriminator
 
@@ -93,6 +93,6 @@ Node type discriminator
 
 > `optional` **version?**: `string`
 
-Defined in: [core/src/types/ast.ts:265](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L265)
+Defined in: [core/src/types/ast.ts:265](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L265)
 
 Version constraint

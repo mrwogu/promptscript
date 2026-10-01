@@ -8,7 +8,7 @@
 
 > **isReservedWord**(`word`): word is "string" \| "number" \| "boolean" \| "identity" \| "context" \| "standards" \| "restrictions" \| "knowledge" \| "shortcuts" \| "commands" \| "guards" \| "params" \| "skills" \| "local" \| "agents" \| "workflows" \| "prompts" \| "examples" \| "hooks" \| "mcpServers" \| "plugins" \| "inherit" \| "use" \| "extend" \| "list" \| "enum" \| "range" \| "meta" \| "as" \| "true" \| "false" \| "null"
 
-Defined in: [core/src/types/constants.ts:83](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/constants.ts#L83)
+Defined in: [core/src/types/constants.ts:83](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/constants.ts#L83)
 
 Check if a string is a reserved word.
 

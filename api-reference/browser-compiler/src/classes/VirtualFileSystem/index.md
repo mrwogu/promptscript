@@ -6,7 +6,7 @@
 
 # Class: VirtualFileSystem
 
-Defined in: [browser-compiler/src/virtual-fs.ts:11](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L11)
+Defined in: [browser-compiler/src/virtual-fs.ts:11](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L11)
 
 Virtual file system for storing and retrieving files in memory.
 
@@ -16,7 +16,7 @@ Virtual file system for storing and retrieving files in memory.
 
 > **new VirtualFileSystem**(`initialFiles?`): `VirtualFileSystem`
 
-Defined in: [browser-compiler/src/virtual-fs.ts:14](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L14)
+Defined in: [browser-compiler/src/virtual-fs.ts:14](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L14)
 
 #### Parameters
 
@@ -36,7 +36,7 @@ Defined in: [browser-compiler/src/virtual-fs.ts:14](https://github.com/mrwogu/pr
 
 > **get** **size**(): `number`
 
-Defined in: [browser-compiler/src/virtual-fs.ts:137](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L137)
+Defined in: [browser-compiler/src/virtual-fs.ts:137](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L137)
 
 Get the number of files in the virtual file system.
 
@@ -50,7 +50,7 @@ Get the number of files in the virtual file system.
 
 > **clear**(): `void`
 
-Defined in: [browser-compiler/src/virtual-fs.ts:130](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L130)
+Defined in: [browser-compiler/src/virtual-fs.ts:130](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L130)
 
 Clear all files from the virtual file system.
 
@@ -64,7 +64,7 @@ Clear all files from the virtual file system.
 
 > **clone**(): `VirtualFileSystem`
 
-Defined in: [browser-compiler/src/virtual-fs.ts:162](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L162)
+Defined in: [browser-compiler/src/virtual-fs.ts:162](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L162)
 
 Clone this virtual file system.
 
@@ -78,7 +78,7 @@ Clone this virtual file system.
 
 > **delete**(`path`): `boolean`
 
-Defined in: [browser-compiler/src/virtual-fs.ts:83](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L83)
+Defined in: [browser-compiler/src/virtual-fs.ts:83](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L83)
 
 Delete a file from the virtual file system.
 
@@ -98,7 +98,7 @@ Delete a file from the virtual file system.
 
 > **exists**(`path`): `boolean`
 
-Defined in: [browser-compiler/src/virtual-fs.ts:53](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L53)
+Defined in: [browser-compiler/src/virtual-fs.ts:53](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L53)
 
 Check if a file exists in the virtual file system.
 
@@ -118,7 +118,7 @@ Check if a file exists in the virtual file system.
 
 > **glob**(`pattern`): `string`[]
 
-Defined in: [browser-compiler/src/virtual-fs.ts:98](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L98)
+Defined in: [browser-compiler/src/virtual-fs.ts:98](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L98)
 
 List files matching a glob-like pattern.
 Supports basic patterns like "*.prs" and "**/*.prs".
@@ -139,7 +139,7 @@ Supports basic patterns like "*.prs" and "**/*.prs".
 
 > **list**(): `string`[]
 
-Defined in: [browser-compiler/src/virtual-fs.ts:90](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L90)
+Defined in: [browser-compiler/src/virtual-fs.ts:90](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L90)
 
 List all files in the virtual file system.
 
@@ -153,7 +153,7 @@ List all files in the virtual file system.
 
 > **merge**(`other`): `void`
 
-Defined in: [browser-compiler/src/virtual-fs.ts:170](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L170)
+Defined in: [browser-compiler/src/virtual-fs.ts:170](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L170)
 
 Merge another virtual file system into this one.
 Files from the other system will overwrite files in this system.
@@ -174,7 +174,7 @@ Files from the other system will overwrite files in this system.
 
 > **read**(`path`): `string`
 
-Defined in: [browser-compiler/src/virtual-fs.ts:62](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L62)
+Defined in: [browser-compiler/src/virtual-fs.ts:62](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L62)
 
 Read a file from the virtual file system.
 
@@ -198,7 +198,7 @@ Error if the file does not exist
 
 > **toMap**(): `Map`\<`string`, `string`\>
 
-Defined in: [browser-compiler/src/virtual-fs.ts:144](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L144)
+Defined in: [browser-compiler/src/virtual-fs.ts:144](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L144)
 
 Get all files as a Map.
 
@@ -212,7 +212,7 @@ Get all files as a Map.
 
 > **toObject**(): `Record`\<`string`, `string`\>
 
-Defined in: [browser-compiler/src/virtual-fs.ts:151](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L151)
+Defined in: [browser-compiler/src/virtual-fs.ts:151](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L151)
 
 Get all files as a plain object.
 
@@ -226,7 +226,7 @@ Get all files as a plain object.
 
 > **write**(`path`, `content`): `void`
 
-Defined in: [browser-compiler/src/virtual-fs.ts:76](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/browser-compiler/src/virtual-fs.ts#L76)
+Defined in: [browser-compiler/src/virtual-fs.ts:76](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/virtual-fs.ts#L76)
 
 Write a file to the virtual file system.
 

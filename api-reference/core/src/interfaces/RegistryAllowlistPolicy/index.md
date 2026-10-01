@@ -6,7 +6,7 @@
 
 # Interface: RegistryAllowlistPolicy
 
-Defined in: [core/src/types/policy.ts:50](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/policy.ts#L50)
+Defined in: [core/src/types/policy.ts:50](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/policy.ts#L50)
 
 Registry-allowlist policy: restricts which registries can provide extensions.
 
@@ -20,7 +20,7 @@ Registry-allowlist policy: restricts which registries can provide extensions.
 
 > **allowed**: `string`[]
 
-Defined in: [core/src/types/policy.ts:53](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/policy.ts#L53)
+Defined in: [core/src/types/policy.ts:53](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/policy.ts#L53)
 
 List of allowed registry prefixes
 
@@ -30,7 +30,7 @@ List of allowed registry prefixes
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/policy.ts:18](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/policy.ts#L18)
+Defined in: [core/src/types/policy.ts:18](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/policy.ts#L18)
 
 Human-readable description
 
@@ -44,7 +44,7 @@ Human-readable description
 
 > **kind**: `"registry-allowlist"`
 
-Defined in: [core/src/types/policy.ts:51](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/policy.ts#L51)
+Defined in: [core/src/types/policy.ts:51](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/policy.ts#L51)
 
 Policy kind discriminator
 
@@ -58,7 +58,7 @@ Policy kind discriminator
 
 > **name**: `string`
 
-Defined in: [core/src/types/policy.ts:16](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/policy.ts#L16)
+Defined in: [core/src/types/policy.ts:16](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/policy.ts#L16)
 
 Unique policy name within the config
 
@@ -72,7 +72,7 @@ Unique policy name within the config
 
 > **severity**: [`PolicySeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicySeverity/index.md)
 
-Defined in: [core/src/types/policy.ts:22](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/policy.ts#L22)
+Defined in: [core/src/types/policy.ts:22](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/policy.ts#L22)
 
 Violation severity
 

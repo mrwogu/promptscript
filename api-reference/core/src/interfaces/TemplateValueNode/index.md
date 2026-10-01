@@ -6,7 +6,7 @@
 
 # Interface: TemplateValueNode
 
-Defined in: [core/src/types/ast.ts:519](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L519)
+Defined in: [core/src/types/ast.ts:519](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L519)
 
 Canonical template expression value.
 
@@ -20,7 +20,7 @@ Canonical template expression value.
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L497)
+Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L497)
 
 #### column
 
@@ -56,7 +56,7 @@ Byte offset from start of file
 
 > `readonly` **name**: `string`
 
-Defined in: [core/src/types/ast.ts:521](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L521)
+Defined in: [core/src/types/ast.ts:521](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L521)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [core/src/types/ast.ts:521](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **type**: `"TemplateValueNode"`
 
-Defined in: [core/src/types/ast.ts:520](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L520)
+Defined in: [core/src/types/ast.ts:520](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L520)
 
 #### Overrides
 

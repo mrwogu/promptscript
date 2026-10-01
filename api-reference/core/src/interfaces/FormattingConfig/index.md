@@ -6,7 +6,7 @@
 
 # Interface: FormattingConfig
 
-Defined in: [core/src/types/config.ts:12](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/config.ts#L12)
+Defined in: [core/src/types/config.ts:12](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/config.ts#L12)
 
 Formatting configuration for output files.
 Controls how generated markdown is formatted.
@@ -17,7 +17,7 @@ Controls how generated markdown is formatted.
 
 > `optional` **prettier?**: `string` \| `boolean` \| [`PrettierMarkdownOptions`](https://getpromptscript.dev/api-reference/core/src/interfaces/PrettierMarkdownOptions/index.md)
 
-Defined in: [core/src/types/config.ts:29](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/config.ts#L29)
+Defined in: [core/src/types/config.ts:29](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/config.ts#L29)
 
 Enable Prettier formatting.
 - `true`: Auto-detect .prettierrc in project
@@ -44,7 +44,7 @@ formatting:
 
 > `optional` **printWidth?**: `number`
 
-Defined in: [core/src/types/config.ts:44](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/config.ts#L44)
+Defined in: [core/src/types/config.ts:44](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/config.ts#L44)
 
 Explicit printWidth setting (shorthand for prettier.printWidth).
 
@@ -54,7 +54,7 @@ Explicit printWidth setting (shorthand for prettier.printWidth).
 
 > `optional` **proseWrap?**: `"always"` \| `"never"` \| `"preserve"`
 
-Defined in: [core/src/types/config.ts:34](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/config.ts#L34)
+Defined in: [core/src/types/config.ts:34](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/config.ts#L34)
 
 Explicit proseWrap setting (shorthand for prettier.proseWrap).
 
@@ -64,6 +64,6 @@ Explicit proseWrap setting (shorthand for prettier.proseWrap).
 
 > `optional` **tabWidth?**: `number`
 
-Defined in: [core/src/types/config.ts:39](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/config.ts#L39)
+Defined in: [core/src/types/config.ts:39](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/config.ts#L39)
 
 Explicit tabWidth setting (shorthand for prettier.tabWidth).

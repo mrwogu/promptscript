@@ -6,7 +6,7 @@
 
 # Interface: ParsedGitUrl
 
-Defined in: [resolver/src/git-url-utils.ts:17](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-url-utils.ts#L17)
+Defined in: [resolver/src/git-url-utils.ts:17](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-url-utils.ts#L17)
 
 Parsed Git URL structure.
 
@@ -16,7 +16,7 @@ Parsed Git URL structure.
 
 > **host**: `string`
 
-Defined in: [resolver/src/git-url-utils.ts:23](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-url-utils.ts#L23)
+Defined in: [resolver/src/git-url-utils.ts:23](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-url-utils.ts#L23)
 
 Host (e.g., github.com, gitlab.com)
 
@@ -26,7 +26,7 @@ Host (e.g., github.com, gitlab.com)
 
 > **original**: `string`
 
-Defined in: [resolver/src/git-url-utils.ts:19](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-url-utils.ts#L19)
+Defined in: [resolver/src/git-url-utils.ts:19](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-url-utils.ts#L19)
 
 Full original URL
 
@@ -36,7 +36,7 @@ Full original URL
 
 > **owner**: `string`
 
-Defined in: [resolver/src/git-url-utils.ts:25](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-url-utils.ts#L25)
+Defined in: [resolver/src/git-url-utils.ts:25](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-url-utils.ts#L25)
 
 Repository owner/organization
 
@@ -46,7 +46,7 @@ Repository owner/organization
 
 > `optional` **port?**: `number`
 
-Defined in: [resolver/src/git-url-utils.ts:29](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-url-utils.ts#L29)
+Defined in: [resolver/src/git-url-utils.ts:29](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-url-utils.ts#L29)
 
 Port number (if specified)
 
@@ -56,7 +56,7 @@ Port number (if specified)
 
 > **protocol**: `"ssh"` \| `"git"` \| `"https"`
 
-Defined in: [resolver/src/git-url-utils.ts:21](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-url-utils.ts#L21)
+Defined in: [resolver/src/git-url-utils.ts:21](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-url-utils.ts#L21)
 
 Protocol (https, ssh, git)
 
@@ -66,6 +66,6 @@ Protocol (https, ssh, git)
 
 > **repo**: `string`
 
-Defined in: [resolver/src/git-url-utils.ts:27](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-url-utils.ts#L27)
+Defined in: [resolver/src/git-url-utils.ts:27](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-url-utils.ts#L27)
 
 Repository name (without .git)

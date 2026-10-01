@@ -6,7 +6,7 @@
 
 # Interface: ProvenanceEventOptions
 
-Defined in: [core/src/provenance.ts:356](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/provenance.ts#L356)
+Defined in: [core/src/provenance.ts:356](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/provenance.ts#L356)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [core/src/provenance.ts:356](https://github.com/mrwogu/promptscript/
 
 > `readonly` `optional` **baseBody?**: [`BlockBody`](https://getpromptscript.dev/api-reference/core/src/interfaces/BlockBody/index.md)
 
-Defined in: [core/src/provenance.ts:362](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/provenance.ts#L362)
+Defined in: [core/src/provenance.ts:362](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/provenance.ts#L362)
 
 Base canonical body used to suppress duplicate append events.
 
@@ -24,7 +24,7 @@ Base canonical body used to suppress duplicate append events.
 
 > `readonly` `optional` **baseContent?**: [`BlockContent`](https://getpromptscript.dev/api-reference/core/src/type-aliases/BlockContent/index.md)
 
-Defined in: [core/src/provenance.ts:364](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/provenance.ts#L364)
+Defined in: [core/src/provenance.ts:364](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/provenance.ts#L364)
 
 Base content used to suppress duplicate append events.
 
@@ -34,7 +34,7 @@ Base content used to suppress duplicate append events.
 
 > `readonly` `optional` **finalBody?**: [`BlockBody`](https://getpromptscript.dev/api-reference/core/src/interfaces/BlockBody/index.md)
 
-Defined in: [core/src/provenance.ts:360](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/provenance.ts#L360)
+Defined in: [core/src/provenance.ts:360](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/provenance.ts#L360)
 
 Final canonical body used to preserve source locations during mapping.
 
@@ -44,7 +44,7 @@ Final canonical body used to preserve source locations during mapping.
 
 > `readonly` `optional` **finalContent?**: [`BlockContent`](https://getpromptscript.dev/api-reference/core/src/type-aliases/BlockContent/index.md)
 
-Defined in: [core/src/provenance.ts:358](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/provenance.ts#L358)
+Defined in: [core/src/provenance.ts:358](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/provenance.ts#L358)
 
 Final content used to map incoming values to final canonical positions.
 
@@ -54,7 +54,7 @@ Final content used to map incoming values to final canonical positions.
 
 > `readonly` `optional` **resolveDetails?**: (`path`, `node`) => `Pick`\<[`ProvenanceEvent`](https://getpromptscript.dev/api-reference/core/src/interfaces/ProvenanceEvent/index.md), `"action"` \| `"strategy"`\> \| `undefined`
 
-Defined in: [core/src/provenance.ts:366](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/provenance.ts#L366)
+Defined in: [core/src/provenance.ts:366](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/provenance.ts#L366)
 
 Per-path strategy override for skill-aware merges.
 

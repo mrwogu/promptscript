@@ -6,7 +6,7 @@
 
 # Class: FileLoader
 
-Defined in: [resolver/src/loader.ts:74](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L74)
+Defined in: [resolver/src/loader.ts:74](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L74)
 
 File loader for loading and resolving PromptScript files.
 
@@ -16,7 +16,7 @@ File loader for loading and resolving PromptScript files.
 
 > **new FileLoader**(`options`): `FileLoader`
 
-Defined in: [resolver/src/loader.ts:80](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L80)
+Defined in: [resolver/src/loader.ts:80](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L80)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [resolver/src/loader.ts:80](https://github.com/mrwogu/promptscript/b
 
 > **getLocalPath**(): `string`
 
-Defined in: [resolver/src/loader.ts:219](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L219)
+Defined in: [resolver/src/loader.ts:219](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L219)
 
 Get the local path.
 
@@ -48,7 +48,7 @@ Get the local path.
 
 > **getProjectRoot**(): `string`
 
-Defined in: [resolver/src/loader.ts:226](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L226)
+Defined in: [resolver/src/loader.ts:226](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L226)
 
 Get the project root used as the traversal safety boundary.
 
@@ -62,7 +62,7 @@ Get the project root used as the traversal safety boundary.
 
 > **getRegistryPath**(): `string`
 
-Defined in: [resolver/src/loader.ts:212](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L212)
+Defined in: [resolver/src/loader.ts:212](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L212)
 
 Get the registry path.
 
@@ -76,7 +76,7 @@ Get the registry path.
 
 > **load**(`path`): `Promise`\<`string`\>
 
-Defined in: [resolver/src/loader.ts:99](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L99)
+Defined in: [resolver/src/loader.ts:99](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L99)
 
 Load file content from disk.
 
@@ -104,7 +104,7 @@ FileNotFoundError if file doesn't exist
 
 > **resolveRef**(`ref`, `fromFile`): `string`
 
-Defined in: [resolver/src/loader.ts:151](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L151)
+Defined in: [resolver/src/loader.ts:151](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L151)
 
 Resolve a PathReference to an absolute path.
 
@@ -134,7 +134,7 @@ Absolute filesystem path
 
 > **toAbsolutePath**(`path`): `string`
 
-Defined in: [resolver/src/loader.ts:121](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/loader.ts#L121)
+Defined in: [resolver/src/loader.ts:121](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/loader.ts#L121)
 
 Convert a path string to an absolute path.
 

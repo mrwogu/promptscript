@@ -6,7 +6,7 @@
 
 # Interface: CanonicalProgram
 
-Defined in: [core/src/types/ast.ts:726](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L726)
+Defined in: [core/src/types/ast.ts:726](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L726)
 
 Immutable canonical program. Legacy collection fields are derived projections.
 
@@ -20,7 +20,7 @@ Immutable canonical program. Legacy collection fields are derived projections.
 
 > `readonly` `optional` **agentProvenance?**: readonly `object`[]
 
-Defined in: [core/src/types/ast.ts:734](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L734)
+Defined in: [core/src/types/ast.ts:734](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L734)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [core/src/types/ast.ts:734](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **blocks**: readonly [`CanonicalBlock`](https://getpromptscript.dev/api-reference/core/src/interfaces/CanonicalBlock/index.md)[]
 
-Defined in: [core/src/types/ast.ts:731](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L731)
+Defined in: [core/src/types/ast.ts:731](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L731)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: [core/src/types/ast.ts:731](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **extends**: readonly [`CanonicalExtendBlock`](https://getpromptscript.dev/api-reference/core/src/interfaces/CanonicalExtendBlock/index.md)[]
 
-Defined in: [core/src/types/ast.ts:732](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L732)
+Defined in: [core/src/types/ast.ts:732](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L732)
 
 ***
 
@@ -44,7 +44,7 @@ Defined in: [core/src/types/ast.ts:732](https://github.com/mrwogu/promptscript/b
 
 > `readonly` `optional` **inherit?**: `object`
 
-Defined in: [core/src/types/ast.ts:729](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L729)
+Defined in: [core/src/types/ast.ts:729](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L729)
 
 #### loc
 
@@ -166,7 +166,7 @@ Node type discriminator
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L497)
+Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L497)
 
 #### column
 
@@ -202,7 +202,7 @@ Byte offset from start of file
 
 > `readonly` `optional` **meta?**: `object`
 
-Defined in: [core/src/types/ast.ts:728](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L728)
+Defined in: [core/src/types/ast.ts:728](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L728)
 
 #### fields
 
@@ -262,7 +262,7 @@ Node type discriminator
 
 > `readonly` **operations**: readonly [`ProgramOperation`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ProgramOperation/index.md)[]
 
-Defined in: [core/src/types/ast.ts:736](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L736)
+Defined in: [core/src/types/ast.ts:736](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L736)
 
 ***
 
@@ -270,7 +270,7 @@ Defined in: [core/src/types/ast.ts:736](https://github.com/mrwogu/promptscript/b
 
 > `readonly` `optional` **overrides?**: readonly [`CanonicalOverrideBlock`](https://getpromptscript.dev/api-reference/core/src/interfaces/CanonicalOverrideBlock/index.md)[]
 
-Defined in: [core/src/types/ast.ts:733](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L733)
+Defined in: [core/src/types/ast.ts:733](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L733)
 
 ***
 
@@ -278,7 +278,7 @@ Defined in: [core/src/types/ast.ts:733](https://github.com/mrwogu/promptscript/b
 
 > `readonly` `optional` **syntaxFeatures?**: readonly `object`[]
 
-Defined in: [core/src/types/ast.ts:735](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L735)
+Defined in: [core/src/types/ast.ts:735](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L735)
 
 ***
 
@@ -286,7 +286,7 @@ Defined in: [core/src/types/ast.ts:735](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **type**: `"CanonicalProgram"`
 
-Defined in: [core/src/types/ast.ts:727](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L727)
+Defined in: [core/src/types/ast.ts:727](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L727)
 
 #### Overrides
 
@@ -298,4 +298,4 @@ Defined in: [core/src/types/ast.ts:727](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **uses**: readonly `object`[]
 
-Defined in: [core/src/types/ast.ts:730](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L730)
+Defined in: [core/src/types/ast.ts:730](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L730)

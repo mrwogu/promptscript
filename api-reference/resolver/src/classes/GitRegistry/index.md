@@ -6,7 +6,7 @@
 
 # Class: GitRegistry
 
-Defined in: [resolver/src/git-registry.ts:173](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L173)
+Defined in: [resolver/src/git-registry.ts:173](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L173)
 
 Git-based registry implementation.
 
@@ -20,7 +20,7 @@ Git-based registry implementation.
 
 > **new GitRegistry**(`options`): `GitRegistry`
 
-Defined in: [resolver/src/git-registry.ts:186](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L186)
+Defined in: [resolver/src/git-registry.ts:186](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L186)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ Defined in: [resolver/src/git-registry.ts:186](https://github.com/mrwogu/prompts
 
 > **addSparsePaths**(`targetDir`, `paths`): `Promise`\<`void`\>
 
-Defined in: [resolver/src/git-registry.ts:540](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L540)
+Defined in: [resolver/src/git-registry.ts:540](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L540)
 
 Add paths to an existing sparse checkout so their blobs are fetched
 on demand. Used when a cached partial clone needs a subdirectory that
@@ -64,7 +64,7 @@ readonly `string`[]
 
 > **checkoutCommit**(`targetDir`, `commit`): `Promise`\<`void`\>
 
-Defined in: [resolver/src/git-registry.ts:305](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L305)
+Defined in: [resolver/src/git-registry.ts:305](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L305)
 
 Checkout a specific commit in an already-cloned repository.
 Used to enforce lockfile pinning: after cloning at a tag/branch,
@@ -94,7 +94,7 @@ Commit hash to checkout
 
 > **cloneAtTag**(`repoUrl`, `tag`, `targetDir`, `fallbackRepoUrl?`, `sparsePath?`): `Promise`\<`void`\>
 
-Defined in: [resolver/src/git-registry.ts:411](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L411)
+Defined in: [resolver/src/git-registry.ts:411](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L411)
 
 Clone a repo at a specific Git tag (shallow, depth=1).
 When a `fallbackRepoUrl` is provided, auth errors trigger an automatic
@@ -145,7 +145,7 @@ Optional subdirectory to limit the checkout to.
 
 > **cloneSparse**(`repoUrl`, `ref`, `targetDir`, `sparsePath`, `fallbackRepoUrl?`): `Promise`\<`void`\>
 
-Defined in: [resolver/src/git-registry.ts:641](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L641)
+Defined in: [resolver/src/git-registry.ts:641](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L641)
 
 Clone with sparse checkout — only fetch the requested path within the repo.
 When a `fallbackRepoUrl` is provided, auth errors trigger an automatic
@@ -193,7 +193,7 @@ Optional fallback URL to try on auth failure
 
 > **disableSparseCheckout**(`targetDir`): `Promise`\<`void`\>
 
-Defined in: [resolver/src/git-registry.ts:518](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L518)
+Defined in: [resolver/src/git-registry.ts:518](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L518)
 
 Disable sparse-checkout, materializing the full working tree.
 Used when a root-level import needs the whole repository but the
@@ -215,7 +215,7 @@ cached clone is partial.
 
 > **exists**(`path`): `Promise`\<`boolean`\>
 
-Defined in: [resolver/src/git-registry.ts:239](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L239)
+Defined in: [resolver/src/git-registry.ts:239](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L239)
 
 Check if a file exists in the registry.
 
@@ -243,7 +243,7 @@ True if the file exists
 
 > **fetch**(`path`): `Promise`\<`string`\>
 
-Defined in: [resolver/src/git-registry.ts:214](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L214)
+Defined in: [resolver/src/git-registry.ts:214](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L214)
 
 Fetch the content of a file from the registry.
 
@@ -283,7 +283,7 @@ GitRefNotFoundError if the ref doesn't exist
 
 > **getCommitHash**(`ref?`): `Promise`\<`string`\>
 
-Defined in: [resolver/src/git-registry.ts:380](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L380)
+Defined in: [resolver/src/git-registry.ts:380](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L380)
 
 Get the current commit hash for a ref.
 
@@ -307,7 +307,7 @@ Commit hash
 
 > **isSparseCheckout**(`targetDir`): `Promise`\<`boolean`\>
 
-Defined in: [resolver/src/git-registry.ts:503](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L503)
+Defined in: [resolver/src/git-registry.ts:503](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L503)
 
 Check whether the checkout at `targetDir` uses sparse-checkout.
 
@@ -327,7 +327,7 @@ Check whether the checkout at `targetDir` uses sparse-checkout.
 
 > **list**(`path`): `Promise`\<`string`[]\>
 
-Defined in: [resolver/src/git-registry.ts:263](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L263)
+Defined in: [resolver/src/git-registry.ts:263](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L263)
 
 List files in a directory.
 
@@ -355,7 +355,7 @@ Array of file/directory names
 
 > **listTags**(`repoUrl`, `cache?`): `Promise`\<`string`[]\>
 
-Defined in: [resolver/src/git-registry.ts:573](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L573)
+Defined in: [resolver/src/git-registry.ts:573](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L573)
 
 List all semver tags from a remote repo.
 Results are cached via RegistryCache to avoid repeated ls-remote calls.
@@ -386,7 +386,7 @@ Sorted semver tag strings
 
 > **refresh**(`ref?`): `Promise`\<`void`\>
 
-Defined in: [resolver/src/git-registry.ts:291](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L291)
+Defined in: [resolver/src/git-registry.ts:291](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L291)
 
 Force refresh the cache for a specific ref.
 
@@ -408,7 +408,7 @@ Git ref to refresh (defaults to defaultRef)
 
 > **removeRemote**(`targetDir`): `Promise`\<`void`\>
 
-Defined in: [resolver/src/git-registry.ts:362](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L362)
+Defined in: [resolver/src/git-registry.ts:362](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L362)
 
 Remove clone transport metadata before a repository is vendored.
 
@@ -428,7 +428,7 @@ Remove clone transport metadata before a repository is vendored.
 
 > **resolveVersion**(`repoUrl`, `range`, `cache?`): `Promise`\<`string` \| `null`\>
 
-Defined in: [resolver/src/git-registry.ts:621](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/git-registry.ts#L621)
+Defined in: [resolver/src/git-registry.ts:621](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/git-registry.ts#L621)
 
 Resolve a semver range against available tags from a remote repo.
 

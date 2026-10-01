@@ -1,6 +1,6 @@
 # PromptScript
 
-> Prompt-as-Code for Enterprise AI. Standardize, audit, and deploy instructions across any AI coding assistant.
+> Open-source compiler for AI coding agent rules. Write instructions, skills, agents, and MCP servers once and get native files for 50 tools.
 
 PromptScript is an agent platform configuration language. It defines instructions, skills, agents, MCP servers, plugins, hooks, workflows, and policies once, then compiles native output for 50 AI coding agent targets.
 
@@ -9,10 +9,11 @@ Every page below is plain Markdown. The whole documentation in one file: https:/
 ## Start
 
 - [Getting Started](https://getpromptscript.dev/getting-started/index.md): Install the PromptScript CLI, create your first .prs file, and compile native instructions for Claude Code, GitHub Copilot, Cursor, and 47 more AI coding agents.
+- [PromptScript vs Manual Configuration](https://getpromptscript.dev/guides/vs-manual/index.md): Compare managing AI instructions manually vs with PromptScript
 - [Enterprise Tutorial: Building Layered AI Infrastructure](https://getpromptscript.dev/tutorial/index.md): Step-by-step enterprise tutorial: build organization, team, and project layers in PromptScript and compile them to native AI agent configuration.
 - [Real-Life Tutorial: Checkout Service](https://getpromptscript.dev/examples/real-life-checkout-service/index.md): Roll out PromptScript in a production checkout service with shared policy, payment-specific rules, native agents, CI drift checks, safe takeover, and rollback.
-- [PromptScript vs Manual Configuration](https://getpromptscript.dev/guides/vs-manual/index.md): Compare managing AI instructions manually vs with PromptScript
-- [FAQ & Troubleshooting](https://getpromptscript.dev/guides/faq/index.md): Answers to common PromptScript questions: supported AI tools, installation, inheritance, private registries, CI/CD, and common errors.
+- [Glossary](https://getpromptscript.dev/glossary/index.md): Plain-language definitions of PromptScript terms: .prs files, blocks, targets, formatters, inheritance, registries, skills, agents, MCP servers, hooks, overlays, and policies.
+- [FAQ & Troubleshooting](https://getpromptscript.dev/guides/faq/index.md): Answers to common PromptScript questions: supported AI tools, AGENTS.md, migration, privacy, installation, inheritance, private registries, CI/CD, and common errors.
 
 ## Migrate
 
@@ -21,7 +22,7 @@ Every page below is plain Markdown. The whole documentation in one file: https:/
 - [AI Migration Best Practices](https://getpromptscript.dev/guides/ai-migration-best-practices/index.md): Guidelines for AI models performing PromptScript migration
 - [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/index.md): Safe upgrade workflow for PromptScript syntax, block shapes, replacement operations, and Factory hooks
 
-## Agent Platform
+## Core Features
 
 - [Agent Platform](https://getpromptscript.dev/features/index.md): Define instructions, skills, agents, tools, integrations, and automation once, then compile them to native AI coding agent formats.
 - [Agents](https://getpromptscript.dev/features/agents/index.md): Define specialized AI agents once and compile them to native platform-specific agent formats.
@@ -50,7 +51,7 @@ Every page below is plain Markdown. The whole documentation in one file: https:/
 - [Markdown Imports](https://getpromptscript.dev/guides/markdown-imports/index.md): Import skills directly from .md files with @use in PromptScript. No extra tools needed.
 - [Build Your Registry](https://getpromptscript.dev/guides/registry/index.md): Learn how to create and manage PromptScript registries for your organization, with self-service registry commands and decentralized architecture.
 
-## Scale to Organization
+## Teams and Enterprise
 
 - [Enterprise Setup](https://getpromptscript.dev/guides/enterprise/index.md): Roll out PromptScript across an organization: shared registries, layered inheritance, policies, and governed AI instructions per team.
 - [Policy Engine](https://getpromptscript.dev/guides/policy-engine/index.md): Enforce declarative organization policies on skill extensions during validation

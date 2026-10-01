@@ -6,7 +6,7 @@
 
 # Interface: FileEntry
 
-Defined in: [server/src/types.ts:19](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/server/src/types.ts#L19)
+Defined in: [server/src/types.ts:19](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/server/src/types.ts#L19)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [server/src/types.ts:19](https://github.com/mrwogu/promptscript/blob
 
 > **modified**: `string`
 
-Defined in: [server/src/types.ts:22](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/server/src/types.ts#L22)
+Defined in: [server/src/types.ts:22](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/server/src/types.ts#L22)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [server/src/types.ts:22](https://github.com/mrwogu/promptscript/blob
 
 > **path**: `string`
 
-Defined in: [server/src/types.ts:20](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/server/src/types.ts#L20)
+Defined in: [server/src/types.ts:20](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/server/src/types.ts#L20)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [server/src/types.ts:20](https://github.com/mrwogu/promptscript/blob
 
 > **size**: `number`
 
-Defined in: [server/src/types.ts:21](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/server/src/types.ts#L21)
+Defined in: [server/src/types.ts:21](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/server/src/types.ts#L21)

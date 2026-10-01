@@ -8,7 +8,7 @@
 
 > **buildReferenceKey**(`repoUrl`, `relativePath`, `version`): `string`
 
-Defined in: [resolver/src/reference-hasher.ts:21](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/resolver/src/reference-hasher.ts#L21)
+Defined in: [resolver/src/reference-hasher.ts:21](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/reference-hasher.ts#L21)
 
 Build a lockfile key for a registry reference file.
 Format: `<repoUrl>\0<relativePath>\0<version>`

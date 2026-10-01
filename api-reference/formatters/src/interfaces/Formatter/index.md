@@ -6,7 +6,7 @@
 
 # Interface: Formatter
 
-Defined in: [formatters/src/types.ts:77](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/types.ts#L77)
+Defined in: [formatters/src/types.ts:77](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/types.ts#L77)
 
 Common interface for all formatters.
 
@@ -20,7 +20,7 @@ Common interface for all formatters.
 
 > `readonly` **defaultConvention**: `string`
 
-Defined in: [formatters/src/types.ts:85](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/types.ts#L85)
+Defined in: [formatters/src/types.ts:85](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/types.ts#L85)
 
 Default convention for this formatter
 
@@ -30,7 +30,7 @@ Default convention for this formatter
 
 > `readonly` **description**: `string`
 
-Defined in: [formatters/src/types.ts:83](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/types.ts#L83)
+Defined in: [formatters/src/types.ts:83](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/types.ts#L83)
 
 Human-readable description
 
@@ -40,7 +40,7 @@ Human-readable description
 
 > `readonly` **name**: `string`
 
-Defined in: [formatters/src/types.ts:79](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/types.ts#L79)
+Defined in: [formatters/src/types.ts:79](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/types.ts#L79)
 
 Unique formatter identifier
 
@@ -50,7 +50,7 @@ Unique formatter identifier
 
 > `readonly` **outputPath**: `string`
 
-Defined in: [formatters/src/types.ts:81](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/types.ts#L81)
+Defined in: [formatters/src/types.ts:81](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/types.ts#L81)
 
 Default output file path
 
@@ -60,7 +60,7 @@ Default output file path
 
 > **format**(`ast`, `options?`): [`FormatterOutput`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterOutput/index.md)
 
-Defined in: [formatters/src/types.ts:87](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/types.ts#L87)
+Defined in: [formatters/src/types.ts:87](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/types.ts#L87)
 
 Transform AST to target format
 
@@ -84,7 +84,7 @@ Transform AST to target format
 
 > `optional` **formatCanonical**(`ast`, `options?`): [`FormatterOutput`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterOutput/index.md)
 
-Defined in: [formatters/src/types.ts:95](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/types.ts#L95)
+Defined in: [formatters/src/types.ts:95](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/types.ts#L95)
 
 Optional canonical entry point.
 
@@ -112,7 +112,7 @@ invoking their `format` method.
 
 > **getSkillBasePath**(): `string` \| `null`
 
-Defined in: [formatters/src/types.ts:97](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/types.ts#L97)
+Defined in: [formatters/src/types.ts:97](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/types.ts#L97)
 
 Base path for skills (e.g., '.claude/skills'), or null if no skill support
 
@@ -126,7 +126,7 @@ Base path for skills (e.g., '.claude/skills'), or null if no skill support
 
 > **getSkillFileName**(): `string` \| `null`
 
-Defined in: [formatters/src/types.ts:99](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/types.ts#L99)
+Defined in: [formatters/src/types.ts:99](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/types.ts#L99)
 
 Skill file name (e.g., 'SKILL.md' or 'skill.md'), or null if no skill support
 
@@ -140,7 +140,7 @@ Skill file name (e.g., 'SKILL.md' or 'skill.md'), or null if no skill support
 
 > **referencesMode**(): `"none"` \| `"directory"` \| `"inline"`
 
-Defined in: [formatters/src/types.ts:101](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/types.ts#L101)
+Defined in: [formatters/src/types.ts:101](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/types.ts#L101)
 
 How this formatter handles skill references: 'directory', 'inline', or 'none'
 
@@ -154,7 +154,7 @@ How this formatter handles skill references: 'directory', 'inline', or 'none'
 
 > `optional` **transformInjectedSkillContent**(`content`): `string`
 
-Defined in: [formatters/src/types.ts:110](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/types.ts#L110)
+Defined in: [formatters/src/types.ts:110](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/types.ts#L110)
 
 Transform the raw content of a pass-through skill file (e.g. the bundled
 PromptScript SKILL.md injected by the compiler) before it is written to

@@ -8,6 +8,6 @@
 
 > `const` **BLOCKED\_PATTERNS\_UK**: `RegExp`[]
 
-Defined in: [validator/src/rules/blocked-patterns.ts:344](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/rules/blocked-patterns.ts#L344)
+Defined in: [validator/src/rules/blocked-patterns.ts:344](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/rules/blocked-patterns.ts#L344)
 
 Ukrainian (Українська) prompt injection patterns.

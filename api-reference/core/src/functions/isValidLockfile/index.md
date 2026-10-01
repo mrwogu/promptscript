@@ -8,7 +8,7 @@
 
 > **isValidLockfile**(`data`): `data is Lockfile`
 
-Defined in: [core/src/types/lockfile.ts:53](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/lockfile.ts#L53)
+Defined in: [core/src/types/lockfile.ts:53](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/lockfile.ts#L53)
 
 Type guard: validates parsed lockfile has correct version and shape
 

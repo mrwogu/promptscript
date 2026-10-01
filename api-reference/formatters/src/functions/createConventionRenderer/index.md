@@ -8,7 +8,7 @@
 
 > **createConventionRenderer**(`convention?`): [`ConventionRenderer`](https://getpromptscript.dev/api-reference/formatters/src/classes/ConventionRenderer/index.md)
 
-Defined in: [formatters/src/convention-renderer.ts:287](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/convention-renderer.ts#L287)
+Defined in: [formatters/src/convention-renderer.ts:287](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/convention-renderer.ts#L287)
 
 Create a convention renderer from a convention name or definition.
 

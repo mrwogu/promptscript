@@ -6,7 +6,7 @@
 
 # Interface: VersionEntry
 
-Defined in: [formatters/src/create-simple-formatter.ts:6](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/create-simple-formatter.ts#L6)
+Defined in: [formatters/src/create-simple-formatter.ts:6](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/create-simple-formatter.ts#L6)
 
 Version info for a single version entry.
 
@@ -16,7 +16,7 @@ Version info for a single version entry.
 
 > `readonly` **description**: `string`
 
-Defined in: [formatters/src/create-simple-formatter.ts:8](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/create-simple-formatter.ts#L8)
+Defined in: [formatters/src/create-simple-formatter.ts:8](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/create-simple-formatter.ts#L8)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [formatters/src/create-simple-formatter.ts:8](https://github.com/mrw
 
 > `readonly` **name**: `string`
 
-Defined in: [formatters/src/create-simple-formatter.ts:7](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/create-simple-formatter.ts#L7)
+Defined in: [formatters/src/create-simple-formatter.ts:7](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/create-simple-formatter.ts#L7)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [formatters/src/create-simple-formatter.ts:7](https://github.com/mrw
 
 > `readonly` **outputPath**: `string`
 
-Defined in: [formatters/src/create-simple-formatter.ts:9](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/create-simple-formatter.ts#L9)
+Defined in: [formatters/src/create-simple-formatter.ts:9](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/create-simple-formatter.ts#L9)

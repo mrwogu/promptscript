@@ -6,7 +6,7 @@
 
 # Interface: ValidationRule
 
-Defined in: [validator/src/types.ts:75](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/types.ts#L75)
+Defined in: [validator/src/types.ts:75](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/types.ts#L75)
 
 A validation rule definition.
 
@@ -16,7 +16,7 @@ A validation rule definition.
 
 > **defaultSeverity**: [`Severity`](https://getpromptscript.dev/api-reference/validator/src/type-aliases/Severity/index.md)
 
-Defined in: [validator/src/types.ts:83](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/types.ts#L83)
+Defined in: [validator/src/types.ts:83](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/types.ts#L83)
 
 Default severity level
 
@@ -26,7 +26,7 @@ Default severity level
 
 > **description**: `string`
 
-Defined in: [validator/src/types.ts:81](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/types.ts#L81)
+Defined in: [validator/src/types.ts:81](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/types.ts#L81)
 
 Rule description
 
@@ -36,7 +36,7 @@ Rule description
 
 > **id**: `string`
 
-Defined in: [validator/src/types.ts:77](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/types.ts#L77)
+Defined in: [validator/src/types.ts:77](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/types.ts#L77)
 
 Unique rule identifier (e.g., "PS001")
 
@@ -46,7 +46,7 @@ Unique rule identifier (e.g., "PS001")
 
 > **name**: `string`
 
-Defined in: [validator/src/types.ts:79](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/types.ts#L79)
+Defined in: [validator/src/types.ts:79](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/types.ts#L79)
 
 Rule name (e.g., "required-meta-id")
 
@@ -56,7 +56,7 @@ Rule name (e.g., "required-meta-id")
 
 > **validate**: (`ctx`) => `void`
 
-Defined in: [validator/src/types.ts:85](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/types.ts#L85)
+Defined in: [validator/src/types.ts:85](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/types.ts#L85)
 
 Validation function
 

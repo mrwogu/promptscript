@@ -8,7 +8,7 @@
 
 > **usesSequentialOperations**(`ast`): `boolean`
 
-Defined in: [core/src/syntax-versions.ts:233](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/syntax-versions.ts#L233)
+Defined in: [core/src/syntax-versions.ts:233](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/syntax-versions.ts#L233)
 
 Select declaration-ordered resolution for syntax 1.5.0+ or ordered features.
 

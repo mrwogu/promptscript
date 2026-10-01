@@ -6,7 +6,7 @@
 
 # Interface: FormatOptions
 
-Defined in: [compiler/src/types.ts:42](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/types.ts#L42)
+Defined in: [compiler/src/types.ts:42](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/types.ts#L42)
 
 Options for formatting.
 
@@ -16,7 +16,7 @@ Options for formatting.
 
 > `optional` **convention?**: `string` \| [`OutputConvention`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputConvention/index.md)
 
-Defined in: [compiler/src/types.ts:44](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/types.ts#L44)
+Defined in: [compiler/src/types.ts:44](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/types.ts#L44)
 
 Output convention to use
 
@@ -26,7 +26,7 @@ Output convention to use
 
 > `optional` **models?**: [`ModelsConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelsConfig/index.md)
 
-Defined in: [compiler/src/types.ts:62](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/types.ts#L62)
+Defined in: [compiler/src/types.ts:62](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/types.ts#L62)
 
 Model catalog settings from promptscript.yaml, used to map agent models.
 
@@ -36,7 +36,7 @@ Model catalog settings from promptscript.yaml, used to map agent models.
 
 > `optional` **outputPath?**: `string`
 
-Defined in: [compiler/src/types.ts:46](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/types.ts#L46)
+Defined in: [compiler/src/types.ts:46](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/types.ts#L46)
 
 Custom output path
 
@@ -46,7 +46,7 @@ Custom output path
 
 > `optional` **prettier?**: [`PrettierMarkdownOptions`](https://getpromptscript.dev/api-reference/core/src/interfaces/PrettierMarkdownOptions/index.md)
 
-Defined in: [compiler/src/types.ts:56](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/types.ts#L56)
+Defined in: [compiler/src/types.ts:56](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/types.ts#L56)
 
 Prettier formatting options for markdown output.
 
@@ -56,7 +56,7 @@ Prettier formatting options for markdown output.
 
 > `optional` **targetConfig?**: [`TargetConfig`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/TargetConfig/index.md)
 
-Defined in: [compiler/src/types.ts:59](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/types.ts#L59)
+Defined in: [compiler/src/types.ts:59](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/types.ts#L59)
 
 Full target configuration, passed through from promptscript.yaml.
 
@@ -66,7 +66,7 @@ Full target configuration, passed through from promptscript.yaml.
 
 > `optional` **version?**: `string`
 
-Defined in: [compiler/src/types.ts:52](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/types.ts#L52)
+Defined in: [compiler/src/types.ts:52](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/types.ts#L52)
 
 Target version or format variant.
 Use 'legacy' for deprecated formats.

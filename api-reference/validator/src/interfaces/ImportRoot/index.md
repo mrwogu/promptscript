@@ -6,7 +6,7 @@
 
 # Interface: ImportRoot
 
-Defined in: [validator/src/types.ts:155](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/types.ts#L155)
+Defined in: [validator/src/types.ts:155](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/types.ts#L155)
 
 Root directory of imported content for one lockfile dependency.
 
@@ -16,7 +16,7 @@ Root directory of imported content for one lockfile dependency.
 
 > **commit**: `string`
 
-Defined in: [validator/src/types.ts:159](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/types.ts#L159)
+Defined in: [validator/src/types.ts:159](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/types.ts#L159)
 
 Commit SHA the lockfile pins for the import
 
@@ -26,7 +26,7 @@ Commit SHA the lockfile pins for the import
 
 > **import**: `string`
 
-Defined in: [validator/src/types.ts:157](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/types.ts#L157)
+Defined in: [validator/src/types.ts:157](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/types.ts#L157)
 
 Normalized import key (matches promptscript.lock dependency keys)
 
@@ -36,6 +36,6 @@ Normalized import key (matches promptscript.lock dependency keys)
 
 > **path**: `string`
 
-Defined in: [validator/src/types.ts:161](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/types.ts#L161)
+Defined in: [validator/src/types.ts:161](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/types.ts#L161)
 
 Absolute path holding the import's resolved content

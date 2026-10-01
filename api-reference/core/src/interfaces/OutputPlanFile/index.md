@@ -6,7 +6,7 @@
 
 # Interface: OutputPlanFile
 
-Defined in: [core/src/output-plan.ts:45](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L45)
+Defined in: [core/src/output-plan.ts:45](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L45)
 
 One normalized file in an output plan.
 
@@ -20,7 +20,7 @@ One normalized file in an output plan.
 
 > **content**: `string`
 
-Defined in: [core/src/output-plan.ts:14](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L14)
+Defined in: [core/src/output-plan.ts:14](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L14)
 
 File contents.
 
@@ -34,7 +34,7 @@ File contents.
 
 > `optional` **managedOutputDirectories?**: `string`[]
 
-Defined in: [core/src/output-plan.ts:22](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L22)
+Defined in: [core/src/output-plan.ts:22](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L22)
 
 Relative directories managed by this artifact.
 
@@ -48,7 +48,7 @@ Relative directories managed by this artifact.
 
 > `optional` **managedOutputFiles?**: `string`[]
 
-Defined in: [core/src/output-plan.ts:24](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L24)
+Defined in: [core/src/output-plan.ts:24](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L24)
 
 Relative files managed by this artifact.
 
@@ -62,7 +62,7 @@ Relative files managed by this artifact.
 
 > `optional` **merge?**: [`StructuredMergePlan`](https://getpromptscript.dev/api-reference/core/src/interfaces/StructuredMergePlan/index.md)
 
-Defined in: [core/src/output-plan.ts:18](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L18)
+Defined in: [core/src/output-plan.ts:18](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L18)
 
 Optional structured merge instructions.
 
@@ -76,7 +76,7 @@ Optional structured merge instructions.
 
 > `optional` **mode?**: `number`
 
-Defined in: [core/src/output-plan.ts:16](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L16)
+Defined in: [core/src/output-plan.ts:16](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L16)
 
 Optional Unix file mode.
 
@@ -90,7 +90,7 @@ Optional Unix file mode.
 
 > **originalPath**: `string`
 
-Defined in: [core/src/output-plan.ts:49](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L49)
+Defined in: [core/src/output-plan.ts:49](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L49)
 
 Original formatter path before normalization.
 
@@ -100,7 +100,7 @@ Original formatter path before normalization.
 
 > **owner**: `string`
 
-Defined in: [core/src/output-plan.ts:51](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L51)
+Defined in: [core/src/output-plan.ts:51](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L51)
 
 Formatter or adapter that owns the file.
 
@@ -110,7 +110,7 @@ Formatter or adapter that owns the file.
 
 > **path**: `string`
 
-Defined in: [core/src/output-plan.ts:47](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L47)
+Defined in: [core/src/output-plan.ts:47](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L47)
 
 Normalized project-relative path.
 
@@ -124,7 +124,7 @@ Normalized project-relative path.
 
 > `optional` **resourceOf?**: `string`
 
-Defined in: [core/src/output-plan.ts:55](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L55)
+Defined in: [core/src/output-plan.ts:55](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L55)
 
 Normalized parent path for nested resources.
 
@@ -134,6 +134,6 @@ Normalized parent path for nested resources.
 
 > **role**: [`OutputPlanArtifactRole`](https://getpromptscript.dev/api-reference/core/src/type-aliases/OutputPlanArtifactRole/index.md)
 
-Defined in: [core/src/output-plan.ts:53](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/output-plan.ts#L53)
+Defined in: [core/src/output-plan.ts:53](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/output-plan.ts#L53)
 
 Artifact role used for collision resolution.

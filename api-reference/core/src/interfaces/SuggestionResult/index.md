@@ -6,7 +6,7 @@
 
 # Interface: SuggestionResult
 
-Defined in: [core/src/types/manifest.ts:187](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L187)
+Defined in: [core/src/types/manifest.ts:187](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L187)
 
 Result of applying suggestion rules to a project.
 
@@ -16,7 +16,7 @@ Result of applying suggestion rules to a project.
 
 > `optional` **inherit?**: `string`
 
-Defined in: [core/src/types/manifest.ts:189](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L189)
+Defined in: [core/src/types/manifest.ts:189](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L189)
 
 Suggested configuration to inherit
 
@@ -26,7 +26,7 @@ Suggested configuration to inherit
 
 > **reasoning**: [`SuggestionReasoning`](https://getpromptscript.dev/api-reference/core/src/interfaces/SuggestionReasoning/index.md)[]
 
-Defined in: [core/src/types/manifest.ts:195](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L195)
+Defined in: [core/src/types/manifest.ts:195](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L195)
 
 Reasoning for each suggestion
 
@@ -36,7 +36,7 @@ Reasoning for each suggestion
 
 > **skills**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:193](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L193)
+Defined in: [core/src/types/manifest.ts:193](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L193)
 
 Suggested skills to include
 
@@ -46,6 +46,6 @@ Suggested skills to include
 
 > **use**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:191](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L191)
+Defined in: [core/src/types/manifest.ts:191](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L191)
 
 Suggested fragments to use

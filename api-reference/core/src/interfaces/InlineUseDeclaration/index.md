@@ -6,7 +6,7 @@
 
 # Interface: InlineUseDeclaration
 
-Defined in: [core/src/types/ast.ts:230](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L230)
+Defined in: [core/src/types/ast.ts:230](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L230)
 
 Inline
 
@@ -21,7 +21,7 @@ Same syntax as top-level UseDeclaration but appears inside block content.
 
 > `optional` **alias?**: `string`
 
-Defined in: [core/src/types/ast.ts:237](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L237)
+Defined in: [core/src/types/ast.ts:237](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L237)
 
 Alias for the phase
 
@@ -31,7 +31,7 @@ Alias for the phase
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:241](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L241)
+Defined in: [core/src/types/ast.ts:241](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L241)
 
 Source location
 
@@ -41,7 +41,7 @@ Source location
 
 > `optional` **outputDir?**: `string`
 
-Defined in: [core/src/types/ast.ts:239](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L239)
+Defined in: [core/src/types/ast.ts:239](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L239)
 
 Optional inline output directory (forward-slash relative).
 
@@ -51,7 +51,7 @@ Optional inline output directory (forward-slash relative).
 
 > `optional` **params?**: [`ParamArgument`](https://getpromptscript.dev/api-reference/core/src/interfaces/ParamArgument/index.md)[]
 
-Defined in: [core/src/types/ast.ts:235](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L235)
+Defined in: [core/src/types/ast.ts:235](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L235)
 
 Template parameters
 
@@ -61,7 +61,7 @@ Template parameters
 
 > **path**: [`PathReference`](https://getpromptscript.dev/api-reference/core/src/interfaces/PathReference/index.md)
 
-Defined in: [core/src/types/ast.ts:233](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L233)
+Defined in: [core/src/types/ast.ts:233](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L233)
 
 Path to the sub-skill file
 
@@ -71,4 +71,4 @@ Path to the sub-skill file
 
 > `readonly` **type**: `"InlineUseDeclaration"`
 
-Defined in: [core/src/types/ast.ts:231](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L231)
+Defined in: [core/src/types/ast.ts:231](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L231)

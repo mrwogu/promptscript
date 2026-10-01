@@ -6,7 +6,7 @@
 
 # Interface: InitOptions
 
-Defined in: [cli/src/types.ts:4](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L4)
+Defined in: [cli/src/types.ts:4](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L4)
 
 Options for the init command.
 
@@ -16,7 +16,7 @@ Options for the init command.
 
 > `optional` **\_forceLlm?**: `boolean`
 
-Defined in: [cli/src/types.ts:37](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L37)
+Defined in: [cli/src/types.ts:37](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L37)
 
 Internal: force LLM flow (used by prs migrate --llm)
 
@@ -26,7 +26,7 @@ Internal: force LLM flow (used by prs migrate --llm)
 
 > `optional` **\_forceMigrate?**: `boolean`
 
-Defined in: [cli/src/types.ts:35](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L35)
+Defined in: [cli/src/types.ts:35](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L35)
 
 Internal: force migrate flow (used by prs migrate)
 
@@ -36,7 +36,7 @@ Internal: force migrate flow (used by prs migrate)
 
 > `optional` **\_migrateFiles?**: `string`[]
 
-Defined in: [cli/src/types.ts:39](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L39)
+Defined in: [cli/src/types.ts:39](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L39)
 
 Internal: specific files to migrate (used by prs migrate --files)
 
@@ -46,7 +46,7 @@ Internal: specific files to migrate (used by prs migrate --files)
 
 > `optional` **autoImport?**: `boolean`
 
-Defined in: [cli/src/types.ts:24](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L24)
+Defined in: [cli/src/types.ts:24](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L24)
 
 Non-interactive static import of detected files (--auto-import)
 
@@ -56,7 +56,7 @@ Non-interactive static import of detected files (--auto-import)
 
 > `optional` **backup?**: `boolean`
 
-Defined in: [cli/src/types.ts:26](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L26)
+Defined in: [cli/src/types.ts:26](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L26)
 
 Create backup before migration
 
@@ -66,7 +66,7 @@ Create backup before migration
 
 > `optional` **dryRun?**: `boolean`
 
-Defined in: [cli/src/types.ts:28](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L28)
+Defined in: [cli/src/types.ts:28](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L28)
 
 Preview planned files without writing
 
@@ -76,7 +76,7 @@ Preview planned files without writing
 
 > `optional` **force?**: `boolean`
 
-Defined in: [cli/src/types.ts:20](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L20)
+Defined in: [cli/src/types.ts:20](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L20)
 
 Force reinitialize even if already initialized
 
@@ -86,7 +86,7 @@ Force reinitialize even if already initialized
 
 > `optional` **hooks?**: `boolean`
 
-Defined in: [cli/src/types.ts:33](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L33)
+Defined in: [cli/src/types.ts:33](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L33)
 
 Install auto-compile hooks for selected targets.
 Defaults to `true`; pass `--no-hooks` on the CLI to opt out.
@@ -97,7 +97,7 @@ Defaults to `true`; pass `--no-hooks` on the CLI to opt out.
 
 > `optional` **inherit?**: `string`
 
-Defined in: [cli/src/types.ts:10](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L10)
+Defined in: [cli/src/types.ts:10](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L10)
 
 Inheritance path (e.g., @company/team)
 
@@ -107,7 +107,7 @@ Inheritance path (e.g., @company/team)
 
 > `optional` **interactive?**: `boolean`
 
-Defined in: [cli/src/types.ts:16](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L16)
+Defined in: [cli/src/types.ts:16](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L16)
 
 Interactive mode (prompts for all options)
 
@@ -117,7 +117,7 @@ Interactive mode (prompts for all options)
 
 > `optional` **migrate?**: `boolean`
 
-Defined in: [cli/src/types.ts:22](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L22)
+Defined in: [cli/src/types.ts:22](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L22)
 
 Install migration skill for AI-assisted migration
 
@@ -127,7 +127,7 @@ Install migration skill for AI-assisted migration
 
 > `optional` **name?**: `string`
 
-Defined in: [cli/src/types.ts:8](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L8)
+Defined in: [cli/src/types.ts:8](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L8)
 
 Project name (overrides auto-detection)
 
@@ -137,7 +137,7 @@ Project name (overrides auto-detection)
 
 > `optional` **registry?**: `string`
 
-Defined in: [cli/src/types.ts:12](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L12)
+Defined in: [cli/src/types.ts:12](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L12)
 
 Registry path or URL
 
@@ -147,7 +147,7 @@ Registry path or URL
 
 > `optional` **targets?**: `string`[]
 
-Defined in: [cli/src/types.ts:14](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L14)
+Defined in: [cli/src/types.ts:14](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L14)
 
 Target AI tools
 
@@ -157,7 +157,7 @@ Target AI tools
 
 > `optional` **team?**: `string`
 
-Defined in: [cli/src/types.ts:6](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L6)
+Defined in: [cli/src/types.ts:6](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L6)
 
 Team namespace
 
@@ -167,6 +167,6 @@ Team namespace
 
 > `optional` **yes?**: `boolean`
 
-Defined in: [cli/src/types.ts:18](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/cli/src/types.ts#L18)
+Defined in: [cli/src/types.ts:18](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/cli/src/types.ts#L18)
 
 Skip prompts, use defaults

@@ -6,7 +6,7 @@
 
 # Class: Validator
 
-Defined in: [validator/src/validator.ts:42](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/validator.ts#L42)
+Defined in: [validator/src/validator.ts:42](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/validator.ts#L42)
 
 AST validator for PromptScript files.
 
@@ -36,7 +36,7 @@ if (!result.valid) {
 
 > **new Validator**(`config?`): `Validator`
 
-Defined in: [validator/src/validator.ts:53](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/validator.ts#L53)
+Defined in: [validator/src/validator.ts:53](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/validator.ts#L53)
 
 Create a new validator instance.
 
@@ -58,7 +58,7 @@ Validator configuration
 
 > **addRule**(`rule`): `void`
 
-Defined in: [validator/src/validator.ts:161](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/validator.ts#L161)
+Defined in: [validator/src/validator.ts:161](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/validator.ts#L161)
 
 Add a custom validation rule.
 
@@ -80,7 +80,7 @@ The rule to add
 
 > **getConfig**(): [`ValidatorConfig`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidatorConfig/index.md)
 
-Defined in: [validator/src/validator.ts:183](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/validator.ts#L183)
+Defined in: [validator/src/validator.ts:183](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/validator.ts#L183)
 
 Get the current configuration.
 
@@ -94,7 +94,7 @@ Get the current configuration.
 
 > **getRules**(): [`ValidationRule`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationRule/index.md)[]
 
-Defined in: [validator/src/validator.ts:190](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/validator.ts#L190)
+Defined in: [validator/src/validator.ts:190](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/validator.ts#L190)
 
 Get all registered rules.
 
@@ -108,7 +108,7 @@ Get all registered rules.
 
 > **removeRule**(`ruleNameOrId`): `boolean`
 
-Defined in: [validator/src/validator.ts:171](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/validator.ts#L171)
+Defined in: [validator/src/validator.ts:171](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/validator.ts#L171)
 
 Remove a validation rule by name or id.
 
@@ -132,7 +132,7 @@ True if the rule was found and removed
 
 > **updateConfig**(`partial`): `void`
 
-Defined in: [validator/src/validator.ts:74](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/validator.ts#L74)
+Defined in: [validator/src/validator.ts:74](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/validator.ts#L74)
 
 Update validator configuration after construction.
 Allows the compiler to inject runtime data (registry references, lockfile, etc.)
@@ -154,7 +154,7 @@ that becomes available only after resolution.
 
 > **validate**(`input`): [`ValidationResult`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationResult/index.md)
 
-Defined in: [validator/src/validator.ts:88](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/validator.ts#L88)
+Defined in: [validator/src/validator.ts:88](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/validator.ts#L88)
 
 Validate an AST.
 

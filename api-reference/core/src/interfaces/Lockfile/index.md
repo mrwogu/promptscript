@@ -6,7 +6,7 @@
 
 # Interface: Lockfile
 
-Defined in: [core/src/types/lockfile.ts:36](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/lockfile.ts#L36)
+Defined in: [core/src/types/lockfile.ts:36](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/lockfile.ts#L36)
 
 PromptScript lockfile (promptscript.lock).
 Pins all remote dependencies to exact commits for reproducible builds.
@@ -17,7 +17,7 @@ Pins all remote dependencies to exact commits for reproducible builds.
 
 > **dependencies**: `Record`\<`string`, [`LockfileDependency`](https://getpromptscript.dev/api-reference/core/src/interfaces/LockfileDependency/index.md)\>
 
-Defined in: [core/src/types/lockfile.ts:40](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/lockfile.ts#L40)
+Defined in: [core/src/types/lockfile.ts:40](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/lockfile.ts#L40)
 
 Map of repo URL to locked dependency
 
@@ -27,7 +27,7 @@ Map of repo URL to locked dependency
 
 > `optional` **references?**: `Record`\<`string`, [`LockfileReference`](https://getpromptscript.dev/api-reference/core/src/interfaces/LockfileReference/index.md)\>
 
-Defined in: [core/src/types/lockfile.ts:42](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/lockfile.ts#L42)
+Defined in: [core/src/types/lockfile.ts:42](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/lockfile.ts#L42)
 
 Map of reference key to integrity hash (optional, for registry reference files)
 
@@ -37,6 +37,6 @@ Map of reference key to integrity hash (optional, for registry reference files)
 
 > **version**: `number`
 
-Defined in: [core/src/types/lockfile.ts:38](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/lockfile.ts#L38)
+Defined in: [core/src/types/lockfile.ts:38](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/lockfile.ts#L38)
 
 Lockfile format version. Use type guard `isValidLockfile()` after parsing.

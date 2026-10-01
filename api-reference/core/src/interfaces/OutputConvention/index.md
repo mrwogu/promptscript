@@ -6,7 +6,7 @@
 
 # Interface: OutputConvention
 
-Defined in: [core/src/types/convention.ts:58](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/convention.ts#L58)
+Defined in: [core/src/types/convention.ts:58](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/convention.ts#L58)
 
 Output convention definition.
 
@@ -16,7 +16,7 @@ Output convention definition.
 
 > `optional` **codeBlockDelimiter?**: `string`
 
-Defined in: [core/src/types/convention.ts:89](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/convention.ts#L89)
+Defined in: [core/src/types/convention.ts:89](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/convention.ts#L89)
 
 Code block delimiter.
 
@@ -32,7 +32,7 @@ Code block delimiter.
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/convention.ts:67](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/convention.ts#L67)
+Defined in: [core/src/types/convention.ts:67](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/convention.ts#L67)
 
 Human-readable description.
 
@@ -42,7 +42,7 @@ Human-readable description.
 
 > `optional` **listStyle?**: `"dash"` \| `"asterisk"` \| `"bullet"` \| `"numbered"`
 
-Defined in: [core/src/types/convention.ts:83](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/convention.ts#L83)
+Defined in: [core/src/types/convention.ts:83](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/convention.ts#L83)
 
 How to render lists.
 
@@ -58,7 +58,7 @@ How to render lists.
 
 > **name**: `string`
 
-Defined in: [core/src/types/convention.ts:62](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/convention.ts#L62)
+Defined in: [core/src/types/convention.ts:62](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/convention.ts#L62)
 
 Convention identifier.
 
@@ -68,7 +68,7 @@ Convention identifier.
 
 > `optional` **rootWrapper?**: `object`
 
-Defined in: [core/src/types/convention.ts:94](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/convention.ts#L94)
+Defined in: [core/src/types/convention.ts:94](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/convention.ts#L94)
 
 Whether to wrap content in a root element.
 
@@ -86,7 +86,7 @@ Whether to wrap content in a root element.
 
 > **section**: [`SectionRenderer`](https://getpromptscript.dev/api-reference/core/src/interfaces/SectionRenderer/index.md)
 
-Defined in: [core/src/types/convention.ts:72](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/convention.ts#L72)
+Defined in: [core/src/types/convention.ts:72](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/convention.ts#L72)
 
 Section rendering configuration.
 
@@ -96,6 +96,6 @@ Section rendering configuration.
 
 > `optional` **subsection?**: [`SectionRenderer`](https://getpromptscript.dev/api-reference/core/src/interfaces/SectionRenderer/index.md)
 
-Defined in: [core/src/types/convention.ts:77](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/convention.ts#L77)
+Defined in: [core/src/types/convention.ts:77](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/convention.ts#L77)
 
 Subsection rendering (defaults to section config if not specified).

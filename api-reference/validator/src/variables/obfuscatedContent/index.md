@@ -8,7 +8,7 @@
 
 > `const` **obfuscatedContent**: [`ValidationRule`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationRule/index.md)
 
-Defined in: [validator/src/rules/obfuscated-content.ts:620](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/validator/src/rules/obfuscated-content.ts#L620)
+Defined in: [validator/src/rules/obfuscated-content.ts:620](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/rules/obfuscated-content.ts#L620)
 
 PS012: Detect obfuscated content that may hide malicious instructions.
 

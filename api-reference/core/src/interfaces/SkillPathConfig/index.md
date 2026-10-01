@@ -6,7 +6,7 @@
 
 # Interface: SkillPathConfig
 
-Defined in: [core/src/target-catalog.ts:39](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/target-catalog.ts#L39)
+Defined in: [core/src/target-catalog.ts:39](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/target-catalog.ts#L39)
 
 Skill path configuration for a target.
 - `basePath`: Directory where skill files are written (e.g. '.claude/skills')
@@ -19,7 +19,7 @@ Skill path configuration for a target.
 
 > **basePath**: `string` \| `null`
 
-Defined in: [core/src/target-catalog.ts:40](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/target-catalog.ts#L40)
+Defined in: [core/src/target-catalog.ts:40](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/target-catalog.ts#L40)
 
 ***
 
@@ -27,4 +27,4 @@ Defined in: [core/src/target-catalog.ts:40](https://github.com/mrwogu/promptscri
 
 > **fileName**: `string` \| `null`
 
-Defined in: [core/src/target-catalog.ts:41](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/target-catalog.ts#L41)
+Defined in: [core/src/target-catalog.ts:41](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/target-catalog.ts#L41)

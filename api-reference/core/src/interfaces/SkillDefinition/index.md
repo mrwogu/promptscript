@@ -6,7 +6,7 @@
 
 # Interface: SkillDefinition
 
-Defined in: [core/src/types/ast.ts:764](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L764)
+Defined in: [core/src/types/ast.ts:764](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L764)
 
 Typed representation of a skill in the
 
@@ -23,7 +23,7 @@ This interface provides typed access for skill-specific properties.
 
 > `optional` **agent?**: `string`
 
-Defined in: [core/src/types/ast.ts:782](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L782)
+Defined in: [core/src/types/ast.ts:782](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L782)
 
 Agent to use
 
@@ -33,7 +33,7 @@ Agent to use
 
 > `optional` **allowedTools?**: `string`[]
 
-Defined in: [core/src/types/ast.ts:776](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L776)
+Defined in: [core/src/types/ast.ts:776](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L776)
 
 Allowed tools
 
@@ -43,7 +43,7 @@ Allowed tools
 
 > `optional` **composedFrom?**: [`ComposedPhase`](https://getpromptscript.dev/api-reference/core/src/interfaces/ComposedPhase/index.md)[]
 
-Defined in: [core/src/types/ast.ts:794](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L794)
+Defined in: [core/src/types/ast.ts:794](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L794)
 
 Metadata about composed phases (set by resolver, not by user)
 
@@ -53,7 +53,7 @@ Metadata about composed phases (set by resolver, not by user)
 
 > `optional` **content?**: `string` \| [`TextContent`](https://getpromptscript.dev/api-reference/core/src/interfaces/TextContent/index.md)
 
-Defined in: [core/src/types/ast.ts:768](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L768)
+Defined in: [core/src/types/ast.ts:768](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L768)
 
 Skill content/instructions
 
@@ -63,7 +63,7 @@ Skill content/instructions
 
 > `optional` **context?**: `string`
 
-Defined in: [core/src/types/ast.ts:780](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L780)
+Defined in: [core/src/types/ast.ts:780](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L780)
 
 Context mode
 
@@ -73,7 +73,7 @@ Context mode
 
 > **description**: `string`
 
-Defined in: [core/src/types/ast.ts:766](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L766)
+Defined in: [core/src/types/ast.ts:766](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L766)
 
 Skill description (required)
 
@@ -83,7 +83,7 @@ Skill description (required)
 
 > `optional` **disableModelInvocation?**: `boolean`
 
-Defined in: [core/src/types/ast.ts:778](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L778)
+Defined in: [core/src/types/ast.ts:778](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L778)
 
 Disable model invocation
 
@@ -93,7 +93,7 @@ Disable model invocation
 
 > `optional` **examples?**: `Record`\<`string`, [`ExampleDefinition`](https://getpromptscript.dev/api-reference/core/src/interfaces/ExampleDefinition/index.md)\>
 
-Defined in: [core/src/types/ast.ts:790](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L790)
+Defined in: [core/src/types/ast.ts:790](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L790)
 
 Structured examples for few-shot prompting
 
@@ -103,7 +103,7 @@ Structured examples for few-shot prompting
 
 > `optional` **inputs?**: `Record`\<`string`, [`SkillContractField`](https://getpromptscript.dev/api-reference/core/src/interfaces/SkillContractField/index.md)\>
 
-Defined in: [core/src/types/ast.ts:786](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L786)
+Defined in: [core/src/types/ast.ts:786](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L786)
 
 Runtime inputs the skill expects
 
@@ -113,7 +113,7 @@ Runtime inputs the skill expects
 
 > `optional` **outputs?**: `Record`\<`string`, [`SkillContractField`](https://getpromptscript.dev/api-reference/core/src/interfaces/SkillContractField/index.md)\>
 
-Defined in: [core/src/types/ast.ts:788](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L788)
+Defined in: [core/src/types/ast.ts:788](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L788)
 
 Outputs the skill produces
 
@@ -123,7 +123,7 @@ Outputs the skill produces
 
 > `optional` **params?**: [`ParamDefinition`](https://getpromptscript.dev/api-reference/core/src/interfaces/ParamDefinition/index.md)[]
 
-Defined in: [core/src/types/ast.ts:770](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L770)
+Defined in: [core/src/types/ast.ts:770](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L770)
 
 Template parameters for parameterization
 
@@ -133,7 +133,7 @@ Template parameters for parameterization
 
 > `optional` **references?**: `string`[]
 
-Defined in: [core/src/types/ast.ts:792](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L792)
+Defined in: [core/src/types/ast.ts:792](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L792)
 
 Reference files attached to skill context (paths resolved by resolver)
 
@@ -143,7 +143,7 @@ Reference files attached to skill context (paths resolved by resolver)
 
 > `optional` **requires?**: `string`[]
 
-Defined in: [core/src/types/ast.ts:784](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L784)
+Defined in: [core/src/types/ast.ts:784](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L784)
 
 Skills that must exist for this skill to work
 
@@ -153,7 +153,7 @@ Skills that must exist for this skill to work
 
 > `optional` **trigger?**: `string`
 
-Defined in: [core/src/types/ast.ts:772](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L772)
+Defined in: [core/src/types/ast.ts:772](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L772)
 
 Trigger phrases
 
@@ -163,6 +163,6 @@ Trigger phrases
 
 > `optional` **userInvocable?**: `boolean`
 
-Defined in: [core/src/types/ast.ts:774](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/ast.ts#L774)
+Defined in: [core/src/types/ast.ts:774](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L774)
 
 Whether user can invoke directly

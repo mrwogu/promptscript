@@ -8,7 +8,7 @@
 
 > **classifyConfidence**(`score`): [`ConfidenceLevel`](https://getpromptscript.dev/api-reference/importer/src/enumerations/ConfidenceLevel/index.md)
 
-Defined in: [importer/src/confidence.ts:17](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/importer/src/confidence.ts#L17)
+Defined in: [importer/src/confidence.ts:17](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/importer/src/confidence.ts#L17)
 
 ## Parameters
 

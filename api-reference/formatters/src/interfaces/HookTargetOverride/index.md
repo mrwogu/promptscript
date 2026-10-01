@@ -6,7 +6,7 @@
 
 # Interface: HookTargetOverride
 
-Defined in: [formatters/src/hook-adapters.ts:36](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L36)
+Defined in: [formatters/src/hook-adapters.ts:36](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L36)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [formatters/src/hook-adapters.ts:36](https://github.com/mrwogu/promp
 
 > `optional` **command?**: `string`[]
 
-Defined in: [formatters/src/hook-adapters.ts:39](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L39)
+Defined in: [formatters/src/hook-adapters.ts:39](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L39)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [formatters/src/hook-adapters.ts:39](https://github.com/mrwogu/promp
 
 > `optional` **continueOnFailure?**: `boolean`
 
-Defined in: [formatters/src/hook-adapters.ts:43](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L43)
+Defined in: [formatters/src/hook-adapters.ts:43](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L43)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [formatters/src/hook-adapters.ts:43](https://github.com/mrwogu/promp
 
 > `optional` **cwd?**: `string`
 
-Defined in: [formatters/src/hook-adapters.ts:45](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L45)
+Defined in: [formatters/src/hook-adapters.ts:45](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L45)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [formatters/src/hook-adapters.ts:45](https://github.com/mrwogu/promp
 
 > `optional` **enabled?**: `boolean`
 
-Defined in: [formatters/src/hook-adapters.ts:44](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L44)
+Defined in: [formatters/src/hook-adapters.ts:44](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L44)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [formatters/src/hook-adapters.ts:44](https://github.com/mrwogu/promp
 
 > `optional` **event?**: [`PortableHookEvent`](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/PortableHookEvent/index.md)
 
-Defined in: [formatters/src/hook-adapters.ts:37](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L37)
+Defined in: [formatters/src/hook-adapters.ts:37](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L37)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [formatters/src/hook-adapters.ts:37](https://github.com/mrwogu/promp
 
 > `optional` **matcher?**: `string`
 
-Defined in: [formatters/src/hook-adapters.ts:38](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L38)
+Defined in: [formatters/src/hook-adapters.ts:38](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L38)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [formatters/src/hook-adapters.ts:38](https://github.com/mrwogu/promp
 
 > `optional` **script?**: [`HookScriptDefinition`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/HookScriptDefinition/index.md)
 
-Defined in: [formatters/src/hook-adapters.ts:40](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L40)
+Defined in: [formatters/src/hook-adapters.ts:40](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L40)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [formatters/src/hook-adapters.ts:40](https://github.com/mrwogu/promp
 
 > `optional` **statusMessage?**: `string`
 
-Defined in: [formatters/src/hook-adapters.ts:42](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L42)
+Defined in: [formatters/src/hook-adapters.ts:42](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L42)
 
 ***
 
@@ -78,4 +78,4 @@ Defined in: [formatters/src/hook-adapters.ts:42](https://github.com/mrwogu/promp
 
 > `optional` **timeoutMs?**: `number`
 
-Defined in: [formatters/src/hook-adapters.ts:41](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L41)
+Defined in: [formatters/src/hook-adapters.ts:41](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L41)

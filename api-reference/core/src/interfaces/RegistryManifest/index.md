@@ -6,7 +6,7 @@
 
 # Interface: RegistryManifest
 
-Defined in: [core/src/types/manifest.ts:171](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L171)
+Defined in: [core/src/types/manifest.ts:171](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L171)
 
 Complete registry manifest.
 
@@ -45,7 +45,7 @@ suggestionRules:
 
 > **catalog**: [`CatalogEntry`](https://getpromptscript.dev/api-reference/core/src/interfaces/CatalogEntry/index.md)[]
 
-Defined in: [core/src/types/manifest.ts:179](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L179)
+Defined in: [core/src/types/manifest.ts:179](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L179)
 
 Catalog of available configurations
 
@@ -55,7 +55,7 @@ Catalog of available configurations
 
 > **meta**: [`RegistryMeta`](https://getpromptscript.dev/api-reference/core/src/interfaces/RegistryMeta/index.md)
 
-Defined in: [core/src/types/manifest.ts:175](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L175)
+Defined in: [core/src/types/manifest.ts:175](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L175)
 
 Registry metadata
 
@@ -65,7 +65,7 @@ Registry metadata
 
 > **namespaces**: `Record`\<`string`, [`NamespaceDefinition`](https://getpromptscript.dev/api-reference/core/src/interfaces/NamespaceDefinition/index.md)\>
 
-Defined in: [core/src/types/manifest.ts:177](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L177)
+Defined in: [core/src/types/manifest.ts:177](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L177)
 
 Available namespaces
 
@@ -75,7 +75,7 @@ Available namespaces
 
 > **suggestionRules**: [`SuggestionRule`](https://getpromptscript.dev/api-reference/core/src/interfaces/SuggestionRule/index.md)[]
 
-Defined in: [core/src/types/manifest.ts:181](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L181)
+Defined in: [core/src/types/manifest.ts:181](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L181)
 
 Rules for auto-suggesting configurations
 
@@ -85,6 +85,6 @@ Rules for auto-suggesting configurations
 
 > **version**: `"1"`
 
-Defined in: [core/src/types/manifest.ts:173](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/core/src/types/manifest.ts#L173)
+Defined in: [core/src/types/manifest.ts:173](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L173)
 
 Manifest schema version

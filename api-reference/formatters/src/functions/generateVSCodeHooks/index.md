@@ -8,7 +8,7 @@
 
 > **generateVSCodeHooks**(`hooks`): `Record`\<`string`, `unknown`[]\>
 
-Defined in: [formatters/src/hook-adapters.ts:892](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/hook-adapters.ts#L892)
+Defined in: [formatters/src/hook-adapters.ts:892](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L892)
 
 Generate VS Code Copilot Agent hook entries.
 

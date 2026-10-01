@@ -6,7 +6,7 @@
 
 # Class: Compiler
 
-Defined in: [compiler/src/compiler.ts:259](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/compiler.ts#L259)
+Defined in: [compiler/src/compiler.ts:259](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/compiler.ts#L259)
 
 Compiler that orchestrates the PromptScript compilation pipeline.
 
@@ -38,7 +38,7 @@ if (result.success) {
 
 > **new Compiler**(`options`): `Compiler`
 
-Defined in: [compiler/src/compiler.ts:270](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/compiler.ts#L270)
+Defined in: [compiler/src/compiler.ts:270](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/compiler.ts#L270)
 
 #### Parameters
 
@@ -56,7 +56,7 @@ Defined in: [compiler/src/compiler.ts:270](https://github.com/mrwogu/promptscrip
 
 > **compile**(`entryPath`): `Promise`\<[`CompileResult`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/CompileResult/index.md)\>
 
-Defined in: [compiler/src/compiler.ts:424](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/compiler.ts#L424)
+Defined in: [compiler/src/compiler.ts:424](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/compiler.ts#L424)
 
 Compile a PromptScript file through the full pipeline.
 
@@ -80,7 +80,7 @@ Compilation result with outputs, errors, and stats
 
 > **compileAll**(`entryPath`): `Promise`\<[`CompileResult`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/CompileResult/index.md)\>
 
-Defined in: [compiler/src/compiler.ts:985](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/compiler.ts#L985)
+Defined in: [compiler/src/compiler.ts:985](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/compiler.ts#L985)
 
 Compile to all registered formatters.
 Useful when you want to ensure all formatters are used regardless of config.
@@ -105,7 +105,7 @@ Compilation result with all formatter outputs
 
 > **compileFile**(`filePath`): `Promise`\<[`CompileResult`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/CompileResult/index.md)\>
 
-Defined in: [compiler/src/compiler.ts:974](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/compiler.ts#L974)
+Defined in: [compiler/src/compiler.ts:974](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/compiler.ts#L974)
 
 Compile a PromptScript file from a file path.
 This is an alias for compile() for consistency with the documented API.
@@ -130,7 +130,7 @@ Compilation result
 
 > **getFormatters**(): readonly [`Formatter`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/Formatter/index.md)[]
 
-Defined in: [compiler/src/compiler.ts:963](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/compiler.ts#L963)
+Defined in: [compiler/src/compiler.ts:963](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/compiler.ts#L963)
 
 Get the configured formatters.
 
@@ -144,7 +144,7 @@ readonly [`Formatter`](https://getpromptscript.dev/api-reference/compiler/src/in
 
 > **watch**(`entryPath`, `options?`): `Promise`\<[`Watcher`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/Watcher/index.md)\>
 
-Defined in: [compiler/src/compiler.ts:1019](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/compiler/src/compiler.ts#L1019)
+Defined in: [compiler/src/compiler.ts:1019](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/compiler/src/compiler.ts#L1019)
 
 Watch for file changes and recompile automatically.
 

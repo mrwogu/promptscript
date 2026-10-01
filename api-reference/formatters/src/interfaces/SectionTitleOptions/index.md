@@ -6,7 +6,7 @@
 
 # Interface: SectionTitleOptions
 
-Defined in: [formatters/src/section-title-resolver.ts:9](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/section-title-resolver.ts#L9)
+Defined in: [formatters/src/section-title-resolver.ts:9](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/section-title-resolver.ts#L9)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [formatters/src/section-title-resolver.ts:9](https://github.com/mrwo
 
 > `readonly` `optional` **defaultTitle?**: `string`
 
-Defined in: [formatters/src/section-title-resolver.ts:11](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/section-title-resolver.ts#L11)
+Defined in: [formatters/src/section-title-resolver.ts:11](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/section-title-resolver.ts#L11)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [formatters/src/section-title-resolver.ts:11](https://github.com/mrw
 
 > `readonly` `optional` **formatterTitles?**: `Readonly`\<`Record`\<`string`, `string` \| `undefined`\>\>
 
-Defined in: [formatters/src/section-title-resolver.ts:10](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/section-title-resolver.ts#L10)
+Defined in: [formatters/src/section-title-resolver.ts:10](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/section-title-resolver.ts#L10)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [formatters/src/section-title-resolver.ts:10](https://github.com/mrw
 
 > `readonly` `optional` **sourceOverrides?**: `boolean`
 
-Defined in: [formatters/src/section-title-resolver.ts:12](https://github.com/mrwogu/promptscript/blob/5086c9aa8e44c92cc433800652e5eea6aa493e17/packages/formatters/src/section-title-resolver.ts#L12)
+Defined in: [formatters/src/section-title-resolver.ts:12](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/section-title-resolver.ts#L12)
