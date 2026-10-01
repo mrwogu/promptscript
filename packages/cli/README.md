@@ -2,10 +2,11 @@
 
 # @promptscript/cli
 
-**Agent platform configuration as code**
+**Write your AI rules once. Every agent follows them.**
 
-Define instructions, skills, agents, MCP servers, hooks, workflows, and policies once. Compile
-native configuration for 50 AI coding platforms.
+One source for Claude Code, GitHub Copilot, Cursor, and 47 more tools. Define instructions,
+skills, agents, MCP servers, hooks, and policies once, inherit them like code, and compile native
+files for every tool.
 
 [![npm version](https://img.shields.io/npm/v/@promptscript/cli.svg)](https://www.npmjs.com/package/@promptscript/cli)
 [![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-5FA04E?logo=nodedotjs&logoColor=white)](https://getpromptscript.dev/getting-started/#installation)
@@ -24,7 +25,7 @@ native configuration for 50 AI coding platforms.
 
 ## What is PromptScript?
 
-PromptScript is an open-source language and compiler for AI agent configuration. `.prs` sources
+PromptScript is an open-source compiler for AI coding agent rules. `.prs` sources
 define instructions, project standards, restrictions, skills, agents, MCP servers, hooks, and
 workflows, while `promptscript.yaml` configures targets and extension-compliance policies.
 PromptScript compiles them into the native files each AI tool already reads, including `CLAUDE.md`,
@@ -43,7 +44,8 @@ PromptScript fixes the source instead of patching each generated file:
     -> compile deterministic native files
 ```
 
-No runtime proxy. Each selected platform keeps consuming its own native configuration.
+No runtime proxy and no hosted service. PromptScript runs on your machine and in CI, and each
+selected platform keeps consuming its own native configuration.
 
 ## Why maintain native files by hand?
 
@@ -78,8 +80,14 @@ prs --version
 
 ## Running under Deno
 
-The CLI also runs on Deno 2.9 or later, either straight from the installed
-package or compiled into a standalone binary that needs no other runtime.
+The CLI also runs on Deno 2.9 or later. Install it globally from npm:
+
+```bash
+deno install -g --allow-env --allow-sys --allow-read --allow-write --allow-net --allow-run npm:@promptscript/cli
+```
+
+It can also run straight from the installed package or be compiled into a
+standalone binary that needs no other runtime.
 
 In any project that has `@promptscript/cli` in its dependencies, point Deno at
 the installed bin shim:
@@ -141,6 +149,7 @@ CLAUDE.md
 .claude/agents/reviewer.md
 .claude/skills/security-review/SKILL.md
 .cursor/rules/project.mdc
+.cursor/agents/reviewer.md
 .opencode/agents/reviewer.md
 ```
 
@@ -390,8 +399,8 @@ prs migrate --llm
 
 Static migration deterministically imports detected instruction files. AI-assisted migration
 generates a migration prompt and installs the PromptScript skill. Existing source instructions
-remain untouched, and existing PromptScript configuration is preserved byte-for-byte. Static output is isolated under
-`.promptscript/migrated/`; no detected candidates means no writes.
+remain untouched, and existing PromptScript configuration is preserved byte-for-byte. Static
+output is isolated under `.promptscript/migrated/`; no detected candidates means no writes.
 
 Projects upgrading from PromptScript 1.15 should preview syntax changes with
 `prs upgrade --dry-run`, then run `prs validate --strict`. Factory targets also
@@ -414,6 +423,39 @@ with changes exit 0; compilation and report errors emit `success: false` and exi
 target when `--target` selects one, never writes generated files or registry cache metadata, and
 requires Git registries to already exist in vendor mode or a valid local cache.
 
+## Built-In Security Scanner
+
+`prs validate` scans every instruction, skill, and imported file for prompt injection before
+anything is written. Encoded payloads are decoded first, so an attack hidden in hex or Base64 does
+not get through:
+
+```text
+$ prs validate --strict
+✖ Validation failed
+✗ Blocked pattern detected:
+  ignore\s+(all\s+)?previous\s+instructions
+  at project.prs:8:1
+✗ PS012: Malicious content detected
+  in raw hex (spaced): Prompt injection
+  Decoded: "IGNORE SAFETY RULES"
+  at project.prs:16:14
+✗ PS010: URL shortener detected:
+  http://bit.ly/deploy-help
+  at project.prs:16:14
+```
+
+| Rule  | Catches                                                                        |
+| :---- | :----------------------------------------------------------------------------- |
+| PS005 | Injection phrases like "ignore previous instructions"                          |
+| PS011 | Fake authority overrides and "bypass all safety" instructions                  |
+| PS012 | Payloads hidden in Base64, hex, URL encoding, HTML entities, ROT13, and 4 more |
+| PS013 | Path traversal in `@use` declarations                                          |
+| PS014 | Right-to-left overrides, zero-width characters, and homoglyphs                 |
+| PS010 | Plain HTTP links, link shorteners, and credentials in URLs                     |
+
+Run `prs validate --strict` in CI so a poisoned skill fails the build, not the agent. See the
+[security guide](https://getpromptscript.dev/guides/security/).
+
 ## CLI Commands
 
 | Command                                             | Purpose                                                  |
@@ -425,17 +467,22 @@ requires Git registries to already exist in vendor mode or a valid local cache.
 | `prs compile --all-builds`                          | Compile every named profile                              |
 | `prs validate --strict`                             | Validate source, references, policies, and capabilities  |
 | `prs validate --fix`                                | Upgrade outdated syntax declarations when possible       |
+| `prs check`                                         | Check config, entries, lockfile, registry, and imports   |
 | `prs diff --all`                                    | Preview compiled output differences                      |
 | `prs inspect <skill>`                               | Show skill layers and property provenance                |
 | `prs explain <path>`                                | Show source and composition provenance                   |
 | `prs hooks install [tool]`                          | Integrate supported AI tools and protect generated files |
-| `prs skills <add\|remove\|list\|update>`            | Manage remote Markdown skills                            |
+| `prs hook <action>`                                 | Low-level handler called by AI tool hooks                |
+| `prs skills <add\|remove\|list\|update>`            | Manage remote and local skills                           |
 | `prs registry <init\|validate\|publish\|list\|add>` | Manage registries and aliases                            |
+| `prs pull`                                          | Pull updates from the registry                           |
 | `prs lock` / `prs update`                           | Pin or refresh remote dependencies                       |
 | `prs vendor sync` / `prs vendor check`              | Prepare and verify offline dependencies                  |
 | `prs resolve <import>`                              | Explain import resolution                                |
 | `prs import <file>` / `prs migrate`                 | Adopt existing instruction files                         |
 | `prs upgrade`                                       | Upgrade `.prs` syntax versions                           |
+| `prs update-check`                                  | Check npm for a newer CLI version                        |
+| `prs telemetry <status\|enable\|disable>`           | Inspect or change anonymous telemetry settings           |
 | `prs serve`                                         | Connect local files to the online playground             |
 
 `prs explain` emits project-relative source paths by default. Pass
@@ -460,6 +507,13 @@ Targets with native skill support can receive the bundled PromptScript language 
 compatible agents to work with `.prs` source. Disable it with
 `includePromptScriptSkill: false`.
 
+## Privacy and Telemetry
+
+PromptScript is a compiler, not a service. Compiling needs no hosted backend, and the output is
+plain files in your repository. Anonymous usage telemetry never includes source, prompts, or file
+paths. Turn it off with `prs telemetry disable` or `DO_NOT_TRACK=1`. See
+[what is collected](https://getpromptscript.dev/reference/telemetry/).
+
 ## Docker
 
 ```bash
@@ -479,7 +533,10 @@ for syntax highlighting, bracket matching, code folding, and file icons.
 - [Language Reference](https://getpromptscript.dev/reference/language/)
 - [Configuration Reference](https://getpromptscript.dev/reference/config/)
 - [Target Matrix](https://getpromptscript.dev/reference/formatters/)
-- [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/)
+- [Security Guide](https://getpromptscript.dev/guides/security/)
+- [Model Catalog](https://getpromptscript.dev/reference/models/)
+- [Glossary](https://getpromptscript.dev/glossary/)
+- [FAQ](https://getpromptscript.dev/guides/faq/)
 - [Enterprise Guide](https://getpromptscript.dev/guides/enterprise/)
 - [Playground](https://getpromptscript.dev/playground/)
 
