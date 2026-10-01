@@ -475,6 +475,7 @@ with `includePromptScriptSkill: false`.
 | [Security Guide](https://getpromptscript.dev/guides/security/)                | Validation rules, injection detection, and safe registries  |
 | [Model Catalog](https://getpromptscript.dev/reference/models/)                | Model aliases and per-target model names                    |
 | [Anonymous Usage Telemetry](https://getpromptscript.dev/reference/telemetry/) | Collected fields, delivery, and opt-out controls            |
+| [Glossary](https://getpromptscript.dev/glossary/)                             | Every PromptScript term in one place                        |
 | [FAQ](https://getpromptscript.dev/guides/faq/)                                | Common questions about adoption, targets, and security      |
 | [Enterprise Guide](https://getpromptscript.dev/guides/enterprise/)            | Organization-wide adoption and governance                   |
 
