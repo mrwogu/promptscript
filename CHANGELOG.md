@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.22.0](https://github.com/mrwogu/promptscript/compare/v1.21.0...v1.22.0) (2026-10-01)
+
+
+### Features
+
+* **docs:** add Astro Starlight docs site in apps/docs ([77c6041](https://github.com/mrwogu/promptscript/commit/77c60410b7f837606ba5c6345a1994a81043259e))
+* **docs:** add copy page and Markdown links under titles ([cf7048c](https://github.com/mrwogu/promptscript/commit/cf7048cd7e83a877252f98a91f0e073e33a40fee))
+* **docs:** add homepage FAQ data and refresh OG image ([2f90807](https://github.com/mrwogu/promptscript/commit/2f90807cf53afb84f05f07782ba1d9177e574bc7))
+* **docs:** add motion, stats and dark security band to homepage ([ff31ebe](https://github.com/mrwogu/promptscript/commit/ff31ebe3daad2809b8dd8e3978d33c26e1712679))
+* **docs:** add section tabs under the header ([c1ccddf](https://github.com/mrwogu/promptscript/commit/c1ccddf1c85a3b1282164a2ae8e8905df1257a99))
+* **docs:** add site footer with author and project links ([9c107e2](https://github.com/mrwogu/promptscript/commit/9c107e2f01abe99a47a0eec09bc38cf42822b0cd))
+* **docs:** add skill, models, params and registry to homepage ([3f179dd](https://github.com/mrwogu/promptscript/commit/3f179dd0b905d7ab94fdd433051c230c38a77093))
+* **docs:** clearer sidebar groups and paging inside tabs ([a68d705](https://github.com/mrwogu/promptscript/commit/a68d7056b6f9486495d9c469329657017545e6e7))
+* **docs:** compile playground snippets live in the docs ([0f0e98e](https://github.com/mrwogu/promptscript/commit/0f0e98eba8f52ab0a8e18a28f2f21a57aa898da0))
+* **docs:** generate a page for every target platform ([952c3ef](https://github.com/mrwogu/promptscript/commit/952c3effb90ebaab6fe6941ad797d819b5fc9e45))
+* **docs:** lead homepage with benefits, security and skills ([110f7c2](https://github.com/mrwogu/promptscript/commit/110f7c2b5d29f48a50d1de57bcf542ee22f2c8c7))
+* **docs:** replace hero diagram with one-source visual ([a46d594](https://github.com/mrwogu/promptscript/commit/a46d594eb5cb3881410d3b63e3fc74e9a39bbb6c))
+* **docs:** restore llms.txt, Markdown pages and add structured data ([53dc87a](https://github.com/mrwogu/promptscript/commit/53dc87a762bbdbb355b954e9b47b736c5f59c890))
+* **docs:** serve hub pages as clean Markdown for agents ([0ba79e9](https://github.com/mrwogu/promptscript/commit/0ba79e9b015c463f1e916fc208490248feb48042))
+* **docs:** sharpen homepage copy, add trust section and FAQ ([01f7453](https://github.com/mrwogu/promptscript/commit/01f745341ddce3fa934ff5fb6a6d737d8e777e3d))
+* **docs:** show agents, MCP servers and plugins on homepage ([2983f58](https://github.com/mrwogu/promptscript/commit/2983f587d09b7acb49490b1352f4a596b9881031))
+* **docs:** show GitHub stars and npm downloads from build ([e5f6d6b](https://github.com/mrwogu/promptscript/commit/e5f6d6bd303f279518d3daa60e6d45d3303d90ee))
+* **docs:** show inheritance and generated features in hero ([2bd9f37](https://github.com/mrwogu/promptscript/commit/2bd9f37bc62f1996c1fac7e4d32a76c81f73af6a))
+* **docs:** show prs skills on the homepage ([81a90fa](https://github.com/mrwogu/promptscript/commit/81a90fad0b45791aa972c938ba4cb278d837b58e))
+* **playground:** link header back to the docs sections ([81cb0ff](https://github.com/mrwogu/promptscript/commit/81cb0ff1a71aee827255b88ee5bcab92b5d19fe1))
+
+
+### Bug Fixes
+
+* **deps:** bump stale overrides to patched versions ([538a3fd](https://github.com/mrwogu/promptscript/commit/538a3fd1b14b600cc2a7f648863fbbd0ddca75bb))
+* **docs:** address Sonar findings in sidebar and git helpers ([5086c9a](https://github.com/mrwogu/promptscript/commit/5086c9aa8e44c92cc433800652e5eea6aa493e17))
+* **docs:** keep code, frontmatter paging and copy errors intact ([c4fed7c](https://github.com/mrwogu/promptscript/commit/c4fed7c8daa8067512ab48d4d8726300808fe1c0))
+* **docs:** meet contrast and lint rules flagged by Sonar ([5f70547](https://github.com/mrwogu/promptscript/commit/5f705478199b97188977e110f983894bf5c5259c))
+* **docs:** merge duplicate theme selectors flagged by Sonar ([47f5b34](https://github.com/mrwogu/promptscript/commit/47f5b34137bf9a8528948e2916ea83b81e058520))
+* **docs:** render homepage as raw HTML at the old sizes ([48202e8](https://github.com/mrwogu/promptscript/commit/48202e8da827d62af0706aed1408ee57a1e1c424))
+* **docs:** resolve Sonar findings and cover homepage motion ([4c5fae1](https://github.com/mrwogu/promptscript/commit/4c5fae135c4a0c97f86959293cb1ca226c0b172e))
+* **docs:** resolve Sonar findings in homepage hero ([08cfc98](https://github.com/mrwogu/promptscript/commit/08cfc98594275eb55c64c8368d798f4d973d1b56))
+* **docs:** resolve Sonar findings in OG template and CSS ([6b4243e](https://github.com/mrwogu/promptscript/commit/6b4243eafbd18966f1295a749e58b9e7405a0220))
+* **docs:** stop platform marquee when reduced motion is on ([484a858](https://github.com/mrwogu/promptscript/commit/484a858b44e5eb47ccae8f0894c5456e63754a07))
+* **docs:** strip card markup without regex backtracking ([48c8782](https://github.com/mrwogu/promptscript/commit/48c8782851a6928cf2bb3cb030c4d85649097464))
+
 ## [1.21.0](https://github.com/mrwogu/promptscript/compare/v1.20.0...v1.21.0) (2026-09-29)
 
 
