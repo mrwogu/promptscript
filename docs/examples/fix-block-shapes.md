@@ -17,7 +17,10 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 
 ## 2. Fix Shortcut Shape
 
-**Wrong: target-dependent multiline scalar**
+**Avoid: target-dependent multiline scalar**
+
+This shape still compiles, but it can format differently across targets. Prefer
+the explicit command object below when migrating shared instructions.
 
 ```promptscript
 @shortcuts {
@@ -27,7 +30,7 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 }
 ```
 
-**Correct: explicit command object**
+**Preferred: explicit command object**
 
 ```promptscript
 @meta { id: "shape-remediation" syntax: "1.5.0" }
@@ -50,7 +53,10 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 
 ## 3. Fix Restrictions Shape
 
-**Wrong: structured compatibility form**
+**Avoid: structured compatibility form**
+
+This compatibility form still compiles, but the canonical array body is clearer
+and avoids target-dependent shape warnings.
 
 ```promptscript
 @restrictions {
@@ -58,7 +64,7 @@ PS038 reports observed shape, canonical shape, and suggested replacement.
 }
 ```
 
-**Correct: canonical array body**
+**Preferred: canonical array body**
 
 ```promptscript
 @meta { id: "canonical-restrictions" syntax: "1.5.0" }

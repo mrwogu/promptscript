@@ -283,7 +283,10 @@ When combining multiple source files:
 
 ### Mixing Block Concerns
 
-**Wrong:**
+**Avoid:**
+
+This compiles, but it mixes a restriction into the standards block. Keep
+restrictions in `@restrictions` so migrations preserve intent across targets.
 
 ```promptscript
 @standards {
@@ -294,7 +297,7 @@ When combining multiple source files:
 }
 ```
 
-**Correct:**
+**Preferred:**
 
 ```promptscript
 @standards {
