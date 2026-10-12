@@ -36,7 +36,7 @@
     "promptscript": "./bin/prs.js"
   },
   "dependencies": {
-    "@inquirer/prompts": "^8.7.2",
+    "@inquirer/prompts": "^8.7.3",
     "@promptscript/compiler": "workspace:^",
     "@promptscript/importer": "workspace:^",
     "@promptscript/formatters": "workspace:^",
@@ -47,7 +47,7 @@
     "@promptscript/resolver": "workspace:^",
     "@promptscript/validator": "workspace:^",
     "ajv": "^8.20.0",
-    "chalk": "^6.0.0",
+    "chalk": "^6.0.1",
     "chokidar": "^5.0.0",
     "commander": "^15.0.0",
     "minimatch": "^10.2.6",
