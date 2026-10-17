@@ -168,14 +168,19 @@ describe('resource capability warnings', () => {
   it('ignores unknown targets and blocks without entries', () => {
     // Arrange
     const empty = createProgram([createBlock('mcpServers', {})]);
+    const text = createProgram([
+      { type: 'Block', name: 'skills', content: { type: 'TextContent', value: 'x', loc }, loc },
+    ]);
     const full = createProgram();
 
     // Act
     const emptyWarnings = getResourceCapabilityWarnings(empty, 'cursor', 'modern');
+    const textWarnings = getResourceCapabilityWarnings(text, 'cursor', 'modern');
     const customWarnings = getResourceCapabilityWarnings(full, 'my-custom-target', 'full');
 
     // Assert
     expect(emptyWarnings).toEqual([]);
+    expect(textWarnings).toEqual([]);
     expect(customWarnings).toEqual([]);
   });
 
