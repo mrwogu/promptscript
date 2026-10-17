@@ -39,10 +39,11 @@ targets:
 
 ## Output Files
 
-| File              | Path                            | Purpose                    |
-| ----------------- | ------------------------------- | -------------------------- |
-| Main instructions | `.goosehints`                   | Primary rule file          |
-| Skills            | `.goose/skills/<name>/SKILL.md` | Reusable skill definitions |
+| File              | Path                            | Purpose                                           |
+| ----------------- | ------------------------------- | ------------------------------------------------- |
+| Main instructions | `.goosehints`                   | Primary rule file                                 |
+| Skills            | `.goose/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode         |
+| MCP servers       | `.goose/mcp_config.json`        | MCP server config in `multifile` and `full` modes |
 
 ## Output Versions
 

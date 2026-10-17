@@ -33,9 +33,10 @@ sidebar:
 | Main instructions | `CLAUDE.md` | Primary rule file |
 | Lifecycle hooks | `.claude/settings.json` | Project hooks in `full` mode |
 | Local overrides | `CLAUDE.local.md` | Private instructions (gitignored) |
-| Skills | `.claude/skills/<name>/SKILL.md` | Reusable skill definitions |
+| Skills | `.claude/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode |
 | Commands | `.claude/commands/<name>.md` | Slash commands |
 | Agents | `.claude/agents/<name>.md` | Agent configurations |
+| MCP servers | `.mcp.json` | MCP server config in `full` mode |
 
 <!-- generated:end:output-files -->
 

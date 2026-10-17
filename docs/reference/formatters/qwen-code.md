@@ -40,10 +40,11 @@ targets:
 
 ## Output Files
 
-| File              | Path                           | Purpose                    |
-| ----------------- | ------------------------------ | -------------------------- |
-| Main instructions | `.qwen/rules/project.md`       | Primary rule file          |
-| Skills            | `.qwen/skills/<name>/SKILL.md` | Reusable skill definitions |
+| File              | Path                           | Purpose                                           |
+| ----------------- | ------------------------------ | ------------------------------------------------- |
+| Main instructions | `.qwen/rules/project.md`       | Primary rule file                                 |
+| Skills            | `.qwen/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode         |
+| MCP servers       | `.qwen/mcp.json`               | MCP server config in `multifile` and `full` modes |
 
 ## Output Versions
 

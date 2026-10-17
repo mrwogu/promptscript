@@ -40,12 +40,14 @@ targets:
 
 ## Output Files
 
-| File              | Path                             | Purpose                                       |
-| ----------------- | -------------------------------- | --------------------------------------------- |
-| Main instructions | `AGENTS.md`                      | Primary rule file                             |
-| Lifecycle hooks   | `.codex/hooks.json`              | Project hooks in `multifile` and `full` modes |
-| Skills            | `.agents/skills/<name>/SKILL.md` | Reusable skill definitions                    |
-| Agents            | `.codex/agents/<name>.toml`      | Agent configurations                          |
+| File              | Path                             | Purpose                                           |
+| ----------------- | -------------------------------- | ------------------------------------------------- |
+| Main instructions | `AGENTS.md`                      | Primary rule file                                 |
+| Lifecycle hooks   | `.codex/hooks.json`              | Project hooks in `multifile` and `full` modes     |
+| Skills            | `.agents/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode         |
+| Agents            | `.codex/agents/<name>.toml`      | Agent configurations                              |
+| MCP servers       | `.codex/mcp.json`                | MCP server config in `multifile` and `full` modes |
+| Plugins           | `.codex/plugins.json`            | Plugin config in `multifile` and `full` modes     |
 
 ## Output Versions
 

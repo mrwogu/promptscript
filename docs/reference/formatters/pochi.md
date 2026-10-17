@@ -40,10 +40,10 @@ targets:
 
 ## Output Files
 
-| File              | Path                            | Purpose                    |
-| ----------------- | ------------------------------- | -------------------------- |
-| Main instructions | `.pochi/rules/project.md`       | Primary rule file          |
-| Skills            | `.pochi/skills/<name>/SKILL.md` | Reusable skill definitions |
+| File              | Path                            | Purpose                                   |
+| ----------------- | ------------------------------- | ----------------------------------------- |
+| Main instructions | `.pochi/rules/project.md`       | Primary rule file                         |
+| Skills            | `.pochi/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode |
 
 ## Output Versions
 
