@@ -26,6 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
@@ -62,6 +64,10 @@ jobs:
 
       - name: Push the drift branch
         if: steps.drift.outputs.changed == 'true'
+        env:
+          # A push or pull request made with github.token starts no workflows,
+          # so CI would never run on the drift pull request.
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -71,12 +77,15 @@ jobs:
           # an alias moves), so the pre-commit hook must not block it. CI on
           # the pull request still runs every check.
           git commit --no-verify -m 'chore(core): draft new model releases from OpenRouter'
-          git push --force-with-lease origin chore/model-drift
+          # The branch is rebuilt from main on every run, so force replaces the
+          # previous draft. The checkout fetched only main, so a lease has no
+          # tracking ref to compare against and would reject the push.
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:chore/model-drift
 
       - name: Open or update the drift pull request
         if: steps.drift.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
         run: |
           gh pr create --head chore/model-drift \
             --title 'Sync the model catalog with OpenRouter' \
@@ -88,7 +97,7 @@ jobs:
       - name: Auto-merge when every check passes
         if: steps.drift.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
         run: |
           gh pr merge --auto --squash --delete-branch chore/model-drift \
             || echo "Auto-merge unavailable; merge the drift pull request by hand."
