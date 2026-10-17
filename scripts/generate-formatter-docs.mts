@@ -366,9 +366,8 @@ function generateOverview(f: FormatterInfo): string {
 }
 
 function formatModes(versions: readonly string[]): string {
-  return versions.length === 1
-    ? `\`${versions[0]}\` mode`
-    : `${versions.map((version) => `\`${version}\``).join(' and ')} modes`;
+  const names = versions.map(code);
+  return names.length === 1 ? `${names[0]} mode` : `${names.join(' and ')} modes`;
 }
 
 /**
