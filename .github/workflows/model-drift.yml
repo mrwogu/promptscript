@@ -67,7 +67,10 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git checkout -B chore/model-drift
           git add packages/core/src/model-profiles.ts docs/reference/models.md
-          git commit -m 'chore(core): draft new model releases from OpenRouter'
+          # The draft is expected to fail checks (e.g. docs output blocks when
+          # an alias moves), so the pre-commit hook must not block it. CI on
+          # the pull request still runs every check.
+          git commit --no-verify -m 'chore(core): draft new model releases from OpenRouter'
           git push --force-with-lease origin chore/model-drift
 
       - name: Open or update the drift pull request
