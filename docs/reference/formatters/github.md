@@ -32,10 +32,11 @@ sidebar:
 | ----------------- | ---------------------------------- | ----------------------------------------------------------------- |
 | Main instructions | `.github/copilot-instructions.md`  | Primary rule file                                                 |
 | Lifecycle hooks   | `.github/hooks/promptscript.json`  | Copilot CLI and cloud agent hooks in `multifile` and `full` modes |
-| Skills            | `.github/skills/<name>/SKILL.md`   | Reusable skill definitions                                        |
+| Skills            | `.github/skills/<name>/SKILL.md`   | Reusable skill definitions in `full` mode                         |
 | Prompts           | `.github/prompts/<name>.prompt.md` | Slash commands                                                    |
 | Agents            | `.github/agents/<name>.md`         | Agent configurations                                              |
 | Agents index      | `AGENTS.md`                        | Top-level agents file                                             |
+| MCP servers       | `.vscode/mcp.json`                 | MCP server config in `full` mode                                  |
 
 <!-- generated:end:output-files -->
 

@@ -32,7 +32,7 @@ sidebar:
 | ----------------- | ----------------------------------- | --------------------------------------------- |
 | Main instructions | `OPENCODE.md`                       | Primary rule file                             |
 | Lifecycle hooks   | `.opencode/plugins/promptscript.ts` | Project hooks in `multifile` and `full` modes |
-| Skills            | `.opencode/skills/<name>/SKILL.md`  | Reusable skill definitions                    |
+| Skills            | `.opencode/skills/<name>/SKILL.md`  | Reusable skill definitions in `full` mode     |
 | Commands          | `.opencode/commands/<name>.md`      | Slash commands                                |
 | Agents            | `.opencode/agents/<name>.md`        | Agent configurations                          |
 

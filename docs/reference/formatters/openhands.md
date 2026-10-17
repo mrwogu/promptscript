@@ -40,10 +40,11 @@ targets:
 
 ## Output Files
 
-| File              | Path                                | Purpose                    |
-| ----------------- | ----------------------------------- | -------------------------- |
-| Main instructions | `.openhands/rules/project.md`       | Primary rule file          |
-| Skills            | `.openhands/skills/<name>/SKILL.md` | Reusable skill definitions |
+| File              | Path                                | Purpose                                           |
+| ----------------- | ----------------------------------- | ------------------------------------------------- |
+| Main instructions | `.openhands/rules/project.md`       | Primary rule file                                 |
+| Skills            | `.openhands/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode         |
+| MCP servers       | `.openhands/mcp_config.toml`        | MCP server config in `multifile` and `full` modes |
 
 ## Output Versions
 

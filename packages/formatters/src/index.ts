@@ -184,6 +184,10 @@ export {
   appendTargetHookCapabilityWarnings,
   getTargetHookCapabilityWarnings,
 } from './hook-capability-warnings.js';
+export {
+  appendResourceCapabilityWarnings,
+  getResourceCapabilityWarnings,
+} from './resource-capability-warnings.js';
 
 // Register built-in formatters by iterating the exhaustive formatter map
 import { FormatterRegistry } from './registry.js';

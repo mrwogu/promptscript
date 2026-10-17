@@ -5,6 +5,7 @@ import {
   toLegacyProgram,
   type ProgramInput,
 } from '@promptscript/core';
+import { appendResourceCapabilityWarnings } from './resource-capability-warnings.js';
 import type {
   CanonicalFormatter,
   Formatter,
@@ -25,9 +26,22 @@ export function isLegacyFormatter(formatter: Formatter): formatter is LegacyForm
 }
 
 /**
- * Route canonical AST only to explicit consumers and isolate legacy formatters.
+ * Format a program and report authored resource blocks the target drops.
  */
 export function formatProgram(
+  formatter: Formatter,
+  ast: ProgramInput,
+  options?: FormatOptions
+): FormatterOutput {
+  const output = runFormatter(formatter, ast, options);
+  const program = isCanonicalProgram(ast) ? toLegacyProgram(ast) : ast;
+  return appendResourceCapabilityWarnings(output, program, formatter.name, options?.version);
+}
+
+/**
+ * Route canonical AST only to explicit consumers and isolate legacy formatters.
+ */
+function runFormatter(
   formatter: Formatter,
   ast: ProgramInput,
   options?: FormatOptions
