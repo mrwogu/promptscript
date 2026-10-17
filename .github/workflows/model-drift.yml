@@ -65,8 +65,9 @@ jobs:
       - name: Push the drift branch
         if: steps.drift.outputs.changed == 'true'
         env:
-          # A push or pull request made with github.token starts no workflows,
-          # so CI would never run on the drift pull request.
+          # A push made with github.token starts no workflows, and a pull request
+          # opened with it gets runs that wait for approval. With the PAT, CI on
+          # the drift pull request starts on its own.
           GH_TOKEN: ${{ secrets.RELEASE_PAT }}
         run: |
           git config user.name 'github-actions[bot]'
