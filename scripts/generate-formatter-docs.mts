@@ -365,6 +365,21 @@ function generateOverview(f: FormatterInfo): string {
   return lines.join('\n');
 }
 
+function formatModes(versions: readonly string[]): string {
+  const names = versions.map(code);
+  return names.length === 1 ? `${names[0]} mode` : `${names.join(' and ')} modes`;
+}
+
+/**
+ * " in `full` mode" when only some versions emit the resource, empty otherwise.
+ */
+function resourceModes(f: FormatterInfo, kind: TargetResourceCapability['kind']): string {
+  const resource = f.resources.find((candidate) => candidate.kind === kind);
+  if (!resource) return '';
+  const everyVersion = f.versions.every((version) => resource.versions.includes(version.name));
+  return everyVersion ? '' : ` in ${formatModes(resource.versions)}`;
+}
+
 function generateOutputFiles(f: FormatterInfo): string {
   const lines = [
     '| File | Path | Purpose |',
@@ -379,10 +394,7 @@ function generateOutputFiles(f: FormatterInfo): string {
   }
 
   if (f.hookConfigPath && f.hookVersions.length > 0) {
-    const modeLabel =
-      f.hookVersions.length === 1
-        ? `\`${f.hookVersions[0]}\` mode`
-        : `${f.hookVersions.map((version) => `\`${version}\``).join(' and ')} modes`;
+    const modeLabel = formatModes(f.hookVersions);
     const purpose =
       f.name === 'github'
         ? `Copilot CLI and cloud agent hooks in ${modeLabel}`
@@ -395,7 +407,9 @@ function generateOutputFiles(f: FormatterInfo): string {
   }
 
   if (f.hasSkills) {
-    lines.push(`| Skills | \`${skillPath(f)}\` | Reusable skill definitions |`);
+    lines.push(
+      `| Skills | \`${skillPath(f)}\` | Reusable skill definitions${resourceModes(f, 'skills')} |`
+    );
   }
 
   if (f.hasCommands) {
@@ -415,6 +429,16 @@ function generateOutputFiles(f: FormatterInfo): string {
     if (f.name === 'github') {
       lines.push(`| Agents index | \`AGENTS.md\` | Top-level agents file |`);
     }
+  }
+
+  const mcp = f.resources.find((resource) => resource.kind === 'mcp');
+  if (mcp) {
+    lines.push(`| MCP servers | \`${mcp.path}\` | MCP server config${resourceModes(f, 'mcp')} |`);
+  }
+
+  const plugins = f.resources.find((resource) => resource.kind === 'plugins');
+  if (plugins) {
+    lines.push(`| Plugins | \`${plugins.path}\` | Plugin config${resourceModes(f, 'plugins')} |`);
   }
 
   return lines.join('\n');

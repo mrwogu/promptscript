@@ -113,6 +113,7 @@ describe('Agent platform integration', () => {
     expect(result.success).toBe(true);
     expect(result.errors).toEqual([]);
     expect(result.warnings.map((warning) => warning.message)).toEqual([
+      'Target "claude" has no native plugin output and will omit @plugins.',
       'Hook "validate-types" uses statusMessage, which cursor cannot represent and will omit.',
       'Agent "reviewer": field "tools" is not supported by target "cursor" and will be omitted.',
       'Agent "reviewer": field "skills" is not supported by target "cursor" and will be omitted.',
@@ -120,6 +121,9 @@ describe('Agent platform integration', () => {
       'Hook "validate-types" uses statusMessage, which factory cannot represent and will omit.',
       'Target "github" version "multifile" cannot emit @agents and will omit it.',
       'Hook "validate-types" uses statusMessage, which github cannot represent and will omit.',
+      'Target "github" version "multifile" cannot emit @skills and will omit it.',
+      'Target "github" version "multifile" cannot emit @mcpServers and will omit it.',
+      'Target "github" has no native plugin output and will omit @plugins.',
     ]);
     expect(requireOutput(result, 'CLAUDE.md')).toContain('platform engineering assistant');
     expect(requireOutput(result, '.claude/skills/security-review/SKILL.md')).toContain(

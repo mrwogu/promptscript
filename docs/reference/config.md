@@ -571,6 +571,13 @@ Hook files are emitted in `multifile` and `full` target modes. `simple` keeps
 its single-file contract and reports a compatibility warning when `@hooks` is
 present.
 
+MCP and plugin files depend on the mode too. `github`, `claude`, `cursor`, and
+`grok` write MCP config only in `full` mode, `antigravity` in every mode, and the
+other MCP targets in `multifile` and `full`. `cursor` and `grok` write plugin
+config only in `full` mode, `factory` and `codex` in `multifile` and `full`. A
+target or mode that cannot write `@skills`, `@mcpServers`, or `@plugins` reports
+`PS4002` instead of dropping the block silently.
+
 **Cursor Versions:**
 
 | Version     | Output Files                                                                                        |

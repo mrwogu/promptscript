@@ -40,11 +40,12 @@ targets:
 
 ## Output Files
 
-| File              | Path                               | Purpose                                       |
-| ----------------- | ---------------------------------- | --------------------------------------------- |
-| Main instructions | `.windsurf/rules/project.md`       | Primary rule file                             |
-| Lifecycle hooks   | `.windsurf/hooks.json`             | Project hooks in `multifile` and `full` modes |
-| Skills            | `.windsurf/skills/<name>/SKILL.md` | Reusable skill definitions                    |
+| File              | Path                               | Purpose                                           |
+| ----------------- | ---------------------------------- | ------------------------------------------------- |
+| Main instructions | `.windsurf/rules/project.md`       | Primary rule file                                 |
+| Lifecycle hooks   | `.windsurf/hooks.json`             | Project hooks in `multifile` and `full` modes     |
+| Skills            | `.windsurf/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode         |
+| MCP servers       | `.windsurf/mcp_config.json`        | MCP server config in `multifile` and `full` modes |
 
 ## Output Versions
 
