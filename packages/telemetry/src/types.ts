@@ -50,6 +50,7 @@ export interface TelemetryBatch {
 
 export interface TelemetryConfigInput {
   environment?: NodeJS.ProcessEnv;
+  systemEnabled?: boolean;
   userEnabled?: boolean;
   projectEnabled?: boolean;
   configurationValid?: boolean;

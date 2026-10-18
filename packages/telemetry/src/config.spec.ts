@@ -40,12 +40,13 @@ describe('resolveTelemetryConfig', () => {
   it('does not let an environment opt-in override config vetoes', () => {
     const config = resolveTelemetryConfig({
       environment: { PROMPTSCRIPT_TELEMETRY: 'true' },
+      systemEnabled: false,
       userEnabled: false,
       projectEnabled: false,
     });
 
     expect(config.enabled).toBe(false);
-    expect(config.vetoes).toEqual(['user config', 'project config']);
+    expect(config.vetoes).toEqual(['system config', 'user config', 'project config']);
   });
 
   it('fails closed when configuration is unavailable', () => {

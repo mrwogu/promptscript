@@ -40,6 +40,9 @@ export function resolveTelemetryConfig(input: TelemetryConfigInput = {}): Resolv
   if (isDisabled(environment['PROMPTSCRIPT_TELEMETRY'])) {
     vetoes.push('PROMPTSCRIPT_TELEMETRY');
   }
+  if (input.systemEnabled === false) {
+    vetoes.push('system config');
+  }
   if (input.userEnabled === false) {
     vetoes.push('user config');
   }
