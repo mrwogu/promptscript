@@ -152,8 +152,10 @@ export const MODEL_PROFILES: readonly ModelProfile[] = [
   }),
   claude('sonnet', '4.5', {
     apiId: 'claude-sonnet-4-5-20250929',
+    status: 'deprecated',
     successor: 'claude-sonnet-4-6',
     releaseDate: '2025-09-29',
+    retirementDate: '2026-11-30',
   }),
   claude('sonnet', '4.6', { successor: 'claude-sonnet-5' }),
   claude('sonnet', '5', { successor: 'claude-sonnet-5-5', releaseDate: '2026-06-30' }),
