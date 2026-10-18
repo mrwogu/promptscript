@@ -463,8 +463,8 @@ describe('built-in model profiles', () => {
 
     expect(latest).toEqual({
       opus: 'claude-opus-5-5',
-      sonnet: 'claude-sonnet-5',
-      haiku: 'claude-haiku-4-5',
+      sonnet: 'claude-sonnet-5-5',
+      haiku: 'claude-haiku-5-5',
       fable: 'claude-fable-5-1',
     });
   });
@@ -513,12 +513,14 @@ describe('built-in model profiles', () => {
     expect(mapModelToTarget('claude-sonnet-4-5', 'claude', models).value).toBe(
       'claude-sonnet-4-5-20250929'
     );
-    expect(mapModelToTarget('haiku', 'factory', models).value).toBe('claude-haiku-4-5-20251001');
+    expect(mapModelToTarget('claude-haiku-4-5', 'factory', models).value).toBe(
+      'claude-haiku-4-5-20251001'
+    );
   });
 
   it('keep dateless ids on Cursor', () => {
     expect(mapModelToTarget('claude-sonnet-4-5', 'cursor', models).value).toBe('claude-sonnet-4-5');
-    expect(mapModelToTarget('haiku', 'cursor', models).value).toBe('claude-haiku-4-5');
+    expect(mapModelToTarget('haiku', 'cursor', models).value).toBe('claude-haiku-5-5');
     expect(mapModelToTarget('opus', 'cursor', models).value).toBe('claude-opus-5-5');
   });
 });
