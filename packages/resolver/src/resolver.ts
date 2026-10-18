@@ -106,6 +106,29 @@ function isValueRecord(value: unknown): value is Record<string, Value> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+/**
+ * Record the file that defines each skill, so the layer-boundary policy can
+ * measure how far an @extend is from the base definition. Skills that came
+ * from an import keep the source they already have.
+ */
+function stampSkillBaseSource(ast: Program, source: string): Program {
+  const skills = ast.blocks.find((block) => block.name === 'skills');
+  if (skills?.content.type !== 'ObjectContent') return ast;
+
+  const properties: Record<string, Value> = {};
+  for (const [name, skill] of Object.entries(skills.content.properties)) {
+    properties[name] =
+      isValueRecord(skill) && skill['__baseSource'] === undefined
+        ? { ...skill, __baseSource: source }
+        : skill;
+  }
+  const content = { ...skills.content, properties };
+  return {
+    ...ast,
+    blocks: ast.blocks.map((block) => (block === skills ? { ...skills, content } : block)),
+  };
+}
+
 const SKILL_REPLACE_PROPERTIES = new Set<string>(SKILL_REPLACE_PROPERTY_NAMES);
 const SKILL_APPEND_PROPERTIES = new Set(['references', 'examples', 'requires', 'scripts']);
 const SKILL_MERGE_PROPERTIES = new Set(['params', 'inputs', 'outputs']);
@@ -611,6 +634,7 @@ export class Resolver {
       preserveDeclarationOrder: sequentialOperations,
     });
     ast = ensureAgentProvenance(ast, absPath);
+    ast = stampSkillBaseSource(ast, absPath);
     this.logger.debug(`AST node count: ${this.countNodes(ast)}`);
 
     if (sequentialOperations) {
