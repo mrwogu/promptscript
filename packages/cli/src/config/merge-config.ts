@@ -13,6 +13,12 @@ function deepMergeRegistry(
 
   const merged = { ...target };
 
+  // Git is picked before url and path, so a source that selects url or path
+  // drops the target's git, or the lower priority registry would still win
+  if (!source.git && (source.path !== undefined || source.url !== undefined)) {
+    delete merged.git;
+  }
+
   if (source.path !== undefined) merged.path = source.path;
   if (source.url !== undefined) merged.url = source.url;
 

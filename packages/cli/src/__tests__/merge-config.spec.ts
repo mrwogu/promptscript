@@ -251,6 +251,25 @@ describe('config/merge-config', () => {
     expect(result.registry?.auth?.tokenEnvVar).toBe('NEW_TOKEN');
   });
 
+  it('should let a project path registry replace the user git registry', () => {
+    const userConfig: UserConfig = {
+      version: '1',
+      registry: {
+        git: { url: 'https://github.com/user/reg.git' },
+        cache: { ttl: 60000 },
+      },
+    };
+
+    const projectConfig: PromptScriptConfig = {
+      ...baseProjectConfig,
+      registry: { path: './registry' },
+    };
+
+    const result = mergeConfigs(userConfig, projectConfig, {});
+
+    expect(result.registry).toEqual({ path: './registry', cache: { ttl: 60000 } });
+  });
+
   it('should override url from user config', () => {
     const userConfig: UserConfig = {
       version: '1',

@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import type { LockOptions } from '../types.js';
-import { loadEffectiveConfig, findConfigFile } from '../config/loader.js';
+import { loadConfig, loadEffectiveConfig, findConfigFile } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import type { Lockfile, LockfileDependency } from '@promptscript/core';
 import { LOCKFILE_VERSION, isGitTimeoutError, isValidLockfile } from '@promptscript/core';
@@ -42,9 +42,10 @@ export interface RemoteDependencyOptions {
 /**
  * Generate or update promptscript.lock by resolving all remote imports.
  *
- * This command collects all registry aliases configured in the project and
- * global config, then writes a lockfile that pins each dependency to a
- * resolved version and commit hash for reproducible builds.
+ * This command collects the registry aliases configured in the project and
+ * every remote import (user aliases included), then writes a lockfile that
+ * pins each dependency to a resolved version and commit hash for reproducible
+ * builds.
  *
  * Existing pins are preserved unless --update is used.
  */
@@ -65,9 +66,9 @@ export async function lockCommand(options: LockOptions): Promise<void> {
 
     const config = await loadEffectiveConfig();
 
-    // Collect registry aliases from config
-    const aliases = config.registries ?? {};
-    const aliasEntries = Object.entries(aliases);
+    // Pin only project aliases. A user alias gets pinned through the imports
+    // that use it, so personal aliases never land in the shared lockfile.
+    const aliasEntries = Object.entries((await loadConfig()).registries ?? {});
     const defaultGitRegistry = config.registry?.git;
 
     // Load existing lockfile to preserve already-resolved entries
