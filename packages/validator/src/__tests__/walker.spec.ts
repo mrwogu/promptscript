@@ -56,6 +56,35 @@ describe('walker', () => {
       expect(texts).toEqual(['Hello, world!']);
     });
 
+    it('should skip provenance the resolver attaches to skills', () => {
+      const texts: string[] = [];
+      const ast = createTestProgram({
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            loc: defaultLoc,
+            content: {
+              type: 'ObjectContent',
+              loc: defaultLoc,
+              properties: {
+                review: {
+                  content: 'Review the change.',
+                  __baseSource: '/registry/@core/skills.prs',
+                  __layerTrace: [{ property: 'content', source: '/registry/@team/overlay.prs' }],
+                  __composedFrom: [{ source: '/registry/@core/base.prs', phase: 'base' }],
+                },
+              },
+            },
+          },
+        ],
+      });
+
+      walkText(ast, (text) => texts.push(text));
+
+      expect(texts).toEqual(['Review the change.']);
+    });
+
     it('should walk text in object content', () => {
       const texts: string[] = [];
       const ast = createTestProgram({

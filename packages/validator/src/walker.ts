@@ -17,6 +17,12 @@ import { blockBodyToContent, valueNodeToValue } from '@promptscript/core';
 export type TextCallback = (text: string, loc: SourceLocation) => void;
 
 /**
+ * Provenance the resolver attaches to skills. It holds file paths and merge
+ * strategies, not instructions, so text rules must not scan it.
+ */
+const RESOLVER_PROVENANCE_KEYS = new Set(['__baseSource', '__layerTrace', '__composedFrom']);
+
+/**
  * Callback function for blocks.
  */
 export type BlockCallback = (block: Block | ExtendBlock) => void;
@@ -165,7 +171,7 @@ function walkObjectProperties(
   exclude?: Set<string>
 ): void {
   for (const [key, value] of Object.entries(properties)) {
-    if (exclude?.has(key)) continue;
+    if (exclude?.has(key) || RESOLVER_PROVENANCE_KEYS.has(key)) continue;
     walkValue(value, loc, callback, exclude);
   }
 }
