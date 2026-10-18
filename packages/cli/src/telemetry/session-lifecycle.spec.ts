@@ -1,6 +1,6 @@
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { Command } from 'commander';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ResolvedTelemetryConfig, RuntimeMetadata } from '@promptscript/telemetry';
@@ -37,6 +37,7 @@ vi.mock('./config.js', () => ({
 }));
 
 import { CLI_VERSION } from '../cli-version.js';
+import { SYSTEM_CONFIG_PATH } from '../config/user-config.js';
 import {
   commandFeatures,
   finishCliTelemetry,
@@ -258,6 +259,14 @@ describe('resolveFlushSelfInvocation', () => {
   it('fails closed when the endpoint host cannot be parsed', () => {
     vi.stubGlobal('Deno', { build: { standalone: false } });
     expect(resolveFlushSelfInvocation({ ...config, endpoint: 'not-a-url' })).toBeUndefined();
+  });
+
+  it('grants the flush child reads on the system config directory', () => {
+    vi.stubGlobal('Deno', { build: { standalone: false } });
+    const invocation = resolveFlushSelfInvocation(config);
+    const readFlag = invocation?.prefixArgs.find((arg) => arg.startsWith('--allow-read='));
+
+    expect(readFlag?.split('=')[1]?.split(',')).toContain(dirname(SYSTEM_CONFIG_PATH));
   });
 
   it('grants the flush child reads on the PROMPTSCRIPT_CONFIG directory', () => {

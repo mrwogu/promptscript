@@ -16,7 +16,7 @@ import {
 } from '@promptscript/telemetry';
 import { getRuntimeInfo, getRuntimeVersion } from '../runtime/runtime-info.js';
 import { CLI_VERSION } from '../cli-version.js';
-import { USER_CONFIG_PATH } from '../config/user-config.js';
+import { SYSTEM_CONFIG_PATH, USER_CONFIG_PATH } from '../config/user-config.js';
 import { resolveCliTelemetryConfig } from './config.js';
 
 let activeSession: TelemetrySession | null = null;
@@ -132,6 +132,7 @@ export function resolveFlushSelfInvocation(
     const readScopes = [
       process.cwd(),
       dirname(USER_CONFIG_PATH),
+      dirname(SYSTEM_CONFIG_PATH),
       config.cacheDirectory,
       cliDirectory,
       ...(environmentConfig === undefined || environmentConfig === ''
