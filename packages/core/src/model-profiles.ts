@@ -1,7 +1,7 @@
 /**
  * Built-in model profiles.
  *
- * Checked on 2026-09-23 against the provider model and deprecation pages,
+ * Checked on 2026-10-18 against the provider model and deprecation pages,
  * the Claude Code model configuration, and the GitHub Copilot supported
  * models list. Status and retirement dates follow the provider API; a tool
  * can stop offering a model before the provider does.
@@ -152,11 +152,16 @@ export const MODEL_PROFILES: readonly ModelProfile[] = [
   }),
   claude('sonnet', '4.5', {
     apiId: 'claude-sonnet-4-5-20250929',
+    status: 'deprecated',
     successor: 'claude-sonnet-4-6',
     releaseDate: '2025-09-29',
+    retirementDate: '2026-11-30',
   }),
   claude('sonnet', '4.6', { successor: 'claude-sonnet-5' }),
-  claude('sonnet', '5', { releaseDate: '2026-06-30' }),
+  claude('sonnet', '5', { successor: 'claude-sonnet-5-5', releaseDate: '2026-06-30' }),
+  claude('sonnet', '5.5', {
+    releaseDate: '2026-09-28',
+  }),
   claude('haiku', '3.5', {
     id: 'claude-3-5-haiku',
     apiId: 'claude-3-5-haiku-20241022',
@@ -167,7 +172,14 @@ export const MODEL_PROFILES: readonly ModelProfile[] = [
     releaseDate: '2024-10-22',
     retirementDate: '2026-02-19',
   }),
-  claude('haiku', '4.5', { apiId: 'claude-haiku-4-5-20251001', releaseDate: '2025-10-15' }),
+  claude('haiku', '4.5', {
+    successor: 'claude-haiku-5-5',
+    apiId: 'claude-haiku-4-5-20251001',
+    releaseDate: '2025-10-15',
+  }),
+  claude('haiku', '5.5', {
+    releaseDate: '2026-10-07',
+  }),
   claude('fable', '5', { successor: 'claude-fable-5-1', releaseDate: '2026-06-09' }),
   claude('fable', '5.1', { releaseDate: '2026-09-01' }),
   claude('mythos', '5', { successor: 'claude-mythos-5-1', releaseDate: '2026-06-09' }),
@@ -236,7 +248,13 @@ export const MODEL_PROFILES: readonly ModelProfile[] = [
     successor: 'gpt-6-astra',
     releaseDate: '2026-07-09',
   }),
-  openai('gpt-sol', '6', 'gpt-6-sol', 'GPT-6 Sol', { releaseDate: '2026-09-22' }),
+  openai('gpt-sol', '6', 'gpt-6-sol', 'GPT-6 Sol', {
+    successor: 'gpt-6.1-sol',
+    releaseDate: '2026-09-22',
+  }),
+  openai('gpt-sol', '6.1', 'gpt-6.1-sol', 'GPT-6.1 Sol', {
+    releaseDate: '2026-09-29',
+  }),
   openai('gpt-terra', '5.6', 'gpt-5.6-terra', 'GPT-5.6 Terra', {
     successor: 'gpt-6-sol',
     releaseDate: '2026-07-09',

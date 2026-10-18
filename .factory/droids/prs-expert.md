@@ -1,8 +1,8 @@
 ---
-# promptscript-generated: 2026-09-23T18:39:16.977Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-10-18T07:17:21.833Z | source: .promptscript/project.prs | target: factory
 name: prs-expert
 description: PromptScript language expert. Helps with syntax, compilation issues, and migrations.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 tools: ['Read', 'Grep', 'Glob', 'Bash', 'WebFetch']
 ---
 

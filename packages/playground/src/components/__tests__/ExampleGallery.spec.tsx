@@ -92,7 +92,7 @@ describe('ExampleGallery — gallery examples compile', () => {
     const githubReviewer = result.outputs.get('.github/agents/deep-reviewer.md')?.content;
     expect(githubReviewer).toContain('model: Claude Opus 4.5');
     const githubSpecWriter = result.outputs.get('.github/agents/spec-writer.md')?.content;
-    expect(githubSpecWriter).toContain('specModel: Claude Haiku 4.5');
+    expect(githubSpecWriter).toContain('specModel: Claude Haiku 5.5');
     // Claude has no specModel slot, so the compiler reports the loss.
     expect(result.warnings).toContainEqual(
       expect.objectContaining({
