@@ -1404,6 +1404,53 @@ describe('Resolver — registry marker handling', () => {
     expect(contextBlock).toBeDefined();
   });
 
+  it('records the cached registry file as the base source of its skills', async () => {
+    const tempDir = join(testCacheDir, 'project-base-source');
+    await fs.mkdir(tempDir, { recursive: true });
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(
+      prsFile,
+      ['@meta {', '  id: "base-source"', '  syntax: "1.5.0"', '}', '', '@use @acme/standards'].join(
+        '\n'
+      )
+    );
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.writeFile(
+        join(targetDir, 'standards.prs'),
+        [
+          '@meta {',
+          '  id: "acme-standards"',
+          '  syntax: "1.5.0"',
+          '}',
+          '',
+          '@skills {',
+          '  review: {',
+          '    description: "Review code"',
+          '  }',
+          '}',
+        ].join('\n')
+      );
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-base-source'),
+    });
+
+    const result = await resolver.resolve(prsFile);
+    const skills = result.ast?.blocks.find((b) => b.name === 'skills');
+    const review = (skills?.content as { properties?: Record<string, Record<string, unknown>> })
+      .properties?.['review'];
+
+    expect(review?.['__baseSource']).toEqual(
+      expect.stringMatching(/regcache-base-source.*standards\.prs$/)
+    );
+  });
+
   it('resolves a root-level registry import via auto-discovery (no sub-path)', async () => {
     const tempDir = join(testCacheDir, 'project-root-import');
     await fs.mkdir(tempDir, { recursive: true });

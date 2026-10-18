@@ -1934,7 +1934,7 @@ export class Resolver {
         const parseResult = parse(source, { filename: resolvedFullPath });
 
         if (parseResult.ast) {
-          resolvedAST = parseResult.ast;
+          resolvedAST = stampSkillBaseSource(parseResult.ast, resolvedFullPath);
         } else {
           for (const e of parseResult.errors) {
             errors.push(new ResolveError(e.message, e.location));
