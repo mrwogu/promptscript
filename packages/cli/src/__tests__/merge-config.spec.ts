@@ -270,6 +270,22 @@ describe('config/merge-config', () => {
     expect(result.registry).toEqual({ path: './registry', cache: { ttl: 60000 } });
   });
 
+  it('should let a project path registry replace the user url registry', () => {
+    const userConfig: UserConfig = {
+      version: '1',
+      registry: { url: 'https://user-registry.example.com' },
+    };
+
+    const projectConfig: PromptScriptConfig = {
+      ...baseProjectConfig,
+      registry: { path: './registry' },
+    };
+
+    const result = mergeConfigs(userConfig, projectConfig, {});
+
+    expect(result.registry).toEqual({ path: './registry' });
+  });
+
   it('should override url from user config', () => {
     const userConfig: UserConfig = {
       version: '1',
