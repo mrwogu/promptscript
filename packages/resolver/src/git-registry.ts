@@ -20,7 +20,7 @@ import { FileNotFoundError, isGitTimeoutError } from '@promptscript/core';
 import type { Registry } from './registry.js';
 import { GitCacheManager } from './git-cache-manager.js';
 import type { RegistryCache } from './registry-cache.js';
-import { parseGitUrl, parseVersionedPath, normalizeGitUrl } from './git-url-utils.js';
+import { parseVersionedPath, normalizeGitUrl } from './git-url-utils.js';
 
 /** 24-hour TTL for cached tag lists */
 const TAGS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -969,10 +969,9 @@ export class GitRegistry implements Registry {
     }
 
     const token = this.auth?.type === 'token' ? this.resolveToken() : undefined;
-    const sshKeyPath =
-      this.auth?.type === 'ssh' && parseGitUrl(this.originalUrl)?.protocol === 'ssh'
-        ? this.auth.sshKeyPath
-        : undefined;
+    // Not limited to an SSH registry URL: a fallback URL, and the origin of a
+    // clone made from it, can be SSH. Git ignores the command over HTTPS.
+    const sshKeyPath = this.auth?.type === 'ssh' ? this.auth.sshKeyPath : undefined;
 
     // simple-git rejects GIT_* variables set with env() unless they are
     // allowed here, and the config count and ssh command also need their
@@ -1009,8 +1008,8 @@ export class GitRegistry implements Registry {
     }
 
     if (sshKeyPath) {
-      const keyPath = `'${sshKeyPath.replace(/'/g, `'\\''`)}'`;
-      git.env('GIT_SSH_COMMAND', `ssh -i ${keyPath}`);
+      const keyPath = sshKeyPath.replaceAll("'", String.raw`'\''`);
+      git.env('GIT_SSH_COMMAND', `ssh -i '${keyPath}'`);
     }
 
     return git;

@@ -713,6 +713,34 @@ describe('GitRegistry', () => {
       expect(mockGit.clone).toHaveBeenCalledTimes(2);
     });
 
+    it('should use the SSH key for an SSH fallback of an HTTPS registry', async () => {
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockImplementationOnce(async (_url: string, targetPath: string) => {
+          await fs.mkdir(join(targetPath, '@company'), { recursive: true });
+          await fs.writeFile(join(targetPath, '@company', 'base.prs'), '@meta\nname = "base"');
+        });
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        fallbackUrl: 'git@github.com:org/repo.git',
+        cacheDir: testCacheDir,
+        auth: { type: 'ssh', sshKeyPath: '/path/to/key' },
+      });
+
+      await registry.fetch('@company/base');
+
+      expect(mockGit.clone).toHaveBeenLastCalledWith(
+        'git@github.com:org/repo.git',
+        expect.any(String),
+        expect.any(Array)
+      );
+      expect(simpleGit).not.toHaveBeenCalledWith(
+        expect.objectContaining({ allowEnvironment: ['GIT_TERMINAL_PROMPT'] })
+      );
+      expect(mockGit.env).toHaveBeenCalledWith('GIT_SSH_COMMAND', "ssh -i '/path/to/key'");
+    });
+
     it('should throw combined auth error when both primary and fallback fail', async () => {
       mockGit.clone
         .mockRejectedValueOnce(new Error('Authentication failed'))
