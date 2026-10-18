@@ -1,7 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
-import { interpolateEnvVars as interpolateEnvironmentVariables } from '@promptscript/core';
+import {
+  deepMerge,
+  interpolateEnvVars as interpolateEnvironmentVariables,
+} from '@promptscript/core';
 import type { PromptScriptConfig } from '@promptscript/core';
 import { loadUserAndSystemConfig } from './user-config.js';
 import { loadEnvOverrides } from './env-config.js';
@@ -54,6 +58,7 @@ export function findConfigFile(customPath?: string): string | null {
 
 /**
  * Load the PromptScript configuration.
+ * Follows `extends` chains, see {@link loadConfigFile}.
  * @param customPath - Optional custom config file path.
  * @returns The parsed configuration.
  * @throws Error if no config file is found or parsing fails.
@@ -68,17 +73,50 @@ export async function loadConfig(customPath?: string): Promise<PromptScriptConfi
     throw new Error('No PromptScript configuration found. Run: prs init');
   }
 
+  const config: unknown = await loadConfigFile(configFile, []);
+  return config as PromptScriptConfig;
+}
+
+/**
+ * Parse one config file and merge it over the file named in its `extends`.
+ * The base path is relative to the file that extends it. Objects merge deeply,
+ * arrays and scalars from the extending file replace the base ones.
+ */
+async function loadConfigFile(
+  configFile: string,
+  chain: string[]
+): Promise<Record<string, unknown>> {
+  const absolutePath = resolve(configFile);
+  if (chain.includes(absolutePath)) {
+    throw new Error(`Circular config extends: ${[...chain, absolutePath].join(' -> ')}`);
+  }
+
   let content = await readFile(configFile, 'utf-8');
 
   // Interpolate environment variables in the YAML content
   content = interpolateEnvVars(content);
 
+  let config: Record<string, unknown>;
   try {
-    return parseYaml(content) as PromptScriptConfig;
+    config = parseYaml(content);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown parse error';
     throw new Error(`Failed to parse ${configFile}: ${message}`, { cause: error });
   }
+
+  const basePath = config?.['extends'];
+  if (typeof basePath !== 'string') {
+    return config;
+  }
+
+  const own = { ...config };
+  delete own['extends'];
+  const baseFile = resolve(dirname(absolutePath), basePath);
+  if (!existsSync(baseFile)) {
+    throw new Error(`Extended config not found: ${baseFile} (from ${configFile})`);
+  }
+  const base = await loadConfigFile(baseFile, [...chain, absolutePath]);
+  return deepMerge(base, own, { arrayStrategy: 'replace' });
 }
 
 /**
