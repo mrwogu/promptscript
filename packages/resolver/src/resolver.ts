@@ -108,8 +108,9 @@ function isValueRecord(value: unknown): value is Record<string, Value> {
 
 /**
  * Record the file that defines each skill, so the layer-boundary policy can
- * measure how far an @extend is from the base definition. Skills that came
- * from an import keep the source they already have.
+ * measure how far an @extend is from the base definition. Runs before imports
+ * are merged, so it only sees this file's own skills, and it overwrites any
+ * `__baseSource` written by hand so a file cannot claim another layer.
  */
 function stampSkillBaseSource(ast: Program, source: string): Program {
   const skills = ast.blocks.find((block) => block.name === 'skills');
@@ -117,10 +118,7 @@ function stampSkillBaseSource(ast: Program, source: string): Program {
 
   const properties: Record<string, Value> = {};
   for (const [name, skill] of Object.entries(skills.content.properties)) {
-    properties[name] =
-      isValueRecord(skill) && skill['__baseSource'] === undefined
-        ? { ...skill, __baseSource: source }
-        : skill;
+    properties[name] = isValueRecord(skill) ? { ...skill, __baseSource: source } : skill;
   }
   const content = { ...skills.content, properties };
   return {
