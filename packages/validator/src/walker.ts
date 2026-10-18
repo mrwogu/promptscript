@@ -17,12 +17,6 @@ import { blockBodyToContent, valueNodeToValue } from '@promptscript/core';
 export type TextCallback = (text: string, loc: SourceLocation) => void;
 
 /**
- * Provenance the resolver attaches to skills. It holds file paths and merge
- * strategies, not instructions, so text rules must not scan it.
- */
-const RESOLVER_PROVENANCE_KEYS = new Set(['__baseSource', '__layerTrace', '__composedFrom']);
-
-/**
  * Callback function for blocks.
  */
 export type BlockCallback = (block: Block | ExtendBlock) => void;
@@ -52,7 +46,8 @@ export function walkText(ast: Program, callback: TextCallback, options?: WalkTex
 
   // Walk blocks
   for (const block of ast.blocks) {
-    walkBlockContent(block.content, block.loc, callback, exclude);
+    const content = block.name === 'skills' ? withoutSkillBaseSource(block.content) : block.content;
+    walkBlockContent(content, block.loc, callback, exclude);
     walkPresentationTitles(block.canonicalBody, callback);
   }
 
@@ -68,6 +63,32 @@ export function walkText(ast: Program, callback: TextCallback, options?: WalkTex
   for (const override of ast.overrides ?? []) {
     walkOverrideReplacement(override, callback, exclude);
   }
+}
+
+/**
+ * Drop the `__baseSource` path from each skill. The resolver always writes it
+ * (a hand-written value is overwritten), so it is a file path, not prompt
+ * text. Only this key on skill records is skipped, the same key anywhere else
+ * is still scanned.
+ */
+function withoutSkillBaseSource(content: BlockContent): BlockContent {
+  if (content.type !== 'ObjectContent') return content;
+  const properties: Record<string, Value> = {};
+  for (const [name, skill] of Object.entries(content.properties)) {
+    if (
+      skill !== null &&
+      typeof skill === 'object' &&
+      !Array.isArray(skill) &&
+      '__baseSource' in skill
+    ) {
+      const rest: Record<string, Value> = { ...(skill as Record<string, Value>) };
+      delete rest['__baseSource'];
+      properties[name] = rest;
+    } else {
+      properties[name] = skill;
+    }
+  }
+  return { ...content, properties };
 }
 
 function walkOverrideReplacement(
@@ -171,7 +192,7 @@ function walkObjectProperties(
   exclude?: Set<string>
 ): void {
   for (const [key, value] of Object.entries(properties)) {
-    if (exclude?.has(key) || RESOLVER_PROVENANCE_KEYS.has(key)) continue;
+    if (exclude?.has(key)) continue;
     walkValue(value, loc, callback, exclude);
   }
 }

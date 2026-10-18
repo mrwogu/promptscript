@@ -56,7 +56,7 @@ describe('walker', () => {
       expect(texts).toEqual(['Hello, world!']);
     });
 
-    it('should skip provenance the resolver attaches to skills', () => {
+    it('should skip the base source the resolver stamps on skills', () => {
       const texts: string[] = [];
       const ast = createTestProgram({
         blocks: [
@@ -71,10 +71,18 @@ describe('walker', () => {
                 review: {
                   content: 'Review the change.',
                   __baseSource: '/registry/@core/skills.prs',
-                  __layerTrace: [{ property: 'content', source: '/registry/@team/overlay.prs' }],
-                  __composedFrom: [{ source: '/registry/@core/base.prs', phase: 'base' }],
                 },
               },
+            },
+          },
+          {
+            type: 'Block',
+            name: 'context',
+            loc: defaultLoc,
+            content: {
+              type: 'ObjectContent',
+              loc: defaultLoc,
+              properties: { __baseSource: 'Text outside skills is still scanned.' },
             },
           },
         ],
@@ -82,7 +90,7 @@ describe('walker', () => {
 
       walkText(ast, (text) => texts.push(text));
 
-      expect(texts).toEqual(['Review the change.']);
+      expect(texts).toEqual(['Review the change.', 'Text outside skills is still scanned.']);
     });
 
     it('should walk text in object content', () => {
