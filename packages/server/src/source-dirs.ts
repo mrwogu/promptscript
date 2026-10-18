@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { join, dirname } from 'node:path';
+import { join, dirname, relative, isAbsolute } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 
 const DEFAULT_SOURCE_DIR = '.promptscript';
@@ -64,6 +64,18 @@ export async function resolveSourceDir(workspace: string): Promise<string> {
 export async function resolveFileGlobs(workspace: string): Promise<string[]> {
   const sourceDir = await resolveSourceDir(workspace);
   return [`${sourceDir}/**/*.prs`, 'promptscript.yaml', 'promptscript.yml'];
+}
+
+/**
+ * Whether a resolved path inside the workspace is one the file listing can
+ * return: a .prs file under the source directory or the project config.
+ */
+export async function isSourceFile(workspace: string, resolvedPath: string): Promise<boolean> {
+  const rel = relative(workspace, resolvedPath);
+  if (CONFIG_FILENAMES.includes(rel)) return true;
+  const sourceDir = join(workspace, await resolveSourceDir(workspace));
+  const fromSource = relative(sourceDir, resolvedPath);
+  return rel.endsWith('.prs') && !fromSource.startsWith('..') && !isAbsolute(fromSource);
 }
 
 /**

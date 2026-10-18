@@ -1,4 +1,5 @@
-import { mkdtemp, writeFile, mkdir, rm } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { mkdtemp, writeFile, mkdir, rm, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import Fastify from 'fastify';
@@ -67,8 +68,21 @@ describe('server routes', () => {
     });
 
     it('returns 404 for nonexistent file', async () => {
-      const res = await app.inject({ method: 'GET', url: '/api/files/nope.prs' });
+      const res = await app.inject({ method: 'GET', url: '/api/files/.promptscript/nope.prs' });
       expect(res.statusCode).toBe(404);
+    });
+
+    it('reads the project config', async () => {
+      const res = await app.inject({ method: 'GET', url: '/api/files/promptscript.yaml' });
+      expect(res.statusCode).toBe(200);
+      expect(res.json().content).toBe('targets: [claude]');
+    });
+
+    it('returns 403 for a workspace file outside the sources', async () => {
+      await writeFile(join(workspace, '.env'), 'SECRET=1');
+      const res = await app.inject({ method: 'GET', url: '/api/files/.env' });
+      expect(res.statusCode).toBe(403);
+      expect(res.body).not.toContain('SECRET');
     });
 
     it('returns 403 for path traversal', async () => {
@@ -95,16 +109,37 @@ describe('server routes', () => {
       const read = await app.inject({ method: 'GET', url: '/api/files/.promptscript/team.prs' });
       expect(read.json().content).toBe('@identity Updated');
     });
+
+    it('returns 403 outside the sources', async () => {
+      await writeFile(join(workspace, 'notes.md'), 'keep');
+      const res = await app.inject({
+        method: 'PUT',
+        url: '/api/files/notes.md',
+        payload: { content: 'overwritten' },
+      });
+      expect(res.statusCode).toBe(403);
+      expect(await readFile(join(workspace, 'notes.md'), 'utf-8')).toBe('keep');
+    });
   });
 
   describe('POST /api/files/*', () => {
     it('creates a new file', async () => {
       const res = await app.inject({
         method: 'POST',
-        url: '/api/files/src/new.prs',
+        url: '/api/files/.promptscript/new.prs',
         payload: { content: '@identity New' },
       });
       expect(res.statusCode).toBe(201);
+    });
+
+    it('returns 403 outside the source dir', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/files/src/new.prs',
+        payload: { content: '@identity New' },
+      });
+      expect(res.statusCode).toBe(403);
+      expect(existsSync(join(workspace, 'src/new.prs'))).toBe(false);
     });
 
     it('returns 409 if file already exists', async () => {
@@ -124,6 +159,13 @@ describe('server routes', () => {
 
       const read = await app.inject({ method: 'GET', url: '/api/files/.promptscript/team.prs' });
       expect(read.statusCode).toBe(404);
+    });
+
+    it('returns 403 outside the sources', async () => {
+      await writeFile(join(workspace, '.env'), 'SECRET=1');
+      const res = await app.inject({ method: 'DELETE', url: '/api/files/.env' });
+      expect(res.statusCode).toBe(403);
+      expect(existsSync(join(workspace, '.env'))).toBe(true);
     });
   });
 
@@ -161,7 +203,10 @@ describe('server routes', () => {
 
   describe('DELETE /api/files/* nonexistent', () => {
     it('returns 404 for nonexistent file', async () => {
-      const res = await app.inject({ method: 'DELETE', url: '/api/files/nonexistent.prs' });
+      const res = await app.inject({
+        method: 'DELETE',
+        url: '/api/files/.promptscript/nonexistent.prs',
+      });
       expect(res.statusCode).toBe(404);
     });
   });
@@ -169,10 +214,10 @@ describe('server routes', () => {
   describe('PUT /api/files/* write error', () => {
     it('returns 500 when write fails on valid path', async () => {
       // Try to write to a path that is a directory, causing EISDIR
-      await mkdir(join(workspace, '.promptscript/isdir'), { recursive: true });
+      await mkdir(join(workspace, '.promptscript/isdir.prs'), { recursive: true });
       const res = await app.inject({
         method: 'PUT',
-        url: '/api/files/.promptscript/isdir',
+        url: '/api/files/.promptscript/isdir.prs',
         payload: { content: 'content' },
       });
       expect(res.statusCode).toBe(500);

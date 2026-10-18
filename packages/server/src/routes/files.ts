@@ -3,9 +3,16 @@ import { readFile, writeFile, unlink, stat, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import fg from 'fast-glob';
 import { resolveSafePath, PathTraversalError } from '../path-guard.js';
-import { resolveFileGlobs } from '../source-dirs.js';
+import { isSourceFile, resolveFileGlobs } from '../source-dirs.js';
 
 const MAX_BODY_SIZE = 1_048_576; // 1MB
+
+// The file routes reach only what the listing shows, so the allowed origin
+// cannot read or write other workspace files such as .env.
+async function resolveSourcePath(workspace: string, filePath: string): Promise<string | null> {
+  const resolved = await resolveSafePath(workspace, filePath);
+  return (await isSourceFile(workspace, resolved)) ? resolved : null;
+}
 
 export function registerRoutes(app: FastifyInstance, workspace: string, readOnly: boolean): void {
   // List files (rate limiting is applied globally via @fastify/rate-limit in server.ts)
@@ -30,7 +37,8 @@ export function registerRoutes(app: FastifyInstance, workspace: string, readOnly
   app.get<{ Params: { '*': string } }>('/api/files/*', async (request, reply) => {
     const filePath = request.params['*'];
     try {
-      const resolved = await resolveSafePath(workspace, filePath);
+      const resolved = await resolveSourcePath(workspace, filePath);
+      if (!resolved) return reply.status(403).send({ error: 'Forbidden' });
       const content = await readFile(resolved, 'utf-8');
       return { path: filePath, content };
     } catch (err) {
@@ -49,7 +57,8 @@ export function registerRoutes(app: FastifyInstance, workspace: string, readOnly
       if (readOnly) return reply.status(403).send({ error: 'Read-only mode' });
       const filePath = request.params['*'];
       try {
-        const resolved = await resolveSafePath(workspace, filePath);
+        const resolved = await resolveSourcePath(workspace, filePath);
+        if (!resolved) return reply.status(403).send({ error: 'Forbidden' });
         await writeFile(resolved, request.body.content, 'utf-8');
         return { path: filePath, status: 'updated' };
       } catch (err) {
@@ -69,7 +78,8 @@ export function registerRoutes(app: FastifyInstance, workspace: string, readOnly
       if (readOnly) return reply.status(403).send({ error: 'Read-only mode' });
       const filePath = request.params['*'];
       try {
-        const resolved = await resolveSafePath(workspace, filePath);
+        const resolved = await resolveSourcePath(workspace, filePath);
+        if (!resolved) return reply.status(403).send({ error: 'Forbidden' });
         try {
           await stat(resolved);
           return reply.status(409).send({ error: 'File already exists' });
@@ -93,7 +103,8 @@ export function registerRoutes(app: FastifyInstance, workspace: string, readOnly
     if (readOnly) return reply.status(403).send({ error: 'Read-only mode' });
     const filePath = request.params['*'];
     try {
-      const resolved = await resolveSafePath(workspace, filePath);
+      const resolved = await resolveSourcePath(workspace, filePath);
+      if (!resolved) return reply.status(403).send({ error: 'Forbidden' });
       await unlink(resolved);
       return { path: filePath, status: 'deleted' };
     } catch (err) {
