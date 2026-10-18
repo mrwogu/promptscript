@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { readFile, writeFile, unlink, stat, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, unlink, stat, mkdir, lstat, realpath } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import fg from 'fast-glob';
 import { resolveSafePath, PathTraversalError } from '../path-guard.js';
@@ -8,10 +8,21 @@ import { isSourceFile, resolveFileGlobs } from '../source-dirs.js';
 const MAX_BODY_SIZE = 1_048_576; // 1MB
 
 // The file routes reach only what the listing shows, so the allowed origin
-// cannot read or write other workspace files such as .env.
+// cannot read or write other workspace files such as .env. A symlink must also
+// point at a source file, and a dangling one is rejected, because a write
+// through it would create its target.
 async function resolveSourcePath(workspace: string, filePath: string): Promise<string | null> {
   const resolved = await resolveSafePath(workspace, filePath);
-  return (await isSourceFile(workspace, resolved)) ? resolved : null;
+  if (!(await isSourceFile(workspace, resolved))) return null;
+  const target = await realpath(resolved).catch(() => null);
+  if (target) {
+    return (await isSourceFile(await realpath(workspace), target)) ? resolved : null;
+  }
+  const isLink = await lstat(resolved).then(
+    (stats) => stats.isSymbolicLink(),
+    () => false
+  );
+  return isLink ? null : resolved;
 }
 
 export function registerRoutes(app: FastifyInstance, workspace: string, readOnly: boolean): void {

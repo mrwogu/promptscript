@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { mkdtemp, writeFile, mkdir, rm, readFile } from 'node:fs/promises';
+import { mkdtemp, writeFile, mkdir, rm, readFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import Fastify from 'fastify';
@@ -94,6 +94,47 @@ describe('server routes', () => {
         url: '/api/files/..%2F..%2F..%2Fetc%2Fpasswd',
       });
       expect(res.statusCode).toBe(403);
+    });
+  });
+
+  describe('symlinks in the source dir', () => {
+    it('rejects a .prs symlink to a file outside the sources', async () => {
+      await writeFile(join(workspace, '.env'), 'SECRET=1');
+      await symlink('../.env', join(workspace, '.promptscript/secret.prs'));
+
+      const read = await app.inject({ method: 'GET', url: '/api/files/.promptscript/secret.prs' });
+      const write = await app.inject({
+        method: 'PUT',
+        url: '/api/files/.promptscript/secret.prs',
+        payload: { content: 'overwritten' },
+      });
+
+      expect(read.statusCode).toBe(403);
+      expect(read.body).not.toContain('SECRET');
+      expect(write.statusCode).toBe(403);
+      expect(await readFile(join(workspace, '.env'), 'utf-8')).toBe('SECRET=1');
+    });
+
+    it('rejects a dangling .prs symlink so a write cannot create its target', async () => {
+      await symlink('../.env', join(workspace, '.promptscript/new.prs'));
+
+      const res = await app.inject({
+        method: 'PUT',
+        url: '/api/files/.promptscript/new.prs',
+        payload: { content: 'SECRET=1' },
+      });
+
+      expect(res.statusCode).toBe(403);
+      expect(existsSync(join(workspace, '.env'))).toBe(false);
+    });
+
+    it('allows a symlink to another source file', async () => {
+      await symlink('team.prs', join(workspace, '.promptscript/alias.prs'));
+
+      const res = await app.inject({ method: 'GET', url: '/api/files/.promptscript/alias.prs' });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.json().content).toBe('@identity Team Lead');
     });
   });
 

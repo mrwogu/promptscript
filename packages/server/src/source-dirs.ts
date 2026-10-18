@@ -3,7 +3,7 @@ import { join, dirname, relative, isAbsolute } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 
 const DEFAULT_SOURCE_DIR = '.promptscript';
-const CONFIG_FILENAMES = ['promptscript.yaml', 'promptscript.yml'];
+const CONFIG_FILENAMES = new Set(['promptscript.yaml', 'promptscript.yml']);
 
 interface TargetEntry {
   [key: string]: { enabled?: boolean; version?: string; convention?: string } | undefined;
@@ -72,7 +72,7 @@ export async function resolveFileGlobs(workspace: string): Promise<string[]> {
  */
 export async function isSourceFile(workspace: string, resolvedPath: string): Promise<boolean> {
   const rel = relative(workspace, resolvedPath);
-  if (CONFIG_FILENAMES.includes(rel)) return true;
+  if (CONFIG_FILENAMES.has(rel)) return true;
   const sourceDir = join(workspace, await resolveSourceDir(workspace));
   const fromSource = relative(sourceDir, resolvedPath);
   return rel.endsWith('.prs') && !fromSource.startsWith('..') && !isAbsolute(fromSource);

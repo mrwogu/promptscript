@@ -864,7 +864,7 @@ All compilation happens locally in your browser - no data is sent to any externa
 :::
 
 :::note[Security]
-The server only accepts requests from `https://getpromptscript.dev` by default (CORS). Use `--cors-origin` to allow other origins. Use `--read-only` to prevent file modifications. The file routes reach only the files the listing shows: `.prs` files in the source directory and `promptscript.yaml` / `promptscript.yml`. Other workspace files, such as `.env`, return 403.
+The server only accepts requests from `https://getpromptscript.dev` by default (CORS). Use `--cors-origin` to allow other origins. Use `--read-only` to prevent file modifications. The file routes reach only the files the listing shows: `.prs` files in the source directory and `promptscript.yaml` / `promptscript.yml`. Other workspace files, such as `.env`, return 403, and so does a symlink that points outside the source files.
 :::
 
 ---
