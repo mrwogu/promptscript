@@ -968,6 +968,28 @@ export class GitRegistry implements Registry {
       options.baseDir = baseDir;
     }
 
+    const token = this.auth?.type === 'token' ? this.resolveToken() : undefined;
+    const sshKeyPath =
+      this.auth?.type === 'ssh' && parseGitUrl(this.originalUrl)?.protocol === 'ssh'
+        ? this.auth.sshKeyPath
+        : undefined;
+
+    // simple-git rejects GIT_* variables set with env() unless they are
+    // allowed here, and the config count and ssh command also need their
+    // unsafe flag.
+    const allowEnvironment = ['GIT_TERMINAL_PROMPT'];
+    if (token) {
+      allowEnvironment.push('GIT_CONFIG_COUNT', 'GIT_CONFIG_KEY_0', 'GIT_CONFIG_VALUE_0');
+    }
+    if (sshKeyPath) {
+      allowEnvironment.push('GIT_SSH_COMMAND');
+    }
+    options.allowEnvironment = allowEnvironment;
+    options.unsafe = {
+      allowUnsafeConfigEnvCount: Boolean(token),
+      allowUnsafeSshCommand: Boolean(sshKeyPath),
+    };
+
     const git = simpleGit(options);
 
     // Prevent interactive credential prompts from hanging indefinitely.
@@ -977,24 +999,18 @@ export class GitRegistry implements Registry {
     git.env('GIT_TERMINAL_PROMPT', '0');
     git.env('GCM_INTERACTIVE', 'never');
 
-    if (this.auth?.type === 'token') {
-      const token = this.resolveToken();
-      if (token) {
-        git.env('GIT_CONFIG_COUNT', '1');
-        git.env('GIT_CONFIG_KEY_0', `http.${this.url}.extraHeader`);
-        git.env(
-          'GIT_CONFIG_VALUE_0',
-          `Authorization: Basic ${Buffer.from(`${token}:`).toString('base64')}`
-        );
-      }
+    if (token) {
+      git.env('GIT_CONFIG_COUNT', '1');
+      git.env('GIT_CONFIG_KEY_0', `http.${this.url}.extraHeader`);
+      git.env(
+        'GIT_CONFIG_VALUE_0',
+        `Authorization: Basic ${Buffer.from(`${token}:`).toString('base64')}`
+      );
     }
 
-    if (this.auth?.type === 'ssh' && this.auth.sshKeyPath) {
-      const parsed = parseGitUrl(this.originalUrl);
-      if (parsed?.protocol === 'ssh') {
-        const keyPath = `'${this.auth.sshKeyPath.replace(/'/g, `'\\''`)}'`;
-        git.env('GIT_SSH_COMMAND', `ssh -i ${keyPath}`);
-      }
+    if (sshKeyPath) {
+      const keyPath = `'${sshKeyPath.replace(/'/g, `'\\''`)}'`;
+      git.env('GIT_SSH_COMMAND', `ssh -i ${keyPath}`);
     }
 
     return git;
@@ -1280,6 +1296,7 @@ function createRemoteValidationGit(baseDir: string | undefined, timeout: number)
       stdErr: false,
       stdOut: false,
     },
+    allowEnvironment: ['GIT_TERMINAL_PROMPT'],
   };
   const git = baseDir ? simpleGit(baseDir, options) : simpleGit(options);
   git.env('GIT_TERMINAL_PROMPT', '0');

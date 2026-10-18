@@ -142,6 +142,17 @@ describe('GitRegistry — extended methods', () => {
         'GIT_CONFIG_VALUE_0',
         'Authorization: Basic dGVzdC10b2tlbjo='
       );
+      expect(simpleGit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          allowEnvironment: [
+            'GIT_TERMINAL_PROMPT',
+            'GIT_CONFIG_COUNT',
+            'GIT_CONFIG_KEY_0',
+            'GIT_CONFIG_VALUE_0',
+          ],
+          unsafe: { allowUnsafeConfigEnvCount: true, allowUnsafeSshCommand: false },
+        })
+      );
     });
 
     it('removes an existing target directory before cloning', async () => {
@@ -402,6 +413,8 @@ describe('GitRegistry — extended methods', () => {
 
       expect(simpleGit).toHaveBeenCalledWith({
         timeout: { block: 12_345, stdErr: false, stdOut: false },
+        allowEnvironment: ['GIT_TERMINAL_PROMPT'],
+        unsafe: { allowUnsafeConfigEnvCount: false, allowUnsafeSshCommand: false },
       });
     });
 
@@ -418,6 +431,8 @@ describe('GitRegistry — extended methods', () => {
 
       expect(simpleGit).toHaveBeenCalledWith({
         timeout: { block: 999, stdErr: false, stdOut: false },
+        allowEnvironment: ['GIT_TERMINAL_PROMPT'],
+        unsafe: { allowUnsafeConfigEnvCount: false, allowUnsafeSshCommand: false },
       });
     });
 
@@ -433,6 +448,8 @@ describe('GitRegistry — extended methods', () => {
 
       expect(simpleGit).toHaveBeenCalledWith({
         timeout: { block: 60_000, stdErr: false, stdOut: false },
+        allowEnvironment: ['GIT_TERMINAL_PROMPT'],
+        unsafe: { allowUnsafeConfigEnvCount: false, allowUnsafeSshCommand: false },
       });
     });
 

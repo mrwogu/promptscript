@@ -486,6 +486,12 @@ describe('GitRegistry', () => {
         'GIT_SSH_COMMAND',
         expect.stringContaining('StrictHostKeyChecking=no')
       );
+      expect(simpleGit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          allowEnvironment: ['GIT_TERMINAL_PROMPT', 'GIT_SSH_COMMAND'],
+          unsafe: { allowUnsafeConfigEnvCount: false, allowUnsafeSshCommand: true },
+        })
+      );
     });
 
     it('should disable interactive credential prompts to prevent hangs', async () => {
@@ -1154,6 +1160,7 @@ describe('validateRemoteAccess', () => {
     expect(result.error).toContain('https://github.com/org/repo.git');
     expect(simpleGit).toHaveBeenCalledWith({
       timeout: { block: 25, stdErr: false, stdOut: false },
+      allowEnvironment: ['GIT_TERMINAL_PROMPT'],
     });
     expect(mockGit.env).toHaveBeenCalledWith('GIT_TERMINAL_PROMPT', '0');
     expect(mockGit.env).toHaveBeenCalledWith('GCM_INTERACTIVE', 'never');
@@ -1172,6 +1179,7 @@ describe('validateRemoteAccess', () => {
     expect(result.error).toContain('https://github.com/org/repo.git');
     expect(simpleGit).toHaveBeenCalledWith(expect.any(String), {
       timeout: { block: 25, stdErr: false, stdOut: false },
+      allowEnvironment: ['GIT_TERMINAL_PROMPT'],
     });
   });
 
@@ -1225,6 +1233,7 @@ describe('validateRemoteAccess', () => {
     expect(result.error).toContain('Timed out after 60000ms');
     expect(simpleGit).toHaveBeenCalledWith({
       timeout: { block: 60_000, stdErr: false, stdOut: false },
+      allowEnvironment: ['GIT_TERMINAL_PROMPT'],
     });
   });
 });
