@@ -8,7 +8,7 @@
 
 > **isGitTimeoutError**(`error`): `boolean`
 
-Defined in: [core/src/git-timeout.ts:10](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/git-timeout.ts#L10)
+Defined in: [core/src/git-timeout.ts:10](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/git-timeout.ts#L10)
 
 Classify an error as a Git operation timeout.
 

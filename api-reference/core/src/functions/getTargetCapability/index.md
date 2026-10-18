@@ -8,7 +8,7 @@
 
 > **getTargetCapability**(`name`): [`TargetCapability`](https://getpromptscript.dev/api-reference/core/src/interfaces/TargetCapability/index.md)
 
-Defined in: [core/src/target-catalog.ts:870](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/target-catalog.ts#L870)
+Defined in: [core/src/target-catalog.ts:870](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/target-catalog.ts#L870)
 
 Get the complete capability contract for a known target.
 

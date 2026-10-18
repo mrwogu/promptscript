@@ -33,10 +33,10 @@ targets:
 
 ## Output Files
 
-| File              | Path                             | Purpose                    |
-| ----------------- | -------------------------------- | -------------------------- |
-| Main instructions | `.cortex/rules/project.md`       | Primary rule file          |
-| Skills            | `.cortex/skills/<name>/SKILL.md` | Reusable skill definitions |
+| File              | Path                             | Purpose                                   |
+| ----------------- | -------------------------------- | ----------------------------------------- |
+| Main instructions | `.cortex/rules/project.md`       | Primary rule file                         |
+| Skills            | `.cortex/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode |
 
 ## Output Versions
 

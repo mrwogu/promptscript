@@ -8,6 +8,6 @@
 
 > `const` **BLOCKED\_PATTERNS\_JA**: `RegExp`[]
 
-Defined in: [validator/src/rules/blocked-patterns.ts:184](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/rules/blocked-patterns.ts#L184)
+Defined in: [validator/src/rules/blocked-patterns.ts:184](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/rules/blocked-patterns.ts#L184)
 
 Japanese (日本語) prompt injection patterns.

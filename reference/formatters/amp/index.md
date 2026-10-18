@@ -32,11 +32,11 @@ targets:
 
 ## Output Files
 
-| File              | Path                             | Purpose                    |
-| ----------------- | -------------------------------- | -------------------------- |
-| Main instructions | `AGENTS.md`                      | Primary rule file          |
-| Skills            | `.agents/skills/<name>/SKILL.md` | Reusable skill definitions |
-| Agents            | `.agents/agents/<name>.md`       | Agent configurations       |
+| File              | Path                             | Purpose                                   |
+| ----------------- | -------------------------------- | ----------------------------------------- |
+| Main instructions | `AGENTS.md`                      | Primary rule file                         |
+| Skills            | `.agents/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode |
+| Agents            | `.agents/agents/<name>.md`       | Agent configurations                      |
 
 ## Output Versions
 

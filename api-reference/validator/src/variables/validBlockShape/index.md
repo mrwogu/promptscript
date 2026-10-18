@@ -8,7 +8,7 @@
 
 > `const` **validBlockShape**: [`ValidationRule`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationRule/index.md)
 
-Defined in: [validator/src/rules/valid-block-shape.ts:173](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/rules/valid-block-shape.ts#L173)
+Defined in: [validator/src/rules/valid-block-shape.ts:173](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/rules/valid-block-shape.ts#L173)
 
 PS038: Canonical built-in block shapes.
 

@@ -33,10 +33,10 @@ targets:
 
 ## Output Files
 
-| File              | Path                            | Purpose                    |
-| ----------------- | ------------------------------- | -------------------------- |
-| Main instructions | `.iflow/rules/project.md`       | Primary rule file          |
-| Skills            | `.iflow/skills/<name>/SKILL.md` | Reusable skill definitions |
+| File              | Path                            | Purpose                                   |
+| ----------------- | ------------------------------- | ----------------------------------------- |
+| Main instructions | `.iflow/rules/project.md`       | Primary rule file                         |
+| Skills            | `.iflow/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode |
 
 ## Output Versions
 

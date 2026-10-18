@@ -8,4 +8,4 @@
 
 > `const` **Into**: `TokenType`
 
-Defined in: [parser/src/lexer/tokens.ts:115](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/parser/src/lexer/tokens.ts#L115)
+Defined in: [parser/src/lexer/tokens.ts:115](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/parser/src/lexer/tokens.ts#L115)

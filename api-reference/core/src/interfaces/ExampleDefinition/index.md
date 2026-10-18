@@ -6,7 +6,7 @@
 
 # Interface: ExampleDefinition
 
-Defined in: [core/src/types/ast.ts:826](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L826)
+Defined in: [core/src/types/ast.ts:826](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/ast.ts#L826)
 
 Typed representation of an example in the
 
@@ -21,7 +21,7 @@ This is a helper extraction type (like SkillDefinition), NOT an AST node.
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/ast.ts:832](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L832)
+Defined in: [core/src/types/ast.ts:832](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/ast.ts#L832)
 
 Optional description
 
@@ -31,7 +31,7 @@ Optional description
 
 > **input**: `string` \| [`TextContent`](https://getpromptscript.dev/api-reference/core/src/interfaces/TextContent/index.md)
 
-Defined in: [core/src/types/ast.ts:828](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L828)
+Defined in: [core/src/types/ast.ts:828](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/ast.ts#L828)
 
 Input data for the example
 
@@ -41,6 +41,6 @@ Input data for the example
 
 > **output**: `string` \| [`TextContent`](https://getpromptscript.dev/api-reference/core/src/interfaces/TextContent/index.md)
 
-Defined in: [core/src/types/ast.ts:830](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/ast.ts#L830)
+Defined in: [core/src/types/ast.ts:830](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/ast.ts#L830)
 
 Expected output

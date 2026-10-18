@@ -8,9 +8,9 @@
 
 > **formatProgram**(`formatter`, `ast`, `options?`): [`FormatterOutput`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterOutput/index.md)
 
-Defined in: [formatters/src/formatter-adapter.ts:30](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/formatter-adapter.ts#L30)
+Defined in: [formatters/src/formatter-adapter.ts:31](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/formatter-adapter.ts#L31)
 
-Route canonical AST only to explicit consumers and isolate legacy formatters.
+Format a program and report authored resource blocks the target drops.
 
 ## Parameters
 

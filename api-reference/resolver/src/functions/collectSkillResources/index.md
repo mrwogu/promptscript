@@ -8,7 +8,7 @@
 
 > **collectSkillResources**(`skillMdPath`, `parsed`, `logger?`): `Promise`\<[`CollectedSkillResources`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/CollectedSkillResources/index.md)\>
 
-Defined in: [resolver/src/skill-resources.ts:41](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/resolver/src/skill-resources.ts#L41)
+Defined in: [resolver/src/skill-resources.ts:41](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/resolver/src/skill-resources.ts#L41)
 
 Collect every file that travels with a SKILL.md.
 

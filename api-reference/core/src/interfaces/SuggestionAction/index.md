@@ -6,7 +6,7 @@
 
 # Interface: SuggestionAction
 
-Defined in: [core/src/types/manifest.ts:105](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L105)
+Defined in: [core/src/types/manifest.ts:105](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/manifest.ts#L105)
 
 What to suggest when a condition matches.
 
@@ -16,7 +16,7 @@ What to suggest when a condition matches.
 
 > `optional` **inherit?**: `string`
 
-Defined in: [core/src/types/manifest.ts:107](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L107)
+Defined in: [core/src/types/manifest.ts:107](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/manifest.ts#L107)
 
 Configuration to inherit
 
@@ -26,7 +26,7 @@ Configuration to inherit
 
 > `optional` **skills?**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:111](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L111)
+Defined in: [core/src/types/manifest.ts:111](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/manifest.ts#L111)
 
 Skills to include
 
@@ -36,6 +36,6 @@ Skills to include
 
 > `optional` **use?**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:109](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/types/manifest.ts#L109)
+Defined in: [core/src/types/manifest.ts:109](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/manifest.ts#L109)
 
 Fragments to use

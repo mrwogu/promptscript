@@ -8,7 +8,7 @@
 
 > **getSyntaxFeatureUsages**(`ast`): [`SyntaxFeatureUsage`](https://getpromptscript.dev/api-reference/core/src/interfaces/SyntaxFeatureUsage/index.md)[]
 
-Defined in: [core/src/syntax-versions.ts:244](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/syntax-versions.ts#L244)
+Defined in: [core/src/syntax-versions.ts:244](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/syntax-versions.ts#L244)
 
 Find all versioned non-block syntax features used by a parsed program.
 

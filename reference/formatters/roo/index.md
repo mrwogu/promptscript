@@ -32,9 +32,10 @@ targets:
 
 ## Output Files
 
-| File              | Path        | Purpose           |
-| ----------------- | ----------- | ----------------- |
-| Main instructions | `.roorules` | Primary rule file |
+| File              | Path                     | Purpose                                           |
+| ----------------- | ------------------------ | ------------------------------------------------- |
+| Main instructions | `.roorules`              | Primary rule file                                 |
+| MCP servers       | `.roo/mcp_settings.json` | MCP server config in `multifile` and `full` modes |
 
 ## Output Versions
 

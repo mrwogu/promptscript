@@ -8,7 +8,7 @@
 
 > **formatProfileEntry**(`candidate`): `string`
 
-Defined in: [core/src/model-drift.ts:288](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-drift.ts#L288)
+Defined in: [core/src/model-drift.ts:284](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-drift.ts#L284)
 
 Draft text for model-profiles.ts: the helper call for one candidate,
 with the fields OpenRouter knows about.

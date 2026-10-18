@@ -109,6 +109,14 @@ Hook files require `multifile` or `full` mode. In `simple` mode, formatters
 preserve single-file output and report a compatibility warning. Cursor emits
 hook files only in `full` mode and reports `PS4002` in its other modes.
 
+MCP and plugin files have their own mode rules. GitHub Copilot, Claude Code, Cursor, and Grok Build
+write MCP config only in `full` mode, Antigravity in every mode, and the other MCP targets in
+`multifile` and `full`. Cursor and Grok Build write plugin config only in `full` mode, Factory Droid
+and Codex in `multifile` and `full`. Each target page lists the modes under Output Files.
+
+When a target or the selected mode cannot write `@skills`, `@mcpServers`, or `@plugins`,
+compilation reports `PS4002` with the block location instead of dropping the block silently.
+
 Agent-level `mcpServers` references are emitted by Claude Code, Cursor, and Factory Droid.
 
 ## Shared Markdown Formatters

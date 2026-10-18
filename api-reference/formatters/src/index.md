@@ -223,6 +223,7 @@ from the compiled PromptScript AST.
 
 ## Functions
 
+- [appendResourceCapabilityWarnings](https://getpromptscript.dev/api-reference/formatters/src/functions/appendResourceCapabilityWarnings/index.md)
 - [appendTargetHookCapabilityWarnings](https://getpromptscript.dev/api-reference/formatters/src/functions/appendTargetHookCapabilityWarnings/index.md)
 - [applyHookTargetOverrides](https://getpromptscript.dev/api-reference/formatters/src/functions/applyHookTargetOverrides/index.md)
 - [applyMergeOperations](https://getpromptscript.dev/api-reference/formatters/src/functions/applyMergeOperations/index.md)
@@ -248,6 +249,7 @@ from the compiled PromptScript AST.
 - [getExpectedSections](https://getpromptscript.dev/api-reference/formatters/src/functions/getExpectedSections/index.md)
 - [getFormatter](https://getpromptscript.dev/api-reference/formatters/src/functions/getFormatter/index.md)
 - [getHookCompatibilityWarnings](https://getpromptscript.dev/api-reference/formatters/src/functions/getHookCompatibilityWarnings/index.md)
+- [getResourceCapabilityWarnings](https://getpromptscript.dev/api-reference/formatters/src/functions/getResourceCapabilityWarnings/index.md)
 - [getTargetHookCapabilityWarnings](https://getpromptscript.dev/api-reference/formatters/src/functions/getTargetHookCapabilityWarnings/index.md)
 - [hasFormatter](https://getpromptscript.dev/api-reference/formatters/src/functions/hasFormatter/index.md)
 - [hasOwnedEntries](https://getpromptscript.dev/api-reference/formatters/src/functions/hasOwnedEntries/index.md)

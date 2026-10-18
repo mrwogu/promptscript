@@ -24,6 +24,7 @@
 | ----------------- | ---------------------------- | ------------------------------------------------- |
 | Main instructions | `.agent/rules/project.md`    | Primary rule file                                 |
 | Workflows         | `.agent/workflows/<name>.md` | Workflow shortcuts; simple commands remain inline |
+| MCP servers       | `.agents/mcp_config.json`    | MCP server config                                 |
 
 <!-- generated:end:output-files -->
 

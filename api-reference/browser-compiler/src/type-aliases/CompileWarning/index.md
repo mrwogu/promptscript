@@ -8,6 +8,6 @@
 
 > **CompileWarning** = [`ValidationMessage`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationMessage/index.md)
 
-Defined in: [browser-compiler/src/compiler.ts:104](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/browser-compiler/src/compiler.ts#L104)
+Defined in: [browser-compiler/src/compiler.ts:104](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/browser-compiler/src/compiler.ts#L104)
 
 Compilation warning reported by validation or by a formatter.

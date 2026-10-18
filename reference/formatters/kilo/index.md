@@ -33,10 +33,11 @@ targets:
 
 ## Output Files
 
-| File              | Path                               | Purpose                    |
-| ----------------- | ---------------------------------- | -------------------------- |
-| Main instructions | `.kilocode/rules/project.md`       | Primary rule file          |
-| Skills            | `.kilocode/skills/<name>/SKILL.md` | Reusable skill definitions |
+| File              | Path                               | Purpose                                           |
+| ----------------- | ---------------------------------- | ------------------------------------------------- |
+| Main instructions | `.kilocode/rules/project.md`       | Primary rule file                                 |
+| Skills            | `.kilocode/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode         |
+| MCP servers       | `.kilocode/mcp_settings.json`      | MCP server config in `multifile` and `full` modes |
 
 ## Output Versions
 

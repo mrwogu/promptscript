@@ -8,7 +8,7 @@
 
 > **resolveSectionTitle**(`ast`, `sectionIdOrAlias`, `options?`): `string`
 
-Defined in: [formatters/src/section-title-resolver.ts:64](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/section-title-resolver.ts#L64)
+Defined in: [formatters/src/section-title-resolver.ts:64](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/section-title-resolver.ts#L64)
 
 Resolve a generated section title without changing its output protocol.
 

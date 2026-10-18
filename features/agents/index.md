@@ -157,7 +157,7 @@ below cannot drift from what formatters actually emit:
 GitHub transformation examples: `tools` maps PromptScript and Claude Code tool
 names to Copilot aliases (`Grep` and `Glob` both become `search`), and `model`
 uses Copilot model names (`sonnet` becomes the newest Sonnet release, such as
-`Claude Sonnet 5`). Other targets keep the `model` field name but also get
+`Claude Sonnet 5.5`). Other targets keep the `model` field name but also get
 their native model names, see [Models](#models).
 Codex transformation examples: `content` becomes `developer_instructions`,
 `reasoningEffort` becomes `model_reasoning_effort`, and `skills` becomes the

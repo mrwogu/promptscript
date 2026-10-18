@@ -8,7 +8,7 @@
 
 > **compareModelReleases**(`a`, `b`): `number`
 
-Defined in: [core/src/model-catalog.ts:228](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-catalog.ts#L228)
+Defined in: [core/src/model-catalog.ts:228](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-catalog.ts#L228)
 
 Order two releases of one family: version first, then release date.
 

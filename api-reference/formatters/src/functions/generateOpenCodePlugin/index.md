@@ -8,7 +8,7 @@
 
 > **generateOpenCodePlugin**(`hooks`): `string` \| `null`
 
-Defined in: [formatters/src/hook-adapters.ts:1292](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L1292)
+Defined in: [formatters/src/hook-adapters.ts:1292](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/hook-adapters.ts#L1292)
 
 Generate the project-local OpenCode plugin for portable hook definitions.
 

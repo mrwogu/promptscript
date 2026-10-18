@@ -33,10 +33,11 @@ targets:
 
 ## Output Files
 
-| File              | Path                            | Purpose                    |
-| ----------------- | ------------------------------- | -------------------------- |
-| Main instructions | `AGENTS.md`                     | Primary rule file          |
-| Skills            | `.crush/skills/<name>/SKILL.md` | Reusable skill definitions |
+| File              | Path                            | Purpose                                           |
+| ----------------- | ------------------------------- | ------------------------------------------------- |
+| Main instructions | `AGENTS.md`                     | Primary rule file                                 |
+| Skills            | `.crush/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode         |
+| MCP servers       | `.crush/mcp.json`               | MCP server config in `multifile` and `full` modes |
 
 ## Output Versions
 

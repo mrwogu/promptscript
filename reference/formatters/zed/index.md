@@ -33,9 +33,10 @@ targets:
 
 ## Output Files
 
-| File              | Path        | Purpose           |
-| ----------------- | ----------- | ----------------- |
-| Main instructions | `AGENTS.md` | Primary rule file |
+| File              | Path                 | Purpose                                           |
+| ----------------- | -------------------- | ------------------------------------------------- |
+| Main instructions | `AGENTS.md`          | Primary rule file                                 |
+| MCP servers       | `.zed/settings.json` | MCP server config in `multifile` and `full` modes |
 
 ## Output Versions
 

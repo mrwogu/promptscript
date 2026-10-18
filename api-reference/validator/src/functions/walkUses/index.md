@@ -8,7 +8,7 @@
 
 > **walkUses**(`ast`, `callback`): `void`
 
-Defined in: [validator/src/walker.ts:124](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/walker.ts#L124)
+Defined in: [validator/src/walker.ts:124](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/walker.ts#L124)
 
 Walk all use declarations in the AST.
 

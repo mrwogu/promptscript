@@ -63,7 +63,8 @@ Define remote HTTP or SSE servers:
 | `timeoutMs`     | Configure startup or request timeout             |
 
 Target formatters translate these properties into native MCP configuration. File paths and supported
-fields vary by platform. See the [formatter capability matrix](https://getpromptscript.dev/reference/formatters/index.md#mcp--hooks--plugins-support).
+fields vary by platform, and some targets write MCP config only in `full` mode. A target or mode
+without MCP output reports `PS4002`. See the [formatter capability matrix](https://getpromptscript.dev/reference/formatters/index.md#mcp--hooks--plugins-support).
 
 ## Credential Handling
 
@@ -123,7 +124,9 @@ Plugins group related capabilities:
 | `hooks`       | Referenced lifecycle hook IDs |
 | `mcpServers`  | Referenced MCP server names   |
 
-Current plugin output exists for Factory, Cursor, Codex, and Grok target families. Plugin contracts
+Current plugin output exists for Factory, Cursor, Codex, and Grok target families. Cursor and Grok
+write it only in `full` mode, Factory and Codex in `multifile` and `full`. Other targets and modes
+report `PS4002` and omit `@plugins`. Plugin contracts
 are platform-specific, so target support must be checked before using a generated manifest.
 Marketplace discovery, installation, and publishing remain outside compiler scope.
 

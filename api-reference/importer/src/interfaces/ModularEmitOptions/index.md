@@ -6,7 +6,7 @@
 
 # Interface: ModularEmitOptions
 
-Defined in: [importer/src/emitter.ts:100](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/importer/src/emitter.ts#L100)
+Defined in: [importer/src/emitter.ts:100](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/importer/src/emitter.ts#L100)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [importer/src/emitter.ts:100](https://github.com/mrwogu/promptscript
 
 > **projectName**: `string`
 
-Defined in: [importer/src/emitter.ts:101](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/importer/src/emitter.ts#L101)
+Defined in: [importer/src/emitter.ts:101](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/importer/src/emitter.ts#L101)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [importer/src/emitter.ts:101](https://github.com/mrwogu/promptscript
 
 > `optional` **syntaxVersion?**: `string`
 
-Defined in: [importer/src/emitter.ts:102](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/importer/src/emitter.ts#L102)
+Defined in: [importer/src/emitter.ts:102](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/importer/src/emitter.ts#L102)

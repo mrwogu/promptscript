@@ -6,27 +6,17 @@
 
 # Interface: OpenRouterModelEntry
 
-Defined in: [core/src/model-drift.ts:25](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-drift.ts#L25)
+Defined in: [core/src/model-drift.ts:27](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-drift.ts#L27)
 
 A model entry parsed out of OpenRouter's /api/v1/models response.
 
 ## Properties
 
-### apiId?
-
-> `readonly` `optional` **apiId?**: `string`
-
-Defined in: [core/src/model-drift.ts:37](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-drift.ts#L37)
-
-The provider's real API id, when OpenRouter knows it.
-
-***
-
 ### displayName
 
 > `readonly` **displayName**: `string`
 
-Defined in: [core/src/model-drift.ts:31](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-drift.ts#L31)
+Defined in: [core/src/model-drift.ts:33](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-drift.ts#L33)
 
 Display name with the provider prefix cut off.
 
@@ -36,7 +26,7 @@ Display name with the provider prefix cut off.
 
 > `readonly` **provider**: `string`
 
-Defined in: [core/src/model-drift.ts:29](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-drift.ts#L29)
+Defined in: [core/src/model-drift.ts:31](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-drift.ts#L31)
 
 Catalog provider the entry belongs to.
 
@@ -46,7 +36,7 @@ Catalog provider the entry belongs to.
 
 > `readonly` **releaseDate**: `string`
 
-Defined in: [core/src/model-drift.ts:33](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-drift.ts#L33)
+Defined in: [core/src/model-drift.ts:35](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-drift.ts#L35)
 
 Release date approximation: the day OpenRouter listed the model.
 
@@ -56,7 +46,7 @@ Release date approximation: the day OpenRouter listed the model.
 
 > `readonly` `optional` **retirementDate?**: `string`
 
-Defined in: [core/src/model-drift.ts:35](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-drift.ts#L35)
+Defined in: [core/src/model-drift.ts:37](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-drift.ts#L37)
 
 Retirement hint, when OpenRouter carries an expiration date.
 
@@ -66,6 +56,6 @@ Retirement hint, when OpenRouter carries an expiration date.
 
 > `readonly` **slug**: `string`
 
-Defined in: [core/src/model-drift.ts:27](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-drift.ts#L27)
+Defined in: [core/src/model-drift.ts:29](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-drift.ts#L29)
 
 Base id without the provider prefix (e.g. 'claude-opus-5.5').

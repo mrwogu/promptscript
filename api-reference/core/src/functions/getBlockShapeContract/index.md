@@ -8,7 +8,7 @@
 
 > **getBlockShapeContract**(`name`): [`BlockShapeContract`](https://getpromptscript.dev/api-reference/core/src/interfaces/BlockShapeContract/index.md) \| `undefined`
 
-Defined in: [core/src/block-shapes.ts:146](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/block-shapes.ts#L146)
+Defined in: [core/src/block-shapes.ts:146](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/block-shapes.ts#L146)
 
 Return the shape contract for a built-in block.
 

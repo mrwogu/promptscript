@@ -8,7 +8,7 @@
 
 > **generateCursorHooks**(`hooks`): `Record`\<`string`, `unknown`\>
 
-Defined in: [formatters/src/hook-adapters.ts:662](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/hook-adapters.ts#L662)
+Defined in: [formatters/src/hook-adapters.ts:662](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/hook-adapters.ts#L662)
 
 Generate Cursor hooks.json entries from portable hook definitions.
 

@@ -8,6 +8,6 @@
 
 > `const` **LATEST\_SYNTAX\_VERSION**: `"1.5.0"` = `'1.5.0'`
 
-Defined in: [core/src/syntax-versions.ts:170](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/syntax-versions.ts#L170)
+Defined in: [core/src/syntax-versions.ts:170](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/syntax-versions.ts#L170)
 
 Latest known syntax version.

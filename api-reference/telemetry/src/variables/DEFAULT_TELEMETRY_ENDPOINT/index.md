@@ -8,4 +8,4 @@
 
 > `const` **DEFAULT\_TELEMETRY\_ENDPOINT**: `"https://telemetry.guziak.net/v1/events"` = `'https://telemetry.guziak.net/v1/events'`
 
-Defined in: [telemetry/src/config.ts:5](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/telemetry/src/config.ts#L5)
+Defined in: [telemetry/src/config.ts:5](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/telemetry/src/config.ts#L5)

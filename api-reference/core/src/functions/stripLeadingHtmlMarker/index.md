@@ -8,7 +8,7 @@
 
 > **stripLeadingHtmlMarker**(`body`): `string`
 
-Defined in: [core/src/utils/markers.ts:79](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/utils/markers.ts#L79)
+Defined in: [core/src/utils/markers.ts:79](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/utils/markers.ts#L79)
 
 Remove a leading PromptScript HTML marker from a markdown body.
 

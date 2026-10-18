@@ -8,6 +8,6 @@
 
 > `const` **validSemver**: [`ValidationRule`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationRule/index.md)
 
-Defined in: [validator/src/rules/valid-semver.ts:44](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/validator/src/rules/valid-semver.ts#L44)
+Defined in: [validator/src/rules/valid-semver.ts:44](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/rules/valid-semver.ts#L44)
 
 PS003: Syntax version must be valid semver

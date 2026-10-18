@@ -33,9 +33,10 @@ targets:
 
 ## Output Files
 
-| File              | Path                         | Purpose           |
-| ----------------- | ---------------------------- | ----------------- |
-| Main instructions | `.continue/rules/project.md` | Primary rule file |
+| File              | Path                         | Purpose                                           |
+| ----------------- | ---------------------------- | ------------------------------------------------- |
+| Main instructions | `.continue/rules/project.md` | Primary rule file                                 |
+| MCP servers       | `.continue/config.json`      | MCP server config in `multifile` and `full` modes |
 
 ## Output Versions
 

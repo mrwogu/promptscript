@@ -33,13 +33,15 @@ targets:
 
 ## Output Files
 
-| File              | Path                             | Purpose                      |
-| ----------------- | -------------------------------- | ---------------------------- |
-| Main instructions | `AGENTS.md`                      | Primary rule file            |
-| Lifecycle hooks   | `.grok/hooks/promptscript.json`  | Project hooks in `full` mode |
-| Skills            | `.claude/skills/<name>/SKILL.md` | Reusable skill definitions   |
-| Commands          | `.claude/commands/<name>.md`     | Slash commands               |
-| Agents            | `.claude/agents/<name>.md`       | Agent configurations         |
+| File              | Path                             | Purpose                                   |
+| ----------------- | -------------------------------- | ----------------------------------------- |
+| Main instructions | `AGENTS.md`                      | Primary rule file                         |
+| Lifecycle hooks   | `.grok/hooks/promptscript.json`  | Project hooks in `full` mode              |
+| Skills            | `.claude/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode |
+| Commands          | `.claude/commands/<name>.md`     | Slash commands                            |
+| Agents            | `.claude/agents/<name>.md`       | Agent configurations                      |
+| MCP servers       | `.mcp.json`                      | MCP server config in `full` mode          |
+| Plugins           | `.grok/plugins.json`             | Plugin config in `full` mode              |
 
 ## Output Versions
 

@@ -33,11 +33,11 @@ targets:
 
 ## Output Files
 
-| File              | Path                                  | Purpose                    |
-| ----------------- | ------------------------------------- | -------------------------- |
-| Main instructions | `.commandcode/rules/project.md`       | Primary rule file          |
-| Skills            | `.commandcode/skills/<name>/SKILL.md` | Reusable skill definitions |
-| Commands          | `.commandcode/commands/<name>.md`     | Slash commands             |
+| File              | Path                                  | Purpose                                   |
+| ----------------- | ------------------------------------- | ----------------------------------------- |
+| Main instructions | `.commandcode/rules/project.md`       | Primary rule file                         |
+| Skills            | `.commandcode/skills/<name>/SKILL.md` | Reusable skill definitions in `full` mode |
+| Commands          | `.commandcode/commands/<name>.md`     | Slash commands                            |
 
 ## Output Versions
 

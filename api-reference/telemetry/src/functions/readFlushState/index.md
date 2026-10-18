@@ -8,7 +8,7 @@
 
 > **readFlushState**(`cacheDirectory`): [`FlushState`](https://getpromptscript.dev/api-reference/telemetry/src/interfaces/FlushState/index.md)
 
-Defined in: [telemetry/src/spool.ts:389](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/telemetry/src/spool.ts#L389)
+Defined in: [telemetry/src/spool.ts:389](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/telemetry/src/spool.ts#L389)
 
 ## Parameters
 

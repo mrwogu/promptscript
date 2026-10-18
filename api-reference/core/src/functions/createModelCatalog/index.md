@@ -8,7 +8,7 @@
 
 > **createModelCatalog**(`config?`, `builtIns?`): [`ModelCatalog`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelCatalog/index.md)
 
-Defined in: [core/src/model-catalog.ts:242](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/model-catalog.ts#L242)
+Defined in: [core/src/model-catalog.ts:242](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-catalog.ts#L242)
 
 Create a catalog from the built-in profiles and a project's model config.
 

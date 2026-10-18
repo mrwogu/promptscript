@@ -662,7 +662,10 @@ Generates `.cursor/commands/test.md`:
 <!-- output:cursor for="cursor-slash-commands" file="commands/test.md" -->
 
 ```markdown
-Write unit tests using: - Vitest as the test runner - AAA pattern (Arrange, Act, Assert)
+Write unit tests using:
+
+- Vitest as the test runner
+- AAA pattern (Arrange, Act, Assert)
 ```
 
 <!-- /output -->
@@ -1179,7 +1182,7 @@ under mapping:
 name: code-reviewer
 description: Reviews code for quality and best practices
 tools: ['read', 'search', 'execute']
-model: Claude Sonnet 5
+model: Claude Sonnet 5.5
 ---
 
 You are a senior code reviewer ensuring high standards.

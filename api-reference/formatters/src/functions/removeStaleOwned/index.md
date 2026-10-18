@@ -8,7 +8,7 @@
 
 > **removeStaleOwned**(`target`, `plan`): `void`
 
-Defined in: [formatters/src/structured-output.ts:103](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/formatters/src/structured-output.ts#L103)
+Defined in: [formatters/src/structured-output.ts:103](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/structured-output.ts#L103)
 
 Remove previously owned entries that have disappeared from generated output.
 

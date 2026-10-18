@@ -8,7 +8,7 @@
 
 > **getPackageVersion**(`baseDir`, `relativePath?`): `string`
 
-Defined in: [core/src/utils/package.ts:64](https://github.com/mrwogu/promptscript/blob/a426289c08607d674cfba8adc7393396231ad6b9/packages/core/src/utils/package.ts#L64)
+Defined in: [core/src/utils/package.ts:64](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/utils/package.ts#L64)
 
 Get package version from a package.json file.
 
