@@ -86,7 +86,7 @@ describe('parseOpenRouterModels', () => {
     const entries = parseOpenRouterModels(
       payload([
         entry('anthropic/claude-opus-5.5', 'Anthropic: Claude Opus 5.5', RELEASE, {
-          canonical_slug: 'anthropic/claude-opus-5-5-20260921',
+          canonical_slug: 'anthropic/claude-opus-5.5-20260921',
         }),
         entry('x-ai/grok-4.5', 'SpaceXAI: Grok 4.5', RELEASE, {
           canonical_slug: 'x-ai/grok-4.5-20260708',
@@ -101,7 +101,6 @@ describe('parseOpenRouterModels', () => {
         displayName: 'Claude Opus 5.5',
         releaseDate: '2026-09-21',
         retirementDate: undefined,
-        apiId: 'claude-opus-5-5-20260921',
       },
       {
         slug: 'grok-4.5',
@@ -109,7 +108,6 @@ describe('parseOpenRouterModels', () => {
         displayName: 'Grok 4.5',
         releaseDate: '2026-09-21',
         retirementDate: undefined,
-        apiId: 'grok-4.5-20260708',
       },
     ]);
   });
@@ -145,7 +143,7 @@ describe('parseOpenRouterModels', () => {
 });
 
 describe('detectModelDrift', () => {
-  it('drafts a new version of a known family with the provider api id', () => {
+  it('drafts a new version of a known family', () => {
     const report = detectModelDrift(
       parseOpenRouterModels(
         payload([
@@ -166,7 +164,6 @@ describe('detectModelDrift', () => {
         displayName: 'Claude Opus 6',
         releaseDate: '2026-09-21',
         retirementDate: undefined,
-        apiId: 'claude-opus-6-20260724',
       },
     ]);
   });
@@ -312,12 +309,9 @@ describe('formatProfileEntry', () => {
       id: 'claude-opus-6',
       displayName: 'Claude Opus 6',
       releaseDate: '2026-07-24',
-      apiId: 'claude-opus-6-20260724',
     });
 
-    expect(text).toBe(
-      "  claude('opus', '6', {\n    apiId: 'claude-opus-6-20260724',\n    releaseDate: '2026-07-24',\n  }),"
-    );
+    expect(text).toBe("  claude('opus', '6', {\n    releaseDate: '2026-07-24',\n  }),");
   });
 
   it('writes other providers with their own helper and display name', () => {
@@ -328,11 +322,10 @@ describe('formatProfileEntry', () => {
       id: 'gpt-5.3-codex',
       displayName: 'GPT-5.3-Codex',
       releaseDate: '2026-02-24',
-      apiId: 'gpt-5.3-codex-20260224',
     });
 
     expect(text).toBe(
-      "  openai('gpt-codex', '5.3', 'gpt-5.3-codex', 'GPT-5.3-Codex', {\n    apiId: 'gpt-5.3-codex-20260224',\n    releaseDate: '2026-02-24',\n  }),"
+      "  openai('gpt-codex', '5.3', 'gpt-5.3-codex', 'GPT-5.3-Codex', {\n    releaseDate: '2026-02-24',\n  }),"
     );
   });
 

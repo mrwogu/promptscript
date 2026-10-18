@@ -2,10 +2,12 @@
  * Drift between the built-in model catalog and OpenRouter's model list.
  *
  * OpenRouter's public /api/v1/models endpoint lists every model it serves
- * with the provider's real API id in `canonical_slug`. That is enough to
- * draft new releases of known families deterministically; retirement
- * dates, successors across families, and the naming of new families stay
- * manual.
+ * with the day it was listed. That is enough to draft new releases of known
+ * families deterministically; API ids, retirement dates, successors across
+ * families, and the naming of new families stay manual. OpenRouter's
+ * `canonical_slug` is its own snapshot name, not the provider's API id
+ * (`claude-sonnet-5.5-20260928` for the Claude API id `claude-sonnet-5-5`),
+ * so drafts leave `apiId` out and the catalog falls back to the id.
  *
  * @module model-drift
  */
@@ -33,8 +35,6 @@ export interface OpenRouterModelEntry {
   readonly releaseDate: string;
   /** Retirement hint, when OpenRouter carries an expiration date. */
   readonly retirementDate?: string;
-  /** The provider's real API id, when OpenRouter knows it. */
-  readonly apiId?: string;
 }
 
 /** A new release of a family the catalog already tracks. */
@@ -49,7 +49,6 @@ export interface ModelDriftCandidate {
   readonly displayName: string;
   readonly releaseDate: string;
   readonly retirementDate?: string;
-  readonly apiId?: string;
 }
 
 /** Result of comparing OpenRouter's model list with the catalog. */
@@ -133,7 +132,6 @@ export function parseOpenRouterModels(payload: unknown): OpenRouterModelEntry[] 
     const created = raw['created'];
     if (provider === undefined || slug === '' || name === undefined || typeof created !== 'number')
       continue;
-    const canonicalSlug = readString(raw, 'canonical_slug');
     const expirationDate = readString(raw, 'expiration_date');
     entries.push({
       slug,
@@ -141,7 +139,6 @@ export function parseOpenRouterModels(payload: unknown): OpenRouterModelEntry[] 
       displayName: stripProviderPrefix(name),
       releaseDate: releaseDateFromCreated(created),
       retirementDate: expirationDate,
-      apiId: canonicalSlug === undefined ? undefined : canonicalSlug.split('/')[1],
     });
   }
   return entries;
@@ -217,7 +214,6 @@ function draftCandidate(
     displayName: entry.displayName,
     releaseDate: entry.releaseDate,
     retirementDate: entry.retirementDate,
-    apiId: entry.apiId,
   };
 }
 
@@ -287,7 +283,6 @@ export function displacedProfile(
  */
 export function formatProfileEntry(candidate: ModelDriftCandidate): string {
   const fields = [
-    ...(candidate.apiId === undefined ? [] : [`apiId: '${candidate.apiId}'`]),
     ...(candidate.retirementDate === undefined
       ? []
       : [`status: 'deprecated'`, `retirementDate: '${candidate.retirementDate}'`]),

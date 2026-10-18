@@ -6,8 +6,8 @@ families from [OpenRouter](https://openrouter.ai) into
 `docs/reference/models.md`; the list is visible at
 [getpromptscript.dev/reference/models](https://getpromptscript.dev/reference/models/)
 once this merges and the docs deploy. The drafted entries carry the id,
-the provider API id (`canonical_slug`), the display name, and the
-OpenRouter listing date. The pull request merges itself as soon as every
+the display name, and the OpenRouter listing date; the id doubles as the
+API id. The pull request merges itself as soon as every
 check passes; when a floating alias moved, the catalog tests fail on
 purpose and it waits for a human.
 
@@ -19,6 +19,8 @@ purpose until the hardcoded expectations match the values you verified.
 - [ ] Verify release dates against the provider pages; OpenRouter reports
       the day it listed the model, not the release day.
 - [ ] Verify retirement dates and statuses; OpenRouter rarely carries them.
+- [ ] Check the API id on the provider page; set `apiId` when it differs
+      from the drafted id.
 - [ ] Check successors across families and floating aliases
       (`opus`, `sonnet`, `haiku`, `fable`), then sweep the docs, run
       `pnpm docs:validate --update-outputs`, `./scripts/sync-skill.sh`, and
