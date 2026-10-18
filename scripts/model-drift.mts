@@ -121,7 +121,7 @@ function draftedProfile(candidate: ModelDriftCandidate): ModelProfile {
     family: candidate.family,
     version: candidate.version,
     displayName: candidate.displayName,
-    apiId: candidate.apiId ?? candidate.id,
+    apiId: candidate.id,
     aliases: [],
     status: 'current',
     targets: {},

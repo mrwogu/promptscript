@@ -286,11 +286,13 @@ Update them when a provider releases, deprecates, or retires a model.
 
 A weekly workflow drafts the mechanical part: it reads
 [OpenRouter](https://openrouter.ai)'s model list, adds new releases of
-known families to `model-profiles.ts` (id, API id, display name, listing
-date, and the successor on the release each one displaces), and opens a
-pull request with the checklist above the manual work: release and
-retirement dates, successors across families, floating aliases, and
-target-specific names. The pull request merges itself when every check
+known families to `model-profiles.ts` (id, display name, listing date,
+and the successor on the release each one displaces), and opens a pull
+request with the checklist above the manual work: release and retirement
+dates, API ids, successors across families, floating aliases, and
+target-specific names. A drafted release uses its id as the API id;
+OpenRouter's `canonical_slug` is its own snapshot name, so set `apiId` by
+hand only when the provider page lists a different one. The pull request merges itself when every check
 passes; when a floating alias moved, the catalog tests fail on purpose
 until the hardcoded expectations are updated. Run it on demand
 with `pnpm models:drift:apply`, or check without editing with
