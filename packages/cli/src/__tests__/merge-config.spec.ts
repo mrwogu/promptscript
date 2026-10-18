@@ -40,6 +40,27 @@ describe('config/merge-config', () => {
     expect(result.telemetry).toBe(true);
   });
 
+  it('should merge user registry aliases under project aliases', () => {
+    const userConfig: UserConfig = {
+      version: '1',
+      registries: {
+        '@company': 'github.com/user/company',
+        '@shared': 'github.com/user/shared',
+      },
+    };
+
+    const result = mergeConfigs(
+      userConfig,
+      { ...baseProjectConfig, registries: { '@company': 'github.com/project/company' } },
+      {}
+    );
+
+    expect(result.registries).toEqual({
+      '@company': 'github.com/project/company',
+      '@shared': 'github.com/user/shared',
+    });
+  });
+
   it('should apply user config registry as base', () => {
     const userConfig: UserConfig = {
       version: '1',

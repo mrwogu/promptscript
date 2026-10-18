@@ -72,6 +72,7 @@ vi.mock('../../output/console.js', () => ({
 
 vi.mock('../../config/loader.js', () => ({
   loadConfig: mockLoadConfig,
+  loadEffectiveConfig: mockLoadConfig,
   findConfigFile: mockFindConfigFile,
 }));
 

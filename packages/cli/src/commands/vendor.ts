@@ -13,7 +13,7 @@ import { existsSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import type { VendorSyncOptions, VendorCheckOptions } from '../types.js';
-import { loadConfig } from '../config/loader.js';
+import { loadEffectiveConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import type { Lockfile, LockfileDependency } from '@promptscript/core';
 import { isValidLockfile } from '@promptscript/core';
@@ -54,7 +54,7 @@ export async function vendorSyncCommand(options: VendorSyncOptions): Promise<voi
     }
 
     const deps = getRepositoryDependencies(lockfile);
-    const config = await loadConfig();
+    const config = await loadEffectiveConfig();
     const defaultGitRegistry = config.registry?.git;
     validateDependencyPaths(deps);
 

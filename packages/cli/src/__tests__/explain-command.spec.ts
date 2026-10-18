@@ -33,6 +33,7 @@ vi.spyOn(console, 'warn').mockImplementation(() => {});
 const mockLoadConfig = vi.fn();
 vi.mock('../config/loader', () => ({
   loadConfig: (...args: unknown[]) => mockLoadConfig(...args),
+  loadEffectiveConfig: (...args: unknown[]) => mockLoadConfig(...args),
   findConfigFile: () => 'promptscript.yaml',
   CONFIG_FILES: ['promptscript.yaml'],
 }));

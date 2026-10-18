@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const {
   mockLoadConfig,
   mockFindConfigFile,
-  mockLoadUserConfig,
   mockExistsSync,
   mockReadFileSync,
   mockStatSync,
@@ -19,7 +18,6 @@ const {
 } = vi.hoisted(() => {
   const mockLoadConfig = vi.fn();
   const mockFindConfigFile = vi.fn();
-  const mockLoadUserConfig = vi.fn();
   const mockExistsSync = vi.fn().mockReturnValue(false);
   const mockReadFileSync = vi.fn();
   const mockStatSync = vi.fn().mockReturnValue({ isDirectory: () => false });
@@ -35,7 +33,6 @@ const {
   return {
     mockLoadConfig,
     mockFindConfigFile,
-    mockLoadUserConfig,
     mockExistsSync,
     mockReadFileSync,
     mockStatSync,
@@ -57,11 +54,8 @@ vi.mock('../../output/console.js', () => ({
 
 vi.mock('../../config/loader.js', () => ({
   loadConfig: mockLoadConfig,
+  loadEffectiveConfig: mockLoadConfig,
   findConfigFile: mockFindConfigFile,
-}));
-
-vi.mock('../../config/user-config.js', () => ({
-  loadUserConfig: mockLoadUserConfig,
 }));
 
 vi.mock('@promptscript/resolver', () => ({
@@ -142,7 +136,6 @@ describe('resolveCommand', () => {
       targets: [],
       registries: { '@company': 'github.com/company/base' },
     });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExpandAlias.mockReturnValue({
       repoUrl: 'github.com/company/base',
       path: 'security',
@@ -167,7 +160,6 @@ describe('resolveCommand', () => {
       targets: [],
       registries: { '@company': 'github.com/company/base' },
     });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExpandAlias.mockImplementation(() => {
       throw new Error('Unknown alias: @unknown');
     });
@@ -181,7 +173,6 @@ describe('resolveCommand', () => {
   it('should handle local file imports', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExistsSync.mockImplementation((path: string) => !path.endsWith('.promptscript/vendor'));
 
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
@@ -201,7 +192,6 @@ describe('resolveCommand', () => {
       targets: [],
       registries: { '@company': 'github.com/company/base' },
     });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
 
     await resolveCommand('@INVALID/path', {});
 
@@ -217,7 +207,6 @@ describe('resolveCommand', () => {
       targets: [],
       registries: { '@company': 'github.com/company/base' },
     });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExpandAlias.mockReturnValue({
       repoUrl: 'github.com/company/base',
       path: 'security',
@@ -261,7 +250,6 @@ describe('resolveCommand', () => {
   it('should error when no registries are configured for alias import', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
 
     await resolveCommand('@company/security', {});
 
@@ -277,7 +265,6 @@ describe('resolveCommand', () => {
       targets: [],
       registries: { '@company': 'github.com/company/base' },
     });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExpandAlias.mockReturnValue({
       repoUrl: 'github.com/company/base',
       path: 'security',
@@ -302,7 +289,6 @@ describe('resolveCommand', () => {
       targets: [],
       registries: { '@company': 'github.com/company/base' },
     });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExpandAlias.mockReturnValue({
       repoUrl: 'github.com/company/base',
       path: 'security',
@@ -324,7 +310,6 @@ describe('resolveCommand', () => {
   it('should resolve direct URL imports and emit JSON', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExistsSync.mockReturnValue(false);
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
@@ -344,7 +329,6 @@ describe('resolveCommand', () => {
   it('should preserve scoped paths in direct URL imports', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExistsSync.mockReturnValue(false);
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
@@ -362,7 +346,6 @@ describe('resolveCommand', () => {
   it('should parse versions after scoped direct URL paths', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExistsSync.mockReturnValue(false);
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
@@ -379,7 +362,6 @@ describe('resolveCommand', () => {
   it('should parse Git refs containing slashes', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExistsSync.mockReturnValue(false);
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
@@ -399,7 +381,6 @@ describe('resolveCommand', () => {
       targets: [],
       registries: { '@company': 'github.com/company/base' },
     });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExpandAlias.mockReturnValue({
       repoUrl: 'github.com/company/base',
       path: 'security',
@@ -438,7 +419,6 @@ describe('resolveCommand', () => {
       targets: [],
       registries: { '@company': 'github.com/company/base' },
     });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExpandAlias.mockReturnValue({
       repoUrl: 'github.com/company/base',
       path: 'security',
@@ -477,7 +457,6 @@ describe('resolveCommand', () => {
   it('should reject an invalid lockfile', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockLockfileExists.mockReturnValue(true);
     mockReadFileSync.mockReturnValue(JSON.stringify({ invalid: true }));
 
@@ -490,7 +469,6 @@ describe('resolveCommand', () => {
   it('should match markdown child lock entries', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockLockfileExists.mockReturnValue(true);
     mockReadFileSync.mockReturnValue(
       JSON.stringify({
@@ -521,7 +499,6 @@ describe('resolveCommand', () => {
   it('should reject an empty import path', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
 
     await resolveCommand('', {});
 
@@ -532,7 +509,6 @@ describe('resolveCommand', () => {
   it('should reject an existing vendor directory without a manifest', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExistsSync.mockImplementation((path: string) => path.endsWith('.promptscript/vendor'));
 
     await resolveCommand('github.com/company/base/security', {});
@@ -546,7 +522,6 @@ describe('resolveCommand', () => {
   it('should reject an unpinned vendored dependency', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockLoadVendorManifest.mockResolvedValue({ version: 1, dependencies: {} });
     mockExistsSync.mockImplementation((path: string) => !path.endsWith('.promptscript/vendor'));
 
@@ -561,7 +536,6 @@ describe('resolveCommand', () => {
   it('should reject a missing vendored dependency', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockLockfileExists.mockReturnValue(true);
     mockReadFileSync.mockReturnValue(
       JSON.stringify({
@@ -590,7 +564,6 @@ describe('resolveCommand', () => {
   it('should report stale cache when locked checkout verification fails', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockLockfileExists.mockReturnValue(true);
     mockReadFileSync.mockReturnValue(
       JSON.stringify({
@@ -622,7 +595,6 @@ describe('resolveCommand', () => {
       targets: [],
       registries: { '@company': 'github.com/company/base' },
     });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExpandAlias.mockReturnValue({
       repoUrl: 'github.com/company/base',
       path: '../outside',
@@ -644,7 +616,6 @@ describe('resolveCommand', () => {
       targets: [],
       registries: { '@company': 'github.com/company/base' },
     });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExpandAlias.mockReturnValue({
       repoUrl: 'github.com/company/base',
       path: 'security',
@@ -669,7 +640,6 @@ describe('resolveCommand', () => {
   ])('should classify %s as %s', async (importPath, expectedType, directory) => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExistsSync.mockImplementation((path: string) => !path.endsWith('.promptscript/vendor'));
     mockStatSync.mockReturnValue({ isDirectory: () => directory });
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
@@ -684,7 +654,6 @@ describe('resolveCommand', () => {
   it('should reject a resolved file whose real path escapes after extension resolution', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockExistsSync.mockImplementation((path: string) => !path.endsWith('.promptscript/vendor'));
     mockStatSync.mockReturnValue({ isDirectory: () => false });
     mockIsRealPathInside.mockResolvedValueOnce(true).mockResolvedValueOnce(false);

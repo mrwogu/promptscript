@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { resolve, dirname, relative } from 'node:path';
 import type { PullOptions } from '../types.js';
-import { loadConfig } from '../config/loader.js';
+import { loadEffectiveConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import {
   createFileSystemRegistry,
@@ -30,7 +30,7 @@ export async function pullCommand(options: PullOptions): Promise<void> {
       return;
     }
 
-    const config = await loadConfig();
+    const config = await loadEffectiveConfig();
 
     // Check if inherit is configured
     if (!config.inherit) {
@@ -107,7 +107,7 @@ export async function pullCommand(options: PullOptions): Promise<void> {
  * Create the appropriate registry based on configuration and options.
  */
 async function createRegistry(
-  config: Awaited<ReturnType<typeof loadConfig>>,
+  config: Awaited<ReturnType<typeof loadEffectiveConfig>>,
   options: PullOptions,
   spinner: ReturnType<typeof createSpinner>
 ): Promise<Registry> {

@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import type { LockOptions } from '../types.js';
-import { loadConfig, findConfigFile } from '../config/loader.js';
+import { loadEffectiveConfig, findConfigFile } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import type { Lockfile, LockfileDependency } from '@promptscript/core';
 import { LOCKFILE_VERSION, isGitTimeoutError, isValidLockfile } from '@promptscript/core';
@@ -63,7 +63,7 @@ export async function lockCommand(options: LockOptions): Promise<void> {
       return;
     }
 
-    const config = await loadConfig();
+    const config = await loadEffectiveConfig();
 
     // Collect registry aliases from config
     const aliases = config.registries ?? {};

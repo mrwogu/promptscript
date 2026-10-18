@@ -106,7 +106,10 @@ vi.mock('../../output/console.js', () => ({
 
 vi.mock('../lock.js', () => ({ LOCKFILE_PATH: 'promptscript.lock' }));
 
-vi.mock('../../config/loader.js', () => ({ loadConfig: mockLoadConfig }));
+vi.mock('../../config/loader.js', () => ({
+  loadConfig: mockLoadConfig,
+  loadEffectiveConfig: mockLoadConfig,
+}));
 
 vi.mock('node:fs', () => ({ existsSync: mockExistsSync }));
 

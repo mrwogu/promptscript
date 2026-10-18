@@ -63,6 +63,16 @@ Default registry configuration used when no project-level registry is configured
 | `registry.cache.enabled`        | Enable caching (default: `true`)         |
 | `registry.cache.ttl`            | Cache TTL in milliseconds                |
 
+### `registries`
+
+Registry aliases available in every project. A project alias with the same name
+wins. `prs registry add --global` writes here.
+
+```yaml
+registries:
+  '@company': github.com/acme/promptscript-base
+```
+
 ### `defaults`
 
 Default values used by `prs init --yes` when no CLI flags are provided.

@@ -9,7 +9,7 @@ import {
 } from '@promptscript/core';
 import { Resolver } from '@promptscript/resolver';
 import type { ExplainOptions } from '../types.js';
-import { CONFIG_FILES, loadConfig } from '../config/loader.js';
+import { CONFIG_FILES, loadEffectiveConfig } from '../config/loader.js';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { ConsoleOutput, createSpinner } from '../output/console.js';
 
@@ -305,7 +305,7 @@ export async function explainCommand(targetPath: string, options: ExplainOptions
       throw new Error(`No PromptScript configuration found in ${projectRoot}. Run: prs init`);
     }
 
-    const config = await loadConfig(configPath);
+    const config = await loadEffectiveConfig(configPath);
     const registry = await resolveRegistryPath(config);
     const resolver = new Resolver({
       registryPath: registry.isRemote ? registry.path : resolve(projectRoot, registry.path),

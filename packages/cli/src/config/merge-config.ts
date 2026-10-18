@@ -103,6 +103,11 @@ export function mergeConfigs(
     merged.registry = deepMergeRegistry(userRegistry, merged.registry);
   }
 
+  // Registry aliases: project aliases win over user aliases
+  if (userConfig.registries) {
+    merged.registries = { ...userConfig.registries, ...projectConfig.registries };
+  }
+
   // Apply env overrides (higher priority than project config)
   if (envOverrides.registry) {
     merged.registry = deepMergeRegistry(merged.registry, envOverrides.registry);

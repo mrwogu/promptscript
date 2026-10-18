@@ -2,7 +2,7 @@ import { resolve, join } from 'node:path';
 import { existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import type { ValidateOptions } from '../types.js';
 import type { CompileResult } from '@promptscript/compiler';
-import { findConfigFile, loadConfig } from '../config/loader.js';
+import { findConfigFile, loadEffectiveConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import { Compiler } from '@promptscript/compiler';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
@@ -328,7 +328,7 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
     : createSpinner('Loading configuration...').start();
 
   try {
-    const config = await loadConfig();
+    const config = await loadEffectiveConfig();
     const lockfile = loadValidationLockfile();
     const vendorDir = resolve('.promptscript/vendor');
 
@@ -443,7 +443,7 @@ async function runFix(requestedFiles?: string[]): Promise<void> {
       : discoverPrsFiles('.promptscript');
   let fixedCount = 0;
   const configPath = findConfigFile();
-  const config = configPath ? await loadConfig(configPath) : undefined;
+  const config = configPath ? await loadEffectiveConfig(configPath) : undefined;
   const lockfile = loadValidationLockfile();
   const vendorDir = resolve('.promptscript/vendor');
   const registryPath = config
