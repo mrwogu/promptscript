@@ -9,7 +9,7 @@ import {
 import type { PromptScriptConfig } from '@promptscript/core';
 import { loadUserAndSystemConfig } from './user-config.js';
 import { loadEnvOverrides } from './env-config.js';
-import { mergeConfigs } from './merge-config.js';
+import { deepMergeRegistry, mergeConfigs } from './merge-config.js';
 
 /**
  * List of config file names to search for.
@@ -116,7 +116,15 @@ async function loadConfigFile(
     throw new Error(`Extended config not found: ${baseFile} (from ${configFile})`);
   }
   const base = await loadConfigFile(baseFile, [...chain, absolutePath]);
-  return deepMerge(base, own, { arrayStrategy: 'replace' });
+  const merged = deepMerge(base, own, { arrayStrategy: 'replace' });
+  // Registry backends follow the same rules as the other config levels
+  if (base['registry'] !== undefined && own['registry'] !== undefined) {
+    merged['registry'] = deepMergeRegistry(
+      base['registry'] as PromptScriptConfig['registry'],
+      own['registry'] as PromptScriptConfig['registry']
+    );
+  }
+  return merged;
 }
 
 /**

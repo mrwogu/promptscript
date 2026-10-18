@@ -1307,6 +1307,7 @@ How the merge works:
 
 - The `extends` path is relative to the file that declares it. A base file can extend another file. A circular chain is an error.
 - Objects merge deeply and the extending file wins. Arrays such as `targets` are replaced, not joined, so the example above compiles only `github`.
+- `registry` merges like the other config levels: if the extending file picks another backend (for example `registry.path` over a base `registry.git`), the base backend is dropped.
 - Paths inside a base file, like `input.entry` or `registry.path`, stay relative to the project, not to the base file.
 - `prs migrate` and `prs serve` read only the project file.
 

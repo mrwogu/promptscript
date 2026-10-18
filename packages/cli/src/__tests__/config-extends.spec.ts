@@ -61,6 +61,17 @@ describe('config extends', () => {
     });
   });
 
+  it('should let a project path registry replace a base git registry', async () => {
+    const root = project({
+      'base.yaml': 'registry:\n  git:\n    url: https://github.com/acme/base.git\n',
+      'promptscript.yaml': 'id: app\nextends: ./base.yaml\nregistry:\n  path: ./registry\n',
+    });
+
+    const config = await loadConfig(join(root, 'promptscript.yaml'));
+
+    expect(config.registry).toEqual({ path: './registry' });
+  });
+
   it('should resolve each extends path relative to its own file', async () => {
     const root = project({
       'shared/org.yaml': "syntax: '1.4.0'\ndescription: org\n",
