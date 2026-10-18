@@ -718,6 +718,10 @@ registry:
 Developers run `prs init` and the `@company` alias resolves automatically - no manual
 configuration required.
 
+On Windows, place the file at `%ProgramData%\promptscript\config.yaml`. It uses the same
+format as the user config. Add `telemetry: false` to opt out of telemetry on every machine. See
+[System Config](user-config.md#system-config) for how it merges with the user config.
+
 ### Three-Level Config Precedence
 
 Aliases merge from three levels, highest priority first:

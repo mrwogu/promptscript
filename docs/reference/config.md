@@ -416,7 +416,7 @@ The `registries` field is resolved by merging three sources in priority order:
 | Middle   | `~/.promptscript/config.yaml`   | User-level    |
 | Lowest   | `/etc/promptscript/config.yaml` | System-level  |
 
-Project aliases override user aliases, which override system aliases. This allows IT to provision company-wide aliases (system level) while teams or projects can add or override specific aliases.
+Project aliases override user aliases, which override system aliases. This allows IT to provision company-wide aliases (system level) while teams or projects can add or override specific aliases. On Windows the system file is `%ProgramData%\promptscript\config.yaml`.
 
 #### User-Level Config (`~/.promptscript/config.yaml`)
 

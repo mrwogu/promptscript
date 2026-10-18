@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { parse as parseYaml } from 'yaml';
 import { interpolateEnvVars as interpolateEnvironmentVariables } from '@promptscript/core';
 import type { PromptScriptConfig } from '@promptscript/core';
-import { loadUserConfig } from './user-config.js';
+import { loadUserAndSystemConfig } from './user-config.js';
 import { loadEnvOverrides } from './env-config.js';
 import { mergeConfigs } from './merge-config.js';
 
@@ -83,7 +83,7 @@ export async function loadConfig(customPath?: string): Promise<PromptScriptConfi
 
 /**
  * Load the effective configuration by merging all config sources.
- * Priority (highest to lowest): CLI flags > env vars > project config > user config.
+ * Priority (highest to lowest): CLI flags > env vars > project config > user config > system config.
  *
  * @param customPath - Optional custom project config file path.
  * @param cliFlags - Optional CLI flag overrides.
@@ -93,7 +93,7 @@ export async function loadEffectiveConfig(
   customPath?: string,
   cliFlags?: Partial<PromptScriptConfig>
 ): Promise<PromptScriptConfig> {
-  const userConfig = await loadUserConfig();
+  const userConfig = await loadUserAndSystemConfig();
   const projectConfig = await loadConfig(customPath);
   const envOverrides = loadEnvOverrides();
 

@@ -21,7 +21,7 @@ vi.mock('../utils/manifest-loader.js', async (importOriginal) => {
 // Mock user-config
 const mockLoadUserConfig = vi.fn();
 vi.mock('../config/user-config.js', () => ({
-  loadUserConfig: (...args: unknown[]) => mockLoadUserConfig(...args),
+  loadUserAndSystemConfig: (...args: unknown[]) => mockLoadUserConfig(...args),
 }));
 
 // Mock importer

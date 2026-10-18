@@ -18,6 +18,7 @@ vi.mock('../../output/console.js', () => ({
 
 vi.mock('../../config/user-config.js', () => ({
   loadUserConfig: mockLoadUserConfig,
+  SYSTEM_CONFIG_PATH: '/etc/promptscript/config.yaml',
 }));
 
 vi.mock('../../config/loader.js', () => ({
@@ -109,6 +110,30 @@ describe('registryListCommand', () => {
     // old entry from global should not be shown for @company
     expect(calls.some((line) => line.includes('old'))).toBe(false);
 
+    consoleSpy.mockRestore();
+  });
+
+  it('should show system aliases under user aliases', async () => {
+    // System config is loaded first, then the user config
+    mockLoadUserConfig
+      .mockResolvedValueOnce({
+        version: '1',
+        registries: { '@company': 'github.com/acme/base', '@it': 'github.com/acme/it' },
+      })
+      .mockResolvedValueOnce({
+        version: '1',
+        registries: { '@company': 'github.com/me/fork' },
+      });
+    mockFindConfigFile.mockReturnValue(null);
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(mockConsoleLog);
+
+    await registryListCommand({ format: 'json' });
+
+    const output = JSON.parse(consoleSpy.mock.calls[0]?.[0] as string) as unknown;
+    expect(output).toEqual([
+      { alias: '@it', url: 'github.com/acme/it', source: 'system' },
+      { alias: '@company', url: 'github.com/me/fork', source: 'global' },
+    ]);
     consoleSpy.mockRestore();
   });
 

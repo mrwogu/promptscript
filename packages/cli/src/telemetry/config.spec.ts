@@ -68,6 +68,19 @@ describe('resolveCliTelemetryConfig', () => {
     expect(config.vetoes).toContain('user config');
   });
 
+  it('lets a system telemetry opt-out veto a user opt-in', async () => {
+    const cwd = directory();
+    const systemConfigPath = join(cwd, 'system.yaml');
+    const userConfigPath = join(cwd, 'user.yaml');
+    writeFileSync(systemConfigPath, "version: '1'\ntelemetry: false\n");
+    writeFileSync(userConfigPath, "version: '1'\ntelemetry: true\n");
+
+    const config = await resolveCliTelemetryConfig({ cwd, systemConfigPath, userConfigPath });
+
+    expect(config.enabled).toBe(false);
+    expect(config.vetoes).toContain('system config');
+  });
+
   it('treats project telemetry false as a hard veto', async () => {
     const cwd = directory();
     const userConfigPath = join(cwd, 'user.yaml');
