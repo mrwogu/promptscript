@@ -32,10 +32,11 @@ if [[ ! -f "$SOURCE" ]]; then
   exit 1
 fi
 
-# Writes the embedded skill module generated from SKILL.md to the given path.
-# The output is normalized with Prettier so regeneration is byte-stable.
-generate_embedded_skill() {
-  local generated_path="$1"
+# Prints the embedded skill module generated from SKILL.md, normalized with
+# Prettier so regeneration is byte-stable. It is formatted as the real output
+# path: a temporary copy can pick up other Prettier config or match an ignore
+# pattern (the root .gitignore ignores tmp/, which covers mktemp on Linux).
+render_embedded_skill() {
   node -e '
     const fs = require("node:fs");
     const source = fs.readFileSync(process.argv[1], "utf8");
@@ -49,9 +50,8 @@ generate_embedded_skill() {
       `  ${JSON.stringify(source)};`,
       "",
     ].join("\n");
-    fs.writeFileSync(process.argv[2], output);
-  ' "$SOURCE" "$generated_path"
-  "$ROOT/node_modules/.bin/prettier" --write "$generated_path" > /dev/null
+    process.stdout.write(output);
+  ' "$SOURCE" | "$ROOT/node_modules/.bin/prettier" --stdin-filepath "$GENERATED_FILE"
 }
 
 mode="${1:-}"
@@ -70,13 +70,10 @@ if [[ "$mode" = "--check" ]]; then
       failed=1
     fi
   done
-  expected_dir="$(mktemp -d)"
-  generate_embedded_skill "$expected_dir/promptscript-skill.ts"
-  if [[ ! -f "$GENERATED_FILE" ]] || ! cmp -s "$expected_dir/promptscript-skill.ts" "$GENERATED_FILE"; then
+  if [[ ! -f "$GENERATED_FILE" ]] || ! render_embedded_skill | cmp -s - "$GENERATED_FILE"; then
     echo "OUT OF SYNC: $GENERATED_FILE" >&2
     failed=1
   fi
-  rm -rf "$expected_dir"
   if [[ "$failed" -ne 0 ]]; then
     echo "Run './scripts/sync-skill.sh' to fix." >&2
     exit 1
@@ -92,5 +89,6 @@ for dest in "${DESTINATIONS[@]}"; do
 done
 
 mkdir -p "$GENERATED_DIR"
-generate_embedded_skill "$GENERATED_FILE"
+rendered="$(render_embedded_skill)"
+printf '%s\n' "$rendered" > "$GENERATED_FILE"
 echo "Synced: $GENERATED_FILE"

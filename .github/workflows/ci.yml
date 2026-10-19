@@ -113,6 +113,22 @@ jobs:
         if: matrix.node-version == '25.x'
         run: pnpm docs:highlight:check
 
+      - name: Validate PromptScript Sources
+        if: matrix.node-version == '25.x'
+        run: pnpm prs validate --strict
+
+      - name: Skill Copies Drift Check
+        if: matrix.node-version == '25.x'
+        run: |
+          if ! pnpm skill:check; then
+            echo "::error::SKILL.md copies are out of sync. Run 'pnpm skill:sync' locally and commit the changes."
+            exit 1
+          fi
+
+      - name: Grammar Coverage Check
+        if: matrix.node-version == '25.x'
+        run: pnpm grammar:check
+
       - name: Build
         run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t build
 
