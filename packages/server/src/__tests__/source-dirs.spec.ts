@@ -6,6 +6,7 @@ import {
   resolveFileGlobs,
   resolveWatchPaths,
   readProjectConfig,
+  isSourceFile,
 } from '../source-dirs.js';
 
 describe('readProjectConfig', () => {
@@ -112,6 +113,38 @@ describe('resolveFileGlobs', () => {
     await writeFile(join(workspace, 'promptscript.yaml'), 'input:\n  entry: ai/prompts/main.prs\n');
     const globs = await resolveFileGlobs(workspace);
     expect(globs).toEqual(['ai/prompts/**/*.prs', 'promptscript.yaml', 'promptscript.yml']);
+  });
+});
+
+describe('isSourceFile', () => {
+  let workspace: string;
+
+  beforeEach(async () => {
+    workspace = await mkdtemp(join(tmpdir(), 'prs-source-file-'));
+  });
+
+  afterEach(async () => {
+    await rm(workspace, { recursive: true, force: true });
+  });
+
+  it('accepts .prs files under the source dir and the config files', async () => {
+    expect(await isSourceFile(workspace, join(workspace, '.promptscript/team.prs'))).toBe(true);
+    expect(await isSourceFile(workspace, join(workspace, '.promptscript/a/b.prs'))).toBe(true);
+    expect(await isSourceFile(workspace, join(workspace, 'promptscript.yaml'))).toBe(true);
+    expect(await isSourceFile(workspace, join(workspace, 'promptscript.yml'))).toBe(true);
+  });
+
+  it('rejects other files in the workspace', async () => {
+    expect(await isSourceFile(workspace, join(workspace, '.env'))).toBe(false);
+    expect(await isSourceFile(workspace, join(workspace, 'team.prs'))).toBe(false);
+    expect(await isSourceFile(workspace, join(workspace, '.promptscript/notes.md'))).toBe(false);
+    expect(await isSourceFile(workspace, join(workspace, 'sub/promptscript.yaml'))).toBe(false);
+  });
+
+  it('follows the source dir from the config entry', async () => {
+    await writeFile(join(workspace, 'promptscript.yaml'), 'input:\n  entry: ai/prompts/main.prs\n');
+    expect(await isSourceFile(workspace, join(workspace, 'ai/prompts/main.prs'))).toBe(true);
+    expect(await isSourceFile(workspace, join(workspace, '.promptscript/team.prs'))).toBe(false);
   });
 });
 
