@@ -111,13 +111,14 @@ function printTypeExpression(expr: DeepReadonly<TypeExpression>): string {
       return `range(${printNumber(constraints?.min ?? 0)}..${printNumber(constraints?.max ?? 0)})`;
     case 'enum':
       return `enum(${(constraints?.options ?? []).map((option) => quote(typeof option === 'string' ? option : JSON.stringify(option))).join(', ')})`;
+    /* v8 ignore next -- the grammar has no list type keyword */
     case 'list':
     case 'string':
     case 'number':
     case 'boolean':
       return expr.kind;
+    /* v8 ignore next 2 -- exhaustive switch */
     default:
-      /* v8 ignore next -- exhaustive switch */
       return assertNever(expr.kind);
   }
 }
@@ -221,8 +222,8 @@ function printValueNode(
       }));
       return closeList('{', withComments(items, comments, inner, depth + 1), '}', indent);
     }
+    /* v8 ignore next 2 -- exhaustive switch */
     default:
-      /* v8 ignore next -- exhaustive switch */
       return assertNever(node);
   }
 }
@@ -385,13 +386,12 @@ function printEntry(
       ];
     }
     case 'ListEntry': {
-      // restrictionItem only accepts a StringLiteral, so a string item must never print bare.
       const { value } = entry;
-      const item =
-        value.type === 'ScalarValueNode' && typeof value.value === 'string'
-          ? quote(value.value)
-          : printValueNode(value, indent, ctx, comments);
-      return [`${indent}- ${item}`];
+      /* v8 ignore next 3 -- restrictionItem only accepts a string literal */
+      if (value.type !== 'ScalarValueNode' || typeof value.value !== 'string') {
+        throw new Error('List items are always string literals');
+      }
+      return [`${indent}- ${quote(value.value)}`];
     }
     case 'InlineUseEntry':
       return [indent + printUse(entry.declaration as InlineUseDeclaration, ctx)];
@@ -403,8 +403,8 @@ function printEntry(
       const section = entry.sectionId ? `${entry.sectionId} ` : '';
       return [`${indent}@header ${section}${quote(entry.title)}`];
     }
+    /* v8 ignore next 2 -- exhaustive switch */
     default:
-      /* v8 ignore next -- exhaustive switch */
       return assertNever(entry);
   }
 }
@@ -493,8 +493,8 @@ function printOverride(
         ],
         comments
       );
+    /* v8 ignore next 2 -- exhaustive switch */
     default:
-      /* v8 ignore next -- exhaustive switch */
       return assertNever(replacement);
   }
 }
@@ -515,8 +515,8 @@ function printOperation(
       return printExtend(operation.extension, comments, ctx);
     case 'OverrideOperation':
       return printOverride(operation.override, comments, ctx);
+    /* v8 ignore next 2 -- exhaustive switch */
     default:
-      /* v8 ignore next -- exhaustive switch */
       return assertNever(operation);
   }
 }
