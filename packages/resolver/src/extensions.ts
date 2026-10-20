@@ -41,6 +41,7 @@ const SKILL_PRESERVE_PROPERTIES = new Set([
   '__composedFrom',
   'sealed',
   '__layerTrace',
+  '__baseSource',
 ]);
 
 // ── AST-node type guards ─────────────────────────────────────────────
