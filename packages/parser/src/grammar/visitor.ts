@@ -888,7 +888,7 @@ class PromptScriptVisitor extends BaseVisitor {
 
   /** Overflowing literals (e.g. 400 digits) become Infinity, which no later stage can represent. */
   private parseNumber(token: IToken): number {
-    const value = parseFloat(token.image);
+    const value = Number.parseFloat(token.image);
     if (Number.isFinite(value)) return value;
     this.diagnostics.push({
       message: `Number literal ${token.image.slice(0, 20)}... is too large to represent. Use a smaller number.`,

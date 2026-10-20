@@ -7,6 +7,7 @@ import type {
   CanonicalOverrideBlock,
   CanonicalProgram,
   DeepReadonly,
+  FieldEntry,
   InheritDeclaration,
   InlineUseDeclaration,
   MetaBlock,
@@ -46,14 +47,16 @@ interface PrintContext {
   readonly bareEnv: boolean;
 }
 
+const ESCAPES = new Map([
+  ['\\', String.raw`\\`],
+  ['"', String.raw`\"`],
+  ['\n', String.raw`\n`],
+  ['\t', String.raw`\t`],
+  ['\r', String.raw`\r`],
+]);
+
 function quote(value: string): string {
-  const escaped = value
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, '\\n')
-    .replace(/\t/g, '\\t')
-    .replace(/\r/g, '\\r');
-  return `"${escaped}"`;
+  return `"${value.replaceAll(/["\\\n\t\r]/g, (ch) => ESCAPES.get(ch) ?? ch)}"`;
 }
 
 function printKey(name: string): string {
@@ -75,8 +78,8 @@ function printNumber(value: number): string {
   const digits = whole + fraction;
   const point = whole!.length + Number(exponent);
   if (point <= 0) return `${sign}0.${'0'.repeat(-point)}${digits}`;
-  if (point >= digits.length) return `${sign}${digits}${'0'.repeat(point - digits.length)}`;
-  return `${sign}${digits.slice(0, point)}.${digits.slice(point)}`;
+  // String(n) has one leading digit, so point is <= 0 or >= digits.length: no decimal point is left.
+  return `${sign}${digits}${'0'.repeat(point - digits.length)}`;
 }
 
 function printScalar(value: PrimitiveValue, ctx: PrintContext): string {
@@ -107,17 +110,19 @@ function printTypeExpression(expr: DeepReadonly<TypeExpression>): string {
     case 'range':
       return `range(${printNumber(constraints?.min ?? 0)}..${printNumber(constraints?.max ?? 0)})`;
     case 'enum':
-      return `enum(${(constraints?.options ?? []).map((option) => quote(String(option))).join(', ')})`;
+      return `enum(${(constraints?.options ?? []).map((option) => quote(typeof option === 'string' ? option : JSON.stringify(option))).join(', ')})`;
     case 'list':
     case 'string':
     case 'number':
     case 'boolean':
       return expr.kind;
     default:
+      /* v8 ignore next -- exhaustive switch */
       return assertNever(expr.kind);
   }
 }
 
+/* v8 ignore next 3 -- exhaustiveness guard */
 function assertNever(value: never): never {
   throw new Error(`Unhandled node: ${JSON.stringify(value)}`);
 }
@@ -217,6 +222,7 @@ function printValueNode(
       return closeList('{', withComments(items, comments, inner, depth + 1), '}', indent);
     }
     default:
+      /* v8 ignore next -- exhaustive switch */
       return assertNever(node);
   }
 }
@@ -238,7 +244,8 @@ function printArray(printed: string[], indent: string): string {
 
 function printParams(params: DeepReadonly<ParamArgument[]> | undefined, ctx: PrintContext): string {
   if (!params) return '';
-  return `(${params.map((param) => `${param.name}: ${printValue(param.value, '', ctx)}`).join(', ')})`;
+  const args = params.map((param) => `${param.name}: ${printValue(param.value, '', ctx)}`);
+  return `(${args.join(', ')})`;
 }
 
 function printImport(
@@ -351,6 +358,12 @@ function printMeta(
   return `@meta ${printList([...lines, ...comments.map((c) => c.text)], '{', '}', '')}`;
 }
 
+function fieldMarker(entry: FieldEntry, replaced: ReadonlySet<string>): string {
+  if (entry.optional) return '?';
+  if (replaced.has(entry.name)) return '!';
+  return '';
+}
+
 function printEntry(
   entry: BlockEntry,
   indent: string,
@@ -363,7 +376,7 @@ function printEntry(
     case 'TextEntry':
       return [indent + printText(entry.text, indent)];
     case 'FieldEntry': {
-      const marker = entry.optional ? '?' : replaced.has(entry.name) ? '!' : '';
+      const marker = fieldMarker(entry, replaced);
       const fallback = entry.defaultValue
         ? ` = ${printValueNode(entry.defaultValue, indent, ctx)}`
         : '';
@@ -391,6 +404,7 @@ function printEntry(
       return [`${indent}@header ${section}${quote(entry.title)}`];
     }
     default:
+      /* v8 ignore next -- exhaustive switch */
       return assertNever(entry);
   }
 }
@@ -480,6 +494,7 @@ function printOverride(
         comments
       );
     default:
+      /* v8 ignore next -- exhaustive switch */
       return assertNever(replacement);
   }
 }
@@ -501,6 +516,7 @@ function printOperation(
     case 'OverrideOperation':
       return printOverride(operation.override, comments, ctx);
     default:
+      /* v8 ignore next -- exhaustive switch */
       return assertNever(operation);
   }
 }
