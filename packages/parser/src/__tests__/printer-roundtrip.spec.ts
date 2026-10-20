@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { BlockBody, FieldEntry, Program } from '@promptscript/core';
 import { parse } from '../parse.js';
 import { printProgram } from '../printer.js';
 
@@ -151,21 +152,16 @@ describe('printProgram edge cases', () => {
 
 describe('printProgram value formatting', () => {
   it('rejects non-finite numbers instead of printing a string', () => {
-    const ast = parse('@context { a: 1 }').ast!;
-    const block = ast.blocks[0]!;
-    const entry = block.canonicalBody!.entries[0] as { value: { value: number } };
-    const broken = {
-      ...ast,
-      blocks: [
-        {
-          ...block,
-          canonicalBody: {
-            ...block.canonicalBody!,
-            entries: [{ ...entry, value: { ...entry.value, value: Infinity } }],
-          },
-        },
-      ],
-    } as unknown as typeof ast;
+    const parsed = parse('@context { a: 1 }').ast!;
+    const { loc } = parsed;
+    const entry: FieldEntry = {
+      type: 'FieldEntry',
+      name: 'a',
+      value: { type: 'ScalarValueNode', value: Infinity, loc },
+      loc,
+    };
+    const body: BlockBody = { type: 'BlockBody', shape: 'object', entries: [entry], loc };
+    const broken: Program = { ...parsed, blocks: [{ ...parsed.blocks[0]!, canonicalBody: body }] };
 
     expect(() => printProgram(broken)).toThrow('non-finite');
   });
