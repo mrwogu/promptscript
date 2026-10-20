@@ -969,7 +969,7 @@ describe('number literal overflow', () => {
 
     expect(result.ast).toBeNull();
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0]!.message).toContain('is too large to represent');
+    expect(result.errors[0]!.message).toContain('is too large to represent. Use a smaller number.');
     expect(result.errors[0]!.location).toMatchObject({ file: 'big.prs', line: 1, column: 15 });
   });
 

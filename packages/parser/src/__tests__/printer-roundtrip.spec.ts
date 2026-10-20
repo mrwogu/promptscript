@@ -251,11 +251,15 @@ describe('printProgram comments', () => {
   });
 
   it('reports each comment with its text, position and nesting depth', () => {
-    const parsed = parseCanonical('# top\n@identity {\n  a: 1 # inner\n}');
+    const parsed = parseCanonical(
+      '# top\n@identity { # open\n  a: 1 # inner\n  b: """\n  x\n  """ # after text\n}'
+    );
 
-    expect(parsed.comments.map((c) => [c.text, c.loc.line, c.depth])).toEqual([
-      ['# top', 1, 0],
-      ['# inner', 3, 1],
+    expect(parsed.comments.map((c) => [c.text, c.loc.line, c.depth, c.trailing])).toEqual([
+      ['# top', 1, 0, false],
+      ['# open', 2, 1, true],
+      ['# inner', 3, 1, true],
+      ['# after text', 6, 1, true],
     ]);
   });
 });
@@ -284,7 +288,7 @@ describe('printProgram nested comments', () => {
   });
 
   it('moves comments inside @meta before its closing brace, keeping text and order', () => {
-    // Known limit: MetaBlock fields have no positions in core, so they cannot be placed per field.
+    // Known limit: MetaBlock fields have no positions in core, so they cannot be placed per field. Tracked in #555.
     const parsed = parseCanonical('@meta {\n  # the id\n  id: "a"\n  syntax: "1.0.0"\n}');
 
     expect(printProgram(parsed.ast!, parsed.comments)).toBe(

@@ -891,7 +891,7 @@ class PromptScriptVisitor extends BaseVisitor {
     const value = parseFloat(token.image);
     if (Number.isFinite(value)) return value;
     this.diagnostics.push({
-      message: `Number literal ${token.image.slice(0, 20)}... is too large to represent. Use a smaller number or a string.`,
+      message: `Number literal ${token.image.slice(0, 20)}... is too large to represent. Use a smaller number.`,
       loc: this.loc(token),
     });
     return 0;

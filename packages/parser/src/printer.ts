@@ -347,7 +347,7 @@ function printMeta(
   }
   // Known limit: MetaBlock fields carry no source positions, so every comment inside @meta
   // moves to just before its closing brace (text and order are kept). Fixing that needs
-  // positions on MetaBlock in core.
+  // positions on MetaBlock in core. Tracked in #555.
   return `@meta ${printList([...lines, ...comments.map((c) => c.text)], '{', '}', '')}`;
 }
 
