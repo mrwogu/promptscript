@@ -1,0 +1,202 @@
+### string escapes
+@meta { id: "a" syntax: "1.0.0" }
+@identity { note: "q\"uote\ttab\nline" }
+### backslash before n
+@identity { path: "C:\\new" }
+### env var
+@identity { token: ${API_TOKEN} other: ${HOME:-/tmp} }
+### keyword keys
+@identity { "use": 1 "true": 2 string: "x" }
+### nested values
+@context { a: { b: [1, 2, { c: null }] d: [] e: {} } }
+### typed fields
+@params { name: string mode?: enum("a", "b") size: range(1..5) flag: boolean = true }
+### template expr
+@context { name: {{projectName}} }
+### inherit with params
+@inherit @stacks/ts@1.2.0(projectName: "x", strict: true)
+### use alias and into
+@use ./frag(a: 1) as frag into "skills/seo"
+### extend replace modifier
+@extend standards { testing!: ["Use Vitest"] other: 1 }
+### extend dotted path
+@extend standards.code { frameworks: [react] }
+### override block and value
+@override identity { "x" }
+@override standards.code { a: 1 }
+### header directive
+@meta { id: "a" syntax: "1.5.0" }
+@identity { @header "Who" """text""" }
+### legacy heading
+@meta { id: "a" syntax: "1.5.0" }
+@knowledge { """
+## Who
+
+body
+""" }
+### legacy heading without body
+@meta { id: "a" syntax: "1.5.0" }
+@knowledge { """## Who""" }
+### dash list
+@restrictions { - "never lie" - "be kind" }
+### mixed text and fields
+@knowledge { """
+  indented
+    deeper
+""" key: """
+  a
+""" }
+### meta params
+@meta { id: "a" params: { projectName: string strict?: boolean = true mode: enum("dev", "prod") } }
+### inline use in block
+@skills { @use ./sub as phase review: { description: "d" } }
+### negative and float numbers
+@context { a: -1 b: 2.5 c: -0.5 }
+### quoted env reference without the feature
+@identity { token: "${HOME}" list: ["${A}", 1] }
+### bare env reference with the feature
+@identity { token: ${HOME} other: ${B:-x} }
+### quoted env reference in list item
+@restrictions { - "${HOME}" }
+### quoted env reference in meta, use arg and typed default
+@meta { id: "a" syntax: "1.0.0" params: { p: string = "${X}" } }
+@use ./f(a: "${B}")
+### small fraction
+@context { a: 0.0000001 b: -0.00000000000012345 }
+### large integer
+@context { a: 1000000000000000000000 b: 123456789012345678901234 }
+### bare and quoted env references together
+@identity { a: ${X} b: "${Y}" }
+### env-looking enum option
+@params { mode: enum("${X}", "b") }
+@identity { other: ${HOME} }
+### range with extreme bounds
+@params { a: range(1..1000000000000000000000) b: range(0.0000001..1) }
+### negative zero
+@context { a: -0 }
+### user object that looks like a node
+@meta { id: "a" x: { type: "TypeExpression" kind: "foo" } y: { type: "TextContent" value: "hi" } }
+### whitespace-only lines in text
+@knowledge { """
+  a
+     
+  b
+""" }
+### user field named location
+@context { location: "x" loc: { line: 1 column: 2 } }
+### comment before a block
+# about identity
+@identity { a: 1 }
+### comment inside a block before a field
+@identity {
+  # why a
+  a: 1
+  b: 2
+}
+### comment after the last field
+@identity {
+  a: 1
+  # nothing else
+}
+@context { b: 2 }
+### trailing comment on a field line
+@identity {
+  a: 1 # one
+  b: 2 # two
+}
+### trailing comment on a use line
+@use ./frag # shared
+@identity { a: 1 }
+### comment with unicode
+# zażółć gęślą jaźń 😀 你好
+@identity { a: "é" }
+### hash inside strings is not a comment
+@identity { a: "not # a comment" b: """
+  also # not
+""" } # real
+### comments between top-level declarations
+@meta { id: "a" syntax: "1.0.0" }
+# one
+@use ./f
+
+# two
+@identity { a: 1 }
+# three
+### comment in an empty block
+@identity {
+  # nothing yet
+}
+### comment inside meta (known limit: comments move before the closing brace)
+@meta {
+  # the id
+  id: "a"
+  syntax: "1.0.0" # version
+}
+### comment in an extend and an override
+@extend standards {
+  # more
+  a: 1
+}
+@override identity {
+  # swap
+  "x"
+}
+### comment inside a nested value
+@context { a: [
+  1, # first
+  2
+] b: 1 }
+### comment after a nested close on the last line
+@identity { a: { b: 1 } } # end
+### comment after a single-line text value
+@identity {
+  a: """x""" # real
+  b: 1
+}
+### comment between @meta and its brace
+@meta # odd
+{ id: "a" syntax: "1.0.0" }
+### two blocks on one line with a trailing comment
+@identity { a: 1 } @context { b: 2 } # t
+### multi-line use with inner and trailing comments
+@use ./frag(
+  # p
+  a: 1
+) # t
+@identity { a: 1 }
+### multi-line inherit with inner and trailing comments
+@inherit ./base(
+  # p
+  a: 1
+) # t
+@identity { a: 1 }
+### comments in nested objects
+@standards {
+  code: {
+    # level 2
+    style: {
+      # level 3
+      size: 2 # two
+    }
+    # after style
+  }
+  naming: 1
+}
+### comments in a nested array
+@context {
+  a: [
+    1, # first
+    # before second
+    { x: 1 },
+    2
+    # after last
+  ]
+  b: 1
+}
+### file with only comments
+# just a note
+
+# and another
+
+### empty file
+

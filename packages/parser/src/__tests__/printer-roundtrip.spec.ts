@@ -104,78 +104,25 @@ describe('printProgram round trip', () => {
   }
 });
 
-/** Syntax that no fixture file exercises, so the printer is checked against it directly. */
-const EDGE_CASES: Record<string, string> = {
-  'string escapes':
-    '@meta { id: "a" syntax: "1.0.0" }\n@identity { note: "q\\"uote\\ttab\\nline" }',
-  'backslash before n': '@identity { path: "C:\\\\new" }',
-  'env var': '@identity { token: ${API_TOKEN} other: ${HOME:-/tmp} }',
-  'keyword keys': '@identity { "use": 1 "true": 2 string: "x" }',
-  'nested values': '@context { a: { b: [1, 2, { c: null }] d: [] e: {} } }',
-  'typed fields':
-    '@params { name: string mode?: enum("a", "b") size: range(1..5) flag: boolean = true }',
-  'template expr': '@context { name: {{projectName}} }',
-  'inherit with params': '@inherit @stacks/ts@1.2.0(projectName: "x", strict: true)',
-  'use alias and into': '@use ./frag(a: 1) as frag into "skills/seo"',
-  'extend replace modifier': '@extend standards { testing!: ["Use Vitest"] other: 1 }',
-  'extend dotted path': '@extend standards.code { frameworks: [react] }',
-  'override block and value': '@override identity { "x" }\n@override standards.code { a: 1 }',
-  'header directive': '@meta { id: "a" syntax: "1.5.0" }\n@identity { @header "Who" """text""" }',
-  'legacy heading': '@meta { id: "a" syntax: "1.5.0" }\n@knowledge { """\n## Who\n\nbody\n""" }',
-  'legacy heading without body': '@meta { id: "a" syntax: "1.5.0" }\n@knowledge { """## Who""" }',
-  'dash list': '@restrictions { - "never lie" - "be kind" }',
-  'mixed text and fields': '@knowledge { """\n  indented\n    deeper\n""" key: """\n  a\n""" }',
-  'meta params':
-    '@meta { id: "a" params: { projectName: string strict?: boolean = true mode: enum("dev", "prod") } }',
-  'inline use in block': '@skills { @use ./sub as phase review: { description: "d" } }',
-  'negative and float numbers': '@context { a: -1 b: 2.5 c: -0.5 }',
-  'quoted env reference without the feature': '@identity { token: "${HOME}" list: ["${A}", 1] }',
-  'bare env reference with the feature': '@identity { token: ${HOME} other: ${B:-x} }',
-  'quoted env reference in list item': '@restrictions { - "${HOME}" }',
-  'quoted env reference in meta, use arg and typed default':
-    '@meta { id: "a" syntax: "1.0.0" params: { p: string = "${X}" } }\n@use ./f(a: "${B}")',
-  'small fraction': '@context { a: 0.0000001 b: -0.00000000000012345 }',
-  'large integer': '@context { a: 1000000000000000000000 b: 123456789012345678901234 }',
-  'bare and quoted env references together': '@identity { a: ${X} b: "${Y}" }',
-  'env-looking enum option': '@params { mode: enum("${X}", "b") }\n@identity { other: ${HOME} }',
-  'range with extreme bounds':
-    '@params { a: range(1..1000000000000000000000) b: range(0.0000001..1) }',
-  'negative zero': '@context { a: -0 }',
-  'user object that looks like a node':
-    '@meta { id: "a" x: { type: "TypeExpression" kind: "foo" } y: { type: "TextContent" value: "hi" } }',
-  'whitespace-only lines in text': '@knowledge { """\n  a\n     \n  b\n""" }',
-  'user field named location': '@context { location: "x" loc: { line: 1 column: 2 } }',
-  'comment before a block': '# about identity\n@identity { a: 1 }',
-  'comment inside a block before a field': '@identity {\n  # why a\n  a: 1\n  b: 2\n}',
-  'comment after the last field': '@identity {\n  a: 1\n  # nothing else\n}\n@context { b: 2 }',
-  'trailing comment on a field line': '@identity {\n  a: 1 # one\n  b: 2 # two\n}',
-  'trailing comment on a use line': '@use ./frag # shared\n@identity { a: 1 }',
-  'comment with unicode': '# zażółć gęślą jaźń \u{1F600} \u4F60\u597D\n@identity { a: "\u00E9" }',
-  'hash inside strings is not a comment':
-    '@identity { a: "not # a comment" b: """\n  also # not\n""" } # real',
-  'comments between top-level declarations':
-    '@meta { id: "a" syntax: "1.0.0" }\n# one\n@use ./f\n\n# two\n@identity { a: 1 }\n# three',
-  'comment in an empty block': '@identity {\n  # nothing yet\n}',
-  'comment inside meta (known limit: comments move before the closing brace)':
-    '@meta {\n  # the id\n  id: "a"\n  syntax: "1.0.0" # version\n}',
-  'comment in an extend and an override':
-    '@extend standards {\n  # more\n  a: 1\n}\n@override identity {\n  # swap\n  "x"\n}',
-  'comment inside a nested value': '@context { a: [\n  1, # first\n  2\n] b: 1 }',
-  'comment after a nested close on the last line': '@identity { a: { b: 1 } } # end',
-  'comment after a single-line text value': '@identity {\n  a: """x""" # real\n  b: 1\n}',
-  'comment between @meta and its brace': '@meta # odd\n{ id: "a" syntax: "1.0.0" }',
-  'two blocks on one line with a trailing comment': '@identity { a: 1 } @context { b: 2 } # t',
-  'multi-line use with inner and trailing comments':
-    '@use ./frag(\n  # p\n  a: 1\n) # t\n@identity { a: 1 }',
-  'multi-line inherit with inner and trailing comments':
-    '@inherit ./base(\n  # p\n  a: 1\n) # t\n@identity { a: 1 }',
-  'comments in nested objects':
-    '@standards {\n  code: {\n    # level 2\n    style: {\n      # level 3\n      size: 2 # two\n    }\n    # after style\n  }\n  naming: 1\n}',
-  'comments in a nested array':
-    '@context {\n  a: [\n    1, # first\n    # before second\n    { x: 1 },\n    2\n    # after last\n  ]\n  b: 1\n}',
-  'file with only comments': '# just a note\n\n# and another\n',
-  'empty file': '',
-};
+/**
+ * Syntax that no fixture file exercises, so the printer is checked against it directly.
+ * The sources live in a fixture so they read as plain `.prs` text. Each case starts with a
+ * `### <name>` line; its body runs to the next marker minus the final line break.
+ */
+function loadEdgeCases(): Record<string, string> {
+  const text = readFileSync(join(__dirname, 'fixtures', 'printer-edge-cases.txt'), 'utf-8');
+  return Object.fromEntries(
+    text
+      .split(/^### /m)
+      .slice(1)
+      .map((chunk) => {
+        const newline = chunk.indexOf('\n');
+        return [chunk.slice(0, newline), chunk.slice(newline + 1).replace(/\n$/, '')] as const;
+      })
+  );
+}
+
+const EDGE_CASES = loadEdgeCases();
 
 describe('printProgram edge cases', () => {
   for (const [name, source] of Object.entries(EDGE_CASES)) {
