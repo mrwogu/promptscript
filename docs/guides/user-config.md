@@ -90,7 +90,8 @@ Windows). It sits under the user config:
 
 - user values win, and `registries` and `defaults` merge key by key
 - a user `registry.git` or `registry.url` replaces the system registry backend
-- a system `telemetry: false` cannot be turned back on by the user
+- `telemetry: false` at any layer is a hard opt-out, so a system `false` cannot be
+  turned back on by the user, a project or a CLI flag
 
 `prs registry list` shows system aliases with `(system)`.
 
