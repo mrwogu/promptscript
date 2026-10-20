@@ -1,16 +1,25 @@
+import { SYNTAX_FEATURES, blockContentToBody } from '@promptscript/core';
 import type {
   Block,
   BlockBody,
   BlockContent,
   BlockEntry,
+  DeepReadonly,
   ExtendBlock,
+  InheritDeclaration,
   InlineUseDeclaration,
   MetaBlock,
   OverrideBlock,
   ParamArgument,
   ParamDefinition,
-  PathReference,
+  PrimitiveValue,
   Program,
+  TemplateExpression,
+  TextContent,
+  TypeExpression,
+  UseDeclaration,
+  Value,
+  ValueNode,
 } from '@promptscript/core';
 
 const INDENT = '  ';
@@ -31,14 +40,9 @@ const KEYWORDS = new Set([
   'enum',
 ]);
 
-type Dict = Record<string, unknown>;
-
-function isDict(value: unknown): value is Dict {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function str(value: unknown): string {
-  return typeof value === 'string' ? value : '';
+interface PrintContext {
+  /** Print `${VAR}` strings bare; only safe when the source already used the env-var-value feature. */
+  readonly bareEnv: boolean;
 }
 
 function quote(value: string): string {
@@ -55,11 +59,34 @@ function printKey(name: string): string {
   return IDENTIFIER.test(name) && !KEYWORDS.has(name) ? name : quote(name);
 }
 
+/**
+ * The lexer has no exponent notation, so expand `String(n)` output such as
+ * `1e-7` or `1e+21` into plain decimal digits without losing precision.
+ */
+function printNumber(value: number): string {
+  const text = String(value);
+  const match = /^(-?)(\d+)(?:\.(\d+))?e([+-]\d+)$/.exec(text);
+  if (!match) return text;
+  const [, sign, whole, fraction = '', exponent] = match;
+  const digits = whole + fraction;
+  const point = whole!.length + Number(exponent);
+  if (point <= 0) return `${sign}0.${'0'.repeat(-point)}${digits}`;
+  if (point >= digits.length) return `${sign}${digits}${'0'.repeat(point - digits.length)}`;
+  return `${sign}${digits.slice(0, point)}.${digits.slice(point)}`;
+}
+
+function printScalar(value: PrimitiveValue, ctx: PrintContext): string {
+  if (typeof value === 'string') return ctx.bareEnv && ENV_VAR.test(value) ? value : quote(value);
+  if (typeof value === 'number') return printNumber(value);
+  return String(value);
+}
+
 /** Triple-quoted text; the parser strips the common indent and trims, so any indent is safe. */
 function printText(text: string, closeIndent: string): string {
+  // Only exactly empty lines stay empty; whitespace-only lines are content and must survive.
   const body = text
     .split('\n')
-    .map((line) => (line.trim() === '' ? '' : closeIndent + INDENT + line))
+    .map((line) => (line === '' ? '' : closeIndent + INDENT + line))
     .join('\n');
   return `"""\n${body}\n${closeIndent}"""`;
 }
@@ -70,68 +97,79 @@ function printList(items: string[], open: string, close: string, indent: string)
   return `${open}\n${items.map((item) => inner + item).join('\n')}\n${indent}${close}`;
 }
 
-function printTypeExpression(expr: Dict): string {
-  const kind = str(expr['kind']);
-  const constraints = isDict(expr['constraints']) ? expr['constraints'] : {};
-  if (kind === 'range')
-    return `range(${String(constraints['min'])}..${String(constraints['max'])})`;
-  if (kind === 'enum') {
-    const options = Array.isArray(constraints['options']) ? constraints['options'] : [];
-    return `enum(${options.map((option) => quote(str(option))).join(', ')})`;
+function printTypeExpression(expr: DeepReadonly<TypeExpression>, ctx: PrintContext): string {
+  const { constraints } = expr;
+  switch (expr.kind) {
+    case 'range':
+      return `range(${constraints?.min}..${constraints?.max})`;
+    case 'enum':
+      return `enum(${(constraints?.options ?? []).map((option) => printValue(option, '', ctx)).join(', ')})`;
+    case 'list':
+    case 'string':
+    case 'number':
+    case 'boolean':
+      return expr.kind;
+    default:
+      return assertNever(expr.kind);
   }
-  return kind;
 }
 
-/**
- * Print a raw `Value` or a canonical `ValueNode`. Both are accepted because the
- * canonical body carries the same information as the legacy projection.
- */
-function printValue(value: unknown, indent: string): string {
-  if (typeof value === 'string') return ENV_VAR.test(value) ? value : quote(value);
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-  if (value === null) return 'null';
-  if (Array.isArray(value)) return printArray(value, indent);
-  if (!isDict(value)) throw new Error(`Cannot print value of type ${typeof value}`);
+function assertNever(value: never): never {
+  throw new Error(`Unhandled node: ${JSON.stringify(value)}`);
+}
 
-  switch (value['type']) {
+function isNode<T extends string>(value: object, type: T): boolean {
+  return 'type' in value && value.type === type;
+}
+
+/** Print a legacy `Value` (meta fields, params, @use arguments). */
+function printValue(value: Value | DeepReadonly<Value>, indent: string, ctx: PrintContext): string {
+  if (value === null || typeof value !== 'object') return printScalar(value, ctx);
+  if (Array.isArray(value))
+    return printArray(
+      value.map((item) => printValue(item, indent + INDENT, ctx)),
+      indent
+    );
+  if (isNode(value, 'TextContent')) return printText((value as TextContent).value, indent);
+  if (isNode(value, 'TemplateExpression')) return `{{${(value as TemplateExpression).name}}}`;
+  if (isNode(value, 'TypeExpression')) return printTypeExpression(value as TypeExpression, ctx);
+  const lines = Object.entries(value).map(
+    ([key, entry]) => `${printKey(key)}: ${printValue(entry as Value, indent + INDENT, ctx)}`
+  );
+  return printList(lines, '{', '}', indent);
+}
+
+/** Print a canonical `ValueNode`. */
+function printValueNode(node: ValueNode, indent: string, ctx: PrintContext): string {
+  switch (node.type) {
     case 'ScalarValueNode':
-      return printValue(value['value'], indent);
+      return printScalar(node.value, ctx);
     case 'TextValueNode':
-    case 'TextContent':
-      return printText(str(value['value']), indent);
+      return printText(node.value, indent);
     case 'TemplateValueNode':
-    case 'TemplateExpression':
-      return `{{${str(value['name'])}}}`;
+      return `{{${node.name}}}`;
     case 'TypeExpressionValueNode':
-      return printValue(value['expression'], indent);
-    case 'TypeExpression':
-      return printTypeExpression(value);
-    case 'ArrayValueNode': {
-      const elements = Array.isArray(value['elements']) ? value['elements'] : [];
+      return printTypeExpression(node.expression, ctx);
+    case 'ArrayValueNode':
       return printArray(
-        elements.map((element) => (isDict(element) ? element['value'] : element)),
+        node.elements.map((element) => printValueNode(element.value, indent + INDENT, ctx)),
         indent
       );
-    }
-    case 'ObjectValueNode': {
-      const fields = Array.isArray(value['fields']) ? value['fields'] : [];
-      const lines = fields.map(
-        (field) =>
-          `${printKey(isDict(field) ? str(field['name']) : '')}: ${printValue(isDict(field) ? field['value'] : undefined, indent + INDENT)}`
+    case 'ObjectValueNode':
+      return printList(
+        node.fields.map(
+          (field) => `${printKey(field.name)}: ${printValueNode(field.value, indent + INDENT, ctx)}`
+        ),
+        '{',
+        '}',
+        indent
       );
-      return printList(lines, '{', '}', indent);
-    }
-    default: {
-      const lines = Object.entries(value).map(
-        ([key, entry]) => `${printKey(key)}: ${printValue(entry, indent + INDENT)}`
-      );
-      return printList(lines, '{', '}', indent);
-    }
+    default:
+      return assertNever(node);
   }
 }
 
-function printArray(items: unknown[], indent: string): string {
-  const printed = items.map((item) => printValue(item, indent + INDENT));
+function printArray(printed: string[], indent: string): string {
   // Arrays need commas, so keep the simple case on one line and only break for nested values.
   if (printed.every((item) => !item.includes('\n'))) return `[${printed.join(', ')}]`;
   return printList(
@@ -142,145 +180,109 @@ function printArray(items: unknown[], indent: string): string {
   );
 }
 
-function printParams(params: ParamArgument[] | undefined): string {
+function printParams(params: ParamArgument[] | undefined, ctx: PrintContext): string {
   if (!params) return '';
-  return `(${params.map((param) => `${param.name}: ${printValue(param.value, '')}`).join(', ')})`;
+  return `(${params.map((param) => `${param.name}: ${printValue(param.value, '', ctx)}`).join(', ')})`;
 }
 
-function printPath(path: PathReference): string {
-  return path.raw;
+function printImport(
+  keyword: string,
+  decl: InheritDeclaration | UseDeclaration | InlineUseDeclaration,
+  ctx: PrintContext
+): string {
+  return `@${keyword} ${decl.path.raw}${printParams(decl.params, ctx)}`;
 }
 
-interface ImportLike {
-  path: PathReference;
-  params?: ParamArgument[];
-  alias?: string;
-  outputDir?: string;
-}
-
-function printUse(keyword: string, decl: ImportLike, inherit = false): string {
-  const parts = [`@${keyword} ${printPath(decl.path)}${printParams(decl.params)}`];
-  if (!inherit) {
-    if (decl.alias) parts.push(`as ${decl.alias}`);
-    if (decl.outputDir) parts.push(`into ${quote(decl.outputDir)}`);
-  }
+function printUse(decl: UseDeclaration | InlineUseDeclaration, ctx: PrintContext): string {
+  const parts = [printImport('use', decl, ctx)];
+  if (decl.alias) parts.push(`as ${decl.alias}`);
+  if (decl.outputDir) parts.push(`into ${quote(decl.outputDir)}`);
   return parts.join(' ');
 }
 
-function printParamDefinition(def: ParamDefinition, indent: string): string {
+function printParamDefinition(def: ParamDefinition, indent: string, ctx: PrintContext): string {
   const type =
     def.paramType.kind === 'enum'
       ? `enum(${def.paramType.options.map(quote).join(', ')})`
       : def.paramType.kind;
   const hasDefault = def.defaultValue !== undefined;
   const optional = def.optional && !hasDefault ? '?' : '';
-  const fallback = hasDefault ? ` = ${printValue(def.defaultValue, indent)}` : '';
+  const fallback = hasDefault ? ` = ${printValue(def.defaultValue!, indent, ctx)}` : '';
   return `${def.name}${optional}: ${type}${fallback}`;
 }
 
-function printMeta(meta: MetaBlock): string {
+function printMeta(meta: MetaBlock, ctx: PrintContext): string {
   const lines = Object.entries(meta.fields).map(
-    ([key, value]) => `${printKey(key)}: ${printValue(value, INDENT)}`
+    ([key, value]) => `${printKey(key)}: ${printValue(value, INDENT, ctx)}`
   );
   if (meta.params) {
-    const defs = meta.params.map((def) => printParamDefinition(def, INDENT + INDENT));
+    const defs = meta.params.map((def) => printParamDefinition(def, INDENT + INDENT, ctx));
     lines.push(`params: ${printList(defs, '{', '}', INDENT)}`);
   }
   return `@meta ${printList(lines, '{', '}', '')}`;
 }
 
-/** Build ordered entries from the legacy projection when no canonical body was retained. */
-function entriesFromContent(content: BlockContent): readonly Dict[] {
-  switch (content.type) {
-    case 'TextContent':
-      return [{ type: 'TextEntry', text: content.value }];
-    case 'ArrayContent':
-      return content.elements.map((value) => ({ type: 'ListEntry', value }));
-    case 'ObjectContent':
-    case 'MixedContent': {
-      const text = content.type === 'MixedContent' && content.text ? [content.text.value] : [];
-      return [
-        ...text.map((value) => ({ type: 'TextEntry', text: value })),
-        ...Object.entries(content.properties).map(([name, value]) => ({
-          type: 'FieldEntry',
-          name,
-          value,
-        })),
-        ...(content.listItems ?? []).map((value) => ({ type: 'ListEntry', value })),
-        ...(content.inlineUses ?? []).map((declaration) => ({
-          type: 'InlineUseEntry',
-          declaration,
-        })),
-      ];
-    }
-  }
-}
-
 function printEntry(
-  entry: Dict,
+  entry: BlockEntry,
   indent: string,
   replaced: ReadonlySet<string>,
+  ctx: PrintContext,
   legacyRemainder = ''
 ): string[] {
-  switch (entry['type']) {
+  switch (entry.type) {
     case 'TextEntry':
-      return [indent + printText(str(entry['text']), indent)];
+      return [indent + printText(entry.text, indent)];
     case 'FieldEntry': {
-      const name = str(entry['name']);
-      const marker = entry['optional'] === true ? '?' : replaced.has(name) ? '!' : '';
-      const fallback =
-        entry['defaultValue'] === undefined
-          ? ''
-          : ` = ${printValue(entry['defaultValue'], indent)}`;
+      const marker = entry.optional ? '?' : replaced.has(entry.name) ? '!' : '';
+      const fallback = entry.defaultValue
+        ? ` = ${printValueNode(entry.defaultValue, indent, ctx)}`
+        : '';
       return [
-        `${indent}${printKey(name)}${marker}: ${printValue(entry['value'], indent)}${fallback}`,
+        `${indent}${printKey(entry.name)}${marker}: ${printValueNode(entry.value, indent, ctx)}${fallback}`,
       ];
     }
-    case 'ListEntry':
-      return [`${indent}- ${printValue(entry['value'], indent)}`];
-    case 'InlineUseEntry': {
-      const declaration = entry['declaration'] as InlineUseDeclaration;
-      return [indent + printUse('use', declaration)];
+    case 'ListEntry': {
+      // restrictionItem only accepts a StringLiteral, so a string item must never print bare.
+      const { value } = entry;
+      const item =
+        value.type === 'ScalarValueNode' && typeof value.value === 'string'
+          ? quote(value.value)
+          : printValueNode(value, indent, ctx);
+      return [`${indent}- ${item}`];
     }
+    case 'InlineUseEntry':
+      return [indent + printUse(entry.declaration as InlineUseDeclaration, ctx)];
     case 'PresentationEntry': {
-      const title = str(entry['title']);
-      if (entry['source'] === 'legacy') {
+      if (entry.source === 'legacy') {
         // A legacy heading is the first line of a text block, so it is printed as text.
-        return [indent + printText(`## ${title}\n${legacyRemainder}`, indent)];
+        return [indent + printText(`## ${entry.title}\n${legacyRemainder}`, indent)];
       }
-      const section = typeof entry['sectionId'] === 'string' ? `${entry['sectionId']} ` : '';
-      return [`${indent}@header ${section}${quote(title)}`];
+      const section = entry.sectionId ? `${entry.sectionId} ` : '';
+      return [`${indent}@header ${section}${quote(entry.title)}`];
     }
     default:
-      throw new Error(`Unknown block entry type: ${String(entry['type'])}`);
+      return assertNever(entry);
   }
-}
-
-function printBody(
-  body: BlockBody | undefined,
-  content: BlockContent,
-  indent: string,
-  replaced: ReadonlySet<string> = new Set()
-): string[] {
-  const entries: readonly (BlockEntry | Dict)[] = body ? body.entries : entriesFromContent(content);
-  return printEntries(entries as readonly Dict[], indent, replaced);
 }
 
 /** Print entries in order, folding a legacy heading and the text after it back into one block. */
 function printEntries(
-  entries: readonly Dict[],
+  entries: readonly BlockEntry[],
   indent: string,
-  replaced: ReadonlySet<string>
+  replaced: ReadonlySet<string>,
+  ctx: PrintContext
 ): string[] {
   return entries.flatMap((entry, index) => {
     const previous = entries[index - 1];
-    if (previous?.['type'] === 'PresentationEntry' && previous['source'] === 'legacy') {
-      return entry['type'] === 'TextEntry' ? [] : printEntry(entry, indent, replaced);
+    if (previous?.type === 'PresentationEntry' && previous.source === 'legacy') {
+      return entry.type === 'TextEntry' ? [] : printEntry(entry, indent, replaced, ctx);
     }
     const next = entries[index + 1];
     const remainder =
-      entry['source'] === 'legacy' && next?.['type'] === 'TextEntry' ? str(next['text']) : '';
-    return printEntry(entry, indent, replaced, remainder);
+      entry.type === 'PresentationEntry' && entry.source === 'legacy' && next?.type === 'TextEntry'
+        ? next.text
+        : '';
+    return printEntry(entry, indent, replaced, ctx, remainder);
   });
 }
 
@@ -288,34 +290,43 @@ function printBlockLike(
   head: string,
   body: BlockBody | undefined,
   content: BlockContent,
-  replaced?: ReadonlySet<string>
+  ctx: PrintContext,
+  replaced: ReadonlySet<string> = new Set()
 ): string {
-  const lines = printBody(body, content, INDENT, replaced);
+  // Fall back to the legacy projection when no canonical body was retained.
+  const entries = (body ?? blockContentToBody(content)).entries;
+  const lines = printEntries(entries, INDENT, replaced, ctx);
   return lines.length === 0 ? `${head} {\n}` : `${head} {\n${lines.join('\n')}\n}`;
 }
 
-function printBlock(block: Block): string {
-  return printBlockLike(`@${block.name}`, block.canonicalBody, block.content);
+function printBlock(block: Block, ctx: PrintContext): string {
+  return printBlockLike(`@${block.name}`, block.canonicalBody, block.content, ctx);
 }
 
-function printExtend(block: ExtendBlock): string {
+function printExtend(block: ExtendBlock, ctx: PrintContext): string {
   const replaced = new Set((block.replacements ?? []).map((replacement) => replacement.property));
   return printBlockLike(
     `@extend ${block.targetPath}`,
     block.canonicalBody,
     block.content,
+    ctx,
     replaced
   );
 }
 
-function printOverride(block: OverrideBlock): string {
+function printOverride(block: OverrideBlock, ctx: PrintContext): string {
   const head = `@override ${block.targetPath}`;
   const { replacement } = block;
-  if (replacement.type === 'BlockReplacement') {
-    const lines = printEntries(replacement.body.entries as unknown as Dict[], INDENT, new Set());
-    return `${head} {\n${lines.join('\n')}\n}`;
+  switch (replacement.type) {
+    case 'BlockReplacement': {
+      const lines = printEntries(replacement.body.entries, INDENT, new Set(), ctx);
+      return `${head} {\n${lines.join('\n')}\n}`;
+    }
+    case 'ValueReplacement':
+      return `${head} {\n${INDENT}${printValueNode(replacement.value, INDENT, ctx)}\n}`;
+    default:
+      return assertNever(replacement);
   }
-  return `${head} {\n${INDENT}${printValue(replacement.value, INDENT)}\n}`;
 }
 
 /**
@@ -326,12 +337,19 @@ function printOverride(block: OverrideBlock): string {
  * because the legacy AST does not retain their interleaved order.
  */
 export function printProgram(ast: Program): string {
+  // A quoted "${VAR}" must stay quoted unless the source already used the env-var-value feature,
+  // otherwise the round trip would add that feature to the program.
+  const ctx: PrintContext = {
+    bareEnv: (ast.syntaxFeatures ?? []).some(
+      (usage) => usage.feature === SYNTAX_FEATURES.ENV_VAR_VALUE
+    ),
+  };
   const sections: string[] = [];
-  if (ast.meta) sections.push(printMeta(ast.meta));
-  if (ast.inherit) sections.push(printUse('inherit', ast.inherit, true));
-  sections.push(...ast.uses.map((use) => printUse('use', use)));
-  sections.push(...ast.blocks.map(printBlock));
-  sections.push(...ast.extends.map(printExtend));
-  sections.push(...(ast.overrides ?? []).map(printOverride));
+  if (ast.meta) sections.push(printMeta(ast.meta, ctx));
+  if (ast.inherit) sections.push(printImport('inherit', ast.inherit, ctx));
+  sections.push(...ast.uses.map((use) => printUse(use, ctx)));
+  sections.push(...ast.blocks.map((block) => printBlock(block, ctx)));
+  sections.push(...ast.extends.map((block) => printExtend(block, ctx)));
+  sections.push(...(ast.overrides ?? []).map((block) => printOverride(block, ctx)));
   return sections.join('\n\n') + '\n';
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from '../parse.js';
 import { printProgram } from '../printer.js';
@@ -23,23 +24,18 @@ function stripPositions(value: unknown): unknown {
   return value;
 }
 
-function findPrsFiles(dir: string): string[] {
-  return readdirSync(dir).flatMap((name) => {
-    if (['node_modules', 'dist', '.git', '.nx', 'coverage'].includes(name)) return [];
-    const path = join(dir, name);
-    if (statSync(path).isDirectory()) return findPrsFiles(path);
-    return name.endsWith('.prs') ? [path] : [];
-  });
-}
+/** Tracked fixtures that are deliberately not valid syntax; they are error tests, not round-trip inputs. */
+const INVALID_FIXTURES = new Set<string>([
+  'packages/resolver/src/__tests__/__fixtures__/invalid-syntax.prs',
+]);
 
-/** Files that parse cleanly; invalid-syntax fixtures are error tests, not round-trip inputs. */
+/** Tracked files only, so untracked WIP and other worktrees never change the suite. */
 function loadFixtures(): { name: string; source: string }[] {
-  return findPrsFiles(repoRoot)
-    .map((path) => ({ name: relative(repoRoot, path), source: readFileSync(path, 'utf-8') }))
-    .filter(({ source }) => {
-      const result = parse(source);
-      return result.ast !== null && result.errors.length === 0;
-    });
+  const listed = execFileSync('git', ['ls-files', '*.prs'], { cwd: repoRoot, encoding: 'utf-8' });
+  return listed
+    .split('\n')
+    .filter((name) => name !== '' && !INVALID_FIXTURES.has(name))
+    .map((name) => ({ name, source: readFileSync(join(repoRoot, name), 'utf-8') }));
 }
 
 /**
@@ -53,9 +49,19 @@ const KNOWN_EDGE_FAILURES: Record<string, string> = {};
 describe('printProgram round trip', () => {
   const fixtures = loadFixtures();
 
-  it('finds fixtures to round trip', () => {
-    expect(fixtures.length).toBeGreaterThan(0);
+  it('finds the tracked fixture corpus', () => {
+    expect(fixtures.length).toBeGreaterThanOrEqual(56);
   });
+
+  it.each(fixtures.map(({ name, source }) => [name, source] as const))(
+    'parses without errors: %s',
+    (_name, source) => {
+      const result = parse(source);
+
+      expect(result.errors).toEqual([]);
+      expect(result.ast).not.toBeNull();
+    }
+  );
 
   for (const { name, source } of fixtures) {
     const reason = KNOWN_FAILURES[name];
@@ -100,6 +106,14 @@ const EDGE_CASES: Record<string, string> = {
     '@meta { id: "a" params: { projectName: string strict?: boolean = true mode: enum("dev", "prod") } }',
   'inline use in block': '@skills { @use ./sub as phase review: { description: "d" } }',
   'negative and float numbers': '@context { a: -1 b: 2.5 c: -0.5 }',
+  'quoted env reference without the feature': '@identity { token: "${HOME}" list: ["${A}", 1] }',
+  'bare env reference with the feature': '@identity { token: ${HOME} other: ${B:-x} }',
+  'quoted env reference in list item': '@restrictions { - "${HOME}" }',
+  'quoted env reference in meta, use arg and typed default':
+    '@meta { id: "a" syntax: "1.0.0" params: { p: string = "${X}" } }\n@use ./f(a: "${B}")',
+  'small fraction': '@context { a: 0.0000001 b: -0.00000000000012345 }',
+  'large integer': '@context { a: 1000000000000000000000 b: 123456789012345678901234 }',
+  'whitespace-only lines in text': '@knowledge { """\n  a\n     \n  b\n""" }',
 };
 
 describe('printProgram edge cases', () => {
@@ -117,6 +131,36 @@ describe('printProgram edge cases', () => {
       // Assert
       expect(reparsed.errors).toEqual([]);
       expect(stripPositions(reparsed.ast)).toEqual(stripPositions(parsed.ast));
+      expect(stripPositions(reparsed.ast?.syntaxFeatures)).toEqual(
+        stripPositions(parsed.ast?.syntaxFeatures)
+      );
     });
   }
+});
+
+describe('printProgram value formatting', () => {
+  it('prints numbers without exponent notation', () => {
+    const ast = parse('@context { a: 0.0000001 b: 1000000000000000000000 }').ast!;
+
+    const printed = printProgram(ast);
+
+    expect(printed).toContain('a: 0.0000001');
+    expect(printed).toContain('b: 1000000000000000000000');
+  });
+
+  it('keeps whitespace-only lines inside text values', () => {
+    const ast = parse('@knowledge { """\n  a\n     \n  b\n""" }').ast!;
+
+    const reparsed = parse(printProgram(ast)).ast!;
+
+    expect(JSON.stringify(stripPositions(reparsed.blocks[0]?.content))).toContain('a\\n   \\nb');
+  });
+
+  it('quotes env references unless the source used the env-var-value feature', () => {
+    const quoted = parse('@identity { a: "${HOME}" }').ast!;
+    const bare = parse('@identity { a: ${HOME} }').ast!;
+
+    expect(printProgram(quoted)).toContain('a: "${HOME}"');
+    expect(printProgram(bare)).toContain('a: ${HOME}');
+  });
 });
