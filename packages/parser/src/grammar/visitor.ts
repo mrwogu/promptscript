@@ -876,6 +876,17 @@ class PromptScriptVisitor extends BaseVisitor {
     return field;
   }
 
+  /** Overflowing literals (e.g. 400 digits) become Infinity, which no later stage can represent. */
+  private parseNumber(token: IToken): number {
+    const value = parseFloat(token.image);
+    if (Number.isFinite(value)) return value;
+    this.diagnostics.push({
+      message: `Number literal is too large to represent: ${token.image.slice(0, 20)}...`,
+      loc: this.loc(token),
+    });
+    return 0;
+  }
+
   /**
    * value → Value
    */
@@ -885,7 +896,7 @@ class PromptScriptVisitor extends BaseVisitor {
     }
 
     if (ctx.NumberLiteral) {
-      return parseFloat(ctx.NumberLiteral[0]!.image);
+      return this.parseNumber(ctx.NumberLiteral[0]!);
     }
 
     if (ctx.EnvVar) {
@@ -1006,8 +1017,8 @@ class PromptScriptVisitor extends BaseVisitor {
    */
   rangeType(ctx: RangeTypeCstCtx): TypeExpression {
     const [minToken, maxToken] = ctx.NumberLiteral;
-    const min = parseFloat(minToken.image);
-    const max = parseFloat(maxToken.image);
+    const min = this.parseNumber(minToken);
+    const max = this.parseNumber(maxToken);
 
     return {
       type: 'TypeExpression',
