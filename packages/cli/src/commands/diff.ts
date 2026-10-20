@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs';
 import type { DiffOptions } from '../types.js';
 import { isValidLockfile, type Lockfile, type Logger } from '@promptscript/core';
 import type { FormatterOutput } from '@promptscript/compiler';
-import { loadConfig } from '../config/loader.js';
+import { loadEffectiveConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput, isVerbose, isDebug } from '../output/console.js';
 import { createPager, Pager } from '../output/pager.js';
 import { Compiler } from '@promptscript/compiler';
@@ -170,7 +170,7 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     : createSpinner('Loading configuration...').start();
 
   try {
-    const config = await loadConfig();
+    const config = await loadEffectiveConfig();
     const buildProfile = getBuildProfile(config, options.build);
 
     // --all is the default behavior when no target is specified

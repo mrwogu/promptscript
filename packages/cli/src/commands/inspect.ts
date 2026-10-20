@@ -3,7 +3,7 @@ import { resolve, basename } from 'node:path';
 import type { ObjectContent, TextContent } from '@promptscript/core';
 import { Resolver } from '@promptscript/resolver';
 import type { InspectOptions } from '../types.js';
-import { CONFIG_FILES, loadConfig } from '../config/loader.js';
+import { CONFIG_FILES, loadEffectiveConfig } from '../config/loader.js';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { ConsoleOutput, createSpinner } from '../output/console.js';
 
@@ -32,7 +32,7 @@ export async function inspectCommand(skillName: string, options: InspectOptions)
       throw new Error(`No PromptScript configuration found in ${projectRoot}. Run: prs init`);
     }
 
-    const config = await loadConfig(configPath);
+    const config = await loadEffectiveConfig(configPath);
     const registry = await resolveRegistryPath(config);
     const localPath = resolve(projectRoot, '.promptscript');
 

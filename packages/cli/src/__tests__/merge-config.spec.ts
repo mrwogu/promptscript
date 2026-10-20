@@ -40,6 +40,27 @@ describe('config/merge-config', () => {
     expect(result.telemetry).toBe(true);
   });
 
+  it('should merge user registry aliases under project aliases', () => {
+    const userConfig: UserConfig = {
+      version: '1',
+      registries: {
+        '@company': 'github.com/user/company',
+        '@shared': 'github.com/user/shared',
+      },
+    };
+
+    const result = mergeConfigs(
+      userConfig,
+      { ...baseProjectConfig, registries: { '@company': 'github.com/project/company' } },
+      {}
+    );
+
+    expect(result.registries).toEqual({
+      '@company': 'github.com/project/company',
+      '@shared': 'github.com/user/shared',
+    });
+  });
+
   it('should apply user config registry as base', () => {
     const userConfig: UserConfig = {
       version: '1',
@@ -228,6 +249,41 @@ describe('config/merge-config', () => {
 
     expect(result.registry?.auth?.type).toBe('basic');
     expect(result.registry?.auth?.tokenEnvVar).toBe('NEW_TOKEN');
+  });
+
+  it('should let a project path registry replace the user git registry', () => {
+    const userConfig: UserConfig = {
+      version: '1',
+      registry: {
+        git: { url: 'https://github.com/user/reg.git' },
+        cache: { ttl: 60000 },
+      },
+    };
+
+    const projectConfig: PromptScriptConfig = {
+      ...baseProjectConfig,
+      registry: { path: './registry' },
+    };
+
+    const result = mergeConfigs(userConfig, projectConfig, {});
+
+    expect(result.registry).toEqual({ path: './registry', cache: { ttl: 60000 } });
+  });
+
+  it('should let a project path registry replace the user url registry', () => {
+    const userConfig: UserConfig = {
+      version: '1',
+      registry: { url: 'https://user-registry.example.com' },
+    };
+
+    const projectConfig: PromptScriptConfig = {
+      ...baseProjectConfig,
+      registry: { path: './registry' },
+    };
+
+    const result = mergeConfigs(userConfig, projectConfig, {});
+
+    expect(result.registry).toEqual({ path: './registry' });
   });
 
   it('should override url from user config', () => {

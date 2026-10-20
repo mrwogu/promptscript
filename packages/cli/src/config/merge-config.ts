@@ -13,6 +13,14 @@ function deepMergeRegistry(
 
   const merged = { ...target };
 
+  // Backends are picked in the order git, url, path. A source that selects
+  // url or path drops the target backends picked before it, or the lower
+  // priority registry would still win
+  if (!source.git && (source.path !== undefined || source.url !== undefined)) {
+    delete merged.git;
+    if (source.url === undefined) delete merged.url;
+  }
+
   if (source.path !== undefined) merged.path = source.path;
   if (source.url !== undefined) merged.url = source.url;
 
@@ -101,6 +109,11 @@ export function mergeConfigs(
   if (userConfig.registry) {
     const userRegistry = userConfigToProjectRegistry(userConfig.registry);
     merged.registry = deepMergeRegistry(userRegistry, merged.registry);
+  }
+
+  // Registry aliases: project aliases win over user aliases
+  if (userConfig.registries) {
+    merged.registries = { ...userConfig.registries, ...projectConfig.registries };
   }
 
   // Apply env overrides (higher priority than project config)

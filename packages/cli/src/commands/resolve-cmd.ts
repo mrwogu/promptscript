@@ -6,8 +6,7 @@ import type { Lockfile, LockfileDependency, PathReference } from '@promptscript/
 import { isValidLockfile } from '@promptscript/core';
 import { parse } from '@promptscript/parser';
 import type { ResolveCommandOptions } from '../types.js';
-import { loadConfig, findConfigFile } from '../config/loader.js';
-import { loadUserConfig } from '../config/user-config.js';
+import { loadEffectiveConfig, findConfigFile } from '../config/loader.js';
 import { ConsoleOutput } from '../output/console.js';
 import {
   FileLoader,
@@ -157,12 +156,8 @@ export async function resolveCommand(
       throw new Error('No project config found. Run: prs init');
     }
 
-    const config = await loadConfig();
-    const userConfig = await loadUserConfig();
-    const registries = {
-      ...(userConfig.registries ?? {}),
-      ...(config.registries ?? {}),
-    };
+    const config = await loadEffectiveConfig();
+    const registries = config.registries ?? {};
     const alias = importPath.startsWith('@') ? (importPath.split('/')[0] ?? '') : undefined;
     if (alias) {
       if (!validateAlias(alias)) {

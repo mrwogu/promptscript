@@ -60,6 +60,7 @@ vi.mock('../../output/console.js', () => ({
 
 vi.mock('../../config/loader.js', () => ({
   loadConfig: mockLoadConfig,
+  loadEffectiveConfig: mockLoadConfig,
 }));
 
 vi.mock('@promptscript/resolver', () => ({

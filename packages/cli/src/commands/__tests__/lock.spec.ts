@@ -72,6 +72,7 @@ vi.mock('../../output/console.js', () => ({
 
 vi.mock('../../config/loader.js', () => ({
   loadConfig: mockLoadConfig,
+  loadEffectiveConfig: mockLoadConfig,
   findConfigFile: mockFindConfigFile,
 }));
 
@@ -185,6 +186,36 @@ describe('lockCommand', () => {
     expect(parsed.dependencies['github.com/company/base']?.commit).toBe(
       '1234567890abcdef1234567890abcdef12345678'
     );
+  });
+
+  it('should pin user aliases only through the imports that use them', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    // loadEffectiveConfig runs first, then loadConfig for the project aliases
+    mockLoadConfig
+      .mockResolvedValueOnce({
+        targets: [],
+        registries: {
+          '@company': 'github.com/company/base',
+          '@personal': 'github.com/me/private',
+        },
+      })
+      .mockResolvedValueOnce({
+        targets: [],
+        registries: { '@company': 'github.com/company/base' },
+      });
+    mockCollectRemoteImports.mockResolvedValueOnce([
+      { repoUrl: 'github.com/me/used', path: '@org/base.prs', version: '' },
+    ]);
+    mockExistsSync.mockReturnValue(false);
+
+    await lockCommand({});
+
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as { dependencies: Record<string, unknown> };
+    expect(Object.keys(parsed.dependencies).sort()).toEqual([
+      'github.com/company/base',
+      'github.com/me/used',
+    ]);
   });
 
   it('should include generated reference hashes', async () => {
