@@ -51,7 +51,7 @@ import {
   isValidGitUrl,
   githubRepoToManifestUrl,
 } from '../utils/manifest-loader.js';
-import { loadUserConfig } from '../config/user-config.js';
+import { loadUserAndSystemConfig } from '../config/user-config.js';
 import { loadEnvOverrides } from '../config/env-config.js';
 import { CONFIG_FILES } from '../config/loader.js';
 import {
@@ -599,7 +599,7 @@ async function resolveConfig(
 ): Promise<ResolvedConfig> {
   // If --yes flag, use all defaults (including manifest suggestions)
   if (options.yes) {
-    const userConfig = await loadUserConfig();
+    const userConfig = await loadUserAndSystemConfig();
     const envOverrides = loadEnvOverrides();
     let inherit = options.inherit;
     let use: string[] | undefined;
@@ -854,7 +854,7 @@ async function runInteractivePrompts(
   }
 
   // 5. Targets
-  const userConfig = await loadUserConfig();
+  const userConfig = await loadUserAndSystemConfig();
   const configuredTargets =
     (options.targets as AIToolTarget[] | undefined) ??
     (userConfig.defaults?.targets as AIToolTarget[] | undefined) ??

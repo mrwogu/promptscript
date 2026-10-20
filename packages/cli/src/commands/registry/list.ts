@@ -1,14 +1,24 @@
 import { ConsoleOutput } from '../../output/console.js';
-import { loadUserConfig } from '../../config/user-config.js';
+import { loadUserConfig, SYSTEM_CONFIG_PATH } from '../../config/user-config.js';
 import { findConfigFile } from '../../config/loader.js';
 import { readFile } from 'node:fs/promises';
 import { parse as parseYaml } from 'yaml';
-import type { PromptScriptConfig } from '@promptscript/core';
+import type { PromptScriptConfig, RegistriesConfig } from '@promptscript/core';
 import type { RegistryListOptions } from '../../types.js';
+
+type AliasSource = 'system' | 'global' | 'project';
+
+function aliasUrls(registries: RegistriesConfig | undefined): Record<string, string> {
+  const urls: Record<string, string> = {};
+  for (const [alias, entry] of Object.entries(registries ?? {})) {
+    urls[alias] = typeof entry === 'string' ? entry : entry.url;
+  }
+  return urls;
+}
 
 /**
  * Show merged registry alias mappings from all config levels.
- * Project config overrides user (global) config — last write wins.
+ * Project config overrides user (global) config, which overrides system config.
  */
 export async function registryListCommand(options: RegistryListOptions = {}): Promise<void> {
   try {
@@ -25,45 +35,36 @@ export async function registryListCommand(options: RegistryListOptions = {}): Pr
       return;
     }
 
-    const userConfig = await loadUserConfig();
-
-    // Collect user-level aliases
-    const userAliases: Record<string, string> = {};
-    if (userConfig.registries) {
-      for (const [alias, entry] of Object.entries(userConfig.registries)) {
-        userAliases[alias] = typeof entry === 'string' ? entry : entry.url;
-      }
-    }
+    const systemAliases = aliasUrls((await loadUserConfig(SYSTEM_CONFIG_PATH)).registries);
+    const userAliases = aliasUrls((await loadUserConfig()).registries);
 
     // Collect project-level aliases
-    const projectAliases: Record<string, string> = {};
+    let projectAliases: Record<string, string> = {};
     const configFile = findConfigFile();
     if (configFile) {
       try {
         const content = await readFile(configFile, 'utf-8');
         const projectConfig = parseYaml(content) as PromptScriptConfig;
-        if (projectConfig?.registries) {
-          for (const [alias, entry] of Object.entries(projectConfig.registries)) {
-            projectAliases[alias] = typeof entry === 'string' ? entry : entry.url;
-          }
-        }
+        projectAliases = aliasUrls(projectConfig?.registries);
       } catch {
         // Ignore parse errors — project config is optional
       }
     }
 
-    // Merge: project overrides user
-    const merged: Array<{ alias: string; url: string; source: 'global' | 'project' }> = [];
-
-    for (const [alias, url] of Object.entries(userAliases)) {
-      if (!(alias in projectAliases)) {
-        merged.push({ alias, url, source: 'global' });
+    // Merge: project overrides user, user overrides system
+    const levels: Array<[AliasSource, Record<string, string>]> = [
+      ['system', systemAliases],
+      ['global', userAliases],
+      ['project', projectAliases],
+    ];
+    const winners = new Map<string, { alias: string; url: string; source: AliasSource }>();
+    for (const [level, aliases] of levels) {
+      for (const [alias, url] of Object.entries(aliases)) {
+        winners.delete(alias);
+        winners.set(alias, { alias, url, source: level });
       }
     }
-
-    for (const [alias, url] of Object.entries(projectAliases)) {
-      merged.push({ alias, url, source: 'project' });
-    }
+    const merged = [...winners.values()];
 
     const filtered =
       source === 'global'

@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { join } from 'node:path';
-import { loadUserConfig } from '../config/user-config.js';
+import {
+  loadUserAndSystemConfig,
+  loadUserConfig,
+  mergeUserConfigs,
+  resolveSystemConfigPath,
+  SYSTEM_CONFIG_PATH,
+} from '../config/user-config.js';
 
 // Mock fs modules
 vi.mock('node:fs', () => ({
@@ -105,5 +111,73 @@ defaults:
     await loadUserConfig();
 
     expect(mockExistsSync).toHaveBeenCalledWith(join('/mock/home', '.promptscript', 'config.yaml'));
+  });
+
+  it('should load the system config under the user config', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockImplementation(async (path) =>
+      path === SYSTEM_CONFIG_PATH
+        ? "registries:\n  '@it': github.com/acme/it\n  '@company': github.com/acme/base\n"
+        : "registries:\n  '@company': github.com/me/fork\n"
+    );
+
+    const config = await loadUserAndSystemConfig();
+
+    expect(config.registries).toEqual({
+      '@it': 'github.com/acme/it',
+      '@company': 'github.com/me/fork',
+    });
+  });
+
+  it('should merge the system config under the user config', () => {
+    const merged = mergeUserConfigs(
+      {
+        version: '1',
+        telemetry: false,
+        registries: { '@company': 'github.com/acme/base', '@it': 'github.com/acme/it' },
+        defaults: { targets: ['github'], team: 'platform' },
+      },
+      {
+        version: '1',
+        telemetry: true,
+        registries: { '@company': 'github.com/me/fork' },
+        defaults: { team: 'frontend' },
+      }
+    );
+
+    expect(merged).toEqual({
+      version: '1',
+      telemetry: false,
+      registries: { '@company': 'github.com/me/fork', '@it': 'github.com/acme/it' },
+      defaults: { targets: ['github'], team: 'frontend' },
+    });
+  });
+
+  it('should let a user url registry replace the system git registry', () => {
+    const merged = mergeUserConfigs(
+      {
+        version: '1',
+        registry: { git: { url: 'https://github.com/acme/base.git' }, cache: { ttl: 1000 } },
+      },
+      { version: '1', registry: { url: 'https://registry.example.com' } }
+    );
+
+    expect(merged.registry).toEqual({ url: 'https://registry.example.com', cache: { ttl: 1000 } });
+  });
+
+  it('should place the system config under ProgramData on Windows', () => {
+    const path = resolveSystemConfigPath('win32', 'D:\\Data');
+
+    expect(path).toBe(join('D:\\Data', 'promptscript', 'config.yaml'));
+  });
+
+  it('should fall back to the default ProgramData folder on Windows', () => {
+    const path = resolveSystemConfigPath('win32', undefined);
+
+    expect(path).toBe(join('C:\\ProgramData', 'promptscript', 'config.yaml'));
+  });
+
+  it('should place the system config under /etc on other platforms', () => {
+    expect(resolveSystemConfigPath('linux')).toBe('/etc/promptscript/config.yaml');
   });
 });

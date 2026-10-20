@@ -1025,7 +1025,7 @@ or Git working tree.
 
 #### prs registry list
 
-List configured registry alias mappings, showing the merged project and global user result.
+List configured registry alias mappings, showing the merged project, global user and system result.
 
 ```bash
 prs registry list [options]
@@ -1054,9 +1054,10 @@ prs registry list --format json
 **Example output:**
 
 ```
-  @company  →  github.com/acme/promptscript-base  (project)
-  @team     →  github.com/acme/team-frontend      (project)
-  @shared   →  github.com/acme/shared-libs        (global)
+  @security  →  github.com/acme/security-standards  (system)
+  @shared    →  github.com/acme/shared-libs  (global)
+  @company   →  github.com/acme/promptscript-base  (project)
+  @team      →  github.com/acme/team-frontend  (project)
 ```
 
 #### prs registry add

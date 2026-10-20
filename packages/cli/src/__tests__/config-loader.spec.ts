@@ -22,7 +22,7 @@ vi.mock('node:fs/promises', () => ({
 }));
 
 vi.mock('../config/user-config.js', () => ({
-  loadUserConfig: vi.fn().mockResolvedValue({ version: '1' }),
+  loadUserAndSystemConfig: vi.fn().mockResolvedValue({ version: '1' }),
 }));
 
 vi.mock('../config/env-config.js', () => ({
@@ -239,10 +239,10 @@ syntax: "1.0.0"
 
   describe('loadEffectiveConfig', () => {
     it('should merge user config, project config, env overrides, and CLI flags', async () => {
-      const { loadUserConfig } = await import('../config/user-config.js');
+      const { loadUserAndSystemConfig } = await import('../config/user-config.js');
       const { loadEnvOverrides } = await import('../config/env-config.js');
 
-      vi.mocked(loadUserConfig).mockResolvedValue({
+      vi.mocked(loadUserAndSystemConfig).mockResolvedValue({
         version: '1',
         registry: { git: { url: 'https://github.com/user/reg.git' } },
       });

@@ -4,13 +4,14 @@ import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { parseDocument } from 'yaml';
 import { resolveTelemetryConfig, type ResolvedTelemetryConfig } from '@promptscript/telemetry';
 import { CONFIG_FILES, loadConfig } from '../config/loader.js';
-import { USER_CONFIG_PATH } from '../config/user-config.js';
+import { SYSTEM_CONFIG_PATH, USER_CONFIG_PATH } from '../config/user-config.js';
 
 export interface CliTelemetryConfigOptions {
   cwd?: string;
   config?: string;
   cacheDirectory?: string;
   userConfigPath?: string;
+  systemConfigPath?: string;
 }
 
 function resolveFrom(baseDirectory: string, value: string): string {
@@ -69,13 +70,16 @@ export async function resolveCliTelemetryConfig(
   options: CliTelemetryConfigOptions = {}
 ): Promise<ResolvedTelemetryConfig> {
   const cwd = options.cwd === undefined ? process.cwd() : resolve(process.cwd(), options.cwd);
+  const systemSetting = await readUserTelemetrySetting(
+    options.systemConfigPath ?? SYSTEM_CONFIG_PATH
+  );
   const userSetting = await readUserTelemetrySetting(options.userConfigPath ?? USER_CONFIG_PATH);
   const projectPath = findProjectConfig(cwd, options.config);
   const environmentConfig = process.env['PROMPTSCRIPT_CONFIG'];
   const projectConfigRequested =
     options.config !== undefined || (environmentConfig !== undefined && environmentConfig !== '');
   let projectEnabled: boolean | undefined;
-  let configurationValid = userSetting.valid;
+  let configurationValid = systemSetting.valid && userSetting.valid;
 
   if (projectConfigRequested && projectPath === null) {
     configurationValid = false;
@@ -94,6 +98,7 @@ export async function resolveCliTelemetryConfig(
 
   return resolveTelemetryConfig({
     environment: process.env,
+    systemEnabled: systemSetting.enabled,
     userEnabled: userSetting.enabled,
     projectEnabled,
     configurationValid,
