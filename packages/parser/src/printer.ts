@@ -64,6 +64,9 @@ function printKey(name: string): string {
  * `1e-7` or `1e+21` into plain decimal digits without losing precision.
  */
 function printNumber(value: number): string {
+  // "Infinity" and "NaN" would reparse as strings, so refuse instead of changing the type.
+  if (!Number.isFinite(value)) throw new Error(`Cannot print non-finite number: ${value}`);
+  if (Object.is(value, -0)) return '-0';
   const text = String(value);
   const match = /^(-?)(\d+)(?:\.(\d+))?e([+-]\d+)$/.exec(text);
   if (!match) return text;
@@ -97,13 +100,13 @@ function printList(items: string[], open: string, close: string, indent: string)
   return `${open}\n${items.map((item) => inner + item).join('\n')}\n${indent}${close}`;
 }
 
-function printTypeExpression(expr: DeepReadonly<TypeExpression>, ctx: PrintContext): string {
+function printTypeExpression(expr: DeepReadonly<TypeExpression>): string {
   const { constraints } = expr;
   switch (expr.kind) {
     case 'range':
-      return `range(${constraints?.min}..${constraints?.max})`;
+      return `range(${printNumber(constraints?.min ?? 0)}..${printNumber(constraints?.max ?? 0)})`;
     case 'enum':
-      return `enum(${(constraints?.options ?? []).map((option) => printValue(option, '', ctx)).join(', ')})`;
+      return `enum(${(constraints?.options ?? []).map((option) => quote(String(option))).join(', ')})`;
     case 'list':
     case 'string':
     case 'number':
@@ -118,8 +121,15 @@ function assertNever(value: never): never {
   throw new Error(`Unhandled node: ${JSON.stringify(value)}`);
 }
 
-function isNode<T extends string>(value: object, type: T): boolean {
-  return 'type' in value && value.type === type;
+interface LegacyNodes {
+  TextContent: TextContent;
+  TemplateExpression: TemplateExpression;
+  TypeExpression: TypeExpression;
+}
+
+/** Parser nodes always carry `loc`; that tells them apart from user objects with a `type` key. */
+function isNode<K extends keyof LegacyNodes>(value: object, type: K): value is LegacyNodes[K] {
+  return 'type' in value && value.type === type && 'loc' in value;
 }
 
 /** Print a legacy `Value` (meta fields, params, @use arguments). */
@@ -130,9 +140,9 @@ function printValue(value: Value | DeepReadonly<Value>, indent: string, ctx: Pri
       value.map((item) => printValue(item, indent + INDENT, ctx)),
       indent
     );
-  if (isNode(value, 'TextContent')) return printText((value as TextContent).value, indent);
-  if (isNode(value, 'TemplateExpression')) return `{{${(value as TemplateExpression).name}}}`;
-  if (isNode(value, 'TypeExpression')) return printTypeExpression(value as TypeExpression, ctx);
+  if (isNode(value, 'TextContent')) return printText(value.value, indent);
+  if (isNode(value, 'TemplateExpression')) return `{{${value.name}}}`;
+  if (isNode(value, 'TypeExpression')) return printTypeExpression(value);
   const lines = Object.entries(value).map(
     ([key, entry]) => `${printKey(key)}: ${printValue(entry as Value, indent + INDENT, ctx)}`
   );
@@ -149,7 +159,7 @@ function printValueNode(node: ValueNode, indent: string, ctx: PrintContext): str
     case 'TemplateValueNode':
       return `{{${node.name}}}`;
     case 'TypeExpressionValueNode':
-      return printTypeExpression(node.expression, ctx);
+      return printTypeExpression(node.expression);
     case 'ArrayValueNode':
       return printArray(
         node.elements.map((element) => printValueNode(element.value, indent + INDENT, ctx)),

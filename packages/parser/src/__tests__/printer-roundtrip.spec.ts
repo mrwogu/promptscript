@@ -38,14 +38,6 @@ function loadFixtures(): { name: string; source: string }[] {
     .map((name) => ({ name, source: readFileSync(join(repoRoot, name), 'utf-8') }));
 }
 
-/**
- * Fixtures whose round trip is known to differ, with the reason. Each one is
- * skipped so the sizing stays visible instead of being silently dropped.
- */
-const KNOWN_FAILURES: Record<string, string> = {};
-
-const KNOWN_EDGE_FAILURES: Record<string, string> = {};
-
 describe('printProgram round trip', () => {
   const fixtures = loadFixtures();
 
@@ -64,9 +56,7 @@ describe('printProgram round trip', () => {
   );
 
   for (const { name, source } of fixtures) {
-    const reason = KNOWN_FAILURES[name];
-    const test = reason ? it.skip : it;
-    test(`reparses its own output: ${name}${reason ? ` (${reason})` : ''}`, () => {
+    it(`reparses its own output: ${name}`, () => {
       // Arrange
       const original = parse(source).ast!;
 
@@ -113,14 +103,18 @@ const EDGE_CASES: Record<string, string> = {
     '@meta { id: "a" syntax: "1.0.0" params: { p: string = "${X}" } }\n@use ./f(a: "${B}")',
   'small fraction': '@context { a: 0.0000001 b: -0.00000000000012345 }',
   'large integer': '@context { a: 1000000000000000000000 b: 123456789012345678901234 }',
+  'env-looking enum option': '@params { mode: enum("${X}", "b") }\n@identity { other: ${HOME} }',
+  'range with extreme bounds':
+    '@params { a: range(1..1000000000000000000000) b: range(0.0000001..1) }',
+  'negative zero': '@context { a: -0 }',
+  'user object that looks like a node':
+    '@meta { id: "a" x: { type: "TypeExpression" kind: "foo" } y: { type: "TextContent" value: "hi" } }',
   'whitespace-only lines in text': '@knowledge { """\n  a\n     \n  b\n""" }',
 };
 
 describe('printProgram edge cases', () => {
   for (const [name, source] of Object.entries(EDGE_CASES)) {
-    const reason = KNOWN_EDGE_FAILURES[name];
-    const test = reason ? it.skip : it;
-    test(`reparses its own output: ${name}${reason ? ` (${reason})` : ''}`, () => {
+    it(`reparses its own output: ${name}`, () => {
       // Arrange
       const parsed = parse(source);
       expect(parsed.errors).toEqual([]);
@@ -139,6 +133,26 @@ describe('printProgram edge cases', () => {
 });
 
 describe('printProgram value formatting', () => {
+  it('rejects non-finite numbers instead of printing a string', () => {
+    const ast = parse('@context { a: 1 }').ast!;
+    const block = ast.blocks[0]!;
+    const entry = block.canonicalBody!.entries[0] as { value: { value: number } };
+    const broken = {
+      ...ast,
+      blocks: [
+        {
+          ...block,
+          canonicalBody: {
+            ...block.canonicalBody!,
+            entries: [{ ...entry, value: { ...entry.value, value: Infinity } }],
+          },
+        },
+      ],
+    } as unknown as typeof ast;
+
+    expect(() => printProgram(broken)).toThrow('non-finite');
+  });
+
   it('prints numbers without exponent notation', () => {
     const ast = parse('@context { a: 0.0000001 b: 1000000000000000000000 }').ast!;
 
