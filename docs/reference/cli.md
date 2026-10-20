@@ -14,7 +14,7 @@ Complete reference for the PromptScript command-line interface.
 | Start a project               | [`prs init`](#prs-init)                                                                                        |
 | Bring existing instructions   | [`prs import`](#prs-import), [`prs migrate`](#prs-migrate)                                                     |
 | Generate native files         | [`prs compile`](#prs-compile), [`prs build`](#prs-build)                                                       |
-| Check before commit or in CI  | [`prs validate`](#prs-validate), [`prs check`](#prs-check), [`prs diff`](#prs-diff)                            |
+| Check before commit or in CI  | [`prs validate`](#prs-validate), [`prs fmt`](#prs-fmt), [`prs check`](#prs-check), [`prs diff`](#prs-diff)     |
 | Understand the result         | [`prs explain`](#prs-explain), [`prs inspect`](#prs-inspect), [`prs resolve`](#prs-resolve)                    |
 | Share and pin dependencies    | [`prs registry`](#prs-registry), [`prs pull`](#prs-pull), [`prs lock`](#prs-lock), [`prs update`](#prs-update) |
 | Work offline                  | [`prs vendor`](#prs-vendor)                                                                                    |
@@ -548,6 +548,58 @@ prs validate --format json
 | 0    | Validation passed                         |
 | 1    | Validation errors found                   |
 | 2    | Validation warnings found (with --strict) |
+
+---
+
+### prs fmt
+
+Rewrite `.prs` files in canonical form. Each file is parsed and printed back, and
+written only when the output differs from the current content.
+
+```bash
+prs fmt [options] [paths...]
+```
+
+A path may be a file or a directory. Directories are walked for `*.prs`, skipping
+`node_modules`, `vendor` and `.cache`. With no paths, `prs fmt` formats every `.prs`
+file under `.promptscript`.
+
+**Options:**
+
+| Option    | Description                                                             |
+| --------- | ----------------------------------------------------------------------- |
+| `--check` | Write nothing, list files that would change, exit 1 if any would change |
+
+**Examples:**
+
+```bash
+# Format the project in place
+prs fmt
+
+# Format one file and one directory
+prs fmt .promptscript/project.prs shared/
+
+# CI: fail when a file is not formatted
+prs fmt --check
+```
+
+A file that does not parse is reported with its first error and location, is never
+written, and makes the exit code 1. Other files are still processed. The last line
+summarizes how many files were formatted (or would change with `--check`), how many
+were unchanged and how many failed.
+
+**Known limits of the printer:**
+
+- Comments inside `@meta` move before its closing brace.
+- Blank lines between comments are dropped.
+- Comments inside `@use` and `@inherit` parameter lists move to their own line.
+
+**Exit Codes:**
+
+| Code | Meaning                                                            |
+| ---- | ------------------------------------------------------------------ |
+| 0    | All files formatted or unchanged (`--check`: nothing would change) |
+| 1    | A file failed to parse, or `--check` found files that would change |
 
 ---
 
