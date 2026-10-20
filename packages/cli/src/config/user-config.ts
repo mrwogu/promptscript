@@ -12,11 +12,18 @@ export const USER_CONFIG_PATH = join(homedir(), '.promptscript', 'config.yaml');
 
 /**
  * Path to the system-level PromptScript config file, provisioned by IT.
+ * The platform and ProgramData are parameters so both branches can be tested.
  */
-export const SYSTEM_CONFIG_PATH =
-  process.platform === 'win32'
-    ? join(process.env['ProgramData'] ?? String.raw`C:\ProgramData`, 'promptscript', 'config.yaml')
+export function resolveSystemConfigPath(
+  platform: NodeJS.Platform = process.platform,
+  programData: string | undefined = process.env['ProgramData']
+): string {
+  return platform === 'win32'
+    ? join(programData ?? String.raw`C:\ProgramData`, 'promptscript', 'config.yaml')
     : '/etc/promptscript/config.yaml';
+}
+
+export const SYSTEM_CONFIG_PATH = resolveSystemConfigPath();
 
 /**
  * Default user config returned when no config file exists.

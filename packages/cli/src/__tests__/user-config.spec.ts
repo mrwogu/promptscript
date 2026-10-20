@@ -4,6 +4,7 @@ import {
   loadUserAndSystemConfig,
   loadUserConfig,
   mergeUserConfigs,
+  resolveSystemConfigPath,
   SYSTEM_CONFIG_PATH,
 } from '../config/user-config.js';
 
@@ -162,5 +163,21 @@ defaults:
     );
 
     expect(merged.registry).toEqual({ url: 'https://registry.example.com', cache: { ttl: 1000 } });
+  });
+
+  it('should place the system config under ProgramData on Windows', () => {
+    const path = resolveSystemConfigPath('win32', 'D:\\Data');
+
+    expect(path).toBe(join('D:\\Data', 'promptscript', 'config.yaml'));
+  });
+
+  it('should fall back to the default ProgramData folder on Windows', () => {
+    const path = resolveSystemConfigPath('win32', undefined);
+
+    expect(path).toBe(join('C:\\ProgramData', 'promptscript', 'config.yaml'));
+  });
+
+  it('should place the system config under /etc on other platforms', () => {
+    expect(resolveSystemConfigPath('linux')).toBe('/etc/promptscript/config.yaml');
   });
 });
