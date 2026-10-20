@@ -16,9 +16,17 @@ export interface Comment {
    * a block's last entry apart from a comment after the block.
    */
   readonly depth: number;
+  /**
+   * True when a token ends on the line where the comment starts, so the comment
+   * follows code instead of standing on its own line.
+   */
+  readonly trailing: boolean;
 }
 
 const OPENERS = new Set(['LBrace', 'LBracket', 'LParen']);
+// Note: `}}` lexes as one TemplateClose and is not counted as two closes. It only
+// pairs with `{{` in valid source, where the net is zero; `}}` closing two objects is a
+// parse error anyway, so depth is only approximate in already-broken input.
 const CLOSERS = new Set(['RBrace', 'RBracket', 'RParen']);
 
 /** Collect comments in source order, with the nesting depth of each. */
@@ -31,16 +39,19 @@ export function collectComments(lexResult: ILexingResult, file: string): Comment
     while (next < lexResult.tokens.length && lexResult.tokens[next]!.startOffset < offset) {
       const name = lexResult.tokens[next]!.tokenType.name;
       if (OPENERS.has(name)) depth++;
-      if (CLOSERS.has(name)) depth--;
+      // Recovery mode can see stray closers; never go below top level.
+      if (CLOSERS.has(name)) depth = Math.max(0, depth - 1);
       next++;
     }
   };
   for (const token of found) {
     countUntil(token.startOffset);
+    const previous = lexResult.tokens[next - 1];
     comments.push({
       text: token.image,
       loc: { file, line: token.startLine!, column: token.startColumn!, offset: token.startOffset },
       depth,
+      trailing: previous !== undefined && previous.endLine === token.startLine,
     });
   }
   return comments;

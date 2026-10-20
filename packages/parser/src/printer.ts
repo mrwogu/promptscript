@@ -150,8 +150,23 @@ function printValue(value: Value | DeepReadonly<Value>, indent: string, ctx: Pri
   return printList(lines, '{', '}', indent);
 }
 
-/** Print a canonical `ValueNode`. */
-function printValueNode(node: ValueNode, indent: string, ctx: PrintContext): string {
+function isContainer(node: ValueNode): boolean {
+  return node.type === 'ArrayValueNode' || node.type === 'ObjectValueNode';
+}
+
+/**
+ * Print a canonical `ValueNode`. `comments` are those inside the value and
+ * `depth` is the nesting depth of the container the value sits in, so nested
+ * arrays and objects can place them like a block does.
+ */
+function printValueNode(
+  node: ValueNode,
+  indent: string,
+  ctx: PrintContext,
+  comments: readonly Comment[] = [],
+  depth = BLOCK_DEPTH
+): string {
+  const inner = indent + INDENT;
   switch (node.type) {
     case 'ScalarValueNode':
       return printScalar(node.value, ctx);
@@ -161,23 +176,53 @@ function printValueNode(node: ValueNode, indent: string, ctx: PrintContext): str
       return `{{${node.name}}}`;
     case 'TypeExpressionValueNode':
       return printTypeExpression(node.expression);
-    case 'ArrayValueNode':
-      return printArray(
-        node.elements.map((element) => printValueNode(element.value, indent + INDENT, ctx)),
-        indent
-      );
-    case 'ObjectValueNode':
-      return printList(
-        node.fields.map(
-          (field) => `${printKey(field.name)}: ${printValueNode(field.value, indent + INDENT, ctx)}`
-        ),
-        '{',
-        '}',
-        indent
-      );
+    case 'ArrayValueNode': {
+      if (comments.length === 0) {
+        return printArray(
+          node.elements.map((element) => printValueNode(element.value, inner, ctx)),
+          indent
+        );
+      }
+      // The comma has to be part of the element so a trailing comment lands after it.
+      const last = node.elements.length - 1;
+      const items = node.elements.map<Placed>((element, index) => ({
+        loc: element.loc,
+        holds: isContainer(element.value),
+        print: (own) => [
+          inner +
+            printValueNode(element.value, inner, ctx, own, depth + 1) +
+            (index < last ? ',' : ''),
+        ],
+      }));
+      return closeList('[', withComments(items, comments, inner, depth + 1), ']', indent);
+    }
+    case 'ObjectValueNode': {
+      if (comments.length === 0) {
+        return printList(
+          node.fields.map(
+            (field) => `${printKey(field.name)}: ${printValueNode(field.value, inner, ctx)}`
+          ),
+          '{',
+          '}',
+          indent
+        );
+      }
+      const items = node.fields.map<Placed>((field) => ({
+        loc: field.loc,
+        holds: isContainer(field.value),
+        print: (own) => [
+          `${inner}${printKey(field.name)}: ${printValueNode(field.value, inner, ctx, own, depth + 1)}`,
+        ],
+      }));
+      return closeList('{', withComments(items, comments, inner, depth + 1), '}', indent);
+    }
     default:
       return assertNever(node);
   }
+}
+
+function closeList(open: string, groups: string[][], close: string, indent: string): string {
+  return `${open}\n${groups.flat().join('\n')}\n${indent}${close}`;
 }
 
 function printArray(printed: string[], indent: string): string {
@@ -232,8 +277,14 @@ function printParamDefinition(
 /** A printed declaration or entry with the source position used to place comments around it. */
 interface Placed {
   readonly loc: SourceLocation;
-  readonly lines: string[];
+  /** Prints the item, given the comments that sit inside it (only when `holds`). */
+  readonly print: (inside: readonly Comment[]) => string[];
+  /** True when the item can place comments nested inside it; others leave them to their neighbours. */
+  readonly holds: boolean;
 }
+
+/** Entries of a block sit one level inside it. */
+const BLOCK_DEPTH = 1;
 
 function offsetOf(loc: SourceLocation): number {
   return loc.offset ?? 0;
@@ -242,33 +293,43 @@ function offsetOf(loc: SourceLocation): number {
 /**
  * Comments are not in the AST, so each one is re-attached by source position:
  * it is printed before the first item that starts after it, which keeps a
- * comment above the thing it described. A comment on the line where an item
- * starts stays on that line. Whatever is left sat after the last item and
- * closes the container. Returns one group per item so callers can choose the
- * separator, plus a final group for the leftovers when there are any.
+ * comment above the thing it described. A comment that followed code on its
+ * line stays after the item it followed. Comments nested deeper than this
+ * container go to the item they sit inside. Whatever is left sat after the
+ * last item and closes the container. Returns one group per item so callers can
+ * choose the separator, plus a final group for the leftovers when there are any.
+ *
+ * Attaching by the `trailing` flag, not by comparing line numbers, is what keeps
+ * printing stable: a multi-line item prints its comment on a different line than
+ * the one the item started on.
  */
 function withComments(
   items: readonly Placed[],
   comments: readonly Comment[],
-  indent: string
+  indent: string,
+  depth: number
 ): string[][] {
   const groups: string[][] = [];
-  let next = 0;
+  let rest = comments;
   items.forEach((item, index) => {
-    const group: string[] = [];
-    while (next < comments.length && offsetOf(comments[next]!.loc) < offsetOf(item.loc)) {
-      group.push(indent + comments[next++]!.text);
-    }
-    const lines = [...item.lines];
-    const trailing = comments[next];
-    const nextStart = items[index + 1] ? offsetOf(items[index + 1]!.loc) : Infinity;
-    if (trailing && trailing.loc.line === item.loc.line && offsetOf(trailing.loc) < nextStart) {
+    const start = offsetOf(item.loc);
+    const end = items[index + 1] ? offsetOf(items[index + 1]!.loc) : Infinity;
+    const leading = rest.filter((c) => offsetOf(c.loc) < start);
+    rest = rest.filter((c) => offsetOf(c.loc) >= start);
+    const isInside = (c: Comment): boolean =>
+      item.holds && c.depth > depth && offsetOf(c.loc) < end;
+    const inside = rest.filter(isInside);
+    rest = rest.filter((c) => !isInside(c));
+    const lines = [...item.print(inside)];
+    // Only the next comment in order can trail the item; taking a later one would reorder comments.
+    const trailing = rest[0];
+    if (trailing?.trailing && trailing.depth <= depth && offsetOf(trailing.loc) < end) {
       lines[lines.length - 1] += ` ${trailing.text}`;
-      next++;
+      rest = rest.filter((c) => c !== trailing);
     }
-    groups.push([...group, ...lines]);
+    groups.push([...leading.map((c) => indent + c.text), ...lines]);
   });
-  if (next < comments.length) groups.push(comments.slice(next).map((c) => indent + c.text));
+  if (rest.length > 0) groups.push(rest.map((c) => indent + c.text));
   return groups;
 }
 
@@ -284,7 +345,9 @@ function printMeta(
     const defs = meta.params.map((def) => printParamDefinition(def, INDENT + INDENT, ctx));
     lines.push(`params: ${printList(defs, '{', '}', INDENT)}`);
   }
-  // Meta fields carry no positions, so comments inside @meta gather before its closing brace.
+  // Known limit: MetaBlock fields carry no source positions, so every comment inside @meta
+  // moves to just before its closing brace (text and order are kept). Fixing that needs
+  // positions on MetaBlock in core.
   return `@meta ${printList([...lines, ...comments.map((c) => c.text)], '{', '}', '')}`;
 }
 
@@ -293,7 +356,8 @@ function printEntry(
   indent: string,
   replaced: ReadonlySet<string>,
   ctx: PrintContext,
-  legacyRemainder = ''
+  legacyRemainder = '',
+  comments: readonly Comment[] = []
 ): string[] {
   switch (entry.type) {
     case 'TextEntry':
@@ -304,7 +368,7 @@ function printEntry(
         ? ` = ${printValueNode(entry.defaultValue, indent, ctx)}`
         : '';
       return [
-        `${indent}${printKey(entry.name)}${marker}: ${printValueNode(entry.value, indent, ctx)}${fallback}`,
+        `${indent}${printKey(entry.name)}${marker}: ${printValueNode(entry.value, indent, ctx, comments)}${fallback}`,
       ];
     }
     case 'ListEntry': {
@@ -313,7 +377,7 @@ function printEntry(
       const item =
         value.type === 'ScalarValueNode' && typeof value.value === 'string'
           ? quote(value.value)
-          : printValueNode(value, indent, ctx);
+          : printValueNode(value, indent, ctx, comments);
       return [`${indent}- ${item}`];
     }
     case 'InlineUseEntry':
@@ -340,17 +404,24 @@ function printEntries(
 ): Placed[] {
   return entries.flatMap((entry, index) => {
     const previous = entries[index - 1];
+    // The text after a legacy heading was already folded into the heading's own text block.
     if (previous?.type === 'PresentationEntry' && previous.source === 'legacy') {
-      return entry.type === 'TextEntry'
-        ? []
-        : [{ loc: entry.loc, lines: printEntry(entry, indent, replaced, ctx) }];
+      if (entry.type === 'TextEntry') return [];
     }
     const next = entries[index + 1];
     const remainder =
       entry.type === 'PresentationEntry' && entry.source === 'legacy' && next?.type === 'TextEntry'
         ? next.text
         : '';
-    return [{ loc: entry.loc, lines: printEntry(entry, indent, replaced, ctx, remainder) }];
+    const holds =
+      (entry.type === 'FieldEntry' || entry.type === 'ListEntry') && isContainer(entry.value);
+    return [
+      {
+        loc: entry.loc,
+        holds,
+        print: (inside) => printEntry(entry, indent, replaced, ctx, remainder, inside),
+      },
+    ];
   });
 }
 
@@ -359,7 +430,7 @@ function printBracedBody(
   items: readonly Placed[],
   comments: readonly Comment[]
 ): string[] {
-  const lines = withComments(items, comments, INDENT).flat();
+  const lines = withComments(items, comments, INDENT, BLOCK_DEPTH).flat();
   return lines.length === 0 ? [`${head} {`, '}'] : [`${head} {`, ...lines, '}'];
 }
 
@@ -402,7 +473,8 @@ function printOverride(
         [
           {
             loc: replacement.value.loc,
-            lines: [INDENT + printValueNode(replacement.value, INDENT, ctx)],
+            holds: isContainer(replacement.value),
+            print: (inside) => [INDENT + printValueNode(replacement.value, INDENT, ctx, inside)],
           },
         ],
         comments
@@ -417,13 +489,11 @@ function printOperation(
   comments: readonly Comment[],
   ctx: PrintContext
 ): string[] {
-  // Declarations without a body have nowhere inside to put comments, so they follow it.
-  const after = comments.map((c) => c.text);
   switch (operation.type) {
     case 'InheritOperation':
-      return [printImport('inherit', operation.declaration, ctx), ...after];
+      return [printImport('inherit', operation.declaration, ctx)];
     case 'UseOperation':
-      return [printUse(operation.declaration, ctx), ...after];
+      return [printUse(operation.declaration, ctx)];
     case 'BlockOperation':
       return printBlockLike(`@${operation.block.name}`, operation.block.body, comments, ctx);
     case 'ExtendOperation':
@@ -456,23 +526,19 @@ export function printProgram(
     ...(program.meta ? [{ loc: program.meta.loc, operation: undefined }] : []),
     ...program.operations.map((operation) => ({ loc: operation.loc, operation })),
   ].sort((a, b) => offsetOf(a.loc) - offsetOf(b.loc));
-  const insideOf = (index: number): Comment[] => {
-    const end = declarations[index + 1] ? offsetOf(declarations[index + 1]!.loc) : Infinity;
-    return comments.filter(
-      (c) =>
-        c.depth > 0 &&
-        offsetOf(c.loc) >= offsetOf(declarations[index]!.loc) &&
-        offsetOf(c.loc) < end
-    );
-  };
-  const items: Placed[] = declarations.map(({ loc, operation }, index) => ({
-    loc,
-    lines:
-      operation === undefined
-        ? printMeta(program.meta!, insideOf(index), ctx).split('\n')
-        : printOperation(operation, insideOf(index), ctx),
-  }));
-  const topLevel = comments.filter((c) => c.depth === 0);
-  const sections = withComments(items, topLevel, '').map((group) => group.join('\n'));
+  // Imports have no body to hold comments, so any inside their parameter list are placed like
+  // top-level ones; every other declaration takes the comments nested inside it.
+  const items = declarations.map<Placed>(({ loc, operation }) => {
+    if (operation === undefined) {
+      return {
+        loc,
+        holds: true,
+        print: (inside) => printMeta(program.meta!, inside, ctx).split('\n'),
+      };
+    }
+    const holds = operation.type !== 'InheritOperation' && operation.type !== 'UseOperation';
+    return { loc, holds, print: (inside) => printOperation(operation, inside, ctx) };
+  });
+  const sections = withComments(items, comments, '', 0).map((group) => group.join('\n'));
   return sections.join('\n\n') + '\n';
 }

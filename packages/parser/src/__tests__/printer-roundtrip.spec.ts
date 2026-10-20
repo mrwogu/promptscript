@@ -92,12 +92,14 @@ describe('printProgram round trip', () => {
       const original = parseCanonical(source);
 
       // Act
-      const reparsed = parseCanonical(printProgram(original.ast!, original.comments));
+      const printed = printProgram(original.ast!, original.comments);
+      const reparsed = parseCanonical(printed);
 
       // Assert
       expect(reparsed.errors).toEqual([]);
       expect(stripPositions(reparsed.ast)).toEqual(stripPositions(original.ast));
       expect(commentTexts(reparsed.comments)).toEqual(commentTexts(original.comments));
+      expect(printProgram(reparsed.ast!, reparsed.comments)).toBe(printed);
     });
   }
 });
@@ -158,6 +160,18 @@ const EDGE_CASES: Record<string, string> = {
   'comment in an extend and an override':
     '@extend standards {\n  # more\n  a: 1\n}\n@override identity {\n  # swap\n  "x"\n}',
   'comment inside a nested value': '@context { a: [\n  1, # first\n  2\n] b: 1 }',
+  'comment after a nested close on the last line': '@identity { a: { b: 1 } } # end',
+  'comment after a single-line text value': '@identity {\n  a: """x""" # real\n  b: 1\n}',
+  'comment between @meta and its brace': '@meta # odd\n{ id: "a" syntax: "1.0.0" }',
+  'two blocks on one line with a trailing comment': '@identity { a: 1 } @context { b: 2 } # t',
+  'multi-line use with inner and trailing comments':
+    '@use ./frag(\n  # p\n  a: 1\n) # t\n@identity { a: 1 }',
+  'multi-line inherit with inner and trailing comments':
+    '@inherit ./base(\n  # p\n  a: 1\n) # t\n@identity { a: 1 }',
+  'comments in nested objects':
+    '@standards {\n  code: {\n    # level 2\n    style: {\n      # level 3\n      size: 2 # two\n    }\n    # after style\n  }\n  naming: 1\n}',
+  'comments in a nested array':
+    '@context {\n  a: [\n    1, # first\n    # before second\n    { x: 1 },\n    2\n    # after last\n  ]\n  b: 1\n}',
   'file with only comments': '# just a note\n\n# and another\n',
   'empty file': '',
 };
@@ -172,7 +186,8 @@ describe('printProgram edge cases', () => {
       expect(parsed.errors).toEqual([]);
 
       // Act
-      const reparsed = parseCanonical(printProgram(parsed.ast!, parsed.comments));
+      const printed = printProgram(parsed.ast!, parsed.comments);
+      const reparsed = parseCanonical(printed);
 
       // Assert
       expect(reparsed.errors).toEqual([]);
@@ -181,6 +196,7 @@ describe('printProgram edge cases', () => {
         stripPositions(parsed.ast?.syntaxFeatures)
       );
       expect(commentTexts(reparsed.comments)).toEqual(commentTexts(parsed.comments));
+      expect(printProgram(reparsed.ast!, reparsed.comments)).toBe(printed);
     });
   }
 });
@@ -240,6 +256,39 @@ describe('printProgram comments', () => {
       ['# top', 1, 0],
       ['# inner', 3, 1],
     ]);
+  });
+});
+
+describe('printProgram nested comments', () => {
+  it('keeps comments inside nested objects at their own level', () => {
+    const source = readFileSync(
+      join(repoRoot, 'packages/parser/src/__tests__/__fixtures__/comprehensive.prs'),
+      'utf-8'
+    );
+    const parsed = parseCanonical(source);
+
+    const printed = printProgram(parsed.ast!, parsed.comments);
+
+    expect(printed).toContain(
+      '  code: {\n    # Level 2\n    style: {\n      # Level 3\n      indentation: {\n        # Level 4\n        type: "spaces"'
+    );
+  });
+
+  it('puts the comma before a trailing comment in an array', () => {
+    const parsed = parseCanonical('@context {\n  a: [\n    1, # first\n    2\n  ]\n}');
+
+    expect(printProgram(parsed.ast!, parsed.comments)).toBe(
+      '@context {\n  a: [\n    1, # first\n    2\n  ]\n}\n'
+    );
+  });
+
+  it('keeps a comment that follows a stray closing brace in recovery mode', () => {
+    const parsed = parseCanonical('@identity { a: 1 }\n}\n# lost\n@context { b: 2 }', {
+      recovery: true,
+    });
+
+    expect(parsed.comments.map((c) => [c.text, c.depth])).toEqual([['# lost', 0]]);
+    expect(printProgram(parsed.ast!, parsed.comments)).toContain('# lost');
   });
 });
 
