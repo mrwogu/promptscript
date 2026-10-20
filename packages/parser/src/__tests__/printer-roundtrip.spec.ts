@@ -3,8 +3,8 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { BlockBody, FieldEntry, Program } from '@promptscript/core';
-import { parse } from '../parse.js';
+import type { BlockBody, CanonicalProgram, FieldEntry } from '@promptscript/core';
+import { parseCanonical } from '../parse.js';
 import { printProgram } from '../printer.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -13,16 +13,32 @@ const repoRoot = join(__dirname, '..', '..', '..', '..');
 /** Source-position metadata, which a printer cannot and should not preserve. */
 const POSITION_KEYS = new Set(['loc', 'titleLoc', 'sectionLoc', 'location']);
 
+/** The parser's source position shape; user fields that merely share a key name do not match it. */
+function isPosition(value: unknown): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'line' in value &&
+    typeof value.line === 'number' &&
+    'column' in value &&
+    typeof value.column === 'number'
+  );
+}
+
 function stripPositions(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(stripPositions);
   if (typeof value === 'object' && value !== null) {
     return Object.fromEntries(
       Object.entries(value)
-        .filter(([key]) => !POSITION_KEYS.has(key))
+        .filter(([key, entry]) => !(POSITION_KEYS.has(key) && isPosition(entry)))
         .map(([key, entry]) => [key, stripPositions(entry)])
     );
   }
   return value;
+}
+
+function commentTexts(comments: readonly { text: string }[]): string[] {
+  return comments.map((comment) => comment.text);
 }
 
 /** Tracked fixtures that are deliberately not valid syntax; they are error tests, not round-trip inputs. */
@@ -61,7 +77,7 @@ describe('printProgram round trip', () => {
   it.each(fixtures.map(({ name, source }) => [name, source] as const))(
     'parses without errors: %s',
     (_name, source) => {
-      const result = parse(source);
+      const result = parseCanonical(source);
 
       expect(result.errors).toEqual([]);
       expect(result.ast).not.toBeNull();
@@ -73,15 +89,15 @@ describe('printProgram round trip', () => {
     const test = reason ? it.skip : it;
     test(`reparses its own output: ${name}${reason ? ` (${reason})` : ''}`, () => {
       // Arrange
-      const original = parse(source).ast!;
+      const original = parseCanonical(source);
 
       // Act
-      const printed = printProgram(original);
-      const reparsed = parse(printed);
+      const reparsed = parseCanonical(printProgram(original.ast!, original.comments));
 
       // Assert
       expect(reparsed.errors).toEqual([]);
-      expect(stripPositions(reparsed.ast)).toEqual(stripPositions(original));
+      expect(stripPositions(reparsed.ast)).toEqual(stripPositions(original.ast));
+      expect(commentTexts(reparsed.comments)).toEqual(commentTexts(original.comments));
     });
   }
 });
@@ -126,6 +142,24 @@ const EDGE_CASES: Record<string, string> = {
   'user object that looks like a node':
     '@meta { id: "a" x: { type: "TypeExpression" kind: "foo" } y: { type: "TextContent" value: "hi" } }',
   'whitespace-only lines in text': '@knowledge { """\n  a\n     \n  b\n""" }',
+  'user field named location': '@context { location: "x" loc: { line: 1 column: 2 } }',
+  'comment before a block': '# about identity\n@identity { a: 1 }',
+  'comment inside a block before a field': '@identity {\n  # why a\n  a: 1\n  b: 2\n}',
+  'comment after the last field': '@identity {\n  a: 1\n  # nothing else\n}\n@context { b: 2 }',
+  'trailing comment on a field line': '@identity {\n  a: 1 # one\n  b: 2 # two\n}',
+  'trailing comment on a use line': '@use ./frag # shared\n@identity { a: 1 }',
+  'comment with unicode': '# zażółć gęślą jaźń \u{1F600} \u4F60\u597D\n@identity { a: "\u00E9" }',
+  'hash inside strings is not a comment':
+    '@identity { a: "not # a comment" b: """\n  also # not\n""" } # real',
+  'comments between top-level declarations':
+    '@meta { id: "a" syntax: "1.0.0" }\n# one\n@use ./f\n\n# two\n@identity { a: 1 }\n# three',
+  'comment in an empty block': '@identity {\n  # nothing yet\n}',
+  'comment inside meta': '@meta {\n  # the id\n  id: "a"\n  syntax: "1.0.0" # version\n}',
+  'comment in an extend and an override':
+    '@extend standards {\n  # more\n  a: 1\n}\n@override identity {\n  # swap\n  "x"\n}',
+  'comment inside a nested value': '@context { a: [\n  1, # first\n  2\n] b: 1 }',
+  'file with only comments': '# just a note\n\n# and another\n',
+  'empty file': '',
 };
 
 describe('printProgram edge cases', () => {
@@ -134,11 +168,11 @@ describe('printProgram edge cases', () => {
     const test = reason ? it.skip : it;
     test(`reparses its own output: ${name}${reason ? ` (${reason})` : ''}`, () => {
       // Arrange
-      const parsed = parse(source);
+      const parsed = parseCanonical(source);
       expect(parsed.errors).toEqual([]);
 
       // Act
-      const reparsed = parse(printProgram(parsed.ast!));
+      const reparsed = parseCanonical(printProgram(parsed.ast!, parsed.comments));
 
       // Assert
       expect(reparsed.errors).toEqual([]);
@@ -146,13 +180,72 @@ describe('printProgram edge cases', () => {
       expect(stripPositions(reparsed.ast?.syntaxFeatures)).toEqual(
         stripPositions(parsed.ast?.syntaxFeatures)
       );
+      expect(commentTexts(reparsed.comments)).toEqual(commentTexts(parsed.comments));
     });
   }
 });
 
+describe('printProgram comments', () => {
+  it('keeps source order of declarations instead of grouping by kind', () => {
+    const parsed = parseCanonical(
+      '@identity { a: 1 }\n@use ./f\n@extend identity { b: 1 }\n@context { c: 1 }'
+    );
+
+    const printed = printProgram(parsed.ast!, parsed.comments);
+
+    const order = ['@identity', '@use', '@extend', '@context'].map((name) => printed.indexOf(name));
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(order).not.toContain(-1);
+  });
+
+  it('prints a leading comment directly above the item it described', () => {
+    const parsed = parseCanonical('@identity {\n  a: 1\n  # about b\n  b: 2\n}');
+
+    const printed = printProgram(parsed.ast!, parsed.comments);
+
+    expect(printed).toBe('@identity {\n  a: 1\n  # about b\n  b: 2\n}\n');
+  });
+
+  it('keeps a trailing comment on the line of its field', () => {
+    const parsed = parseCanonical('@identity {\n  a: 1 # one\n  b: 2\n}');
+
+    expect(printProgram(parsed.ast!, parsed.comments)).toContain('  a: 1 # one\n  b: 2');
+  });
+
+  it('prints a comment after the last field before the closing brace', () => {
+    const parsed = parseCanonical('@identity {\n  a: 1\n  # last\n}\n@context { b: 2 }');
+
+    expect(printProgram(parsed.ast!, parsed.comments)).toContain('  a: 1\n  # last\n}\n\n@context');
+  });
+
+  it('does not treat a hash inside a string as a comment', () => {
+    const parsed = parseCanonical('@identity { a: "x # y" }');
+
+    expect(parsed.comments).toEqual([]);
+  });
+
+  it('keeps a user field named location through the round trip', () => {
+    const parsed = parseCanonical('@context { location: "x" }');
+
+    const reparsed = parseCanonical(printProgram(parsed.ast!, parsed.comments));
+
+    expect(JSON.stringify(stripPositions(reparsed.ast))).toContain('"name":"location"');
+    expect(stripPositions(reparsed.ast)).toEqual(stripPositions(parsed.ast));
+  });
+
+  it('reports each comment with its text, position and nesting depth', () => {
+    const parsed = parseCanonical('# top\n@identity {\n  a: 1 # inner\n}');
+
+    expect(parsed.comments.map((c) => [c.text, c.loc.line, c.depth])).toEqual([
+      ['# top', 1, 0],
+      ['# inner', 3, 1],
+    ]);
+  });
+});
+
 describe('printProgram value formatting', () => {
   it('rejects non-finite numbers instead of printing a string', () => {
-    const parsed = parse('@context { a: 1 }').ast!;
+    const parsed = parseCanonical('@context { a: 1 }').ast!;
     const { loc } = parsed;
     const entry: FieldEntry = {
       type: 'FieldEntry',
@@ -161,13 +254,18 @@ describe('printProgram value formatting', () => {
       loc,
     };
     const body: BlockBody = { type: 'BlockBody', shape: 'object', entries: [entry], loc };
-    const broken: Program = { ...parsed, blocks: [{ ...parsed.blocks[0]!, canonicalBody: body }] };
+    const operation = parsed.operations[0]!;
+    if (operation.type !== 'BlockOperation') throw new Error('expected a block operation');
+    const broken: CanonicalProgram = {
+      ...parsed,
+      operations: [{ ...operation, block: { ...operation.block, body } }],
+    };
 
     expect(() => printProgram(broken)).toThrow('non-finite');
   });
 
   it('prints numbers without exponent notation', () => {
-    const ast = parse('@context { a: 0.0000001 b: 1000000000000000000000 }').ast!;
+    const ast = parseCanonical('@context { a: 0.0000001 b: 1000000000000000000000 }').ast!;
 
     const printed = printProgram(ast);
 
@@ -176,16 +274,16 @@ describe('printProgram value formatting', () => {
   });
 
   it('keeps whitespace-only lines inside text values', () => {
-    const ast = parse('@knowledge { """\n  a\n     \n  b\n""" }').ast!;
+    const ast = parseCanonical('@knowledge { """\n  a\n     \n  b\n""" }').ast!;
 
-    const reparsed = parse(printProgram(ast)).ast!;
+    const reparsed = parseCanonical(printProgram(ast)).ast!;
 
     expect(JSON.stringify(stripPositions(reparsed.blocks[0]?.content))).toContain('a\\n   \\nb');
   });
 
   it('quotes env references unless the source used the env-var-value feature', () => {
-    const quoted = parse('@identity { a: "${HOME}" }').ast!;
-    const bare = parse('@identity { a: ${HOME} }').ast!;
+    const quoted = parseCanonical('@identity { a: "${HOME}" }').ast!;
+    const bare = parseCanonical('@identity { a: ${HOME} }').ast!;
 
     expect(printProgram(quoted)).toContain('a: "${HOME}"');
     expect(printProgram(bare)).toContain('a: ${HOME}');

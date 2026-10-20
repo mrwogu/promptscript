@@ -1,19 +1,20 @@
-import { SYNTAX_FEATURES, blockContentToBody } from '@promptscript/core';
+import { SYNTAX_FEATURES } from '@promptscript/core';
+import type { Comment } from './comments.js';
 import type {
-  Block,
   BlockBody,
-  BlockContent,
   BlockEntry,
+  CanonicalExtendBlock,
+  CanonicalOverrideBlock,
+  CanonicalProgram,
   DeepReadonly,
-  ExtendBlock,
   InheritDeclaration,
   InlineUseDeclaration,
   MetaBlock,
-  OverrideBlock,
   ParamArgument,
   ParamDefinition,
   PrimitiveValue,
-  Program,
+  ProgramOperation,
+  SourceLocation,
   TemplateExpression,
   TextContent,
   TypeExpression,
@@ -190,27 +191,34 @@ function printArray(printed: string[], indent: string): string {
   );
 }
 
-function printParams(params: ParamArgument[] | undefined, ctx: PrintContext): string {
+function printParams(params: DeepReadonly<ParamArgument[]> | undefined, ctx: PrintContext): string {
   if (!params) return '';
   return `(${params.map((param) => `${param.name}: ${printValue(param.value, '', ctx)}`).join(', ')})`;
 }
 
 function printImport(
   keyword: string,
-  decl: InheritDeclaration | UseDeclaration | InlineUseDeclaration,
+  decl: DeepReadonly<InheritDeclaration | UseDeclaration | InlineUseDeclaration>,
   ctx: PrintContext
 ): string {
   return `@${keyword} ${decl.path.raw}${printParams(decl.params, ctx)}`;
 }
 
-function printUse(decl: UseDeclaration | InlineUseDeclaration, ctx: PrintContext): string {
+function printUse(
+  decl: DeepReadonly<UseDeclaration | InlineUseDeclaration>,
+  ctx: PrintContext
+): string {
   const parts = [printImport('use', decl, ctx)];
   if (decl.alias) parts.push(`as ${decl.alias}`);
   if (decl.outputDir) parts.push(`into ${quote(decl.outputDir)}`);
   return parts.join(' ');
 }
 
-function printParamDefinition(def: ParamDefinition, indent: string, ctx: PrintContext): string {
+function printParamDefinition(
+  def: DeepReadonly<ParamDefinition>,
+  indent: string,
+  ctx: PrintContext
+): string {
   const type =
     def.paramType.kind === 'enum'
       ? `enum(${def.paramType.options.map(quote).join(', ')})`
@@ -221,7 +229,54 @@ function printParamDefinition(def: ParamDefinition, indent: string, ctx: PrintCo
   return `${def.name}${optional}: ${type}${fallback}`;
 }
 
-function printMeta(meta: MetaBlock, ctx: PrintContext): string {
+/** A printed declaration or entry with the source position used to place comments around it. */
+interface Placed {
+  readonly loc: SourceLocation;
+  readonly lines: string[];
+}
+
+function offsetOf(loc: SourceLocation): number {
+  return loc.offset ?? 0;
+}
+
+/**
+ * Comments are not in the AST, so each one is re-attached by source position:
+ * it is printed before the first item that starts after it, which keeps a
+ * comment above the thing it described. A comment on the line where an item
+ * starts stays on that line. Whatever is left sat after the last item and
+ * closes the container. Returns one group per item so callers can choose the
+ * separator, plus a final group for the leftovers when there are any.
+ */
+function withComments(
+  items: readonly Placed[],
+  comments: readonly Comment[],
+  indent: string
+): string[][] {
+  const groups: string[][] = [];
+  let next = 0;
+  items.forEach((item, index) => {
+    const group: string[] = [];
+    while (next < comments.length && offsetOf(comments[next]!.loc) < offsetOf(item.loc)) {
+      group.push(indent + comments[next++]!.text);
+    }
+    const lines = [...item.lines];
+    const trailing = comments[next];
+    const nextStart = items[index + 1] ? offsetOf(items[index + 1]!.loc) : Infinity;
+    if (trailing && trailing.loc.line === item.loc.line && offsetOf(trailing.loc) < nextStart) {
+      lines[lines.length - 1] += ` ${trailing.text}`;
+      next++;
+    }
+    groups.push([...group, ...lines]);
+  });
+  if (next < comments.length) groups.push(comments.slice(next).map((c) => indent + c.text));
+  return groups;
+}
+
+function printMeta(
+  meta: DeepReadonly<MetaBlock>,
+  comments: readonly Comment[],
+  ctx: PrintContext
+): string {
   const lines = Object.entries(meta.fields).map(
     ([key, value]) => `${printKey(key)}: ${printValue(value, INDENT, ctx)}`
   );
@@ -229,7 +284,8 @@ function printMeta(meta: MetaBlock, ctx: PrintContext): string {
     const defs = meta.params.map((def) => printParamDefinition(def, INDENT + INDENT, ctx));
     lines.push(`params: ${printList(defs, '{', '}', INDENT)}`);
   }
-  return `@meta ${printList(lines, '{', '}', '')}`;
+  // Meta fields carry no positions, so comments inside @meta gather before its closing brace.
+  return `@meta ${printList([...lines, ...comments.map((c) => c.text)], '{', '}', '')}`;
 }
 
 function printEntry(
@@ -281,85 +337,142 @@ function printEntries(
   indent: string,
   replaced: ReadonlySet<string>,
   ctx: PrintContext
-): string[] {
+): Placed[] {
   return entries.flatMap((entry, index) => {
     const previous = entries[index - 1];
     if (previous?.type === 'PresentationEntry' && previous.source === 'legacy') {
-      return entry.type === 'TextEntry' ? [] : printEntry(entry, indent, replaced, ctx);
+      return entry.type === 'TextEntry'
+        ? []
+        : [{ loc: entry.loc, lines: printEntry(entry, indent, replaced, ctx) }];
     }
     const next = entries[index + 1];
     const remainder =
       entry.type === 'PresentationEntry' && entry.source === 'legacy' && next?.type === 'TextEntry'
         ? next.text
         : '';
-    return printEntry(entry, indent, replaced, ctx, remainder);
+    return [{ loc: entry.loc, lines: printEntry(entry, indent, replaced, ctx, remainder) }];
   });
+}
+
+function printBracedBody(
+  head: string,
+  items: readonly Placed[],
+  comments: readonly Comment[]
+): string[] {
+  const lines = withComments(items, comments, INDENT).flat();
+  return lines.length === 0 ? [`${head} {`, '}'] : [`${head} {`, ...lines, '}'];
 }
 
 function printBlockLike(
   head: string,
-  body: BlockBody | undefined,
-  content: BlockContent,
+  body: DeepReadonly<BlockBody>,
+  comments: readonly Comment[],
   ctx: PrintContext,
   replaced: ReadonlySet<string> = new Set()
-): string {
-  // Fall back to the legacy projection when no canonical body was retained.
-  const entries = (body ?? blockContentToBody(content)).entries;
-  const lines = printEntries(entries, INDENT, replaced, ctx);
-  return lines.length === 0 ? `${head} {\n}` : `${head} {\n${lines.join('\n')}\n}`;
+): string[] {
+  return printBracedBody(head, printEntries(body.entries, INDENT, replaced, ctx), comments);
 }
 
-function printBlock(block: Block, ctx: PrintContext): string {
-  return printBlockLike(`@${block.name}`, block.canonicalBody, block.content, ctx);
-}
-
-function printExtend(block: ExtendBlock, ctx: PrintContext): string {
+function printExtend(
+  block: DeepReadonly<CanonicalExtendBlock>,
+  comments: readonly Comment[],
+  ctx: PrintContext
+): string[] {
   const replaced = new Set((block.replacements ?? []).map((replacement) => replacement.property));
-  return printBlockLike(
-    `@extend ${block.targetPath}`,
-    block.canonicalBody,
-    block.content,
-    ctx,
-    replaced
-  );
+  return printBlockLike(`@extend ${block.targetPath}`, block.body, comments, ctx, replaced);
 }
 
-function printOverride(block: OverrideBlock, ctx: PrintContext): string {
+function printOverride(
+  block: DeepReadonly<CanonicalOverrideBlock>,
+  comments: readonly Comment[],
+  ctx: PrintContext
+): string[] {
   const head = `@override ${block.targetPath}`;
   const { replacement } = block;
   switch (replacement.type) {
-    case 'BlockReplacement': {
-      const lines = printEntries(replacement.body.entries, INDENT, new Set(), ctx);
-      return `${head} {\n${lines.join('\n')}\n}`;
-    }
+    case 'BlockReplacement':
+      return printBracedBody(
+        head,
+        printEntries(replacement.body.entries, INDENT, new Set(), ctx),
+        comments
+      );
     case 'ValueReplacement':
-      return `${head} {\n${INDENT}${printValueNode(replacement.value, INDENT, ctx)}\n}`;
+      return printBracedBody(
+        head,
+        [
+          {
+            loc: replacement.value.loc,
+            lines: [INDENT + printValueNode(replacement.value, INDENT, ctx)],
+          },
+        ],
+        comments
+      );
     default:
       return assertNever(replacement);
   }
 }
 
+function printOperation(
+  operation: DeepReadonly<ProgramOperation>,
+  comments: readonly Comment[],
+  ctx: PrintContext
+): string[] {
+  // Declarations without a body have nowhere inside to put comments, so they follow it.
+  const after = comments.map((c) => c.text);
+  switch (operation.type) {
+    case 'InheritOperation':
+      return [printImport('inherit', operation.declaration, ctx), ...after];
+    case 'UseOperation':
+      return [printUse(operation.declaration, ctx), ...after];
+    case 'BlockOperation':
+      return printBlockLike(`@${operation.block.name}`, operation.block.body, comments, ctx);
+    case 'ExtendOperation':
+      return printExtend(operation.extension, comments, ctx);
+    case 'OverrideOperation':
+      return printOverride(operation.override, comments, ctx);
+    default:
+      return assertNever(operation);
+  }
+}
+
 /**
- * Print a parsed program as canonical `.prs` source (2-space indent).
- *
- * Comments are not part of the AST and are not printed. Top-level declarations
- * are emitted grouped by kind (meta, inherit, uses, blocks, extends, overrides)
- * because the legacy AST does not retain their interleaved order.
+ * Print a parsed program as canonical `.prs` source (2-space indent), in the
+ * order the author wrote it. Pass the comments from the parse result to keep
+ * them; without them none are printed.
  */
-export function printProgram(ast: Program): string {
+export function printProgram(
+  program: DeepReadonly<CanonicalProgram>,
+  comments: readonly Comment[] = []
+): string {
   // A quoted "${VAR}" must stay quoted unless the source already used the env-var-value feature,
   // otherwise the round trip would add that feature to the program.
   const ctx: PrintContext = {
-    bareEnv: (ast.syntaxFeatures ?? []).some(
+    bareEnv: (program.syntaxFeatures ?? []).some(
       (usage) => usage.feature === SYNTAX_FEATURES.ENV_VAR_VALUE
     ),
   };
-  const sections: string[] = [];
-  if (ast.meta) sections.push(printMeta(ast.meta, ctx));
-  if (ast.inherit) sections.push(printImport('inherit', ast.inherit, ctx));
-  sections.push(...ast.uses.map((use) => printUse(use, ctx)));
-  sections.push(...ast.blocks.map((block) => printBlock(block, ctx)));
-  sections.push(...ast.extends.map((block) => printExtend(block, ctx)));
-  sections.push(...(ast.overrides ?? []).map((block) => printOverride(block, ctx)));
+  // @meta is not an operation, so merge it back in by position.
+  const declarations = [
+    ...(program.meta ? [{ loc: program.meta.loc, operation: undefined }] : []),
+    ...program.operations.map((operation) => ({ loc: operation.loc, operation })),
+  ].sort((a, b) => offsetOf(a.loc) - offsetOf(b.loc));
+  const insideOf = (index: number): Comment[] => {
+    const end = declarations[index + 1] ? offsetOf(declarations[index + 1]!.loc) : Infinity;
+    return comments.filter(
+      (c) =>
+        c.depth > 0 &&
+        offsetOf(c.loc) >= offsetOf(declarations[index]!.loc) &&
+        offsetOf(c.loc) < end
+    );
+  };
+  const items: Placed[] = declarations.map(({ loc, operation }, index) => ({
+    loc,
+    lines:
+      operation === undefined
+        ? printMeta(program.meta!, insideOf(index), ctx).split('\n')
+        : printOperation(operation, insideOf(index), ctx),
+  }));
+  const topLevel = comments.filter((c) => c.depth === 0);
+  const sections = withComments(items, topLevel, '').map((group) => group.join('\n'));
   return sections.join('\n\n') + '\n';
 }

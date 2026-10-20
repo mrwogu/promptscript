@@ -21,6 +21,8 @@ export {
 } from './parse.js';
 export type { CanonicalParseResult, ParseOptions, ParseResult } from './parse.js';
 
+export type { Comment } from './comments.js';
+
 // Printer
 export { printProgram } from './printer.js';
 
