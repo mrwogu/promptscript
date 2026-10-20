@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { PSLexer } from './lexer/lexer.js';
+import { collectComments, type Comment } from './comments.js';
 import { acquireParser, releaseParser } from './grammar/parser-pool.js';
 import { createVisitor, type EnvProvider } from './grammar/visitor.js';
 import type { CanonicalProgram, Program } from '@promptscript/core';
@@ -44,6 +45,8 @@ export interface ParseResult {
   ast: Program | null;
   /** List of errors encountered during parsing. */
   errors: ParseError[];
+  /** Comments in source order. They are not part of the AST. */
+  comments: readonly Comment[];
 }
 
 /**
@@ -54,6 +57,8 @@ export interface CanonicalParseResult {
   ast: CanonicalProgram | null;
   /** List of errors encountered during parsing. */
   errors: ParseError[];
+  /** Comments in source order. They are not part of the AST. */
+  comments: readonly Comment[];
 }
 
 /**
@@ -96,6 +101,7 @@ export function parseCanonical(source: string, options: ParseOptions = {}): Cano
 
   // Lexing phase
   const lexResult = PSLexer.tokenize(source);
+  const comments = collectComments(lexResult, filename);
 
   for (const err of lexResult.errors) {
     let message = `Lexer: ${err.message}`;
@@ -119,7 +125,7 @@ export function parseCanonical(source: string, options: ParseOptions = {}): Cano
   }
 
   if (errors.length > 0 && !isRecoveryMode) {
-    return { ast: null, errors };
+    return { ast: null, errors, comments };
   }
 
   // Parsing phase
@@ -145,7 +151,7 @@ export function parseCanonical(source: string, options: ParseOptions = {}): Cano
   }
 
   if (errors.length > 0 && !isRecoveryMode) {
-    return { ast: null, errors };
+    return { ast: null, errors, comments };
   }
 
   // AST transformation phase
@@ -163,9 +169,9 @@ export function parseCanonical(source: string, options: ParseOptions = {}): Cano
       errors.push(new ParseError(diagnostic.message, diagnostic.loc));
     }
     if (errors.length > 0 && !isRecoveryMode) {
-      return { ast: null, errors };
+      return { ast: null, errors, comments };
     }
-    return { ast, errors };
+    return { ast, errors, comments };
   } catch (err) {
     errors.push(
       new ParseError(`AST transformation: ${err instanceof Error ? err.message : String(err)}`, {
@@ -174,7 +180,7 @@ export function parseCanonical(source: string, options: ParseOptions = {}): Cano
         column: 1,
       })
     );
-    return { ast: null, errors };
+    return { ast: null, errors, comments };
   }
 }
 
@@ -189,6 +195,7 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
   return {
     ast: result.ast ? toLegacyProgram(result.ast, { preserveCanonicalBody: true }) : null,
     errors: result.errors,
+    comments: result.comments,
   };
 }
 
@@ -267,6 +274,7 @@ export function parseFile(
           column: 1,
         }),
       ],
+      comments: [],
     };
   }
 }
@@ -292,6 +300,7 @@ export function parseCanonicalFile(
           column: 1,
         }),
       ],
+      comments: [],
     };
   }
 }

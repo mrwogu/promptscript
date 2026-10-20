@@ -1,8 +1,11 @@
 import { createToken, Lexer, TokenType } from 'chevrotain';
 
 // ============================================================
-// Whitespace & Comments (skipped)
+// Whitespace & Comments (whitespace skipped, comments collected in a side group)
 // ============================================================
+
+/** Lexer group that holds comment tokens, outside the stream the parser sees. */
+export const COMMENT_GROUP = 'comments';
 
 export const WhiteSpace = createToken({
   name: 'WhiteSpace',
@@ -13,7 +16,8 @@ export const WhiteSpace = createToken({
 export const LineComment = createToken({
   name: 'LineComment',
   pattern: /#[^\n\r]*/,
-  group: Lexer.SKIPPED,
+  // Kept out of the parser's token stream but still reported, so tooling can read comments.
+  group: COMMENT_GROUP,
 });
 
 // ============================================================

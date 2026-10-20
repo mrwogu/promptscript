@@ -68,7 +68,7 @@ describe('Resolver', () => {
         const result = originalParse(source, options);
         if (options?.filename === targetPath && result.ast) {
           return {
-            ast: result.ast,
+            ...result,
             errors: [
               new ParseError('Recovered parser diagnostic', {
                 file: targetPath,

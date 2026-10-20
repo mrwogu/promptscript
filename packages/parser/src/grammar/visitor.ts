@@ -275,6 +275,16 @@ export interface VisitorDiagnostic {
  */
 const defaultEnvProvider: EnvProvider = (name: string) => process.env[name];
 
+/** The leftmost token of a CST subtree. */
+function firstToken(node: CstNode): IToken {
+  let first: IToken | undefined;
+  for (const child of Object.values(node.children).flat()) {
+    const token = 'children' in child ? firstToken(child) : child;
+    if (!first || token.startOffset < first.startOffset) first = token;
+  }
+  return first!;
+}
+
 /**
  * CST Visitor that transforms Concrete Syntax Tree to AST.
  */
@@ -876,6 +886,17 @@ class PromptScriptVisitor extends BaseVisitor {
     return field;
   }
 
+  /** Overflowing literals (e.g. 400 digits) become Infinity, which no later stage can represent. */
+  private parseNumber(token: IToken): number {
+    const value = Number.parseFloat(token.image);
+    if (Number.isFinite(value)) return value;
+    this.diagnostics.push({
+      message: `Number literal ${token.image.slice(0, 20)}... is too large to represent. Use a smaller number.`,
+      loc: this.loc(token),
+    });
+    return 0;
+  }
+
   /**
    * value → Value
    */
@@ -885,7 +906,7 @@ class PromptScriptVisitor extends BaseVisitor {
     }
 
     if (ctx.NumberLiteral) {
-      return parseFloat(ctx.NumberLiteral[0]!.image);
+      return this.parseNumber(ctx.NumberLiteral[0]!);
     }
 
     if (ctx.EnvVar) {
@@ -1006,8 +1027,8 @@ class PromptScriptVisitor extends BaseVisitor {
    */
   rangeType(ctx: RangeTypeCstCtx): TypeExpression {
     const [minToken, maxToken] = ctx.NumberLiteral;
-    const min = parseFloat(minToken.image);
-    const max = parseFloat(maxToken.image);
+    const min = this.parseNumber(minToken);
+    const max = this.parseNumber(maxToken);
 
     return {
       type: 'TypeExpression',
@@ -1209,12 +1230,10 @@ class PromptScriptVisitor extends BaseVisitor {
       ctx.Identifier?.[0];
     if (token) return this.loc(token);
 
-    const expression = ctx.typeExpr
-      ? (this.visit(ctx.typeExpr[0]!) as TypeExpression)
-      : ctx.templateExpr
-        ? (this.visit(ctx.templateExpr[0]!) as TemplateExpression)
-        : undefined;
-    return expression ? expression.loc : fallbackLoc;
+    // Both expression kinds locate themselves by their first token. Reading it from the CST
+    // avoids visiting the expression a second time, which would repeat its diagnostics.
+    const nested = ctx.typeExpr?.[0] ?? ctx.templateExpr?.[0];
+    return nested ? this.loc(firstToken(nested)) : fallbackLoc;
   }
 
   private parseTextBlock(token: IToken): string {

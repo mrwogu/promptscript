@@ -960,3 +960,31 @@ describe('parseOrThrow', () => {
     }
   });
 });
+
+describe('number literal overflow', () => {
+  it('reports a located error instead of accepting Infinity', () => {
+    const source = `@context { a: ${'9'.repeat(400)} }`;
+
+    const result = parse(source, { filename: 'big.prs' });
+
+    expect(result.ast).toBeNull();
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]!.message).toContain('is too large to represent. Use a smaller number.');
+    expect(result.errors[0]!.location).toMatchObject({ file: 'big.prs', line: 1, column: 15 });
+  });
+
+  it('reports an overflowing range bound once, with its location', () => {
+    const result = parse(`@params { a: range(1..${'9'.repeat(400)}) }`, { filename: 'big.prs' });
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]!.location).toMatchObject({ file: 'big.prs', line: 1, column: 23 });
+  });
+
+  it('reports each overflowing bound of a range', () => {
+    const big = '9'.repeat(400);
+
+    const result = parse(`@params { a: range(${big}..${big}) }`);
+
+    expect(result.errors).toHaveLength(2);
+  });
+});
