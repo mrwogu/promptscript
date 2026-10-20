@@ -156,7 +156,8 @@ const EDGE_CASES: Record<string, string> = {
   'comments between top-level declarations':
     '@meta { id: "a" syntax: "1.0.0" }\n# one\n@use ./f\n\n# two\n@identity { a: 1 }\n# three',
   'comment in an empty block': '@identity {\n  # nothing yet\n}',
-  'comment inside meta': '@meta {\n  # the id\n  id: "a"\n  syntax: "1.0.0" # version\n}',
+  'comment inside meta (known limit: comments move before the closing brace)':
+    '@meta {\n  # the id\n  id: "a"\n  syntax: "1.0.0" # version\n}',
   'comment in an extend and an override':
     '@extend standards {\n  # more\n  a: 1\n}\n@override identity {\n  # swap\n  "x"\n}',
   'comment inside a nested value': '@context { a: [\n  1, # first\n  2\n] b: 1 }',
@@ -279,6 +280,15 @@ describe('printProgram nested comments', () => {
 
     expect(printProgram(parsed.ast!, parsed.comments)).toBe(
       '@context {\n  a: [\n    1, # first\n    2\n  ]\n}\n'
+    );
+  });
+
+  it('moves comments inside @meta before its closing brace, keeping text and order', () => {
+    // Known limit: MetaBlock fields have no positions in core, so they cannot be placed per field.
+    const parsed = parseCanonical('@meta {\n  # the id\n  id: "a"\n  syntax: "1.0.0"\n}');
+
+    expect(printProgram(parsed.ast!, parsed.comments)).toBe(
+      '@meta {\n  id: "a"\n  syntax: "1.0.0"\n  # the id\n}\n'
     );
   });
 
