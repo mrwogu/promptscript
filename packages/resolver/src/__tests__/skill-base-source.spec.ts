@@ -56,4 +56,65 @@ describe('skill base source', () => {
       },
     });
   });
+
+  it('stamps skills in every @skills block of a file', async () => {
+    const corePath = join(directory, 'core.prs');
+    await writeFile(
+      corePath,
+      `
+@meta { id: "core" syntax: "1.5.0" }
+@skills {
+  first: { description: "First" }
+}
+@skills {
+  second: { description: "Second" }
+}
+`
+    );
+    const projectPath = join(directory, 'project.prs');
+    await writeFile(
+      projectPath,
+      `
+@meta { id: "project" syntax: "1.5.0" }
+@use ./core
+`
+    );
+
+    const resolver = new Resolver({ registryPath: directory, localPath: directory, cache: false });
+    const result = await resolver.resolve(projectPath);
+    const skillBlocks = result.ast?.blocks.filter((block) => block.name === 'skills') ?? [];
+
+    expect(result.errors).toEqual([]);
+    expect(skillBlocks).toHaveLength(2);
+    expect(skillBlocks[0]?.content).toMatchObject({
+      properties: { first: { __baseSource: corePath } },
+    });
+    expect(skillBlocks[1]?.content).toMatchObject({
+      properties: { second: { __baseSource: corePath } },
+    });
+  });
+
+  it('stamps skills found by a directory import with their SKILL.md path', async () => {
+    const skillDir = join(directory, 'review');
+    await mkdir(skillDir);
+    const skillPath = join(skillDir, 'SKILL.md');
+    await writeFile(skillPath, '---\nname: review\ndescription: Review code\n---\n\nBody.\n');
+    const projectPath = join(directory, 'project.prs');
+    await writeFile(
+      projectPath,
+      `
+@meta { id: "project" syntax: "1.5.0" }
+@use ./review
+`
+    );
+
+    const resolver = new Resolver({ registryPath: directory, localPath: directory, cache: false });
+    const result = await resolver.resolve(projectPath);
+    const skills = result.ast?.blocks.find((block) => block.name === 'skills');
+
+    expect(result.errors).toEqual([]);
+    expect(skills?.content).toMatchObject({
+      properties: { review: { __baseSource: skillPath } },
+    });
+  });
 });

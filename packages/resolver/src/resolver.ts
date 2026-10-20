@@ -113,18 +113,19 @@ function isValueRecord(value: unknown): value is Record<string, Value> {
  * `__baseSource` written by hand so a file cannot claim another layer.
  */
 function stampSkillBaseSource(ast: Program, source: string): Program {
-  const skills = ast.blocks.find((block) => block.name === 'skills');
-  if (skills?.content.type !== 'ObjectContent') return ast;
+  let changed = false;
+  const blocks = ast.blocks.map((block) => {
+    if (block.name !== 'skills' || block.content.type !== 'ObjectContent') return block;
 
-  const properties: Record<string, Value> = {};
-  for (const [name, skill] of Object.entries(skills.content.properties)) {
-    properties[name] = isValueRecord(skill) ? { ...skill, __baseSource: source } : skill;
-  }
-  const content = { ...skills.content, properties };
-  return {
-    ...ast,
-    blocks: ast.blocks.map((block) => (block === skills ? { ...skills, content } : block)),
-  };
+    changed = true;
+    const properties: Record<string, Value> = {};
+    for (const [name, skill] of Object.entries(block.content.properties)) {
+      properties[name] = isValueRecord(skill) ? { ...skill, __baseSource: source } : skill;
+    }
+    return { ...block, content: { ...block.content, properties } };
+  });
+
+  return changed ? { ...ast, blocks } : ast;
 }
 
 const SKILL_REPLACE_PROPERTIES = new Set<string>(SKILL_REPLACE_PROPERTY_NAMES);
@@ -632,7 +633,6 @@ export class Resolver {
       preserveDeclarationOrder: sequentialOperations,
     });
     ast = ensureAgentProvenance(ast, absPath);
-    ast = stampSkillBaseSource(ast, absPath);
     this.logger.debug(`AST node count: ${this.countNodes(ast)}`);
 
     if (sequentialOperations) {
@@ -1191,13 +1191,15 @@ export class Resolver {
       const mdErrors: ResolveError[] = [];
       const result = await this.loadAndParseMd(absPath, source, mdErrors);
       errors.push(...mdErrors);
-      if (result.ast) {
+      // Stamp here, not in doResolve: directory scans set their own per-skill path.
+      const mdAst = result.ast && stampSkillBaseSource(result.ast, absPath);
+      if (mdAst) {
         context.parsedFiles.set(absPath, {
-          ast: result.ast,
+          ast: mdAst,
           errors: mdErrors,
         });
       }
-      return result;
+      return { ast: mdAst };
     }
 
     const parseResult = parse(source, { filename: absPath });
@@ -1213,12 +1215,13 @@ export class Resolver {
       (err) => new ResolveError(err.message, err.location)
     );
     errors.push(...parseErrors);
+    const ast = stampSkillBaseSource(parseResult.ast, absPath);
     context.parsedFiles.set(absPath, {
-      ast: parseResult.ast,
+      ast,
       errors: parseErrors,
     });
 
-    return { ast: parseResult.ast };
+    return { ast };
   }
 
   /**
@@ -1925,7 +1928,7 @@ export class Resolver {
         dependencies.add(resolvedFullPath);
         const source = await readFile(resolvedFullPath, 'utf-8');
         const mdResult = await this.loadAndParseMd(resolvedFullPath, source, errors);
-        resolvedAST = mdResult.ast;
+        resolvedAST = mdResult.ast && stampSkillBaseSource(mdResult.ast, resolvedFullPath);
       } else if (!isRoot && existsSync(resolvedFullPath)) {
         // Found a .prs file — parse it
         this.logger.debug(`Found .prs file: ${resolvedFullPath}`);
@@ -2265,6 +2268,7 @@ export class Resolver {
       skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
     }
     addParsedSkillMetadata(skillProps, parsed);
+    skillProps['__baseSource'] = skillMdPath;
 
     const collected = await collectSkillResources(skillMdPath, parsed, this.logger);
     errors.push(...collected.errors);
