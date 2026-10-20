@@ -2005,6 +2005,10 @@ Single-line comments with `#`:
 }
 ```
 
+Comments are not part of the compiled output. The parser keeps them next to the
+AST so its `.prs` printer can write them back; see the
+[parser README](https://github.com/mrwogu/promptscript/blob/main/packages/parser/README.md#printing).
+
 ## URL Imports
 
 PromptScript supports Go-module-style bare URL imports in `@use` and `@inherit` declarations. A URL import references a Git repository directly by its host path — no registry alias required.

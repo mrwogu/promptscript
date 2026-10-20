@@ -507,8 +507,28 @@ function printOperation(
 
 /**
  * Print a parsed program as canonical `.prs` source (2-space indent), in the
- * order the author wrote it. Pass the comments from the parse result to keep
- * them; without them none are printed.
+ * order the author wrote it.
+ *
+ * Comments live beside the AST, so pass the `comments` from the same
+ * `parseCanonical` result; without them none are printed. Each comment is
+ * printed above the next declaration or entry, trailing on its line, or before
+ * the closing brace of its container, including inside nested objects and
+ * arrays. Printing the reparsed output gives the same text.
+ *
+ * Known limits: comments inside `@meta` move before its closing brace (tracked
+ * in #555), blank lines between comments are not kept, and comments in the
+ * parameter list of `@use` or `@inherit` are printed before the next declaration.
+ *
+ * @param program - Canonical program from `parseCanonical`
+ * @param comments - Comments from the same parse result
+ * @returns `.prs` source ending with a newline
+ * @throws {Error} If the AST holds a non-finite number, which `.prs` cannot express
+ *
+ * @example
+ * ```typescript
+ * const { ast, comments } = parseCanonical('# note\n@identity { a: 1 }');
+ * console.log(printProgram(ast!, comments));
+ * ```
  */
 export function printProgram(
   program: DeepReadonly<CanonicalProgram>,

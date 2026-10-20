@@ -78,6 +78,11 @@ reentrant calls cross-contaminates results. Use `createParser` and
 | `ParseOptions`         | Options for parse functions          |
 | `ParseResult`          | Mutable compatibility AST and errors |
 | `CanonicalParseResult` | Immutable canonical AST and errors   |
+| `Comment`              | A `#` comment: text, location, depth |
+
+Both parse results also carry `comments`, the `#` comments of the source in
+order. Comments are not part of the AST, so the resolver, validator and
+formatters never see them.
 
 ## Usage (internal)
 
@@ -100,6 +105,65 @@ const fileResult = await parseFile('./project.prs');
 
 Use `parseCanonical` or `parseCanonicalOrThrow` for new integrations that need
 exact top-level and block-body source order.
+
+## Printing
+
+`printProgram(program, comments?)` turns a `CanonicalProgram` back into `.prs`
+source (2-space indent). Pass the `ast` and `comments` from `parseCanonical`.
+
+```
+  source --parseCanonical--> { ast, comments } --printProgram--> source
+```
+
+```typescript
+import { parseCanonical, printProgram } from '@promptscript/parser';
+
+const source = `# who we are
+@identity {
+  name: "demo" # short name
+  # why
+  tags: ["a", "b"]
+}
+`;
+
+const { ast, comments, errors } = parseCanonical(source);
+if (ast && errors.length === 0) {
+  console.log(printProgram(ast, comments));
+}
+```
+
+This prints the source back unchanged:
+
+```
+# who we are
+@identity {
+  name: "demo" # short name
+  # why
+  tags: ["a", "b"]
+}
+```
+
+What is kept:
+
+- Declarations and block entries in the order the author wrote them
+  (`@meta`, `@inherit`, `@use`, blocks, `@extend` and `@override` are not regrouped).
+- Comments: above an entry or declaration, trailing on a line, after the last
+  entry of a block, and inside nested objects and arrays. A `#` inside a string
+  or text block is content, not a comment.
+- Numbers (no exponent notation) and `${VAR}` references.
+
+Printing is stable: printing the reparsed output gives the same text. Without
+`comments`, no comments are printed. A non-finite number in a hand-built AST
+throws.
+
+Known limits:
+
+- Comments inside `@meta` move to just before its closing brace, because
+  `@meta` fields carry no source positions. Text and order are kept. Tracked in
+  [#555](https://github.com/mrwogu/promptscript/issues/555).
+- Blank lines between comments are not kept.
+- Comments inside the parameter list of `@use` or `@inherit` are printed on
+  their own lines before the next declaration.
 
 ## License
 
