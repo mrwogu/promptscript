@@ -363,7 +363,7 @@ Settings merge in this order, highest first:
 3. User config at `~/.promptscript/config.yaml`
 4. System config, provisioned by IT: `/etc/promptscript/config.yaml` on macOS and Linux, `%ProgramData%\promptscript\config.yaml` on Windows
 
-The user config wins over the system config. `registries`, `defaults`, and `registry` merge one level deep, and a user `registry.url` without `git` drops the system git backend. A system `telemetry: false` cannot be turned back on by the user.
+The user config wins over the system config. Between those two, `registries`, `defaults`, and `registry` merge one level deep, and a user `registry.url` without `git` drops the system git backend. Only `registry`, `registries`, and `telemetry` from the user and system layers reach a project's effective config. `defaults` (`team`, `targets`) are read by `prs init` only. `telemetry: false` at any layer is a hard opt-out: a higher-priority `telemetry: true` cannot turn it back on.
 
 ### Extending a Config File
 
