@@ -354,6 +354,41 @@ Remote imports are recorded in `promptscript.lock` with commit and SHA-256 integ
 - Inspect skill provenance with `prs inspect <skill>`.
 - Build reproducibly with version pins, lockfile integrity, and vendor mode.
 
+### Configuration Layers
+
+Settings merge in this order, highest first:
+
+1. CLI flags and environment variables
+2. Project `promptscript.yaml`
+3. User config at `~/.promptscript/config.yaml`
+4. System config, provisioned by IT: `/etc/promptscript/config.yaml` on macOS and Linux, `%ProgramData%\promptscript\config.yaml` on Windows
+
+The user config wins over the system config. `registries`, `defaults`, and `registry` merge one level deep, and a user `registry.url` without `git` drops the system git backend. A system `telemetry: false` cannot be turned back on by the user.
+
+### Extending a Config File
+
+Share settings across projects with `extends`:
+
+```yaml
+# shared/base.config.yaml
+targets:
+  - claude
+registries:
+  '@company': github.com/acme/promptscript-base
+```
+
+```yaml
+# app/promptscript.yaml
+id: app
+extends: ../shared/base.config.yaml
+targets:
+  - github
+```
+
+The path is relative to the declaring file and chains are allowed, but a cycle is an error. Objects merge deeply and arrays are replaced, so `app` compiles only `github`. A different `registry` backend in the extending file drops the base one.
+
+See the [configuration reference](https://getpromptscript.dev/reference/config/) and the [enterprise guide](https://getpromptscript.dev/guides/enterprise/) for details.
+
 ## Monorepo Build Profiles
 
 Create scoped builds in `promptscript.yaml`:
