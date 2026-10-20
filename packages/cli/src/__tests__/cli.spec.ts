@@ -15,6 +15,12 @@ vi.mock('../commands/validate', () => ({
   validateCommand: mockValidate,
 }));
 
+const mockFmt = vi.fn();
+
+vi.mock('../commands/fmt', () => ({
+  fmtCommand: mockFmt,
+}));
+
 const mockExplain = vi.fn();
 
 vi.mock('../commands/explain', () => ({
@@ -80,6 +86,7 @@ const createChainableMock = (): Record<string, ReturnType<typeof vi.fn>> => ({
   argument: mockArgument,
   description: mockDescription,
   option: mockOption,
+  addHelpText: vi.fn().mockReturnThis(),
   action: vi.fn().mockImplementation(function (
     this: Record<string, ReturnType<typeof vi.fn>>,
     fn: (...args: unknown[]) => unknown
@@ -177,11 +184,23 @@ describe('cli', () => {
       });
     });
 
+    it('should pass paths and options to the fmt command', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', '--help']);
+
+      const fmtAction = capturedActions[4];
+      expect(fmtAction).toBeDefined();
+
+      fmtAction?.(['a.prs'], { check: true });
+
+      expect(mockFmt).toHaveBeenCalledWith({ check: true, paths: ['a.prs'] });
+    });
+
     it('should wire the explain action callback', async () => {
       const { run } = await import('../cli.js');
       run(['node', 'prs', '--help']);
 
-      const explainAction = capturedActions[5];
+      const explainAction = capturedActions[6];
       expect(explainAction).toBeDefined();
 
       explainAction?.('standards.code', { format: 'json' });

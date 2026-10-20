@@ -113,6 +113,16 @@ export interface ValidateOptions {
 }
 
 /**
+ * Options for the fmt command.
+ */
+export interface FmtOptions {
+  /** Files or directories to format (defaults to .promptscript) */
+  paths?: string[];
+  /** Write nothing, exit 1 if any file would change */
+  check?: boolean;
+}
+
+/**
  * Options for the pull command.
  */
 export interface PullOptions {

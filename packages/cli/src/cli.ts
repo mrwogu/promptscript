@@ -20,6 +20,7 @@ import { updateCommand } from './commands/update.js';
 import { vendorSyncCommand, vendorCheckCommand } from './commands/vendor.js';
 import { resolveCommand } from './commands/resolve-cmd.js';
 import { inspectCommand } from './commands/inspect.js';
+import { fmtCommand } from './commands/fmt.js';
 import { explainCommand } from './commands/explain.js';
 import { setContext, LogLevel, ConsoleOutput } from './output/console.js';
 import { checkForUpdates, printUpdateNotification } from './utils/version-check.js';
@@ -177,6 +178,23 @@ program
   .option('--skip-policies', 'Skip extension compliance policy evaluation')
   .option('--ignore-hashes', 'Skip reference integrity checks')
   .action((files, opts) => validateCommand({ ...opts, files }));
+
+program
+  .command('fmt [paths...]')
+  .description('Format .prs files in canonical form')
+  .option('--check', 'Write nothing, list files that would change, exit 1 if any would')
+  .addHelpText(
+    'after',
+    `
+Known limits of the printer:
+  - comments inside @meta move before its closing brace
+  - blank lines between comments are dropped
+  - comments inside @use/@inherit parameter lists move to their own line
+
+With no paths, formats every .prs file under .promptscript (vendor, .cache and
+node_modules are skipped).`
+  )
+  .action((paths, opts) => fmtCommand({ ...opts, paths }));
 
 program
   .command('inspect <skill-name>')
