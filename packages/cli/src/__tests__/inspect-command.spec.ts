@@ -121,6 +121,32 @@ describe('commands/inspect', () => {
     expect(output).toContain('description');
   });
 
+  it('should use the defining file as the base layer', async () => {
+    mockResolve.mockResolvedValue(
+      makeResolvedAst({
+        'code-review': {
+          description: 'Overridden',
+          __baseSource: '/registry/@core/skills.prs',
+          __layerTrace: [
+            {
+              property: 'description',
+              source: '/registry/@team/overlay.prs',
+              strategy: 'replace',
+              action: 'replaced',
+            },
+          ],
+        },
+      })
+    );
+
+    const { inspectCommand } = await import('../commands/inspect.js');
+    await inspectCommand('code-review', { layers: true } as InspectOptions);
+
+    const output = (console.log as ReturnType<typeof vi.fn>).mock.calls.map((c) => c[0]).join('\n');
+    expect(output).toContain('Layer 1 -- skills.prs (base)');
+    expect(output).not.toContain('__baseSource');
+  });
+
   it('should show layer-level view with --layers', async () => {
     mockResolve.mockResolvedValue(
       makeResolvedAst({

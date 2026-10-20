@@ -101,7 +101,10 @@ export async function inspectCommand(skillName: string, options: InspectOptions)
         ? ['(all replace)']
         : [];
     const composedFrom = Array.isArray(skill['__composedFrom']) ? skill['__composedFrom'] : null;
-    const baseSource = skillsBlock.loc?.file ?? '<unknown>';
+    const baseSource =
+      typeof skill['__baseSource'] === 'string'
+        ? skill['__baseSource']
+        : (skillsBlock.loc?.file ?? '<unknown>');
 
     if (isJson) {
       outputJson(skillName, skill, trace, sealed, composedFrom, baseSource);
@@ -161,6 +164,7 @@ const INTERNAL_KEYS = new Set([
   'properties',
   '__layerTrace',
   '__composedFrom',
+  '__baseSource',
   'composedFrom',
 ]);
 

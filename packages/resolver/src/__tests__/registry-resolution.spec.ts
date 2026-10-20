@@ -445,6 +445,30 @@ describe('Resolver — registry marker handling', () => {
     }
   });
 
+  /** Resolve a project whose `@acme/standards` clone holds the given standards.prs. */
+  async function resolveWithClonedStandards(
+    name: string,
+    project: string[],
+    standards: string[]
+  ): Promise<ResolvedAST> {
+    const tempDir = join(testCacheDir, name);
+    await fs.mkdir(tempDir, { recursive: true });
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, project.join('\n'));
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.writeFile(join(targetDir, 'standards.prs'), standards.join('\n'));
+    });
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, `regcache-${name}`),
+    });
+    return resolver.resolve(prsFile);
+  }
+
   it('resolves a file without registry imports normally (regression)', async () => {
     // Arrange
     const resolver = new Resolver({
@@ -1340,68 +1364,63 @@ describe('Resolver — registry marker handling', () => {
   });
 
   it('resolves registry import when .prs file exists in cloned repo', async () => {
-    // Arrange
-    const tempDir = join(testCacheDir, 'project2');
-    await fs.mkdir(tempDir, { recursive: true });
-
-    const prsContent = [
-      '@meta {',
-      '  id: "test-with-registry"',
-      '  syntax: "1.0.0"',
-      '}',
-      '',
-      '@use @acme/standards',
-      '',
-      '@identity {',
-      '  """',
-      '  test identity',
-      '  """',
-      '}',
-    ].join('\n');
-    const prsFile = join(tempDir, 'test.prs');
-    await fs.writeFile(prsFile, prsContent);
-
-    // Mock git.clone to plant a .prs file in the target directory.
-    // The Resolver calls gitRegistry.cloneAtTag(repoUrl, tag, cachePath) which:
-    //   1. rm -rf cachePath
-    //   2. mkdir cachePath
-    //   3. git.clone(repoUrl, cachePath, flags)
-    // So our mock receives the cachePath as the second arg.
-    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
-      await fs.mkdir(targetDir, { recursive: true });
-      await fs.writeFile(
-        join(targetDir, 'standards.prs'),
-        [
-          '@meta {',
-          '  id: "acme-standards"',
-          '  syntax: "1.0.0"',
-          '}',
-          '',
-          '@context {',
-          '  """',
-          '  Follow coding standards',
-          '  """',
-          '}',
-        ].join('\n')
-      );
-    });
-
-    const resolver = new Resolver({
-      registryPath: resolve(FIXTURES_DIR, 'registry'),
-      localPath: tempDir,
-      registries: TEST_REGISTRIES,
-      cache: false,
-      cacheDir: join(testCacheDir, 'regcache2'),
-    });
-
-    // Act
-    const result = await resolver.resolve(prsFile);
+    // The Resolver clones into cachePath, so the git.clone mock plants
+    // standards.prs in its second argument.
+    const result = await resolveWithClonedStandards(
+      'project2',
+      [
+        '@meta {',
+        '  id: "test-with-registry"',
+        '  syntax: "1.0.0"',
+        '}',
+        '',
+        '@use @acme/standards',
+        '',
+        '@identity {',
+        '  """',
+        '  test identity',
+        '  """',
+        '}',
+      ],
+      [
+        '@meta {',
+        '  id: "acme-standards"',
+        '  syntax: "1.0.0"',
+        '}',
+        '',
+        '@context {',
+        '  """',
+        '  Follow coding standards',
+        '  """',
+        '}',
+      ]
+    );
 
     // Assert — the result should have been parsed
     expect(result.ast).not.toBeNull();
     // Look for the context block from the imported file
     const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
     expect(contextBlock).toBeDefined();
+  });
+
+  it('records the cached registry file as the base source of its skills', async () => {
+    const result = await resolveWithClonedStandards(
+      'base-source',
+      ['@meta { id: "base-source" syntax: "1.5.0" }', '@use @acme/standards'],
+      [
+        '@meta { id: "acme-standards" syntax: "1.5.0" }',
+        '@skills {',
+        '  review: { description: "Review code" }',
+        '}',
+      ]
+    );
+    const skills = result.ast?.blocks.find((b) => b.name === 'skills');
+    const review = (skills?.content as { properties?: Record<string, Record<string, unknown>> })
+      .properties?.['review'];
+
+    expect(review?.['__baseSource']).toEqual(
+      expect.stringMatching(/regcache-base-source.*standards\.prs$/)
+    );
   });
 
   it('resolves a root-level registry import via auto-discovery (no sub-path)', async () => {

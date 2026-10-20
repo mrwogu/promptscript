@@ -47,15 +47,7 @@ Controls which layers can extend which, based on distance in a defined layer hie
 
 Example: with `layers: ['@core', '@team', '@project']` and `maxDistance: 1`, a `@project` extension cannot directly modify a `@core` skill — it must go through `@team`.
 
-:::caution[Currently schematic]
-
-Layer-boundary distance is measured against the skill's base-definition
-provenance (`__baseSource`), which the resolver does not attach to plain
-`@use` + `@extend` chains yet. On a normal `prs validate` run today this
-policy kind does not produce violations - the scenario above is schematic.
-Property-protection and registry-allowlist do fire end to end (see
-[Runnable Walkthrough](#runnable-walkthrough)).
-:::
+The distance is measured between the registry of the file that defines the skill and the registry of the file that extends it. Sources outside the `layers` list, like the project's own `.prs` files, are not checked.
 
 ### Property Protection
 
@@ -226,7 +218,7 @@ Re-run and the error is gone - validation succeeds with exit code 0, leaving onl
 
 ## How It Works
 
-The policy engine operates on the resolved AST after all `@extend` and `@use` declarations have been applied. It inspects the `__layerTrace` metadata that the resolver attaches to each skill during composition. This trace records which property was modified, by which source file, and with which merge strategy.
+The policy engine operates on the resolved AST after all `@extend` and `@use` declarations have been applied. It inspects the `__layerTrace` metadata that the resolver attaches to each skill during composition. This trace records which property was modified, by which source file, and with which merge strategy. The resolver also records `__baseSource`, the file that first defined the skill, which `layer-boundary` uses as the base layer.
 
 For each configured policy, the engine:
 
