@@ -969,14 +969,22 @@ describe('number literal overflow', () => {
 
     expect(result.ast).toBeNull();
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0]!.message).toContain('too large');
+    expect(result.errors[0]!.message).toContain('is too large to represent');
     expect(result.errors[0]!.location).toMatchObject({ file: 'big.prs', line: 1, column: 15 });
   });
 
-  it('reports an overflowing range bound', () => {
-    const result = parse(`@params { a: range(1..${'9'.repeat(400)}) }`);
+  it('reports an overflowing range bound once, with its location', () => {
+    const result = parse(`@params { a: range(1..${'9'.repeat(400)}) }`, { filename: 'big.prs' });
 
-    expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.errors.every((error) => error.message.includes('too large'))).toBe(true);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]!.location).toMatchObject({ file: 'big.prs', line: 1, column: 23 });
+  });
+
+  it('reports each overflowing bound of a range', () => {
+    const big = '9'.repeat(400);
+
+    const result = parse(`@params { a: range(${big}..${big}) }`);
+
+    expect(result.errors).toHaveLength(2);
   });
 });
