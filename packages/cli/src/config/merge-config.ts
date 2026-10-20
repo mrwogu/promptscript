@@ -4,7 +4,7 @@ import type { PromptScriptConfig, UserConfig } from '@promptscript/core';
  * Deep merge two registry config objects.
  * Source values override target values.
  */
-function deepMergeRegistry(
+export function deepMergeRegistry(
   target: PromptScriptConfig['registry'],
   source: PromptScriptConfig['registry']
 ): PromptScriptConfig['registry'] {

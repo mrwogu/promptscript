@@ -1282,19 +1282,34 @@ targets:
 
 ## Extending Configuration
 
-You can extend another configuration file:
+You can extend another configuration file, for example one shared by every project in a monorepo:
 
 ```yaml
-id: extended-project
+# shared/base.config.yaml
 syntax: '1.4.0'
-extends: ./base.config.yaml
+registries:
+  '@company': github.com/acme/promptscript-base
+targets:
+  - claude
+```
+
+```yaml
+# app/promptscript.yaml
+id: extended-project
+extends: ../shared/base.config.yaml
 
 targets:
   - github:
       output: custom/path.md
 ```
 
-Extended configurations are deep-merged.
+How the merge works:
+
+- The `extends` path is relative to the file that declares it. A base file can extend another file. A circular chain is an error.
+- Objects merge deeply and the extending file wins. Arrays such as `targets` are replaced, not joined, so the example above compiles only `github`.
+- `registry` merges like the other config levels: if the extending file picks another backend (for example `registry.path` over a base `registry.git`), the base backend is dropped.
+- Paths inside a base file, like `input.entry` or `registry.path`, stay relative to the project, not to the base file.
+- `prs migrate` and `prs serve` read only the project file.
 
 ## Schema Validation
 

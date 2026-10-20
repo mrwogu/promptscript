@@ -1,9 +1,7 @@
 import { ConsoleOutput } from '../../output/console.js';
 import { loadUserConfig, SYSTEM_CONFIG_PATH } from '../../config/user-config.js';
-import { findConfigFile } from '../../config/loader.js';
-import { readFile } from 'node:fs/promises';
-import { parse as parseYaml } from 'yaml';
-import type { PromptScriptConfig, RegistriesConfig } from '@promptscript/core';
+import { findConfigFile, loadConfig } from '../../config/loader.js';
+import type { RegistriesConfig } from '@promptscript/core';
 import type { RegistryListOptions } from '../../types.js';
 
 type AliasSource = 'system' | 'global' | 'project';
@@ -43,9 +41,7 @@ export async function registryListCommand(options: RegistryListOptions = {}): Pr
     const configFile = findConfigFile();
     if (configFile) {
       try {
-        const content = await readFile(configFile, 'utf-8');
-        const projectConfig = parseYaml(content) as PromptScriptConfig;
-        projectAliases = aliasUrls(projectConfig?.registries);
+        projectAliases = aliasUrls((await loadConfig(configFile)).registries);
       } catch {
         // Ignore parse errors — project config is optional
       }

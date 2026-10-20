@@ -1,12 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockLoadUserConfig, mockFindConfigFile, mockReadFile, mockConsoleLog } = vi.hoisted(() => {
-  const mockLoadUserConfig = vi.fn();
-  const mockFindConfigFile = vi.fn();
-  const mockReadFile = vi.fn();
-  const mockConsoleLog = vi.fn();
-  return { mockLoadUserConfig, mockFindConfigFile, mockReadFile, mockConsoleLog };
-});
+const { mockLoadUserConfig, mockFindConfigFile, mockLoadConfig, mockConsoleLog } = vi.hoisted(
+  () => {
+    const mockLoadUserConfig = vi.fn();
+    const mockFindConfigFile = vi.fn();
+    const mockLoadConfig = vi.fn();
+    const mockConsoleLog = vi.fn();
+    return { mockLoadUserConfig, mockFindConfigFile, mockLoadConfig, mockConsoleLog };
+  }
+);
 
 vi.mock('../../output/console.js', () => ({
   ConsoleOutput: {
@@ -23,14 +25,7 @@ vi.mock('../../config/user-config.js', () => ({
 
 vi.mock('../../config/loader.js', () => ({
   findConfigFile: mockFindConfigFile,
-}));
-
-vi.mock('node:fs/promises', () => ({
-  readFile: mockReadFile,
-}));
-
-vi.mock('yaml', () => ({
-  parse: vi.fn((content: string) => JSON.parse(content)),
+  loadConfig: mockLoadConfig,
 }));
 
 import { registryListCommand } from '../registry/list.js';
@@ -72,9 +67,7 @@ describe('registryListCommand', () => {
   it('should display project-level aliases as project', async () => {
     mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
-    mockReadFile.mockResolvedValue(
-      JSON.stringify({ registries: { '@team': 'github.com/company/team' } })
-    );
+    mockLoadConfig.mockResolvedValue({ registries: { '@team': 'github.com/company/team' } });
 
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(mockConsoleLog);
 
@@ -92,9 +85,7 @@ describe('registryListCommand', () => {
       registries: { '@company': 'github.com/company/old' },
     });
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
-    mockReadFile.mockResolvedValue(
-      JSON.stringify({ registries: { '@company': 'github.com/company/new' } })
-    );
+    mockLoadConfig.mockResolvedValue({ registries: { '@company': 'github.com/company/new' } });
 
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(mockConsoleLog);
 
@@ -146,14 +137,12 @@ describe('registryListCommand', () => {
       },
     });
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
-    mockReadFile.mockResolvedValue(
-      JSON.stringify({
-        registries: {
-          '@project': 'github.com/company/project',
-          '@shared': 'github.com/company/project-shared',
-        },
-      })
-    );
+    mockLoadConfig.mockResolvedValue({
+      registries: {
+        '@project': 'github.com/company/project',
+        '@shared': 'github.com/company/project-shared',
+      },
+    });
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(mockConsoleLog);
 
     await registryListCommand({ source: 'project' });
@@ -241,11 +230,9 @@ describe('registryListCommand', () => {
   it('should handle object-form registry entries in project config', async () => {
     mockLoadUserConfig.mockResolvedValue({ version: '1' });
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
-    mockReadFile.mockResolvedValue(
-      JSON.stringify({
-        registries: { '@team': { url: 'github.com/company/team', root: 'src' } },
-      })
-    );
+    mockLoadConfig.mockResolvedValue({
+      registries: { '@team': { url: 'github.com/company/team', root: 'src' } },
+    });
 
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(mockConsoleLog);
 
@@ -270,7 +257,7 @@ describe('registryListCommand', () => {
       registries: { '@company': 'github.com/company/base' },
     });
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
-    mockReadFile.mockRejectedValue(new Error('read error'));
+    mockLoadConfig.mockRejectedValue(new Error('read error'));
 
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(mockConsoleLog);
 
