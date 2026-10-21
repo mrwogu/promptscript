@@ -11,7 +11,7 @@ Choose operation from intent, not convenience.
 | --------------------------------------------------- | ------------------------ | -------------------------------------------- |
 | Add or merge content                                | `@extend path { ... }`   | Preferred additive operation                 |
 | Replace one direct regular field in an extension    | `field!: value`          | Compatibility form from syntax 1.3           |
-| Replace one complete existing block or nested value | `@override path { ... }` | Preferred explicit replacement in syntax 1.6 |
+| Replace one complete existing block or nested value | `@override path { ... }` | Preferred explicit replacement in syntax 1.5 |
 
 ## Add with `@extend`
 
@@ -81,7 +81,7 @@ It replaces that target as one atomic value.
 - Traversal through scalar value: resolution error.
 - Attempt to change sealed skill property: resolution error.
 - Replacement before target declaration: resolution error.
-- Syntax below 1.6: PS018 upgrade warning.
+- Syntax below 1.5: PS018 upgrade warning.
 
 ## Enterprise Guidance
 

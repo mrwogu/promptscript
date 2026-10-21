@@ -75,6 +75,7 @@ first.
 @hooks { ... }          # Portable lifecycle hooks (syntax 1.4.0+)
 @mcpServers { ... }     # MCP server configurations (syntax 1.4.0+)
 @plugins { ... }        # Capability bundles (syntax 1.4.0+)
+@prompts { ... }        # Prompt definitions with typed inputs (syntax 1.6.0+, ignored by every target)
 @local { ... }          # Private config (not committed)
 @extend path { ... }    # Modify imported blocks
 @override path { ... }  # Replace one complete existing target (syntax 1.5.0+)

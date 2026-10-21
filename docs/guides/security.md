@@ -139,6 +139,8 @@ PromptScript includes built-in validation rules to detect potential prompt injec
 
 The text rules (PS005, PS010, PS011, PS012, PS014) scan every block, including values under a key named `resources`. They skip only the `resources` entries of `@skills.<name>`, also when that path is reached through `@extend` or `@override`. Only reference files (under `references/`) are checked, by PS026, for PromptScript directives.
 
+The same five text rules scan `@prompts` entries: the `system` and `user` text and the descriptions of inputs and outputs. They check authored text only. Runtime input values do not exist at validation time and are never scanned, so a prompt that takes user input has to treat those values as untrusted. PS043 rejects malformed or undeclared slots, and PS046 warns when a slot sits in the system message.
+
 PS011 detects imperative `skip` or `bypass` instructions and phrases qualified by `all` or `safety`. Suppression-pattern matches in top-level Markdown list items under defensive ATX headings such as `Don'ts`, `Do not`, `Forbidden`, or `Restrictions` are treated as defensive guidance. Tab-indented, nested, continuation-line, prose, arbitrary-heading, setext-heading, and thematic-break content remains fail-closed and is scanned. Authority or execute patterns remain errors. Unclosed fenced code blocks are scanned.
 
 ### Obfuscation Detection (PS012)

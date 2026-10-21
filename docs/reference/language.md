@@ -175,28 +175,29 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | Version | Status  | Blocks and features                                                                                                                        |
 | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `1.0.0` | Stable  | `@identity`, `@context`, `@standards`, `@restrictions`, `@knowledge`, `@shortcuts`, `@commands`, `@guards`, `@params`, `@skills`, `@local` |
-| `1.1.0` | Stable  | All 1.0.0 blocks + `@agents`, `@workflows`; reserves internal `@prompts`                                                                   |
+| `1.1.0` | Stable  | All 1.0.0 blocks + `@agents`, `@workflows`, and the `@prompts` block name                                                                  |
 | `1.2.0` | Stable  | All 1.1.0 blocks + `@examples`                                                                                                             |
 | `1.3.0` | Stable  | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
 | `1.4.0` | Stable  | All 1.3.0 features + `@hooks`, `@mcpServers`, `@plugins`                                                                                   |
 | `1.5.0` | Current | All 1.4.0 features + `@header` section titles, `@override` replacement, declaration order, unquoted `${VAR}` values                        |
+| `1.6.0` | Stable  | All 1.5.0 features + validated `@prompts` entries with typed inputs and runtime slots; every target ignores them                           |
 
 :::note[Block Availability]
 `@workflows` emits workflow files such as `.claude/workflows/<name>.md`.
-`@prompts` is internal. `@hooks`, `@mcpServers`, and `@plugins` require syntax `1.4.0`.
+`@prompts` entries require syntax `1.6.0`. `@hooks`, `@mcpServers`, and `@plugins` require syntax `1.4.0`.
 :::
 
 ### Block Version Requirements
 
-| Block         | Minimum Syntax Version |
-| ------------- | ---------------------- |
-| `@agents`     | `1.1.0`                |
-| `@workflows`  | `1.1.0`                |
-| `@prompts`    | `1.1.0`                |
-| `@examples`   | `1.2.0`                |
-| `@hooks`      | `1.4.0`                |
-| `@mcpServers` | `1.4.0`                |
-| `@plugins`    | `1.4.0`                |
+| Block         | Minimum Syntax Version     |
+| ------------- | -------------------------- |
+| `@agents`     | `1.1.0`                    |
+| `@workflows`  | `1.1.0`                    |
+| `@prompts`    | `1.1.0` (entries: `1.6.0`) |
+| `@examples`   | `1.2.0`                    |
+| `@hooks`      | `1.4.0`                    |
+| `@mcpServers` | `1.4.0`                    |
+| `@plugins`    | `1.4.0`                    |
 
 All other built-in blocks are available from `1.0.0`.
 Regular block field replacement with `field!: value` requires syntax `1.3.0`. Generated section title overrides with `@header`, atomic target replacement with `@override`, and unquoted `${VAR}` values require syntax `1.5.0`.
@@ -1659,6 +1660,105 @@ Marketplace publishing and installation are outside the compiler scope.
 
 **Target Support:** Plugins are emitted to `.factory/plugins.json` (Factory), `.cursor/plugins.json` (Cursor), `.codex/plugins.json` (Codex), and `.grok/plugins.json` (Grok).
 
+### @prompts
+
+Defines named prompts with typed inputs. Requires syntax `1.6.0`. The
+validator checks every entry, and every target ignores the block, so it never
+changes generated output.
+
+```promptscript
+@meta {
+  id: "acme-support"
+  syntax: "1.6.0"
+  owner: "team-support"
+  risk: "medium"
+}
+
+@identity {
+  """
+  You work for the Acme support team.
+  """
+}
+
+@restrictions {
+  - "Never promise a refund before it is approved."
+}
+
+@prompts {
+  refund-reply: {
+    description: "Answer a customer refund request"
+    risk: "high"
+    dataClasses: ["pii"]
+    compose: [identity, restrictions]
+    model: { ref: "claude-sonnet-5-5", temperature: 0.2, maxTokens: 800 }
+    inputs: { message: { type: "string", description: "Customer message" } }
+    output: {
+      decision: { type: "enum", options: ["approve", "escalate"] }
+      citations: { type: "list", items: { type: "string" } }
+    }
+    system: "You answer refund requests for Acme customers."
+    user: """
+      Customer wrote: {{input.message}}
+    """
+  }
+}
+```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMjPgFo4AVzRpm1LPLES4AT3YZCs+QEYKANgoAGPeMHMA7qxjVzIDqVUatOo4S1BBwANZefFIQaiSOAL5iYtzSnFgQWIbC+nIgenlOAJrMaoIu2mGCYNqCuDCCAIJK9eqa2li1MKQUOfkJSazc1PBYIYzpbHDZTsq5AHIwAG4egjTMJKH1QsNgaqxSggBGMNXDkh2hghia1MzLUj0FiazJa2RYU6JOO3tSysPkQyyL4SCRSeCMEJoCasLwNVhwFwrISMNRwLDrFY-faCYYARzUIyCoJC4S8OAgAHMcMSwdgMABhKAYOBweCyZDyNAQCDyAC6OQkLDIzDZHNS7AyhjouJGYxhcAFTgkJGY4KgwNlYC8jGZanBqjY7iwygArGb5DKOGQPNg1MNZHYKAAmGUkUwAFWYYU4cFkAA47HZBM9QZJWGg1B9NXxWRhKTBNZk0IncuiQqxKZbBOC4JCINCIGwvAy0Ri+NRBLG4PGYPIQyHBc4o5GsMCm2CYIxQkXYcJaoYU15OLFs8xC5MOfJrmtltn5BCMMyOPzG8rQd2BAqk4PU-IoKFdCAZRkYCQ-f3k3uQOmIJn6-E12HQ6CjOiz15iqUMAikZXsQc+KEuiUynI0zSCKi6KYrQjxNmiHheH064SKW0EVmUtwcMCwB3q2FDVrW8QvhIfQFBIzzxCA8R8gwaTUIY+BEKQ5AwFQtDHiAyy0L2+AWNRQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+| Field                                                 | Required | Type     | Description                                                                                                                                                     |
+| ----------------------------------------------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| entry key                                             | Yes      | name     | Letters, digits, `_` and `-`, up to 64 characters, unique when case is ignored                                                                                  |
+| `description`                                         | Yes      | string   | What the prompt does                                                                                                                                            |
+| `system`, `user`                                      | One      | string   | Message text, a quoted string or a `"""` text block. At least one is required                                                                                   |
+| `compose`                                             | No       | string[] | Blocks to compose into the system message: `identity`, `context`, `knowledge`, `standards`, `restrictions`, `examples`. Each must exist in the resolved program |
+| `model`                                               | No       | object   | `ref` (required) plus `temperature`, `topP`, `topK`, `maxTokens`, `stop`, `seed`                                                                                |
+| `inputs`                                              | No       | object   | Name to `{ type, description, options?, default? }`. Types are `string`, `number`, `boolean`, `enum`                                                            |
+| `output`                                              | No       | object   | Field name to `{ type, description?, options?, items? }`. Types add `list`, which needs `items`                                                                 |
+| `risk`, `owner`, `domain`, `dataClasses`, `reviewers` | No       | mixed    | Governance values. `risk` is `low`, `medium`, `high` or `critical`. `@meta` can hold defaults                                                                   |
+
+Keys and field names cannot be `__proto__`, `prototype`, `constructor` or any
+other name that every JavaScript object has. A key also cannot be `index`,
+`readme` or a Windows device name such as `con` or `com1`, in any case. When the
+file has `@prompts`, `@meta.id` must not contain `..`, must not start or end
+with `/`, and each `/` segment uses letters, digits, `.`, `_` and `-`.
+
+**Runtime slots.** `{{input.name}}` inside a string or text block marks a value
+the caller supplies later. `name` must be a declared input. A slot has no
+spaces, filters or expressions. Write `\{{` to keep two literal braces: the
+backslash and braces stand for `{{`, and no slot is read there. Slots are only
+live in the entry's own `system` and `user` text. They are not allowed in the
+blocks named in `compose`. Slots must be written inside a string, because the
+unquoted form `{{input.name}}` does not parse.
+
+Any other unescaped `{{` in `system` or `user` is an error at every syntax
+version: `{{ input.name }}`, `{{Input.name}}`, `{{input.a.b}}` and a bare
+`{{name}}` all fail PS043. Slots in the system message are allowed but warned
+about by PS046, because caller input then reaches the most trusted message.
+
+**Composition.** `@inherit` merges prompts by key: the child's text and scalars
+win and arrays are joined. `@extend prompts.<key>` appends text and merges
+`inputs` and `output`. `@override prompts.<key>` replaces the entry, and
+`@override prompts.<key>.user` replaces one field. `@use` adds the imported
+prompts, and a same-key entry with different content is a resolve error.
+`@use` does not carry `@meta`, so set governance values on the entries
+themselves.
+
+**Diagnostics.**
+
+| Code  | Severity | Checks                                                                                                                 |
+| ----- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| PS042 | error    | Keys, fields, parameters, contracts, `compose`, governance values, the `@meta.id`, floating model aliases at high risk |
+| PS043 | error    | Undeclared or malformed slots, and slots in composed blocks                                                            |
+| PS044 | warning  | Declared inputs that no slot uses                                                                                      |
+| PS046 | warning  | Slots in the system message                                                                                            |
+
+PS045 and PS018 also apply, see [Versions and Diagnostics](language/versions-and-diagnostics.md).
+
 ## @extend Block
 
 Modify inherited or existing blocks:
@@ -1951,6 +2051,10 @@ Use `{{variable}}` syntax to reference template parameters:
 <!-- playground-link-end -->
 
 Template expressions are resolved during inheritance resolution when parameters are bound.
+
+A dotted name such as `{{input.name}}` is never a template variable. Template
+resolution leaves it untouched, which keeps runtime slots in `@prompts` text
+intact. See [`@prompts`](#prompts).
 
 **Valid Variable Names:**
 

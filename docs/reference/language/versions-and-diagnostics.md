@@ -10,14 +10,15 @@ organization version.
 
 ## Syntax Versions
 
-| Version | Added capability                                                                                       |
-| ------- | ------------------------------------------------------------------------------------------------------ |
-| `1.0.0` | Core instruction and composition blocks                                                                |
-| `1.1.0` | Agents and workflows                                                                                   |
-| `1.2.0` | Few-shot examples                                                                                      |
-| `1.3.0` | Direct regular field replacement with `field!`                                                         |
-| `1.4.0` | Hooks, MCP servers, and plugins                                                                        |
-| `1.5.0` | Contextual section headers, atomic `@override`, declaration-order operations, unquoted `${VAR}` values |
+| Version | Added capability                                                                                                |
+| ------- | --------------------------------------------------------------------------------------------------------------- |
+| `1.0.0` | Core instruction and composition blocks                                                                         |
+| `1.1.0` | Agents and workflows                                                                                            |
+| `1.2.0` | Few-shot examples                                                                                               |
+| `1.3.0` | Direct regular field replacement with `field!`                                                                  |
+| `1.4.0` | Hooks, MCP servers, and plugins                                                                                 |
+| `1.5.0` | Contextual section headers, atomic `@override`, declaration-order operations, unquoted `${VAR}` values          |
+| `1.6.0` | Prompt definitions: validated `@prompts` entries with typed inputs and runtime slots; every target ignores them |
 
 Use the minimum required version for reusable published fragments. Use current
 syntax for new project entry files.
@@ -51,6 +52,15 @@ preserves permissions. Multi-file upgrade is not transactional: a write-time
 failure in a later file does not roll back files already replaced. Symlinks are
 skipped. Run upgrades on a clean version-control branch.
 
+## Prompt Definitions
+
+`@prompts` entries need syntax `1.6.0`. A file that declares an older version
+and has entries gets a PS018 warning, and `prs validate --fix` raises the
+version. PS042 to PS046 check the entries and their `{{input.name}}` slots,
+see [`@prompts`](../language.md#prompts). PS045 only runs from `1.6.0`, because
+from that version a `{{name}}` that nothing bound is reported instead of being
+printed silently. No target emits prompt definitions.
+
 ## Model Versions
 
 `@meta.syntax` does not track AI models. Agent and skill `model` values resolve
@@ -59,20 +69,25 @@ Floating aliases such as `sonnet` follow the newest release in the catalog,
 and the [Model Catalog](../models.md) lists every built-in model.
 PS041 reports pinned models that are deprecated or retired, together with
 their replacement, models outside `models.supported`, and inconsistent
-`models.profiles` entries.
+`models.profiles` entries. It also reads the `model.ref` of `@prompts` entries.
 
 ## Key Diagnostics
 
-| Diagnostic | Meaning                                     | Action                                      |
-| ---------- | ------------------------------------------- | ------------------------------------------- |
-| PS018      | Used feature requires newer syntax          | Run `prs validate --fix` or `prs upgrade`   |
-| PS019      | Unknown built-in block name                 | Correct typo or confirm custom block intent |
-| PS034      | Invalid hook executable or option           | Fix command, script, or target override     |
-| PS037      | Invalid contextual section header           | Fix owner, key, title, or duplicate         |
-| PS038      | Unsupported or risky built-in block shape   | Convert to canonical shape                  |
-| PS041      | Unsupported model or invalid model profile  | Switch model or update `models` config      |
-| PS4002     | Target cannot preserve requested capability | Use documented target fallback              |
-| PS4004     | Target cannot run or write the model        | Pick another model or set a target name     |
+| Diagnostic | Meaning                                      | Action                                      |
+| ---------- | -------------------------------------------- | ------------------------------------------- |
+| PS018      | Used feature requires newer syntax           | Run `prs validate --fix` or `prs upgrade`   |
+| PS019      | Unknown built-in block name                  | Correct typo or confirm custom block intent |
+| PS034      | Invalid hook executable or option            | Fix command, script, or target override     |
+| PS037      | Invalid contextual section header            | Fix owner, key, title, or duplicate         |
+| PS038      | Unsupported or risky built-in block shape    | Convert to canonical shape                  |
+| PS041      | Unsupported model or invalid model profile   | Switch model or update `models` config      |
+| PS042      | Invalid `@prompts` entry or governance value | Fix the entry as the message describes      |
+| PS043      | Undeclared or malformed runtime slot         | Declare the input or fix the slot           |
+| PS044      | Declared prompt input is never used          | Use the input or remove it                  |
+| PS045      | `{{name}}` left in text (syntax 1.6.0+)      | Bind it with a parameter or remove it       |
+| PS046      | Runtime slot in the system message           | Move the slot to the user message           |
+| PS4002     | Target cannot preserve requested capability  | Use documented target fallback              |
+| PS4004     | Target cannot run or write the model         | Pick another model or set a target name     |
 
 ## Release Gate
 

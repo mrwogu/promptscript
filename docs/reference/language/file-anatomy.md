@@ -59,16 +59,19 @@ source order.
 
 ## Public Blocks
 
-| Group             | Blocks                                                                         |
-| ----------------- | ------------------------------------------------------------------------------ |
-| Core instructions | `@identity`, `@context`, `@standards`, `@restrictions`, `@knowledge`, `@local` |
-| Interaction       | `@shortcuts`, `@guards`, `@params`, `@examples`                                |
-| Agent platform    | `@skills`, `@agents`, `@workflows`, `@hooks`, `@mcpServers`, `@plugins`        |
-| Composition       | `@inherit`, `@use`, `@extend`, `@override`                                     |
-| Presentation      | Contextual `@header` entries inside supported owner blocks                     |
+| Group              | Blocks                                                                         |
+| ------------------ | ------------------------------------------------------------------------------ |
+| Core instructions  | `@identity`, `@context`, `@standards`, `@restrictions`, `@knowledge`, `@local` |
+| Interaction        | `@shortcuts`, `@guards`, `@params`, `@examples`                                |
+| Agent platform     | `@skills`, `@agents`, `@workflows`, `@hooks`, `@mcpServers`, `@plugins`        |
+| Prompt definitions | `@prompts`                                                                     |
+| Composition        | `@inherit`, `@use`, `@extend`, `@override`                                     |
+| Presentation       | Contextual `@header` entries inside supported owner blocks                     |
 
-`@commands` remains a compatibility alias for `@shortcuts`. `@prompts` is
-reserved for internal compiler use.
+`@commands` remains a compatibility alias for `@shortcuts`. `@prompts` holds
+prompt definitions with typed inputs. The validator checks it at syntax `1.6.0`
+and every target ignores it, so it never changes generated output. See
+[`@prompts` in the language reference](../language.md#prompts).
 
 ## Related Reference
 
