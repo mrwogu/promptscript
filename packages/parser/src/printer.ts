@@ -442,7 +442,7 @@ function withComments(
 }
 
 /** Marks a blank line until the very end, so blank lines of text content are never mistaken for it. */
-const BLANK = '\u0000prs-blank\u0000';
+const BLANK = '\u0000}prs-blank';
 
 function line(c: Comment, indent: string): string {
   return c.kind === 'blank' ? BLANK : indent + c.text;

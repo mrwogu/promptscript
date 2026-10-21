@@ -32,16 +32,13 @@ const OPENERS = new Set(['LBrace', 'LBracket', 'LParen']);
 // parse error anyway, so depth is only approximate in already-broken input.
 const CLOSERS = new Set(['RBrace', 'RBracket', 'RParen']);
 
-/** Token types whose text may span lines; blank lines inside them are content, not layout. */
-const MULTILINE_TOKENS = new Set(['TextBlock', 'StringLiteral']);
-
 /**
- * Offsets where a run of blank lines starts, outside multi-line tokens. A run of
+ * Offsets where a run of blank lines starts, outside tokens that span lines (text blocks, strings, env vars). A run of
  * several blank lines counts once. Lines end at CRLF, CR or LF.
  */
 function blankRuns(source: string, lexResult: ILexingResult): { offset: number; line: number }[] {
   const spans = lexResult.tokens
-    .filter((token) => MULTILINE_TOKENS.has(token.tokenType.name))
+    .filter((token) => /[\r\n]/.test(token.image))
     .map((token) => [token.startOffset, token.endOffset!] as const);
   const runs: { offset: number; line: number }[] = [];
   let span = 0;

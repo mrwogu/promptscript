@@ -669,3 +669,17 @@ y"
     a: 1
   }
 }
+### blank line inside a multi-line env var is content
+@identity {
+  a: ${X:-foo
+
+bar}
+  b: 1
+}
+--- expected
+@identity {
+  a: ${X:-foo
+
+bar}
+  b: 1
+}

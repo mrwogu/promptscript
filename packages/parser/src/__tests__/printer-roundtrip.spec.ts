@@ -342,7 +342,7 @@ describe('printProgram layout', () => {
 
   it('keeps the bytes of the internal blank marker inside strings and text', () => {
     // Arrange
-    const marker = '\u0000prs-blank\u0000';
+    const marker = '\u0000}prs-blank\u0000';
     const source = `@identity {\n  a: "x${marker}y"\n  b: """\n  ${marker}\n  """\n  c: ${'"' + marker + '"'}\n\n  d: 1\n}`;
     const parsed = parseCanonical(source);
 
@@ -382,7 +382,7 @@ describe('printProgram layout', () => {
 
   it('does not take marker bytes inside an element for a surviving blank line', () => {
     // Arrange
-    const marker = '\u0000prs-blank\u0000';
+    const marker = '\u0000}prs-blank\u0000';
     const parsed = parseCanonical(`@context {\n  items: [\n\n    "x${marker}y", 1\n\n  ]\n}`);
 
     // Act
@@ -391,6 +391,21 @@ describe('printProgram layout', () => {
 
     // Assert
     expect(printed).toBe(`@context {\n  items: ["x${marker}y", 1]\n}\n`);
+    expect(printProgram(reparsed.ast!, reparsed.comments)).toBe(printed);
+  });
+
+  it('keeps a line that looks like a blank marker inside an env var', () => {
+    // Arrange
+    const source = '@identity {\n  a: ${X:-\n\u0000prs-blank\u0000\n}\n}';
+    const parsed = parseCanonical(source);
+
+    // Act
+    const printed = printProgram(parsed.ast!, parsed.comments);
+    const reparsed = parseCanonical(printed);
+
+    // Assert
+    expect(parsed.errors).toEqual([]);
+    expect(stripPositions(reparsed.ast)).toEqual(stripPositions(parsed.ast));
     expect(printProgram(reparsed.ast!, reparsed.comments)).toBe(printed);
   });
 });
