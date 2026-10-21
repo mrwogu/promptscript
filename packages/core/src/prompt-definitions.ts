@@ -87,7 +87,7 @@ export const PROMPT_SCALAR_TYPES: readonly PromptScalarType[] = [
 export const PROMPT_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
 
 /** Pattern of an input name. A slot can only name such an input. */
-export const PROMPT_INPUT_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
+export const PROMPT_INPUT_NAME_PATTERN = /^[A-Za-z_]\w*$/;
 
 const RESERVED_FILE_NAMES = /^(?:index|readme|con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
 const UNSAFE_NAMES: ReadonlySet<string> = new Set([
@@ -306,9 +306,7 @@ function readInput(name: string, raw: Raw, bad: Report): PromptInput | undefined
   if (!description?.trim())
     bad(`${where} needs a description`, 'Add description: "<what it holds>"');
   const options = readOptions(field(raw, 'options'), where, bad);
-  if (type === 'enum' && (options === undefined || options.length === 0)) {
-    bad(`${where} is an enum without options`, 'Add options: ["a", "b"]');
-  }
+  checkEnumOptions(type, options, `${where} is`, bad);
   const input: PromptInput = { description: description ?? '', type: type ?? 'string' };
   if (options) input.options = options;
   const fallback = field(raw, 'default');
@@ -326,6 +324,33 @@ function readInput(name: string, raw: Raw, bad: Report): PromptInput | undefined
   return type ? input : undefined;
 }
 
+function checkEnumOptions(
+  type: string | undefined,
+  options: string[] | undefined,
+  subject: string,
+  bad: Report
+): void {
+  if (type === 'enum' && (options === undefined || options.length === 0)) {
+    bad(`${subject} an enum without options`, 'Add options: ["a", "b"]');
+  }
+}
+
+function readListItems(
+  raw: ObjectRaw,
+  where: string,
+  bad: Report
+): PromptOutputField['items'] | undefined {
+  const items = field(raw, 'items');
+  if (items?.kind !== 'object') {
+    bad(`${where} is a list without items`, 'Add items: { type: "string" }');
+    return undefined;
+  }
+  const type = readScalarType(items, `${where} items`, bad) as PromptScalarType | undefined;
+  const options = readOptions(field(items, 'options'), `${where} items`, bad);
+  checkEnumOptions(type, options, `${where} items are`, bad);
+  return type ? { type, ...(options ? { options } : {}) } : undefined;
+}
+
 function readOutputField(name: string, raw: Raw, bad: Report): PromptOutputField | undefined {
   const where = `output "${name}"`;
   if (raw.kind !== 'object') {
@@ -333,27 +358,16 @@ function readOutputField(name: string, raw: Raw, bad: Report): PromptOutputField
     return undefined;
   }
   const type = readScalarType(raw, where, bad, ['list']);
-  const description = stringOf(field(raw, 'description')) ?? '';
   const options = readOptions(field(raw, 'options'), where, bad);
-  if (type === 'enum' && (options === undefined || options.length === 0)) {
-    bad(`${where} is an enum without options`, 'Add options: ["a", "b"]');
-  }
-  const result: PromptOutputField = { description, type: type ?? 'string' };
+  checkEnumOptions(type, options, `${where} is`, bad);
+  const result: PromptOutputField = {
+    description: stringOf(field(raw, 'description')) ?? '',
+    type: type ?? 'string',
+  };
   if (options) result.options = options;
   if (type === 'list') {
-    const items = field(raw, 'items');
-    if (items?.kind !== 'object') {
-      bad(`${where} is a list without items`, 'Add items: { type: "string" }');
-    } else {
-      const itemType = readScalarType(items, `${where} items`, bad) as PromptScalarType | undefined;
-      const itemOptions = readOptions(field(items, 'options'), `${where} items`, bad);
-      if (itemType === 'enum' && (itemOptions === undefined || itemOptions.length === 0)) {
-        bad(`${where} items are an enum without options`, 'Add options: ["a", "b"]');
-      }
-      if (itemType) {
-        result.items = { type: itemType, ...(itemOptions ? { options: itemOptions } : {}) };
-      }
-    }
+    const items = readListItems(raw, where, bad);
+    if (items) result.items = items;
   }
   return type ? result : undefined;
 }
@@ -394,35 +408,53 @@ function readNamedMap<T>(
   return result;
 }
 
+function readRisk(raw: Raw | undefined, governance: GovernanceMeta, bad: Report): void {
+  if (raw === undefined) return;
+  const level = stringOf(raw);
+  if (level !== undefined && (RISK_LEVELS as readonly string[]).includes(level)) {
+    governance.risk = level as RiskLevel;
+  } else {
+    bad(`risk must be one of: ${RISK_LEVELS.join(', ')}`, 'Set risk to a supported level.');
+  }
+}
+
+function readGovernanceName(
+  key: 'owner' | 'domain',
+  raw: Raw | undefined,
+  governance: GovernanceMeta,
+  bad: Report
+): void {
+  if (raw === undefined) return;
+  const text = stringOf(raw)?.trim();
+  if (text) governance[key] = text;
+  else
+    bad(`${key} must be a non-empty string`, `Set ${key} to a name, for example "team-support".`);
+}
+
+function readGovernanceList(
+  key: 'dataClasses' | 'reviewers',
+  raw: Raw | undefined,
+  governance: GovernanceMeta,
+  bad: Report
+): void {
+  if (raw === undefined) return;
+  const list = stringList(raw);
+  if (list) governance[key] = list;
+  else bad(`${key} must be a list of strings`, `Write ${key}: ["a", "b"]`);
+}
+
 /**
  * Check governance values and read the ones that are valid.
  * Shared by `@prompts` entries and `@meta`.
  */
 function readGovernance(lookup: (name: string) => Raw | undefined, bad: Report): GovernanceMeta {
   const governance: GovernanceMeta = {};
-  const risk = lookup('risk');
-  if (risk !== undefined) {
-    const level = stringOf(risk);
-    if (level !== undefined && (RISK_LEVELS as readonly string[]).includes(level)) {
-      governance.risk = level as RiskLevel;
-    } else {
-      bad(`risk must be one of: ${RISK_LEVELS.join(', ')}`, 'Set risk to a supported level.');
-    }
-  }
+  readRisk(lookup('risk'), governance, bad);
   for (const key of ['owner', 'domain'] as const) {
-    const raw = lookup(key);
-    if (raw === undefined) continue;
-    const text = stringOf(raw)?.trim();
-    if (text) governance[key] = text;
-    else
-      bad(`${key} must be a non-empty string`, `Set ${key} to a name, for example "team-support".`);
+    readGovernanceName(key, lookup(key), governance, bad);
   }
   for (const key of ['dataClasses', 'reviewers'] as const) {
-    const raw = lookup(key);
-    if (raw === undefined) continue;
-    const list = stringList(raw);
-    if (list) governance[key] = list;
-    else bad(`${key} must be a list of strings`, `Write ${key}: ["a", "b"]`);
+    readGovernanceList(key, lookup(key), governance, bad);
   }
   return governance;
 }
@@ -485,6 +517,45 @@ interface EntrySource {
   loc: SourceLocation;
 }
 
+function readMessages(raw: ObjectRaw, bad: Report): { system?: string; user?: string } {
+  const texts: { system?: string; user?: string } = {};
+  for (const role of ['system', 'user'] as const) {
+    const value = field(raw, role);
+    if (value === undefined) continue;
+    const text = stringOf(value);
+    if (text === undefined) {
+      bad(`${role} must be a string or a text block`, `Write ${role}: "..." or a """ text block.`);
+    } else {
+      texts[role] = text;
+    }
+  }
+  if (!texts.system?.trim() && !texts.user?.trim()) {
+    bad('needs a system or a user message', 'Add user: "<message>"');
+  }
+  return texts;
+}
+
+function readContracts(
+  raw: ObjectRaw,
+  bad: Report
+): { inputs: Record<string, PromptInput>; fields?: Record<string, PromptOutputField> } {
+  const inputsRaw = field(raw, 'inputs');
+  const outputRaw = field(raw, 'output');
+  const inputs =
+    inputsRaw &&
+    readNamedMap(
+      inputsRaw,
+      'inputs',
+      bad,
+      (n, v) => readInput(n, v, bad),
+      PROMPT_INPUT_NAME_PATTERN
+    );
+  const fields =
+    outputRaw &&
+    readNamedMap(outputRaw, 'output', bad, (n, v) => readOutputField(n, v, bad), undefined);
+  return { inputs: inputs ?? {}, ...(fields ? { fields } : {}) };
+}
+
 function readEntry(
   { key, raw, loc }: EntrySource,
   blocks: ReadonlySet<string>,
@@ -499,44 +570,16 @@ function readEntry(
 
   const description = stringOf(field(raw, 'description'));
   if (!description?.trim()) bad('description is required', 'Add description: "<what it does>"');
-
-  const texts: { system?: string; user?: string } = {};
-  for (const role of ['system', 'user'] as const) {
-    const value = field(raw, role);
-    if (value === undefined) continue;
-    const text = stringOf(value);
-    if (text === undefined)
-      bad(`${role} must be a string or a text block`, `Write ${role}: "..." or a """ text block.`);
-    else texts[role] = text;
-  }
-  if (!texts.system?.trim() && !texts.user?.trim()) {
-    bad('needs a system or a user message', 'Add user: "<message>"');
-  }
-
+  const texts = readMessages(raw, bad);
   const composeRaw = field(raw, 'compose');
-  const inputsRaw = field(raw, 'inputs');
-  const outputRaw = field(raw, 'output');
   const modelRaw = field(raw, 'model');
-  const inputs =
-    (inputsRaw &&
-      readNamedMap(
-        inputsRaw,
-        'inputs',
-        bad,
-        (n, v) => readInput(n, v, bad),
-        PROMPT_INPUT_NAME_PATTERN
-      )) ??
-    {};
-  const fields =
-    outputRaw &&
-    readNamedMap(outputRaw, 'output', bad, (n, v) => readOutputField(n, v, bad), undefined);
+  const { inputs, fields } = readContracts(raw, bad);
   const model = modelRaw && readModel(modelRaw, bad);
 
   return {
     name: key,
     description: description ?? '',
-    ...(texts.system !== undefined ? { system: texts.system } : {}),
-    ...(texts.user !== undefined ? { user: texts.user } : {}),
+    ...texts,
     compose: composeRaw ? readCompose(composeRaw, blocks, bad) : [],
     inputs,
     ...(fields ? { output: { fields } } : {}),
@@ -579,24 +622,27 @@ function checkKey(key: string, seen: Map<string, string>, bad: Report): boolean 
   return ok;
 }
 
-function collectEntries(program: ProgramInput): { entries: EntrySource[]; blocks: Set<string> } {
-  const entries: EntrySource[] = [];
-  const blocks = new Set<string>();
-  for (const block of program.blocks) {
-    blocks.add(block.name);
-    if (block.name !== 'prompts') continue;
-    if (isCanonicalBlock(block)) {
-      for (const entry of block.body.entries) {
-        if (entry.type === 'FieldEntry') {
-          entries.push({ key: entry.name, raw: fromNode(entry.value), loc: entry.loc });
-        }
-      }
-    } else if (block.content.type === 'ObjectContent' || block.content.type === 'MixedContent') {
-      for (const [key, value] of Object.entries(block.content.properties)) {
-        entries.push({ key, raw: fromValue(value), loc: block.loc });
-      }
-    }
+function entriesOf(block: ProgramInput['blocks'][number]): EntrySource[] {
+  if (isCanonicalBlock(block)) {
+    return block.body.entries.flatMap((entry) =>
+      entry.type === 'FieldEntry'
+        ? [{ key: entry.name, raw: fromNode(entry.value), loc: entry.loc }]
+        : []
+    );
   }
+  if (block.content.type !== 'ObjectContent' && block.content.type !== 'MixedContent') return [];
+  return Object.entries(block.content.properties).map(([key, value]) => ({
+    key,
+    raw: fromValue(value),
+    loc: block.loc,
+  }));
+}
+
+function collectEntries(program: ProgramInput): { entries: EntrySource[]; blocks: Set<string> } {
+  const blocks = new Set(program.blocks.map((block) => block.name));
+  const entries = program.blocks
+    .filter((block) => block.name === 'prompts')
+    .flatMap((block) => entriesOf(block));
   return { entries, blocks };
 }
 

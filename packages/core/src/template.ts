@@ -221,7 +221,7 @@ export function interpolateText(text: string, ctx: TemplateContext): string {
   // Match {{variable}} and dotted {{namespace.name}} patterns. Dotted names such
   // as the runtime slot {{input.name}} are never compile time variables, so they
   // pass through untouched.
-  const pattern = /\{\{([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*)\}\}/g;
+  const pattern = /\{\{([a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)\}\}/g;
 
   return text.replace(pattern, (match, varName: string) => {
     if (varName.includes('.')) return match;
