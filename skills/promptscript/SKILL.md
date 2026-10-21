@@ -1100,7 +1100,7 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | `@hooks`      | `1.4.0`                |
 | `@mcpServers` | `1.4.0`                |
 | `@plugins`    | `1.4.0`                |
-| `@prompts`    | `1.1.0`                |
+| `@prompts`    | `1.6.0`                |
 
 All other built-in blocks are available from `1.0.0`.
 Regular block field replacement with `field!: value` requires syntax `1.3.0`.
