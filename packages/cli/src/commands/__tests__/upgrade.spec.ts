@@ -131,6 +131,7 @@ describe('upgradeCommand', () => {
     await upgradeCommand({ dryRun: false });
 
     expect(process.exitCode).toBe(1);
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('supported 1.6.0'));
     expect(readFileSync(filePath, 'utf-8')).toBe(original);
   });
 

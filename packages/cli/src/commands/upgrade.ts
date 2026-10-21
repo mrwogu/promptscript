@@ -1,5 +1,10 @@
 import { lstatSync, readFileSync } from 'node:fs';
-import { compareVersions, getLatestSyntaxVersion, isKnownSyntaxVersion } from '@promptscript/core';
+import {
+  compareVersions,
+  getHighestKnownSyntaxVersion,
+  getLatestSyntaxVersion,
+  isKnownSyntaxVersion,
+} from '@promptscript/core';
 import { parse } from '@promptscript/parser';
 import { fixSyntaxVersion, discoverPrsFiles } from './validate.js';
 import { ConsoleOutput } from '../output/console.js';
@@ -73,7 +78,7 @@ export async function upgradeCommand(options: UpgradeOptions): Promise<void> {
       }
       if (comparison > 0) {
         ConsoleOutput.error(
-          `Cannot upgrade ${filePath}: syntax ${declaredVersion} is newer than supported ${latest}`
+          `Cannot upgrade ${filePath}: syntax ${declaredVersion} is newer than supported ${getHighestKnownSyntaxVersion()}`
         );
         errorCount++;
         continue;
