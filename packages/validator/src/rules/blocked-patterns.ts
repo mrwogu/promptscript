@@ -576,7 +576,7 @@ export const blockedPatterns: ValidationRule = {
           }
         }
       },
-      { excludeProperties: ['resources'] }
+      { skipSkillResources: true }
     );
   },
 };

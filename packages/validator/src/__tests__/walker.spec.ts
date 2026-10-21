@@ -361,6 +361,80 @@ describe('walker', () => {
       expect(texts).toEqual(['Visible description']);
     });
 
+    it('should skip only skill resources with skipSkillResources', () => {
+      const texts: string[] = [];
+      const props = (extra: Record<string, unknown>): never =>
+        ({ type: 'ObjectContent', properties: extra, loc: defaultLoc }) as never;
+      const ast = createTestProgram({
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            loc: defaultLoc,
+            content: props({
+              review: { description: 'skill-desc', resources: ['skill-res'] },
+            }),
+          },
+          {
+            type: 'Block',
+            name: 'context',
+            loc: defaultLoc,
+            content: props({
+              resources: 'context-res',
+            }),
+          },
+        ],
+        extends: [
+          {
+            type: 'ExtendBlock',
+            targetPath: 'skills.review',
+            loc: defaultLoc,
+            content: props({
+              resources: ['ext-skill-res'],
+              notes: 'ext-notes',
+            }),
+          },
+          {
+            type: 'ExtendBlock',
+            targetPath: 'skills.review.resources',
+            loc: defaultLoc,
+            content: props({
+              path: 'ext-res-path',
+            }),
+          },
+          {
+            type: 'ExtendBlock',
+            targetPath: 'context',
+            loc: defaultLoc,
+            content: props({
+              resources: 'ext-context-res',
+            }),
+          },
+        ],
+        overrides: [
+          {
+            type: 'OverrideBlock',
+            targetPath: 'skills.review',
+            loc: defaultLoc,
+            replacement: {
+              type: 'ValueReplacement',
+              loc: defaultLoc,
+              value: createValueNode(
+                { resources: ['ovr-skill-res'], notes: 'ovr-notes' } as never,
+                defaultLoc
+              ),
+            },
+          },
+        ],
+      });
+
+      walkText(ast, (text) => texts.push(text), { skipSkillResources: true });
+
+      expect(texts.sort()).toEqual(
+        ['skill-desc', 'context-res', 'ext-notes', 'ext-context-res', 'ovr-notes'].sort()
+      );
+    });
+
     it('should walk nested text content', () => {
       const texts: string[] = [];
       const ast = createTestProgram({

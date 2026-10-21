@@ -302,7 +302,7 @@ export const unicodeSecurity: ValidationRule = {
           });
         }
       },
-      { excludeProperties: ['resources'] }
+      { skipSkillResources: true }
     );
   },
 };
