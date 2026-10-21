@@ -429,9 +429,9 @@ See exact output paths and feature support in the
   agents pointed at `.prs` source.
 - **Scoped monorepo builds** - compile one package with `prs build <name>`, inspect it with
   `prs diff --build <name>`, or compile every profile with `prs compile --all-builds`.
-- **CI-ready output** - use `prs validate --strict --format json`, `prs compile --dry-run`, and
-  `prs diff --format json` for deterministic machine-readable changes without generated-file
-  writes.
+- **CI-ready output** - use `prs validate --strict --format json`, `prs compile --dry-run`,
+  `prs diff --format json`, and `prs fmt --check` for deterministic machine-readable changes
+  and formatting checks without generated-file writes.
 
 ## Adopt Without a Rewrite
 

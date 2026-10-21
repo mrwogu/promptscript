@@ -39,6 +39,7 @@ vi.mock('commander', () => {
     description: vi.fn().mockReturnThis(),
     version: vi.fn().mockReturnThis(),
     option: vi.fn().mockReturnThis(),
+    addHelpText: vi.fn().mockReturnThis(),
     hook: vi.fn().mockReturnThis(),
     argument: vi.fn().mockReturnThis(),
     action: vi.fn().mockReturnThis(),
@@ -50,6 +51,7 @@ vi.mock('commander', () => {
       description = chainable.description;
       version = chainable.version;
       option = chainable.option;
+      addHelpText = chainable.addHelpText;
       hook = chainable.hook;
       argument = chainable.argument;
       action = chainable.action;

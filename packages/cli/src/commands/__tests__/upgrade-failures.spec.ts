@@ -106,7 +106,7 @@ describe('upgradeCommand failure coverage', () => {
     await upgradeCommand({});
 
     expect(mocks.writeFileSync).toHaveBeenCalledWith(
-      expect.stringContaining('.upgrade-'),
+      expect.stringContaining('.tmp'),
       '@meta { syntax: "2.0.0" }',
       { encoding: 'utf-8', mode: 0o640 }
     );

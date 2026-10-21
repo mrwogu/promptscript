@@ -494,38 +494,49 @@ the build, not the agent. See the
 
 ## CLI Commands
 
-| Command                                             | Purpose                                                  |
-| :-------------------------------------------------- | :------------------------------------------------------- |
-| `prs init`                                          | Detect project context and initialize PromptScript       |
-| `prs compile`                                       | Compile all configured targets                           |
-| `prs compile --watch`                               | Recompile when source changes                            |
-| `prs build <name>`                                  | Compile one named build profile                          |
-| `prs compile --all-builds`                          | Compile every named profile                              |
-| `prs validate --strict`                             | Validate source, references, policies, and capabilities  |
-| `prs validate --fix`                                | Upgrade outdated syntax declarations when possible       |
-| `prs check`                                         | Check config, entries, lockfile, registry, and imports   |
-| `prs diff --all`                                    | Preview compiled output differences                      |
-| `prs inspect <skill>`                               | Show skill layers and property provenance                |
-| `prs explain <path>`                                | Show source and composition provenance                   |
-| `prs hooks install [tool]`                          | Integrate supported AI tools and protect generated files |
-| `prs hook <action>`                                 | Low-level handler called by AI tool hooks                |
-| `prs skills <add\|remove\|list\|update>`            | Manage remote and local skills                           |
-| `prs registry <init\|validate\|publish\|list\|add>` | Manage registries and aliases                            |
-| `prs pull`                                          | Pull updates from the registry                           |
-| `prs lock` / `prs update`                           | Pin or refresh remote dependencies                       |
-| `prs vendor sync` / `prs vendor check`              | Prepare and verify offline dependencies                  |
-| `prs resolve <import>`                              | Explain import resolution                                |
-| `prs import <file>` / `prs migrate`                 | Adopt existing instruction files                         |
-| `prs upgrade`                                       | Upgrade `.prs` syntax versions                           |
-| `prs update-check`                                  | Check npm for a newer CLI version                        |
-| `prs telemetry <status\|enable\|disable>`           | Inspect or change anonymous telemetry settings           |
-| `prs serve`                                         | Connect local files to the online playground             |
+| Command                                             | Purpose                                                   |
+| :-------------------------------------------------- | :-------------------------------------------------------- |
+| `prs init`                                          | Detect project context and initialize PromptScript        |
+| `prs compile`                                       | Compile all configured targets                            |
+| `prs compile --watch`                               | Recompile when source changes                             |
+| `prs build <name>`                                  | Compile one named build profile                           |
+| `prs compile --all-builds`                          | Compile every named profile                               |
+| `prs validate --strict`                             | Validate source, references, policies, and capabilities   |
+| `prs validate --fix`                                | Upgrade outdated syntax declarations when possible        |
+| `prs fmt [paths...]`                                | Rewrite `.prs` files in canonical form (`--check` for CI) |
+| `prs check`                                         | Check config, entries, lockfile, registry, and imports    |
+| `prs diff --all`                                    | Preview compiled output differences                       |
+| `prs inspect <skill>`                               | Show skill layers and property provenance                 |
+| `prs explain <path>`                                | Show source and composition provenance                    |
+| `prs hooks install [tool]`                          | Integrate supported AI tools and protect generated files  |
+| `prs hook <action>`                                 | Low-level handler called by AI tool hooks                 |
+| `prs skills <add\|remove\|list\|update>`            | Manage remote and local skills                            |
+| `prs registry <init\|validate\|publish\|list\|add>` | Manage registries and aliases                             |
+| `prs pull`                                          | Pull updates from the registry                            |
+| `prs lock` / `prs update`                           | Pin or refresh remote dependencies                        |
+| `prs vendor sync` / `prs vendor check`              | Prepare and verify offline dependencies                   |
+| `prs resolve <import>`                              | Explain import resolution                                 |
+| `prs import <file>` / `prs migrate`                 | Adopt existing instruction files                          |
+| `prs upgrade`                                       | Upgrade `.prs` syntax versions                            |
+| `prs update-check`                                  | Check npm for a newer CLI version                         |
+| `prs telemetry <status\|enable\|disable>`           | Inspect or change anonymous telemetry settings            |
+| `prs serve`                                         | Connect local files to the online playground              |
 
 `prs explain` emits project-relative source paths by default. Pass
 `--absolute-paths` to opt in to host filesystem paths. JSON output contains
 `version`, `path`, `entries`, and `diagnostics`. The command exits nonzero for
 missing paths, resolution failures, or fatal diagnostics; warning-only
 diagnostics keep exit status 0.
+
+`prs fmt` rewrites `.prs` files atomically and keeps comments and declaration order, but
+not blank lines: blank lines between fields and around comments are dropped, every array
+prints on one line, comments inside `@meta` move before its closing brace, and comments in
+`@use` and `@inherit` parameter lists move to their own line. Directory walks skip
+`node_modules`, `vendor` and `.cache`. Files without the `.prs` extension and symbolic
+links (to files or directories) are skipped, and read-only files are reported and not written. It exits 1 for a
+missing path, a named path that is not a regular file, a directory or file that cannot
+be read, a file that cannot be parsed or written, or (with `--check`) files that would
+change. `--quiet` hides the `--check` file list.
 
 See the [complete CLI reference](https://getpromptscript.dev/reference/cli/) for every option.
 

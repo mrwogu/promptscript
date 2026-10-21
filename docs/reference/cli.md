@@ -14,7 +14,7 @@ Complete reference for the PromptScript command-line interface.
 | Start a project               | [`prs init`](#prs-init)                                                                                        |
 | Bring existing instructions   | [`prs import`](#prs-import), [`prs migrate`](#prs-migrate)                                                     |
 | Generate native files         | [`prs compile`](#prs-compile), [`prs build`](#prs-build)                                                       |
-| Check before commit or in CI  | [`prs validate`](#prs-validate), [`prs check`](#prs-check), [`prs diff`](#prs-diff)                            |
+| Check before commit or in CI  | [`prs validate`](#prs-validate), [`prs fmt`](#prs-fmt), [`prs check`](#prs-check), [`prs diff`](#prs-diff)     |
 | Understand the result         | [`prs explain`](#prs-explain), [`prs inspect`](#prs-inspect), [`prs resolve`](#prs-resolve)                    |
 | Share and pin dependencies    | [`prs registry`](#prs-registry), [`prs pull`](#prs-pull), [`prs lock`](#prs-lock), [`prs update`](#prs-update) |
 | Work offline                  | [`prs vendor`](#prs-vendor)                                                                                    |
@@ -548,6 +548,76 @@ prs validate --format json
 | 0    | Validation passed                         |
 | 1    | Validation errors found                   |
 | 2    | Validation warnings found (with --strict) |
+
+---
+
+### prs fmt
+
+Rewrite `.prs` files in canonical form. Each file is parsed and printed back, and
+written only when the output differs from the current content.
+
+```bash
+prs fmt [options] [paths...]
+```
+
+A path may be a file or a directory. Directories are walked for `*.prs`, skipping
+`node_modules`, `vendor` and `.cache`. That skip applies only when walking a
+directory, so naming `.promptscript/vendor` explicitly formats the vendored files. A
+file path without the `.prs` extension is skipped with a warning and is not counted,
+so `prs fmt .promptscript/*` leaves `.md` and `.sh` files alone. Symbolic links, to files or
+directories, are skipped with a warning and are not counted, whether named directly,
+found while walking or used as the default `.promptscript`. A link is never replaced by
+a regular file and never followed out of the project. Non-regular files such as named pipes are ignored when found while walking. With
+no paths, `prs fmt` formats every `.prs` file under `.promptscript`.
+
+**Options:**
+
+| Option    | Description                                                             |
+| --------- | ----------------------------------------------------------------------- |
+| `--check` | Write nothing, list files that would change, exit 1 if any would change |
+
+**Examples:**
+
+```bash
+# Format the project in place
+prs fmt
+
+# Format one file and one directory
+prs fmt .promptscript/project.prs shared/
+
+# CI: fail when a file is not formatted
+prs fmt --check
+```
+
+A file that does not parse is reported with its first error and location, is never
+written, and makes the exit code 1. A file that cannot be read or written is
+reported the same way, and so is a directory that cannot be read during a walk (the
+rest of the walk continues), a named path that is not a regular file, and a read-only
+file, which is never rewritten. Files are written atomically (temporary file, then rename,
+keeping the original mode), and the printed output is parsed again before writing;
+if it does not parse the file is left untouched and reported as failed. Other files
+are still processed. The last line summarizes how many files were formatted (or would
+change with `--check`), how many were unchanged and how many failed.
+
+`--check` lists the files that would change through the normal output, so `--quiet`
+hides the list; the exit code still reports the result.
+
+**Known limits of the printer:**
+
+The printer keeps comments and declaration order but not blank lines.
+
+- Blank lines between fields, before comments and between comments are dropped. One
+  blank line separates top-level declarations.
+- Every array is printed on one line.
+- Comments inside `@meta` move before its closing brace.
+- Comments inside `@use` and `@inherit` parameter lists move to their own line.
+
+**Exit Codes:**
+
+| Code | Meaning                                                                                                                                                        |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0    | All files formatted or unchanged (`--check`: nothing would change)                                                                                             |
+| 1    | A path was not found or is not a regular file, a directory or file cannot be read, a file failed to parse or write, or `--check` found files that would change |
 
 ---
 

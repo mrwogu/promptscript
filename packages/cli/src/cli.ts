@@ -20,6 +20,7 @@ import { updateCommand } from './commands/update.js';
 import { vendorSyncCommand, vendorCheckCommand } from './commands/vendor.js';
 import { resolveCommand } from './commands/resolve-cmd.js';
 import { inspectCommand } from './commands/inspect.js';
+import { fmtCommand } from './commands/fmt.js';
 import { explainCommand } from './commands/explain.js';
 import { setContext, LogLevel, ConsoleOutput } from './output/console.js';
 import { checkForUpdates, printUpdateNotification } from './utils/version-check.js';
@@ -177,6 +178,31 @@ program
   .option('--skip-policies', 'Skip extension compliance policy evaluation')
   .option('--ignore-hashes', 'Skip reference integrity checks')
   .action((files, opts) => validateCommand({ ...opts, files }));
+
+program
+  .command('fmt [paths...]')
+  .description('Format .prs files in canonical form')
+  .option('--check', 'Write nothing, list files that would change, exit 1 if any would')
+  .addHelpText(
+    'after',
+    `
+Known limits of the printer:
+  - comments and declaration order are kept, but blank lines are not: blank
+    lines between fields and around comments are dropped, and one blank line
+    separates top-level declarations
+  - every array is printed on one line
+  - comments inside @meta move before its closing brace
+  - comments inside @use/@inherit parameter lists move to their own line
+
+With no paths, formats every .prs file under .promptscript. Directory walks skip
+node_modules, vendor and .cache; name a file or one of those directories
+explicitly to format it. Files without the .prs extension and symbolic links (to files
+or directories) are skipped. Read-only files are reported and not written.
+Exit code 1: a path is missing, a directory or file cannot be read, a file cannot
+be parsed or written, a named path is not a regular file, or --check found files
+that would change.`
+  )
+  .action((paths, opts) => fmtCommand({ ...opts, paths }));
 
 program
   .command('inspect <skill-name>')
