@@ -206,10 +206,22 @@ body
 
   b: 2
 }
+--- expected
+@identity {
+  a: 1
+
+  b: 2
+}
 ### two blank lines collapse to one
 @identity {
   a: 1
 
+
+  b: 2
+}
+--- expected
+@identity {
+  a: 1
 
   b: 2
 }
@@ -218,12 +230,39 @@ body
 
   a: 1
 }
+--- expected
+@identity {
+  a: 1
+}
 ### blank line before closing brace dropped
 @identity {
   a: 1
 
 }
+--- expected
+@identity {
+  a: 1
+}
+### whitespace-only line counts as blank
+@identity {
+  a: 1
+   
+  b: 2
+}
+--- expected
+@identity {
+  a: 1
+
+  b: 2
+}
 ### blank line before a comment inside a block kept
+@identity {
+  a: 1
+
+  # about b
+  b: 2
+}
+--- expected
 @identity {
   a: 1
 
@@ -234,7 +273,17 @@ body
 # about identity
 
 @identity { a: 1 }
+--- expected
+# about identity
+
+@identity {
+  a: 1
+}
 ### consecutive use lines stay adjacent
+@use ./a
+@use ./b
+@use ./c
+--- expected
 @use ./a
 @use ./b
 @use ./c
@@ -242,9 +291,24 @@ body
 @identity { a: 1 }
 
 @context { b: 2 }
+--- expected
+@identity {
+  a: 1
+}
+
+@context {
+  b: 2
+}
 ### blocks without a blank line stay adjacent
 @identity { a: 1 }
 @context { b: 2 }
+--- expected
+@identity {
+  a: 1
+}
+@context {
+  b: 2
+}
 ### blank lines inside a text block stay content
 @knowledge {
   """
@@ -253,10 +317,51 @@ body
   second
   """
 }
-### long array wraps one element per line
-@context { items: ["aaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbb", "cccccccccccccccccccc", "dddddddddddddddddddd", "eeeeeeeeeeee"] }
-### short array stays on one line
-@context { items: ["a", "b", "c"] }
+--- expected
+@knowledge {
+  """
+    first
+
+    second
+  """
+}
+### blank line inside a multi-line string is content
+@identity { a: "x
+
+y"
+
+  b: 1 }
+--- expected
+@identity {
+  a: "x\n\ny"
+
+  b: 1
+}
+### blank lines at the start and end of the file dropped
+
+
+@identity { a: 1 }
+
+
+
+--- expected
+@identity {
+  a: 1
+}
+### object with only edge blank lines
+@context {
+  o: {
+
+    a: 1
+
+  }
+}
+--- expected
+@context {
+  o: {
+    a: 1
+  }
+}
 ### blank line between objects in an array kept
 @context {
   items: [
@@ -265,11 +370,147 @@ body
     { b: 2 }
   ]
 }
+--- expected
+@context {
+  items: [
+    {
+      a: 1
+    },
+
+    {
+      b: 2
+    }
+  ]
+}
 ### blank lines at array edges dropped
 @context {
   items: [
 
     1, 2
 
+  ]
+}
+--- expected
+@context {
+  items: [1, 2]
+}
+### short array stays on one line
+@context { items: ["a", "b", "c"] }
+--- expected
+@context {
+  items: ["a", "b", "c"]
+}
+### array fits at exactly 100 columns
+@context { items: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@context {
+  items: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
+}
+### array wraps at 101 columns
+@context { items: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@context {
+  items: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ]
+}
+### nested array fits with its comma at exactly 100 columns
+@context { items: [["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], 1] }
+--- expected
+@context {
+  items: [
+    ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],
+    1
+  ]
+}
+### nested array wraps when its comma would reach 101 columns
+@context { items: [["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], 1] }
+--- expected
+@context {
+  items: [
+    [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ],
+    1
+  ]
+}
+### default value array fits at exactly 100 columns
+@params { tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@params {
+  tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
+}
+### default value array wraps at 101 columns
+@params { tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@params {
+  tags: string = [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ]
+}
+### meta array fits at exactly 100 columns
+@meta { id: "a" tags: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@meta {
+  id: "a"
+  tags: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
+}
+### meta array wraps at 101 columns
+@meta { id: "a" tags: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@meta {
+  id: "a"
+  tags: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ]
+}
+### use parameter array fits at exactly 100 columns
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+--- expected
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+### use parameter array wraps at 101 columns
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+--- expected
+@use ./a(x: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+])
+### blank line inside use parameters dropped and trailing comment kept
+@use ./a(
+  x: 1,
+
+  y: 2
+) # note
+@context { b: 1 }
+--- expected
+@use ./a(x: 1, y: 2) # note
+@context {
+  b: 1
+}
+### meta nested array fits with its comma at exactly 100 columns
+@meta { id: "a" tags: [["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], 1] }
+--- expected
+@meta {
+  id: "a"
+  tags: [
+    ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],
+    1
+  ]
+}
+### meta nested array wraps when its comma would reach 101 columns
+@meta { id: "a" tags: [["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], 1] }
+--- expected
+@meta {
+  id: "a"
+  tags: [
+    [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ],
+    1
   ]
 }

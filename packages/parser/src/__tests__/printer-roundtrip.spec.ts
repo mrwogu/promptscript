@@ -114,7 +114,13 @@ describe('printProgram round trip', () => {
  * The sources live in a fixture so they read as plain `.prs` text. Each case starts with a
  * `### <name>` line; its body runs to the next marker minus the final line break.
  */
-function loadEdgeCases(): Record<string, string> {
+interface EdgeCase {
+  source: string;
+  /** Exact printed text, when the case follows a `--- expected` line. */
+  expected?: string;
+}
+
+function loadEdgeCases(): Record<string, EdgeCase> {
   const text = readFileSync(join(__dirname, 'fixtures', 'printer-edge-cases.txt'), 'utf-8');
   return Object.fromEntries(
     text
@@ -122,7 +128,11 @@ function loadEdgeCases(): Record<string, string> {
       .slice(1)
       .map((chunk) => {
         const newline = chunk.indexOf('\n');
-        return [chunk.slice(0, newline), chunk.slice(newline + 1).replace(/\n$/, '')] as const;
+        const [source = '', expected] = chunk
+          .slice(newline + 1)
+          .replace(/\n$/, '')
+          .split('\n--- expected\n');
+        return [chunk.slice(0, newline), { source, expected }] as const;
       })
   );
 }
@@ -133,7 +143,7 @@ const EDGE_CASES = loadEdgeCases();
 const KEEPS_WHITESPACE: Record<string, true> = { 'whitespace-only lines in text': true };
 
 describe('printProgram edge cases', () => {
-  for (const [name, source] of Object.entries(EDGE_CASES)) {
+  for (const [name, { source, expected }] of Object.entries(EDGE_CASES)) {
     const reason = KNOWN_EDGE_FAILURES[name];
     const test = reason ? it.skip : it;
     test(`reparses its own output: ${name}${reason ? ` (${reason})` : ''}`, () => {
@@ -154,6 +164,7 @@ describe('printProgram edge cases', () => {
       expect(commentTexts(reparsed.comments)).toEqual(commentTexts(parsed.comments));
       expect(printProgram(reparsed.ast!, reparsed.comments)).toBe(printed);
       if (!(name in KEEPS_WHITESPACE)) expectNoTrailingWhitespace(printed);
+      if (expected !== undefined) expect(printed).toBe(expected + '\n');
     });
   }
 });
@@ -327,5 +338,45 @@ describe('printProgram layout', () => {
 
   it('prints no trailing whitespace for a whitespace-only source line', () => {
     expect(print('@identity {\n  a: 1\n   \n  b: 2\n}')).toBe('@identity {\n  a: 1\n\n  b: 2\n}\n');
+  });
+
+  it('keeps the bytes of the internal blank marker inside strings and text', () => {
+    // Arrange
+    const marker = '\u0000prs-blank\u0000';
+    const source = `@identity {\n  a: "x${marker}y"\n  b: """\n  ${marker}\n  """\n  c: ${'"' + marker + '"'}\n\n  d: 1\n}`;
+    const parsed = parseCanonical(source);
+
+    // Act
+    const printed = printProgram(parsed.ast!, parsed.comments);
+    const reparsed = parseCanonical(printed);
+
+    // Assert
+    expect(parsed.errors).toEqual([]);
+    expect(printed).toContain(`a: "x${marker}y"`);
+    expect(stripPositions(reparsed.ast)).toEqual(stripPositions(parsed.ast));
+    expect(printProgram(reparsed.ast!, reparsed.comments)).toBe(printed);
+  });
+
+  it('collapses adjacent blank entries handed in by a caller', () => {
+    const parsed = parseCanonical('@identity { a: 1 }\n\n@context { b: 2 }');
+    const blank = parsed.comments.find((c) => c.kind === 'blank')!;
+
+    const printed = printProgram(parsed.ast!, [blank, blank]);
+
+    expect(printed).toBe('@identity {\n  a: 1\n}\n\n@context {\n  b: 2\n}\n');
+  });
+
+  it('keeps blank lines in files with CRLF and bare CR line ends', () => {
+    for (const eol of ['\r\n', '\r']) {
+      const parsed = parseCanonical(['@identity {', '  a: 1', '', '  b: 2', '}'].join(eol));
+
+      expect(printProgram(parsed.ast!, parsed.comments)).toBe('@identity {\n  a: 1\n\n  b: 2\n}\n');
+    }
+  });
+
+  it('keeps blank lines inside a later block after an earlier block', () => {
+    const printed = print('@identity {\n  a: 1\n}\n\n@context {\n  b: 1\n\n  c: 2\n}');
+
+    expect(printed).toBe('@identity {\n  a: 1\n}\n\n@context {\n  b: 1\n\n  c: 2\n}\n');
   });
 });

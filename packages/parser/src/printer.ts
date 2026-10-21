@@ -144,21 +144,27 @@ function printValue(
   value: Value | DeepReadonly<Value>,
   indent: string,
   ctx: PrintContext,
-  column = indent.length + 2
+  room = PRINT_WIDTH - indent.length - 2
 ): string {
   if (value === null || typeof value !== 'object') return printScalar(value, ctx);
-  if (Array.isArray(value))
+  if (Array.isArray(value)) {
+    const last = value.length - 1;
+    const inner = indent + INDENT;
     return printArray(
-      value.map((item) => printValue(item, indent + INDENT, ctx, indent.length + INDENT.length)),
+      value.map((item, index) =>
+        printValue(item, inner, ctx, PRINT_WIDTH - inner.length - (index < last ? 1 : 0))
+      ),
       indent,
-      column
+      room
     );
+  }
   if (isNode(value, 'TextContent')) return printText(value.value, indent);
   if (isNode(value, 'TemplateExpression')) return `{{${value.name}}}`;
   if (isNode(value, 'TypeExpression')) return printTypeExpression(value);
   const lines = Object.entries(value).map(([key, entry]) => {
     const head = `${printKey(key)}: `;
-    return head + printValue(entry as Value, indent + INDENT, ctx, indent.length + 2 + head.length);
+    const inner = indent + INDENT;
+    return head + printValue(entry as Value, inner, ctx, PRINT_WIDTH - inner.length - head.length);
   });
   return printList(lines, '{', '}', indent);
 }
@@ -176,7 +182,7 @@ function printValueNode(
   node: ValueNode,
   indent: string,
   ctx: PrintContext,
-  column: number,
+  room: number,
   comments: readonly Comment[] = [],
   depth = BLOCK_DEPTH
 ): string {
@@ -199,7 +205,14 @@ function printValueNode(
           holds: isContainer(element.value),
           print: (own) => [
             inner +
-              printValueNode(element.value, inner, ctx, inner.length, own, depth + 1) +
+              printValueNode(
+                element.value,
+                inner,
+                ctx,
+                PRINT_WIDTH - inner.length - (index < last ? 1 : 0),
+                own,
+                depth + 1
+              ) +
               (index < last ? ',' : ''),
           ],
         }));
@@ -211,21 +224,33 @@ function printValueNode(
         );
         if (keepsLayout(comments, laidOut)) return laidOut;
       }
+      const lastElement = node.elements.length - 1;
       return printArray(
-        node.elements.map((element) => printValueNode(element.value, inner, ctx, inner.length)),
+        node.elements.map((element, index) =>
+          printValueNode(
+            element.value,
+            inner,
+            ctx,
+            PRINT_WIDTH - inner.length - (index < lastElement ? 1 : 0)
+          )
+        ),
         indent,
-        column
+        room
       );
     }
     case 'ObjectValueNode': {
       if (comments.length > 0) {
-        const items = node.fields.map<Placed>((field) => ({
-          loc: field.loc,
-          holds: isContainer(field.value),
-          print: (own) => [
-            `${inner}${printKey(field.name)}: ${printValueNode(field.value, inner, ctx, inner.length + printKey(field.name).length + 2, own, depth + 1)}`,
-          ],
-        }));
+        const items = node.fields.map<Placed>((field) => {
+          const head = `${inner}${printKey(field.name)}: `;
+          return {
+            loc: field.loc,
+            holds: isContainer(field.value),
+            print: (own) => [
+              head +
+                printValueNode(field.value, inner, ctx, PRINT_WIDTH - head.length, own, depth + 1),
+            ],
+          };
+        });
         const laidOut = closeList(
           '{',
           withComments(items, comments, inner, depth + 1),
@@ -235,10 +260,12 @@ function printValueNode(
         if (keepsLayout(comments, laidOut)) return laidOut;
       }
       return printList(
-        node.fields.map(
-          (field) =>
-            `${printKey(field.name)}: ${printValueNode(field.value, inner, ctx, inner.length + printKey(field.name).length + 2)}`
-        ),
+        node.fields.map((field) => {
+          const head = `${printKey(field.name)}: `;
+          return (
+            head + printValueNode(field.value, inner, ctx, PRINT_WIDTH - inner.length - head.length)
+          );
+        }),
         '{',
         '}',
         indent
@@ -259,17 +286,18 @@ function closeList(open: string, groups: string[][], close: string, indent: stri
  * real comment or a blank line survived; edge blank lines alone must not force it.
  */
 function keepsLayout(comments: readonly Comment[], printed: string): boolean {
-  return comments.some((c) => c.kind === 'comment') || printed.includes(BLANK);
+  return comments.some((c) => c.kind === 'comment') || printed.split('\n').includes(BLANK);
 }
 
 /** Printing width the repo's Prettier config uses; arrays that fit stay on one line. */
 const PRINT_WIDTH = 100;
 
-function printArray(printed: string[], indent: string, column: number): string {
+/** `room` is the width left on the line for the array after what precedes and follows it. */
+function printArray(printed: string[], indent: string, room: number): string {
   // Arrays need commas, so keep the simple case on one line while it fits.
   if (printed.every((item) => !item.includes('\n'))) {
     const line = `[${printed.join(', ')}]`;
-    if (column + line.length <= PRINT_WIDTH) return line;
+    if (line.length <= room) return line;
   }
   return printList(
     printed.map((item, index) => (index < printed.length - 1 ? `${item},` : item)),
@@ -279,9 +307,21 @@ function printArray(printed: string[], indent: string, column: number): string {
   );
 }
 
-function printParams(params: DeepReadonly<ParamArgument[]> | undefined, ctx: PrintContext): string {
+function printParams(
+  params: DeepReadonly<ParamArgument[]> | undefined,
+  ctx: PrintContext,
+  prefix: string
+): string {
   if (!params) return '';
-  const args = params.map((param) => `${param.name}: ${printValue(param.value, '', ctx)}`);
+  // Each argument sits on the line after the path and the arguments before it, and is
+  // followed by a comma or the closing parenthesis.
+  let width = prefix.length + 1;
+  const args = params.map((param) => {
+    const head = `${param.name}: `;
+    const text = head + printValue(param.value, '', ctx, PRINT_WIDTH - width - head.length - 1);
+    width += text.length + 2;
+    return text;
+  });
   return `(${args.join(', ')})`;
 }
 
@@ -290,7 +330,8 @@ function printImport(
   decl: DeepReadonly<InheritDeclaration | UseDeclaration | InlineUseDeclaration>,
   ctx: PrintContext
 ): string {
-  return `@${keyword} ${decl.path.raw}${printParams(decl.params, ctx)}`;
+  const head = `@${keyword} ${decl.path.raw}`;
+  return head + printParams(decl.params, ctx, head);
 }
 
 function printUse(
@@ -314,8 +355,11 @@ function printParamDefinition(
       : def.paramType.kind;
   const hasDefault = def.defaultValue !== undefined;
   const optional = def.optional && !hasDefault ? '?' : '';
-  const fallback = hasDefault ? ` = ${printValue(def.defaultValue!, indent, ctx)}` : '';
-  return `${def.name}${optional}: ${type}${fallback}`;
+  const head = `${def.name}${optional}: ${type}`;
+  const fallback = hasDefault
+    ? ` = ${printValue(def.defaultValue!, indent, ctx, PRINT_WIDTH - indent.length - head.length - 3)}`
+    : '';
+  return head + fallback;
 }
 
 /** A printed declaration or entry with the source position used to place comments around it. */
@@ -363,7 +407,8 @@ function withComments(
     const isInside = (c: Comment): boolean =>
       item.holds && c.depth > depth && offsetOf(c.loc) < end;
     const inside = rest.filter(isInside);
-    rest = rest.filter((c) => !isInside(c));
+    // A blank line nested in an item that cannot place it must not block a comment trailing the item.
+    rest = rest.filter((c) => !isInside(c) && !(isStray(c, depth) && offsetOf(c.loc) < end));
     const lines = [...item.print(inside)];
     // Only the next comment in order can trail the item; taking a later one would reorder comments.
     const trailing = rest[0];
@@ -409,7 +454,7 @@ function printMeta(
 ): string {
   const lines = Object.entries(meta.fields).map(([key, value]) => {
     const head = `${printKey(key)}: `;
-    return head + printValue(value, INDENT, ctx, INDENT.length + head.length);
+    return head + printValue(value, INDENT, ctx, PRINT_WIDTH - INDENT.length - head.length);
   });
   if (meta.params) {
     const defs = meta.params.map((def) => printParamDefinition(def, INDENT + INDENT, ctx));
@@ -441,13 +486,15 @@ function printEntry(
       return [indent + printText(entry.text, indent)];
     case 'FieldEntry': {
       const head = `${indent}${printKey(entry.name)}${fieldMarker(entry, replaced)}: `;
-      // The default value follows the first value on its line; head plus three is an estimate of its column.
+      const value = printValueNode(entry.value, indent, ctx, PRINT_WIDTH - head.length, comments);
+      // The default value follows the last line of the first value.
+      const used = value.includes('\n')
+        ? value.length - value.lastIndexOf('\n') - 1
+        : head.length + value.length;
       const fallback = entry.defaultValue
-        ? ` = ${printValueNode(entry.defaultValue, indent, ctx, head.length + 3)}`
+        ? ` = ${printValueNode(entry.defaultValue, indent, ctx, PRINT_WIDTH - used - 3)}`
         : '';
-      return [
-        `${head}${printValueNode(entry.value, indent, ctx, head.length, comments)}${fallback}`,
-      ];
+      return [`${head}${value}${fallback}`];
     }
     case 'ListEntry': {
       const { value } = entry;
@@ -553,7 +600,8 @@ function printOverride(
             loc: replacement.value.loc,
             holds: isContainer(replacement.value),
             print: (inside) => [
-              INDENT + printValueNode(replacement.value, INDENT, ctx, INDENT.length, inside),
+              INDENT +
+                printValueNode(replacement.value, INDENT, ctx, PRINT_WIDTH - INDENT.length, inside),
             ],
           },
         ],
@@ -597,11 +645,12 @@ function printOperation(
  * the closing brace of its container, including inside nested objects and
  * arrays. A blank line is kept where the source had one or more (at most one, never
  * at the edge of a block, object, array or file), and an array that does not fit in
- * 100 columns is printed one element per line. Printing the reparsed output gives the same text.
+ * 100 columns is printed one element per line. Printing the reparsed output gives
+ * the same text.
  *
  * Known limits: comments inside `@meta` move before its closing brace (tracked
- * in #555), and comments in the
- * parameter list of `@use` or `@inherit` are printed before the next declaration.
+ * in #555), and comments in the parameter list of `@use` or `@inherit` are printed
+ * before the next declaration. Blank lines inside `@meta` and those parameter lists are dropped.
  *
  * @param program - Canonical program from `parseCanonical`
  * @param comments - Comments from the same parse result
@@ -644,9 +693,9 @@ export function printProgram(
     return { loc, holds, print: (inside) => printOperation(operation, inside, ctx) };
   });
   // Declarations are only separated by a blank line when the source had one.
-  return (
-    layout(withComments(items, comments, '', 0))
-      .join('\n')
-      .replaceAll(BLANK, '') + '\n'
-  );
+  // Only whole lines equal to the marker are blank lines; the same bytes in a string stay content.
+  const lines = layout(withComments(items, comments, '', 0))
+    .join('\n')
+    .split('\n');
+  return lines.map((l) => (l === BLANK ? '' : l)).join('\n') + '\n';
 }

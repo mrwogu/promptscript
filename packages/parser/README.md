@@ -81,7 +81,9 @@ reentrant calls cross-contaminates results. Use `createParser` and
 | `Comment`              | A `#` comment or blank-line run: kind, text, location, depth |
 
 Both parse results also carry `comments`, the `#` comments of the source in
-order. Comments are not part of the AST, so the resolver, validator and
+order. Each blank-line run outside a string or text block is listed too, as an
+entry with `kind: 'blank'` and empty `text`; real comments have
+`kind: 'comment'`. Neither is part of the AST, so the resolver, validator and
 formatters never see them.
 
 ## Usage (internal)
@@ -159,7 +161,8 @@ Arrays stay on one line while the line fits in 100 columns; longer ones, and
 arrays of objects, print one element per line.
 
 Printing is stable: printing the reparsed output gives the same text. Without
-`comments`, no comments are printed. A non-finite number in a hand-built AST
+`comments`, no comments and no blank lines are printed, so declarations follow
+each other on consecutive lines. A non-finite number in a hand-built AST
 throws.
 
 Known limits:
@@ -169,6 +172,8 @@ Known limits:
   [#555](https://github.com/mrwogu/promptscript/issues/555).
 - Comments inside the parameter list of `@use` or `@inherit` are printed on
   their own lines before the next declaration.
+- Blank lines inside `@meta` and inside the parameter list of `@use` or
+  `@inherit` are dropped.
 
 ## License
 

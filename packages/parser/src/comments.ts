@@ -3,8 +3,9 @@ import type { SourceLocation } from '@promptscript/core';
 import { COMMENT_GROUP } from './lexer/tokens.js';
 
 /**
- * A `#` comment. Comments are not part of the AST; they travel next to it so
- * that resolver, validator and formatters never see them.
+ * A `#` comment or a run of blank lines (`kind: 'blank'`). Neither is part of
+ * the AST; they travel next to it so that resolver, validator and formatters
+ * never see them.
  */
 export interface Comment {
   /** `comment` for a `#` comment, `blank` for a run of empty lines the printer may keep as one. */
@@ -31,27 +32,29 @@ const OPENERS = new Set(['LBrace', 'LBracket', 'LParen']);
 // parse error anyway, so depth is only approximate in already-broken input.
 const CLOSERS = new Set(['RBrace', 'RBracket', 'RParen']);
 
+/** Token types whose text may span lines; blank lines inside them are content, not layout. */
+const MULTILINE_TOKENS = new Set(['TextBlock', 'StringLiteral']);
+
 /**
- * Offsets where a run of blank lines starts, outside text blocks (their blank
- * lines are content). A run of several blank lines counts once.
+ * Offsets where a run of blank lines starts, outside multi-line tokens. A run of
+ * several blank lines counts once. Lines end at CRLF, CR or LF.
  */
 function blankRuns(source: string, lexResult: ILexingResult): { offset: number; line: number }[] {
   const spans = lexResult.tokens
-    .filter((token) => token.tokenType.name === 'TextBlock')
-    .map((token) => [token.startOffset, token.endOffset ?? token.startOffset] as const);
+    .filter((token) => MULTILINE_TOKENS.has(token.tokenType.name))
+    .map((token) => [token.startOffset, token.endOffset!] as const);
   const runs: { offset: number; line: number }[] = [];
+  let span = 0;
   let offset = 0;
   let line = 1;
   let inRun = false;
-  while (offset < source.length) {
-    const end = source.indexOf('\n', offset);
-    if (end === -1) break; // text after the last newline is not a finished line
-    const blank =
-      source.slice(offset, end).trim() === '' &&
-      !spans.some(([from, to]) => offset >= from && offset <= to);
+  for (const end of source.matchAll(/\r\n|\r|\n/g)) {
+    while (span < spans.length && spans[span]![1] < offset) span++;
+    const inside = span < spans.length && spans[span]![0] <= offset;
+    const blank = !inside && source.slice(offset, end.index).trim() === '';
     if (blank && !inRun) runs.push({ offset, line });
     inRun = blank;
-    offset = end + 1;
+    offset = end.index + end[0].length;
     line++;
   }
   return runs;
@@ -61,7 +64,7 @@ function blankRuns(source: string, lexResult: ILexingResult): { offset: number; 
  * Collect comments and blank-line runs in source order, with the nesting depth
  * of each. Blank entries have `kind: 'blank'` and empty text.
  */
-export function collectComments(lexResult: ILexingResult, file: string, source = ''): Comment[] {
+export function collectComments(lexResult: ILexingResult, file: string, source: string): Comment[] {
   const found = lexResult.groups[COMMENT_GROUP] ?? [];
   let depth = 0;
   let next = 0;
