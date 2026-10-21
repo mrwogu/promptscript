@@ -1,0 +1,467 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+  "title": "PromptScript Prompt Bundle v1",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+      "description": "Schema URL, the version tag of the bundle.",
+      "examples": [
+        "https://getpromptscript.dev/schema/prompt-bundle/v1.json"
+      ]
+    },
+    "id": {
+      "type": "string",
+      "description": "Prompt id, `<@meta.id>/<key>`.",
+      "examples": [
+        "acme-support/refund-reply"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "description": "What the prompt does"
+    },
+    "contentHash": {
+      "type": "string",
+      "description": "Content hash: `sha256-` plus 64 lowercase hex characters.",
+      "pattern": "^sha256-[0-9a-f]{64}$"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PromptBundleMessage"
+      },
+      "description": "One or two messages, system first.",
+      "minItems": 1,
+      "maxItems": 2
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/PromptBundleInput"
+      },
+      "description": "Declared runtime inputs by name",
+      "propertyNames": {
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+        "not": {
+          "enum": [
+            "__defineGetter__",
+            "__defineSetter__",
+            "__lookupGetter__",
+            "__lookupSetter__",
+            "__proto__",
+            "constructor",
+            "hasOwnProperty",
+            "isPrototypeOf",
+            "propertyIsEnumerable",
+            "prototype",
+            "toLocaleString",
+            "toString",
+            "valueOf"
+          ]
+        }
+      }
+    },
+    "output": {
+      "$ref": "#/definitions/PromptBundleOutput",
+      "description": "Output contract"
+    },
+    "model": {
+      "$ref": "#/definitions/PromptBundleModel",
+      "description": "Model identity and parameters"
+    },
+    "governance": {
+      "$ref": "#/definitions/GovernanceMeta",
+      "description": "Effective governance: the entry value, else the file-level default. Lists are sorted and deduplicated."
+    },
+    "provenance": {
+      "$ref": "#/definitions/PromptBundleProvenance",
+      "description": "Provenance of the messages"
+    }
+  },
+  "required": [
+    "$schema",
+    "id",
+    "description",
+    "contentHash",
+    "messages",
+    "inputs",
+    "governance",
+    "provenance"
+  ],
+  "additionalProperties": false,
+  "description": "A portable, content-hashed prompt bundle, version 1.\n\n`contentHash` is SHA-256 over the RFC 8785 canonical JSON of every field except `contentHash` and `provenance`.",
+  "definitions": {
+    "PromptBundleMessage": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "$ref": "#/definitions/PromptBundleRole",
+          "description": "Message role"
+        },
+        "content": {
+          "type": "string",
+          "description": "Message text with runtime slots left unrendered. Line endings are `\\n`.",
+          "examples": [
+            "Customer wrote: {{input.message}}"
+          ]
+        }
+      },
+      "required": [
+        "role",
+        "content"
+      ],
+      "additionalProperties": false,
+      "description": "One message of a prompt bundle."
+    },
+    "PromptBundleRole": {
+      "type": "string",
+      "enum": [
+        "system",
+        "user"
+      ],
+      "description": "Role of a bundle message."
+    },
+    "PromptBundleInput": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/PromptScalarType",
+          "description": "Value type"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the input"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Allowed values of an enum input"
+        },
+        "default": {
+          "type": [
+            "string",
+            "number",
+            "boolean"
+          ],
+          "description": "Value used when the caller passes none"
+        },
+        "required": {
+          "type": "boolean",
+          "description": "True when the input has no default.",
+          "examples": [
+            true
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "description",
+        "required"
+      ],
+      "additionalProperties": false,
+      "description": "One declared input of a prompt bundle."
+    },
+    "PromptScalarType": {
+      "type": "string",
+      "enum": [
+        "string",
+        "number",
+        "boolean",
+        "enum"
+      ],
+      "description": "Scalar value types allowed for prompt inputs and output fields."
+    },
+    "PromptBundleOutput": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "object",
+          "description": "Always `object`"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/PromptBundleOutputProperty"
+          },
+          "description": "Properties by name",
+          "propertyNames": {
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+            "not": {
+              "enum": [
+                "__defineGetter__",
+                "__defineSetter__",
+                "__lookupGetter__",
+                "__lookupSetter__",
+                "__proto__",
+                "constructor",
+                "hasOwnProperty",
+                "isPrototypeOf",
+                "propertyIsEnumerable",
+                "prototype",
+                "toLocaleString",
+                "toString",
+                "valueOf"
+              ]
+            }
+          }
+        },
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Names of required properties, sorted. All properties are required."
+        },
+        "additionalProperties": {
+          "type": "boolean",
+          "const": false,
+          "description": "Always false"
+        }
+      },
+      "required": [
+        "type",
+        "properties",
+        "required",
+        "additionalProperties"
+      ],
+      "additionalProperties": false,
+      "description": "Output contract of a prompt bundle, a JSON Schema subset."
+    },
+    "PromptBundleOutputProperty": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "number",
+            "boolean",
+            "array"
+          ],
+          "description": "JSON Schema type"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the property"
+        },
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Allowed values of an enum property"
+        },
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            },
+            "enum": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false,
+          "description": "Item schema of an array property"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false,
+      "description": "One property of a prompt bundle output schema."
+    },
+    "PromptBundleModel": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "Reference as authored.",
+          "examples": [
+            "claude-sonnet-5-5"
+          ]
+        },
+        "profile": {
+          "type": "string",
+          "description": "Catalog profile id the reference resolved to, when one matched"
+        },
+        "provider": {
+          "type": "string",
+          "description": "Resolved model provider.",
+          "examples": [
+            "anthropic"
+          ]
+        },
+        "apiId": {
+          "type": "string",
+          "description": "Resolved provider API model identifier.",
+          "examples": [
+            "claude-sonnet-5-5"
+          ]
+        },
+        "params": {
+          "$ref": "#/definitions/ModelParams",
+          "description": "Invocation parameters"
+        }
+      },
+      "required": [
+        "ref",
+        "provider",
+        "apiId",
+        "params"
+      ],
+      "additionalProperties": false,
+      "description": "Model identity of a prompt bundle: the authored reference plus what it resolved to."
+    },
+    "ModelParams": {
+      "type": "object",
+      "properties": {
+        "temperature": {
+          "type": "number",
+          "description": "Sampling temperature"
+        },
+        "topP": {
+          "type": "number",
+          "description": "Nucleus sampling threshold"
+        },
+        "topK": {
+          "type": "number",
+          "description": "Top-k sampling cutoff"
+        },
+        "maxTokens": {
+          "type": "number",
+          "description": "Maximum number of tokens to generate"
+        },
+        "stop": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Stop sequences, in authored order"
+        },
+        "seed": {
+          "type": "number",
+          "description": "Sampling seed, at most 2^53-1.",
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false,
+      "description": "Invocation parameters of a model."
+    },
+    "GovernanceMeta": {
+      "type": "object",
+      "properties": {
+        "risk": {
+          "$ref": "#/definitions/RiskLevel",
+          "description": "Risk classification"
+        },
+        "owner": {
+          "type": "string",
+          "description": "Team or person accountable for the prompt"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Business domain of the prompt"
+        },
+        "dataClasses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Classes of data the prompt handles (e.g. 'pii')"
+        },
+        "reviewers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "People or teams that review changes"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Governance metadata of a prompt."
+    },
+    "RiskLevel": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "description": "Risk classification of a prompt."
+    },
+    "PromptBundleProvenance": {
+      "type": "object",
+      "properties": {
+        "entry": {
+          "type": "string",
+          "description": "Entry file of the compilation.",
+          "examples": [
+            ".promptscript/project.prs"
+          ]
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PromptBundleSegment"
+          },
+          "description": "Message segments with their source files"
+        }
+      },
+      "required": [
+        "entry",
+        "segments"
+      ],
+      "additionalProperties": false,
+      "description": "Provenance of a prompt bundle. Informational, outside the hash."
+    },
+    "PromptBundleSegment": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "$ref": "#/definitions/PromptBundleRole",
+          "description": "Message the segment belongs to"
+        },
+        "path": {
+          "type": "string",
+          "description": "Block path of the segment.",
+          "examples": [
+            "identity"
+          ]
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Distinct source files of the segment, in trace order"
+        }
+      },
+      "required": [
+        "message",
+        "path",
+        "files"
+      ],
+      "additionalProperties": false,
+      "description": "Where one message segment came from. Informational, outside the hash."
+    }
+  }
+}

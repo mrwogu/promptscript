@@ -138,7 +138,7 @@ export interface PromptBundleV1 {
   output?: PromptBundleOutput;
   /** Model identity and parameters */
   model?: PromptBundleModel;
-  /** Effective governance: entry value, else @meta. Lists are sorted and deduplicated. */
+  /** Effective governance: the entry value, else the file-level default. Lists are sorted and deduplicated. */
   governance: GovernanceMeta;
   /** Provenance of the messages */
   provenance: PromptBundleProvenance;

@@ -40,7 +40,10 @@ export interface ModelParams {
   maxTokens?: number;
   /** Stop sequences, in authored order */
   stop?: string[];
-  /** Sampling seed, at most 2^53-1 */
+  /**
+   * Sampling seed, at most 2^53-1.
+   * @maximum 9007199254740991
+   */
   seed?: number;
 }
 

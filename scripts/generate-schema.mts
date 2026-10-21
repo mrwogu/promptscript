@@ -30,6 +30,95 @@ const config: Config = {
 
 const outputPath = path.resolve(__dirname, '../schema/config.json');
 
+type JsonObject = Record<string, unknown>;
+
+interface BundleSchemaTarget {
+  type: string;
+  schemaId: string;
+  title: string;
+  output: string;
+}
+
+const BUNDLE_SCHEMAS: BundleSchemaTarget[] = [
+  {
+    type: 'PromptBundleV1',
+    schemaId: 'https://getpromptscript.dev/schema/prompt-bundle/v1.json',
+    title: 'PromptScript Prompt Bundle v1',
+    output: '../schema/prompt-bundle-v1.json',
+  },
+  {
+    type: 'PromptBundleIndexV1',
+    schemaId: 'https://getpromptscript.dev/schema/prompt-bundle-index/v1.json',
+    title: 'PromptScript Prompt Bundle Index v1',
+    output: '../schema/prompt-bundle-index-v1.json',
+  },
+];
+
+/**
+ * Names a bundle map key must never take: `__proto__`, `prototype`, `constructor`
+ * and every own property name of Object.prototype. Computed so it cannot drift.
+ */
+const FORBIDDEN_KEYS = [
+  ...new Set([...Object.getOwnPropertyNames(Object.prototype), 'prototype']),
+].sort();
+
+const KEY_NAMES = {
+  pattern: '^[A-Za-z_][A-Za-z0-9_]*$',
+  not: { enum: FORBIDDEN_KEYS },
+};
+
+function isObject(value: unknown): value is JsonObject {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Closes every object level and drops the non-standard `example` keyword the
+ * generator emits next to `examples`, so strict validators accept the schema.
+ */
+function tightenSchema(node: unknown): void {
+  if (Array.isArray(node)) {
+    node.forEach(tightenSchema);
+    return;
+  }
+  if (!isObject(node)) return;
+  delete node['example'];
+  if (node['type'] === 'object' && 'properties' in node && !('additionalProperties' in node)) {
+    node['additionalProperties'] = false;
+  }
+  Object.values(node).forEach(tightenSchema);
+}
+
+function mapNode(parent: unknown, key: string): JsonObject {
+  const node = isObject(parent) ? parent[key] : undefined;
+  if (!isObject(node)) throw new Error(`Generated schema has no "${key}" object to patch`);
+  return node;
+}
+
+function generateBundleSchema(target: BundleSchemaTarget): JsonObject {
+  const generator = createGenerator({
+    ...config,
+    path: path.resolve(__dirname, '../packages/core/src/types/prompt-bundle.ts'),
+    type: target.type,
+    schemaId: target.schemaId,
+  });
+  const schema = generator.createSchema(target.type) as JsonObject;
+  tightenSchema(schema);
+
+  if (target.type === 'PromptBundleV1') {
+    const definitions = mapNode(schema, 'definitions');
+    const outputProperties = mapNode(
+      mapNode(mapNode(definitions, 'PromptBundleOutput'), 'properties'),
+      'properties'
+    );
+    mapNode(mapNode(schema, 'properties'), 'inputs')['propertyNames'] = KEY_NAMES;
+    outputProperties['propertyNames'] = KEY_NAMES;
+  }
+
+  // The metaschema URL stays the first key of the file
+  const { $schema, ...rest } = schema;
+  return { $schema, $id: target.schemaId, title: target.title, ...rest };
+}
+
 async function main(): Promise<void> {
   console.log('Generating JSON Schema from TypeScript types...');
   console.log(`  Source: ${config.path}`);
@@ -91,6 +180,12 @@ async function main(): Promise<void> {
   }
 
   fs.writeFileSync(outputPath, JSON.stringify(enrichedSchema, null, 2) + '\n');
+
+  for (const target of BUNDLE_SCHEMAS) {
+    const file = path.resolve(__dirname, target.output);
+    console.log(`  Output: ${file}`);
+    fs.writeFileSync(file, JSON.stringify(generateBundleSchema(target), null, 2) + '\n');
+  }
 
   console.log('✅ Schema generated successfully!');
 }
