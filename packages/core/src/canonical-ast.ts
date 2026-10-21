@@ -363,7 +363,12 @@ export function blockBodyToContent(body: BlockBody): BlockContent {
   const listItems = listEntries.map((entry) => valueNodeToValue(entry.value));
 
   for (const entry of fieldEntries) {
-    properties[entry.name] = valueNodeToValue(entry.value);
+    Object.defineProperty(properties, entry.name, {
+      value: valueNodeToValue(entry.value),
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
   }
 
   const projection = getBodyProjection(body);

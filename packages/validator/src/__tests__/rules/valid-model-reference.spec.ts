@@ -136,6 +136,28 @@ describe('PS041: valid-model-reference', () => {
       expect(messages[0]?.message).toContain('Skill "commit": model "acme-1"');
     });
 
+    it('checks the nested model.ref of prompts', () => {
+      const messages = validate(
+        [block('prompts', { reply: { description: 'D', model: { ref: 'acme-1', maxTokens: 5 } } })],
+        { profiles: PROFILES }
+      );
+
+      expect(messages).toHaveLength(1);
+      expect(messages[0]?.message).toBe(
+        'Prompt "reply": model.ref "acme-1" resolves to Acme 1, which is retired'
+      );
+    });
+
+    it.each<[string, Value]>([
+      ['a model that is a string', 'acme-1'],
+      ['a model object without ref', { temperature: 1 }],
+      ['a model that is a list', ['acme-1']],
+    ])('ignores a prompt with %s', (_title, model) => {
+      expect(validate([block('prompts', { reply: { model } })], { profiles: PROFILES })).toEqual(
+        []
+      );
+    });
+
     it('works with the built-in catalog alone', () => {
       expect(validate([agents({ a: { model: 'inherit' }, b: { model: 'sonnet' } })])).toEqual([]);
     });

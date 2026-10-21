@@ -62,6 +62,25 @@ describe('upgradeCommand', () => {
     expect(console.log).toHaveBeenCalledWith(expect.stringContaining('0 file(s) upgraded'));
   });
 
+  it('should upgrade an old file and leave a known newer one alone', async () => {
+    mkdirSync(join(tmpDir, '.promptscript'), { recursive: true });
+    const newer = `@meta {\n  id: "newer"\n  syntax: "1.6.0"\n}\n`;
+    writeFileSync(
+      join(tmpDir, '.promptscript', 'a-old.prs'),
+      `@meta {\n  id: "old"\n  syntax: "1.4.0"\n}\n`
+    );
+    writeFileSync(join(tmpDir, '.promptscript', 'b-new.prs'), newer);
+
+    await upgradeCommand({ dryRun: false });
+
+    expect(process.exitCode).toBeUndefined();
+    expect(readFileSync(join(tmpDir, '.promptscript', 'a-old.prs'), 'utf-8')).toContain(
+      `syntax: "${getLatestSyntaxVersion()}"`
+    );
+    expect(readFileSync(join(tmpDir, '.promptscript', 'b-new.prs'), 'utf-8')).toBe(newer);
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('already at 1.6.0'));
+  });
+
   it('should not write files in dry-run mode', async () => {
     mkdirSync(join(tmpDir, '.promptscript'), { recursive: true });
     writeFileSync(
@@ -112,6 +131,7 @@ describe('upgradeCommand', () => {
     await upgradeCommand({ dryRun: false });
 
     expect(process.exitCode).toBe(1);
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('supported 1.6.0'));
     expect(readFileSync(filePath, 'utf-8')).toBe(original);
   });
 

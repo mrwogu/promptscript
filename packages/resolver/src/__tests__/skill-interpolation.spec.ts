@@ -35,6 +35,15 @@ describe('interpolateSkillContent', () => {
     expect(result).toBe('Use react framework.');
   });
 
+  it('keeps dotted names such as runtime slots and still binds plain names', () => {
+    const result = interpolateSkillContent(
+      '{{input.x}} {{lang}} {{a.b.c}} {{lang.x}}',
+      [makeParam('lang', 'string')],
+      { lang: 'ts' }
+    );
+    expect(result).toBe('{{input.x}} ts {{a.b.c}} {{lang.x}}');
+  });
+
   it('returns content unchanged when no params defined', () => {
     const result = interpolateSkillContent('Plain content.', undefined, {});
     expect(result).toBe('Plain content.');

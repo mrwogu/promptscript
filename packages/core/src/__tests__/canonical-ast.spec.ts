@@ -31,6 +31,27 @@ import {
 const LOC = { file: 'legacy.prs', line: 1, column: 1, offset: 0 };
 
 describe('canonical AST compatibility', () => {
+  it('keeps a field named __proto__ as an own property', () => {
+    const body = createBlockBody(
+      [
+        {
+          type: 'FieldEntry',
+          name: '__proto__',
+          value: createValueNode('x', LOC),
+          loc: LOC,
+        },
+      ],
+      LOC
+    );
+
+    const content = blockBodyToContent(body);
+
+    expect(content.type).toBe('ObjectContent');
+    const properties = (content as { properties: Record<string, unknown> }).properties;
+    expect(Object.hasOwn(properties, '__proto__')).toBe(true);
+    expect(Object.getPrototypeOf(properties)).toBe(Object.prototype);
+  });
+
   it('round-trips agent provenance through canonical and legacy projections', () => {
     const provenance = [
       {

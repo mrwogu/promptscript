@@ -57,9 +57,7 @@ export interface RegistryAllowlistPolicy extends BasePolicyDefinition {
  * Union of all policy definition types.
  */
 export type PolicyDefinition =
-  | LayerBoundaryPolicy
-  | PropertyProtectionPolicy
-  | RegistryAllowlistPolicy;
+  LayerBoundaryPolicy | PropertyProtectionPolicy | RegistryAllowlistPolicy;
 
 /**
  * A single policy violation.

@@ -253,4 +253,46 @@ describe('Parameterized Inheritance E2E', () => {
     expect(result.errors.length).toBeGreaterThan(0);
     expect(result.errors[0]!.message).toContain('name');
   });
+
+  it('should keep runtime slots while binding {{variables}} in @prompts', async () => {
+    await writeFile(
+      join(dir, 'prompts-base.prs'),
+      `
+@meta {
+  id: "prompts-base"
+  syntax: "1.6.0"
+  params: {
+    serviceName: string
+  }
+}
+
+@prompts {
+  reply: {
+    description: "Reply for {{serviceName}}"
+    user: "{{serviceName}} got: {{input.message}}"
+    inputs: { message: { type: "string", description: "Message" } }
+  }
+}
+`
+    );
+    await writeFile(
+      join(dir, 'prompts-project.prs'),
+      `
+@meta {
+  id: "prompts-project"
+  syntax: "1.6.0"
+}
+
+@inherit ./prompts-base(serviceName: "user-api")
+`
+    );
+
+    const resolver = new Resolver({ localPath: dir, registryPath: dir });
+    const result = await resolver.resolve(join(dir, 'prompts-project.prs'));
+
+    expect(result.errors).toHaveLength(0);
+    const prompts = result.ast!.blocks.find((b) => b.name === 'prompts');
+    expect(JSON.stringify(prompts!.content)).toContain('user-api got: {{input.message}}');
+    expect(JSON.stringify(prompts!.content)).toContain('Reply for user-api');
+  });
 });

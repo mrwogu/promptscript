@@ -1095,11 +1095,13 @@ export function interpolateSkillContent(
     }
   }
 
-  // Replace {{variable}} patterns
-  return content.replace(/\{\{(\w+)\}\}/g, (_match, varName: string) => {
+  // Replace {{variable}} patterns. Dotted names such as the runtime slot
+  // {{input.name}} are never skill parameters, so they pass through untouched.
+  return content.replace(/\{\{(\w+(?:\.\w+)*)\}\}/g, (match, varName: string) => {
+    if (varName.includes('.')) return match;
     const value = bound.get(varName);
     if (value === undefined) {
-      return _match;
+      return match;
     }
     if (typeof value === 'string') return value;
     if (typeof value === 'number' || typeof value === 'boolean') return String(value);

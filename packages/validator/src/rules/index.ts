@@ -41,6 +41,11 @@ import { validSectionHeaders } from './valid-section-headers.js';
 import { validBlockShape } from './valid-block-shape.js';
 import { importExcludes } from './import-excludes.js';
 import { validModelReference } from './valid-model-reference.js';
+import { validPromptDefinition } from './valid-prompt-definition.js';
+import { unresolvedPromptSlot } from './unresolved-prompt-slot.js';
+import { unusedPromptDeclaration } from './unused-prompt-declaration.js';
+import { unresolvedTemplateVariable } from './unresolved-template-variable.js';
+import { slotInSystemMessage } from './slot-in-system-message.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -113,6 +118,11 @@ export { validSectionHeaders } from './valid-section-headers.js';
 export { validBlockShape } from './valid-block-shape.js';
 export { importExcludes } from './import-excludes.js';
 export { validModelReference } from './valid-model-reference.js';
+export { validPromptDefinition } from './valid-prompt-definition.js';
+export { unresolvedPromptSlot } from './unresolved-prompt-slot.js';
+export { unusedPromptDeclaration } from './unused-prompt-declaration.js';
+export { unresolvedTemplateVariable } from './unresolved-template-variable.js';
+export { slotInSystemMessage } from './slot-in-system-message.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -189,6 +199,16 @@ export const allRules: ValidationRule[] = [
   importExcludes,
   // Valid model references (PS041)
   validModelReference,
+  // Valid prompt definitions (PS042)
+  validPromptDefinition,
+  // Unresolved prompt slots (PS043)
+  unresolvedPromptSlot,
+  // Unused prompt declarations (PS044)
+  unusedPromptDeclaration,
+  // Unresolved template variables (PS045)
+  unresolvedTemplateVariable,
+  // Slot in system message (PS046)
+  slotInSystemMessage,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,

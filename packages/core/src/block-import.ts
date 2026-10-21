@@ -31,30 +31,63 @@ function withSkillOutputDirectory(source: Program, outputDir: string): Program {
   return result;
 }
 
-function assertNoDuplicateSkills(
+function serializeEntry(value: Value | undefined): string {
+  return JSON.stringify(value);
+}
+
+/** Like `serializeEntry`, but a text block compares by its text, not by where it was written. */
+function serializeEntryContent(value: Value | undefined): string {
+  return JSON.stringify(value, function (this: unknown, key: string, entry: unknown): unknown {
+    const owner = this as { type?: unknown };
+    return key === 'loc' && owner.type === 'TextContent' ? undefined : entry;
+  });
+}
+
+function entryProperties(
+  program: Program,
+  blockName: string,
+  allowMixed: boolean
+): Record<string, Value> | undefined {
+  const content = program.blocks.find((block) => block.name === blockName)?.content;
+  if (content?.type === 'ObjectContent') return content.properties;
+  return allowMixed && content?.type === 'MixedContent' ? content.properties : undefined;
+}
+
+function findConflictingEntries(
+  target: Program,
+  source: Program,
+  blockName: string,
+  serialize: (value: Value | undefined) => string,
+  allowMixed = false
+): string[] {
+  const targetProperties = entryProperties(target, blockName, allowMixed);
+  const sourceProperties = entryProperties(source, blockName, allowMixed);
+  if (!targetProperties || !sourceProperties) return [];
+
+  return Object.keys(sourceProperties).filter(
+    (name) =>
+      Object.hasOwn(targetProperties, name) &&
+      serialize(sourceProperties[name]) !== serialize(targetProperties[name])
+  );
+}
+
+function assertNoDuplicateEntries(
   target: Program,
   source: Program,
   declaration: UseDeclaration
 ): void {
-  const targetSkills = target.blocks.find((block) => block.name === 'skills');
-  const sourceSkills = source.blocks.find((block) => block.name === 'skills');
-  if (
-    targetSkills?.content.type !== 'ObjectContent' ||
-    sourceSkills?.content.type !== 'ObjectContent'
-  ) {
-    return;
-  }
-
-  const targetProperties = targetSkills.content.properties;
-  const sourceProperties = sourceSkills.content.properties;
-  const duplicates = Object.keys(sourceProperties).filter(
-    (name) =>
-      Object.hasOwn(targetProperties, name) &&
-      JSON.stringify(sourceProperties[name]) !== JSON.stringify(targetProperties[name])
-  );
-  if (duplicates.length > 0) {
+  const skills = findConflictingEntries(target, source, 'skills', serializeEntry);
+  if (skills.length > 0) {
     throw new ResolveError(
-      `Duplicate skill name(s) detected when importing '${declaration.path.raw}': ${duplicates.join(', ')}`,
+      `Duplicate skill name(s) detected when importing '${declaration.path.raw}': ${skills.join(', ')}`,
+      declaration.loc
+    );
+  }
+  const prompts = findConflictingEntries(target, source, 'prompts', serializeEntryContent, true);
+  if (prompts.length > 0) {
+    throw new ResolveError(
+      `Duplicate prompt name(s) detected when importing '${declaration.path.raw}': ${prompts.join(', ')}. ` +
+        'Rename one of the entries, or remove it from this file to use the imported one.',
       declaration.loc
     );
   }
@@ -175,7 +208,7 @@ export function resolveUseImport(
   if (conflicts.length > 0) {
     throw new AgentConflictError(conflicts, declaration.loc);
   }
-  assertNoDuplicateSkills(target, source, declaration);
+  assertNoDuplicateEntries(target, source, declaration);
 
   const blocks = mergeBlockCollections(qualified.program.blocks, target.blocks, {
     content: IMPORT_MERGE_POLICY,

@@ -42,26 +42,26 @@ Ordinary `header` and `headers` fields remain domain properties.
 
 ## Built-in Block Matrix
 
-| Block           | Canonical | Supported compatibility           | Output notes                                                                        |
-| --------------- | --------- | --------------------------------- | ----------------------------------------------------------------------------------- |
-| `@identity`     | `text`    | `object`, `mixed`                 | Text becomes the assistant introduction. Structured fields are formatter-sensitive. |
-| `@context`      | `mixed`   | `text`, `object`                  | Formatters consume known metadata and optional prose independently.                 |
-| `@standards`    | `object`  | `mixed`, `text`                   | Category fields render broadly. Free-form text currently renders only on Factory.   |
-| `@restrictions` | `array`   | `text`, `object`, `mixed`         | Dash lists are preferred. Legacy text and `items` arrays remain supported.          |
-| `@knowledge`    | `text`    | `object`, `mixed`                 | Text renders as reference material. Structured fields are formatter-sensitive.      |
-| `@shortcuts`    | `object`  | Scalar and multiline entry values | Explicit `content` removes target-dependent multiline command ambiguity.            |
-| `@commands`     | `object`  | Same as `@shortcuts`              | Backwards-compatible alias. Prefer `@shortcuts` in new files.                       |
-| `@guards`       | `object`  | `mixed`                           | Named fields drive target-native path rules. Free-form text is not portable.        |
-| `@params`       | `object`  | None                              | Fields define typed template parameters.                                            |
-| `@skills`       | `object`  | None                              | Each field is a named skill definition or inline skill import.                      |
-| `@local`        | `text`    | `object`, `mixed`                 | Claude emits text to `CLAUDE.local.md`. Structured fields are not portable.         |
-| `@agents`       | `object`  | None                              | Each field is a named agent definition.                                             |
-| `@workflows`    | `object`  | None                              | Each field is a named workflow definition.                                          |
-| `@hooks`        | `object`  | None                              | Each field is a portable lifecycle hook.                                            |
-| `@mcpServers`   | `object`  | None                              | Each field is a named MCP server definition.                                        |
-| `@plugins`      | `object`  | None                              | Each field is a named plugin bundle.                                                |
-| `@prompts`      | `object`  | None                              | Reserved internal registry. Do not author it in project files.                      |
-| `@examples`     | `object`  | None                              | Each field is a named input/output example.                                         |
+| Block           | Canonical | Supported compatibility           | Output notes                                                                                 |
+| --------------- | --------- | --------------------------------- | -------------------------------------------------------------------------------------------- |
+| `@identity`     | `text`    | `object`, `mixed`                 | Text becomes the assistant introduction. Structured fields are formatter-sensitive.          |
+| `@context`      | `mixed`   | `text`, `object`                  | Formatters consume known metadata and optional prose independently.                          |
+| `@standards`    | `object`  | `mixed`, `text`                   | Category fields render broadly. Free-form text currently renders only on Factory.            |
+| `@restrictions` | `array`   | `text`, `object`, `mixed`         | Dash lists are preferred. Legacy text and `items` arrays remain supported.                   |
+| `@knowledge`    | `text`    | `object`, `mixed`                 | Text renders as reference material. Structured fields are formatter-sensitive.               |
+| `@shortcuts`    | `object`  | Scalar and multiline entry values | Explicit `content` removes target-dependent multiline command ambiguity.                     |
+| `@commands`     | `object`  | Same as `@shortcuts`              | Backwards-compatible alias. Prefer `@shortcuts` in new files.                                |
+| `@guards`       | `object`  | `mixed`                           | Named fields drive target-native path rules. Free-form text is not portable.                 |
+| `@params`       | `object`  | None                              | Fields define typed template parameters.                                                     |
+| `@skills`       | `object`  | None                              | Each field is a named skill definition or inline skill import.                               |
+| `@local`        | `text`    | `object`, `mixed`                 | Claude emits text to `CLAUDE.local.md`. Structured fields are not portable.                  |
+| `@agents`       | `object`  | None                              | Each field is a named agent definition.                                                      |
+| `@workflows`    | `object`  | None                              | Each field is a named workflow definition.                                                   |
+| `@hooks`        | `object`  | None                              | Each field is a portable lifecycle hook.                                                     |
+| `@mcpServers`   | `object`  | None                              | Each field is a named MCP server definition.                                                 |
+| `@plugins`      | `object`  | None                              | Each field is a named plugin bundle.                                                         |
+| `@prompts`      | `object`  | None                              | Each field is a named prompt definition. Validated at syntax 1.6.0, ignored by every target. |
+| `@examples`     | `object`  | None                              | Each field is a named input/output example.                                                  |
 
 Supported compatibility means the parser and current consumers retain defined
 behavior. PS038 warns when a legacy shape can omit data or vary by formatter.

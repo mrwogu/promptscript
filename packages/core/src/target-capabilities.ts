@@ -573,7 +573,6 @@ const UNSUPPORTED_BLOCKS: Readonly<Partial<Record<KnownTarget, readonly string[]
     'skills',
     'agents',
     'workflows',
-    'prompts',
     'shortcuts',
     'guards',
     'local',

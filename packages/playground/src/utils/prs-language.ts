@@ -126,6 +126,8 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
     ],
 
     string: [
+      // \{{ is an escaped brace pair, not the start of a template or slot
+      [/\\\{\{/, 'string.escape'],
       // Template expressions inside strings
       [/\{\{/, 'variable.template', '@templateExpressionInString'],
       // Environment variables inside strings
@@ -139,6 +141,8 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
     ],
 
     stringSingle: [
+      // \{{ is an escaped brace pair, not the start of a template or slot
+      [/\\\{\{/, 'string.escape'],
       // Template expressions inside strings
       [/\{\{/, 'variable.template', '@templateExpressionInString'],
       // Environment variables inside strings
@@ -157,10 +161,13 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
       // fence rule keeps the delimiters styled either way.
       [/(```)([\w+#.-]+)/, { token: 'string.fence', next: '@embeddedCode.$2', nextEmbedded: '$2' }],
       [/```/, 'string.fence', '@plainFence'],
+      // \{{ is an escaped brace pair, not the start of a template or slot
+      [/\\\{\{/, 'string.escape'],
       [/\{\{/, 'variable.template', '@templateExpressionInString'],
       // Environment variables inside multiline strings
       [/\$\{[A-Za-z_][A-Za-z0-9_]*(?::-[^}]*)?\}/, 'variable.env'],
-      [/[^"{$`]+/, 'string'],
+      [/[^"{$`\\]+/, 'string'],
+      [/\\/, 'string'],
       [/\$(?!\{)/, 'string'],
       [/\{(?!\{)/, 'string'],
       [/`/, 'string'],
@@ -177,7 +184,15 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
     ],
 
     templateExpressionInString: [
-      [/[a-zA-Z_][a-zA-Z0-9_]*/, 'variable.name'],
+      // Runtime slot namespace, only right after the opening braces: {{input.name}}
+      [/input\.(?=[a-zA-Z_])/, { token: 'variable.slot', switchTo: '@templateExpressionRest' }],
+      [/[a-zA-Z_]\w*/, { token: 'variable.name', switchTo: '@templateExpressionRest' }],
+      [/\}\}/, 'variable.template', '@pop'],
+    ],
+
+    templateExpressionRest: [
+      [/[a-zA-Z_]\w*/, 'variable.name'],
+      [/\./, 'delimiter'],
       [/\}\}/, 'variable.template', '@pop'],
     ],
   },
@@ -235,6 +250,7 @@ export const prsThemeRules: Monaco.editor.ITokenThemeRule[] = [
   { token: 'delimiter.list-marker', foreground: 'facc15' },
   { token: 'delimiter', foreground: '94a3b8' },
   { token: 'variable.template', foreground: 'f472b6', fontStyle: 'bold' },
+  { token: 'variable.slot', foreground: 'f472b6', fontStyle: 'bold' },
   { token: 'variable.name', foreground: 'fb923c' },
   { token: 'variable.env', foreground: 'fbbf24' },
   { token: 'string.url', foreground: '67e8f9' },
@@ -379,6 +395,15 @@ export function createPrsCompletionProvider(
             '@examples {\n  $1: {\n    input: """\n    $2\n    """\n    output: """\n    $3\n    """\n  }\n}',
           insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           documentation: 'Provide example interactions',
+          range,
+        },
+        {
+          label: '@prompts',
+          kind: monaco.languages.CompletionItemKind.Keyword,
+          insertText:
+            '@prompts {\n  $1: {\n    description: "$2"\n    inputs: { $3: { type: "string" description: "$4" } }\n    user: "$5 {{input.$3}}"\n  }\n}',
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          documentation: 'Define a prompt with typed inputs (syntax 1.6.0)',
           range,
         },
       ];

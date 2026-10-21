@@ -244,6 +244,7 @@ CLAUDE.md
 | Tool integrations       | `@mcpServers`                                                     | Platform-specific JSON or TOML MCP configuration                                       |
 | Capability bundles      | `@plugins`                                                        | Native plugin manifests where supported                                                |
 | Automation              | `@hooks`, `@workflows`                                            | Lifecycle hook configuration and workflow files                                        |
+| Prompt definitions      | `@prompts`                                                        | Validated with typed inputs (syntax 1.6.0), ignored by every target                    |
 | Monorepo delivery       | `builds` in `promptscript.yaml`                                   | Scoped output for packages, applications, and plugins                                  |
 
 Target support stays explicit. Unsupported platform-specific capabilities are omitted rather than

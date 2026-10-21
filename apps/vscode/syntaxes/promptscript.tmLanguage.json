@@ -67,10 +67,11 @@
       "name": "string.quoted.triple.prs",
       "patterns": [
         { "include": "#fenced-code" },
+        { "include": "#escaped-slot" },
         { "include": "#template-in-string" },
         { "include": "#env-variable" },
         {
-          "match": "[^\"{}$`]+",
+          "match": "[^\"{}$`\\\\]+",
           "name": "string.quoted.triple.prs"
         }
       ]
@@ -275,6 +276,7 @@
       "end": "\"",
       "name": "string.quoted.double.prs",
       "patterns": [
+        { "include": "#escaped-slot" },
         { "include": "#template-in-string" },
         { "include": "#escape-sequence" },
         { "include": "#env-variable" }
@@ -285,6 +287,7 @@
       "end": "'",
       "name": "string.quoted.single.prs",
       "patterns": [
+        { "include": "#escaped-slot" },
         { "include": "#template-in-string" },
         { "include": "#escape-sequence" },
         { "include": "#env-variable" }
@@ -309,6 +312,11 @@
           "name": "invalid.illegal.escape.prs"
         }
       ]
+    },
+    "escaped-slot": {
+      "comment": "\\{{ is an escaped brace pair: the renderer emits {{ and does not read a slot",
+      "match": "\\\\\\{\\{",
+      "name": "constant.character.escape.prs"
     },
     "env-variable": {
       "match": "\\$\\{[A-Za-z_][A-Za-z0-9_]*(?::-[^}]*)?\\}",
@@ -342,8 +350,17 @@
       },
       "patterns": [
         {
+          "comment": "Runtime slot namespace: {{input.name}}",
+          "match": "(?<![\\w.])input\\.(?=[a-zA-Z_])",
+          "name": "variable.language.slot.prs"
+        },
+        {
           "match": "[a-zA-Z_][a-zA-Z0-9_]*",
           "name": "variable.other.template.prs"
+        },
+        {
+          "match": "\\.",
+          "name": "punctuation.accessor.prs"
         }
       ]
     },
