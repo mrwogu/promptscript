@@ -42,6 +42,7 @@ describe('@use of prompt entries', () => {
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0]?.message).toContain('Duplicate prompt name(s)');
     expect(result.errors[0]?.message).toContain('review');
+    expect(result.errors[0]?.location).toMatchObject({ file: join(dir, 'conflict.prs'), line: 11 });
   });
 
   it('accepts a same-key entry with identical text written in another file', async () => {
