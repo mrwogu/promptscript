@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { BUILTIN_FORMATTERS, FEATURE_MATRIX, type ToolName } from '@promptscript/formatters';
+import { stripPromptScriptMarkers } from '@promptscript/core';
 import { Compiler } from '../compiler.js';
 
 /**
@@ -152,6 +153,40 @@ const KITCHEN_SINK_SOURCE = `@meta {
 `;
 
 /**
+ * A `@prompts` entry with a sentinel in every authored field. Coding targets
+ * ignore the block, so no sentinel may reach any output and the rest of each
+ * output must not change.
+ */
+const PROMPTS_BLOCK = `
+@prompts {
+  ZZPROMPTKEY: {
+    description: "ZZPROMPTDESC answer a probe"
+    risk: "medium"
+    owner: "ZZPROMPTOWNER"
+    domain: "ZZPROMPTDOMAIN"
+    dataClasses: ["ZZPROMPTCLASS"]
+    reviewers: ["ZZPROMPTREVIEWER"]
+    compose: [identity, restrictions]
+    model: { ref: "ZZPROMPTMODEL", temperature: 0.2, maxTokens: 64, stop: ["ZZPROMPTSTOP"], seed: 7 }
+    inputs: {
+      ZZPROMPTINPUT: { type: "string", description: "ZZPROMPTINPUTDESC probe input", default: "ZZPROMPTDEFAULT" }
+    }
+    output: {
+      ZZPROMPTFIELD: { type: "enum", options: ["ZZPROMPTOPTION"], description: "ZZPROMPTFIELDDESC probe output" }
+    }
+    system: "ZZPROMPTSYSTEM you answer probes."
+    user: """
+      ZZPROMPTUSER {{input.ZZPROMPTINPUT}} and \\{{input.ZZPROMPTESCAPED}}
+    """
+  }
+}
+`;
+
+/** The kitchen sink at the syntax version that accepts `@prompts`. */
+const SINK_WITHOUT_PROMPTS = KITCHEN_SINK_SOURCE.replace('syntax: "1.5.0"', 'syntax: "1.6.0"');
+const SINK_WITH_PROMPTS = `${SINK_WITHOUT_PROMPTS}${PROMPTS_BLOCK}`;
+
+/**
  * Sentinels that every target must preserve. These map to blocks that all
  * markdown-producing formatters render, so absence is always a defect.
  */
@@ -224,24 +259,45 @@ function listTargetVersions(): TargetVersion[] {
 
 let directory: string;
 let entryPath: string;
+let withoutPromptsPath: string;
+let withPromptsPath: string;
 
 beforeAll(() => {
   directory = mkdtempSync(join(tmpdir(), 'promptscript-compilation-matrix-'));
   mkdirSync(join(directory, '.promptscript'), { recursive: true });
   entryPath = join(directory, 'project.prs');
   writeFileSync(entryPath, KITCHEN_SINK_SOURCE);
+  withoutPromptsPath = join(directory, 'without-prompts.prs');
+  writeFileSync(withoutPromptsPath, SINK_WITHOUT_PROMPTS);
+  withPromptsPath = join(directory, 'with-prompts.prs');
+  writeFileSync(withPromptsPath, SINK_WITH_PROMPTS);
 });
 
 afterAll(() => {
   rmSync(directory, { recursive: true, force: true });
 });
 
-async function compileTo(target: string, version: string) {
+async function compileTo(target: string, version: string, source: string = entryPath) {
   const compiler = new Compiler({
     resolver: { registryPath: directory, projectRoot: directory },
     formatters: [{ name: target, config: { version } }],
   });
-  return compiler.compile(entryPath);
+  return compiler.compile(source);
+}
+
+/**
+ * Outputs and warnings in a form that compares by value: generation markers
+ * are removed and the entry file path, which differs per variant, is masked.
+ */
+function comparable(result: Awaited<ReturnType<typeof compileTo>>, entry: string): string {
+  return JSON.stringify({
+    outputs: [...result.outputs].map(([path, output]) => ({
+      path,
+      content: stripPromptScriptMarkers(output.content),
+      warnings: output.warnings,
+    })),
+    warnings: result.warnings,
+  }).replaceAll(JSON.stringify(entry).slice(1, -1), '<entry>');
 }
 
 describe('Compilation matrix smoke tests', () => {
@@ -278,6 +334,19 @@ describe('Compilation matrix smoke tests', () => {
         if (TARGET_OMITTED_UNIVERSAL_SENTINELS[target]?.includes(sentinel)) continue;
         expect(blob, `${target} (${version}) dropped ${sentinel}`).toContain(sentinel);
       }
+    });
+
+    it('ignores prompt definitions', async () => {
+      const without = await compileTo(target, version, withoutPromptsPath);
+      const withPrompts = await compileTo(target, version, withPromptsPath);
+
+      expect(without.errors).toEqual([]);
+      expect(withPrompts.errors).toEqual([]);
+      expect(comparable(withPrompts, withPromptsPath)).toBe(
+        comparable(without, withoutPromptsPath)
+      );
+      const blob = [...withPrompts.outputs.values()].map((output) => output.content).join('\n');
+      expect(blob, `${target} (${version}) leaked a prompt sentinel`).not.toContain('ZZPROMPT');
     });
 
     it('fills every integration config it writes', async () => {
