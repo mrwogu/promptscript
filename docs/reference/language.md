@@ -179,8 +179,8 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | `1.2.0` | Stable  | All 1.1.0 blocks + `@examples`                                                                                                             |
 | `1.3.0` | Stable  | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
 | `1.4.0` | Stable  | All 1.3.0 features + `@hooks`, `@mcpServers`, `@plugins`                                                                                   |
-| `1.5.0` | Current | All 1.4.0 features + `@header` section titles, `@override` replacement, declaration order, unquoted `${VAR}` values                        |
-| `1.6.0` | Stable  | All 1.5.0 features + validated `@prompts` entries with typed inputs and runtime slots; every target ignores them                           |
+| `1.5.0` | Stable  | All 1.4.0 features + `@header` section titles, `@override` replacement, declaration order, unquoted `${VAR}` values                        |
+| `1.6.0` | Current | All 1.5.0 features + validated `@prompts` entries with typed inputs and runtime slots; every target ignores them                           |
 
 :::note[Block Availability]
 `@workflows` emits workflow files such as `.claude/workflows/<name>.md`.

@@ -198,7 +198,7 @@ export const SYNTAX_VERSIONS: Readonly<Record<string, SyntaxVersionDef>> = {
 };
 
 /** Latest known syntax version. */
-export const LATEST_SYNTAX_VERSION = '1.5.0';
+export const LATEST_SYNTAX_VERSION = '1.6.0';
 
 /**
  * Get the latest known syntax version.
