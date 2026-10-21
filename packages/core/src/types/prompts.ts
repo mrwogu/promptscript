@@ -34,14 +34,24 @@ export interface ModelParams {
   temperature?: number;
   /** Nucleus sampling threshold */
   topP?: number;
-  /** Top-k sampling cutoff */
+  /**
+   * Top-k sampling cutoff.
+   * @asType integer
+   * @minimum 1
+   */
   topK?: number;
-  /** Maximum number of tokens to generate */
+  /**
+   * Maximum number of tokens to generate.
+   * @asType integer
+   * @minimum 1
+   */
   maxTokens?: number;
   /** Stop sequences, in authored order */
   stop?: string[];
   /**
    * Sampling seed, at most 2^53-1.
+   * @asType integer
+   * @minimum 0
    * @maximum 9007199254740991
    */
   seed?: number;
