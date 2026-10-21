@@ -587,6 +587,12 @@ describe('extractPromptDefinitions', () => {
 });
 
 describe('validateGovernanceFields', () => {
+  it('reads governance next to a meta field named type', () => {
+    const fields = { id: 'x', syntax: '1.6.0', type: 'TemplateExpression', risk: 'huge' };
+
+    expect(validateGovernanceFields(fields)).toEqual([expect.stringContaining('risk')]);
+  });
+
   it('accepts valid and absent fields', () => {
     expect(validateGovernanceFields({ id: 'a', risk: 'low', reviewers: ['x'] })).toEqual([]);
   });

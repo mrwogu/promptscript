@@ -467,7 +467,11 @@ function readGovernance(lookup: (name: string) => Raw | undefined, bad: Report):
  */
 export function validateGovernanceFields(fields: Record<string, Value>): string[] {
   const messages: string[] = [];
-  const raw = fromValue(fields) as ObjectRaw;
+  // Not fromValue(fields): a field named "type" would make the map look like a typed node.
+  const raw: ObjectRaw = {
+    kind: 'object',
+    fields: Object.entries(fields).map(([name, value]) => ({ name, value: fromValue(value) })),
+  };
   const lookup = (name: string): Raw | undefined => field(raw, name);
   readGovernance(lookup, (message) => messages.push(`@meta ${message}`));
   return messages;
