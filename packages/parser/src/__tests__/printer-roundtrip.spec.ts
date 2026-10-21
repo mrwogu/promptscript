@@ -379,4 +379,18 @@ describe('printProgram layout', () => {
 
     expect(printed).toBe('@identity {\n  a: 1\n}\n\n@context {\n  b: 1\n\n  c: 2\n}\n');
   });
+
+  it('does not take marker bytes inside an element for a surviving blank line', () => {
+    // Arrange
+    const marker = '\u0000prs-blank\u0000';
+    const parsed = parseCanonical(`@context {\n  items: [\n\n    "x${marker}y", 1\n\n  ]\n}`);
+
+    // Act
+    const printed = printProgram(parsed.ast!, parsed.comments);
+    const reparsed = parseCanonical(printed);
+
+    // Assert
+    expect(printed).toBe(`@context {\n  items: ["x${marker}y", 1]\n}\n`);
+    expect(printProgram(reparsed.ast!, reparsed.comments)).toBe(printed);
+  });
 });

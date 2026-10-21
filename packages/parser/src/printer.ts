@@ -310,15 +310,17 @@ function printArray(printed: string[], indent: string, room: number): string {
 function printParams(
   params: DeepReadonly<ParamArgument[]> | undefined,
   ctx: PrintContext,
-  prefix: string
+  prefix: string,
+  tail: string
 ): string {
   if (!params) return '';
   // Each argument sits on the line after the path and the arguments before it, and is
-  // followed by a comma or the closing parenthesis.
+  // followed by a comma, or by the closing parenthesis and whatever `tail` adds after it.
   let width = prefix.length + 1;
-  const args = params.map((param) => {
+  const args = params.map((param, index) => {
     const head = `${param.name}: `;
-    const text = head + printValue(param.value, '', ctx, PRINT_WIDTH - width - head.length - 1);
+    const after = index < params.length - 1 ? 1 : 1 + tail.length;
+    const text = head + printValue(param.value, '', ctx, PRINT_WIDTH - width - head.length - after);
     width += text.length + 2;
     return text;
   });
@@ -328,20 +330,22 @@ function printParams(
 function printImport(
   keyword: string,
   decl: DeepReadonly<InheritDeclaration | UseDeclaration | InlineUseDeclaration>,
-  ctx: PrintContext
+  ctx: PrintContext,
+  tail = ''
 ): string {
   const head = `@${keyword} ${decl.path.raw}`;
-  return head + printParams(decl.params, ctx, head);
+  return head + printParams(decl.params, ctx, head, tail) + tail;
 }
 
 function printUse(
   decl: DeepReadonly<UseDeclaration | InlineUseDeclaration>,
   ctx: PrintContext
 ): string {
-  const parts = [printImport('use', decl, ctx)];
-  if (decl.alias) parts.push(`as ${decl.alias}`);
-  if (decl.outputDir) parts.push(`into ${quote(decl.outputDir)}`);
-  return parts.join(' ');
+  const tail = [
+    ...(decl.alias ? [` as ${decl.alias}`] : []),
+    ...(decl.outputDir ? [` into ${quote(decl.outputDir)}`] : []),
+  ].join('');
+  return printImport('use', decl, ctx, tail);
 }
 
 function printParamDefinition(

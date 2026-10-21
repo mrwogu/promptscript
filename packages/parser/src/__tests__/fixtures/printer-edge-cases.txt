@@ -514,3 +514,97 @@ y"
     1
   ]
 }
+### use second parameter array fits at exactly 100 columns
+@use ./a(x: "pppppppppppppppppppp", y: ["aaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbb"])
+--- expected
+@use ./a(x: "pppppppppppppppppppp", y: ["aaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbb"])
+### use second parameter array wraps counting the first parameter
+@use ./a(x: "pppppppppppppppppppp", y: ["aaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+--- expected
+@use ./a(x: "pppppppppppppppppppp", y: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbb"
+])
+### default value follows the closing bracket of a wrapped value
+@params { tags: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@params {
+  tags: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ] = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
+}
+### meta param default array fits at exactly 100 columns
+@meta { id: "a" params: { tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] } }
+--- expected
+@meta {
+  id: "a"
+  params: {
+    tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
+  }
+}
+### meta param default array wraps at 101 columns
+@meta { id: "a" params: { tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] } }
+--- expected
+@meta {
+  id: "a"
+  params: {
+    tags: string = [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ]
+  }
+}
+### commented array child fits with its comma at exactly 100 columns
+@context {
+  items: [
+    # note
+    ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],
+    1
+  ]
+}
+--- expected
+@context {
+  items: [
+    # note
+    ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],
+    1
+  ]
+}
+### commented array child wraps when its comma would reach 101 columns
+@context {
+  items: [
+    # note
+    ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],
+    1
+  ]
+}
+--- expected
+@context {
+  items: [
+    # note
+    [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ],
+    1
+  ]
+}
+### use alias leaves room for the parameter array at exactly 100 columns
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) as somealias
+--- expected
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) as somealias
+### use alias wraps the parameter array at 101 columns
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) as somealias
+--- expected
+@use ./a(x: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+]) as somealias
+### use into leaves room for the parameter array
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) into "skills/seo"
+--- expected
+@use ./a(x: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+]) into "skills/seo"
