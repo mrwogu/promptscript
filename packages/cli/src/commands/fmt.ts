@@ -68,7 +68,6 @@ function collectFiles(paths: string[], failures: string[]): string[] {
       files.add(target);
     }
   }
-  // Compare by code units so the order never depends on the locale;.
   return [...files].sort(comparePaths);
 }
 
