@@ -187,10 +187,10 @@ program
     'after',
     `
 Known limits of the printer:
-  - comments and declaration order are kept, but blank lines are not: blank
-    lines between fields and around comments are dropped, and one blank line
-    separates top-level declarations
-  - every array is printed on one line
+  - comments and declaration order are kept
+  - a blank line between entries is kept, several become one, and blank lines
+    at the start or end of a block, object, array or file are dropped
+  - arrays that do not fit in 100 columns print one element per line
   - comments inside @meta move before its closing brace
   - comments inside @use/@inherit parameter lists move to their own line
 
