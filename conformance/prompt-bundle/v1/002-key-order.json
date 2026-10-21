@@ -1,0 +1,33 @@
+{
+  "description": "The bundle of 001 with every object written in reverse key order. Canonical form and hash are the same.",
+  "bundle": {
+    "provenance": {
+      "segments": [
+        {
+          "files": [".promptscript/project.prs"],
+          "path": "prompts.refund-reply.user",
+          "message": "user"
+        }
+      ],
+      "entry": ".promptscript/project.prs"
+    },
+    "governance": {
+      "owner": "team-support",
+      "risk": "medium"
+    },
+    "inputs": {},
+    "messages": [
+      {
+        "content": "Answer the refund request politely and ask for the order number.",
+        "role": "user"
+      }
+    ],
+    "contentHash": "sha256-0e6f0d8c29583a005baceba739febd0896d7c1edf25c92b5e76a20fe99135591",
+    "description": "Answer a customer refund request",
+    "id": "acme-support/refund-reply",
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json"
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Answer a customer refund request\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/refund-reply\",\"inputs\":{},\"messages\":[{\"content\":\"Answer the refund request politely and ask for the order number.\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-0e6f0d8c29583a005baceba739febd0896d7c1edf25c92b5e76a20fe99135591",
+  "slots": []
+}

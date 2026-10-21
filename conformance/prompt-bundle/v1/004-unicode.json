@@ -1,0 +1,33 @@
+{
+  "description": "Non-ASCII text, U+2028, a control character, quotes, a backslash and an emoji. Control characters become \\u00xx escapes in the canonical form, U+2028 and all other characters stay as they are.",
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/unicode",
+    "description": "Zażółć gęślą jaźń 😀 - \"quoted\" and back\\slash",
+    "contentHash": "sha256-6f5b103bedd1bf0a0e0612482901f67e6c99b3bef59ee9ce914d7def5dc9a88e",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Line separator, bell\u0007, tab\t, quote \" and \\ backslash, euro €, emoji 😀."
+      }
+    ],
+    "inputs": {},
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "user",
+          "path": "prompts.refund-reply.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Zażółć gęślą jaźń 😀 - \\\"quoted\\\" and back\\\\slash\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/unicode\",\"inputs\":{},\"messages\":[{\"content\":\"Line separator, bell\\u0007, tab\\t, quote \\\" and \\\\ backslash, euro €, emoji 😀.\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-6f5b103bedd1bf0a0e0612482901f67e6c99b3bef59ee9ce914d7def5dc9a88e",
+  "slots": []
+}

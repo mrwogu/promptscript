@@ -1,0 +1,94 @@
+{
+  "description": "Number forms: 0.2, 800, a default of 100.0 stored as 100, and 1e21 serialized as 1e+21. Two slots in the user message.",
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/numbers",
+    "description": "Number forms in params and defaults",
+    "contentHash": "sha256-7fd97e3406e82dc02de66c4c5ea5a87d779381f20ff355743ea8d0747a5a11ce",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You answer refund requests."
+      },
+      {
+        "role": "user",
+        "content": "Refund {{input.amount}} of at most {{input.ceiling}}."
+      }
+    ],
+    "inputs": {
+      "amount": {
+        "type": "number",
+        "description": "Refund amount",
+        "default": 100,
+        "required": false
+      },
+      "ceiling": {
+        "type": "number",
+        "description": "Upper bound",
+        "default": 1e21,
+        "required": false
+      }
+    },
+    "model": {
+      "ref": "claude-sonnet-5-5",
+      "provider": "anthropic",
+      "apiId": "claude-sonnet-5-5",
+      "params": {
+        "temperature": 0.2,
+        "maxTokens": 800
+      }
+    },
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "system",
+          "path": "prompts.numbers.system",
+          "files": [".promptscript/project.prs"]
+        },
+        {
+          "message": "user",
+          "path": "prompts.numbers.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Number forms in params and defaults\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/numbers\",\"inputs\":{\"amount\":{\"default\":100,\"description\":\"Refund amount\",\"required\":false,\"type\":\"number\"},\"ceiling\":{\"default\":1e+21,\"description\":\"Upper bound\",\"required\":false,\"type\":\"number\"}},\"messages\":[{\"content\":\"You answer refund requests.\",\"role\":\"system\"},{\"content\":\"Refund {{input.amount}} of at most {{input.ceiling}}.\",\"role\":\"user\"}],\"model\":{\"apiId\":\"claude-sonnet-5-5\",\"params\":{\"maxTokens\":800,\"temperature\":0.2},\"provider\":\"anthropic\",\"ref\":\"claude-sonnet-5-5\"}}",
+  "contentHash": "sha256-7fd97e3406e82dc02de66c4c5ea5a87d779381f20ff355743ea8d0747a5a11ce",
+  "slots": [
+    {
+      "message": 1,
+      "kind": "slot",
+      "name": "amount",
+      "offset": 7,
+      "length": 16
+    },
+    {
+      "message": 1,
+      "kind": "slot",
+      "name": "ceiling",
+      "offset": 35,
+      "length": 17
+    }
+  ],
+  "render": {
+    "inputs": {
+      "amount": 42.5
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You answer refund requests."
+      },
+      {
+        "role": "user",
+        "content": "Refund 42.5 of at most 1e+21."
+      }
+    ]
+  }
+}
