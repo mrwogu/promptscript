@@ -194,6 +194,16 @@ describe('prompt bundle schema rules', () => {
     ],
     ['an output property named toString', withOutput('toString')],
     [
+      'a fractional maxTokens',
+      mutate(
+        (b) => (b['model'] = { ref: 'm', provider: 'p', apiId: 'a', params: { maxTokens: 1.5 } })
+      ),
+    ],
+    [
+      'a zero topK',
+      mutate((b) => (b['model'] = { ref: 'm', provider: 'p', apiId: 'a', params: { topK: 0 } })),
+    ],
+    [
       'a seed above 2^53-1',
       mutate(
         (b) => (b['model'] = { ref: 'm', provider: 'p', apiId: 'a', params: { seed: 2 ** 53 } })
