@@ -161,11 +161,12 @@ jobs:
         if: matrix.node-version == '25.x' && hashFiles('coverage/**/coverage-final.json') != ''
 
       - name: Report no coverage to Codecov
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         if: matrix.node-version == '25.x' && hashFiles('coverage/**/coverage-final.json') == ''
         with:
           run_command: empty-upload
           force: true
+          fail_ci_if_error: true
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() && matrix.node-version == '25.x' }}
