@@ -138,6 +138,13 @@ describe('PS043: unresolved-prompt-slot', () => {
       });
     });
 
+    it('reports a malformed input slot in a composed block', () => {
+      const messages = run({ compose: ['identity'] }, composed('See {{input.foo.bar}}'));
+
+      expect(messages).toHaveLength(1);
+      expect(messages[0]!.message).toContain('contains {{input.foo.bar}}');
+    });
+
     it('reports a dotted name in a composed block at the block', () => {
       const messages = run({ compose: ['identity'] }, composed('Team {{ctx.foo}}'));
 

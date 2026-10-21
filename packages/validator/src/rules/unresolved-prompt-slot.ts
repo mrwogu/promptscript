@@ -15,6 +15,7 @@ import {
 
 const NAMESPACED = /^\{\{\s*([A-Za-z_]\w*)\.[A-Za-z_]\w*\s*\}\}$/;
 const NEAR_MISS_SLOT = /^\{\{\s*input\s*\.\s*([a-z_]\w*)\s*\}\}$/i;
+const DOTTED = /^\{\{\s*[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+\s*\}\}$/;
 const BARE = /^\{\{\s*([A-Za-z_]\w*)\s*\}\}$/;
 
 /** A slot as authored, for messages: `{{input.name}}`. */
@@ -90,7 +91,7 @@ function checkOwnText(ctx: RuleContext, prompt: PromptDefinition): void {
 
 /** A live slot, or a dotted `{{ns.name}}` that is not one. */
 function isSlotLike(match: RuntimeSlotMatch, source: string): boolean {
-  return match.kind === 'slot' || (match.kind === 'invalid' && NAMESPACED.test(source));
+  return match.kind === 'slot' || (match.kind === 'invalid' && DOTTED.test(source));
 }
 
 function checkComposedText(ctx: RuleContext, prompt: PromptDefinition): void {
