@@ -574,7 +574,7 @@ Use `@use` to import and merge fragments (like mixins):
 
 ### Merge Precedence
 
-PromptScript applies declarations in source order. Import merge policy and
+Under syntax `1.5.0`, PromptScript applies declarations in source order. Import merge policy and
 later operations are separate decisions:
 
 ```promptscript
