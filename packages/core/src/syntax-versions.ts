@@ -212,7 +212,10 @@ export function getLatestSyntaxVersion(): string {
  * default version that new files are written with.
  */
 export function getHighestKnownSyntaxVersion(): string {
-  return Object.keys(SYNTAX_VERSIONS).reduce((a, b) => (compareVersions(a, b) >= 0 ? a : b));
+  return Object.keys(SYNTAX_VERSIONS).reduce(
+    (a, b) => (compareVersions(a, b) >= 0 ? a : b),
+    '0.0.0'
+  );
 }
 
 /**
