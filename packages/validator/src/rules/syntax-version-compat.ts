@@ -3,7 +3,7 @@ import { walkBlocks, getBlockName } from '../walker.js';
 import { isValidSemver } from './valid-semver.js';
 import {
   isKnownSyntaxVersion,
-  getLatestSyntaxVersion,
+  getHighestKnownSyntaxVersion,
   getMinimumVersionForBlock,
   getMinimumVersionForFeature,
   getSyntaxFeatureUsages,
@@ -27,7 +27,7 @@ export const syntaxVersionCompat: ValidationRule = {
 
     if (!isKnownSyntaxVersion(syntax)) {
       ctx.report({
-        message: `Unknown syntax version "${syntax}". Latest known version is "${getLatestSyntaxVersion()}".`,
+        message: `Unknown syntax version "${syntax}". Latest known version is "${getHighestKnownSyntaxVersion()}".`,
         location: meta.loc ?? ctx.ast.loc,
         suggestion: 'Use "prs upgrade" to update to the latest syntax version.',
       });

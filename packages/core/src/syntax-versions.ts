@@ -208,6 +208,14 @@ export function getLatestSyntaxVersion(): string {
 }
 
 /**
+ * Get the highest syntax version in the registry, which can be above the
+ * default version that new files are written with.
+ */
+export function getHighestKnownSyntaxVersion(): string {
+  return Object.keys(SYNTAX_VERSIONS).reduce((a, b) => (compareVersions(a, b) >= 0 ? a : b));
+}
+
+/**
  * Check if a version string is a known syntax version.
  */
 export function isKnownSyntaxVersion(version: string): boolean {

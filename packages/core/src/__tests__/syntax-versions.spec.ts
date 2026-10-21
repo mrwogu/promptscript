@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   SYNTAX_VERSIONS,
+  getHighestKnownSyntaxVersion,
   getLatestSyntaxVersion,
   isKnownSyntaxVersion,
   getBlocksForVersion,
@@ -111,6 +112,12 @@ describe('registry consistency', () => {
         expect(current.features).toContain(feature);
       }
     }
+  });
+});
+
+describe('getHighestKnownSyntaxVersion', () => {
+  it('returns the highest registered version', () => {
+    expect(getHighestKnownSyntaxVersion()).toBe('1.6.0');
   });
 });
 

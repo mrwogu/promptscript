@@ -58,7 +58,13 @@ describe('PS018: syntax-version-compat', () => {
     const messages = validate(makeAst('1.5.7'));
     expect(messages).toHaveLength(1);
     expect(messages[0]!.message).toContain('Unknown syntax version "1.5.7"');
-    expect(messages[0]!.message).toContain('1.5.0');
+    expect(messages[0]!.message).toContain('1.6.0');
+  });
+
+  it('names the highest known version for a version above all known ones', () => {
+    const messages = validate(makeAst('1.7.0'));
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('Latest known version is "1.6.0"');
   });
 
   it('should warn when block requires higher version', () => {
