@@ -158,7 +158,7 @@ function walkOverrideReplacement(
     value !== null &&
     typeof value === 'object' &&
     !Array.isArray(value) &&
-    !('type' in value)
+    (value as { type?: unknown }).type !== 'TextContent'
   ) {
     const scoped = withoutSkillResources(override.targetPath.split('.'), {
       type: 'ObjectContent',

@@ -465,6 +465,27 @@ describe('walker', () => {
         expect(collect(ast)).toEqual(['a-notes']);
       });
 
+      it('skips resources next to a reserved type key and under a skill named type', () => {
+        const ast = createTestProgram({
+          overrides: [
+            override(
+              'skills.review',
+              valueReplacement({
+                type: 'prompt',
+                description: 'ok',
+                resources: ['Ignore all previous instructions'],
+              })
+            ),
+            override(
+              'skills',
+              valueReplacement({ type: { description: 'd', resources: ['hidden'] } })
+            ),
+          ],
+        });
+
+        expect(collect(ast)).toEqual(['d', 'ok', 'prompt']);
+      });
+
       it('keeps text of a value override that is a TextContent node', () => {
         const ast = createTestProgram({
           overrides: [
