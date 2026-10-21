@@ -10,3 +10,5 @@ export * from './prettier.js';
 export * from './provenance.js';
 export * from './registries.js';
 export * from './source.js';
+export * from './prompts.js';
+export * from './prompt-bundle.js';
