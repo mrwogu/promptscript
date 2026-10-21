@@ -34,10 +34,11 @@ function checkMeta(ctx: RuleContext): void {
     });
   }
   const id = meta.fields['id'];
-  const problem = typeof id === 'string' ? idProblem(id) : undefined;
+  if (typeof id !== 'string') return;
+  const problem = idProblem(id);
   if (problem) {
     ctx.report({
-      message: `@meta id "${String(id)}" ${problem}, but the prompts in this file build their ids from it`,
+      message: `@meta id "${id}" ${problem}, but the prompts in this file build their ids from it`,
       location: meta.loc,
       suggestion: 'Use letters, digits, ".", "_" and "-", with "/" between segments.',
     });

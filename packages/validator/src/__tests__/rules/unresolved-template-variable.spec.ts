@@ -102,6 +102,22 @@ describe('PS045: unresolved-template-variable', () => {
       expect(run([promptsBlock({ review: entry })])).toEqual([]);
     });
 
+    it('skips prompt text when free text sits next to the entries', () => {
+      const block: Block = {
+        type: 'Block',
+        name: 'prompts',
+        loc: PROMPT_LOC,
+        content: {
+          type: 'MixedContent',
+          text: textBlockValue('Notes') as never,
+          properties: { review: { ...VALID_PROMPT, user: 'Hi {{input.message}}' } },
+          loc: PROMPT_LOC,
+        },
+      };
+
+      expect(run([block])).toEqual([]);
+    });
+
     it('still checks other text of a prompt entry', () => {
       const entry = { ...VALID_PROMPT, description: 'For {{team}}' };
 

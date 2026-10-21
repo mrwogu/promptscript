@@ -11,7 +11,7 @@ import type { ValidationRule } from '../types.js';
 import { offsetLocation, walkText } from '../walker.js';
 import { isValidSemver } from './valid-semver.js';
 
-const TEMPLATE = /\{\{([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)\}\}/g;
+const TEMPLATE = /\{\{([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\}\}/g;
 const FENCE = /^\s*(```|~~~)/;
 const PROMPT_TEXT_KEYS = new Set(['system', 'user']);
 
@@ -42,7 +42,8 @@ function isPlainObject(value: Value): value is Record<string, Value> {
 function withoutPromptText(ast: Program): Program {
   const strip = (block: Block): Block => {
     const content: BlockContent = block.content;
-    if (block.name !== 'prompts' || content.type !== 'ObjectContent') return block;
+    if (block.name !== 'prompts') return block;
+    if (content.type !== 'ObjectContent' && content.type !== 'MixedContent') return block;
     const properties: Record<string, Value> = {};
     for (const [key, entry] of Object.entries(content.properties)) {
       properties[key] = isPlainObject(entry)

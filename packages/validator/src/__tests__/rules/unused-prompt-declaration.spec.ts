@@ -24,6 +24,12 @@ describe('PS044: unused-prompt-declaration', () => {
     ).toEqual([]);
   });
 
+  it('counts a use in a system-only entry', () => {
+    expect(
+      run({ inputs: TWO_INPUTS, user: undefined, system: '{{input.message}} {{input.orderTotal}}' })
+    ).toEqual([]);
+  });
+
   it('reports an input that no text uses', () => {
     const messages = run({ inputs: TWO_INPUTS, user: '{{input.message}}' });
 
