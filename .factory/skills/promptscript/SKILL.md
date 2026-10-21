@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-09-26T06:14:36.139Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-10-21T01:03:15.685Z | source: .promptscript/project.prs | target: factory
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -1154,6 +1154,8 @@ prs build <name>            # Compile a named build profile
 prs validate --strict       # Validate syntax
 prs validate --fix          # Auto-fix syntax version declarations
 prs validate --skip-policies # Skip policy engine evaluation
+prs fmt                     # Rewrite .prs files in canonical form
+prs fmt --check             # List files that would change, exit 1 if any
 prs upgrade                 # Upgrade all .prs files to latest syntax version
 prs import CLAUDE.md        # Import existing AI instructions
 prs import CLAUDE.md --dry-run # Preview import conversion
