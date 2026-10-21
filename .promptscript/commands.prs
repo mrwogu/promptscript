@@ -194,31 +194,31 @@
   @header post-work "Post-Work Verification (MANDATORY)"
 
   """
-  ## Development Commands
+    ## Development Commands
 
-  ```bash
-  pnpm install              # Install dependencies
-  pnpm nx build <pkg>       # Build package
-  pnpm nx test <pkg>        # Run tests
-  pnpm nx lint <pkg>        # Lint code
-  pnpm nx run-many -t test  # Test all packages
-  pnpm nx graph             # View dependency graph
-  pnpm prs compile          # Compile .prs files (uses local dev version)
-  ```
+    ```bash
+    pnpm install              # Install dependencies
+    pnpm nx build <pkg>       # Build package
+    pnpm nx test <pkg>        # Run tests
+    pnpm nx lint <pkg>        # Lint code
+    pnpm nx run-many -t test  # Test all packages
+    pnpm nx graph             # View dependency graph
+    pnpm prs compile          # Compile .prs files (uses local dev version)
+    ```
 
-  ## Post-Work Verification
+    ## Post-Work Verification
 
-  After completing ANY code changes, run ALL steps in order:
-  ```bash
-  pnpm run format           # 1. Format code with Prettier
-  pnpm run lint             # 2. Check for linting errors
-  pnpm run typecheck        # 3. Verify TypeScript types
-  pnpm run test             # 4. Run all tests
-  pnpm prs validate --strict  # 5. Validate .prs files
-  pnpm schema:check         # 6. Verify JSON schemas are current
-  pnpm skill:check          # 7. Verify SKILL.md copies are in sync
-  pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
-  ```
-  If any step fails, fix the issue and re-run from that step.
+    After completing ANY code changes, run ALL steps in order:
+    ```bash
+    pnpm run format           # 1. Format code with Prettier
+    pnpm run lint             # 2. Check for linting errors
+    pnpm run typecheck        # 3. Verify TypeScript types
+    pnpm run test             # 4. Run all tests
+    pnpm prs validate --strict  # 5. Validate .prs files
+    pnpm schema:check         # 6. Verify JSON schemas are current
+    pnpm skill:check          # 7. Verify SKILL.md copies are in sync
+    pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
+    ```
+    If any step fails, fix the issue and re-run from that step.
   """
 }
