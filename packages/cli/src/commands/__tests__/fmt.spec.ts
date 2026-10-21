@@ -7,10 +7,25 @@ import {
   rmSync,
   statSync,
   utimesSync,
+  chmodSync,
+  readdirSync,
 } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fmtCommand } from '../fmt.js';
+
+const printOverride = vi.hoisted(() => ({ output: undefined as string | undefined }));
+
+vi.mock('@promptscript/parser', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@promptscript/parser')>();
+  return {
+    ...actual,
+    printProgram: (...args: Parameters<typeof actual.printProgram>): string =>
+      printOverride.output ?? actual.printProgram(...args),
+  };
+});
+
+const isRoot = typeof process.getuid === 'function' && process.getuid() === 0;
 
 const MESSY = '@meta{id:"a" syntax:"1.0.0"}\n\n\n@identity{\n"""\nHi\n"""\n}';
 
@@ -34,6 +49,7 @@ describe('fmtCommand', () => {
   });
 
   afterEach(() => {
+    printOverride.output = undefined;
     vi.restoreAllMocks();
     process.exitCode = undefined;
     rmSync(dir, { recursive: true, force: true });
@@ -47,8 +63,9 @@ describe('fmtCommand', () => {
 
     fmtCommand({ paths: [file] });
 
-    expect(readFileSync(file, 'utf-8')).not.toBe(MESSY);
-    expect(readFileSync(file, 'utf-8').endsWith('\n')).toBe(true);
+    expect(readFileSync(file, 'utf-8')).toBe(
+      '@meta {\n  id: "a"\n  syntax: "1.0.0"\n}\n\n@identity {\n  """\n    Hi\n  """\n}\n'
+    );
     expect(text()).toContain('Formatted');
     expect(text()).toContain('1 formatted, 0 unchanged, 0 failed');
     expect(process.exitCode).toBeUndefined();
@@ -149,6 +166,102 @@ describe('fmtCommand', () => {
     fmtCommand({ paths: [join(dir, 'nope.prs')] });
 
     expect(text()).toContain('Path not found');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('skips an explicit non-.prs file with a warning and does not count it', () => {
+    const notes = join(dir, 'notes.md');
+    writeFileSync(notes, MESSY);
+
+    fmtCommand({ paths: [notes] });
+
+    expect(readFileSync(notes, 'utf-8')).toBe(MESSY);
+    expect(text()).toContain('not a .prs file');
+    expect(text()).toContain('0 formatted, 0 unchanged, 0 failed');
+    expect(process.exitCode).toBeUndefined();
+  });
+
+  it('skips .cache when walking a directory', () => {
+    mkdirSync(join(dir, '.cache'));
+    writeFileSync(join(dir, '.cache', 'c.prs'), MESSY);
+
+    fmtCommand({ paths: [dir] });
+
+    expect(readFileSync(join(dir, '.cache', 'c.prs'), 'utf-8')).toBe(MESSY);
+    expect(text()).toContain('0 formatted, 0 unchanged, 0 failed');
+  });
+
+  it('formats vendored files that are named explicitly', () => {
+    mkdirSync(join(dir, 'vendor'));
+    const file = join(dir, 'vendor', 'v.prs');
+    writeFileSync(file, MESSY);
+
+    fmtCommand({ paths: [file] });
+
+    expect(readFileSync(file, 'utf-8')).not.toBe(MESSY);
+  });
+
+  it('--check reports both a would-change file and a parse failure, writing nothing', () => {
+    const bad = join(dir, 'bad.prs');
+    const messy = join(dir, 'messy.prs');
+    writeFileSync(bad, '@meta {\n  id: 1 2 3\n}\n');
+    writeFileSync(messy, MESSY);
+
+    fmtCommand({ paths: [dir], check: true });
+
+    expect(readFileSync(messy, 'utf-8')).toBe(MESSY);
+    expect(readFileSync(bad, 'utf-8')).toBe('@meta {\n  id: 1 2 3\n}\n');
+    expect(text()).toContain('Would reformat');
+    expect(text()).toContain('messy.prs');
+    expect(text()).toContain('bad.prs:2:9');
+    expect(text()).toContain('1 would change, 0 unchanged, 1 failed');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('refuses to write output that does not parse', () => {
+    const file = join(dir, 'a.prs');
+    writeFileSync(file, MESSY);
+    printOverride.output = '@meta {{{ garbage';
+
+    fmtCommand({ paths: [file] });
+
+    expect(readFileSync(file, 'utf-8')).toBe(MESSY);
+    expect(text()).toContain('printer produced unparseable output, file left untouched');
+    expect(text()).toContain('0 formatted, 0 unchanged, 1 failed');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it.skipIf(isRoot)('records a read error, keeps going and exits 1', () => {
+    const locked = join(dir, 'a-locked.prs');
+    const good = join(dir, 'b-good.prs');
+    writeFileSync(locked, MESSY);
+    chmodSync(locked, 0o000);
+    writeFileSync(good, MESSY);
+
+    fmtCommand({ paths: [dir] });
+
+    chmodSync(locked, 0o644);
+    expect(readFileSync(good, 'utf-8')).not.toBe(MESSY);
+    expect(text()).toContain('a-locked.prs');
+    expect(text()).toContain('EACCES');
+    expect(text()).toContain('1 formatted, 0 unchanged, 1 failed');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it.skipIf(isRoot)('records a write error, keeps going and leaves no temporary file', () => {
+    mkdirSync(join(dir, 'ro'));
+    mkdirSync(join(dir, 'rw'));
+    writeFileSync(join(dir, 'ro', 'a.prs'), MESSY);
+    writeFileSync(join(dir, 'rw', 'b.prs'), MESSY);
+    chmodSync(join(dir, 'ro'), 0o555);
+
+    fmtCommand({ paths: [dir] });
+
+    chmodSync(join(dir, 'ro'), 0o755);
+    expect(readFileSync(join(dir, 'ro', 'a.prs'), 'utf-8')).toBe(MESSY);
+    expect(readdirSync(join(dir, 'ro'))).toEqual(['a.prs']);
+    expect(readFileSync(join(dir, 'rw', 'b.prs'), 'utf-8')).not.toBe(MESSY);
+    expect(text()).toContain('1 formatted, 0 unchanged, 1 failed');
     expect(process.exitCode).toBe(1);
   });
 });

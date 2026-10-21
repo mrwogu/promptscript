@@ -1,9 +1,9 @@
-import { chmodSync, lstatSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
-import { randomUUID } from 'node:crypto';
+import { lstatSync, readFileSync } from 'node:fs';
 import { compareVersions, getLatestSyntaxVersion } from '@promptscript/core';
 import { parse } from '@promptscript/parser';
 import { fixSyntaxVersion, discoverPrsFiles } from './validate.js';
 import { ConsoleOutput } from '../output/console.js';
+import { writeFileAtomic } from '../utils/write-file-atomic.js';
 
 export interface UpgradeOptions {
   dryRun?: boolean;
@@ -14,22 +14,6 @@ interface UpgradePlan {
   originalContent: string;
   content: string;
   declaredVersion: string;
-}
-
-function writeUpgrade(filePath: string, content: string, mode: number): void {
-  const temporaryPath = `${filePath}.upgrade-${process.pid}-${randomUUID()}.tmp`;
-  try {
-    writeFileSync(temporaryPath, content, { encoding: 'utf-8', mode });
-    chmodSync(temporaryPath, mode);
-    renameSync(temporaryPath, filePath);
-  } catch (error) {
-    try {
-      unlinkSync(temporaryPath);
-    } catch {
-      // The temporary file may not have been created.
-    }
-    throw error;
-  }
 }
 
 /**
@@ -155,7 +139,7 @@ export async function upgradeCommand(options: UpgradeOptions): Promise<void> {
       if (currentStats.isSymbolicLink()) {
         throw new Error('file became a symbolic link during upgrade');
       }
-      writeUpgrade(plan.filePath, plan.content, currentStats.mode & 0o7777);
+      writeFileAtomic(plan.filePath, plan.content, currentStats.mode & 0o7777);
       console.log(`Upgraded: ${plan.filePath}  "${plan.declaredVersion}" \u2192 "${latest}"`);
       upgradedCount++;
     } catch (error) {

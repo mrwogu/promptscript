@@ -1,8 +1,9 @@
-import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { relative, resolve, sep } from 'node:path';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { extname, relative, resolve, sep } from 'node:path';
 import { parseCanonical, printProgram } from '@promptscript/parser';
 import type { FmtOptions } from '../types.js';
 import { ConsoleOutput } from '../output/console.js';
+import { writeFileAtomic } from '../utils/write-file-atomic.js';
 import { discoverPrsFiles } from './validate.js';
 
 /** Directories holding third-party sources that must never be rewritten. */
@@ -25,6 +26,8 @@ function collectFiles(paths: string[], failures: string[]): string[] {
       for (const file of discoverPrsFiles(target)) {
         if (!isSkipped(file, target)) files.add(file);
       }
+    } else if (extname(target) !== '.prs') {
+      ConsoleOutput.warning(`Skipped ${input}: not a .prs file`);
     } else {
       files.add(target);
     }
@@ -45,29 +48,38 @@ export function fmtCommand(options: FmtOptions): void {
   for (const file of files) {
     const rel = relative(process.cwd(), file);
     const name = rel.startsWith('..') ? file : rel;
-    const source = readFileSync(file, 'utf-8');
-    const { ast, errors, comments } = parseCanonical(source, { filename: name });
-    if (!ast || errors.length > 0) {
-      const first = errors[0];
-      const loc = first?.location;
-      // The parser reports -1:-1 for errors at end of input.
-      const where = loc && loc.line > 0 ? `:${loc.line}:${loc.column}` : '';
-      const message = first?.message.split('\n')[0] ?? 'Parse failed';
-      failures.push(`${name}${where} ${message}`);
-      continue;
-    }
+    try {
+      const source = readFileSync(file, 'utf-8');
+      const { ast, errors, comments } = parseCanonical(source, { filename: name });
+      if (!ast || errors.length > 0) {
+        const first = errors[0];
+        const loc = first?.location;
+        // The parser reports -1:-1 for errors at end of input.
+        const where = loc && loc.line > 0 ? `:${loc.line}:${loc.column}` : '';
+        const message = first?.message.split('\n')[0] ?? 'Parse failed';
+        failures.push(`${name}${where} ${message}`);
+        continue;
+      }
 
-    const formatted = printProgram(ast, comments);
-    if (formatted === source) {
-      unchanged++;
-      continue;
-    }
-    changed++;
-    if (options.check) {
-      ConsoleOutput.warning(`Would reformat ${name}`);
-    } else {
-      writeFileSync(file, formatted, 'utf-8');
-      ConsoleOutput.success(`Formatted ${name}`);
+      const formatted = printProgram(ast, comments);
+      if (formatted === source) {
+        unchanged++;
+        continue;
+      }
+      if (parseCanonical(formatted, { filename: name }).errors.length > 0) {
+        failures.push(`${name} printer produced unparseable output, file left untouched`);
+        continue;
+      }
+      if (options.check) {
+        ConsoleOutput.warning(`Would reformat ${name}`);
+      } else {
+        writeFileAtomic(file, formatted, statSync(file).mode & 0o7777);
+        ConsoleOutput.success(`Formatted ${name}`);
+      }
+      changed++;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      failures.push(`${name} ${message}`);
     }
   }
 
