@@ -531,11 +531,12 @@ diagnostics keep exit status 0.
 `prs fmt` rewrites `.prs` files atomically and keeps comments and declaration order, but
 not blank lines: blank lines between fields and around comments are dropped, every array
 prints on one line, comments inside `@meta` move before its closing brace, and comments in
-`@use` and `@inherit` parameter lists move to their own line. Directory walks skip `node_modules`, `vendor` and `.cache`. Files without the
-`.prs` extension and symbolic links are skipped, and read-only files are reported and not
-written. It exits 1 for a missing path, a named path that is not a regular file, a directory or file
-that cannot be read, a file that cannot be parsed or written, or (with `--check`) files that would change. `--quiet` hides the `--check`
-file list.
+`@use` and `@inherit` parameter lists move to their own line. Directory walks skip
+`node_modules`, `vendor` and `.cache`. Files without the `.prs` extension and symbolic
+links are skipped, and read-only files are reported and not written. It exits 1 for a
+missing path, a named path that is not a regular file, a directory or file that cannot
+be read, a file that cannot be parsed or written, or (with `--check`) files that would
+change. `--quiet` hides the `--check` file list.
 
 See the [complete CLI reference](https://getpromptscript.dev/reference/cli/) for every option.
 

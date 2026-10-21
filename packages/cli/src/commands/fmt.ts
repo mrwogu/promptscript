@@ -16,16 +16,17 @@ import { writeFileAtomic } from '../utils/write-file-atomic.js';
 /** Directories holding third-party sources that must never be rewritten. */
 const SKIPPED_DIRS = new Set(['node_modules', 'vendor', '.cache']);
 
-/**
- * Walk a directory for .prs files, symbolic links included so the caller can warn.
- * Unlike discoverPrsFiles, a directory that cannot be read is reported and the walk
- * continues, so readable files are still formatted and the failure is not swallowed.
- */
+/** Path relative to the working directory, as reported in messages. */
 function displayName(file: string): string {
   const rel = relative(process.cwd(), file);
   return rel.startsWith('..') ? file : rel;
 }
 
+/**
+ * Walk a directory for .prs files, symbolic links included so the caller can warn.
+ * Unlike discoverPrsFiles, a directory that cannot be read is reported and the walk
+ * continues, so readable files are still formatted and the failure is not swallowed.
+ */
 function walkPrsFiles(dir: string, failures: string[]): string[] {
   const results: string[] = [];
   try {

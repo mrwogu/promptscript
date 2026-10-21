@@ -566,8 +566,8 @@ directory, so naming `.promptscript/vendor` explicitly formats the vendored file
 file path without the `.prs` extension is skipped with a warning and is not counted,
 so `prs fmt .promptscript/*` leaves `.md` and `.sh` files alone. Symbolic links are
 skipped with a warning and are not counted, so a link is never replaced by a regular
-file. With no paths,
-`prs fmt` formats every `.prs` file under `.promptscript`.
+file. Non-regular files such as named pipes are ignored when found while walking. With
+no paths, `prs fmt` formats every `.prs` file under `.promptscript`.
 
 **Options:**
 
