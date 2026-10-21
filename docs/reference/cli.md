@@ -590,7 +590,9 @@ prs fmt --check
 
 A file that does not parse is reported with its first error and location, is never
 written, and makes the exit code 1. A file that cannot be read or written is
-reported the same way, and so is a read-only file, which is never rewritten. Files are written atomically (temporary file, then rename,
+reported the same way, and so is a directory that cannot be read during a walk (the
+rest of the walk continues), a named path that is not a regular file, and a read-only
+file, which is never rewritten. Files are written atomically (temporary file, then rename,
 keeping the original mode), and the printed output is parsed again before writing;
 if it does not parse the file is left untouched and reported as failed. Other files
 are still processed. The last line summarizes how many files were formatted (or would
@@ -611,10 +613,10 @@ The printer keeps comments and declaration order but not blank lines.
 
 **Exit Codes:**
 
-| Code | Meaning                                                                                                 |
-| ---- | ------------------------------------------------------------------------------------------------------- |
-| 0    | All files formatted or unchanged (`--check`: nothing would change)                                      |
-| 1    | A path was not found, a file failed to parse, read or write, or `--check` found files that would change |
+| Code | Meaning                                                                                                                                                        |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0    | All files formatted or unchanged (`--check`: nothing would change)                                                                                             |
+| 1    | A path was not found or is not a regular file, a directory or file cannot be read, a file failed to parse or write, or `--check` found files that would change |
 
 ---
 

@@ -21,6 +21,11 @@ const SKIPPED_DIRS = new Set(['node_modules', 'vendor', '.cache']);
  * Unlike discoverPrsFiles, a directory that cannot be read is reported and the walk
  * continues, so readable files are still formatted and the failure is not swallowed.
  */
+function displayName(file: string): string {
+  const rel = relative(process.cwd(), file);
+  return rel.startsWith('..') ? file : rel;
+}
+
 function walkPrsFiles(dir: string, failures: string[]): string[] {
   const results: string[] = [];
   try {
@@ -28,13 +33,13 @@ function walkPrsFiles(dir: string, failures: string[]): string[] {
       const fullPath = join(dir, entry.name);
       if (entry.isDirectory()) {
         if (!SKIPPED_DIRS.has(entry.name)) results.push(...walkPrsFiles(fullPath, failures));
-      } else if (entry.name.endsWith('.prs')) {
+      } else if (entry.name.endsWith('.prs') && (entry.isFile() || entry.isSymbolicLink())) {
         results.push(fullPath);
       }
     }
   } catch (error) {
     // fs.readdirSync only ever throws Error instances.
-    failures.push(`${dir} ${(error as Error).message}`);
+    failures.push(`${displayName(dir)} ${(error as Error).message}`);
   }
   return results;
 }
@@ -49,12 +54,14 @@ function collectFiles(paths: string[], failures: string[]): string[] {
       for (const file of walkPrsFiles(target, failures)) files.add(file);
     } else if (extname(target) !== '.prs') {
       ConsoleOutput.warning(`Skipped ${input}: not a .prs file`);
+    } else if (!statSync(target).isFile()) {
+      failures.push(`${input} is not a regular file`);
     } else {
       files.add(target);
     }
   }
-  // Compare by code units so the order never depends on the locale; paths are unique.
-  return [...files].sort((a, b) => (a < b ? -1 : 1));
+  // Compare by code units so the order never depends on the locale;.
+  return [...files].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 type FileOutcome = 'changed' | 'unchanged' | 'skipped' | 'failed';
@@ -127,9 +134,7 @@ export function fmtCommand(options: FmtOptions): void {
   const counts: Record<FileOutcome, number> = { changed: 0, unchanged: 0, skipped: 0, failed: 0 };
 
   for (const file of files) {
-    const rel = relative(process.cwd(), file);
-    const name = rel.startsWith('..') ? file : rel;
-    counts[formatOne(file, name, options.check === true, failures)]++;
+    counts[formatOne(file, displayName(file), options.check === true, failures)]++;
   }
 
   for (const failure of failures) ConsoleOutput.error(failure);

@@ -198,8 +198,9 @@ With no paths, formats every .prs file under .promptscript. Directory walks skip
 node_modules, vendor and .cache; name a file or one of those directories
 explicitly to format it. Files without the .prs extension and symbolic links are
 skipped. Read-only files are reported and not written.
-Exit code 1: a path is missing, a file cannot be parsed, read or written, or
---check found files that would change.`
+Exit code 1: a path is missing, a directory or file cannot be read, a file cannot
+be parsed or written, a named path is not a regular file, or --check found files
+that would change.`
   )
   .action((paths, opts) => fmtCommand({ ...opts, paths }));
 

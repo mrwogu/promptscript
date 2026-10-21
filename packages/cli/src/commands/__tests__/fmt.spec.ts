@@ -13,6 +13,7 @@ import {
   lstatSync,
 } from 'node:fs';
 import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { fmtCommand } from '../fmt.js';
 
@@ -36,6 +37,7 @@ vi.mock('@promptscript/parser', async (importOriginal) => {
   };
 });
 
+const hasMkfifo = process.platform !== 'win32';
 const isRoot = typeof process.getuid === 'function' && process.getuid() === 0;
 
 const MESSY = '@meta{id:"a" syntax:"1.0.0"}\n\n\n@identity{\n"""\nHi\n"""\n}';
@@ -319,6 +321,37 @@ describe('fmtCommand', () => {
     expect(text().indexOf('a.prs')).toBeLessThan(text().indexOf('b.prs'));
     expect(readFileSync(join(dir, 'notes.md'), 'utf-8')).toBe(MESSY);
     expect(text()).toContain('3 formatted, 0 unchanged, 0 failed');
+  });
+
+  it('formats explicit paths in sorted order', () => {
+    const a = join(dir, 'a.prs');
+    const b = join(dir, 'b.prs');
+    writeFileSync(a, MESSY);
+    writeFileSync(b, MESSY);
+
+    fmtCommand({ paths: [b, a] });
+
+    expect(text().indexOf('a.prs')).toBeLessThan(text().indexOf('b.prs'));
+  });
+
+  it.skipIf(!hasMkfifo)('ignores a named pipe found while walking and finishes', () => {
+    execFileSync('mkfifo', [join(dir, 'pipe.prs')]);
+    writeFileSync(join(dir, 'ok.prs'), MESSY);
+
+    fmtCommand({ paths: [dir] });
+
+    expect(text()).toContain('1 formatted, 0 unchanged, 0 failed');
+    expect(process.exitCode).toBeUndefined();
+  });
+
+  it.skipIf(!hasMkfifo)('reports an explicitly named pipe as not a regular file', () => {
+    const pipe = join(dir, 'pipe.prs');
+    execFileSync('mkfifo', [pipe]);
+
+    fmtCommand({ paths: [pipe] });
+
+    expect(text()).toContain('is not a regular file');
+    expect(process.exitCode).toBe(1);
   });
 
   it.skipIf(isRoot)('reports an unreadable subdirectory and still formats the rest', () => {
