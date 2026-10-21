@@ -234,6 +234,15 @@ describe('normalizeProvenanceFiles', () => {
     expect(result.entries[0]?.history[0]?.strategy).toBe('x');
   });
 
+  it('should leave an already normalized trace unchanged', () => {
+    const once = normalizeProvenanceFiles(
+      trace('/home/ann/other/a.prs', [entry('identity', '/work/app/b.prs', [])]),
+      '/work/app'
+    );
+
+    expect(normalizeProvenanceFiles(once, undefined)).toEqual(once);
+  });
+
   it('should not change its input', () => {
     const input = trace('/work/app/a.prs', [entry('identity', '/work/app/a.prs', [])]);
     const before = JSON.stringify(input);

@@ -461,6 +461,33 @@ describe('FormatterRegistry', () => {
     });
   });
 
+  describe('listDefault', () => {
+    it('should list every registered formatter except the opt-in prompt targets', () => {
+      // Act
+      const names = FormatterRegistry.listDefault();
+
+      // Assert
+      expect(FormatterRegistry.list()).toEqual(expect.arrayContaining(['bundle', 'prompt-text']));
+      expect(names).not.toContain('bundle');
+      expect(names).not.toContain('prompt-text');
+      expect(names).toEqual(
+        FormatterRegistry.list().filter((n) => n !== 'bundle' && n !== 'prompt-text')
+      );
+    });
+
+    it('should keep a custom formatter in the default list', () => {
+      // Arrange
+      FormatterRegistry.register('my-custom-target', () => new MockFormatter());
+
+      // Act
+      const names = FormatterRegistry.listDefault();
+      FormatterRegistry.unregister('my-custom-target');
+
+      // Assert
+      expect(names).toContain('my-custom-target');
+    });
+  });
+
   describe('has', () => {
     it('should return true for registered formatter', () => {
       // Act & Assert

@@ -70,6 +70,8 @@ import { MimoFormatter } from './formatters/mimo.js';
 import { DeepAgentsFormatter } from './formatters/deep-agents.js';
 import { ForgecodeFormatter } from './formatters/forgecode.js';
 import { HermesFormatter } from './formatters/hermes.js';
+import { BundleFormatter } from './formatters/bundle.js';
+import { PromptTextFormatter } from './formatters/prompt-text.js';
 import { GitlabDuoFormatter } from './formatters/gitlab-duo.js';
 
 /**
@@ -133,6 +135,9 @@ export const BUILTIN_FORMATTERS = {
   'deep-agents': DeepAgentsFormatter,
   forgecode: ForgecodeFormatter,
   hermes: HermesFormatter,
+  // Prompt targets, opt-in only
+  bundle: BundleFormatter,
+  'prompt-text': PromptTextFormatter,
   // GitLab Duo (Agent Platform)
   'gitlab-duo': GitlabDuoFormatter,
 } as const satisfies Record<KnownTarget, FormatterClass>;

@@ -101,6 +101,25 @@ describe('output plan', () => {
     ).toThrow(OutputPlanPathError);
   });
 
+  it('plans nothing for an omitted artifact and its nested files', () => {
+    const plan = createOutputPlan([
+      {
+        owner: 'bundle',
+        output: {
+          path: 'prompts/index.json',
+          content: '',
+          omit: true,
+          managedOutputDirectories: ['prompts'],
+          additionalFiles: [{ path: 'prompts/a.json', content: '{}' }],
+        },
+      },
+      { owner: 'claude', output: { path: 'CLAUDE.md', content: 'x' } },
+    ]);
+
+    expect(plan.files.map((file) => file.path)).toEqual(['CLAUDE.md']);
+    expect(plan.managedPaths.directories).toEqual([]);
+  });
+
   it('flattens nested resources and keeps deterministic path order', () => {
     const candidates: OutputPlanCandidate[] = [
       {

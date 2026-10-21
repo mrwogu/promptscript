@@ -893,6 +893,14 @@ export function getTargetDefinition(name: KnownTarget): TargetDefinition {
 }
 
 /**
+ * Built-in targets that write instructions for a coding agent: every known target except the
+ * prompt family.
+ */
+export const CODING_TARGETS: readonly KnownTarget[] = KNOWN_TARGETS.filter(
+  (name) => TARGET_DEFINITIONS[name].family !== 'prompt'
+);
+
+/**
  * Whether a target name is a built-in prompt target (`bundle`, `prompt-text`).
  * Prompt targets are opt-in: no "all formatters" default includes them.
  * @param name - Any target name, built-in or custom

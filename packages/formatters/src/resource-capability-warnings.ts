@@ -1,5 +1,6 @@
 import {
   isKnownTarget,
+  isPromptTarget,
   resolveTargetVersion,
   TARGET_CAPABILITIES,
   type Block,
@@ -39,7 +40,7 @@ export function getResourceCapabilityWarnings(
   target: string,
   version: string | undefined
 ): FormatterWarning[] {
-  if (!isKnownTarget(target)) return [];
+  if (!isKnownTarget(target) || isPromptTarget(target)) return [];
 
   const capability = TARGET_CAPABILITIES[target];
   const resolvedVersion = resolveTargetVersion(capability, version);

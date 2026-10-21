@@ -9,7 +9,7 @@
  */
 
 import {
-  KNOWN_TARGETS,
+  CODING_TARGETS,
   getTargetCapability,
   getTargetSectionCapability,
   type KnownTarget,
@@ -183,16 +183,16 @@ const PARITY_DEFINITIONS: Omit<SectionSpec, 'requiredBy' | 'optionalFor' | 'head
  * Complete parity matrix projected from canonical target capabilities.
  */
 export const PARITY_MATRIX: SectionSpec[] = PARITY_DEFINITIONS.map((definition) => {
-  const requiredBy = KNOWN_TARGETS.filter(
+  const requiredBy = CODING_TARGETS.filter(
     (target) =>
       getTargetSectionCapability(getTargetCapability(target), definition.id)?.support === 'required'
   );
-  const optionalFor = KNOWN_TARGETS.filter(
+  const optionalFor = CODING_TARGETS.filter(
     (target) =>
       getTargetSectionCapability(getTargetCapability(target), definition.id)?.support === 'optional'
   );
   const headerVariations = Object.fromEntries(
-    KNOWN_TARGETS.map((target) => [
+    CODING_TARGETS.map((target) => [
       target,
       getTargetSectionCapability(getTargetCapability(target), definition.id)?.headers,
     ])

@@ -5,6 +5,7 @@ import type {
   OutputArtifact,
   PrettierMarkdownOptions,
   Program,
+  ProvenanceTrace,
   SourceLocation,
 } from '@promptscript/core';
 
@@ -69,6 +70,12 @@ export interface FormatOptions {
 
   /** Model catalog settings from promptscript.yaml, used to map agent models. */
   models?: ModelsConfig;
+
+  /**
+   * Provenance of the resolved program. Only the prompt targets read it, and the compilers pass
+   * it only to them, after rewriting every file so no machine path remains.
+   */
+  provenance?: ProvenanceTrace;
 }
 
 /**

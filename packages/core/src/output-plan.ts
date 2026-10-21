@@ -22,6 +22,11 @@ export interface OutputArtifact {
   managedOutputDirectories?: string[];
   /** Relative files managed by this artifact. */
   managedOutputFiles?: string[];
+  /**
+   * Plan nothing for this artifact. A formatter sets it when it has no file to write,
+   * for example a prompt target in a program without prompts.
+   */
+  omit?: boolean;
 }
 
 /** Role an artifact plays in collision resolution. */
@@ -282,6 +287,7 @@ function toPlanFile(
 function flattenCandidate(candidate: OutputPlanCandidate): OutputPlanFile[] {
   const role = candidate.role ?? 'primary';
   const files: OutputPlanFile[] = [];
+  if (candidate.output.omit === true) return files;
 
   const visit = (
     output: OutputArtifact,

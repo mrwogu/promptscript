@@ -85,6 +85,7 @@ class FileNormalizer {
   }
 
   file(raw: string): string {
+    if (raw.startsWith('external:')) return raw;
     const posix = collapse(toPosix(raw));
     const reference = this.references.get(posix);
     if (reference !== undefined) return reference;
