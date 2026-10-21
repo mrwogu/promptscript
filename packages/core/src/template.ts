@@ -210,6 +210,12 @@ function valueToString(value: Value): string {
 }
 
 /**
+ * Matches `{{variable}}` and dotted `{{namespace.name}}` placeholders. Global,
+ * so use it with `replace` or `matchAll`, which do not share `lastIndex`.
+ */
+export const TEMPLATE_VARIABLE_PATTERN = /\{\{([a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)\}\}/g;
+
+/**
  * Interpolate template variables in a text string.
  *
  * @param text - Text containing {{variable}} placeholders
@@ -218,12 +224,9 @@ function valueToString(value: Value): string {
  * @throws UndefinedVariableError if a variable is used but not defined
  */
 export function interpolateText(text: string, ctx: TemplateContext): string {
-  // Match {{variable}} and dotted {{namespace.name}} patterns. Dotted names such
-  // as the runtime slot {{input.name}} are never compile time variables, so they
-  // pass through untouched.
-  const pattern = /\{\{([a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)\}\}/g;
-
-  return text.replace(pattern, (match, varName: string) => {
+  // Dotted names such as the runtime slot {{input.name}} are never compile time
+  // variables, so they pass through untouched.
+  return text.replace(TEMPLATE_VARIABLE_PATTERN, (match, varName: string) => {
     if (varName.includes('.')) return match;
     const value = ctx.params.get(varName);
     if (value === undefined) {

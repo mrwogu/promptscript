@@ -2,6 +2,7 @@ import {
   compareVersions,
   getMinimumVersionForFeature,
   SYNTAX_FEATURES,
+  TEMPLATE_VARIABLE_PATTERN,
   type Block,
   type BlockContent,
   type Program,
@@ -12,7 +13,6 @@ import { offsetLocation, walkText } from '../walker.js';
 import { getPromptExtraction } from './prompt-rule-utils.js';
 import { isValidSemver } from './valid-semver.js';
 
-const TEMPLATE = /\{\{([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\}\}/g;
 const FENCE = /^\s*(```|~~~)/;
 const PROMPT_TEXT_KEYS = new Set(['system', 'user']);
 
@@ -63,7 +63,7 @@ function withoutPromptText(ast: Program): Program {
 function scan(ctx: RuleContext, program: Program, skipDotted: boolean): void {
   walkText(program, (text, loc) => {
     const masked = maskFencedCode(text);
-    for (const match of masked.matchAll(TEMPLATE)) {
+    for (const match of masked.matchAll(TEMPLATE_VARIABLE_PATTERN)) {
       if (masked[match.index - 1] === '\\') continue;
       const name = match[1]!;
       const dotted = name.includes('.');
