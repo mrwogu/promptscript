@@ -190,7 +190,8 @@ Known limits of the printer:
   - comments and declaration order are kept
   - a blank line between entries is kept, several become one, and blank lines
     at the start or end of a block, object, array or file are dropped
-  - arrays that do not fit in 100 columns print one element per line
+  - arrays that do not fit in 100 characters print one element per line
+  - blank lines inside @meta and inside @use/@inherit parameter lists are dropped
   - comments inside @meta move before its closing brace
   - comments inside @use/@inherit parameter lists move to their own line
 

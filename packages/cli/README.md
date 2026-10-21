@@ -530,8 +530,9 @@ diagnostics keep exit status 0.
 
 `prs fmt` rewrites `.prs` files atomically and keeps comments and declaration order. A
 blank line between entries is kept, several become one, and blank lines at the start or
-end of a block, object, array or file are dropped. Arrays that do not fit in 100 columns
-print one element per line. Comments inside `@meta` move before its closing brace, and
+end of a block, object, array or file are dropped. Arrays that do not fit in 100 characters
+print one element per line. Blank lines inside `@meta` and inside `@use` and `@inherit`
+parameter lists are dropped. Comments inside `@meta` move before its closing brace, and
 comments in `@use` and `@inherit` parameter lists move to their own line. Directory walks skip
 `node_modules`, `vendor` and `.cache`. Files without the `.prs` extension and symbolic
 links (to files or directories) are skipped, and read-only files are reported and not written. It exits 1 for a

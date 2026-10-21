@@ -157,7 +157,7 @@ What is kept:
   the start or end of the file. Blank lines inside a text block are content.
 - Numbers (no exponent notation) and `${VAR}` references.
 
-Arrays stay on one line while the line fits in 100 columns; longer ones, and
+Arrays stay on one line while the line fits in 100 characters; longer ones, and
 arrays of objects, print one element per line.
 
 Printing is stable: printing the reparsed output gives the same text. Without

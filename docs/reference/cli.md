@@ -608,7 +608,8 @@ The printer keeps comments and declaration order.
 
 - A blank line between entries is kept. Several in a row become one. Blank lines at
   the start or end of a block, object, array or file are dropped.
-- Arrays that do not fit in 100 columns print one element per line.
+- Arrays that do not fit in 100 characters print one element per line.
+- Blank lines inside `@meta` and inside `@use` and `@inherit` parameter lists are dropped.
 - Comments inside `@meta` move before its closing brace.
 - Comments inside `@use` and `@inherit` parameter lists move to their own line.
 
