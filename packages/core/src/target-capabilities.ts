@@ -1431,6 +1431,24 @@ const VERSION_CAPABILITIES: Readonly<Record<KnownTarget, TargetVersionData>> = {
       },
     },
   },
+  bundle: {
+    versions: {
+      v1: {
+        name: 'v1',
+        description: 'One JSON bundle per prompt plus prompts/index.json',
+        outputPath: 'prompts/index.json',
+      },
+    },
+  },
+  'prompt-text': {
+    versions: {
+      v1: {
+        name: 'v1',
+        description: 'One Markdown preview per prompt plus prompts/README.md',
+        outputPath: 'prompts/README.md',
+      },
+    },
+  },
 };
 
 export interface TargetCapabilitySeed {

@@ -984,7 +984,7 @@ export class Compiler {
    */
   async compileAll(entryPath: string): Promise<CompileResult> {
     // Get all registered formatters
-    const allFormatters = FormatterRegistry.list();
+    const allFormatters = FormatterRegistry.listDefault();
 
     // Create a new compiler with all formatters
     const compiler = new Compiler({
@@ -1487,7 +1487,8 @@ export async function compile(
   options: CompileOptions = {}
 ): Promise<CompileResult> {
   // Get default formatters from registry if not specified
-  const formatters: CompilerOptions['formatters'] = options.formatters ?? FormatterRegistry.list();
+  const formatters: CompilerOptions['formatters'] =
+    options.formatters ?? FormatterRegistry.listDefault();
 
   // Build resolver options with sensible defaults
   const resolverOptions = {

@@ -1,3 +1,4 @@
+import { isPromptTarget } from '@promptscript/core';
 import type { Formatter, FormatterClass, FormatterFactory } from './types.js';
 
 /**
@@ -72,6 +73,15 @@ export class FormatterRegistry {
    */
   static list(): string[] {
     return Array.from(this.factories.keys());
+  }
+
+  /**
+   * List the formatter names that an "all formatters" default uses.
+   * Prompt targets are opt-in and never part of it.
+   * @returns Array of formatter identifiers
+   */
+  static listDefault(): string[] {
+    return this.list().filter((name) => !isPromptTarget(name));
   }
 
   /**

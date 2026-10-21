@@ -182,7 +182,7 @@ export class BrowserCompiler {
     this.validator = new Validator({ ...options.validator, logger: this.logger });
 
     // Load all formatters by default if none specified
-    const formatters = options.formatters ?? FormatterRegistry.list();
+    const formatters = options.formatters ?? FormatterRegistry.listDefault();
     this.loadedFormatters = this.loadFormatters(formatters);
 
     this.logger.debug(
