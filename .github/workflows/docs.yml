@@ -75,6 +75,9 @@ jobs:
           mkdir -p apps/docs/public/schema/diff
           cp schema/config.json apps/docs/public/schema/config.json
           cp schema/diff-v1.json apps/docs/public/schema/diff/v1.json
+          mkdir -p apps/docs/public/schema/prompt-bundle apps/docs/public/schema/prompt-bundle-index
+          cp schema/prompt-bundle-v1.json apps/docs/public/schema/prompt-bundle/v1.json
+          cp schema/prompt-bundle-index-v1.json apps/docs/public/schema/prompt-bundle-index/v1.json
 
       - name: Build documentation
         if: env.IS_RELEASE == 'true'
