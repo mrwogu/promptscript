@@ -1,5 +1,6 @@
 import {
   createOutputPlan,
+  isPromptTarget,
   type Logger,
   type OutputPlan,
   type OutputPlanCandidate,
@@ -7,6 +8,7 @@ import {
 } from '@promptscript/core';
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
 import { postFormatWithPrettier } from '../prettier/post-format.js';
+import { hasPromptBundleSchemaLine } from './prompt-bundle-ownership.js';
 
 const PROMPTSCRIPT_MARKERS = [
   '<!-- PromptScript',
@@ -30,6 +32,8 @@ export function applyConfiguredHeader(
 }
 
 function applyHeaderToOutput(output: FormatterOutput, header: string): void {
+  // A prompt file is hashed or previewed as written, so a configured header never goes into it.
+  if (isPromptOutput(output)) return;
   const lines = output.content.split('\n');
   const markerIndex = lines.findIndex((line) =>
     PROMPTSCRIPT_MARKERS.some((marker) => line.includes(marker))
@@ -50,6 +54,13 @@ function applyHeaderToOutput(output: FormatterOutput, header: string): void {
   for (const child of output.additionalFiles ?? []) {
     applyHeaderToOutput(child, header);
   }
+}
+
+function isPromptOutput(output: FormatterOutput): boolean {
+  return (
+    (output.target !== undefined && isPromptTarget(output.target)) ||
+    (output.path.endsWith('.json') && hasPromptBundleSchemaLine(output.content))
+  );
 }
 
 function outputFromPlanFile(file: OutputPlanFile, provenance?: FormatterOutput): FormatterOutput {

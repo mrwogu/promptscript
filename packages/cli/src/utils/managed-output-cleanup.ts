@@ -17,7 +17,9 @@ import { promisify } from 'node:util';
 import type { FormatterOutput } from '@promptscript/compiler';
 import { getRuntimeInfo } from '../runtime/runtime-info.js';
 import { resolveSelfInvocation, type SelfInvocation } from '../runtime/self-invocation.js';
+import { isPromptTarget } from '@promptscript/core';
 import { MANAGED_OUTPUT_WORKER_COMMAND } from '../managed-output-worker.js';
+import { isVerifiedPromptBundleOutput } from './prompt-bundle-ownership.js';
 
 const execFileAsync = promisify(execFile);
 const PROMPTSCRIPT_MARKER_PATTERNS = [
@@ -141,6 +143,7 @@ export async function cleanupManagedOutputs(
 ): Promise<ManagedOutputCleanupResult> {
   const outputRoot = resolve(options.outputRoot);
   const managedDirectories = collectManagedDirectories(outputs, outputRoot);
+  const flatDirectories = collectPromptTargetDirectories(outputs, outputRoot);
   const managedFiles = collectManagedFiles(outputs, outputRoot);
   const desiredFiles = collectDesiredFiles(outputs, outputRoot);
   const removed: string[] = [];
@@ -161,7 +164,8 @@ export async function cleanupManagedOutputs(
         options.dryRun === true,
         removed,
         ancestorGuards,
-        reportUnresolvedWorker
+        reportUnresolvedWorker,
+        !flatDirectories.has(directory)
       );
     } finally {
       await closeDirectoryGuards(ancestorGuards);
@@ -298,6 +302,24 @@ function collectManagedDirectories(
   }
 
   return [...directories].sort();
+}
+
+/**
+ * Directories owned by a prompt target. They hold files of the target only, so cleanup there
+ * stays in the directory itself and never walks into a subdirectory.
+ */
+function collectPromptTargetDirectories(
+  outputs: Map<string, FormatterOutput>,
+  outputRoot: string
+): Set<string> {
+  const directories = new Set<string>();
+  for (const output of outputs.values()) {
+    if (output.target === undefined || !isPromptTarget(output.target)) continue;
+    for (const directory of output.managedOutputDirectories ?? []) {
+      directories.add(resolve(outputRoot, directory));
+    }
+  }
+  return directories;
 }
 
 function collectDesiredFiles(
@@ -592,7 +614,8 @@ async function visitDirectory(
   dryRun: boolean,
   removed: string[],
   ancestorGuards: DirectoryGuard[],
-  onUnresolvedWorker: () => void
+  onUnresolvedWorker: () => void,
+  recursive = true
 ): Promise<void> {
   const directoryHandle = await safeOpenDirectory(directory);
   if (!directoryHandle) return;
@@ -609,7 +632,16 @@ async function visitDirectory(
       if (!entryStat || entryStat.isSymbolicLink()) continue;
 
       if (entryStat.isDirectory()) {
-        await visitDirectory(entryPath, desiredFiles, dryRun, removed, guards, onUnresolvedWorker);
+        if (recursive) {
+          await visitDirectory(
+            entryPath,
+            desiredFiles,
+            dryRun,
+            removed,
+            guards,
+            onUnresolvedWorker
+          );
+        }
         continue;
       }
 
@@ -887,6 +919,9 @@ async function safeLstat(path: string): Promise<Awaited<ReturnType<typeof lstat>
 async function isPromptScriptGenerated(path: string, allowInlineMarker = false): Promise<boolean> {
   try {
     const content = await readFile(path, 'utf-8');
+    // A generated bundle or index is JSON, so it has no comment marker. Its first key and, for
+    // a bundle, its content hash tell it from a copied or edited file.
+    if (path.endsWith('.json') && isVerifiedPromptBundleOutput(content)) return true;
     const lines = content
       .replace(/^\uFEFF/, '')
       .split(/\r?\n/)

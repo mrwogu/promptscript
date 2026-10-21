@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 import type { FormatterOutput } from '@promptscript/compiler';
-import type { Logger } from '@promptscript/core';
+import { isPromptTarget, type Logger } from '@promptscript/core';
 
 /**
  * Markdown-family extensions that should be post-processed through Prettier.
@@ -52,6 +52,8 @@ export async function postFormatWithPrettier(
 
   for (const output of queue) {
     if (!MARKDOWN_RE.test(output.path)) continue;
+    // A prompt-text preview must keep the bytes of the bundle's system message.
+    if (output.target !== undefined && isPromptTarget(output.target)) continue;
     const absPath = resolve(projectRoot, output.path);
 
     let config: import('prettier').Options | null = null;

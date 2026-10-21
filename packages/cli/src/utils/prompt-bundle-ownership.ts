@@ -1,0 +1,46 @@
+import { hashPromptBundle } from '@promptscript/core';
+
+/**
+ * First key of every bundle and index file. A bundle or index is told apart from any other JSON
+ * file by this line alone, so quoting the URL somewhere else in a file never claims it.
+ */
+export const PROMPT_BUNDLE_SCHEMA_LINE =
+  /^\s*"\$schema": "https:\/\/getpromptscript\.dev\/schema\/prompt-bundle(-index)?\/v1\.json",$/;
+
+/** Whether the file starts like a generated bundle or index: an opening brace, then `$schema`. */
+export function hasPromptBundleSchemaLine(content: string): boolean {
+  const [first, second] = content.replace(/^\uFEFF/, '').split(/\r?\n/, 2);
+  return first?.trim() === '{' && second !== undefined && PROMPT_BUNDLE_SCHEMA_LINE.test(second);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Whether a file is a generated bundle or index that is still what the compiler wrote.
+ *
+ * It must start with the `$schema` line, parse as JSON, and, for a bundle, carry a `contentHash`
+ * that verifies. A copied or hand-edited bundle fails the check, so cleanup never removes it.
+ */
+export function isVerifiedPromptBundleOutput(content: string): boolean {
+  if (!hasPromptBundleSchemaLine(content)) return false;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    return false;
+  }
+  if (!isRecord(parsed)) return false;
+  if (parsed['$schema'] === 'https://getpromptscript.dev/schema/prompt-bundle-index/v1.json') {
+    return Array.isArray(parsed['prompts']);
+  }
+  try {
+    return (
+      typeof parsed['contentHash'] === 'string' &&
+      hashPromptBundle(parsed) === parsed['contentHash']
+    );
+  } catch {
+    return false;
+  }
+}

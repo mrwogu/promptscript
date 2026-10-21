@@ -173,3 +173,130 @@ describe('prs compile with the prompt targets', () => {
     expect(second).toBe(first);
   });
 });
+
+describe('generated prompt files', () => {
+  it('removes the files of a prompt that left the source', async () => {
+    const { directory, source } = await project(['bundle', 'prompt-text'], ['refund', 'triage']);
+    await compileSuccessfully(directory);
+
+    await writeFile(source, entry(['refund']));
+    await compileSuccessfully(directory);
+
+    for (const file of ['prompts/triage.json', 'prompts/triage.md']) {
+      expect(existsSync(join(directory, file)), file).toBe(false);
+    }
+    for (const file of ['prompts/refund-reply.json', 'prompts/refund-reply.md']) {
+      expect(existsSync(join(directory, file)), file).toBe(true);
+    }
+    const index = JSON.parse(await readFile(join(directory, 'prompts', 'index.json'), 'utf8'));
+    expect(index.prompts.map((prompt: { id: string }) => prompt.id)).toEqual([
+      'acme-support/refund-reply',
+    ]);
+  });
+
+  it('keeps a user JSON file that only quotes the schema URL', async () => {
+    const { directory } = await project(['bundle'], ['refund']);
+    await compileSuccessfully(directory);
+    const note = join(directory, 'prompts', 'notes.json');
+    await writeFile(
+      note,
+      '{\n  "docs": "https://getpromptscript.dev/schema/prompt-bundle/v1.json"\n}\n'
+    );
+
+    await compileSuccessfully(directory);
+
+    expect(existsSync(note)).toBe(true);
+  });
+
+  it('keeps a bundle that was edited by hand', async () => {
+    const { directory, source } = await project(['bundle'], ['refund', 'triage']);
+    await compileSuccessfully(directory);
+    const triage = join(directory, 'prompts', 'triage.json');
+    const edited = (await readFile(triage, 'utf8')).replace('Triage this', 'Edited');
+    const changed = edited.replace('Ticket:', 'Edited ticket:');
+    await writeFile(triage, changed);
+
+    await writeFile(source, entry(['refund']));
+    await compileSuccessfully(directory);
+
+    expect(existsSync(triage)).toBe(true);
+    expect(await readFile(triage, 'utf8')).toBe(changed);
+  });
+
+  it('keeps a file in a subdirectory of the prompts directory', async () => {
+    const { directory, source } = await project(['bundle'], ['refund', 'triage']);
+    await compileSuccessfully(directory);
+    const copy = join(directory, 'prompts', 'old', 'triage.json');
+    await mkdir(join(directory, 'prompts', 'old'), { recursive: true });
+    await writeFile(copy, await readFile(join(directory, 'prompts', 'triage.json'), 'utf8'));
+
+    await writeFile(source, entry(['refund']));
+    await compileSuccessfully(directory);
+
+    expect(existsSync(copy)).toBe(true);
+    expect(existsSync(join(directory, 'prompts', 'triage.json'))).toBe(false);
+  });
+
+  it('does not overwrite a user file at the path of a bundle', async () => {
+    const { directory } = await project(['bundle'], ['refund']);
+    const target = join(directory, 'prompts', 'refund-reply.json');
+    await mkdir(join(directory, 'prompts'), { recursive: true });
+    await writeFile(target, '{"mine":true}\n');
+
+    process.exitCode = undefined;
+    await compileCommand({ cwd: directory });
+
+    expect(process.exitCode).toBe(1);
+    expect(await readFile(target, 'utf8')).toBe('{"mine":true}\n');
+  });
+
+  it('overwrites a bundle it generated earlier', async () => {
+    const { directory, source } = await project(['bundle'], ['refund']);
+    await compileSuccessfully(directory);
+
+    await writeFile(source, entry(['refund']).replace('Customer wrote', 'The customer wrote'));
+    await compileSuccessfully(directory);
+
+    const bundle = JSON.parse(
+      await readFile(join(directory, 'prompts', 'refund-reply.json'), 'utf8')
+    );
+    expect(bundle.messages[1].content).toContain('The customer wrote');
+  });
+
+  it('keeps the preview text exactly as the bundle has it, past Prettier', async () => {
+    const { directory, source } = await project(['bundle', 'prompt-text'], ['refund']);
+    await writeFile(
+      source,
+      entry(['refund']).replace(
+        'system: "You answer refund requests."',
+        'system: """\n      * first   point\n      * second point\n    """'
+      )
+    );
+
+    await compileSuccessfully(directory);
+
+    const preview = await readFile(join(directory, 'prompts', 'refund-reply.md'), 'utf8');
+    expect(preview).toContain('* first   point\n* second point\n');
+    expect(preview).not.toContain('- first point');
+  });
+
+  it('puts no configured header into a prompt file', async () => {
+    const { directory } = await project(['bundle', 'prompt-text'], ['refund']);
+    const config = join(directory, 'promptscript.yaml');
+    await writeFile(
+      config,
+      `${await readFile(config, 'utf8')}output:\n  header: "HEADER-LINE-ZZ"\n`
+    );
+
+    await compileSuccessfully(directory);
+
+    for (const file of [
+      'prompts/refund-reply.json',
+      'prompts/refund-reply.md',
+      'prompts/README.md',
+    ]) {
+      expect(await readFile(join(directory, file), 'utf8'), file).not.toContain('HEADER-LINE-ZZ');
+    }
+    JSON.parse(await readFile(join(directory, 'prompts', 'refund-reply.json'), 'utf8'));
+  });
+});
