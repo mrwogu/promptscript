@@ -7,9 +7,18 @@ function unsupported(kind: string, path: string): PSError {
   );
 }
 
+const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+
+/** RFC 8785 section 3.2.2.2: a lone surrogate must be an error. */
+function quote(text: string, path: string): string {
+  if (LONE_SURROGATE.test(text)) throw unsupported('a lone surrogate', path);
+  return JSON.stringify(text);
+}
+
 function serialize(value: unknown, path: string, ancestors: Set<object>): string {
   switch (typeof value) {
     case 'string':
+      return quote(value, path);
     case 'boolean':
       return JSON.stringify(value);
     case 'number':
@@ -48,7 +57,7 @@ function serializeContainer(value: object, path: string, ancestors: Set<object>)
     const member = record[key];
     if (member === undefined) continue;
     const memberPath = path ? `${path}.${key}` : key;
-    members.push(JSON.stringify(key) + ':' + serialize(member, memberPath, ancestors));
+    members.push(quote(key, memberPath) + ':' + serialize(member, memberPath, ancestors));
   }
   return '{' + members.join(',') + '}';
 }
@@ -57,14 +66,14 @@ function serializeContainer(value: object, path: string, ancestors: Set<object>)
  * Serialize a JSON value as RFC 8785 canonical JSON.
  *
  * No whitespace, object keys sorted by UTF-16 code units, strings and numbers in
- * ECMAScript form. Properties set to `undefined` are skipped. Lone surrogates in
- * strings are escaped as `\udXXX`, so the canonical text is always well-formed.
+ * ECMAScript form. Properties set to `undefined` are skipped. A lone surrogate in a
+ * string or key is an error, as RFC 8785 requires.
  *
  * @param value - A JSON value
  * @returns The canonical JSON text
  * @throws PSError for a non-finite number, a bigint, a function, a symbol, an
  *   `undefined` outside an object property, an array hole, a circular reference or
- *   an object that is not a plain object (a Date, a Map, a class instance). The message names the path, such as `model.params.temperature`.
+ *   a lone surrogate or an object that is not a plain object (a Date, a Map, a class instance). The message names the path, such as `model.params.temperature`.
  *
  * @example
  * canonicalizeJson({ b: 1, a: [true, null] }); // '{"a":[true,null],"b":1}'

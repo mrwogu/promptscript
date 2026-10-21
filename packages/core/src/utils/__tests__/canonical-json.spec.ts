@@ -95,6 +95,9 @@ describe('canonicalizeJson', () => {
     ['undefined at the root', undefined, '<root>'],
     ['an array hole', [1, , 3], '[1]'], // eslint-disable-line no-sparse-arrays
     ['an unfilled array', { list: new Array(2) }, 'list[0]'],
+    ['a lone high surrogate', { s: 'a\uD800b' }, 's'],
+    ['a lone low surrogate', ['\uDC00'], '[0]'],
+    ['a lone surrogate in a key', { 'k\uD800': 1 }, 'k\uD800'],
     ['a Date', { d: new Date(0) }, 'd'],
     ['a Map', { m: new Map([['a', 1]]) }, 'm'],
     ['a String object', { s: new String('ab') }, 's'], // eslint-disable-line no-new-wrappers
@@ -127,5 +130,9 @@ describe('canonicalizeJson', () => {
       '{"a":2,"b":1}',
       '{"__proto__":{"x":1},"k":2}',
     ]);
+  });
+
+  it('keeps a valid surrogate pair', () => {
+    expect(canonicalizeJson({ s: '\u{1F600}' })).toBe('{"s":"\u{1F600}"}');
   });
 });

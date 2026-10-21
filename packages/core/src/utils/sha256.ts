@@ -21,8 +21,7 @@ function rotr(x: number, n: number): number {
  * SHA-256 of a string, as 64 lowercase hex characters.
  *
  * The text is encoded as UTF-8 with `TextEncoder`, so a lone surrogate becomes U+FFFD.
- * Canonical JSON never holds one, because `canonicalizeJson` escapes lone surrogates
- * as `\udXXX`. Pure TypeScript with no `node:crypto`, so it runs in the browser and
+ * Canonical JSON never holds one, because `canonicalizeJson` rejects lone surrogates. Pure TypeScript with no `node:crypto`, so it runs in the browser and
  * stays synchronous.
  *
  * @param text - Text to hash
