@@ -144,9 +144,12 @@ function elementRoom(inner: string, index: number, last: number): number {
   return PRINT_WIDTH - inner.length - (index < last ? 1 : 0);
 }
 
-/** True for a printed value that can break across lines: a non-empty array or object, or a text block. */
+/**
+ * True for a printed value that can break across lines: a non-empty array, an object (always
+ * `{` and a line break, unlike a `{{template}}`) or a text block.
+ */
 function canWrap(flat: string): boolean {
-  return flat.length > 2 && /^(\[|\{|""")/.test(flat);
+  return flat.length > 2 && /^(\[|\{\n|""")/.test(flat);
 }
 
 /** Width a printed value needs on the line where it starts: all of it, or only its opening token if it can wrap. */
@@ -687,7 +690,7 @@ function printOperation(
  * the closing brace of its container, including inside nested objects and
  * arrays. A blank line is kept where the source had one or more (at most one, never
  * at the edge of a block, object, array or file), and an array that does not fit in
- * 100 columns is printed one element per line. Printing the reparsed output gives
+ * 100 characters is printed one element per line. Printing the reparsed output gives
  * the same text.
  *
  * Known limits: comments inside `@meta` move before its closing brace (tracked

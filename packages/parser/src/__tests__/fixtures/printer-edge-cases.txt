@@ -400,13 +400,13 @@ y"
 @context {
   items: ["a", "b", "c"]
 }
-### array fits at exactly 100 columns
+### array fits at exactly 100 characters
 @context { items: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
 --- expected
 @context {
   items: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
 }
-### array wraps at 101 columns
+### array wraps at 101 characters
 @context { items: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
 --- expected
 @context {
@@ -415,7 +415,7 @@ y"
     "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
   ]
 }
-### nested array fits with its comma at exactly 100 columns
+### nested array fits with its comma at exactly 100 characters
 @context { items: [["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], 1] }
 --- expected
 @context {
@@ -424,7 +424,7 @@ y"
     1
   ]
 }
-### nested array wraps when its comma would reach 101 columns
+### nested array wraps when its comma would reach 101 characters
 @context { items: [["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], 1] }
 --- expected
 @context {
@@ -436,13 +436,13 @@ y"
     1
   ]
 }
-### default value array fits at exactly 100 columns
+### default value array fits at exactly 100 characters
 @params { tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
 --- expected
 @params {
   tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
 }
-### default value array wraps at 101 columns
+### default value array wraps at 101 characters
 @params { tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
 --- expected
 @params {
@@ -451,14 +451,14 @@ y"
     "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
   ]
 }
-### meta array fits at exactly 100 columns
+### meta array fits at exactly 100 characters
 @meta { id: "a" tags: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
 --- expected
 @meta {
   id: "a"
   tags: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
 }
-### meta array wraps at 101 columns
+### meta array wraps at 101 characters
 @meta { id: "a" tags: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
 --- expected
 @meta {
@@ -468,11 +468,11 @@ y"
     "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
   ]
 }
-### use parameter array fits at exactly 100 columns
+### use parameter array fits at exactly 100 characters
 @use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
 --- expected
 @use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
-### use parameter array wraps at 101 columns
+### use parameter array wraps at 101 characters
 @use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
 --- expected
 @use ./a(x: [
@@ -491,7 +491,7 @@ y"
 @context {
   b: 1
 }
-### meta nested array fits with its comma at exactly 100 columns
+### meta nested array fits with its comma at exactly 100 characters
 @meta { id: "a" tags: [["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], 1] }
 --- expected
 @meta {
@@ -501,7 +501,7 @@ y"
     1
   ]
 }
-### meta nested array wraps when its comma would reach 101 columns
+### meta nested array wraps when its comma would reach 101 characters
 @meta { id: "a" tags: [["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], 1] }
 --- expected
 @meta {
@@ -514,7 +514,7 @@ y"
     1
   ]
 }
-### use second parameter array fits at exactly 100 columns
+### use second parameter array fits at exactly 100 characters
 @use ./a(x: "pppppppppppppppppppp", y: ["aaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbb"])
 --- expected
 @use ./a(x: "pppppppppppppppppppp", y: ["aaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbb"])
@@ -534,7 +534,7 @@ y"
     "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
   ] = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
 }
-### meta param default array fits at exactly 100 columns
+### meta param default array fits at exactly 100 characters
 @meta { id: "a" params: { tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] } }
 --- expected
 @meta {
@@ -543,7 +543,7 @@ y"
     tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
   }
 }
-### meta param default array wraps at 101 columns
+### meta param default array wraps at 101 characters
 @meta { id: "a" params: { tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] } }
 --- expected
 @meta {
@@ -555,7 +555,7 @@ y"
     ]
   }
 }
-### commented array child fits with its comma at exactly 100 columns
+### commented array child fits with its comma at exactly 100 characters
 @context {
   items: [
     # note
@@ -571,7 +571,7 @@ y"
     1
   ]
 }
-### commented array child wraps when its comma would reach 101 columns
+### commented array child wraps when its comma would reach 101 characters
 @context {
   items: [
     # note
@@ -590,11 +590,11 @@ y"
     1
   ]
 }
-### use alias leaves room for the parameter array at exactly 100 columns
+### use alias leaves room for the parameter array at exactly 100 characters
 @use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) as somealias
 --- expected
 @use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) as somealias
-### use alias wraps the parameter array at 101 columns
+### use alias wraps the parameter array at 101 characters
 @use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) as somealias
 --- expected
 @use ./a(x: [
@@ -615,7 +615,7 @@ y"
   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 ], y: [1, 2])
-### inline use in a block fits at exactly 100 columns
+### inline use in a block fits at exactly 100 characters
 @skills { @use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) }
 --- expected
 @skills {
@@ -725,3 +725,49 @@ bar}
     "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
   ] = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
 }
+### template parameter after a wrapping array does not hide its width
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], y: {{name}}) as somealias
+--- expected
+@use ./a(x: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+], y: {{name}}) as somealias
+### template default after an array value does not hide its width
+@params { t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = {{name}} }
+--- expected
+@params {
+  t: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ] = {{name}}
+}
+### text block default leaves room for its opening quotes at exactly 100 characters
+@params { t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = """
+  hi
+  """ }
+--- expected
+@params {
+  t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = """
+    hi
+  """
+}
+### text block default wraps the value when its opening quotes would pass 100 characters
+@params { t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = """
+  hi
+  """ }
+--- expected
+@params {
+  t: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ] = """
+    hi
+  """
+}
+### middle use parameter wraps and the last one follows its closing bracket
+@use ./a(x: 1, y: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], z: 2)
+--- expected
+@use ./a(x: 1, y: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+], z: 2)
