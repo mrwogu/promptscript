@@ -7,3 +7,5 @@ export * from './version.js';
 export * from './levenshtein.js';
 export * from './markers.js';
 export * from './interpolate-env.js';
+export * from './canonical-json.js';
+export * from './sha256.js';
