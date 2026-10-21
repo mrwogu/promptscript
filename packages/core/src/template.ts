@@ -218,10 +218,13 @@ function valueToString(value: Value): string {
  * @throws UndefinedVariableError if a variable is used but not defined
  */
 export function interpolateText(text: string, ctx: TemplateContext): string {
-  // Match {{variable}} patterns
-  const pattern = /\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g;
+  // Match {{variable}} and dotted {{namespace.name}} patterns. Dotted names such
+  // as the runtime slot {{input.name}} are never compile time variables, so they
+  // pass through untouched.
+  const pattern = /\{\{([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*)\}\}/g;
 
-  return text.replace(pattern, (_match, varName: string) => {
+  return text.replace(pattern, (match, varName: string) => {
+    if (varName.includes('.')) return match;
     const value = ctx.params.get(varName);
     if (value === undefined) {
       throw new UndefinedVariableError(varName, ctx.sourceFile);

@@ -194,6 +194,22 @@ describe('template', () => {
       expect(() => interpolateText('Hello, {{undefined}}!', ctx)).toThrow(UndefinedVariableError);
     });
 
+    it('should keep dotted runtime slots and still bind plain variables', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['p', 'bound']]),
+        sourceFile: 'test.prs',
+      };
+
+      expect(interpolateText('{{input.x}} {{p}}', ctx)).toBe('{{input.x}} bound');
+      expect(interpolateText('{{a.b.c}} {{p.q}}', ctx)).toBe('{{a.b.c}} {{p.q}}');
+    });
+
+    it('should still throw for an unbound plain name next to a slot', () => {
+      const ctx: TemplateContext = { params: new Map(), sourceFile: 'test.prs' };
+
+      expect(() => interpolateText('{{input.x}} {{missing}}', ctx)).toThrow(UndefinedVariableError);
+    });
+
     it('should not interpolate malformed patterns', () => {
       const ctx: TemplateContext = {
         params: new Map([['name', 'World']]),
