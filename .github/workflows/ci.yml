@@ -121,6 +121,16 @@ jobs:
         if: matrix.node-version == '25.x'
         run: pnpm prs fmt --check
 
+      - name: Check Compiled Outputs
+        if: matrix.node-version == '25.x'
+        run: |
+          pnpm prs compile
+          if [ -n "$(git status --porcelain)" ]; then
+            git status --short
+            echo "::error::Compiled outputs are out of date. Run 'pnpm prs compile' locally and commit the changes."
+            exit 1
+          fi
+
       - name: Skill Copies Drift Check
         if: matrix.node-version == '25.x'
         run: |
@@ -148,7 +158,15 @@ jobs:
 
       - name: Upload coverage
         uses: codecov/codecov-action@v7
-        if: matrix.node-version == '25.x'
+        if: matrix.node-version == '25.x' && hashFiles('coverage/**/coverage-final.json') != ''
+
+      - name: Report no coverage to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
+        if: matrix.node-version == '25.x' && hashFiles('coverage/**/coverage-final.json') == ''
+        with:
+          run_command: empty-upload
+          force: true
+          fail_ci_if_error: true
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() && matrix.node-version == '25.x' }}
