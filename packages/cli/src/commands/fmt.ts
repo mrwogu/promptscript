@@ -32,7 +32,68 @@ function collectFiles(paths: string[], failures: string[]): string[] {
       files.add(target);
     }
   }
-  return [...files].sort();
+  // Compare by code units so the order never depends on the locale.
+  return [...files].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+}
+
+type FileOutcome = 'changed' | 'unchanged' | 'skipped' | 'failed';
+type ParseErrors = ReturnType<typeof parseCanonical>['errors'];
+
+function describeParseFailure(name: string, errors: ParseErrors): string {
+  const first = errors[0];
+  const loc = first?.location;
+  // The parser reports -1:-1 for errors at end of input.
+  const where = loc && loc.line > 0 ? `:${loc.line}:${loc.column}` : '';
+  const message = first?.message.split('\n')[0] ?? 'Parse failed';
+  return `${name}${where} ${message}`;
+}
+
+function writeFormatted(
+  file: string,
+  name: string,
+  formatted: string,
+  failures: string[]
+): FileOutcome {
+  try {
+    accessSync(file, constants.W_OK);
+  } catch {
+    failures.push(`${name} not writable`);
+    return 'failed';
+  }
+  writeFileAtomic(file, formatted, statSync(file).mode & 0o7777);
+  ConsoleOutput.success(`Formatted ${name}`);
+  return 'changed';
+}
+
+function formatOne(file: string, name: string, check: boolean, failures: string[]): FileOutcome {
+  try {
+    if (lstatSync(file).isSymbolicLink()) {
+      ConsoleOutput.warning(`Skipped ${name}: symbolic link`);
+      return 'skipped';
+    }
+    const source = readFileSync(file, 'utf-8');
+    const { ast, errors, comments } = parseCanonical(source, { filename: name });
+    if (!ast || errors.length > 0) {
+      failures.push(describeParseFailure(name, errors));
+      return 'failed';
+    }
+
+    const formatted = printProgram(ast, comments);
+    if (formatted === source) return 'unchanged';
+    if (parseCanonical(formatted, { filename: name }).errors.length > 0) {
+      failures.push(`${name} printer produced unparseable output, file left untouched`);
+      return 'failed';
+    }
+    if (check) {
+      ConsoleOutput.warning(`Would reformat ${name}`);
+      return 'changed';
+    }
+    return writeFormatted(file, name, formatted, failures);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    failures.push(`${name} ${message}`);
+    return 'failed';
+  }
 }
 
 /**
@@ -42,61 +103,20 @@ export function fmtCommand(options: FmtOptions): void {
   const failures: string[] = [];
   const requested = options.paths && options.paths.length > 0 ? options.paths : ['.promptscript'];
   const files = collectFiles(requested, failures);
-  let changed = 0;
-  let unchanged = 0;
+  const counts: Record<FileOutcome, number> = { changed: 0, unchanged: 0, skipped: 0, failed: 0 };
 
   for (const file of files) {
     const rel = relative(process.cwd(), file);
     const name = rel.startsWith('..') ? file : rel;
-    try {
-      if (lstatSync(file).isSymbolicLink()) {
-        ConsoleOutput.warning(`Skipped ${name}: symbolic link`);
-        continue;
-      }
-      const source = readFileSync(file, 'utf-8');
-      const { ast, errors, comments } = parseCanonical(source, { filename: name });
-      if (!ast || errors.length > 0) {
-        const first = errors[0];
-        const loc = first?.location;
-        // The parser reports -1:-1 for errors at end of input.
-        const where = loc && loc.line > 0 ? `:${loc.line}:${loc.column}` : '';
-        const message = first?.message.split('\n')[0] ?? 'Parse failed';
-        failures.push(`${name}${where} ${message}`);
-        continue;
-      }
-
-      const formatted = printProgram(ast, comments);
-      if (formatted === source) {
-        unchanged++;
-        continue;
-      }
-      if (parseCanonical(formatted, { filename: name }).errors.length > 0) {
-        failures.push(`${name} printer produced unparseable output, file left untouched`);
-        continue;
-      }
-      if (options.check) {
-        ConsoleOutput.warning(`Would reformat ${name}`);
-      } else {
-        try {
-          accessSync(file, constants.W_OK);
-        } catch {
-          failures.push(`${name} not writable`);
-          continue;
-        }
-        writeFileAtomic(file, formatted, statSync(file).mode & 0o7777);
-        ConsoleOutput.success(`Formatted ${name}`);
-      }
-      changed++;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      failures.push(`${name} ${message}`);
-    }
+    counts[formatOne(file, name, options.check === true, failures)]++;
   }
 
   for (const failure of failures) ConsoleOutput.error(failure);
   ConsoleOutput.newline();
   const verb = options.check ? 'would change' : 'formatted';
-  ConsoleOutput.stats(`${changed} ${verb}, ${unchanged} unchanged, ${failures.length} failed`);
+  ConsoleOutput.stats(
+    `${counts.changed} ${verb}, ${counts.unchanged} unchanged, ${failures.length} failed`
+  );
 
-  if (failures.length > 0 || (options.check && changed > 0)) process.exitCode = 1;
+  if (failures.length > 0 || (options.check && counts.changed > 0)) process.exitCode = 1;
 }
