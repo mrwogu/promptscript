@@ -25,7 +25,18 @@ interface ModelReference {
 const MODEL_FIELDS: Readonly<Record<string, { label: string; fields: readonly string[] }>> = {
   agents: { label: 'Agent', fields: ['model', 'specModel'] },
   skills: { label: 'Skill', fields: ['model'] },
+  // A prompt's model is an object, its catalog name is `model.ref`.
+  prompts: { label: 'Prompt', fields: ['model.ref'] },
 };
+
+function readField(entry: Record<string, Value>, field: string): Value | undefined {
+  let current: Value | undefined = entry;
+  for (const part of field.split('.')) {
+    if (current === null || typeof current !== 'object' || Array.isArray(current)) return undefined;
+    current = Object.hasOwn(current, part) ? (current as Record<string, Value>)[part] : undefined;
+  }
+  return current;
+}
 
 function blockEntries(block: Block): Array<[string, Record<string, Value>]> {
   if (block.content.type !== 'ObjectContent' && block.content.type !== 'MixedContent') return [];
@@ -43,7 +54,7 @@ function collectReferences(ctx: RuleContext): ModelReference[] {
     if (!spec) continue;
     for (const [name, entry] of blockEntries(block)) {
       for (const field of spec.fields) {
-        const value = entry[field];
+        const value = readField(entry, field);
         if (typeof value === 'string' && value.trim().length > 0) {
           references.push({
             owner: `${spec.label} "${name}"`,
@@ -136,8 +147,8 @@ function checkReference(
 /**
  * PS041: Valid model references.
  *
- * Checks `model` and `specModel` in @agents and `model` in @skills against
- * the model catalog (built-in profiles plus `models.profiles`):
+ * Checks `model` and `specModel` in @agents, `model` in @skills and `model.ref`
+ * in @prompts against the model catalog (built-in profiles plus `models.profiles`):
  * - retired and deprecated models, with the recommended replacement
  * - with `models.supported` set: unknown models and models outside the set
  *
