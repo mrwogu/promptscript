@@ -74,6 +74,7 @@ Entries are in message order, then text order.
 | `005-numbers.json`         | `0.2`, `800`, a default of `100.0` stored as `100`, and `1e21` as `1e+21`  |
 | `006-excluded-fields.json` | Another `provenance.entry`, same hash as 001                               |
 | `007-provenance-file.json` | Another `provenance.segments[0].files`, same hash as 001                   |
+| `008-escape.json`          | An escaped slot, a backslash before an escape, and a real slot             |
 | `011-hash-mismatch.json`   | A wrong `contentHash` in the bundle, the vector holds the correct one      |
 
-Numbers 003 and 008 to 010 are reserved for vectors that need a compiler or a renderer.
+Numbers 003, 009 and 010 are reserved for vectors that need a compiler or a renderer.

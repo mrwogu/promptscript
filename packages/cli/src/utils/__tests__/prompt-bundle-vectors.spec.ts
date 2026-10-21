@@ -62,6 +62,7 @@ describe('prompt bundle conformance vectors', () => {
       '005-numbers',
       '006-excluded-fields',
       '007-provenance-file',
+      '008-escape',
       '011-hash-mismatch',
     ]);
   });

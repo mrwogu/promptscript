@@ -1,5 +1,5 @@
 {
-  "description": "The bundle of 001 with another provenance.entry. contentHash and provenance are outside the hash input, so the hash is the one of 001. $schema is inside it: another $schema value gives another hash.",
+  "description": "The bundle of 001 with another provenance.entry, same hash as 001. Provenance is outside the hash input.",
   "bundle": {
     "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
     "id": "acme-support/refund-reply",
