@@ -459,6 +459,15 @@ function readGovernance(lookup: (name: string) => Raw | undefined, bad: Report):
   return governance;
 }
 
+function readMetaGovernanceWith(fields: Record<string, Value>, bad: Report): GovernanceMeta {
+  // Not fromValue(fields): a field named "type" would make the map look like a typed node.
+  const raw: ObjectRaw = {
+    kind: 'object',
+    fields: Object.entries(fields).map(([name, value]) => ({ name, value: fromValue(value) })),
+  };
+  return readGovernance((name) => field(raw, name), bad);
+}
+
 /**
  * Check governance fields of `@meta`, which act as defaults for prompts.
  *
@@ -467,14 +476,19 @@ function readGovernance(lookup: (name: string) => Raw | undefined, bad: Report):
  */
 export function validateGovernanceFields(fields: Record<string, Value>): string[] {
   const messages: string[] = [];
-  // Not fromValue(fields): a field named "type" would make the map look like a typed node.
-  const raw: ObjectRaw = {
-    kind: 'object',
-    fields: Object.entries(fields).map(([name, value]) => ({ name, value: fromValue(value) })),
-  };
-  const lookup = (name: string): Raw | undefined => field(raw, name);
-  readGovernance(lookup, (message) => messages.push(`@meta ${message}`));
+  readMetaGovernanceWith(fields, (message) => messages.push(`@meta ${message}`));
   return messages;
+}
+
+/**
+ * Read the governance defaults of `@meta`. Invalid values are left out, see
+ * {@link validateGovernanceFields} for the messages.
+ *
+ * @param fields - The `@meta` fields
+ * @returns The valid governance fields
+ */
+export function readMetaGovernance(fields: Record<string, Value>): GovernanceMeta {
+  return readMetaGovernanceWith(fields, () => undefined);
 }
 
 function readCompose(raw: Raw, blocks: ReadonlySet<string>, bad: Report): ComposableBlock[] {
