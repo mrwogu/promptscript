@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import {
   chmodSync,
+  mkdirSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
@@ -42,5 +43,15 @@ describe('writeFileAtomic', () => {
 
     expect(() => writeFileAtomic(join(dir, 'missing', 'a.prs'), 'x', 0o644)).toThrow();
     expect(readdirSync(dir)).toEqual([]);
+  });
+
+  it('removes the temporary file when the rename fails', () => {
+    const dir = tempDir();
+    const target = join(dir, 'target');
+    mkdirSync(target);
+    writeFileSync(join(target, 'keep'), 'x');
+
+    expect(() => writeFileAtomic(target, 'new', 0o644)).toThrow();
+    expect(readdirSync(dir)).toEqual(['target']);
   });
 });

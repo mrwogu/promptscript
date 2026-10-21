@@ -9,19 +9,30 @@ import {
   utimesSync,
   chmodSync,
   readdirSync,
+  symlinkSync,
+  lstatSync,
 } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fmtCommand } from '../fmt.js';
 
-const printOverride = vi.hoisted(() => ({ output: undefined as string | undefined }));
+const printOverride = vi.hoisted(() => ({
+  output: undefined as string | undefined,
+  error: undefined as unknown,
+  parse: undefined as unknown,
+}));
 
 vi.mock('@promptscript/parser', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@promptscript/parser')>();
   return {
     ...actual,
-    printProgram: (...args: Parameters<typeof actual.printProgram>): string =>
-      printOverride.output ?? actual.printProgram(...args),
+    parseCanonical: (...args: Parameters<typeof actual.parseCanonical>) =>
+      (printOverride.parse as ReturnType<typeof actual.parseCanonical> | undefined) ??
+      actual.parseCanonical(...args),
+    printProgram: (...args: Parameters<typeof actual.printProgram>): string => {
+      if (printOverride.error !== undefined) throw printOverride.error;
+      return printOverride.output ?? actual.printProgram(...args);
+    },
   };
 });
 
@@ -50,6 +61,8 @@ describe('fmtCommand', () => {
 
   afterEach(() => {
     printOverride.output = undefined;
+    printOverride.error = undefined;
+    printOverride.parse = undefined;
     vi.restoreAllMocks();
     process.exitCode = undefined;
     rmSync(dir, { recursive: true, force: true });
@@ -262,6 +275,68 @@ describe('fmtCommand', () => {
     expect(readdirSync(join(dir, 'ro'))).toEqual(['a.prs']);
     expect(readFileSync(join(dir, 'rw', 'b.prs'), 'utf-8')).not.toBe(MESSY);
     expect(text()).toContain('1 formatted, 0 unchanged, 1 failed');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('skips a named symbolic link and leaves link and target alone', () => {
+    const target = join(dir, 'target.prs');
+    const link = join(dir, 'l.prs');
+    writeFileSync(target, MESSY);
+    symlinkSync(target, link);
+
+    fmtCommand({ paths: [link] });
+
+    expect(lstatSync(link).isSymbolicLink()).toBe(true);
+    expect(readFileSync(target, 'utf-8')).toBe(MESSY);
+    expect(text()).toContain('symbolic link');
+    expect(text()).toContain('0 formatted, 0 unchanged, 0 failed');
+    expect(process.exitCode).toBeUndefined();
+  });
+
+  it.skipIf(isRoot)('reports a read-only file as not writable and leaves it', () => {
+    const file = join(dir, 'a.prs');
+    writeFileSync(file, MESSY);
+    chmodSync(file, 0o444);
+
+    fmtCommand({ paths: [file] });
+
+    expect(readFileSync(file, 'utf-8')).toBe(MESSY);
+    expect(text()).toContain('not writable');
+    expect(text()).toContain('0 formatted, 0 unchanged, 1 failed');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('reports a parse error without a location by file name only', () => {
+    const file = join(dir, 'a.prs');
+    writeFileSync(file, '@meta {');
+
+    fmtCommand({ paths: [file] });
+
+    expect(text()).toContain('a.prs ');
+    expect(text()).not.toContain('a.prs:');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('reports a failed parse that carries no error', () => {
+    const file = join(dir, 'a.prs');
+    writeFileSync(file, MESSY);
+    printOverride.parse = { ast: undefined, errors: [], comments: [] };
+
+    fmtCommand({ paths: [file] });
+
+    expect(text()).toContain('Parse failed');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('reports a non-Error value thrown by the printer', () => {
+    const file = join(dir, 'a.prs');
+    writeFileSync(file, MESSY);
+    printOverride.error = 'boom';
+
+    fmtCommand({ paths: [file] });
+
+    expect(readFileSync(file, 'utf-8')).toBe(MESSY);
+    expect(text()).toContain('a.prs boom');
     expect(process.exitCode).toBe(1);
   });
 });
