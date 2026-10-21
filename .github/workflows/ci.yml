@@ -158,7 +158,14 @@ jobs:
 
       - name: Upload coverage
         uses: codecov/codecov-action@v7
-        if: matrix.node-version == '25.x'
+        if: matrix.node-version == '25.x' && hashFiles('coverage/**/coverage-final.json') != ''
+
+      - name: Report no coverage to Codecov
+        uses: codecov/codecov-action@v7
+        if: matrix.node-version == '25.x' && hashFiles('coverage/**/coverage-final.json') == ''
+        with:
+          run_command: empty-upload
+          force: true
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() && matrix.node-version == '25.x' }}
