@@ -1083,11 +1083,12 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | Version | What it adds                                                                                                            |
 | ------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `1.0.0` | Core blocks (identity, context, standards, restrictions, knowledge, shortcuts, commands, guards, params, skills, local) |
-| `1.1.0` | Adds `@agents` and `@workflows`; reserves internal `@prompts`                                                           |
+| `1.1.0` | Adds `@agents` and `@workflows`                                                                                         |
 | `1.2.0` | Adds `@examples` (few-shot input/output pairs)                                                                          |
 | `1.3.0` | Adds explicit regular block field replacement in `@extend`                                                              |
 | `1.4.0` | Adds `@hooks`, `@mcpServers`, and `@plugins`                                                                            |
 | `1.5.0` | Adds `@header` section titles, `@override` replacement, and unquoted `${VAR}` values                                    |
+| `1.6.0` | Adds validated `@prompts` entries with typed inputs and runtime slots; every target ignores them                        |
 
 ### Block Version Requirements
 
@@ -1099,12 +1100,14 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | `@hooks`      | `1.4.0`                |
 | `@mcpServers` | `1.4.0`                |
 | `@plugins`    | `1.4.0`                |
+| `@prompts`    | `1.1.0`                |
 
 All other built-in blocks are available from `1.0.0`.
 Regular block field replacement with `field!: value` requires syntax `1.3.0`.
 Generated section title overrides with `@header` require syntax `1.5.0`.
 Atomic replacement with `@override` requires syntax `1.5.0`.
 Unquoted `${VAR}` references as values require syntax `1.5.0`.
+Entries in `@prompts` require syntax `1.6.0`.
 
 ### Generated Section Headers
 
