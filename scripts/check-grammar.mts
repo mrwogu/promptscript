@@ -371,12 +371,12 @@ for (const [form, wrap] of slotForms) {
   if (scopesOf(wrap('{{ns.name}}'), 'ns').includes('variable.language.slot.prs')) {
     syncErrors.push(`TextMate scopes another namespace as a runtime slot in a ${form}`);
   }
-  const escaped = scopesOf(wrap('\\{{input.name}}'), '\\{{');
+  const escaped = scopesOf(wrap(String.raw`\{{input.name}}`), String.raw`\{{`);
   if (!escaped.includes('constant.character.escape.prs')) {
-    syncErrors.push(`TextMate does not scope \\{{ as an escape in a ${form}`);
+    syncErrors.push(String.raw`TextMate does not scope \{{ as an escape in a ${form}`);
   }
   if (escaped.includes('invalid.illegal.escape.prs')) {
-    syncErrors.push(`TextMate marks \\{{ as an illegal escape in a ${form}`);
+    syncErrors.push(String.raw`TextMate marks \{{ as an illegal escape in a ${form}`);
   }
 }
 
@@ -387,7 +387,7 @@ for (const state of ['string', 'stringSingle', 'multilineString']) {
   const escapeAt = sources.indexOf(String.raw`\\\{\{`);
   const templateAt = sources.indexOf(String.raw`\{\{`);
   if (escapeAt === -1 || templateAt === -1 || escapeAt > templateAt) {
-    syncErrors.push(`Monaco ${state} does not read \\{{ as an escape before {{`);
+    syncErrors.push(String.raw`Monaco ${state} does not read \{{ as an escape before {{`);
   }
 }
 

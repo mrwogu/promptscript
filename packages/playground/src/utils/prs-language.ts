@@ -186,12 +186,12 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
     templateExpressionInString: [
       // Runtime slot namespace, only right after the opening braces: {{input.name}}
       [/input\.(?=[a-zA-Z_])/, { token: 'variable.slot', switchTo: '@templateExpressionRest' }],
-      [/[a-zA-Z_][a-zA-Z0-9_]*/, { token: 'variable.name', switchTo: '@templateExpressionRest' }],
+      [/[a-zA-Z_]\w*/, { token: 'variable.name', switchTo: '@templateExpressionRest' }],
       [/\}\}/, 'variable.template', '@pop'],
     ],
 
     templateExpressionRest: [
-      [/[a-zA-Z_][a-zA-Z0-9_]*/, 'variable.name'],
+      [/[a-zA-Z_]\w*/, 'variable.name'],
       [/\./, 'delimiter'],
       [/\}\}/, 'variable.template', '@pop'],
     ],
