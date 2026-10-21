@@ -1,6 +1,6 @@
 ---
 title: Execution Order
-description: PromptScript 1.6 declaration order and deterministic resolution
+description: PromptScript declaration order and deterministic resolution
 ---
 
 # Execution Order

@@ -1,6 +1,6 @@
 ---
 title: File Anatomy
-description: Complete PromptScript 1.6 file structure and recommended declaration order
+description: Complete PromptScript file structure and recommended declaration order
 ---
 
 # File Anatomy
