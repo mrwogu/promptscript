@@ -7,7 +7,9 @@ import { COMMENT_GROUP } from './lexer/tokens.js';
  * that resolver, validator and formatters never see them.
  */
 export interface Comment {
-  /** The full comment including the leading `#`. */
+  /** `comment` for a `#` comment, `blank` for a run of empty lines the printer may keep as one. */
+  readonly kind: 'comment' | 'blank';
+  /** The full comment including the leading `#`; empty for a blank entry. */
   readonly text: string;
   readonly loc: SourceLocation;
   /**
@@ -29,8 +31,37 @@ const OPENERS = new Set(['LBrace', 'LBracket', 'LParen']);
 // parse error anyway, so depth is only approximate in already-broken input.
 const CLOSERS = new Set(['RBrace', 'RBracket', 'RParen']);
 
-/** Collect comments in source order, with the nesting depth of each. */
-export function collectComments(lexResult: ILexingResult, file: string): Comment[] {
+/**
+ * Offsets where a run of blank lines starts, outside text blocks (their blank
+ * lines are content). A run of several blank lines counts once.
+ */
+function blankRuns(source: string, lexResult: ILexingResult): { offset: number; line: number }[] {
+  const spans = lexResult.tokens
+    .filter((token) => token.tokenType.name === 'TextBlock')
+    .map((token) => [token.startOffset, token.endOffset ?? token.startOffset] as const);
+  const runs: { offset: number; line: number }[] = [];
+  let offset = 0;
+  let line = 1;
+  let inRun = false;
+  while (offset < source.length) {
+    const end = source.indexOf('\n', offset);
+    if (end === -1) break; // text after the last newline is not a finished line
+    const blank =
+      source.slice(offset, end).trim() === '' &&
+      !spans.some(([from, to]) => offset >= from && offset <= to);
+    if (blank && !inRun) runs.push({ offset, line });
+    inRun = blank;
+    offset = end + 1;
+    line++;
+  }
+  return runs;
+}
+
+/**
+ * Collect comments and blank-line runs in source order, with the nesting depth
+ * of each. Blank entries have `kind: 'blank'` and empty text.
+ */
+export function collectComments(lexResult: ILexingResult, file: string, source = ''): Comment[] {
   const found = lexResult.groups[COMMENT_GROUP] ?? [];
   let depth = 0;
   let next = 0;
@@ -44,14 +75,24 @@ export function collectComments(lexResult: ILexingResult, file: string): Comment
       next++;
     }
   };
-  for (const token of found) {
-    countUntil(token.startOffset);
+  const entries = [
+    ...found.map((token) => ({
+      offset: token.startOffset,
+      line: token.startLine!,
+      column: token.startColumn!,
+      text: token.image,
+    })),
+    ...blankRuns(source, lexResult).map((run) => ({ ...run, column: 1, text: '' })),
+  ].sort((a, b) => a.offset - b.offset);
+  for (const entry of entries) {
+    countUntil(entry.offset);
     const previous = lexResult.tokens[next - 1];
     comments.push({
-      text: token.image,
-      loc: { file, line: token.startLine!, column: token.startColumn!, offset: token.startOffset },
+      kind: entry.text === '' ? 'blank' : 'comment',
+      text: entry.text,
+      loc: { file, line: entry.line, column: entry.column, offset: entry.offset },
       depth,
-      trailing: previous !== undefined && previous.endLine === token.startLine,
+      trailing: entry.text !== '' && previous !== undefined && previous.endLine === entry.line,
     });
   }
   return comments;

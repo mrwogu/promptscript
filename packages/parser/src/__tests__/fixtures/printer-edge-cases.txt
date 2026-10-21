@@ -200,3 +200,76 @@ body
 
 ### empty file
 
+### blank line between fields kept
+@identity {
+  a: 1
+
+  b: 2
+}
+### two blank lines collapse to one
+@identity {
+  a: 1
+
+
+  b: 2
+}
+### blank line after opening brace dropped
+@identity {
+
+  a: 1
+}
+### blank line before closing brace dropped
+@identity {
+  a: 1
+
+}
+### blank line before a comment inside a block kept
+@identity {
+  a: 1
+
+  # about b
+  b: 2
+}
+### blank line between top-level comment and block kept
+# about identity
+
+@identity { a: 1 }
+### consecutive use lines stay adjacent
+@use ./a
+@use ./b
+@use ./c
+### blocks with a blank line between keep it
+@identity { a: 1 }
+
+@context { b: 2 }
+### blocks without a blank line stay adjacent
+@identity { a: 1 }
+@context { b: 2 }
+### blank lines inside a text block stay content
+@knowledge {
+  """
+  first
+
+  second
+  """
+}
+### long array wraps one element per line
+@context { items: ["aaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbb", "cccccccccccccccccccc", "dddddddddddddddddddd", "eeeeeeeeeeee"] }
+### short array stays on one line
+@context { items: ["a", "b", "c"] }
+### blank line between objects in an array kept
+@context {
+  items: [
+    { a: 1 },
+
+    { b: 2 }
+  ]
+}
+### blank lines at array edges dropped
+@context {
+  items: [
+
+    1, 2
+
+  ]
+}

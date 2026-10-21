@@ -37,8 +37,13 @@ function stripPositions(value: unknown): unknown {
   return value;
 }
 
-function commentTexts(comments: readonly { text: string }[]): string[] {
-  return comments.map((comment) => comment.text);
+/** Blank entries may legitimately vanish on the first print, so only real comments are compared. */
+function commentTexts(comments: readonly { kind: string; text: string }[]): string[] {
+  return comments.filter((comment) => comment.kind === 'comment').map((comment) => comment.text);
+}
+
+function expectNoTrailingWhitespace(printed: string): void {
+  expect(printed.split('\n').filter((line) => /[ \t]+$/.test(line))).toEqual([]);
 }
 
 /** Tracked fixtures that are deliberately not valid syntax; they are error tests, not round-trip inputs. */
@@ -124,6 +129,9 @@ function loadEdgeCases(): Record<string, string> {
 
 const EDGE_CASES = loadEdgeCases();
 
+/** Cases whose text content legitimately holds whitespace-only lines. */
+const KEEPS_WHITESPACE: Record<string, true> = { 'whitespace-only lines in text': true };
+
 describe('printProgram edge cases', () => {
   for (const [name, source] of Object.entries(EDGE_CASES)) {
     const reason = KNOWN_EDGE_FAILURES[name];
@@ -145,6 +153,7 @@ describe('printProgram edge cases', () => {
       );
       expect(commentTexts(reparsed.comments)).toEqual(commentTexts(parsed.comments));
       expect(printProgram(reparsed.ast!, reparsed.comments)).toBe(printed);
+      if (!(name in KEEPS_WHITESPACE)) expectNoTrailingWhitespace(printed);
     });
   }
 });
@@ -179,7 +188,7 @@ describe('printProgram comments', () => {
   it('prints a comment after the last field before the closing brace', () => {
     const parsed = parseCanonical('@identity {\n  a: 1\n  # last\n}\n@context { b: 2 }');
 
-    expect(printProgram(parsed.ast!, parsed.comments)).toContain('  a: 1\n  # last\n}\n\n@context');
+    expect(printProgram(parsed.ast!, parsed.comments)).toContain('  a: 1\n  # last\n}\n@context');
   });
 
   it('does not treat a hash inside a string as a comment', () => {
@@ -297,5 +306,26 @@ describe('printProgram value formatting', () => {
 
     expect(printProgram(quoted)).toContain('a: "${HOME}"');
     expect(printProgram(bare)).toContain('a: ${HOME}');
+  });
+});
+
+describe('printProgram layout', () => {
+  const print = (source: string): string => {
+    const parsed = parseCanonical(source);
+    return printProgram(parsed.ast!, parsed.comments);
+  };
+
+  it('records one blank entry per run, never inside a text block', () => {
+    const parsed = parseCanonical('@a { x: 1\n\n\n y: """\n p\n\n q\n""" }');
+
+    expect(parsed.comments.map((c) => [c.kind, c.loc.line, c.depth])).toEqual([['blank', 2, 1]]);
+  });
+
+  it('keeps all content when a blank line sits between a comment and its block', () => {
+    expect(print('# note\n\n@identity { a: 1 }')).toBe('# note\n\n@identity {\n  a: 1\n}\n');
+  });
+
+  it('prints no trailing whitespace for a whitespace-only source line', () => {
+    expect(print('@identity {\n  a: 1\n   \n  b: 2\n}')).toBe('@identity {\n  a: 1\n\n  b: 2\n}\n');
   });
 });
