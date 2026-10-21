@@ -139,21 +139,24 @@ function isNode<K extends keyof LegacyNodes>(value: object, type: K): value is L
   return 'type' in value && value.type === type && 'loc' in value;
 }
 
+/** Width left for an array element on its own line; every element but the last is followed by a comma. */
+function elementRoom(inner: string, index: number, last: number): number {
+  return PRINT_WIDTH - inner.length - (index < last ? 1 : 0);
+}
+
 /** Print a legacy `Value` (meta fields, params, @use arguments). */
 function printValue(
   value: Value | DeepReadonly<Value>,
   indent: string,
   ctx: PrintContext,
-  room = PRINT_WIDTH - indent.length - 2
+  room: number
 ): string {
   if (value === null || typeof value !== 'object') return printScalar(value, ctx);
   if (Array.isArray(value)) {
     const last = value.length - 1;
     const inner = indent + INDENT;
     return printArray(
-      value.map((item, index) =>
-        printValue(item, inner, ctx, PRINT_WIDTH - inner.length - (index < last ? 1 : 0))
-      ),
+      value.map((item, index) => printValue(item, inner, ctx, elementRoom(inner, index, last))),
       indent,
       room
     );
@@ -209,7 +212,7 @@ function printValueNode(
                 element.value,
                 inner,
                 ctx,
-                PRINT_WIDTH - inner.length - (index < last ? 1 : 0),
+                elementRoom(inner, index, last),
                 own,
                 depth + 1
               ) +
@@ -227,12 +230,7 @@ function printValueNode(
       const lastElement = node.elements.length - 1;
       return printArray(
         node.elements.map((element, index) =>
-          printValueNode(
-            element.value,
-            inner,
-            ctx,
-            PRINT_WIDTH - inner.length - (index < lastElement ? 1 : 0)
-          )
+          printValueNode(element.value, inner, ctx, elementRoom(inner, index, lastElement))
         ),
         indent,
         room
@@ -320,7 +318,17 @@ function printParams(
   let width = indent.length + prefix.length + 1;
   const args = params.map((param, index) => {
     const head = `${param.name}: `;
-    const after = index < params.length - 1 ? 1 : 1 + tail.length;
+    // What must still fit on this line after the argument: the later arguments up to the first
+    // line break in their flat form, then the closing parenthesis and the tail.
+    let after = 0;
+    let lineEnds = false;
+    for (const later of params.slice(index + 1)) {
+      if (lineEnds) break;
+      const flat = `${later.name}: ${printValue(later.value, indent, ctx, Infinity)}`.split('\n');
+      after += 2 + flat[0]!.length;
+      lineEnds = flat.length > 1;
+    }
+    if (!lineEnds) after += 1 + tail.length;
     const text =
       head + printValue(param.value, indent, ctx, PRINT_WIDTH - width - head.length - after);
     // A wrapped argument ends on a fresh line, so the next one continues after its last line.
@@ -500,7 +508,8 @@ function printEntry(
       const flatDefault = entry.defaultValue
         ? printValueNode(entry.defaultValue, indent, ctx, Infinity)
         : '';
-      const reserve = flatDefault === '' || flatDefault.includes('\n') ? 0 : flatDefault.length + 3;
+      // Only the first line of the default follows the value; a longer default continues below it.
+      const reserve = flatDefault === '' ? 0 : flatDefault.split('\n')[0]!.length + 3;
       const value = printValueNode(
         entry.value,
         indent,

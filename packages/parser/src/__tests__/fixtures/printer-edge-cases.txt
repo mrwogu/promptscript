@@ -639,3 +639,33 @@ y"
     "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
   ] = ["aaaaaaaaaaa", "bbbbbbbbbbb"]
 }
+### use parameter array leaves room for a later parameter at exactly 100 characters
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], y: 1)
+--- expected
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], y: 1)
+### use parameter array wraps when a later parameter would pass 100 characters
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], y: 1)
+--- expected
+@use ./a(x: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+], y: 1)
+### multi-line default leaves room for its opening brace at exactly 100 characters
+@params { t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = { a: 1 } }
+--- expected
+@params {
+  t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = {
+    a: 1
+  }
+}
+### multi-line default wraps the value when its opening brace would pass 100 characters
+@params { t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = { a: 1 } }
+--- expected
+@params {
+  t: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ] = {
+    a: 1
+  }
+}
