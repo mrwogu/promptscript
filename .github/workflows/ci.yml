@@ -117,6 +117,10 @@ jobs:
         if: matrix.node-version == '25.x'
         run: pnpm prs validate --strict
 
+      - name: Check PromptScript Formatting
+        if: matrix.node-version == '25.x'
+        run: pnpm prs fmt --check
+
       - name: Skill Copies Drift Check
         if: matrix.node-version == '25.x'
         run: |
