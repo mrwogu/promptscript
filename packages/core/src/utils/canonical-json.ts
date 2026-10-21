@@ -7,7 +7,7 @@ function unsupported(kind: string, path: string): PSError {
   );
 }
 
-function serialize(value: unknown, path: string): string {
+function serialize(value: unknown, path: string, ancestors: Set<object>): string {
   switch (typeof value) {
     case 'string':
     case 'boolean':
@@ -22,18 +22,33 @@ function serialize(value: unknown, path: string): string {
       throw unsupported(typeof value, path);
   }
   if (value === null) return 'null';
+  if (ancestors.has(value)) throw unsupported('a circular reference', path);
+  ancestors.add(value);
+  try {
+    return serializeContainer(value, path, ancestors);
+  } finally {
+    ancestors.delete(value);
+  }
+}
+
+function serializeContainer(value: object, path: string, ancestors: Set<object>): string {
   if (Array.isArray(value)) {
-    const items = value.map((item, i) => serialize(item, `${path}[${i}]`));
+    // Array.from visits holes as undefined, which then throws
+    const items = Array.from(value, (item: unknown, i) =>
+      serialize(item, `${path}[${i}]`, ancestors)
+    );
     return '[' + items.join(',') + ']';
   }
+  const proto: unknown = Object.getPrototypeOf(value);
+  if (proto !== Object.prototype && proto !== null) throw unsupported('a non-plain object', path);
   const record = value as Record<string, unknown>;
   const members: string[] = [];
-  // Default sort order compares UTF-16 code units, as RFC 8785 requires
+  // Sort by UTF-16 code units, as RFC 8785 requires
   for (const key of Object.keys(record).sort((a, b) => Number(a > b) - Number(a < b))) {
     const member = record[key];
     if (member === undefined) continue;
     const memberPath = path ? `${path}.${key}` : key;
-    members.push(JSON.stringify(key) + ':' + serialize(member, memberPath));
+    members.push(JSON.stringify(key) + ':' + serialize(member, memberPath, ancestors));
   }
   return '{' + members.join(',') + '}';
 }
@@ -42,16 +57,18 @@ function serialize(value: unknown, path: string): string {
  * Serialize a JSON value as RFC 8785 canonical JSON.
  *
  * No whitespace, object keys sorted by UTF-16 code units, strings and numbers in
- * ECMAScript form. Properties set to `undefined` are skipped.
+ * ECMAScript form. Properties set to `undefined` are skipped. Lone surrogates in
+ * strings are escaped as `\udXXX`, so the canonical text is always well-formed.
  *
  * @param value - A JSON value
  * @returns The canonical JSON text
- * @throws PSError for a non-finite number, a bigint, a function, a symbol or an
- *   `undefined` outside an object property. The message names the path, such as `model.params.temperature`.
+ * @throws PSError for a non-finite number, a bigint, a function, a symbol, an
+ *   `undefined` outside an object property, an array hole, a circular reference or
+ *   an object that is not a plain object (a Date, a Map, a class instance). The message names the path, such as `model.params.temperature`.
  *
  * @example
  * canonicalizeJson({ b: 1, a: [true, null] }); // '{"a":[true,null],"b":1}'
  */
 export function canonicalizeJson(value: unknown): string {
-  return serialize(value, '');
+  return serialize(value, '', new Set());
 }

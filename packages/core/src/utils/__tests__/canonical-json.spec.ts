@@ -93,10 +93,39 @@ describe('canonicalizeJson', () => {
     ['symbol', { s: Symbol('x') }, 's'],
     ['undefined in an array', [undefined], '[0]'],
     ['undefined at the root', undefined, '<root>'],
+    ['an array hole', [1, , 3], '[1]'], // eslint-disable-line no-sparse-arrays
+    ['an unfilled array', { list: new Array(2) }, 'list[0]'],
+    ['a Date', { d: new Date(0) }, 'd'],
+    ['a Map', { m: new Map([['a', 1]]) }, 'm'],
+    ['a String object', { s: new String('ab') }, 's'], // eslint-disable-line no-new-wrappers
   ])('throws a PSError naming the path for %s', (_name, value, path) => {
     const act = (): string => canonicalizeJson(value);
 
     expect(act).toThrow(PSError);
     expect(act).toThrow(path);
+  });
+
+  it('names the path of a circular reference', () => {
+    const loop: Record<string, unknown> = { name: 'loop' };
+    loop['self'] = { again: [loop] };
+
+    expect(() => canonicalizeJson(loop)).toThrow(PSError);
+    expect(() => canonicalizeJson(loop)).toThrow('self.again[0]');
+  });
+
+  it('accepts a repeated object that is not a cycle', () => {
+    const shared = { a: 1 };
+
+    expect(canonicalizeJson({ x: shared, y: [shared] })).toBe('{"x":{"a":1},"y":[{"a":1}]}');
+  });
+
+  it('serializes a null-prototype object and an own __proto__ key', () => {
+    const bare = Object.assign(Object.create(null) as object, { b: 1, a: 2 });
+    const parsed: unknown = JSON.parse('{"__proto__":{"x":1},"k":2}');
+
+    expect([canonicalizeJson(bare), canonicalizeJson(parsed)]).toEqual([
+      '{"a":2,"b":1}',
+      '{"__proto__":{"x":1},"k":2}',
+    ]);
   });
 });
