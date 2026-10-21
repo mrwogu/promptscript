@@ -144,6 +144,17 @@ function elementRoom(inner: string, index: number, last: number): number {
   return PRINT_WIDTH - inner.length - (index < last ? 1 : 0);
 }
 
+/** True for a printed value that can break across lines: a non-empty array or object, or a text block. */
+function canWrap(flat: string): boolean {
+  return flat.length > 2 && /^(\[|\{|""")/.test(flat);
+}
+
+/** Width a printed value needs on the line where it starts: all of it, or only its opening token if it can wrap. */
+function headWidth(flat: string): number {
+  if (!canWrap(flat)) return flat.length;
+  return flat.startsWith('"""') ? 3 : 1;
+}
+
 /** Print a legacy `Value` (meta fields, params, @use arguments). */
 function printValue(
   value: Value | DeepReadonly<Value>,
@@ -319,14 +330,15 @@ function printParams(
   const args = params.map((param, index) => {
     const head = `${param.name}: `;
     // What must still fit on this line after the argument: the later arguments up to the first
-    // line break in their flat form, then the closing parenthesis and the tail.
+    // line break, then the closing parenthesis and the tail. A later value that can wrap only
+    // needs its opening token on this line, and ends the line.
     let after = 0;
     let lineEnds = false;
     for (const later of params.slice(index + 1)) {
       if (lineEnds) break;
-      const flat = `${later.name}: ${printValue(later.value, indent, ctx, Infinity)}`.split('\n');
-      after += 2 + flat[0]!.length;
-      lineEnds = flat.length > 1;
+      const flat = printValue(later.value, indent, ctx, Infinity);
+      after += 2 + `${later.name}: `.length + headWidth(flat);
+      lineEnds = canWrap(flat);
     }
     if (!lineEnds) after += 1 + tail.length;
     const text =
@@ -508,8 +520,8 @@ function printEntry(
       const flatDefault = entry.defaultValue
         ? printValueNode(entry.defaultValue, indent, ctx, Infinity)
         : '';
-      // Only the first line of the default follows the value; a longer default continues below it.
-      const reserve = flatDefault === '' ? 0 : flatDefault.split('\n')[0]!.length + 3;
+      // A default that can wrap only needs its opening token on the value's line.
+      const reserve = flatDefault === '' ? 0 : headWidth(flatDefault) + 3;
       const value = printValueNode(
         entry.value,
         indent,
