@@ -370,6 +370,38 @@ describe('fmtCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('skips a symlinked directory given explicitly and writes nothing inside it', () => {
+    mkdirSync(join(dir, 'real'));
+    writeFileSync(join(dir, 'real', 'a.prs'), MESSY);
+    symlinkSync(join(dir, 'real'), join(dir, 'linked'));
+
+    fmtCommand({ paths: [join(dir, 'linked')] });
+
+    expect(readFileSync(join(dir, 'real', 'a.prs'), 'utf-8')).toBe(MESSY);
+    expect(text()).toContain('linked: symbolic link');
+    expect(text()).toContain('0 formatted, 0 unchanged, 0 failed');
+    expect(process.exitCode).toBeUndefined();
+  });
+
+  it('skips a symlinked default .promptscript directory', () => {
+    mkdirSync(join(dir, 'outside'));
+    writeFileSync(join(dir, 'outside', 'a.prs'), MESSY);
+    mkdirSync(join(dir, 'project'));
+    symlinkSync(join(dir, 'outside'), join(dir, 'project', '.promptscript'));
+    const previous = process.cwd();
+    process.chdir(join(dir, 'project'));
+
+    try {
+      fmtCommand({});
+    } finally {
+      process.chdir(previous);
+    }
+
+    expect(readFileSync(join(dir, 'outside', 'a.prs'), 'utf-8')).toBe(MESSY);
+    expect(text()).toContain('.promptscript: symbolic link');
+    expect(process.exitCode).toBeUndefined();
+  });
+
   it.skipIf(isRoot)('reports a read-only file as not writable and leaves it', () => {
     const file = join(dir, 'a.prs');
     writeFileSync(file, MESSY);

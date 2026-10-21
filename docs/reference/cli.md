@@ -564,9 +564,10 @@ A path may be a file or a directory. Directories are walked for `*.prs`, skippin
 `node_modules`, `vendor` and `.cache`. That skip applies only when walking a
 directory, so naming `.promptscript/vendor` explicitly formats the vendored files. A
 file path without the `.prs` extension is skipped with a warning and is not counted,
-so `prs fmt .promptscript/*` leaves `.md` and `.sh` files alone. Symbolic links are
-skipped with a warning and are not counted, so a link is never replaced by a regular
-file. Non-regular files such as named pipes are ignored when found while walking. With
+so `prs fmt .promptscript/*` leaves `.md` and `.sh` files alone. Symbolic links, to files or
+directories, are skipped with a warning and are not counted, whether named directly,
+found while walking or used as the default `.promptscript`. A link is never replaced by
+a regular file and never followed out of the project. Non-regular files such as named pipes are ignored when found while walking. With
 no paths, `prs fmt` formats every `.prs` file under `.promptscript`.
 
 **Options:**

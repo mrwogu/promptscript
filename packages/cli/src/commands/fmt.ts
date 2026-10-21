@@ -52,11 +52,22 @@ function comparePaths(a: string, b: string): number {
   return 0;
 }
 
+function isSymbolicLink(path: string): boolean {
+  try {
+    return lstatSync(path).isSymbolicLink();
+  } catch {
+    return false;
+  }
+}
+
 function collectFiles(paths: string[], failures: string[]): string[] {
   const files = new Set<string>();
   for (const input of paths) {
     const target = resolve(input);
-    if (!existsSync(target)) {
+    if (isSymbolicLink(target)) {
+      // A linked path can lead outside the project, so it is never followed.
+      ConsoleOutput.warning(`Skipped ${input}: symbolic link`);
+    } else if (!existsSync(target)) {
       failures.push(`Path not found: ${input}`);
     } else if (statSync(target).isDirectory()) {
       for (const file of walkPrsFiles(target, failures)) files.add(file);
