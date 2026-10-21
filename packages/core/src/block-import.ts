@@ -43,23 +43,27 @@ function serializeEntryContent(value: Value | undefined): string {
   });
 }
 
+function entryProperties(
+  program: Program,
+  blockName: string,
+  allowMixed: boolean
+): Record<string, Value> | undefined {
+  const content = program.blocks.find((block) => block.name === blockName)?.content;
+  if (content?.type === 'ObjectContent') return content.properties;
+  return allowMixed && content?.type === 'MixedContent' ? content.properties : undefined;
+}
+
 function findConflictingEntries(
   target: Program,
   source: Program,
   blockName: string,
-  serialize: (value: Value | undefined) => string
+  serialize: (value: Value | undefined) => string,
+  allowMixed = false
 ): string[] {
-  const targetBlock = target.blocks.find((block) => block.name === blockName);
-  const sourceBlock = source.blocks.find((block) => block.name === blockName);
-  if (
-    targetBlock?.content.type !== 'ObjectContent' ||
-    sourceBlock?.content.type !== 'ObjectContent'
-  ) {
-    return [];
-  }
+  const targetProperties = entryProperties(target, blockName, allowMixed);
+  const sourceProperties = entryProperties(source, blockName, allowMixed);
+  if (!targetProperties || !sourceProperties) return [];
 
-  const targetProperties = targetBlock.content.properties;
-  const sourceProperties = sourceBlock.content.properties;
   return Object.keys(sourceProperties).filter(
     (name) =>
       Object.hasOwn(targetProperties, name) &&
@@ -79,7 +83,7 @@ function assertNoDuplicateEntries(
       declaration.loc
     );
   }
-  const prompts = findConflictingEntries(target, source, 'prompts', serializeEntryContent);
+  const prompts = findConflictingEntries(target, source, 'prompts', serializeEntryContent, true);
   if (prompts.length > 0) {
     throw new ResolveError(
       `Duplicate prompt name(s) detected when importing '${declaration.path.raw}': ${prompts.join(', ')}. ` +

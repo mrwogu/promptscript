@@ -134,6 +134,27 @@ describe('block import', () => {
     ).not.toThrow();
   });
 
+  it('compares prompt entries that sit next to free text', () => {
+    const mixed = (user: string): Block => ({
+      type: 'Block',
+      name: 'prompts',
+      content: {
+        type: 'MixedContent',
+        text: { type: 'TextContent', value: 'notes', loc: LOC },
+        properties: { review: { description: 'Review', user } },
+        loc: LOC,
+      },
+      loc: LOC,
+    });
+
+    expect(() =>
+      resolveUseImport(program([mixed('Local')]), use(), program([mixed('Other')]))
+    ).toThrow(/Duplicate prompt name/);
+    expect(() =>
+      resolveUseImport(program([mixed('Local')]), use(), program([mixed('Local')]))
+    ).not.toThrow();
+  });
+
   it('adds new prompt entries and ignores where identical text was written', () => {
     const text = (file: string): Value => ({
       type: 'TextContent',
