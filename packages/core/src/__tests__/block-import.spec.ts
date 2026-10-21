@@ -118,6 +118,51 @@ describe('block import', () => {
     ).not.toThrow();
   });
 
+  it('rejects conflicting prompt entries but permits identical ones', () => {
+    const entry = (user: string): Record<string, Value> => ({
+      review: { description: 'Review', user },
+    });
+    const target = program([block('prompts', entry('Local'))]);
+
+    expect(() =>
+      resolveUseImport(target, use(), program([block('prompts', entry('Other'))]))
+    ).toThrow(
+      /Duplicate prompt name\(s\) detected when importing '\.\/shared': review\. Rename one/
+    );
+    expect(() =>
+      resolveUseImport(target, use(), program([block('prompts', entry('Local'))]))
+    ).not.toThrow();
+  });
+
+  it('adds new prompt entries and ignores where identical text was written', () => {
+    const text = (file: string): Value => ({
+      type: 'TextContent',
+      value: 'Same text',
+      loc: { file, line: 4, column: 3, offset: 40 },
+    });
+    const entry = (file: string): Record<string, Value> => ({
+      review: { description: 'Review', user: text(file) },
+    });
+    const target = program([block('prompts', entry('local.prs'))]);
+    const source = program([
+      block('prompts', { ...entry('shared.prs'), extra: { description: 'Extra', user: 'Hi' } }),
+    ]);
+
+    const result = resolveUseImport(target, use(), source);
+
+    expect(Object.keys((result.blocks[0]!.content as { properties: object }).properties)).toEqual([
+      'review',
+      'extra',
+    ]);
+  });
+
+  it('does not treat object prototype names as existing prompts', () => {
+    const target = program([block('prompts', { review: { description: 'R', user: 'U' } })]);
+    const source = program([block('prompts', { constructor: { description: 'C', user: 'U' } })]);
+
+    expect(() => resolveUseImport(target, use(), source)).not.toThrow();
+  });
+
   it('qualifies imported agents under an alias and records provenance', () => {
     const source = program([block('agents', { reviewer: { description: 'Review code' } })]);
 
