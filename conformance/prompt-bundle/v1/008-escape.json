@@ -1,0 +1,61 @@
+{
+  "description": "One user message with an escaped slot, a backslash before an escape, and a real slot. The escapes are not slots. The scanner pins two escaped entries and one slot.",
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/escape",
+    "description": "Escaped and real slots",
+    "contentHash": "sha256-ac119134de811c86fc2d6e261ca7a75c9468e2e4e5cfb5bc9f1652648bfe4b47",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Literal \\{{input.x}} and \\\\{{input.x}}, real: {{input.message}}"
+      }
+    ],
+    "inputs": {
+      "message": {
+        "type": "string",
+        "description": "Customer message",
+        "required": true
+      }
+    },
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "user",
+          "path": "prompts.escape.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Escaped and real slots\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/escape\",\"inputs\":{\"message\":{\"description\":\"Customer message\",\"required\":true,\"type\":\"string\"}},\"messages\":[{\"content\":\"Literal \\\\{{input.x}} and \\\\\\\\{{input.x}}, real: {{input.message}}\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-ac119134de811c86fc2d6e261ca7a75c9468e2e4e5cfb5bc9f1652648bfe4b47",
+  "slots": [
+    {
+      "message": 0,
+      "kind": "escaped",
+      "name": null,
+      "offset": 8,
+      "length": 3
+    },
+    {
+      "message": 0,
+      "kind": "escaped",
+      "name": null,
+      "offset": 26,
+      "length": 3
+    },
+    {
+      "message": 0,
+      "kind": "slot",
+      "name": "message",
+      "offset": 46,
+      "length": 17
+    }
+  ]
+}

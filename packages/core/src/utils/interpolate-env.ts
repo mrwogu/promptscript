@@ -21,13 +21,11 @@ export function interpolateEnvVars(
     result += text.slice(cursor, start);
     const nameStart = start + 2;
     const firstCode = text.charCodeAt(nameStart);
-    if (
-      !(
-        (firstCode >= 65 && firstCode <= 90) ||
-        (firstCode >= 97 && firstCode <= 122) ||
-        firstCode === 95
-      )
-    ) {
+    if (!(
+      (firstCode >= 65 && firstCode <= 90) ||
+      (firstCode >= 97 && firstCode <= 122) ||
+      firstCode === 95
+    )) {
       result += '${';
       cursor = nameStart;
       continue;
@@ -36,14 +34,12 @@ export function interpolateEnvVars(
     let nameEnd = nameStart + 1;
     while (nameEnd < text.length) {
       const code = text.charCodeAt(nameEnd);
-      if (
-        !(
-          (code >= 65 && code <= 90) ||
-          (code >= 97 && code <= 122) ||
-          (code >= 48 && code <= 57) ||
-          code === 95
-        )
-      ) {
+      if (!(
+        (code >= 65 && code <= 90) ||
+        (code >= 97 && code <= 122) ||
+        (code >= 48 && code <= 57) ||
+        code === 95
+      )) {
         break;
       }
       nameEnd += 1;

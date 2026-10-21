@@ -1,0 +1,34 @@
+{
+  "description": "The bundle of 001 with a wrong contentHash field. The contentHash of this vector is the correct recomputed value. A consumer must recompute the hash and reject this bundle.",
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/refund-reply",
+    "description": "Answer a customer refund request",
+    "contentHash": "sha256-0000000000000000000000000000000000000000000000000000000000000000",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Answer the refund request politely and ask for the order number."
+      }
+    ],
+    "inputs": {},
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "user",
+          "path": "prompts.refund-reply.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Answer a customer refund request\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/refund-reply\",\"inputs\":{},\"messages\":[{\"content\":\"Answer the refund request politely and ask for the order number.\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-0e6f0d8c29583a005baceba739febd0896d7c1edf25c92b5e76a20fe99135591",
+  "slots": [],
+  "error": "hash-mismatch"
+}
