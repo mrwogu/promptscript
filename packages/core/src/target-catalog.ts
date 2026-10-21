@@ -12,6 +12,7 @@
  */
 
 import { KNOWN_TARGETS, type KnownTarget } from './types/config.js';
+import type { SectionProfile } from './section-registry.js';
 import { DEFAULT_OUTPUT_PATHS } from './target-output-paths.js';
 import {
   createTargetCapability,
@@ -80,6 +81,7 @@ interface TargetDefinitionBase {
   family: TargetFamily;
   skillPath: SkillPathConfig;
   features: DefaultFeatureProfile;
+  sectionProfile?: SectionProfile;
 }
 
 /**

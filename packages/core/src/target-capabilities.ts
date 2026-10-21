@@ -8,6 +8,7 @@
 import { HOOK_CAPABILITIES, type HookCapability } from './hook-capabilities.js';
 import { KNOWN_TARGETS, type KnownTarget } from './types/config.js';
 import { PSError } from './errors/base.js';
+import type { SectionProfile } from './section-registry.js';
 
 export interface TargetVersionCapability {
   readonly name: string;
@@ -57,6 +58,8 @@ export interface TargetCapability {
   readonly unsupportedBlocks: readonly string[];
   readonly mcpConfigPath: string | null;
   readonly mcpConfigFormat: 'json' | 'toml' | null;
+  /** Section set the target renders. */
+  readonly sectionProfile: SectionProfile;
 }
 
 export class TargetCapabilitiesError extends PSError {
@@ -1439,6 +1442,7 @@ export interface TargetCapabilitySeed {
     readonly hasAgents: boolean;
     readonly hasCommands: boolean;
   };
+  readonly sectionProfile?: SectionProfile;
 }
 
 function featureStatus(
@@ -1589,6 +1593,7 @@ export function createTargetCapability(
     unsupportedBlocks: UNSUPPORTED_BLOCKS[target] ?? [],
     mcpConfigPath: mcpConfig?.path ?? null,
     mcpConfigFormat: mcpConfig?.format ?? null,
+    sectionProfile: seed.sectionProfile ?? 'coding',
   };
 }
 

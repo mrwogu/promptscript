@@ -401,6 +401,12 @@ describe('Target catalog integrity', () => {
     expect(validateTargetDefinitionConsistency()).toEqual([]);
   });
 
+  it('should give every existing target the coding section profile', () => {
+    for (const target of KNOWN_TARGETS) {
+      expect(TARGET_DEFINITIONS[target].sectionProfile, target).toBe('coding');
+    }
+  });
+
   it('should expose canonical MCP metadata for every declared MCP resource', () => {
     for (const target of KNOWN_TARGETS) {
       const definition = TARGET_DEFINITIONS[target];

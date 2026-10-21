@@ -204,6 +204,41 @@ export const SECTION_REGISTRY: readonly SectionContract[] = [
   },
 ] as const;
 
+/** Which set of sections a target renders. */
+export type SectionProfile = 'coding' | 'general';
+
+const GENERAL_SECTION_DEFS: readonly (readonly [string, string, string])[] = [
+  ['context', 'Context', 'Background the prompt relies on'],
+  ['knowledge', 'Knowledge', 'Reference knowledge'],
+  ['standards', 'Standards', 'Rules the answer follows'],
+  ['restrictions', 'Restrictions', 'Things the answer must not do'],
+  ['examples', 'Examples', 'Input and output examples'],
+];
+
+const GENERAL_SECTIONS: readonly SectionContract[] = GENERAL_SECTION_DEFS.map(
+  ([id, defaultTitle, description]) => ({
+    id,
+    defaultTitle,
+    description,
+    primaryForBlocks: [id],
+    primaryOwner: id,
+    fallbackOwners: [],
+    sourceBlocks: [id],
+    required: false,
+    legacyHeadingFallback: false,
+    formatterAliases: [id],
+  })
+);
+
+/**
+ * Section contracts per profile. `coding` is the registry itself, by reference.
+ * `general` has no identity heading and no coding sections; all of its sections are optional.
+ */
+export const SECTION_PROFILES: Readonly<Record<SectionProfile, readonly SectionContract[]>> = {
+  coding: SECTION_REGISTRY,
+  general: GENERAL_SECTIONS,
+};
+
 export function getSectionContract(sectionIdOrAlias: string): SectionContract | undefined {
   return SECTION_REGISTRY.find(
     (section) =>
