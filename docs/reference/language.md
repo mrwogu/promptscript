@@ -1754,7 +1754,7 @@ themselves.
 | Code  | Severity | Checks                                                                                                                 |
 | ----- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
 | PS042 | error    | Keys, fields, parameters, contracts, `compose`, governance values, the `@meta.id`, floating model aliases at high risk |
-| PS043 | error    | Undeclared or malformed slots, and slots in composed blocks                                                            |
+| PS043 | error    | Undeclared or malformed slots, and slots or dotted names in composed blocks                                            |
 | PS044 | warning  | Declared inputs that no slot uses                                                                                      |
 | PS046 | warning  | Slots in the system message                                                                                            |
 

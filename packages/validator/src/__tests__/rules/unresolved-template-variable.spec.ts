@@ -35,6 +35,24 @@ describe('PS045: unresolved-template-variable', () => {
     ]);
   });
 
+  describe('blocks a prompt composes', () => {
+    const composing = (text: string): Block[] => [
+      textOnlyBlock('identity', text),
+      promptsBlock({ review: { ...VALID_PROMPT, compose: ['identity'] } }),
+    ];
+
+    it.each(['{{input.leak}}', '{{ctx.foo}}'])('leaves dotted %s to PS043', (slot) => {
+      expect(run(composing(`See ${slot}`))).toEqual([]);
+    });
+
+    it('still reports a plain name', () => {
+      const messages = run(composing('Hello {{name}}'));
+
+      expect(messages).toHaveLength(1);
+      expect(messages[0]!.message).toBe('{{name}} is not bound and is printed literally');
+    });
+  });
+
   it.each(['{{a.b}}', '{{input.message}}', '{{a.b.c}}'])(
     'reports %s outside prompt text',
     (slot) => {

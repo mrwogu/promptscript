@@ -138,6 +138,17 @@ describe('PS043: unresolved-prompt-slot', () => {
       });
     });
 
+    it('reports a dotted name in a composed block at the block', () => {
+      const messages = run({ compose: ['identity'] }, composed('Team {{ctx.foo}}'));
+
+      expect(messages).toHaveLength(1);
+      expect(messages[0]).toMatchObject({
+        message: expect.stringContaining('composes @identity, which contains {{ctx.foo}}'),
+        suggestion: expect.stringContaining('\\{{ctx.foo}}'),
+        location: PROMPT_LOC,
+      });
+    });
+
     it.each([
       ['an escaped slot', 'Say \\{{input.message}}'],
       ['text without braces', 'Be kind'],

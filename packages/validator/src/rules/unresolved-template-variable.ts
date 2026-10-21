@@ -7,8 +7,9 @@ import {
   type Program,
   type Value,
 } from '@promptscript/core';
-import type { ValidationRule } from '../types.js';
+import type { RuleContext, ValidationRule } from '../types.js';
 import { offsetLocation, walkText } from '../walker.js';
+import { getPromptExtraction } from './prompt-rule-utils.js';
 import { isValidSemver } from './valid-semver.js';
 
 const TEMPLATE = /\{\{([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\}\}/g;
@@ -55,6 +56,27 @@ function withoutPromptText(ast: Program): Program {
   return { ...ast, blocks: ast.blocks.map(strip) };
 }
 
+function scan(ctx: RuleContext, program: Program, skipDotted: boolean): void {
+  walkText(program, (text, loc) => {
+    const masked = maskFencedCode(text);
+    for (const match of masked.matchAll(TEMPLATE)) {
+      if (masked[match.index - 1] === '\\') continue;
+      const name = match[1]!;
+      const dotted = name.includes('.');
+      if (dotted && skipDotted) continue;
+      ctx.report({
+        message: dotted
+          ? `{{${name}}} is not a template variable outside prompt text and is printed literally`
+          : `{{${name}}} is not bound and is printed literally`,
+        location: offsetLocation(loc, text, match.index),
+        suggestion: dotted
+          ? 'Remove it, or move it into the system or user text of a @prompts entry, where {{input.<name>}} is a runtime slot.'
+          : 'Bind it with a parameter or remove it.',
+      });
+    }
+  });
+}
+
 /**
  * PS045: Unresolved template variables.
  *
@@ -80,22 +102,17 @@ export const unresolvedTemplateVariable: ValidationRule = {
       return;
     }
 
-    walkText(withoutPromptText(ctx.ast), (text, loc) => {
-      const masked = maskFencedCode(text);
-      for (const match of masked.matchAll(TEMPLATE)) {
-        if (masked[match.index - 1] === '\\') continue;
-        const name = match[1]!;
-        const dotted = name.includes('.');
-        ctx.report({
-          message: dotted
-            ? `{{${name}}} is not a template variable outside prompt text and is printed literally`
-            : `{{${name}}} is not bound and is printed literally`,
-          location: offsetLocation(loc, text, match.index),
-          suggestion: dotted
-            ? 'Remove it, or move it into the system or user text of a @prompts entry, where {{input.<name>}} is a runtime slot.'
-            : 'Bind it with a parameter or remove it.',
-        });
-      }
-    });
+    const composed = new Set<string>(
+      getPromptExtraction(ctx).prompts.flatMap((prompt) => prompt.compose)
+    );
+    const program = withoutPromptText(ctx.ast);
+    // PS043 owns dotted names in composed blocks, so only plain names are checked there.
+    const isComposed = (block: Block): boolean => composed.has(block.name);
+    scan(ctx, { ...program, blocks: program.blocks.filter((b) => !isComposed(b)) }, false);
+    scan(
+      ctx,
+      { ...program, blocks: program.blocks.filter(isComposed), extends: [], overrides: [] },
+      true
+    );
   },
 };

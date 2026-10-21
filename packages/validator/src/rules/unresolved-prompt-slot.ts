@@ -88,15 +88,18 @@ function checkOwnText(ctx: RuleContext, prompt: PromptDefinition): void {
   }
 }
 
-function isSlot(match: RuntimeSlotMatch): boolean {
-  return match.kind === 'slot';
+/** A live slot, or a dotted `{{ns.name}}` that is not one. */
+function isSlotLike(match: RuntimeSlotMatch, source: string): boolean {
+  return match.kind === 'slot' || (match.kind === 'invalid' && NAMESPACED.test(source));
 }
 
 function checkComposedText(ctx: RuleContext, prompt: PromptDefinition): void {
   for (const block of prompt.compose) {
     for (const { text, loc } of collectBlockTexts(ctx, block)) {
-      for (const match of findRuntimeSlots(text).filter(isSlot)) {
-        const slot = slotText(match.name);
+      for (const match of findRuntimeSlots(text)) {
+        const source = text.slice(match.offset, match.offset + match.length);
+        if (!isSlotLike(match, source)) continue;
+        const slot = match.kind === 'slot' ? slotText(match.name) : source;
         const escaped = slot.replace('{{', String.raw`\{{`);
         ctx.report({
           message: `Prompt "${prompt.name}" composes @${block}, which contains ${slot}. Slots are only live in the prompt's own system and user text`,
