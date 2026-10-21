@@ -7,7 +7,11 @@ import {
   hashPromptBundle,
   type PromptBundleV1,
 } from '@promptscript/core';
-import { compile as compileInBrowser } from '@promptscript/browser-compiler';
+import {
+  BrowserCompiler,
+  VirtualFileSystem,
+  compile as compileInBrowser,
+} from '@promptscript/browser-compiler';
 import { Compiler } from '@promptscript/compiler';
 
 const directories: string[] = [];
@@ -151,5 +155,37 @@ describe('prompt targets in the CLI compiler and the BrowserCompiler', () => {
 
     expect(converted.get('prompts/refund-reply.json')).toBe(lf.get('prompts/refund-reply.json'));
     expect(converted.get('prompts/index.json')).toBe(lf.get('prompts/index.json'));
+  });
+});
+
+describe('BrowserCompiler environment guard', () => {
+  const fs = (): VirtualFileSystem => new VirtualFileSystem(FILES);
+
+  it.each([['bundle'], ['prompt-text']])('refuses the %s target with envVars set', (name) => {
+    expect(
+      () => new BrowserCompiler({ fs: fs(), formatters: [name], envVars: { HOME: '/home/ann' } })
+    ).toThrow(/cannot compile with envVars set/);
+  });
+
+  it('allows a prompt target with no envVars or an empty map', () => {
+    expect(() => new BrowserCompiler({ fs: fs(), formatters: ['bundle'] })).not.toThrow();
+    expect(
+      () => new BrowserCompiler({ fs: fs(), formatters: ['bundle'], envVars: {} })
+    ).not.toThrow();
+  });
+
+  it('allows envVars with coding targets only', () => {
+    expect(
+      () => new BrowserCompiler({ fs: fs(), formatters: ['claude'], envVars: { HOME: 'x' } })
+    ).not.toThrow();
+  });
+
+  it('leaves the prompt targets out of the default formatter set', async () => {
+    const result = await new BrowserCompiler({
+      fs: fs(),
+      envVars: { HOME: '/home/ann' },
+    }).compile('project.prs');
+
+    expect([...result.outputs.keys()].filter((path) => path.startsWith('prompts/'))).toEqual([]);
   });
 });

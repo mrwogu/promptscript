@@ -8,6 +8,8 @@
  */
 
 import {
+  ErrorCode,
+  PSError,
   createOutputPlan,
   isPromptTarget,
   noopLogger,
@@ -15,7 +17,6 @@ import {
   type FactoryRulesMode,
   type Logger,
   type OutputPlan,
-  type PSError,
   type OutputConvention,
   type PrettierMarkdownOptions,
   type ProvenanceTrace,
@@ -187,6 +188,7 @@ export class BrowserCompiler {
     // Load all formatters by default if none specified
     const formatters = options.formatters ?? FormatterRegistry.listDefault();
     this.loadedFormatters = this.loadFormatters(formatters);
+    this.assertPromptTargetsWithoutEnv(options.envVars);
 
     this.logger.debug(
       `BrowserCompiler initialized with ${this.loadedFormatters.length} formatters`
@@ -481,6 +483,25 @@ export class BrowserCompiler {
     }
 
     return options;
+  }
+
+  /**
+   * The prompt targets never interpolate `${VAR}`, but the browser resolver interpolates
+   * environment variables while parsing, for every target at once. With variables set, a bundle
+   * compiled here would differ from the one the CLI writes, so the combination is refused.
+   */
+  private assertPromptTargetsWithoutEnv(envVars: Record<string, string> | undefined): void {
+    if (!envVars || Object.keys(envVars).length === 0) return;
+    const promptTargets = this.loadedFormatters
+      .map(({ formatter }) => formatter.name)
+      .filter((name) => isPromptTarget(name));
+    if (promptTargets.length === 0) return;
+    throw new PSError(
+      `The ${promptTargets.join(' and ')} target cannot compile with envVars set. ` +
+        'Prompt targets keep ${VAR} as text, but the browser compiler interpolates environment variables while parsing, ' +
+        'so the bundle would differ from the one the CLI writes. Compile prompt targets in a separate BrowserCompiler without envVars.',
+      ErrorCode.INVALID_VALUE
+    );
   }
 
   /**
