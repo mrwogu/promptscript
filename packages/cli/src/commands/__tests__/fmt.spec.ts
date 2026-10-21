@@ -246,6 +246,21 @@ describe('fmtCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('refuses to write output that parses to a different program', () => {
+    const file = join(dir, 'a.prs');
+    writeFileSync(file, MESSY);
+    printOverride.output = '@meta {\n  id: "a"\n  syntax: "1.0.0"\n}\n@identity {\n  x: 1\n}\n';
+
+    fmtCommand({ paths: [file] });
+
+    expect(readFileSync(file, 'utf-8')).toBe(MESSY);
+    expect(text()).toContain(
+      'formatted output does not parse to the same program, file not written'
+    );
+    expect(text()).toContain('0 formatted, 0 unchanged, 1 failed');
+    expect(process.exitCode).toBe(1);
+  });
+
   it.skipIf(isRoot)('records a read error, keeps going and exits 1', () => {
     const locked = join(dir, 'a-locked.prs');
     const good = join(dir, 'b-good.prs');
