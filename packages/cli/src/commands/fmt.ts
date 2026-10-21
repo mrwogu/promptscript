@@ -23,7 +23,7 @@ function collectFiles(paths: string[], failures: string[]): string[] {
     if (!existsSync(target)) {
       failures.push(`Path not found: ${input}`);
     } else if (statSync(target).isDirectory()) {
-      for (const file of discoverPrsFiles(target)) {
+      for (const file of discoverPrsFiles(target, false, true)) {
         if (!isSkipped(file, target)) files.add(file);
       }
     } else if (extname(target) !== '.prs') {

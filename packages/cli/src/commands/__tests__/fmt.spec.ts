@@ -293,6 +293,23 @@ describe('fmtCommand', () => {
     expect(process.exitCode).toBeUndefined();
   });
 
+  it('warns about a symbolic link found while walking and writes nothing through it', () => {
+    mkdirSync(join(dir, 'walk'));
+    const target = join(dir, 'target.prs');
+    const link = join(dir, 'walk', 'l.prs');
+    writeFileSync(target, MESSY);
+    symlinkSync(target, link);
+
+    fmtCommand({ paths: [join(dir, 'walk')] });
+
+    expect(lstatSync(link).isSymbolicLink()).toBe(true);
+    expect(readFileSync(target, 'utf-8')).toBe(MESSY);
+    expect(text()).toContain('Skipped');
+    expect(text()).toContain('l.prs: symbolic link');
+    expect(text()).toContain('0 formatted, 0 unchanged, 0 failed');
+    expect(process.exitCode).toBeUndefined();
+  });
+
   it.skipIf(isRoot)('reports a read-only file as not writable and leaves it', () => {
     const file = join(dir, 'a.prs');
     writeFileSync(file, MESSY);
