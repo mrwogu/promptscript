@@ -311,17 +311,21 @@ function printParams(
   params: DeepReadonly<ParamArgument[]> | undefined,
   ctx: PrintContext,
   prefix: string,
-  tail: string
+  tail: string,
+  indent: string
 ): string {
   if (!params) return '';
   // Each argument sits on the line after the path and the arguments before it, and is
   // followed by a comma, or by the closing parenthesis and whatever `tail` adds after it.
-  let width = prefix.length + 1;
+  let width = indent.length + prefix.length + 1;
   const args = params.map((param, index) => {
     const head = `${param.name}: `;
     const after = index < params.length - 1 ? 1 : 1 + tail.length;
-    const text = head + printValue(param.value, '', ctx, PRINT_WIDTH - width - head.length - after);
-    width += text.length + 2;
+    const text =
+      head + printValue(param.value, indent, ctx, PRINT_WIDTH - width - head.length - after);
+    // A wrapped argument ends on a fresh line, so the next one continues after its last line.
+    const newline = text.lastIndexOf('\n');
+    width = newline === -1 ? width + text.length + 2 : text.length - newline - 1 + 2;
     return text;
   });
   return `(${args.join(', ')})`;
@@ -331,21 +335,23 @@ function printImport(
   keyword: string,
   decl: DeepReadonly<InheritDeclaration | UseDeclaration | InlineUseDeclaration>,
   ctx: PrintContext,
-  tail = ''
+  tail = '',
+  indent = ''
 ): string {
   const head = `@${keyword} ${decl.path.raw}`;
-  return head + printParams(decl.params, ctx, head, tail) + tail;
+  return head + printParams(decl.params, ctx, head, tail, indent) + tail;
 }
 
 function printUse(
   decl: DeepReadonly<UseDeclaration | InlineUseDeclaration>,
-  ctx: PrintContext
+  ctx: PrintContext,
+  indent = ''
 ): string {
   const tail = [
     ...(decl.alias ? [` as ${decl.alias}`] : []),
     ...(decl.outputDir ? [` into ${quote(decl.outputDir)}`] : []),
   ].join('');
-  return printImport('use', decl, ctx, tail);
+  return printImport('use', decl, ctx, tail, indent);
 }
 
 function printParamDefinition(
@@ -490,7 +496,18 @@ function printEntry(
       return [indent + printText(entry.text, indent)];
     case 'FieldEntry': {
       const head = `${indent}${printKey(entry.name)}${fieldMarker(entry, replaced)}: `;
-      const value = printValueNode(entry.value, indent, ctx, PRINT_WIDTH - head.length, comments);
+      // A default that fits on one line follows the value, so the value must leave room for it.
+      const flatDefault = entry.defaultValue
+        ? printValueNode(entry.defaultValue, indent, ctx, Infinity)
+        : '';
+      const reserve = flatDefault === '' || flatDefault.includes('\n') ? 0 : flatDefault.length + 3;
+      const value = printValueNode(
+        entry.value,
+        indent,
+        ctx,
+        PRINT_WIDTH - head.length - reserve,
+        comments
+      );
       // The default value follows the last line of the first value.
       const used = value.includes('\n')
         ? value.length - value.lastIndexOf('\n') - 1
@@ -509,7 +526,7 @@ function printEntry(
       return [`${indent}- ${quote(value.value)}`];
     }
     case 'InlineUseEntry':
-      return [indent + printUse(entry.declaration as InlineUseDeclaration, ctx)];
+      return [indent + printUse(entry.declaration as InlineUseDeclaration, ctx, indent)];
     case 'PresentationEntry': {
       if (entry.source === 'legacy') {
         // A legacy heading is the first line of a text block, so it is printed as text.

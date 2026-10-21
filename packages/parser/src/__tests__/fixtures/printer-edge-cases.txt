@@ -608,3 +608,34 @@ y"
   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 ]) into "skills/seo"
+### use parameter after a wrapped array continues on its last line
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], y: [1, 2])
+--- expected
+@use ./a(x: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+], y: [1, 2])
+### inline use in a block fits at exactly 100 columns
+@skills { @use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) }
+--- expected
+@skills {
+  @use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+}
+### inline use in a block wraps counting the block indent
+@skills { @use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) }
+--- expected
+@skills {
+  @use ./a(x: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ])
+}
+### field default reserves room after a long array value
+@params { tags: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = ["aaaaaaaaaaa", "bbbbbbbbbbb"] }
+--- expected
+@params {
+  tags: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ] = ["aaaaaaaaaaa", "bbbbbbbbbbb"]
+}
