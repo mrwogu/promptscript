@@ -1,19 +1,42 @@
-import { accessSync, constants, existsSync, lstatSync, readFileSync, statSync } from 'node:fs';
-import { extname, relative, resolve, sep } from 'node:path';
+import {
+  accessSync,
+  constants,
+  existsSync,
+  lstatSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+} from 'node:fs';
+import { extname, join, relative, resolve } from 'node:path';
 import { parseCanonical, printProgram } from '@promptscript/parser';
 import type { FmtOptions } from '../types.js';
 import { ConsoleOutput } from '../output/console.js';
 import { writeFileAtomic } from '../utils/write-file-atomic.js';
-import { discoverPrsFiles } from './validate.js';
 
 /** Directories holding third-party sources that must never be rewritten. */
 const SKIPPED_DIRS = new Set(['node_modules', 'vendor', '.cache']);
 
-function isSkipped(file: string, root: string): boolean {
-  return relative(root, file)
-    .split(sep)
-    .slice(0, -1)
-    .some((segment) => SKIPPED_DIRS.has(segment));
+/**
+ * Walk a directory for .prs files, symbolic links included so the caller can warn.
+ * Unlike discoverPrsFiles, a directory that cannot be read is reported and the walk
+ * continues, so readable files are still formatted and the failure is not swallowed.
+ */
+function walkPrsFiles(dir: string, failures: string[]): string[] {
+  const results: string[] = [];
+  try {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (!SKIPPED_DIRS.has(entry.name)) results.push(...walkPrsFiles(fullPath, failures));
+      } else if (entry.name.endsWith('.prs')) {
+        results.push(fullPath);
+      }
+    }
+  } catch (error) {
+    // fs.readdirSync only ever throws Error instances.
+    failures.push(`${dir} ${(error as Error).message}`);
+  }
+  return results;
 }
 
 function collectFiles(paths: string[], failures: string[]): string[] {
@@ -23,17 +46,15 @@ function collectFiles(paths: string[], failures: string[]): string[] {
     if (!existsSync(target)) {
       failures.push(`Path not found: ${input}`);
     } else if (statSync(target).isDirectory()) {
-      for (const file of discoverPrsFiles(target, false, true)) {
-        if (!isSkipped(file, target)) files.add(file);
-      }
+      for (const file of walkPrsFiles(target, failures)) files.add(file);
     } else if (extname(target) !== '.prs') {
       ConsoleOutput.warning(`Skipped ${input}: not a .prs file`);
     } else {
       files.add(target);
     }
   }
-  // Compare by code units so the order never depends on the locale.
-  return [...files].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  // Compare by code units so the order never depends on the locale; paths are unique.
+  return [...files].sort((a, b) => (a < b ? -1 : 1));
 }
 
 type FileOutcome = 'changed' | 'unchanged' | 'skipped' | 'failed';

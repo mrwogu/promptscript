@@ -310,6 +310,33 @@ describe('fmtCommand', () => {
     expect(process.exitCode).toBeUndefined();
   });
 
+  it('walks a directory in sorted order and ignores other file types', () => {
+    for (const name of ['b.prs', 'c.prs', 'a.prs']) writeFileSync(join(dir, name), MESSY);
+    writeFileSync(join(dir, 'notes.md'), MESSY);
+
+    fmtCommand({ paths: [dir] });
+
+    expect(text().indexOf('a.prs')).toBeLessThan(text().indexOf('b.prs'));
+    expect(readFileSync(join(dir, 'notes.md'), 'utf-8')).toBe(MESSY);
+    expect(text()).toContain('3 formatted, 0 unchanged, 0 failed');
+  });
+
+  it.skipIf(isRoot)('reports an unreadable subdirectory and still formats the rest', () => {
+    mkdirSync(join(dir, 'locked'));
+    writeFileSync(join(dir, 'locked', 'hidden.prs'), MESSY);
+    writeFileSync(join(dir, 'ok.prs'), MESSY);
+    chmodSync(join(dir, 'locked'), 0o000);
+
+    fmtCommand({ paths: [dir] });
+
+    chmodSync(join(dir, 'locked'), 0o755);
+    expect(readFileSync(join(dir, 'ok.prs'), 'utf-8')).not.toBe(MESSY);
+    expect(text()).toContain('locked');
+    expect(text()).toContain('EACCES');
+    expect(text()).toContain('1 formatted, 0 unchanged, 1 failed');
+    expect(process.exitCode).toBe(1);
+  });
+
   it.skipIf(isRoot)('reports a read-only file as not writable and leaves it', () => {
     const file = join(dir, 'a.prs');
     writeFileSync(file, MESSY);
