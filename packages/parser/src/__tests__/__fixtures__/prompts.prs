@@ -1,0 +1,38 @@
+@meta {
+  id: "acme-support"
+  syntax: "1.6.0"
+  owner: "team-support"
+  risk: "medium"
+}
+
+@identity {
+  """
+  You work for the Acme support team.
+  """
+}
+
+@restrictions {
+  - "Never promise a refund before it is approved."
+}
+
+# A prompt with typed inputs and outputs, composed from the blocks above.
+@prompts {
+  refund-reply: {
+    description: "Answer a customer refund request"
+    risk: "high"
+    dataClasses: ["pii"]
+    compose: [identity, restrictions]
+    model: { ref: "claude-sonnet-5-5", temperature: 0.2, maxTokens: 800 }
+    inputs: { message: { type: "string", description: "Customer message" } }
+    output: {
+      decision: { type: "enum", options: ["approve", "escalate"] }
+      citations: { type: "list", items: { type: "string" } }
+    }
+    system: "You answer refund requests for Acme customers."
+    user: """
+      Customer wrote: {{input.message}}
+
+      Write \{{input.message}} to show the slot syntax without filling it.
+    """
+  }
+}
