@@ -20,12 +20,15 @@ const SKIPPED_DIRS = new Set(['node_modules', 'vendor', '.cache']);
 const POSITION_KEYS = new Set(['loc', 'titleLoc', 'sectionLoc', 'location']);
 
 /**
- * The program as JSON without source positions. Syntax feature usages are left out
- * because they count occurrences, which a rewrite may change without changing the program.
+ * The program as JSON without source positions. Syntax feature usages are reduced to the
+ * set of feature names: a rewrite may change how often a feature occurs, but not which ones.
  */
 function programKey(program: unknown): string {
   return JSON.stringify(program, (key, value: unknown) => {
-    if (key === 'syntaxFeatures') return undefined;
+    if (key === 'syntaxFeatures' && Array.isArray(value)) {
+      const names = value.map((usage: { feature?: unknown }) => usage.feature);
+      return [...new Set(names)].sort((a, b) => String(a).localeCompare(String(b)));
+    }
     const isPosition = typeof value === 'object' && value !== null && 'line' in value;
     return POSITION_KEYS.has(key) && isPosition ? undefined : value;
   });

@@ -261,6 +261,30 @@ describe('fmtCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('refuses to write output that adds a syntax feature', () => {
+    const file = join(dir, 'a.prs');
+    const source = '@identity { a: "${A}" }';
+    writeFileSync(file, source);
+    printOverride.output = '@identity {\n  a: ${A}\n}\n';
+
+    fmtCommand({ paths: [file] });
+
+    expect(readFileSync(file, 'utf-8')).toBe(source);
+    expect(text()).toContain('does not parse to the same program');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('writes output that only changes how often a syntax feature occurs', () => {
+    const file = join(dir, 'a.prs');
+    writeFileSync(file, '@identity { a: ${A} b: "${B}" }');
+
+    fmtCommand({ paths: [file] });
+
+    expect(readFileSync(file, 'utf-8')).toContain('b: ${B}');
+    expect(text()).toContain('1 formatted, 0 unchanged, 0 failed');
+    expect(process.exitCode).toBeUndefined();
+  });
+
   it.skipIf(isRoot)('records a read error, keeps going and exits 1', () => {
     const locked = join(dir, 'a-locked.prs');
     const good = join(dir, 'b-good.prs');
