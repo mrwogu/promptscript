@@ -139,20 +139,50 @@ function isNode<K extends keyof LegacyNodes>(value: object, type: K): value is L
   return 'type' in value && value.type === type && 'loc' in value;
 }
 
+/** Width left for an array element on its own line; every element but the last is followed by a comma. */
+function elementRoom(inner: string, index: number, last: number): number {
+  return PRINT_WIDTH - inner.length - (index < last ? 1 : 0);
+}
+
+/**
+ * True for a printed value that can break across lines: a non-empty array, an object (always
+ * `{` and a line break, unlike a `{{template}}`) or a text block.
+ */
+function canWrap(flat: string): boolean {
+  return flat.length > 2 && /^(\[|\{\n|""")/.test(flat);
+}
+
+/** Width a printed value needs on the line where it starts: all of it, or only its opening token if it can wrap. */
+function headWidth(flat: string): number {
+  if (!canWrap(flat)) return flat.length;
+  return flat.startsWith('"""') ? 3 : 1;
+}
+
 /** Print a legacy `Value` (meta fields, params, @use arguments). */
-function printValue(value: Value | DeepReadonly<Value>, indent: string, ctx: PrintContext): string {
+function printValue(
+  value: Value | DeepReadonly<Value>,
+  indent: string,
+  ctx: PrintContext,
+  room: number
+): string {
   if (value === null || typeof value !== 'object') return printScalar(value, ctx);
-  if (Array.isArray(value))
+  if (Array.isArray(value)) {
+    const last = value.length - 1;
+    const inner = indent + INDENT;
     return printArray(
-      value.map((item) => printValue(item, indent + INDENT, ctx)),
-      indent
+      value.map((item, index) => printValue(item, inner, ctx, elementRoom(inner, index, last))),
+      indent,
+      room
     );
+  }
   if (isNode(value, 'TextContent')) return printText(value.value, indent);
   if (isNode(value, 'TemplateExpression')) return `{{${value.name}}}`;
   if (isNode(value, 'TypeExpression')) return printTypeExpression(value);
-  const lines = Object.entries(value).map(
-    ([key, entry]) => `${printKey(key)}: ${printValue(entry as Value, indent + INDENT, ctx)}`
-  );
+  const lines = Object.entries(value).map(([key, entry]) => {
+    const head = `${printKey(key)}: `;
+    const inner = indent + INDENT;
+    return head + printValue(entry as Value, inner, ctx, PRINT_WIDTH - inner.length - head.length);
+  });
   return printList(lines, '{', '}', indent);
 }
 
@@ -169,6 +199,7 @@ function printValueNode(
   node: ValueNode,
   indent: string,
   ctx: PrintContext,
+  room: number,
   comments: readonly Comment[] = [],
   depth = BLOCK_DEPTH
 ): string {
@@ -183,44 +214,74 @@ function printValueNode(
     case 'TypeExpressionValueNode':
       return printTypeExpression(node.expression);
     case 'ArrayValueNode': {
-      if (comments.length === 0) {
-        return printArray(
-          node.elements.map((element) => printValueNode(element.value, inner, ctx)),
+      if (comments.length > 0) {
+        // The comma has to be part of the element so a trailing comment lands after it.
+        const last = node.elements.length - 1;
+        const items = node.elements.map<Placed>((element, index) => ({
+          loc: element.loc,
+          holds: isContainer(element.value),
+          print: (own) => [
+            inner +
+              printValueNode(
+                element.value,
+                inner,
+                ctx,
+                elementRoom(inner, index, last),
+                own,
+                depth + 1
+              ) +
+              (index < last ? ',' : ''),
+          ],
+        }));
+        const laidOut = closeList(
+          '[',
+          withComments(items, comments, inner, depth + 1),
+          ']',
           indent
         );
+        if (keepsLayout(comments, laidOut)) return laidOut;
       }
-      // The comma has to be part of the element so a trailing comment lands after it.
-      const last = node.elements.length - 1;
-      const items = node.elements.map<Placed>((element, index) => ({
-        loc: element.loc,
-        holds: isContainer(element.value),
-        print: (own) => [
-          inner +
-            printValueNode(element.value, inner, ctx, own, depth + 1) +
-            (index < last ? ',' : ''),
-        ],
-      }));
-      return closeList('[', withComments(items, comments, inner, depth + 1), ']', indent);
+      const lastElement = node.elements.length - 1;
+      return printArray(
+        node.elements.map((element, index) =>
+          printValueNode(element.value, inner, ctx, elementRoom(inner, index, lastElement))
+        ),
+        indent,
+        room
+      );
     }
     case 'ObjectValueNode': {
-      if (comments.length === 0) {
-        return printList(
-          node.fields.map(
-            (field) => `${printKey(field.name)}: ${printValueNode(field.value, inner, ctx)}`
-          ),
+      if (comments.length > 0) {
+        const items = node.fields.map<Placed>((field) => {
+          const head = `${inner}${printKey(field.name)}: `;
+          return {
+            loc: field.loc,
+            holds: isContainer(field.value),
+            print: (own) => [
+              head +
+                printValueNode(field.value, inner, ctx, PRINT_WIDTH - head.length, own, depth + 1),
+            ],
+          };
+        });
+        const laidOut = closeList(
           '{',
+          withComments(items, comments, inner, depth + 1),
           '}',
           indent
         );
+        if (keepsLayout(comments, laidOut)) return laidOut;
       }
-      const items = node.fields.map<Placed>((field) => ({
-        loc: field.loc,
-        holds: isContainer(field.value),
-        print: (own) => [
-          `${inner}${printKey(field.name)}: ${printValueNode(field.value, inner, ctx, own, depth + 1)}`,
-        ],
-      }));
-      return closeList('{', withComments(items, comments, inner, depth + 1), '}', indent);
+      return printList(
+        node.fields.map((field) => {
+          const head = `${printKey(field.name)}: `;
+          return (
+            head + printValueNode(field.value, inner, ctx, PRINT_WIDTH - inner.length - head.length)
+          );
+        }),
+        '{',
+        '}',
+        indent
+      );
     }
     /* v8 ignore next 2 -- exhaustive switch */
     default:
@@ -229,12 +290,27 @@ function printValueNode(
 }
 
 function closeList(open: string, groups: string[][], close: string, indent: string): string {
-  return `${open}\n${groups.flat().join('\n')}\n${indent}${close}`;
+  return `${open}\n${layout(groups).join('\n')}\n${indent}${close}`;
 }
 
-function printArray(printed: string[], indent: string): string {
-  // Arrays need commas, so keep the simple case on one line and only break for nested values.
-  if (printed.every((item) => !item.includes('\n'))) return `[${printed.join(', ')}]`;
+/**
+ * A container printed with its comments only differs from the plain form when a
+ * real comment or a blank line survived; edge blank lines alone must not force it.
+ */
+function keepsLayout(comments: readonly Comment[], printed: string): boolean {
+  return comments.some((c) => c.kind === 'comment') || printed.split('\n').includes(BLANK);
+}
+
+/** Printing width the repo's Prettier config uses; arrays that fit stay on one line. */
+const PRINT_WIDTH = 100;
+
+/** `room` is the width left on the line for the array after what precedes and follows it. */
+function printArray(printed: string[], indent: string, room: number): string {
+  // Arrays need commas, so keep the simple case on one line while it fits.
+  if (printed.every((item) => !item.includes('\n'))) {
+    const line = `[${printed.join(', ')}]`;
+    if (line.length <= room) return line;
+  }
   return printList(
     printed.map((item, index) => (index < printed.length - 1 ? `${item},` : item)),
     '[',
@@ -243,28 +319,62 @@ function printArray(printed: string[], indent: string): string {
   );
 }
 
-function printParams(params: DeepReadonly<ParamArgument[]> | undefined, ctx: PrintContext): string {
+function printParams(
+  params: DeepReadonly<ParamArgument[]> | undefined,
+  ctx: PrintContext,
+  prefix: string,
+  tail: string,
+  indent: string
+): string {
   if (!params) return '';
-  const args = params.map((param) => `${param.name}: ${printValue(param.value, '', ctx)}`);
+  // Each argument sits on the line after the path and the arguments before it, and is
+  // followed by a comma, or by the closing parenthesis and whatever `tail` adds after it.
+  let width = indent.length + prefix.length + 1;
+  const args = params.map((param, index) => {
+    const head = `${param.name}: `;
+    // What must still fit on this line after the argument: the later arguments up to the first
+    // line break, then the closing parenthesis and the tail. A later value that can wrap only
+    // needs its opening token on this line, and ends the line.
+    let after = 0;
+    let lineEnds = false;
+    for (const later of params.slice(index + 1)) {
+      if (lineEnds) break;
+      const flat = printValue(later.value, indent, ctx, Infinity);
+      after += 2 + `${later.name}: `.length + headWidth(flat);
+      lineEnds = canWrap(flat);
+    }
+    if (!lineEnds) after += 1 + tail.length;
+    const text =
+      head + printValue(param.value, indent, ctx, PRINT_WIDTH - width - head.length - after);
+    // A wrapped argument ends on a fresh line, so the next one continues after its last line.
+    const newline = text.lastIndexOf('\n');
+    width = newline === -1 ? width + text.length + 2 : text.length - newline - 1 + 2;
+    return text;
+  });
   return `(${args.join(', ')})`;
 }
 
 function printImport(
   keyword: string,
   decl: DeepReadonly<InheritDeclaration | UseDeclaration | InlineUseDeclaration>,
-  ctx: PrintContext
+  ctx: PrintContext,
+  tail = '',
+  indent = ''
 ): string {
-  return `@${keyword} ${decl.path.raw}${printParams(decl.params, ctx)}`;
+  const head = `@${keyword} ${decl.path.raw}`;
+  return head + printParams(decl.params, ctx, head, tail, indent) + tail;
 }
 
 function printUse(
   decl: DeepReadonly<UseDeclaration | InlineUseDeclaration>,
-  ctx: PrintContext
+  ctx: PrintContext,
+  indent = ''
 ): string {
-  const parts = [printImport('use', decl, ctx)];
-  if (decl.alias) parts.push(`as ${decl.alias}`);
-  if (decl.outputDir) parts.push(`into ${quote(decl.outputDir)}`);
-  return parts.join(' ');
+  const tail = [
+    ...(decl.alias ? [` as ${decl.alias}`] : []),
+    ...(decl.outputDir ? [` into ${quote(decl.outputDir)}`] : []),
+  ].join('');
+  return printImport('use', decl, ctx, tail, indent);
 }
 
 function printParamDefinition(
@@ -278,8 +388,11 @@ function printParamDefinition(
       : def.paramType.kind;
   const hasDefault = def.defaultValue !== undefined;
   const optional = def.optional && !hasDefault ? '?' : '';
-  const fallback = hasDefault ? ` = ${printValue(def.defaultValue!, indent, ctx)}` : '';
-  return `${def.name}${optional}: ${type}${fallback}`;
+  const head = `${def.name}${optional}: ${type}`;
+  const fallback = hasDefault
+    ? ` = ${printValue(def.defaultValue!, indent, ctx, PRINT_WIDTH - indent.length - head.length - 3)}`
+    : '';
+  return head + fallback;
 }
 
 /** A printed declaration or entry with the source position used to place comments around it. */
@@ -322,12 +435,13 @@ function withComments(
   items.forEach((item, index) => {
     const start = offsetOf(item.loc);
     const end = items[index + 1] ? offsetOf(items[index + 1]!.loc) : Infinity;
-    const leading = rest.filter((c) => offsetOf(c.loc) < start);
+    const leading = rest.filter((c) => offsetOf(c.loc) < start && !isStray(c, depth));
     rest = rest.filter((c) => offsetOf(c.loc) >= start);
     const isInside = (c: Comment): boolean =>
       item.holds && c.depth > depth && offsetOf(c.loc) < end;
     const inside = rest.filter(isInside);
-    rest = rest.filter((c) => !isInside(c));
+    // A blank line nested in an item that cannot place it must not block a comment trailing the item.
+    rest = rest.filter((c) => !isInside(c) && !(isStray(c, depth) && offsetOf(c.loc) < end));
     const lines = [...item.print(inside)];
     // Only the next comment in order can trail the item; taking a later one would reorder comments.
     const trailing = rest[0];
@@ -335,10 +449,35 @@ function withComments(
       lines[lines.length - 1] += ` ${trailing.text}`;
       rest = rest.filter((c) => c !== trailing);
     }
-    groups.push([...leading.map((c) => indent + c.text), ...lines]);
+    groups.push([...leading.map((c) => line(c, indent)), ...lines]);
   });
-  if (rest.length > 0) groups.push(rest.map((c) => indent + c.text));
+  const left = rest.filter((c) => !isStray(c, depth));
+  if (left.length > 0) groups.push(left.map((c) => line(c, indent)));
   return groups;
+}
+
+/** Marks a blank line until the very end, so blank lines of text content are never mistaken for it. */
+const BLANK = '\u0000}prs-blank';
+
+function line(c: Comment, indent: string): string {
+  return c.kind === 'blank' ? BLANK : indent + c.text;
+}
+
+/** A blank line nested deeper than the container that received it belongs to something it cannot place. */
+function isStray(c: Comment, depth: number): boolean {
+  return c.kind === 'blank' && c.depth > depth;
+}
+
+/**
+ * Flatten placed groups into lines. At most one blank line is kept in a row,
+ * and none at the start or end, because the container's edges are not places a
+ * source would put one.
+ */
+function layout(groups: readonly string[][]): string[] {
+  const lines = groups.flat().filter((l, i, all) => l !== BLANK || all[i - 1] !== BLANK);
+  while (lines[0] === BLANK) lines.shift();
+  while (lines.at(-1) === BLANK) lines.pop();
+  return lines;
 }
 
 function printMeta(
@@ -346,9 +485,10 @@ function printMeta(
   comments: readonly Comment[],
   ctx: PrintContext
 ): string {
-  const lines = Object.entries(meta.fields).map(
-    ([key, value]) => `${printKey(key)}: ${printValue(value, INDENT, ctx)}`
-  );
+  const lines = Object.entries(meta.fields).map(([key, value]) => {
+    const head = `${printKey(key)}: `;
+    return head + printValue(value, INDENT, ctx, PRINT_WIDTH - INDENT.length - head.length);
+  });
   if (meta.params) {
     const defs = meta.params.map((def) => printParamDefinition(def, INDENT + INDENT, ctx));
     lines.push(`params: ${printList(defs, '{', '}', INDENT)}`);
@@ -356,7 +496,8 @@ function printMeta(
   // Known limit: MetaBlock fields carry no source positions, so every comment inside @meta
   // moves to just before its closing brace (text and order are kept). Fixing that needs
   // positions on MetaBlock in core. Tracked in #555.
-  return `@meta ${printList([...lines, ...comments.map((c) => c.text)], '{', '}', '')}`;
+  const texts = comments.filter((c) => c.kind === 'comment').map((c) => c.text);
+  return `@meta ${printList([...lines, ...texts], '{', '}', '')}`;
 }
 
 function fieldMarker(entry: FieldEntry, replaced: ReadonlySet<string>): string {
@@ -377,13 +518,28 @@ function printEntry(
     case 'TextEntry':
       return [indent + printText(entry.text, indent)];
     case 'FieldEntry': {
-      const marker = fieldMarker(entry, replaced);
-      const fallback = entry.defaultValue
-        ? ` = ${printValueNode(entry.defaultValue, indent, ctx)}`
+      const head = `${indent}${printKey(entry.name)}${fieldMarker(entry, replaced)}: `;
+      // A default that fits on one line follows the value, so the value must leave room for it.
+      const flatDefault = entry.defaultValue
+        ? printValueNode(entry.defaultValue, indent, ctx, Infinity)
         : '';
-      return [
-        `${indent}${printKey(entry.name)}${marker}: ${printValueNode(entry.value, indent, ctx, comments)}${fallback}`,
-      ];
+      // A default that can wrap only needs its opening token on the value's line.
+      const reserve = flatDefault === '' ? 0 : headWidth(flatDefault) + 3;
+      const value = printValueNode(
+        entry.value,
+        indent,
+        ctx,
+        PRINT_WIDTH - head.length - reserve,
+        comments
+      );
+      // The default value follows the last line of the first value.
+      const used = value.includes('\n')
+        ? value.length - value.lastIndexOf('\n') - 1
+        : head.length + value.length;
+      const fallback = entry.defaultValue
+        ? ` = ${printValueNode(entry.defaultValue, indent, ctx, PRINT_WIDTH - used - 3)}`
+        : '';
+      return [`${head}${value}${fallback}`];
     }
     case 'ListEntry': {
       const { value } = entry;
@@ -394,7 +550,7 @@ function printEntry(
       return [`${indent}- ${quote(value.value)}`];
     }
     case 'InlineUseEntry':
-      return [indent + printUse(entry.declaration as InlineUseDeclaration, ctx)];
+      return [indent + printUse(entry.declaration as InlineUseDeclaration, ctx, indent)];
     case 'PresentationEntry': {
       if (entry.source === 'legacy') {
         // A legacy heading is the first line of a text block, so it is printed as text.
@@ -444,7 +600,7 @@ function printBracedBody(
   items: readonly Placed[],
   comments: readonly Comment[]
 ): string[] {
-  const lines = withComments(items, comments, INDENT, BLOCK_DEPTH).flat();
+  const lines = layout(withComments(items, comments, INDENT, BLOCK_DEPTH));
   return lines.length === 0 ? [`${head} {`, '}'] : [`${head} {`, ...lines, '}'];
 }
 
@@ -488,7 +644,10 @@ function printOverride(
           {
             loc: replacement.value.loc,
             holds: isContainer(replacement.value),
-            print: (inside) => [INDENT + printValueNode(replacement.value, INDENT, ctx, inside)],
+            print: (inside) => [
+              INDENT +
+                printValueNode(replacement.value, INDENT, ctx, PRINT_WIDTH - INDENT.length, inside),
+            ],
           },
         ],
         comments
@@ -529,11 +688,14 @@ function printOperation(
  * `parseCanonical` result; without them none are printed. Each comment is
  * printed above the next declaration or entry, trailing on its line, or before
  * the closing brace of its container, including inside nested objects and
- * arrays. Printing the reparsed output gives the same text.
+ * arrays. A blank line is kept where the source had one or more (at most one, never
+ * at the edge of a block, object, array or file), and an array that does not fit in
+ * 100 characters is printed one element per line. Printing the reparsed output gives
+ * the same text.
  *
  * Known limits: comments inside `@meta` move before its closing brace (tracked
- * in #555), blank lines between comments are not kept, and comments in the
- * parameter list of `@use` or `@inherit` are printed before the next declaration.
+ * in #555), and comments in the parameter list of `@use` or `@inherit` are printed
+ * before the next declaration. Blank lines inside `@meta` and those parameter lists are dropped.
  *
  * @param program - Canonical program from `parseCanonical`
  * @param comments - Comments from the same parse result
@@ -575,6 +737,10 @@ export function printProgram(
     const holds = operation.type !== 'InheritOperation' && operation.type !== 'UseOperation';
     return { loc, holds, print: (inside) => printOperation(operation, inside, ctx) };
   });
-  const sections = withComments(items, comments, '', 0).map((group) => group.join('\n'));
-  return sections.join('\n\n') + '\n';
+  // Declarations are only separated by a blank line when the source had one.
+  // Only whole lines equal to the marker are blank lines; the same bytes in a string stay content.
+  const lines = layout(withComments(items, comments, '', 0))
+    .join('\n')
+    .split('\n');
+  return lines.map((l) => (l === BLANK ? '' : l)).join('\n') + '\n';
 }

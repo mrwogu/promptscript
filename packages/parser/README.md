@@ -73,15 +73,17 @@ reentrant calls cross-contaminates results. Use `createParser` and
 
 ### Types
 
-| Type                   | Description                          |
-| :--------------------- | :----------------------------------- |
-| `ParseOptions`         | Options for parse functions          |
-| `ParseResult`          | Mutable compatibility AST and errors |
-| `CanonicalParseResult` | Immutable canonical AST and errors   |
-| `Comment`              | A `#` comment: text, location, depth |
+| Type                   | Description                                                  |
+| :--------------------- | :----------------------------------------------------------- |
+| `ParseOptions`         | Options for parse functions                                  |
+| `ParseResult`          | Mutable compatibility AST and errors                         |
+| `CanonicalParseResult` | Immutable canonical AST and errors                           |
+| `Comment`              | A `#` comment or blank-line run: kind, text, location, depth |
 
 Both parse results also carry `comments`, the `#` comments of the source in
-order. Comments are not part of the AST, so the resolver, validator and
+order. Each blank-line run outside a string or text block is listed too, as an
+entry with `kind: 'blank'` and empty `text`; real comments have
+`kind: 'comment'`. Neither is part of the AST, so the resolver, validator and
 formatters never see them.
 
 ## Usage (internal)
@@ -150,10 +152,17 @@ What is kept:
 - Comments: above an entry or declaration, trailing on a line, after the last
   entry of a block, and inside nested objects and arrays. A `#` inside a string
   or text block is content, not a comment.
+- Blank lines: one or more in the source stay as one. None are added, and none
+  are kept right after an opening or before a closing brace or bracket, or at
+  the start or end of the file. Blank lines inside a text block are content.
 - Numbers (no exponent notation) and `${VAR}` references.
 
+Arrays stay on one line while the line fits in 100 characters; longer ones, and
+arrays of objects, print one element per line.
+
 Printing is stable: printing the reparsed output gives the same text. Without
-`comments`, no comments are printed. A non-finite number in a hand-built AST
+`comments`, no comments and no blank lines are printed, so declarations follow
+each other on consecutive lines. A non-finite number in a hand-built AST
 throws.
 
 Known limits:
@@ -161,9 +170,10 @@ Known limits:
 - Comments inside `@meta` move to just before its closing brace, because
   `@meta` fields carry no source positions. Text and order are kept. Tracked in
   [#555](https://github.com/mrwogu/promptscript/issues/555).
-- Blank lines between comments are not kept.
 - Comments inside the parameter list of `@use` or `@inherit` are printed on
   their own lines before the next declaration.
+- Blank lines inside `@meta` and inside the parameter list of `@use` or
+  `@inherit` are dropped.
 
 ## License
 

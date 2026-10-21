@@ -200,3 +200,574 @@ body
 
 ### empty file
 
+### blank line between fields kept
+@identity {
+  a: 1
+
+  b: 2
+}
+--- expected
+@identity {
+  a: 1
+
+  b: 2
+}
+### two blank lines collapse to one
+@identity {
+  a: 1
+
+
+  b: 2
+}
+--- expected
+@identity {
+  a: 1
+
+  b: 2
+}
+### blank line after opening brace dropped
+@identity {
+
+  a: 1
+}
+--- expected
+@identity {
+  a: 1
+}
+### blank line before closing brace dropped
+@identity {
+  a: 1
+
+}
+--- expected
+@identity {
+  a: 1
+}
+### whitespace-only line counts as blank
+@identity {
+  a: 1
+   
+  b: 2
+}
+--- expected
+@identity {
+  a: 1
+
+  b: 2
+}
+### blank line before a comment inside a block kept
+@identity {
+  a: 1
+
+  # about b
+  b: 2
+}
+--- expected
+@identity {
+  a: 1
+
+  # about b
+  b: 2
+}
+### blank line between top-level comment and block kept
+# about identity
+
+@identity { a: 1 }
+--- expected
+# about identity
+
+@identity {
+  a: 1
+}
+### consecutive use lines stay adjacent
+@use ./a
+@use ./b
+@use ./c
+--- expected
+@use ./a
+@use ./b
+@use ./c
+### blocks with a blank line between keep it
+@identity { a: 1 }
+
+@context { b: 2 }
+--- expected
+@identity {
+  a: 1
+}
+
+@context {
+  b: 2
+}
+### blocks without a blank line stay adjacent
+@identity { a: 1 }
+@context { b: 2 }
+--- expected
+@identity {
+  a: 1
+}
+@context {
+  b: 2
+}
+### blank lines inside a text block stay content
+@knowledge {
+  """
+  first
+
+  second
+  """
+}
+--- expected
+@knowledge {
+  """
+    first
+
+    second
+  """
+}
+### blank line inside a multi-line string is content
+@identity { a: "x
+
+y"
+
+  b: 1 }
+--- expected
+@identity {
+  a: "x\n\ny"
+
+  b: 1
+}
+### blank lines at the start and end of the file dropped
+
+
+@identity { a: 1 }
+
+
+
+--- expected
+@identity {
+  a: 1
+}
+### object with only edge blank lines
+@context {
+  o: {
+
+    a: 1
+
+  }
+}
+--- expected
+@context {
+  o: {
+    a: 1
+  }
+}
+### blank line between objects in an array kept
+@context {
+  items: [
+    { a: 1 },
+
+    { b: 2 }
+  ]
+}
+--- expected
+@context {
+  items: [
+    {
+      a: 1
+    },
+
+    {
+      b: 2
+    }
+  ]
+}
+### blank lines at array edges dropped
+@context {
+  items: [
+
+    1, 2
+
+  ]
+}
+--- expected
+@context {
+  items: [1, 2]
+}
+### short array stays on one line
+@context { items: ["a", "b", "c"] }
+--- expected
+@context {
+  items: ["a", "b", "c"]
+}
+### array fits at exactly 100 characters
+@context { items: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@context {
+  items: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
+}
+### array wraps at 101 characters
+@context { items: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@context {
+  items: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ]
+}
+### nested array fits with its comma at exactly 100 characters
+@context { items: [["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], 1] }
+--- expected
+@context {
+  items: [
+    ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],
+    1
+  ]
+}
+### nested array wraps when its comma would reach 101 characters
+@context { items: [["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], 1] }
+--- expected
+@context {
+  items: [
+    [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ],
+    1
+  ]
+}
+### default value array fits at exactly 100 characters
+@params { tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@params {
+  tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
+}
+### default value array wraps at 101 characters
+@params { tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@params {
+  tags: string = [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ]
+}
+### meta array fits at exactly 100 characters
+@meta { id: "a" tags: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@meta {
+  id: "a"
+  tags: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
+}
+### meta array wraps at 101 characters
+@meta { id: "a" tags: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@meta {
+  id: "a"
+  tags: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ]
+}
+### use parameter array fits at exactly 100 characters
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+--- expected
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+### use parameter array wraps at 101 characters
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+--- expected
+@use ./a(x: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+])
+### blank line inside use parameters dropped and trailing comment kept
+@use ./a(
+  x: 1,
+
+  y: 2
+) # note
+@context { b: 1 }
+--- expected
+@use ./a(x: 1, y: 2) # note
+@context {
+  b: 1
+}
+### meta nested array fits with its comma at exactly 100 characters
+@meta { id: "a" tags: [["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], 1] }
+--- expected
+@meta {
+  id: "a"
+  tags: [
+    ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],
+    1
+  ]
+}
+### meta nested array wraps when its comma would reach 101 characters
+@meta { id: "a" tags: [["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], 1] }
+--- expected
+@meta {
+  id: "a"
+  tags: [
+    [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ],
+    1
+  ]
+}
+### use second parameter array fits at exactly 100 characters
+@use ./a(x: "pppppppppppppppppppp", y: ["aaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbb"])
+--- expected
+@use ./a(x: "pppppppppppppppppppp", y: ["aaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbb"])
+### use second parameter array wraps counting the first parameter
+@use ./a(x: "pppppppppppppppppppp", y: ["aaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+--- expected
+@use ./a(x: "pppppppppppppppppppp", y: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbb"
+])
+### default value follows the closing bracket of a wrapped value
+@params { tags: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@params {
+  tags: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ] = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
+}
+### meta param default array fits at exactly 100 characters
+@meta { id: "a" params: { tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] } }
+--- expected
+@meta {
+  id: "a"
+  params: {
+    tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
+  }
+}
+### meta param default array wraps at 101 characters
+@meta { id: "a" params: { tags: string = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] } }
+--- expected
+@meta {
+  id: "a"
+  params: {
+    tags: string = [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ]
+  }
+}
+### commented array child fits with its comma at exactly 100 characters
+@context {
+  items: [
+    # note
+    ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],
+    1
+  ]
+}
+--- expected
+@context {
+  items: [
+    # note
+    ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],
+    1
+  ]
+}
+### commented array child wraps when its comma would reach 101 characters
+@context {
+  items: [
+    # note
+    ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],
+    1
+  ]
+}
+--- expected
+@context {
+  items: [
+    # note
+    [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ],
+    1
+  ]
+}
+### use alias leaves room for the parameter array at exactly 100 characters
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) as somealias
+--- expected
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) as somealias
+### use alias wraps the parameter array at 101 characters
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) as somealias
+--- expected
+@use ./a(x: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+]) as somealias
+### use into leaves room for the parameter array
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) into "skills/seo"
+--- expected
+@use ./a(x: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+]) into "skills/seo"
+### use parameter after a wrapped array continues on its last line
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], y: [1, 2])
+--- expected
+@use ./a(x: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+], y: [1, 2])
+### inline use in a block fits at exactly 100 characters
+@skills { @use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) }
+--- expected
+@skills {
+  @use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+}
+### inline use in a block wraps counting the block indent
+@skills { @use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]) }
+--- expected
+@skills {
+  @use ./a(x: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ])
+}
+### use parameter array leaves room for a later parameter at exactly 100 characters
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], y: 1)
+--- expected
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], y: 1)
+### use parameter array wraps when a later parameter would pass 100 characters
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], y: 1)
+--- expected
+@use ./a(x: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+], y: 1)
+### multi-line default leaves room for its opening brace at exactly 100 characters
+@params { t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = { a: 1 } }
+--- expected
+@params {
+  t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = {
+    a: 1
+  }
+}
+### multi-line default wraps the value when its opening brace would pass 100 characters
+@params { t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = { a: 1 } }
+--- expected
+@params {
+  t: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ] = {
+    a: 1
+  }
+}
+### blank line inside a multi-line env var is content
+@identity {
+  a: ${X:-foo
+
+bar}
+  b: 1
+}
+--- expected
+@identity {
+  a: ${X:-foo
+
+bar}
+  b: 1
+}
+### flat parameter array before a later array that wraps
+@use ./a(x: [1, 2], y: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+--- expected
+@use ./a(x: [1, 2], y: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+])
+### parameter array keeps the head of a later array on its line at exactly 100 characters
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], y: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+--- expected
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], y: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+])
+### parameter array wraps when the head of a later array would pass 100 characters
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], y: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+--- expected
+@use ./a(x: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+], y: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+])
+### flat field value before an array default that wraps
+@params { t: [1, 2] = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@params {
+  t: [1, 2] = [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ]
+}
+### field value leaves room for the head of a wrapping default at exactly 100 characters
+@params { t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@params {
+  t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ]
+}
+### field value wraps when the head of its default would pass 100 characters
+@params { t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] }
+--- expected
+@params {
+  t: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ] = ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
+}
+### template parameter after a wrapping array does not hide its width
+@use ./a(x: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], y: {{name}}) as somealias
+--- expected
+@use ./a(x: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+], y: {{name}}) as somealias
+### template default after an array value does not hide its width
+@params { t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = {{name}} }
+--- expected
+@params {
+  t: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ] = {{name}}
+}
+### text block default leaves room for its opening quotes at exactly 100 characters
+@params { t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = """
+  hi
+  """ }
+--- expected
+@params {
+  t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = """
+    hi
+  """
+}
+### text block default wraps the value when its opening quotes would pass 100 characters
+@params { t: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"] = """
+  hi
+  """ }
+--- expected
+@params {
+  t: [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ] = """
+    hi
+  """
+}
+### middle use parameter wraps and the last one follows its closing bracket
+@use ./a(x: 1, y: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], z: 2)
+--- expected
+@use ./a(x: 1, y: [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+], z: 2)

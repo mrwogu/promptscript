@@ -101,7 +101,7 @@ export function parseCanonical(source: string, options: ParseOptions = {}): Cano
 
   // Lexing phase
   const lexResult = PSLexer.tokenize(source);
-  const comments = collectComments(lexResult, filename);
+  const comments = collectComments(lexResult, filename, source);
 
   for (const err of lexResult.errors) {
     let message = `Lexer: ${err.message}`;

@@ -16,6 +16,24 @@ import { writeFileAtomic } from '../utils/write-file-atomic.js';
 /** Directories holding third-party sources that must never be rewritten. */
 const SKIPPED_DIRS = new Set(['node_modules', 'vendor', '.cache']);
 
+/** Keys that hold a source position; they legitimately change when the layout does. */
+const POSITION_KEYS = new Set(['loc', 'titleLoc', 'sectionLoc', 'location']);
+
+/**
+ * The program as JSON without source positions. Syntax feature usages are reduced to the
+ * set of feature names: a rewrite may change how often a feature occurs, but not which ones.
+ */
+function programKey(program: unknown): string {
+  return JSON.stringify(program, (key, value: unknown) => {
+    if (key === 'syntaxFeatures' && Array.isArray(value)) {
+      const names = value.map((usage: { feature?: unknown }) => usage.feature);
+      return [...new Set(names)].sort((a, b) => String(a).localeCompare(String(b)));
+    }
+    const isPosition = typeof value === 'object' && value !== null && 'line' in value;
+    return POSITION_KEYS.has(key) && isPosition ? undefined : value;
+  });
+}
+
 /** Path relative to the working directory, as reported in messages. */
 function displayName(file: string): string {
   const rel = relative(process.cwd(), file);
@@ -126,8 +144,15 @@ function formatOne(file: string, name: string, check: boolean, failures: string[
 
     const formatted = printProgram(ast, comments);
     if (formatted === source) return 'unchanged';
-    if (parseCanonical(formatted, { filename: name }).errors.length > 0) {
+    const reparsed = parseCanonical(formatted, { filename: name });
+    if (reparsed.errors.length > 0) {
       failures.push(`${name} printer produced unparseable output, file left untouched`);
+      return 'failed';
+    }
+    if (programKey(reparsed.ast) !== programKey(ast)) {
+      failures.push(
+        `${name} formatted output does not parse to the same program, file not written`
+      );
       return 'failed';
     }
     if (check) {

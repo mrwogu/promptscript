@@ -604,11 +604,12 @@ hides the list; the exit code still reports the result.
 
 **Known limits of the printer:**
 
-The printer keeps comments and declaration order but not blank lines.
+The printer keeps comments and declaration order.
 
-- Blank lines between fields, before comments and between comments are dropped. One
-  blank line separates top-level declarations.
-- Every array is printed on one line.
+- A blank line between entries is kept. Several in a row become one. Blank lines at
+  the start or end of a block, object, array or file are dropped.
+- Arrays that do not fit in 100 characters print one element per line.
+- Blank lines inside `@meta` and inside `@use` and `@inherit` parameter lists are dropped.
 - Comments inside `@meta` move before its closing brace.
 - Comments inside `@use` and `@inherit` parameter lists move to their own line.
 
