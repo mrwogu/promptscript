@@ -217,8 +217,8 @@ instructions. See the official [context-files documentation](https://hermes-agen
 PromptScript does not create `.hermes.md`, native skill directories, agent
 files, command files, workflow files, prompt files, hook files, MCP
 configuration, or plugin manifests.
-Unsupported blocks are omitted with actionable non-fatal compatibility
-warnings. Move required guidance into supported `AGENTS.md` instruction
+Unsupported blocks other than `@prompts` are omitted with actionable non-fatal
+compatibility warnings. Move required guidance into supported `AGENTS.md` instruction
 blocks.
 
 ### GitLab Duo
