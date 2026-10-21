@@ -77,12 +77,14 @@ const mockVersion = vi.fn().mockReturnThis();
 const mockOption = vi.fn().mockReturnThis();
 const mockHook = vi.fn().mockReturnThis();
 const mockArgument = vi.fn().mockReturnThis();
-const capturedActions: Array<(...args: unknown[]) => unknown> = [];
+// Actions keyed by command spec; subcommands are keyed 'parent spec' so they never
+// collide with top-level names and adding a command never shifts a lookup.
+const actionsBySpec = new Map<string, (...args: unknown[]) => unknown>();
 const mockAction = vi.fn().mockReturnThis();
 const mockParseAsync = vi.fn();
 
 // Create a chainable mock that supports nested command() calls
-const createChainableMock = (): Record<string, ReturnType<typeof vi.fn>> => ({
+const createChainableMock = (key: string): Record<string, ReturnType<typeof vi.fn>> => ({
   argument: mockArgument,
   description: mockDescription,
   option: mockOption,
@@ -91,15 +93,18 @@ const createChainableMock = (): Record<string, ReturnType<typeof vi.fn>> => ({
     this: Record<string, ReturnType<typeof vi.fn>>,
     fn: (...args: unknown[]) => unknown
   ) {
-    capturedActions.push(fn);
+    actionsBySpec.set(key, fn);
     mockAction(fn);
     return this;
   }),
-  command: mockCommand,
+  command: vi.fn().mockImplementation((spec: string, ...rest: unknown[]) => {
+    mockCommand(spec, ...rest);
+    return createChainableMock(`${key} ${spec}`);
+  }),
 });
 
 // Create chainable mock for command
-mockCommand.mockImplementation(() => createChainableMock());
+mockCommand.mockImplementation((spec: string) => createChainableMock(spec));
 
 afterEach(() => {
   delete process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'];
@@ -172,7 +177,7 @@ describe('cli', () => {
       const { run } = await import('../cli.js');
       run(['node', 'prs', '--help']);
 
-      const validateAction = capturedActions[3];
+      const validateAction = actionsBySpec.get('validate [files...]');
       expect(validateAction).toBeDefined();
 
       validateAction?.(['project.prs'], { strict: true, format: 'json' });
@@ -188,7 +193,7 @@ describe('cli', () => {
       const { run } = await import('../cli.js');
       run(['node', 'prs', '--help']);
 
-      const fmtAction = capturedActions[4];
+      const fmtAction = actionsBySpec.get('fmt [paths...]');
       expect(fmtAction).toBeDefined();
 
       fmtAction?.(['a.prs'], { check: true });
@@ -200,7 +205,7 @@ describe('cli', () => {
       const { run } = await import('../cli.js');
       run(['node', 'prs', '--help']);
 
-      const explainAction = capturedActions[6];
+      const explainAction = actionsBySpec.get('explain <path>');
       expect(explainAction).toBeDefined();
 
       explainAction?.('standards.code', { format: 'json' });
@@ -300,20 +305,21 @@ describe('cli', () => {
     });
 
     it('should wire skills action callbacks to their command functions', async () => {
-      // The capturedActions array is populated during module loading.
-      // Invoke only the skills-related action callbacks (the last 4 registered),
-      // which correspond to skills add, remove, list, and update subcommands.
+      // Actions are captured during module loading, keyed by command spec.
       const { run } = await import('../cli.js');
       run(['node', 'prs', '--help']);
 
-      // The skills subcommands are registered last, so their action callbacks
-      // are the final 4 in the capturedActions array.
-      const skillsActions = capturedActions.slice(-4);
-      expect(skillsActions).toHaveLength(4);
+      const skillsActions = [
+        'skills add <source>',
+        'skills remove <name>',
+        'skills list',
+        'skills update [name]',
+      ].map((key) => actionsBySpec.get(key));
+      expect(skillsActions.every((fn) => fn !== undefined)).toBe(true);
 
       // Invoke each skills action with test arguments
       for (const cb of skillsActions) {
-        cb('test-arg', { dryRun: false });
+        cb?.('test-arg', { dryRun: false });
       }
 
       // Verify each skills command function was called
