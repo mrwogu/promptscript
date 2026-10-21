@@ -3,7 +3,7 @@
 @context {
   project: "PromptScript"
 
-  languages: [typescript]
+  languages: ["typescript"]
   runtime: "Node.js 20+"
 
   monorepo: {
@@ -12,39 +12,39 @@
   }
 
   """
-  ## Architecture
+    ## Architecture
 
-  The project is organized as a monorepo with these packages:
+    The project is organized as a monorepo with these packages:
 
-  ```mermaid
-  flowchart TB
-    subgraph packages
-      core[core - Types, errors, utilities]
-      parser[parser - Chevrotain-based parser]
-      resolver[resolver - Inheritance & import resolution]
-      validator[validator - AST validation rules]
-      compiler[compiler - Pipeline orchestration]
-      formatters[formatters - Output formatters]
-      cli[cli - Command-line interface]
-    end
+    ```mermaid
+    flowchart TB
+      subgraph packages
+        core[core - Types, errors, utilities]
+        parser[parser - Chevrotain-based parser]
+        resolver[resolver - Inheritance & import resolution]
+        validator[validator - AST validation rules]
+        compiler[compiler - Pipeline orchestration]
+        formatters[formatters - Output formatters]
+        cli[cli - Command-line interface]
+      end
 
-    cli --> compiler
-    cli --> resolver
-    compiler --> resolver
-    compiler --> validator
-    compiler --> formatters
-    resolver --> parser
-    parser --> core
-    resolver --> core
-    validator --> core
-    formatters --> core
-  ```
+      cli --> compiler
+      cli --> resolver
+      compiler --> resolver
+      compiler --> validator
+      compiler --> formatters
+      resolver --> parser
+      parser --> core
+      resolver --> core
+      validator --> core
+      formatters --> core
+    ```
 
-  ## Key Libraries
+    ## Key Libraries
 
-  - Parser: Chevrotain
-  - CLI: Commander.js
-  - Testing: Vitest
-  - Linting: ESLint + Prettier
+    - Parser: Chevrotain
+    - CLI: Commander.js
+    - Testing: Vitest
+    - Linting: ESLint + Prettier
   """
 }

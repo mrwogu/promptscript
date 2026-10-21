@@ -600,7 +600,8 @@ are still processed. The last line summarizes how many files were formatted (or 
 change with `--check`), how many were unchanged and how many failed.
 
 `--check` lists the files that would change through the normal output, so `--quiet`
-hides the list; the exit code still reports the result.
+hides the list; the exit code still reports the result. This repo runs `prs fmt --check` in CI and in
+the pre-commit hook.
 
 **Known limits of the printer:**
 

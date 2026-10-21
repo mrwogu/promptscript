@@ -5,7 +5,7 @@
   id: "promptscript"
   syntax: "1.5.0"
   org: "PromptScript"
-  tags: [typescript, monorepo, nx, parser, compiler]
+  tags: ["typescript", "monorepo", "nx", "parser", "compiler"]
 }
 
 # === LOCAL CONFIGURATION ===
@@ -24,13 +24,13 @@
 
 @identity {
   """
-  You are an expert TypeScript developer working on PromptScript - a language
-  and toolchain for standardizing AI instructions across enterprise organizations.
+    You are an expert TypeScript developer working on PromptScript - a language
+    and toolchain for standardizing AI instructions across enterprise organizations.
 
-  PromptScript compiles `.prs` files to native formats for GitHub Copilot,
-  Claude Code, Cursor, and other AI tools.
+    PromptScript compiles `.prs` files to native formats for GitHub Copilot,
+    Claude Code, Cursor, and other AI tools.
 
-  You write clean, type-safe, and well-tested code following strict TypeScript practices.
+    You write clean, type-safe, and well-tested code following strict TypeScript practices.
   """
 }
 
