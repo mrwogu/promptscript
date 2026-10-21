@@ -186,7 +186,7 @@ program
   .addHelpText(
     'after',
     `
-Known limits of the printer (layout improvements are planned):
+Known limits of the printer:
   - comments and declaration order are kept, but blank lines are not: blank
     lines between fields and around comments are dropped, and one blank line
     separates top-level declarations
@@ -196,7 +196,8 @@ Known limits of the printer (layout improvements are planned):
 
 With no paths, formats every .prs file under .promptscript. Directory walks skip
 node_modules, vendor and .cache; name a file or one of those directories
-explicitly to format it. Files without the .prs extension are skipped.
+explicitly to format it. Files without the .prs extension and symbolic links are
+skipped. Read-only files are reported and not written.
 Exit code 1: a path is missing, a file cannot be parsed, read or written, or
 --check found files that would change.`
   )

@@ -564,7 +564,9 @@ A path may be a file or a directory. Directories are walked for `*.prs`, skippin
 `node_modules`, `vendor` and `.cache`. That skip applies only when walking a
 directory, so naming `.promptscript/vendor` explicitly formats the vendored files. A
 file path without the `.prs` extension is skipped with a warning and is not counted,
-so `prs fmt .promptscript/*` leaves `.md` and `.sh` files alone. With no paths,
+so `prs fmt .promptscript/*` leaves `.md` and `.sh` files alone. Symbolic links are
+skipped with a warning and are not counted, so a link is never replaced by a regular
+file. With no paths,
 `prs fmt` formats every `.prs` file under `.promptscript`.
 
 **Options:**
@@ -588,7 +590,7 @@ prs fmt --check
 
 A file that does not parse is reported with its first error and location, is never
 written, and makes the exit code 1. A file that cannot be read or written is
-reported the same way. Files are written atomically (temporary file, then rename,
+reported the same way, and so is a read-only file, which is never rewritten. Files are written atomically (temporary file, then rename,
 keeping the original mode), and the printed output is parsed again before writing;
 if it does not parse the file is left untouched and reported as failed. Other files
 are still processed. The last line summarizes how many files were formatted (or would
@@ -599,8 +601,7 @@ hides the list; the exit code still reports the result.
 
 **Known limits of the printer:**
 
-The printer keeps comments and declaration order but not blank lines. Layout
-improvements are planned.
+The printer keeps comments and declaration order but not blank lines.
 
 - Blank lines between fields, before comments and between comments are dropped. One
   blank line separates top-level declarations.
