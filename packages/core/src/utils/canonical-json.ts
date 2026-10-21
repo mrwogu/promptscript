@@ -23,17 +23,19 @@ function serialize(value: unknown, path: string): string {
   }
   if (value === null) return 'null';
   if (Array.isArray(value)) {
-    return `[${value.map((item, i) => serialize(item, `${path}[${i}]`)).join(',')}]`;
+    const items = value.map((item, i) => serialize(item, `${path}[${i}]`));
+    return '[' + items.join(',') + ']';
   }
   const record = value as Record<string, unknown>;
   const members: string[] = [];
   // Default sort order compares UTF-16 code units, as RFC 8785 requires
-  for (const key of Object.keys(record).sort()) {
+  for (const key of Object.keys(record).sort((a, b) => Number(a > b) - Number(a < b))) {
     const member = record[key];
     if (member === undefined) continue;
-    members.push(`${JSON.stringify(key)}:${serialize(member, path ? `${path}.${key}` : key)}`);
+    const memberPath = path ? `${path}.${key}` : key;
+    members.push(JSON.stringify(key) + ':' + serialize(member, memberPath));
   }
-  return `{${members.join(',')}}`;
+  return '{' + members.join(',') + '}';
 }
 
 /**

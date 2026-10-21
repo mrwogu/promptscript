@@ -17,7 +17,10 @@ export interface RuntimeSlotMatch {
   length: number;
 }
 
-const SLOT = new RegExp(`\\{\\{${RUNTIME_SLOT_NAMESPACE}\\.([A-Za-z_][A-Za-z0-9_]*)\\}\\}`, 'y');
+const SLOT = new RegExp(
+  String.raw`\{\{${RUNTIME_SLOT_NAMESPACE}\.([A-Za-z_][A-Za-z0-9_]*)\}\}`,
+  'y'
+);
 
 /**
  * Find the runtime slots, escapes and malformed `{{` in prompt text.

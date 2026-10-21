@@ -60,7 +60,7 @@ const BUNDLE_SCHEMAS: BundleSchemaTarget[] = [
  */
 const FORBIDDEN_KEYS = [
   ...new Set([...Object.getOwnPropertyNames(Object.prototype), 'prototype']),
-].sort();
+].sort((a, b) => Number(a > b) - Number(a < b));
 
 const KEY_NAMES = {
   pattern: '^[A-Za-z_][A-Za-z0-9_]*$',

@@ -1,5 +1,7 @@
 const PRIMES: number[] = [];
-for (let n = 2; PRIMES.length < 64; n++) {
+let candidate = 2;
+while (PRIMES.length < 64) {
+  const n = candidate++;
   if (PRIMES.every((p) => n % p !== 0)) PRIMES.push(n);
 }
 
@@ -59,11 +61,11 @@ export function sha256Hex(text: string): string {
       h = g;
       g = f;
       f = e;
-      e = (d! + t1) | 0;
+      e = (d! + t1) >>> 0;
       d = c;
       c = b;
       b = a;
-      a = (t1 + t2) | 0;
+      a = (t1 + t2) >>> 0;
     }
     [a, b, c, d, e, f, g, h].forEach((v, i) => {
       state[i] = state[i]! + v!;
