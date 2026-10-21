@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { accessSync, constants, existsSync, lstatSync, readFileSync, statSync } from 'node:fs';
 import { extname, relative, resolve, sep } from 'node:path';
 import { parseCanonical, printProgram } from '@promptscript/parser';
 import type { FmtOptions } from '../types.js';
@@ -49,6 +49,10 @@ export function fmtCommand(options: FmtOptions): void {
     const rel = relative(process.cwd(), file);
     const name = rel.startsWith('..') ? file : rel;
     try {
+      if (lstatSync(file).isSymbolicLink()) {
+        ConsoleOutput.warning(`Skipped ${name}: symbolic link`);
+        continue;
+      }
       const source = readFileSync(file, 'utf-8');
       const { ast, errors, comments } = parseCanonical(source, { filename: name });
       if (!ast || errors.length > 0) {
@@ -73,6 +77,12 @@ export function fmtCommand(options: FmtOptions): void {
       if (options.check) {
         ConsoleOutput.warning(`Would reformat ${name}`);
       } else {
+        try {
+          accessSync(file, constants.W_OK);
+        } catch {
+          failures.push(`${name} not writable`);
+          continue;
+        }
         writeFileAtomic(file, formatted, statSync(file).mode & 0o7777);
         ConsoleOutput.success(`Formatted ${name}`);
       }
