@@ -31,8 +31,9 @@ export type UseCallback = (use: UseDeclaration) => void;
  */
 export interface WalkTextOptions {
   /**
-   * Property names to exclude from walking.
-   * Useful for skipping non-instructional content like skill resource files.
+   * Property names to exclude from walking, at every depth under every block.
+   * For skill resource lists use `skipSkillResources`, which is scoped to
+   * `@skills.<name>.resources`.
    */
   excludeProperties?: string[];
   /**
@@ -152,7 +153,13 @@ function walkOverrideReplacement(
 
   const loc = replacement.loc ?? override.loc;
   const value = valueNodeToValue(replacement.value);
-  if (skipResources && value !== null && typeof value === 'object' && !Array.isArray(value)) {
+  if (
+    skipResources &&
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    !('type' in value)
+  ) {
     const scoped = withoutSkillResources(override.targetPath.split('.'), {
       type: 'ObjectContent',
       properties: value as Record<string, Value>,
