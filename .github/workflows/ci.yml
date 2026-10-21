@@ -121,6 +121,16 @@ jobs:
         if: matrix.node-version == '25.x'
         run: pnpm prs fmt --check
 
+      - name: Check Compiled Outputs
+        if: matrix.node-version == '25.x'
+        run: |
+          pnpm prs compile
+          if [ -n "$(git status --porcelain)" ]; then
+            git status --short
+            echo "::error::Compiled outputs are out of date. Run 'pnpm prs compile' locally and commit the changes."
+            exit 1
+          fi
+
       - name: Skill Copies Drift Check
         if: matrix.node-version == '25.x'
         run: |
