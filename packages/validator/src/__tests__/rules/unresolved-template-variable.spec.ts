@@ -98,12 +98,22 @@ describe('PS045: unresolved-template-variable', () => {
       ['a tilde fence', '~~~\n{{name}}\n~~~'],
       ['an indented fence with a language', '  ```ts\n  {{name}}\n  ```'],
       ['a fence that is never closed', '```\n{{name}}'],
+      ['an inline code span', 'Write `{{name}}` to bind it'],
+      ['an inline code span with a dotted name', 'Use `{{a.b}}` here'],
       ['an escaped variable', 'Write \\{{name}} literally'],
       ['text without braces', 'Plain'],
       ['a spaced variable', '{{ name }}'],
       ['single braces', '{name}'],
     ])('skips %s', (_title, text) => {
       expect(run(identity(text))).toEqual([]);
+    });
+
+    it('reports a variable outside an inline code span on the same line', () => {
+      const messages = run(identity('`{{in}}` and {{out}}'));
+
+      expect(messages).toHaveLength(1);
+      expect(messages[0]!.message).toContain('{{out}}');
+      expect(messages[0]!.location?.column).toBe(14);
     });
 
     it('reports a variable after the fence closes', () => {

@@ -1759,6 +1759,7 @@ themselves.
 | PS046 | warning  | Slots in the system message                                                                                            |
 
 PS045 and PS018 also apply, see [Versions and Diagnostics](language/versions-and-diagnostics.md).
+PS045 skips fenced code blocks, inline code spans and escaped `\{{`.
 
 ## @extend Block
 

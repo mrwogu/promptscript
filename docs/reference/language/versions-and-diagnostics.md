@@ -60,7 +60,8 @@ version. PS042 to PS046 check the entries and their `{{input.name}}` slots,
 see [`@prompts`](../language.md#prompts). The parser rejects a `__proto__` field
 name in every block, and PS042 rejects the other prototype names. PS045 only runs from `1.6.0`, because
 from that version a `{{name}}` that nothing bound is reported instead of being
-printed silently. No target emits prompt definitions.
+printed silently. Fenced code blocks, inline code spans and escaped `\{{` are
+skipped, so documentation of template syntax stays quiet. No target emits prompt definitions.
 
 ## Model Versions
 

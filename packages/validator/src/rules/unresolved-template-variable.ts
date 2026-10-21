@@ -16,7 +16,9 @@ const TEMPLATE = /\{\{([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\}\}/g;
 const FENCE = /^\s*(```|~~~)/;
 const PROMPT_TEXT_KEYS = new Set(['system', 'user']);
 
-/** Blank out fenced code blocks, keeping offsets and line breaks. */
+const INLINE_CODE = /`[^`\n]*`/g;
+
+/** Blank out fenced code blocks and inline code spans, keeping offsets and line breaks. */
 function maskFencedCode(text: string): string {
   let inFence = false;
   return text
@@ -25,7 +27,9 @@ function maskFencedCode(text: string): string {
       const isFence = FENCE.test(line);
       const masked = inFence || isFence;
       if (isFence) inFence = !inFence;
-      return masked ? ' '.repeat(line.length) : line;
+      return masked
+        ? ' '.repeat(line.length)
+        : line.replace(INLINE_CODE, (code) => ' '.repeat(code.length));
     })
     .join('\n');
 }
@@ -83,7 +87,7 @@ function scan(ctx: RuleContext, program: Program, skipDotted: boolean): void {
  * From syntax 1.6.0, a `{{name}}` that is still in the resolved text was never
  * bound, and a dotted `{{a.b}}` outside the `system` and `user` text of a
  * prompt is not a runtime slot. Both are printed literally by every target.
- * Fenced code blocks and escaped `\{{` are skipped. Prompt text is checked by PS043.
+ * Fenced code blocks, inline code spans and escaped `\{{` are skipped. Prompt text is checked by PS043.
  */
 export const unresolvedTemplateVariable: ValidationRule = {
   id: 'PS045',
