@@ -186,13 +186,19 @@ program
   .addHelpText(
     'after',
     `
-Known limits of the printer:
+Known limits of the printer (layout improvements are planned):
+  - comments and declaration order are kept, but blank lines are not: blank
+    lines between fields and around comments are dropped, and one blank line
+    separates top-level declarations
+  - every array is printed on one line
   - comments inside @meta move before its closing brace
-  - blank lines between comments are dropped
   - comments inside @use/@inherit parameter lists move to their own line
 
-With no paths, formats every .prs file under .promptscript (vendor, .cache and
-node_modules are skipped).`
+With no paths, formats every .prs file under .promptscript. Directory walks skip
+node_modules, vendor and .cache; name a file or one of those directories
+explicitly to format it. Files without the .prs extension are skipped.
+Exit code 1: a path is missing, a file cannot be parsed, read or written, or
+--check found files that would change.`
   )
   .action((paths, opts) => fmtCommand({ ...opts, paths }));
 

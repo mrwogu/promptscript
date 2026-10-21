@@ -561,8 +561,11 @@ prs fmt [options] [paths...]
 ```
 
 A path may be a file or a directory. Directories are walked for `*.prs`, skipping
-`node_modules`, `vendor` and `.cache`. With no paths, `prs fmt` formats every `.prs`
-file under `.promptscript`.
+`node_modules`, `vendor` and `.cache`. That skip applies only when walking a
+directory, so naming `.promptscript/vendor` explicitly formats the vendored files. A
+file path without the `.prs` extension is skipped with a warning and is not counted,
+so `prs fmt .promptscript/*` leaves `.md` and `.sh` files alone. With no paths,
+`prs fmt` formats every `.prs` file under `.promptscript`.
 
 **Options:**
 
@@ -584,22 +587,33 @@ prs fmt --check
 ```
 
 A file that does not parse is reported with its first error and location, is never
-written, and makes the exit code 1. Other files are still processed. The last line
-summarizes how many files were formatted (or would change with `--check`), how many
-were unchanged and how many failed.
+written, and makes the exit code 1. A file that cannot be read or written is
+reported the same way. Files are written atomically (temporary file, then rename,
+keeping the original mode), and the printed output is parsed again before writing;
+if it does not parse the file is left untouched and reported as failed. Other files
+are still processed. The last line summarizes how many files were formatted (or would
+change with `--check`), how many were unchanged and how many failed.
+
+`--check` lists the files that would change through the normal output, so `--quiet`
+hides the list; the exit code still reports the result.
 
 **Known limits of the printer:**
 
+The printer keeps comments and declaration order but not blank lines. Layout
+improvements are planned.
+
+- Blank lines between fields, before comments and between comments are dropped. One
+  blank line separates top-level declarations.
+- Every array is printed on one line.
 - Comments inside `@meta` move before its closing brace.
-- Blank lines between comments are dropped.
 - Comments inside `@use` and `@inherit` parameter lists move to their own line.
 
 **Exit Codes:**
 
-| Code | Meaning                                                            |
-| ---- | ------------------------------------------------------------------ |
-| 0    | All files formatted or unchanged (`--check`: nothing would change) |
-| 1    | A file failed to parse, or `--check` found files that would change |
+| Code | Meaning                                                                                                 |
+| ---- | ------------------------------------------------------------------------------------------------------- |
+| 0    | All files formatted or unchanged (`--check`: nothing would change)                                      |
+| 1    | A path was not found, a file failed to parse, read or write, or `--check` found files that would change |
 
 ---
 

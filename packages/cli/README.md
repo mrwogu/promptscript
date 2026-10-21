@@ -528,6 +528,15 @@ the build, not the agent. See the
 missing paths, resolution failures, or fatal diagnostics; warning-only
 diagnostics keep exit status 0.
 
+`prs fmt` rewrites `.prs` files atomically and keeps comments and declaration order, but
+not blank lines: blank lines between fields and around comments are dropped, every array
+prints on one line, comments inside `@meta` move before its closing brace, and comments in
+`@use` and `@inherit` parameter lists move to their own line. Layout improvements are
+planned. Directory walks skip `node_modules`, `vendor` and `.cache`, and files without the
+`.prs` extension are skipped. It exits 1 for a missing path, a file that cannot be parsed,
+read or written, or (with `--check`) files that would change. `--quiet` hides the `--check`
+file list.
+
 See the [complete CLI reference](https://getpromptscript.dev/reference/cli/) for every option.
 
 ## Hooks and Generated-File Protection
