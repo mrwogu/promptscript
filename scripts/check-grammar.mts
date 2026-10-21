@@ -10,7 +10,12 @@
 
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { bundledLanguages, bundledLanguagesAlias } from 'shiki';
+import {
+  bundledLanguages,
+  bundledLanguagesAlias,
+  createHighlighter,
+  type LanguageRegistration,
+} from 'shiki';
 import { BLOCK_TYPES } from '../packages/core/src/types/constants.js';
 import {
   CONTEXTUAL_DIRECTIVES,
@@ -330,10 +335,59 @@ for (const stringRule of ['double-string', 'single-string', 'triple-string']) {
       ?.map((pattern) => pattern.include)
       .filter((include): include is string => include !== undefined) ?? []
   );
-  for (const requiredInclude of ['#template-in-string', '#env-variable']) {
+  for (const requiredInclude of ['#escaped-slot', '#template-in-string', '#env-variable']) {
     if (!nestedIncludes.has(requiredInclude)) {
       syncErrors.push(`TextMate ${stringRule} is missing ${requiredInclude}`);
     }
+  }
+}
+
+// --- Runtime slots and slot escapes ---
+// {{input.name}} is a runtime slot and \{{ an escaped brace pair, in every
+// string form. Both highlighters must agree, so check real tokenization.
+
+const slotHighlighter = await createHighlighter({
+  langs: [{ ...(grammar as unknown as LanguageRegistration), name: 'promptscript' }],
+  themes: ['github-dark'],
+});
+
+function scopesOf(code: string, text: string): string[] {
+  const tokens = slotHighlighter
+    .codeToTokens(code, { lang: 'promptscript', theme: 'github-dark', includeExplanation: true })
+    .tokens.flat()
+    .flatMap((token) => token.explanation ?? []);
+  return tokens.find((part) => part.content === text)?.scopes.map((s) => s.scopeName) ?? [];
+}
+
+const slotForms: Array<[string, (body: string) => string]> = [
+  ['double-quoted string', (body) => `@prompts { p: { user: "${body}" } }`],
+  ['single-quoted string', (body) => `@prompts { p: { user: '${body}' } }`],
+  ['text block', (body) => `@prompts { p: { user: """${body}""" } }`],
+];
+for (const [form, wrap] of slotForms) {
+  if (!scopesOf(wrap('{{input.name}}'), 'input.').includes('variable.language.slot.prs')) {
+    syncErrors.push(`TextMate does not scope input. as a runtime slot in a ${form}`);
+  }
+  if (scopesOf(wrap('{{ns.name}}'), 'ns').includes('variable.language.slot.prs')) {
+    syncErrors.push(`TextMate scopes another namespace as a runtime slot in a ${form}`);
+  }
+  const escaped = scopesOf(wrap('\\{{input.name}}'), '\\{{');
+  if (!escaped.includes('constant.character.escape.prs')) {
+    syncErrors.push(`TextMate does not scope \\{{ as an escape in a ${form}`);
+  }
+  if (escaped.includes('invalid.illegal.escape.prs')) {
+    syncErrors.push(`TextMate marks \\{{ as an illegal escape in a ${form}`);
+  }
+}
+
+// Monaco: the same escape rule must come before the template rule in each string state.
+for (const state of ['string', 'stringSingle', 'multilineString']) {
+  const rules = (prsLanguageDefinition.tokenizer as Record<string, unknown[]>)[state] ?? [];
+  const sources = rules.map((rule) => (Array.isArray(rule) ? (rule[0] as RegExp).source : ''));
+  const escapeAt = sources.indexOf(String.raw`\\\{\{`);
+  const templateAt = sources.indexOf(String.raw`\{\{`);
+  if (escapeAt === -1 || templateAt === -1 || escapeAt > templateAt) {
+    syncErrors.push(`Monaco ${state} does not read \\{{ as an escape before {{`);
   }
 }
 
