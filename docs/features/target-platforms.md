@@ -209,7 +209,8 @@ instructions. See the official [context-files documentation](https://hermes-agen
 | Supported instruction blocks             | `AGENTS.md`   | `@identity`, `@context`, `@standards`, `@knowledge`, `@restrictions`, and `@examples` render into the single file                                                  |
 | `simple`, `multifile`, `full`            | `AGENTS.md`   | All aliases intentionally emit the same file                                                                                                                       |
 | Skills                                   | None          | No verified project-local Hermes skill output path; see the official [skills documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills) |
-| Agents, commands, workflows, and prompts | None          | No verified project-local native contract                                                                                                                          |
+| Agents, commands, and workflows          | None          | No verified project-local native contract                                                                                                                          |
+| Prompt definitions (`@prompts`)          | None          | Not instructions for a coding agent, so the block is skipped without a warning                                                                                     |
 | Scoped rules (`@guards`) and local files | None          | No verified project-local native contract                                                                                                                          |
 | Hooks, MCP servers, plugins              | None          | No verified project-local native contract; `PS4002` compatibility warnings include source locations                                                                |
 

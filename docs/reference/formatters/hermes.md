@@ -53,11 +53,11 @@ targets:
 
 ## MCP and Hooks
 
-| Block         | Support                                                                                                                |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `@mcpServers` | Not supported                                                                                                          |
-| `@hooks`      | Not supported                                                                                                          |
-| Not emitted   | `@skills`, `@agents`, `@workflows`, `@prompts`, `@shortcuts`, `@guards`, `@local`, `@hooks`, `@mcpServers`, `@plugins` |
+| Block         | Support                                                                                                    |
+| ------------- | ---------------------------------------------------------------------------------------------------------- |
+| `@mcpServers` | Not supported                                                                                              |
+| `@hooks`      | Not supported                                                                                              |
+| Not emitted   | `@skills`, `@agents`, `@workflows`, `@shortcuts`, `@guards`, `@local`, `@hooks`, `@mcpServers`, `@plugins` |
 
 Native hook reference: <https://promptscript.dev/docs/guides/hooks/>
 

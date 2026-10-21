@@ -107,7 +107,6 @@ Keep generated files reviewed.`,
       'skills',
       'agents',
       'workflows',
-      'prompts',
       'shortcuts',
       'guards',
       'local',
@@ -134,7 +133,6 @@ Keep generated files reviewed.`,
     expect(output.content).not.toContain('skills content');
     expect(output.content).not.toContain('agents content');
     expect(output.content).not.toContain('workflows content');
-    expect(output.content).not.toContain('prompts content');
     expect(output.content).not.toContain('shortcuts content');
     expect(output.warnings).toHaveLength(unsupportedNames.length);
     expect(output.warnings).toEqual(
@@ -146,6 +144,27 @@ Keep generated files reviewed.`,
         })
       )
     );
+  });
+
+  it('skips prompt definitions without a warning', () => {
+    const formatter = new HermesFormatter();
+    const ast = createProgram([
+      createBlock(
+        'prompts',
+        {
+          type: 'ObjectContent',
+          properties: { review: { description: 'Review', user: 'prompts content' } },
+          loc: createLoc(2),
+        },
+        2
+      ),
+    ]);
+
+    const output = formatter.format(ast);
+
+    expect(output.content).not.toContain('prompts content');
+    expect(output.warnings ?? []).toEqual([]);
+    expect(output.additionalFiles ?? []).toHaveLength(0);
   });
 
   it('reports unsupported hooks through the target hook capability registry', () => {
