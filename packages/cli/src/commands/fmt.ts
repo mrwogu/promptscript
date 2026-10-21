@@ -45,6 +45,13 @@ function walkPrsFiles(dir: string, failures: string[]): string[] {
   return results;
 }
 
+/** Order by UTF-16 code units so the result never depends on the locale. */
+function comparePaths(a: string, b: string): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
 function collectFiles(paths: string[], failures: string[]): string[] {
   const files = new Set<string>();
   for (const input of paths) {
@@ -62,7 +69,7 @@ function collectFiles(paths: string[], failures: string[]): string[] {
     }
   }
   // Compare by code units so the order never depends on the locale;.
-  return [...files].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return [...files].sort(comparePaths);
 }
 
 type FileOutcome = 'changed' | 'unchanged' | 'skipped' | 'failed';
