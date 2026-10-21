@@ -255,6 +255,30 @@ describe('validateCommand --fix', () => {
     expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Fixed'));
   });
 
+  it('should raise the syntax version to 1.6.0 for prompt definitions', async () => {
+    mkdirSync(join(tmpDir, '.promptscript'), { recursive: true });
+    writeFileSync(
+      join(tmpDir, '.promptscript', 'project.prs'),
+      `@meta {
+  id: "test"
+  syntax: "1.5.0"
+}
+
+@prompts {
+  review: {
+    description: "Review a change"
+    user: "Review this change."
+  }
+}
+`
+    );
+
+    await validateCommand({ fix: true });
+
+    const content = readFileSync(join(tmpDir, '.promptscript', 'project.prs'), 'utf-8');
+    expect(content).toContain('syntax: "1.6.0"');
+  });
+
   it('should only fix explicitly requested files', async () => {
     mkdirSync(join(tmpDir, 'custom'), { recursive: true });
     const requestedPath = join(tmpDir, 'custom', 'requested.prs');

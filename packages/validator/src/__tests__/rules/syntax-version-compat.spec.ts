@@ -222,4 +222,37 @@ describe('PS018: syntax-version-compat', () => {
       location: usageLoc,
     });
   });
+
+  describe('prompt definitions', () => {
+    const promptsAst = (version: string): Program => {
+      const ast = makeAst(version);
+      ast.blocks = [
+        {
+          type: 'Block',
+          name: 'prompts',
+          loc,
+          content: {
+            type: 'ObjectContent',
+            properties: { review: { description: 'Review' } },
+            loc,
+          },
+        },
+      ];
+      return ast;
+    };
+
+    it('warns below 1.6.0 and points to the fix command', () => {
+      const messages = validate(promptsAst('1.5.0'));
+
+      expect(messages).toHaveLength(1);
+      expect(messages[0]).toMatchObject({
+        message: expect.stringContaining('"prompt-definitions" requires syntax >= 1.6.0'),
+        suggestion: expect.stringContaining('prs validate --fix'),
+      });
+    });
+
+    it('accepts 1.6.0', () => {
+      expect(validate(promptsAst('1.6.0'))).toHaveLength(0);
+    });
+  });
 });

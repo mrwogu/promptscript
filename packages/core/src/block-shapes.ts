@@ -130,7 +130,8 @@ export const BLOCK_SHAPE_CONTRACTS = {
     canonicalShape: 'object',
     supportedShapes: OBJECT_ONLY_SHAPES,
     legacyShapes: [],
-    example: '@prompts { review: { content: """Review changes.""" } }',
+    example:
+      '@prompts { review: { description: "Review a change" user: "Review {{input.diff}}" inputs: { diff: { type: "string" description: "The change" } } } }',
   },
   examples: {
     canonicalShape: 'object',

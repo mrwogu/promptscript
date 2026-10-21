@@ -12,7 +12,7 @@ import {
   usesSequentialOperations,
   type SyntaxFeature,
 } from '../syntax-versions.js';
-import type { Program } from '../types/ast.js';
+import type { Block, Program } from '../types/ast.js';
 import { BLOCK_TYPES } from '../types/constants.js';
 
 describe('SYNTAX_VERSIONS', () => {
@@ -176,6 +176,11 @@ describe('syntax feature capabilities', () => {
       SYNTAX_FEATURES.EXPLICIT_OVERRIDE,
       SYNTAX_FEATURES.ENV_VAR_VALUE,
     ]);
+    expect(getFeaturesForVersion('1.6.0')).toEqual([
+      ...getFeaturesForVersion('1.5.0')!,
+      SYNTAX_FEATURES.PROMPT_DEFINITIONS,
+    ]);
+    expect(getBlocksForVersion('1.6.0')).toEqual(getBlocksForVersion('1.5.0'));
     expect(getFeaturesForVersion('9.9.9')).toBeUndefined();
   });
 
@@ -184,6 +189,7 @@ describe('syntax feature capabilities', () => {
     expect(getMinimumVersionForFeature(SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE)).toBe('1.5.0');
     expect(getMinimumVersionForFeature(SYNTAX_FEATURES.EXPLICIT_OVERRIDE)).toBe('1.5.0');
     expect(getMinimumVersionForFeature(SYNTAX_FEATURES.ENV_VAR_VALUE)).toBe('1.5.0');
+    expect(getMinimumVersionForFeature(SYNTAX_FEATURES.PROMPT_DEFINITIONS)).toBe('1.6.0');
     expect(getMinimumVersionForFeature('unknown-feature' as SyntaxFeature)).toBeUndefined();
   });
 
@@ -265,5 +271,45 @@ describe('syntax feature capabilities', () => {
     expect(getSyntaxFeatureUsages(ast)).toEqual([
       { feature: SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE, location: loc },
     ]);
+  });
+});
+
+describe('prompt definition usage', () => {
+  const loc = { file: 'prompts.prs', line: 4, column: 1, offset: 40 };
+  const withPrompts = (content: Block['content']): Program => ({
+    type: 'Program',
+    loc,
+    uses: [],
+    blocks: [{ type: 'Block', name: 'prompts', content, loc }],
+    extends: [],
+  });
+
+  it('reports one usage per non-empty @prompts block', () => {
+    const ast = withPrompts({
+      type: 'ObjectContent',
+      properties: { review: { description: 'Review' } },
+      loc,
+    });
+
+    expect(getSyntaxFeatureUsages(ast)).toEqual([
+      { feature: SYNTAX_FEATURES.PROMPT_DEFINITIONS, location: loc },
+    ]);
+  });
+
+  it.each<[string, Block['content']]>([
+    ['an empty object', { type: 'ObjectContent', properties: {}, loc }],
+    ['blank text', { type: 'TextContent', value: '  ', loc }],
+    ['an empty array', { type: 'ArrayContent', elements: [], loc }],
+    ['an empty mixed body', { type: 'MixedContent', properties: {}, loc }],
+  ])('ignores %s', (_title, content) => {
+    expect(getSyntaxFeatureUsages(withPrompts(content))).toEqual([]);
+  });
+
+  it.each<[string, Block['content']]>([
+    ['text', { type: 'TextContent', value: 'Review changes.', loc }],
+    ['an array', { type: 'ArrayContent', elements: ['a'], loc }],
+    ['a mixed body', { type: 'MixedContent', properties: { a: 'b' }, loc }],
+  ])('counts non-empty %s', (_title, content) => {
+    expect(getSyntaxFeatureUsages(withPrompts(content))).toHaveLength(1);
   });
 });

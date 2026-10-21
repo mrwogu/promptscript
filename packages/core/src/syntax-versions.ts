@@ -1,5 +1,5 @@
 import { compareVersions, isValidVersion } from './utils/version.js';
-import type { Program, SourceLocation } from './types/index.js';
+import type { Block, Program, SourceLocation } from './types/index.js';
 
 /**
  * Syntax features that are versioned independently from block availability.
@@ -10,6 +10,7 @@ export const SYNTAX_FEATURES = {
   SECTION_HEADER_OVERRIDE: 'section-header-override',
   EXPLICIT_OVERRIDE: 'explicit-override',
   ENV_VAR_VALUE: 'env-var-value',
+  PROMPT_DEFINITIONS: 'prompt-definitions',
 } as const;
 
 export type SyntaxFeature = (typeof SYNTAX_FEATURES)[keyof typeof SYNTAX_FEATURES];
@@ -164,6 +165,36 @@ export const SYNTAX_VERSIONS: Readonly<Record<string, SyntaxVersionDef>> = {
       SYNTAX_FEATURES.ENV_VAR_VALUE,
     ],
   },
+  '1.6.0': {
+    blocks: [
+      'identity',
+      'context',
+      'standards',
+      'restrictions',
+      'knowledge',
+      'shortcuts',
+      'commands',
+      'guards',
+      'params',
+      'skills',
+      'local',
+      'agents',
+      'workflows',
+      'hooks',
+      'mcpServers',
+      'plugins',
+      'prompts',
+      'examples',
+    ],
+    features: [
+      SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
+      SYNTAX_FEATURES.ORDERED_OPERATIONS,
+      SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE,
+      SYNTAX_FEATURES.EXPLICIT_OVERRIDE,
+      SYNTAX_FEATURES.ENV_VAR_VALUE,
+      SYNTAX_FEATURES.PROMPT_DEFINITIONS,
+    ],
+  },
 };
 
 /** Latest known syntax version. */
@@ -238,6 +269,18 @@ export function usesSequentialOperations(ast: Program): boolean {
   );
 }
 
+function hasPromptContent(content: Block['content']): boolean {
+  switch (content.type) {
+    case 'ObjectContent':
+    case 'MixedContent':
+      return Object.keys(content.properties).length > 0;
+    case 'TextContent':
+      return content.value.trim().length > 0;
+    case 'ArrayContent':
+      return content.elements.length > 0;
+  }
+}
+
 /**
  * Find all versioned non-block syntax features used by a parsed program.
  */
@@ -268,6 +311,14 @@ export function getSyntaxFeatureUsages(ast: Program): SyntaxFeatureUsage[] {
     usages.push({
       feature: SYNTAX_FEATURES.EXPLICIT_OVERRIDE,
       location: override.loc,
+    });
+  }
+
+  const prompts = ast.blocks.find((block) => block.name === 'prompts');
+  if (prompts && hasPromptContent(prompts.content)) {
+    usages.push({
+      feature: SYNTAX_FEATURES.PROMPT_DEFINITIONS,
+      location: prompts.loc,
     });
   }
 
