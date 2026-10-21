@@ -4,8 +4,9 @@ import { suspiciousUrls } from '../rules/suspicious-urls.js';
 import { authorityInjection } from '../rules/authority-injection.js';
 import { obfuscatedContent } from '../rules/obfuscated-content.js';
 import { blockedPatterns } from '../rules/blocked-patterns.js';
+import { unicodeSecurity } from '../rules/unicode-security.js';
 import { pathTraversal, hasPathTraversal } from '../rules/path-traversal.js';
-import { createObjectBlock } from './object-block-helper.js';
+import { RESOURCES_PLACEMENTS, skillResourcesBlock } from './object-block-helper.js';
 import type { RuleContext, ValidationMessage, ValidatorConfig } from '../types.js';
 import {
   SECURITY_STRICT,
@@ -2760,6 +2761,13 @@ describe('resources keys outside @skills are scanned', () => {
       payload: `Config: ${OPAQUE_BASE64}`,
       finding: 'Long Base64',
     },
+    {
+      id: 'PS014',
+      rule: unicodeSecurity,
+      config: {},
+      payload: 'Check this file: test\u202Etxt.exe',
+      finding: 'U+202E',
+    },
   ];
 
   describe.each(cases)('$id', ({ id, rule, config, payload, finding }) => {
@@ -2769,34 +2777,18 @@ describe('resources keys outside @skills are scanned', () => {
       return messages;
     };
 
-    const expectFinding = (messages: ValidationMessage[]): void => {
+    it.each(RESOURCES_PLACEMENTS)('flags $title', ({ build }) => {
+      const messages = run(build(payload));
+
       expect(rule.id).toBe(id);
       expect(messages.length).toBeGreaterThan(0);
       expect(messages[0]!.message).toContain(finding);
       expect(messages[0]!.location?.file).toBe('test.prs');
       expect(messages[0]!.location?.line).toBe(1);
-    };
-
-    it('flags text under resources in @context', () => {
-      expectFinding(run(createObjectBlock('context', { resources: payload })));
-    });
-
-    it('flags text under a nested resources key in @identity', () => {
-      expectFinding(
-        run(createObjectBlock('identity', { section: { resources: { note: payload } } }))
-      );
-    });
-
-    it('flags text under resources in @prompts', () => {
-      expectFinding(run(createObjectBlock('prompts', { resources: { content: payload } })));
-    });
-
-    it('flags text under a skill entry key other than resources', () => {
-      expectFinding(run(createObjectBlock('skills', { review: { notes: payload } })));
     });
 
     it('still skips @skills.<name>.resources', () => {
-      expect(run(createObjectBlock('skills', { review: { resources: [payload] } }))).toEqual([]);
+      expect(run(skillResourcesBlock(payload))).toEqual([]);
     });
   });
 });

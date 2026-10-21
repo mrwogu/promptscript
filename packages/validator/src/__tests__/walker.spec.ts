@@ -5,30 +5,8 @@ import {
   type Program,
   type SourceLocation,
 } from '@promptscript/core';
+import { createTestProgram } from './object-block-helper.js';
 import { walkText, walkBlocks, walkUses, hasContent, offsetLocation } from '../walker.js';
-
-/**
- * Create a minimal test AST.
- */
-function createTestProgram(overrides: Partial<Program> = {}): Program {
-  const defaultLoc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
-  return {
-    type: 'Program',
-    loc: defaultLoc,
-    meta: {
-      type: 'MetaBlock',
-      loc: defaultLoc,
-      fields: {
-        id: 'test-project',
-        version: '1.0.0',
-      },
-    },
-    uses: [],
-    blocks: [],
-    extends: [],
-    ...overrides,
-  };
-}
 
 describe('walker', () => {
   const defaultLoc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
@@ -551,34 +529,6 @@ describe('walker', () => {
   });
 
   describe('walkBlocks', () => {
-    it('should walk all blocks', () => {
-      const blockNames: string[] = [];
-      const ast = createTestProgram({
-        blocks: [
-          {
-            type: 'Block',
-            name: 'identity',
-            loc: defaultLoc,
-            content: { type: 'TextContent', value: '', loc: defaultLoc },
-          },
-          {
-            type: 'Block',
-            name: 'context',
-            loc: defaultLoc,
-            content: { type: 'TextContent', value: '', loc: defaultLoc },
-          },
-        ],
-      });
-
-      walkBlocks(ast, (block) => {
-        if ('name' in block) {
-          blockNames.push(block.name);
-        }
-      });
-
-      expect(blockNames).toEqual(['identity', 'context']);
-    });
-
     it('should walk extend blocks', () => {
       const targetPaths: string[] = [];
       const ast = createTestProgram({

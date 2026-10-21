@@ -1,29 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import type { Program, SourceLocation, TextContent } from '@promptscript/core';
+import type { SourceLocation, TextContent } from '@promptscript/core';
+import { createTestProgram } from './object-block-helper.js';
 import { walkText, walkBlocks, hasContent } from '../walker.js';
-
-/**
- * Create a minimal test AST.
- */
-function createTestProgram(overrides: Partial<Program> = {}): Program {
-  const defaultLoc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
-  return {
-    type: 'Program',
-    loc: defaultLoc,
-    meta: {
-      type: 'MetaBlock',
-      loc: defaultLoc,
-      fields: {
-        id: 'test-project',
-        version: '1.0.0',
-      },
-    },
-    uses: [],
-    blocks: [],
-    extends: [],
-    ...overrides,
-  };
-}
 
 describe('walker additional coverage', () => {
   const defaultLoc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };

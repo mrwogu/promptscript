@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Program, SourceLocation, Block } from '@promptscript/core';
 import { unicodeSecurity } from '../rules/unicode-security.js';
-import { createObjectBlock } from './object-block-helper.js';
 import type { RuleContext, ValidationMessage, ValidatorConfig } from '../types.js';
 import { SECURITY_STRICT, SECURITY_MODERATE, SECURITY_MINIMAL } from '../presets.js';
 
@@ -680,40 +679,5 @@ describe('unicode-security rule (PS014)', () => {
     it('should be disabled in SECURITY_MINIMAL', () => {
       expect(SECURITY_MINIMAL.rules?.['unicode-security']).toBe('off');
     });
-  });
-});
-
-describe('unicode-security rule (PS014) - resources keys', () => {
-  const payload = 'Check this file: test\u202Etxt.exe';
-  const run = (block: Block): ValidationMessage[] => {
-    const { ctx, messages } = createRuleContext(createTestProgram({ blocks: [block] }));
-    unicodeSecurity.validate(ctx);
-    return messages;
-  };
-
-  const expectFinding = (messages: ValidationMessage[]): void => {
-    expect(messages.length).toBeGreaterThan(0);
-    expect(unicodeSecurity.id).toBe('PS014');
-    expect(messages[0]!.message).toContain('U+202E');
-    expect(messages[0]!.location?.file).toBe('test.prs');
-    expect(messages[0]!.location?.line).toBe(1);
-  };
-
-  it('flags text under resources in @context', () => {
-    expectFinding(run(createObjectBlock('context', { resources: payload })));
-  });
-
-  it('flags text under a nested resources key in @identity', () => {
-    expectFinding(
-      run(createObjectBlock('identity', { section: { resources: { note: payload } } }))
-    );
-  });
-
-  it('flags text under resources in @prompts', () => {
-    expectFinding(run(createObjectBlock('prompts', { resources: { content: payload } })));
-  });
-
-  it('still skips @skills.<name>.resources', () => {
-    expect(run(createObjectBlock('skills', { review: { resources: [payload] } }))).toEqual([]);
   });
 });
