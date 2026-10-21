@@ -1721,8 +1721,9 @@ changes generated output.
 | `output`                                              | No       | object   | Field name to `{ type, description?, options?, items? }`. Types add `list`, which needs `items`                                                                 |
 | `risk`, `owner`, `domain`, `dataClasses`, `reviewers` | No       | mixed    | Governance values. `risk` is `low`, `medium`, `high` or `critical`. `@meta` can hold defaults                                                                   |
 
-Keys and field names cannot be `__proto__`, `prototype`, `constructor` or any
-other name that every JavaScript object has. A key also cannot be `index`,
+The parser rejects a field named `__proto__` in any block with a located parse
+error. PS042 rejects `prototype`, `constructor` and any other name that every
+JavaScript object has. A key also cannot be `index`,
 `readme` or a Windows device name such as `con` or `com1`, in any case. When the
 file has `@prompts`, `@meta.id` must not contain `..`, must not start or end
 with `/`, and each `/` segment uses letters, digits, `.`, `_` and `-`.

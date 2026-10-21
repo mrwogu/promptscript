@@ -57,7 +57,8 @@ skipped. Run upgrades on a clean version-control branch.
 `@prompts` entries need syntax `1.6.0`. A file that declares an older version
 and has entries gets a PS018 warning, and `prs validate --fix` raises the
 version. PS042 to PS046 check the entries and their `{{input.name}}` slots,
-see [`@prompts`](../language.md#prompts). PS045 only runs from `1.6.0`, because
+see [`@prompts`](../language.md#prompts). The parser rejects a `__proto__` field
+name in every block, and PS042 rejects the other prototype names. PS045 only runs from `1.6.0`, because
 from that version a `{{name}}` that nothing bound is reported instead of being
 printed silently. No target emits prompt definitions.
 

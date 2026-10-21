@@ -831,6 +831,7 @@ class PromptScriptVisitor extends BaseVisitor {
     const valueResult = this.visit(values[0]!);
     const defaultValue = values.length > 1 ? this.visit(values[1]!) : undefined;
     const loc = this.loc(keyToken);
+    this.rejectProtoKey(name, loc);
 
     // Special handling for 'params' field in @meta block
     // Check if the value was parsed as a paramDefList (returns ParamDefinition[])
@@ -884,6 +885,15 @@ class PromptScriptVisitor extends BaseVisitor {
     }
     if (cacheKey) this.fieldCache.set(cacheKey, field);
     return field;
+  }
+
+  /** Assigning "__proto__" on a plain object sets its prototype instead of adding a key. */
+  private rejectProtoKey(name: string, loc: SourceLocation): void {
+    if (name !== '__proto__') return;
+    this.diagnostics.push({
+      message: 'The field name "__proto__" is reserved. Rename the field.',
+      loc,
+    });
   }
 
   /** Overflowing literals (e.g. 400 digits) become Infinity, which no later stage can represent. */

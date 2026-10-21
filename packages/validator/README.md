@@ -53,7 +53,7 @@ This is an internal package bundled into `@promptscript/cli`. It is not publishe
 | PS039 | agent-namespaces             | error    | Namespaced agent names must be well-formed and match provenance                         |
 | PS040 | import-excludes              | error    | Import validation excludes must match the commit pinned in the lockfile                 |
 | PS041 | valid-model-reference        | warning  | Model references must name served models from the project model set                     |
-| PS042 | valid-prompt-definition      | error    | Validate @prompts entries, their contracts and governance values                        |
+| PS042 | valid-prompt-definition      | error    | Validate @prompts entries, contracts and governance (the parser rejects "**proto**")    |
 | PS043 | unresolved-prompt-slot       | error    | Runtime slots in prompt text must name declared inputs                                  |
 | PS044 | unused-prompt-declaration    | warning  | Declared prompt inputs should be used in the prompt text                                |
 | PS045 | unresolved-template-variable | warning  | Template variables left in resolved text are printed literally                          |
