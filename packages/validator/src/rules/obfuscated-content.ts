@@ -665,7 +665,7 @@ export const obfuscatedContent: ValidationRule = {
           });
         }
       },
-      { excludeProperties: ['resources'] }
+      { skipSkillResources: true }
     );
   },
 };

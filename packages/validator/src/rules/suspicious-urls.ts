@@ -391,7 +391,7 @@ export const suspiciousUrls: ValidationRule = {
           }
         }
       },
-      { excludeProperties: ['resources'] }
+      { skipSkillResources: true }
     );
   },
 };

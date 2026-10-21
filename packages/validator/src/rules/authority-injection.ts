@@ -648,7 +648,7 @@ export const authorityInjection: ValidationRule = {
           }
         }
       },
-      { excludeProperties: ['resources'] }
+      { skipSkillResources: true }
     );
   },
 };

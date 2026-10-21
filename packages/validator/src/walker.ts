@@ -31,10 +31,17 @@ export type UseCallback = (use: UseDeclaration) => void;
  */
 export interface WalkTextOptions {
   /**
-   * Property names to exclude from walking.
-   * Useful for skipping non-instructional content like skill resource files.
+   * Property names to exclude from walking, at every depth under every block.
+   * For skill resource lists use `skipSkillResources`, which is scoped to
+   * `@skills.<name>.resources`.
    */
   excludeProperties?: string[];
+  /**
+   * Skip skill resource lists (`@skills.<name>.resources`, including the same
+   * path reached through `@extend` and `@override`). The `resources` key under
+   * any other block or property is still scanned.
+   */
+  skipSkillResources?: boolean;
 }
 
 /**
@@ -43,17 +50,22 @@ export interface WalkTextOptions {
  */
 export function walkText(ast: Program, callback: TextCallback, options?: WalkTextOptions): void {
   const exclude = options?.excludeProperties ? new Set(options.excludeProperties) : undefined;
+  const skipResources = options?.skipSkillResources === true;
 
   // Walk blocks
   for (const block of ast.blocks) {
-    const content = block.name === 'skills' ? withoutSkillBaseSource(block.content) : block.content;
+    let content = block.name === 'skills' ? withoutSkillBaseSource(block.content) : block.content;
+    if (skipResources) content = withoutSkillResources([block.name], content);
     walkBlockContent(content, block.loc, callback, exclude);
     walkPresentationTitles(block.canonicalBody, callback);
   }
 
   // Walk extend blocks
   for (const ext of ast.extends) {
-    walkBlockContent(ext.content, ext.loc, callback, exclude);
+    const content = skipResources
+      ? withoutSkillResources(ext.targetPath.split('.'), ext.content)
+      : ext.content;
+    walkBlockContent(content, ext.loc, callback, exclude);
     walkPresentationTitles(ext.canonicalBody, callback);
   }
 
@@ -61,7 +73,7 @@ export function walkText(ast: Program, callback: TextCallback, options?: WalkTex
   // than `content`, so text rules would otherwise never see it on an
   // unresolved program.
   for (const override of ast.overrides ?? []) {
-    walkOverrideReplacement(override, callback, exclude);
+    walkOverrideReplacement(override, callback, exclude, skipResources);
   }
 }
 
@@ -91,15 +103,46 @@ function withoutSkillBaseSource(content: BlockContent): BlockContent {
   return { ...content, properties };
 }
 
+/**
+ * Drop skill `resources` from content found at `path` (block name, or the
+ * dot-split target path of an extend/override). Only `skills.<name>.resources`
+ * is affected: `resources` under any other block or key is left in place.
+ */
+function withoutSkillResources(path: string[], content: BlockContent): BlockContent {
+  if (path[0] !== 'skills' || path.length > 3) return content;
+  if (path.length === 3) {
+    // The target is the resource list itself.
+    return path[2] === 'resources'
+      ? { type: 'ObjectContent', properties: {}, loc: content.loc }
+      : content;
+  }
+  if (content.type !== 'ObjectContent' && content.type !== 'MixedContent') return content;
+  const properties: Record<string, Value> = {};
+  for (const [key, value] of Object.entries(content.properties)) {
+    if (path.length === 2) {
+      if (key !== 'resources') properties[key] = value;
+    } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      const rest: Record<string, Value> = { ...(value as Record<string, Value>) };
+      delete rest['resources'];
+      properties[key] = rest;
+    } else {
+      properties[key] = value;
+    }
+  }
+  return { ...content, properties };
+}
+
 function walkOverrideReplacement(
   override: OverrideBlock,
   callback: TextCallback,
-  exclude?: Set<string>
+  exclude?: Set<string>,
+  skipResources = false
 ): void {
   const { replacement } = override;
   if (replacement.type === 'BlockReplacement') {
+    const body = blockBodyToContent(replacement.body);
     walkBlockContent(
-      blockBodyToContent(replacement.body),
+      skipResources ? withoutSkillResources(override.targetPath.split('.'), body) : body,
       replacement.loc ?? override.loc,
       callback,
       exclude
@@ -108,12 +151,30 @@ function walkOverrideReplacement(
     return;
   }
 
-  walkValue(
-    valueNodeToValue(replacement.value),
-    replacement.loc ?? override.loc,
-    callback,
-    exclude
-  );
+  const loc = replacement.loc ?? override.loc;
+  const value = valueNodeToValue(replacement.value);
+  if (
+    skipResources &&
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    (value as { type?: unknown }).type !== 'TextContent'
+  ) {
+    const scoped = withoutSkillResources(override.targetPath.split('.'), {
+      type: 'ObjectContent',
+      properties: value as Record<string, Value>,
+      loc,
+    });
+    walkBlockContent(scoped, loc, callback, exclude);
+    return;
+  }
+  if (skipResources && isSkillResourcesPath(override.targetPath)) return;
+  walkValue(value, loc, callback, exclude);
+}
+
+function isSkillResourcesPath(targetPath: string): boolean {
+  const path = targetPath.split('.');
+  return path.length === 3 && path[0] === 'skills' && path[2] === 'resources';
 }
 
 function walkPresentationTitles(body: BlockBody | undefined, callback: TextCallback): void {
