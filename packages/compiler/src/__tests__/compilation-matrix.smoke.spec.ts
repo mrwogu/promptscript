@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { BUILTIN_FORMATTERS, FEATURE_MATRIX, type ToolName } from '@promptscript/formatters';
-import { stripPromptScriptMarkers } from '@promptscript/core';
+import { isPromptTarget, stripPromptScriptMarkers } from '@promptscript/core';
 import { Compiler } from '../compiler.js';
 
 /**
@@ -247,9 +247,14 @@ function declaredStatus(target: string, featureId: string): string | undefined {
   return feature?.tools[target as ToolName];
 }
 
+/**
+ * The matrix covers the coding targets. The prompt targets write application prompts, not
+ * instructions for a coding agent, and have their own specs.
+ */
 function listTargetVersions(): TargetVersion[] {
   const combinations: TargetVersion[] = [];
   for (const [target, FormatterCtor] of Object.entries(BUILTIN_FORMATTERS)) {
+    if (isPromptTarget(target)) continue;
     for (const version of Object.keys(FormatterCtor.getSupportedVersions())) {
       combinations.push({ target, version });
     }
@@ -306,7 +311,7 @@ describe('Compilation matrix smoke tests', () => {
   it('covers every registered target', () => {
     expect(combinations.length).toBeGreaterThan(0);
     expect(new Set(combinations.map((entry) => entry.target)).size).toBe(
-      Object.keys(BUILTIN_FORMATTERS).length
+      Object.keys(BUILTIN_FORMATTERS).filter((target) => !isPromptTarget(target)).length
     );
   });
 

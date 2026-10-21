@@ -9,13 +9,16 @@
 
 import {
   createOutputPlan,
+  isPromptTarget,
   noopLogger,
+  normalizeProvenanceFiles,
   type FactoryRulesMode,
   type Logger,
   type OutputPlan,
   type PSError,
   type OutputConvention,
   type PrettierMarkdownOptions,
+  type ProvenanceTrace,
 } from '@promptscript/core';
 import {
   FormatterRegistry,
@@ -312,13 +315,24 @@ export class BrowserCompiler {
       owner: string;
       role: 'primary';
     }> = [];
+    // Only the prompt targets read provenance, so the other targets never see a path.
+    let safeProvenance: ProvenanceTrace | undefined;
+    const provenanceFor = (target: string): ProvenanceTrace | undefined => {
+      if (!isPromptTarget(target)) return undefined;
+      safeProvenance ??= normalizeProvenanceFiles(resolved.provenance, this.projectRoot);
+      return safeProvenance;
+    };
 
     for (const { formatter, config } of this.loadedFormatters) {
       const formatterStart = Date.now();
       this.logger.verbose(`Formatting for ${formatter.name}`);
 
       try {
-        const formatOptions = this.getFormatOptionsForTarget(formatter.name, config);
+        const formatOptions = this.getFormatOptionsForTarget(
+          formatter.name,
+          config,
+          provenanceFor(formatter.name)
+        );
         this.logger.debug(`  Convention: ${formatOptions.convention ?? 'default'}`);
 
         const output = formatProgram(formatter, canonicalAst, formatOptions);
@@ -445,12 +459,17 @@ export class BrowserCompiler {
   /**
    * Get format options for a specific target.
    */
-  private getFormatOptionsForTarget(_targetName: string, config?: TargetConfig): FormatOptions {
+  private getFormatOptionsForTarget(
+    _targetName: string,
+    config?: TargetConfig,
+    provenance?: ProvenanceTrace
+  ): FormatOptions {
     const options: FormatOptions = {
       outputPath: config?.output,
       version: config?.version,
       prettier: this.prettierOptions,
       targetConfig: config,
+      ...(provenance ? { provenance } : {}),
     };
 
     const conventionName = config?.convention;

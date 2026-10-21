@@ -146,8 +146,14 @@ function textLines(text: string, asBullets: boolean): string[] {
 function bodyLines(content: BlockContent, asBullets: boolean): string[] {
   const listed = (items: Value[] | undefined): string[] =>
     (items ?? []).flatMap((item) => itemLines(item, 0));
-  const properties = (record: Record<string, Value>): string[] =>
-    Object.entries(record).flatMap(([key, value]) => propertyLines(key, value, 0));
+  // A list merged from several layers is stored under `items`, and renders as a plain list.
+  const properties = (record: Record<string, Value>): string[] => {
+    const { items, ...rest } = record;
+    return [
+      ...(Array.isArray(items) ? listed(items) : propertyLines('items', items ?? null, 0)),
+      ...Object.entries(rest).flatMap(([key, value]) => propertyLines(key, value, 0)),
+    ];
+  };
   switch (content.type) {
     case 'TextContent':
       return textLines(content.value, asBullets);

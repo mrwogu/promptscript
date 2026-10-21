@@ -1,6 +1,11 @@
 import type { Program } from '@promptscript/core';
 import type { Formatter, FormatOptions, FormatterOutput, FormatterVersionMap } from '../types.js';
-import { PromptFormatError, buildPromptBundles, type BuiltPrompts } from './bundle.js';
+import {
+  PromptFormatError,
+  buildPromptBundles,
+  compositionOf,
+  type BuiltPrompts,
+} from './bundle.js';
 
 /** Placement of the files of one prompt target. */
 export interface PromptLayout {
@@ -61,7 +66,9 @@ export abstract class PromptFormatter implements Formatter {
 
   format(ast: Program, options?: FormatOptions): FormatterOutput {
     const layout = layoutOf(this.name, options?.outputPath ?? this.outputPath);
-    const rendered = this.render(buildPromptBundles(ast, options, this.name));
+    const built = buildPromptBundles(ast, options, this.name);
+    const rendered = this.render(built);
+    const composition = built.prompts.flatMap((prompt) => compositionOf(prompt) ?? []);
     if (rendered.primary === undefined) {
       return {
         path: layout.primary,
@@ -78,6 +85,7 @@ export abstract class PromptFormatter implements Formatter {
         content: file.content,
       })),
       managedOutputDirectories: [layout.directory],
+      ...(composition.length > 0 ? { composition } : {}),
       ...(rendered.warnings?.length ? { warnings: rendered.warnings } : {}),
     };
   }

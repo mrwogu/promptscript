@@ -5,6 +5,7 @@ import type {
   OutputArtifact,
   PrettierMarkdownOptions,
   Program,
+  PromptComposition,
   ProvenanceTrace,
   SourceLocation,
 } from '@promptscript/core';
@@ -36,6 +37,8 @@ export interface FormatterOutput extends OutputArtifact {
   warnings?: FormatterWarning[];
   /** Additional files to generate (e.g., workflows) */
   additionalFiles?: FormatterOutput[];
+  /** Blocks composed into prompts, for the prompt targets. Not part of any written file. */
+  composition?: PromptComposition[];
 }
 
 /**

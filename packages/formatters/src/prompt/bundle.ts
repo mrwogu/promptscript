@@ -1,4 +1,5 @@
 import {
+  COMPOSABLE_BLOCKS,
   ErrorCode,
   PSError,
   compareVersions,
@@ -7,6 +8,7 @@ import {
   hashPromptBundle,
   normalizeProvenanceFiles,
   readMetaGovernance,
+  type ComposableBlock,
   type GovernanceMeta,
   type ModelParams,
   type Program,
@@ -16,6 +18,7 @@ import {
   type PromptBundleOutputProperty,
   type PromptBundleSegment,
   type PromptBundleV1,
+  type PromptComposition,
   type PromptDefinition,
   type PromptOutputField,
   type PromptScalarType,
@@ -217,12 +220,12 @@ function filesOf(trace: ProvenanceTrace | undefined, path: string): string[] {
   const files: string[] = [];
   for (const entry of trace?.entries ?? []) {
     if (!isUnder(entry.path, path)) continue;
-    files.push(entry.source.file);
     for (const step of entry.history) {
       if (['declaration', 'extend', 'override'].includes(step.operation)) {
         files.push(step.source.file);
       }
     }
+    files.push(entry.source.file);
   }
   return [...new Set(files)];
 }
@@ -340,6 +343,19 @@ export function buildPromptBundles(
     })),
     source,
   };
+}
+
+/**
+ * The blocks a prompt composed into its system message, with their source files.
+ * Undefined for a prompt that composes nothing.
+ */
+export function compositionOf(prompt: BuiltPrompt): PromptComposition | undefined {
+  const blocks = prompt.bundle.provenance.segments.flatMap((segment) =>
+    segment.message === 'system' && (COMPOSABLE_BLOCKS as readonly string[]).includes(segment.path)
+      ? [{ block: segment.path as ComposableBlock, files: segment.files }]
+      : []
+  );
+  return blocks.length > 0 ? { prompt: prompt.bundle.id, blocks } : undefined;
 }
 
 /** Serialize a bundle or an index the way every prompt file is written. */

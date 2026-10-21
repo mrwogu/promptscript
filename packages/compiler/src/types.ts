@@ -10,6 +10,8 @@ import type {
   OutputPlan,
   PrettierMarkdownOptions,
   Program,
+  PromptComposition,
+  ProvenanceTrace,
   SourceLocation,
 } from '@promptscript/core';
 import type { ResolverOptions } from '@promptscript/resolver';
@@ -34,6 +36,8 @@ export interface FormatterOutput extends OutputArtifact {
   }>;
   /** Additional files to generate (e.g., .cursor/commands/, .github/prompts/) */
   additionalFiles?: FormatterOutput[];
+  /** Blocks composed into prompts, for the prompt targets. Not part of any written file. */
+  composition?: PromptComposition[];
 }
 
 /**
@@ -60,6 +64,12 @@ export interface FormatOptions {
 
   /** Model catalog settings from promptscript.yaml, used to map agent models. */
   models?: ModelsConfig;
+
+  /**
+   * Provenance of the resolved program, with every file rewritten so no machine path remains.
+   * Passed only to the prompt targets.
+   */
+  provenance?: ProvenanceTrace;
 }
 
 /**
@@ -239,6 +249,8 @@ export interface CompileResult {
   warnings: ValidationMessage[];
   /** Compilation statistics */
   stats: CompileStats;
+  /** Blocks each prompt composed into its system message, when a prompt target ran */
+  composition?: PromptComposition[];
 }
 
 /**
