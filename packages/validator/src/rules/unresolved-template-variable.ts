@@ -60,10 +60,15 @@ function withoutPromptText(ast: Program): Program {
   return { ...ast, blocks: ast.blocks.map(strip) };
 }
 
+/** A private copy, so a stray exec or test on the shared export cannot move our lastIndex. */
+function templatePattern(): RegExp {
+  return new RegExp(TEMPLATE_VARIABLE_PATTERN.source, TEMPLATE_VARIABLE_PATTERN.flags);
+}
+
 function scan(ctx: RuleContext, program: Program, skipDotted: boolean): void {
   walkText(program, (text, loc) => {
     const masked = maskFencedCode(text);
-    for (const match of masked.matchAll(TEMPLATE_VARIABLE_PATTERN)) {
+    for (const match of masked.matchAll(templatePattern())) {
       if (masked[match.index - 1] === '\\') continue;
       const name = match[1]!;
       const dotted = name.includes('.');

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Block, Value } from '@promptscript/core';
+import { TEMPLATE_VARIABLE_PATTERN, type Block, type Value } from '@promptscript/core';
 import { unresolvedTemplateVariable } from '../../rules/unresolved-template-variable.js';
 import {
   PROMPT_LOC,
@@ -90,6 +90,13 @@ describe('PS045: unresolved-template-variable', () => {
       expect(run(identity('{{name}}'), { syntax: undefined as never })).toHaveLength(0);
       expect(run(identity('{{name}}'), { syntax: 16 })).toHaveLength(0);
     });
+  });
+
+  it('is not affected by a stray exec on the shared pattern', () => {
+    TEMPLATE_VARIABLE_PATTERN.exec('{{warm}}');
+
+    expect(run(identity('Hello {{name}}'))).toHaveLength(1);
+    TEMPLATE_VARIABLE_PATTERN.lastIndex = 0;
   });
 
   describe('skipped text', () => {
