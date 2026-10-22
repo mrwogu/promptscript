@@ -702,7 +702,7 @@ prompt-text=Prompt text`.split(`
     risk: "high"
     dataClasses: ["pii"]
     compose: [identity, standards, restrictions]
-    model: { ref: "claude-sonnet-5-5", temperature: 0.2, maxTokens: 600 }
+    model: { ref: "claude-sonnet-5-5", maxTokens: 600 }
     inputs: {
       order_total: { type: "number", description: "Order total in EUR" }
       days_since_delivery: { type: "number", description: "Days since the order arrived" }
