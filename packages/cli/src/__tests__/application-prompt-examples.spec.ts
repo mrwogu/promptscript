@@ -121,3 +121,37 @@ describe.each(NAMES)('application prompt example %s', (name) => {
     }
   });
 });
+
+const PAGE = await readFile(
+  new URL('../../../../docs/examples/application-prompts.md', import.meta.url),
+  'utf8'
+);
+
+/** The contents of every fence of a language on the docs page, in order. */
+function fences(language: string): string[] {
+  return [...PAGE.matchAll(new RegExp('```' + language + '\\n([\\s\\S]*?)```', 'g'))].map(
+    (match) => match[1] ?? ''
+  );
+}
+
+describe('the application prompt examples page', () => {
+  it('shows every fixture file byte for byte', async () => {
+    const shown = fences('promptscript');
+    expect(shown).toHaveLength(NAMES.length);
+
+    for (const [index, name] of NAMES.entries()) {
+      const [, org, project] = (shown[index] ?? '').split(/^# (?:org|project)\.prs\n/m);
+      const files = join(FIXTURES, name, '.promptscript');
+      // A blank line separates the two files inside the fence.
+      expect(org, name).toBe(`${await readFile(join(files, 'org.prs'), 'utf8')}\n`);
+      expect(project, name).toBe(await readFile(join(files, 'project.prs'), 'utf8'));
+    }
+  });
+
+  it('shows the bundle that the refund example compiles to', async () => {
+    const directory = await compileFixture('support-refund-reply');
+
+    const [shown] = fences('json');
+    expect(JSON.parse(shown ?? 'null')).toEqual(await readJson(directory, 'refund-reply.json'));
+  });
+});

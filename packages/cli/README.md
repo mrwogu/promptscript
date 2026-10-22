@@ -310,7 +310,8 @@ writes a Markdown preview of each composed system message. Both are opt-in: name
 They write nothing for a program without prompts. PromptScript does not escape, delimit or filter
 the values an application puts into a prompt, and it does not enforce output schemas. Read the
 [application prompts guide](https://getpromptscript.dev/guides/application-prompts/) before you
-ship a bundle.
+ship a bundle. Four runnable [application prompt examples](https://getpromptscript.dev/examples/application-prompts/)
+show typed inputs, enum outputs, defaults and citations.
 
 ## Skills from Local Files, Registries, or Git
 
