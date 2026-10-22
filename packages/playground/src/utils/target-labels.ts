@@ -63,5 +63,8 @@ prompt-text=Prompt text
 export const TARGET_LABELS = Object.fromEntries(
   LABELS.trim()
     .split('\n')
-    .map((line) => line.split('='))
+    .map((line) => {
+      const split = line.indexOf('=');
+      return [line.slice(0, split), line.slice(split + 1)];
+    })
 ) as Record<KnownTarget, string>;
