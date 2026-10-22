@@ -239,6 +239,23 @@ describe('generated prompt files', () => {
     expect(await readFile(triage, 'utf8')).toBe(changed);
   });
 
+  it('keeps a renamed copy of a bundle and removes the original of a removed prompt', async () => {
+    const { directory, source } = await project(['bundle'], ['refund', 'triage']);
+    await compileSuccessfully(directory);
+    const original = join(directory, 'prompts', 'triage.json');
+    const copy = join(directory, 'prompts', 'triage-copy.json');
+    const indexCopy = join(directory, 'prompts', 'index-copy.json');
+    await writeFile(copy, await readFile(original, 'utf8'));
+    await writeFile(indexCopy, await readFile(join(directory, 'prompts', 'index.json'), 'utf8'));
+
+    await writeFile(source, entry(['refund']));
+    await compileSuccessfully(directory);
+
+    expect(existsSync(original)).toBe(false);
+    expect(existsSync(copy)).toBe(true);
+    expect(existsSync(indexCopy)).toBe(true);
+  });
+
   it('keeps a file in a subdirectory of the prompts directory', async () => {
     const { directory, source } = await project(['bundle'], ['refund', 'triage']);
     await compileSuccessfully(directory);

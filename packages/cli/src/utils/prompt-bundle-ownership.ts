@@ -16,10 +16,16 @@ export function hasPromptBundleSchemaLine(content: string): boolean {
 /**
  * Whether a file is a generated bundle or index that is still what the compiler wrote.
  *
- * It must start with the `$schema` line, parse as JSON, and, for a bundle, carry a `contentHash`
- * that verifies. A copied or hand-edited bundle fails the check, so cleanup never removes it.
+ * It must start with the `$schema` line and parse as JSON. A bundle must carry a `contentHash`
+ * that verifies and sit under the name the target gives it, `<last id segment>.json`. An index
+ * must sit under one of the given index file names. A copied, renamed or hand-edited file fails
+ * the check, so cleanup never removes it.
  */
-export function isVerifiedPromptBundleOutput(content: string): boolean {
+export function isVerifiedPromptBundleOutput(
+  content: string,
+  fileName: string,
+  indexFileNames: ReadonlySet<string>
+): boolean {
   if (!hasPromptBundleSchemaLine(content)) return false;
   let parsed: Record<string, unknown>;
   try {
@@ -29,12 +35,14 @@ export function isVerifiedPromptBundleOutput(content: string): boolean {
     return false;
   }
   if (parsed['$schema'] === 'https://getpromptscript.dev/schema/prompt-bundle-index/v1.json') {
-    return Array.isArray(parsed['prompts']);
+    return Array.isArray(parsed['prompts']) && indexFileNames.has(fileName);
   }
   try {
     return (
       typeof parsed['contentHash'] === 'string' &&
-      hashPromptBundle(parsed) === parsed['contentHash']
+      hashPromptBundle(parsed) === parsed['contentHash'] &&
+      typeof parsed['id'] === 'string' &&
+      fileName === `${parsed['id'].split('/').at(-1)}.json`
     );
   } catch {
     return false;

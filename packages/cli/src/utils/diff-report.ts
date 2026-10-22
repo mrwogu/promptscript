@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { lstat, readFile } from 'node:fs/promises';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 import type { CompileError, CompileResult, FormatterOutput } from '@promptscript/compiler';
+import type { OmittedManagedDirectory } from '@promptscript/core';
 import {
   cleanupManagedOutputs,
   isPromptScriptOwnedHookOutput,
@@ -83,7 +84,7 @@ export interface BuildCompilationDiffOptions {
   warnings: CompileResult['warnings'];
   includeContent?: boolean;
   /** Directories of omitted outputs, from the compiler plan, so removed files are reported */
-  omittedDirectories?: ReadonlyArray<{ owner: string; directory: string }>;
+  omittedDirectories?: readonly OmittedManagedDirectory[];
 }
 
 interface MarkerMetadata {

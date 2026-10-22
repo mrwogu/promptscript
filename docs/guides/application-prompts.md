@@ -276,8 +276,9 @@ Bundles and previews are generated output.
 - A bundle or index is recognised by its first key, `"$schema"` with a prompt bundle URL. A JSON
   file that only quotes the URL somewhere is never claimed.
 - When a prompt leaves the source, `prs compile` removes its files from the target directory. It
-  removes a bundle only when the file parses and its `contentHash` verifies, so a copied or
-  hand-edited bundle stays. It does not enter subdirectories.
+  removes a bundle only when the file parses, its `contentHash` verifies and its name is the one
+  the target gives it, so a renamed copy or a hand-edited bundle stays. It does not enter
+  subdirectories.
 - A file at the path of a bundle that PromptScript did not generate is not overwritten without
   `--force`.
 - When the last prompt leaves the source, the target writes nothing and `prs compile` removes the

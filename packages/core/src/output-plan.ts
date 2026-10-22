@@ -97,6 +97,16 @@ export interface OutputPlanManagedPaths {
  * deterministic order. Collision resolution happens before any filesystem
  * consumer sees the plan.
  */
+/** A managed directory of an output that a formatter omitted. */
+export interface OmittedManagedDirectory {
+  /** Target that owns the directory */
+  owner: string;
+  /** Managed directory, project-relative */
+  directory: string;
+  /** Path the omitted output would have had */
+  path: string;
+}
+
 export interface OutputPlan {
   /** Selected normalized files. */
   files: OutputPlanFile[];
@@ -120,7 +130,7 @@ export interface OutputPlan {
    * An omitted output writes nothing, but cleanup still needs its directory to remove files
    * the owner wrote earlier.
    */
-  omittedManagedDirectories?: Array<{ owner: string; directory: string }>;
+  omittedManagedDirectories?: OmittedManagedDirectory[];
 }
 
 /**
@@ -326,12 +336,16 @@ function comparePaths(left: OutputPlanFile, right: OutputPlanFile): number {
 export function createOutputPlan(candidates: readonly OutputPlanCandidate[]): OutputPlan {
   const selected = new Map<string, OutputPlanFile>();
   const collisions: OutputPlanCollision[] = [];
-  const omittedManagedDirectories: Array<{ owner: string; directory: string }> = [];
+  const omittedManagedDirectories: OmittedManagedDirectory[] = [];
 
   for (const candidate of candidates) {
     if (candidate.output.omit === true) {
       for (const directory of normalizeManagedPaths(candidate.output).directories ?? []) {
-        omittedManagedDirectories.push({ owner: candidate.owner, directory });
+        omittedManagedDirectories.push({
+          owner: candidate.owner,
+          directory,
+          path: normalizeOutputPath(candidate.output.path),
+        });
       }
     }
     for (const file of flattenCandidate(candidate)) {
