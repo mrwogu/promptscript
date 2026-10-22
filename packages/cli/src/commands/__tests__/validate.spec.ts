@@ -133,6 +133,47 @@ describe('validateCommand', () => {
     );
   });
 
+  it('ignores validation.skipPolicies from the config', async () => {
+    // Arrange
+    const policies = [{ name: 'approved', kind: 'registry-allowlist', allowed: ['@core'] }];
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      validation: { skipPolicies: true },
+      policies,
+    });
+    mockResolveRegistryPath.mockResolvedValue({ path: './registry', isRemote: false });
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
+    mockCompile.mockResolvedValue({ success: true, errors: [], warnings: [], outputs: new Map() });
+
+    // Act
+    await validateCommand({});
+
+    // Assert
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ validator: { policies, skipPolicies: undefined } })
+    );
+  });
+
+  it('skips policies with --skip-policies', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      validation: {},
+      policies: [{ name: 'approved', kind: 'registry-allowlist', allowed: ['@core'] }],
+    });
+    mockResolveRegistryPath.mockResolvedValue({ path: './registry', isRemote: false });
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
+    mockCompile.mockResolvedValue({ success: true, errors: [], warnings: [], outputs: new Map() });
+
+    // Act
+    await validateCommand({ skipPolicies: true });
+
+    // Assert
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ validator: { policies: undefined, skipPolicies: true } })
+    );
+  });
+
   it('should output JSON format when --format json is specified', async () => {
     // Arrange
     mockLoadConfig.mockResolvedValue({

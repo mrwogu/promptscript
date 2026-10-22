@@ -45,7 +45,7 @@ Controls which layers can extend which, based on distance in a defined layer hie
 | `layers`      | `string[]` | Yes      | Ordered list of layers from base to leaf |
 | `maxDistance` | `number`   | No       | Maximum allowed distance (default: 1)    |
 
-Example: with `layers: ['@core', '@team', '@project']` and `maxDistance: 1`, a `@project` extension cannot directly modify a `@core` skill — it must go through `@team`.
+Example: with `layers: ['@core', '@team', '@project']` and `maxDistance: 1`, a `@project` extension cannot directly modify a `@core` skill - it must go through `@team`.
 
 The distance is measured between the registry of the file that defines the skill and the registry of the file that extends it. Sources outside the `layers` list, like the project's own `.prs` files, are not checked.
 
@@ -75,6 +75,32 @@ Any extension sourced from a registry not in the `allowed` list produces a viola
 - **`error`**: Validation fails (non-zero exit code)
 - **`warning`**: Reported but does not fail validation (unless `--strict`)
 
+## Policies in Extended Configs
+
+When `promptscript.yaml` uses `extends`, the policies of the base file are kept and the project's own policies are appended after them:
+
+```yaml
+# shared/org.yaml
+policies:
+  - name: approved-registries
+    kind: registry-allowlist
+    severity: error
+    allowed: ['@core', '@team']
+```
+
+```yaml
+# app/promptscript.yaml
+id: app
+extends: ../shared/org.yaml
+policies:
+  - name: protect-content
+    kind: property-protection
+    severity: warning
+    properties: ['content']
+```
+
+The project is validated against both `approved-registries` and `protect-content`. A base policy cannot be removed or redefined from the extending file: a policy with the same `name` as a base policy is a config error, and so is a `policies` value that is not a list, such as `policies: null` (a bare `policies:` key is accepted only when the base has no policies). See [Extending Configuration](../reference/config.md#extending-configuration) for the other merge rules.
+
 ## Skipping Policies
 
 For development, use `--skip-policies`:
@@ -82,6 +108,8 @@ For development, use `--skip-policies`:
 ```bash
 prs validate --skip-policies
 ```
+
+The flag skips policies for one run of `prs validate`. A `skipPolicies` key under `validation` in `promptscript.yaml` is ignored by both commands. Setting `validation.rules.policy-compliance` to `off` still turns PS030 off, including from an extending file.
 
 > **Note:** Never use `--skip-policies` in CI pipelines.
 
