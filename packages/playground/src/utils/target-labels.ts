@@ -55,7 +55,11 @@ bundle=Prompt bundle
 prompt-text=Prompt text
 `;
 
-/** Display names of the targets, shared by the panels. */
+/**
+ * Display names of the targets, shared by the panels. Kept as one text block
+ * on purpose: a 52-entry object literal with the catalog keys is reported by
+ * Sonar as a copy of the output path map in core. See #577.
+ */
 export const TARGET_LABELS = Object.fromEntries(
   LABELS.trim()
     .split('\n')
