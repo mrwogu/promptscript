@@ -7,49 +7,55 @@ import {
   selectWarnings,
   type FormatterName,
 } from '../store';
+import { TARGET_DEFINITIONS } from '@promptscript/core';
 import type { CompileWarning } from '@promptscript/browser-compiler';
 
-const FORMATTERS: { name: FormatterName; label: string; icon: string }[] = [
-  { name: 'github', label: 'GitHub', icon: '🐙' },
-  { name: 'claude', label: 'Claude', icon: '🤖' },
-  { name: 'cursor', label: 'Cursor', icon: '↗' },
-  { name: 'antigravity', label: 'Antigravity', icon: '🚀' },
-  { name: 'factory', label: 'Factory', icon: '🏭' },
-  { name: 'opencode', label: 'OpenCode', icon: '💻' },
-  { name: 'gemini', label: 'Gemini', icon: '♊' },
-  { name: 'windsurf', label: 'Windsurf', icon: '🏄' },
-  { name: 'cline', label: 'Cline', icon: '⌨' },
-  { name: 'roo', label: 'Roo Code', icon: '🦘' },
-  { name: 'codex', label: 'Codex', icon: '📜' },
-  { name: 'continue', label: 'Continue', icon: '▶' },
-  { name: 'augment', label: 'Augment', icon: '➕' },
-  { name: 'goose', label: 'Goose', icon: '🪿' },
-  { name: 'kilo', label: 'Kilo Code', icon: '⚖' },
-  { name: 'amp', label: 'Amp', icon: '⚡' },
-  { name: 'trae', label: 'Trae', icon: '🌲' },
-  { name: 'junie', label: 'Junie', icon: '🌸' },
-  { name: 'kiro', label: 'Kiro CLI', icon: '🔮' },
-  { name: 'cortex', label: 'Cortex Code', icon: '🧠' },
-  { name: 'crush', label: 'Crush', icon: '💎' },
-  { name: 'command-code', label: 'Command Code', icon: '⌘' },
-  { name: 'kode', label: 'Kode', icon: '🔷' },
-  { name: 'mcpjam', label: 'MCPJam', icon: '🎵' },
-  { name: 'mistral-vibe', label: 'Mistral Vibe', icon: '🌊' },
-  { name: 'mux', label: 'Mux', icon: '🔀' },
-  { name: 'openhands', label: 'OpenHands', icon: '🤲' },
-  { name: 'pi', label: 'Pi', icon: '🥧' },
-  { name: 'qoder', label: 'Qoder', icon: '🔢' },
-  { name: 'qwen-code', label: 'Qwen Code', icon: '🐦' },
-  { name: 'zencoder', label: 'Zencoder', icon: '🧘' },
-  { name: 'neovate', label: 'Neovate', icon: '✨' },
-  { name: 'pochi', label: 'Pochi', icon: '🐕' },
-  { name: 'adal', label: 'AdaL', icon: '🔬' },
-  { name: 'iflow', label: 'iFlow CLI', icon: '🌀' },
-  { name: 'openclaw', label: 'OpenClaw', icon: '🦀' },
-  { name: 'codebuddy', label: 'CodeBuddy', icon: '👥' },
-  { name: 'hermes', label: 'Hermes Agent', icon: 'H' },
-  { name: 'gitlab-duo', label: 'GitLab Duo', icon: '🦊' },
-];
+/** Tab labels and icons. A target without an entry shows its catalog name. */
+const TAB_DISPLAY: Partial<Record<FormatterName, { label: string; icon: string }>> = {
+  github: { label: 'GitHub', icon: '🐙' },
+  claude: { label: 'Claude', icon: '🤖' },
+  cursor: { label: 'Cursor', icon: '↗' },
+  antigravity: { label: 'Antigravity', icon: '🚀' },
+  factory: { label: 'Factory', icon: '🏭' },
+  opencode: { label: 'OpenCode', icon: '💻' },
+  gemini: { label: 'Gemini', icon: '♊' },
+  windsurf: { label: 'Windsurf', icon: '🏄' },
+  cline: { label: 'Cline', icon: '⌨' },
+  roo: { label: 'Roo Code', icon: '🦘' },
+  codex: { label: 'Codex', icon: '📜' },
+  continue: { label: 'Continue', icon: '▶' },
+  augment: { label: 'Augment', icon: '➕' },
+  goose: { label: 'Goose', icon: '🪿' },
+  kilo: { label: 'Kilo Code', icon: '⚖' },
+  amp: { label: 'Amp', icon: '⚡' },
+  trae: { label: 'Trae', icon: '🌲' },
+  junie: { label: 'Junie', icon: '🌸' },
+  kiro: { label: 'Kiro CLI', icon: '🔮' },
+  cortex: { label: 'Cortex Code', icon: '🧠' },
+  crush: { label: 'Crush', icon: '💎' },
+  'command-code': { label: 'Command Code', icon: '⌘' },
+  kode: { label: 'Kode', icon: '🔷' },
+  mcpjam: { label: 'MCPJam', icon: '🎵' },
+  'mistral-vibe': { label: 'Mistral Vibe', icon: '🌊' },
+  mux: { label: 'Mux', icon: '🔀' },
+  openhands: { label: 'OpenHands', icon: '🤲' },
+  pi: { label: 'Pi', icon: '🥧' },
+  qoder: { label: 'Qoder', icon: '🔢' },
+  'qwen-code': { label: 'Qwen Code', icon: '🐦' },
+  zencoder: { label: 'Zencoder', icon: '🧘' },
+  neovate: { label: 'Neovate', icon: '✨' },
+  pochi: { label: 'Pochi', icon: '🐕' },
+  adal: { label: 'AdaL', icon: '🔬' },
+  iflow: { label: 'iFlow CLI', icon: '🌀' },
+  openclaw: { label: 'OpenClaw', icon: '🦀' },
+  codebuddy: { label: 'CodeBuddy', icon: '👥' },
+  hermes: { label: 'Hermes Agent', icon: 'H' },
+  'gitlab-duo': { label: 'GitLab Duo', icon: '🦊' },
+  bundle: { label: 'Bundle', icon: '📦' },
+  'prompt-text': { label: 'Prompt text', icon: '📝' },
+};
+
+const TAB_TARGETS = Object.keys(TARGET_DEFINITIONS) as FormatterName[];
 
 function CopyButton({ content }: { content: string }) {
   const [showCopied, setShowCopied] = useState(false);
@@ -208,26 +214,25 @@ export function OutputPanel() {
         role="tablist"
         aria-label="Output formatters"
       >
-        {FORMATTERS.filter((formatter) => enabledTargets.includes(formatter.name)).map(
-          (formatter) => {
-            const isActive = activeFormatter === formatter.name;
+        {TAB_TARGETS.filter((name) => enabledTargets.includes(name)).map((name) => {
+          const isActive = activeFormatter === name;
+          const display = TAB_DISPLAY[name];
 
-            return (
-              <button
-                key={formatter.name}
-                onClick={() => setActiveFormatter(formatter.name)}
-                role="tab"
-                aria-selected={isActive}
-                className={`px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-                  isActive ? 'tab-active text-white' : 'tab-inactive text-gray-400'
-                }`}
-              >
-                <span>{formatter.icon}</span>
-                <span>{formatter.label}</span>
-              </button>
-            );
-          }
-        )}
+          return (
+            <button
+              key={name}
+              onClick={() => setActiveFormatter(name)}
+              role="tab"
+              aria-selected={isActive}
+              className={`px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                isActive ? 'tab-active text-white' : 'tab-inactive text-gray-400'
+              }`}
+            >
+              <span>{display?.icon ?? '•'}</span>
+              <span>{display?.label ?? name}</span>
+            </button>
+          );
+        })}
       </div>
 
       {!isCompiling && warnings.length > 0 && <WarningPanel warnings={warnings} />}

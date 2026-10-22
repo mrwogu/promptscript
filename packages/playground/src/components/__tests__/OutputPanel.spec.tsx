@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { CompileResult, CompileWarning } from '@promptscript/browser-compiler';
 import { OutputPanel } from '../OutputPanel';
@@ -82,5 +82,54 @@ describe('OutputPanel warnings', () => {
     render(<OutputPanel />);
 
     expect(screen.queryByRole('button', { name: /1 warning/ })).toBeNull();
+  });
+});
+
+describe('OutputPanel target tabs', () => {
+  const output = (path: string, content: string, formatter: string) => [
+    path,
+    { path, content, formatter },
+  ];
+
+  afterEach(() => {
+    usePlaygroundStore.getState().setTargetEnabled('aider', false);
+    usePlaygroundStore.getState().setTargetEnabled('bundle', false);
+  });
+
+  it('gives a tab to a catalog target the old list did not know', () => {
+    usePlaygroundStore.getState().setTargetEnabled('aider', true);
+    usePlaygroundStore.setState({ activeFormatter: 'aider', isCompiling: false });
+
+    render(<OutputPanel />);
+
+    expect(screen.getByRole('tab', { name: /aider/ })).toBeInTheDocument();
+  });
+
+  it('shows the bundle files and the JSON as written', () => {
+    const index = '{"prompts":["support-reply"]}';
+    const bundle = '{"key":"support-reply"}';
+    usePlaygroundStore.getState().setTargetEnabled('bundle', true);
+    usePlaygroundStore.setState({
+      activeFormatter: 'bundle',
+      isCompiling: false,
+      compileResult: {
+        ...buildResult([]),
+        outputs: new Map([
+          output('prompts/index.json', index, 'bundle'),
+          output('prompts/support-reply.json', bundle, 'bundle'),
+        ]) as CompileResult['outputs'],
+        outputOwners: new Map([
+          ['prompts/index.json', 'bundle'],
+          ['prompts/support-reply.json', 'bundle'],
+        ]),
+      },
+    });
+
+    render(<OutputPanel />);
+
+    expect(screen.getByRole('tab', { name: /Bundle/ })).toBeInTheDocument();
+    expect(screen.getByTitle('prompts/index.json')).toBeInTheDocument();
+    expect(screen.getByTitle('prompts/support-reply.json')).toBeInTheDocument();
+    expect(screen.getByText(index)).toBeInTheDocument();
   });
 });
