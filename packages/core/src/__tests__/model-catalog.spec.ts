@@ -343,6 +343,25 @@ describe('createModelCatalog', () => {
       expect(models.getProfile('odd')?.retirementDate).toBeUndefined();
     });
 
+    it('reads a pricing override and ignores a malformed one', () => {
+      const pricing = { inputUsdPerMillion: 2, outputUsdPerMillion: 10, checkedOn: '2026-10-22' };
+      const models = catalog({
+        profiles: {
+          'claude-opus-2-5': { pricing },
+          'in-house-7b': {
+            pricing: { inputUsdPerMillion: -1, outputUsdPerMillion: 10, checkedOn: '2026-10-22' },
+          },
+          'in-house-8b': {
+            pricing: { inputUsdPerMillion: 'free', outputUsdPerMillion: 0 },
+          } as unknown as NonNullable<ModelsConfig['profiles']>[string],
+        },
+      });
+
+      expect(models.getProfile('claude-opus-2-5')?.pricing).toEqual(pricing);
+      expect(models.getProfile('in-house-7b')?.pricing).toBeUndefined();
+      expect(models.getProfile('in-house-8b')?.pricing).toBeUndefined();
+    });
+
     it('ignores a non-object profiles value', () => {
       const models = catalog({ profiles: 'nope' as unknown as ModelsConfig['profiles'] });
 
@@ -403,6 +422,7 @@ describe('validateModelCatalog', () => {
         successor: 'nowhere',
         releaseDate: '2025/01/01',
         retirementDate: 'soon',
+        pricing: { inputUsdPerMillion: 1, outputUsdPerMillion: 5, checkedOn: 'yesterday' },
       }),
     ]);
 
@@ -411,6 +431,7 @@ describe('validateModelCatalog', () => {
       'model "lost" names unknown successor "nowhere"',
       'model "lost" has invalid release date "2025/01/01", expected YYYY-MM-DD',
       'model "lost" has invalid retirement date "soon", expected YYYY-MM-DD',
+      'model "lost" has invalid price check date "yesterday", expected YYYY-MM-DD',
       'successor chain of "self" loops',
     ]);
   });

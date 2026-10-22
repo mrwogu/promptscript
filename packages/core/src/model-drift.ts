@@ -13,7 +13,10 @@
  */
 
 import { compareModelVersions } from './model-catalog.js';
-import type { ModelProfile } from './types/models.js';
+import type { ModelPricing, ModelProfile } from './types/models.js';
+
+/** List price OpenRouter carries for a model, in USD per million tokens. */
+export type OpenRouterPricing = Pick<ModelPricing, 'inputUsdPerMillion' | 'outputUsdPerMillion'>;
 
 /** OpenRouter provider prefixes that map onto catalog providers. */
 const PROVIDER_PREFIXES: Readonly<Record<string, string>> = {
@@ -35,6 +38,8 @@ export interface OpenRouterModelEntry {
   readonly releaseDate: string;
   /** Retirement hint, when OpenRouter carries an expiration date. */
   readonly retirementDate?: string;
+  /** List price, when OpenRouter carries one. */
+  readonly pricing?: OpenRouterPricing;
 }
 
 /** A new release of a family the catalog already tracks. */
@@ -49,6 +54,8 @@ export interface ModelDriftCandidate {
   readonly displayName: string;
   readonly releaseDate: string;
   readonly retirementDate?: string;
+  /** List price OpenRouter carries, to be verified against the provider page. */
+  readonly pricing?: OpenRouterPricing;
 }
 
 /** Result of comparing OpenRouter's model list with the catalog. */
@@ -86,6 +93,26 @@ function stripProviderPrefix(name: string): string {
  */
 function releaseDateFromCreated(created: number): string {
   return new Date(created * 1000).toISOString().slice(0, 10);
+}
+
+/**
+ * OpenRouter prices one token as a decimal string like "0.000002"; the
+ * catalog prices a million. Rounding absorbs the float error of the scale.
+ */
+function perMillion(value: unknown): number | undefined {
+  if (typeof value !== 'string' || value.trim() === '') return undefined;
+  const perToken = Number(value);
+  if (!Number.isFinite(perToken) || perToken < 0) return undefined;
+  return Number((perToken * 1e6).toFixed(6));
+}
+
+function readPricing(raw: Record<string, unknown>): OpenRouterPricing | undefined {
+  const pricing = raw['pricing'];
+  if (!isRecord(pricing)) return undefined;
+  const input = perMillion(pricing['prompt']);
+  const output = perMillion(pricing['completion']);
+  if (input === undefined || output === undefined) return undefined;
+  return { inputUsdPerMillion: input, outputUsdPerMillion: output };
 }
 
 function escapeRegExp(text: string): string {
@@ -139,6 +166,7 @@ export function parseOpenRouterModels(payload: unknown): OpenRouterModelEntry[] 
       displayName: stripProviderPrefix(name),
       releaseDate: releaseDateFromCreated(created),
       retirementDate: expirationDate,
+      pricing: readPricing(raw),
     });
   }
   return entries;
@@ -214,6 +242,7 @@ function draftCandidate(
     displayName: entry.displayName,
     releaseDate: entry.releaseDate,
     retirementDate: entry.retirementDate,
+    pricing: entry.pricing,
   };
 }
 
@@ -279,14 +308,25 @@ export function displacedProfile(
 
 /**
  * Draft text for model-profiles.ts: the helper call for one candidate,
- * with the fields OpenRouter knows about.
+ * with the fields OpenRouter knows about. A price is dated with the day
+ * of the run, `pricesCheckedOn`, for a human to verify against the
+ * provider page.
  */
-export function formatProfileEntry(candidate: ModelDriftCandidate): string {
+export function formatProfileEntry(
+  candidate: ModelDriftCandidate,
+  pricesCheckedOn: string
+): string {
+  const { pricing } = candidate;
   const fields = [
     ...(candidate.retirementDate === undefined
       ? []
       : [`status: 'deprecated'`, `retirementDate: '${candidate.retirementDate}'`]),
     `releaseDate: '${candidate.releaseDate}'`,
+    ...(pricing === undefined
+      ? []
+      : [
+          `pricing: usd(${pricing.inputUsdPerMillion}, ${pricing.outputUsdPerMillion}, '${pricesCheckedOn}')`,
+        ]),
   ];
   const body = fields.map((field) => `    ${field},`).join('\n');
   if (candidate.provider === 'anthropic') {
