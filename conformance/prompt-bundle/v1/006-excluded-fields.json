@@ -1,5 +1,5 @@
 {
-  "description": "The bundle of 001 with another provenance.entry, same hash as 001. Provenance is outside the hash input.",
+  "description": "The bundle of 001 with another provenance.entry. Provenance and contentHash are outside the hash input, so the hash equals 001. A variant with a different contentHash value keeps the hash, and a variant with a different $schema gives another one.",
   "bundle": {
     "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
     "id": "acme-support/refund-reply",
@@ -29,5 +29,23 @@
   },
   "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Answer a customer refund request\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/refund-reply\",\"inputs\":{},\"messages\":[{\"content\":\"Answer the refund request politely and ask for the order number.\",\"role\":\"user\"}]}",
   "contentHash": "sha256-0e6f0d8c29583a005baceba739febd0896d7c1edf25c92b5e76a20fe99135591",
-  "slots": []
+  "slots": [],
+  "variants": [
+    {
+      "description": "Another contentHash value gives the same hash",
+      "set": {
+        "contentHash": "sha256-0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Answer a customer refund request\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/refund-reply\",\"inputs\":{},\"messages\":[{\"content\":\"Answer the refund request politely and ask for the order number.\",\"role\":\"user\"}]}",
+      "contentHash": "sha256-0e6f0d8c29583a005baceba739febd0896d7c1edf25c92b5e76a20fe99135591"
+    },
+    {
+      "description": "Another $schema gives another hash",
+      "set": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v2.json"
+      },
+      "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v2.json\",\"description\":\"Answer a customer refund request\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/refund-reply\",\"inputs\":{},\"messages\":[{\"content\":\"Answer the refund request politely and ask for the order number.\",\"role\":\"user\"}]}",
+      "contentHash": "sha256-add8a7362c117f1511fe371d15477dad23b8581a0bfbb09a309274a53466b2b6"
+    }
+  ]
 }

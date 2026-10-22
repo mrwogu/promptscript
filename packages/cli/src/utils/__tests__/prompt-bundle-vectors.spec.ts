@@ -36,6 +36,13 @@ interface Vector {
   slots: unknown[];
   render?: RenderCase | RenderCase[];
   error?: string;
+  warnings?: string[];
+  variants?: {
+    description: string;
+    set: Record<string, unknown>;
+    canonical: string;
+    contentHash: string;
+  }[];
 }
 
 const VECTOR_DIR = new URL('../../../../../conformance/prompt-bundle/v1/', import.meta.url);
@@ -79,7 +86,7 @@ afterAll(() => {
 async function compileSource(
   source: NonNullable<Vector['source']>,
   change: (text: string) => string = (text) => text
-): Promise<Map<string, string>> {
+): Promise<{ files: Map<string, string>; warnings: string[] }> {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'prs-vector-')));
   directories.push(root);
   for (const [path, text] of Object.entries(source.files)) {
@@ -91,7 +98,10 @@ async function compileSource(
     formatters: ['bundle'],
   }).compile(join(root, source.entry));
   expect(result.errors).toEqual([]);
-  return new Map([...result.outputs].map(([path, output]) => [path, output.content]));
+  return {
+    files: new Map([...result.outputs].map(([path, output]) => [path, output.content])),
+    warnings: result.warnings.map((warning) => warning.ruleId),
+  };
 }
 
 const fileOf = (v: Vector): string => `${JSON.stringify(v.bundle, null, 2)}\n`;
@@ -124,6 +134,8 @@ describe('prompt bundle conformance vectors', () => {
       '016-compose-restrictions',
       '017-compose-examples',
       '018-compose-order',
+      '019-slot-in-system',
+      '020-prototype-input',
     ]);
   });
 
@@ -171,6 +183,7 @@ describe('prompt bundle conformance vectors', () => {
       '016-compose-restrictions',
       '017-compose-examples',
       '018-compose-order',
+      '019-slot-in-system',
     ]);
   });
 
@@ -178,9 +191,16 @@ describe('prompt bundle conformance vectors', () => {
     const source = v.source!;
 
     it('compiles to the bundle byte for byte', async () => {
-      const outputs = await compileSource(source);
+      const { files } = await compileSource(source);
 
-      expect(outputs.get(`prompts/${keyOf(v)}.json`)).toBe(fileOf(v));
+      expect(files.get(`prompts/${keyOf(v)}.json`)).toBe(fileOf(v));
+    });
+
+    it('reports the pinned warnings, when the vector has any', async () => {
+      const { warnings } = await compileSource(source);
+
+      for (const code of v.warnings ?? []) expect(warnings).toContain(code);
+      if (v.warnings === undefined) expect(warnings).not.toContain('PS046');
     });
 
     it('compiles to the same bytes with the other line ending', async () => {
@@ -188,9 +208,9 @@ describe('prompt bundle conformance vectors', () => {
       const other = (text: string): string =>
         crlf ? text.replace(/\r\n/g, '\n') : text.replace(/\n/g, '\r\n');
 
-      const outputs = await compileSource(source, other);
+      const { files } = await compileSource(source, other);
 
-      expect(outputs.get(`prompts/${keyOf(v)}.json`)).toBe(fileOf(v));
+      expect(files.get(`prompts/${keyOf(v)}.json`)).toBe(fileOf(v));
     });
   });
 
@@ -223,6 +243,37 @@ describe('prompt bundle conformance vectors', () => {
 
     expect(positions.every((position) => position >= 0)).toBe(true);
     expect(positions).toEqual([...positions].sort((a, b) => a - b));
+  });
+
+  it('lists the slot of the system message in 019-slot-in-system', () => {
+    const { slots } = vector('019-slot-in-system');
+
+    expect(slots[0]).toMatchObject({ message: 0, kind: 'slot', name: 'lang' });
+  });
+
+  it('fails a slot named like a prototype member with missing-input in 020-prototype-input', () => {
+    const v = vector('020-prototype-input');
+
+    expect(v.bundle['inputs']).toEqual({});
+    expect(v.slots).toMatchObject([{ message: 0, kind: 'slot', name: 'constructor' }]);
+    expect(v.render).toEqual({ inputs: {}, error: 'missing-input' });
+  });
+
+  it('hashes the variants of 006-excluded-fields as pinned', () => {
+    const v = vector('006-excluded-fields');
+
+    const hashes = (v.variants ?? []).map((variant) => {
+      const changed = { ...v.bundle, ...variant.set };
+      return [canonicalizeJson(hashInput(changed)), hashOf(changed), variant.contentHash];
+    });
+
+    expect(hashes).toHaveLength(2);
+    for (const [, hash, pinned] of hashes) expect(hash).toBe(pinned);
+    expect(hashes.map(([canonical]) => canonical)).toEqual(
+      (v.variants ?? []).map((variant) => variant.canonical)
+    );
+    expect(v.variants?.[0]?.contentHash).toBe(v.contentHash);
+    expect(v.variants?.[1]?.contentHash).not.toBe(v.contentHash);
   });
 
   it('keeps ${VAR} as text in 010-literals-and-errors', () => {

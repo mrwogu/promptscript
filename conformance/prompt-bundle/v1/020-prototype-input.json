@@ -1,0 +1,45 @@
+{
+  "description": "A slot named constructor with no input of that name. A renderer finds own inputs only, so the render fails with missing-input and never reads Object.prototype.",
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/greet",
+    "description": "Greet by an input named like an Object.prototype member",
+    "contentHash": "sha256-091ab38f57c4a1408ef32ff1b19a8dc383e1485c056f6c54a73b235ae324538d",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hi {{input.constructor}}"
+      }
+    ],
+    "inputs": {},
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "user",
+          "path": "prompts.greet.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Greet by an input named like an Object.prototype member\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/greet\",\"inputs\":{},\"messages\":[{\"content\":\"Hi {{input.constructor}}\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-091ab38f57c4a1408ef32ff1b19a8dc383e1485c056f6c54a73b235ae324538d",
+  "slots": [
+    {
+      "message": 0,
+      "kind": "slot",
+      "name": "constructor",
+      "offset": 3,
+      "length": 21
+    }
+  ],
+  "render": {
+    "inputs": {},
+    "error": "missing-input"
+  }
+}
