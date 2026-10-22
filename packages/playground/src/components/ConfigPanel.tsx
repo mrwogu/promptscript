@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { usePlaygroundStore, type FormatterName, type ConventionType } from '../store';
+import type { KnownTarget } from '@promptscript/core';
+import { usePlaygroundStore, type ConventionType } from '../store';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const TARGET_INFO: Record<
-  FormatterName,
+  KnownTarget,
   { label: string; versions: string[]; supportsXml: boolean; hint?: string }
 > = {
   github: {
@@ -232,7 +233,7 @@ const TARGET_INFO: Record<
   },
 };
 
-const POPULAR_TARGETS: FormatterName[] = [
+const POPULAR_TARGETS: KnownTarget[] = [
   'github',
   'claude',
   'cursor',
@@ -276,8 +277,8 @@ export function ConfigPanel() {
   if (!showConfig) return null;
 
   const allTargets = Object.entries(TARGET_INFO) as [
-    FormatterName,
-    (typeof TARGET_INFO)[FormatterName],
+    KnownTarget,
+    (typeof TARGET_INFO)[KnownTarget],
   ][];
   const visibleTargets = showAll
     ? allTargets

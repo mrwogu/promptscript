@@ -65,18 +65,25 @@ function dedupe<T extends LocatedMessage>(items: T[], idOf: (item: T) => string)
   });
 }
 
-function mergeResults(a: CompileResult, b: CompileResult): CompileResult {
+function mergeResults(results: CompileResult[]): CompileResult {
+  const slowest = (time: (r: CompileResult) => number): number => Math.max(...results.map(time));
   return {
-    success: a.success && b.success,
-    outputs: new Map([...a.outputs, ...b.outputs]),
-    outputOwners: new Map([...(a.outputOwners ?? []), ...(b.outputOwners ?? [])]),
-    errors: dedupe([...a.errors, ...b.errors], (e) => e.code),
-    warnings: dedupe([...a.warnings, ...b.warnings], (w) => w.ruleId),
+    success: results.every((r) => r.success),
+    outputs: new Map(results.flatMap((r) => [...r.outputs])),
+    outputOwners: new Map(results.flatMap((r) => [...(r.outputOwners ?? [])])),
+    errors: dedupe(
+      results.flatMap((r) => r.errors),
+      (e) => e.code
+    ),
+    warnings: dedupe(
+      results.flatMap((r) => r.warnings),
+      (w) => w.ruleId
+    ),
     stats: {
-      resolveTime: Math.max(a.stats.resolveTime, b.stats.resolveTime),
-      validateTime: Math.max(a.stats.validateTime, b.stats.validateTime),
-      formatTime: Math.max(a.stats.formatTime, b.stats.formatTime),
-      totalTime: Math.max(a.stats.totalTime, b.stats.totalTime),
+      resolveTime: slowest((r) => r.stats.resolveTime),
+      validateTime: slowest((r) => r.stats.validateTime),
+      formatTime: slowest((r) => r.stats.formatTime),
+      totalTime: slowest((r) => r.stats.totalTime),
     },
   };
 }
@@ -170,7 +177,7 @@ export function useCompiler() {
               ...(coding.length > 0 ? [run(coding, envVars)] : []),
               ...(prompts.length > 0 ? [run(prompts, {})] : []),
             ];
-      setCompileResult((await Promise.all(passes)).reduce(mergeResults));
+      setCompileResult(mergeResults(await Promise.all(passes)));
     } finally {
       setCompiling(false);
     }

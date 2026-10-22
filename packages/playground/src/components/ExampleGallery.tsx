@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { usePlaygroundStore, type FileState, type FormatterName } from '../store';
+import type { KnownTarget } from '@promptscript/core';
+import { usePlaygroundStore, type FileState } from '../store';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import refundOrg from '../examples/support-refund-reply/org.prs?raw';
+import refundProject from '../examples/support-refund-reply/project.prs?raw';
 
 export interface Example {
   id: string;
@@ -11,7 +14,7 @@ export interface Example {
   /** Optional environment variables to set when loading this example */
   envVars?: Record<string, string>;
   /** Optional targets to enable when loading this example */
-  targets?: FormatterName[];
+  targets?: KnownTarget[];
 }
 
 export const EXAMPLES: Example[] = [
@@ -727,75 +730,8 @@ export const EXAMPLES: Example[] = [
     complexity: 'intermediate',
     targets: ['bundle', 'prompt-text'],
     files: [
-      {
-        path: 'project.prs',
-        content: `@meta {
-  id: "acme-support"
-  syntax: "1.6.0"
-}
-
-@inherit ./org
-
-@prompts {
-  refund-reply: {
-    description: "Decide on a refund request and write the reply"
-    risk: "high"
-    dataClasses: ["pii"]
-    compose: [identity, standards, restrictions]
-    model: { ref: "claude-sonnet-5-5", temperature: 0.2, maxTokens: 600 }
-    inputs: {
-      order_total: { type: "number", description: "Order total in EUR" }
-      days_since_delivery: { type: "number", description: "Days since the order arrived" }
-      message: { type: "string", description: "What the customer wrote" }
-    }
-    output: {
-      decision: {
-        type: "enum"
-        options: ["approve", "escalate", "deny"]
-        description: "What happens to the refund request"
-      }
-      reply: { type: "string", description: "The reply to send to the customer" }
-    }
-    system: """
-      Refunds are allowed within 30 days of delivery.
-      Send anything above 500 EUR to a human by choosing escalate.
-    """
-    user: """
-      Order total: {{input.order_total}} EUR
-      Days since delivery: {{input.days_since_delivery}}
-      Customer wrote: {{input.message}}
-    """
-  }
-}
-`,
-      },
-      {
-        path: 'org.prs',
-        content: `@meta {
-  id: "acme-org"
-  syntax: "1.6.0"
-  owner: "team-support"
-  risk: "medium"
-}
-
-@identity {
-  """
-  You are a support agent at Acme, an online shop.
-  You write short and polite replies in plain English.
-  """
-}
-
-@restrictions {
-  - "Never promise a refund that the policy does not allow."
-  - "Never ask the customer for a full card number."
-}
-
-@standards {
-  tone: "Calm and direct"
-  length: "At most 120 words"
-}
-`,
-      },
+      { path: 'project.prs', content: refundProject },
+      { path: 'org.prs', content: refundOrg },
     ],
   },
 

@@ -135,5 +135,47 @@ describe('OutputPanel target tabs', () => {
     expect(screen.getByTitle('prompts/index.json')).toBeInTheDocument();
     expect(screen.getByTitle('prompts/support-reply.json')).toBeInTheDocument();
     expect(screen.getByText(index)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTitle('prompts/support-reply.json'));
+
+    expect(screen.getByText(bundle)).toBeInTheDocument();
+  });
+});
+
+describe('OutputPanel failed compiles', () => {
+  it('lists the errors and keeps the files that other targets produced', () => {
+    usePlaygroundStore.setState({
+      activeFormatter: 'claude',
+      isCompiling: false,
+      compileResult: {
+        ...buildResult([]),
+        success: false,
+        errors: [{ name: 'CompileError', code: 'PS0000', message: 'bundle broke' }],
+      },
+    });
+
+    render(<OutputPanel />);
+
+    expect(screen.getByText('Compilation Failed')).toBeInTheDocument();
+    expect(screen.getByText(/bundle broke/)).toBeInTheDocument();
+    expect(screen.getByText('# CLAUDE.md')).toBeInTheDocument();
+  });
+
+  it('shows only the errors when no target produced a file', () => {
+    usePlaygroundStore.setState({
+      activeFormatter: 'claude',
+      isCompiling: false,
+      compileResult: {
+        ...buildResult([]),
+        success: false,
+        outputs: new Map(),
+        errors: [{ name: 'CompileError', code: 'PS0000', message: 'all broke' }],
+      },
+    });
+
+    render(<OutputPanel />);
+
+    expect(screen.getByText(/all broke/)).toBeInTheDocument();
+    expect(screen.queryByText('# CLAUDE.md')).toBeNull();
   });
 });

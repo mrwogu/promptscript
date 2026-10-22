@@ -5,13 +5,12 @@ import {
   selectOutputsForFormatter,
   selectEnabledTargets,
   selectWarnings,
-  type FormatterName,
 } from '../store';
-import { TARGET_DEFINITIONS } from '@promptscript/core';
-import type { CompileWarning } from '@promptscript/browser-compiler';
+import { TARGET_DEFINITIONS, type KnownTarget } from '@promptscript/core';
+import type { CompileError, CompileWarning } from '@promptscript/browser-compiler';
 
 /** Tab labels and icons. A target without an entry shows its catalog name. */
-const TAB_DISPLAY: Partial<Record<FormatterName, { label: string; icon: string }>> = {
+const TAB_DISPLAY: Partial<Record<KnownTarget, { label: string; icon: string }>> = {
   github: { label: 'GitHub', icon: '🐙' },
   claude: { label: 'Claude', icon: '🤖' },
   cursor: { label: 'Cursor', icon: '↗' },
@@ -55,7 +54,7 @@ const TAB_DISPLAY: Partial<Record<FormatterName, { label: string; icon: string }
   'prompt-text': { label: 'Prompt text', icon: '📝' },
 };
 
-const TAB_TARGETS = Object.keys(TARGET_DEFINITIONS) as FormatterName[];
+const TAB_TARGETS = Object.keys(TARGET_DEFINITIONS) as KnownTarget[];
 
 function CopyButton({ content }: { content: string }) {
   const [showCopied, setShowCopied] = useState(false);
@@ -174,6 +173,28 @@ function WarningPanel({ warnings }: { warnings: CompileWarning[] }) {
   );
 }
 
+function ErrorList({ errors, className }: { errors: CompileError[]; className: string }) {
+  return (
+    <div className={className}>
+      <div className="text-red-400 font-medium mb-2">Compilation Failed</div>
+      <ul className="space-y-2">
+        {errors.map((error, i) => (
+          <li key={i} className="text-sm">
+            <div className="text-red-300">
+              {error.location?.file && (
+                <span className="text-gray-400">
+                  {error.location.file}:{error.location.line}:{error.location.column}{' '}
+                </span>
+              )}
+              <span className="text-yellow-400">[{error.code}]</span> {error.message}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 type OutputViewMode = 'tree' | 'tabs';
 
 export function OutputPanel() {
@@ -246,26 +267,17 @@ export function OutputPanel() {
               <span>Compiling...</span>
             </div>
           </div>
-        ) : compileResult && !compileResult.success ? (
-          <div className="p-4 overflow-auto">
-            <div className="text-red-400 font-medium mb-2">Compilation Failed</div>
-            <ul className="space-y-2">
-              {compileResult.errors.map((error, i) => (
-                <li key={i} className="text-sm">
-                  <div className="text-red-300">
-                    {error.location?.file && (
-                      <span className="text-gray-400">
-                        {error.location.file}:{error.location.line}:{error.location.column}{' '}
-                      </span>
-                    )}
-                    <span className="text-yellow-400">[{error.code}]</span> {error.message}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+        ) : compileResult && !compileResult.success && outputs.length === 0 ? (
+          <ErrorList errors={compileResult.errors} className="p-4 overflow-auto" />
         ) : outputs.length > 0 ? (
           <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Some targets failed but others produced files: show both. */}
+            {compileResult && !compileResult.success && (
+              <ErrorList
+                errors={compileResult.errors}
+                className="p-3 max-h-48 overflow-auto flex-shrink-0 border-b border-ps-border"
+              />
+            )}
             {/* View mode toggle + tabs view */}
             {outputs.length > 1 && (
               <div className="flex items-center border-b border-ps-border bg-ps-bg">

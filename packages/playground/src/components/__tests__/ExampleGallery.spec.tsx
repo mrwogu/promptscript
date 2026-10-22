@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { compile } from '@promptscript/browser-compiler';
@@ -312,5 +314,19 @@ describe('ExampleGallery — rendering', () => {
     render(<ExampleGallery />);
     fireEvent.click(screen.getByLabelText('Close'));
     expect(usePlaygroundStore.getState().showExamples).toBe(false);
+  });
+});
+
+describe('ExampleGallery — shared example sources', () => {
+  it('keeps the refund example equal to the CLI fixture', () => {
+    const fixture = join(
+      __dirname,
+      '../../../../cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/.promptscript'
+    );
+    const example = EXAMPLES.find((candidate) => candidate.id === 'support-refund-reply');
+
+    for (const file of example?.files ?? []) {
+      expect(file.content, file.path).toBe(readFileSync(join(fixture, file.path), 'utf8'));
+    }
   });
 });
