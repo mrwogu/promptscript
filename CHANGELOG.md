@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.23.0](https://github.com/mrwogu/promptscript/compare/v1.22.0...v1.23.0) (2026-10-22)
+
+
+### Features
+
+* **cli:** add prs fmt to format .prs files with the printer ([#559](https://github.com/mrwogu/promptscript/issues/559)) ([ac1f3aa](https://github.com/mrwogu/promptscript/commit/ac1f3aa3d3886b03572a25364d1874b55361142d))
+* **cli:** read the system config under the user config ([#545](https://github.com/mrwogu/promptscript/issues/545)) ([114e0d0](https://github.com/mrwogu/promptscript/commit/114e0d088d2f3d1a4af2b8d13c431f9a9ca220c2))
+* **cli:** support extends in promptscript.yaml ([#547](https://github.com/mrwogu/promptscript/issues/547)) ([503e176](https://github.com/mrwogu/promptscript/commit/503e176d701774e6bfb8f610062f374113669b3e))
+* **core:** add prompt bundle contracts and conformance vectors ([#567](https://github.com/mrwogu/promptscript/issues/567)) ([0484384](https://github.com/mrwogu/promptscript/commit/04843843f42817bcc327994646b6251f820642f5))
+* **core:** add release config, label schema and render vectors ([#584](https://github.com/mrwogu/promptscript/issues/584)) ([849e6c5](https://github.com/mrwogu/promptscript/commit/849e6c50bbf17e42e00d8ea9dfe8a97fd14a7fc8))
+* **formatters:** add bundle and prompt-text targets for prompts ([#573](https://github.com/mrwogu/promptscript/issues/573)) ([f66b3fa](https://github.com/mrwogu/promptscript/commit/f66b3fa0261c28f645b5e247d8f722653eb6781c))
+* **parser:** keep blank lines and wrap arrays in the printer ([#566](https://github.com/mrwogu/promptscript/issues/566)) ([c8e7854](https://github.com/mrwogu/promptscript/commit/c8e78542d6150caf726fb752552afd624fe179a6))
+* **playground:** preview prompt bundles and add prompt examples ([#576](https://github.com/mrwogu/promptscript/issues/576)) ([0ac7c05](https://github.com/mrwogu/promptscript/commit/0ac7c05d152fc94a2fe27453ee126f6e4e7ada5c))
+* **validator:** add the prompts block with slot validation ([#569](https://github.com/mrwogu/promptscript/issues/569)) ([30158c1](https://github.com/mrwogu/promptscript/commit/30158c10d9288728118ed0f48f8ea256834a3dee))
+
+
+### Bug Fixes
+
+* **cli:** drop temperature from the application prompt examples ([#583](https://github.com/mrwogu/promptscript/issues/583)) ([611ba7c](https://github.com/mrwogu/promptscript/commit/611ba7cf89ea406e51d8ff9aa7894cc79ab5a422))
+* **cli:** keep base policies under extends, never skip them in check ([#586](https://github.com/mrwogu/promptscript/issues/586)) ([ff8e75e](https://github.com/mrwogu/promptscript/commit/ff8e75e13b37323def46a4ec9d77474d593d1f95))
+* **cli:** resolve registry aliases from the user config ([#544](https://github.com/mrwogu/promptscript/issues/544)) ([2caf19b](https://github.com/mrwogu/promptscript/commit/2caf19bbbc5b204b95b31f398327587cccd06bcc))
+* **resolver:** make the layer-boundary policy fire ([#548](https://github.com/mrwogu/promptscript/issues/548)) ([0aba86b](https://github.com/mrwogu/promptscript/commit/0aba86b42cfb4c2be103c69652ffef4afb3af1ba))
+* **server:** restrict file routes to source globs ([#542](https://github.com/mrwogu/promptscript/issues/542)) ([12d8c72](https://github.com/mrwogu/promptscript/commit/12d8c7247f64fd776bff5ccd253830d693bcae5d))
+* **validator:** scan text under resources keys outside [@skills](https://github.com/skills) ([#562](https://github.com/mrwogu/promptscript/issues/562)) ([2faa2d4](https://github.com/mrwogu/promptscript/commit/2faa2d468bcb9110466a346b5ac7c67796a9f5c4))
+
 ## [1.22.0](https://github.com/mrwogu/promptscript/compare/v1.21.0...v1.22.0) (2026-10-18)
 
 
