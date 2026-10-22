@@ -233,7 +233,7 @@ const TARGET_INFO: Record<
   },
 };
 
-const POPULAR_TARGETS: KnownTarget[] = [
+const POPULAR_TARGETS = new Set<KnownTarget>([
   'github',
   'claude',
   'cursor',
@@ -242,7 +242,7 @@ const POPULAR_TARGETS: KnownTarget[] = [
   'codex',
   'gemini',
   'antigravity',
-];
+]);
 
 const CONVENTION_OPTIONS: { value: ConventionType; label: string }[] = [
   { value: 'markdown', label: 'Markdown' },
@@ -282,7 +282,7 @@ export function ConfigPanel() {
   ][];
   const visibleTargets = showAll
     ? allTargets
-    : allTargets.filter(([target]) => POPULAR_TARGETS.includes(target));
+    : allTargets.filter(([target]) => POPULAR_TARGETS.has(target));
 
   return (
     <div
@@ -393,7 +393,7 @@ export function ConfigPanel() {
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                   }`}
                 >
-                  Popular ({POPULAR_TARGETS.length})
+                  Popular ({POPULAR_TARGETS.size})
                 </button>
                 <button
                   onClick={() => setShowAll(true)}

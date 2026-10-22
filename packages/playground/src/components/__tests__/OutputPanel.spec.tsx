@@ -179,3 +179,18 @@ describe('OutputPanel failed compiles', () => {
     expect(screen.queryByText('# CLAUDE.md')).toBeNull();
   });
 });
+
+describe('OutputPanel tab selection', () => {
+  it('switches the active formatter when a tab is clicked', () => {
+    act(() => {
+      usePlaygroundStore.getState().setTargetEnabled('aider', true);
+      usePlaygroundStore.setState({ activeFormatter: 'claude', isCompiling: false });
+    });
+    render(<OutputPanel />);
+
+    fireEvent.click(screen.getByRole('tab', { name: /aider/ }));
+
+    expect(usePlaygroundStore.getState().activeFormatter).toBe('aider');
+    act(() => usePlaygroundStore.getState().setTargetEnabled('aider', false));
+  });
+});

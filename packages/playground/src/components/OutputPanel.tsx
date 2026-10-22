@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, type ReactNode } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import {
   usePlaygroundStore,
@@ -173,7 +173,7 @@ function WarningPanel({ warnings }: { warnings: CompileWarning[] }) {
   );
 }
 
-function ErrorList({ errors, className }: { errors: CompileError[]; className: string }) {
+function ErrorList({ errors, className }: Readonly<{ errors: CompileError[]; className: string }>) {
   return (
     <div className={className}>
       <div className="text-red-400 font-medium mb-2">Compilation Failed</div>
@@ -227,6 +227,109 @@ export function OutputPanel() {
 
   const currentOutput = outputs[activeOutputIndex];
 
+  let content: ReactNode;
+  if (isCompiling) {
+    content = (
+      <div className="flex items-center justify-center h-full text-gray-400">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 border-2 border-ps-primary border-t-transparent rounded-full animate-spin" />
+          <span>Compiling...</span>
+        </div>
+      </div>
+    );
+  } else if (compileResult && !compileResult.success && outputs.length === 0) {
+    content = <ErrorList errors={compileResult.errors} className="p-4 overflow-auto" />;
+  } else if (outputs.length > 0) {
+    content = (
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Some targets failed but others produced files: show both. */}
+        {compileResult && !compileResult.success && (
+          <ErrorList
+            errors={compileResult.errors}
+            className="p-3 max-h-48 overflow-auto flex-shrink-0 border-b border-ps-border"
+          />
+        )}
+        {/* View mode toggle + tabs view */}
+        {outputs.length > 1 && (
+          <div className="flex items-center border-b border-ps-border bg-ps-bg">
+            <button
+              onClick={() => setOutputViewMode(outputViewMode === 'tree' ? 'tabs' : 'tree')}
+              className="px-2 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-ps-surface/50 flex-shrink-0 cursor-pointer flex items-center gap-1"
+              title={outputViewMode === 'tree' ? 'Switch to tabs' : 'Switch to tree'}
+            >
+              {outputViewMode === 'tree' ? (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M1 2h5l1 1h7v1H6.5L5.5 3H2v9h4v1H1V2z" />
+                    <path d="M7 6h8v8H7V6zm1 1v6h6V7H8z" />
+                  </svg>
+                  <span>Tree</span>
+                </>
+              ) : (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <rect x="1" y="2" width="4" height="3" rx="0.5" />
+                    <rect x="6" y="2" width="4" height="3" rx="0.5" />
+                    <rect x="11" y="2" width="4" height="3" rx="0.5" />
+                  </svg>
+                  <span>Tabs</span>
+                </>
+              )}
+            </button>
+            {outputViewMode === 'tabs' && (
+              <div className="flex overflow-x-auto">
+                {outputs.map((output, index) => (
+                  <button
+                    key={output.path}
+                    onClick={() => setActiveOutputIndex(index)}
+                    className={`px-3 py-1.5 text-xs font-mono whitespace-nowrap cursor-pointer ${
+                      index === activeOutputIndex
+                        ? 'bg-ps-surface text-white border-b-2 border-ps-primary'
+                        : 'text-gray-400 hover:text-gray-300 hover:bg-ps-surface/50'
+                    }`}
+                    title={output.path}
+                  >
+                    {output.path.split('/').pop()}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="flex-1 flex overflow-hidden">
+          {/* Output file tree (when in tree mode) */}
+          {outputViewMode === 'tree' && outputs.length > 1 && (
+            <OutputFileTree
+              outputs={outputs}
+              activeIndex={activeOutputIndex}
+              onSelect={setActiveOutputIndex}
+            />
+          )}
+
+          {/* File content */}
+          {currentOutput && (
+            <div className="flex-1 overflow-auto p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-gray-500 font-mono">{currentOutput.path}</span>
+                <CopyButton content={currentOutput.content} />
+              </div>
+              <pre className="text-sm font-mono whitespace-pre-wrap text-gray-300 bg-ps-bg p-4 rounded overflow-auto">
+                {currentOutput.content}
+              </pre>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="flex items-center justify-center h-full text-gray-500">
+        No output available
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col">
       {/* Formatter tabs — only show enabled targets */}
@@ -259,103 +362,7 @@ export function OutputPanel() {
       {!isCompiling && warnings.length > 0 && <WarningPanel warnings={warnings} />}
 
       {/* Output content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-ps-surface">
-        {isCompiling ? (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-ps-primary border-t-transparent rounded-full animate-spin" />
-              <span>Compiling...</span>
-            </div>
-          </div>
-        ) : compileResult && !compileResult.success && outputs.length === 0 ? (
-          <ErrorList errors={compileResult.errors} className="p-4 overflow-auto" />
-        ) : outputs.length > 0 ? (
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Some targets failed but others produced files: show both. */}
-            {compileResult && !compileResult.success && (
-              <ErrorList
-                errors={compileResult.errors}
-                className="p-3 max-h-48 overflow-auto flex-shrink-0 border-b border-ps-border"
-              />
-            )}
-            {/* View mode toggle + tabs view */}
-            {outputs.length > 1 && (
-              <div className="flex items-center border-b border-ps-border bg-ps-bg">
-                <button
-                  onClick={() => setOutputViewMode(outputViewMode === 'tree' ? 'tabs' : 'tree')}
-                  className="px-2 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-ps-surface/50 flex-shrink-0 cursor-pointer flex items-center gap-1"
-                  title={outputViewMode === 'tree' ? 'Switch to tabs' : 'Switch to tree'}
-                >
-                  {outputViewMode === 'tree' ? (
-                    <>
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M1 2h5l1 1h7v1H6.5L5.5 3H2v9h4v1H1V2z" />
-                        <path d="M7 6h8v8H7V6zm1 1v6h6V7H8z" />
-                      </svg>
-                      <span>Tree</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <rect x="1" y="2" width="4" height="3" rx="0.5" />
-                        <rect x="6" y="2" width="4" height="3" rx="0.5" />
-                        <rect x="11" y="2" width="4" height="3" rx="0.5" />
-                      </svg>
-                      <span>Tabs</span>
-                    </>
-                  )}
-                </button>
-                {outputViewMode === 'tabs' && (
-                  <div className="flex overflow-x-auto">
-                    {outputs.map((output, index) => (
-                      <button
-                        key={output.path}
-                        onClick={() => setActiveOutputIndex(index)}
-                        className={`px-3 py-1.5 text-xs font-mono whitespace-nowrap cursor-pointer ${
-                          index === activeOutputIndex
-                            ? 'bg-ps-surface text-white border-b-2 border-ps-primary'
-                            : 'text-gray-400 hover:text-gray-300 hover:bg-ps-surface/50'
-                        }`}
-                        title={output.path}
-                      >
-                        {output.path.split('/').pop()}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="flex-1 flex overflow-hidden">
-              {/* Output file tree (when in tree mode) */}
-              {outputViewMode === 'tree' && outputs.length > 1 && (
-                <OutputFileTree
-                  outputs={outputs}
-                  activeIndex={activeOutputIndex}
-                  onSelect={setActiveOutputIndex}
-                />
-              )}
-
-              {/* File content */}
-              {currentOutput && (
-                <div className="flex-1 overflow-auto p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-gray-500 font-mono">{currentOutput.path}</span>
-                    <CopyButton content={currentOutput.content} />
-                  </div>
-                  <pre className="text-sm font-mono whitespace-pre-wrap text-gray-300 bg-ps-bg p-4 rounded overflow-auto">
-                    {currentOutput.content}
-                  </pre>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-full text-gray-500">
-            No output available
-          </div>
-        )}
-      </div>
+      <div className="flex-1 flex flex-col overflow-hidden bg-ps-surface">{content}</div>
     </div>
   );
 }
