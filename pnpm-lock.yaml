@@ -202,6 +202,9 @@ importers:
       '@inquirer/prompts':
         specifier: ^8.7.3
         version: 8.7.3(@types/node@26.6.2)
+      '@promptscript/browser-compiler':
+        specifier: workspace:^
+        version: link:../browser-compiler
       '@promptscript/compiler':
         specifier: workspace:^
         version: link:../compiler

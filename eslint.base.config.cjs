@@ -177,8 +177,6 @@ function createBaseConfig(baseDirectory) {
               'ora',
               'commander',
               'yaml',
-              // Only the cli parity spec imports it, to compare bundles with the CLI compiler.
-              '@promptscript/browser-compiler',
             ],
           },
         ],
