@@ -52,6 +52,12 @@ const BUNDLE_SCHEMAS: BundleSchemaTarget[] = [
     title: 'PromptScript Prompt Bundle Index v1',
     output: '../schema/prompt-bundle-index-v1.json',
   },
+  {
+    type: 'PromptReleaseLabelV1',
+    schemaId: 'https://getpromptscript.dev/schema/prompt-release-label/v1.json',
+    title: 'PromptScript Prompt Release Label v1',
+    output: '../schema/prompt-release-label-v1.json',
+  },
 ];
 
 /**
