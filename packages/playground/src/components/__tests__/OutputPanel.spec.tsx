@@ -140,6 +140,38 @@ describe('OutputPanel target tabs', () => {
 
     expect(screen.getByText(bundle)).toBeInTheDocument();
   });
+
+  it('switches between the file tree and file tabs', () => {
+    const index = '{"prompts":["support-reply"]}';
+    const bundle = '{"key":"support-reply"}';
+    usePlaygroundStore.getState().setTargetEnabled('bundle', true);
+    usePlaygroundStore.setState({
+      activeFormatter: 'bundle',
+      isCompiling: false,
+      compileResult: {
+        ...buildResult([]),
+        outputs: new Map([
+          output('prompts/index.json', index, 'bundle'),
+          output('prompts/support-reply.json', bundle, 'bundle'),
+        ]) as CompileResult['outputs'],
+        outputOwners: new Map([
+          ['prompts/index.json', 'bundle'],
+          ['prompts/support-reply.json', 'bundle'],
+        ]),
+      },
+    });
+
+    render(<OutputPanel />);
+
+    fireEvent.click(screen.getByTitle('Switch to tabs'));
+    fireEvent.click(screen.getByTitle('prompts/support-reply.json'));
+
+    expect(screen.getByText(bundle)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTitle('Switch to tree'));
+
+    expect(screen.getByText('Output (2)')).toBeInTheDocument();
+  });
 });
 
 describe('OutputPanel failed compiles', () => {
