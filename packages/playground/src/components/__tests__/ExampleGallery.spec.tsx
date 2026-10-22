@@ -325,6 +325,7 @@ describe('ExampleGallery — shared example sources', () => {
     );
     const example = EXAMPLES.find((candidate) => candidate.id === 'support-refund-reply');
 
+    expect(example).toBeDefined();
     for (const file of example?.files ?? []) {
       expect(file.content, file.path).toBe(readFileSync(join(fixture, file.path), 'utf8'));
     }

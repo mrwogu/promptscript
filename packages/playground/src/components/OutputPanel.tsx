@@ -7,6 +7,7 @@ import {
   selectWarnings,
 } from '../store';
 import { TARGET_DEFINITIONS, type KnownTarget } from '@promptscript/core';
+import { TARGET_LABELS } from '../utils/target-labels';
 import type { CompileError, CompileWarning } from '@promptscript/browser-compiler';
 
 /** Tab labels and icons. A target without an entry shows its catalog name. */
@@ -353,7 +354,7 @@ export function OutputPanel() {
               }`}
             >
               <span>{display?.icon ?? '•'}</span>
-              <span>{display?.label ?? name}</span>
+              <span>{display?.label ?? TARGET_LABELS[name]}</span>
             </button>
           );
         })}

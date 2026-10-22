@@ -54,8 +54,12 @@ async function compiled(): Promise<CompileResult> {
   return usePlaygroundStore.getState().compileResult as CompileResult;
 }
 
+type FormatterSpec = NonNullable<NonNullable<Parameters<typeof compile>[2]>['formatters']>[number];
+
+const nameOf = (f: FormatterSpec): string => (typeof f === 'string' ? f : f.name);
+
 function namesOf(call: number): string[] {
-  return (compileMock.mock.calls[call]?.[2]?.formatters ?? []).map((f) => f.name);
+  return (compileMock.mock.calls[call]?.[2]?.formatters ?? []).map(nameOf);
 }
 
 describe('useCompiler', () => {
@@ -77,7 +81,7 @@ describe('useCompiler', () => {
   it('compiles prompt targets in a second pass without environment variables', async () => {
     arrange(['claude', 'bundle'], { NAME: 'value' });
     compileMock.mockImplementation(async (_files, _entry, options) =>
-      options?.formatters?.some((f) => f.name === 'bundle')
+      options?.formatters?.some((f) => nameOf(f) === 'bundle')
         ? resultFor('prompts/index.json', 'bundle', [sharedWarning])
         : resultFor('CLAUDE.md', 'claude', [sharedWarning])
     );
@@ -109,7 +113,7 @@ describe('useCompiler', () => {
     arrange(['claude', 'bundle'], { NAME: 'value' });
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     compileMock.mockImplementation(async (_files, _entry, options) => {
-      if (options?.formatters?.some((f) => f.name === 'bundle')) throw new Error('bundle broke');
+      if (options?.formatters?.some((f) => nameOf(f) === 'bundle')) throw new Error('bundle broke');
       return resultFor('CLAUDE.md', 'claude');
     });
 
@@ -120,5 +124,26 @@ describe('useCompiler', () => {
       expect.objectContaining({ code: 'PS0000', message: 'bundle broke' }),
     ]);
     expect(result.outputs.has('CLAUDE.md')).toBe(true);
+  });
+
+  it('keeps messages that differ only by column and drops identical ones', async () => {
+    arrange(['claude', 'bundle'], { NAME: 'value' });
+    const error = (column: number) => ({
+      name: 'CompileError',
+      code: 'PS0001',
+      message: 'same',
+      location: { file: 'project.prs', line: 2, column },
+    });
+    compileMock.mockImplementation(async (_files, _entry, options) => ({
+      ...resultFor('x', 'x'),
+      success: false,
+      errors: options?.formatters?.some((f) => nameOf(f) === 'bundle')
+        ? [error(1), error(5)]
+        : [error(1)],
+    }));
+
+    const result = await compiled();
+
+    expect(result.errors).toEqual([error(1), error(5)]);
   });
 });

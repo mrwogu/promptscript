@@ -134,7 +134,7 @@ describe('OutputPanel target tabs', () => {
 
     render(<OutputPanel />);
 
-    expect(screen.getByRole('tab', { name: /aider/ })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Aider/ })).toBeInTheDocument();
   });
 
   it('switches the active formatter when a tab is clicked', () => {
@@ -142,7 +142,7 @@ describe('OutputPanel target tabs', () => {
     act(() => usePlaygroundStore.setState({ activeFormatter: 'claude' }));
     render(<OutputPanel />);
 
-    fireEvent.click(screen.getByRole('tab', { name: /aider/ }));
+    fireEvent.click(screen.getByRole('tab', { name: /Aider/ }));
 
     expect(usePlaygroundStore.getState().activeFormatter).toBe('aider');
   });
