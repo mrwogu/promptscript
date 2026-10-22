@@ -2,6 +2,9 @@ import {
   COMPOSABLE_BLOCKS,
   ErrorCode,
   PSError,
+  PROMPT_BUNDLE_INDEX_SCHEMA_URL,
+  PROMPT_BUNDLE_SCHEMA_URL,
+  compareCodeUnits,
   compareVersions,
   isValidVersion,
   extractPromptDefinitions,
@@ -30,11 +33,10 @@ import type { FormatOptions } from '../types.js';
 import { composeSystemMessage, normalizeNewlines } from './compose.js';
 
 /** Schema URL of a bundle. It is the version tag and is part of the hash. */
-export const PROMPT_BUNDLE_SCHEMA = 'https://getpromptscript.dev/schema/prompt-bundle/v1.json';
+export const PROMPT_BUNDLE_SCHEMA = PROMPT_BUNDLE_SCHEMA_URL;
 
 /** Schema URL of a bundle index. */
-export const PROMPT_BUNDLE_INDEX_SCHEMA =
-  'https://getpromptscript.dev/schema/prompt-bundle-index/v1.json';
+export const PROMPT_BUNDLE_INDEX_SCHEMA = PROMPT_BUNDLE_INDEX_SCHEMA_URL;
 
 /** First syntax version that allows prompt definitions. */
 export const PROMPT_SYNTAX_VERSION = '1.6.0';
@@ -65,12 +67,8 @@ export class PromptFormatError extends PSError {
   }
 }
 
-function byCodeUnits(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
-
 function sortedUnique(values: readonly string[]): string[] {
-  return [...new Set(values)].sort(byCodeUnits);
+  return [...new Set(values)].sort(compareCodeUnits);
 }
 
 function deepNormalize<T>(value: T): T {
@@ -186,7 +184,7 @@ function buildOutput(prompt: PromptDefinition): PromptBundleOutput | undefined {
   return {
     type: 'object',
     properties: Object.fromEntries(fields.map(([name, field]) => [name, buildProperty(field)])),
-    required: fields.map(([name]) => name).sort(byCodeUnits),
+    required: fields.map(([name]) => name).sort(compareCodeUnits),
     additionalProperties: false,
   };
 }

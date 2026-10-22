@@ -1,4 +1,4 @@
-import type { PromptBundleIndexV1 } from '@promptscript/core';
+import { compareCodeUnits, type PromptBundleIndexV1 } from '@promptscript/core';
 import { PROMPT_BUNDLE_INDEX_SCHEMA, toJsonFile, type BuiltPrompts } from '../prompt/bundle.js';
 import { PromptFormatter, type PromptRender } from '../prompt/prompt-formatter.js';
 import type { FormatterVersionMap } from '../types.js';
@@ -40,7 +40,7 @@ export class BundleFormatter extends PromptFormatter {
           description: bundle.description,
           contentHash: bundle.contentHash,
         }))
-        .sort((a, b) => Number(a.id > b.id) - Number(a.id < b.id)),
+        .sort((a, b) => compareCodeUnits(a.id, b.id)),
     };
     return {
       primary: toJsonFile(index),

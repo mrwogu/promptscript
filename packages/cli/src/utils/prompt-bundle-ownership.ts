@@ -1,4 +1,4 @@
-import { hashPromptBundle } from '@promptscript/core';
+import { PROMPT_BUNDLE_INDEX_SCHEMA_URL, hashPromptBundle } from '@promptscript/core';
 
 /**
  * First key of every bundle and index file. A bundle or index is told apart from any other JSON
@@ -34,7 +34,7 @@ export function isVerifiedPromptBundleOutput(
   } catch {
     return false;
   }
-  if (parsed['$schema'] === 'https://getpromptscript.dev/schema/prompt-bundle-index/v1.json') {
+  if (parsed['$schema'] === PROMPT_BUNDLE_INDEX_SCHEMA_URL) {
     return Array.isArray(parsed['prompts']) && indexFileNames.has(fileName);
   }
   try {

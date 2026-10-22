@@ -1,6 +1,13 @@
 import { canonicalizeJson } from './utils/canonical-json.js';
 import { sha256Hex } from './utils/sha256.js';
 
+/** Schema URL of a prompt bundle. It is the version tag and is part of the hash. */
+export const PROMPT_BUNDLE_SCHEMA_URL = 'https://getpromptscript.dev/schema/prompt-bundle/v1.json';
+
+/** Schema URL of a prompt bundle index. */
+export const PROMPT_BUNDLE_INDEX_SCHEMA_URL =
+  'https://getpromptscript.dev/schema/prompt-bundle-index/v1.json';
+
 /**
  * Content hash of a prompt bundle.
  *

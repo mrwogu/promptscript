@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PSError } from '../../errors/base.js';
-import { canonicalizeJson } from '../canonical-json.js';
+import { canonicalizeJson, compareCodeUnits } from '../canonical-json.js';
 
 function doubleFromBits(hex: string): number {
   const view = new DataView(new ArrayBuffer(8));
@@ -134,5 +134,18 @@ describe('canonicalizeJson', () => {
 
   it('keeps a valid surrogate pair', () => {
     expect(canonicalizeJson({ s: '\u{1F600}' })).toBe('{"s":"\u{1F600}"}');
+  });
+});
+
+describe('compareCodeUnits', () => {
+  it('orders by UTF-16 code units, not by locale', () => {
+    const sorted = ['b', 'B', 'a', 'é', 'z', 'A'].sort(compareCodeUnits);
+
+    expect(sorted).toEqual(['A', 'B', 'a', 'b', 'z', 'é']);
+  });
+
+  it('sorts an astral character by its first surrogate, before U+FF5E', () => {
+    expect(compareCodeUnits('\u{1F600}', '～')).toBe(-1);
+    expect(compareCodeUnits('a', 'a')).toBe(0);
   });
 });

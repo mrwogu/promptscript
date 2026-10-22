@@ -1,3 +1,4 @@
+import { compareCodeUnits } from '@promptscript/core';
 import type { BuiltPrompt, BuiltPrompts } from '../prompt/bundle.js';
 import { singleLine } from '../prompt/compose.js';
 import { PromptFormatter, type PromptRender } from '../prompt/prompt-formatter.js';
@@ -26,7 +27,7 @@ function cell(text: string): string {
 
 function readme(listed: readonly BuiltPrompt[]): string {
   const rows = [...listed]
-    .sort((a, b) => Number(a.key > b.key) - Number(a.key < b.key))
+    .sort((a, b) => compareCodeUnits(a.key, b.key))
     .map(
       ({ key, bundle }) => `| \`${key}\` | ${cell(bundle.description)} | [${key}.md](${key}.md) |`
     );

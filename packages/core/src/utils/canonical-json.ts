@@ -7,6 +7,14 @@ function unsupported(kind: string, path: string): PSError {
   );
 }
 
+/**
+ * Compare two strings by UTF-16 code units, the order RFC 8785 requires.
+ * Unlike `localeCompare` it gives the same order on every host.
+ */
+export function compareCodeUnits(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
 
 /** RFC 8785 section 3.2.2.2: a lone surrogate must be an error. */
@@ -53,7 +61,7 @@ function serializeContainer(value: object, path: string, ancestors: Set<object>)
   const record = value as Record<string, unknown>;
   const members: string[] = [];
   // Sort by UTF-16 code units, as RFC 8785 requires
-  for (const key of Object.keys(record).sort((a, b) => Number(a > b) - Number(a < b))) {
+  for (const key of Object.keys(record).sort(compareCodeUnits)) {
     const member = record[key];
     if (member === undefined) continue;
     const memberPath = path ? `${path}.${key}` : key;
