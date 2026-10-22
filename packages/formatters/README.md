@@ -90,7 +90,8 @@ Output formatters for 50 AI coding targets and two prompt targets.
 
 The prompt targets compile `@prompts` entries (syntax 1.6.0). They are never part of
 `FormatterRegistry.listDefault()`, which lists the formatters an "all targets" default uses. They
-write nothing for a program without prompts.
+write nothing for a program without prompts. A standalone `format()` call then returns an output
+with `omit: true` and empty content, so a caller that writes files checks `omit` first.
 
 ## Public API
 
