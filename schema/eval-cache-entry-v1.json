@@ -1,0 +1,190 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/eval-cache-entry/v1.json",
+  "title": "PromptScript Eval Cache Entry v1",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://getpromptscript.dev/schema/eval-cache-entry/v1.json",
+      "description": "Schema URL, the version tag of the entry.",
+      "examples": [
+        "https://getpromptscript.dev/schema/eval-cache-entry/v1.json"
+      ]
+    },
+    "key": {
+      "type": "string",
+      "description": "Cache key: 64 lowercase hex characters.",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "request": {
+      "$ref": "#/definitions/EvalCacheRequestV1",
+      "description": "The request the entry answers"
+    },
+    "response": {
+      "$ref": "#/definitions/EvalCacheResponseV1",
+      "description": "The recorded response"
+    }
+  },
+  "required": [
+    "$schema",
+    "key",
+    "request",
+    "response"
+  ],
+  "additionalProperties": false,
+  "description": "One recorded model call of the eval cache, version 1. The file name is the key, and the key is the SHA-256 of the canonical JSON of `request`.",
+  "definitions": {
+    "EvalCacheRequestV1": {
+      "type": "object",
+      "properties": {
+        "contentHash": {
+          "type": "string",
+          "description": "Content hash of the prompt bundle, or of the rubric for a judge call.",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        },
+        "inputsHash": {
+          "type": "string",
+          "description": "Hash of the canonical JSON of the case inputs after validation and defaults.",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        },
+        "modelRef": {
+          "type": "string",
+          "description": "Model reference as written in the suite or the prompt.",
+          "examples": [
+            "claude-sonnet-5-5"
+          ]
+        },
+        "provider": {
+          "type": "string",
+          "description": "Provider name.",
+          "examples": [
+            "anthropic"
+          ]
+        },
+        "apiId": {
+          "type": "string",
+          "description": "Provider API model identifier.",
+          "examples": [
+            "claude-sonnet-5-5"
+          ]
+        },
+        "params": {
+          "$ref": "#/definitions/ModelParams",
+          "description": "Effective parameters of the call, the output token cap included"
+        },
+        "sample": {
+          "type": "integer",
+          "description": "Sample index: 0 for the case call, the run index for judge calls.",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "contentHash",
+        "inputsHash",
+        "modelRef",
+        "provider",
+        "apiId",
+        "params",
+        "sample"
+      ],
+      "additionalProperties": false,
+      "description": "The request a cache entry answers; the cache key is derived from it."
+    },
+    "ModelParams": {
+      "type": "object",
+      "properties": {
+        "temperature": {
+          "type": "number",
+          "description": "Sampling temperature"
+        },
+        "topP": {
+          "type": "number",
+          "description": "Nucleus sampling threshold"
+        },
+        "topK": {
+          "type": "integer",
+          "description": "Top-k sampling cutoff.",
+          "minimum": 1
+        },
+        "maxTokens": {
+          "type": "integer",
+          "description": "Maximum number of tokens to generate.",
+          "minimum": 1
+        },
+        "stop": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Stop sequences, in authored order"
+        },
+        "seed": {
+          "type": "integer",
+          "description": "Sampling seed, at most 2^53-1.",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false,
+      "description": "Invocation parameters of a model."
+    },
+    "EvalCacheResponseV1": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Response text"
+        },
+        "usage": {
+          "$ref": "#/definitions/EvalTokenUsageV1",
+          "description": "Token usage the provider reported"
+        },
+        "latencyMs": {
+          "type": "integer",
+          "description": "Call latency in milliseconds.",
+          "minimum": 0
+        },
+        "status": {
+          "type": "integer",
+          "description": "HTTP status of the call.",
+          "minimum": 100,
+          "maximum": 599
+        },
+        "stopReason": {
+          "type": "string",
+          "description": "Provider stop reason, when reported"
+        }
+      },
+      "required": [
+        "text",
+        "usage",
+        "latencyMs",
+        "status"
+      ],
+      "additionalProperties": false,
+      "description": "The recorded response of a cache entry."
+    },
+    "EvalTokenUsageV1": {
+      "type": "object",
+      "properties": {
+        "inputTokens": {
+          "type": "integer",
+          "description": "Input tokens.",
+          "minimum": 0
+        },
+        "outputTokens": {
+          "type": "integer",
+          "description": "Output tokens.",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "inputTokens",
+        "outputTokens"
+      ],
+      "additionalProperties": false,
+      "description": "Token counts of one or more model calls."
+    }
+  }
+}

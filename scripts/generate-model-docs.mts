@@ -96,8 +96,14 @@ function generateSummary(): string {
   const providers = new Set(MODEL_PROFILES.map((profile) => profile.provider));
   return (
     `This version ships ${MODEL_PROFILES.length} profiles from ${providers.size} providers. ` +
-    `They were last checked against the provider documentation on ${checkedDate()}.`
+    `They were last checked against the provider documentation on ${checkedDate()}. ` +
+    'Prices are list prices in USD per million tokens, read from the provider pricing page ' +
+    'on the date in the last column; they ignore cache, batch and long-context tiers.'
   );
+}
+
+function price(value: number | undefined): string {
+  return value === undefined ? '-' : String(value);
 }
 
 function generateFloatingAliases(): string {
@@ -168,12 +174,26 @@ function generateProfiles(): string {
       describeStatus(profile),
       profile.releaseDate ?? '-',
       profile.successor ? code(profile.successor) : '-',
+      price(profile.pricing?.inputUsdPerMillion),
+      price(profile.pricing?.outputUsdPerMillion),
+      profile.pricing?.checkedOn ?? '-',
     ]);
     return [
       `### ${nameOf(PROVIDER_NAMES, provider, 'provider')}`,
       '',
       table(
-        ['Profile id', 'Display name', 'API id', 'Aliases', 'Status', 'Released', 'Successor'],
+        [
+          'Profile id',
+          'Display name',
+          'API id',
+          'Aliases',
+          'Status',
+          'Released',
+          'Successor',
+          'Input $/MTok',
+          'Output $/MTok',
+          'Price checked',
+        ],
         rows
       ),
     ].join('\n');

@@ -8,6 +8,28 @@
 export type ModelStatus = 'current' | 'legacy' | 'deprecated' | 'retired';
 
 /**
+ * List price of a model, in USD per million tokens. Cache, batch and
+ * long-context tiers are ignored, so a cost computed from it is an estimate.
+ */
+export interface ModelPricing {
+  /**
+   * Price of one million input tokens in USD.
+   * @minimum 0
+   */
+  inputUsdPerMillion: number;
+  /**
+   * Price of one million output tokens in USD.
+   * @minimum 0
+   */
+  outputUsdPerMillion: number;
+  /**
+   * Date the price was checked against the provider, YYYY-MM-DD.
+   * @pattern ^\d{4}-\d{2}-\d{2}$
+   */
+  checkedOn: string;
+}
+
+/**
  * Model profile declared in promptscript.yaml.
  *
  * A key of `models.profiles` that matches a built-in profile id overrides only
@@ -59,6 +81,8 @@ export interface ModelProfileInput {
    *   github: Claude Opus 9 (Preview)
    */
   targets?: Record<string, string>;
+  /** List price per million tokens, for cost estimates */
+  pricing?: ModelPricing;
 }
 
 /**
@@ -89,6 +113,8 @@ export interface ModelProfile {
   readonly retirementDate?: string;
   /** Native model names per target, overriding the target naming scheme */
   readonly targets: Readonly<Record<string, string>>;
+  /** List price per million tokens, absent when unknown */
+  readonly pricing?: ModelPricing;
 }
 
 /**

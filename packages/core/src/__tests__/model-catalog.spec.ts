@@ -343,6 +343,25 @@ describe('createModelCatalog', () => {
       expect(models.getProfile('odd')?.retirementDate).toBeUndefined();
     });
 
+    it('reads a pricing override and ignores a malformed one', () => {
+      const pricing = { inputUsdPerMillion: 2, outputUsdPerMillion: 10, checkedOn: '2026-10-22' };
+      const models = catalog({
+        profiles: {
+          'claude-opus-2-5': { pricing },
+          'in-house-7b': {
+            pricing: { inputUsdPerMillion: -1, outputUsdPerMillion: 10, checkedOn: '2026-10-22' },
+          },
+          'in-house-8b': {
+            pricing: { inputUsdPerMillion: 'free', outputUsdPerMillion: 0 },
+          } as unknown as NonNullable<ModelsConfig['profiles']>[string],
+        },
+      });
+
+      expect(models.getProfile('claude-opus-2-5')?.pricing).toEqual(pricing);
+      expect(models.getProfile('in-house-7b')?.pricing).toBeUndefined();
+      expect(models.getProfile('in-house-8b')?.pricing).toBeUndefined();
+    });
+
     it('ignores a non-object profiles value', () => {
       const models = catalog({ profiles: 'nope' as unknown as ModelsConfig['profiles'] });
 

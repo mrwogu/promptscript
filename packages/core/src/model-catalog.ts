@@ -10,7 +10,13 @@
 
 import { MODEL_PROFILES } from './model-profiles.js';
 import type { KnownTarget } from './types/config.js';
-import type { ModelProfile, ModelProfileInput, ModelsConfig, ModelStatus } from './types/models.js';
+import type {
+  ModelPricing,
+  ModelProfile,
+  ModelProfileInput,
+  ModelsConfig,
+  ModelStatus,
+} from './types/models.js';
 
 /**
  * Short names that always point at the newest release of a model family.
@@ -104,6 +110,19 @@ function modelStatus(value: unknown): ModelStatus | undefined {
   return MODEL_STATUSES.find((status) => status === value);
 }
 
+function isPrice(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
+}
+
+function modelPricing(value: unknown): ModelPricing | undefined {
+  if (!isRecord(value)) return undefined;
+  const input = value['inputUsdPerMillion'];
+  const output = value['outputUsdPerMillion'];
+  const checkedOn = nonEmptyString(value['checkedOn']);
+  if (!isPrice(input) || !isPrice(output) || checkedOn === undefined) return undefined;
+  return { inputUsdPerMillion: input, outputUsdPerMillion: output, checkedOn };
+}
+
 // Config values come from YAML, so every field is checked before use.
 function optionalFields(input: ModelProfileInput): Partial<ModelProfile> {
   const fields: {
@@ -129,6 +148,8 @@ function optionalFields(input: ModelProfileInput): Partial<ModelProfile> {
   if (releaseDate) fields.releaseDate = releaseDate;
   const retirementDate = nonEmptyString(input.retirementDate);
   if (retirementDate) fields.retirementDate = retirementDate;
+  const pricing = modelPricing(input.pricing);
+  if (pricing) fields.pricing = pricing;
   return fields;
 }
 

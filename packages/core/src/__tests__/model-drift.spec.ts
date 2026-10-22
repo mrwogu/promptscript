@@ -140,6 +140,37 @@ describe('parseOpenRouterModels', () => {
 
     expect(model?.retirementDate).toBe('2026-12-11');
   });
+
+  it('scales per-token price strings to USD per million tokens', () => {
+    const [sonnet, haiku] = parseOpenRouterModels(
+      payload([
+        entry('anthropic/claude-sonnet-5.5', 'Anthropic: Claude Sonnet 5.5', RELEASE, {
+          pricing: { prompt: '0.000002', completion: '0.00001', web_search: '0.01' },
+        }),
+        entry('anthropic/claude-haiku-5.5', 'Anthropic: Claude Haiku 5.5', RELEASE, {
+          pricing: { prompt: '0.0000001', completion: '0.0000005' },
+        }),
+      ])
+    );
+
+    expect(sonnet?.pricing).toEqual({ inputUsdPerMillion: 2, outputUsdPerMillion: 10 });
+    expect(haiku?.pricing).toEqual({ inputUsdPerMillion: 0.1, outputUsdPerMillion: 0.5 });
+  });
+
+  it.each([
+    ['no pricing object', {}],
+    ['a missing completion price', { pricing: { prompt: '0.000002' } }],
+    ['a numeric price', { pricing: { prompt: 0.000002, completion: '0.00001' } }],
+    ['an empty price', { pricing: { prompt: '', completion: '0.00001' } }],
+    ['a negative price', { pricing: { prompt: '-0.000002', completion: '0.00001' } }],
+    ['a non-numeric price', { pricing: { prompt: 'free', completion: '0.00001' } }],
+  ])('leaves the price out with %s', (_name, extra) => {
+    const [model] = parseOpenRouterModels(
+      payload([entry('openai/gpt-5.2', 'OpenAI: GPT-5.2', RELEASE, extra)])
+    );
+
+    expect(model?.pricing).toBeUndefined();
+  });
 });
 
 describe('detectModelDrift', () => {
@@ -166,6 +197,24 @@ describe('detectModelDrift', () => {
         retirementDate: undefined,
       },
     ]);
+  });
+
+  it('carries the OpenRouter price into the candidate', () => {
+    const report = detectModelDrift(
+      parseOpenRouterModels(
+        payload([
+          entry('anthropic/claude-opus-6', 'Anthropic: Claude Opus 6', RELEASE, {
+            pricing: { prompt: '0.000005', completion: '0.000025' },
+          }),
+        ])
+      ),
+      PROFILES
+    );
+
+    expect(report.candidates[0]?.pricing).toEqual({
+      inputUsdPerMillion: 5,
+      outputUsdPerMillion: 25,
+    });
   });
 
   it('keeps dotted and dashed versions of catalog releases out of the candidates', () => {
@@ -301,28 +350,55 @@ describe('displacedProfile', () => {
 });
 
 describe('formatProfileEntry', () => {
+  const CHECKED_ON = '2026-10-22';
+
   it('writes an Anthropic release with the claude helper', () => {
-    const text = formatProfileEntry({
-      provider: 'anthropic',
-      family: 'claude-opus',
-      version: '6',
-      id: 'claude-opus-6',
-      displayName: 'Claude Opus 6',
-      releaseDate: '2026-07-24',
-    });
+    const text = formatProfileEntry(
+      {
+        provider: 'anthropic',
+        family: 'claude-opus',
+        version: '6',
+        id: 'claude-opus-6',
+        displayName: 'Claude Opus 6',
+        releaseDate: '2026-07-24',
+      },
+      CHECKED_ON
+    );
 
     expect(text).toBe("  claude('opus', '6', {\n    releaseDate: '2026-07-24',\n  }),");
   });
 
+  it('writes a price with the day it was checked', () => {
+    const text = formatProfileEntry(
+      {
+        provider: 'anthropic',
+        family: 'claude-opus',
+        version: '6',
+        id: 'claude-opus-6',
+        displayName: 'Claude Opus 6',
+        releaseDate: '2026-07-24',
+        pricing: { inputUsdPerMillion: 0.1, outputUsdPerMillion: 0.5 },
+      },
+      CHECKED_ON
+    );
+
+    expect(text).toBe(
+      "  claude('opus', '6', {\n    releaseDate: '2026-07-24',\n    pricing: usd(0.1, 0.5, '2026-10-22'),\n  }),"
+    );
+  });
+
   it('writes other providers with their own helper and display name', () => {
-    const text = formatProfileEntry({
-      provider: 'openai',
-      family: 'gpt-codex',
-      version: '5.3',
-      id: 'gpt-5.3-codex',
-      displayName: 'GPT-5.3-Codex',
-      releaseDate: '2026-02-24',
-    });
+    const text = formatProfileEntry(
+      {
+        provider: 'openai',
+        family: 'gpt-codex',
+        version: '5.3',
+        id: 'gpt-5.3-codex',
+        displayName: 'GPT-5.3-Codex',
+        releaseDate: '2026-02-24',
+      },
+      CHECKED_ON
+    );
 
     expect(text).toBe(
       "  openai('gpt-codex', '5.3', 'gpt-5.3-codex', 'GPT-5.3-Codex', {\n    releaseDate: '2026-02-24',\n  }),"
@@ -330,15 +406,18 @@ describe('formatProfileEntry', () => {
   });
 
   it('writes a retirement hint as a deprecated release', () => {
-    const text = formatProfileEntry({
-      provider: 'xai',
-      family: 'grok',
-      version: '4.6',
-      id: 'grok-4.6',
-      displayName: 'Grok 4.6',
-      releaseDate: '2026-08-10',
-      retirementDate: '2027-08-10',
-    });
+    const text = formatProfileEntry(
+      {
+        provider: 'xai',
+        family: 'grok',
+        version: '4.6',
+        id: 'grok-4.6',
+        displayName: 'Grok 4.6',
+        releaseDate: '2026-08-10',
+        retirementDate: '2027-08-10',
+      },
+      CHECKED_ON
+    );
 
     expect(text).toBe(
       "  xai('grok', '4.6', 'grok-4.6', 'Grok 4.6', {\n    status: 'deprecated',\n    retirementDate: '2027-08-10',\n    releaseDate: '2026-08-10',\n  }),"

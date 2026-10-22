@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/eval-label-row/v1.json",
+  "title": "PromptScript Eval Label Row v1",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Dataset row id the label is for.",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
+    },
+    "assertion": {
+      "type": "string",
+      "description": "Id of the llm-judge assertion the label is for.",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
+    },
+    "verdict": {
+      "$ref": "#/definitions/EvalVerdict",
+      "description": "Human verdict"
+    },
+    "note": {
+      "type": "string",
+      "description": "Reviewer note"
+    }
+  },
+  "required": [
+    "id",
+    "assertion",
+    "verdict"
+  ],
+  "additionalProperties": false,
+  "description": "One human label of a judged case, version 1.",
+  "definitions": {
+    "EvalVerdict": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "description": "Verdict of a judge run or a human label."
+    }
+  }
+}

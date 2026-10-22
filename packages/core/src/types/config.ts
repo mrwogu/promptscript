@@ -222,6 +222,68 @@ export interface ReleasesConfig {
   environments: ReleaseEnvironmentName[];
 }
 
+/** Request and response format of an eval provider. */
+export type EvalProviderKind = 'anthropic' | 'openai-compatible';
+
+/** One model provider that eval suites can call. */
+export interface EvalProviderConfig {
+  /** Request and response format: the Anthropic Messages API or an OpenAI-compatible chat API */
+  kind: EvalProviderKind;
+  /**
+   * Base URL of the provider API.
+   * @example "https://llm.corp.example/v1"
+   */
+  baseUrl?: string;
+  /**
+   * Environment variable that holds the provider API key. The key itself
+   * is never read from the config.
+   * @pattern ^[A-Z_][A-Z0-9_]*$
+   * @example "ANTHROPIC_API_KEY"
+   */
+  apiKeyEnvVar?: string;
+}
+
+/**
+ * Eval settings (`eval` in promptscript.yaml): the providers eval suites
+ * call and the limits of a run.
+ */
+export interface EvalConfig {
+  /**
+   * Providers by name. The name is the provider of a prompt's model,
+   * such as `anthropic` or `openai`, or the name a suite model entry uses.
+   * @example
+   * providers:
+   *   anthropic: { kind: anthropic, apiKeyEnvVar: ANTHROPIC_API_KEY }
+   */
+  providers?: Record<string, EvalProviderConfig>;
+  /**
+   * Time limit of one model call in milliseconds, response body included.
+   * @asType integer
+   * @minimum 1
+   * @default 60000
+   */
+  timeoutMs?: number;
+  /**
+   * Output token cap of a model call when the prompt sets no `maxTokens`.
+   * @asType integer
+   * @minimum 1
+   * @default 1024
+   */
+  maxOutputTokens?: number;
+  /**
+   * Largest number of dataset rows a suite runs.
+   * @asType integer
+   * @minimum 1
+   * @default 1000
+   */
+  maxCases?: number;
+  /**
+   * Directory for eval reports, relative to the project root.
+   * @example ".promptscript/eval-reports"
+   */
+  reportDir?: string;
+}
+
 /**
  * PromptScript configuration file (promptscript.yaml).
  */
@@ -451,6 +513,15 @@ export interface PromptScriptConfig {
    *   environments: [staging, prod]
    */
   releases?: ReleasesConfig;
+
+  /**
+   * Eval settings: providers and run limits.
+   * @example
+   * eval:
+   *   providers:
+   *     anthropic: { kind: anthropic, apiKeyEnvVar: ANTHROPIC_API_KEY }
+   */
+  eval?: EvalConfig;
 
   /**
    * Universal directory for auto-discovering skills and commands.
