@@ -123,7 +123,7 @@ describe('getHighestKnownSyntaxVersion', () => {
 
 describe('getLatestSyntaxVersion', () => {
   it('should return the highest known version', () => {
-    expect(getLatestSyntaxVersion()).toBe('1.5.0');
+    expect(getLatestSyntaxVersion()).toBe('1.6.0');
   });
 });
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { KNOWN_TARGETS } from '@promptscript/core';
+import { CODING_TARGETS } from '@promptscript/core';
 import { BUILTIN_FORMATTERS } from '../builtin-formatters.js';
 import type { Formatter } from '../types.js';
 import {
@@ -232,7 +232,7 @@ function getAvailableBlocks(ast: Program): string[] {
 /**
  * All known target names from the canonical core registry.
  */
-const ALL_FORMATTER_NAMES: FormatterName[] = [...KNOWN_TARGETS];
+const ALL_FORMATTER_NAMES: FormatterName[] = [...CODING_TARGETS];
 
 describe('Parity Matrix Tests', () => {
   const formatters: Map<FormatterName, Formatter> = new Map();
@@ -242,7 +242,7 @@ describe('Parity Matrix Tests', () => {
     vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
 
     formatters.clear();
-    for (const target of KNOWN_TARGETS) {
+    for (const target of CODING_TARGETS) {
       formatters.set(target, new BUILTIN_FORMATTERS[target]());
     }
   });
@@ -265,7 +265,7 @@ describe('Parity Matrix Tests', () => {
     });
 
     it('all known targets should be instantiable and registered in test map', () => {
-      expect(formatters.size).toBe(KNOWN_TARGETS.length);
+      expect(formatters.size).toBe(CODING_TARGETS.length);
       for (const name of ALL_FORMATTER_NAMES) {
         expect(formatters.has(name), `${name} should be in formatters map`).toBe(true);
       }

@@ -589,6 +589,12 @@
             },
             "gitlab-duo": {
               "$ref": "#/definitions/TargetConfig"
+            },
+            "bundle": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "prompt-text": {
+              "$ref": "#/definitions/TargetConfig"
             }
           },
           "additionalProperties": {
@@ -661,7 +667,9 @@
         "deep-agents",
         "forgecode",
         "hermes",
-        "gitlab-duo"
+        "gitlab-duo",
+        "bundle",
+        "prompt-text"
       ],
       "description": "Known built-in output targets. These are the targets with first-class formatter support."
     },

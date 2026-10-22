@@ -92,7 +92,7 @@ Common changes:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AIRgwZmoYMJFqdWEAWik0TiltEjcoLGgIVjs4HEqsRjcsCh9+AaGR015Aq3CQAHoqgDcIGHMIlJBY3YXggCUYdc2dN2oq7UYcDFZ6uHGFvbz8kHyAXQZOLGpHfCIpHIMCotBADFWMFoEDY+FS7yAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fHz4AIRgwZmoYMJFqdWEAWik0TiltEjcoLGgIVjs4HEqsRjcsCh9+AaGR015Aq3CQAHoqgDcIGHMIlJBY3YXggCUYdc2dN2oq7UYcDFZ6uHGFvbz8kHyAXQZOLGpHfCIpHIMCotBADFWMFoEDY+FS7yAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -110,7 +110,7 @@ Common changes:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AQTAOajCicghGE3tmahEAI1gdZhISDE9ZHAw0GAoffjgcRqxGN1NeQKtwkAB6ahgANwgYcwiw2eDgqThGagg0LAg2FJAAJVX18x03amXtRj7WdXg83fb2TiwL2JAcS+1zWG3ajxgjCwrHgcDoskhDxMjnh3RkHDgpiGc2CAM+vEKBRA+QAugxftRHPgiKRyIMaPQQCsYLQzqx8KliUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fHz4AQTAOajCicghGE3tmahEAI1gdZhISDE9ZHAw0GAoffjgcRqxGN1NeQKtwkAB6ahgANwgYcwiw2eDgqThGagg0LAg2FJAAJVX18x03amXtRj7WdXg83fb2TiwL2JAcS+1zWG3ajxgjCwrHgcDoskhDxMjnh3RkHDgpiGc2CAM+vEKBRA+QAugxftRHPgiKRyIMaPQQCsYLQzqx8KliUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -159,7 +159,7 @@ replacement, and `@override` for complete existing targets.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344EU8ManFlQKsBHBgJGGpwkABRVnUIVhgmrvVeAGUy8QqqvOD+esbmzqwAWl0SE2UIgGFmEiWsXgAFZigIRkc8uJYpMOQIgFU4O1LqQ+2AFUc0GAHGB7QsCIBdONmYWAKmY1BI2BSTDYADdOFgIGwMFAIrxCgUQPlfgw4dRHPgiKRyDAqLQQAxYbQEax8KkMUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344EU8ManFlQKsBHBgJGGpwkABRVnUIVhgmrvVeAGUy8QqqvOD+esbmzqwAWl0SE2UIgGFmEiWsXgAFZigIRkc8uJYpMOQIgFU4O1LqQ+2AFUc0GAHGB7QsCIBdONmYWAKmY1BI2BSTDYADdOFgIGwMFAIrxCgUQPlfgw4dRHPgiKRyDAqLQQAxYbQEax8KkMUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -232,7 +232,7 @@ Hooks that were customized directly in `.codex/config.toml` rather than in
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34cZmYAa2VAqxVmahJsAFo2RukTMOrg4JgAN04sFJA0ZjgsRqwyqEa3OBg8rt4GrEYcGGpBgFFxE3mu3QbPMOQItFY0Egi6cPA6pYiAXTjgkWp1YTgOp73mKWTeYF4nAwACNYKEFNQ3HZCjVgjC4T58iB8vcGP1qI58ERSOQYFRaCAGH1aBA2PhUsigA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH34cZmYAa2VAqxVmahJsAFo2RukTMOrg4JgAN04sFJA0ZjgsRqwyqEa3OBg8rt4GrEYcGGpBgFFxE3mu3QbPMOQItFY0Egi6cPA6pYiAXTjgkWp1YTgOp73mKWTeYF4nAwACNYKEFNQ3HZCjVgjC4T58iB8vcGP1qI58ERSOQYFRaCAGH1aBA2PhUsigA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

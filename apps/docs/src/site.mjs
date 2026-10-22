@@ -35,6 +35,7 @@ export const SIDEBAR = [
       { label: 'MCP Servers and Plugins', slug: 'features/integrations' },
       { label: 'Hooks and Workflows', slug: 'features/automation' },
       { label: 'Target Output Families', slug: 'features/target-platforms' },
+      { label: 'Application Prompts', slug: 'guides/application-prompts' },
       { label: 'AI Tool Hooks', slug: 'guides/hooks' },
       { label: 'Examples (Few-Shot)', slug: 'guides/examples' },
     ],

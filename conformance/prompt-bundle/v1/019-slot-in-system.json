@@ -1,0 +1,75 @@
+{
+  "description": "A slot in the system message. It is live and renders like any other slot, and compiling it reports the warning PS046.",
+  "source": {
+    "entry": ".promptscript/project.prs",
+    "files": {
+      ".promptscript/project.prs": "@meta {\n  id: \"acme-support\"\n  syntax: \"1.6.0\"\n  owner: \"team-support\"\n  risk: \"medium\"\n}\n\n@prompts {\n  slotted: {\n    description: \"A slot in the system message\"\n    system: \"Reply in {{input.lang}}\"\n    user: \"Question: {{input.question}}\"\n    inputs: {\n      lang: { type: \"string\", description: \"Language\" }\n      question: { type: \"string\", description: \"Question\" }\n    }\n  }\n}\n"
+    }
+  },
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/slotted",
+    "description": "A slot in the system message",
+    "contentHash": "sha256-082d5ce0246b2dd11f002ef0115c0eb26e0a65de322999b64e2a9b6bbb12dae4",
+    "messages": [
+      {
+        "role": "system",
+        "content": "Reply in {{input.lang}}"
+      },
+      {
+        "role": "user",
+        "content": "Question: {{input.question}}"
+      }
+    ],
+    "inputs": {
+      "lang": {
+        "type": "string",
+        "description": "Language",
+        "required": true
+      },
+      "question": {
+        "type": "string",
+        "description": "Question",
+        "required": true
+      }
+    },
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "system",
+          "path": "prompts.slotted.system",
+          "files": [".promptscript/project.prs"]
+        },
+        {
+          "message": "user",
+          "path": "prompts.slotted.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"A slot in the system message\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/slotted\",\"inputs\":{\"lang\":{\"description\":\"Language\",\"required\":true,\"type\":\"string\"},\"question\":{\"description\":\"Question\",\"required\":true,\"type\":\"string\"}},\"messages\":[{\"content\":\"Reply in {{input.lang}}\",\"role\":\"system\"},{\"content\":\"Question: {{input.question}}\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-082d5ce0246b2dd11f002ef0115c0eb26e0a65de322999b64e2a9b6bbb12dae4",
+  "slots": [
+    {
+      "message": 0,
+      "kind": "slot",
+      "name": "lang",
+      "offset": 9,
+      "length": 14
+    },
+    {
+      "message": 1,
+      "kind": "slot",
+      "name": "question",
+      "offset": 10,
+      "length": 18
+    }
+  ],
+  "warnings": ["PS046"]
+}

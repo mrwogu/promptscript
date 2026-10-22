@@ -585,7 +585,10 @@ export type KnownTarget =
   | 'forgecode'
   | 'hermes'
   // GitLab Duo (Agent Platform)
-  | 'gitlab-duo';
+  | 'gitlab-duo'
+  // Prompt targets for application prompts, opt-in only
+  | 'bundle'
+  | 'prompt-text';
 
 /**
  * Branded type for custom (user-registered) target names.
@@ -671,6 +674,9 @@ export const KNOWN_TARGETS = [
   'hermes',
   // GitLab Duo (Agent Platform)
   'gitlab-duo',
+  // Prompt targets for application prompts, opt-in only
+  'bundle',
+  'prompt-text',
 ] as const satisfies readonly KnownTarget[];
 
 /**

@@ -17,7 +17,9 @@ import { promisify } from 'node:util';
 import type { FormatterOutput } from '@promptscript/compiler';
 import { getRuntimeInfo } from '../runtime/runtime-info.js';
 import { resolveSelfInvocation, type SelfInvocation } from '../runtime/self-invocation.js';
+import { compareCodeUnits, isPromptTarget, type OmittedManagedDirectory } from '@promptscript/core';
 import { MANAGED_OUTPUT_WORKER_COMMAND } from '../managed-output-worker.js';
+import { isVerifiedPromptBundleOutput } from './prompt-bundle-ownership.js';
 
 const execFileAsync = promisify(execFile);
 const PROMPTSCRIPT_MARKER_PATTERNS = [
@@ -117,6 +119,11 @@ export interface ManagedOutputCleanupOptions {
   outputRoot: string;
   /** Report actions without modifying the filesystem */
   dryRun?: boolean;
+  /**
+   * Directories of outputs a formatter omitted, with the owning target. Prompt targets omit
+   * their output when a program has no prompts, and their old files still need cleanup.
+   */
+  omittedDirectories?: readonly OmittedManagedDirectory[];
 }
 
 interface DirectoryGuard {
@@ -140,7 +147,14 @@ export async function cleanupManagedOutputs(
   options: ManagedOutputCleanupOptions
 ): Promise<ManagedOutputCleanupResult> {
   const outputRoot = resolve(options.outputRoot);
-  const managedDirectories = collectManagedDirectories(outputs, outputRoot);
+  const omitted = collectOmittedDirectories(options.omittedDirectories ?? [], outputRoot);
+  const managedDirectories = [
+    ...new Set([...collectManagedDirectories(outputs, outputRoot), ...omitted.all]),
+  ].sort(compareCodeUnits);
+  const flatDirectories = new Set([
+    ...collectPromptTargetDirectories(outputs, outputRoot),
+    ...omitted.prompt,
+  ]);
   const managedFiles = collectManagedFiles(outputs, outputRoot);
   const desiredFiles = collectDesiredFiles(outputs, outputRoot);
   const removed: string[] = [];
@@ -150,6 +164,20 @@ export async function cleanupManagedOutputs(
   const reportUnresolvedWorker = (): void => {
     unresolvedWorker = true;
   };
+
+  // An index under a custom name is not found by the walk below, which knows `index.json` only.
+  await Promise.all(
+    omitted.indexes.map((index) =>
+      removeStaleIndex(
+        index,
+        outputRoot,
+        desiredFiles,
+        options.dryRun === true,
+        removed,
+        reportUnresolvedWorker
+      )
+    )
+  );
 
   for (const directory of managedDirectories) {
     const ancestorGuards = await openAncestorDirectories(outputRoot, directory);
@@ -161,7 +189,8 @@ export async function cleanupManagedOutputs(
         options.dryRun === true,
         removed,
         ancestorGuards,
-        reportUnresolvedWorker
+        reportUnresolvedWorker,
+        !flatDirectories.has(directory)
       );
     } finally {
       await closeDirectoryGuards(ancestorGuards);
@@ -298,6 +327,107 @@ function collectManagedDirectories(
   }
 
   return [...directories].sort();
+}
+
+function containedDirectory(directory: string, outputRoot: string): string | undefined {
+  const normalized = directory.replaceAll('\\', '/');
+  if (!normalized || isAbsolute(normalized)) return undefined;
+  if (normalized.split('/').includes('..')) return undefined;
+  const absolutePath = resolve(outputRoot, normalized);
+  return isWithin(outputRoot, absolutePath) ? absolutePath : undefined;
+}
+
+function collectOmittedDirectories(
+  omitted: readonly OmittedManagedDirectory[],
+  outputRoot: string
+): { all: string[]; prompt: string[]; indexes: StaleIndex[] } {
+  const all: string[] = [];
+  const prompt: string[] = [];
+  const indexes: StaleIndex[] = [];
+  for (const { owner, directory, primaryFile } of omitted) {
+    const absolutePath = containedDirectory(directory, outputRoot);
+    if (absolutePath === undefined) continue;
+    all.push(absolutePath);
+    if (!isPromptTarget(owner)) continue;
+    prompt.push(absolutePath);
+    if (primaryFile !== 'index.json') indexes.push({ directory: absolutePath, name: primaryFile });
+  }
+  return { all, prompt, indexes };
+}
+
+/** An index file that a prompt target wrote under a custom name and no longer writes. */
+interface StaleIndex {
+  directory: string;
+  name: string;
+}
+
+/**
+ * Remove a stale prompt index under a custom file name.
+ * The file must be a regular file that parses as an index, like the files the directory walk
+ * removes, and it goes through the same guarded unlink.
+ */
+async function removeStaleIndex(
+  index: StaleIndex,
+  outputRoot: string,
+  desiredFiles: Set<string>,
+  dryRun: boolean,
+  removed: string[],
+  onUnresolvedWorker: () => void
+): Promise<void> {
+  const filePath = resolve(index.directory, index.name);
+  if (desiredFiles.has(filePath)) return;
+  const ancestorGuards = await openAncestorDirectories(outputRoot, index.directory);
+  if (!ancestorGuards) return;
+  try {
+    const handle = await safeOpenDirectory(index.directory);
+    if (!handle) return;
+    const guards = [...ancestorGuards, { path: index.directory, handle }];
+    try {
+      const fileStat = await safeLstat(filePath);
+      if (!fileStat?.isFile() || !(await directoryGuardsMatch(guards))) return;
+      const content = await readFile(filePath, 'utf-8').catch(() => '');
+      if (!isVerifiedPromptBundleOutput(content, index.name, index.name)) return;
+      if (dryRun) {
+        removed.push(filePath);
+        return;
+      }
+      const current = await safeLstat(filePath);
+      if (!current?.isFile() || !isSameFile(fileStat, current)) return;
+      if (!(await directoryGuardsMatch(guards))) return;
+      const directoryStat = await handle.stat();
+      const unlinked = await guardedUnlink(
+        index.directory,
+        index.name,
+        directoryStat,
+        fileStat,
+        undefined,
+        onUnresolvedWorker
+      );
+      if (unlinked) removed.push(filePath);
+    } finally {
+      await handle.close();
+    }
+  } finally {
+    await closeDirectoryGuards(ancestorGuards);
+  }
+}
+
+/**
+ * Directories owned by a prompt target. They hold files of the target only, so cleanup there
+ * stays in the directory itself and never walks into a subdirectory.
+ */
+function collectPromptTargetDirectories(
+  outputs: Map<string, FormatterOutput>,
+  outputRoot: string
+): Set<string> {
+  const directories = new Set<string>();
+  for (const output of outputs.values()) {
+    if (output.target === undefined || !isPromptTarget(output.target)) continue;
+    for (const directory of output.managedOutputDirectories ?? []) {
+      directories.add(resolve(outputRoot, directory));
+    }
+  }
+  return directories;
 }
 
 function collectDesiredFiles(
@@ -592,7 +722,8 @@ async function visitDirectory(
   dryRun: boolean,
   removed: string[],
   ancestorGuards: DirectoryGuard[],
-  onUnresolvedWorker: () => void
+  onUnresolvedWorker: () => void,
+  recursive = true
 ): Promise<void> {
   const directoryHandle = await safeOpenDirectory(directory);
   if (!directoryHandle) return;
@@ -607,6 +738,9 @@ async function visitDirectory(
       const entryPath = resolve(directory, entry.name);
       const entryStat = await safeLstat(entryPath);
       if (!entryStat || entryStat.isSymbolicLink()) continue;
+
+      // A directory owned by a prompt target is cleaned in place, never below.
+      if (entryStat.isDirectory() && !recursive) continue;
 
       if (entryStat.isDirectory()) {
         await visitDirectory(entryPath, desiredFiles, dryRun, removed, guards, onUnresolvedWorker);
@@ -887,6 +1021,11 @@ async function safeLstat(path: string): Promise<Awaited<ReturnType<typeof lstat>
 async function isPromptScriptGenerated(path: string, allowInlineMarker = false): Promise<boolean> {
   try {
     const content = await readFile(path, 'utf-8');
+    // A generated bundle or index is JSON, so it has no comment marker. Its first key and, for
+    // a bundle, its content hash tell it from a copied or edited file.
+    if (path.endsWith('.json') && isVerifiedPromptBundleOutput(content, basename(path))) {
+      return true;
+    }
     const lines = content
       .replace(/^\uFEFF/, '')
       .split(/\r?\n/)

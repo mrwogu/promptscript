@@ -12,6 +12,7 @@
  */
 
 import { KNOWN_TARGETS, type KnownTarget } from './types/config.js';
+import type { SectionProfile } from './section-registry.js';
 import { DEFAULT_OUTPUT_PATHS } from './target-output-paths.js';
 import {
   createTargetCapability,
@@ -27,8 +28,9 @@ import {
  * - `markdown-instruction`: Formatters extending MarkdownInstructionFormatter
  * - `simple`: Formatters created via createSimpleMarkdownFormatter
  * - `agents-md-only`: Targets using the project-local AGENTS.md contract
+ * - `prompt`: Application prompt targets, opt-in only, never part of an "all formatters" default
  */
-export type TargetFamily = 'base' | 'markdown-instruction' | 'simple' | 'agents-md-only';
+export type TargetFamily = 'base' | 'markdown-instruction' | 'simple' | 'agents-md-only' | 'prompt';
 
 /**
  * Skill path configuration for a target.
@@ -80,6 +82,7 @@ interface TargetDefinitionBase {
   family: TargetFamily;
   skillPath: SkillPathConfig;
   features: DefaultFeatureProfile;
+  sectionProfile?: SectionProfile;
 }
 
 /**
@@ -747,6 +750,34 @@ const TARGET_DEFINITION_BASE = {
       hasCommands: false,
     },
   },
+  bundle: {
+    name: 'bundle',
+    outputPath: DEFAULT_OUTPUT_PATHS['bundle'],
+    family: 'prompt',
+    skillPath: { basePath: null, fileName: null },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'v1',
+      hasSkills: false,
+      hasAgents: false,
+      hasCommands: false,
+    },
+    sectionProfile: 'general',
+  },
+  'prompt-text': {
+    name: 'prompt-text',
+    outputPath: DEFAULT_OUTPUT_PATHS['prompt-text'],
+    family: 'prompt',
+    skillPath: { basePath: null, fileName: null },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'v1',
+      hasSkills: false,
+      hasAgents: false,
+      hasCommands: false,
+    },
+    sectionProfile: 'general',
+  },
 } as const satisfies Record<KnownTarget, TargetDefinitionBase>;
 
 /**
@@ -859,6 +890,27 @@ export function getTargetDefinition(name: KnownTarget): TargetDefinition {
     throw new Error(`Unknown target: ${name}`);
   }
   return def;
+}
+
+/**
+ * Built-in targets that write instructions for a coding agent: every known target except the
+ * prompt family.
+ */
+export const CODING_TARGETS: readonly KnownTarget[] = KNOWN_TARGETS.filter(
+  (name) => TARGET_DEFINITIONS[name].family !== 'prompt'
+);
+
+/**
+ * Whether a target name is a built-in prompt target (`bundle`, `prompt-text`).
+ * Prompt targets are opt-in: no "all formatters" default includes them.
+ * @param name - Any target name, built-in or custom
+ * @returns True for a built-in target of the `prompt` family
+ */
+export function isPromptTarget(name: string): boolean {
+  return (
+    Object.hasOwn(TARGET_DEFINITIONS, name) &&
+    TARGET_DEFINITIONS[name as KnownTarget].family === 'prompt'
+  );
 }
 
 /**

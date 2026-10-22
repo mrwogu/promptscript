@@ -1209,6 +1209,87 @@ command = "echo owned # promptscript-generated:owned"
     });
   });
 
+  describe('stale prompt index under a custom name', () => {
+    const INDEX = `{\n  "$schema": "https://getpromptscript.dev/schema/prompt-bundle-index/v1.json",\n  "source": "p.prs",\n  "prompts": []\n}\n`;
+    const omitted = [{ owner: 'bundle', directory: 'prompts', primaryFile: 'all.json' }];
+
+    async function setup(content: string): Promise<{ project: string; file: string }> {
+      const project = await createTemporaryDirectory('promptscript-cleanup-index-');
+      await mkdir(join(project, 'prompts'), { recursive: true });
+      const file = join(project, 'prompts', 'all.json');
+      await writeFile(file, content);
+      return { project, file };
+    }
+
+    it('removes an index that parses', async () => {
+      const { project, file } = await setup(INDEX);
+
+      const result = await cleanupManagedOutputs(new Map(), {
+        outputRoot: project,
+        omittedDirectories: omitted,
+      });
+
+      expect(result.removed).toEqual([file]);
+      await expect(lstat(file)).rejects.toMatchObject({ code: 'ENOENT' });
+    });
+
+    it('only reports the index in a dry run', async () => {
+      const { project, file } = await setup(INDEX);
+
+      const result = await cleanupManagedOutputs(new Map(), {
+        outputRoot: project,
+        dryRun: true,
+        omittedDirectories: omitted,
+      });
+
+      expect(result.removed).toEqual([file]);
+      await expect(readFile(file, 'utf-8')).resolves.toBe(INDEX);
+    });
+
+    it('keeps a file that is not an index, a symlink and a planned file', async () => {
+      const { project, file } = await setup('{"mine":true}\n');
+      const planned = new Map<string, FormatterOutput>([
+        ['prompts/all.json', { path: 'prompts/all.json', content: INDEX }],
+      ]);
+
+      const first = await cleanupManagedOutputs(new Map(), {
+        outputRoot: project,
+        omittedDirectories: omitted,
+      });
+      await rm(file);
+      await writeFile(join(project, 'real.json'), INDEX);
+      await symlink(join(project, 'real.json'), file, 'file');
+      const second = await cleanupManagedOutputs(new Map(), {
+        outputRoot: project,
+        omittedDirectories: omitted,
+      });
+      await rm(file);
+      await writeFile(file, INDEX);
+      const third = await cleanupManagedOutputs(planned, {
+        outputRoot: project,
+        omittedDirectories: omitted,
+      });
+
+      expect([first.removed, second.removed, third.removed]).toEqual([[], [], []]);
+      await expect(readFile(file, 'utf-8')).resolves.toBe(INDEX);
+    });
+
+    it('ignores a missing directory and a directory outside the root', async () => {
+      const project = await createTemporaryDirectory('promptscript-cleanup-index-');
+
+      const result = await cleanupManagedOutputs(new Map(), {
+        outputRoot: project,
+        omittedDirectories: [
+          ...omitted,
+          { owner: 'bundle', directory: '../elsewhere', primaryFile: 'all.json' },
+          { owner: 'claude', directory: 'prompts', primaryFile: 'all.json' },
+        ],
+      });
+
+      expect(result.removed).toEqual([]);
+    });
+  });
+
   async function createTemporaryDirectory(prefix: string): Promise<string> {
     const directory = await mkdtemp(join(tmpdir(), prefix));
     temporaryDirectories.push(directory);

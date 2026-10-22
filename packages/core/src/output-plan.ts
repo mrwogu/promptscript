@@ -22,6 +22,11 @@ export interface OutputArtifact {
   managedOutputDirectories?: string[];
   /** Relative files managed by this artifact. */
   managedOutputFiles?: string[];
+  /**
+   * Plan nothing for this artifact. A formatter sets it when it has no file to write,
+   * for example a prompt target in a program without prompts.
+   */
+  omit?: boolean;
 }
 
 /** Role an artifact plays in collision resolution. */
@@ -85,6 +90,16 @@ export interface OutputPlanManagedPaths {
   files: string[];
 }
 
+/** A managed directory of an output that a formatter omitted. */
+export interface OmittedManagedDirectory {
+  /** Target that owns the directory */
+  owner: string;
+  /** Managed directory, project-relative */
+  directory: string;
+  /** File name of the omitted output, for example `index.json` */
+  primaryFile: string;
+}
+
 /**
  * Shared, filesystem-independent output plan.
  *
@@ -110,6 +125,12 @@ export interface OutputPlan {
   /** Convenience aliases for managed path consumers. */
   managedOutputDirectories: string[];
   managedOutputFiles: string[];
+  /**
+   * Managed directories of outputs that formatters omitted, with their owner.
+   * An omitted output writes nothing, but cleanup still needs its directory to remove files
+   * the owner wrote earlier.
+   */
+  omittedManagedDirectories?: OmittedManagedDirectory[];
 }
 
 /**
@@ -282,6 +303,7 @@ function toPlanFile(
 function flattenCandidate(candidate: OutputPlanCandidate): OutputPlanFile[] {
   const role = candidate.role ?? 'primary';
   const files: OutputPlanFile[] = [];
+  if (candidate.output.omit === true) return files;
 
   const visit = (
     output: OutputArtifact,
@@ -314,8 +336,18 @@ function comparePaths(left: OutputPlanFile, right: OutputPlanFile): number {
 export function createOutputPlan(candidates: readonly OutputPlanCandidate[]): OutputPlan {
   const selected = new Map<string, OutputPlanFile>();
   const collisions: OutputPlanCollision[] = [];
+  const omittedManagedDirectories: OmittedManagedDirectory[] = [];
 
   for (const candidate of candidates) {
+    if (candidate.output.omit === true) {
+      for (const directory of normalizeManagedPaths(candidate.output).directories ?? []) {
+        omittedManagedDirectories.push({
+          owner: candidate.owner,
+          directory,
+          primaryFile: normalizeOutputPath(candidate.output.path).split('/').at(-1) ?? '',
+        });
+      }
+    }
     for (const file of flattenCandidate(candidate)) {
       const collisionKey = normalizeOutputCollisionKey(file.path);
       const existing = selected.get(collisionKey);
@@ -389,5 +421,6 @@ export function createOutputPlan(candidates: readonly OutputPlanCandidate[]): Ou
     injected: files.filter((file) => file.role === 'injected'),
     managedOutputDirectories: managedPaths.directories,
     managedOutputFiles: managedPaths.files,
+    omittedManagedDirectories,
   };
 }

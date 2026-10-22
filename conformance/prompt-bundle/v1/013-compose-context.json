@@ -1,0 +1,67 @@
+{
+  "description": "compose: [context]. Properties become bullets, lists are indented one level, under a Context heading.",
+  "source": {
+    "entry": ".promptscript/project.prs",
+    "files": {
+      ".promptscript/project.prs": "@meta {\n  id: \"acme-support\"\n  syntax: \"1.6.0\"\n  owner: \"team-support\"\n  risk: \"medium\"\n}\n\n@context {\n  product: \"Acme Cloud\"\n  tier: \"enterprise\"\n  regions: [\"eu\", \"us\"]\n}\n\n@prompts {\n  compose: {\n    description: \"Answer with composed text\"\n    compose: [context]\n    system: \"Answer the question.\"\n    user: \"Question: {{input.question}}\"\n    inputs: { question: { type: \"string\", description: \"The question\" } }\n  }\n}\n"
+    }
+  },
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/compose",
+    "description": "Answer with composed text",
+    "contentHash": "sha256-bcae16e4a025c716c883bdf870643a0def0c8e225899d484500a86c48e8add7a",
+    "messages": [
+      {
+        "role": "system",
+        "content": "## Context\n\n- product: Acme Cloud\n- tier: enterprise\n- regions:\n  - eu\n  - us\n\nAnswer the question."
+      },
+      {
+        "role": "user",
+        "content": "Question: {{input.question}}"
+      }
+    ],
+    "inputs": {
+      "question": {
+        "type": "string",
+        "description": "The question",
+        "required": true
+      }
+    },
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "system",
+          "path": "context",
+          "files": [".promptscript/project.prs"]
+        },
+        {
+          "message": "system",
+          "path": "prompts.compose.system",
+          "files": [".promptscript/project.prs"]
+        },
+        {
+          "message": "user",
+          "path": "prompts.compose.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Answer with composed text\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/compose\",\"inputs\":{\"question\":{\"description\":\"The question\",\"required\":true,\"type\":\"string\"}},\"messages\":[{\"content\":\"## Context\\n\\n- product: Acme Cloud\\n- tier: enterprise\\n- regions:\\n  - eu\\n  - us\\n\\nAnswer the question.\",\"role\":\"system\"},{\"content\":\"Question: {{input.question}}\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-bcae16e4a025c716c883bdf870643a0def0c8e225899d484500a86c48e8add7a",
+  "slots": [
+    {
+      "message": 1,
+      "kind": "slot",
+      "name": "question",
+      "offset": 10,
+      "length": 18
+    }
+  ]
+}

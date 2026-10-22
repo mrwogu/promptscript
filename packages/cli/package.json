@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@inquirer/prompts": "^8.7.3",
+    "@promptscript/browser-compiler": "workspace:^",
     "@promptscript/compiler": "workspace:^",
     "@promptscript/importer": "workspace:^",
     "@promptscript/formatters": "workspace:^",

@@ -66,7 +66,7 @@ differ on a host. A target can replace the executable with its own `command`:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34cZmYAa2VAqwUYahIIVgwoAFo0ZigIRkcw6uDgmAA3TiwUkBoYFo56xuaW3RIMTzz+nWYSRc8w5AjWZikIunCQKlcyU0ZqCDQsAHo4S+vTW8YcGEZyqbqGpqgKEgAVnAIgBdOLBETUdTCOC9cH9MAYRhYZjUHq8PqrfoLJahXg7EB7A4gI4RU7rG4PK43e6PSkvN4fFqI5Goxz-IGHY4tFpwLBXZG8Ej7GCg+HBQo1VaDB4iuFSrGLLCvOpjRhuPnrAD60x+zR1ZSgKyxkqxvHUJhwbgARvKzQMmtbYHjEVA4KKFRL4abeJL8iB8iCGCM0fgiKRyDBTvQQMNaBA2PhUgGgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH34cZmYAa2VAqwUYahIIVgwoAFo0ZigIRkcw6uDgmAA3TiwUkBoYFo56xuaW3RIMTzz+nWYSRc8w5AjWZikIunCQKlcyU0ZqCDQsAHo4S+vTW8YcGEZyqbqGpqgKEgAVnAIgBdOLBETUdTCOC9cH9MAYRhYZjUHq8PqrfoLJahXg7EB7A4gI4RU7rG4PK43e6PSkvN4fFqI5Goxz-IGHY4tFpwLBXZG8Ej7GCg+HBQo1VaDB4iuFSrGLLCvOpjRhuPnrAD60x+zR1ZSgKyxkqxvHUJhwbgARvKzQMmtbYHjEVA4KKFRL4abeJL8iB8iCGCM0fgiKRyDBTvQQMNaBA2PhUgGgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -323,7 +323,8 @@ silently incomplete Windows command.
 
 ### Hook Capability Matrix
 
-All 50 built-in targets have an explicit lifecycle-hook classification. `All`
+All 50 coding agent targets have an explicit lifecycle-hook classification. The two prompt
+targets write no hooks. `All`
 means all eight portable events; `watch` means `prs compile --watch`.
 
 | Target         | Status       | Config path                         | Portable events                                  | Command format                 | Timeout       | Project root               | Fallback                  |
@@ -469,7 +470,7 @@ Workflows describe repeatable multi-step procedures:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH35zZmoAazAoC2VAq15qGFgMOBgwuuDgqThGagg0LAg2FJAABUbMRrFeADcMKAhxbGkGppgWmDzOnTYOdhHYkDjt9N4AJRgZiBhzHRwMVnUDOAhWRjtbe0ar92VG5tax06ACYKOcPCoyiRsINHnReAt2K91PCsI40HZGDgYIxynB4Q8ZBw4KYgcEAMxggBq80Wy14T1YMDUHBk42YZCwAGVev0sIY3Fg0IKybwACxg8YwSZ2f7rVq8VjMYmirLnGAARzc8H5GDQNGYcygvAARjAwGU7MKTQs4DhkUDDlteIUCiB8gBdBicLDURz4IikcgwKi0EAMGbMl5sfCpd1AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH35zZmoAazAoC2VAq15qGFgMOBgwuuDgqThGagg0LAg2FJAABUbMRrFeADcMKAhxbGkGppgWmDzOnTYOdhHYkDjt9N4AJRgZiBhzHRwMVnUDOAhWRjtbe0ar92VG5tax06ACYKOcPCoyiRsINHnReAt2K91PCsI40HZGDgYIxynB4Q8ZBw4KYgcEAMxggBq80Wy14T1YMDUHBk42YZCwAGVev0sIY3Fg0IKybwACxg8YwSZ2f7rVq8VjMYmigCsYIuAEc3PB+Rg0DRmHMoLwAEYwMBlOzC00LOA4ZFAw5bXiFAogfIAXQYnCw1Ec+CIpHIMCotBADBmzJebHwqQ9QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -520,7 +521,7 @@ Use `@shortcuts` for user-invoked actions:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344HGZqLEY3U15Aq3CQAHpqGFgMOBgIsLrg4JpmMiwwrGo3TvrgqThGagg0LAg2FJAAJQ9eFraO3nNygGswKAs83p02DnZlgDFmKCPzBRw7TZh2u13qA-uxT1ksZjQvAARjAwOU7Gg3ECoEocBBWOoKCdeIUCiB8gBdBicEaOfBEUjkGBUWggBgANxgtEWrHwqXRQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344HGZqLEY3U15Aq3CQAHpqGFgMOBgIsLrg4JpmMiwwrGo3TvrgqThGagg0LAg2FJAAJQ9eFraO3nNygGswKAs83p02DnZlgDFmKCPzBRw7TZh2u13qA-uxT1ksZjQvAARjAwOU7Gg3ECoEocBBWOoKCdeIUCiB8gBdBicEaOfBEUjkGBUWggBgANxgtEWrHwqXRQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

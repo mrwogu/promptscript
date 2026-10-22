@@ -106,6 +106,12 @@ export type { ForgecodeVersion } from './forgecode.js';
 export { HermesFormatter, HERMES_VERSIONS } from './hermes.js';
 export type { HermesVersion } from './hermes.js';
 
+// Prompt targets
+export { BundleFormatter, BUNDLE_VERSIONS } from './bundle.js';
+export type { BundleVersion } from './bundle.js';
+export { PromptTextFormatter, PROMPT_TEXT_VERSIONS } from './prompt-text.js';
+export type { PromptTextVersion } from './prompt-text.js';
+
 // GitLab Duo (Agent Platform)
 export { GitlabDuoFormatter, GITLAB_DUO_VERSIONS } from './gitlab-duo.js';
 export type { GitlabDuoVersion } from './gitlab-duo.js';

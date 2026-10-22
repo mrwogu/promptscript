@@ -14,7 +14,8 @@ Cursor rules. New to the terms? See the [Glossary](../glossary.md).
 
 ## How many AI tools are supported?
 
-PromptScript currently compiles to **50 AI coding agent targets**. See the full list in
+PromptScript currently compiles to **50 AI coding agent targets**, plus two targets for
+[application prompts](application-prompts.md). See the full list in
 [Target Platforms](../features/target-platforms.md) or the
 [formatter matrix](../reference/formatters/index.md).
 

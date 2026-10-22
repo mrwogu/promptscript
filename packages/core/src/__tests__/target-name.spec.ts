@@ -13,6 +13,7 @@ import {
   validateTargetDefinitionConsistency,
   getTargetFeatures,
   getTargetSkillPath,
+  isPromptTarget,
   getTargetCapability,
   assertTargetDefinitionConsistency,
   type TargetDefinition,
@@ -361,7 +362,7 @@ describe('Target catalog integrity', () => {
   });
 
   it('should have a valid family for every target', () => {
-    const validFamilies = ['base', 'markdown-instruction', 'simple', 'agents-md-only'];
+    const validFamilies = ['base', 'markdown-instruction', 'simple', 'agents-md-only', 'prompt'];
     for (const target of KNOWN_TARGETS) {
       const def = TARGET_DEFINITIONS[target];
       expect(validFamilies, `${target} has invalid family`).toContain(def.family);
@@ -399,6 +400,35 @@ describe('Target catalog integrity', () => {
   it('should have complete and consistent capability metadata', () => {
     expect(validateTargetCapabilities(TARGET_DEFINITIONS)).toEqual([]);
     expect(validateTargetDefinitionConsistency()).toEqual([]);
+  });
+
+  it('should give every coding target the coding section profile and prompt targets the general one', () => {
+    for (const target of KNOWN_TARGETS) {
+      const expected = TARGET_DEFINITIONS[target].family === 'prompt' ? 'general' : 'coding';
+      expect(TARGET_DEFINITIONS[target].sectionProfile, target).toBe(expected);
+    }
+  });
+
+  it('should register the bundle and prompt-text targets as opt-in prompt targets', () => {
+    for (const target of ['bundle', 'prompt-text'] as const) {
+      const definition = TARGET_DEFINITIONS[target];
+
+      expect(definition.family).toBe('prompt');
+      expect(definition.features.defaultEnabled).toBe(false);
+      expect(Object.keys(definition.versions)).toEqual(['v1']);
+      expect(definition.features.hasSkills).toBe(false);
+      expect(definition.features.hasAgents).toBe(false);
+      expect(definition.features.hasCommands).toBe(false);
+      expect(isPromptTarget(target)).toBe(true);
+    }
+    expect(TARGET_DEFINITIONS.bundle.outputPath).toBe('prompts/index.json');
+    expect(TARGET_DEFINITIONS['prompt-text'].outputPath).toBe('prompts/README.md');
+  });
+
+  it('should not report a coding or custom target as a prompt target', () => {
+    expect(isPromptTarget('claude')).toBe(false);
+    expect(isPromptTarget('my-custom')).toBe(false);
+    expect(isPromptTarget('constructor')).toBe(false);
   });
 
   it('should expose canonical MCP metadata for every declared MCP resource', () => {

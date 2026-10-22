@@ -1,0 +1,9 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You work for the Acme support team.
+
+Never:
+- Never promise a refund before it is approved.

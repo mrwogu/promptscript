@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { KNOWN_TARGETS, TARGET_DEFINITIONS } from '@promptscript/core';
+import { CODING_TARGETS, TARGET_DEFINITIONS } from '@promptscript/core';
 import { GitHubFormatter } from '../formatters/github.js';
 import { CursorFormatter } from '../formatters/cursor.js';
 import { BUILTIN_FORMATTERS } from '../builtin-formatters.js';
@@ -184,7 +184,7 @@ pnpm lint
  * instructions, while agents-md-only targets emit the AGENTS.md contract
  * unchanged, so content parity checks cover the rendering families only.
  */
-const CONTENT_PARITY_TARGETS = KNOWN_TARGETS.filter(
+const CONTENT_PARITY_TARGETS = CODING_TARGETS.filter(
   (target) => TARGET_DEFINITIONS[target].family !== 'agents-md-only'
 );
 
@@ -192,7 +192,7 @@ const CONTENT_PARITY_TARGETS = KNOWN_TARGETS.filter(
  * Build the full list of all known target formatters.
  */
 function buildAllFormatters(): Formatter[] {
-  return KNOWN_TARGETS.map((target) => new BUILTIN_FORMATTERS[target]());
+  return CODING_TARGETS.map((target) => new BUILTIN_FORMATTERS[target]());
 }
 
 describe('Formatter Parity Tests', () => {
@@ -210,7 +210,7 @@ describe('Formatter Parity Tests', () => {
 
   describe('Formatter Count', () => {
     it('should have all known targets registered', () => {
-      expect(formatters.length).toBe(KNOWN_TARGETS.length);
+      expect(formatters).toHaveLength(CODING_TARGETS.length);
     });
 
     it('all formatters should have unique names', () => {

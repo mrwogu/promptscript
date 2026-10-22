@@ -10,15 +10,15 @@ organization version.
 
 ## Syntax Versions
 
-| Version | Added capability                                                                                                |
-| ------- | --------------------------------------------------------------------------------------------------------------- |
-| `1.0.0` | Core instruction and composition blocks                                                                         |
-| `1.1.0` | Agents and workflows                                                                                            |
-| `1.2.0` | Few-shot examples                                                                                               |
-| `1.3.0` | Direct regular field replacement with `field!`                                                                  |
-| `1.4.0` | Hooks, MCP servers, and plugins                                                                                 |
-| `1.5.0` | Contextual section headers, atomic `@override`, declaration-order operations, unquoted `${VAR}` values          |
-| `1.6.0` | Prompt definitions: validated `@prompts` entries with typed inputs and runtime slots; every target ignores them |
+| Version | Added capability                                                                                                                                              |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `1.0.0` | Core instruction and composition blocks                                                                                                                       |
+| `1.1.0` | Agents and workflows                                                                                                                                          |
+| `1.2.0` | Few-shot examples                                                                                                                                             |
+| `1.3.0` | Direct regular field replacement with `field!`                                                                                                                |
+| `1.4.0` | Hooks, MCP servers, and plugins                                                                                                                               |
+| `1.5.0` | Contextual section headers, atomic `@override`, declaration-order operations, unquoted `${VAR}` values                                                        |
+| `1.6.0` | Prompt definitions: validated `@prompts` entries with typed inputs and runtime slots; coding agent targets skip them, `bundle` and `prompt-text` compile them |
 
 Use the minimum required version for reusable published fragments. Use current
 syntax for new project entry files.

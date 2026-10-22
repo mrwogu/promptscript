@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-10-21T19:37:11.640Z | source: .promptscript/project.prs | target: github
+# promptscript-generated: 2026-10-22T00:32:30.946Z | source: .promptscript/project.prs | target: github
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -9,9 +9,10 @@ description: >-
   promptscript.yaml, resolving compilation errors, understanding inheritance
   (@inherit), composition (@use, @extend, @override), contextual @header
   metadata, or migrating AI instructions
-  to PromptScript. Also use when asked about the 50 built-in compilation
-  targets, including GitHub Copilot, Claude Code, Cursor, Antigravity,
-  Factory AI, and AGENTS.md-based platforms.
+  to PromptScript. Also use when asked about the 50 built-in coding agent
+  compilation targets, including GitHub Copilot, Claude Code, Cursor,
+  Antigravity, Factory AI, and AGENTS.md-based platforms, or about the
+  bundle and prompt-text targets for application prompts.
 license: MIT
 metadata:
   author: PromptScript
@@ -76,7 +77,7 @@ first.
 @hooks { ... }          # Portable lifecycle hooks (syntax 1.4.0+)
 @mcpServers { ... }     # MCP server configurations (syntax 1.4.0+)
 @plugins { ... }        # Capability bundles (syntax 1.4.0+)
-@prompts { ... }        # Prompt definitions with typed inputs (syntax 1.6.0+, ignored by every target)
+@prompts { ... }        # Prompt definitions with typed inputs (syntax 1.6.0+, compiled by bundle and prompt-text)
 @local { ... }          # Private config (not committed)
 @extend path { ... }    # Modify imported blocks
 @override path { ... }  # Replace one complete existing target (syntax 1.5.0+)
@@ -1092,7 +1093,7 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | `1.3.0` | Adds explicit regular block field replacement in `@extend`                                                              |
 | `1.4.0` | Adds `@hooks`, `@mcpServers`, and `@plugins`                                                                            |
 | `1.5.0` | Adds `@header` section titles, `@override` replacement, and unquoted `${VAR}` values                                    |
-| `1.6.0` | Adds validated `@prompts` entries with typed inputs and runtime slots; every target ignores them                        |
+| `1.6.0` | Adds validated `@prompts` entries with typed inputs and runtime slots; coding agent targets skip them                   |
 
 ### Block Version Requirements
 
@@ -1232,7 +1233,7 @@ writes when no candidates are detected.
 
 ## Output Targets
 
-50 supported targets. Key examples:
+50 coding agent targets and two prompt targets. Key examples:
 
 | Target      | Main File                       | Skills                                             |
 | ----------- | ------------------------------- | -------------------------------------------------- |
@@ -1251,6 +1252,25 @@ writes when no candidates are detected.
 | Hermes      | AGENTS.md                       | -------------------------------------------------- |
 | + 37 more   |                                 | See full list in documentation                     |
 
+### Application Prompts
+
+The `bundle` and `prompt-text` targets are not coding agent targets. They are opt-in (never in an
+"all targets" default) and compile `@prompts` entries at syntax `1.6.0`. They write nothing for a
+program without prompts.
+
+| Target        | Output                                     | Content                                            |
+| ------------- | ------------------------------------------ | -------------------------------------------------- |
+| `bundle`      | `prompts/<key>.json`, `prompts/index.json` | One content-hashed JSON bundle per prompt          |
+| `prompt-text` | `prompts/<key>.md`, `prompts/README.md`    | A Markdown preview of each composed system message |
+
+A prompt with `compose: [identity, restrictions]` builds its system message from those blocks in a
+fixed order (identity, context, knowledge, standards, restrictions, examples), then its own
+`system` text. Every `{{` in a composed block is escaped, so only the prompt's own text carries a
+live `{{input.name}}` slot. PromptScript does not escape, delimit or filter input values, and does
+not enforce output schemas. A consumer recomputes `contentHash`, validates the structure, and never
+fetches `$schema`. `prompt-text` is a preview, not an approved artifact. See
+`docs/guides/application-prompts.md`.
+
 Targets that share an output path (for example Factory, Codex, and every AGENTS.md target) are
 reconciled in one output plan before anything is written. Identical content merges silently;
 differing content reports `PS4001`, where a formatter output replaces an earlier one and a
@@ -1261,10 +1281,10 @@ case-insensitively and NFC-normalized on every platform.
 
 For detailed information about each formatter's output paths, supported features, quirks, and example outputs:
 
-- **Full formatter reference:** `docs/reference/formatters/` (7 dedicated pages + index of all 50)
+- **Full formatter reference:** `docs/reference/formatters/` (7 dedicated pages + index of all 52 targets)
 - **llms-full.txt:** Available at the docs site root - contains all documentation in a single file for LLM consumption
 - **Dedicated pages exist for:** Claude Code, GitHub Copilot, Cursor, Antigravity, Factory AI, Gemini CLI, OpenCode
-- **All 50 formatters indexed at:** `docs/reference/formatters/index.md` with output paths, tier, and feature flags
+- **All 52 targets indexed at:** `docs/reference/formatters/index.md` with output paths, tier, and feature flags
 
 ### Auto-Compilation Hooks
 

@@ -453,7 +453,7 @@ Once aliases are configured, use them in any import path:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AJXhmKAA3A35dTFZHBXl1Exw3ACMKXQB6DEYhbppmMlNGagg0LABadow4GB9+CFYcGHGsATqMBu7+Zmp1btn5otY+ADU1uAg2aTEoCDnjMn2sRbd5zeH6x124EUYAGs4N1qDA+lh+AA9dLZHIgfJ0dDYPCIEC1b7bX57A5HOYwKi0EAMFjsThYHi8ADKbjQ5AgdzkClWvCIpHIdmoHmUqzBFF4ADlmBtMNQNswwMy7OJmIw3FoRFgbqw6GJPLxWMKxLwwRgoPY+oCNATFkIRLxAlYQil0VsdjjDscFiA4nAEiJkuEQOksrkXVaSBBCMswlguQsCot-ttxBhqOJlJbgiwpGFkBEAApQPowHAVKTUWQiTxx7wgAC6cQ4-2W6jTmezjFz+bWRZjpYilcjvjB-3GjCVbETcSmXqzObzUALOvgYYgA+VeXyCKRIEwuHwGLIWL+AOBoPBA+hsJyhPoTDYHC4aL4NLpD0Z8lsrKiHJ13N4vIJgq1ovFkufGU5QVbBlVVGMNS1URdX1TAgWNChTX8C04ggUIvS3H5d0NEFdSPGFTz9V13SSG0fRyPJgkDYNWFDcMfEKXxoxLeNhytFMYHrEBxybSdp2Y2N407KtZ1rLieObKdWwEjsKwYxZeznBchxQq1RwbCcW0LRT+0HVglwRcsGHJahHHwNlogJGhz2qWhlXwVIESAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fHz4AJXhmKAA3A35dTFZHBXl1Exw3ACMKXQB6DEYhbppmMlNGagg0LABadow4GB9+CFYcGHGsATqMBu7+Zmp1btn5otY+ADU1uAg2aTEoCDnjMn2sRbd5zeH6x124EUYAGs4N1qDA+lh+AA9dLZHIgfJ0dDYPCIEC1b7bX57A5HOYwKi0EAMFjsThYHi8ADKbjQ5AgdzkClWvCIpHIdmoHmUqzBFF4ADlmBtMNQNswwMy7OJmIw3FoRFgbqw6GJPLxWMKxLwwRgoPY+oCNATFkIRLxAlYQil0VsdjjDscFiA4nAEiJkuEQOksrkXVaSBBCMswlguQsCot-ttxBhqOJlJbgiwpGFkBEAApQPowHAVKTUWQiTxx7wgAC6cQ4-2W6jTmezjFz+bWRZjpYilcjvjB-3GjCVbETcSmXqzObzUALOvgYYgA+VeXyCKRIEwuHwGLIWL+AOBoPBA+hsJyhPoTDYHC4aL4NLpD0Z8lsrKiHJ13N4vIJgq1ovFkufGU5QVbBlVVGMNS1URdX1TAgWNChTX8C04ggUIvS3H5d0NEFdSPGFTz9V13SSG0fRyPJgkDYNWFDcMfEKXxoxLeNhytFMYHrEBxybSdp2Y2N407KtZ1rLieObKdWwEjsKwYxZeznBchxQq1RwbCcW0LRT+0HVglwRcsGHJahHHwNlogJGhz2qWhlXwVIESAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -486,8 +486,9 @@ targets:
 
 **Available Targets:**
 
-PromptScript ships 50 built-in targets. See [Target Platforms](../features/target-platforms.md) for
-platform families and [Supported Formatters](formatters/index.md) for the full capability matrix.
+PromptScript ships 50 coding agent targets and two prompt targets. See
+[Target Platforms](../features/target-platforms.md) for platform families and
+[Supported Formatters](formatters/index.md) for the full capability matrix.
 
 | Target         | Default Output                    | Default Convention | Supported Versions                             |
 | -------------- | --------------------------------- | ------------------ | ---------------------------------------------- |
@@ -541,6 +542,14 @@ platform families and [Supported Formatters](formatters/index.md) for the full c
 | `deep-agents`  | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `forgecode`    | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `hermes`       | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `bundle`       | `prompts/index.json`              | -                  | v1                                             |
+| `prompt-text`  | `prompts/README.md`               | -                  | v1                                             |
+
+`bundle` and `prompt-text` compile `@prompts` entries for applications, not instructions for a
+coding agent. They are opt-in: no default selection includes them, so name them in `targets`. A
+target `output` moves the primary file, and the other files sit next to it. The target owns that
+directory, so `output` must name one. They write nothing for a program without prompts and need
+syntax `1.6.0`. See [Application Prompts](../guides/application-prompts.md).
 
 ### MCP, Hooks, and Plugins Support
 

@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getModelCatalog, normalizeProgram, KNOWN_TARGETS } from '@promptscript/core';
+import { getModelCatalog, normalizeProgram, CODING_TARGETS } from '@promptscript/core';
 import type { ModelProfile, Program, SourceLocation } from '@promptscript/core';
 import { GitHubFormatter } from '../formatters/github.js';
 import { formatProgram } from '../formatter-adapter.js';
@@ -1474,7 +1474,7 @@ describe('Golden Files Tests', () => {
     it('all known targets should produce output with a valid path', () => {
       const ast = createCanonicalAST();
 
-      const allFormatters = KNOWN_TARGETS.map((target) => new BUILTIN_FORMATTERS[target]());
+      const allFormatters = CODING_TARGETS.map((target) => new BUILTIN_FORMATTERS[target]());
 
       for (const formatter of allFormatters) {
         const result = formatter.format(ast);

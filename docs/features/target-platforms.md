@@ -1,13 +1,13 @@
 ---
 title: Target Platforms
-description: Configure 50 built-in AI coding agent targets and choose native output modes for instructions, skills, agents, integrations, and automation.
+description: Configure 50 built-in AI coding agent targets and two prompt targets, and choose native output modes for instructions, skills, agents, integrations, and automation.
 ---
 
 # Target Platforms
 
-PromptScript includes 50 built-in output targets. All targets receive project instructions. Rich
-formatters additionally emit native skills, agents, commands, MCP configuration, hooks, workflows,
-or plugin manifests when their platform supports those concepts.
+PromptScript includes 50 coding agent targets and two prompt targets. All coding agent targets
+receive project instructions. Rich formatters additionally emit native skills, agents, commands, MCP
+configuration, hooks, workflows, or plugin manifests when their platform supports those concepts.
 
 ## Platform Families
 
@@ -237,10 +237,26 @@ GitLab UI surfaces the instructions from GitLab 18.11. See the official
 | Scoped rules (`@guards`) and local files | None              | No verified project-local native contract                                                           |
 | Hooks, MCP servers, plugins              | None              | No verified project-local native contract; `PS4002` compatibility warnings include source locations |
 
+## Prompt Targets
+
+Two further targets are not coding agent targets. They compile the prompts of an application. See
+[Application Prompts](../guides/application-prompts.md).
+
+| Target        | Output                                        | Content                                             |
+| ------------- | --------------------------------------------- | --------------------------------------------------- |
+| `bundle`      | `prompts/<key>.json` and `prompts/index.json` | One content-hashed JSON bundle per `@prompts` entry |
+| `prompt-text` | `prompts/<key>.md` and `prompts/README.md`    | A Markdown preview of each composed system message  |
+
+Prompt targets are opt-in. No default selection includes them: not `compile()`, not `compileAll`,
+not the browser compiler, and not the `prs init` target picker. Name them in `targets` to use
+them. They write nothing for a program without `@prompts` entries, and they need syntax `1.6.0`.
+They have one version, `v1`, and no skills, agents, commands, hooks, or other resources.
+
 ## Related Documentation
 
 - [Supported Formatters](../reference/formatters/index.md)
 - [Configuration: Targets](../reference/config.md#targets)
+- [Application Prompts](../guides/application-prompts.md)
 - [Agents](agents.md)
 - [Skills and Resources](skills.md)
 - [MCP Servers and Plugins](integrations.md)

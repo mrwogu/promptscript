@@ -668,6 +668,33 @@ function printStats(stats: CompileResult['stats']): void {
 }
 
 /**
+ * Lines that name, for each prompt that composes blocks, the blocks and the files they came from.
+ * Composed text ships inside the prompt, so the author sees where it comes from.
+ */
+export function formatComposition(composition: CompileResult['composition']): string[] {
+  if (!composition || composition.length === 0) return [];
+  return [
+    'Composed prompts (this text is public once shipped):',
+    ...composition.flatMap(({ prompt, blocks }) => [
+      `  ${prompt}`,
+      ...blocks.map(({ block, files }) => `    ${block}: ${files.join(', ') || 'unknown source'}`),
+    ]),
+  ];
+}
+
+/**
+ * Print the composition of prompts.
+ */
+function printComposition(composition: CompileResult['composition']): void {
+  const lines = formatComposition(composition);
+  if (lines.length === 0) return;
+  ConsoleOutput.newline();
+  lines.forEach((line, index) =>
+    index === 0 ? ConsoleOutput.info(line) : ConsoleOutput.muted(line)
+  );
+}
+
+/**
  * Print compilation warnings.
  */
 function printWarnings(warnings: CompileResult['warnings']): void {
@@ -1037,6 +1064,7 @@ async function compileCommandWithResult(
       const cleanupResult = await cleanupManagedOutputs(plannedOutputMap, {
         outputRoot: effectiveOptions.output,
         dryRun: options.dryRun,
+        omittedDirectories: result.outputPlan?.omittedManagedDirectories,
       });
       for (const removedPath of cleanupResult.removed) {
         if (options.dryRun) {
@@ -1099,6 +1127,7 @@ async function compileCommandWithResult(
       });
     }
 
+    printComposition(result.composition);
     printStats(result.stats);
     printWarnings(result.warnings);
 

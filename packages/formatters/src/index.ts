@@ -146,6 +146,12 @@ export type {
 
 // All formatter classes, version constants, and version types
 export * from './formatters/index.js';
+export {
+  PROMPT_BUNDLE_INDEX_SCHEMA,
+  PROMPT_BUNDLE_SCHEMA,
+  PromptFormatError,
+  buildPromptBundles,
+} from './prompt/bundle.js';
 
 // Built-in formatter map
 export { BUILTIN_FORMATTERS } from './builtin-formatters.js';

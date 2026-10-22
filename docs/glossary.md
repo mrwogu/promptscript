@@ -38,7 +38,8 @@ A named section of a `.prs` file that starts with `@`, for example `@identity`,
 ### Target
 
 One AI tool that PromptScript compiles for, such as `claude`, `github`, `cursor`, or
-`codex`. There are 50 built-in targets. See [Supported Formatters](reference/formatters/index.md).
+`codex`. There are 50 coding agent targets and two prompt targets, `bundle` and `prompt-text`. See
+[Supported Formatters](reference/formatters/index.md).
 
 ### Formatter
 

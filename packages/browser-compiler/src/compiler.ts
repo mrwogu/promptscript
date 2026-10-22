@@ -8,18 +8,22 @@
  */
 
 import {
+  PSError,
   createOutputPlan,
+  isPromptTarget,
   noopLogger,
+  normalizeProvenanceFiles,
   type FactoryRulesMode,
   type Logger,
   type OutputPlan,
-  type PSError,
   type OutputConvention,
   type PrettierMarkdownOptions,
+  type ProvenanceTrace,
 } from '@promptscript/core';
 import {
   FormatterRegistry,
   formatProgram,
+  PromptFormatError,
   type Formatter,
   type FormatterOutput,
   type FormatOptions,
@@ -182,8 +186,9 @@ export class BrowserCompiler {
     this.validator = new Validator({ ...options.validator, logger: this.logger });
 
     // Load all formatters by default if none specified
-    const formatters = options.formatters ?? FormatterRegistry.list();
+    const formatters = options.formatters ?? FormatterRegistry.listDefault();
     this.loadedFormatters = this.loadFormatters(formatters);
+    this.assertPromptTargetsWithoutEnv(options.envVars);
 
     this.logger.debug(
       `BrowserCompiler initialized with ${this.loadedFormatters.length} formatters`
@@ -312,13 +317,23 @@ export class BrowserCompiler {
       owner: string;
       role: 'primary';
     }> = [];
+    // Only the prompt targets read provenance, so the other targets never see a path.
+    let safeProvenance: ProvenanceTrace | undefined;
+    const promptProvenance = (): ProvenanceTrace => {
+      safeProvenance ??= normalizeProvenanceFiles(resolved.provenance, this.projectRoot);
+      return safeProvenance;
+    };
 
     for (const { formatter, config } of this.loadedFormatters) {
       const formatterStart = Date.now();
       this.logger.verbose(`Formatting for ${formatter.name}`);
 
       try {
-        const formatOptions = this.getFormatOptionsForTarget(formatter.name, config);
+        const formatOptions = this.getFormatOptionsForTarget(
+          formatter.name,
+          config,
+          isPromptTarget(formatter.name) ? promptProvenance() : undefined
+        );
         this.logger.debug(`  Convention: ${formatOptions.convention ?? 'default'}`);
 
         const output = formatProgram(formatter, canonicalAst, formatOptions);
@@ -445,12 +460,17 @@ export class BrowserCompiler {
   /**
    * Get format options for a specific target.
    */
-  private getFormatOptionsForTarget(_targetName: string, config?: TargetConfig): FormatOptions {
+  private getFormatOptionsForTarget(
+    _targetName: string,
+    config?: TargetConfig,
+    provenance?: ProvenanceTrace
+  ): FormatOptions {
     const options: FormatOptions = {
       outputPath: config?.output,
       version: config?.version,
       prettier: this.prettierOptions,
       targetConfig: config,
+      ...(provenance ? { provenance } : {}),
     };
 
     const conventionName = config?.convention;
@@ -462,6 +482,25 @@ export class BrowserCompiler {
     }
 
     return options;
+  }
+
+  /**
+   * The prompt targets never interpolate `${VAR}`, but the browser resolver interpolates
+   * environment variables while parsing, for every target at once. With variables set, a bundle
+   * compiled here would differ from the one the CLI writes, so the combination is refused.
+   */
+  private assertPromptTargetsWithoutEnv(envVars: Record<string, string> | undefined): void {
+    if (!envVars || Object.keys(envVars).length === 0) return;
+    const promptTargets = this.loadedFormatters
+      .map(({ formatter }) => formatter.name)
+      .filter((name) => isPromptTarget(name));
+    if (promptTargets.length === 0) return;
+    throw new PromptFormatError(
+      `The ${promptTargets.join(' and ')} target cannot compile with envVars set. ` +
+        'Prompt targets keep ${VAR} as text, but the browser compiler interpolates environment variables while parsing, ' +
+        'so the bundle would differ from the one the CLI writes. Compile prompt targets in a separate BrowserCompiler without envVars.',
+      { file: 'BrowserCompiler options (envVars)', line: 1, column: 1 }
+    );
   }
 
   /**

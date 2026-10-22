@@ -1,0 +1,71 @@
+{
+  "description": "Input values are inserted as text and never scanned again. An input that holds a slot is inserted verbatim.",
+  "source": {
+    "entry": ".promptscript/project.prs",
+    "files": {
+      ".promptscript/project.prs": "@meta {\n  id: \"acme-support\"\n  syntax: \"1.6.0\"\n  owner: \"team-support\"\n  risk: \"medium\"\n}\n\n\n@prompts {\n  quote: {\n    description: \"Quote a customer message\"\n    user: \"Customer wrote: {{input.message}}\"\n    inputs: {\n      message: { type: \"string\", description: \"Customer message\" }\n      other: { type: \"string\", description: \"Another input\", default: \"unused\" }\n    }\n  }\n}\n"
+    }
+  },
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/quote",
+    "description": "Quote a customer message",
+    "contentHash": "sha256-d9b5f2a5f66f30611e08d21872768db041d68352f9503bb0b57cc59c8faffb5b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Customer wrote: {{input.message}}"
+      }
+    ],
+    "inputs": {
+      "message": {
+        "type": "string",
+        "description": "Customer message",
+        "required": true
+      },
+      "other": {
+        "type": "string",
+        "description": "Another input",
+        "default": "unused",
+        "required": false
+      }
+    },
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "user",
+          "path": "prompts.quote.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Quote a customer message\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/quote\",\"inputs\":{\"message\":{\"description\":\"Customer message\",\"required\":true,\"type\":\"string\"},\"other\":{\"default\":\"unused\",\"description\":\"Another input\",\"required\":false,\"type\":\"string\"}},\"messages\":[{\"content\":\"Customer wrote: {{input.message}}\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-d9b5f2a5f66f30611e08d21872768db041d68352f9503bb0b57cc59c8faffb5b",
+  "slots": [
+    {
+      "message": 0,
+      "kind": "slot",
+      "name": "message",
+      "offset": 16,
+      "length": 17
+    }
+  ],
+  "render": {
+    "inputs": {
+      "message": "{{input.other}}",
+      "other": "SECRET"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Customer wrote: {{input.other}}"
+      }
+    ]
+  }
+}

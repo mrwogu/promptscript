@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { lstat, readFile } from 'node:fs/promises';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 import type { CompileError, CompileResult, FormatterOutput } from '@promptscript/compiler';
+import type { OmittedManagedDirectory } from '@promptscript/core';
 import {
   cleanupManagedOutputs,
   isPromptScriptOwnedHookOutput,
@@ -82,6 +83,8 @@ export interface BuildCompilationDiffOptions {
   outputs: Map<string, FormatterOutput>;
   warnings: CompileResult['warnings'];
   includeContent?: boolean;
+  /** Directories of omitted outputs, from the compiler plan, so removed files are reported */
+  omittedDirectories?: readonly OmittedManagedDirectory[];
 }
 
 interface MarkerMetadata {
@@ -486,15 +489,18 @@ export async function buildCompilationDiff(
     }
   }
 
-  const hasManagedMetadata = [...options.outputs.values()].some(
-    (output) =>
-      (output.managedOutputDirectories?.length ?? 0) > 0 ||
-      (output.managedOutputFiles?.length ?? 0) > 0
-  );
+  const hasManagedMetadata =
+    (options.omittedDirectories?.length ?? 0) > 0 ||
+    [...options.outputs.values()].some(
+      (output) =>
+        (output.managedOutputDirectories?.length ?? 0) > 0 ||
+        (output.managedOutputFiles?.length ?? 0) > 0
+    );
   if (hasManagedMetadata) {
     const cleanup = await cleanupManagedOutputs(options.outputs, {
       outputRoot,
       dryRun: true,
+      omittedDirectories: options.omittedDirectories,
     });
     for (const removedPath of cleanup.removed) {
       let existingContent = '';

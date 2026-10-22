@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   HOOK_CAPABILITIES,
-  KNOWN_TARGETS,
+  CODING_TARGETS,
   TARGET_DEFINITIONS,
   type HookCapability,
   type Program,
@@ -38,7 +38,7 @@ const ast: Program = {
 
 describe('target hook capability warnings', () => {
   it('never silently omits hooks for a non-native built-in target', () => {
-    for (const target of KNOWN_TARGETS) {
+    for (const target of CODING_TARGETS) {
       const capability: HookCapability = HOOK_CAPABILITIES[target];
       if (capability.status === 'native' || capability.status === 'compatible') continue;
 
@@ -57,7 +57,7 @@ describe('target hook capability warnings', () => {
   });
 
   it('surfaces the omission warning through every non-native formatter', () => {
-    for (const target of KNOWN_TARGETS) {
+    for (const target of CODING_TARGETS) {
       const capability: HookCapability = HOOK_CAPABILITIES[target];
       if (capability.status === 'native' || capability.status === 'compatible') continue;
 
@@ -78,7 +78,7 @@ describe('target hook capability warnings', () => {
   });
 
   it('warns when a native target mode cannot emit hooks', () => {
-    for (const target of KNOWN_TARGETS) {
+    for (const target of CODING_TARGETS) {
       const capability: HookCapability = HOOK_CAPABILITIES[target];
       if (capability.status !== 'native' || !capability.nativeVersions) continue;
 
@@ -131,7 +131,7 @@ describe('target hook capability warnings', () => {
   });
 
   it('registers native hook files for cleanup in unsupported modes', () => {
-    for (const target of KNOWN_TARGETS) {
+    for (const target of CODING_TARGETS) {
       const capability: HookCapability = HOOK_CAPABILITIES[target];
       if (capability.status !== 'native' || !capability.configPath) continue;
 

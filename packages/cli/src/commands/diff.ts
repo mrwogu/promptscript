@@ -346,6 +346,7 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
           })),
         ],
         includeContent: options.includeContent,
+        omittedDirectories: result.outputPlan?.omittedManagedDirectories,
       });
       console.log(JSON.stringify(report, null, 2));
       return;

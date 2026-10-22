@@ -1,13 +1,17 @@
 import {
   AgentConflictError,
   createOutputPlan,
+  isPromptTarget,
   noopLogger,
+  normalizeProvenanceFiles,
   portableRealpathSync,
   type Logger,
   type LockfileDependency,
   type ModelsConfig,
   type OutputPlanCandidate,
   type OutputPlan,
+  type PromptComposition,
+  type ProvenanceTrace,
   type PSError,
 } from '@promptscript/core';
 import { FormatterRegistry, formatProgram } from '@promptscript/formatters';
@@ -755,13 +759,32 @@ export class Compiler {
     const formatErrors: CompileError[] = [];
     const formatWarnings: ValidationMessage[] = [];
     const planCandidates: OutputPlanCandidate[] = [];
+    const compositions = new Map<string, PromptComposition>();
+    // Only the prompt targets read provenance, so the other targets never see a path.
+    let safeProvenance: ProvenanceTrace | undefined;
+    const promptProvenance = (): ProvenanceTrace => {
+      safeProvenance ??= normalizeProvenanceFiles(
+        resolved.provenance,
+        inferProjectRoot(
+          this.options.resolver.localPath,
+          this.options.resolver.projectRoot,
+          resolvedEntryPath
+        ),
+        { realpath: portableRealpathSync }
+      );
+      return safeProvenance;
+    };
 
     for (const { formatter, config } of this.loadedFormatters) {
       const formatterStart = Date.now();
       this.logger.verbose(`Formatting for ${formatter.name}`);
 
       try {
-        const formatOptions = this.getFormatOptionsForTarget(formatter.name, config);
+        const formatOptions = this.getFormatOptionsForTarget(
+          formatter.name,
+          config,
+          isPromptTarget(formatter.name) ? promptProvenance() : undefined
+        );
         this.logger.debug(`  Convention: ${formatOptions.convention ?? 'default'}`);
 
         const output = formatProgram(formatter, canonicalAst, formatOptions);
@@ -780,6 +803,9 @@ export class Compiler {
           });
         }
 
+        for (const composition of output.composition ?? []) {
+          compositions.set(composition.prompt, composition);
+        }
         planCandidates.push({ output, owner: formatter.name, role: 'primary' });
       } catch (err) {
         formatErrors.push({
@@ -868,6 +894,10 @@ export class Compiler {
         this.logger.verbose(`  → ${file.path} (auto-injected promptscript skill)`);
       }
 
+      // A prompt target names its source the way its bundle does, so a marker never
+      // carries a path above the project root.
+      const labelFor = (owner: string): string =>
+        isPromptTarget(owner) ? promptProvenance().entry : sourceLabel;
       const markedFiles = outputPlan.files.map((file) => {
         const target = file.role === 'injected' ? 'promptscript' : file.owner;
         const marked = addMarkerToOutput(
@@ -883,7 +913,7 @@ export class Compiler {
               ? { managedOutputFiles: file.managedOutputFiles }
               : {}),
           },
-          sourceLabel,
+          labelFor(target),
           target
         );
         return { ...file, content: marked.content };
@@ -901,7 +931,7 @@ export class Compiler {
         const output: FormatterOutput = {
           path: file.path,
           content: file.content,
-          source: sourceLabel,
+          source: file.role === 'injected' ? sourceLabel : labelFor(file.owner),
           target: file.role === 'injected' ? 'promptscript' : file.owner,
           ...(file.mode !== undefined ? { mode: file.mode } : {}),
           ...(file.merge !== undefined ? { merge: file.merge } : {}),
@@ -954,6 +984,7 @@ export class Compiler {
       errors: [],
       warnings: allWarnings,
       stats,
+      ...(compositions.size > 0 ? { composition: [...compositions.values()] } : {}),
     };
   }
 
@@ -984,7 +1015,7 @@ export class Compiler {
    */
   async compileAll(entryPath: string): Promise<CompileResult> {
     // Get all registered formatters
-    const allFormatters = FormatterRegistry.list();
+    const allFormatters = FormatterRegistry.listDefault();
 
     // Create a new compiler with all formatters
     const compiler = new Compiler({
@@ -1259,7 +1290,8 @@ export class Compiler {
    */
   private getFormatOptionsForTarget(
     _targetName: string,
-    config?: TargetConfig
+    config?: TargetConfig,
+    provenance?: ProvenanceTrace
   ): import('./types.js').FormatOptions {
     const customConventions = this.options.customConventions;
     const prettierOptions = this.options.prettier;
@@ -1270,6 +1302,7 @@ export class Compiler {
       prettier: prettierOptions,
       targetConfig: config,
       models: this.models,
+      ...(provenance ? { provenance } : {}),
     };
 
     const conventionName = config?.convention;
@@ -1487,7 +1520,8 @@ export async function compile(
   options: CompileOptions = {}
 ): Promise<CompileResult> {
   // Get default formatters from registry if not specified
-  const formatters: CompilerOptions['formatters'] = options.formatters ?? FormatterRegistry.list();
+  const formatters: CompilerOptions['formatters'] =
+    options.formatters ?? FormatterRegistry.listDefault();
 
   // Build resolver options with sensible defaults
   const resolverOptions = {

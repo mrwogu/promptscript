@@ -29,7 +29,7 @@ as field values remain part of an `object` body:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH35qeCxqCEYsCDZlQKteAFpwkAA5GAA3GGpeIjRmODtBxlLTPMLWYrgRTwxqcTq4likw5AiAVUHZcsqsXgAVRzQYAGURiDQsCLoWzbtWUmlewn7qMZAAXR98kHyPhk45Uc+CIpHIMCotBADC6tBqrHwqV+QA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH35qeCxqCEYsCDZlQKteAFpwkAA5GAA3GGpeIjRmODtBxlLTPMLWYrgRTwxqcTq4likw5AiAVUHZcsqsXgAVRzQYAGURiDQsCLoWzbtWUmlewn7qMZAAXR98kHyPhk45Uc+CIpHIMCotBADC6tBqrHwqV+QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -42,26 +42,26 @@ Ordinary `header` and `headers` fields remain domain properties.
 
 ## Built-in Block Matrix
 
-| Block           | Canonical | Supported compatibility           | Output notes                                                                                 |
-| --------------- | --------- | --------------------------------- | -------------------------------------------------------------------------------------------- |
-| `@identity`     | `text`    | `object`, `mixed`                 | Text becomes the assistant introduction. Structured fields are formatter-sensitive.          |
-| `@context`      | `mixed`   | `text`, `object`                  | Formatters consume known metadata and optional prose independently.                          |
-| `@standards`    | `object`  | `mixed`, `text`                   | Category fields render broadly. Free-form text currently renders only on Factory.            |
-| `@restrictions` | `array`   | `text`, `object`, `mixed`         | Dash lists are preferred. Legacy text and `items` arrays remain supported.                   |
-| `@knowledge`    | `text`    | `object`, `mixed`                 | Text renders as reference material. Structured fields are formatter-sensitive.               |
-| `@shortcuts`    | `object`  | Scalar and multiline entry values | Explicit `content` removes target-dependent multiline command ambiguity.                     |
-| `@commands`     | `object`  | Same as `@shortcuts`              | Backwards-compatible alias. Prefer `@shortcuts` in new files.                                |
-| `@guards`       | `object`  | `mixed`                           | Named fields drive target-native path rules. Free-form text is not portable.                 |
-| `@params`       | `object`  | None                              | Fields define typed template parameters.                                                     |
-| `@skills`       | `object`  | None                              | Each field is a named skill definition or inline skill import.                               |
-| `@local`        | `text`    | `object`, `mixed`                 | Claude emits text to `CLAUDE.local.md`. Structured fields are not portable.                  |
-| `@agents`       | `object`  | None                              | Each field is a named agent definition.                                                      |
-| `@workflows`    | `object`  | None                              | Each field is a named workflow definition.                                                   |
-| `@hooks`        | `object`  | None                              | Each field is a portable lifecycle hook.                                                     |
-| `@mcpServers`   | `object`  | None                              | Each field is a named MCP server definition.                                                 |
-| `@plugins`      | `object`  | None                              | Each field is a named plugin bundle.                                                         |
-| `@prompts`      | `object`  | None                              | Each field is a named prompt definition. Validated at syntax 1.6.0, ignored by every target. |
-| `@examples`     | `object`  | None                              | Each field is a named input/output example.                                                  |
+| Block           | Canonical | Supported compatibility           | Output notes                                                                                                                                 |
+| --------------- | --------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@identity`     | `text`    | `object`, `mixed`                 | Text becomes the assistant introduction. Structured fields are formatter-sensitive.                                                          |
+| `@context`      | `mixed`   | `text`, `object`                  | Formatters consume known metadata and optional prose independently.                                                                          |
+| `@standards`    | `object`  | `mixed`, `text`                   | Category fields render broadly. Free-form text currently renders only on Factory.                                                            |
+| `@restrictions` | `array`   | `text`, `object`, `mixed`         | Dash lists are preferred. Legacy text and `items` arrays remain supported.                                                                   |
+| `@knowledge`    | `text`    | `object`, `mixed`                 | Text renders as reference material. Structured fields are formatter-sensitive.                                                               |
+| `@shortcuts`    | `object`  | Scalar and multiline entry values | Explicit `content` removes target-dependent multiline command ambiguity.                                                                     |
+| `@commands`     | `object`  | Same as `@shortcuts`              | Backwards-compatible alias. Prefer `@shortcuts` in new files.                                                                                |
+| `@guards`       | `object`  | `mixed`                           | Named fields drive target-native path rules. Free-form text is not portable.                                                                 |
+| `@params`       | `object`  | None                              | Fields define typed template parameters.                                                                                                     |
+| `@skills`       | `object`  | None                              | Each field is a named skill definition or inline skill import.                                                                               |
+| `@local`        | `text`    | `object`, `mixed`                 | Claude emits text to `CLAUDE.local.md`. Structured fields are not portable.                                                                  |
+| `@agents`       | `object`  | None                              | Each field is a named agent definition.                                                                                                      |
+| `@workflows`    | `object`  | None                              | Each field is a named workflow definition.                                                                                                   |
+| `@hooks`        | `object`  | None                              | Each field is a portable lifecycle hook.                                                                                                     |
+| `@mcpServers`   | `object`  | None                              | Each field is a named MCP server definition.                                                                                                 |
+| `@plugins`      | `object`  | None                              | Each field is a named plugin bundle.                                                                                                         |
+| `@prompts`      | `object`  | None                              | Each field is a named prompt definition. Validated at syntax 1.6.0, skipped by coding agent targets, compiled by `bundle` and `prompt-text`. |
+| `@examples`     | `object`  | None                              | Each field is a named input/output example.                                                                                                  |
 
 Supported compatibility means the parser and current consumers retain defined
 behavior. PS038 warns when a legacy shape can omit data or vary by formatter.
@@ -239,7 +239,7 @@ supported forms:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344HGZqLEY3U15Aq14+AGU3NDRyjhk4RgwoDGpecWYqrREsCCNOLGpHOIiAemoYADcIGHMIlJAAJWXV8x1mKV4ARzcekxmQIvqmlraK6V5YdQxGR14SNygxqAhWO0m0145hMOAUfXUwgAtFI0JwpNp3Fg0NVZiA5hw4Fgoc9XpdNrErvVglsPAp4DUMJ5eIt7lgVBhoG5FnAKGjCddgnwAMJUtgQbpQXhEGBVEQAI1gwvY0zRGIpG1qcWCUi61AgaDGbE2pJsFLgeWCwRY7EmBKuRKNRt15KxyipMlp7QZTJZbOJ4Qtht4hQKIHyAF0GIDHPgiKRyDAqLQQAwljBaONWPhUv6gA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344HGZqLEY3U15Aq14+AGU3NDRyjhk4RgwoDGpecWYqrREsCCNOLGpHOIiAemoYADcIGHMIlJAAJWXV8x1mKV4ARzcekxmQIvqmlraK6V5YdQxGR14SNygxqAhWO0m0145hMOAUfXUwgAtFI0JwpNp3Fg0NVZiA5hw4Fgoc9XpdNrErvVglsPAp4DUMJ5eIt7lgVBhoG5FnAKGjCddgnwAMJUtgQbpQXhEGBVEQAI1gwvY0zRGIpG1qcWCUi61AgaDGbE2pJsFLgeWCwRY7EmBKuRKNRt15KxyipMlp7QZTJZbOJ4Qtht4hQKIHyAF0GIDHPgiKRyDAqLQQAwljBaONWPhUv6gA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -293,7 +293,7 @@ replacement. The rule ignores custom block names:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34OUgBacWYSDAgrQKteMvCQAGE3OCwqsWo1Rx02Dm1qGGra5QA3DCgIbxAffJB8gF0GTixqR3wiUnIYKloQBnGYWgg2fFTFoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH34OUgBacWYSDAgrQKteMvCQAGE3OCwqsWo1Rx02Dm1qGGra5QA3DCgIbxAffJB8gF0GTixqR3wiUnIYKloQBnGYWgg2fFTFoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

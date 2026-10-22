@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  KNOWN_TARGETS,
+  CODING_TARGETS,
   type Block,
   type Program,
   type SourceLocation,
@@ -185,7 +185,7 @@ describe('resource capability warnings', () => {
   });
 
   it('never drops an authored resource block silently', () => {
-    for (const target of KNOWN_TARGETS) {
+    for (const target of CODING_TARGETS) {
       const formatterClass = BUILTIN_FORMATTERS[target] as FormatterClass;
       for (const version of Object.keys(formatterClass.getSupportedVersions())) {
         // Arrange

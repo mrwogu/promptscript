@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { usePlaygroundStore, type FormatterName, type ConventionType } from '../store';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
+/** Prompt targets compile separately and have no settings here. */
+type CodingFormatterName = Exclude<FormatterName, 'bundle' | 'prompt-text'>;
+
 const TARGET_INFO: Record<
-  FormatterName,
+  CodingFormatterName,
   { label: string; versions: string[]; supportsXml: boolean }
 > = {
   github: {
@@ -263,8 +266,8 @@ export function ConfigPanel() {
   if (!showConfig) return null;
 
   const allTargets = Object.entries(TARGET_INFO) as [
-    FormatterName,
-    (typeof TARGET_INFO)[FormatterName],
+    CodingFormatterName,
+    (typeof TARGET_INFO)[CodingFormatterName],
   ][];
   const visibleTargets = showAll
     ? allTargets

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  SECTION_PROFILES,
   SECTION_REGISTRY,
   blockOwnsSection,
   getPrimarySectionForBlock,
@@ -31,5 +32,25 @@ describe('section registry', () => {
     ]);
     expect(blockOwnsSection('knowledge', 'commands')).toBe(true);
     expect(blockOwnsSection('identity', 'git-commits')).toBe(false);
+  });
+
+  describe('profiles', () => {
+    it('should use the existing registry for the coding profile', () => {
+      expect(SECTION_PROFILES.coding).toBe(SECTION_REGISTRY);
+    });
+
+    it('should list five optional sections without an identity heading in the general profile', () => {
+      const general = SECTION_PROFILES.general;
+
+      expect(general.map((section) => section.id)).toEqual([
+        'context',
+        'knowledge',
+        'standards',
+        'restrictions',
+        'examples',
+      ]);
+      expect(general.every((section) => !section.required)).toBe(true);
+      expect(general.some((section) => section.primaryForBlocks.includes('identity'))).toBe(false);
+    });
   });
 });

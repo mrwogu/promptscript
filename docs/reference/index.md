@@ -80,7 +80,7 @@ Complete reference documentation for PromptScript.
   </div>
   <div class="ref-item__content">
     <h3>Formatters</h3>
-    <p>All 50 supported AI agent targets - output paths, features, quirks, and examples.</p>
+    <p>All 50 supported AI agent targets and two prompt targets - output paths, features, quirks, and examples.</p>
   </div>
   <div class="ref-item__arrow">→</div>
 </a>

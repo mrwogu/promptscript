@@ -64,6 +64,9 @@ const DEFAULT_OUTPUT_PATH_VALUES = {
   hermes: 'AGENTS.md',
   // GitLab Duo (Agent Platform)
   'gitlab-duo': 'AGENTS.md',
+  // Prompt targets: the primary file of a prompts/ directory
+  bundle: 'prompts/index.json',
+  'prompt-text': 'prompts/README.md',
 } as const satisfies Record<KnownTarget, string>;
 
 export const DEFAULT_OUTPUT_PATHS: typeof DEFAULT_OUTPUT_PATH_VALUES & DefaultOutputPathMap =

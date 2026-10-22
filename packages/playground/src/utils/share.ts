@@ -88,6 +88,8 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
     forgecode: { enabled: false, version: 'simple' },
     hermes: { enabled: false, version: 'simple' },
     'gitlab-duo': { enabled: false, version: 'full' },
+    bundle: { enabled: false, version: 'v1' },
+    'prompt-text': { enabled: false, version: 'v1' },
   },
   formatting: {
     tabWidth: 2,

@@ -37,7 +37,7 @@ GEMINI.md                          # Gemini CLI
 
 ## The PromptScript Approach
 
-With PromptScript, you write one `.prs` file and compile to all 50 targets:
+With PromptScript, you write one `.prs` file and compile to all 50 coding agent targets:
 
 ::::tabs
 :::tab[Single source file]
@@ -64,7 +64,7 @@ With PromptScript, you write one `.prs` file and compile to all 50 targets:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prO9wiscMahCyDuLMhlZyA9ABGGIwA1pxiCnACrGIY1GJwdg7inFjucsJ2gtIgMvmsOQCazACugvEwFYVEaK4eYjAAbjBQzHXUggDuzNShTgDmgmyCuFUAggAKAJLark0QjDAU2bn5eay29qzc0b5xCXBZhYIsjZIiUL4DpRgD8JLIMgAqcnUAyoxuaJogALp0UbwdKsAaPGQANXcwJkf0EWy2DmowLcGggbCOwFWClyADlmq5BLVmHAJjNBOE5EkNjkcTJxlAuhgqYImhgoOJsFUnGhSr87NYQNY6OhsHhECAvMwfH4giFwrEojEDokqLQQAwWOw0vgAMSCd6lNDkCAwMTaZijFxE4hkWCCailVhHFzIiiCXHMDyYageZhgK1VMTMRilPh6dJsQH7QSsL0VB0wdmCTBhO7LBx8ATHHLiQyS7yYWXBMIRJX7eKJAo5HR6Ay5EzmKw0wQkCCEJySLCOmAChx7WKVzGrM4wcEgSZXJY4ZhQRqdAcq2GrDjRQbjychGAzueExeV5ebJEoxaR505wR0idT7ez+eJ6Kos8FQXWAEEdjUOT4IikcjLGh6BAFpaHRVh8CMIUgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKAVgoAGLQF8prO9wiscMahCyDuLMhlZyA9ABGGIwA1pxiCnACrGIY1GJwdg7inFjucsJ2gtIgMvmsOQCazACugvEwFYVEaK4eYjAAbjBQzHXUggDuzNShTgDmgmyCuFUAggAKAJLark0QjDAU2bn5eay29qzc0b5xCXBZhYIsjZIiUL4DpRgD8JLIMgAqcnUAyoxuaJogALp0UbwdKsAaPGQANXcwJkf0EWy2DmowLcGggbCOwFWClyADlmq5BLVmHAJjNBOE5EkNjkcTJxlAuhgqYImhgoOJsFUnGhSr87NYQNY6OhsHhECAvMwfH4giFwrEojEDokqLQQAwWOw0vgAMSCd6lNDkCAwMTaZijFxE4hkWCCailVhHFzIiiCXHMDyYageZhgK1VMTMRilPh6dJsQH7QSsL0VB0wdmCTBhO7LBx8ATHHLiQyS7yYWXBMIRJX7eKJAo5HR6Ay5EwANks1cEJAghCckiwjpgAoce1ilcxqzOMHBIEmVyWOGYUEanUHKthqw40UGE6nIRgs-nhKXlZXmyRKMWkedOcEdMn053c4XieiqPPBUF1gBBHY1Dk+CIpHIyw0PQIAtLQ6KsPgRhCkAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -97,7 +97,7 @@ GEMINI.md
 
 | Benefit                      | How                                                               |
 | ---------------------------- | ----------------------------------------------------------------- |
-| **Single source of truth**   | One `.prs` file, up to 50 target outputs                          |
+| **Single source of truth**   | One `.prs` file, up to 50 coding agent outputs                    |
 | **Compile-time validation**  | Errors caught before deployment                                   |
 | **Hierarchical inheritance** | Org → Team → Project                                              |
 | **Full audit trail**         | Git history on `.prs` files                                       |

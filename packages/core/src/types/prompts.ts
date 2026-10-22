@@ -83,6 +83,14 @@ export interface PromptOutputSchema {
   fields: Record<string, PromptOutputField>;
 }
 
+/** The blocks one prompt composed into its system message, and the files they came from. */
+export interface PromptComposition {
+  /** Prompt id, `<@meta.id>/<key>` */
+  prompt: string;
+  /** Composed blocks in composition order */
+  blocks: Array<{ block: ComposableBlock; files: string[] }>;
+}
+
 /** Typed view of one @prompts entry. Extraction type, not an AST node. */
 export interface PromptDefinition {
   /** Entry key */

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { normalizeProgram } from '../canonical-ast.js';
 import {
   extractPromptDefinitions,
+  readMetaGovernance,
   validateGovernanceFields,
   type PromptExtraction,
 } from '../prompt-definitions.js';
@@ -602,5 +603,33 @@ describe('validateGovernanceFields', () => {
       '@meta risk must be one of: low, medium, high, critical',
       '@meta owner must be a non-empty string',
     ]);
+  });
+});
+
+describe('readMetaGovernance', () => {
+  it('reads every governance field and ignores the rest', () => {
+    const fields = {
+      id: 'a',
+      type: 'x',
+      risk: 'high',
+      owner: 'team',
+      domain: 'support',
+      dataClasses: ['pii'],
+      reviewers: ['ann'],
+    };
+
+    expect(readMetaGovernance(fields)).toEqual({
+      risk: 'high',
+      owner: 'team',
+      domain: 'support',
+      dataClasses: ['pii'],
+      reviewers: ['ann'],
+    });
+  });
+
+  it('leaves out invalid values instead of failing', () => {
+    expect(readMetaGovernance({ risk: 'huge', owner: 3, domain: 'ops' })).toEqual({
+      domain: 'ops',
+    });
   });
 });

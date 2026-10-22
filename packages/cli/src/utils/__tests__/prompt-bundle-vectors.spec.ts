@@ -1,6 +1,17 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 import { Ajv } from 'ajv';
-import { describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it } from 'vitest';
+import { Compiler } from '@promptscript/compiler';
 import { canonicalizeJson, findRuntimeSlots, sha256Hex } from '@promptscript/core';
 
 interface Bundle {
@@ -9,13 +20,29 @@ interface Bundle {
   messages: { role: string; content: string }[];
 }
 
+interface RenderCase {
+  name?: string;
+  inputs: Record<string, unknown>;
+  messages?: { role: string; content: string }[];
+  error?: string;
+}
+
 interface Vector {
   description: string;
+  source?: { entry: string; files: Record<string, string> };
   bundle: Bundle;
   canonical: string;
   contentHash: string;
   slots: unknown[];
+  render?: RenderCase | RenderCase[];
   error?: string;
+  warnings?: string[];
+  variants?: {
+    description: string;
+    set: Record<string, unknown>;
+    canonical: string;
+    contentHash: string;
+  }[];
 }
 
 const VECTOR_DIR = new URL('../../../../../conformance/prompt-bundle/v1/', import.meta.url);
@@ -47,6 +74,39 @@ function hashOf(bundle: Record<string, unknown>): string {
   return `sha256-${sha256Hex(canonicalizeJson(hashInput(bundle)))}`;
 }
 
+const directories: string[] = [];
+
+afterAll(() => {
+  for (const directory of directories.splice(0)) {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+/** Compile a vector source with the bundle target and return the files it wrote. */
+async function compileSource(
+  source: NonNullable<Vector['source']>,
+  change: (text: string) => string = (text) => text
+): Promise<{ files: Map<string, string>; warnings: string[] }> {
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'prs-vector-')));
+  directories.push(root);
+  for (const [path, text] of Object.entries(source.files)) {
+    mkdirSync(dirname(join(root, path)), { recursive: true });
+    writeFileSync(join(root, path), change(text));
+  }
+  const result = await new Compiler({
+    resolver: { registryPath: root, projectRoot: root, localPath: join(root, '.promptscript') },
+    formatters: ['bundle'],
+  }).compile(join(root, source.entry));
+  expect(result.errors).toEqual([]);
+  return {
+    files: new Map([...result.outputs].map(([path, output]) => [path, output.content])),
+    warnings: result.warnings.map((warning) => warning.ruleId),
+  };
+}
+
+const fileOf = (v: Vector): string => `${JSON.stringify(v.bundle, null, 2)}\n`;
+const keyOf = (v: Vector): string => String(v.bundle['id']).split('/')[1] ?? '';
+
 function vector(name: string): Vector {
   const found = vectors.get(name);
   if (!found) throw new Error(`Missing vector ${name}`);
@@ -58,12 +118,25 @@ describe('prompt bundle conformance vectors', () => {
     expect([...vectors.keys()]).toEqual([
       '001-minimal',
       '002-key-order',
+      '003-crlf',
       '004-unicode',
       '005-numbers',
       '006-excluded-fields',
       '007-provenance-file',
       '008-escape',
+      '009-no-rescan',
+      '010-literals-and-errors',
       '011-hash-mismatch',
+      '012-compose-identity',
+      '013-compose-context',
+      '014-compose-knowledge',
+      '015-compose-standards',
+      '016-compose-restrictions',
+      '017-compose-examples',
+      '018-compose-order',
+      '019-slot-in-system',
+      '020-prototype-input',
+      '021-compose-mixed',
     ]);
   });
 
@@ -96,6 +169,137 @@ describe('prompt bundle conformance vectors', () => {
       }
     });
   });
+
+  const withSource = [...vectors.entries()].filter(([, v]) => v.source !== undefined);
+
+  it('has a source for the vectors that need a compiler', () => {
+    expect(withSource.map(([name]) => name)).toEqual([
+      '003-crlf',
+      '009-no-rescan',
+      '010-literals-and-errors',
+      '012-compose-identity',
+      '013-compose-context',
+      '014-compose-knowledge',
+      '015-compose-standards',
+      '016-compose-restrictions',
+      '017-compose-examples',
+      '018-compose-order',
+      '019-slot-in-system',
+      '021-compose-mixed',
+    ]);
+  });
+
+  describe.each(withSource)('%s source', (_name, v) => {
+    const source = v.source!;
+
+    it('compiles to the bundle byte for byte', async () => {
+      const { files } = await compileSource(source);
+
+      expect(files.get(`prompts/${keyOf(v)}.json`)).toBe(fileOf(v));
+    });
+
+    it('reports the pinned warnings, when the vector has any', async () => {
+      const { warnings } = await compileSource(source);
+
+      for (const code of v.warnings ?? []) expect(warnings).toContain(code);
+      if (v.warnings === undefined) expect(warnings).not.toContain('PS046');
+    });
+
+    it('compiles to the same bytes with the other line ending', async () => {
+      const crlf = source.files[source.entry]!.includes('\r\n');
+      const other = (text: string): string =>
+        crlf ? text.replace(/\r\n/g, '\n') : text.replace(/\n/g, '\r\n');
+
+      const { files } = await compileSource(source, other);
+
+      expect(files.get(`prompts/${keyOf(v)}.json`)).toBe(fileOf(v));
+    });
+  });
+
+  it('keeps the source of 003-crlf in CRLF', () => {
+    const text = vector('003-crlf').source!.files['.promptscript/project.prs']!;
+
+    expect(
+      text.split('\n').every((line, i, all) => i === all.length - 1 || line.endsWith('\r'))
+    ).toBe(true);
+  });
+
+  it('escapes slots in composed blocks and leaves the own text live', () => {
+    const { messages } = vector('012-compose-identity').bundle;
+
+    expect(messages[0]?.content).toContain('\\{{greeting}}');
+    expect(messages[1]?.content).toContain('{{input.question}}');
+  });
+
+  it('puts the composed blocks in the fixed order whatever order compose lists them in', () => {
+    const content = vector('018-compose-order').bundle.messages[0]?.content ?? '';
+    const positions = [
+      'You are the Acme support assistant.',
+      '## Context',
+      '## Knowledge',
+      '## Standards',
+      '## Restrictions',
+      '## Examples',
+      'Answer the question.',
+    ].map((marker) => content.indexOf(marker));
+
+    expect(positions.every((position) => position >= 0)).toBe(true);
+    expect(positions).toEqual([...positions].sort((a, b) => a - b));
+  });
+
+  it('lists the slot of the system message in 019-slot-in-system', () => {
+    const { slots } = vector('019-slot-in-system');
+
+    expect(slots[0]).toMatchObject({ message: 0, kind: 'slot', name: 'lang' });
+  });
+
+  it('fails a slot named like a prototype member with missing-input in 020-prototype-input', () => {
+    const v = vector('020-prototype-input');
+
+    expect(v.bundle['inputs']).toEqual({});
+    expect(v.slots).toMatchObject([{ message: 0, kind: 'slot', name: 'constructor' }]);
+    expect(v.render).toEqual({ inputs: {}, error: 'missing-input' });
+  });
+
+  it('hashes the variants of 006-excluded-fields as pinned', () => {
+    const v = vector('006-excluded-fields');
+
+    const hashes = (v.variants ?? []).map((variant) => {
+      const changed = { ...v.bundle, ...variant.set };
+      return [canonicalizeJson(hashInput(changed)), hashOf(changed), variant.contentHash];
+    });
+
+    expect(hashes).toHaveLength(2);
+    for (const [, hash, pinned] of hashes) expect(hash).toBe(pinned);
+    expect(hashes.map(([canonical]) => canonical)).toEqual(
+      (v.variants ?? []).map((variant) => variant.canonical)
+    );
+    expect(v.variants?.[0]?.contentHash).toBe(v.contentHash);
+    expect(v.variants?.[1]?.contentHash).not.toBe(v.contentHash);
+  });
+
+  it('keeps ${VAR} as text in 010-literals-and-errors', () => {
+    expect(vector('010-literals-and-errors').bundle.messages[0]?.content).toBe(
+      'Home is ${HOME} and ${USER:-nobody}.'
+    );
+  });
+
+  it('inserts an input that holds a slot verbatim in 009-no-rescan', () => {
+    const { render } = vector('009-no-rescan');
+    const cases = Array.isArray(render) ? render : [render];
+
+    expect(cases[0]?.messages?.[0]?.content).toBe('Customer wrote: {{input.other}}');
+  });
+
+  it.each([...vectors.entries()].filter(([, v]) => v.render !== undefined))(
+    '%s describes each render case with inputs and one outcome',
+    (_name, v) => {
+      for (const c of Array.isArray(v.render) ? v.render : [v.render!]) {
+        expect(typeof c.inputs).toBe('object');
+        expect(Number(c.messages !== undefined) + Number(c.error !== undefined)).toBe(1);
+      }
+    }
+  );
 
   it.each(['002-key-order', '006-excluded-fields', '007-provenance-file', '011-hash-mismatch'])(
     '%s shares the hash of 001-minimal',

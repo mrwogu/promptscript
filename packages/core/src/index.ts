@@ -29,12 +29,14 @@ export * from './template.js';
 // Canonical AST compatibility layer
 export * from './canonical-ast.js';
 export * from './provenance.js';
+export * from './provenance-files.js';
 export * from './block-merge.js';
 export * from './block-shapes.js';
 export * from './block-aliases.js';
 export * from './block-override.js';
 export * from './block-import.js';
 export * from './prompt-definitions.js';
+export * from './prompt-bundle-hash.js';
 export * from './agent-names.js';
 export * from './inline-uses.js';
 export * from './presentation.js';

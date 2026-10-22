@@ -492,6 +492,8 @@ export const selectOutputsForFormatter = (
     forgecode: [/^AGENTS\.md$/],
     hermes: [/^AGENTS\.md$/],
     'gitlab-duo': [/^AGENTS\.md$/, /^skills\/.*\.md$/],
+    bundle: [/^prompts\/.*\.json$/],
+    'prompt-text': [/^prompts\/.*\.md$/],
   };
 
   const patterns = formatterPatterns[formatter];

@@ -1,0 +1,176 @@
+{
+  "description": "Environment references stay text. Numbers render in RFC 8785 form and booleans as true or false. A missing input, a wrong type and a value outside the options are errors.",
+  "source": {
+    "entry": ".promptscript/project.prs",
+    "files": {
+      ".promptscript/project.prs": "@meta {\n  id: \"acme-support\"\n  syntax: \"1.6.0\"\n  owner: \"team-support\"\n  risk: \"medium\"\n}\n\n\n@prompts {\n  literals: {\n    description: \"Render literals\"\n    system: \"Home is ${HOME} and ${USER:-nobody}.\"\n    user: \"Amount {{input.amount}}, urgent {{input.urgent}}, ratio {{input.ratio}}, big {{input.big}}, tone {{input.tone}}\"\n    inputs: {\n      amount: { type: \"number\", description: \"Amount\" }\n      urgent: { type: \"boolean\", description: \"Urgent\" }\n      ratio: { type: \"number\", description: \"Ratio\", default: 0.2 }\n      big: { type: \"number\", description: \"A large number\", default: 1000000000000000000000 }\n      tone: { type: \"enum\", description: \"Tone\", options: [\"warm\", \"formal\"], default: \"warm\" }\n    }\n  }\n}\n"
+    }
+  },
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/literals",
+    "description": "Render literals",
+    "contentHash": "sha256-b5bed80e82c52e08d3ac24ca14f242df79e861ed3e7e3840485e1919348537ba",
+    "messages": [
+      {
+        "role": "system",
+        "content": "Home is ${HOME} and ${USER:-nobody}."
+      },
+      {
+        "role": "user",
+        "content": "Amount {{input.amount}}, urgent {{input.urgent}}, ratio {{input.ratio}}, big {{input.big}}, tone {{input.tone}}"
+      }
+    ],
+    "inputs": {
+      "amount": {
+        "type": "number",
+        "description": "Amount",
+        "required": true
+      },
+      "urgent": {
+        "type": "boolean",
+        "description": "Urgent",
+        "required": true
+      },
+      "ratio": {
+        "type": "number",
+        "description": "Ratio",
+        "default": 0.2,
+        "required": false
+      },
+      "big": {
+        "type": "number",
+        "description": "A large number",
+        "default": 1e21,
+        "required": false
+      },
+      "tone": {
+        "type": "enum",
+        "description": "Tone",
+        "options": ["warm", "formal"],
+        "default": "warm",
+        "required": false
+      }
+    },
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "system",
+          "path": "prompts.literals.system",
+          "files": [".promptscript/project.prs"]
+        },
+        {
+          "message": "user",
+          "path": "prompts.literals.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Render literals\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/literals\",\"inputs\":{\"amount\":{\"description\":\"Amount\",\"required\":true,\"type\":\"number\"},\"big\":{\"default\":1e+21,\"description\":\"A large number\",\"required\":false,\"type\":\"number\"},\"ratio\":{\"default\":0.2,\"description\":\"Ratio\",\"required\":false,\"type\":\"number\"},\"tone\":{\"default\":\"warm\",\"description\":\"Tone\",\"options\":[\"warm\",\"formal\"],\"required\":false,\"type\":\"enum\"},\"urgent\":{\"description\":\"Urgent\",\"required\":true,\"type\":\"boolean\"}},\"messages\":[{\"content\":\"Home is ${HOME} and ${USER:-nobody}.\",\"role\":\"system\"},{\"content\":\"Amount {{input.amount}}, urgent {{input.urgent}}, ratio {{input.ratio}}, big {{input.big}}, tone {{input.tone}}\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-b5bed80e82c52e08d3ac24ca14f242df79e861ed3e7e3840485e1919348537ba",
+  "slots": [
+    {
+      "message": 1,
+      "kind": "slot",
+      "name": "amount",
+      "offset": 7,
+      "length": 16
+    },
+    {
+      "message": 1,
+      "kind": "slot",
+      "name": "urgent",
+      "offset": 32,
+      "length": 16
+    },
+    {
+      "message": 1,
+      "kind": "slot",
+      "name": "ratio",
+      "offset": 56,
+      "length": 15
+    },
+    {
+      "message": 1,
+      "kind": "slot",
+      "name": "big",
+      "offset": 77,
+      "length": 13
+    },
+    {
+      "message": 1,
+      "kind": "slot",
+      "name": "tone",
+      "offset": 97,
+      "length": 14
+    }
+  ],
+  "render": [
+    {
+      "name": "numbers and booleans",
+      "inputs": {
+        "amount": 100,
+        "urgent": true
+      },
+      "messages": [
+        {
+          "role": "system",
+          "content": "Home is ${HOME} and ${USER:-nobody}."
+        },
+        {
+          "role": "user",
+          "content": "Amount 100, urgent true, ratio 0.2, big 1e+21, tone warm"
+        }
+      ]
+    },
+    {
+      "name": "false and a float",
+      "inputs": {
+        "amount": 100.5,
+        "urgent": false,
+        "ratio": 1,
+        "tone": "formal"
+      },
+      "messages": [
+        {
+          "role": "system",
+          "content": "Home is ${HOME} and ${USER:-nobody}."
+        },
+        {
+          "role": "user",
+          "content": "Amount 100.5, urgent false, ratio 1, big 1e+21, tone formal"
+        }
+      ]
+    },
+    {
+      "name": "missing input",
+      "inputs": {
+        "urgent": true
+      },
+      "error": "missing-input"
+    },
+    {
+      "name": "wrong type",
+      "inputs": {
+        "amount": "a lot",
+        "urgent": true
+      },
+      "error": "invalid-type"
+    },
+    {
+      "name": "value outside the options",
+      "inputs": {
+        "amount": 1,
+        "urgent": true,
+        "tone": "angry"
+      },
+      "error": "invalid-option"
+    }
+  ]
+}

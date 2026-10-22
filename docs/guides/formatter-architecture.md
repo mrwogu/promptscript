@@ -9,7 +9,7 @@ This guide explains the internal architecture of PromptScript formatters, focusi
 
 ## Overview
 
-PromptScript compiles to 50 AI agent targets. Rich native formatters, AGENTS.md targets, and shared
+PromptScript compiles to 50 AI coding agent targets. Rich native formatters, AGENTS.md targets, and shared
 Markdown formatters map the same PromptScript source to each platform's instruction and capability
 contracts. Shared extraction and rendering logic preserves semantic parity where native platforms
 support equivalent features.
@@ -195,6 +195,23 @@ Tracks which sections each formatter supports, enabling:
 - **Parity validation**: Ensure all formatters handle the same blocks
 - **Feature coverage**: Track capabilities across targets
 - **Documentation**: Auto-generate feature matrices
+
+Each target has a section profile. The 50 coding agent targets use the `coding` profile, which is
+the registry itself. The two prompt targets use the `general` profile: Context, Knowledge,
+Standards, Restrictions, and Examples, all optional, and no identity heading.
+
+### Prompt Formatters
+
+The `bundle` and `prompt-text` targets do not extend `BaseFormatter`. They share one builder that
+reads the `@prompts` entries, composes each system message, and builds each bundle. Its renderers
+are copies of the ideas behind the coding formatters, not shared helpers, because a bundle is
+hashed. A change that improves the output of a coding target must never move the bytes of a
+bundle. Parity and golden specs iterate the coding targets only.
+
+A prompt formatter reads provenance from `FormatOptions`. The compilers pass it only to prompt
+targets, after rewriting every file with `normalizeProvenanceFiles`, so no machine path reaches an
+artifact. A formatter that has nothing to write returns an artifact with `omit` set, and the output
+plan skips it.
 
 ## Formatter Parity
 
