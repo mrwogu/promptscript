@@ -1,5 +1,6 @@
 import { useCallback, useRef, useEffect } from 'react';
-import { compile } from '@promptscript/browser-compiler';
+import { compile, type CompileResult } from '@promptscript/browser-compiler';
+import { isPromptTarget } from '@promptscript/core';
 import { useShallow } from 'zustand/react/shallow';
 import { usePlaygroundStore, selectFilesAsMap, type FormatterName } from '../store';
 
@@ -28,6 +29,56 @@ function findEntryFile(files: Record<string, string>): string {
   if (firstPrs) return firstPrs;
 
   return 'project.prs';
+}
+
+interface LocatedMessage {
+  message: string;
+  location?: { file?: string; line?: number; column?: number };
+}
+
+function failedResult(error: unknown): CompileResult {
+  return {
+    success: false,
+    outputs: new Map(),
+    outputOwners: new Map(),
+    errors: [
+      {
+        name: 'CompileError',
+        code: 'PS0000',
+        message: error instanceof Error ? error.message : String(error),
+      },
+    ],
+    warnings: [],
+    stats: { resolveTime: 0, validateTime: 0, formatTime: 0, totalTime: 0 },
+  };
+}
+
+/** Both compiles run the same validator, so the same message can come back twice. */
+function dedupe<T extends LocatedMessage>(items: T[], idOf: (item: T) => string): T[] {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    const { file, line, column } = item.location ?? {};
+    const key = [idOf(item), item.message, file, line, column].join('|');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function mergeResults(a: CompileResult, b: CompileResult): CompileResult {
+  return {
+    success: a.success && b.success,
+    outputs: new Map([...a.outputs, ...b.outputs]),
+    outputOwners: new Map([...(a.outputOwners ?? []), ...(b.outputOwners ?? [])]),
+    errors: dedupe([...a.errors, ...b.errors], (e) => e.code),
+    warnings: dedupe([...a.warnings, ...b.warnings], (w) => w.ruleId),
+    stats: {
+      resolveTime: Math.max(a.stats.resolveTime, b.stats.resolveTime),
+      validateTime: Math.max(a.stats.validateTime, b.stats.validateTime),
+      formatTime: Math.max(a.stats.formatTime, b.stats.formatTime),
+      totalTime: Math.max(a.stats.totalTime, b.stats.totalTime),
+    },
+  };
 }
 
 export function useCompiler() {
@@ -86,38 +137,40 @@ export function useCompiler() {
     const entryFile = findEntryFile(files);
     setCompiling(true);
     try {
-      const result = await compile(files, entryFile, {
-        bundledRegistry: true,
-        formatters: enabledFormatters,
-        prettier: {
-          tabWidth: config.formatting.tabWidth,
-          proseWrap: config.formatting.proseWrap,
-          printWidth: config.formatting.printWidth,
-        },
-        envVars: config.envVars,
-      });
-      setCompileResult(result);
-    } catch (error) {
-      console.error('Compilation error:', error);
-      setCompileResult({
-        success: false,
-        outputs: new Map(),
-        outputOwners: new Map(),
-        errors: [
-          {
-            name: 'CompileError',
-            code: 'PS0000',
-            message: error instanceof Error ? error.message : String(error),
-          },
-        ],
-        warnings: [],
-        stats: {
-          resolveTime: 0,
-          validateTime: 0,
-          formatTime: 0,
-          totalTime: 0,
-        },
-      });
+      const run = async (
+        formatters: typeof enabledFormatters,
+        envVars: Record<string, string>
+      ): Promise<CompileResult> => {
+        try {
+          return await compile(files, entryFile, {
+            bundledRegistry: true,
+            formatters,
+            prettier: {
+              tabWidth: config.formatting.tabWidth,
+              proseWrap: config.formatting.proseWrap,
+              printWidth: config.formatting.printWidth,
+            },
+            envVars,
+          });
+        } catch (error) {
+          console.error('Compilation error:', error);
+          return failedResult(error);
+        }
+      };
+
+      // Prompt targets refuse environment variables, so they get their own
+      // pass without them. This keeps ${VAR} as text in bundles, like the CLI.
+      const { envVars } = config;
+      const coding = enabledFormatters.filter((f) => !isPromptTarget(f.name));
+      const prompts = enabledFormatters.filter((f) => isPromptTarget(f.name));
+      const passes =
+        Object.keys(envVars).length === 0
+          ? [run(enabledFormatters, envVars)]
+          : [
+              ...(coding.length > 0 ? [run(coding, envVars)] : []),
+              ...(prompts.length > 0 ? [run(prompts, {})] : []),
+            ];
+      setCompileResult((await Promise.all(passes)).reduce(mergeResults));
     } finally {
       setCompiling(false);
     }

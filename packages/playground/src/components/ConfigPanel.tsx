@@ -2,12 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { usePlaygroundStore, type FormatterName, type ConventionType } from '../store';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
-/** Prompt targets compile separately and have no settings here. */
-type CodingFormatterName = Exclude<FormatterName, 'bundle' | 'prompt-text'>;
-
 const TARGET_INFO: Record<
-  CodingFormatterName,
-  { label: string; versions: string[]; supportsXml: boolean }
+  FormatterName,
+  { label: string; versions: string[]; supportsXml: boolean; hint?: string }
 > = {
   github: {
     label: 'GitHub Copilot',
@@ -220,6 +217,19 @@ const TARGET_INFO: Record<
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
+  // Prompt targets, off by default
+  bundle: {
+    label: 'Prompt bundle',
+    versions: ['v1'],
+    supportsXml: false,
+    hint: 'Portable JSON prompt bundle with a content hash',
+  },
+  'prompt-text': {
+    label: 'Prompt text',
+    versions: ['v1'],
+    supportsXml: false,
+    hint: 'Markdown system prompt previews',
+  },
 };
 
 const POPULAR_TARGETS: FormatterName[] = [
@@ -266,8 +276,8 @@ export function ConfigPanel() {
   if (!showConfig) return null;
 
   const allTargets = Object.entries(TARGET_INFO) as [
-    CodingFormatterName,
-    (typeof TARGET_INFO)[CodingFormatterName],
+    FormatterName,
+    (typeof TARGET_INFO)[FormatterName],
   ][];
   const visibleTargets = showAll
     ? allTargets
@@ -405,7 +415,7 @@ export function ConfigPanel() {
                 return (
                   <div key={target} className="flex items-center gap-3">
                     {/* Enable checkbox */}
-                    <label className="flex items-center gap-2 min-w-[140px]">
+                    <label className="flex items-center gap-2 min-w-[140px]" title={info.hint}>
                       <input
                         type="checkbox"
                         checked={settings.enabled}

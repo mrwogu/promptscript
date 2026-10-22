@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import { ConfigPanel } from '../components/ConfigPanel';
 import { usePlaygroundStore } from '../store';
 
@@ -285,5 +285,29 @@ describe('ConfigPanel', () => {
     const githubVersionSelect = selects[1]; // First target select (after ProseWrap)
 
     expect(githubVersionSelect).toBeDisabled();
+  });
+});
+
+describe('ConfigPanel prompt targets', () => {
+  afterEach(() => {
+    act(() => {
+      usePlaygroundStore.getState().setTargetEnabled('bundle', false);
+      usePlaygroundStore.getState().setTargetEnabled('prompt-text', false);
+      usePlaygroundStore.setState({ showConfig: false });
+    });
+  });
+
+  it('lists the bundle and prompt-text targets and toggles them', () => {
+    usePlaygroundStore.setState({ showConfig: true });
+    render(<ConfigPanel />);
+    fireEvent.click(screen.getByText(/^All \(/));
+
+    const bundle = screen.getByLabelText('Prompt bundle');
+    const text = screen.getByLabelText('Prompt text');
+    fireEvent.click(bundle);
+    fireEvent.click(text);
+
+    expect(usePlaygroundStore.getState().config.targets['bundle'].enabled).toBe(true);
+    expect(usePlaygroundStore.getState().config.targets['prompt-text'].enabled).toBe(true);
   });
 });

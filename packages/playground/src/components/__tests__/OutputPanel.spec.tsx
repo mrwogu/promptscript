@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import type { CompileResult, CompileWarning } from '@promptscript/browser-compiler';
 import { OutputPanel } from '../OutputPanel';
 import { usePlaygroundStore } from '../../store';
@@ -92,13 +92,17 @@ describe('OutputPanel target tabs', () => {
   ];
 
   afterEach(() => {
-    usePlaygroundStore.getState().setTargetEnabled('aider', false);
-    usePlaygroundStore.getState().setTargetEnabled('bundle', false);
+    act(() => {
+      usePlaygroundStore.getState().setTargetEnabled('aider', false);
+      usePlaygroundStore.getState().setTargetEnabled('bundle', false);
+    });
   });
 
   it('gives a tab to a catalog target the old list did not know', () => {
-    usePlaygroundStore.getState().setTargetEnabled('aider', true);
-    usePlaygroundStore.setState({ activeFormatter: 'aider', isCompiling: false });
+    act(() => {
+      usePlaygroundStore.getState().setTargetEnabled('aider', true);
+      usePlaygroundStore.setState({ activeFormatter: 'aider', isCompiling: false });
+    });
 
     render(<OutputPanel />);
 

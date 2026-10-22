@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { usePlaygroundStore, type FileState } from '../store';
+import { usePlaygroundStore, type FileState, type FormatterName } from '../store';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
 export interface Example {
@@ -10,6 +10,8 @@ export interface Example {
   files: FileState[];
   /** Optional environment variables to set when loading this example */
   envVars?: Record<string, string>;
+  /** Optional targets to enable when loading this example */
+  targets?: FormatterName[];
 }
 
 export const EXAMPLES: Example[] = [
@@ -712,6 +714,85 @@ export const EXAMPLES: Example[] = [
   git: {
     format: "Conventional Commits"
   }
+}
+`,
+      },
+    ],
+  },
+
+  {
+    id: 'support-refund-reply',
+    name: 'Support Refund Reply',
+    description: 'An application prompt with typed inputs, an output contract and a bundle',
+    complexity: 'intermediate',
+    targets: ['bundle', 'prompt-text'],
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "acme-support"
+  syntax: "1.6.0"
+}
+
+@inherit ./org
+
+@prompts {
+  refund-reply: {
+    description: "Decide on a refund request and write the reply"
+    risk: "high"
+    dataClasses: ["pii"]
+    compose: [identity, standards, restrictions]
+    model: { ref: "claude-sonnet-5-5", temperature: 0.2, maxTokens: 600 }
+    inputs: {
+      order_total: { type: "number", description: "Order total in EUR" }
+      days_since_delivery: { type: "number", description: "Days since the order arrived" }
+      message: { type: "string", description: "What the customer wrote" }
+    }
+    output: {
+      decision: {
+        type: "enum"
+        options: ["approve", "escalate", "deny"]
+        description: "What happens to the refund request"
+      }
+      reply: { type: "string", description: "The reply to send to the customer" }
+    }
+    system: """
+      Refunds are allowed within 30 days of delivery.
+      Send anything above 500 EUR to a human by choosing escalate.
+    """
+    user: """
+      Order total: {{input.order_total}} EUR
+      Days since delivery: {{input.days_since_delivery}}
+      Customer wrote: {{input.message}}
+    """
+  }
+}
+`,
+      },
+      {
+        path: 'org.prs',
+        content: `@meta {
+  id: "acme-org"
+  syntax: "1.6.0"
+  owner: "team-support"
+  risk: "medium"
+}
+
+@identity {
+  """
+  You are a support agent at Acme, an online shop.
+  You write short and polite replies in plain English.
+  """
+}
+
+@restrictions {
+  - "Never promise a refund that the policy does not allow."
+  - "Never ask the customer for a full card number."
+}
+
+@standards {
+  tone: "Calm and direct"
+  length: "At most 120 words"
 }
 `,
       },
@@ -1961,6 +2042,7 @@ export function ExampleGallery() {
   const setFiles = usePlaygroundStore((s) => s.setFiles);
   const setShowExamples = usePlaygroundStore((s) => s.setShowExamples);
   const setEnvVars = usePlaygroundStore((s) => s.setEnvVars);
+  const setTargetEnabled = usePlaygroundStore((s) => s.setTargetEnabled);
   const modalRef = useRef<HTMLDivElement>(null);
 
   useFocusTrap(modalRef, true);
@@ -1977,6 +2059,7 @@ export function ExampleGallery() {
     setFiles(example.files);
     // Set env vars if the example has them, otherwise clear them
     setEnvVars(example.envVars ?? {});
+    for (const target of example.targets ?? []) setTargetEnabled(target, true);
     setShowExamples(false);
   };
 
