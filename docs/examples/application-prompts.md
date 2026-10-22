@@ -29,7 +29,7 @@ PromptScript does not do.
 
 ## HR Policy Assistant
 
-An employee asks about company policy and the model answers from the policy of their country. I use it to show a required input next to an optional one. `question` has no default, so the bundle marks it as required. `country` has a default, so it is optional. The output is an enum, `category`, plus the text of the answer.
+An employee asks about company policy and the model answers from the policy of their country. It shows a required input next to an optional one. `question` has no default, so the bundle marks it as required. `country` has a default, so it is optional. The output is an enum, `category`, plus the text of the answer.
 
 ```text
 hr-policy-assistant/
