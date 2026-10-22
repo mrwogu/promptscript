@@ -9,7 +9,7 @@
   grounded-answer: {
     description: "Answer a question from retrieved passages and cite them"
     compose: [identity, standards, restrictions]
-    model: { ref: "claude-sonnet-5-5", temperature: 0, maxTokens: 700 }
+    model: { ref: "claude-sonnet-5-5", maxTokens: 700 }
     inputs: {
       question: { type: "string", description: "The user question" }
       passages: { type: "string", description: "Retrieved passages, one per line, each led by [id]" }

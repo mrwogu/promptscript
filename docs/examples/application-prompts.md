@@ -84,7 +84,7 @@ hr-policy-assistant/
   policy-answer: {
     description: "Answer an employee question about HR policy"
     compose: [identity, standards, restrictions]
-    model: { ref: "claude-sonnet-5-5", temperature: 0.1, maxTokens: 500 }
+    model: { ref: "claude-sonnet-5-5", maxTokens: 500 }
     inputs: {
       question: { type: "string", description: "The employee question" }
       country: { type: "string", description: "Country of employment", default: "Poland" }
@@ -166,7 +166,7 @@ support-refund-reply/
     risk: "high"
     dataClasses: ["pii"]
     compose: [identity, standards, restrictions]
-    model: { ref: "claude-sonnet-5-5", temperature: 0.2, maxTokens: 600 }
+    model: { ref: "claude-sonnet-5-5", maxTokens: 600 }
     inputs: {
       order_total: { type: "number", description: "Order total in EUR" }
       days_since_delivery: { type: "number", description: "Days since the order arrived" }
@@ -248,7 +248,7 @@ sales-follow-up-email/
   follow-up: {
     description: "Write a follow-up email after a sales call"
     compose: [identity, standards, restrictions]
-    model: { ref: "claude-haiku-5-5", temperature: 0.7, maxTokens: 400 }
+    model: { ref: "claude-haiku-5-5", maxTokens: 400 }
     inputs: {
       recipient: { type: "string", description: "First name of the recipient" }
       call_notes: { type: "string", description: "Notes from the call", default: "No notes." }
@@ -332,7 +332,7 @@ rag-answer-with-citations/
   grounded-answer: {
     description: "Answer a question from retrieved passages and cite them"
     compose: [identity, standards, restrictions]
-    model: { ref: "claude-sonnet-5-5", temperature: 0, maxTokens: 700 }
+    model: { ref: "claude-sonnet-5-5", maxTokens: 700 }
     inputs: {
       question: { type: "string", description: "The user question" }
       passages: { type: "string", description: "Retrieved passages, one per line, each led by [id]" }
@@ -368,7 +368,7 @@ in the user message are left as written. `contentHash` covers everything except 
   "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
   "id": "acme-support/refund-reply",
   "description": "Decide on a refund request and write the reply",
-  "contentHash": "sha256-187e5cf46d409507d969fdbff3dca5603b8c71fee0e7c831ae57f6bf734faa81",
+  "contentHash": "sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824",
   "messages": [
     {
       "role": "system",
@@ -418,7 +418,6 @@ in the user message are left as written. `contentHash` covers everything except 
     "provider": "anthropic",
     "apiId": "claude-sonnet-5-5",
     "params": {
-      "temperature": 0.2,
       "maxTokens": 600
     }
   },
