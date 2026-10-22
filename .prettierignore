@@ -34,6 +34,11 @@ schema/config.json
 schema/prompt-bundle-v1.json
 schema/prompt-bundle-index-v1.json
 schema/prompt-release-label-v1.json
+schema/eval-dataset-row-v1.json
+schema/eval-suite-v1.json
+schema/eval-label-row-v1.json
+schema/eval-cache-entry-v1.json
+schema/eval-report-v1.json
 
 # Lock files - machine generated
 pnpm-lock.yaml

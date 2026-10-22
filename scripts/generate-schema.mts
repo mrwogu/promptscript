@@ -32,31 +32,71 @@ const outputPath = path.resolve(__dirname, '../schema/config.json');
 
 type JsonObject = Record<string, unknown>;
 
-interface BundleSchemaTarget {
+interface SchemaTarget {
+  /** Source file under packages/core/src/types that declares the type */
+  source: string;
   type: string;
   schemaId: string;
   title: string;
   output: string;
 }
 
-const BUNDLE_SCHEMAS: BundleSchemaTarget[] = [
+const GENERATED_SCHEMAS: SchemaTarget[] = [
   {
+    source: 'prompt-bundle.ts',
     type: 'PromptBundleV1',
     schemaId: 'https://getpromptscript.dev/schema/prompt-bundle/v1.json',
     title: 'PromptScript Prompt Bundle v1',
     output: '../schema/prompt-bundle-v1.json',
   },
   {
+    source: 'prompt-bundle.ts',
     type: 'PromptBundleIndexV1',
     schemaId: 'https://getpromptscript.dev/schema/prompt-bundle-index/v1.json',
     title: 'PromptScript Prompt Bundle Index v1',
     output: '../schema/prompt-bundle-index-v1.json',
   },
   {
+    source: 'prompt-bundle.ts',
     type: 'PromptReleaseLabelV1',
     schemaId: 'https://getpromptscript.dev/schema/prompt-release-label/v1.json',
     title: 'PromptScript Prompt Release Label v1',
     output: '../schema/prompt-release-label-v1.json',
+  },
+  {
+    source: 'eval.ts',
+    type: 'EvalDatasetRowV1',
+    schemaId: 'https://getpromptscript.dev/schema/eval-dataset-row/v1.json',
+    title: 'PromptScript Eval Dataset Row v1',
+    output: '../schema/eval-dataset-row-v1.json',
+  },
+  {
+    source: 'eval.ts',
+    type: 'EvalSuiteV1',
+    schemaId: 'https://getpromptscript.dev/schema/eval-suite/v1.json',
+    title: 'PromptScript Eval Suite v1',
+    output: '../schema/eval-suite-v1.json',
+  },
+  {
+    source: 'eval.ts',
+    type: 'EvalLabelRowV1',
+    schemaId: 'https://getpromptscript.dev/schema/eval-label-row/v1.json',
+    title: 'PromptScript Eval Label Row v1',
+    output: '../schema/eval-label-row-v1.json',
+  },
+  {
+    source: 'eval.ts',
+    type: 'EvalCacheEntryV1',
+    schemaId: 'https://getpromptscript.dev/schema/eval-cache-entry/v1.json',
+    title: 'PromptScript Eval Cache Entry v1',
+    output: '../schema/eval-cache-entry-v1.json',
+  },
+  {
+    source: 'eval.ts',
+    type: 'EvalReportV1',
+    schemaId: 'https://getpromptscript.dev/schema/eval-report/v1.json',
+    title: 'PromptScript Eval Report v1',
+    output: '../schema/eval-report-v1.json',
   },
 ];
 
@@ -100,10 +140,10 @@ function mapNode(parent: unknown, key: string): JsonObject {
   return node;
 }
 
-function generateBundleSchema(target: BundleSchemaTarget): JsonObject {
+function generateTypeSchema(target: SchemaTarget): JsonObject {
   const generator = createGenerator({
     ...config,
-    path: path.resolve(__dirname, '../packages/core/src/types/prompt-bundle.ts'),
+    path: path.resolve(__dirname, '../packages/core/src/types', target.source),
     type: target.type,
     schemaId: target.schemaId,
   });
@@ -187,10 +227,10 @@ async function main(): Promise<void> {
 
   fs.writeFileSync(outputPath, JSON.stringify(enrichedSchema, null, 2) + '\n');
 
-  for (const target of BUNDLE_SCHEMAS) {
+  for (const target of GENERATED_SCHEMAS) {
     const file = path.resolve(__dirname, target.output);
     console.log(`  Output: ${file}`);
-    fs.writeFileSync(file, JSON.stringify(generateBundleSchema(target), null, 2) + '\n');
+    fs.writeFileSync(file, JSON.stringify(generateTypeSchema(target), null, 2) + '\n');
   }
 
   console.log('✅ Schema generated successfully!');

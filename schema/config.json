@@ -282,6 +282,11 @@
       "description": "Release settings for prompt bundles.",
       "example": "releases:\n  environments: [staging, prod]"
     },
+    "eval": {
+      "$ref": "#/definitions/EvalConfig",
+      "description": "Eval settings: providers and run limits.",
+      "example": "eval:\n  providers:\n    anthropic: { kind: anthropic, apiKeyEnvVar: ANTHROPIC_API_KEY }"
+    },
     "universalDir": {
       "type": [
         "string",
@@ -1050,6 +1055,10 @@
           },
           "description": "Native model names per target. A target listed here always receives this name, even when its naming scheme or provider list would not map the model. Keys are target names, matched case-insensitively. Only targets that write a native model field use them; validation reports other keys.",
           "example": "targets:\n  github: Claude Opus 9 (Preview)"
+        },
+        "pricing": {
+          "$ref": "#/definitions/ModelPricing",
+          "description": "List price per million tokens, for cost estimates"
         }
       },
       "additionalProperties": false,
@@ -1065,6 +1074,33 @@
         "retired"
       ],
       "description": "Lifecycle status of a model profile.\n- `current`: recommended for new instructions\n- `legacy`: still served, but superseded by a newer version\n- `deprecated`: the provider announced a retirement date\n- `retired`: the provider no longer serves the model"
+    },
+    "ModelPricing": {
+      "type": "object",
+      "properties": {
+        "inputUsdPerMillion": {
+          "type": "number",
+          "description": "Price of one million input tokens in USD.",
+          "minimum": 0
+        },
+        "outputUsdPerMillion": {
+          "type": "number",
+          "description": "Price of one million output tokens in USD.",
+          "minimum": 0
+        },
+        "checkedOn": {
+          "type": "string",
+          "description": "Date the price was checked against the provider, YYYY-MM-DD.",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [
+        "inputUsdPerMillion",
+        "outputUsdPerMillion",
+        "checkedOn"
+      ],
+      "additionalProperties": false,
+      "description": "List price of a model, in USD per million tokens. Cache, batch and long-context tiers are ignored, so a cost computed from it is an estimate."
     },
     "ReleasesConfig": {
       "type": "object",
@@ -1100,6 +1136,86 @@
       "type": "string",
       "description": "Name of a release environment.",
       "pattern": "^[a-z][a-z0-9-]{0,31}$"
+    },
+    "EvalConfig": {
+      "type": "object",
+      "properties": {
+        "providers": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/EvalProviderConfig"
+          },
+          "description": "Providers by name. The name is the provider of a prompt's model, such as `anthropic` or `openai`, or the name a suite model entry uses.",
+          "example": "providers:\n  anthropic: { kind: anthropic, apiKeyEnvVar: ANTHROPIC_API_KEY }"
+        },
+        "timeoutMs": {
+          "type": "integer",
+          "description": "Time limit of one model call in milliseconds, response body included.",
+          "minimum": 1,
+          "default": 60000
+        },
+        "maxOutputTokens": {
+          "type": "integer",
+          "description": "Output token cap of a model call when the prompt sets no `maxTokens`.",
+          "minimum": 1,
+          "default": 1024
+        },
+        "maxCases": {
+          "type": "integer",
+          "description": "Largest number of dataset rows a suite runs.",
+          "minimum": 1,
+          "default": 1000
+        },
+        "reportDir": {
+          "type": "string",
+          "description": "Directory for eval reports, relative to the project root.",
+          "examples": [
+            ".promptscript/eval-reports"
+          ],
+          "example": ".promptscript/eval-reports"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Eval settings (`eval` in promptscript.yaml): the providers eval suites call and the limits of a run."
+    },
+    "EvalProviderConfig": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/EvalProviderKind",
+          "description": "Request and response format: the Anthropic Messages API or an OpenAI-compatible chat API"
+        },
+        "baseUrl": {
+          "type": "string",
+          "description": "Base URL of the provider API.",
+          "examples": [
+            "https://llm.corp.example/v1"
+          ],
+          "example": "https://llm.corp.example/v1"
+        },
+        "apiKeyEnvVar": {
+          "type": "string",
+          "description": "Environment variable that holds the provider API key. The key itself is never read from the config.",
+          "examples": [
+            "ANTHROPIC_API_KEY"
+          ],
+          "pattern": "^[A-Z_][A-Z0-9_]*$",
+          "example": "ANTHROPIC_API_KEY"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false,
+      "description": "One model provider that eval suites can call."
+    },
+    "EvalProviderKind": {
+      "type": "string",
+      "enum": [
+        "anthropic",
+        "openai-compatible"
+      ],
+      "description": "Request and response format of an eval provider."
     },
     "ValidationExclude": {
       "type": "object",
