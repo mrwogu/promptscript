@@ -3,6 +3,7 @@ import {
   ErrorCode,
   PSError,
   compareVersions,
+  isValidVersion,
   extractPromptDefinitions,
   getModelCatalog,
   hashPromptBundle,
@@ -84,17 +85,24 @@ function deepNormalize<T>(value: T): T {
 }
 
 /**
- * Refuse a program below syntax 1.6.0 that authors prompts.
- * A program without a readable `syntax` is accepted: the default is the current version.
+ * Refuse a program whose syntax is not a valid version of at least 1.6.0.
+ * A missing, unreadable or prerelease-below-1.6.0 syntax fails closed: the bundle would claim a
+ * language level the source never declared.
  */
 function assertSyntax(program: Program, target: string): void {
   const declared = program.meta?.fields['syntax'];
-  if (typeof declared !== 'string' || !/^\d+\.\d+\.\d+$/.test(declared)) return;
-  if (compareVersions(declared, PROMPT_SYNTAX_VERSION) >= 0) return;
+  if (
+    typeof declared === 'string' &&
+    isValidVersion(declared) &&
+    compareVersions(declared, PROMPT_SYNTAX_VERSION) >= 0
+  ) {
+    return;
+  }
+  const shown = typeof declared === 'string' ? `"${declared}"` : 'none';
   throw new PromptFormatError(
-    `The ${target} target needs syntax ${PROMPT_SYNTAX_VERSION}, but the resolved program declares "${declared}". ` +
+    `The ${target} target needs syntax ${PROMPT_SYNTAX_VERSION} or later, but the resolved program declares ${shown}. ` +
       `Set syntax: "${PROMPT_SYNTAX_VERSION}" in @meta, or run "prs validate --fix".`,
-    program.meta?.loc
+    program.meta?.loc ?? program.loc
   );
 }
 

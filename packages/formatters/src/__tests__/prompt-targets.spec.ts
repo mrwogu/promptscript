@@ -844,19 +844,41 @@ describe('bundle target', () => {
       expect(new BundleFormatter().format(program({ meta: { syntax: '1.2.0' } })).omit).toBe(true);
     });
 
-    it('needs an id in @meta, also when there is no @meta at all', () => {
+    it('needs an id in @meta', () => {
       const ast = program({ prompts: reply() });
-      delete ast.meta;
+      delete ast.meta?.fields['id'];
 
       expect(() => new BundleFormatter().format(ast)).toThrow(/id in @meta/);
     });
 
-    it('accepts a program whose syntax cannot be read', () => {
-      for (const syntax of ['latest', 7] as const) {
+    it('refuses a syntax that is unreadable, not a version or below 1.6.0', () => {
+      for (const syntax of ['latest', 7, '1.5.0-rc.1', '1.6.0-rc.1', '1.6'] as const) {
         const ast = program({ meta: { syntax }, prompts: reply() });
 
-        expect(new BundleFormatter().format(ast).omit).toBeUndefined();
+        expect(() => new BundleFormatter().format(ast), String(syntax)).toThrow(
+          /needs syntax 1\.6\.0 or later/
+        );
       }
+    });
+
+    it('refuses a program without a declared syntax and names it', () => {
+      const ast = program({ prompts: reply() });
+      delete ast.meta?.fields['syntax'];
+
+      expect(() => new PromptTextFormatter().format(ast)).toThrow(/declares none/);
+    });
+
+    it('locates the syntax error at the program when there is no @meta', () => {
+      const ast = program({ prompts: reply() });
+      delete ast.meta;
+
+      expect(() => new BundleFormatter().format(ast)).toThrow(/declares none/);
+    });
+
+    it('accepts a later syntax', () => {
+      const ast = program({ meta: { syntax: '1.7.0' }, prompts: reply() });
+
+      expect(new BundleFormatter().format(ast).omit).toBeUndefined();
     });
 
     it('counts the problems after the first one', () => {
