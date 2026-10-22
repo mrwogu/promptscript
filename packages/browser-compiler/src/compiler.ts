@@ -8,7 +8,6 @@
  */
 
 import {
-  ErrorCode,
   PSError,
   createOutputPlan,
   isPromptTarget,
@@ -24,6 +23,7 @@ import {
 import {
   FormatterRegistry,
   formatProgram,
+  PromptFormatError,
   type Formatter,
   type FormatterOutput,
   type FormatOptions,
@@ -495,11 +495,11 @@ export class BrowserCompiler {
       .map(({ formatter }) => formatter.name)
       .filter((name) => isPromptTarget(name));
     if (promptTargets.length === 0) return;
-    throw new PSError(
+    throw new PromptFormatError(
       `The ${promptTargets.join(' and ')} target cannot compile with envVars set. ` +
         'Prompt targets keep ${VAR} as text, but the browser compiler interpolates environment variables while parsing, ' +
         'so the bundle would differ from the one the CLI writes. Compile prompt targets in a separate BrowserCompiler without envVars.',
-      ErrorCode.INVALID_VALUE
+      { file: 'BrowserCompiler options (envVars)', line: 1, column: 1 }
     );
   }
 

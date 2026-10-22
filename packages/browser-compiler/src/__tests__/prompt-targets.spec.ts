@@ -61,6 +61,17 @@ describe('prompt targets in the BrowserCompiler', () => {
       ).toThrow(/cannot compile with envVars set/);
     });
 
+    it('raises a prompt format error that carries a location', () => {
+      expect(
+        () => new BrowserCompiler({ fs: fs(), formatters: ['bundle'], envVars: { A: 'b' } })
+      ).toThrow(
+        expect.objectContaining({
+          name: 'PromptFormatError',
+          location: expect.objectContaining({ file: expect.stringContaining('envVars') }),
+        })
+      );
+    });
+
     it('names the rule it protects in the message', () => {
       expect(
         () => new BrowserCompiler({ fs: fs(), formatters: ['bundle'], envVars: { A: 'b' } })
