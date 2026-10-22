@@ -94,7 +94,7 @@ function assertSyntax(program: Program, target: string): void {
   ) {
     return;
   }
-  const shown = typeof declared === 'string' ? `"${declared}"` : 'none';
+  const shown = declared === undefined ? 'none' : `"${String(declared)}"`;
   throw new PromptFormatError(
     `The ${target} target needs syntax ${PROMPT_SYNTAX_VERSION} or later, but the resolved program declares ${shown}. ` +
       `Set syntax: "${PROMPT_SYNTAX_VERSION}" in @meta, or run "prs validate --fix".`,

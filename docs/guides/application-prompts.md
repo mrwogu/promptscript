@@ -283,6 +283,10 @@ Bundles and previews are generated output.
   the target gives it, so a renamed copy or a hand-edited bundle stays. An index is removed only
   under the name the target gives it, `index.json` unless `output` names another file. It does not
   enter subdirectories.
+- The output directory belongs to the target. A verified bundle from another project that you save
+  there is removed on the next compile.
+- A prompt key may not equal the file name of the output, as in key `all` with
+  `output: prompts/all.json`. The compile fails and asks you to rename one of them.
 - A file at the path of a bundle that PromptScript did not generate is not overwritten without
   `--force`.
 - When the last prompt leaves the source, the target writes nothing and `prs compile` removes the

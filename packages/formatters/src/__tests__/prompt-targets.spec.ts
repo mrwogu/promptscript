@@ -170,6 +170,43 @@ describe('bundle target', () => {
       }
     });
 
+    it('refuses a prompt key that equals the bundle output name', () => {
+      const ast = program({ prompts: reply() });
+      const clash = program({ prompts: { all: reply()['refund-reply'] as Value } });
+
+      expect(() => new BundleFormatter().format(clash, { outputPath: 'prompts/ALL.json' })).toThrow(
+        /writes "all.json" for a prompt and as its output "prompts\/ALL.json"/
+      );
+      expect(() =>
+        new BundleFormatter().format(ast, { outputPath: 'prompts/all.json' })
+      ).not.toThrow();
+    });
+
+    it('refuses a prompt key that equals the preview output name', () => {
+      const named = program({
+        prompts: { all: reply({ system: 'You help.' })['refund-reply'] as Value },
+      });
+
+      expect(() =>
+        new PromptTextFormatter().format(named, { outputPath: 'previews/all.md' })
+      ).toThrow(/writes "all.md" for a prompt and as its output "previews\/all.md"/);
+    });
+
+    it('names the default output of each target in the hint', () => {
+      const ast = program({ prompts: reply() });
+
+      expect(() => new PromptTextFormatter().format(ast, { outputPath: 'x.md' })).toThrow(
+        /for example "prompts\/README.md"/
+      );
+    });
+
+    it('shows a numeric syntax as it was written', () => {
+      const ast = program({ prompts: reply() });
+      (ast.meta as { fields: Record<string, unknown> }).fields['syntax'] = 1.6;
+
+      expect(() => new BundleFormatter().format(ast)).toThrow(/declares "1.6"/);
+    });
+
     it('drops leading dot segments from a nested output path', () => {
       const output = new BundleFormatter().format(program({ prompts: reply() }), {
         outputPath: '././x/index.json',

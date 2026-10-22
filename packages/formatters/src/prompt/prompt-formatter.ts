@@ -20,7 +20,12 @@ export interface PromptLayout {
  * A target owns the directory of its primary file, so a path without one is refused: cleanup
  * would otherwise treat the project root as owned.
  */
-function layoutOf(target: string, primary: string, location?: SourceLocation): PromptLayout {
+function layoutOf(
+  target: string,
+  primary: string,
+  example: string,
+  location?: SourceLocation
+): PromptLayout {
   if (/^(?:[\\/]|[A-Za-z]:)/.test(primary)) {
     throw new PromptFormatError(
       `The ${target} target writes inside the project, so its output must be a relative path such as ` +
@@ -36,7 +41,7 @@ function layoutOf(target: string, primary: string, location?: SourceLocation): P
   if (directory === '') {
     throw new PromptFormatError(
       `The ${target} target writes a directory of files next to its primary file, so its output must name one, ` +
-        `for example "prompts/index.json". Got "${primary}".`,
+        `for example "${example}". Got "${primary}".`,
       location
     );
   }
@@ -74,10 +79,20 @@ export abstract class PromptFormatter implements Formatter {
     const layout = layoutOf(
       this.name,
       options?.outputPath ?? this.outputPath,
+      this.outputPath,
       ast.meta?.loc ?? ast.loc
     );
     const built = buildPromptBundles(ast, options, this.name);
     const rendered = this.render(built);
+    const primaryName = layout.primary.split('/').at(-1)?.toLowerCase();
+    const clash = rendered.files.find((file) => file.name.toLowerCase() === primaryName);
+    if (clash) {
+      throw new PromptFormatError(
+        `The ${this.name} target writes "${clash.name}" for a prompt and as its output "${layout.primary}". ` +
+          'Rename the prompt or set another output.',
+        ast.meta?.loc ?? ast.loc
+      );
+    }
     const composition = built.prompts.flatMap((prompt) => compositionOf(prompt) ?? []);
     if (rendered.primary === undefined) {
       return {
