@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { compile } from '@promptscript/browser-compiler';
@@ -25,8 +27,10 @@ async function compileExample(id: string, options: Parameters<typeof compile>[2]
 describe('ExampleGallery — gallery examples compile', () => {
   it('uses current syntax for every PromptScript file', () => {
     for (const example of EXAMPLES) {
+      // Application prompts need 1.6.0, everything else stays on 1.5.0.
+      const syntax = example.targets ? '1.6.0' : '1.5.0';
       for (const file of example.files.filter((candidate) => candidate.path.endsWith('.prs'))) {
-        expect(file.content, `${example.id}:${file.path}`).toContain('syntax: "1.5.0"');
+        expect(file.content, `${example.id}:${file.path}`).toContain(`syntax: "${syntax}"`);
       }
     }
   });
@@ -60,6 +64,18 @@ describe('ExampleGallery — gallery examples compile', () => {
       ).toEqual([]);
     });
   }
+
+  it('compiles the support refund example to a bundle and a preview', async () => {
+    const result = await compileExample('support-refund-reply', {
+      formatters: [{ name: 'bundle' }, { name: 'prompt-text' }],
+    });
+
+    const bundle = JSON.parse(result.outputs.get('prompts/refund-reply.json')!.content);
+    expect(bundle.id).toBe('acme-support/refund-reply');
+    expect(Object.keys(bundle.inputs)).toEqual(['order_total', 'days_since_delivery', 'message']);
+    expect(result.outputs.has('prompts/index.json')).toBe(true);
+    expect(result.outputs.has('prompts/refund-reply.md')).toBe(true);
+  });
 
   it('resolves composition and replacement in declaration order', async () => {
     const result = await compileExample('composition-order', {
@@ -276,9 +292,42 @@ describe('ExampleGallery — rendering', () => {
     expect(state.files[0]?.content).toContain('hello-world');
   });
 
+  it('enables the targets of an example and leaves the others alone', () => {
+    const store = usePlaygroundStore.getState();
+    store.setTargetEnabled('bundle', false);
+    store.setTargetEnabled('prompt-text', false);
+    const before = { ...usePlaygroundStore.getState().config.targets };
+    render(<ExampleGallery />);
+
+    fireEvent.click(screen.getByText('Support Refund Reply'));
+
+    const targets = usePlaygroundStore.getState().config.targets;
+    expect(targets['bundle'].enabled).toBe(true);
+    expect(targets['prompt-text'].enabled).toBe(true);
+    expect(targets['github']).toEqual(before['github']);
+    expect(targets['claude']).toEqual(before['claude']);
+    store.setTargetEnabled('bundle', false);
+    store.setTargetEnabled('prompt-text', false);
+  });
+
   it('closes the modal when the close button is clicked', () => {
     render(<ExampleGallery />);
     fireEvent.click(screen.getByLabelText('Close'));
     expect(usePlaygroundStore.getState().showExamples).toBe(false);
+  });
+});
+
+describe('ExampleGallery — shared example sources', () => {
+  it('keeps the refund example equal to the CLI fixture', () => {
+    const fixture = join(
+      __dirname,
+      '../../../../cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/.promptscript'
+    );
+    const example = EXAMPLES.find((candidate) => candidate.id === 'support-refund-reply');
+
+    expect(example).toBeDefined();
+    for (const file of example?.files ?? []) {
+      expect(file.content, file.path).toBe(readFileSync(join(fixture, file.path), 'utf8'));
+    }
   });
 });

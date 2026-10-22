@@ -1,228 +1,198 @@
 import { useState, useEffect, useRef } from 'react';
-import { usePlaygroundStore, type FormatterName, type ConventionType } from '../store';
+import type { KnownTarget } from '@promptscript/core';
+import { usePlaygroundStore, type ConventionType } from '../store';
 import { useFocusTrap } from '../hooks/useFocusTrap';
-
-/** Prompt targets compile separately and have no settings here. */
-type CodingFormatterName = Exclude<FormatterName, 'bundle' | 'prompt-text'>;
+import { TARGET_LABELS } from '../utils/target-labels';
 
 const TARGET_INFO: Record<
-  CodingFormatterName,
-  { label: string; versions: string[]; supportsXml: boolean }
+  KnownTarget,
+  { versions: string[]; supportsXml: boolean; hint?: string }
 > = {
   github: {
-    label: 'GitHub Copilot',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: true,
   },
   claude: {
-    label: 'Claude Code',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: true,
   },
   cursor: {
-    label: 'Cursor',
     versions: ['standard', 'legacy'],
     supportsXml: false, // Cursor only supports markdown
   },
   antigravity: {
-    label: 'Antigravity',
     versions: ['simple', 'frontmatter'],
     supportsXml: true,
   },
   factory: {
-    label: 'Factory AI',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   opencode: {
-    label: 'OpenCode',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: true,
   },
   gemini: {
-    label: 'Gemini CLI',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: true,
   },
   windsurf: {
-    label: 'Windsurf',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   cline: {
-    label: 'Cline',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   roo: {
-    label: 'Roo Code',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   codex: {
-    label: 'Codex',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   continue: {
-    label: 'Continue',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   augment: {
-    label: 'Augment',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   goose: {
-    label: 'Goose',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   kilo: {
-    label: 'Kilo Code',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   amp: {
-    label: 'Amp',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   trae: {
-    label: 'Trae',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   junie: {
-    label: 'Junie',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   kiro: {
-    label: 'Kiro CLI',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   cortex: {
-    label: 'Cortex Code',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   crush: {
-    label: 'Crush',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   'command-code': {
-    label: 'Command Code',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   kode: {
-    label: 'Kode',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   mcpjam: {
-    label: 'MCPJam',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   'mistral-vibe': {
-    label: 'Mistral Vibe',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   mux: {
-    label: 'Mux',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   openhands: {
-    label: 'OpenHands',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   pi: {
-    label: 'Pi',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   qoder: {
-    label: 'Qoder',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   'qwen-code': {
-    label: 'Qwen Code',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   zencoder: {
-    label: 'Zencoder',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   neovate: {
-    label: 'Neovate',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   pochi: {
-    label: 'Pochi',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   adal: {
-    label: 'AdaL',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   iflow: {
-    label: 'iFlow CLI',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   openclaw: {
-    label: 'OpenClaw',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   codebuddy: {
-    label: 'CodeBuddy',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
   // AGENTS.md-only targets
-  aider: { label: 'Aider', versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  aider: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
   'amazon-q': {
-    label: 'Amazon Q',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
-  warp: { label: 'Warp', versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  zed: { label: 'Zed', versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  jules: { label: 'Jules', versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  devin: { label: 'Devin', versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  grok: { label: 'Grok Build', versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  kimi: { label: 'Kimi CLI', versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  mimo: { label: 'MiMo Code', versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  warp: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  zed: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  jules: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  devin: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  grok: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  kimi: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  mimo: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
   'deep-agents': {
-    label: 'Deep Agents',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
-  forgecode: { label: 'ForgeCode', versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  hermes: { label: 'Hermes Agent', versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  forgecode: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  hermes: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
   'gitlab-duo': {
-    label: 'GitLab Duo',
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
+  },
+  // Prompt targets, off by default
+  bundle: {
+    versions: ['v1'],
+    supportsXml: false,
+    hint: 'Portable JSON prompt bundle with a content hash',
+  },
+  'prompt-text': {
+    versions: ['v1'],
+    supportsXml: false,
+    hint: 'Markdown system prompt previews',
   },
 };
 
-const POPULAR_TARGETS: FormatterName[] = [
+const POPULAR_TARGETS = new Set<KnownTarget>([
   'github',
   'claude',
   'cursor',
@@ -231,7 +201,7 @@ const POPULAR_TARGETS: FormatterName[] = [
   'codex',
   'gemini',
   'antigravity',
-];
+]);
 
 const CONVENTION_OPTIONS: { value: ConventionType; label: string }[] = [
   { value: 'markdown', label: 'Markdown' },
@@ -266,12 +236,12 @@ export function ConfigPanel() {
   if (!showConfig) return null;
 
   const allTargets = Object.entries(TARGET_INFO) as [
-    CodingFormatterName,
-    (typeof TARGET_INFO)[CodingFormatterName],
+    KnownTarget,
+    (typeof TARGET_INFO)[KnownTarget],
   ][];
   const visibleTargets = showAll
     ? allTargets
-    : allTargets.filter(([target]) => POPULAR_TARGETS.includes(target));
+    : allTargets.filter(([target]) => POPULAR_TARGETS.has(target));
 
   return (
     <div
@@ -382,7 +352,7 @@ export function ConfigPanel() {
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                   }`}
                 >
-                  Popular ({POPULAR_TARGETS.length})
+                  Popular ({POPULAR_TARGETS.size})
                 </button>
                 <button
                   onClick={() => setShowAll(true)}
@@ -405,14 +375,14 @@ export function ConfigPanel() {
                 return (
                   <div key={target} className="flex items-center gap-3">
                     {/* Enable checkbox */}
-                    <label className="flex items-center gap-2 min-w-[140px]">
+                    <label className="flex items-center gap-2 min-w-[140px]" title={info.hint}>
                       <input
                         type="checkbox"
                         checked={settings.enabled}
                         onChange={(e) => setTargetEnabled(target, e.target.checked)}
                         className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0"
                       />
-                      <span className="text-sm text-gray-200">{info.label}</span>
+                      <span className="text-sm text-gray-200">{TARGET_LABELS[target]}</span>
                     </label>
 
                     {/* Version select */}
@@ -441,7 +411,11 @@ export function ConfigPanel() {
                         )
                       }
                       disabled={!settings.enabled || !info.supportsXml}
-                      title={!info.supportsXml ? `${info.label} only supports markdown` : undefined}
+                      title={
+                        !info.supportsXml
+                          ? `${TARGET_LABELS[target]} only supports markdown`
+                          : undefined
+                      }
                       className="w-24 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-indigo-500"
                     >
                       {CONVENTION_OPTIONS.map((opt) => (

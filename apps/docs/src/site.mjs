@@ -137,6 +137,7 @@ export const SIDEBAR = [
       { label: 'Migrate Factory Hooks', slug: 'examples/migrate-factory-hooks' },
       { label: 'Agent Platform', slug: 'examples/agent-platform' },
       { label: 'Agents', slug: 'examples/agents' },
+      { label: 'Application Prompts', slug: 'examples/application-prompts' },
       { label: 'Team Setup', slug: 'examples/team-setup' },
       { label: 'Enterprise', slug: 'examples/enterprise' },
       { label: 'Skills and Local', slug: 'examples/skills-and-local' },

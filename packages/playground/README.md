@@ -26,6 +26,15 @@ An interactive editor that lets users write `.prs` code and see compiled output 
                           +-----------------------+
 ```
 
+## Targets
+
+GitHub, Claude, Cursor and Antigravity are on by default. Turn other coding targets on in the
+configuration panel. The `bundle` and `prompt-text` targets are opt-in too: turn them on there or
+load the Support Refund Reply example.
+
+Prompt targets compile in a separate pass without environment variables. A `${VAR}` in a prompt
+stays text in the bundle, the same as with the CLI. Coding targets still get your variables.
+
 ## Tech Stack
 
 - [React](https://react.dev/) 19

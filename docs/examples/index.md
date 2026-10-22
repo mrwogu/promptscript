@@ -36,6 +36,12 @@ Real-world PromptScript configuration examples.
 | Combine skills, agents, MCP, hooks, and workflows | [Agent Platform](agent-platform.md)               |
 | Define specialized workers                        | [Agents](agents.md)                               |
 
+### Build Applications
+
+| Goal                                       | Example                                       |
+| ------------------------------------------ | --------------------------------------------- |
+| Compile prompts for an application to JSON | [Application Prompts](application-prompts.md) |
+
 ### Scale Organization
 
 | Goal                                   | Example                                        |
@@ -111,6 +117,17 @@ Real-world PromptScript configuration examples.
   <div class="ref-item__content">
     <h3>Agent Platform</h3>
     <p>Runnable examples for MCP, hooks, workflows, plugins, field replacement, skills, and build profiles.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
+
+<a href="application-prompts/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--cyan">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2m-3 10H7v-2h10zm0-3H7V7h10z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Application Prompts</h3>
+    <p>Four prompts for applications with typed inputs, enum outputs, defaults, and citations, compiled to content-hashed JSON bundles.</p>
   </div>
   <div class="ref-item__arrow">→</div>
 </a>

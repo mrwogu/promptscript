@@ -1,0 +1,38 @@
+@meta {
+  id: "acme-sales"
+  syntax: "1.6.0"
+}
+
+@inherit ./org
+
+@prompts {
+  follow-up: {
+    description: "Write a follow-up email after a sales call"
+    compose: [identity, standards, restrictions]
+    model: { ref: "claude-haiku-5-5", temperature: 0.7, maxTokens: 400 }
+    inputs: {
+      recipient: { type: "string", description: "First name of the recipient" }
+      call_notes: { type: "string", description: "Notes from the call", default: "No notes." }
+      tone: {
+        type: "enum"
+        options: ["friendly", "formal"]
+        description: "Tone of the email"
+        default: "friendly"
+      }
+      days_since_call: { type: "number", description: "Days since the call", default: 3 }
+      mention_demo: { type: "boolean", description: "Offer a product demo", default: false }
+    }
+    output: {
+      subject: { type: "string", description: "Subject line" }
+      body: { type: "string", description: "Email body" }
+    }
+    system: "Match the tone that the user message asks for."
+    user: """
+      Recipient: {{input.recipient}}
+      Tone: {{input.tone}}
+      Days since the call: {{input.days_since_call}}
+      Offer a demo: {{input.mention_demo}}
+      Notes: {{input.call_notes}}
+    """
+  }
+}

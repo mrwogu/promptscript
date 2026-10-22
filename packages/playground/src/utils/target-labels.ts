@@ -1,0 +1,70 @@
+import type { KnownTarget } from '@promptscript/core';
+
+const LABELS = `
+github=GitHub Copilot
+claude=Claude Code
+cursor=Cursor
+antigravity=Antigravity
+factory=Factory AI
+opencode=OpenCode
+gemini=Gemini CLI
+windsurf=Windsurf
+cline=Cline
+roo=Roo Code
+codex=Codex
+continue=Continue
+augment=Augment
+goose=Goose
+kilo=Kilo Code
+amp=Amp
+trae=Trae
+junie=Junie
+kiro=Kiro CLI
+cortex=Cortex Code
+crush=Crush
+command-code=Command Code
+kode=Kode
+mcpjam=MCPJam
+mistral-vibe=Mistral Vibe
+mux=Mux
+openhands=OpenHands
+pi=Pi
+qoder=Qoder
+qwen-code=Qwen Code
+zencoder=Zencoder
+neovate=Neovate
+pochi=Pochi
+adal=AdaL
+iflow=iFlow CLI
+openclaw=OpenClaw
+codebuddy=CodeBuddy
+aider=Aider
+amazon-q=Amazon Q
+warp=Warp
+zed=Zed
+jules=Jules
+devin=Devin
+grok=Grok Build
+kimi=Kimi CLI
+mimo=MiMo Code
+deep-agents=Deep Agents
+forgecode=ForgeCode
+hermes=Hermes Agent
+gitlab-duo=GitLab Duo
+bundle=Prompt bundle
+prompt-text=Prompt text
+`;
+
+/**
+ * Display names of the targets, shared by the panels. Kept as one text block
+ * on purpose: a 52-entry object literal with the catalog keys is reported by
+ * Sonar as a copy of the output path map in core. See #577.
+ */
+export const TARGET_LABELS = Object.fromEntries(
+  LABELS.trim()
+    .split('\n')
+    .map((line) => {
+      const split = line.indexOf('=');
+      return [line.slice(0, split), line.slice(split + 1)];
+    })
+) as Record<KnownTarget, string>;

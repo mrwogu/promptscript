@@ -205,6 +205,23 @@ describe('share utilities', () => {
       expect(decoded?.config?.targets?.claude).toBeUndefined();
     });
 
+    it('should round-trip an enabled prompt target', () => {
+      const config: PlaygroundConfig = {
+        ...defaultConfig,
+        targets: {
+          ...defaultConfig.targets,
+          bundle: { enabled: true, version: 'v1' },
+        },
+      };
+
+      const encoded = encodeState(mockFiles, 'bundle', undefined, config);
+      const decoded = decodeState(encoded);
+
+      expect(decoded?.formatter).toBe('bundle');
+      expect(decoded?.config?.targets?.bundle?.enabled).toBe(true);
+      expect(mergeConfigWithDefaults(decoded?.config).targets.bundle.enabled).toBe(true);
+    });
+
     it('should include only non-default formatting settings', () => {
       const config: PlaygroundConfig = {
         ...defaultConfig,

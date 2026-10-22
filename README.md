@@ -423,7 +423,8 @@ They write nothing for a program without prompts. A prompt can compose blocks su
 `@identity` and `@restrictions` into its system message. PromptScript does not escape, delimit or
 filter the values an application puts into a prompt, and it does not enforce output schemas. Read
 the [application prompts guide](https://getpromptscript.dev/guides/application-prompts/) before you
-ship a bundle.
+ship a bundle. Four runnable [application prompt examples](https://getpromptscript.dev/examples/application-prompts/)
+show typed inputs, enum outputs, defaults and citations.
 
 ## Built for Repositories and Organizations
 

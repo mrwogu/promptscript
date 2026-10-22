@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
+import type { KnownTarget } from '@promptscript/core';
 import { usePlaygroundStore, type FileState } from '../store';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import refundOrg from '../examples/support-refund-reply/org.prs?raw';
+import refundProject from '../examples/support-refund-reply/project.prs?raw';
 
 export interface Example {
   id: string;
@@ -10,6 +13,8 @@ export interface Example {
   files: FileState[];
   /** Optional environment variables to set when loading this example */
   envVars?: Record<string, string>;
+  /** Optional targets to enable when loading this example */
+  targets?: KnownTarget[];
 }
 
 export const EXAMPLES: Example[] = [
@@ -715,6 +720,18 @@ export const EXAMPLES: Example[] = [
 }
 `,
       },
+    ],
+  },
+
+  {
+    id: 'support-refund-reply',
+    name: 'Support Refund Reply',
+    description: 'An application prompt with typed inputs, an output contract and a bundle',
+    complexity: 'intermediate',
+    targets: ['bundle', 'prompt-text'],
+    files: [
+      { path: 'project.prs', content: refundProject },
+      { path: 'org.prs', content: refundOrg },
     ],
   },
 
@@ -1961,6 +1978,7 @@ export function ExampleGallery() {
   const setFiles = usePlaygroundStore((s) => s.setFiles);
   const setShowExamples = usePlaygroundStore((s) => s.setShowExamples);
   const setEnvVars = usePlaygroundStore((s) => s.setEnvVars);
+  const setTargetEnabled = usePlaygroundStore((s) => s.setTargetEnabled);
   const modalRef = useRef<HTMLDivElement>(null);
 
   useFocusTrap(modalRef, true);
@@ -1977,6 +1995,7 @@ export function ExampleGallery() {
     setFiles(example.files);
     // Set env vars if the example has them, otherwise clear them
     setEnvVars(example.envVars ?? {});
+    for (const target of example.targets ?? []) setTargetEnabled(target, true);
     setShowExamples(false);
   };
 

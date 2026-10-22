@@ -1,55 +1,61 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, type ReactNode } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import {
   usePlaygroundStore,
   selectOutputsForFormatter,
   selectEnabledTargets,
   selectWarnings,
-  type FormatterName,
 } from '../store';
-import type { CompileWarning } from '@promptscript/browser-compiler';
+import { TARGET_DEFINITIONS, type KnownTarget } from '@promptscript/core';
+import { TARGET_LABELS } from '../utils/target-labels';
+import type { CompileError, CompileWarning } from '@promptscript/browser-compiler';
 
-const FORMATTERS: { name: FormatterName; label: string; icon: string }[] = [
-  { name: 'github', label: 'GitHub', icon: '🐙' },
-  { name: 'claude', label: 'Claude', icon: '🤖' },
-  { name: 'cursor', label: 'Cursor', icon: '↗' },
-  { name: 'antigravity', label: 'Antigravity', icon: '🚀' },
-  { name: 'factory', label: 'Factory', icon: '🏭' },
-  { name: 'opencode', label: 'OpenCode', icon: '💻' },
-  { name: 'gemini', label: 'Gemini', icon: '♊' },
-  { name: 'windsurf', label: 'Windsurf', icon: '🏄' },
-  { name: 'cline', label: 'Cline', icon: '⌨' },
-  { name: 'roo', label: 'Roo Code', icon: '🦘' },
-  { name: 'codex', label: 'Codex', icon: '📜' },
-  { name: 'continue', label: 'Continue', icon: '▶' },
-  { name: 'augment', label: 'Augment', icon: '➕' },
-  { name: 'goose', label: 'Goose', icon: '🪿' },
-  { name: 'kilo', label: 'Kilo Code', icon: '⚖' },
-  { name: 'amp', label: 'Amp', icon: '⚡' },
-  { name: 'trae', label: 'Trae', icon: '🌲' },
-  { name: 'junie', label: 'Junie', icon: '🌸' },
-  { name: 'kiro', label: 'Kiro CLI', icon: '🔮' },
-  { name: 'cortex', label: 'Cortex Code', icon: '🧠' },
-  { name: 'crush', label: 'Crush', icon: '💎' },
-  { name: 'command-code', label: 'Command Code', icon: '⌘' },
-  { name: 'kode', label: 'Kode', icon: '🔷' },
-  { name: 'mcpjam', label: 'MCPJam', icon: '🎵' },
-  { name: 'mistral-vibe', label: 'Mistral Vibe', icon: '🌊' },
-  { name: 'mux', label: 'Mux', icon: '🔀' },
-  { name: 'openhands', label: 'OpenHands', icon: '🤲' },
-  { name: 'pi', label: 'Pi', icon: '🥧' },
-  { name: 'qoder', label: 'Qoder', icon: '🔢' },
-  { name: 'qwen-code', label: 'Qwen Code', icon: '🐦' },
-  { name: 'zencoder', label: 'Zencoder', icon: '🧘' },
-  { name: 'neovate', label: 'Neovate', icon: '✨' },
-  { name: 'pochi', label: 'Pochi', icon: '🐕' },
-  { name: 'adal', label: 'AdaL', icon: '🔬' },
-  { name: 'iflow', label: 'iFlow CLI', icon: '🌀' },
-  { name: 'openclaw', label: 'OpenClaw', icon: '🦀' },
-  { name: 'codebuddy', label: 'CodeBuddy', icon: '👥' },
-  { name: 'hermes', label: 'Hermes Agent', icon: 'H' },
-  { name: 'gitlab-duo', label: 'GitLab Duo', icon: '🦊' },
-];
+/** Tab labels and icons. A target without an entry shows its catalog name. */
+const TAB_DISPLAY: Partial<Record<KnownTarget, { label: string; icon: string }>> = {
+  github: { label: 'GitHub', icon: '🐙' },
+  claude: { label: 'Claude', icon: '🤖' },
+  cursor: { label: 'Cursor', icon: '↗' },
+  antigravity: { label: 'Antigravity', icon: '🚀' },
+  factory: { label: 'Factory', icon: '🏭' },
+  opencode: { label: 'OpenCode', icon: '💻' },
+  gemini: { label: 'Gemini', icon: '♊' },
+  windsurf: { label: 'Windsurf', icon: '🏄' },
+  cline: { label: 'Cline', icon: '⌨' },
+  roo: { label: 'Roo Code', icon: '🦘' },
+  codex: { label: 'Codex', icon: '📜' },
+  continue: { label: 'Continue', icon: '▶' },
+  augment: { label: 'Augment', icon: '➕' },
+  goose: { label: 'Goose', icon: '🪿' },
+  kilo: { label: 'Kilo Code', icon: '⚖' },
+  amp: { label: 'Amp', icon: '⚡' },
+  trae: { label: 'Trae', icon: '🌲' },
+  junie: { label: 'Junie', icon: '🌸' },
+  kiro: { label: 'Kiro CLI', icon: '🔮' },
+  cortex: { label: 'Cortex Code', icon: '🧠' },
+  crush: { label: 'Crush', icon: '💎' },
+  'command-code': { label: 'Command Code', icon: '⌘' },
+  kode: { label: 'Kode', icon: '🔷' },
+  mcpjam: { label: 'MCPJam', icon: '🎵' },
+  'mistral-vibe': { label: 'Mistral Vibe', icon: '🌊' },
+  mux: { label: 'Mux', icon: '🔀' },
+  openhands: { label: 'OpenHands', icon: '🤲' },
+  pi: { label: 'Pi', icon: '🥧' },
+  qoder: { label: 'Qoder', icon: '🔢' },
+  'qwen-code': { label: 'Qwen Code', icon: '🐦' },
+  zencoder: { label: 'Zencoder', icon: '🧘' },
+  neovate: { label: 'Neovate', icon: '✨' },
+  pochi: { label: 'Pochi', icon: '🐕' },
+  adal: { label: 'AdaL', icon: '🔬' },
+  iflow: { label: 'iFlow CLI', icon: '🌀' },
+  openclaw: { label: 'OpenClaw', icon: '🦀' },
+  codebuddy: { label: 'CodeBuddy', icon: '👥' },
+  hermes: { label: 'Hermes Agent', icon: 'H' },
+  'gitlab-duo': { label: 'GitLab Duo', icon: '🦊' },
+  bundle: { label: 'Bundle', icon: '📦' },
+  'prompt-text': { label: 'Prompt text', icon: '📝' },
+};
+
+const TAB_TARGETS = Object.keys(TARGET_DEFINITIONS) as KnownTarget[];
 
 function CopyButton({ content }: { content: string }) {
   const [showCopied, setShowCopied] = useState(false);
@@ -168,6 +174,28 @@ function WarningPanel({ warnings }: { warnings: CompileWarning[] }) {
   );
 }
 
+function ErrorList({ errors, className }: Readonly<{ errors: CompileError[]; className: string }>) {
+  return (
+    <div className={className}>
+      <div className="text-red-400 font-medium mb-2">Compilation Failed</div>
+      <ul className="space-y-2">
+        {errors.map((error, i) => (
+          <li key={i} className="text-sm">
+            <div className="text-red-300">
+              {error.location?.file && (
+                <span className="text-gray-400">
+                  {error.location.file}:{error.location.line}:{error.location.column}{' '}
+                </span>
+              )}
+              <span className="text-yellow-400">[{error.code}]</span> {error.message}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 type OutputViewMode = 'tree' | 'tabs';
 
 export function OutputPanel() {
@@ -200,6 +228,109 @@ export function OutputPanel() {
 
   const currentOutput = outputs[activeOutputIndex];
 
+  let content: ReactNode;
+  if (isCompiling) {
+    content = (
+      <div className="flex items-center justify-center h-full text-gray-400">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 border-2 border-ps-primary border-t-transparent rounded-full animate-spin" />
+          <span>Compiling...</span>
+        </div>
+      </div>
+    );
+  } else if (compileResult && !compileResult.success && outputs.length === 0) {
+    content = <ErrorList errors={compileResult.errors} className="p-4 overflow-auto" />;
+  } else if (outputs.length > 0) {
+    content = (
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Some targets failed but others produced files: show both. */}
+        {compileResult && !compileResult.success && (
+          <ErrorList
+            errors={compileResult.errors}
+            className="p-3 max-h-48 overflow-auto flex-shrink-0 border-b border-ps-border"
+          />
+        )}
+        {/* View mode toggle + tabs view */}
+        {outputs.length > 1 && (
+          <div className="flex items-center border-b border-ps-border bg-ps-bg">
+            <button
+              onClick={() => setOutputViewMode(outputViewMode === 'tree' ? 'tabs' : 'tree')}
+              className="px-2 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-ps-surface/50 flex-shrink-0 cursor-pointer flex items-center gap-1"
+              title={outputViewMode === 'tree' ? 'Switch to tabs' : 'Switch to tree'}
+            >
+              {outputViewMode === 'tree' ? (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M1 2h5l1 1h7v1H6.5L5.5 3H2v9h4v1H1V2z" />
+                    <path d="M7 6h8v8H7V6zm1 1v6h6V7H8z" />
+                  </svg>
+                  <span>Tree</span>
+                </>
+              ) : (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <rect x="1" y="2" width="4" height="3" rx="0.5" />
+                    <rect x="6" y="2" width="4" height="3" rx="0.5" />
+                    <rect x="11" y="2" width="4" height="3" rx="0.5" />
+                  </svg>
+                  <span>Tabs</span>
+                </>
+              )}
+            </button>
+            {outputViewMode === 'tabs' && (
+              <div className="flex overflow-x-auto">
+                {outputs.map((output, index) => (
+                  <button
+                    key={output.path}
+                    onClick={() => setActiveOutputIndex(index)}
+                    className={`px-3 py-1.5 text-xs font-mono whitespace-nowrap cursor-pointer ${
+                      index === activeOutputIndex
+                        ? 'bg-ps-surface text-white border-b-2 border-ps-primary'
+                        : 'text-gray-400 hover:text-gray-300 hover:bg-ps-surface/50'
+                    }`}
+                    title={output.path}
+                  >
+                    {output.path.split('/').pop()}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="flex-1 flex overflow-hidden">
+          {/* Output file tree (when in tree mode) */}
+          {outputViewMode === 'tree' && outputs.length > 1 && (
+            <OutputFileTree
+              outputs={outputs}
+              activeIndex={activeOutputIndex}
+              onSelect={setActiveOutputIndex}
+            />
+          )}
+
+          {/* File content */}
+          {currentOutput && (
+            <div className="flex-1 overflow-auto p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-gray-500 font-mono">{currentOutput.path}</span>
+                <CopyButton content={currentOutput.content} />
+              </div>
+              <pre className="text-sm font-mono whitespace-pre-wrap text-gray-300 bg-ps-bg p-4 rounded overflow-auto">
+                {currentOutput.content}
+              </pre>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="flex items-center justify-center h-full text-gray-500">
+        No output available
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col">
       {/* Formatter tabs — only show enabled targets */}
@@ -208,137 +339,31 @@ export function OutputPanel() {
         role="tablist"
         aria-label="Output formatters"
       >
-        {FORMATTERS.filter((formatter) => enabledTargets.includes(formatter.name)).map(
-          (formatter) => {
-            const isActive = activeFormatter === formatter.name;
+        {TAB_TARGETS.filter((name) => enabledTargets.includes(name)).map((name) => {
+          const isActive = activeFormatter === name;
+          const display = TAB_DISPLAY[name];
 
-            return (
-              <button
-                key={formatter.name}
-                onClick={() => setActiveFormatter(formatter.name)}
-                role="tab"
-                aria-selected={isActive}
-                className={`px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-                  isActive ? 'tab-active text-white' : 'tab-inactive text-gray-400'
-                }`}
-              >
-                <span>{formatter.icon}</span>
-                <span>{formatter.label}</span>
-              </button>
-            );
-          }
-        )}
+          return (
+            <button
+              key={name}
+              onClick={() => setActiveFormatter(name)}
+              role="tab"
+              aria-selected={isActive}
+              className={`px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                isActive ? 'tab-active text-white' : 'tab-inactive text-gray-400'
+              }`}
+            >
+              <span>{display?.icon ?? '•'}</span>
+              <span>{display?.label ?? TARGET_LABELS[name]}</span>
+            </button>
+          );
+        })}
       </div>
 
       {!isCompiling && warnings.length > 0 && <WarningPanel warnings={warnings} />}
 
       {/* Output content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-ps-surface">
-        {isCompiling ? (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-ps-primary border-t-transparent rounded-full animate-spin" />
-              <span>Compiling...</span>
-            </div>
-          </div>
-        ) : compileResult && !compileResult.success ? (
-          <div className="p-4 overflow-auto">
-            <div className="text-red-400 font-medium mb-2">Compilation Failed</div>
-            <ul className="space-y-2">
-              {compileResult.errors.map((error, i) => (
-                <li key={i} className="text-sm">
-                  <div className="text-red-300">
-                    {error.location?.file && (
-                      <span className="text-gray-400">
-                        {error.location.file}:{error.location.line}:{error.location.column}{' '}
-                      </span>
-                    )}
-                    <span className="text-yellow-400">[{error.code}]</span> {error.message}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : outputs.length > 0 ? (
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* View mode toggle + tabs view */}
-            {outputs.length > 1 && (
-              <div className="flex items-center border-b border-ps-border bg-ps-bg">
-                <button
-                  onClick={() => setOutputViewMode(outputViewMode === 'tree' ? 'tabs' : 'tree')}
-                  className="px-2 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-ps-surface/50 flex-shrink-0 cursor-pointer flex items-center gap-1"
-                  title={outputViewMode === 'tree' ? 'Switch to tabs' : 'Switch to tree'}
-                >
-                  {outputViewMode === 'tree' ? (
-                    <>
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M1 2h5l1 1h7v1H6.5L5.5 3H2v9h4v1H1V2z" />
-                        <path d="M7 6h8v8H7V6zm1 1v6h6V7H8z" />
-                      </svg>
-                      <span>Tree</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <rect x="1" y="2" width="4" height="3" rx="0.5" />
-                        <rect x="6" y="2" width="4" height="3" rx="0.5" />
-                        <rect x="11" y="2" width="4" height="3" rx="0.5" />
-                      </svg>
-                      <span>Tabs</span>
-                    </>
-                  )}
-                </button>
-                {outputViewMode === 'tabs' && (
-                  <div className="flex overflow-x-auto">
-                    {outputs.map((output, index) => (
-                      <button
-                        key={output.path}
-                        onClick={() => setActiveOutputIndex(index)}
-                        className={`px-3 py-1.5 text-xs font-mono whitespace-nowrap cursor-pointer ${
-                          index === activeOutputIndex
-                            ? 'bg-ps-surface text-white border-b-2 border-ps-primary'
-                            : 'text-gray-400 hover:text-gray-300 hover:bg-ps-surface/50'
-                        }`}
-                        title={output.path}
-                      >
-                        {output.path.split('/').pop()}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="flex-1 flex overflow-hidden">
-              {/* Output file tree (when in tree mode) */}
-              {outputViewMode === 'tree' && outputs.length > 1 && (
-                <OutputFileTree
-                  outputs={outputs}
-                  activeIndex={activeOutputIndex}
-                  onSelect={setActiveOutputIndex}
-                />
-              )}
-
-              {/* File content */}
-              {currentOutput && (
-                <div className="flex-1 overflow-auto p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-gray-500 font-mono">{currentOutput.path}</span>
-                    <CopyButton content={currentOutput.content} />
-                  </div>
-                  <pre className="text-sm font-mono whitespace-pre-wrap text-gray-300 bg-ps-bg p-4 rounded overflow-auto">
-                    {currentOutput.content}
-                  </pre>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-full text-gray-500">
-            No output available
-          </div>
-        )}
-      </div>
+      <div className="flex-1 flex flex-col overflow-hidden bg-ps-surface">{content}</div>
     </div>
   );
 }
