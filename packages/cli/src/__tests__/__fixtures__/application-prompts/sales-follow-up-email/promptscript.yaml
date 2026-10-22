@@ -1,0 +1,7 @@
+version: '1'
+project:
+  id: sales-follow-up-email
+targets:
+  - bundle
+  - prompt-text
+includePromptScriptSkill: false

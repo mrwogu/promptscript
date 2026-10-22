@@ -1,0 +1,7 @@
+version: '1'
+project:
+  id: hr-policy-assistant
+targets:
+  - bundle
+  - prompt-text
+includePromptScriptSkill: false

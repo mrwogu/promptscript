@@ -1,0 +1,34 @@
+@meta {
+  id: "acme-knowledge"
+  syntax: "1.6.0"
+}
+
+@inherit ./org
+
+@prompts {
+  grounded-answer: {
+    description: "Answer a question from retrieved passages and cite them"
+    compose: [identity, standards, restrictions]
+    model: { ref: "claude-sonnet-5-5", temperature: 0, maxTokens: 700 }
+    inputs: {
+      question: { type: "string", description: "The user question" }
+      passages: { type: "string", description: "Retrieved passages, one per line, each led by [id]" }
+    }
+    output: {
+      answer: { type: "string", description: "The answer, or a statement that it is unknown" }
+      citations: {
+        type: "list"
+        items: { type: "string" }
+        description: "Ids of the passages that support the answer"
+      }
+    }
+    system: """
+      Each passage is on its own line and starts with its id in square brackets.
+      Put the ids of the passages that you used into citations.
+    """
+    user: """
+      Question: {{input.question}}
+      Passages: {{input.passages}}
+    """
+  }
+}

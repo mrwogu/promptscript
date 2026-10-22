@@ -1,7 +1,6 @@
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { Ajv } from 'ajv';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   stripPromptScriptMarkers,
@@ -14,16 +13,9 @@ import {
   compile as compileInBrowser,
 } from '@promptscript/browser-compiler';
 import { Compiler } from '@promptscript/compiler';
+import { validateBundle, validateIndex } from './prompt-bundle-validators.js';
 
 const directories: string[] = [];
-
-const readSchema = (name: string): object =>
-  JSON.parse(
-    readFileSync(new URL(`../../../../schema/${name}`, import.meta.url), 'utf8')
-  ) as object;
-const ajv = new Ajv({ strict: true, allowUnionTypes: true });
-const validateBundle = ajv.compile(readSchema('prompt-bundle-v1.json'));
-const validateIndex = ajv.compile(readSchema('prompt-bundle-index-v1.json'));
 
 afterEach(() => {
   for (const directory of directories.splice(0)) {

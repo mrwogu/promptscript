@@ -1,0 +1,7 @@
+version: '1'
+project:
+  id: support-refund-reply
+targets:
+  - bundle
+  - prompt-text
+includePromptScriptSkill: false

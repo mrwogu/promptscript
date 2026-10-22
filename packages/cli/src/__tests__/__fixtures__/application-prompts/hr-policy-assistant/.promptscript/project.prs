@@ -1,0 +1,35 @@
+@meta {
+  id: "acme-hr"
+  syntax: "1.6.0"
+  dataClasses: ["internal"]
+}
+
+@inherit ./org
+
+@prompts {
+  policy-answer: {
+    description: "Answer an employee question about HR policy"
+    compose: [identity, standards, restrictions]
+    model: { ref: "claude-sonnet-5-5", temperature: 0.1, maxTokens: 500 }
+    inputs: {
+      question: { type: "string", description: "The employee question" }
+      country: { type: "string", description: "Country of employment", default: "Poland" }
+    }
+    output: {
+      category: {
+        type: "enum"
+        options: ["leave", "benefits", "payroll", "conduct", "other"]
+        description: "Policy area of the question"
+      }
+      answer: { type: "string", description: "The answer for the employee" }
+    }
+    system: """
+      Answer only from the policy of the employee's country.
+      Name the policy area before you answer.
+    """
+    user: """
+      Country: {{input.country}}
+      Question: {{input.question}}
+    """
+  }
+}

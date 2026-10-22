@@ -1,0 +1,7 @@
+version: '1'
+project:
+  id: rag-answer-with-citations
+targets:
+  - bundle
+  - prompt-text
+includePromptScriptSkill: false
