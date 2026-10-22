@@ -279,7 +279,7 @@
     },
     "releases": {
       "$ref": "#/definitions/ReleasesConfig",
-      "description": "Release settings for prompt bundles. Opts in to the `prs release` commands.",
+      "description": "Release settings for prompt bundles.",
       "example": "releases:\n  environments: [staging, prod]"
     },
     "universalDir": {

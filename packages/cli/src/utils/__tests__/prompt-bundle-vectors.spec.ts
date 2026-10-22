@@ -315,10 +315,11 @@ describe('prompt bundle conformance vectors', () => {
   it('pins the precedence of a missing input over a type failure in 010-literals-and-errors', () => {
     const cases = [vector('010-literals-and-errors').render ?? []].flat();
 
-    expect(cases.slice(-3).map((c) => [c.inputs, c.error])).toEqual([
+    expect(cases.slice(-4).map((c) => [c.inputs, c.error])).toEqual([
       [{ amount: 1, urgent: 'true' }, 'invalid-type'],
       [{ amount: null, urgent: true }, 'invalid-type'],
       [{ urgent: 'yes' }, 'missing-input'],
+      [{ amount: 'a lot' }, 'missing-input'],
     ]);
   });
 

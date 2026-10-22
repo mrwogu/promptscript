@@ -1,5 +1,5 @@
 {
-  "description": "Caller keys the bundle does not declare are ignored. The render succeeds and reports one unknown-input warning, which names the keys and never the values. A __proto__ key counts as an ordinary extra key.",
+  "description": "Caller keys the bundle does not declare are ignored. The render succeeds and reports one unknown-input warning, which never holds a value. A __proto__ key counts as an ordinary extra key.",
   "source": {
     "entry": ".promptscript/project.prs",
     "files": {

@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { Ajv } from 'ajv';
 import { describe, expect, it } from 'vitest';
+import { validateLabel } from './prompt-bundle-validators.js';
 
 const readSchema = (name: string): object =>
   JSON.parse(
@@ -37,10 +38,13 @@ describe('config schema releases key', () => {
     expect(validate(config(environments))).toBe(false);
   });
 
-  it('accepts 16 environments and a name of 32 characters', () => {
+  it('accepts 16 environments', () => {
     const sixteen = Array.from({ length: 16 }, (_, i) => `env-${i}`);
 
     expect(validate(config(sixteen))).toBe(true);
+  });
+
+  it('accepts a name of 32 characters', () => {
     expect(validate(config(['a'.repeat(32)]))).toBe(true);
   });
 
@@ -57,7 +61,7 @@ describe('config schema releases key', () => {
 });
 
 describe('prompt release label schema', () => {
-  const validate = new Ajv({ strict: true }).compile(readSchema('prompt-release-label-v1.json'));
+  const validate = validateLabel;
   const hash = `sha256-${'0123456789abcdef'.repeat(4)}`;
   const label = (): Record<string, unknown> => ({
     $schema: 'https://getpromptscript.dev/schema/prompt-release-label/v1.json',
@@ -80,10 +84,14 @@ describe('prompt release label schema', () => {
       { ...label(), prompts: [{ ...(label()['prompts'] as object[])[0], x: 1 }] },
     ],
     ['another $schema', { ...label(), $schema: 'https://example.com/label.json' }],
+    ['an uppercase environment', { ...label(), environment: 'Prod' }],
     ['no environment', { ...label(), environment: undefined }],
     [
       'an uppercase hash',
-      { ...label(), prompts: [{ id: 'a/b', contentHash: hash.toUpperCase() }] },
+      {
+        ...label(),
+        prompts: [{ id: 'a/b', contentHash: `sha256-${'0123456789ABCDEF'.repeat(4)}` }],
+      },
     ],
     ['a short hash', { ...label(), prompts: [{ id: 'a/b', contentHash: 'sha256-abc' }] }],
     [

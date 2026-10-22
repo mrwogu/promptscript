@@ -10,3 +10,4 @@ const ajv = new Ajv({ strict: true, allowUnionTypes: true });
 
 export const validateBundle = ajv.compile(readSchema('prompt-bundle-v1.json'));
 export const validateIndex = ajv.compile(readSchema('prompt-bundle-index-v1.json'));
+export const validateLabel = ajv.compile(readSchema('prompt-release-label-v1.json'));

@@ -31,9 +31,11 @@ to the project root, and `files` maps paths to file contents.
 A `variant` is `{ description, set, canonical, contentHash }` and may carry `error`. `set` replaces
 top-level fields of `bundle`. `canonical` and `contentHash` are what the hash input and hash of the
 changed bundle must be. When a variant has `error`, a consumer must reject the changed bundle with
-that code, for example `unsupported-schema` for a `$schema` of another version.
+that code, for example `unsupported-schema` for a `$schema` of another version. With `contentHash`
+set to the variant's value, a variant without `error` must be accepted.
 
-`render` is data for a renderer. Render cases are asserted by a runtime implementation. A case is:
+`render` is data for a renderer. A renderer passes a vector when every case gives the pinned `messages` or `error`, and the pinned
+`warnings`. A case is:
 
 | Field      | Meaning                                                                                                  |
 | ---------- | -------------------------------------------------------------------------------------------------------- |
@@ -42,6 +44,8 @@ that code, for example `unsupported-schema` for a `$schema` of another version.
 | `messages` | The rendered messages, when the render succeeds                                                          |
 | `error`    | Set instead of `messages` when the render must fail: `missing-input`, `invalid-type` or `invalid-option` |
 | `warnings` | Render codes the renderer must report next to `messages`: `unknown-input` or `invalid-slot`              |
+
+`warnings` lists each code once, however many warnings carry it.
 
 A renderer inserts each value as text in one pass and never scans an inserted value again. It
 writes numbers in RFC 8785 form (`100`, `0.2`, `1e+21`) and booleans as `true` or `false`. It
@@ -94,35 +98,36 @@ Entries are in message order, then text order.
   Vector `011-hash-mismatch` carries a wrong `contentHash` in `bundle` and
   `error: "hash-mismatch"`.
 - Validate the structure before using any field.
+- Ignore fields you do not know. They stay in the hash. The schema is closed, so it is stricter than a reader.
 - Never fetch the URL in `$schema`. It is a version tag, not a download link.
 - Never deep-merge bundle JSON into defaults.
 
 ## Files
 
-| File                            | Shows                                                                                                             |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `001-minimal.json`              | One user message, no inputs, one provenance segment                                                               |
-| `002-key-order.json`            | The bundle of 001 with reversed key order, same canonical form and hash                                           |
-| `003-crlf.json`                 | A CRLF source: the description and the user message span two lines and compile to LF                              |
-| `004-unicode.json`              | Non-ASCII text, U+2028, a control character, quotes, a backslash, an emoji                                        |
-| `005-numbers.json`              | `0.2`, `800`, a default of `100.0` stored as `100`, and `1e21` as `1e+21`                                         |
-| `006-excluded-fields.json`      | Another `provenance.entry`; variants for `contentHash` (same hash) and `$schema` (new hash, `unsupported-schema`) |
-| `007-provenance-file.json`      | Another `provenance.segments[0].files`, same hash as 001                                                          |
-| `008-escape.json`               | An escaped slot, a backslash before an escape, and a real slot, with a render case                                |
-| `009-no-rescan.json`            | An input that holds a slot is inserted verbatim, never scanned again                                              |
-| `010-literals-and-errors.json`  | `${HOME}` stays text, number and boolean rendering, the three render errors and their precedence                  |
-| `011-hash-mismatch.json`        | A wrong `contentHash` in the bundle, the vector holds the correct one                                             |
-| `012-compose-identity.json`     | `compose: [identity]`: plain text first, a slot-like `{{greeting}}` escaped                                       |
-| `013-compose-context.json`      | `compose: [context]`: properties as bullets under a Context heading                                               |
-| `014-compose-knowledge.json`    | `compose: [knowledge]`: text under a Knowledge heading                                                            |
-| `015-compose-standards.json`    | `compose: [standards]`: keys as bullets under a Standards heading                                                 |
-| `016-compose-restrictions.json` | `compose: [restrictions]`: bullets under a Restrictions heading                                                   |
-| `017-compose-examples.json`     | `compose: [examples]`: fenced input and output under an Examples heading                                          |
-| `018-compose-order.json`        | All six blocks listed in reverse: the message keeps the fixed order                                               |
-| `019-slot-in-system.json`       | A slot in the system message is live, and compiling it reports `PS046`                                            |
-| `020-prototype-input.json`      | A slot named `constructor` with no such input fails with `missing-input`                                          |
-| `021-compose-mixed.json`        | `compose: [context]` with text, list items and properties: three groups, one blank line apart                     |
-| `022-unknown-input.json`        | Extra caller keys, `__proto__` among them: the render succeeds with an `unknown-input` warning                    |
-| `023-invalid-slot.json`         | Hand-written: `{{ input.x }}` and a lone `{{` stay text and give an `invalid-slot` warning                        |
-| `024-invalid-default.json`      | A number input with a default of `"ten"`: schema-valid, correct hash, `invalid-bundle`                            |
-| `025-forward-field.json`        | A variant adds an unknown top-level field: new hash, accepted                                                     |
+| File                            | Shows                                                                                                                                        |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `001-minimal.json`              | One user message, no inputs, one provenance segment                                                                                          |
+| `002-key-order.json`            | The bundle of 001 with reversed key order, same canonical form and hash                                                                      |
+| `003-crlf.json`                 | A CRLF source: the description and the user message span two lines and compile to LF                                                         |
+| `004-unicode.json`              | Non-ASCII text, U+2028, a control character, quotes, a backslash, an emoji                                                                   |
+| `005-numbers.json`              | `0.2`, `800`, a default of `100.0` stored as `100`, and `1e21` as `1e+21`                                                                    |
+| `006-excluded-fields.json`      | Another `provenance.entry`; variants for `contentHash` (same hash) and `$schema` (new hash, `unsupported-schema`)                            |
+| `007-provenance-file.json`      | Another `provenance.segments[0].files`, same hash as 001                                                                                     |
+| `008-escape.json`               | An escaped slot, a backslash before an escape, and a real slot, with a render case                                                           |
+| `009-no-rescan.json`            | An input that holds a slot is inserted verbatim, never scanned again                                                                         |
+| `010-literals-and-errors.json`  | `${HOME}` stays text, number and boolean rendering, the three render errors and their precedence                                             |
+| `011-hash-mismatch.json`        | A wrong `contentHash` in the bundle, the vector holds the correct one                                                                        |
+| `012-compose-identity.json`     | `compose: [identity]`: plain text first, a slot-like `{{greeting}}` escaped                                                                  |
+| `013-compose-context.json`      | `compose: [context]`: properties as bullets under a Context heading                                                                          |
+| `014-compose-knowledge.json`    | `compose: [knowledge]`: text under a Knowledge heading                                                                                       |
+| `015-compose-standards.json`    | `compose: [standards]`: keys as bullets under a Standards heading                                                                            |
+| `016-compose-restrictions.json` | `compose: [restrictions]`: bullets under a Restrictions heading                                                                              |
+| `017-compose-examples.json`     | `compose: [examples]`: fenced input and output under an Examples heading                                                                     |
+| `018-compose-order.json`        | All six blocks listed in reverse: the message keeps the fixed order                                                                          |
+| `019-slot-in-system.json`       | A slot in the system message is live, and compiling it reports `PS046`                                                                       |
+| `020-prototype-input.json`      | A slot named `constructor` with no such input fails with `missing-input`                                                                     |
+| `021-compose-mixed.json`        | `compose: [context]` with text, list items and properties: three groups, one blank line apart                                                |
+| `022-unknown-input.json`        | Extra caller keys, `__proto__` among them: the render succeeds with an `unknown-input` warning                                               |
+| `023-invalid-slot.json`         | Hand-written, since PS043 rejects it: `{{ input.name }}` and a lone `{{` stay text and give an `invalid-slot` warning                        |
+| `024-invalid-default.json`      | Hand-written, since the compiler rejects the default: a number input with a default of `"ten"`, schema-valid, correct hash, `invalid-bundle` |
+| `025-forward-field.json`        | A variant adds an unknown top-level field: new hash, accepted                                                                                |

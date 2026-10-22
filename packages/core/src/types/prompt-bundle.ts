@@ -1,3 +1,4 @@
+import type { ReleaseEnvironmentName } from './config.js';
 import type { GovernanceMeta, ModelParams, PromptScalarType } from './prompts.js';
 
 /** Role of a bundle message. */
@@ -206,7 +207,7 @@ export interface PromptReleaseLabelV1 {
    * Environment name.
    * @example "prod"
    */
-  environment: string;
+  environment: ReleaseEnvironmentName;
   /** Released prompts sorted by id */
   prompts: PromptReleaseLabelEntry[];
 }

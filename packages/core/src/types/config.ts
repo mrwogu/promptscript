@@ -445,7 +445,7 @@ export interface PromptScriptConfig {
   models?: ModelsConfig;
 
   /**
-   * Release settings for prompt bundles. Opts in to the `prs release` commands.
+   * Release settings for prompt bundles.
    * @example
    * releases:
    *   environments: [staging, prod]
