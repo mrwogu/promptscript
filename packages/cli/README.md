@@ -280,7 +280,7 @@ unsupported platform-specific features.
 | Prompt definitions      | `@prompts`                                                        | Typed inputs (syntax 1.6.0). `bundle` and `prompt-text` compile them             |
 | Monorepo delivery       | `builds` in `promptscript.yaml`                                   | Scoped output for packages and applications                                      |
 
-## 50 Built-In Targets
+## Built-In Targets
 
 PromptScript ships 50 coding agent targets and two prompt targets.
 

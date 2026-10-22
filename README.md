@@ -79,7 +79,7 @@ source. See the [full comparison](https://getpromptscript.dev/guides/vs-manual/)
 - [Portable Skills, Native Agents](#portable-skills-native-agents)
 - [Name a Model Once](#name-a-model-once)
 - [Built-In Security Scanner](#built-in-security-scanner)
-- [50 Built-In Targets](#50-built-in-targets)
+- [Built-In Targets](#built-in-targets)
 - [Prompts for Applications](#prompts-for-applications)
 - [Built for Repositories and Organizations](#built-for-repositories-and-organizations)
 - [Adopt Without a Rewrite](#adopt-without-a-rewrite)
@@ -400,7 +400,7 @@ $ prs validate --strict
 agent. See
 the [security guide](https://getpromptscript.dev/guides/security/).
 
-## 50 Built-In Targets
+## Built-In Targets
 
 PromptScript ships 50 coding agent targets and two prompt targets:
 
