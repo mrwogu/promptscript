@@ -66,6 +66,15 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [x] **`prs upgrade`** — Update syntax version with automatic migrations
 - [x] **`prs migrate`** — Convert existing `.md`, `.cursorrules`, `CLAUDE.md` to PromptScript
 
+### Application Prompts
+
+**Goal:** Write the prompts an application sends to a model in `.prs` files.
+
+- [x] **`@prompts` block** - typed inputs, output contracts, model references and governance fields, checked by PS042-PS046
+- [x] **Runtime slots** - `{{input.name}}` marks a value the application supplies, validated against the declared inputs
+- [x] **`bundle` and `prompt-text` targets** - opt-in targets that write content-hashed JSON bundles and Markdown previews ([guide](docs/guides/application-prompts.md))
+- [x] **Playground preview** - preview prompt bundles in the browser with the Support Refund Reply example; four runnable [examples](docs/examples/application-prompts.md) in the docs
+
 ---
 
 ## 🎯 Current Focus
