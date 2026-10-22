@@ -1,6 +1,6 @@
 import { createOutputPlan, noopLogger } from '@promptscript/core';
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
-import { finalizeOutputPlan } from '../output-plan.js';
+import { applyConfiguredHeader, finalizeOutputPlan } from '../output-plan.js';
 
 vi.mock('../../prettier/post-format.js', () => ({
   postFormatWithPrettier: vi.fn(async (outputs: Map<string, FormatterOutput>) => {
@@ -121,5 +121,41 @@ describe('finalizeOutputPlan', () => {
     expect(finalized.outputs.get(child.path)?.content).toBe(
       '<!-- PromptScript generated -->\n\n# Header\nchild content'
     );
+  });
+});
+
+describe('applyConfiguredHeader for prompt files', () => {
+  const marker =
+    '<!-- PromptScript 2026-01-01T00:00:00.000Z | source: p.prs | target: x - do not edit -->';
+
+  it('leaves a prompt target output without the header', () => {
+    const preview: FormatterOutput = {
+      path: 'prompts/reply.md',
+      content: `${marker}\n\nSystem text`,
+      target: 'prompt-text',
+    };
+    const coding: FormatterOutput = {
+      path: 'CLAUDE.md',
+      content: `${marker}\n\nText`,
+      target: 'claude',
+    };
+    const outputs = new Map([preview, coding].map((output) => [output.path, output]));
+
+    applyConfiguredHeader(outputs, '# Header');
+
+    expect(preview.content).not.toContain('# Header');
+    expect(coding.content).toContain('# Header');
+  });
+
+  it('leaves a bundle file without the header even when it quotes a marker', () => {
+    const bundle: FormatterOutput = {
+      path: 'prompts/reply.json',
+      content: `{\n  "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",\n  "description": "# promptscript-generated: in a message"\n}\n`,
+    };
+
+    applyConfiguredHeader(new Map([[bundle.path, bundle]]), '# Header');
+
+    expect(JSON.parse(bundle.content)).toHaveProperty('description');
+    expect(bundle.content).not.toContain('# Header');
   });
 });

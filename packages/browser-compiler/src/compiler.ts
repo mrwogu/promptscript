@@ -319,8 +319,7 @@ export class BrowserCompiler {
     }> = [];
     // Only the prompt targets read provenance, so the other targets never see a path.
     let safeProvenance: ProvenanceTrace | undefined;
-    const provenanceFor = (target: string): ProvenanceTrace | undefined => {
-      if (!isPromptTarget(target)) return undefined;
+    const promptProvenance = (): ProvenanceTrace => {
       safeProvenance ??= normalizeProvenanceFiles(resolved.provenance, this.projectRoot);
       return safeProvenance;
     };
@@ -333,7 +332,7 @@ export class BrowserCompiler {
         const formatOptions = this.getFormatOptionsForTarget(
           formatter.name,
           config,
-          provenanceFor(formatter.name)
+          isPromptTarget(formatter.name) ? promptProvenance() : undefined
         );
         this.logger.debug(`  Convention: ${formatOptions.convention ?? 'default'}`);
 

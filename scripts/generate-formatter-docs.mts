@@ -566,10 +566,11 @@ function generatePromptTargetPage(f: FormatterInfo): string {
   const files = (PROMPT_TARGET_FILES[f.name] ?? []).map(
     ([name, purpose]) => `| \`${directory}/${name}\` | ${purpose} |`
   );
+  const description = `Compile application prompts with the ${f.name} target: ${f.outputPath} and one file per prompt.`;
   return [
     '---',
     `title: ${f.displayName} Formatter`,
-    `description: ${JSON.stringify(`Compile application prompts with the ${f.name} target: ${f.outputPath} and one file per prompt.`)}`,
+    `description: ${JSON.stringify(description)}`,
     'sidebar:',
     `  label: ${f.displayName}`,
     '---',

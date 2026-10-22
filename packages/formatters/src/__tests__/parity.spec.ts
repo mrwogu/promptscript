@@ -210,7 +210,7 @@ describe('Formatter Parity Tests', () => {
 
   describe('Formatter Count', () => {
     it('should have all known targets registered', () => {
-      expect(formatters.length).toBe(CODING_TARGETS.length);
+      expect(formatters).toHaveLength(CODING_TARGETS.length);
     });
 
     it('all formatters should have unique names', () => {

@@ -19,11 +19,17 @@ const DRIVE_LETTER = /^[A-Za-z]:/;
 const LOCAL_REFERENCE = /^(?:\.{1,2}(?:[\\/]|$)|[\\/]|[A-Za-z]:)/;
 
 function toPosix(path: string): string {
-  return path.normalize('NFC').replace(/\\/g, '/');
+  return path.normalize('NFC').replaceAll('\\', '/');
 }
 
 function isAbsoluteLike(path: string): boolean {
   return path.startsWith('/') || DRIVE_LETTER.test(path);
+}
+
+/** Prefix of a collapsed path: a drive letter, a leading slash, or nothing. */
+function pathPrefix(drive: string, rest: string, absolute: boolean): string {
+  if (drive) return rest.startsWith('/') ? `${drive}/` : drive;
+  return absolute ? '/' : '';
 }
 
 /** Collapse `.` and `..` segments and repeated separators. Keeps leading `..` of a relative path. */
@@ -31,23 +37,25 @@ function collapse(posixPath: string): string {
   const absolute = posixPath.startsWith('/');
   const drive = DRIVE_LETTER.exec(posixPath)?.[0] ?? '';
   const rest = drive ? posixPath.slice(drive.length) : posixPath;
+  const rooted = absolute || drive !== '';
   const out: string[] = [];
   for (const segment of rest.split('/')) {
     if (segment === '' || segment === '.') continue;
-    if (segment === '..') {
-      if (out.length > 0 && out[out.length - 1] !== '..') out.pop();
-      else if (!absolute && !drive) out.push('..');
-      continue;
+    if (segment !== '..') {
+      out.push(segment);
+    } else if (out.length > 0 && out.at(-1) !== '..') {
+      out.pop();
+    } else if (!rooted) {
+      out.push('..');
     }
-    out.push(segment);
   }
-  const prefix = drive ? `${drive}${rest.startsWith('/') ? '/' : ''}` : absolute ? '/' : '';
-  return prefix + out.join('/');
+  return pathPrefix(drive, rest, absolute) + out.join('/');
 }
 
 function basename(posixPath: string): string {
   const segments = posixPath.split('/').filter((segment) => segment.length > 0);
-  return segments[segments.length - 1] ?? 'unknown';
+  // A path relative to a drive, such as `C:file.prs`, keeps its drive letter in the last segment
+  return (segments.at(-1) ?? '').replace(DRIVE_LETTER, '') || 'unknown';
 }
 
 function external(posixPath: string): string {
@@ -73,8 +81,7 @@ class FileNormalizer {
     projectRoot: string | undefined,
     private readonly realpath: ((path: string) => string) | undefined
   ) {
-    this.root =
-      projectRoot === undefined ? undefined : this.stripTrailingSlash(this.resolve(projectRoot));
+    this.root = projectRoot === undefined ? undefined : this.resolve(projectRoot);
   }
 
   /** Remember the authored reference of every file an import resolved to. */
@@ -101,10 +108,6 @@ class FileNormalizer {
     } catch {
       return posix;
     }
-  }
-
-  private stripTrailingSlash(path: string): string {
-    return path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
   }
 
   private relativeToRoot(posix: string): string | undefined {

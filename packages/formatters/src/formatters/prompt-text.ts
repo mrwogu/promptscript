@@ -1,4 +1,5 @@
 import type { BuiltPrompt, BuiltPrompts } from '../prompt/bundle.js';
+import { singleLine } from '../prompt/compose.js';
 import { PromptFormatter, type PromptRender } from '../prompt/prompt-formatter.js';
 import type { FormatterVersionMap, FormatterWarning } from '../types.js';
 
@@ -16,8 +17,11 @@ function systemMessage(prompt: BuiltPrompt): string | undefined {
   return prompt.bundle.messages.find((message) => message.role === 'system')?.content;
 }
 
+/** A table cell on one line, with backslashes and pipes escaped. */
 function cell(text: string): string {
-  return text.replace(/\s*\n\s*/g, ' ').replace(/\|/g, '\\|');
+  return singleLine(text)
+    .replaceAll('\\', String.raw`\\`)
+    .replaceAll('|', String.raw`\|`);
 }
 
 function readme(listed: readonly BuiltPrompt[]): string {
@@ -52,7 +56,7 @@ export class PromptTextFormatter extends PromptFormatter {
     super('prompt-text', PROMPT_TEXT_VERSIONS.v1.outputPath, 'Prompt previews (Markdown)');
   }
 
-  static override getSupportedVersions(): FormatterVersionMap {
+  static getSupportedVersions(): FormatterVersionMap {
     return PROMPT_TEXT_VERSIONS;
   }
 

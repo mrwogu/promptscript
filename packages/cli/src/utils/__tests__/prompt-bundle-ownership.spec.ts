@@ -86,7 +86,10 @@ describe('isVerifiedPromptBundleOutput', () => {
     ['a wrong hash', bundleFile({ contentHash: `sha256-${'0'.repeat(64)}` })],
     ['no hash', bundleFile({ contentHash: undefined })],
     ['a numeric hash', bundleFile({ contentHash: 7 })],
-    ['a value JSON cannot carry in the hash', bundleFile({ inputs: { n: Number.MAX_VALUE * 2 } })],
+    [
+      'a string the hash cannot carry',
+      bundleFile().replace('"description": "Reply"', '"description": "\\ud800"'),
+    ],
     ['invalid JSON', `{\n  "$schema": "${BUNDLE_SCHEMA}",\n  "id": `],
     ['an index without a prompt list', `{\n  "$schema": "${INDEX_SCHEMA}",\n  "prompts": 1\n}\n`],
   ])('rejects %s', (_name, content) => {

@@ -1,5 +1,5 @@
 import type { Program } from '@promptscript/core';
-import type { Formatter, FormatOptions, FormatterOutput, FormatterVersionMap } from '../types.js';
+import type { Formatter, FormatOptions, FormatterOutput, FormatterWarning } from '../types.js';
 import {
   PromptFormatError,
   buildPromptBundles,
@@ -21,12 +21,12 @@ export interface PromptLayout {
  * would otherwise treat the project root as owned.
  */
 function layoutOf(target: string, primary: string): PromptLayout {
-  const path = primary.replace(/\\/g, '/');
+  const path = primary.replaceAll('\\', '/');
   const slash = path.lastIndexOf('/');
   if (slash <= 0) {
     throw new PromptFormatError(
       `The ${target} target writes a directory of files next to its primary file, so its output must name one, ` +
-        `for example "prompts/${path || 'index'}". Got "${primary}".`
+        `for example "prompts/index.json". Got "${primary}".`
     );
   }
   return { primary: path, directory: path.slice(0, slash) };
@@ -39,7 +39,7 @@ export interface PromptRender {
   /** Other files, relative to the directory of the primary file */
   files: Array<{ name: string; content: string }>;
   /** Diagnostics for prompts the target skipped */
-  warnings?: FormatterOutput['warnings'];
+  warnings?: FormatterWarning[];
 }
 
 /**
@@ -56,11 +56,6 @@ export abstract class PromptFormatter implements Formatter {
     readonly outputPath: string,
     readonly description: string
   ) {}
-
-  /** Version map of the target, for the registry. */
-  static getSupportedVersions(): FormatterVersionMap {
-    return {};
-  }
 
   protected abstract render(built: BuiltPrompts): PromptRender;
 

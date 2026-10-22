@@ -13,10 +13,6 @@ export function hasPromptBundleSchemaLine(content: string): boolean {
   return first?.trim() === '{' && second !== undefined && PROMPT_BUNDLE_SCHEMA_LINE.test(second);
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
 /**
  * Whether a file is a generated bundle or index that is still what the compiler wrote.
  *
@@ -25,13 +21,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  */
 export function isVerifiedPromptBundleOutput(content: string): boolean {
   if (!hasPromptBundleSchemaLine(content)) return false;
-  let parsed: unknown;
+  let parsed: Record<string, unknown>;
   try {
-    parsed = JSON.parse(content);
+    // The file starts with an opening brace, so a valid parse is an object.
+    parsed = JSON.parse(content) as Record<string, unknown>;
   } catch {
     return false;
   }
-  if (!isRecord(parsed)) return false;
   if (parsed['$schema'] === 'https://getpromptscript.dev/schema/prompt-bundle-index/v1.json') {
     return Array.isArray(parsed['prompts']);
   }

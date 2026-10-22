@@ -154,6 +154,7 @@ function jsonType(type: PromptScalarType): ItemType {
 function buildProperty(field: PromptOutputField): PromptBundleOutputProperty {
   const description = { description: field.description };
   if (field.type === 'list') {
+    /* v8 ignore next -- the extractor rejects a list without items */
     const items = field.items ?? { type: 'string' as const };
     return {
       type: 'array',
@@ -269,12 +270,7 @@ function buildBundle(
     ...(composed.text !== undefined ? [{ role: 'system' as const, content: composed.text }] : []),
     ...(prompt.user !== undefined ? [{ role: 'user' as const, content: prompt.user }] : []),
   ];
-  if (messages.length === 0) {
-    throw new PromptFormatError(
-      `Prompt "${prompt.name}" has no message: add system or user text, or compose a block that has content.`,
-      prompt.loc
-    );
-  }
+  // The extractor rejects an entry with neither a system nor a user message, so one exists.
   const output = buildOutput(prompt);
   const model = buildModel(prompt, options);
   const defaults = readMetaGovernance(program.meta?.fields ?? {});

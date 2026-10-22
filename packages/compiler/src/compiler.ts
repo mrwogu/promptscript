@@ -762,8 +762,7 @@ export class Compiler {
     const compositions = new Map<string, PromptComposition>();
     // Only the prompt targets read provenance, so the other targets never see a path.
     let safeProvenance: ProvenanceTrace | undefined;
-    const provenanceFor = (target: string): ProvenanceTrace | undefined => {
-      if (!isPromptTarget(target)) return undefined;
+    const promptProvenance = (): ProvenanceTrace => {
       safeProvenance ??= normalizeProvenanceFiles(
         resolved.provenance,
         inferProjectRoot(
@@ -784,7 +783,7 @@ export class Compiler {
         const formatOptions = this.getFormatOptionsForTarget(
           formatter.name,
           config,
-          provenanceFor(formatter.name)
+          isPromptTarget(formatter.name) ? promptProvenance() : undefined
         );
         this.logger.debug(`  Convention: ${formatOptions.convention ?? 'default'}`);
 
@@ -898,7 +897,7 @@ export class Compiler {
       // A prompt target names its source the way its bundle does, so a marker never
       // carries a path above the project root.
       const labelFor = (owner: string): string =>
-        isPromptTarget(owner) ? (provenanceFor(owner)?.entry ?? sourceLabel) : sourceLabel;
+        isPromptTarget(owner) ? promptProvenance().entry : sourceLabel;
       const markedFiles = outputPlan.files.map((file) => {
         const target = file.role === 'injected' ? 'promptscript' : file.owner;
         const marked = addMarkerToOutput(
@@ -971,7 +970,6 @@ export class Compiler {
         errors: formatErrors,
         warnings: allWarnings,
         stats,
-        ...(compositions.size > 0 ? { composition: [...compositions.values()] } : {}),
       };
     }
 

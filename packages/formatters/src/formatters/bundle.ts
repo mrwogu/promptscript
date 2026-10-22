@@ -24,7 +24,7 @@ export class BundleFormatter extends PromptFormatter {
     super('bundle', BUNDLE_VERSIONS.v1.outputPath, 'Prompt bundles (JSON)');
   }
 
-  static override getSupportedVersions(): FormatterVersionMap {
+  static getSupportedVersions(): FormatterVersionMap {
     return BUNDLE_VERSIONS;
   }
 

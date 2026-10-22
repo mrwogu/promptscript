@@ -183,6 +183,9 @@ describe('normalizeProvenanceFiles', () => {
       ['a Windows path on another drive', 'D:\\data\\c.prs', 'external:c.prs'],
       ['a UNC path', '\\\\server\\share\\d.prs', 'external:d.prs'],
       ['a relative path that climbs', '../e.prs', 'external:e.prs'],
+      ['a path relative to a drive', 'C:f.prs', 'external:f.prs'],
+      ['a path that climbs above the filesystem root', '/work/../../g.prs', 'external:g.prs'],
+      ['the filesystem root', '/', 'external:unknown'],
     ])('should name %s as external', (_name, file, expected) => {
       const result = normalizeProvenanceFiles(trace(file, []), '/work/app');
 
@@ -217,6 +220,26 @@ describe('normalizeProvenanceFiles', () => {
       expect(text).not.toContain('/Users');
       expect(text).not.toContain('ann');
       expect(text).not.toContain('.cache');
+    });
+  });
+
+  it('should treat the filesystem root as a project root', () => {
+    const result = normalizeProvenanceFiles(trace('/a.prs', []), '/');
+
+    expect(result.entry).toBe('a.prs');
+  });
+
+  it('should keep a chain link that has no target', () => {
+    const noTarget: ProvenanceLink = { operation: 'inherit', source: at('/work/app/a.prs') };
+    const input = trace('/work/app/a.prs', [
+      entry('identity', '/work/app/a.prs', [step('/work/app/a.prs', { chain: [noTarget] })]),
+    ]);
+
+    const result = normalizeProvenanceFiles(input, '/work/app');
+
+    expect(result.entries[0]?.history[0]?.chain[0]).toEqual({
+      operation: 'inherit',
+      source: { file: 'a.prs', line: 3, column: 2, offset: 40 },
     });
   });
 

@@ -238,6 +238,28 @@ describe('bundle target', () => {
       });
     });
 
+    it('turns a list of enum items into array items with an enum', () => {
+      const bundle = bundleOf(
+        program({
+          prompts: reply({
+            output: {
+              tags: {
+                type: 'list',
+                items: { type: 'enum', options: ['a', 'b'] },
+                description: 'Tags',
+              },
+              scores: { type: 'list', items: { type: 'number' }, description: 'Scores' },
+            },
+          }),
+        })
+      );
+
+      expect(bundle.output?.properties).toEqual({
+        tags: { type: 'array', description: 'Tags', items: { type: 'string', enum: ['a', 'b'] } },
+        scores: { type: 'array', description: 'Scores', items: { type: 'number' } },
+      });
+    });
+
     it('keeps ${VAR} and other text as it is', () => {
       const bundle = bundleOf(
         program({ prompts: reply({ system: 'Home is ${HOME} and $PATH.', user: 'x' }) })
@@ -524,6 +546,155 @@ describe('bundle target', () => {
       expect(system(bundleOf(ast))).toBe('## Context\n\n- a: b');
     });
 
+    it('renders nested values as indented bullets and drops what has no text', () => {
+      const ast = program({
+        blocks: [
+          createBlock(
+            'context',
+            {
+              type: 'MixedContent',
+              text: { type: 'TextContent', value: 'Intro\n    indented line', loc: createLoc(2) },
+              properties: {
+                matrix: [['a', 'b'], { name: 'n', tags: ['t'] }],
+                nested: { empty: {}, deep: { leaf: 'v' } },
+                note: { type: 'TextContent', value: 'first\n  second', loc: createLoc(2) },
+                expr: { type: 'TypeExpression', kind: 'range', loc: createLoc(2) },
+                hidden: null,
+                __internal: 'x',
+                items: 'not a list',
+              },
+              loc: createLoc(2),
+            } as BlockContent,
+            2
+          ),
+        ],
+        prompts: reply({ compose: ['context'] }),
+      });
+
+      expect(system(bundleOf(ast))).toBe(
+        [
+          '## Context',
+          '',
+          'Intro\nindented line',
+          '',
+          '- matrix:',
+          '    - a',
+          '    - b',
+          '  - name: n',
+          '  - tags:',
+          '    - t',
+          '- nested:',
+          '  - deep:',
+          '    - leaf: v',
+          '- note: first',
+          '  second',
+          '- items: not a list',
+        ].join('\n')
+      );
+    });
+
+    it('skips empty text, unreadable items, internal names and incomplete examples', () => {
+      const ast = program({
+        blocks: [
+          createBlock(
+            'context',
+            {
+              type: 'MixedContent',
+              text: { type: 'TextContent', value: '   ', loc: createLoc(2) },
+              properties: { list: ['kept', null, { type: 'TypeExpression', kind: 'range' }] },
+              loc: createLoc(2),
+            } as BlockContent,
+            2
+          ),
+          createBlock(
+            'knowledge',
+            { type: 'ArrayContent', elements: ['first', ''], loc: createLoc(3) },
+            3
+          ),
+          createBlock(
+            'examples',
+            objectContent({
+              __hidden: { input: 'a', output: 'b' },
+              text: 'not an example',
+              noOutput: { input: 'only input' },
+              objectInput: { input: { a: 1 }, output: 'x' },
+              ok: { input: 'in', output: 'out', description: 'Multi\n\n  line  description' },
+            }),
+            4
+          ),
+        ],
+        prompts: reply({ compose: ['context', 'knowledge', 'examples'] }),
+      });
+
+      expect(system(bundleOf(ast))).toBe(
+        [
+          '## Context\n\n- list:\n  - kept',
+          '## Knowledge\n\n- first',
+          '## Examples\n\n### Example: ok\n\nMulti line  description\n\n**Input:**\n\n```\nin\n```\n\n**Output:**\n\n```\nout\n```',
+        ].join('\n\n')
+      );
+    });
+
+    it('keeps blocks without text out of the message and out of the provenance', () => {
+      const ast = program({
+        blocks: [
+          createBlock('examples', textContent('plain text'), 3),
+          createBlock('knowledge', objectContent({}), 4),
+          createBlock('identity', textContent('You help.'), 5),
+        ],
+        prompts: reply({ compose: ['examples', 'knowledge', 'identity'] }),
+      });
+
+      const bundle = bundleOf(ast);
+
+      expect(system(bundle)).toBe('You help.');
+      expect(bundle.provenance.segments.map((segment) => segment.path)).toEqual([
+        'identity',
+        'prompts.refund-reply.user',
+      ]);
+    });
+
+    it('renders a list merged from several layers as plain bullets', () => {
+      const ast = program({
+        blocks: [
+          createBlock(
+            'restrictions',
+            objectContent({ items: ['Never share secrets', 'Escalate refunds'], severity: 'high' }),
+            3
+          ),
+          createBlock(
+            'context',
+            {
+              type: 'MixedContent',
+              properties: { product: 'Acme Cloud' },
+              loc: createLoc(2),
+            } as BlockContent,
+            4
+          ),
+        ],
+        prompts: reply({ compose: ['context', 'restrictions'] }),
+      });
+
+      expect(system(bundleOf(ast))).toBe(
+        [
+          '## Context\n\n- product: Acme Cloud',
+          '## Restrictions\n\n- Never share secrets\n- Escalate refunds\n- severity: high',
+        ].join('\n\n')
+      );
+    });
+
+    it('dedents continuation lines and ignores blank ones', () => {
+      const ast = program({
+        blocks: [
+          createBlock('knowledge', textContent('Title\n    indented\n      deeper\n\n'), 3),
+          createBlock('identity', textContent('One\n\n'), 4),
+        ],
+        prompts: reply({ compose: ['knowledge', 'identity'] }),
+      });
+
+      expect(system(bundleOf(ast))).toBe('One\n\n## Knowledge\n\nTitle\nindented\n  deeper');
+    });
+
     it('fences an example with more backticks than its content holds', () => {
       const ast = program({
         blocks: [
@@ -673,6 +844,47 @@ describe('bundle target', () => {
       expect(new BundleFormatter().format(program({ meta: { syntax: '1.2.0' } })).omit).toBe(true);
     });
 
+    it('needs an id in @meta, also when there is no @meta at all', () => {
+      const ast = program({ prompts: reply() });
+      delete ast.meta;
+
+      expect(() => new BundleFormatter().format(ast)).toThrow(/id in @meta/);
+    });
+
+    it('accepts a program whose syntax cannot be read', () => {
+      for (const syntax of ['latest', 7] as const) {
+        const ast = program({ meta: { syntax }, prompts: reply() });
+
+        expect(new BundleFormatter().format(ast).omit).toBeUndefined();
+      }
+    });
+
+    it('counts the problems after the first one', () => {
+      const ast = program({ prompts: { one: { user: 'x' }, two: { user: 'y' } } });
+
+      expect(() => new BundleFormatter().format(ast)).toThrow(/1 more problems in @prompts/);
+    });
+
+    it('names an unknown source when there is neither a trace nor a file', () => {
+      const ast = program({ prompts: reply() });
+      delete (ast as { loc?: unknown }).loc;
+
+      const output = new BundleFormatter().format(ast);
+
+      expect((JSON.parse(output.content) as PromptBundleIndexV1).source).toBe('unknown');
+    });
+
+    it('names the file of the program as external when there is no trace', () => {
+      const ast = program({ prompts: reply() });
+      ast.loc = { file: '/Users/ann/work/project.prs', line: 1, column: 1 };
+
+      const output = new BundleFormatter().format(ast);
+
+      expect((JSON.parse(output.content) as PromptBundleIndexV1).source).toBe(
+        'external:project.prs'
+      );
+    });
+
     it('needs an id in @meta', () => {
       const ast = program({ prompts: reply() });
       ast.meta = { type: 'MetaBlock', fields: { syntax: '1.6.0' }, loc: createLoc(1) };
@@ -776,6 +988,25 @@ describe('prompt-text target', () => {
     });
 
     expect(formatter.format(ast).content).toContain('| Line one Line \\| two |');
+  });
+
+  it('lists several previews sorted by key and escapes backslashes in descriptions', () => {
+    const ast = program({
+      prompts: {
+        zeta: { description: 'Last', system: 'z' },
+        alpha: { description: 'Path C:\\temp', system: 'a' },
+      },
+    });
+
+    const rows = formatter
+      .format(ast)
+      .content.split('\n')
+      .filter((line) => line.startsWith('| `'));
+
+    expect(rows).toEqual([
+      '| `alpha` | Path C:\\\\temp | [alpha.md](alpha.md) |',
+      '| `zeta` | Last | [zeta.md](zeta.md) |',
+    ]);
   });
 
   it('refuses to emit below syntax 1.6.0', () => {

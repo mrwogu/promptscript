@@ -631,17 +631,11 @@ async function visitDirectory(
       const entryStat = await safeLstat(entryPath);
       if (!entryStat || entryStat.isSymbolicLink()) continue;
 
+      // A directory owned by a prompt target is cleaned in place, never below.
+      if (entryStat.isDirectory() && !recursive) continue;
+
       if (entryStat.isDirectory()) {
-        if (recursive) {
-          await visitDirectory(
-            entryPath,
-            desiredFiles,
-            dryRun,
-            removed,
-            guards,
-            onUnresolvedWorker
-          );
-        }
+        await visitDirectory(entryPath, desiredFiles, dryRun, removed, guards, onUnresolvedWorker);
         continue;
       }
 

@@ -1,11 +1,11 @@
 import {
   COMPOSABLE_BLOCKS,
-  SECTION_PROFILES,
   type Block,
   type BlockContent,
   type ComposableBlock,
   type Program,
   type PromptDefinition,
+  type TextContent,
   type Value,
 } from '@promptscript/core';
 
@@ -37,20 +37,32 @@ export interface ComposedSystemMessage {
 
 /** Replace `\r\n` and `\r` with `\n`. */
 export function normalizeNewlines(text: string): string {
-  return text.replace(/\r\n?/g, '\n');
+  return text.replaceAll(/\r\n?/g, '\n');
 }
 
 /** Escape every `{{` so a composed block can never carry a live slot. */
 export function escapeSlots(text: string): string {
-  return text.replace(/\{\{/g, '\\{{');
+  return text.replaceAll('{{', String.raw`\{{`);
+}
+
+/** Remove trailing spaces and tabs. A loop, because a regex backtracks on a long run. */
+function trimTrailingBlanks(line: string): string {
+  let end = line.length;
+  while (end > 0 && (line[end - 1] === ' ' || line[end - 1] === '\t')) end--;
+  return line.slice(0, end);
 }
 
 function trimLines(text: string): string {
+  return text.split('\n').map(trimTrailingBlanks).join('\n').trim();
+}
+
+/** Join the non-empty lines of a text with one space each. */
+export function singleLine(text: string): string {
   return text
     .split('\n')
-    .map((line) => line.replace(/[ \t]+$/, ''))
-    .join('\n')
-    .trim();
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .join(' ');
 }
 
 function dedent(text: string): string {
@@ -59,10 +71,14 @@ function dedent(text: string): string {
   const indents = lines
     .slice(1)
     .filter((line) => line.trim().length > 0)
-    .map((line) => /^\s*/.exec(line)?.[0].length ?? 0);
-  const margin = indents.length > 0 ? Math.min(...indents) : 0;
-  if (margin === 0) return text.trim();
-  return [lines[0]?.trim() ?? '', ...lines.slice(1).map((line) => line.slice(margin))]
+    .map((line) => line.length - line.trimStart().length);
+  // Infinity when every continuation line is blank
+  const margin = Math.min(...indents);
+  if (margin === 0 || margin === Infinity) return text.trim();
+  return [
+    ...lines.slice(0, 1).map((line) => line.trim()),
+    ...lines.slice(1).map((line) => line.slice(margin)),
+  ]
     .join('\n')
     .trim();
 }
@@ -71,7 +87,7 @@ function isInternal(name: string): boolean {
   return name.startsWith('__') || name === 'composedFrom';
 }
 
-function isNode(value: Value, type: string): value is Value & { type: string; value?: string } {
+function isNode(value: Value, type: string): boolean {
   return (
     typeof value === 'object' &&
     value !== null &&
@@ -80,12 +96,14 @@ function isNode(value: Value, type: string): value is Value & { type: string; va
   );
 }
 
+function isTextContent(value: Value): value is TextContent {
+  return isNode(value, 'TextContent');
+}
+
 function scalarText(value: Value): string | undefined {
   if (typeof value === 'string') return value;
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-  if (isNode(value, 'TextContent')) {
-    return typeof value.value === 'string' ? dedent(value.value) : '';
-  }
+  if (isTextContent(value)) return dedent(value.value);
   return undefined;
 }
 
@@ -107,7 +125,7 @@ function indented(pad: string, text: string, label: string): string[] {
 function itemLines(item: Value, depth: number): string[] {
   const pad = '  '.repeat(depth);
   const text = scalarText(item);
-  if (text !== undefined) return indented(pad, text, '');
+  if (text !== undefined) return text === '' ? [] : indented(pad, text, '');
   if (Array.isArray(item)) return item.flatMap((nested) => itemLines(nested, depth + 1));
   if (isPlainObject(item)) {
     return Object.entries(item).flatMap(([key, nested]) => propertyLines(key, nested, depth));
@@ -149,9 +167,11 @@ function bodyLines(content: BlockContent, asBullets: boolean): string[] {
   // A list merged from several layers is stored under `items`, and renders as a plain list.
   const properties = (record: Record<string, Value>): string[] => {
     const { items, ...rest } = record;
+    const merged = Array.isArray(items);
+    const others = Object.entries(merged ? rest : record);
     return [
-      ...(Array.isArray(items) ? listed(items) : propertyLines('items', items ?? null, 0)),
-      ...Object.entries(rest).flatMap(([key, value]) => propertyLines(key, value, 0)),
+      ...(merged ? listed(items) : []),
+      ...others.flatMap(([key, value]) => propertyLines(key, value, 0)),
     ];
   };
   switch (content.type) {
@@ -160,14 +180,21 @@ function bodyLines(content: BlockContent, asBullets: boolean): string[] {
     case 'ArrayContent':
       return listed(content.elements);
     case 'ObjectContent':
-      return [...listed(content.listItems), ...properties(content.properties)];
+      return joinGroups([listed(content.listItems), properties(content.properties)]);
     case 'MixedContent':
-      return [
-        ...(content.text ? textLines(content.text.value, asBullets) : []),
-        ...listed(content.listItems),
-        ...properties(content.properties),
-      ];
+      return joinGroups([
+        content.text ? textLines(content.text.value, asBullets) : [],
+        listed(content.listItems),
+        properties(content.properties),
+      ]);
   }
+}
+
+/** Separate the non-empty groups of lines with one blank line. */
+function joinGroups(groups: string[][]): string[] {
+  return groups
+    .filter((group) => group.length > 0)
+    .flatMap((group, index) => (index === 0 ? group : ['', ...group]));
 }
 
 function fence(text: string): string {
@@ -191,7 +218,7 @@ function examplesBody(content: BlockContent): string[] {
     const input = field(value, 'input');
     const output = field(value, 'output');
     if (!input || !output) continue;
-    const description = field(value, 'description').replace(/\s*\n\s*/g, ' ');
+    const description = singleLine(field(value, 'description'));
     parts.push(`### Example: ${name}`);
     if (description) parts.push('', description);
     parts.push('', '**Input:**', '', fence(input), '', '**Output:**', '', fence(output));
@@ -199,9 +226,14 @@ function examplesBody(content: BlockContent): string[] {
   return parts;
 }
 
-function findBlock(program: Program, name: string): Block | undefined {
-  return program.blocks.find((block) => block.name === name);
-}
+/** Headings of the blocks that have one. A test keeps them equal to the general profile. */
+const SECTION_TITLES: Record<Exclude<ComposableBlock, 'identity'>, string> = {
+  context: 'Context',
+  knowledge: 'Knowledge',
+  standards: 'Standards',
+  restrictions: 'Restrictions',
+  examples: 'Examples',
+};
 
 function renderBlock(block: Block, name: ComposableBlock): string {
   const lines =
@@ -210,8 +242,7 @@ function renderBlock(block: Block, name: ComposableBlock): string {
       : bodyLines(block.content, name === 'restrictions');
   const body = trimLines(normalizeNewlines(lines.join('\n')));
   if (body.length === 0 || name === 'identity') return body;
-  const title = SECTION_PROFILES.general.find((section) => section.id === name)?.defaultTitle;
-  return `## ${title ?? name}\n\n${body}`;
+  return `## ${SECTION_TITLES[name]}\n\n${body}`;
 }
 
 /**
@@ -231,18 +262,23 @@ export function composeSystemMessage(
   program: Program,
   prompt: PromptDefinition
 ): ComposedSystemMessage {
-  const blocks: ComposedSegment[] = [];
-  for (const name of COMPOSABLE_BLOCKS) {
-    if (!prompt.compose.includes(name)) continue;
-    const block = findBlock(program, name);
-    const text = block ? renderBlock(block, name) : '';
-    if (text.length > 0) blocks.push({ block: name, text: escapeSlots(text) });
-  }
-  const own = prompt.system === undefined ? undefined : normalizeNewlines(prompt.system);
-  const parts = [...blocks.map((segment) => segment.text), ...(own ? [own] : [])];
+  const blocks: ComposedSegment[] = COMPOSABLE_BLOCKS.filter((name) =>
+    prompt.compose.includes(name)
+  )
+    .flatMap((name) =>
+      program.blocks
+        .filter((block) => block.name === name)
+        .slice(0, 1)
+        .map((block) => ({ block: name, text: renderBlock(block, name) }))
+    )
+    .filter((segment) => segment.text.length > 0)
+    .map((segment) => ({ ...segment, text: escapeSlots(segment.text) }));
+  const own = normalizeNewlines(prompt.system ?? '');
+  const hasOwnText = own.length > 0;
+  const parts = [...blocks.map((segment) => segment.text), ...(hasOwnText ? [own] : [])];
   return {
     ...(parts.length > 0 ? { text: parts.join('\n\n') } : {}),
     blocks,
-    hasOwnText: own !== undefined && own.length > 0,
+    hasOwnText,
   };
 }

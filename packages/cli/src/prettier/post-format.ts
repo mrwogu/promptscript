@@ -51,9 +51,7 @@ export async function postFormatWithPrettier(
   }
 
   for (const output of queue) {
-    if (!MARKDOWN_RE.test(output.path)) continue;
-    // A prompt-text preview must keep the bytes of the bundle's system message.
-    if (output.target !== undefined && isPromptTarget(output.target)) continue;
+    if (!isFormattable(output)) continue;
     const absPath = resolve(projectRoot, output.path);
 
     let config: import('prettier').Options | null = null;
@@ -83,6 +81,15 @@ export async function postFormatWithPrettier(
   }
 
   return warnings;
+}
+
+/**
+ * Whether Prettier should reformat an output: markdown, except a prompt-text preview, which must
+ * keep the bytes of the system message of its bundle.
+ */
+function isFormattable(output: FormatterOutput): boolean {
+  if (!MARKDOWN_RE.test(output.path)) return false;
+  return output.target === undefined || !isPromptTarget(output.target);
 }
 
 /**
