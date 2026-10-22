@@ -1,0 +1,39 @@
+{
+  "description": "A source with CRLF line endings compiles to LF in every string. The description and the user message each span two lines.",
+  "source": {
+    "entry": ".promptscript/project.prs",
+    "files": {
+      ".promptscript/project.prs": "@meta {\r\n  id: \"acme-support\"\r\n  syntax: \"1.6.0\"\r\n  owner: \"team-support\"\r\n  risk: \"medium\"\r\n}\r\n\r\n@prompts {\r\n  refund-reply: {\r\n    description: \"\"\"\r\n      Answer a customer\r\n      refund request\r\n    \"\"\"\r\n    user: \"\"\"\r\n      Answer the refund request politely\r\n      and ask for the order number.\r\n    \"\"\"\r\n  }\r\n}\r\n"
+    }
+  },
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/refund-reply",
+    "description": "Answer a customer\nrefund request",
+    "contentHash": "sha256-6b8569e084a8326954ce5d4d244b77a1453fab5fbf94e4bcef8bc64ddc45db68",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Answer the refund request politely\nand ask for the order number."
+      }
+    ],
+    "inputs": {},
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "user",
+          "path": "prompts.refund-reply.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Answer a customer\\nrefund request\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/refund-reply\",\"inputs\":{},\"messages\":[{\"content\":\"Answer the refund request politely\\nand ask for the order number.\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-6b8569e084a8326954ce5d4d244b77a1453fab5fbf94e4bcef8bc64ddc45db68",
+  "slots": []
+}

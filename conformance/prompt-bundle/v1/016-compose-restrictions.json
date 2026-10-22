@@ -1,0 +1,67 @@
+{
+  "description": "compose: [restrictions]. Each restriction becomes a bullet under a Restrictions heading.",
+  "source": {
+    "entry": ".promptscript/project.prs",
+    "files": {
+      ".promptscript/project.prs": "@meta {\n  id: \"acme-support\"\n  syntax: \"1.6.0\"\n  owner: \"team-support\"\n  risk: \"medium\"\n}\n\n@restrictions {\n  - \"Never share secrets\"\n  - \"Escalate refunds above 500\"\n}\n\n@prompts {\n  compose: {\n    description: \"Answer with composed text\"\n    compose: [restrictions]\n    system: \"Answer the question.\"\n    user: \"Question: {{input.question}}\"\n    inputs: { question: { type: \"string\", description: \"The question\" } }\n  }\n}\n"
+    }
+  },
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/compose",
+    "description": "Answer with composed text",
+    "contentHash": "sha256-efbbcebe55381430baa05a2ff03aa558a7f895de4f74e21f4c75728bb72b9d94",
+    "messages": [
+      {
+        "role": "system",
+        "content": "## Restrictions\n\n- Never share secrets\n- Escalate refunds above 500\n\nAnswer the question."
+      },
+      {
+        "role": "user",
+        "content": "Question: {{input.question}}"
+      }
+    ],
+    "inputs": {
+      "question": {
+        "type": "string",
+        "description": "The question",
+        "required": true
+      }
+    },
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "system",
+          "path": "restrictions",
+          "files": [".promptscript/project.prs"]
+        },
+        {
+          "message": "system",
+          "path": "prompts.compose.system",
+          "files": [".promptscript/project.prs"]
+        },
+        {
+          "message": "user",
+          "path": "prompts.compose.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Answer with composed text\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/compose\",\"inputs\":{\"question\":{\"description\":\"The question\",\"required\":true,\"type\":\"string\"}},\"messages\":[{\"content\":\"## Restrictions\\n\\n- Never share secrets\\n- Escalate refunds above 500\\n\\nAnswer the question.\",\"role\":\"system\"},{\"content\":\"Question: {{input.question}}\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-efbbcebe55381430baa05a2ff03aa558a7f895de4f74e21f4c75728bb72b9d94",
+  "slots": [
+    {
+      "message": 1,
+      "kind": "slot",
+      "name": "question",
+      "offset": 10,
+      "length": 18
+    }
+  ]
+}

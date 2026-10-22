@@ -1,0 +1,67 @@
+{
+  "description": "compose: [standards]. Each key becomes a bullet, lists are indented one level, under a Standards heading.",
+  "source": {
+    "entry": ".promptscript/project.prs",
+    "files": {
+      ".promptscript/project.prs": "@meta {\n  id: \"acme-support\"\n  syntax: \"1.6.0\"\n  owner: \"team-support\"\n  risk: \"medium\"\n}\n\n@standards {\n  tone: \"warm\"\n  format: [\"Short paragraphs\", \"No jargon\"]\n}\n\n@prompts {\n  compose: {\n    description: \"Answer with composed text\"\n    compose: [standards]\n    system: \"Answer the question.\"\n    user: \"Question: {{input.question}}\"\n    inputs: { question: { type: \"string\", description: \"The question\" } }\n  }\n}\n"
+    }
+  },
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/compose",
+    "description": "Answer with composed text",
+    "contentHash": "sha256-6ca5da05074c9a5c2accf7288af8677087dc3a1d9a3eeda5bc261605154f0886",
+    "messages": [
+      {
+        "role": "system",
+        "content": "## Standards\n\n- tone: warm\n- format:\n  - Short paragraphs\n  - No jargon\n\nAnswer the question."
+      },
+      {
+        "role": "user",
+        "content": "Question: {{input.question}}"
+      }
+    ],
+    "inputs": {
+      "question": {
+        "type": "string",
+        "description": "The question",
+        "required": true
+      }
+    },
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "system",
+          "path": "standards",
+          "files": [".promptscript/project.prs"]
+        },
+        {
+          "message": "system",
+          "path": "prompts.compose.system",
+          "files": [".promptscript/project.prs"]
+        },
+        {
+          "message": "user",
+          "path": "prompts.compose.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Answer with composed text\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/compose\",\"inputs\":{\"question\":{\"description\":\"The question\",\"required\":true,\"type\":\"string\"}},\"messages\":[{\"content\":\"## Standards\\n\\n- tone: warm\\n- format:\\n  - Short paragraphs\\n  - No jargon\\n\\nAnswer the question.\",\"role\":\"system\"},{\"content\":\"Question: {{input.question}}\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-6ca5da05074c9a5c2accf7288af8677087dc3a1d9a3eeda5bc261605154f0886",
+  "slots": [
+    {
+      "message": 1,
+      "kind": "slot",
+      "name": "question",
+      "offset": 10,
+      "length": 18
+    }
+  ]
+}

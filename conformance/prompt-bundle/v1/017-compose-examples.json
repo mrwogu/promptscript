@@ -1,0 +1,67 @@
+{
+  "description": "compose: [examples]. Each example becomes a heading with a fenced input and output under an Examples heading.",
+  "source": {
+    "entry": ".promptscript/project.prs",
+    "files": {
+      ".promptscript/project.prs": "@meta {\n  id: \"acme-support\"\n  syntax: \"1.6.0\"\n  owner: \"team-support\"\n  risk: \"medium\"\n}\n\n@examples {\n  greeting: {\n    input: \"Hello\"\n    output: \"Hi, how can I help?\"\n  }\n}\n\n@prompts {\n  compose: {\n    description: \"Answer with composed text\"\n    compose: [examples]\n    system: \"Answer the question.\"\n    user: \"Question: {{input.question}}\"\n    inputs: { question: { type: \"string\", description: \"The question\" } }\n  }\n}\n"
+    }
+  },
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/compose",
+    "description": "Answer with composed text",
+    "contentHash": "sha256-e3c38268a8d2235cfa395490bd0d546952e0866aa458af4781b8efdd41ba9f42",
+    "messages": [
+      {
+        "role": "system",
+        "content": "## Examples\n\n### Example: greeting\n\n**Input:**\n\n```\nHello\n```\n\n**Output:**\n\n```\nHi, how can I help?\n```\n\nAnswer the question."
+      },
+      {
+        "role": "user",
+        "content": "Question: {{input.question}}"
+      }
+    ],
+    "inputs": {
+      "question": {
+        "type": "string",
+        "description": "The question",
+        "required": true
+      }
+    },
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "system",
+          "path": "examples",
+          "files": [".promptscript/project.prs"]
+        },
+        {
+          "message": "system",
+          "path": "prompts.compose.system",
+          "files": [".promptscript/project.prs"]
+        },
+        {
+          "message": "user",
+          "path": "prompts.compose.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Answer with composed text\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/compose\",\"inputs\":{\"question\":{\"description\":\"The question\",\"required\":true,\"type\":\"string\"}},\"messages\":[{\"content\":\"## Examples\\n\\n### Example: greeting\\n\\n**Input:**\\n\\n```\\nHello\\n```\\n\\n**Output:**\\n\\n```\\nHi, how can I help?\\n```\\n\\nAnswer the question.\",\"role\":\"system\"},{\"content\":\"Question: {{input.question}}\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-e3c38268a8d2235cfa395490bd0d546952e0866aa458af4781b8efdd41ba9f42",
+  "slots": [
+    {
+      "message": 1,
+      "kind": "slot",
+      "name": "question",
+      "offset": 10,
+      "length": 18
+    }
+  ]
+}
