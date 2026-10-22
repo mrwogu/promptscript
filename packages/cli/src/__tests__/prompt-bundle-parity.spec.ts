@@ -1,6 +1,7 @@
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
+import { Ajv } from 'ajv';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   stripPromptScriptMarkers,
@@ -15,6 +16,14 @@ import {
 import { Compiler } from '@promptscript/compiler';
 
 const directories: string[] = [];
+
+const readSchema = (name: string): object =>
+  JSON.parse(
+    readFileSync(new URL(`../../../../schema/${name}`, import.meta.url), 'utf8')
+  ) as object;
+const ajv = new Ajv({ strict: true, allowUnionTypes: true });
+const validateBundle = ajv.compile(readSchema('prompt-bundle-v1.json'));
+const validateIndex = ajv.compile(readSchema('prompt-bundle-index-v1.json'));
 
 afterEach(() => {
   for (const directory of directories.splice(0)) {
@@ -128,6 +137,19 @@ describe('prompt targets in the CLI compiler and the BrowserCompiler', () => {
     expect(cli.contentHash).toBe(browser.contentHash);
     expect(hashPromptBundle(cli)).toBe(cli.contentHash);
     expect(cli.provenance.entry).toBe('project.prs');
+  });
+
+  it('writes files that validate against the published schemas on both sides', async () => {
+    for (const outputs of [await viaCli(FILES), await viaBrowser(FILES)]) {
+      const index = JSON.parse(outputs.get('prompts/index.json') ?? '');
+      expect(validateIndex(index), JSON.stringify(validateIndex.errors)).toBe(true);
+      for (const { file } of index.prompts as { file: string }[]) {
+        const bundle = JSON.parse(outputs.get(`prompts/${file}`) ?? '');
+        expect(validateBundle(bundle), `${file} ${JSON.stringify(validateBundle.errors)}`).toBe(
+          true
+        );
+      }
+    }
   });
 
   it('keeps ${VAR} as text on both sides', async () => {
