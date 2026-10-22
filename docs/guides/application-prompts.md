@@ -68,7 +68,7 @@ A prompt is an entry of `@prompts`. It can reuse the blocks of the same program:
 <!-- playground-link-end -->
 
 The reference for every field is in the [language reference](../reference/language.md#prompts).
-The file must declare `syntax: "1.6.0"` or later. Both targets refuse a lower version, and
+The file must declare `syntax: "1.6.0"` or later. Both targets refuse a lower version, a prerelease below it and a missing syntax, and
 `prs validate` warns about `@prompts` entries below it (an error with `--strict`).
 
 ## Compile
