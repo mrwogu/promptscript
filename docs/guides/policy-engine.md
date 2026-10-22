@@ -6,7 +6,7 @@ description: Enforce declarative organization policies on skill extensions durin
 # Policy Engine
 
 The policy engine validates skill extensions against declarative organizational rules.
-Policies are evaluated during `prs validate` and optionally during `prs compile`.
+Policies are evaluated by `prs validate` and `prs check`. `prs compile` does not evaluate them.
 
 ## Configuration
 
