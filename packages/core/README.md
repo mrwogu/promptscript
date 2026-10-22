@@ -134,16 +134,19 @@ Compatibility timeline:
 The `bundle` and `prompt-text` targets belong to the `prompt` family and use the `general` section
 profile. No default selection includes them.
 
-| Export                          | Description                                                                                                     |
-| :------------------------------ | :-------------------------------------------------------------------------------------------------------------- |
-| `SECTION_PROFILES`              | Section contracts per profile. `coding` is the existing registry, `general` has five                            |
-| `SectionProfile`                | `'coding'` or `'general'`. Every target reports its profile as `sectionProfile`                                 |
-| `isPromptTarget(name)`          | True for a built-in target of the `prompt` family                                                               |
-| `CODING_TARGETS`                | Every known target except the prompt family                                                                     |
-| `hashPromptBundle(bundle)`      | `sha256-` plus SHA-256 over the canonical JSON without `contentHash` and `provenance`                           |
-| `normalizeProvenanceFiles(...)` | Rewrites a trace: authored reference for a pack, relative path in the root, else `external:` plus the base name |
-| `readMetaGovernance(fields)`    | Reads the governance defaults of `@meta`                                                                        |
-| `extractPromptDefinitions(...)` | Reads the `@prompts` entries of a program into typed definitions                                                |
+| Export                           | Description                                                                                                     |
+| :------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| `SECTION_PROFILES`               | Section contracts per profile. `coding` is the existing registry, `general` has five                            |
+| `SectionProfile`                 | `'coding'` or `'general'`. Every target reports its profile as `sectionProfile`                                 |
+| `isPromptTarget(name)`           | True for a built-in target of the `prompt` family                                                               |
+| `CODING_TARGETS`                 | Every known target except the prompt family                                                                     |
+| `compareCodeUnits(a, b)`         | Compares two strings by UTF-16 code units, the order RFC 8785 requires, whatever the locale                     |
+| `PROMPT_BUNDLE_SCHEMA_URL`       | Schema URL of a prompt bundle, the version tag inside the hash                                                  |
+| `PROMPT_BUNDLE_INDEX_SCHEMA_URL` | Schema URL of a prompt bundle index                                                                             |
+| `hashPromptBundle(bundle)`       | `sha256-` plus SHA-256 over the canonical JSON without `contentHash` and `provenance`                           |
+| `normalizeProvenanceFiles(...)`  | Rewrites a trace: authored reference for a pack, relative path in the root, else `external:` plus the base name |
+| `readMetaGovernance(fields)`     | Reads the governance defaults of `@meta`                                                                        |
+| `extractPromptDefinitions(...)`  | Reads the `@prompts` entries of a program into typed definitions                                                |
 
 `normalizeProvenanceFiles` is pure. It takes an optional `realpath` function and works for POSIX
 and Windows paths. It covers every file in a trace: entries, history steps, chain links, nested
@@ -151,7 +154,9 @@ traces and absolute targets. Anything that would still be absolute, climb above 
 drive letter becomes `external:<basename>`.
 
 An `OutputArtifact` with `omit` set is skipped by `createOutputPlan`. A formatter uses it when it has
-no file to write.
+no file to write. The plan still records the managed directories of such an artifact in
+`omittedManagedDirectories`, one `OmittedManagedDirectory` (`owner`, `directory`, `primaryFile`) per
+directory, so cleanup can remove the files an earlier compile wrote there.
 
 ### Output planning
 

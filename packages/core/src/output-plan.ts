@@ -90,13 +90,6 @@ export interface OutputPlanManagedPaths {
   files: string[];
 }
 
-/**
- * Shared, filesystem-independent output plan.
- *
- * `files` is sorted by normalized path. `outputs` and `owners` use the same
- * deterministic order. Collision resolution happens before any filesystem
- * consumer sees the plan.
- */
 /** A managed directory of an output that a formatter omitted. */
 export interface OmittedManagedDirectory {
   /** Target that owns the directory */
@@ -107,6 +100,13 @@ export interface OmittedManagedDirectory {
   primaryFile: string;
 }
 
+/**
+ * Shared, filesystem-independent output plan.
+ *
+ * `files` is sorted by normalized path. `outputs` and `owners` use the same
+ * deterministic order. Collision resolution happens before any filesystem
+ * consumer sees the plan.
+ */
 export interface OutputPlan {
   /** Selected normalized files. */
   files: OutputPlanFile[];
