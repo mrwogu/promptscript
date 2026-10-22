@@ -85,12 +85,43 @@ describe('OutputPanel warnings', () => {
   });
 });
 
-describe('OutputPanel target tabs', () => {
-  const output = (path: string, content: string, formatter: string) => [
-    path,
-    { path, content, formatter },
-  ];
+const INDEX = '{"prompts":["support-reply"]}';
+const BUNDLE = '{"key":"support-reply"}';
 
+/** Enable a target, make it the active tab and optionally give it a compile result. */
+function arrange(
+  target: 'aider' | 'bundle' | 'claude',
+  compileResult?: Partial<CompileResult>
+): void {
+  act(() => {
+    usePlaygroundStore.getState().setTargetEnabled(target, true);
+    usePlaygroundStore.setState({
+      activeFormatter: target,
+      isCompiling: false,
+      ...(compileResult && { compileResult: { ...buildResult([]), ...compileResult } }),
+    });
+  });
+}
+
+function bundleResult(): Partial<CompileResult> {
+  const paths = { 'prompts/index.json': INDEX, 'prompts/support-reply.json': BUNDLE };
+  return {
+    outputs: new Map(
+      Object.entries(paths).map(([path, content]) => [path, { path, content, formatter: 'bundle' }])
+    ),
+    outputOwners: new Map(Object.keys(paths).map((path) => [path, 'bundle'])),
+  };
+}
+
+function failedResult(message: string, outputs?: CompileResult['outputs']): Partial<CompileResult> {
+  return {
+    success: false,
+    errors: [{ name: 'CompileError', code: 'PS0000', message }],
+    ...(outputs && { outputs }),
+  };
+}
+
+describe('OutputPanel target tabs', () => {
   afterEach(() => {
     act(() => {
       usePlaygroundStore.getState().setTargetEnabled('aider', false);
@@ -99,74 +130,45 @@ describe('OutputPanel target tabs', () => {
   });
 
   it('gives a tab to a catalog target the old list did not know', () => {
-    act(() => {
-      usePlaygroundStore.getState().setTargetEnabled('aider', true);
-      usePlaygroundStore.setState({ activeFormatter: 'aider', isCompiling: false });
-    });
+    arrange('aider');
 
     render(<OutputPanel />);
 
     expect(screen.getByRole('tab', { name: /aider/ })).toBeInTheDocument();
   });
 
+  it('switches the active formatter when a tab is clicked', () => {
+    arrange('aider');
+    act(() => usePlaygroundStore.setState({ activeFormatter: 'claude' }));
+    render(<OutputPanel />);
+
+    fireEvent.click(screen.getByRole('tab', { name: /aider/ }));
+
+    expect(usePlaygroundStore.getState().activeFormatter).toBe('aider');
+  });
+
   it('shows the bundle files and the JSON as written', () => {
-    const index = '{"prompts":["support-reply"]}';
-    const bundle = '{"key":"support-reply"}';
-    usePlaygroundStore.getState().setTargetEnabled('bundle', true);
-    usePlaygroundStore.setState({
-      activeFormatter: 'bundle',
-      isCompiling: false,
-      compileResult: {
-        ...buildResult([]),
-        outputs: new Map([
-          output('prompts/index.json', index, 'bundle'),
-          output('prompts/support-reply.json', bundle, 'bundle'),
-        ]) as CompileResult['outputs'],
-        outputOwners: new Map([
-          ['prompts/index.json', 'bundle'],
-          ['prompts/support-reply.json', 'bundle'],
-        ]),
-      },
-    });
+    arrange('bundle', bundleResult());
 
     render(<OutputPanel />);
 
     expect(screen.getByRole('tab', { name: /Bundle/ })).toBeInTheDocument();
     expect(screen.getByTitle('prompts/index.json')).toBeInTheDocument();
-    expect(screen.getByTitle('prompts/support-reply.json')).toBeInTheDocument();
-    expect(screen.getByText(index)).toBeInTheDocument();
+    expect(screen.getByText(INDEX)).toBeInTheDocument();
 
     fireEvent.click(screen.getByTitle('prompts/support-reply.json'));
 
-    expect(screen.getByText(bundle)).toBeInTheDocument();
+    expect(screen.getByText(BUNDLE)).toBeInTheDocument();
   });
 
   it('switches between the file tree and file tabs', () => {
-    const index = '{"prompts":["support-reply"]}';
-    const bundle = '{"key":"support-reply"}';
-    usePlaygroundStore.getState().setTargetEnabled('bundle', true);
-    usePlaygroundStore.setState({
-      activeFormatter: 'bundle',
-      isCompiling: false,
-      compileResult: {
-        ...buildResult([]),
-        outputs: new Map([
-          output('prompts/index.json', index, 'bundle'),
-          output('prompts/support-reply.json', bundle, 'bundle'),
-        ]) as CompileResult['outputs'],
-        outputOwners: new Map([
-          ['prompts/index.json', 'bundle'],
-          ['prompts/support-reply.json', 'bundle'],
-        ]),
-      },
-    });
-
+    arrange('bundle', bundleResult());
     render(<OutputPanel />);
 
     fireEvent.click(screen.getByTitle('Switch to tabs'));
     fireEvent.click(screen.getByTitle('prompts/support-reply.json'));
 
-    expect(screen.getByText(bundle)).toBeInTheDocument();
+    expect(screen.getByText(BUNDLE)).toBeInTheDocument();
 
     fireEvent.click(screen.getByTitle('Switch to tree'));
 
@@ -176,15 +178,7 @@ describe('OutputPanel target tabs', () => {
 
 describe('OutputPanel failed compiles', () => {
   it('lists the errors and keeps the files that other targets produced', () => {
-    usePlaygroundStore.setState({
-      activeFormatter: 'claude',
-      isCompiling: false,
-      compileResult: {
-        ...buildResult([]),
-        success: false,
-        errors: [{ name: 'CompileError', code: 'PS0000', message: 'bundle broke' }],
-      },
-    });
+    arrange('claude', failedResult('bundle broke'));
 
     render(<OutputPanel />);
 
@@ -194,35 +188,11 @@ describe('OutputPanel failed compiles', () => {
   });
 
   it('shows only the errors when no target produced a file', () => {
-    usePlaygroundStore.setState({
-      activeFormatter: 'claude',
-      isCompiling: false,
-      compileResult: {
-        ...buildResult([]),
-        success: false,
-        outputs: new Map(),
-        errors: [{ name: 'CompileError', code: 'PS0000', message: 'all broke' }],
-      },
-    });
+    arrange('claude', failedResult('all broke', new Map()));
 
     render(<OutputPanel />);
 
     expect(screen.getByText(/all broke/)).toBeInTheDocument();
     expect(screen.queryByText('# CLAUDE.md')).toBeNull();
-  });
-});
-
-describe('OutputPanel tab selection', () => {
-  it('switches the active formatter when a tab is clicked', () => {
-    act(() => {
-      usePlaygroundStore.getState().setTargetEnabled('aider', true);
-      usePlaygroundStore.setState({ activeFormatter: 'claude', isCompiling: false });
-    });
-    render(<OutputPanel />);
-
-    fireEvent.click(screen.getByRole('tab', { name: /aider/ }));
-
-    expect(usePlaygroundStore.getState().activeFormatter).toBe('aider');
-    act(() => usePlaygroundStore.getState().setTargetEnabled('aider', false));
   });
 });
