@@ -204,7 +204,7 @@ describe('bundle target', () => {
       const ast = program({ prompts: reply() });
       (ast.meta as { fields: Record<string, unknown> }).fields['syntax'] = 1.6;
 
-      expect(() => new BundleFormatter().format(ast)).toThrow(/declares "1.6"/);
+      expect(() => new BundleFormatter().format(ast)).toThrow(/declares 1\.6\b/);
     });
 
     it('drops leading dot segments from a nested output path', () => {
