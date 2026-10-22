@@ -7,7 +7,6 @@ import {
 } from '../prompt-bundle-ownership.js';
 
 const BUNDLE_SCHEMA = 'https://getpromptscript.dev/schema/prompt-bundle/v1.json';
-const INDEXES: ReadonlySet<string> = new Set(['index.json']);
 const INDEX_SCHEMA = 'https://getpromptscript.dev/schema/prompt-bundle-index/v1.json';
 
 function bundleFile(change: Record<string, unknown> = {}, eol = '\n'): string {
@@ -65,33 +64,33 @@ describe('hasPromptBundleSchemaLine', () => {
 
 describe('isVerifiedPromptBundleOutput', () => {
   it('rejects a bundle saved under another name', () => {
-    expect(isVerifiedPromptBundleOutput(bundleFile(), 'reply-copy.json', INDEXES)).toBe(false);
-    expect(isVerifiedPromptBundleOutput(bundleFile(), 'other.json', INDEXES)).toBe(false);
+    expect(isVerifiedPromptBundleOutput(bundleFile(), 'reply-copy.json')).toBe(false);
+    expect(isVerifiedPromptBundleOutput(bundleFile(), 'other.json')).toBe(false);
   });
 
   it('rejects a bundle without a string id', () => {
     const content = bundleFile({ id: 7 });
 
-    expect(isVerifiedPromptBundleOutput(content, 'reply.json', INDEXES)).toBe(false);
+    expect(isVerifiedPromptBundleOutput(content, 'reply.json')).toBe(false);
   });
 
-  it('rejects an index under a name the target does not give its index', () => {
+  it('accepts an index only under the name of the default output', () => {
     const content = `{\n  "$schema": "${INDEX_SCHEMA}",\n  "prompts": []\n}\n`;
 
-    expect(isVerifiedPromptBundleOutput(content, 'copy-of-index.json', INDEXES)).toBe(false);
-    expect(isVerifiedPromptBundleOutput(content, 'all.json', new Set(['all.json']))).toBe(true);
+    expect(isVerifiedPromptBundleOutput(content, 'copy-of-index.json')).toBe(false);
+    expect(isVerifiedPromptBundleOutput(content, 'all.json')).toBe(false);
+    expect(isVerifiedPromptBundleOutput(content, 'index.json')).toBe(true);
   });
 
   it('accepts a bundle whose hash verifies', () => {
-    expect(isVerifiedPromptBundleOutput(bundleFile(), 'reply.json', INDEXES)).toBe(true);
+    expect(isVerifiedPromptBundleOutput(bundleFile(), 'reply.json')).toBe(true);
   });
 
   it('accepts a bundle with different provenance, which is outside the hash', () => {
     expect(
       isVerifiedPromptBundleOutput(
         bundleFile({ provenance: { entry: 'other.prs', segments: [] } }),
-        'reply.json',
-        INDEXES
+        'reply.json'
       )
     ).toBe(true);
   });
@@ -100,8 +99,7 @@ describe('isVerifiedPromptBundleOutput', () => {
     expect(
       isVerifiedPromptBundleOutput(
         `{\n  "$schema": "${INDEX_SCHEMA}",\n  "source": "p.prs",\n  "prompts": []\n}\n`,
-        'index.json',
-        INDEXES
+        'index.json'
       )
     ).toBe(true);
   });
@@ -118,7 +116,7 @@ describe('isVerifiedPromptBundleOutput', () => {
     ['invalid JSON', `{\n  "$schema": "${BUNDLE_SCHEMA}",\n  "id": `],
     ['an index without a prompt list', `{\n  "$schema": "${INDEX_SCHEMA}",\n  "prompts": 1\n}\n`],
   ])('rejects %s', (_name, content) => {
-    expect(isVerifiedPromptBundleOutput(content, 'reply.json', INDEXES)).toBe(false);
+    expect(isVerifiedPromptBundleOutput(content, 'reply.json')).toBe(false);
   });
 });
 

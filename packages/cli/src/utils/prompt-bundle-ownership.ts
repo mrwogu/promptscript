@@ -13,19 +13,18 @@ export function hasPromptBundleSchemaLine(content: string): boolean {
   return first?.trim() === '{' && second !== undefined && PROMPT_BUNDLE_SCHEMA_LINE.test(second);
 }
 
+/** File name of the index in the default output. */
+const PROMPT_BUNDLE_INDEX_FILE = 'index.json';
+
 /**
  * Whether a file is a generated bundle or index that is still what the compiler wrote.
  *
  * It must start with the `$schema` line and parse as JSON. A bundle must carry a `contentHash`
  * that verifies and sit under the name the target gives it, `<last id segment>.json`. An index
- * must sit under one of the given index file names. A copied, renamed or hand-edited file fails
+ * must be named `index.json`, the name of the default output. A copied, renamed or hand-edited file fails
  * the check, so cleanup never removes it.
  */
-export function isVerifiedPromptBundleOutput(
-  content: string,
-  fileName: string,
-  indexFileNames: ReadonlySet<string>
-): boolean {
+export function isVerifiedPromptBundleOutput(content: string, fileName: string): boolean {
   if (!hasPromptBundleSchemaLine(content)) return false;
   let parsed: Record<string, unknown>;
   try {
@@ -35,7 +34,7 @@ export function isVerifiedPromptBundleOutput(
     return false;
   }
   if (parsed['$schema'] === PROMPT_BUNDLE_INDEX_SCHEMA_URL) {
-    return Array.isArray(parsed['prompts']) && indexFileNames.has(fileName);
+    return Array.isArray(parsed['prompts']) && fileName === PROMPT_BUNDLE_INDEX_FILE;
   }
   try {
     return (

@@ -103,8 +103,6 @@ export interface OmittedManagedDirectory {
   owner: string;
   /** Managed directory, project-relative */
   directory: string;
-  /** Path the omitted output would have had */
-  path: string;
 }
 
 export interface OutputPlan {
@@ -341,11 +339,7 @@ export function createOutputPlan(candidates: readonly OutputPlanCandidate[]): Ou
   for (const candidate of candidates) {
     if (candidate.output.omit === true) {
       for (const directory of normalizeManagedPaths(candidate.output).directories ?? []) {
-        omittedManagedDirectories.push({
-          owner: candidate.owner,
-          directory,
-          path: normalizeOutputPath(candidate.output.path),
-        });
+        omittedManagedDirectories.push({ owner: candidate.owner, directory });
       }
     }
     for (const file of flattenCandidate(candidate)) {

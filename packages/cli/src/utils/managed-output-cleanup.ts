@@ -147,11 +147,10 @@ export async function cleanupManagedOutputs(
   options: ManagedOutputCleanupOptions
 ): Promise<ManagedOutputCleanupResult> {
   const outputRoot = resolve(options.outputRoot);
-  const indexFileNames = collectIndexFileNames(outputs, options.omittedDirectories ?? []);
   const omitted = collectOmittedDirectories(options.omittedDirectories ?? [], outputRoot);
   const managedDirectories = [
     ...new Set([...collectManagedDirectories(outputs, outputRoot), ...omitted.all]),
-  ].sort();
+  ].sort((a, b) => a.localeCompare(b));
   const flatDirectories = new Set([
     ...collectPromptTargetDirectories(outputs, outputRoot),
     ...omitted.prompt,
@@ -177,8 +176,7 @@ export async function cleanupManagedOutputs(
         removed,
         ancestorGuards,
         reportUnresolvedWorker,
-        !flatDirectories.has(directory),
-        indexFileNames
+        !flatDirectories.has(directory)
       );
     } finally {
       await closeDirectoryGuards(ancestorGuards);
@@ -315,21 +313,6 @@ function collectManagedDirectories(
   }
 
   return [...directories].sort();
-}
-
-/** File names a prompt target gives its index: the primary paths, written or omitted. */
-function collectIndexFileNames(
-  outputs: Map<string, FormatterOutput>,
-  omitted: readonly OmittedManagedDirectory[]
-): Set<string> {
-  const names = new Set<string>();
-  for (const output of outputs.values()) {
-    if (output.target !== undefined && isPromptTarget(output.target)) {
-      names.add(output.path.replaceAll('\\', '/').split('/').at(-1) ?? '');
-    }
-  }
-  for (const { path } of omitted) names.add(path.split('/').at(-1) ?? '');
-  return names;
 }
 
 function containedDirectory(directory: string, outputRoot: string): string | undefined {
@@ -666,8 +649,7 @@ async function visitDirectory(
   removed: string[],
   ancestorGuards: DirectoryGuard[],
   onUnresolvedWorker: () => void,
-  recursive = true,
-  indexFileNames: ReadonlySet<string> = new Set()
+  recursive = true
 ): Promise<void> {
   const directoryHandle = await safeOpenDirectory(directory);
   if (!directoryHandle) return;
@@ -687,21 +669,12 @@ async function visitDirectory(
       if (entryStat.isDirectory() && !recursive) continue;
 
       if (entryStat.isDirectory()) {
-        await visitDirectory(
-          entryPath,
-          desiredFiles,
-          dryRun,
-          removed,
-          guards,
-          onUnresolvedWorker,
-          true,
-          indexFileNames
-        );
+        await visitDirectory(entryPath, desiredFiles, dryRun, removed, guards, onUnresolvedWorker);
         continue;
       }
 
       if (!entryStat.isFile() || desiredFiles.has(entryPath)) continue;
-      if (!(await isPromptScriptGenerated(entryPath, false, indexFileNames))) continue;
+      if (!(await isPromptScriptGenerated(entryPath))) continue;
       if (!(await directoryGuardsMatch(guards))) continue;
 
       if (dryRun) {
@@ -971,19 +944,12 @@ async function safeLstat(path: string): Promise<Awaited<ReturnType<typeof lstat>
   }
 }
 
-async function isPromptScriptGenerated(
-  path: string,
-  allowInlineMarker = false,
-  indexFileNames: ReadonlySet<string> = new Set()
-): Promise<boolean> {
+async function isPromptScriptGenerated(path: string, allowInlineMarker = false): Promise<boolean> {
   try {
     const content = await readFile(path, 'utf-8');
     // A generated bundle or index is JSON, so it has no comment marker. Its first key and, for
     // a bundle, its content hash tell it from a copied or edited file.
-    if (
-      path.endsWith('.json') &&
-      isVerifiedPromptBundleOutput(content, basename(path), indexFileNames)
-    ) {
+    if (path.endsWith('.json') && isVerifiedPromptBundleOutput(content, basename(path))) {
       return true;
     }
     const lines = content
