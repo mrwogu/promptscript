@@ -194,6 +194,22 @@ describe('generated prompt files', () => {
     ]);
   });
 
+  it('removes the generated files when the last prompt leaves the source', async () => {
+    const { directory, source } = await project(['bundle', 'prompt-text'], ['refund', 'triage']);
+    await compileSuccessfully(directory);
+    const edited = join(directory, 'prompts', 'triage.json');
+    const changed = (await readFile(edited, 'utf8')).replace('Ticket:', 'Edited ticket:');
+    await writeFile(edited, changed);
+
+    await writeFile(source, entry(['refund']).replace(/@prompts[\s\S]*$/, ''));
+    await compileSuccessfully(directory);
+
+    for (const file of ['index.json', 'refund-reply.json', 'refund-reply.md', 'README.md']) {
+      expect(existsSync(join(directory, 'prompts', file)), file).toBe(false);
+    }
+    expect(await readFile(edited, 'utf8')).toBe(changed);
+  });
+
   it('keeps a user JSON file that only quotes the schema URL', async () => {
     const { directory } = await project(['bundle'], ['refund']);
     await compileSuccessfully(directory);

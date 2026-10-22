@@ -115,6 +115,12 @@ export interface OutputPlan {
   /** Convenience aliases for managed path consumers. */
   managedOutputDirectories: string[];
   managedOutputFiles: string[];
+  /**
+   * Managed directories of outputs that formatters omitted, with their owner.
+   * An omitted output writes nothing, but cleanup still needs its directory to remove files
+   * the owner wrote earlier.
+   */
+  omittedManagedDirectories?: Array<{ owner: string; directory: string }>;
 }
 
 /**
@@ -320,8 +326,14 @@ function comparePaths(left: OutputPlanFile, right: OutputPlanFile): number {
 export function createOutputPlan(candidates: readonly OutputPlanCandidate[]): OutputPlan {
   const selected = new Map<string, OutputPlanFile>();
   const collisions: OutputPlanCollision[] = [];
+  const omittedManagedDirectories: Array<{ owner: string; directory: string }> = [];
 
   for (const candidate of candidates) {
+    if (candidate.output.omit === true) {
+      for (const directory of normalizeManagedPaths(candidate.output).directories ?? []) {
+        omittedManagedDirectories.push({ owner: candidate.owner, directory });
+      }
+    }
     for (const file of flattenCandidate(candidate)) {
       const collisionKey = normalizeOutputCollisionKey(file.path);
       const existing = selected.get(collisionKey);
@@ -395,5 +407,6 @@ export function createOutputPlan(candidates: readonly OutputPlanCandidate[]): Ou
     injected: files.filter((file) => file.role === 'injected'),
     managedOutputDirectories: managedPaths.directories,
     managedOutputFiles: managedPaths.files,
+    omittedManagedDirectories,
   };
 }

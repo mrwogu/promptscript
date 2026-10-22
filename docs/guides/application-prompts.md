@@ -280,8 +280,8 @@ Bundles and previews are generated output.
   hand-edited bundle stays. It does not enter subdirectories.
 - A file at the path of a bundle that PromptScript did not generate is not overwritten without
   `--force`.
-- When the last prompt leaves the source, the target writes nothing, and the files from the
-  earlier compile stay on disk. Delete them by hand.
+- When the last prompt leaves the source, the target writes nothing and `prs compile` removes the
+  files of the earlier compile by the same rule. A bundle you edited stays.
 
 ## What PromptScript Does Not Do
 

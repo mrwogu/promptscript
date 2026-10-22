@@ -119,6 +119,11 @@ export interface ManagedOutputCleanupOptions {
   outputRoot: string;
   /** Report actions without modifying the filesystem */
   dryRun?: boolean;
+  /**
+   * Directories of outputs a formatter omitted, with the owning target. Prompt targets omit
+   * their output when a program has no prompts, and their old files still need cleanup.
+   */
+  omittedDirectories?: ReadonlyArray<{ owner: string; directory: string }>;
 }
 
 interface DirectoryGuard {
@@ -142,8 +147,14 @@ export async function cleanupManagedOutputs(
   options: ManagedOutputCleanupOptions
 ): Promise<ManagedOutputCleanupResult> {
   const outputRoot = resolve(options.outputRoot);
-  const managedDirectories = collectManagedDirectories(outputs, outputRoot);
-  const flatDirectories = collectPromptTargetDirectories(outputs, outputRoot);
+  const omitted = collectOmittedDirectories(options.omittedDirectories ?? [], outputRoot);
+  const managedDirectories = [
+    ...new Set([...collectManagedDirectories(outputs, outputRoot), ...omitted.all]),
+  ].sort();
+  const flatDirectories = new Set([
+    ...collectPromptTargetDirectories(outputs, outputRoot),
+    ...omitted.prompt,
+  ]);
   const managedFiles = collectManagedFiles(outputs, outputRoot);
   const desiredFiles = collectDesiredFiles(outputs, outputRoot);
   const removed: string[] = [];
@@ -302,6 +313,29 @@ function collectManagedDirectories(
   }
 
   return [...directories].sort();
+}
+
+function containedDirectory(directory: string, outputRoot: string): string | undefined {
+  const normalized = directory.replaceAll('\\', '/');
+  if (!normalized || isAbsolute(normalized)) return undefined;
+  if (normalized.split('/').includes('..')) return undefined;
+  const absolutePath = resolve(outputRoot, normalized);
+  return isWithin(outputRoot, absolutePath) ? absolutePath : undefined;
+}
+
+function collectOmittedDirectories(
+  omitted: ReadonlyArray<{ owner: string; directory: string }>,
+  outputRoot: string
+): { all: string[]; prompt: string[] } {
+  const all: string[] = [];
+  const prompt: string[] = [];
+  for (const { owner, directory } of omitted) {
+    const absolutePath = containedDirectory(directory, outputRoot);
+    if (absolutePath === undefined) continue;
+    all.push(absolutePath);
+    if (isPromptTarget(owner)) prompt.push(absolutePath);
+  }
+  return { all, prompt };
 }
 
 /**

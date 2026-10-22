@@ -1064,6 +1064,7 @@ async function compileCommandWithResult(
       const cleanupResult = await cleanupManagedOutputs(plannedOutputMap, {
         outputRoot: effectiveOptions.output,
         dryRun: options.dryRun,
+        omittedDirectories: result.outputPlan?.omittedManagedDirectories,
       });
       for (const removedPath of cleanupResult.removed) {
         if (options.dryRun) {

@@ -69,6 +69,8 @@ export abstract class PromptFormatter implements Formatter {
         path: layout.primary,
         content: '',
         omit: true,
+        // Nothing is written, but cleanup still needs the directory to remove earlier files.
+        managedOutputDirectories: [layout.directory],
         ...(rendered.warnings?.length ? { warnings: rendered.warnings } : {}),
       };
     }
