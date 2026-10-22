@@ -9,10 +9,10 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { Ajv } from 'ajv';
 import { afterAll, describe, expect, it } from 'vitest';
 import { Compiler } from '@promptscript/compiler';
 import { canonicalizeJson, findRuntimeSlots, sha256Hex } from '@promptscript/core';
+import { validateBundle, validateIndex } from '../../__tests__/prompt-bundle-validators.js';
 
 interface Bundle {
   [key: string]: unknown;
@@ -53,14 +53,6 @@ const vectors = new Map<string, Vector>(
     .filter((name) => /^\d{3}-.*\.json$/.test(name))
     .sort()
     .map((name) => [name.replace(/\.json$/, ''), readJson(new URL(name, VECTOR_DIR)) as Vector])
-);
-
-const ajv = new Ajv({ strict: true, allowUnionTypes: true });
-const validateBundle = ajv.compile(
-  readJson(new URL('../../../../../schema/prompt-bundle-v1.json', import.meta.url)) as object
-);
-const validateIndex = ajv.compile(
-  readJson(new URL('../../../../../schema/prompt-bundle-index-v1.json', import.meta.url)) as object
 );
 
 function hashInput(bundle: Record<string, unknown>): Record<string, unknown> {
