@@ -147,6 +147,30 @@ describe('bundle target', () => {
         new BundleFormatter().format(program({ prompts: reply() }), { outputPath: 'index.json' })
       ).toThrow(/must name one/);
     });
+
+    it('refuses an output path whose directory is the project root', () => {
+      for (const outputPath of ['./index.json', '././index.json', '.\\index.json', '/index.json']) {
+        expect(
+          () => new BundleFormatter().format(program({ prompts: reply() }), { outputPath }),
+          outputPath
+        ).toThrow(/must name one/);
+      }
+    });
+
+    it('drops leading dot segments from a nested output path', () => {
+      const output = new BundleFormatter().format(program({ prompts: reply() }), {
+        outputPath: '././x/index.json',
+      });
+
+      expect(output.path).toBe('x/index.json');
+      expect(output.managedOutputDirectories).toEqual(['x']);
+    });
+
+    it('locates the refusal at the @meta block', () => {
+      expect(() =>
+        new PromptTextFormatter().format(program({ prompts: reply() }), { outputPath: './a.md' })
+      ).toThrow(expect.objectContaining({ location: expect.objectContaining({ line: 1 }) }));
+    });
   });
 
   describe('bundle fields', () => {

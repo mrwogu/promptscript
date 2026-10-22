@@ -1,4 +1,4 @@
-import type { Program } from '@promptscript/core';
+import type { Program, SourceLocation } from '@promptscript/core';
 import type { Formatter, FormatOptions, FormatterOutput, FormatterWarning } from '../types.js';
 import {
   PromptFormatError,
@@ -20,16 +20,20 @@ export interface PromptLayout {
  * A target owns the directory of its primary file, so a path without one is refused: cleanup
  * would otherwise treat the project root as owned.
  */
-function layoutOf(target: string, primary: string): PromptLayout {
-  const path = primary.replaceAll('\\', '/');
-  const slash = path.lastIndexOf('/');
-  if (slash <= 0) {
+function layoutOf(target: string, primary: string, location?: SourceLocation): PromptLayout {
+  const segments = primary
+    .replaceAll('\\', '/')
+    .split('/')
+    .filter((segment) => segment !== '' && segment !== '.');
+  const directory = segments.slice(0, -1).join('/');
+  if (directory === '') {
     throw new PromptFormatError(
       `The ${target} target writes a directory of files next to its primary file, so its output must name one, ` +
-        `for example "prompts/index.json". Got "${primary}".`
+        `for example "prompts/index.json". Got "${primary}".`,
+      location
     );
   }
-  return { primary: path, directory: path.slice(0, slash) };
+  return { primary: segments.join('/'), directory };
 }
 
 /** What a prompt target does with the built prompts of a program. */
@@ -60,7 +64,11 @@ export abstract class PromptFormatter implements Formatter {
   protected abstract render(built: BuiltPrompts): PromptRender;
 
   format(ast: Program, options?: FormatOptions): FormatterOutput {
-    const layout = layoutOf(this.name, options?.outputPath ?? this.outputPath);
+    const layout = layoutOf(
+      this.name,
+      options?.outputPath ?? this.outputPath,
+      ast.meta?.loc ?? ast.loc
+    );
     const built = buildPromptBundles(ast, options, this.name);
     const rendered = this.render(built);
     const composition = built.prompts.flatMap((prompt) => compositionOf(prompt) ?? []);
