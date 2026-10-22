@@ -1,0 +1,49 @@
+{
+  "description": "A number input whose default is the string \"ten\". The hash is correct and the bundle is schema-valid, so only the rule that a default has the declared type rejects it.",
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/invalid-default",
+    "description": "Bundle with a default of the wrong type",
+    "contentHash": "sha256-69c3b93f1cb3a3b561be10866e8bfca2d683774bea004d1d08dffd38598d89e7",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Amount {{input.amount}}"
+      }
+    ],
+    "inputs": {
+      "amount": {
+        "type": "number",
+        "description": "Amount",
+        "default": "ten",
+        "required": false
+      }
+    },
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "user",
+          "path": "prompts.invalid-default.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Bundle with a default of the wrong type\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/invalid-default\",\"inputs\":{\"amount\":{\"default\":\"ten\",\"description\":\"Amount\",\"required\":false,\"type\":\"number\"}},\"messages\":[{\"content\":\"Amount {{input.amount}}\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-69c3b93f1cb3a3b561be10866e8bfca2d683774bea004d1d08dffd38598d89e7",
+  "slots": [
+    {
+      "message": 0,
+      "kind": "slot",
+      "name": "amount",
+      "offset": 7,
+      "length": 16
+    }
+  ],
+  "error": "invalid-bundle"
+}

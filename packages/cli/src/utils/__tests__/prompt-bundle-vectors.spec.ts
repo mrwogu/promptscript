@@ -25,6 +25,7 @@ interface RenderCase {
   inputs: Record<string, unknown>;
   messages?: { role: string; content: string }[];
   error?: string;
+  warnings?: string[];
 }
 
 interface Vector {
@@ -42,6 +43,7 @@ interface Vector {
     set: Record<string, unknown>;
     canonical: string;
     contentHash: string;
+    error?: string;
   }[];
 }
 
@@ -129,6 +131,10 @@ describe('prompt bundle conformance vectors', () => {
       '019-slot-in-system',
       '020-prototype-input',
       '021-compose-mixed',
+      '022-unknown-input',
+      '023-invalid-slot',
+      '024-invalid-default',
+      '025-forward-field',
     ]);
   });
 
@@ -178,6 +184,7 @@ describe('prompt bundle conformance vectors', () => {
       '018-compose-order',
       '019-slot-in-system',
       '021-compose-mixed',
+      '022-unknown-input',
     ]);
   });
 
@@ -268,6 +275,95 @@ describe('prompt bundle conformance vectors', () => {
     );
     expect(v.variants?.[0]?.contentHash).toBe(v.contentHash);
     expect(v.variants?.[1]?.contentHash).not.toBe(v.contentHash);
+  });
+
+  it.each([...vectors.entries()].filter(([, v]) => v.variants !== undefined))(
+    '%s hashes every variant as pinned',
+    (_name, v) => {
+      for (const variant of v.variants ?? []) {
+        const changed = { ...v.bundle, ...variant.set };
+
+        expect(canonicalizeJson(hashInput(changed))).toBe(variant.canonical);
+        expect(hashOf(changed)).toBe(variant.contentHash);
+      }
+    }
+  );
+
+  it('rejects the $schema variant of 006-excluded-fields with unsupported-schema', () => {
+    const variants = vector('006-excluded-fields').variants ?? [];
+
+    expect(variants.map((variant) => variant.error)).toEqual([undefined, 'unsupported-schema']);
+  });
+
+  it('only uses the pinned error and warning codes', () => {
+    const topLevel = new Set(['hash-mismatch', 'invalid-bundle', 'unsupported-schema']);
+    const renderErrors = new Set(['missing-input', 'invalid-type', 'invalid-option']);
+    const renderWarnings = new Set(['unknown-input', 'invalid-slot']);
+
+    for (const v of vectors.values()) {
+      if (v.error !== undefined) expect(topLevel.has(v.error)).toBe(true);
+      for (const variant of v.variants ?? []) {
+        if (variant.error !== undefined) expect(topLevel.has(variant.error)).toBe(true);
+      }
+      for (const c of v.render === undefined ? [] : [v.render].flat()) {
+        if (c.error !== undefined) expect(renderErrors.has(c.error)).toBe(true);
+        for (const code of c.warnings ?? []) expect(renderWarnings.has(code)).toBe(true);
+      }
+    }
+  });
+
+  it('pins the precedence of a missing input over a type failure in 010-literals-and-errors', () => {
+    const cases = [vector('010-literals-and-errors').render ?? []].flat();
+
+    expect(cases.slice(-3).map((c) => [c.inputs, c.error])).toEqual([
+      [{ amount: 1, urgent: 'true' }, 'invalid-type'],
+      [{ amount: null, urgent: true }, 'invalid-type'],
+      [{ urgent: 'yes' }, 'missing-input'],
+    ]);
+  });
+
+  it('renders the escapes of 008-escape as text', () => {
+    const c = [vector('008-escape').render ?? []].flat()[0];
+
+    expect(c?.messages?.[0]?.content).toBe('Literal {{input.x}} and \\{{input.x}}, real: hi');
+  });
+
+  it('reports extra caller keys, a __proto__ key included, in 022-unknown-input', () => {
+    const c = [vector('022-unknown-input').render ?? []].flat()[0];
+
+    expect(Object.keys(c?.inputs ?? {})).toEqual(['name', 'extra', '__proto__']);
+    expect(c?.warnings).toEqual(['unknown-input']);
+  });
+
+  it('keeps invalid slots as text in 023-invalid-slot', () => {
+    const v = vector('023-invalid-slot');
+
+    expect(v.source).toBeUndefined();
+    expect(v.slots.map((slot) => (slot as { kind: string }).kind)).toEqual([
+      'invalid',
+      'slot',
+      'invalid',
+    ]);
+    expect([v.render ?? []].flat()[0]?.warnings).toEqual(['invalid-slot']);
+  });
+
+  it('declares a default of the wrong type in 024-invalid-default and expects invalid-bundle', () => {
+    const v = vector('024-invalid-default');
+
+    expect(v.error).toBe('invalid-bundle');
+    expect((v.bundle['inputs'] as Record<string, { default: unknown }>)['amount']?.default).toBe(
+      'ten'
+    );
+  });
+
+  it('adds a field the schema does not know only in the variant of 025-forward-field', () => {
+    const v = vector('025-forward-field');
+    const changed = { ...v.bundle, ...v.variants?.[0]?.set };
+
+    expect(validateBundle(v.bundle)).toBe(true);
+    expect(validateBundle(changed)).toBe(false);
+    expect(v.variants?.[0]?.error).toBeUndefined();
+    expect(v.variants?.[0]?.contentHash).not.toBe(v.contentHash);
   });
 
   it('keeps ${VAR} as text in 010-literals-and-errors', () => {

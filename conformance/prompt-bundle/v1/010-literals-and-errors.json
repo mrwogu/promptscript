@@ -171,6 +171,29 @@
         "tone": "angry"
       },
       "error": "invalid-option"
+    },
+    {
+      "name": "a string for a boolean",
+      "inputs": {
+        "amount": 1,
+        "urgent": "true"
+      },
+      "error": "invalid-type"
+    },
+    {
+      "name": "null is a wrong type",
+      "inputs": {
+        "amount": null,
+        "urgent": true
+      },
+      "error": "invalid-type"
+    },
+    {
+      "name": "missing input wins over a type failure",
+      "inputs": {
+        "urgent": "yes"
+      },
+      "error": "missing-input"
     }
   ]
 }

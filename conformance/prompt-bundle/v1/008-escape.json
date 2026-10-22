@@ -57,5 +57,16 @@
       "offset": 46,
       "length": 17
     }
-  ]
+  ],
+  "render": {
+    "inputs": {
+      "message": "hi"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Literal {{input.x}} and \\{{input.x}}, real: hi"
+      }
+    ]
+  }
 }
