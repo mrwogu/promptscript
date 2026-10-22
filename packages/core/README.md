@@ -26,41 +26,41 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 
 ## Modules
 
-| Module                   | Description                                                                             |
-| :----------------------- | :-------------------------------------------------------------------------------------- |
-| **types/ast**            | AST interfaces (`Program`, `Block`, `Value`, `BlockContent`, etc.)                      |
-| **canonical-ast**        | Immutable canonical AST factories and legacy compatibility projections                  |
-| **block-merge**          | Shared inheritance and import block merge policies                                      |
-| **types/config**         | Configuration schema (`PromptScriptConfig`, input/output/registry types)                |
-| **types/models**         | Model configuration and profile types (`ModelsConfig`, `ModelProfile`)                  |
-| **types/constants**      | Shared constants (block names, syntax version)                                          |
-| **types/convention**     | Convention type definitions for formatter output                                        |
-| **types/manifest**       | Registry manifest types                                                                 |
-| **types/source**         | Source location and mapping types                                                       |
-| **types/prompts**        | Prompt entry types (`PromptDefinition`, `PromptInput`, `GovernanceMeta`, `ModelParams`) |
-| **types/prompt-bundle**  | Prompt bundle and index types (`PromptBundleV1`, `PromptBundleIndexV1`)                 |
-| **types/prettier**       | Prettier configuration types                                                            |
-| **structured-output**    | Shared structured merge plan types for generated settings files                         |
-| **output-plan**          | Deterministic output path normalization, collision resolution, and ownership data       |
-| **section-registry**     | Section contracts, with the `coding` and `general` profiles (`SECTION_PROFILES`)        |
-| **target-catalog**       | Target definitions, families, and helpers (`isPromptTarget`, `CODING_TARGETS`)          |
-| **errors**               | Error hierarchy (`PSError`, `ParseError`, `ResolveError`, `ValidationError`, etc.)      |
-| **utils/diagnostic**     | Diagnostic formatting utilities                                                         |
-| **utils/merge**          | Deep merge for AST nodes                                                                |
-| **utils/package**        | Package metadata helpers                                                                |
-| **utils/path**           | Path parsing and formatting (`parsePath`, `formatPath`)                                 |
-| **utils/version**        | Semantic version comparison (`parseVersion`)                                            |
-| **utils/levenshtein**    | Edit-distance utilities (`levenshteinDistance`, `findClosestMatch`)                     |
-| **utils/canonical-json** | RFC 8785 canonical JSON (`canonicalizeJson`)                                            |
-| **utils/sha256**         | Synchronous, browser-safe SHA-256 as hex (`sha256Hex`)                                  |
-| **utils/runtime-slots**  | Scanner for `{{input.name}}` slots and `\{{` escapes (`findRuntimeSlots`)               |
-| **prompt-bundle-hash**   | Content hash of a prompt bundle (`hashPromptBundle`)                                    |
-| **provenance-files**     | Rewrites provenance files so no machine path remains (`normalizeProvenanceFiles`)       |
-| **syntax-versions**      | Syntax version registry and lookup helpers (see API reference below)                    |
-| **model-profiles**       | Built-in model profiles (`MODEL_PROFILES`) with lifecycle status and successors         |
-| **model-catalog**        | Model catalog, alias resolution, model sets, and per-target model name mapping          |
-| **logger**               | `Logger` interface for verbose/debug output                                             |
-| **template**             | Template interpolation for parameterized skills                                         |
+| Module                   | Description                                                                                                  |
+| :----------------------- | :----------------------------------------------------------------------------------------------------------- |
+| **types/ast**            | AST interfaces (`Program`, `Block`, `Value`, `BlockContent`, etc.)                                           |
+| **canonical-ast**        | Immutable canonical AST factories and legacy compatibility projections                                       |
+| **block-merge**          | Shared inheritance and import block merge policies                                                           |
+| **types/config**         | Configuration schema (`PromptScriptConfig`, input/output/registry types)                                     |
+| **types/models**         | Model configuration and profile types (`ModelsConfig`, `ModelProfile`)                                       |
+| **types/constants**      | Shared constants (block names, syntax version)                                                               |
+| **types/convention**     | Convention type definitions for formatter output                                                             |
+| **types/manifest**       | Registry manifest types                                                                                      |
+| **types/source**         | Source location and mapping types                                                                            |
+| **types/prompts**        | Prompt entry types (`PromptDefinition`, `PromptInput`, `GovernanceMeta`, `ModelParams`, `PromptComposition`) |
+| **types/prompt-bundle**  | Prompt bundle and index types (`PromptBundleV1`, `PromptBundleIndexV1`)                                      |
+| **types/prettier**       | Prettier configuration types                                                                                 |
+| **structured-output**    | Shared structured merge plan types for generated settings files                                              |
+| **output-plan**          | Deterministic output path normalization, collision resolution, and ownership data                            |
+| **section-registry**     | Section contracts, with the `coding` and `general` profiles (`SECTION_PROFILES`)                             |
+| **target-catalog**       | Target definitions, families, and helpers (`isPromptTarget`, `CODING_TARGETS`)                               |
+| **errors**               | Error hierarchy (`PSError`, `ParseError`, `ResolveError`, `ValidationError`, etc.)                           |
+| **utils/diagnostic**     | Diagnostic formatting utilities                                                                              |
+| **utils/merge**          | Deep merge for AST nodes                                                                                     |
+| **utils/package**        | Package metadata helpers                                                                                     |
+| **utils/path**           | Path parsing and formatting (`parsePath`, `formatPath`)                                                      |
+| **utils/version**        | Semantic version comparison (`parseVersion`)                                                                 |
+| **utils/levenshtein**    | Edit-distance utilities (`levenshteinDistance`, `findClosestMatch`)                                          |
+| **utils/canonical-json** | RFC 8785 canonical JSON (`canonicalizeJson`)                                                                 |
+| **utils/sha256**         | Synchronous, browser-safe SHA-256 as hex (`sha256Hex`)                                                       |
+| **utils/runtime-slots**  | Scanner for `{{input.name}}` slots and `\{{` escapes (`findRuntimeSlots`)                                    |
+| **prompt-bundle-hash**   | Content hash of a prompt bundle (`hashPromptBundle`)                                                         |
+| **provenance-files**     | Rewrites provenance files so no machine path remains (`normalizeProvenanceFiles`)                            |
+| **syntax-versions**      | Syntax version registry and lookup helpers (see API reference below)                                         |
+| **model-profiles**       | Built-in model profiles (`MODEL_PROFILES`) with lifecycle status and successors                              |
+| **model-catalog**        | Model catalog, alias resolution, model sets, and per-target model name mapping                               |
+| **logger**               | `Logger` interface for verbose/debug output                                                                  |
+| **template**             | Template interpolation for parameterized skills                                                              |
 
 ## API Reference
 

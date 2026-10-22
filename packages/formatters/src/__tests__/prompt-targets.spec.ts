@@ -530,22 +530,16 @@ describe('bundle target', () => {
 
       const message = system(bundleOf(ast)) ?? '';
 
-      for (const piece of [
-        'ctx-text',
-        'ctx-scalar',
-        'ctx-a',
-        'ctx-b',
-        'ctx-deep',
-        'ctx-item',
-        'flag: true',
-        'count: 3',
-        'know-1',
-        'know-2',
-        '- text-rule',
-        '- list-rule',
-      ]) {
-        expect(message, piece).toContain(piece);
-      }
+      expect(message).toBe(
+        [
+          '## Context',
+          'ctx-text\n\n- ctx-item\n\n- scalar: ctx-scalar\n- list:\n  - ctx-a\n  - ctx-b\n- nested:\n  - deep:\n    - value: ctx-deep\n- flag: true\n- count: 3',
+          '## Knowledge',
+          'know-1\nknow-2',
+          '## Restrictions',
+          '- text-rule\n\n- list-rule',
+        ].join('\n\n')
+      );
     });
 
     it('escapes every {{ in composed blocks and leaves the own text live', () => {
@@ -715,7 +709,7 @@ describe('bundle target', () => {
       expect(system(bundleOf(ast))).toBe(
         [
           '## Context\n\n- product: Acme Cloud',
-          '## Restrictions\n\n- Never share secrets\n- Escalate refunds\n- severity: high',
+          '## Restrictions\n\n- Never share secrets\n- Escalate refunds\n\n- severity: high',
         ].join('\n\n')
       );
     });

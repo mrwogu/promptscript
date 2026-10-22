@@ -136,6 +136,7 @@ describe('prompt bundle conformance vectors', () => {
       '018-compose-order',
       '019-slot-in-system',
       '020-prototype-input',
+      '021-compose-mixed',
     ]);
   });
 
@@ -184,6 +185,7 @@ describe('prompt bundle conformance vectors', () => {
       '017-compose-examples',
       '018-compose-order',
       '019-slot-in-system',
+      '021-compose-mixed',
     ]);
   });
 

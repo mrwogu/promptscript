@@ -213,6 +213,8 @@ Without `compose`, the system message is the prompt's own text.
 - Properties of `context` and `standards` become `- key: value` bullets, and lists are indented
   one level.
 - `restrictions` become `- ` bullets, and `examples` become an input and an output in fenced code.
+- Inside a block, its text, its list items and its properties are separate groups, in that order,
+  divided by one blank line.
 - `@header` titles are ignored.
 
 Every `{{` in a composed block is escaped as `\{{`, so a composed block never carries a live

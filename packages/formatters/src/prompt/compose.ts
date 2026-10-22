@@ -169,10 +169,10 @@ function bodyLines(content: BlockContent, asBullets: boolean): string[] {
     const { items, ...rest } = record;
     const merged = Array.isArray(items);
     const others = Object.entries(merged ? rest : record);
-    return [
-      ...(merged ? listed(items) : []),
-      ...others.flatMap(([key, value]) => propertyLines(key, value, 0)),
-    ];
+    return joinGroups([
+      merged ? listed(items) : [],
+      others.flatMap(([key, value]) => propertyLines(key, value, 0)),
+    ]);
   };
   switch (content.type) {
     case 'TextContent':

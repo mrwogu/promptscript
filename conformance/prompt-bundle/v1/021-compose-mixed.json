@@ -1,0 +1,67 @@
+{
+  "description": "compose: [context] where the block holds text, list items and properties. The groups come in that order and are divided by one blank line.",
+  "source": {
+    "entry": ".promptscript/project.prs",
+    "files": {
+      ".promptscript/project.prs": "@meta {\n  id: \"acme-support\"\n  syntax: \"1.6.0\"\n  owner: \"team-support\"\n  risk: \"medium\"\n}\n\n@context {\n  \"\"\"\n  Acme Cloud runs in two regions.\n  \"\"\"\n  - \"Be brief\"\n  - \"Be kind\"\n  product: \"Acme Cloud\"\n  tier: \"enterprise\"\n}\n\n@prompts {\n  mixed: {\n    description: \"Answer with a block of text, list items and properties\"\n    compose: [context]\n    system: \"Answer the question.\"\n    user: \"Question: {{input.question}}\"\n    inputs: { question: { type: \"string\", description: \"The question\" } }\n  }\n}\n"
+    }
+  },
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/mixed",
+    "description": "Answer with a block of text, list items and properties",
+    "contentHash": "sha256-9fdbf60b0d6848b0695b5ccb32c24e8f3b8b60f8ec07c9c9a2b9ebfc4fb269be",
+    "messages": [
+      {
+        "role": "system",
+        "content": "## Context\n\nAcme Cloud runs in two regions.\n\n- Be brief\n- Be kind\n\n- product: Acme Cloud\n- tier: enterprise\n\nAnswer the question."
+      },
+      {
+        "role": "user",
+        "content": "Question: {{input.question}}"
+      }
+    ],
+    "inputs": {
+      "question": {
+        "type": "string",
+        "description": "The question",
+        "required": true
+      }
+    },
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "system",
+          "path": "context",
+          "files": [".promptscript/project.prs"]
+        },
+        {
+          "message": "system",
+          "path": "prompts.mixed.system",
+          "files": [".promptscript/project.prs"]
+        },
+        {
+          "message": "user",
+          "path": "prompts.mixed.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Answer with a block of text, list items and properties\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/mixed\",\"inputs\":{\"question\":{\"description\":\"The question\",\"required\":true,\"type\":\"string\"}},\"messages\":[{\"content\":\"## Context\\n\\nAcme Cloud runs in two regions.\\n\\n- Be brief\\n- Be kind\\n\\n- product: Acme Cloud\\n- tier: enterprise\\n\\nAnswer the question.\",\"role\":\"system\"},{\"content\":\"Question: {{input.question}}\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-9fdbf60b0d6848b0695b5ccb32c24e8f3b8b60f8ec07c9c9a2b9ebfc4fb269be",
+  "slots": [
+    {
+      "message": 1,
+      "kind": "slot",
+      "name": "question",
+      "offset": 10,
+      "length": 18
+    }
+  ]
+}
