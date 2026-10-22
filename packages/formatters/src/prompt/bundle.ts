@@ -2,7 +2,6 @@ import {
   COMPOSABLE_BLOCKS,
   ErrorCode,
   PSError,
-  PROMPT_BUNDLE_INDEX_SCHEMA_URL,
   PROMPT_BUNDLE_SCHEMA_URL,
   compareCodeUnits,
   compareVersions,
@@ -32,11 +31,10 @@ import {
 import type { FormatOptions } from '../types.js';
 import { composeSystemMessage, normalizeNewlines } from './compose.js';
 
-/** Schema URL of a bundle. It is the version tag and is part of the hash. */
-export const PROMPT_BUNDLE_SCHEMA = PROMPT_BUNDLE_SCHEMA_URL;
-
-/** Schema URL of a bundle index. */
-export const PROMPT_BUNDLE_INDEX_SCHEMA = PROMPT_BUNDLE_INDEX_SCHEMA_URL;
+export {
+  PROMPT_BUNDLE_INDEX_SCHEMA_URL as PROMPT_BUNDLE_INDEX_SCHEMA,
+  PROMPT_BUNDLE_SCHEMA_URL as PROMPT_BUNDLE_SCHEMA,
+} from '@promptscript/core';
 
 /** First syntax version that allows prompt definitions. */
 export const PROMPT_SYNTAX_VERSION = '1.6.0';
@@ -281,7 +279,7 @@ function buildBundle(
   const model = buildModel(prompt, options);
   const defaults = readMetaGovernance(program.meta?.fields ?? {});
   const withoutHash: Omit<PromptBundleV1, 'contentHash'> = deepNormalize({
-    $schema: PROMPT_BUNDLE_SCHEMA,
+    $schema: PROMPT_BUNDLE_SCHEMA_URL,
     id: `${metaId(program)}/${prompt.name}`,
     description: prompt.description,
     messages,

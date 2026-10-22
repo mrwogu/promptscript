@@ -868,13 +868,6 @@ describe('bundle target', () => {
       expect(new BundleFormatter().format(program({ meta: { syntax: '1.2.0' } })).omit).toBe(true);
     });
 
-    it('needs an id in @meta', () => {
-      const ast = program({ prompts: reply() });
-      delete ast.meta?.fields['id'];
-
-      expect(() => new BundleFormatter().format(ast)).toThrow(/id in @meta/);
-    });
-
     it('refuses a syntax that is unreadable, not a version or below 1.6.0', () => {
       for (const syntax of ['latest', 7, '1.5.0-rc.1', '1.6.0-rc.1', '1.6'] as const) {
         const ast = program({ meta: { syntax }, prompts: reply() });

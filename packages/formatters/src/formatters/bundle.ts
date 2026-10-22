@@ -1,5 +1,9 @@
-import { compareCodeUnits, type PromptBundleIndexV1 } from '@promptscript/core';
-import { PROMPT_BUNDLE_INDEX_SCHEMA, toJsonFile, type BuiltPrompts } from '../prompt/bundle.js';
+import {
+  PROMPT_BUNDLE_INDEX_SCHEMA_URL,
+  compareCodeUnits,
+  type PromptBundleIndexV1,
+} from '@promptscript/core';
+import { toJsonFile, type BuiltPrompts } from '../prompt/bundle.js';
 import { PromptFormatter, type PromptRender } from '../prompt/prompt-formatter.js';
 import type { FormatterVersionMap } from '../types.js';
 
@@ -31,7 +35,7 @@ export class BundleFormatter extends PromptFormatter {
   protected render(built: BuiltPrompts): PromptRender {
     if (built.prompts.length === 0) return { files: [] };
     const index: PromptBundleIndexV1 = {
-      $schema: PROMPT_BUNDLE_INDEX_SCHEMA,
+      $schema: PROMPT_BUNDLE_INDEX_SCHEMA_URL,
       source: built.source,
       prompts: built.prompts
         .map(({ key, bundle }) => ({
