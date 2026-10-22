@@ -17,7 +17,7 @@ import { promisify } from 'node:util';
 import type { FormatterOutput } from '@promptscript/compiler';
 import { getRuntimeInfo } from '../runtime/runtime-info.js';
 import { resolveSelfInvocation, type SelfInvocation } from '../runtime/self-invocation.js';
-import { isPromptTarget, type OmittedManagedDirectory } from '@promptscript/core';
+import { compareCodeUnits, isPromptTarget, type OmittedManagedDirectory } from '@promptscript/core';
 import { MANAGED_OUTPUT_WORKER_COMMAND } from '../managed-output-worker.js';
 import { isVerifiedPromptBundleOutput } from './prompt-bundle-ownership.js';
 
@@ -150,7 +150,7 @@ export async function cleanupManagedOutputs(
   const omitted = collectOmittedDirectories(options.omittedDirectories ?? [], outputRoot);
   const managedDirectories = [
     ...new Set([...collectManagedDirectories(outputs, outputRoot), ...omitted.all]),
-  ].sort((a, b) => a.localeCompare(b));
+  ].sort(compareCodeUnits);
   const flatDirectories = new Set([
     ...collectPromptTargetDirectories(outputs, outputRoot),
     ...omitted.prompt,
@@ -164,6 +164,20 @@ export async function cleanupManagedOutputs(
   const reportUnresolvedWorker = (): void => {
     unresolvedWorker = true;
   };
+
+  // An index under a custom name is not found by the walk below, which knows `index.json` only.
+  await Promise.all(
+    omitted.indexes.map((index) =>
+      removeStaleIndex(
+        index,
+        outputRoot,
+        desiredFiles,
+        options.dryRun === true,
+        removed,
+        reportUnresolvedWorker
+      )
+    )
+  );
 
   for (const directory of managedDirectories) {
     const ancestorGuards = await openAncestorDirectories(outputRoot, directory);
@@ -326,16 +340,76 @@ function containedDirectory(directory: string, outputRoot: string): string | und
 function collectOmittedDirectories(
   omitted: readonly OmittedManagedDirectory[],
   outputRoot: string
-): { all: string[]; prompt: string[] } {
+): { all: string[]; prompt: string[]; indexes: StaleIndex[] } {
   const all: string[] = [];
   const prompt: string[] = [];
-  for (const { owner, directory } of omitted) {
+  const indexes: StaleIndex[] = [];
+  for (const { owner, directory, primaryFile } of omitted) {
     const absolutePath = containedDirectory(directory, outputRoot);
     if (absolutePath === undefined) continue;
     all.push(absolutePath);
-    if (isPromptTarget(owner)) prompt.push(absolutePath);
+    if (!isPromptTarget(owner)) continue;
+    prompt.push(absolutePath);
+    if (primaryFile !== 'index.json') indexes.push({ directory: absolutePath, name: primaryFile });
   }
-  return { all, prompt };
+  return { all, prompt, indexes };
+}
+
+/** An index file that a prompt target wrote under a custom name and no longer writes. */
+interface StaleIndex {
+  directory: string;
+  name: string;
+}
+
+/**
+ * Remove a stale prompt index under a custom file name.
+ * The file must be a regular file that parses as an index, like the files the directory walk
+ * removes, and it goes through the same guarded unlink.
+ */
+async function removeStaleIndex(
+  index: StaleIndex,
+  outputRoot: string,
+  desiredFiles: Set<string>,
+  dryRun: boolean,
+  removed: string[],
+  onUnresolvedWorker: () => void
+): Promise<void> {
+  const filePath = resolve(index.directory, index.name);
+  if (desiredFiles.has(filePath)) return;
+  const ancestorGuards = await openAncestorDirectories(outputRoot, index.directory);
+  if (!ancestorGuards) return;
+  try {
+    const handle = await safeOpenDirectory(index.directory);
+    if (!handle) return;
+    const guards = [...ancestorGuards, { path: index.directory, handle }];
+    try {
+      const fileStat = await safeLstat(filePath);
+      if (!fileStat?.isFile() || !(await directoryGuardsMatch(guards))) return;
+      const content = await readFile(filePath, 'utf-8').catch(() => '');
+      if (!isVerifiedPromptBundleOutput(content, index.name, index.name)) return;
+      if (dryRun) {
+        removed.push(filePath);
+        return;
+      }
+      const current = await safeLstat(filePath);
+      if (!current?.isFile() || !isSameFile(fileStat, current)) return;
+      if (!(await directoryGuardsMatch(guards))) return;
+      const directoryStat = await handle.stat();
+      const unlinked = await guardedUnlink(
+        index.directory,
+        index.name,
+        directoryStat,
+        fileStat,
+        undefined,
+        onUnresolvedWorker
+      );
+      if (unlinked) removed.push(filePath);
+    } finally {
+      await handle.close();
+    }
+  } finally {
+    await closeDirectoryGuards(ancestorGuards);
+  }
 }
 
 /**

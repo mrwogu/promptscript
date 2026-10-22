@@ -118,7 +118,9 @@ describe('output plan', () => {
 
     expect(plan.files.map((file) => file.path)).toEqual(['CLAUDE.md']);
     expect(plan.managedPaths.directories).toEqual([]);
-    expect(plan.omittedManagedDirectories).toEqual([{ owner: 'bundle', directory: 'prompts' }]);
+    expect(plan.omittedManagedDirectories).toEqual([
+      { owner: 'bundle', directory: 'prompts', primaryFile: 'index.json' },
+    ]);
   });
 
   it('flattens nested resources and keeps deterministic path order', () => {

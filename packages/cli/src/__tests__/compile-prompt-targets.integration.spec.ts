@@ -210,6 +210,35 @@ describe('generated prompt files', () => {
     expect(await readFile(edited, 'utf8')).toBe(changed);
   });
 
+  it('removes a stale index under a custom name and keeps a renamed copy', async () => {
+    const custom = 'bundle:\n      output: prompts/all.json';
+    const { directory, source } = await project([custom], ['refund', 'triage']);
+    await compileSuccessfully(directory);
+    expect(existsSync(join(directory, 'prompts', 'all.json'))).toBe(true);
+    const copy = join(directory, 'prompts', 'all-copy.json');
+    await writeFile(copy, await readFile(join(directory, 'prompts', 'all.json'), 'utf8'));
+
+    await writeFile(source, entry(['refund']).replace(/@prompts[\s\S]*$/, ''));
+    await compileSuccessfully(directory);
+
+    for (const file of ['all.json', 'refund-reply.json', 'triage.json']) {
+      expect(existsSync(join(directory, 'prompts', file)), file).toBe(false);
+    }
+    expect(existsSync(copy)).toBe(true);
+  });
+
+  it('keeps a user file at the custom index name that is not an index', async () => {
+    const custom = 'bundle:\n      output: prompts/all.json';
+    const { directory, source } = await project([custom], ['refund']);
+    await mkdir(join(directory, 'prompts'), { recursive: true });
+    await writeFile(join(directory, 'prompts', 'all.json'), '{"mine":true}\n');
+
+    await writeFile(source, entry(['refund']).replace(/@prompts[\s\S]*$/, ''));
+    await compileSuccessfully(directory);
+
+    expect(await readFile(join(directory, 'prompts', 'all.json'), 'utf8')).toBe('{"mine":true}\n');
+  });
+
   it('keeps a user JSON file that only quotes the schema URL', async () => {
     const { directory } = await project(['bundle'], ['refund']);
     await compileSuccessfully(directory);
