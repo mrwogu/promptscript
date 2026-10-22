@@ -205,7 +205,7 @@ export interface ValidationExclude {
  * Name of a release environment.
  * @pattern ^[a-z][a-z0-9-]{0,31}$
  */
-export type ReleaseEnvironmentName = string;
+export type ReleaseEnvironmentName = string & { readonly __brand?: 'ReleaseEnvironmentName' };
 
 /**
  * Release configuration (`releases` in promptscript.yaml).
