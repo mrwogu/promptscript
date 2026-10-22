@@ -181,6 +181,31 @@ require other guards. See [Guard Dependencies](guides/guard-dependencies.md).
 A catalog entry that maps one model name to the name each target expects. See
 [Model Catalog](reference/models.md).
 
+## Application Prompts
+
+### Prompt bundle
+
+The JSON file the `bundle` target writes for one `@prompts` entry: its messages, inputs, output
+contract, model and governance values. See [Application Prompts](guides/application-prompts.md).
+
+### Runtime slot
+
+A `{{input.name}}` marker in a prompt for a value the application supplies when it calls the
+model. PromptScript keeps the slot as written and does not render it. See
+[Application Prompts](guides/application-prompts.md#runtime-slots).
+
+### Content hash
+
+The `sha256-` digest in a bundle's `contentHash`, computed over its canonical JSON without
+`contentHash` and `provenance`. A program that reads a bundle recomputes it before use. See
+[Application Prompts](guides/application-prompts.md#content-hash).
+
+### `prompt-text`
+
+The opt-in target that writes a Markdown preview of each composed system message under
+`prompts/`. It is for reading, not an approved artifact. See
+[Application Prompts](guides/application-prompts.md#previews).
+
 ## Teams and Organization
 
 ### Registry
