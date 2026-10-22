@@ -399,7 +399,7 @@ targets:
   - github
 ```
 
-The path is relative to the declaring file and chains are allowed, but a cycle is an error. Objects merge deeply and arrays are replaced, so `app` compiles only `github`. A different `registry` backend in the extending file drops the base one.
+The path is relative to the declaring file and chains are allowed, but a cycle is an error. Objects merge deeply and arrays are replaced, so `app` compiles only `github`. The exception is `policies`: base policies are kept and the extending file's policies are appended, and a policy that reuses a base policy name is an error. A different `registry` backend in the extending file drops the base one.
 
 See the [configuration reference](https://getpromptscript.dev/reference/config/) and the [enterprise guide](https://getpromptscript.dev/guides/enterprise/) for details.
 

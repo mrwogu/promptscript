@@ -15,6 +15,7 @@ import { createSpinner, ConsoleOutput, isVerbose } from '../output/console.js';
 import { getEffectiveEntryPaths } from '../utils/build-profile.js';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { isTargetConfig } from '../utils/target-config.js';
+import { buildValidatorConfig } from '../utils/validator-config.js';
 
 /**
  * Check result for a single item.
@@ -409,10 +410,7 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
             lockfile,
             registries: config.registries,
           },
-          validator: {
-            ...config.validation,
-            policies: config.policies,
-          },
+          validator: buildValidatorConfig(config),
           models: config.models,
           formatters: [],
         });

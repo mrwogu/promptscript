@@ -6,6 +6,7 @@ import { findConfigFile, loadEffectiveConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import { Compiler } from '@promptscript/compiler';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
+import { buildValidatorConfig } from '../utils/validator-config.js';
 import {
   getMinimumVersionForBlock,
   getMinimumVersionForFeature,
@@ -351,7 +352,7 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
         registries: config.registries,
       },
       validator: {
-        ...config.validation,
+        ...buildValidatorConfig(config),
         policies: options.skipPolicies ? undefined : config.policies,
         skipPolicies: options.skipPolicies,
       },

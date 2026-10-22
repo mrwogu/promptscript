@@ -1316,6 +1316,7 @@ How the merge works:
 
 - The `extends` path is relative to the file that declares it. A base file can extend another file. A circular chain is an error.
 - Objects merge deeply and the extending file wins. Arrays such as `targets` are replaced, not joined, so the example above compiles only `github`.
+- `policies` is the one array that is joined: the base policies come first and the extending file's policies are appended. A base policy cannot be removed or redefined, so a policy with the same `name` as a base policy is a config error, and so is a `policies` value that is not a list, such as `policies: null` (a bare `policies:` key is accepted only when the base has no policies). Setting `validation.rules.policy-compliance` to `off` still turns PS030 off, including from an extending file.
 - `registry` merges like the other config levels: if the extending file picks another backend (for example `registry.path` over a base `registry.git`), the base backend is dropped.
 - Paths inside a base file, like `input.entry` or `registry.path`, stay relative to the project, not to the base file.
 - `prs migrate` and `prs serve` read only the project file.

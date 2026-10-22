@@ -4,7 +4,10 @@ import { dirname, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import {
   deepMerge,
+  ErrorCode,
   interpolateEnvVars as interpolateEnvironmentVariables,
+  isPlainObject,
+  PSError,
 } from '@promptscript/core';
 import type { PromptScriptConfig } from '@promptscript/core';
 import { loadUserAndSystemConfig } from './user-config.js';
@@ -80,7 +83,9 @@ export async function loadConfig(customPath?: string): Promise<PromptScriptConfi
 /**
  * Parse one config file and merge it over the file named in its `extends`.
  * The base path is relative to the file that extends it. Objects merge deeply,
- * arrays and scalars from the extending file replace the base ones.
+ * arrays and scalars from the extending file replace the base ones. The one
+ * exception is `policies`: base policies are kept and the extending file's
+ * policies are appended, see {@link mergePolicies}.
  */
 async function loadConfigFile(
   configFile: string,
@@ -124,7 +129,50 @@ async function loadConfigFile(
       own['registry'] as PromptScriptConfig['registry']
     );
   }
+  if (own['policies'] !== undefined) {
+    merged['policies'] = mergePolicies(base['policies'], own['policies'], baseFile, absolutePath);
+  }
   return merged;
+}
+
+/**
+ * Merge the `policies` of an extended config pair. Base policies are a floor:
+ * the extending file appends its own and can neither drop nor redefine one.
+ * A bare `policies:` key (parsed as null) is accepted only when the base has no policies.
+ * @throws PSError when the extending file's `policies` is not a list or reuses a base policy name.
+ */
+function mergePolicies(base: unknown, own: unknown, baseFile: string, configFile: string): unknown {
+  const basePolicies = Array.isArray(base) ? base : [];
+  if (own === null && basePolicies.length === 0) {
+    return null;
+  }
+  const location = { file: configFile, line: 1, column: 1 };
+  if (!Array.isArray(own)) {
+    const value = own === null ? 'null' : `a ${typeof own}`;
+    throw new PSError(
+      `"policies" in ${configFile} is ${value}, which would drop the policies of ${baseFile}. ` +
+        'Base policies cannot be removed: delete the key to keep them or list the policies to add.',
+      ErrorCode.INVALID_VALUE,
+      { location }
+    );
+  }
+  const baseNames = new Set(basePolicies.map(policyName));
+  for (const policy of own) {
+    const name = policyName(policy);
+    if (name !== undefined && baseNames.has(name)) {
+      throw new PSError(
+        `Policy "${name}" in ${configFile} is already defined in ${baseFile} or a config it extends. ` +
+          'Base policies cannot be redefined: rename it or change it where the base defines it.',
+        ErrorCode.INVALID_VALUE,
+        { location }
+      );
+    }
+  }
+  return [...basePolicies, ...own];
+}
+
+function policyName(policy: unknown): string | undefined {
+  return isPlainObject(policy) && typeof policy['name'] === 'string' ? policy['name'] : undefined;
 }
 
 /**
