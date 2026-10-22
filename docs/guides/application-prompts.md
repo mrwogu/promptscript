@@ -236,7 +236,8 @@ have no duplicates.
 `model.ref` must name a model in the catalog, or a profile you declare under `models.profiles` in
 `promptscript.yaml`. A floating alias such as `sonnet` resolves to the release it points at when you
 compile. The resolved `profile`, `provider` and `apiId` are part of the content hash, so a catalog
-change cannot move the served model under an approved hash.
+change cannot move the served model under a hash you pinned. `prs validate` warns about a floating
+alias with PS042.
 
 ## Content Hash
 
