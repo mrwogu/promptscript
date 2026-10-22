@@ -1,3 +1,4 @@
+import type { ReleaseEnvironmentName } from './config.js';
 import type { GovernanceMeta, ModelParams, PromptScalarType } from './prompts.js';
 
 /** Role of a bundle message. */
@@ -179,4 +180,34 @@ export interface PromptBundleIndexV1 {
   source: string;
   /** Prompts sorted by id */
   prompts: PromptBundleIndexEntry[];
+}
+
+/** One prompt a release label points at. */
+export interface PromptReleaseLabelEntry {
+  /**
+   * Prompt id.
+   * @example "acme-support/refund-reply"
+   */
+  id: string;
+  /**
+   * Content hash of the released bundle.
+   * @pattern ^sha256-[0-9a-f]{64}$
+   */
+  contentHash: string;
+}
+
+/** Label of one release environment: the bundle each prompt id has there, version 1. */
+export interface PromptReleaseLabelV1 {
+  /**
+   * Schema URL, the version tag of the label.
+   * @example "https://getpromptscript.dev/schema/prompt-release-label/v1.json"
+   */
+  $schema: 'https://getpromptscript.dev/schema/prompt-release-label/v1.json';
+  /**
+   * Environment name.
+   * @example "prod"
+   */
+  environment: ReleaseEnvironmentName;
+  /** Released prompts sorted by id */
+  prompts: PromptReleaseLabelEntry[];
 }

@@ -1,0 +1,72 @@
+{
+  "description": "Caller keys the bundle does not declare are ignored. The render succeeds and reports one unknown-input warning, which never holds a value. A __proto__ key counts as an ordinary extra key.",
+  "source": {
+    "entry": ".promptscript/project.prs",
+    "files": {
+      ".promptscript/project.prs": "@meta {\n  id: \"acme-support\"\n  syntax: \"1.6.0\"\n  owner: \"team-support\"\n  risk: \"medium\"\n}\n\n\n@prompts {\n  greet: {\n    description: \"Greet a customer\"\n    user: \"Hello {{input.name}}.\"\n    inputs: {\n      name: { type: \"string\", description: \"Customer name\" }\n    }\n  }\n}\n"
+    }
+  },
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/greet",
+    "description": "Greet a customer",
+    "contentHash": "sha256-11eee6f7810d1d5f0675c2e98ea5f119b188a05ff7193ed206449864068b4220",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello {{input.name}}."
+      }
+    ],
+    "inputs": {
+      "name": {
+        "type": "string",
+        "description": "Customer name",
+        "required": true
+      }
+    },
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "user",
+          "path": "prompts.greet.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Greet a customer\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/greet\",\"inputs\":{\"name\":{\"description\":\"Customer name\",\"required\":true,\"type\":\"string\"}},\"messages\":[{\"content\":\"Hello {{input.name}}.\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-11eee6f7810d1d5f0675c2e98ea5f119b188a05ff7193ed206449864068b4220",
+  "slots": [
+    {
+      "message": 0,
+      "kind": "slot",
+      "name": "name",
+      "offset": 6,
+      "length": 14
+    }
+  ],
+  "render": [
+    {
+      "name": "extra keys",
+      "inputs": {
+        "name": "Ada",
+        "extra": 1,
+        "__proto__": {
+          "x": 1
+        }
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Hello Ada."
+        }
+      ],
+      "warnings": ["unknown-input"]
+    }
+  ]
+}

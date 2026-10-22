@@ -33,6 +33,7 @@ CHANGELOG.md
 schema/config.json
 schema/prompt-bundle-v1.json
 schema/prompt-bundle-index-v1.json
+schema/prompt-release-label-v1.json
 
 # Lock files - machine generated
 pnpm-lock.yaml

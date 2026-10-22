@@ -1,0 +1,75 @@
+{
+  "description": "Hand-written, because a compiler rejects it with PS043. A slot with spaces and a lone {{ are invalid slots: the text stays as written and the render reports invalid-slot. The valid slot still renders.",
+  "bundle": {
+    "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+    "id": "acme-support/invalid-slot",
+    "description": "Bundle with invalid slots",
+    "contentHash": "sha256-0aa29cc23f86df8d4896130205561536a54cfbc0d0619b81f93aa0dce473b1d1",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hi {{ input.name }}, call {{input.name}} or stop at {{"
+      }
+    ],
+    "inputs": {
+      "name": {
+        "type": "string",
+        "description": "Customer name",
+        "required": true
+      }
+    },
+    "governance": {
+      "risk": "medium",
+      "owner": "team-support"
+    },
+    "provenance": {
+      "entry": ".promptscript/project.prs",
+      "segments": [
+        {
+          "message": "user",
+          "path": "prompts.invalid-slot.user",
+          "files": [".promptscript/project.prs"]
+        }
+      ]
+    }
+  },
+  "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v1.json\",\"description\":\"Bundle with invalid slots\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/invalid-slot\",\"inputs\":{\"name\":{\"description\":\"Customer name\",\"required\":true,\"type\":\"string\"}},\"messages\":[{\"content\":\"Hi {{ input.name }}, call {{input.name}} or stop at {{\",\"role\":\"user\"}]}",
+  "contentHash": "sha256-0aa29cc23f86df8d4896130205561536a54cfbc0d0619b81f93aa0dce473b1d1",
+  "slots": [
+    {
+      "message": 0,
+      "kind": "invalid",
+      "name": null,
+      "offset": 3,
+      "length": 16
+    },
+    {
+      "message": 0,
+      "kind": "slot",
+      "name": "name",
+      "offset": 26,
+      "length": 14
+    },
+    {
+      "message": 0,
+      "kind": "invalid",
+      "name": null,
+      "offset": 52,
+      "length": 2
+    }
+  ],
+  "render": [
+    {
+      "inputs": {
+        "name": "Ada"
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Hi {{ input.name }}, call Ada or stop at {{"
+        }
+      ],
+      "warnings": ["invalid-slot"]
+    }
+  ]
+}

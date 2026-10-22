@@ -202,6 +202,27 @@ export interface ValidationExclude {
 }
 
 /**
+ * Name of a release environment.
+ * @pattern ^[a-z][a-z0-9-]{0,31}$
+ */
+export type ReleaseEnvironmentName = string & { readonly __brand?: 'ReleaseEnvironmentName' };
+
+/**
+ * Release configuration (`releases` in promptscript.yaml).
+ */
+export interface ReleasesConfig {
+  /**
+   * Environment names in promotion order, first to last.
+   * Each name is lowercase letters, digits and hyphens, starting with a letter.
+   * @example ['staging', 'prod']
+   * @minItems 1
+   * @maxItems 16
+   * @uniqueItems true
+   */
+  environments: ReleaseEnvironmentName[];
+}
+
+/**
  * PromptScript configuration file (promptscript.yaml).
  */
 export interface PromptScriptConfig {
@@ -422,6 +443,14 @@ export interface PromptScriptConfig {
    *   supported: [claude-opus-5-5, gpt-6-sol]
    */
   models?: ModelsConfig;
+
+  /**
+   * Release settings for prompt bundles.
+   * @example
+   * releases:
+   *   environments: [staging, prod]
+   */
+  releases?: ReleasesConfig;
 
   /**
    * Universal directory for auto-discovering skills and commands.

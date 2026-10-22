@@ -45,7 +45,8 @@
         "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v2.json"
       },
       "canonical": "{\"$schema\":\"https://getpromptscript.dev/schema/prompt-bundle/v2.json\",\"description\":\"Answer a customer refund request\",\"governance\":{\"owner\":\"team-support\",\"risk\":\"medium\"},\"id\":\"acme-support/refund-reply\",\"inputs\":{},\"messages\":[{\"content\":\"Answer the refund request politely and ask for the order number.\",\"role\":\"user\"}]}",
-      "contentHash": "sha256-add8a7362c117f1511fe371d15477dad23b8581a0bfbb09a309274a53466b2b6"
+      "contentHash": "sha256-add8a7362c117f1511fe371d15477dad23b8581a0bfbb09a309274a53466b2b6",
+      "error": "unsupported-schema"
     }
   ]
 }

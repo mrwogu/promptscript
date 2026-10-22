@@ -277,6 +277,11 @@
       "description": "Model catalog settings: the model set the instructions are written for and custom model profiles.",
       "example": "models:\n  supported: [claude-opus-5-5, gpt-6-sol]"
     },
+    "releases": {
+      "$ref": "#/definitions/ReleasesConfig",
+      "description": "Release settings for prompt bundles.",
+      "example": "releases:\n  environments: [staging, prod]"
+    },
     "universalDir": {
       "type": [
         "string",
@@ -1060,6 +1065,41 @@
         "retired"
       ],
       "description": "Lifecycle status of a model profile.\n- `current`: recommended for new instructions\n- `legacy`: still served, but superseded by a newer version\n- `deprecated`: the provider announced a retirement date\n- `retired`: the provider no longer serves the model"
+    },
+    "ReleasesConfig": {
+      "type": "object",
+      "properties": {
+        "environments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReleaseEnvironmentName"
+          },
+          "description": "Environment names in promotion order, first to last. Each name is lowercase letters, digits and hyphens, starting with a letter.",
+          "examples": [
+            [
+              "staging",
+              "prod"
+            ]
+          ],
+          "example": [
+            "staging",
+            "prod"
+          ],
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "environments"
+      ],
+      "additionalProperties": false,
+      "description": "Release configuration (`releases` in promptscript.yaml)."
+    },
+    "ReleaseEnvironmentName": {
+      "type": "string",
+      "description": "Name of a release environment.",
+      "pattern": "^[a-z][a-z0-9-]{0,31}$"
     },
     "ValidationExclude": {
       "type": "object",
