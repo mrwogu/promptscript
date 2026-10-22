@@ -10,7 +10,7 @@
   policy-answer: {
     description: "Answer an employee question about HR policy"
     compose: [identity, standards, restrictions]
-    model: { ref: "claude-sonnet-5-5", temperature: 0.1, maxTokens: 500 }
+    model: { ref: "claude-sonnet-5-5", maxTokens: 500 }
     inputs: {
       question: { type: "string", description: "The employee question" }
       country: { type: "string", description: "Country of employment", default: "Poland" }

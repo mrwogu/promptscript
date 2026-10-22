@@ -48,7 +48,7 @@ A prompt is an entry of `@prompts`. It can reuse the blocks of the same program:
     risk: "high"
     dataClasses: ["pii"]
     compose: [identity, restrictions]
-    model: { ref: "claude-sonnet-5-5", temperature: 0.2, maxTokens: 800 }
+    model: { ref: "claude-sonnet-5-5", maxTokens: 800 }
     inputs: { message: { type: "string", description: "Customer message" } }
     output: {
       decision: { type: "enum", options: ["approve", "escalate"], description: "What to do next" }
@@ -62,7 +62,7 @@ A prompt is an entry of `@prompts`. It can reuse the blocks of the same program:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMjPgFo4AVzRpm1LPLES4AT3YZCs+QEYKANgoAGPeMHMA7qxjVzIDqVUatOo4S1BBwANZefFIQaiSOAL5iYtzSnFgQWIbC+nIgenlOAJrMaoIu2mGCYNqCuDCCAIJK9eqa2li1MKQUOfkJSazc1PBYIYzpbHDZTsq5AHIwAG4egjTMJKH1QsNgaqxSggBGMNXDkh2hghia1MzLUj0FiazJa2RYU6JOO3tSysPkQyyL4SCRSeCMEJoCasLwNVhwFwrISMNRwLDrFY-faCYYARzUIyCoJC4S8OAgAHMcMSwdgMABhKAYOBweCyZDyNAQCDyAC6OQkLDIzDZHNS7AyhjouJGYxhcAFTgkJGY4KgwNlYC8jGZanBqjY7iwygArGb5DKOGQPNg1MNZHYKAAmGUkUwAFWYYU4cFkAA47HZBM9QZJWGg1B9NXxWRhKTBNZk0IncuiQqxKZbBOC4JCINCIGwvAy0Ri+NRBLG4PGYPIQyHBc4o5GsMCm2CYIxQkXYcJaoYU15OLFs8xC5MOfJrmtltn5BCMMyOPyZbn8xO+-IAOo4bC1Zg5w-uQi6ECN5UXsNGdEwEheYqlDAIpGV7EHfGE9FTU6NZqCVF0UxWhHibNEPC8PpLwkUsgIrMpbg4YFgAgCMowoata3iUNQT6AoJGeeIQHiPkGDSahDHwIhSHIGAqFoEAGGWWhe3wCxiKAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMjPgFo4AVzRpm1LPLES4AT3YZCs+QEYKANgoAGPeMHMA7qxjVzIDqVUatOo4S1BBwANZefFIQaiSOAL5iYtzSnFgQWIbC+nIgenlOAJrMaoIu2mGCYNqCuDCCAIJK9eqa2li1MKQUOfkJSazc1PBYIYzpbHDZTsq5AHIwAG4egjTMJKH1QsNgaqxSggBGMNXDkh2hghia1MzLUj0FiazJa2RYU6JOO3tSysPkQyyL4SCRSeCMEJoCasLwNVhwFwrISMNRwLDrFY-faCYYARzUIyCoJC4S8OAgAHMcMSwdgMABhKAYOBweCyZDyNAQCDyAC6OQkLDIzDZHNS7AyhjouJGYxhcAFTgkJGY4KgwNlYC8jGZanBqjY7iwygArGb5DKSKYACrMMKcOCyAAcdjsgmeoMkrDQag+mr4rIwlJgmsyaFDuXRIVYlMtgnBcEhEGhEDYXgZaIxfGogkDcGDMHkHo9gucft9WGBZbBMEYoTTsOEtUMEa8nFi8eYqcmHPk1zWy3j8ghGGZHH5MsTyZ7TfkAHUcNhaswE6v3IRdCBS8qd16jOiYCQvMVShgEUjc9iDvjCeipqdGs1BKj0ZjaI8y2iPF4+ruJJmb45mUtwcMCwAQD6foUPmhbxJ6oJ9AUEjPPEIDxHyDBpNQhj4EQpDkDAVC0CADDLLQjb4BY6FAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -110,7 +110,7 @@ The example above compiles to `prompts/refund-reply.json`:
   "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
   "id": "acme-support/refund-reply",
   "description": "Answer a customer refund request",
-  "contentHash": "sha256-c205c1bfbab80e42775086ba5f0b963f76bda6221dca41b27cb69f5ea2a4b995",
+  "contentHash": "sha256-46efd8667a8cbc47257eff6ea29ffb0eedd192898c7dfacd72edf77cafc9024a",
   "messages": [
     {
       "role": "system",
@@ -146,7 +146,6 @@ The example above compiles to `prompts/refund-reply.json`:
     "provider": "anthropic",
     "apiId": "claude-sonnet-5-5",
     "params": {
-      "temperature": 0.2,
       "maxTokens": 800
     }
   },

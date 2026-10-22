@@ -9,7 +9,7 @@
   follow-up: {
     description: "Write a follow-up email after a sales call"
     compose: [identity, standards, restrictions]
-    model: { ref: "claude-haiku-5-5", temperature: 0.7, maxTokens: 400 }
+    model: { ref: "claude-haiku-5-5", maxTokens: 400 }
     inputs: {
       recipient: { type: "string", description: "First name of the recipient" }
       call_notes: { type: "string", description: "Notes from the call", default: "No notes." }
