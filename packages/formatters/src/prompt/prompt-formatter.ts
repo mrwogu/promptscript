@@ -21,6 +21,13 @@ export interface PromptLayout {
  * would otherwise treat the project root as owned.
  */
 function layoutOf(target: string, primary: string, location?: SourceLocation): PromptLayout {
+  if (/^(?:[\\/]|[A-Za-z]:)/.test(primary)) {
+    throw new PromptFormatError(
+      `The ${target} target writes inside the project, so its output must be a relative path such as ` +
+        `"prompts/index.json". Got "${primary}".`,
+      location
+    );
+  }
   const segments = primary
     .replaceAll('\\', '/')
     .split('/')

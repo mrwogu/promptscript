@@ -149,11 +149,24 @@ describe('bundle target', () => {
     });
 
     it('refuses an output path whose directory is the project root', () => {
-      for (const outputPath of ['./index.json', '././index.json', '.\\index.json', '/index.json']) {
+      for (const outputPath of ['./index.json', '././index.json', '.\\index.json']) {
         expect(
           () => new BundleFormatter().format(program({ prompts: reply() }), { outputPath }),
           outputPath
         ).toThrow(/must name one/);
+      }
+    });
+
+    it('refuses an absolute output path', () => {
+      for (const outputPath of [
+        '/etc/prompts/index.json',
+        '/index.json',
+        'C:\\prompts\\index.json',
+      ]) {
+        expect(
+          () => new BundleFormatter().format(program({ prompts: reply() }), { outputPath }),
+          outputPath
+        ).toThrow(/relative path/);
       }
     });
 
