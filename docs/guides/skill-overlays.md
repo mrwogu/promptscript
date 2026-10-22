@@ -33,7 +33,7 @@ Import a base skill and extend it:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODt+XUxWRwB6OABraChlDGUAI1aYIt8iDk9eDrKKBqa4ChYpAFpqGAA3CBhzXkCrXik4RmoINCwINhSQAGFmKV4Z+cXecxMcWSwtxg5qWRhGNy2sRx0cV-q4POCLHYnCwB1iIDiwQAoqwcBhWIxpGc5gsluZmNR6mAoBYVBiFD8Xm8Pl8OKQKHFwXl8iB8nR0Ng8IgQBVmGR4bURlBmlRaCAGEC+lgeLwAMpuNDkBYyOQEuxEUjkOzUDzKH4zCi8AByzCw9gw1D1zDAcrWzDeWhEuzYdDE-VYurEyIwUH1jHqGhgFN8QhEyziEFC4RZlQ5dUa3P+ENWcASImSwfSWVy0eCJAghAgrDC9zcXQKxTgIk8BvEyhWgJOMDCyAiAAUoBhEThmFApM8i-DxKWIgBdOIcItZ9Q1+uN5ut9t3Ls9kD9gu+GZFh7W1jluKTYMNpswFttmDPJf3CCPPasam03sMEHURz4BXRL00eggWYHuBn-CpWlAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH343ODt+XUxWRwB6OABraChlDGUAI1aYIt8iDk9eDrKKBqa4ChYpAFpqGAA3CBhzXkCrXik4RmoINCwINhSQAGFmKV4Z+cXecxMcWSwtxg5qWRhGNy2sRx0cV-q4POCLHYnCwB1iIDiwQAoqwcBhWIxpGc5gsluZmNR6mAoBYVBiFD8Xm8Pl8OKQKHFwXl8iB8nR0Ng8IgQBVmGR4bURlBmlRaCAGEC+lgeLwAMpuNDkBYyOQEuxEUjkOzUDzKH4zCi8AByzCw9gw1D1zDAcrWzDeWhEuzYdDE-VYurEyIwUH1jHqGhgFN8QhEyziEFC4RZlQ5dUa3P+ENWcASImSwfSWVy0eCJAghAgrDC9zcXQKxTgIk8BvEyhWgJOMDCyAiAAUoBhEThmFApM8i-DxKWIgBdOIcItZ9Q1+uN5ut9t3Ls9kD9gu+GZFh7W1jluKTYMNpswFttmDPJf3CCPPasam03sMEHURz4BXRL00eggWYHuBn-CpWlAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -62,7 +62,7 @@ When multiple `@use` and `@extend` declarations target the same skill, priority 
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH343ODt+ACM3AFpqf2gAejgAa2goZQxlOpFoYtLyquqsNQA3GCgm1qh2sWVhjDGoItY+AEE0cghpa0NqKWow7oxoFQhaLDoFUfHZGBZPYqIOT14j6AoWtrgKFilamBGW3MvECVl4UjgjGoEDQWAgbBSIAASvUoK8AUC8sE6mAYHVWIx4GFkBE3lBqpgsBxqKxviRvCAALo+QqsR6EZ4yeaLD5Tdo-Zh-OqAmDA0HBCFQmFwhHhEAAFWuaOFmJAwXVGr45ggtN4AAooNg8eiHISAJRxHF4ziEuDEiLc8YU7DU2kUekRRnqvgYDacKQyDBganonpLAogfJ0dDYPCIECVGpkyZfKi0EAMe7PLA8XgAZTcGygWxkcgUODsRFI5Ds1A8ygrdQovAAcswsPYMNQO8wwOW7OJmIw3FoRDLWJcMC9WO2xOiMGjMIxmhoYBRikIRCC4hBQnLE-8wynpnAsfFEsk5eksrkQHESBBCDqwsM3DAWcU4CJPF3xMpxTogowPaIAAAqGoSODMFA+yyN+4i-p6cQcF+OrqCB4EYJB0GwV+U4IXsSEFMUdRftCjDjv+cTVHKmHYTBxqkcMEAUfCbJ3hGUYxrg+AHo6EyfCeab0EwbDZrmBZFiWsjyLYvBVtEtb1rwjZrq2s6YN2hh9nJg7DqO2BsZO06zqIdQLp2y6ruuvibgEO57hEfFKse7RnnACQiJeaSZDkZ4Pk+rAvnW77Eb4eE-nsVFgr8wG8CSYEQTAUEMdQcH4YhTLIfAcKsOh8URHRyU4caEUEQyzJhfwTHkZR25gjRhVJSlsE1Sx455PkkaMgwnDDI4+AKTWwkZiAYy0Gx+CpJGQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH343ODt+ACM3AFpqf2gAejgAa2goZQxlOpFoYtLyquqsNQA3GCgm1qh2sWVhjDGoItY+AEE0cghpa0NqKWow7oxoFQhaLDoFUfHZGBZPYqIOT14j6AoWtrgKFilamBGW3MvECVl4UjgjGoEDQWAgbBSIAASvUoK8AUC8sE6mAYHVWIx4GFkBE3lBqpgsBxqKxviRvCAALo+QqsR6EZ4yeaLD5Tdo-Zh-OqAmDA0HBCFQmFwhHhEAAFWuaOFmJAwXVGr45ggtN4AAooNg8eiHISAJRxHF4ziEuDEiLc8YU7DU2kUekRRnqvgYDacKQyDBganonpLAogfJ0dDYPCIECVGpkyZfKi0EAMe7PLA8XgAZTcGygWxkcgUODsRFI5Ds1A8ygrdQovAAcswsPYMNQO8wwOW7OJmIw3FoRDLWJcMC9WO2xOiMGjMIxmhoYBRikIRCC4hBQnLE-8wynpnAsfFEsk5eksrkQHESBBCDqwsM3DAWcU4CJPF3xMpxTogowPaIAAAqGoSODMFA+yyN+4i-p6cQcF+OrqCB4EYJB0GwV+U4IXsSEFMUdRftCjDjv+cTVHKmHYTBxqkcMEAUfCbJ3hGUYxrg+AHo6EyfCeab0EwbDZrmBZFiWsjyLYvBVtEtb1rwjZrq2s6YN2hh9nJg7DqO2BsZO06zqIdQLp2y6ruuvibgEO57hEfFKse7RnnACQiJeaSZDkZ4Pk+rAvnW77Eb4eE-nsVFgr8wG8CSYEQTAUEMdQcH4YhTLIfAcKsOh8URHRyU4caEUEQyzJhfwTHkZR25gjRhVJSlsE1Sx455PkkaMgwnDDI4+AKTWwkZiAYy0Gx+CpJGQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -93,7 +93,7 @@ When `@extend` targets a skill, each property follows a specific merge strategy:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH34iDk9eACMMOBgKOABraCg4CilyZkdeQKsdNjKsFJBYoZ7ggDkYc142qA6tLF5zZmp6sFmp6hgHRghWdQUcOyqaijjhvOCMKHXpABVmZmaw5AiAIWqcCLpwkAAlGAkXx+AHVqCYYBEALo+fIgfKQhicLDURz4Iikci1Gj0EAANxgtAgbHwqThQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH34iDk9eACMMOBgKOABraCg4CilyZkdeQKsdNjKsFJBYoZ7ggDkYc142qA6tLF5zZmp6sFmp6hgHRghWdQUcOyqaijjhvOCMKHXpABVmZmaw5AiAIWqcCLpwkAAlGAkXx+AHVqCYYBEALo+fIgfKQhicLDURz4Iikci1Gj0EAANxgtAgbHwqThQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -184,7 +184,7 @@ The `sealed` property prevents higher layers from replacing specified skill prop
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq14pcmZHMOrg4Kk4RmoINCwINhSQAAVXcTdGHqM6qAatLF5zZmpSsCnzPJadNg52ftiQOPWAYU6exgwoWph6xxn7V0ZpN2o7QBQCWvlWZlmSZnEIMEcKPtwnsQUC4DAztIwsgIix2JwsBE6MC2h0uuNWBEALpxQoFED5LEMBHURz4IikcgwKi0EAMABuMFovVY+FSBKAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344AGtoKGVAq14pcmZHMOrg4Kk4RmoINCwINhSQAAVXcTdGHqM6qAatLF5zZmpSsCnzPJadNg52ftiQOPWAYU6exgwoWph6xxn7V0ZpN2o7QBQCWvlWZlmSZnEIMEcKPtwnsQUC4DAztIwsgIix2JwsBE6MC2h0uuNWBEALpxQoFED5LEMBHURz4IikcgwKi0EAMABuMFovVY+FSBKAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -204,7 +204,7 @@ The `sealed` property prevents higher layers from replacing specified skill prop
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1maIgMVkYYAFpGHBhGUrDq4OCpOEZqCDQsCDYUkABhOvIGprsANxhhyEZscdY8vtr2TixJ2JAKE6PtvrgYDFhQhWo3GDjCgpB8gF0GfepHfCJSchgVFoIAYy1om3wqVeQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344AGtoKGVAqx1maIgMVkYYAFpGHBhGUrDq4OCpOEZqCDQsCDYUkABhOvIGprsANxhhyEZscdY8vtr2TixJ2JAKE6PtvrgYDFhQhWo3GDjCgpB8gF0GfepHfCJSchgVFoIAYy1om3wqVeQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -269,7 +269,7 @@ Layer 4: project      — local project overrides
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAjWYATAK6MsAejgBraFDiSWwmAFpqMAG4QYAdyq0AOq34kYWDL2C8IwxL0MhB1EeKnK1G7Xse84AT3YMQntHAEYKCIAGXwBfY2N+UTgYARYyDFZ-aTkoBSURTy0dXV4MOF4AI3KYBJMiDlZhKpqKWXk4Cg91Yr0rY15eFThGagg0LAg2UJAABRcxCVU4NBhGCEhGXg9eLxLHAd2YMBgNVkZ4e2RHDROzi8UhRaxVTCwOalZOkmFHAF1jLEQLE6OhsHhEE50pgsjkOgUVD1vPoaPQmGxGlgeLwAMqiNDkHTNODMXi4VJEUjkVLUURfXg4U4wCi8AByzCwvEw1E5zDAZMZQ2YjFEZiCkzYdDKTV4rA5ZSOGCgXIwjBkGAA5szEmYLP1WINbDN+NDMtl2nlFN09j4QIcAkEQg4QBEAKwUGJ2g28EgQQgQVj2LC02qseImOAWJoYajCCrAQ4eK6OWZQVUwHDMKAqah+KPCGO-EAA70cSMBjXJuZpi6Z7OnPOZAux-6AxIaSNjCRTekJ72qZ2p9N1nNHTsQbtsA5h4F-BicYP+fCUsiUVEgBiaU5wHv4MLAoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAjWYATAK6MsAejgBraFDiSWwmAFpqMAG4QYAdyq0AOq34kYWDL2C8IwxL0MhB1EeKnK1G7Xse84AT3YMQntHAEYKCIAGXwBfY2N+UTgYARYyDFZ-aTkoBSURTy0dXV4MOF4AI3KYBJMiDlZhKpqKWXk4Cg91Yr0rY15eFThGagg0LAg2UJAABRcxCVU4NBhGCEhGXg9eLxLHAd2YMBgNVkZ4e2RHDROzi8UhRaxVTCwOalZOkmFHAF1jLEQLE6OhsHhEE50pgsjkOgUVD1vPoaPQmGxGlgeLwAMqiNDkHTNODMXi4VJEUjkVLUURfXg4U4wCi8AByzCwvEw1E5zDAZMZQ2YjFEZiCkzYdDKTV4rA5ZSOGCgXIwjBkGAA5szEmYLP1WINbDN+NDMtl2nlFN09j4QIcAkEQg4QBEAGwUGJ2g28EgQQgQVj2LC02qseImOAWJoYajCCrAQ4eK6OWZQVUwHDMKAqah+KPCGO-EAA70cSMBjXJuZpi6Z7OnPOZAux-6AxIaSNjCRTekJ72qZ2p9N1nNHTsQbtsA5h4F-BicYP+fCUsiUVEgBiaU5wHv4MLAoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -295,7 +295,7 @@ Layer 2 replaces `description` (allowed), appends to `references`, but **cannot*
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgCMArgHo4Aa2hQ4olgBMYAWmowAbhBgB3KrQA6rfiRhYMvYLwjzEvPSCFiFy1Ru13ecAJ7sMhG3YBGCiCABncAXwMDfmE4GAEaZnlhRixxKSgZOSTndU0tXgw4XkEimCjDIg5WeRKyiklpOAonFTztcwNeXlUwGFVWRngbZC7u2xAAQl7+ziHZROTUpUwsDmpWZpJ5Ozox7rsZgfnRESUMakYcCA5U4VUKbd39iaO5+FPhJRIk4VgtnYgMYAXTGqgAjsIIKo4CM7HFGPcbp4lHBGBhWHZQaxwiBwnR0Ng8Ih7IsUmlGplZK0XPldPQmGxqlgeLwAMrCNDkTS1ODMXi4eJEUjkeLUYSbXg4WYUXgAOWYWF4mGoSuYYAF0t48mYiOMPiwEDYdEKNV4rEVhR6MAwUGVGEYEgwAHMYBRosZTJ1WN0rP5SdRfql0k1soo2q4tHYxl4fH4JkEAKwUMJAn28EgQQgQVg2LDi8o46JwUw1C7yYrAMZOOEgAAKUAdMBwzCgimoHlL8nLWLGHBLOedtYbTZbbf6nYx3eogOxkUMMPzEFSRslVfTSgmI6GY-b1pL1GXhrY0ZxeOBDE4+c8+GFZEoNAZan6cFX+ACeKAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgCMArgHo4Aa2hQ4olgBMYAWmowAbhBgB3KrQA6rfiRhYMvYLwjzEvPSCFiFy1Ru13ecAJ7sMhG3YBGCiCABncAXwMDfmE4GAEaZnlhRixxKSgZOSTndU0tXgw4XkEimCjDIg5WeRKyiklpOAonFTztcwNeXlUwGFVWRngbZC7u2xAAQl7+ziHZROTUpUwsDmpWZpJ5Ozox7rsZgfnRESUMakYcCA5U4VUKbd39iaO5+FPhJRIk4VgtnYgMYAXTGqgAjsIIKo4CM7HFGPcbp4lHBGBhWHZQaxwiBwnR0Ng8Ih7IsUmlGplZK0XPldPQmGxqlgeLwAMrCNDkTS1ODMXi4eJEUjkeLUYSbXg4WYUXgAOWYWF4mGoSuYYAF0t48mYiOMPiwEDYdEKNV4rEVhR6MAwUGVGEYEgwAHMYBRosZTJ1WN0rP5SdRfql0k1soo2q4tHYxl4fH4JkEAGwUMJAn28EgQQgQVg2LDi8o46JwUw1C7yYrAMZOOEgAAKUAdMBwzCgimoHlL8nLWLGHBLOedtYbTZbbf6nYx3eogOxkUMMPzEFSRslVfTSgmI6GY-b1pL1GXhrY0ZxeOBDE4+c8+GFZEoNAZan6cFX+ACeKAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -356,7 +356,7 @@ seal it:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCWdk4sFJBYoZru3gBhahMIRgwoXibW9t5zZmpSsCgLXkAUAntXDkYOGVVmEkNmmGopqTgKOODhvLG4GDnpMOQI3o52CIBdOKFAogfL-Bj9aiOfBEUjkGBUWggBiXWgQNj4VKgoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCWdk4sFJBYoZru3gBhahMIRgwoXibW9t5zZmpSsCgLXkAUAntXDkYOGVVmEkNmmGopqTgKOODhvLG4GDnpMOQI3o52CIBdOKFAogfL-Bj9aiOfBEUjkGBUWggBiXWgQNj4VKgoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -380,7 +380,7 @@ replace individual reference files without touching the sealed content:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCWdk4sFJBYoZru3gBhZibeJtb23nMp0rAoC14ACjgYDFhxAEoKOODhvLGmsBgm1kZ4MOQI88vOG7gAekwsDmpWOAoSbxAdHCIEeVxerzgIk8GGo4l+-wiAF0jrJtrs7hFehx2Ei4oUCiB8oiGP1qI58ERSOQYFRaICQM1LnAIGx8KlCUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCWdk4sFJBYoZru3gBhZibeJtb23nMp0rAoC14ACjgYDFhxAEoKOODhvLGmsBgm1kZ4MOQI88vOG7gAekwsDmpWOAoSbxAdHCIEeVxerzgIk8GGo4l+-wiAF0jrJtrs7hFehx2Ei4oUCiB8oiGP1qI58ERSOQYFRaICQM1LnAIGx8KlCUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -429,7 +429,7 @@ breaking changes:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCpOEZqCDQsCDYUkABhOrsm1vbeZoAmHN5AFAJeJrgsajdGLDcmmXNmalKwKAs87tr2Tiwx2JAKJ4fL3kKCkHyAXQZb6kd8ERSOQYFRaCAGM0YLQRqx8KlPkA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCpOEZqCDQsCDYUkABhOrsm1vbeZoAmHN5AFAJeJrgsajdGLDcmmXNmalKwKAs87tr2Tiwx2JAKJ4fL3kKCkHyAXQZb6kd8ERSOQYFRaCAGM0YLQRqx8KlPkA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

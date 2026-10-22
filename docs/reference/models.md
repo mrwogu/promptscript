@@ -9,8 +9,9 @@ PromptScript ships a catalog of Anthropic, OpenAI, Google, and xAI models.
 Agent `model` and `specModel` values and skill `model` values resolve against
 it, so you write a model once and each target gets the name it expects. PS041
 uses the same catalog to report deprecated and retired models, and it also
-checks the `model.ref` of `@prompts` entries. Targets ignore prompt definitions,
-so no target receives that name.
+checks the `model.ref` of `@prompts` entries. Coding agent targets skip prompt
+definitions, so none of them receives that name. The `bundle` target resolves the
+reference and writes the profile, provider, and API id next to it.
 
 This page is generated from the catalog source, so it matches what the
 compiler does. To use a model that is not listed yet, or to change a built-in

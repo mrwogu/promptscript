@@ -51,7 +51,8 @@ type FeatureStatus =
   | 'partial'; // Partially implemented
 ```
 
-The target catalog contains 50 formatters. The matrix currently classifies 37 of them. A missing
+The target catalog contains 50 coding agent targets and two prompt targets. The matrix currently
+classifies 37 of the coding agent targets. A missing
 entry means the target has not been classified for that feature, not that the feature is
 unsupported. The formatter registry and generated
 [platform matrix](../reference/formatters/index.md) remain the source of truth for target

@@ -77,7 +77,7 @@ This creates the following structure:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqxVXdk5xAFopOAh1VjDq4OCWxmoINCwINhSQAFUASQB6MYANXha2q3MTHFkYDGpGHAwAI1gF7D2MOHg84MLWON0SE064nvg+gaGR8JAAYWoNjl51Ex0zBIt1M526blO1AmrAAbsxGHtYGEsNQ3DA4pdrswpI1vjCIDBzPcao84M9BsMOu8AEowfGEwFSHQ7VjqM4gB68CEwKGw+GImDI1HomqXfIgfIAXQYnBRjnwRFI5BgVFoIAYMJ5rTY+FSEqAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344AGtoKGVAqxVXdk5xAFopOAh1VjDq4OCWxmoINCwINhSQAFUASQB6MYANXha2q3MTHFkYDGpGHAwAI1gF7D2MOHg84MLWON0SE064nvg+gaGR8JAAYWoNjl51Ex0zBIt1M526blO1AmrAAbsxGHtYGEsNQ3DA4pdrswpI1vjCIDBzPcao84M9BsMOu8AEowfGEwFSHQ7VjqM4gB68CEwKGw+GImDI1HomqXfIgfIAXQYnBRjnwRFI5BgVFoIAYMJ5rTY+FSEqAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -170,7 +170,7 @@ When a skill from `npx skills` doesn't have the exact settings you need, overrid
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mEhITMOrg4Kk4RmoINCwINhSQAGFqGGw7XQbTXnMTHFrWADdOHrYMKBVmahJsPJbeNzgYagBJBeZGDAAjWDCsajc7Xce+AHlF6k6pXikwDDcoLDirSUl1gAFlmFIoCd5mdsL1WDc7nYXm8PnZvr9-nFCgUQPkALoMJbURz4IikcgwKi0EAMN5weH4VJ4oA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344AGtoKGVAqx1mEhITMOrg4Kk4RmoINCwINhSQAGFqGGw7XQbTXnMTHFrWADdOHrYMKBVmahJsPJbeNzgYagBJBeZGDAAjWDCsajc7Xce+AHlF6k6pXikwDDcoLDirSUl1gAFlmFIoCd5mdsL1WDc7nYXm8PnZvr9-nFCgUQPkALoMJbURz4IikcgwKi0EAMN5weH4VJ4oA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -205,7 +205,7 @@ Pass parameter values in your `.prs` file:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCoDFZ1Nw0YFJA0R1w2PODCgpB8gF0GTixqR3wiUnIYKloQBmaYWgg2fFS5oA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344AGtoKGVAqx1mKQBaahgANwgYczDq4OCoDFZ1Nw0YFJA0R1w2PODCgpB8gF0GTixqR3wiUnIYKloQBmaYWgg2fFS5oA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

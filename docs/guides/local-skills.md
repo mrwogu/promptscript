@@ -154,7 +154,7 @@ EOF
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fH344AGtoKGVAq143CABaN0J6mmZ6kiSw6uDgqThGagg0LAg2FJAAVQBJAHoJgA1ePoh1Kwh2GCgoFc5GO3MTHFkYDGpGHAwAI1gl7CuMOHg8ntrH6inWADdmRivYMLAGEqMDihVYcV0JBMXTivXgAyGIzG4RAAGFqCcOLx1CYdMwSFDTM8em43h9vr9rjAwlhqG4QTUwfkQPkALoMTi0xz4IikcgwKi0EAMT4wWijVj4VIsoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344AGtoKGVAq143CABaN0J6mmZ6kiSw6uDgqThGagg0LAg2FJAAVQBJAHoJgA1ePoh1Kwh2GCgoFc5GO3MTHFkYDGpGHAwAI1gl7CuMOHg8ntrH6inWADdmRivYMLAGEqMDihVYcV0JBMXTivXgAyGIzG4RAAGFqCcOLx1CYdMwSFDTM8em43h9vr9rjAwlhqG4QTUwfkQPkALoMTi0xz4IikcgwKi0EAMT4wWijVj4VIsoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

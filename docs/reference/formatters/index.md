@@ -1,6 +1,6 @@
 ---
 title: Supported Formatters
-description: All 50 AI coding agent targets supported by PromptScript, with output paths, skills, agents, commands, MCP, and hooks support.
+description: All 50 AI coding agent targets and two prompt targets supported by PromptScript, with output paths, skills, agents, commands, MCP, and hooks support.
 sidebar:
   label: Platform Matrix
   order: 0
@@ -28,6 +28,10 @@ sidebar:
 PromptScript treats instructions, skills, agents, commands, MCP servers, hooks, workflows, and
 plugins as platform capabilities. See [Target Platforms](../../features/target-platforms.md) for
 the platform-family model.
+
+Two more targets, `bundle` and `prompt-text`, compile the prompts of an application instead of
+instructions for a coding agent. They are opt-in and appear in the table below with the tier
+Prompt. See [Application Prompts](../../guides/application-prompts.md).
 
 ## Rich Native Formatters
 
@@ -208,6 +212,8 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
 | [Warp](warp.md)                 | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | [Zed](zed.md)                   | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | [Zencoder](zencoder.md)         | Tier 3 | `.zencoder/rules/project.md`      | Yes    | No     | No    | No       |
+| [Prompt Bundle](bundle.md)      | Prompt | `prompts/index.json`              | No     | No     | No    | No       |
+| [Prompt Text](prompt-text.md)   | Prompt | `prompts/README.md`               | No     | No     | No    | No       |
 
 <!-- generated:end:formatter-table -->
 

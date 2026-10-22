@@ -277,9 +277,12 @@ unsupported platform-specific features.
 | Tool integrations       | `@mcpServers`                                                     | Platform-specific MCP configuration                                              |
 | Capability bundles      | `@plugins`                                                        | Native plugin manifests where supported                                          |
 | Automation              | `@hooks`, `@workflows`                                            | Lifecycle hooks and repeatable workflow files                                    |
+| Prompt definitions      | `@prompts`                                                        | Typed inputs (syntax 1.6.0). `bundle` and `prompt-text` compile them             |
 | Monorepo delivery       | `builds` in `promptscript.yaml`                                   | Scoped output for packages and applications                                      |
 
 ## 50 Built-In Targets
+
+PromptScript ships 50 coding agent targets and two prompt targets.
 
 | Platform       | Primary and rich output                                          |
 | :------------- | :--------------------------------------------------------------- |
@@ -298,6 +301,16 @@ Windsurf, Cline, Roo Code, Continue, Aider, Amazon Q, Warp, Zed, OpenHands, Qwen
 Deep Agents, ForgeCode, and Hermes Agent.
 
 See the [complete target and capability matrix](https://getpromptscript.dev/reference/formatters/).
+
+### Prompts for applications
+
+Two more targets are not coding agent targets. With syntax `1.6.0`, `bundle` compiles the
+`@prompts` entries of a program to content-hashed JSON files under `prompts/`, and `prompt-text`
+writes a Markdown preview of each composed system message. Both are opt-in: name them in `targets`.
+They write nothing for a program without prompts. PromptScript does not escape, delimit or filter
+the values an application puts into a prompt, and it does not enforce output schemas. Read the
+[application prompts guide](https://getpromptscript.dev/guides/application-prompts/) before you
+ship a bundle.
 
 ## Skills from Local Files, Registries, or Git
 

@@ -42,6 +42,8 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 | **types/prettier**       | Prettier configuration types                                                            |
 | **structured-output**    | Shared structured merge plan types for generated settings files                         |
 | **output-plan**          | Deterministic output path normalization, collision resolution, and ownership data       |
+| **section-registry**     | Section contracts, with the `coding` and `general` profiles (`SECTION_PROFILES`)        |
+| **target-catalog**       | Target definitions, families, and helpers (`isPromptTarget`, `CODING_TARGETS`)          |
 | **errors**               | Error hierarchy (`PSError`, `ParseError`, `ResolveError`, `ValidationError`, etc.)      |
 | **utils/diagnostic**     | Diagnostic formatting utilities                                                         |
 | **utils/merge**          | Deep merge for AST nodes                                                                |
@@ -52,6 +54,8 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 | **utils/canonical-json** | RFC 8785 canonical JSON (`canonicalizeJson`)                                            |
 | **utils/sha256**         | Synchronous, browser-safe SHA-256 as hex (`sha256Hex`)                                  |
 | **utils/runtime-slots**  | Scanner for `{{input.name}}` slots and `\{{` escapes (`findRuntimeSlots`)               |
+| **prompt-bundle-hash**   | Content hash of a prompt bundle (`hashPromptBundle`)                                    |
+| **provenance-files**     | Rewrites provenance files so no machine path remains (`normalizeProvenanceFiles`)       |
 | **syntax-versions**      | Syntax version registry and lookup helpers (see API reference below)                    |
 | **model-profiles**       | Built-in model profiles (`MODEL_PROFILES`) with lifecycle status and successors         |
 | **model-catalog**        | Model catalog, alias resolution, model sets, and per-target model name mapping          |
@@ -124,6 +128,30 @@ Compatibility timeline:
 | `getCanonicalBlocks(program)`         | Reads blocks from either AST representation                        |
 | `mergeBlockContent(base, next, rule)` | Applies a shared inheritance or import content policy              |
 | `mergeBlockCollections(...)`          | Merges one cross-layer match while retaining same-layer duplicates |
+
+### Prompt targets
+
+The `bundle` and `prompt-text` targets belong to the `prompt` family and use the `general` section
+profile. No default selection includes them.
+
+| Export                          | Description                                                                                                     |
+| :------------------------------ | :-------------------------------------------------------------------------------------------------------------- |
+| `SECTION_PROFILES`              | Section contracts per profile. `coding` is the existing registry, `general` has five                            |
+| `SectionProfile`                | `'coding'` or `'general'`. Every target reports its profile as `sectionProfile`                                 |
+| `isPromptTarget(name)`          | True for a built-in target of the `prompt` family                                                               |
+| `CODING_TARGETS`                | Every known target except the prompt family                                                                     |
+| `hashPromptBundle(bundle)`      | `sha256-` plus SHA-256 over the canonical JSON without `contentHash` and `provenance`                           |
+| `normalizeProvenanceFiles(...)` | Rewrites a trace: authored reference for a pack, relative path in the root, else `external:` plus the base name |
+| `readMetaGovernance(fields)`    | Reads the governance defaults of `@meta`                                                                        |
+| `extractPromptDefinitions(...)` | Reads the `@prompts` entries of a program into typed definitions                                                |
+
+`normalizeProvenanceFiles` is pure. It takes an optional `realpath` function and works for POSIX
+and Windows paths. It covers every file in a trace: entries, history steps, chain links, nested
+traces and absolute targets. Anything that would still be absolute, climb above the root or carry a
+drive letter becomes `external:<basename>`.
+
+An `OutputArtifact` with `omit` set is skipped by `createOutputPlan`. A formatter uses it when it has
+no file to write.
 
 ### Output planning
 

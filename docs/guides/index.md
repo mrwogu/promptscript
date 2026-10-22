@@ -18,6 +18,7 @@ delivery:
 - [MCP Servers and Plugins](../features/integrations.md)
 - [Hooks and Workflows](../features/automation.md)
 - [Target Platforms](../features/target-platforms.md)
+- [Application Prompts](application-prompts.md)
 
 <div class="ref-list">
 
