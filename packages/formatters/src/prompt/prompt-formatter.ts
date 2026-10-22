@@ -29,7 +29,7 @@ function layoutOf(
   if (/^(?:[\\/]|[A-Za-z]:)/.test(primary)) {
     throw new PromptFormatError(
       `The ${target} target writes inside the project, so its output must be a relative path such as ` +
-        `"prompts/index.json". Got "${primary}".`,
+        `"${example}". Got "${primary}".`,
       location
     );
   }

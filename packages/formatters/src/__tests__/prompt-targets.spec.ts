@@ -166,8 +166,16 @@ describe('bundle target', () => {
         expect(
           () => new BundleFormatter().format(program({ prompts: reply() }), { outputPath }),
           outputPath
-        ).toThrow(/relative path/);
+        ).toThrow(/relative path such as "prompts\/index\.json"/);
       }
+    });
+
+    it('names the prompt-text default in its absolute path hint', () => {
+      expect(() =>
+        new PromptTextFormatter().format(program({ prompts: reply() }), {
+          outputPath: '/etc/prompts/README.md',
+        })
+      ).toThrow(/relative path such as "prompts\/README\.md"/);
     });
 
     it('refuses a prompt key that equals the bundle output name', () => {
