@@ -1,0 +1,188 @@
+[
+  ["https://example.com/prompts/", null, null],
+  ["https://Example.COM./prompts", null, null],
+  ["https://[2001:db8::1]/", null, null],
+  ["https://8.8.8.8/", null, null],
+  ["https://mylocalhost.example/", null, null],
+  ["https://internal.example.com/", null, null],
+  ["https://metadata.goog.example/", null, null],
+  ["not a url", "not a valid URL", "not a valid URL"],
+  ["http://example.com/", "scheme is not https", "scheme is not https"],
+  ["ftp://example.com/", "scheme is not https", "scheme is not https"],
+  ["https://user@example.com/", "URL carries credentials", "URL carries credentials"],
+  ["https://:secret@example.com/", "URL carries credentials", "URL carries credentials"],
+  [
+    "https://example.com/?a=1",
+    "URL carries a query or fragment",
+    "URL carries a query or fragment"
+  ],
+  [
+    "https://example.com/#top",
+    "URL carries a query or fragment",
+    "URL carries a query or fragment"
+  ],
+  [
+    "https://0.0.0.0/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://0.1.2.3/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://127.0.0.1/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://127.255.255.254/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://127.0.0.1./",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://2130706433/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://0177.0.0.1/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://0x7f.0.0.1/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://127.1/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://169.254.169.254/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://100.100.100.200/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  ["https://[::]/", "host is local or a metadata endpoint", "host is local or a metadata endpoint"],
+  [
+    "https://[::1]/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://[0:0:0:0:0:0:0:1]/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://[::2]/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://[::127.0.0.1]/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://[::ffff:127.0.0.1]/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://[::ffff:7f00:1]/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://[::ffff:169.254.169.254]/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://[64:ff9b::8.8.8.8]/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://[64:ff9b::10.0.0.1]/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://[fe80::1]/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://[febf::1]/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://[fd00:ec2::254]/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://localhost/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://LOCALHOST./",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://app.localhost/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://metadata.goog/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://metadata.goog./",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://metadata.google.internal./",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  ["https://10.0.0.1/", "host is private", null],
+  ["https://100.64.0.1/", "host is private", null],
+  ["https://100.127.255.255/", "host is private", null],
+  ["https://100.128.0.1/", null, null],
+  ["https://172.16.0.1/", "host is private", null],
+  ["https://172.31.255.255/", "host is private", null],
+  ["https://172.32.0.1/", null, null],
+  ["https://192.168.1.1/", "host is private", null],
+  ["https://192.169.1.1/", null, null],
+  ["https://[::ffff:10.0.0.1]/", "host is private", null],
+  ["https://[::FFFF:192.168.0.1]/", "host is private", null],
+  ["https://[::ffff:8.8.8.8]/", null, null],
+  ["https://[fc00::1]/", "host is private", null],
+  ["https://[fdff:ffff::1]/", "host is private", null],
+  ["https://[fec0::1]/", null, null],
+  ["https://printer.local/", "host is private", null],
+  ["https://db.corp.internal/", "host is private", null],
+  ["https://db.corp.internal./", "host is private", null]
+]

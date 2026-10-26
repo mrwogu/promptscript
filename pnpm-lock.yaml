@@ -223,6 +223,9 @@ importers:
       '@promptscript/resolver':
         specifier: workspace:^
         version: link:../resolver
+      '@promptscript/runtime':
+        specifier: workspace:^
+        version: link:../runtime
       '@promptscript/server':
         specifier: workspace:^
         version: link:../server
@@ -414,6 +417,8 @@ importers:
       yaml:
         specifier: ^2.9.1
         version: 2.9.1
+
+  packages/runtime: {}
 
   packages/server:
     dependencies:

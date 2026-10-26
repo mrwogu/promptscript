@@ -67,6 +67,10 @@ const PACKAGE_META: Record<string, PageMeta> = {
     title: 'Resolver API',
     description: 'Inheritance and import resolution for PromptScript files.',
   },
+  runtime: {
+    title: 'Runtime API',
+    description: 'Load, verify and render PromptScript prompt bundles.',
+  },
   server: {
     title: 'Server API',
     description: 'Local development server for the PromptScript playground.',
@@ -233,6 +237,19 @@ function computePageMeta(relativePath: string, lines: readonly string[]): PageMe
         summary !== ''
           ? truncateDescription(summary)
           : `API reference for the PromptScript ${display} package.`,
+    };
+  }
+
+  // Module page of a second package entry (docs/api-reference/<pkg>/src/<entry>/README.md)
+  if (segments.length === 4 && segments[1] === 'src' && segments[3] === 'README.md') {
+    const entry = segments[2]!;
+    const summary = cleanSummary(extractSummary(lines, headingIndex) ?? '');
+    return {
+      title: `${display} API: ${entry}`,
+      description:
+        summary !== ''
+          ? truncateDescription(summary)
+          : `API reference for the ${entry} entry of the PromptScript ${display} package.`,
     };
   }
 

@@ -1,0 +1,45 @@
+{
+  "name": "@promptscript/runtime",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Load, verify and render PromptScript prompt bundles",
+  "keywords": [
+    "promptscript",
+    "prompt-bundle",
+    "prompts",
+    "llm",
+    "anthropic",
+    "openai"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrwogu/promptscript.git",
+    "directory": "packages/runtime"
+  },
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./node": {
+      "types": "./src/node.d.ts",
+      "default": "./src/node.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -55,6 +55,7 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 | **utils/sha256**         | Synchronous, browser-safe SHA-256 as hex (`sha256Hex`)                                                       |
 | **utils/runtime-slots**  | Scanner for `{{input.name}}` slots and `\{{` escapes (`findRuntimeSlots`)                                    |
 | **prompt-bundle-hash**   | Content hash of a prompt bundle (`hashPromptBundle`)                                                         |
+| **url-rules**            | Checks the URL of a remote prompt file: https only, no local or metadata hosts (`refuseUrl`)                 |
 | **provenance-files**     | Rewrites provenance files so no machine path remains (`normalizeProvenanceFiles`)                            |
 | **syntax-versions**      | Syntax version registry and lookup helpers (see API reference below)                                         |
 | **model-profiles**       | Built-in model profiles (`MODEL_PROFILES`) with lifecycle status and successors                              |
@@ -144,6 +145,7 @@ profile. No default selection includes them.
 | `PROMPT_BUNDLE_SCHEMA_URL`       | Schema URL of a prompt bundle, the version tag inside the hash                                                  |
 | `PROMPT_BUNDLE_INDEX_SCHEMA_URL` | Schema URL of a prompt bundle index                                                                             |
 | `hashPromptBundle(bundle)`       | `sha256-` plus SHA-256 over the canonical JSON without `contentHash` and `provenance`                           |
+| `refuseUrl(url, options)`        | Why a remote prompt file URL is refused, or `undefined`. `allowPrivate: true` lets private hosts pass           |
 | `normalizeProvenanceFiles(...)`  | Rewrites a trace: authored reference for a pack, relative path in the root, else `external:` plus the base name |
 | `readMetaGovernance(fields)`     | Reads the governance defaults of `@meta`                                                                        |
 | `extractPromptDefinitions(...)`  | Reads the `@prompts` entries of a program into typed definitions                                                |

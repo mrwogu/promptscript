@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-10-21T11:59:33.691Z | source: .promptscript/project.prs | target: claude - do not edit -->
+<!-- PromptScript 2026-10-26T23:07:56.178Z | source: .promptscript/project.prs | target: claude - do not edit -->
 
 ## Project
 
@@ -97,7 +97,7 @@ flowchart TB
 
 - Format: Conventional Commits
 - Types: feat, fix, docs, style, refactor, test, chore
-- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, browser-compiler, server, vscode, telemetry) or domain scope (ci, docker) - scopes appear in the release changelog grouped by package
+- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, browser-compiler, server, vscode, telemetry, runtime) or domain scope (ci, docker) - scopes appear in the release changelog grouped by package
 - Example: `feat(parser): add support for multiline strings`
 - Reference: https://www.conventionalcommits.org/
 - Max Subject Length: 70

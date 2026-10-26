@@ -1,0 +1,22 @@
+{
+  "name": "runtime",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/runtime/src",
+  "projectType": "library",
+  "tags": ["scope:runtime", "type:lib"],
+  "implicitDependencies": ["core"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "cache": true,
+      "inputs": ["production", "^production"],
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/runtime",
+        "main": "packages/runtime/src/index.ts",
+        "tsConfig": "packages/runtime/tsconfig.lib.json",
+        "assets": ["packages/runtime/*.md"]
+      }
+    }
+  }
+}
