@@ -1,0 +1,228 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/release-report/v1.json",
+  "title": "PromptScript Release Report",
+  "description": "Machine-readable report emitted by prs release <command> --format json.",
+  "type": "object",
+  "required": [
+    "$schema",
+    "version",
+    "command",
+    "success",
+    "dryRun",
+    "changes",
+    "environments",
+    "warnings",
+    "errors"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "const": "https://getpromptscript.dev/schema/release-report/v1.json"
+    },
+    "version": {
+      "const": 1
+    },
+    "command": {
+      "type": "string",
+      "enum": ["build", "promote", "rollback", "status"]
+    },
+    "success": {
+      "type": "boolean",
+      "description": "False when the command failed or a release file does not verify."
+    },
+    "dryRun": {
+      "type": "boolean",
+      "description": "True when the command wrote nothing."
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Change"
+      },
+      "description": "Files and label entries the command wrote, or would write under --dry-run."
+    },
+    "environments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Environment"
+      },
+      "description": "Filled by status; empty for the other commands."
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/EnvironmentHistory"
+      },
+      "description": "Present when status runs with --history."
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Diagnostic"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Diagnostic"
+      }
+    }
+  },
+  "definitions": {
+    "ContentHash": {
+      "type": "string",
+      "pattern": "^sha256-[0-9a-f]{64}$"
+    },
+    "Change": {
+      "type": "object",
+      "required": ["path", "action"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Project-relative path of the file."
+        },
+        "action": {
+          "type": "string",
+          "enum": ["created", "updated", "unchanged"]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Prompt id of a bundle or label entry."
+        },
+        "contentHash": {
+          "$ref": "#/definitions/ContentHash",
+          "description": "Hash the entry holds after the command."
+        },
+        "previousContentHash": {
+          "$ref": "#/definitions/ContentHash",
+          "description": "Hash the entry held before the command."
+        }
+      }
+    },
+    "Environment": {
+      "type": "object",
+      "required": ["name", "path", "exists", "prompts"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Project-relative path of the label."
+        },
+        "exists": {
+          "type": "boolean",
+          "description": "Whether the label file exists."
+        },
+        "prompts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PromptStatus"
+          }
+        }
+      }
+    },
+    "PromptStatus": {
+      "type": "object",
+      "required": ["id", "contentHash", "file", "exists", "verified", "inBuild"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contentHash": {
+          "$ref": "#/definitions/ContentHash"
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Project-relative path of the bundle file."
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "Whether the bundle file recomputes to its hash."
+        },
+        "inBuild": {
+          "type": "boolean",
+          "description": "Whether the latest build manifest holds this hash for the id."
+        }
+      }
+    },
+    "EnvironmentHistory": {
+      "type": "object",
+      "required": ["environment", "commits"],
+      "additionalProperties": false,
+      "properties": {
+        "environment": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$"
+        },
+        "commits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Commit"
+          }
+        }
+      }
+    },
+    "Commit": {
+      "type": "object",
+      "required": ["commit", "date", "subject"],
+      "additionalProperties": false,
+      "properties": {
+        "commit": {
+          "type": "string",
+          "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$"
+        },
+        "date": {
+          "type": "string",
+          "description": "Author date, ISO 8601."
+        },
+        "subject": {
+          "type": "string"
+        }
+      }
+    },
+    "Diagnostic": {
+      "type": "object",
+      "required": ["message"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "location": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "type": "string"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "column": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

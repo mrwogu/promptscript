@@ -200,6 +200,23 @@ The `sha256-` digest in a bundle's `contentHash`, computed over its canonical JS
 `contentHash` and `provenance`. A program that reads a bundle recomputes it before use. See
 [Application Prompts](guides/application-prompts.md#content-hash).
 
+### Environment
+
+A named stage of a release, such as `staging` or `prod`, listed in `releases.environments` in
+promotion order. Each environment has one release label. See
+[Releasing Application Prompts](guides/releases.md).
+
+### Release label
+
+The file `.promptscript/releases/<env>.json`. It says which bundle hash each prompt has in that
+environment. An application reads it, then reads the bundle file it names. See
+[Releasing Application Prompts](guides/releases.md#files).
+
+### Release manifest
+
+The file `.promptscript/releases/manifest.json`, a bundle index of the latest `prs release build`.
+See [Releasing Application Prompts](guides/releases.md#build).
+
 ### `prompt-text`
 
 The opt-in target that writes a Markdown preview of each composed system message under

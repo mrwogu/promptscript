@@ -2735,7 +2735,7 @@ describe('skillsAddCommand frontmatter validation', () => {
     arrangeValidation({ skillContent: '---\nname: foo\n---\nbody' });
     mockOpen.mockRejectedValueOnce(Object.assign(new Error('lock exists'), { code: 'EEXIST' }));
     mockOpen.mockResolvedValueOnce(mockLockFile);
-    mockStat.mockResolvedValueOnce({ mtimeMs: Date.now() - 60 * 60 * 1000 });
+    mockStat.mockResolvedValue({ mtimeMs: Date.now() - 60 * 60 * 1000 });
     mockReadFile.mockImplementation((filePath: string) => {
       if (filePath.includes('.promptscript-skills-add.lock')) {
         return Promise.resolve('{malformed');
@@ -2809,7 +2809,7 @@ describe('skillsAddCommand frontmatter validation', () => {
 
     expect(mockOpen).toHaveBeenCalledTimes(2);
     expect(mockConsoleError).toHaveBeenCalledWith(
-      expect.stringContaining('Cannot acquire skills add lock')
+      expect.stringContaining('Another "prs skills add" is already running')
     );
     expect(process.exitCode).toBe(1);
   });

@@ -18,6 +18,7 @@ Complete reference for the PromptScript command-line interface.
 | Understand the result         | [`prs explain`](#prs-explain), [`prs inspect`](#prs-inspect), [`prs resolve`](#prs-resolve)                    |
 | Share and pin dependencies    | [`prs registry`](#prs-registry), [`prs pull`](#prs-pull), [`prs lock`](#prs-lock), [`prs update`](#prs-update) |
 | Work offline                  | [`prs vendor`](#prs-vendor)                                                                                    |
+| Release application prompts   | [`prs release`](#prs-release)                                                                                  |
 | Manage skills                 | [`prs skills`](#prs-skills)                                                                                    |
 | Connect AI tool hooks         | [`prs hooks`](#prs-hooks), [`prs hook`](cli/hook.md)                                                           |
 | Edit in the online playground | [`prs serve`](#prs-serve)                                                                                      |
@@ -1162,6 +1163,111 @@ prs registry add @company github.com/acme/promptscript-base
 
 # Add alias to user config (available across all projects)
 prs registry add @company github.com/acme/promptscript-base --global
+```
+
+---
+
+### prs release
+
+Build, promote, roll back and inspect content-hashed prompt bundles per environment. Releases need
+[`releases`](config.md#releases) in `promptscript.yaml`; without it every subcommand fails with
+`PS5001`. See the [releases guide](../guides/releases.md) for the flow.
+
+All four subcommands take these options:
+
+| Option                | Description                      | Default |
+| --------------------- | -------------------------------- | ------- |
+| `--format <format>`   | `text` or `json` (see below)     | `text`  |
+| `-c, --config <path>` | Path to a custom config file     | -       |
+| `--cwd <dir>`         | Working directory (project root) | -       |
+
+With `--format json`, stdout holds one document that matches
+`https://getpromptscript.dev/schema/release-report/v1.json` and the human text goes to stderr. Exit
+code 0 means success or a no-op. Exit code 1 means an error or a failed verification.
+
+Errors use the codes `PS5001` to `PS5008`, listed in the
+[releases guide](../guides/releases.md#error-codes).
+
+#### prs release build
+
+Compile the source in memory and store each prompt as a bundle file under its content hash.
+
+```bash
+prs release build [options]
+```
+
+| Option      | Description                                |
+| ----------- | ------------------------------------------ |
+| `--dry-run` | Show what would be written without writing |
+
+Writes new files to `.promptscript/releases/bundles/`, verifies existing ones, and writes
+`.promptscript/releases/manifest.json` only when it changes. Policies always run, each with its own
+severity. The security rules PS005, PS010, PS011, PS012, PS013 and PS014 always run as errors. Takes
+the project lock `.promptscript-release.lock`; a dry run does not.
+
+```bash
+prs release build
+prs release build --dry-run --format json
+```
+
+#### prs release promote
+
+Point an environment at a bundle.
+
+```bash
+prs release promote <id>[@<hash>] --to <env> [options]
+```
+
+| Option       | Description                                  |
+| ------------ | -------------------------------------------- |
+| `--to <env>` | Environment to promote to (required)         |
+| `--dry-run`  | Show the promotion without writing the label |
+
+`<hash>` is the full `sha256-<64 hex>` or a prefix of at least 8 hex digits. The first environment
+takes only what the source compiles to now. Every later environment takes only the hash the
+previous one holds. There is no flag to skip this order.
+
+```bash
+prs release promote acme-support/refund-reply --to staging
+prs release promote acme-support/refund-reply --to prod
+```
+
+#### prs release rollback
+
+Restore the label of an environment to its state before the last commit that changed it.
+
+```bash
+prs release rollback <env> [options]
+```
+
+| Option      | Description                                 |
+| ----------- | ------------------------------------------- |
+| `--dry-run` | Show the rollback without writing the label |
+
+Reads Git history, so the label must have no uncommitted change. Fails with `PS5006` at the first
+promotion, and in a shallow checkout (run `git fetch --unshallow`).
+
+```bash
+prs release rollback prod
+```
+
+#### prs release status
+
+List the released prompts of every environment and verify their bundles.
+
+```bash
+prs release status [options]
+```
+
+| Option          | Description                                                        |
+| --------------- | ------------------------------------------------------------------ |
+| `--history <n>` | Show commit, date and subject of the last n label commits (1-1000) |
+
+Shows, per environment, the prompt id, the hash, whether it is in the latest build and whether it
+verifies. Exits with code 1 when a referenced bundle is missing or does not verify.
+
+```bash
+prs release status --history 5
 ```
 
 ---

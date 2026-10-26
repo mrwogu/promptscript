@@ -66,6 +66,25 @@ export function isPathInsideDir(dir: string, root: string): boolean {
   return isPathContained(rel, true);
 }
 
+/**
+ * Check directory containment through the real path of the nearest existing ancestors,
+ * case-folded, so neither a link nor a case-insensitive disk hides a path inside `dir`.
+ * Case-folding can also match on a case-sensitive disk; for a guard that only refuses,
+ * that is the safe side. When a path cannot be resolved, the case-folded lexical paths
+ * decide, so a case variant is still refused; the write path checks refuse to write
+ * through a path they cannot verify, with the real reason.
+ */
+export function isPathInsideDirFolded(path: string, dir: string): boolean {
+  if (isPathInsideDir(path, dir)) return true;
+  const folded = (target: string, real: boolean): string =>
+    (real ? resolveThroughExistingAncestor(resolve(target)) : resolve(target)).toLowerCase();
+  try {
+    return isPathContained(relative(folded(dir, true), folded(path, true)), true);
+  } catch {
+    return isPathContained(relative(folded(dir, false), folded(path, false)), true);
+  }
+}
+
 function isPathContained(rel: string, allowEqual: boolean): boolean {
   return (
     (allowEqual && rel === '') ||

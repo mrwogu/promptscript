@@ -1,7 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { Ajv } from 'ajv';
 import { describe, expect, it } from 'vitest';
-import { validateLabel } from './prompt-bundle-validators.js';
+import {
+  createReleaseReport,
+  RELEASE_REPORT_SCHEMA_URL,
+  RELEASE_REPORT_VERSION,
+} from '../utils/release-report.js';
+import { validateLabel, validateReleaseReport } from './prompt-bundle-validators.js';
 
 const readSchema = (name: string): object =>
   JSON.parse(
@@ -98,6 +103,77 @@ describe('prompt release label schema', () => {
       'a hash without the prefix',
       { ...label(), prompts: [{ id: 'a/b', contentHash: '0'.repeat(64) }] },
     ],
+  ])('rejects %s', (_name, value) => {
+    expect(validate(value)).toBe(false);
+  });
+});
+
+describe('release report schema', () => {
+  const validate = validateReleaseReport;
+  const hash = `sha256-${'0123456789abcdef'.repeat(4)}`;
+
+  it('accepts an empty report of every command', () => {
+    for (const command of ['build', 'promote', 'rollback', 'status'] as const) {
+      const report = createReleaseReport(command);
+
+      expect(validate(report), JSON.stringify(validate.errors)).toBe(true);
+    }
+  });
+
+  it('accepts a status report with history', () => {
+    const report = createReleaseReport('status', {
+      environments: [
+        {
+          name: 'prod',
+          path: '.promptscript/releases/prod.json',
+          exists: true,
+          prompts: [
+            {
+              id: 'acme-support/refund-reply',
+              contentHash: hash,
+              file: `.promptscript/releases/bundles/${hash}.json`,
+              exists: true,
+              verified: true,
+              inBuild: false,
+            },
+          ],
+        },
+      ],
+      history: [
+        {
+          environment: 'prod',
+          commits: [{ commit: 'a'.repeat(40), date: '2026-10-22T10:00:00+02:00', subject: 'x' }],
+        },
+      ],
+      errors: [{ code: 'PS5004', message: 'm', location: { file: 'f', line: 1, column: 1 } }],
+    });
+
+    expect(validate(report), JSON.stringify(validate.errors)).toBe(true);
+    expect(report.success).toBe(false);
+  });
+
+  it('pins the schema URL and version the cli writes', () => {
+    const schema = readSchema('release-report-v1.json') as { $id: string };
+
+    expect(schema.$id).toBe(RELEASE_REPORT_SCHEMA_URL);
+    expect(createReleaseReport('build').version).toBe(RELEASE_REPORT_VERSION);
+  });
+
+  it.each([
+    ['an unknown command', { ...createReleaseReport('build'), command: 'deploy' }],
+    ['an extra property', { ...createReleaseReport('build'), extra: 1 }],
+    [
+      'a short change hash',
+      {
+        ...createReleaseReport('promote'),
+        changes: [{ path: 'p', action: 'created', contentHash: 'sha256-abc' }],
+      },
+    ],
+    [
+      'an unknown change action',
+      { ...createReleaseReport('build'), changes: [{ path: 'p', action: 'deleted' }] },
+    ],
+    ['no errors list', { ...createReleaseReport('build'), errors: undefined }],
   ])('rejects %s', (_name, value) => {
     expect(validate(value)).toBe(false);
   });

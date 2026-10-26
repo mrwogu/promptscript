@@ -2397,6 +2397,36 @@ command = "echo old # promptscript-generated:owned"
       vi.useRealTimers();
     });
 
+    it('should not recompile when a release file changes', async () => {
+      vi.useFakeTimers();
+      const clearSpy = vi.spyOn(console, 'clear').mockImplementation(() => {});
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs: new Map(),
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      let changeHandler: ((filename: string) => void) | undefined;
+      mockWatcherOn.mockImplementation((event: string, handler: (filename: string) => void) => {
+        if (event === 'change') changeHandler = handler;
+        return { on: mockWatcherOn };
+      });
+
+      await compileCommand({ watch: true }, mockServices);
+      changeHandler?.(resolve('.promptscript/releases/prod.json'));
+      await vi.advanceTimersByTimeAsync(400);
+      expect(mockCompile).toHaveBeenCalledTimes(1);
+
+      changeHandler?.(resolve('.promptscript/project.prs'));
+      await vi.advanceTimersByTimeAsync(400);
+      expect(mockCompile).toHaveBeenCalledTimes(2);
+
+      clearSpy.mockRestore();
+      vi.useRealTimers();
+    });
+
     it('should serialize recompilation when changes arrive during a build', async () => {
       vi.useFakeTimers();
       mockLoadConfig.mockResolvedValue({

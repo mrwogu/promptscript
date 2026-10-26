@@ -15,3 +15,4 @@ export const compileSchema = (name: string): ReturnType<typeof ajv.compile> =>
 export const validateBundle = ajv.compile(readSchema('prompt-bundle-v1.json'));
 export const validateIndex = ajv.compile(readSchema('prompt-bundle-index-v1.json'));
 export const validateLabel = ajv.compile(readSchema('prompt-release-label-v1.json'));
+export const validateReleaseReport = ajv.compile(readSchema('release-report-v1.json'));

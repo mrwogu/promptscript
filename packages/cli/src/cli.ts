@@ -15,6 +15,7 @@ import { diffCommand } from './commands/diff.js';
 import { checkCommand } from './commands/check.js';
 import { updateCheckCommand } from './commands/update-check.js';
 import { registerRegistryCommands } from './commands/registry/index.js';
+import { registerReleaseCommands } from './commands/release/index.js';
 import { lockCommand } from './commands/lock.js';
 import { updateCommand } from './commands/update.js';
 import { vendorSyncCommand, vendorCheckCommand } from './commands/vendor.js';
@@ -392,6 +393,11 @@ skills
 
 const registry = program.command('registry').description('Manage PromptScript registries');
 registerRegistryCommands(registry);
+
+const release = program
+  .command('release')
+  .description('Build, promote and roll back prompt releases');
+registerReleaseCommands(release);
 
 /**
  * Run the CLI.

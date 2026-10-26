@@ -75,21 +75,29 @@ their replacement, models outside `models.supported`, and inconsistent
 
 ## Key Diagnostics
 
-| Diagnostic | Meaning                                      | Action                                      |
-| ---------- | -------------------------------------------- | ------------------------------------------- |
-| PS018      | Used feature requires newer syntax           | Run `prs validate --fix` or `prs upgrade`   |
-| PS019      | Unknown built-in block name                  | Correct typo or confirm custom block intent |
-| PS034      | Invalid hook executable or option            | Fix command, script, or target override     |
-| PS037      | Invalid contextual section header            | Fix owner, key, title, or duplicate         |
-| PS038      | Unsupported or risky built-in block shape    | Convert to canonical shape                  |
-| PS041      | Unsupported model or invalid model profile   | Switch model or update `models` config      |
-| PS042      | Invalid `@prompts` entry or governance value | Fix the entry as the message describes      |
-| PS043      | Undeclared or malformed runtime slot         | Declare the input or fix the slot           |
-| PS044      | Declared prompt input is never used          | Use the input or remove it                  |
-| PS045      | `{{name}}` left in text (syntax 1.6.0+)      | Bind it with a parameter or remove it       |
-| PS046      | Runtime slot in the system message           | Move the slot to the user message           |
-| PS4002     | Target cannot preserve requested capability  | Use documented target fallback              |
-| PS4004     | Target cannot run or write the model         | Pick another model or set a target name     |
+| Diagnostic | Meaning                                      | Action                                       |
+| ---------- | -------------------------------------------- | -------------------------------------------- |
+| PS018      | Used feature requires newer syntax           | Run `prs validate --fix` or `prs upgrade`    |
+| PS019      | Unknown built-in block name                  | Correct typo or confirm custom block intent  |
+| PS034      | Invalid hook executable or option            | Fix command, script, or target override      |
+| PS037      | Invalid contextual section header            | Fix owner, key, title, or duplicate          |
+| PS038      | Unsupported or risky built-in block shape    | Convert to canonical shape                   |
+| PS041      | Unsupported model or invalid model profile   | Switch model or update `models` config       |
+| PS042      | Invalid `@prompts` entry or governance value | Fix the entry as the message describes       |
+| PS043      | Undeclared or malformed runtime slot         | Declare the input or fix the slot            |
+| PS044      | Declared prompt input is never used          | Use the input or remove it                   |
+| PS045      | `{{name}}` left in text (syntax 1.6.0+)      | Bind it with a parameter or remove it        |
+| PS046      | Runtime slot in the system message           | Move the slot to the user message            |
+| PS4002     | Target cannot preserve requested capability  | Use documented target fallback               |
+| PS4004     | Target cannot run or write the model         | Pick another model or set a target name      |
+| PS5001     | `releases` missing or invalid                | Add `releases.environments`                  |
+| PS5002     | Environment not in `releases.environments`   | Use a configured environment                 |
+| PS5003     | Release bundle or prompt missing             | Run `prs release build` or restore the file  |
+| PS5004     | Release file does not verify                 | Restore it from Git, or run the build        |
+| PS5005     | Promotion skips the previous environment     | Promote to the previous environment first    |
+| PS5006     | Rollback not possible                        | Commit the label or git restore an older one |
+| PS5007     | Another release command holds the lock       | Wait, then run the command again             |
+| PS5008     | Compile output inside the release directory  | Point the target output elsewhere            |
 
 ## Release Gate
 

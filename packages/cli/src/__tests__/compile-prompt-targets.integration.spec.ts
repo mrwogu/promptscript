@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { existsSync } from 'node:fs';
-import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { compileCommand, formatComposition } from '../commands/compile.js';
+import { releaseBuildCommand } from '../commands/release/build.js';
+import { releasePromoteCommand } from '../commands/release/promote.js';
 
 const directories: string[] = [];
 let consoleLog: ReturnType<typeof vi.spyOn>;
@@ -360,5 +362,81 @@ describe('generated prompt files', () => {
       expect(await readFile(join(directory, file), 'utf8'), file).not.toContain('HEADER-LINE-ZZ');
     }
     JSON.parse(await readFile(join(directory, 'prompts', 'refund-reply.json'), 'utf8'));
+  });
+});
+
+describe('prs compile and the release directory', () => {
+  it('refuses an output inside the release directory and writes nothing there', async () => {
+    const custom = 'bundle:\n      output: .promptscript/releases/index.json';
+    const { directory } = await project([custom], ['refund']);
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await compileCommand({ cwd: directory });
+
+    expect(process.exitCode).toBe(1);
+    const printed = errors.mock.calls.flatMap((call) => call.map(String)).join('\n');
+    expect(printed).toContain('belongs to prs release');
+    expect(printed).toContain('Point the target output elsewhere in promptscript.yaml');
+    expect(existsSync(join(directory, '.promptscript', 'releases'))).toBe(false);
+  });
+
+  it('refuses the release directory under another letter case too', async () => {
+    const custom = 'bundle:\n      output: .PromptScript/Releases/index.json';
+    const { directory } = await project([custom], ['refund']);
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await compileCommand({ cwd: directory });
+
+    expect(process.exitCode).toBe(1);
+    expect(errors.mock.calls.flatMap((call) => call.map(String)).join('\n')).toContain('PS5008');
+    expect(existsSync(join(directory, '.PromptScript', 'Releases', 'index.json'))).toBe(false);
+  });
+
+  it('never cleans up release files, wherever they are copied', async () => {
+    const { directory } = await project(['factory', 'bundle'], ['refund']);
+    const config = join(directory, 'promptscript.yaml');
+    await writeFile(
+      config,
+      `${await readFile(config, 'utf8')}releases:\n  environments: [staging]\n`
+    );
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    await releaseBuildCommand({ cwd: directory, format: 'json' });
+    await releasePromoteCommand('acme-support/refund-reply', {
+      cwd: directory,
+      format: 'json',
+      to: 'staging',
+    });
+    const releases = join(directory, '.promptscript', 'releases');
+    const [bundle = ''] = await readdir(join(releases, 'bundles'));
+    const sources = {
+      'manifest.json': join(releases, 'manifest.json'),
+      [bundle]: join(releases, 'bundles', bundle),
+      'staging.json': join(releases, 'staging.json'),
+    };
+    const copies: string[] = [];
+    for (const target of [
+      join(directory, '.factory', 'rules', 'releases'),
+      join(directory, 'prompts'),
+    ]) {
+      await mkdir(target, { recursive: true });
+      for (const [name, path] of Object.entries(sources)) {
+        await writeFile(join(target, name), await readFile(path, 'utf8'));
+        copies.push(join(target, name));
+      }
+    }
+
+    // A bundle under its generated name is owned, so the walk reaching it removes it.
+    const owned = join(directory, '.factory', 'rules', 'releases', 'refund-reply.json');
+    await writeFile(owned, await readFile(sources[bundle] ?? '', 'utf8'));
+
+    await compileSuccessfully(directory);
+    await writeFile(join(directory, '.promptscript', 'project.prs'), entry(['triage']));
+    await compileSuccessfully(directory);
+
+    for (const path of [...copies, ...Object.values(sources)]) {
+      expect(existsSync(path), path).toBe(true);
+    }
+    expect(existsSync(join(directory, 'prompts', 'refund-reply.json'))).toBe(false);
+    expect(existsSync(owned)).toBe(false);
   });
 });

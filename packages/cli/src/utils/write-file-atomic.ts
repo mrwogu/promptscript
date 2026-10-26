@@ -8,7 +8,7 @@ import { randomUUID } from 'node:crypto';
 export function writeFileAtomic(filePath: string, content: string, mode: number): void {
   const temporaryPath = `${filePath}.${process.pid}-${randomUUID()}.tmp`;
   try {
-    writeFileSync(temporaryPath, content, { encoding: 'utf-8', mode });
+    writeFileSync(temporaryPath, content, { encoding: 'utf-8', mode, flag: 'wx' });
     chmodSync(temporaryPath, mode);
     renameSync(temporaryPath, filePath);
   } catch (error) {

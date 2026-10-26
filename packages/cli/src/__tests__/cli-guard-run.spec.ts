@@ -10,6 +10,7 @@ vi.mock('../commands/diff', () => ({ diffCommand: vi.fn() }));
 vi.mock('../commands/check', () => ({ checkCommand: vi.fn() }));
 vi.mock('../commands/update-check', () => ({ updateCheckCommand: vi.fn() }));
 vi.mock('../commands/registry/index', () => ({ registerRegistryCommands: vi.fn() }));
+vi.mock('../commands/release/index', () => ({ registerReleaseCommands: vi.fn() }));
 vi.mock('../commands/hook', () => ({ hookCommand: vi.fn() }));
 vi.mock('../commands/skills', () => ({
   skillsAddCommand: vi.fn(),

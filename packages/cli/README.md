@@ -313,6 +313,11 @@ the values an application puts into a prompt, and it does not enforce output sch
 ship a bundle. Four runnable [application prompt examples](https://getpromptscript.dev/examples/application-prompts/)
 show typed inputs, enum outputs, defaults and citations.
 
+`prs release` stores bundles under their content hash in `.promptscript/releases/` and promotes them
+through the environments you list in `releases.environments`, such as `staging` then `prod`. Every
+promotion is a Git change you review. See the
+[releases guide](https://getpromptscript.dev/guides/releases/).
+
 ## Skills from Local Files, Registries, or Git
 
 ```promptscript
@@ -527,6 +532,7 @@ the build, not the agent. See the
 | `prs skills <add\|remove\|list\|update>`            | Manage remote and local skills                            |
 | `prs registry <init\|validate\|publish\|list\|add>` | Manage registries and aliases                             |
 | `prs pull`                                          | Pull updates from the registry                            |
+| `prs release <build\|promote\|rollback\|status>`    | Release prompt bundles through environments               |
 | `prs lock` / `prs update`                           | Pin or refresh remote dependencies                        |
 | `prs vendor sync` / `prs vendor check`              | Prepare and verify offline dependencies                   |
 | `prs resolve <import>`                              | Explain import resolution                                 |

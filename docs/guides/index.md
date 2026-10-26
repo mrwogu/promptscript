@@ -19,6 +19,7 @@ delivery:
 - [Hooks and Workflows](../features/automation.md)
 - [Target Platforms](../features/target-platforms.md)
 - [Application Prompts](application-prompts.md)
+- [Releasing Application Prompts](releases.md)
 
 <div class="ref-list">
 

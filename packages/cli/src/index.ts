@@ -32,6 +32,23 @@ export type {
   DiffOwnership,
   DiffWarning,
 } from './utils/diff-report.js';
+export { releaseBuildCommand } from './commands/release/build.js';
+export { releasePromoteCommand } from './commands/release/promote.js';
+export { releaseRollbackCommand } from './commands/release/rollback.js';
+export { releaseStatusCommand } from './commands/release/status.js';
+export { RELEASE_REPORT_SCHEMA_URL, RELEASE_REPORT_VERSION } from './utils/release-report.js';
+export type {
+  ReleaseChange,
+  ReleaseChangeAction,
+  ReleaseCommandName,
+  ReleaseDiagnostic,
+  ReleaseEnvironmentHistory,
+  ReleaseEnvironmentStatus,
+  ReleaseHistoryCommit,
+  ReleaseLocation,
+  ReleasePromptStatus,
+  ReleaseReport,
+} from './utils/release-report.js';
 export { checkCommand } from './commands/check.js';
 export { updateCheckCommand } from './commands/update-check.js';
 export { importCommand } from './commands/import.js';

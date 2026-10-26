@@ -22,7 +22,7 @@ vi.mock('node:fs', async (importOriginal) => {
   };
 });
 
-import { validateOutputPath } from './conflict-detector.js';
+import { isPathInsideDirFolded, validateOutputPath } from './conflict-detector.js';
 
 const temporaryDirectories: string[] = [];
 
@@ -89,5 +89,28 @@ describe('validateOutputPath symlink containment', () => {
     fsProbe.errorCode = 'ENOENT';
 
     expect(validateOutputPath('generated.md', outputRoot)).toContain('cannot be verified');
+  });
+});
+
+describe('isPathInsideDirFolded', () => {
+  it('finds a path inside the directory under another letter case', async () => {
+    const { outputRoot } = await createOutputRoot();
+    const releases = join(outputRoot, '.promptscript', 'releases');
+
+    expect(
+      isPathInsideDirFolded(join(outputRoot, '.PromptScript', 'Releases', 'x.json'), releases)
+    ).toBe(true);
+    expect(isPathInsideDirFolded(join(outputRoot, 'prompts', 'x.json'), releases)).toBe(false);
+  });
+
+  it('still refuses a case variant when the path cannot be resolved', async () => {
+    const { outputRoot } = await createOutputRoot();
+    const releases = join(outputRoot, '.promptscript', 'releases');
+    fsProbe.errorCode = 'EACCES';
+
+    expect(
+      isPathInsideDirFolded(join(outputRoot, '.PromptScript', 'Releases', 'x.json'), releases)
+    ).toBe(true);
+    expect(isPathInsideDirFolded(join(outputRoot, 'prompts', 'x.json'), releases)).toBe(false);
   });
 });

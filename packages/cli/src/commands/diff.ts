@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import type { DiffOptions } from '../types.js';
-import { isValidLockfile, type Lockfile, type Logger } from '@promptscript/core';
+import type { Logger } from '@promptscript/core';
 import type { FormatterOutput } from '@promptscript/compiler';
 import { loadEffectiveConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput, isVerbose, isDebug } from '../output/console.js';
@@ -21,8 +21,12 @@ import { prepareLegacyFactoryMigration } from '../utils/legacy-factory-hooks.js'
 import { finalizeOutputPlan } from '../utils/output-plan.js';
 import { getBuildProfile } from '../utils/build-profile.js';
 import { parseTargetEntries } from '../utils/target-config.js';
+import {
+  loadProjectLockfile,
+  registryReferenceRoots,
+  resolveUniversalDir,
+} from '../utils/project-config.js';
 import chalk from 'chalk';
-import { parse as parseYaml } from 'yaml';
 
 /**
  * Configure chalk color level based on options.
@@ -66,29 +70,6 @@ export function createDiffLogger(machineReadable = false): Logger {
       }
     },
   };
-}
-
-/**
- * Resolve universalDir config to NativeSkillOptions.
- */
-function resolveUniversalDir(
-  universalDir: string | boolean | undefined
-): { universalDir: string } | undefined {
-  if (universalDir === false) return undefined;
-  if (typeof universalDir === 'string') return { universalDir };
-  return { universalDir: '.agents' };
-}
-
-async function loadDiffLockfile(projectRoot: string): Promise<Lockfile | undefined> {
-  const lockfilePath = resolve(projectRoot, 'promptscript.lock');
-  if (!existsSync(lockfilePath)) {
-    return undefined;
-  }
-  const parsed: unknown = parseYaml(await readFile(lockfilePath, 'utf-8'), { maxAliasCount: 100 });
-  if (!isValidLockfile(parsed)) {
-    throw new Error(`Invalid lockfile: ${lockfilePath}`);
-  }
-  return parsed;
 }
 
 /**
@@ -216,7 +197,7 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       return;
     }
 
-    const lockfile = await loadDiffLockfile(projectRoot);
+    const lockfile = await loadProjectLockfile(projectRoot);
     const vendorDir = resolve(projectRoot, '.promptscript/vendor');
 
     if (!isJsonFormat) spinner.text = 'Resolving registry...';
@@ -241,10 +222,7 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
         projectRoot,
         vendorDir,
         readOnly: true,
-        referenceRoots:
-          registry.repositoryUrl && registry.repositoryPath
-            ? { [registry.repositoryUrl]: [registry.repositoryPath] }
-            : undefined,
+        referenceRoots: registryReferenceRoots(registry),
         lockfile,
         registries: config.registries,
         skillTargets: config.skillTargets,
