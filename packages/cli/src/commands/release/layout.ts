@@ -10,7 +10,7 @@ import {
   type PromptBundleV1,
   type PromptReleaseLabelV1,
 } from '@promptscript/core';
-import type { ReleaseChangeAction } from '../../utils/release-report.js';
+import type { ReleaseChange, ReleaseChangeAction } from '../../utils/release-report.js';
 import { writeFileAtomic } from '../../utils/write-file-atomic.js';
 import {
   PS5003_BUNDLE_MISSING,
@@ -74,6 +74,35 @@ export function shortHash(contentHash: string): string {
 export function fileAction(existing: string | undefined, next: string): ReleaseChangeAction {
   if (existing === undefined) return 'created';
   return existing === next ? 'unchanged' : 'updated';
+}
+
+/**
+ * The entries of a label that differ between two versions, by prompt id, with the hash
+ * before and after. An entry only before is removed, one only after is created.
+ */
+export function labelChanges(
+  path: string,
+  before: ReadonlyMap<string, string>,
+  after: ReadonlyMap<string, string>
+): ReleaseChange[] {
+  const ids = [...new Set([...before.keys(), ...after.keys()])].sort(compareCodeUnits);
+  return ids.flatMap((id): ReleaseChange[] => {
+    const contentHash = after.get(id);
+    const previousContentHash = before.get(id);
+    if (contentHash === previousContentHash) return [];
+    let action: ReleaseChangeAction = 'updated';
+    if (previousContentHash === undefined) action = 'created';
+    if (contentHash === undefined) action = 'removed';
+    return [
+      {
+        path,
+        action,
+        id,
+        ...(contentHash === undefined ? {} : { contentHash }),
+        ...(previousContentHash === undefined ? {} : { previousContentHash }),
+      },
+    ];
+  });
 }
 
 /** Serialize a release file the way the bundle target writes its files. */

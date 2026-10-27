@@ -20,12 +20,15 @@ import {
   verifyBundleText,
   type ReleasePaths,
 } from './layout.js';
+import { checkAgainstBase, type BaseCheck } from './base.js';
 import { loadReleaseProject, type ReleaseProject } from './project.js';
 import { runReleaseCommand, toDiagnostic, type ReleaseCommandOptions } from './run.js';
 
 export interface ReleaseStatusOptions extends ReleaseCommandOptions {
   /** Show the last n commits of each label */
   history?: string;
+  /** Check the label entries that differ from this Git ref against its promotion rules */
+  base?: string;
 }
 
 function parseHistoryCount(value: string | undefined): number | undefined {
@@ -205,6 +208,35 @@ function printStatus(
   }
 }
 
+/** With --base the config is found by name; say so when the caller pointed elsewhere. */
+function ignoredConfigWarnings(options: ReleaseStatusOptions): ReleaseDiagnostic[] {
+  if (options.base === undefined) return [];
+  const ignored = [
+    ...(options.config === undefined ? [] : ['-c']),
+    ...(process.env['PROMPTSCRIPT_CONFIG'] ? ['PROMPTSCRIPT_CONFIG'] : []),
+  ];
+  if (ignored.length === 0) return [];
+  return [
+    {
+      message: `${ignored.join(' and ')} ${ignored.length > 1 ? 'are' : 'is'} ignored with --base: the config is found by name in the project root, and the rules come from the base.`,
+    },
+  ];
+}
+
+function printBaseCheck(check: BaseCheck): void {
+  const { base, changes } = check;
+  ConsoleOutput.header(`Changes since ${base.ref} (${base.commit.slice(0, 12)})`);
+  if (changes.length === 0) ConsoleOutput.info('  no label entry changed');
+  for (const change of changes) {
+    const from =
+      change.previousContentHash === undefined ? 'none' : shortHash(change.previousContentHash);
+    const to = change.contentHash === undefined ? 'removed' : shortHash(change.contentHash);
+    ConsoleOutput.info(
+      `  ${stripControlCharacters(change.path)}  ${stripControlCharacters(change.id ?? '')}  ${from} -> ${to}`
+    );
+  }
+}
+
 function promptState(prompt: ReleasePromptStatus): string {
   if (!prompt.exists) return 'missing';
   return prompt.verified ? 'ok' : 'corrupt';
@@ -214,14 +246,15 @@ function promptState(prompt: ReleasePromptStatus): string {
 export async function releaseStatusCommand(options: ReleaseStatusOptions): Promise<void> {
   await runReleaseCommand('status', options, async (output) => {
     const historyCount = parseHistoryCount(options.history);
-    const project = await loadReleaseProject(options);
+    // With --base nothing outside the repository may choose the config: no -c, no env.
+    const project = await loadReleaseProject(options, { discover: options.base !== undefined });
     const { paths } = project;
     const manifest = await readManifest(paths);
     const checked = await Promise.all(
       project.environments.map((name) => environmentStatus(paths, name, manifest))
     );
     const environments = checked.map((entry) => entry.value);
-    const warnings = await strayLabels(project);
+    const warnings = [...ignoredConfigWarnings(options), ...(await strayLabels(project))];
 
     let history: ReleaseEnvironmentHistory[] | undefined;
     if (historyCount !== undefined) {
@@ -232,12 +265,21 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
       warnings.push(...logs.flatMap((log) => (log.warning === undefined ? [] : [log.warning])));
     }
 
-    if (!output.json) printStatus(paths, manifest, environments, history);
+    const baseCheck =
+      options.base === undefined
+        ? undefined
+        : await checkAgainstBase(project, options.base, output.json);
+
+    if (!output.json) {
+      printStatus(paths, manifest, environments, history);
+      if (baseCheck !== undefined) printBaseCheck(baseCheck);
+    }
     return {
       environments,
       ...(history === undefined ? {} : { history }),
+      ...(baseCheck === undefined ? {} : { base: baseCheck.base, changes: baseCheck.changes }),
       warnings,
-      errors: checked.flatMap((entry) => entry.errors),
+      errors: [...checked.flatMap((entry) => entry.errors), ...(baseCheck?.errors ?? [])],
     };
   });
 }

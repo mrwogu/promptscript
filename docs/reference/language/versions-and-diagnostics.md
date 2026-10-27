@@ -105,7 +105,7 @@ their replacement, models outside `models.supported`, and inconsistent
 | PS5003     | Release bundle or prompt missing             | Run `prs release build` or restore the file  |
 | PS5004     | Release file does not verify                 | Restore it from Git, or run the build        |
 | PS5005     | Promotion skips the previous environment     | Promote to the previous environment first    |
-| PS5006     | Rollback not possible                        | Commit the label or git restore an older one |
+| PS5006     | Git history, base file or ref is not usable  | Commit the label, fetch base, use a full ref |
 | PS5007     | Another release command holds the lock       | Wait, then run the command again             |
 | PS5008     | Compile output inside the release directory  | Point the target output elsewhere            |
 | PS5101     | Approval role missing or not configured      | Add the role to `governance.roles`           |

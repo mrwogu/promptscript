@@ -1259,15 +1259,29 @@ List the released prompts of every environment and verify their bundles.
 prs release status [options]
 ```
 
-| Option          | Description                                                        |
-| --------------- | ------------------------------------------------------------------ |
-| `--history <n>` | Show commit, date and subject of the last n label commits (1-1000) |
+| Option          | Description                                                             |
+| --------------- | ----------------------------------------------------------------------- |
+| `--history <n>` | Show commit, date and subject of the last n label commits (1-1000)      |
+| `--base <ref>`  | Check every label entry changed since `<ref>` with the rules of `<ref>` |
 
 Shows, per environment, the prompt id, the hash, whether it is in the latest build and whether it
 verifies. Exits with code 1 when a referenced bundle is missing or does not verify.
 
+With `--base <ref>`, every label file in the checkout and at `<ref>` is compared, configured or
+not, and every entry that is new or changed must pass the promotion rules of `<ref>`: the
+environment is configured there, the bundle verifies, and the entry is a rollback of the label's
+last change at `<ref>` (of an entry `<ref>` still holds; this trusts that every commit on `<ref>`
+went through the check), or the first environment holds what the source compiles to with the
+`policies`, `validation` and `models.supported` of `<ref>`, or a later one holds what the
+environment before it holds. A removed entry is listed as `removed` and not checked. The config is
+read at `<ref>`; `-c` and `PROMPTSCRIPT_CONFIG` are ignored with a warning. Any failure exits with
+code 1. A ref that is missing, not a commit, ambiguous (pass the full name, such as
+`refs/remotes/origin/main`) or not fetched in a shallow checkout fails with `PS5006`. See
+[Check label changes with `--base`](../guides/releases.md#check-label-changes-with---base).
+
 ```bash
 prs release status --history 5
+prs release status --base refs/remotes/origin/main
 ```
 
 ### prs approve

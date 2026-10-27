@@ -167,6 +167,18 @@ describe('release report schema', () => {
     expect(report.success).toBe(false);
   });
 
+  it('accepts a status --base report and refuses a base without a full commit', () => {
+    const report = createReleaseReport('status', {
+      base: { ref: 'origin/main', commit: 'b'.repeat(40) },
+      changes: [{ path: '.promptscript/releases/prod.json', action: 'removed', id: 'a/b' }],
+    });
+
+    expect(validate(report), JSON.stringify(validate.errors)).toBe(true);
+    expect(validate({ ...report, base: { ref: 'origin/main', commit: 'b'.repeat(7) } })).toBe(
+      false
+    );
+  });
+
   it('pins the schema URL and version the cli writes', () => {
     const schema = readSchema('release-report-v1.json') as { $id: string };
 

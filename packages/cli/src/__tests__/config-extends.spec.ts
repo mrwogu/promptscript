@@ -1,8 +1,8 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { loadConfig } from '../config/loader.js';
+import { loadConfig, loadConfigFileWith } from '../config/loader.js';
 
 const directories: string[] = [];
 
@@ -423,11 +423,85 @@ describe('config extends', () => {
     await expect(loadConfig(join(root, 'a.yaml'))).rejects.toThrow(/Circular config extends/);
   });
 
+  it('should refuse an empty config file with a clear error', async () => {
+    const root = project({ 'promptscript.yaml': '# nothing here yet\n' });
+    const file = join(root, 'promptscript.yaml');
+
+    await expect(loadConfig(file)).rejects.toThrow(
+      `Failed to parse ${file}: it is empty or not a YAML mapping.`
+    );
+  });
+
+  it('should name an empty base file', async () => {
+    const root = project({
+      'promptscript.yaml': 'id: app\nextends: ./base.yaml\n',
+      'base.yaml': '',
+    });
+
+    await expect(loadConfig(join(root, 'promptscript.yaml'))).rejects.toThrow(
+      `Failed to parse ${join(root, 'base.yaml')}: it is empty or not a YAML mapping.`
+    );
+  });
+
   it('should name the missing base file', async () => {
     const root = project({ 'promptscript.yaml': 'id: app\nextends: ./missing.yaml\n' });
 
     await expect(loadConfig(join(root, 'promptscript.yaml'))).rejects.toThrow(
       `Extended config not found: ${join(root, 'missing.yaml')}`
     );
+  });
+});
+
+describe('loadConfigFileWith', () => {
+  const app = resolve('/repo/app/promptscript.yaml');
+  const org = resolve('/repo/org.yaml');
+
+  it('reads the file and its extends chain through the reader only', async () => {
+    const files = new Map([
+      [app, 'extends: ../org.yaml\ntargets:\n  - claude\n'],
+      [
+        org,
+        "syntax: '1.6.0'\npolicies:\n  - name: base\n    kind: registry-allowlist\n    allowed: ['@core']\n",
+      ],
+    ]);
+    const read = async (path: string): Promise<string | undefined> => files.get(path);
+
+    const config = await loadConfigFileWith(app, read);
+
+    expect(config.syntax).toBe('1.6.0');
+    expect(config.targets).toEqual(['claude']);
+    expect(config.policies?.map((policy) => policy.name)).toEqual(['base']);
+  });
+
+  it('names the file that extends a missing one', async () => {
+    const root = resolve('/repo/promptscript.yaml');
+    const read = async (path: string): Promise<string | undefined> =>
+      path === root ? 'extends: ./gone.yaml\n' : undefined;
+
+    await expect(loadConfigFileWith(root, read)).rejects.toThrow(
+      `Extended config not found: ${resolve('/repo/gone.yaml')} (from ${root})`
+    );
+    await expect(loadConfigFileWith(resolve('/repo/other.yaml'), read)).rejects.toThrow(
+      `Configuration file not found: ${resolve('/repo/other.yaml')}`
+    );
+  });
+
+  it('treats an extends path through a file as a missing file', async () => {
+    const root = project({
+      'promptscript.yaml': 'extends: ./notes.txt/base.yaml\n',
+      'notes.txt': '',
+    });
+
+    await expect(loadConfig(join(root, 'promptscript.yaml'))).rejects.toThrow(
+      'Extended config not found'
+    );
+  });
+
+  it('passes through a read error other than a missing file', async () => {
+    const root = project({ 'promptscript.yaml/keep': '' });
+
+    await expect(loadConfig(join(root, 'promptscript.yaml'))).rejects.toMatchObject({
+      code: 'EISDIR',
+    });
   });
 });

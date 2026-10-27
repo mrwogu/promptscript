@@ -76,7 +76,35 @@ export async function loadConfig(customPath?: string): Promise<PromptScriptConfi
     throw new Error('No PromptScript configuration found. Run: prs init');
   }
 
-  const config: unknown = await loadConfigFile(configFile, []);
+  return loadConfigFileWith(configFile, readWorkingTreeFile);
+}
+
+/**
+ * Reads the text of a config file, or undefined when there is none. The default reads the
+ * working tree; `prs release status --base` reads a Git commit.
+ */
+export type ConfigFileReader = (path: string) => Promise<string | undefined>;
+
+async function readWorkingTreeFile(path: string): Promise<string | undefined> {
+  try {
+    return await readFile(path, 'utf-8');
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    // A missing directory on the way (ENOTDIR) means the file is not there either.
+    if (code === 'ENOENT' || code === 'ENOTDIR') return undefined;
+    throw error;
+  }
+}
+
+/**
+ * Load one config file and its `extends` chain through `read`, with the same merge rules as
+ * {@link loadConfig} and without the user, system or environment layers.
+ */
+export async function loadConfigFileWith(
+  configFile: string,
+  read: ConfigFileReader
+): Promise<PromptScriptConfig> {
+  const config: unknown = await loadConfigFile(configFile, [], read);
   return config as PromptScriptConfig;
 }
 
@@ -90,27 +118,39 @@ export async function loadConfig(customPath?: string): Promise<PromptScriptConfi
  */
 async function loadConfigFile(
   configFile: string,
-  chain: string[]
+  chain: string[],
+  read: ConfigFileReader = readWorkingTreeFile,
+  extendedFrom?: string
 ): Promise<Record<string, unknown>> {
   const absolutePath = resolve(configFile);
   if (chain.includes(absolutePath)) {
     throw new Error(`Circular config extends: ${[...chain, absolutePath].join(' -> ')}`);
   }
 
-  let content = await readFile(configFile, 'utf-8');
+  const text = await read(configFile);
+  if (text === undefined) {
+    throw new Error(
+      extendedFrom === undefined
+        ? `Configuration file not found: ${configFile}`
+        : `Extended config not found: ${absolutePath} (from ${extendedFrom})`
+    );
+  }
 
   // Interpolate environment variables in the YAML content
-  content = interpolateEnvVars(content);
+  const content = interpolateEnvVars(text);
 
-  let config: Record<string, unknown>;
+  let config: unknown;
   try {
     config = parseYaml(content);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown parse error';
     throw new Error(`Failed to parse ${configFile}: ${message}`, { cause: error });
   }
+  if (!isPlainObject(config)) {
+    throw new Error(`Failed to parse ${configFile}: it is empty or not a YAML mapping.`);
+  }
 
-  const basePath = config?.['extends'];
+  const basePath = config['extends'];
   if (typeof basePath !== 'string') {
     return config;
   }
@@ -118,10 +158,7 @@ async function loadConfigFile(
   const own = { ...config };
   delete own['extends'];
   const baseFile = resolve(dirname(absolutePath), basePath);
-  if (!existsSync(baseFile)) {
-    throw new Error(`Extended config not found: ${baseFile} (from ${configFile})`);
-  }
-  const base = await loadConfigFile(baseFile, [...chain, absolutePath]);
+  const base = await loadConfigFile(baseFile, [...chain, absolutePath], read, configFile);
   // Keys with their own rules go first, so their errors name the key and both files
   const policies =
     own['policies'] === undefined

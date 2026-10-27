@@ -196,6 +196,8 @@ Every promotion is a reviewed pull request, and Git history is the release log:
 4. When staging looks right, run `prs release promote <id> --to prod` in a new pull request.
 
 Roll back the same way: run `prs release rollback prod`, commit the label, open a pull request.
+`prs release status --base` lets that pass, see below. Going back further than the last change is a
+new promotion under the promote rules.
 
 Promote, build and rollback take a project lock, `.promptscript-release.lock`. Another release
 command that holds it fails with `PS5007`. A stale lock is broken after its process is gone or after
@@ -354,7 +356,7 @@ read the review of the pull request that added the record.
 set -e
 prs release build
 test -z "$(git status --porcelain -- .promptscript/releases)"
-prs release status
+prs release status --base refs/remotes/origin/main
 ```
 
 Build writes whatever the committed release files miss, so the `test -z` check fails when a pull
@@ -364,15 +366,103 @@ at a bundle that is missing or does not verify. All four commands accept
 `--format json`, which prints one document on stdout that matches
 `https://getpromptscript.dev/schema/release-report/v1.json`, and prints the human text on stderr.
 
+### Check label changes with `--base`
+
+`prs release status --base <ref>` compares the label files in the checkout with the labels at
+`<ref>`, usually the branch the pull request goes into. It looks at every label file: the
+environments configured at `<ref>`, the ones configured in the checkout and every other `*.json`
+file in `.promptscript/releases/` except `manifest.json`. A file whose text did not change passes.
+A changed file that does not read or parse as a label fails. Every entry that is new or changed
+must pass the promotion rules of `<ref>`:
+
+- The environment is in `releases.environments` at `<ref>`.
+- The bundle file exists and verifies for that prompt id.
+- The entry is a rollback: the label at `<ref>` holds the entry, and its new hash is the one the
+  label held before its last change at `<ref>`, the label `prs release rollback` restores. This
+  also covers a `git revert` of the last promotion of one environment. An entry that `<ref>`
+  removed is not brought back this way; adding it again goes through the other rules.
+- Or, in the first environment, the hash is what the source in the checkout compiles to with the
+  `policies`, `validation` and `models.supported` of `<ref>` and the forced security rules, the
+  same compile `prs release promote` runs.
+- Or, in a later environment, the hash is the one the environment before it holds in the checkout.
+
+A rollback skips the compile and the policy check. That is safe only when every commit on `<ref>`
+is the result of a pull request this check ran on, see the precondition below: then the hash
+passed the rules when it was promoted. A rollback can also restore a hash that the rules at
+`<ref>` reject today, and only review stops that. So when you take a prompt down after a rule
+change, do it in two pull requests: remove the entry, then promote the fixed version. Deleting
+the old bundle file does not help, a pull request can add it back from history. Reviewers should
+look at a rollback like at any other label change. A removed entry ships nothing; it is listed with `action: "removed"` and not
+checked.
+
+Any failure exits with code 1. The config is read at `<ref>`: the first of `promptscript.yaml`,
+`promptscript.yml`, `.promptscriptrc.yaml` and `.promptscriptrc.yml` that exists in the project
+root, the same order the loader uses, with its `extends` chain read at the same commit. `-c` and
+`PROMPTSCRIPT_CONFIG` are ignored with `--base`, with a warning. So a pull request cannot loosen the
+rules it is checked with: a new policy, a removed policy, a wider `models.supported` or a new
+environment takes effect after the merge. Add a new environment in a pull request of its own,
+before the first label for it.
+
+The rest of the config comes from the checkout: `registry`, `registries`, `input.entry`,
+`models.profiles` (they describe the models and reach the bundle hash), and the lockfile and the
+vendor directory. A pull request can change those, so review them with the labels.
+
+`<ref>` must name one ref. A short name that matches a tag and a branch, for example a tag called
+`origin/main` next to the remote branch, fails with `PS5006`; pass the full name such as
+`refs/remotes/origin/main`.
+
+In GitHub Actions, run it on `pull_request` events. Check out the history so the base exists, pass
+the base branch through `env`, not inline in `run`, and run the CLI version the lockfile pins:
+
+```yaml
+on: pull_request
+
+jobs:
+  releases:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: npm ci
+      - run: npx prs release status --base "refs/remotes/origin/$BASE_REF"
+        env:
+          BASE_REF: ${{ github.base_ref }}
+```
+
+What `--base` does not do:
+
+- Entries that did not change are not checked again, even when the rules at `<ref>` changed since
+  they were promoted.
+- Going back further than the last change of a label is no rollback. It needs a new promotion under
+  the promote rules, in the first environment with the source reverted.
+- Config files and label files at `<ref>` must be regular files. A config that is a link or a
+  directory fails with `PS5001`; a label that is a link counts as empty, so every entry in the
+  checkout is checked.
+- A config file that `extends` reaches outside the repository cannot be read at `<ref>`; the
+  check fails with `PS5006`.
+- It trusts `<ref>`. Point it at the protected branch the applications read from.
+- The rollback rule trusts the history of `<ref>`: every commit on its first-parent chain must be
+  the result of a pull request this check ran on. With rebase merging, or a fast-forward of a
+  branch with several commits, an unchecked commit lands on that chain, and its label becomes a
+  valid rollback target. Allow only squash or merge commits on that branch, see below. Label
+  history from before the check was required counts as unchecked too: a label whose last change
+  predates the check has an unchecked rollback target until its next change.
+- In a `pull_request` run the pull request controls the workflow file, `package.json` and the
+  lockfile, so it can swap the CLI that runs the check. Protect them as below, or run the check
+  as a required workflow from a repository ruleset.
+
 ## What protects the labels
 
-In this version only branch protection and review protect the label files. The CLI checks what it
-writes, but a label edited by hand in a pull request is caught only by review. `prs release status`
-still checks that the hashes exist and match their bundles.
+Run `prs release status --base` as a required check, and keep review on the release files:
 
-- Add `.promptscript/releases/`, `promptscript.yaml` and every config file it reaches through
-  `extends` to `CODEOWNERS`, and require the review.
-- Protect the branch the applications read from.
+- Add `.promptscript/releases/`, `promptscript.yaml`, every config file it reaches through
+  `extends`, `.github/workflows/`, `package.json` and the lockfile to `CODEOWNERS`, and require the
+  review.
+- Protect the branch the applications read from with a ruleset: require the
+  `prs release status --base` check, allow only squash merges or merge commits (no rebase merging,
+  no fast-forward of branches with several commits) and no direct pushes. The rollback rule
+  relies on that.
 - An older label served from a cache, or a label on a rewritten branch, cannot be detected in this
   version.
 
@@ -388,7 +478,7 @@ content hash before use, as described in [Application Prompts](application-promp
 | PS5003 | A bundle or prompt is missing, or a hash prefix matches nothing   |
 | PS5004 | A release file does not verify, or the hash is not the fresh hash |
 | PS5005 | The promotion skips the previous environment                      |
-| PS5006 | Rollback is not possible                                          |
+| PS5006 | Git cannot give rollback or `--base` the ref, commit or file      |
 | PS5007 | Another release command holds the lock                            |
 | PS5008 | A compile output lies inside `.promptscript/releases/`            |
 

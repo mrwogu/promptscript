@@ -78,9 +78,9 @@ function failureDetail(args: string[], error: ExecException, maxBuffer: number):
 }
 
 /**
- * Run Git in the project with an argument array, no prompts, no pager, no fsmonitor hook
- * and no optional index refresh. Paths must follow `--` in `args`. Spawn failures,
- * timeouts and more output than `maxBuffer` bytes (1 MiB by default) throw.
+ * Run Git in the project with an argument array, no prompts, no pager, no fsmonitor hook,
+ * literal pathspecs and no optional index refresh. Paths must follow `--` in `args`.
+ * Spawn failures, timeouts and more output than `maxBuffer` bytes (1 MiB by default) throw.
  */
 export function runGit(
   args: string[],
@@ -102,6 +102,8 @@ export function runGit(
           GIT_TERMINAL_PROMPT: '0',
           GIT_PAGER: 'cat',
           GIT_OPTIONAL_LOCKS: '0',
+          // Paths are file names, never globs or pathspec magic.
+          GIT_LITERAL_PATHSPECS: '1',
         },
       },
       (error, stdout, stderr) => {
