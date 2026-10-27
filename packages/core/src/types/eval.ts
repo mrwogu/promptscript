@@ -38,13 +38,21 @@ export interface EvalDatasetAllow {
    * @example "PS005"
    */
   rule: string;
-  /** Why the content is expected; copied into the report */
+  /**
+   * Why the content is expected; copied into the report.
+   * @minLength 1
+   * @maxLength 500
+   */
   reason: string;
 }
 
 /** Decision that the dataset may hold personal data, with the reason. */
 export interface EvalDatasetAllowPii {
-  /** Why personal data is expected; copied into the report */
+  /**
+   * Why personal data is expected; copied into the report.
+   * @minLength 1
+   * @maxLength 500
+   */
   reason: string;
 }
 

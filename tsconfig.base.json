@@ -35,7 +35,8 @@
       "@promptscript/server": ["packages/server/src/index.ts"],
       "@promptscript/telemetry": ["./packages/telemetry/src/index.ts"],
       "@promptscript/runtime": ["packages/runtime/src/index.ts"],
-      "@promptscript/runtime/node": ["packages/runtime/src/node.ts"]
+      "@promptscript/runtime/node": ["packages/runtime/src/node.ts"],
+      "@promptscript/eval": ["packages/eval/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-<!-- PromptScript 2026-10-26T23:07:56.178Z | source: .promptscript/project.prs | target: github - do not edit -->
+<!-- PromptScript 2026-10-27T08:22:13.362Z | source: .promptscript/project.prs | target: github - do not edit -->
 
 ## project
 
@@ -137,7 +137,7 @@ pnpm prs compile          # Compile .prs files (uses local dev version)
 - Keep commit message subject line max 70 characters
 - Format: `<type>(<scope>): <description>`
 - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
-- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, browser-compiler, server, vscode, telemetry, runtime) or domain scope (ci, docker) - scopes appear in the release changelog grouped by package
+- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, browser-compiler, server, vscode, telemetry, runtime, eval) or domain scope (ci, docker) - scopes appear in the release changelog grouped by package
 - Example: `feat(parser): add support for multiline strings`
 
 ## configuration-files

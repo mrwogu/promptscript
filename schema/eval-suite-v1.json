@@ -120,7 +120,9 @@
         },
         "reason": {
           "type": "string",
-          "description": "Why the content is expected; copied into the report"
+          "description": "Why the content is expected; copied into the report.",
+          "minLength": 1,
+          "maxLength": 500
         }
       },
       "required": [
@@ -135,7 +137,9 @@
       "properties": {
         "reason": {
           "type": "string",
-          "description": "Why personal data is expected; copied into the report"
+          "description": "Why personal data is expected; copied into the report.",
+          "minLength": 1,
+          "maxLength": 500
         }
       },
       "required": [
