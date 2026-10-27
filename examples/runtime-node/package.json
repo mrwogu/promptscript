@@ -1,0 +1,13 @@
+{
+  "name": "promptscript-runtime-node-example",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Renders the prod label of a PromptScript release with @promptscript/runtime",
+  "type": "module",
+  "dependencies": {
+    "@promptscript/runtime": "file:../../dist/packages/runtime"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

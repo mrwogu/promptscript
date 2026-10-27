@@ -1,1 +1,4 @@
 .claude/worktrees
+
+# The runtime example is a standalone app: its package.json must not make it an nx project
+examples/runtime-node/package.json

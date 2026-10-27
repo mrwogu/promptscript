@@ -1,7 +1,7 @@
 /**
  * Runs the built runtime package under Deno: every render case of the prompt bundle
- * conformance vectors, and one read through the node entry, from the dist files a
- * consumer installs.
+ * conformance vectors, and the prod label of the Node example read through the node entry,
+ * from the dist files a consumer installs.
  *
  * Usage (after `pnpm nx build runtime`):
  *   deno run --allow-read scripts/runtime-deno-smoke.mjs
@@ -9,7 +9,12 @@
  * It needs read access only: no environment and no network permission.
  */
 import { readdir, readFile } from 'node:fs/promises';
-import { loadPrompt } from '../dist/packages/runtime/src/index.js';
+import { fileURLToPath } from 'node:url';
+import {
+  createPromptClient,
+  loadPrompt,
+  toAnthropicMessages,
+} from '../dist/packages/runtime/src/index.js';
 import { directorySource } from '../dist/packages/runtime/src/node.js';
 
 const vectors = new URL('../conformance/prompt-bundle/v1/', import.meta.url);
@@ -57,7 +62,25 @@ for (const [i, name] of names.entries()) {
   }
 }
 
-// The node entry reads through node:fs/promises, which Deno provides
-const file = await directorySource(new URL('.', vectors).pathname).read(names[0]);
-if (!JSON.parse(file.text).bundle) throw new Error(`directorySource could not read ${names[0]}`);
-console.log(`runtime: ${names.length} vectors, ${cases} render cases pass`);
+// The node entry reads the example release through node:fs/promises, which Deno provides
+const example = new URL('../examples/runtime-node/', import.meta.url);
+const client = createPromptClient({
+  source: directorySource(fileURLToPath(new URL('.promptscript/releases/', example))),
+  label: 'prod',
+});
+const prompt = await client.get('acme-support/refund-reply');
+// The same inputs as examples/runtime-node/index.mjs
+const rendered = prompt.render({
+  order_total: 42.5,
+  days_since_delivery: 12,
+  message: 'The kettle arrived broken. Can I get my money back?',
+});
+const expected = await readFile(new URL('expected-output.json', example), 'utf8');
+if (`${JSON.stringify(toAnthropicMessages(rendered), null, 2)}\n` !== expected) {
+  throw new Error(
+    'The example prod label does not render as examples/runtime-node/expected-output.json'
+  );
+}
+console.log(
+  `runtime: ${names.length} vectors, ${cases} render cases and the example prod label pass`
+);

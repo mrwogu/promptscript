@@ -1,0 +1,112 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/prompt-bundle/v1.json",
+  "id": "acme-support/refund-reply",
+  "description": "Decide on a refund request and write the reply",
+  "contentHash": "sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a support agent at Acme, an online shop.\nYou write short and polite replies in plain English.\n\n## Standards\n\n- tone: Calm and direct\n- length: At most 120 words\n\n## Restrictions\n\n- Never promise a refund that the policy does not allow.\n- Never ask the customer for a full card number.\n\nRefunds are allowed within 30 days of delivery.\nSend anything above 500 EUR to a human by choosing escalate."
+    },
+    {
+      "role": "user",
+      "content": "Order total: {{input.order_total}} EUR\nDays since delivery: {{input.days_since_delivery}}\nCustomer wrote: {{input.message}}"
+    }
+  ],
+  "inputs": {
+    "order_total": {
+      "type": "number",
+      "description": "Order total in EUR",
+      "required": true
+    },
+    "days_since_delivery": {
+      "type": "number",
+      "description": "Days since the order arrived",
+      "required": true
+    },
+    "message": {
+      "type": "string",
+      "description": "What the customer wrote",
+      "required": true
+    }
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "decision": {
+        "type": "string",
+        "description": "What happens to the refund request",
+        "enum": [
+          "approve",
+          "escalate",
+          "deny"
+        ]
+      },
+      "reply": {
+        "type": "string",
+        "description": "The reply to send to the customer"
+      }
+    },
+    "required": [
+      "decision",
+      "reply"
+    ],
+    "additionalProperties": false
+  },
+  "model": {
+    "ref": "claude-sonnet-5-5",
+    "profile": "claude-sonnet-5-5",
+    "provider": "anthropic",
+    "apiId": "claude-sonnet-5-5",
+    "params": {
+      "maxTokens": 600
+    }
+  },
+  "governance": {
+    "risk": "high",
+    "owner": "team-support",
+    "dataClasses": [
+      "pii"
+    ]
+  },
+  "provenance": {
+    "entry": ".promptscript/project.prs",
+    "segments": [
+      {
+        "message": "system",
+        "path": "identity",
+        "files": [
+          ".promptscript/org.prs"
+        ]
+      },
+      {
+        "message": "system",
+        "path": "standards",
+        "files": [
+          ".promptscript/org.prs"
+        ]
+      },
+      {
+        "message": "system",
+        "path": "restrictions",
+        "files": [
+          ".promptscript/org.prs"
+        ]
+      },
+      {
+        "message": "system",
+        "path": "prompts.refund-reply.system",
+        "files": [
+          ".promptscript/project.prs"
+        ]
+      },
+      {
+        "message": "user",
+        "path": "prompts.refund-reply.user",
+        "files": [
+          ".promptscript/project.prs"
+        ]
+      }
+    ]
+  }
+}
