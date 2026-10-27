@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-10-27T16:18:13.363Z | source: .promptscript/project.prs | target: github
+# promptscript-generated: 2026-10-27T18:39:07.681Z | source: .promptscript/project.prs | target: github
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -1257,7 +1257,7 @@ prs update <url>            # Update a specific registry
 prs vendor sync             # Copy cached deps to .promptscript/vendor/
 prs vendor check            # Verify vendor matches lockfile
 prs release build           # Write content-hashed prompt bundles to .promptscript/releases/
-prs release promote <id> --to <env> # Point an environment at a bundle (in releases.environments order)
+prs release promote <id> --to <env> # Point an environment at a bundle (in order, after the release gates)
 prs release rollback <env>  # Restore the label before its last commit (from Git)
 prs release status          # List released prompts per environment and verify them
 prs approve <id>@<hash> --role legal --approver @jane --env prod # Record an approval of one exact version

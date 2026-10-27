@@ -1,6 +1,6 @@
 import type { PromptReleaseLabelV1 } from '@promptscript/core';
 import { PS5006_ROLLBACK_UNAVAILABLE, ReleaseError } from './errors.js';
-import { checkPromotionGates } from './gates.js';
+import { checkPromotionGates, gateLines } from './gates.js';
 import { runGit, stripControlCharacters } from './git.js';
 import {
   PROMPT_RELEASE_LABEL_SCHEMA_URL,
@@ -14,7 +14,12 @@ import {
   writeReleaseFile,
   type ReleasePaths,
 } from './layout.js';
-import { environmentIndex, loadReleaseProject } from './project.js';
+import {
+  compileRelease,
+  environmentIndex,
+  loadReleaseProject,
+  type CompiledRelease,
+} from './project.js';
 import { runReleaseCommand, withReleaseLock, type ReleaseCommandOptions } from './run.js';
 
 interface PreviousLabel {
@@ -132,22 +137,27 @@ export async function releaseRollbackCommand(
         new Map(current.prompts.map((entry) => [entry.id, entry.contentHash])),
         new Map(previous.label.prompts.map((entry) => [entry.id, entry.contentHash]))
       );
-      const gates = checkPromotionGates({
-        command: 'rollback',
-        projectRoot: paths.root,
+      // The gates judge every hash the rollback brings back, the entries status --base
+      // checks too; an entry the rollback leaves as it is was judged when it got there.
+      let compiled: Promise<CompiledRelease> | undefined;
+      const gates = await checkPromotionGates({
+        project,
+        config: project.config,
+        configFile: project.paths.relative(project.configPath),
         environment,
-        prompts: previous.label.prompts.map((entry) => {
-          const previousContentHash = current.prompts.find(
-            (held) => held.id === entry.id
-          )?.contentHash;
-          return {
-            ...entry,
-            ...(previousContentHash === undefined ? {} : { previousContentHash }),
-          };
-        }),
+        prompts: entries.flatMap(({ id, contentHash }) =>
+          id === undefined || contentHash === undefined ? [] : [{ id, contentHash }]
+        ),
+        source: () => (compiled ??= compileRelease(project, output.json)),
       });
+      if (!output.json) for (const gate of gates.gates) gateLines(gate).forEach(output.info);
+      const gateReport = {
+        warnings: gates.warnings,
+        ...(gates.gates.length === 0 ? {} : { gates: gates.gates }),
+      };
       if (!gates.passed) {
-        return { success: false, errors: gates.findings };
+        output.info(`Rollback refused. Label ${environment} is unchanged.`);
+        return { success: false, errors: gates.findings, ...gateReport };
       }
 
       const text = labelText(previous.label);
@@ -165,7 +175,7 @@ export async function releaseRollbackCommand(
           ? `Dry run: would restore ${restored}.`
           : `Restored ${restored}. Commit ${relativePath} to record the rollback.`
       );
-      return { changes: [{ path: relativePath, action }, ...entries] };
+      return { changes: [{ path: relativePath, action }, ...entries], ...gateReport };
     });
   });
 }

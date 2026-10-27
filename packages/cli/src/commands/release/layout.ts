@@ -410,6 +410,73 @@ export function verifyBundleText(
   return parsed as unknown as PromptBundleV1;
 }
 
+const isString = (value: unknown): boolean => typeof value === 'string';
+const isOptional = (value: unknown, check: (value: unknown) => boolean): boolean =>
+  value === undefined || check(value);
+const isStrings = (value: unknown): boolean => Array.isArray(value) && value.every(isString);
+
+function isGovernance(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isOptional(value['risk'], isString) &&
+    isOptional(value['owner'], isString) &&
+    isOptional(value['domain'], isString) &&
+    isOptional(value['dataClasses'], isStrings) &&
+    isOptional(value['reviewers'], isStrings)
+  );
+}
+
+function isInputs(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    Object.values(value).every(
+      (input) =>
+        isRecord(input) && isString(input['type']) && isOptional(input['options'], isStrings)
+    )
+  );
+}
+
+function isModel(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isString(value['ref']) &&
+    isString(value['provider']) &&
+    isString(value['apiId']) &&
+    isOptional(value['profile'], isString)
+  );
+}
+
+function isMessages(value: unknown): boolean {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every(
+      (message) => isRecord(message) && isString(message['role']) && isString(message['content'])
+    )
+  );
+}
+
+/**
+ * A bundle file verifies only against its own hash, so the fields the commands read from it
+ * are checked here: governance values, inputs, the model and messages with a string role
+ * and content. Anything else is PS5004.
+ */
+export function checkBundleFields(bundle: PromptBundleV1, file: string): void {
+  const fields: Record<string, unknown> = { ...bundle };
+  const valid =
+    isGovernance(fields['governance']) &&
+    isInputs(fields['inputs']) &&
+    isOptional(fields['model'], isModel) &&
+    isMessages(fields['messages']);
+  if (!valid) {
+    throw new ReleaseError(
+      PS5004_VERIFICATION_FAILED,
+      `${file} has governance values, inputs, a model or messages of the wrong shape, so it is not a prompt bundle the release commands can check. Restore it from Git.`,
+      file
+    );
+  }
+}
+
 /** The verified bundle of a content hash. Missing is PS5003, not verifying is PS5004. */
 export async function readVerifiedBundle(
   paths: ReleasePaths,

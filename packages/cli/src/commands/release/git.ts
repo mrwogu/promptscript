@@ -104,6 +104,10 @@ export function runGit(
           GIT_OPTIONAL_LOCKS: '0',
           // Paths are file names, never globs or pathspec magic.
           GIT_LITERAL_PATHSPECS: '1',
+          // A replace ref must not change what a commit holds, and a partial clone must not
+          // fetch from the network.
+          GIT_NO_REPLACE_OBJECTS: '1',
+          GIT_NO_LAZY_FETCH: '1',
         },
       },
       (error, stdout, stderr) => {
@@ -122,9 +126,13 @@ export function runGit(
   });
 }
 
-/** Characters that move or recolor terminal text: C0, DEL, C1 and the bidi controls. */
-// eslint-disable-next-line no-control-regex
-const TERMINAL_CONTROL_RE = /[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/g;
+/**
+ * Characters that move, recolor or hide terminal text: C0, DEL, C1, the bidi controls and
+ * marks, zero-width characters, line and paragraph separators, word joiner and BOM.
+ */
+const TERMINAL_CONTROL_RE =
+  // eslint-disable-next-line no-control-regex
+  /[\u0000-\u001f\u007f-\u009f\u061c\u200b-\u200f\u2028\u2029\u202a-\u202e\u2060\u2066-\u2069\ufeff]/g;
 
 /** Remove the characters that could rewrite terminal output, from text Git or a file supplies. */
 export function stripControlCharacters(text: string): string {

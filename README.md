@@ -436,7 +436,11 @@ with the rules of the base branch. See the
 `prs approve` records that a person approved one exact bundle hash in a role from
 `governance.roles`, as a JSON file under `.promptscript/approvals/`. The record is a claim; the
 review of the pull request that adds it is what binds it. See
-[approvals](https://getpromptscript.dev/guides/releases/#approvals).
+[approvals](https://getpromptscript.dev/guides/releases/#approvals). Promote, rollback and
+`status --base` run the prompt policies as release gates: a `required-approvals` policy refuses a
+version until a committed record approves that hash for the environment. A record binds only with
+code owner review of its role directory. See
+[release gates](https://getpromptscript.dev/guides/releases/#release-gates).
 
 `prs governance codeowners` writes the `governance` section of `promptscript.yaml` into CODEOWNERS:
 prompt files go to their owners, approval directories to their role teams, and the config and

@@ -89,6 +89,11 @@ directly on the entry text, so `disableRules` and rule severities do not turn it
 PS047 runs only when the config has a `governance` section. See the
 [Policy Engine guide](https://getpromptscript.dev/guides/policy-engine/).
 
+`promptPolicyRisk(subject, policies)` and `promptPolicyMatches(match, subject, risk)` give the
+policy risk and the `match` decision on their own. `evaluatePromptPolicies` takes an optional
+fourth argument, a `{ risk, selects }` scope, for a caller that judges a prompt by more than its
+own fields: the release gates of the CLI judge a bundle with the higher risk of bundle and source.
+
 ## License
 
 MIT

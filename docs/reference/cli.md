@@ -1226,7 +1226,11 @@ prs release promote <id>[@<hash>] --to <env> [options]
 
 `<hash>` is the full `sha256-<64 hex>` or a prefix of at least 8 hex digits. The first environment
 takes only what the source compiles to now. Every later environment takes only the hash the
-previous one holds. There is no flag to skip this order.
+previous one holds. Then the [release gates](../guides/releases.md#release-gates) run: every prompt
+policy on the bundle, and `required-approvals` against the approval records committed at `HEAD`.
+A gate of severity `error` that fails refuses the promotion with `PS030` and leaves the label
+unchanged. `required-evals` reports `unavailable` in the gates and blocks at severity `error`.
+There is no flag to skip the order or the gates.
 
 ```bash
 prs release promote acme-support/refund-reply --to staging
@@ -1246,7 +1250,8 @@ prs release rollback <env> [options]
 | `--dry-run` | Show the rollback without writing the label |
 
 Reads Git history, so the label must have no uncommitted change. Fails with `PS5006` at the first
-promotion, and in a shallow checkout (run `git fetch --unshallow`).
+promotion, and in a shallow checkout (run `git fetch --unshallow`). Every hash the rollback brings
+back must pass the [release gates](../guides/releases.md#release-gates).
 
 ```bash
 prs release rollback prod
@@ -1266,7 +1271,9 @@ prs release status [options]
 | `--base <ref>`  | Check every label entry changed since `<ref>` with the rules of `<ref>` |
 
 Shows, per environment, the prompt id, the hash, whether it is in the latest build and whether it
-verifies. Exits with code 1 when a referenced bundle is missing or does not verify.
+verifies. Exits with code 1 when a referenced bundle is missing or does not verify. With prompt
+policies it also runs the [release gates](../guides/releases.md#release-gates) on every entry and
+shows an `approvals` column (`ok`, `missing: <roles>` or `-`); a failed gate is a warning there.
 
 With `--base <ref>`, every label file in the checkout and at `<ref>` is compared, configured or
 not, and every entry that is new or changed must pass the promotion rules of `<ref>`: the
@@ -1274,7 +1281,9 @@ environment is configured there, the bundle verifies, and the entry is a rollbac
 last change at `<ref>` (of an entry `<ref>` still holds; this trusts that every commit on `<ref>`
 went through the check), or the first environment holds what the source compiles to with the
 `policies`, `validation` and `models.supported` of `<ref>`, or a later one holds what the
-environment before it holds. A removed entry is listed as `removed` and not checked. The config is
+environment before it holds. Every new or changed entry also goes through the release gates with
+the policies, governance and releases of `<ref>` and the approval records committed at `HEAD`, a
+rollback too. A removed entry is listed as `removed` and not checked. The config is
 read at `<ref>`; `-c` and `PROMPTSCRIPT_CONFIG` are ignored with a warning. Any failure exits with
 code 1. A ref that is missing, not a commit, ambiguous (pass the full name, such as
 `refs/remotes/origin/main`) or not fetched in a shallow checkout fails with `PS5006`. See

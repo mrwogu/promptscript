@@ -281,11 +281,114 @@ export async function trackedApprovals(root: string): Promise<Map<string, string
   return blobs;
 }
 
+/** A `git ls-tree -r -z` entry of a regular file: `<mode> blob <blob id>\t<path>`. */
+const TREE_ENTRY_RE = /^100(?:644|755) blob ([0-9a-f]{40}|[0-9a-f]{64})\t(.+)$/s;
+
+/** One record file as committed at HEAD. */
+export interface CommittedApproval {
+  /** Path relative to the project root, as Git has it */
+  path: string;
+  /** The record, when the blob holds a valid one */
+  record?: ApprovalRecordV1;
+}
+
+/** Two paths that differ only in case are one file on a case-insensitive disk. */
+function refuseCaseDuplicates(paths: readonly string[]): void {
+  const seen = new Map<string, string>();
+  for (const path of paths) {
+    const other = seen.get(path.toLowerCase());
+    if (other !== undefined) {
+      const shown = stripControlCharacters(path);
+      throw new GovernanceError(
+        PS5109_APPROVAL_INVALID,
+        `${stripControlCharacters(other)} and ${shown} differ only in case, and a case-insensitive disk keeps one of them. No approval counts until one is deleted in a commit.`,
+        shown
+      );
+    }
+    seen.set(path.toLowerCase(), path);
+  }
+}
+
+/** Git printed more than `maxBuffer` bytes. */
+function isOutputLimit(error: unknown): boolean {
+  const cause = error instanceof Error ? error.cause : undefined;
+  return (
+    cause instanceof Error && 'code' in cause && cause.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'
+  );
+}
+
+/**
+ * A committed record; a blob that is too large or not a record has none. Any other Git
+ * failure is PS5108, so a Git problem never shows as a missing approval.
+ */
+async function committedRecord(root: string, blob: string): Promise<{ record?: ApprovalRecordV1 }> {
+  let shown: GitResult;
+  try {
+    shown = await runGit(['cat-file', 'blob', blob], root, { maxBuffer: MAX_RECORD_BYTES });
+  } catch (error) {
+    // Larger than a record can be: the record does not count.
+    if (isOutputLimit(error)) return {};
+    throw gitError(error instanceof Error ? error.message : String(error), root);
+  }
+  if (shown.status !== 0) throw gitError(stripControlCharacters(shown.stderr.trim()), root);
+  // runGit decodes UTF-8. The bytes count only when they hash back to the blob, so the
+  // decoding lost nothing.
+  const bytes = Buffer.from(shown.stdout, 'utf-8');
+  if (gitBlobId(bytes, blob.length) !== blob) return {};
+  const record = parseApprovalRecord(bytes);
+  return record === undefined ? {} : { record };
+}
+
+/** A regular file committed under the approvals directory. */
+export interface CommittedFile {
+  /** Path relative to the project root, as Git has it */
+  path: string;
+  blob: string;
+}
+
+/**
+ * The regular files committed at HEAD under the approvals directory, listed once with
+ * `git ls-tree`, so only committed records count: a record that is only staged or edited
+ * changes nothing. Links, submodules and trees are no files and never records. Two paths
+ * that differ only in case are PS5109.
+ */
+export async function committedApprovalFiles(root: string): Promise<CommittedFile[]> {
+  let listed: GitResult;
+  try {
+    listed = await runGit(['ls-tree', '-r', '-z', 'HEAD', '--', APPROVALS_DIRECTORY], root, {
+      maxBuffer: MAX_APPROVAL_ENTRIES * 1024,
+    });
+  } catch (error) {
+    throw gitError(error instanceof Error ? error.message : String(error), root);
+  }
+  if (listed.status !== 0) throw gitError(stripControlCharacters(listed.stderr.trim()), root);
+  const files = listed.stdout.split('\0').flatMap((entry) => {
+    const [, blob, path] = TREE_ENTRY_RE.exec(entry) ?? [];
+    return blob === undefined || path === undefined ? [] : [{ blob, path }];
+  });
+  refuseCaseDuplicates(files.map((file) => file.path));
+  return files;
+}
+
+/** The records among committed files below `<approvals>/<role>/<prompt>/` of each role. */
+export function committedApprovals(
+  root: string,
+  files: readonly CommittedFile[],
+  prompt: string,
+  roles: readonly string[]
+): Promise<CommittedApproval[]> {
+  const prefixes = roles.map((role) => `${APPROVALS_DIRECTORY}/${role}/${prompt}/`);
+  const wanted = files.filter(({ path }) => prefixes.some((prefix) => path.startsWith(prefix)));
+  return Promise.all(
+    wanted.map(async ({ blob, path }) => ({ path, ...(await committedRecord(root, blob)) }))
+  );
+}
+
 function gitError(reason: string, root: string): GovernanceError {
   const sentence = reason.endsWith('.') ? reason.slice(0, -1) : reason;
   return new GovernanceError(
     PS5108_GIT_UNAVAILABLE,
-    `Git cannot list the approval records in ${root}: ${sentence}. Records count only as files Git tracks, so run this in a Git checkout with git on PATH.`
+    `Git cannot read the approval records in ${root}: ${sentence}. Records count only as files Git tracks, so run this in a Git checkout with git on PATH.`
   );
 }
 

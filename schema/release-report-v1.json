@@ -60,6 +60,13 @@
       "$ref": "#/definitions/Base",
       "description": "Present when status runs with --base: the ref and the commit it named."
     },
+    "gates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/GateResult"
+      },
+      "description": "The release gates of every prompt version a prompt policy exists for. Absent without prompt policies."
+    },
     "warnings": {
       "type": "array",
       "items": {
@@ -74,6 +81,114 @@
     }
   },
   "definitions": {
+    "GateResult": {
+      "type": "object",
+      "required": ["prompt", "contentHash", "environment", "policyRisk", "passed", "checks"],
+      "additionalProperties": false,
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contentHash": {
+          "$ref": "#/definitions/ContentHash"
+        },
+        "environment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policyRisk": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "The highest of the bundle's and the source's risk and risk floors."
+        },
+        "passed": {
+          "type": "boolean",
+          "description": "False when a check of severity error failed or is unavailable."
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GateCheck"
+          }
+        }
+      }
+    },
+    "GateCheck": {
+      "type": "object",
+      "required": ["policy", "kind", "severity", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "layer-boundary",
+            "property-protection",
+            "registry-allowlist",
+            "required-metadata",
+            "risk-floor",
+            "model-allowlist",
+            "required-approvals",
+            "required-evals",
+            "content-rules"
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["error", "warning"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["passed", "failed", "unavailable"],
+          "description": "unavailable never passes at severity error."
+        },
+        "message": {
+          "type": "string"
+        },
+        "suggestion": {
+          "type": "string"
+        },
+        "approvals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GateApprovals"
+          }
+        }
+      }
+    },
+    "GateApprovals": {
+      "type": "object",
+      "required": ["role", "required", "found", "stale"],
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "found": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Approvers whose committed record counts for this hash and environment."
+        },
+        "stale": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Records of this prompt and role for another hash, as <approver> for <short hash>."
+        }
+      }
+    },
     "ContentHash": {
       "type": "string",
       "pattern": "^sha256-[0-9a-f]{64}$"

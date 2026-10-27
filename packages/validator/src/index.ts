@@ -164,10 +164,12 @@ export {
   parsePolicies,
   evaluatePolicies,
   evaluatePromptPolicies,
+  promptPolicyMatches,
+  promptPolicyRisk,
   promptPolicySubjects,
   normalizeDenyText,
 } from './policy/index.js';
-export type { ParsedPolicies, PolicyContext } from './policy/index.js';
+export type { ParsedPolicies, PolicyContext, PromptPolicyScope } from './policy/index.js';
 
 export function validate(ast: ProgramInput, options: ValidateOptions = {}): ValidationResult {
   const { validator, ...config } = options;

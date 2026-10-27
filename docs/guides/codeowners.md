@@ -205,6 +205,7 @@ A file in `.github/workflows` can change what CI checks. The `protect` line give
 - GitHub matches CODEOWNERS paths byte for byte and case-sensitively. The role lines cover exactly `.promptscript/approvals/<role>`, in lowercase. A file at `.promptscript/approvals/Legal/...` or under a look-alike Unicode name is not matched by the `legal` line, even on a disk that ignores case. The same holds for the releases, the vendor directory and the config names.
 - Any one listed owner can approve a line. A line does not ask for two teams. So adding an owner is the dangerous direction: every owner you add to a prompt, a role or the admins can approve alone.
 - GitLab sections with approval counts and optional sections are not generated.
+- The lines decide who must review an approval record. The [release gates](releases.md#release-gates) then count the committed records, so a `required-approvals` policy only binds when the role directories have their owners and code owner review is required.
 
 ## Options
 

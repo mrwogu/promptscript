@@ -3,6 +3,7 @@
  *
  * The shape is pinned by `schema/release-report-v1.json`.
  */
+import type { PolicyKind, PolicySeverity, RiskLevel } from '@promptscript/core';
 
 export const RELEASE_REPORT_SCHEMA_URL =
   'https://getpromptscript.dev/schema/release-report/v1.json';
@@ -87,6 +88,41 @@ export function toReleaseLocation(
   };
 }
 
+/** Approvals of one role that a required-approvals check counted. */
+export interface ReleaseGateApprovals {
+  role: string;
+  /** Distinct approvers needed */
+  required: number;
+  /** Approvers whose committed record counts for this hash and environment */
+  found: string[];
+  /** Records of this prompt and role for another hash, as `<approver> for <short hash>` */
+  stale: string[];
+}
+
+/** One policy as a release gate judged it for one prompt. */
+export interface ReleaseGateCheck {
+  policy: string;
+  kind: PolicyKind;
+  severity: PolicySeverity;
+  /** `unavailable` never passes at error severity */
+  status: 'passed' | 'failed' | 'unavailable';
+  message?: string;
+  suggestion?: string;
+  approvals?: ReleaseGateApprovals[];
+}
+
+/** The gates of one prompt version on its way into one environment. */
+export interface ReleaseGateResult {
+  prompt: string;
+  contentHash: string;
+  environment: string;
+  /** The highest of the bundle's and the source's risk and risk floors */
+  policyRisk: RiskLevel;
+  /** False when a check of severity error failed or is unavailable */
+  passed: boolean;
+  checks: ReleaseGateCheck[];
+}
+
 /** The commit `prs release status --base` compared the labels with. */
 export interface ReleaseBaseRef {
   /** The ref as given */
@@ -106,6 +142,8 @@ export interface ReleaseReport {
   history?: ReleaseEnvironmentHistory[];
   /** Present when status runs with --base */
   base?: ReleaseBaseRef;
+  /** The gates of every prompt version a policy applies to; absent without prompt policies */
+  gates?: ReleaseGateResult[];
   warnings: ReleaseDiagnostic[];
   errors: ReleaseDiagnostic[];
 }
@@ -126,6 +164,7 @@ export function createReleaseReport(
     environments: partial.environments ?? [],
     ...(partial.history === undefined ? {} : { history: partial.history }),
     ...(partial.base === undefined ? {} : { base: partial.base }),
+    ...(partial.gates === undefined ? {} : { gates: partial.gates }),
     warnings: partial.warnings ?? [],
     errors,
   };

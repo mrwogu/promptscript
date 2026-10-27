@@ -175,24 +175,59 @@ function checkModel(
 function evaluateOne(
   policy: PolicyDefinition,
   subject: PolicySubject,
-  risk: RiskLevel,
+  scope: PromptPolicyScope,
   catalog: ModelCatalog,
   context: PolicyContext
 ): PolicyFinding[] {
+  const { risk, selects } = scope;
   switch (policy.kind) {
     case 'required-metadata':
-      return matches(policy.match, subject, risk) ? checkMetadata(policy, subject, risk) : [];
+      return selects(policy.match) ? checkMetadata(policy, subject, risk) : [];
     case 'risk-floor':
       return checkFloor(policy, subject);
     case 'model-allowlist':
-      return matches(policy.match, subject, risk) ? checkModel(policy, subject, risk, catalog) : [];
+      return selects(policy.match) ? checkModel(policy, subject, risk, catalog) : [];
     case 'content-rules':
-      return matches(policy.match, subject, risk) ? runContentRules(policy, subject, context) : [];
+      return selects(policy.match) ? runContentRules(policy, subject, context) : [];
     default:
       // Skill kinds run in evaluatePolicies. required-approvals and required-evals
       // need approval records and eval results, which validation does not read.
       return [];
   }
+}
+
+/**
+ * The policy risk of a prompt: the higher of its effective risk (unset counts as low)
+ * and the floor of every risk-floor policy, whatever its severity.
+ */
+export function promptPolicyRisk(
+  subject: PolicySubject,
+  policies: readonly PolicyDefinition[]
+): RiskLevel {
+  return policyRisk(
+    subject,
+    policies.filter((policy): policy is RiskFloorPolicy => policy.kind === 'risk-floor')
+  );
+}
+
+/** Whether a policy's `match` selects a prompt at the given policy risk. */
+export function promptPolicyMatches(
+  match: PromptPolicyMatch | undefined,
+  subject: PolicySubject,
+  risk: RiskLevel
+): boolean {
+  return matches(match, subject, risk);
+}
+
+/**
+ * Policy risk and selection that replace the subject's own, for a caller that judges one
+ * prompt by more than its own fields, such as a release gate that also reads the source.
+ */
+export interface PromptPolicyScope {
+  /** Policy risk the checks and their messages use */
+  risk: RiskLevel;
+  /** Whether a policy's `match` selects the prompt */
+  selects: (match: PromptPolicyMatch | undefined) => boolean;
 }
 
 /**
@@ -205,12 +240,14 @@ function evaluateOne(
  * @param policies - Parsed policy definitions
  * @param subjects - Prompts as policies see them
  * @param context - Model catalog settings and the blocked-pattern setup of PS005
+ * @param scope - Risk and selection to use for every subject instead of its own
  * @returns Violations, each at the location of its prompt
  */
 export function evaluatePromptPolicies(
   policies: readonly PolicyDefinition[],
   subjects: readonly PolicySubject[],
-  context: PolicyContext = {}
+  context: PolicyContext = {},
+  scope?: PromptPolicyScope
 ): PolicyViolation[] {
   const floors = policies.filter(
     (policy): policy is RiskFloorPolicy => policy.kind === 'risk-floor'
@@ -219,8 +256,12 @@ export function evaluatePromptPolicies(
   const violations: PolicyViolation[] = [];
   for (const subject of subjects) {
     const risk = policyRisk(subject, floors);
+    const subjectScope = scope ?? {
+      risk,
+      selects: (match: PromptPolicyMatch | undefined) => matches(match, subject, risk),
+    };
     for (const policy of policies) {
-      for (const finding of evaluateOne(policy, subject, risk, catalog, context)) {
+      for (const finding of evaluateOne(policy, subject, subjectScope, catalog, context)) {
         violations.push({
           policyName: policy.name,
           kind: policy.kind,
