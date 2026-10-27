@@ -1980,6 +1980,48 @@ describe('obfuscated-content rule (PS012)', () => {
       expect(messages.some((m) => m.message.includes('Long Base64'))).toBe(true);
     });
 
+    it('should scan an extended skill but not the paths the resolver records on it', () => {
+      // A random temp segment, as macOS gives, reads as Base64 when scanned as text.
+      const path =
+        '/var/folders/25/tdn0jxsx5xj12gmlrrdp1yhm0000gn/T/promptscript-release/registry/@core/skills.prs';
+      const skills = (content: string): Block => ({
+        type: 'Block',
+        name: 'skills',
+        loc: EXTERNAL_LOC,
+        content: {
+          type: 'ObjectContent',
+          loc: EXTERNAL_LOC,
+          properties: {
+            review: {
+              content,
+              __baseSource: path,
+              __layerTrace: [
+                { property: 'content', source: path, strategy: 'replace', action: 'replaced' },
+              ],
+              __composedFrom: [{ name: 'check', source: path, loc: { file: path, line: 1 } }],
+            },
+          },
+        },
+      });
+      const config = { externalRoots: [EXTERNAL_ROOT], scanExternalContent: true };
+      const clean = createRuleContext(
+        createTestProgram({ blocks: [skills('Review the change.')] }),
+        config
+      );
+      const payload = createRuleContext(
+        createTestProgram({ blocks: [skills(`Review the change. ${OPAQUE_BASE64}`)] }),
+        config
+      );
+
+      obfuscatedContent.validate(clean.ctx);
+      obfuscatedContent.validate(payload.ctx);
+
+      expect(clean.messages).toEqual([]);
+      expect(payload.messages.map((m) => m.message)).toEqual([
+        expect.stringContaining(`starts with "${OPAQUE_BASE64.substring(0, 20)}`),
+      ]);
+    });
+
     it('should keep scanning local files when externalRoots are configured', () => {
       const { ctx, messages } = createRuleContext(
         createTestProgram({

@@ -54,7 +54,7 @@ export function walkText(ast: Program, callback: TextCallback, options?: WalkTex
 
   // Walk blocks
   for (const block of ast.blocks) {
-    let content = block.name === 'skills' ? withoutSkillBaseSource(block.content) : block.content;
+    let content = block.name === 'skills' ? withoutSkillMetadata(block.content) : block.content;
     if (skipResources) content = withoutSkillResources([block.name], content);
     walkBlockContent(content, block.loc, callback, exclude);
     walkPresentationTitles(block.canonicalBody, callback);
@@ -78,23 +78,26 @@ export function walkText(ast: Program, callback: TextCallback, options?: WalkTex
 }
 
 /**
- * Drop the `__baseSource` path from each skill. The resolver always writes it
- * (a hand-written value is overwritten), so it is a file path, not prompt
- * text. Only this key on skill records is skipped, the same key anywhere else
- * is still scanned.
+ * Keys the resolver writes on skill records. They hold file paths and merge
+ * bookkeeping, no formatter emits them, and the resolver sets them itself:
+ * `__baseSource` is overwritten, `__layerTrace` records each `@extend` and
+ * `__composedFrom` each composed phase. A path there is not prompt text, and a
+ * random path segment would read as Base64 to the obfuscation scan.
  */
-function withoutSkillBaseSource(content: BlockContent): BlockContent {
+const RESOLVER_SKILL_METADATA = ['__baseSource', '__layerTrace', '__composedFrom'];
+
+/**
+ * Drop the resolver metadata from each skill. Only these keys on skill records
+ * are skipped; the same keys anywhere else, and every other key of a skill
+ * (`__rawFrontmatter` included, it is shipped text), are still scanned.
+ */
+function withoutSkillMetadata(content: BlockContent): BlockContent {
   if (content.type !== 'ObjectContent') return content;
   const properties: Record<string, Value> = {};
   for (const [name, skill] of Object.entries(content.properties)) {
-    if (
-      skill !== null &&
-      typeof skill === 'object' &&
-      !Array.isArray(skill) &&
-      '__baseSource' in skill
-    ) {
+    if (skill !== null && typeof skill === 'object' && !Array.isArray(skill)) {
       const rest: Record<string, Value> = { ...(skill as Record<string, Value>) };
-      delete rest['__baseSource'];
+      for (const key of RESOLVER_SKILL_METADATA) delete rest[key];
       properties[name] = rest;
     } else {
       properties[name] = skill;
