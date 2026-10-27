@@ -18,6 +18,7 @@ describe('parse', () => {
       ['carriageReturn', 'first\rsecond'],
       ['quote', 'say "hi"'],
       ['escapedQuote', 'a\\"b'],
+      ['singleQuote', "it's"],
       ['unknown', '\\q'],
     ])('decodes %s once from left to right', (field, expected) => {
       const source = loadFixture('string-escapes.prs');
