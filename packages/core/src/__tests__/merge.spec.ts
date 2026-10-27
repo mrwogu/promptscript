@@ -6,6 +6,7 @@ import {
   deepClone,
   DEFAULT_MERGE_OPTIONS,
 } from '../utils/merge.js';
+import { ErrorCode } from '../errors/base.js';
 import type { TextContent } from '../types/index.js';
 
 describe('deepMerge', () => {
@@ -127,6 +128,54 @@ describe('deepMerge', () => {
   });
 });
 
+describe('deepMerge reserved keys', () => {
+  // JSON.parse and YAML parsers give "__proto__" as an own key, like a config file would.
+  const parsed = (json: string): Record<string, unknown> =>
+    JSON.parse(json) as Record<string, unknown>;
+
+  it('refuses a "__proto__" key instead of setting the prototype', () => {
+    const parent = { codeowners: { prompts: true } };
+    const child = parsed('{"codeowners":{"__proto__":{"output":"CODEOWNERS"}}}');
+
+    const merge = (): unknown => deepMerge(parent, child);
+
+    expect(merge).toThrow(
+      'The key "__proto__" under "codeowners" is reserved, so it cannot be merged. Rename or remove it.'
+    );
+    expect(merge).toThrow(expect.objectContaining({ code: ErrorCode.INVALID_VALUE }));
+    expect(({} as Record<string, unknown>)['output']).toBeUndefined();
+  });
+
+  it('refuses a "constructor" key', () => {
+    const parent: Record<string, unknown> = { a: 1 };
+    const child = { constructor: { prototype: { polluted: true } } };
+
+    expect(() => deepMerge(parent, child)).toThrow(
+      'The key "constructor" at the top level is reserved, so it cannot be merged. Rename or remove it.'
+    );
+  });
+
+  it('refuses a "prototype" key in the parent too', () => {
+    const parent: Record<string, unknown> = { block: { prototype: { x: 1 } } };
+    const child = { block: { y: 2 } };
+
+    expect(() => deepMerge(parent, child)).toThrow(
+      'The key "prototype" under "block" is reserved, so it cannot be merged. Rename or remove it.'
+    );
+  });
+
+  it('reads only own properties of the parent', () => {
+    const parent = Object.create({ inherited: { a: 1 } }) as Record<string, unknown>;
+    parent['own'] = { b: 2 };
+    const child = { inherited: { c: 3 }, toString: { d: 4 } };
+
+    const merged = deepMerge(parent, child);
+
+    expect(merged).toEqual({ own: { b: 2 }, inherited: { c: 3 }, toString: { d: 4 } });
+    expect(Object.getPrototypeOf(merged)).toBe(Object.prototype);
+  });
+});
+
 describe('DEFAULT_MERGE_OPTIONS', () => {
   it('should have expected defaults', () => {
     expect(DEFAULT_MERGE_OPTIONS).toEqual({
@@ -215,5 +264,19 @@ describe('deepClone', () => {
     expect(cloned).toEqual(value);
     expect(cloned.array).not.toBe(value.array);
     expect(cloned.object.arr).not.toBe(value.object.arr);
+  });
+
+  it('keeps an own "__proto__" key as a key instead of setting the prototype', () => {
+    const value = JSON.parse('{"__proto__":{"output":"CODEOWNERS"},"a":1}') as Record<
+      string,
+      unknown
+    >;
+
+    const cloned = deepClone(value);
+
+    expect(Object.getPrototypeOf(cloned)).toBe(Object.prototype);
+    expect(Object.keys(cloned)).toEqual(['__proto__', 'a']);
+    expect(cloned['output']).toBeUndefined();
+    expect(JSON.stringify(cloned)).toBe(JSON.stringify(value));
   });
 });

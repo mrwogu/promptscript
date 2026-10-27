@@ -369,6 +369,40 @@ describe('config extends', () => {
     await expect(loadConfig(join(root, 'promptscript.yaml'))).rejects.toThrow(message);
   });
 
+  it('should refuse a reserved key anywhere in an extended config and name both files', async () => {
+    const root = project({
+      'base.yaml': "syntax: '1.4.0'\nvalidation:\n  strict: true\n",
+      'promptscript.yaml': [
+        'id: app',
+        'extends: ./base.yaml',
+        'validation:',
+        '  __proto__:',
+        '    strict: false',
+      ].join('\n'),
+    });
+
+    await expect(loadConfig(join(root, 'promptscript.yaml'))).rejects.toMatchObject({
+      code: 'PS3002',
+      message: `The key "__proto__" under "validation" is reserved, so it cannot be merged. Rename or remove it. Found while merging ${join(root, 'promptscript.yaml')} over ${join(root, 'base.yaml')}.`,
+      location: { file: join(root, 'promptscript.yaml'), line: 1, column: 1 },
+    });
+  });
+
+  it('should report a reserved governance key under governance at the extending file', async () => {
+    const root = project({
+      'base.yaml': "governance:\n  admins: ['@acme/platform']\n",
+      'promptscript.yaml': 'id: app\nextends: ./base.yaml\ngovernance:\n  constructor: x\n',
+    });
+
+    await expect(loadConfig(join(root, 'promptscript.yaml'))).rejects.toMatchObject({
+      code: 'PS3002',
+      message: expect.stringMatching(
+        /^The key "constructor" under "governance" is reserved, so it cannot be merged\. Rename or remove it\. Found while merging .*promptscript\.yaml over .*base\.yaml\.$/
+      ),
+      location: { file: join(root, 'promptscript.yaml'), line: 1, column: 1 },
+    });
+  });
+
   it('should name both files when a project would drop base owners', async () => {
     const root = project({
       'base.yaml': "governance:\n  admins: ['@acme/platform']\n",
