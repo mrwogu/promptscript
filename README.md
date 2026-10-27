@@ -251,6 +251,9 @@ CLAUDE.md
 Target support stays explicit. Unsupported platform-specific capabilities are omitted rather than
 approximated with incompatible configuration.
 
+Single-line strings decode escapes once, so `"C:\\new"` preserves the literal
+path `C:\new`. See [string syntax](https://getpromptscript.dev/reference/language/#strings).
+
 ## Compose Instead of Copying
 
 Build organization, team, and project layers with deterministic merge rules:

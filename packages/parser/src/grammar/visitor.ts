@@ -1288,14 +1288,19 @@ class PromptScriptVisitor extends BaseVisitor {
   private parseStringLiteral(raw: string): string {
     // Remove quotes
     const inner = raw.slice(1, -1);
-    // Handle escape sequences
-    let result = inner
-      .replace(/\\n/g, '\n')
-      .replace(/\\t/g, '\t')
-      .replace(/\\r/g, '\r')
-      .replace(/\\"/g, '"')
-      .replace(/\\'/g, "'")
-      .replace(/\\\\/g, '\\');
+    // Consume each supported escape once so an escaped backslash cannot start another escape.
+    let result = inner.replace(/\\([ntr"'\\])/g, (_match: string, escaped: string): string => {
+      switch (escaped) {
+        case 'n':
+          return '\n';
+        case 't':
+          return '\t';
+        case 'r':
+          return '\r';
+        default:
+          return escaped;
+      }
+    });
 
     // Interpolate environment variables if enabled
     if (this.interpolateEnv) {
