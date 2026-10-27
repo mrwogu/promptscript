@@ -12,7 +12,7 @@ import {
   PS5005_PROMOTION_ORDER,
   ReleaseError,
 } from './errors.js';
-import { checkPromotionGates } from './gates.js';
+import { checkPromotionGates, gateLines } from './gates.js';
 import {
   CONTENT_HASH_RE,
   PROMPT_RELEASE_LABEL_SCHEMA_URL,
@@ -28,14 +28,10 @@ import {
   compileRelease,
   environmentIndex,
   loadReleaseProject,
+  type CompiledRelease,
   type ReleaseProject,
 } from './project.js';
-import {
-  runReleaseCommand,
-  withReleaseLock,
-  type ReleaseCommandOptions,
-  type ReleaseOutput,
-} from './run.js';
+import { runReleaseCommand, withReleaseLock, type ReleaseCommandOptions } from './run.js';
 
 export interface ReleasePromoteOptions extends ReleaseCommandOptions {
   /** Environment to promote to */
@@ -121,9 +117,9 @@ async function freshHash(
   project: ReleaseProject,
   id: string,
   wanted: string | undefined,
-  machineReadable: boolean
+  build: () => Promise<CompiledRelease>
 ): Promise<{ contentHash: string; warnings: ReleaseDiagnostic[] }> {
-  const compiled = await compileRelease(project, machineReadable);
+  const compiled = await build();
   const bundle = compiled.bundles.find((candidate) => candidate.id === id);
   if (bundle === undefined) {
     throw new ReleaseError(
@@ -219,7 +215,7 @@ async function promotionHash(
   project: ReleaseProject,
   index: number,
   reference: { id: string; hash?: string },
-  output: ReleaseOutput
+  build: () => Promise<CompiledRelease>
 ): Promise<{ contentHash: string; warnings: ReleaseDiagnostic[] }> {
   const { id } = reference;
   const wanted =
@@ -227,8 +223,7 @@ async function promotionHash(
   if (index > 0) {
     return { contentHash: await promotedHash(project, index, id, wanted), warnings: [] };
   }
-  output.info('Compiling prompts...');
-  return freshHash(project, id, wanted, output.json);
+  return freshHash(project, id, wanted, build);
 }
 
 /** Input warnings against the bundle the environment holds now, if it still verifies. */
@@ -281,8 +276,16 @@ export async function releasePromoteCommand(
     const dryRun = options.dryRun === true;
     const { paths } = project;
 
+    // One fresh build serves the first environment's hash check and the gates.
+    let compiled: Promise<CompiledRelease> | undefined;
+    const build = (): Promise<CompiledRelease> => {
+      if (compiled === undefined) output.info('Compiling prompts...');
+      compiled ??= compileRelease(project, output.json);
+      return compiled;
+    };
+
     return withReleaseLock(paths, dryRun, async () => {
-      const { contentHash, warnings } = await promotionHash(project, index, parsed, output);
+      const { contentHash, warnings } = await promotionHash(project, index, parsed, build);
       const bundle = await readVerifiedBundle(paths, contentHash, id);
 
       const labelPath = paths.label(environment);
@@ -307,14 +310,19 @@ export async function releasePromoteCommand(
         ...(await heldBundleWarnings(paths, id, previousContentHash, bundle, change.path))
       );
 
-      const gates = checkPromotionGates({
-        command: 'promote',
-        projectRoot: paths.root,
+      const gates = await checkPromotionGates({
+        project,
+        config: project.config,
+        configFile: project.paths.relative(project.configPath),
         environment,
-        prompts: [entry],
+        prompts: [{ id, contentHash }],
+        source: build,
       });
+      warnings.push(...gates.warnings);
+      if (!output.json) for (const gate of gates.gates) gateLines(gate).forEach(output.info);
       if (!gates.passed) {
-        return { success: false, errors: gates.findings, warnings };
+        output.info(`Promotion refused. Label ${environment} is unchanged.`);
+        return { success: false, errors: gates.findings, warnings, gates: gates.gates };
       }
 
       const next: PromptReleaseLabelV1 = {
@@ -324,7 +332,11 @@ export async function releasePromoteCommand(
       if (!dryRun) await writeReleaseFile(paths, labelPath, labelText(next));
       const action = existing === undefined ? 'created' : 'updated';
       output.success(promoteSummary({ ...change, action }, environment, dryRun));
-      return { changes: [{ ...change, action }], warnings };
+      return {
+        changes: [{ ...change, action }],
+        warnings,
+        ...(gates.gates.length === 0 ? {} : { gates: gates.gates }),
+      };
     });
   });
 }

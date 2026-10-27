@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { normalizeProgram, type PolicyDefinition, type PolicySubject } from '@promptscript/core';
 import { PROMPT_LOC, promptProgram } from '../../__tests__/prompt-helper.js';
 import { normalizeDenyText } from '../content-rules.js';
-import { evaluatePromptPolicies, promptPolicySubjects } from '../prompt-evaluator.js';
+import {
+  evaluatePromptPolicies,
+  promptPolicyMatches,
+  promptPolicyRisk,
+  promptPolicySubjects,
+} from '../prompt-evaluator.js';
 
 function subject(overrides: Partial<PolicySubject> = {}): PolicySubject {
   return {
@@ -537,5 +542,87 @@ describe('normalizeDenyText', () => {
   it('folds compatibility forms, drops ignorable code points and collapses whitespace', () => {
     // Act / Assert
     expect(normalizeDenyText('  \uFB01\u00AD\u200Bne\t\n PRINT ')).toBe('fine print');
+  });
+});
+
+describe('promptPolicyRisk and promptPolicyMatches', () => {
+  it('raises the effective risk with every risk floor', () => {
+    // Arrange
+    const pii = subject({ governance: { risk: 'low', dataClasses: ['pii'] } });
+
+    // Act
+    const risk = promptPolicyRisk(pii, [DATA_FLOOR, REVIEWERS_AT_HIGH]);
+    const unset = promptPolicyRisk(subject({ inputs: {} }), [REVIEWERS_AT_HIGH]);
+
+    // Assert
+    expect(risk).toBe('high');
+    expect(unset).toBe('low');
+  });
+
+  it('selects on the policy risk it is given, not the authored one', () => {
+    // Arrange
+    const low = subject({ governance: { risk: 'low', domain: 'payments' } });
+
+    // Act
+    const atHigh = promptPolicyMatches({ minRisk: 'high', domains: ['payments'] }, low, 'high');
+    const atLow = promptPolicyMatches({ minRisk: 'high' }, low, 'low');
+
+    // Assert
+    expect(atHigh).toBe(true);
+    expect(atLow).toBe(false);
+    expect(promptPolicyMatches(undefined, low, 'low')).toBe(true);
+  });
+});
+
+describe('evaluatePromptPolicies with a scope', () => {
+  it('uses the given risk and selection instead of the subject own', () => {
+    // Arrange
+    const low = subject({ governance: { risk: 'low' } });
+
+    // Act
+    const selected = evaluatePromptPolicies(
+      [REVIEWERS_AT_HIGH],
+      [low],
+      {},
+      {
+        risk: 'critical',
+        selects: () => true,
+      }
+    );
+    const notSelected = evaluatePromptPolicies(
+      [REVIEWERS_AT_HIGH],
+      [low],
+      {},
+      {
+        risk: 'critical',
+        selects: () => false,
+      }
+    );
+
+    // Assert
+    expect(selected.map((violation) => violation.message)).toEqual([
+      'Prompt "acme/refund-reply" has risk "critical" but no owner',
+      'Prompt "acme/refund-reply" has risk "critical" but no reviewers',
+    ]);
+    expect(notSelected).toEqual([]);
+  });
+
+  it('still judges a risk floor on the subject itself', () => {
+    // Arrange
+    const pii = subject({ governance: { risk: 'low', dataClasses: ['pii'] } });
+
+    // Act
+    const violations = evaluatePromptPolicies(
+      [DATA_FLOOR],
+      [pii],
+      {},
+      {
+        risk: 'critical',
+        selects: () => false,
+      }
+    );
+
+    // Assert
+    expect(violations.map((violation) => violation.policyName)).toEqual(['data-floor']);
   });
 });

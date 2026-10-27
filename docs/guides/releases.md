@@ -132,8 +132,9 @@ Promote warns, without failing, when the new bundle changes inputs compared with
 environment holds now: a new required input, an input that became required, a removed input, or a
 changed type or options. Callers need an update before the release reaches them.
 
-The label is written atomically. Promoting the hash an environment already holds is a no-op with
-exit code 0.
+Before the label is written, inside the lock, the prompt version must pass the
+[release gates](#release-gates). The label is written atomically. Promoting the hash an
+environment already holds is a no-op with exit code 0.
 
 ### Roll back
 
@@ -151,6 +152,8 @@ field in the label.
 - In a shallow checkout the commit before may be missing. `PS5006` then tells you to run
   `git fetch --unshallow`.
 - The restored label must parse and every hash in it must verify.
+- Every hash the rollback brings back must pass the [release gates](#release-gates) with the
+  records committed now. An entry the rollback leaves as it is is not judged again.
 
 A committed rollback is undone by a second rollback, like `helm rollback`. Rollback does not check
 the promotion order.
@@ -182,6 +185,11 @@ empty environment. A label file for an environment that is not configured gives 
 Every referenced bundle is verified, and a failure exits with code 1, so CI can run it.
 `--history <n>` (1 to 1000) adds the commit, date and subject of the last n commits of each label.
 It shows no author names.
+
+With prompt policies, status also runs the [release gates](#release-gates) on every entry and adds
+an `approvals` column: `ok`, `missing: <roles>`, or `-` when no `required-approvals` policy applies.
+Plain status only reports: a gate that fails is a warning and the exit code does not change. The
+check that fails on it is `--base`.
 
 ## One pull request per promotion
 
@@ -334,21 +342,105 @@ With `--format json`, stdout holds one document that matches
 ### What an approval proves
 
 In this version a record is a claim. The approver is whatever `--approver` said, and `createdAt` is
-the clock of the machine that wrote it. `prs release promote` does not read records yet.
+the clock of the machine that wrote it. The [release gates](#release-gates) count records, but only
+committed ones at their own path.
 
 The binding review is the one on the Git host: the pull request that adds the record, at the path
 Git has for it. Give each role directory its own code owners, so a record under `legal/` cannot
-merge without a review from `@acme/legal`:
+merge without a review from `@acme/legal`. `prs governance codeowners` writes these lines from
+`governance`, see [CODEOWNERS from Governance](codeowners.md). By hand they look like this:
 
 ```text
+/promptscript.yaml @acme/prompt-platform
+/shared/base.yaml @acme/prompt-platform
+/.promptscript/releases @acme/prompt-platform
+/.github/CODEOWNERS @acme/prompt-platform
 /.promptscript/approvals @acme/prompt-platform
 /.promptscript/approvals/legal @acme/legal
 /.promptscript/approvals/security @acme/appsec
 ```
 
+The admin lines cover what decides which review a record needs: the config and every file its
+`extends` reaches (here `shared/base.yaml`), the release files and the CODEOWNERS file itself.
+
 Turn on required code owner review for the branch. The host also stops a pull request author from
 approving their own pull request; the CLI does not check that. For "who approved this for prod",
 read the review of the pull request that added the record.
+
+## Release gates
+
+The gates are the prompt policies, run on the prompt version a label is about to hold. They run
+in `prs release promote` before the label is written, in `prs release rollback` for every hash it
+brings back, in `prs release status --base` for every entry that changed, and in plain
+`prs release status` for every entry, where they only warn. There is no flag or setting around
+them: they call the policy evaluators themselves, so `validation.disableRules`,
+`validation.rules`, custom rules and `--skip-policies` do not apply. `validation.blockedPatterns`
+and `validation.allowedPatterns` do apply, like everywhere else.
+
+Without a prompt policy the gates pass and nothing else runs. With one:
+
+- The policies are parsed again. A policy that does not parse fails every gate.
+- The source is built in memory, with the same settings as `prs release build`. A source that does
+  not build fails the gates, also for a rollback: fix the source, or change the policy in a
+  reviewed pull request.
+- The policy risk is the highest of the bundle's risk, the source's risk and the floors of both.
+  `match` sees the domain of either and the data classes of both. A bundle file only verifies
+  against its own hash, so a bundle with lowered governance values still falls under the policies
+  the source falls under.
+- `required-metadata`, `risk-floor`, `model-allowlist` and `content-rules` judge the bundle that
+  ships: its governance, model, inputs and messages.
+- `required-approvals` counts approval records for that prompt, hash and environment. `required-evals`
+  is `unavailable`, see [Policy Engine](policy-engine.md#required-approvals-and-required-evals).
+
+A check of severity `error` that fails, or is `unavailable`, fails the command with a `PS030` error
+that names the policy and what to do. A check of severity `warning` is a warning. The skill policy
+kinds are not part of the gates, they run as `PS030` in the source build.
+
+### Which approvals count
+
+The gates read the records committed at `HEAD`, with `git ls-tree -r HEAD`, never the disk or the
+index. A record that is only staged, or edited and not committed, does not count. `prs approve
+--list` reads the index, so it shows a staged record as `current` while the gates do not count it
+yet.
+
+`status --base` on a pull request counts the records the pull request adds, and the gate cannot
+tell who wrote them. A record binds only through review: each `.promptscript/approvals/<role>/`
+needs that role's team as code owners, with required code owner review on the branch (see
+[What an approval proves](#what-an-approval-proves)). `prs governance codeowners` writes those
+lines, see [CODEOWNERS from Governance](codeowners.md). Without it, any author can add a record in
+another person's name and pass the gate.
+
+A record counts for one approver when:
+
+- its fields name the prompt, the hash and the role, and `environment` is the one promoted to, or
+  absent;
+- its committed path is the one its fields give, `.promptscript/approvals/<role>/<prompt id>/...`.
+  CODEOWNERS protects records by that path, so a record anywhere else had the wrong reviewers;
+- the role is still in `governance.roles`;
+- the bytes are a valid v1 record.
+
+An approver counts once per role, compared lowercased. A record of the same prompt and role for
+another hash shows as stale. Two committed paths under `.promptscript/approvals/` that differ only
+in case fail the gates with `PS5109`: a case-insensitive disk keeps one of them. A committed file
+over 64 KiB is no record and does not count. When Git cannot list or read the records, for example
+git is not on PATH or an object is missing, the gates fail with `PS5108` and do not count zero
+approvals.
+
+`prs release status --base <ref>` takes the policies, governance and releases of `<ref>`, and the
+records committed at `HEAD`.
+
+### Output
+
+```text
+Gates for acme-support/refund-reply@sha256-3f9a1c2b4d5e to prod (policy risk: high)
+  passed       high-risk-models  model-allowlist
+  failed       high-risk-signoff  legal 0 of 1 (stale: @bob for sha256-91bc0d2e1a2b)
+  unavailable  prod-evals  acme-support/refund-reply needs passing evals for prod, but release gates do not read eval results in this version of prs
+Promotion refused. Label prod is unchanged.
+```
+
+With `--format json`, the report holds every result under `gates`, with the status, message and,
+for approvals, the approvers found and the stale records per role.
 
 ## In CI
 
@@ -386,10 +478,12 @@ must pass the promotion rules of `<ref>`:
   same compile `prs release promote` runs.
 - Or, in a later environment, the hash is the one the environment before it holds in the checkout.
 
-A rollback skips the compile and the policy check. That is safe only when every commit on `<ref>`
-is the result of a pull request this check ran on, see the precondition below: then the hash
-passed the rules when it was promoted. A rollback can also restore a hash that the rules at
-`<ref>` reject today, and only review stops that. So when you take a prompt down after a rule
+A rollback skips the promotion order and the compare with the fresh hash. That is safe only when
+every commit on `<ref>` is the result of a pull request this check ran on, see the precondition
+below: then the hash passed the rules when it was promoted. The [release gates](#release-gates)
+still run for it, so the hash a rollback restores needs its approvals. A rollback can also restore a hash that the compile
+rules at `<ref>` (`validation`, the forced security rules, `models.supported`) reject today; the
+gates catch only what the prompt policies check, and review the rest. So when you take a prompt down after a rule
 change, do it in two pull requests: remove the entry, then promote the fixed version. Deleting
 the old bundle file does not help, a pull request can add it back from history. Reviewers should
 look at a rollback like at any other label change. A removed entry ships nothing; it is listed with `action: "removed"` and not
@@ -503,3 +597,4 @@ content hash before use, as described in [Application Prompts](application-promp
 - [Application Prompts](application-prompts.md)
 - [Bundle formatter](../reference/formatters/bundle.md)
 - [Policy Engine](policy-engine.md)
+- [CODEOWNERS from Governance](codeowners.md)

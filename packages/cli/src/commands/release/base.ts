@@ -10,6 +10,7 @@ import type {
   ReleaseBaseRef,
   ReleaseChange,
   ReleaseDiagnostic,
+  ReleaseGateResult,
 } from '../../utils/release-report.js';
 import {
   PS5001_RELEASE_CONFIG,
@@ -34,6 +35,7 @@ import {
   checkReleaseConfig,
   compileRelease,
   ReleaseCompileError,
+  type CompiledRelease,
   type ReleaseProject,
 } from './project.js';
 import { toDiagnostic } from './run.js';
@@ -46,6 +48,9 @@ export interface BaseCheck {
   base: ReleaseBaseRef;
   /** Label entries that differ from the base */
   changes: ReleaseChange[];
+  /** The gates of the changed entries, under the rules of the base */
+  gates: ReleaseGateResult[];
+  warnings: ReleaseDiagnostic[];
   errors: ReleaseDiagnostic[];
 }
 
@@ -268,6 +273,17 @@ interface BaseRules {
   base: ReleaseBaseRef;
   environments: string[];
   head: Map<string, Entries>;
+  /** The checkout's config with the rules of the base */
+  config: PromptScriptConfig;
+  /**
+   * The config the gates judge with: the rules of the base and its `models` too, so a
+   * profile the checkout redefines cannot pass an allowlist under the old name
+   */
+  gateConfig: PromptScriptConfig;
+  /** The config file name at the base, the location of a base policy that does not parse */
+  configName: string;
+  /** The fresh compile under `config`, run on first use */
+  freshBuild: () => Promise<CompiledRelease>;
   /** The fresh compile hashes under the base config, computed on first use */
   freshHashes: () => Promise<Map<string, string>>;
   /** The label of an environment before its last change at the base, read once */
@@ -439,20 +455,24 @@ export async function checkAgainstBase(
   const names = await labelNames(project, environments);
   const labels = await Promise.all(names.map((name) => labelPair(project, base, name)));
 
-  let compiled: Promise<Map<string, string>> | undefined;
+  let compiled: Promise<CompiledRelease> | undefined;
   const rolledBack = new Map<string, Promise<Entries | undefined>>();
+  const config = configWithBaseRules(project.config, loaded?.config);
+  const freshBuild = (): Promise<CompiledRelease> =>
+    (compiled ??= compileRelease({ ...project, config }, machineReadable));
   const rules: BaseRules = {
     project,
     base,
     environments,
     head: new Map(labels.map((label) => [label.name, label.head])),
-    freshHashes: () => {
-      compiled ??= compileRelease(
-        { ...project, config: configWithBaseRules(project.config, loaded?.config) },
-        machineReadable
-      ).then((result) => new Map(result.bundles.map((bundle) => [bundle.id, bundle.contentHash])));
-      return compiled;
-    },
+    config,
+    gateConfig: { ...config, models: loaded?.config.models },
+    configName: loaded?.name ?? 'promptscript.yaml',
+    freshBuild,
+    freshHashes: () =>
+      freshBuild().then(
+        (result) => new Map(result.bundles.map((bundle) => [bundle.id, bundle.contentHash]))
+      ),
     rolledBack: (environment) => {
       let entries = rolledBack.get(environment);
       if (entries === undefined) {
@@ -467,20 +487,34 @@ export async function checkAgainstBase(
   return {
     base,
     changes: checked.flatMap((result) => result.changes),
-    errors: [
+    gates: checked.flatMap((result) => result.gates),
+    warnings: unique(checked.flatMap((result) => result.warnings)),
+    errors: unique([
       ...labels.flatMap((label) =>
         label.error === undefined ? [] : [shownDiagnostic(label.error)]
       ),
       ...checked.flatMap((result) => result.errors),
-    ],
+    ]),
   };
+}
+
+/** One source build serves every environment, so its diagnostics would repeat per label. */
+function unique(diagnostics: ReleaseDiagnostic[]): ReleaseDiagnostic[] {
+  return [
+    ...new Map(diagnostics.map((diagnostic) => [JSON.stringify(diagnostic), diagnostic])).values(),
+  ];
 }
 
 /** The changed entries of one environment, checked and passed through the gates. */
 async function checkEnvironment(
   rules: BaseRules,
   label: LabelPair
-): Promise<{ changes: ReleaseChange[]; errors: ReleaseDiagnostic[] }> {
+): Promise<{
+  changes: ReleaseChange[];
+  gates: ReleaseGateResult[];
+  warnings: ReleaseDiagnostic[];
+  errors: ReleaseDiagnostic[];
+}> {
   const { project } = rules;
   const path = project.paths.relative(project.paths.label(label.name));
   const changes = labelChanges(path, label.previous, label.head);
@@ -488,7 +522,7 @@ async function checkEnvironment(
     (change): change is ReleaseChange & { id: string; contentHash: string } =>
       change.id !== undefined && change.contentHash !== undefined
   );
-  if (present.length === 0) return { changes, errors: [] };
+  if (present.length === 0) return { changes, gates: [], warnings: [], errors: [] };
   const problems = await Promise.all(
     present.map((change) =>
       entryProblem(rules, label.name, change).catch((error: unknown) =>
@@ -497,18 +531,31 @@ async function checkEnvironment(
     )
   );
   const errors = problemDiagnostics(problems);
-  const gates = checkPromotionGates({
-    command: 'status',
-    projectRoot: project.root,
+  // Approvals are the records committed at HEAD; policies, governance and releases are the
+  // base's. An environment the base does not know has no gates: its entries already fail.
+  if (!rules.environments.includes(label.name)) {
+    return { changes, gates: [], warnings: [], errors };
+  }
+  // Only entries whose bundle verifies: plain status or the checks above already report
+  // the others.
+  const verified = await Promise.all(
+    present.map(({ id, contentHash }) =>
+      readVerifiedBundle(project.paths, contentHash, id).then(
+        () => [{ id, contentHash }],
+        () => []
+      )
+    )
+  );
+  const gates = await checkPromotionGates({
+    project,
+    config: rules.gateConfig,
+    configFile: rules.configName,
     environment: label.name,
-    prompts: present.map(({ id, contentHash, previousContentHash }) => ({
-      id,
-      contentHash,
-      ...(previousContentHash === undefined ? {} : { previousContentHash }),
-    })),
+    prompts: verified.flat(),
+    source: rules.freshBuild,
   });
-  if (!gates.passed) errors.push(...gates.findings);
-  return { changes, errors };
+  errors.push(...gates.findings);
+  return { changes, gates: gates.gates, warnings: gates.warnings, errors };
 }
 
 /** Errors that fail one entry; anything else fails the command. */

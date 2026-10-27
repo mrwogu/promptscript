@@ -554,7 +554,9 @@ describe('prs approve', () => {
     const { report } = await run(`${ID}@${hash}`, approval(root));
 
     expect(codes(report)).toEqual(['PS5004']);
-    expect(report.errors[0]?.message).toContain('so it is no prompt bundle to approve');
+    expect(report.errors[0]?.message).toContain(
+      'so it is not a prompt bundle the release commands'
+    );
     expect(existsSync(join(root, '.promptscript/approvals'))).toBe(false);
   });
 

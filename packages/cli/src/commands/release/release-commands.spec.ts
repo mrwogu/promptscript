@@ -22,16 +22,18 @@ import { releaseStatusCommand } from './status.js';
 // Every test compiles a project, which is slow on a loaded machine.
 vi.setConfig({ testTimeout: 120_000, hookTimeout: 120_000 });
 
-// No gate exists yet; a test sets a failing result to see that promote and rollback obey it.
+// The gates have their own specs; here a test sets a failing result to see that promote,
+// rollback and status --base obey it.
 const gate = vi.hoisted(() => ({
   next: undefined as undefined | { passed: boolean; findings: { message: string }[] },
 }));
 vi.mock('./gates.js', () => ({
   checkPromotionGates: () => {
-    const result = gate.next ?? { passed: true, findings: [] };
+    const result = { warnings: [], gates: [], ...(gate.next ?? { passed: true, findings: [] }) };
     gate.next = undefined;
-    return result;
+    return Promise.resolve(result);
   },
+  gateLines: () => [],
 }));
 
 const ID = 'acme-support/refund-reply';

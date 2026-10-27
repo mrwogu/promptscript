@@ -4,8 +4,14 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { link, mkdir, mkdtemp, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { approvalRecordPath, type ApprovalRecordV1 } from '@promptscript/core';
 import {
+  approvalRecordPath,
+  serializeApprovalRecord,
+  type ApprovalRecordV1,
+} from '@promptscript/core';
+import {
+  committedApprovalFiles,
+  committedApprovals,
   ensureApprovalAttributes,
   findApprovalRecords,
   gitBlobId,
@@ -267,4 +273,85 @@ describe('Git path identity', () => {
       expect(id).toBe(expected);
     }
   );
+});
+
+describe('committedApprovals', () => {
+  const git = (cwd: string, ...args: string[]): string =>
+    execFileSync(
+      'git',
+      [
+        '-c',
+        'user.email=t@example.com',
+        '-c',
+        'user.name=T',
+        '-c',
+        'commit.gpgsign=false',
+        ...args,
+      ],
+      { cwd, encoding: 'utf-8', stdio: ['ignore', 'pipe', 'pipe'] }
+    );
+
+  it('reads the records of one prompt and role as committed, never the disk', async () => {
+    const project = await root();
+    git(project, 'init', '-q');
+    const path = approvalRecordPath(RECORD);
+    const other = approvalRecordPath({ ...RECORD, prompt: 'acme-support/other' });
+    for (const file of [path, other]) {
+      await mkdir(join(project, file, '..'), { recursive: true });
+      await writeFile(join(project, file), serializeApprovalRecord(RECORD));
+    }
+    await symlink('x.json', join(project, path, '..', 'link.json'));
+    await writeFile(join(project, path, '..', 'big.json'), 'x'.repeat(64 * 1024 + 1));
+    git(project, 'add', '-A');
+    git(project, 'commit', '-q', '-m', 'records');
+    await writeFile(join(project, path), '{}');
+
+    const files = await committedApprovalFiles(project);
+    const found = await committedApprovals(project, files, RECORD.prompt, ['legal', 'security']);
+
+    expect(found.sort((a, b) => a.path.localeCompare(b.path))).toEqual([
+      { path: path.replace(/[^/]+$/, 'big.json') },
+      { path, record: RECORD },
+    ]);
+  });
+
+  it('refuses a record Git cannot read with PS5108, not as a missing approval', async () => {
+    const project = await root();
+    git(project, 'init', '-q');
+    const path = approvalRecordPath(RECORD);
+    await mkdir(join(project, path, '..'), { recursive: true });
+    await writeFile(join(project, path), serializeApprovalRecord(RECORD));
+    git(project, 'add', '-A');
+    git(project, 'commit', '-q', '-m', 'records');
+    const files = await committedApprovalFiles(project);
+    const gone = [{ path, blob: '0'.repeat(40) }];
+
+    await expect(committedApprovals(project, gone, RECORD.prompt, ['legal'])).rejects.toMatchObject(
+      { code: 'PS5108', message: expect.stringContaining('0000000000') }
+    );
+    try {
+      vi.stubEnv('PATH', '');
+      await expect(
+        committedApprovals(project, files, RECORD.prompt, ['legal'])
+      ).rejects.toMatchObject({
+        code: 'PS5108',
+        message: expect.stringContaining('git is not installed'),
+      });
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it('refuses a project without a commit, or without git, with PS5108', async () => {
+    const project = await root();
+    git(project, 'init', '-q');
+
+    await expect(committedApprovalFiles(project)).rejects.toMatchObject({ code: 'PS5108' });
+    try {
+      vi.stubEnv('PATH', '');
+      await expect(committedApprovalFiles(project)).rejects.toMatchObject({ code: 'PS5108' });
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
 });

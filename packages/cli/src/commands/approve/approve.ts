@@ -22,10 +22,10 @@ import {
 import { checkGovernanceConfig } from '../../utils/governance-config.js';
 import type { ProjectPathOptions } from '../../utils/project-config.js';
 import type { ReleaseDiagnostic } from '../../utils/release-report.js';
-import { PS5004_VERIFICATION_FAILED, ReleaseError } from '../release/errors.js';
 import { stripControlCharacters } from '../release/git.js';
 import {
   CONTENT_HASH_RE,
+  checkBundleFields,
   readLabel,
   readReleaseText,
   shortHash,
@@ -279,7 +279,7 @@ async function approvedBundle(
   const text = await readReleaseText(file);
   if (text !== undefined) {
     const bundle = verifyBundleText(text, contentHash, file);
-    checkShownFields(bundle, file);
+    checkBundleFields(bundle, file);
     if (bundle.id !== id) {
       throw new GovernanceError(
         PS5103_UNKNOWN_HASH,
@@ -304,31 +304,6 @@ async function approvedBundle(
     `${builds} and no release bundle has ${shortHash(contentHash)}. Approve the hash the checkout builds, or one prs release build stored; prs approve --list shows both.`,
     file
   );
-}
-
-/**
- * A stored bundle verifies only against its own hash, so the fields shown to the approver
- * are checked here: a governance object and messages with a string role and content.
- */
-function checkShownFields(bundle: PromptBundleV1, file: string): void {
-  const messages: unknown = bundle.messages;
-  const valid =
-    isPlainObject(bundle.governance) &&
-    Array.isArray(messages) &&
-    messages.length > 0 &&
-    messages.every(
-      (message) =>
-        isPlainObject(message) &&
-        typeof message['role'] === 'string' &&
-        typeof message['content'] === 'string'
-    );
-  if (!valid) {
-    throw new ReleaseError(
-      PS5004_VERIFICATION_FAILED,
-      `${file} has no governance object or no messages with a role and content, so it is no prompt bundle to approve. Restore it from Git.`,
-      file
-    );
-  }
 }
 
 /**

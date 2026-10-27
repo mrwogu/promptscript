@@ -6,6 +6,7 @@ import type {
   ReleaseDiagnostic,
   ReleaseEnvironmentHistory,
   ReleaseEnvironmentStatus,
+  ReleaseGateResult,
   ReleasePromptStatus,
 } from '../../utils/release-report.js';
 import { PS5003_BUNDLE_MISSING, ReleaseError } from './errors.js';
@@ -21,7 +22,13 @@ import {
   type ReleasePaths,
 } from './layout.js';
 import { checkAgainstBase, type BaseCheck } from './base.js';
-import { loadReleaseProject, type ReleaseProject } from './project.js';
+import { checkPromotionGates, gateLines } from './gates.js';
+import {
+  compileRelease,
+  loadReleaseProject,
+  type CompiledRelease,
+  type ReleaseProject,
+} from './project.js';
 import { runReleaseCommand, toDiagnostic, type ReleaseCommandOptions } from './run.js';
 
 export interface ReleaseStatusOptions extends ReleaseCommandOptions {
@@ -177,11 +184,31 @@ async function environmentStatus(
   };
 }
 
+/** The approvals column of one label entry: ok, the roles still missing, or - for none. */
+function approvalsText(
+  gates: readonly ReleaseGateResult[],
+  environment: string,
+  id: string
+): string {
+  const gate = gates.find((entry) => entry.environment === environment && entry.prompt === id);
+  const checks = gate?.checks.filter((check) => check.kind === 'required-approvals') ?? [];
+  if (checks.length === 0) return '-';
+  const missing = new Set(
+    checks.flatMap((check) =>
+      (check.approvals ?? [])
+        .filter((approval) => approval.found.length < approval.required)
+        .map((approval) => stripControlCharacters(approval.role))
+    )
+  );
+  return missing.size === 0 ? 'ok' : `missing: ${[...missing].join(', ')}`;
+}
+
 function printStatus(
   paths: ReleasePaths,
   manifest: PromptBundleIndexV1 | undefined,
   environments: ReleaseEnvironmentStatus[],
-  history: ReleaseEnvironmentHistory[] | undefined
+  history: ReleaseEnvironmentHistory[] | undefined,
+  gates: readonly ReleaseGateResult[]
 ): void {
   if (manifest === undefined) {
     ConsoleOutput.info(
@@ -197,8 +224,12 @@ function printStatus(
     ConsoleOutput.header(`${environment.name}  ${where}`);
     for (const prompt of environment.prompts) {
       const build = prompt.inBuild ? '  in build' : '';
+      const approvals =
+        gates.length === 0
+          ? ''
+          : `  approvals: ${approvalsText(gates, environment.name, prompt.id)}`;
       ConsoleOutput.info(
-        `  ${prompt.id}  ${shortHash(prompt.contentHash)}  ${promptState(prompt)}${build}`
+        `  ${prompt.id}  ${shortHash(prompt.contentHash)}  ${promptState(prompt)}${build}${approvals}`
       );
     }
     const commits = history?.find((entry) => entry.environment === environment.name)?.commits;
@@ -206,6 +237,50 @@ function printStatus(
       ConsoleOutput.muted(`    ${commit.commit.slice(0, 12)}  ${commit.date}  ${commit.subject}`);
     }
   }
+}
+
+/**
+ * The gates of every verified label entry under the checkout's config. Plain status only
+ * reports them: a failure is a warning, the exit code stays. `--base` is the check.
+ */
+async function labelGates(
+  project: ReleaseProject,
+  environments: readonly ReleaseEnvironmentStatus[],
+  machineReadable: boolean
+): Promise<{ gates: ReleaseGateResult[]; warnings: ReleaseDiagnostic[] }> {
+  let compiled: Promise<CompiledRelease> | undefined;
+  const source = (): Promise<CompiledRelease> =>
+    (compiled ??= compileRelease(project, machineReadable));
+  const gates: ReleaseGateResult[] = [];
+  const warnings = new Map<string, ReleaseDiagnostic>();
+  const warn = (diagnostic: ReleaseDiagnostic): void => {
+    // One source build serves every environment, so its errors would repeat per label.
+    warnings.set(JSON.stringify(diagnostic), diagnostic);
+  };
+  const results = await Promise.all(
+    environments.map((environment) =>
+      checkPromotionGates({
+        project,
+        config: project.config,
+        configFile: project.paths.relative(project.configPath),
+        environment: environment.name,
+        prompts: environment.prompts
+          .filter((prompt) => prompt.verified)
+          .map(({ id, contentHash }) => ({ id, contentHash })),
+        source,
+      }).catch((error: unknown) => {
+        // Git missing, say: status still reports what it verified.
+        warn(toDiagnostic(error));
+        return undefined;
+      })
+    )
+  );
+  for (const result of results) {
+    if (result === undefined) continue;
+    gates.push(...result.gates);
+    [...result.findings, ...result.warnings].forEach(warn);
+  }
+  return { gates, warnings: [...warnings.values()] };
 }
 
 /** With --base the config is found by name; say so when the caller pointed elsewhere. */
@@ -235,6 +310,7 @@ function printBaseCheck(check: BaseCheck): void {
       `  ${stripControlCharacters(change.path)}  ${stripControlCharacters(change.id ?? '')}  ${from} -> ${to}`
     );
   }
+  for (const gate of check.gates) gateLines(gate).forEach((line) => ConsoleOutput.info(line));
 }
 
 function promptState(prompt: ReleasePromptStatus): string {
@@ -265,19 +341,33 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
       warnings.push(...logs.flatMap((log) => (log.warning === undefined ? [] : [log.warning])));
     }
 
+    // With --base the changed entries go through the gates of the base, which decide;
+    // without it every entry goes through the checkout's gates, which only report.
     const baseCheck =
       options.base === undefined
         ? undefined
         : await checkAgainstBase(project, options.base, output.json);
+    const gateRun =
+      baseCheck === undefined
+        ? await labelGates(project, environments, output.json)
+        : { gates: baseCheck.gates, warnings: baseCheck.warnings };
+    warnings.push(...gateRun.warnings);
 
     if (!output.json) {
-      printStatus(paths, manifest, environments, history);
+      printStatus(
+        paths,
+        manifest,
+        environments,
+        history,
+        baseCheck === undefined ? gateRun.gates : []
+      );
       if (baseCheck !== undefined) printBaseCheck(baseCheck);
     }
     return {
       environments,
       ...(history === undefined ? {} : { history }),
       ...(baseCheck === undefined ? {} : { base: baseCheck.base, changes: baseCheck.changes }),
+      ...(gateRun.gates.length === 0 ? {} : { gates: gateRun.gates }),
       warnings,
       errors: [...checked.flatMap((entry) => entry.errors), ...(baseCheck?.errors ?? [])],
     };

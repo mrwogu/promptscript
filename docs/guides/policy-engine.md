@@ -87,6 +87,8 @@ For each valid entry a policy sees:
 
 A finding is a PS030 message at the location of the entry, so `prs validate --format json` gives the file and the line.
 
+The release gates see a prompt version the other way round: the bundle that ships, with its composed messages, model and governance, see [Release gates](releases.md#release-gates).
+
 ### Policy risk and `match`
 
 Every prompt kind except `risk-floor` takes an optional `match`:
@@ -204,7 +206,7 @@ policies:
 
 ### Required Approvals and Required Evals
 
-`required-approvals` and `required-evals` describe what a prompt needs before release. `prs validate`, `prs check` and the `prs release` commands check the definitions only: they read no approvals and run no evals, so these policies never report a prompt and do not block a release. Approvals and evals need their own control, for example required reviews on the pull request. [CODEOWNERS from Governance](codeowners.md) gives each approval role directory to its team.
+`required-approvals` and `required-evals` describe what a prompt needs before release. `prs validate`, `prs check` and `prs release build` check the definitions only. The release gates evaluate them: `prs release promote`, `prs release rollback` and `prs release status --base` refuse a prompt version whose `required-approvals` policy finds no committed approval record for that hash and environment, see [Release gates](releases.md#release-gates). `required-evals` is `unavailable` in the gates, because they do not read eval results in this version: at severity `error` it blocks every matching release, at `warning` it only warns. A record binds only through review: [CODEOWNERS from Governance](codeowners.md) gives each approval role directory to its team.
 
 | Kind                 | Field          | Type       | Required | Description                                                        |
 | -------------------- | -------------- | ---------- | -------- | ------------------------------------------------------------------ |
@@ -646,5 +648,7 @@ for (const violation of evaluatePromptPolicies(policies, subjects, context)) {
 ```
 
 `config`, `context`, `policies` and `resolved` are the ones of the snippet above.
+
+`promptPolicyRisk(subject, policies)` returns the policy risk of one subject, and `promptPolicyMatches(match, subject, risk)` whether a `match` selects it. A fourth argument of `evaluatePromptPolicies`, `{ risk, selects }`, replaces the subject's own risk and selection; the release gates use it to judge a bundle with the higher risk of bundle and source.
 
 Requires the workspace packages (`@promptscript/resolver`, `@promptscript/validator`) and `yaml` (v2) as dependencies.

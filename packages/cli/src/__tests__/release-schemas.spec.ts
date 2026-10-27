@@ -127,6 +127,38 @@ describe('release report schema', () => {
     expect(validate(report), JSON.stringify(validate.errors)).toBe(true);
   });
 
+  it('accepts gate results and refuses an unknown gate status', () => {
+    const gate = {
+      prompt: 'acme-support/refund-reply',
+      contentHash: hash,
+      environment: 'prod',
+      policyRisk: 'high',
+      passed: false,
+      checks: [
+        {
+          policy: 'high-risk-signoff',
+          kind: 'required-approvals',
+          severity: 'error',
+          status: 'failed',
+          message: 'needs 1 legal approval for prod, found 0',
+          suggestion: 'Run: prs approve',
+          approvals: [{ role: 'legal', required: 1, found: [], stale: ['@bob for sha256-1'] }],
+        },
+        { policy: 'evals', kind: 'required-evals', severity: 'warning', status: 'unavailable' },
+      ],
+    };
+    const report = createReleaseReport('promote', {
+      gates: [gate as NonNullable<ReturnType<typeof createReleaseReport>['gates']>[number]],
+    });
+    const skipped = {
+      ...report,
+      gates: [{ ...gate, checks: [{ ...gate.checks[1], status: 'skipped' }] }],
+    };
+
+    expect(validate(report), JSON.stringify(validate.errors)).toBe(true);
+    expect(validate(skipped)).toBe(false);
+  });
+
   it('accepts an empty report of every command', () => {
     for (const command of ['build', 'promote', 'rollback', 'status'] as const) {
       const report = createReleaseReport(command);
