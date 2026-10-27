@@ -1,0 +1,19 @@
+{
+  "name": "eval",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/eval/src",
+  "projectType": "library",
+  "tags": ["scope:eval", "type:lib"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/eval",
+        "main": "packages/eval/src/index.ts",
+        "tsConfig": "packages/eval/tsconfig.lib.json",
+        "assets": ["packages/eval/*.md"]
+      }
+    }
+  }
+}

@@ -77,6 +77,11 @@ const moduleBoundaryRules = [
     sourceTag: 'scope:formatters',
     onlyDependOnLibsWithTags: ['scope:core'],
   },
+  // Eval depends on core and validator (the dataset scan reuses validator rules)
+  {
+    sourceTag: 'scope:eval',
+    onlyDependOnLibsWithTags: ['scope:core', 'scope:validator'],
+  },
   // Compiler depends on core, resolver, validator, formatters
   {
     sourceTag: 'scope:compiler',
@@ -102,6 +107,7 @@ const moduleBoundaryRules = [
       'scope:server',
       'scope:telemetry',
       'scope:runtime',
+      'scope:eval',
     ],
   },
   // Browser compiler depends on core, parser, validator, formatters

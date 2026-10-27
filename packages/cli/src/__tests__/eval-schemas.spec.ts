@@ -108,6 +108,14 @@ describe('eval suite schema', () => {
       { ...suite(), dataset: { path: 'd.jsonl', allow: [{ rule: 'PS005' }] } },
     ],
     ['allowPii as a boolean', { ...suite(), dataset: { path: 'd.jsonl', allowPii: true } }],
+    [
+      'an allow entry with an empty reason',
+      { ...suite(), dataset: { path: 'd.jsonl', allow: [{ rule: 'PS005', reason: '' }] } },
+    ],
+    [
+      'an allowPii reason over 500 characters',
+      { ...suite(), dataset: { path: 'd.jsonl', allowPii: { reason: 'x'.repeat(501) } } },
+    ],
     ['a judge with 2 runs', { ...suite(), judge: { runs: 2 } }],
     ['a pass rate above 1', { ...suite(), thresholds: { passRate: 1.5 } }],
     ['a negative cost limit', { ...suite(), thresholds: { maxCostUsd: -1 } }],

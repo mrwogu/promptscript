@@ -54,6 +54,10 @@ const PACKAGE_META: Record<string, PageMeta> = {
     title: 'Core API',
     description: 'Core types, errors, and utilities for the PromptScript toolchain.',
   },
+  eval: {
+    title: 'Eval API',
+    description: 'Eval suites, datasets and assertions for PromptScript prompts.',
+  },
   formatters: { title: 'Formatters API', description: 'Output formatters for PromptScript.' },
   importer: {
     title: 'Importer API',

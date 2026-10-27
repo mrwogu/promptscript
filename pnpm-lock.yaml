@@ -297,6 +297,24 @@ importers:
         specifier: ~0.5.23
         version: 0.5.23
 
+  packages/eval:
+    dependencies:
+      '@promptscript/core':
+        specifier: workspace:^
+        version: link:../core
+      '@promptscript/validator':
+        specifier: workspace:^
+        version: link:../validator
+      '@swc/helpers':
+        specifier: ~0.5.23
+        version: 0.5.23
+      ajv:
+        specifier: ^8.20.0
+        version: 8.20.0
+      yaml:
+        specifier: ^2.9.1
+        version: 2.9.1
+
   packages/formatters:
     dependencies:
       '@promptscript/core':
