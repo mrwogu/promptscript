@@ -71,6 +71,11 @@ function mergeResults(results: CompileResult[]): CompileResult {
     success: results.every((r) => r.success),
     outputs: new Map(results.flatMap((r) => [...r.outputs])),
     outputOwners: new Map(results.flatMap((r) => [...(r.outputOwners ?? [])])),
+    // The passes never write the same path, so the plan that has collisions is
+    // the one the Output tabs need to see shared files.
+    outputPlan:
+      results.map((r) => r.outputPlan).find((plan) => (plan?.collisions.length ?? 0) > 0) ??
+      results.find((r) => r.outputPlan)?.outputPlan,
     errors: dedupe(
       results.flatMap((r) => r.errors),
       (e) => e.code

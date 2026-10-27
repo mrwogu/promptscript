@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { CompileResult, CompileError, CompileWarning } from '@promptscript/browser-compiler';
 import type { FormatterOutput } from '@promptscript/formatters';
 import type { KnownTarget } from '@promptscript/core';
-import { TARGET_DEFINITIONS } from '@promptscript/core';
+import { TARGET_DEFINITIONS, normalizeOutputCollisionKey } from '@promptscript/core';
 
 /**
  * Target/formatter name.
@@ -497,15 +497,37 @@ export const selectOutputsForFormatter = (
   };
 
   const patterns = formatterPatterns[formatter];
-  // Output paths like AGENTS.md or skills/*.md can be claimed by several
-  // targets; outputOwners records the formatter that actually emitted each
-  // file, so a tab never shows content produced by another formatter.
+  // outputOwners records the formatter that actually emitted each file, so it
+  // decides which tab shows it. Matching on paths only is not enough: every new
+  // file a formatter emits (mcp config, commands, agents, skill resources)
+  // would silently vanish until someone adds a regex. The patterns are only a
+  // fallback for results that carry no owner information.
   const owners = state.compileResult.outputOwners;
+  // When two targets emit the very same file (AGENTS.md, CLAUDE.md), the plan
+  // keeps the first owner only. The other target still emitted it, so its tab
+  // has to show it too.
+  // Collisions come in compile order. A later file with different content wins
+  // the path, so everybody who shared the earlier content no longer has it.
+  // The planner compares paths case-insensitively, so the keys do the same.
+  const sharers = new Map<string, Set<string>>();
+  for (const collision of state.compileResult.outputPlan?.collisions ?? []) {
+    const key = normalizeOutputCollisionKey(collision.path);
+    if (collision.identical) {
+      const sharing = sharers.get(key) ?? new Set<string>();
+      sharing.add(collision.incomingOwner);
+      sharers.set(key, sharing);
+    } else if (collision.resolution === 'replace-existing') {
+      sharers.delete(key);
+    }
+  }
   for (const [path, output] of outputMap) {
-    if (!patterns.some((pattern) => pattern.test(path))) continue;
     const owner = owners?.get(path);
-    if (owner !== undefined && owner !== formatter) continue;
-    results.push(output);
+    if (owner === undefined) {
+      if (patterns.some((pattern) => pattern.test(path))) results.push(output);
+      continue;
+    }
+    if (owner === formatter || sharers.get(normalizeOutputCollisionKey(path))?.has(formatter))
+      results.push(output);
   }
 
   // Sort: main file first, then alphabetically.
@@ -522,9 +544,18 @@ export const selectOutputsForFormatter = (
 
   const mainPattern =
     mainFileOverrides[formatter] ?? baseName(TARGET_DEFINITIONS[formatter].outputPath);
+  // The plan knows which file each formatter emitted as its primary one, which
+  // is more reliable than guessing from the file name.
+  const plannedMain = new Set(
+    (state.compileResult.outputPlan?.files ?? [])
+      .filter((file) => file.role === 'primary' && file.owner === formatter)
+      .map((file) => file.path)
+  );
+  const isMain = (path: string): boolean =>
+    plannedMain.size > 0 ? plannedMain.has(path) : path.endsWith(mainPattern);
   results.sort((a, b) => {
-    const aIsMain = a.path.endsWith(mainPattern);
-    const bIsMain = b.path.endsWith(mainPattern);
+    const aIsMain = isMain(a.path);
+    const bIsMain = isMain(b.path);
     if (aIsMain && !bIsMain) return -1;
     if (!aIsMain && bIsMain) return 1;
     return a.path.localeCompare(b.path);
