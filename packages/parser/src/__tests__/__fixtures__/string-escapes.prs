@@ -8,5 +8,6 @@
   carriageReturn: "first\rsecond"
   quote: "say \"hi\""
   escapedQuote: "a\\\"b"
+  singleQuote: 'it\'s'
   unknown: "\q"
 }
