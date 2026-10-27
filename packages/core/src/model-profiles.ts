@@ -9,7 +9,7 @@
  * @module model-profiles
  */
 
-import type { ModelProfile, ModelStatus } from './types/models.js';
+import type { ModelPricing, ModelProfile, ModelStatus } from './types/models.js';
 
 interface ReleaseFields {
   readonly apiId?: string;
@@ -19,6 +19,22 @@ interface ReleaseFields {
   readonly successor?: string;
   readonly releaseDate?: string;
   readonly retirementDate?: string;
+  readonly pricing?: ModelPricing;
+}
+
+/**
+ * Day the built-in prices were read from the Anthropic and OpenAI pricing
+ * pages. A price verified later passes its own date.
+ */
+const PRICES_CHECKED_ON = '2026-10-22';
+
+/**
+ * List price in USD per million input and output tokens. Models that
+ * neither the provider pricing page nor the OpenRouter listing prices
+ * carry no price.
+ */
+function usd(input: number, output: number, checkedOn = PRICES_CHECKED_ON): ModelPricing {
+  return { inputUsdPerMillion: input, outputUsdPerMillion: output, checkedOn };
 }
 
 function release(
@@ -105,6 +121,7 @@ export const MODEL_PROFILES: readonly ModelProfile[] = [
     successor: 'claude-opus-4-1',
     releaseDate: '2025-05-22',
     retirementDate: '2026-06-15',
+    pricing: usd(15, 75),
   }),
   claude('opus', '4.1', {
     apiId: 'claude-opus-4-1-20250805',
@@ -112,17 +129,23 @@ export const MODEL_PROFILES: readonly ModelProfile[] = [
     successor: 'claude-opus-4-5',
     releaseDate: '2025-08-05',
     retirementDate: '2026-08-05',
+    pricing: usd(15, 75),
   }),
   claude('opus', '4.5', {
     apiId: 'claude-opus-4-5-20251101',
     successor: 'claude-opus-4-6',
     releaseDate: '2025-11-24',
+    pricing: usd(5, 25),
   }),
-  claude('opus', '4.6', { successor: 'claude-opus-4-7' }),
-  claude('opus', '4.7', { successor: 'claude-opus-4-8' }),
-  claude('opus', '4.8', { successor: 'claude-opus-5' }),
-  claude('opus', '5', { successor: 'claude-opus-5-5', releaseDate: '2026-07-24' }),
-  claude('opus', '5.5', { releaseDate: '2026-09-22' }),
+  claude('opus', '4.6', { successor: 'claude-opus-4-7', pricing: usd(5, 25) }),
+  claude('opus', '4.7', { successor: 'claude-opus-4-8', pricing: usd(5, 25) }),
+  claude('opus', '4.8', { successor: 'claude-opus-5', pricing: usd(5, 25) }),
+  claude('opus', '5', {
+    successor: 'claude-opus-5-5',
+    releaseDate: '2026-07-24',
+    pricing: usd(5, 25),
+  }),
+  claude('opus', '5.5', { releaseDate: '2026-09-22', pricing: usd(4, 20) }),
   claude('sonnet', '3.5', {
     id: 'claude-3-5-sonnet',
     apiId: 'claude-3-5-sonnet-20241022',
@@ -149,6 +172,7 @@ export const MODEL_PROFILES: readonly ModelProfile[] = [
     successor: 'claude-sonnet-4-5',
     releaseDate: '2025-05-22',
     retirementDate: '2026-06-15',
+    pricing: usd(3, 15),
   }),
   claude('sonnet', '4.5', {
     apiId: 'claude-sonnet-4-5-20250929',
@@ -156,11 +180,17 @@ export const MODEL_PROFILES: readonly ModelProfile[] = [
     successor: 'claude-sonnet-4-6',
     releaseDate: '2025-09-29',
     retirementDate: '2026-11-30',
+    pricing: usd(3, 15),
   }),
-  claude('sonnet', '4.6', { successor: 'claude-sonnet-5' }),
-  claude('sonnet', '5', { successor: 'claude-sonnet-5-5', releaseDate: '2026-06-30' }),
+  claude('sonnet', '4.6', { successor: 'claude-sonnet-5', pricing: usd(3, 15) }),
+  claude('sonnet', '5', {
+    successor: 'claude-sonnet-5-5',
+    releaseDate: '2026-06-30',
+    pricing: usd(2, 10),
+  }),
   claude('sonnet', '5.5', {
     releaseDate: '2026-09-28',
+    pricing: usd(2, 10),
   }),
   claude('haiku', '3.5', {
     id: 'claude-3-5-haiku',
@@ -171,111 +201,168 @@ export const MODEL_PROFILES: readonly ModelProfile[] = [
     successor: 'claude-haiku-4-5',
     releaseDate: '2024-10-22',
     retirementDate: '2026-02-19',
+    pricing: usd(0.8, 4),
   }),
   claude('haiku', '4.5', {
     successor: 'claude-haiku-5-5',
     apiId: 'claude-haiku-4-5-20251001',
     releaseDate: '2025-10-15',
+    pricing: usd(1, 5),
   }),
   claude('haiku', '5.5', {
     releaseDate: '2026-10-07',
+    // Price for prompts up to 100K tokens; longer prompts cost five times as much.
+    pricing: usd(0.1, 0.5),
   }),
-  claude('fable', '5', { successor: 'claude-fable-5-1', releaseDate: '2026-06-09' }),
-  claude('fable', '5.1', { releaseDate: '2026-09-01' }),
-  claude('mythos', '5', { successor: 'claude-mythos-5-1', releaseDate: '2026-06-09' }),
-  claude('mythos', '5.1', { releaseDate: '2026-09-01' }),
+  claude('fable', '5', {
+    successor: 'claude-fable-5-1',
+    releaseDate: '2026-06-09',
+    pricing: usd(10, 50),
+  }),
+  claude('fable', '5.1', { releaseDate: '2026-09-01', pricing: usd(10, 50) }),
+  claude('mythos', '5', {
+    successor: 'claude-mythos-5-1',
+    releaseDate: '2026-06-09',
+    pricing: usd(10, 50),
+  }),
+  claude('mythos', '5.1', { releaseDate: '2026-09-01', pricing: usd(10, 50) }),
 
   // OpenAI
-  openai('gpt-4o', '4o', 'gpt-4o', 'GPT-4o', { successor: 'gpt-4.1', releaseDate: '2024-05-13' }),
-  openai('gpt', '4.1', 'gpt-4.1', 'GPT-4.1', { successor: 'gpt-5.5', releaseDate: '2025-04-14' }),
+  openai('gpt-4o', '4o', 'gpt-4o', 'GPT-4o', {
+    successor: 'gpt-4.1',
+    releaseDate: '2024-05-13',
+    pricing: usd(2.5, 10),
+  }),
+  openai('gpt', '4.1', 'gpt-4.1', 'GPT-4.1', {
+    successor: 'gpt-5.5',
+    releaseDate: '2025-04-14',
+    pricing: usd(2, 8),
+  }),
   openai('gpt', '5', 'gpt-5', 'GPT-5', {
     status: 'deprecated',
     successor: 'gpt-5.1',
     releaseDate: '2025-08-07',
     retirementDate: '2026-12-11',
+    pricing: usd(1.25, 10),
   }),
   openai('gpt', '5.1', 'gpt-5.1', 'GPT-5.1', {
     status: 'deprecated',
     successor: 'gpt-5.2',
     releaseDate: '2025-11-13',
+    pricing: usd(1.25, 10),
   }),
-  openai('gpt', '5.2', 'gpt-5.2', 'GPT-5.2', { successor: 'gpt-5.4', releaseDate: '2025-12-11' }),
-  openai('gpt', '5.4', 'gpt-5.4', 'GPT-5.4', { successor: 'gpt-5.5', releaseDate: '2026-03-05' }),
+  openai('gpt', '5.2', 'gpt-5.2', 'GPT-5.2', {
+    successor: 'gpt-5.4',
+    releaseDate: '2025-12-11',
+    pricing: usd(1.75, 14),
+  }),
+  openai('gpt', '5.4', 'gpt-5.4', 'GPT-5.4', {
+    successor: 'gpt-5.5',
+    releaseDate: '2026-03-05',
+    pricing: usd(2.5, 15),
+  }),
   openai('gpt', '5.5', 'gpt-5.5', 'GPT-5.5', {
     successor: 'gpt-5.6-sol',
     releaseDate: '2026-04-24',
+    pricing: usd(5, 30),
   }),
   openai('gpt-mini', '5', 'gpt-5-mini', 'GPT-5 mini', {
     status: 'deprecated',
     successor: 'gpt-5.4-mini',
     releaseDate: '2025-08-07',
     retirementDate: '2026-12-11',
+    pricing: usd(0.25, 2),
   }),
   openai('gpt-mini', '5.4', 'gpt-5.4-mini', 'GPT-5.4 mini', {
     successor: 'gpt-5.6-terra',
     releaseDate: '2026-03-17',
+    pricing: usd(0.75, 4.5),
   }),
   openai('gpt-nano', '5', 'gpt-5-nano', 'GPT-5 nano', {
     status: 'deprecated',
     successor: 'gpt-5.4-nano',
     releaseDate: '2025-08-07',
     retirementDate: '2026-12-11',
+    pricing: usd(0.05, 0.4),
   }),
   openai('gpt-nano', '5.4', 'gpt-5.4-nano', 'GPT-5.4 nano', {
     successor: 'gpt-5.6-luna',
     releaseDate: '2026-03-17',
+    pricing: usd(0.2, 1.25),
   }),
   openai('gpt-codex', '5', 'gpt-5-codex', 'GPT-5-Codex', { successor: 'gpt-5.1-codex' }),
+  // The OpenAI pricing page lists no codex release before 5.3, so the
+  // 5.1 and 5.2 codex releases take the price of the OpenRouter listing.
   openai('gpt-codex', '5.1', 'gpt-5.1-codex', 'GPT-5.1-Codex', {
     successor: 'gpt-5.2-codex',
     releaseDate: '2025-11-13',
+    pricing: usd(1.25, 10, '2026-10-26'),
   }),
   openai('gpt-codex', '5.2', 'gpt-5.2-codex', 'GPT-5.2-Codex', {
     status: 'deprecated',
     successor: 'gpt-5.3-codex',
     releaseDate: '2026-01-14',
+    pricing: usd(1.75, 14, '2026-10-26'),
   }),
-  openai('gpt-codex', '5.3', 'gpt-5.3-codex', 'GPT-5.3-Codex', { releaseDate: '2026-02-24' }),
+  openai('gpt-codex', '5.3', 'gpt-5.3-codex', 'GPT-5.3-Codex', {
+    releaseDate: '2026-02-24',
+    pricing: usd(1.75, 14),
+  }),
   openai('gpt-codex-max', '5.1', 'gpt-5.1-codex-max', 'GPT-5.1-Codex-Max', {
     successor: 'gpt-5.2-codex',
     releaseDate: '2025-12-04',
+    pricing: usd(1.25, 10, '2026-10-26'),
   }),
   openai('gpt-codex-mini', '5.1', 'gpt-5.1-codex-mini', 'GPT-5.1-Codex-Mini', {
     successor: 'gpt-5.3-codex',
     releaseDate: '2025-11-13',
+    pricing: usd(0.25, 2, '2026-10-26'),
   }),
   openai('gpt-sol', '5.6', 'gpt-5.6-sol', 'GPT-5.6 Sol', {
     successor: 'gpt-6-astra',
     releaseDate: '2026-07-09',
+    pricing: usd(4, 20),
   }),
   openai('gpt-sol', '6', 'gpt-6-sol', 'GPT-6 Sol', {
     successor: 'gpt-6.1-sol',
     releaseDate: '2026-09-22',
+    pricing: usd(2, 10),
   }),
   openai('gpt-sol', '6.1', 'gpt-6.1-sol', 'GPT-6.1 Sol', {
     releaseDate: '2026-09-29',
+    pricing: usd(2, 10),
   }),
   openai('gpt-terra', '5.6', 'gpt-5.6-terra', 'GPT-5.6 Terra', {
     successor: 'gpt-6-sol',
     releaseDate: '2026-07-09',
+    pricing: usd(2, 12),
   }),
   openai('gpt-luna', '5.6', 'gpt-5.6-luna', 'GPT-5.6 Luna', {
     successor: 'gpt-6-luna',
     releaseDate: '2026-07-09',
+    pricing: usd(0.2, 1.2),
   }),
-  openai('gpt-luna', '6', 'gpt-6-luna', 'GPT-6 Luna', { releaseDate: '2026-09-22' }),
-  openai('gpt-astra', '6', 'gpt-6-astra', 'GPT-6 Astra', { releaseDate: '2026-09-03' }),
+  openai('gpt-luna', '6', 'gpt-6-luna', 'GPT-6 Luna', {
+    releaseDate: '2026-09-22',
+    pricing: usd(0.1, 0.5),
+  }),
+  openai('gpt-astra', '6', 'gpt-6-astra', 'GPT-6 Astra', {
+    releaseDate: '2026-09-03',
+    pricing: usd(10, 50),
+  }),
   openai('o3', '3', 'o3', 'o3', {
     status: 'deprecated',
     successor: 'gpt-5.5',
     releaseDate: '2025-04-16',
     retirementDate: '2026-12-11',
+    pricing: usd(2, 8),
   }),
   openai('o4-mini', '4', 'o4-mini', 'o4-mini', {
     status: 'deprecated',
     successor: 'gpt-5.4-mini',
     releaseDate: '2025-04-16',
     retirementDate: '2026-10-23',
+    pricing: usd(1.1, 4.4),
   }),
 
   // Google

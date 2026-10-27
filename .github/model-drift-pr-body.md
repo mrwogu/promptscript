@@ -19,6 +19,10 @@ purpose until the hardcoded expectations match the values you verified.
 - [ ] Verify release dates against the provider pages; OpenRouter reports
       the day it listed the model, not the release day.
 - [ ] Verify retirement dates and statuses; OpenRouter rarely carries them.
+- [ ] Verify the drafted `pricing` against the provider pricing page; the
+      draft carries OpenRouter's list price dated with the day of the run.
+      When OpenRouter lists a different price for an existing entry, update
+      it by hand with a new `checkedOn`; the workflow never rewrites a price.
 - [ ] Check the API id on the provider page; set `apiId` when it differs
       from the drafted id.
 - [ ] Check successors across families and floating aliases

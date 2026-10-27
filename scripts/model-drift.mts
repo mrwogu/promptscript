@@ -135,12 +135,13 @@ function apply(report: ModelDriftReport): void {
   }
   let source = readFileSync(PROFILES_SOURCE, 'utf8');
   const profiles: ModelProfile[] = [...MODEL_PROFILES];
+  const checkedOn = new Date().toISOString().slice(0, 10);
   for (const candidate of report.candidates) {
     source = insertFamilyEntry(
       source,
       candidate.provider,
       candidate.family,
-      formatProfileEntry(candidate)
+      formatProfileEntry(candidate, checkedOn)
     );
     const displaced = displacedProfile(candidate, profiles);
     if (displaced !== undefined) {
@@ -148,7 +149,6 @@ function apply(report: ModelDriftReport): void {
     }
     profiles.push(draftedProfile(candidate));
   }
-  const checkedOn = new Date().toISOString().slice(0, 10);
   source = source.replace(/Checked on \d{4}-\d{2}-\d{2}/, `Checked on ${checkedOn}`);
   writeFileSync(PROFILES_SOURCE, source);
   console.log(`Drafted ${report.candidates.length} release(s) into model-profiles.ts.`);
@@ -157,6 +157,8 @@ function apply(report: ModelDriftReport): void {
   console.log('- Verify release dates against the provider pages; OpenRouter');
   console.log('  reports the day it listed the model, not the release day.');
   console.log('- Verify retirement dates and statuses; OpenRouter rarely carries them.');
+  console.log('- Verify the drafted pricing against the provider pricing page; a');
+  console.log('  changed price on an existing entry is updated by hand, never by this job.');
   console.log('- Check successors across families and floating aliases');
   console.log('  (opus, sonnet, haiku, fable), then sweep the docs, run');
   console.log('  pnpm docs:validate --update-outputs, ./scripts/sync-skill.sh, and');

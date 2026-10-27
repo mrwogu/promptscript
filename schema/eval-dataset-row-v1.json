@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/eval-dataset-row/v1.json",
+  "title": "PromptScript Eval Dataset Row v1",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Row id, unique in the dataset. Absent ids default to `row-<n>`, counted from 1 in file order.",
+      "examples": [
+        "late-delivery"
+      ],
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/EvalInputValue"
+      },
+      "description": "Prompt input values by input name",
+      "propertyNames": {
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+        "not": {
+          "enum": [
+            "__defineGetter__",
+            "__defineSetter__",
+            "__lookupGetter__",
+            "__lookupSetter__",
+            "__proto__",
+            "constructor",
+            "hasOwnProperty",
+            "isPrototypeOf",
+            "propertyIsEnumerable",
+            "prototype",
+            "toLocaleString",
+            "toString",
+            "valueOf"
+          ]
+        }
+      }
+    },
+    "expected": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/EvalExpectedValue"
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+            "not": {
+              "enum": [
+                "__defineGetter__",
+                "__defineSetter__",
+                "__lookupGetter__",
+                "__lookupSetter__",
+                "__proto__",
+                "constructor",
+                "hasOwnProperty",
+                "isPrototypeOf",
+                "propertyIsEnumerable",
+                "prototype",
+                "toLocaleString",
+                "toString",
+                "valueOf"
+              ]
+            }
+          }
+        }
+      ],
+      "description": "Golden answer: the whole response text, or the expected output properties when the prompt has an output contract. A partial object is allowed."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Free-form tags, for filtering and reporting"
+    }
+  },
+  "required": [
+    "inputs"
+  ],
+  "additionalProperties": false,
+  "description": "One row of an eval dataset, version 1: a JSONL line, a YAML item or a CSV row.",
+  "definitions": {
+    "EvalInputValue": {
+      "type": [
+        "string",
+        "number",
+        "boolean"
+      ],
+      "description": "Scalar value of an eval case input."
+    },
+    "EvalExpectedValue": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/EvalInputValue"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "description": "Expected value of one output property: a scalar or a list of strings."
+    }
+  }
+}
