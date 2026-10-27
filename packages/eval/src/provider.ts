@@ -8,6 +8,8 @@ import { EVAL_CODES, EvalProviderError } from './errors.js';
 
 /** One model call a provider makes. */
 export interface EvalRequest {
+  /** Id of the prompt under test */
+  promptId: string;
   /** Provider name, such as `anthropic` */
   provider: string;
   /** Provider API model identifier */
@@ -43,6 +45,16 @@ export type EvalProvider = (
   request: EvalRequest,
   context: EvalProviderContext
 ) => Promise<EvalResponse>;
+
+/** Provider lookup of a run, by provider name. */
+export interface EvalProviderLookup {
+  (name: string): EvalProvider;
+  /**
+   * Name of the secret variable whose value appears in `text`, if any. The run
+   * checks every model of a suite with it, so a `${VAR}` in a profile stops it.
+   */
+  secretIn?: (text: string) => string | undefined;
+}
 
 /** A scripted answer: the response text, or a response with defaults filled in. */
 export type MockAnswer = string | (Pick<EvalResponse, 'text'> & Partial<EvalResponse>);

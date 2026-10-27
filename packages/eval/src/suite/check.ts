@@ -70,6 +70,15 @@ function hasNestedQuantifier(pattern: string): boolean {
   return false;
 }
 
+// loadSuites already refuses bad patterns; suites built in code reach here too
+function compiles(pattern: string, flags = ''): boolean {
+  try {
+    return new RegExp(pattern, flags) instanceof RegExp;
+  } catch {
+    return false;
+  }
+}
+
 function nearestIds(id: string, bundles: readonly PromptBundleV1[]): string[] {
   // A suite can hold a huge prompt string; the distance matrix grows with it
   const probe = id.slice(0, 200);
@@ -122,13 +131,20 @@ function checkAuthoredPatterns(assertions: readonly EvalAssertion[], add: Add): 
         );
       }
     }
-    if (assertion.kind === 'regex' && hasNestedQuantifier(assertion.pattern)) {
-      add(
-        EVAL_CODES.REGEX_RISK,
-        `regex of assertion "${assertion.id}" repeats a group that holds a quantifier, which can backtrack for a very long time; rewrite it without the nesting`,
-        'warning'
-      );
-    }
+    if (assertion.kind === 'regex')
+      checkPattern(assertion.id, assertion.pattern, assertion.flags, add);
+  }
+}
+
+function checkPattern(id: string, pattern: string, flags: string | undefined, add: Add): void {
+  if (!compiles(pattern, flags)) {
+    add(EVAL_CODES.SUITE_INVALID, `regex of assertion "${id}" is not a valid pattern`);
+  } else if (hasNestedQuantifier(pattern)) {
+    add(
+      EVAL_CODES.REGEX_RISK,
+      `regex of assertion "${id}" repeats a group that holds a quantifier, which can backtrack for a very long time; rewrite it without the nesting`,
+      'warning'
+    );
   }
 }
 

@@ -32,10 +32,25 @@ export {
   type AssertionContext,
   type DeterministicAssertion,
 } from './assertions.js';
+export { runEval, type EvalProgress, type RunEvalOptions } from './run.js';
+export {
+  createAnthropicProvider,
+  createOpenAICompatibleProvider,
+  refuseProviderUrl,
+  DEFAULT_PROVIDER_HOSTS,
+  type ProviderConfig,
+  type ProviderDeps,
+} from './http-provider.js';
+export {
+  createProviderFactory,
+  type ProviderFactoryOptions,
+  type ProviderUse,
+} from './provider-setup.js';
 export {
   createMockProvider,
   type EvalProvider,
   type EvalProviderContext,
+  type EvalProviderLookup,
   type EvalRequest,
   type EvalResponse,
   type MockAnswer,

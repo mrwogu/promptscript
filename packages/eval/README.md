@@ -2,8 +2,8 @@
 
 > Part of the [PromptScript](https://github.com/mrwogu/promptscript) monorepo.
 
-Eval suites, datasets and assertions for PromptScript prompts. The package is private and not
-published to npm. No CLI command uses it yet, and it makes no model calls.
+Eval suites, datasets, assertions and the runner for PromptScript prompts. The package is private
+and not published to npm. No CLI command uses it yet.
 
 ## What it does
 
@@ -25,8 +25,16 @@ published to npm. No CLI command uses it yet, and it makes no model calls.
         └─► scanDatasetRow    validator security rules and PII
                               PS6110-PS6114
 
-  evaluateAssertions ──► equals, contains, regex, json-schema on a response
-  createMockProvider ──► scripted answers for tests, no network code
+  runEval ─────► all of the above for every suite, then the cache lookups and
+        │        the budget plan; any error stops here, before any call
+        ▼
+  each case ──► cache hit, or a provider call with a reservation and retries
+        │
+        ▼
+  evaluateAssertions ──► equals, contains, regex, json-schema on the response
+        │
+        ▼
+  EvalReportV1 (schema/eval-report-v1.json)
 ```
 
 ## Suites
@@ -79,6 +87,69 @@ records that personal data is expected.
 own properties only). `regex` patterns and the `pattern` keywords of schemas share a 1 second
 budget per assertion, and an assertion that runs out fails the case. Reasons are at most 160
 characters and quote at most 60 characters of the actual value.
+
+## Runs
+
+`runEval` renders every row with `@promptscript/runtime` before any call; a row the renderer
+refuses is a setup error. It never reads the environment and never prints: the caller passes the
+providers, the cache mode and the budget, and gets the report back. A failed case never throws; it
+becomes a case with status `error`. `llm-judge` assertions are refused (PS6600). A run with no
+case is an error too, and so is a budget, concurrency, row limit or output cap that is not a plain
+number (PS6504, PS6309), reported together with the suite check errors.
+
+| Cache mode | Hit     | Miss                                      |
+| :--------- | :------ | :---------------------------------------- |
+| `replay`   | used    | case error PS6402; no provider, ever      |
+| `record`   | used    | call, then write the entry                |
+| `refresh`  | ignored | every case calls and overwrites its entry |
+| `off`      | ignored | call, write nothing                       |
+
+Entries live at `<cache dir>/<first 2 hex>/<key>.json`. The key is the SHA-256 of the canonical
+JSON of the request: bundle hash, inputs hash after defaults, model reference, provider, API id,
+effective params with the output cap, and the sample index. Every mode but `off` reads the tree
+before any call, `refresh` too, and reads go through `lstat`, so a symlink or another file type in
+the tree is PS6403. An entry that is too big, broken, has a token count over 1e9 or does not match
+its key is a miss with a PS6401 warning. Any other read or write error stops the run (PS6404).
+Writes are atomic, and an entry over the 1 MiB read cap is not written (PS6405). Rows with the same
+key share one call; the later ones count as replayed, with `off` too. `costUsd` is counted per
+case, replayed ones included, while `budget.spentUsd` is what the run paid. To tell whether a run
+called a provider, read `cache.mode` and `cache.live`, not `replayed === 0`. The digest hashes the raw bytes of every
+entry the run used; with `off` it hashes the entries as they would have been written.
+
+Every mode that calls a provider needs a budget (PS6504) and a price for every model (PS6501). A
+project price may raise a built-in one, never lower it (PS6505). Before any call the plan counts
+each miss at its worst case: every UTF-8 byte of the messages and of the output schema as an input
+token, 16 tokens per message, plus the whole output cap. A plan over the budget is refused
+(PS6503). The built-in price is checked for the model reference and for the API id the call goes
+to, so a profile cannot point a cheap name at a dearer model. A snapshot id such as `x-20261001`,
+`x-2026-10-01`, `x-0806` or `x-latest` is checked as `x` too; a gateway id such as `vendor/model` matches
+no built-in price. During the run each call reserves its
+worst case; the actual cost replaces it after a success, a refused call (400, 401, 403, 404, 413, 429) gives it back, and any other failure keeps it as spent. 429, 500, 502, 503 and 529 are tried
+again at most twice, with `retry-after` up to 30 seconds. A slow regex fails fast on later cases
+once it ran out of time.
+
+## Providers
+
+`createAnthropicProvider` and `createOpenAICompatibleProvider` build the body with the runtime
+mappers and add the URL, fixed headers and the transport rules: https to `api.anthropic.com`,
+`api.openai.com` or a host passed in `allowedHosts`; private, link-local and metadata hosts are
+refused either way, and `allowLocal` allows loopback over http. No redirects, a time limit over
+the whole exchange and a 4 MiB body cap. A 4xx message is echoed in at most 200 characters,
+without the key, the values in `secrets`, bearer tokens, control or bidi characters; the key is also taken out of the
+text and stop reason of an answer.
+
+`createProviderFactory` builds them from the `eval` config and an environment: `anthropic` and
+`openai` have built-in URLs and key variables, other providers need an `eval.providers` entry with
+`kind`, `baseUrl` and `apiKeyEnvVar` only (PS6301, PS6303). Keys are read at call time; a missing
+variable is PS6306. The run is refused (PS6307) when the config holds the value of a key variable
+or of any variable of 8 or more characters named like a secret (`KEY`, `TOKEN`, `SECRET`,
+`PASSWORD`, `CREDENTIAL`), a `${VAR}` in `baseUrl` included. `anthropic` or `openai` moved to
+another kind or host must name its key in `apiKeyEnvVar` (PS6303). The config decides which
+variable goes to which allowed host, so `apiKeyEnvVar` can send any variable: review the config
+like code. Every environment value of 8 or more characters is left out of error echoes, and
+`secretIn` on the lookup lets `runEval` run the PS6307 check over the models of every suite, so a
+`${VAR}` in a model profile stops the run too, replay included. `onUse` reports the provider, variable and host of each provider before its first call.
+`createMockProvider` gives scripted answers for tests, with no network code.
 
 ## Commands
 

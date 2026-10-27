@@ -83,6 +83,7 @@ const loaded = (patch: Partial<EvalSuiteV1> = {}): LoadedSuite => ({
     ...patch,
   },
   datasetFile: '/project/.promptscript/evals/datasets/rows.jsonl',
+  hash: `sha256-${'1'.repeat(64)}`,
 });
 const withAssertions = (...assertions: EvalAssertion[]): LoadedSuite => loaded({ assertions });
 const messages = (suite: LoadedSuite): string[] =>
@@ -189,6 +190,7 @@ describe('checkSuites', () => {
     [String.raw`(\w+\s?)*$`, true],
     ['((ab)*c)+', true],
     ['(?:x+){2,}', true],
+    ['((a+)b)+', true],
     [String.raw`\bguarantee(d)?\b`, false],
     ['[(a+)]+', false],
     [String.raw`\(a+\)+`, false],
@@ -199,6 +201,12 @@ describe('checkSuites', () => {
     expect(
       findings.some((finding) => finding.code === 'PS6210' && finding.severity === 'warning')
     ).toBe(warns);
+  });
+
+  it('refuses a regex that does not compile, for suites built in code', () => {
+    expect(messages(withAssertions({ id: 'rx', kind: 'regex', pattern: '(' }))).toEqual([
+      'PS6200 error: Suite .promptscript/evals/refund.eval.yaml: regex of assertion "rx" is not a valid pattern.',
+    ]);
   });
 
   describe('models', () => {
