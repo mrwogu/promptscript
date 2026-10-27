@@ -3,8 +3,8 @@
  *
  * @packageDocumentation
  */
-import { constants, open, realpath, type FileHandle } from 'node:fs/promises';
-import { resolve, sep } from 'node:path';
+import { constants, lstat, open, realpath, type FileHandle } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { PromptLoadError } from './errors.js';
 import { assertFilePath, decodeUtf8, DEFAULT_MAX_BYTES, wholeNumber } from './paths.js';
 import type { DirectorySourceOptions, PromptSource, SourceFile } from './types.js';
@@ -25,14 +25,22 @@ async function fill(file: FileHandle, buffer: Uint8Array, size: number): Promise
 
 async function openBelow(root: string, path: string, fail: Failure): Promise<FileHandle> {
   try {
+    // The root may be a link, such as a deployment's current release. Below it no link is
+    // followed, the same rule as the release commands, so the path cannot leave the root.
     const realRoot = await realpath(root);
-    const real = await realpath(resolve(realRoot, path));
-    if (!real.startsWith(`${realRoot}${sep}`)) {
-      throw fail('source-error', 'leads outside the directory.');
+    const segments = path.split('/');
+    const chain = segments.map((_, index) => resolve(realRoot, ...segments.slice(0, index + 1)));
+    // All segments at once, then in path order: a link wins over a missing file behind it
+    const entries = await Promise.allSettled(chain.map((entry) => lstat(entry)));
+    for (const entry of entries) {
+      if (entry.status === 'rejected') throw entry.reason;
+      if (entry.value.isSymbolicLink()) throw fail('source-error', 'is a symbolic link.');
     }
     // A plain open() of a FIFO waits for a writer forever. With O_NONBLOCK it returns at
-    // once and the fstat in readBelow refuses it. Windows has no O_NONBLOCK and no FIFOs.
-    return await open(real, constants.O_RDONLY | (constants.O_NONBLOCK ?? 0));
+    // once and the fstat in readBelow refuses it. O_NOFOLLOW refuses a file swapped for a
+    // link after the check. Windows has neither flag, and no FIFOs.
+    const flags = constants.O_RDONLY | (constants.O_NONBLOCK ?? 0) | (constants.O_NOFOLLOW ?? 0);
+    return await open(resolve(realRoot, path), flags);
   } catch (error) {
     if (error instanceof PromptLoadError) throw error;
     if (errorCode(error) === 'ENOENT') throw fail('not-found', 'does not exist.');
@@ -66,9 +74,10 @@ async function readBelow(root: string, path: string, maxBytes: number): Promise<
  * A source that reads prompt files from a local directory, such as a release directory
  * checked out with the application.
  *
- * Paths stay below `root`: a symbolic link that leads outside it is refused. Only regular
- * files are read, at most `maxBytes` of them. The directory source sends no ETag, so
- * every pointer refresh reads the file again.
+ * Paths stay below `root`: `root` itself may be a symbolic link, but no link below it is
+ * followed, as in the release commands. Only regular files are read, at most `maxBytes`
+ * of them. The directory source sends no ETag, so every pointer refresh reads the file
+ * again.
  *
  * @param root - Directory that holds the prompt files
  * @param options - Size limit

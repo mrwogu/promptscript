@@ -43,10 +43,13 @@ export function wholeNumber(name: string, value: number, min: 0 | 1): number {
   throw new RangeError(`${name} must be a whole number of ${min} or more.`);
 }
 
-/** Decode UTF-8 strictly, so a broken file never turns into replacement characters. */
+/**
+ * Decode UTF-8 strictly, so a broken file never turns into replacement characters. A byte
+ * order mark is kept, so JSON.parse fails on it as it does in the CLI.
+ */
 export function decodeUtf8(bytes: Uint8Array, where: string, path: string): string {
   try {
-    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    return new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
   } catch {
     throw new PromptLoadError('source-error', `${where} is not valid UTF-8.`, path);
   }

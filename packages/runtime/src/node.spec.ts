@@ -28,6 +28,10 @@ writeFileSync(join(root, 'broken.json'), new Uint8Array([0x7b, 0xff, 0x7d]));
 writeFileSync(join(outside, 'secret.json'), '{}');
 symlinkSync(join(outside, 'secret.json'), join(root, 'escape.json'));
 symlinkSync(join(root, 'ok.json'), join(root, 'inside.json'));
+writeFileSync(join(root, 'bundles', 'x.json'), '{"b":2}');
+symlinkSync(join(root, 'bundles'), join(root, 'linked'));
+// A deployment often points a "current" link at the release it serves
+symlinkSync(root, join(base, 'current'));
 writeFileSync(join(root, 'locked.json'), '{}');
 chmodSync(join(root, 'locked.json'), 0o000);
 
@@ -51,8 +55,42 @@ describe('directorySource', () => {
     expect(await source.read('ok.json')).toEqual({ text: '{"a":1}' });
   });
 
-  it('follows a symbolic link that stays inside', async () => {
-    expect(await directorySource(root).read('inside.json')).toEqual({ text: '{"a":1}' });
+  it('refuses a link below the root, also one that stays inside', async () => {
+    expect(await codeOf('inside.json')).toBe('source-error');
+    expect(await codeOf('linked/x.json')).toBe('source-error');
+    // The link wins over a missing file behind it
+    expect(await codeOf('linked/missing.json')).toBe('source-error');
+    expect(await codeOf('bundles/missing.json')).toBe('not-found');
+    expect(await codeOf('bundles/x.json')).toBe('ok');
+  });
+
+  it('reads below a root that is a link itself', async () => {
+    expect(await directorySource(join(base, 'current')).read('bundles/x.json')).toEqual({
+      text: '{"b":2}',
+    });
+  });
+
+  it.each([
+    ['label', 'invalid-index'],
+    ['bundle', 'invalid-bundle'],
+  ])('refuses a %s that starts with a byte order mark, as the CLI does', async (file, code) => {
+    // Arrange
+    const bundle = makeBundle();
+    const bomRoot = join(base, `bom-${file}`);
+    const mark = (name: string): string => (name === file ? '\uFEFF' : '');
+    mkdirSync(join(bomRoot, 'bundles'), { recursive: true });
+    writeFileSync(join(bomRoot, 'prod.json'), `${mark('label')}${labelOf('prod', [bundle])}`);
+    writeFileSync(
+      join(bomRoot, 'bundles', `${bundle['contentHash']}.json`),
+      `${mark('bundle')}${JSON.stringify(bundle)}`
+    );
+    const client = createPromptClient({ source: directorySource(bomRoot), label: 'prod' });
+
+    // Act
+    const error = await client.get('acme-support/refund-reply').catch((caught: unknown) => caught);
+
+    // Assert
+    expect(error).toMatchObject({ code });
   });
 
   it.each([
