@@ -299,6 +299,18 @@ describe('prs approve', () => {
       'must list the teams or people',
     ],
     ['a missing role', CONFIG, undefined, 'Configured: legal, security'],
+    [
+      'an owner that is no Git host identity',
+      CONFIG.replace("legal: ['@acme/legal']", "legal: ['Legal Team']"),
+      'legal',
+      'governance.roles.legal has "Legal Team", which is not a Git host identity',
+    ],
+    [
+      'an unknown governance key',
+      CONFIG.replace('governance:', "governance:\n  admin: ['@acme/platform']"),
+      'legal',
+      'governance has an unknown key "admin". Did you mean "admins"?',
+    ],
   ])('refuses %s with PS5101', async (_name, config, role, message) => {
     const root = await project(config);
     const hash = await storedBundle(root, ID, 'Stored');

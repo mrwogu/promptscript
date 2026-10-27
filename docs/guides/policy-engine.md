@@ -204,7 +204,7 @@ policies:
 
 ### Required Approvals and Required Evals
 
-`required-approvals` and `required-evals` describe what a prompt needs before release. `prs validate`, `prs check` and the `prs release` commands check the definitions only: they read no approvals and run no evals, so these policies never report a prompt and do not block a release. Approvals and evals need their own control, for example required reviews on the pull request.
+`required-approvals` and `required-evals` describe what a prompt needs before release. `prs validate`, `prs check` and the `prs release` commands check the definitions only: they read no approvals and run no evals, so these policies never report a prompt and do not block a release. Approvals and evals need their own control, for example required reviews on the pull request. [CODEOWNERS from Governance](codeowners.md) gives each approval role directory to its team.
 
 | Kind                 | Field          | Type       | Required | Description                                                        |
 | -------------------- | -------------- | ---------- | -------- | ------------------------------------------------------------------ |

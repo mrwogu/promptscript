@@ -244,6 +244,7 @@ includePromptScriptSkill: true # default: true
 | `models`                   | object                  | No       | Supported model set and model profiles          |
 | `policies`                 | array                   | No       | Policies for skill extensions and prompts       |
 | `releases`                 | object                  | No       | Release environments for prompt bundles         |
+| `governance`               | object                  | No       | Admins, approval roles and CODEOWNERS settings  |
 
 `id` and `syntax` are required even when `input.entry` uses its default.
 
@@ -1252,6 +1253,38 @@ Each name matches `^[a-z][a-z0-9-]{0,31}$` and appears once. The names `index` a
 the Windows device names `con`, `prn`, `aux`, `nul`, `com1` to `com9` and `lpt1` to `lpt9`, are
 refused because each environment is a file named `<name>.json`. Without `releases` every
 `prs release` command fails with `PS5001`. See the [releases guide](../guides/releases.md).
+
+### governance
+
+Who owns the setup and which teams review each approval role. `prs governance codeowners` turns it
+into CODEOWNERS lines, and PS047 checks prompt owners and data classes against it.
+
+```yaml
+governance:
+  admins: ['@acme/prompt-platform']
+  roles:
+    legal: ['@acme/legal']
+  dataClasses: [pii, phi, financial, credentials, internal, public]
+  codeowners:
+    output: .github/CODEOWNERS
+    protect: [.github/workflows]
+    prompts: true
+```
+
+| Field                | Type     | Required | Description                                                                           |
+| -------------------- | -------- | -------- | ------------------------------------------------------------------------------------- |
+| `admins`             | string[] | No       | Owners of the config, the approvals root, the releases and the CODEOWNERS files       |
+| `roles`              | object   | No       | Approval roles, each with a non-empty list of owners. At most 32 roles                |
+| `dataClasses`        | string[] | No       | Data class names the project uses (PS047, and the data classes of policies)           |
+| `codeowners.output`  | string   | No       | `.github/CODEOWNERS` (default), `CODEOWNERS`, `docs/CODEOWNERS`, `.gitlab/CODEOWNERS` |
+| `codeowners.protect` | string[] | No       | More paths the admins own, relative to the repository root                            |
+| `codeowners.prompts` | boolean  | No       | Write CODEOWNERS lines for the `.prs` files that define prompts. Default `true`       |
+
+Owners are a user (`@jane`), a team (`@acme/legal`) or an email address of at most 254 characters.
+Role names match `^[a-z][a-z0-9-]{0,31}$` and are not a Windows device name, because a role names a
+directory. Unknown keys are refused with the closest key. `prs governance codeowners` needs
+`admins`; a problem in this section is `PS5101`. See
+[CODEOWNERS from Governance](../guides/codeowners.md).
 
 ### includePromptScriptSkill
 

@@ -75,6 +75,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [x] **`bundle` and `prompt-text` targets** - opt-in targets that write content-hashed JSON bundles and Markdown previews ([guide](docs/guides/application-prompts.md))
 - [x] **Playground preview** - preview prompt bundles in the browser with the Support Refund Reply example; four runnable [examples](docs/examples/application-prompts.md) in the docs
 - [x] **Prompt policies** - required metadata, risk floors, model allowlists and content rules on `@prompts` entries through PS030, owner, reviewer and data class checks through PS047 ([guide](docs/guides/policy-engine.md#prompt-policies))
+- [x] **CODEOWNERS from governance** - `prs governance codeowners` gives prompt files to their owners, approval roles to their teams and config and release files to the admins ([guide](docs/guides/codeowners.md))
 
 ---
 

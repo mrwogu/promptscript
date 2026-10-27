@@ -325,6 +325,10 @@ with the rules of the base branch. See the
 review of the pull request that adds it is what binds it. See
 [approvals](https://getpromptscript.dev/guides/releases/#approvals).
 
+`prs governance codeowners` writes the `governance` section of `promptscript.yaml` into CODEOWNERS:
+prompt files go to their owners, approval directories to their role teams, and the config and
+release files to the admins. See [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/).
+
 ## Skills from Local Files, Registries, or Git
 
 ```promptscript
@@ -541,6 +545,7 @@ the build, not the agent. See the
 | `prs pull`                                          | Pull updates from the registry                            |
 | `prs release <build\|promote\|rollback\|status>`    | Release prompt bundles through environments               |
 | `prs approve <id>@<hash>` / `prs approve --list`    | Record or list approvals of one prompt version            |
+| `prs governance codeowners`                         | Write CODEOWNERS lines from the governance config         |
 | `prs lock` / `prs update`                           | Pin or refresh remote dependencies                        |
 | `prs vendor sync` / `prs vendor check`              | Prepare and verify offline dependencies                   |
 | `prs resolve <import>`                              | Explain import resolution                                 |

@@ -18,8 +18,13 @@ function temporaryPathFor(filePath: string): string {
 /**
  * Replace a file by writing a sibling temporary file with the given mode and
  * renaming it over the original. The original is never left half-written.
+ * A string is written as UTF-8, bytes as they are.
  */
-export function writeFileAtomic(filePath: string, content: string, mode: number): void {
+export function writeFileAtomic(
+  filePath: string,
+  content: string | Uint8Array,
+  mode: number
+): void {
   const temporaryPath = temporaryPathFor(filePath);
   try {
     writeFileSync(temporaryPath, content, { encoding: 'utf-8', mode, flag: 'wx' });

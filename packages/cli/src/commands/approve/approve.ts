@@ -19,6 +19,7 @@ import {
   PS5105_APPROVAL_EXISTS,
   PS5109_APPROVAL_INVALID,
 } from '../../utils/governance-error.js';
+import { checkGovernanceConfig } from '../../utils/governance-config.js';
 import type { ProjectPathOptions } from '../../utils/project-config.js';
 import type { ReleaseDiagnostic } from '../../utils/release-report.js';
 import { PS5004_VERIFICATION_FAILED, ReleaseError } from '../release/errors.js';
@@ -173,6 +174,15 @@ function checkRole(
     throw new GovernanceError(
       PS5101_GOVERNANCE_CONFIG,
       `governance.roles.${role} in ${configPath} must list the teams or people that review it, for example ['@acme/${role}'].`,
+      configPath
+    );
+  }
+  // The rest of the section too: owner format, unknown keys, the role limit.
+  const problems = checkGovernanceConfig(governance);
+  if (problems.length > 0) {
+    throw new GovernanceError(
+      PS5101_GOVERNANCE_CONFIG,
+      `${problems.map(stripControlCharacters).join('\n')}\nFix the governance section of ${configPath}.`,
       configPath
     );
   }

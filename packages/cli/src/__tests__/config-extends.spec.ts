@@ -505,3 +505,25 @@ describe('loadConfigFileWith', () => {
     });
   });
 });
+
+describe('loadConfig files', () => {
+  it('lists the project file and every file of its extends chain', async () => {
+    // Arrange
+    const root = project({
+      'shared/org.yaml': 'id: org\n',
+      'shared/team.yaml': 'extends: ./org.yaml\n',
+      'app/promptscript.yaml': 'id: app\nextends: ../shared/team.yaml\n',
+    });
+    const files: string[] = [];
+
+    // Act
+    await loadConfig(join(root, 'app/promptscript.yaml'), files);
+
+    // Assert
+    expect(files).toEqual([
+      join(root, 'app/promptscript.yaml'),
+      join(root, 'shared/team.yaml'),
+      join(root, 'shared/org.yaml'),
+    ]);
+  });
+});

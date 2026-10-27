@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-10-27T14:18:11.731Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-10-27T16:18:13.363Z | source: .promptscript/project.prs | target: factory
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -1230,6 +1230,7 @@ prs release status          # List released prompts per environment and verify t
 prs approve <id>@<hash> --role legal --approver @jane --env prod # Record an approval of one exact version
 prs approve --list          # Show approval records per prompt and their state, by the path Git tracks
 prs release status --base refs/remotes/origin/main # Check label changes since a ref with its rules
+prs governance codeowners   # Write CODEOWNERS lines from governance (--check in CI)
 prs resolve @alias/path     # Debug: show how an import resolves
 prs registry list           # Show configured registries and aliases
 prs registry add <alias> <url>  # Add a registry alias

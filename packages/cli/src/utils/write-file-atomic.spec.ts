@@ -39,6 +39,16 @@ describe('writeFileAtomic', () => {
     expect(readdirSync(dir)).toEqual(['a.prs']);
   });
 
+  it('writes bytes as they are', () => {
+    const dir = tempDir();
+    const file = join(dir, 'CODEOWNERS');
+    const bytes = Buffer.from([0x23, 0x20, 0xe9, 0x0a]);
+
+    writeFileAtomic(file, bytes, 0o644);
+
+    expect(readFileSync(file)).toEqual(bytes);
+  });
+
   it('cleans up and rethrows when the target cannot be replaced', () => {
     const dir = tempDir();
 

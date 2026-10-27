@@ -108,12 +108,14 @@ their replacement, models outside `models.supported`, and inconsistent
 | PS5006     | Git history, base file or ref is not usable  | Commit the label, fetch base, use a full ref |
 | PS5007     | Another release command holds the lock       | Wait, then run the command again             |
 | PS5008     | Compile output inside the release directory  | Point the target output elsewhere            |
-| PS5101     | Approval role missing or not configured      | Add the role to `governance.roles`           |
+| PS5101     | `governance` missing or invalid, or no role  | Fix the section or add the role              |
 | PS5102     | Approval reference is not `<id>@<full hash>` | Give the full `sha256-<64 hex>` hash         |
 | PS5103     | Approved hash is not built or released       | Approve the hash `prs approve --list` shows  |
 | PS5104     | Approver is not a user handle                | Use your handle, like `@jane`                |
 | PS5105     | Approval record exists                       | Delete it in a commit to withdraw it         |
-| PS5108     | `prs approve --list` cannot run Git          | Run it in a Git checkout with git on PATH    |
+| PS5106     | CODEOWNERS not managed by this project       | Add the marker line the message names        |
+| PS5107     | CODEOWNERS owner or path refused             | Use Git host identities and plain paths      |
+| PS5108     | Git missing, no repository or Git failed     | Run it in a Git checkout with git on PATH    |
 | PS5109     | Approval record invalid or misplaced         | Fix, move or delete it in a commit           |
 
 PS5109 is a warning when `prs approve --list` reads such a record, or a modified one (its bytes are

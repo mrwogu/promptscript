@@ -12,6 +12,10 @@ export const PS5103_UNKNOWN_HASH = 'PS5103';
 export const PS5104_APPROVER_IDENTITY = 'PS5104';
 /** An approval record with the same role, approver and hash exists. Exit code 2. */
 export const PS5105_APPROVAL_EXISTS = 'PS5105';
+/** The CODEOWNERS file is not managed by prs, or it is managed for another project. Exit code 2. */
+export const PS5106_CODEOWNERS_UNMANAGED = 'PS5106';
+/** A CODEOWNERS owner value or path is refused. */
+export const PS5107_CODEOWNERS_REFUSED = 'PS5107';
 /** Git is missing, the project is not in a repository, or a Git call failed. */
 export const PS5108_GIT_UNAVAILABLE = 'PS5108';
 /**
@@ -26,6 +30,8 @@ export type GovernanceErrorCode =
   | typeof PS5103_UNKNOWN_HASH
   | typeof PS5104_APPROVER_IDENTITY
   | typeof PS5105_APPROVAL_EXISTS
+  | typeof PS5106_CODEOWNERS_UNMANAGED
+  | typeof PS5107_CODEOWNERS_REFUSED
   | typeof PS5108_GIT_UNAVAILABLE
   | typeof PS5109_APPROVAL_INVALID;
 

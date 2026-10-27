@@ -438,6 +438,10 @@ with the rules of the base branch. See the
 review of the pull request that adds it is what binds it. See
 [approvals](https://getpromptscript.dev/guides/releases/#approvals).
 
+`prs governance codeowners` writes the `governance` section of `promptscript.yaml` into CODEOWNERS:
+prompt files go to their owners, approval directories to their role teams, and the config and
+release files to the admins. See [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/).
+
 ## Built for Repositories and Organizations
 
 - **Runs locally** - PromptScript is a compiler, not a service. No hosted backend and no proxy
