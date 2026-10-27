@@ -69,6 +69,8 @@ the same files over HTTPS, for example from the raw file URL of a Git branch.
   `failMode: 'open'` (the default) a failed refresh serves the last verified prompt with
   `meta.stale: true` and calls `onError`; `failMode: 'closed'` throws instead. A label that no
   longer lists a prompt is final in both modes.
+- Never pass a ref from an untrusted caller to `client.get()`. With a label, a pinned ref
+  reads any bundle that was ever built, also one that was rolled back.
 - The mappers return plain request bodies and never override the model or limits of the
   bundle. Newer Anthropic models and API versions reject `temperature`, `top_p` and `top_k`; the
   mapper passes what the bundle sets.

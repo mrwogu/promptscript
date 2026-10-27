@@ -28,6 +28,21 @@ export function assertFilePath(path: string, listedIn?: string): void {
   );
 }
 
+/**
+ * Check a numeric option when it is set. `Number()` of an unset environment variable is
+ * `NaN`, which would turn a size cap, a cache bound or a refresh off without a word.
+ *
+ * @param name - Option name, used in the error
+ * @param value - The value to check
+ * @param min - Smallest allowed value
+ * @returns The value
+ * @throws {RangeError} when the value is not a whole number of `min` or more
+ */
+export function wholeNumber(name: string, value: number, min: 0 | 1): number {
+  if (Number.isSafeInteger(value) && value >= min) return value;
+  throw new RangeError(`${name} must be a whole number of ${min} or more.`);
+}
+
 /** Decode UTF-8 strictly, so a broken file never turns into replacement characters. */
 export function decodeUtf8(bytes: Uint8Array, where: string, path: string): string {
   try {

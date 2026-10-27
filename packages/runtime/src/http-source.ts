@@ -1,6 +1,6 @@
 import { PromptLoadError } from './errors.js';
 import { refuseUrl } from './internal/url-rules.js';
-import { assertFilePath, decodeUtf8, DEFAULT_MAX_BYTES } from './paths.js';
+import { assertFilePath, decodeUtf8, DEFAULT_MAX_BYTES, wholeNumber } from './paths.js';
 import type {
   HttpSourceOptions,
   PromptSource,
@@ -27,39 +27,54 @@ const hostOf = (host: string): string => {
   return name.endsWith('.') ? name.slice(0, -1) : name;
 };
 
-/** Read the stream chunk by chunk, counting bytes, and cancel it above the limit. */
+/** Read the stream chunk by chunk, counting bytes, and cancel it above the limit or on timeout. */
 async function collect(
   reader: Reader,
   chunks: Uint8Array[],
   size: number,
-  max: number
+  max: number,
+  timeout: Promise<never>
 ): Promise<number> {
-  const chunk = await reader.read();
+  let chunk: Awaited<ReturnType<Reader['read']>>;
+  try {
+    chunk = await Promise.race([reader.read(), timeout]);
+  } catch (error) {
+    reader.cancel().catch(() => undefined);
+    throw error;
+  }
   if (chunk.done) return size;
   const total = size + (chunk.value?.byteLength ?? 0);
   if (total > max) {
-    await reader.cancel().catch(() => undefined);
+    reader.cancel().catch(() => undefined);
     return total;
   }
   if (chunk.value) chunks.push(chunk.value);
-  return collect(reader, chunks, total, max);
+  return collect(reader, chunks, total, max, timeout);
 }
 
-/** Cancel a body that is not read, so the connection is not held open. */
-const discard = (response: RuntimeResponse): Promise<void> =>
+/**
+ * Cancel a body that is not read, so the connection is not held open. Never awaited, here
+ * or for a reader: the cancel of a custom body can hang as well.
+ */
+const discard = (response: RuntimeResponse): void => {
   Promise.resolve()
     .then(() => response.body?.getReader().cancel())
     .catch(() => undefined);
+};
 
-async function readBody(response: RuntimeResponse, max: number): Promise<Uint8Array | undefined> {
+async function readBody(
+  response: RuntimeResponse,
+  max: number,
+  timeout: Promise<never>
+): Promise<Uint8Array | undefined> {
   if (Number(response.headers.get('content-length')) > max) {
-    await discard(response);
+    discard(response);
     return undefined;
   }
   const reader = response.body?.getReader();
   if (!reader) return new Uint8Array(0);
   const chunks: Uint8Array[] = [];
-  const size = await collect(reader, chunks, 0, max);
+  const size = await collect(reader, chunks, 0, max, timeout);
   if (size > max) return undefined;
   const bytes = new Uint8Array(size);
   let offset = 0;
@@ -89,8 +104,14 @@ async function readFile(
     why: string
   ) => new PromptLoadError(code, `${where} ${why}`, path);
   const signal = AbortSignal.timeout(config.timeoutMs);
+  // A custom fetch can ignore the signal, so every wait races the timeout as well
+  const timeout = new Promise<never>((_resolve, reject) => {
+    signal.addEventListener('abort', () => reject(new Error('timeout')), { once: true });
+  });
+  // Handled here too: the timer also fires after a read that finished in time
+  timeout.catch(() => undefined);
   try {
-    const response = await config.fetch(url, {
+    const request = config.fetch(url, {
       method: 'GET',
       headers: {
         ...config.headers,
@@ -100,9 +121,17 @@ async function readFile(
       redirect: 'manual',
       signal,
     });
+    // A response that only comes after the timeout is cancelled too, so it frees its connection
+    request.then(
+      (late) => {
+        if (signal.aborted) discard(late);
+      },
+      () => undefined
+    );
+    const response = await Promise.race([request, timeout]);
     const { status } = response;
     const redirect = isRedirect(response, url);
-    if (redirect || status !== 200) await discard(response);
+    if (redirect || status !== 200) discard(response);
     if (redirect) {
       throw fail(
         'redirect-refused',
@@ -112,7 +141,7 @@ async function readFile(
     if (status === 304 && etag !== undefined) return 'not-modified';
     if (status === 404 || status === 410) throw fail('not-found', 'does not exist.');
     if (status !== 200) throw fail('source-error', `answered with status ${status}.`);
-    const bytes = await readBody(response, config.maxBytes);
+    const bytes = await readBody(response, config.maxBytes, timeout);
     if (!bytes) throw fail('too-large', `is larger than ${config.maxBytes} bytes.`);
     const tag = response.headers.get('etag');
     return { text: decodeUtf8(bytes, where, path), ...(tag ? { etag: tag } : undefined) };
@@ -144,6 +173,7 @@ async function readFile(
  * @param options - Headers, fetch, timeout, size limit and allowed hosts
  * @returns A source for `createPromptClient`
  * @throws {PromptLoadError} `url-refused` when the base URL breaks the rules
+ * @throws {RangeError} when `timeoutMs` or `maxBytes` is not a whole number of 1 or more
  *
  * @example
  * const source = httpSource('https://raw.githubusercontent.com/acme/app/main/.promptscript/releases/', {
@@ -177,8 +207,8 @@ export function httpSource(baseUrl: string, options: HttpSourceOptions = {}): Pr
     // Called through globalThis: browsers and edge workers refuse fetch with another receiver
     fetch: options.fetch ?? ((url, init) => globalThis.fetch(url, init)),
     headers: options.headers ?? {},
-    timeoutMs: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
-    maxBytes: options.maxBytes ?? DEFAULT_MAX_BYTES,
+    timeoutMs: wholeNumber('timeoutMs', options.timeoutMs ?? DEFAULT_TIMEOUT_MS, 1),
+    maxBytes: wholeNumber('maxBytes', options.maxBytes ?? DEFAULT_MAX_BYTES, 1),
   };
   return { name: config.name, read: (path, etag) => readFile(config, path, etag) };
 }

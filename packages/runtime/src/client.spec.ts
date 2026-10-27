@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { indexOf, labelOf, makeBundle, type Json } from './__tests__/fixture.js';
 import { createPromptClient } from './client.js';
 import { PromptLoadError, type PromptRuntimeError } from './errors.js';
-import type { PromptCacheStore, PromptClientOptions, PromptSource } from './types.js';
+import type { Prompt, PromptCacheStore, PromptClientOptions, PromptSource } from './types.js';
 
 const ID = 'acme-support/refund-reply';
 const v1 = makeBundle();
@@ -189,7 +189,17 @@ describe('createPromptClient', () => {
   });
 
   it('refuses a label name that is not an environment name', () => {
-    for (const label of ['Prod', 'index', 'manifest', 'com1', '1prod', 'a/b']) {
+    for (const label of [
+      'Prod',
+      'index',
+      'manifest',
+      'com0',
+      'com1',
+      'lpt0',
+      'lpt9',
+      '1prod',
+      'a/b',
+    ]) {
       expect(() => client(releases(), { label })).toThrow(
         expect.objectContaining({ code: 'invalid-index' })
       );
@@ -506,6 +516,226 @@ describe('createPromptClient', () => {
 
     expect(error.code).toBe('source-error');
     expect(pinned.code).toBe('source-error');
+  });
+
+  it('reads a pinned bundle once whatever id comes with the hash', async () => {
+    // Arrange
+    const source = releases();
+    const prompts = client(source);
+
+    // Act
+    const first = await failure(prompts.get(`junk1@${hashOf(v1)}`));
+    const second = await failure(prompts.get(`junk2@${hashOf(v1)}`));
+    const again = await failure(prompts.get(`junk1@${hashOf(v1)}`));
+    const real = await prompts.get(`${ID}@${hashOf(v1)}`);
+
+    // Assert
+    expect(source.reads).toEqual([bundlePath(v1)]);
+    expect(first.code).toBe('index-mismatch');
+    expect(second.code).toBe('index-mismatch');
+    expect(again).toBe(first);
+    expect(real.id).toBe(ID);
+  });
+
+  it('serves the stale prompt when onError throws', async () => {
+    // Arrange
+    const source = releases();
+    const onError = vi.fn(() => {
+      throw new Error('logger broke');
+    });
+    const prompts = client(source, { onError });
+    await prompts.get(ID);
+    source.down = true;
+    later(60_000);
+    await prompts.get(ID);
+    await flush();
+
+    // Act
+    const prompt = await prompts.get(ID);
+
+    // Assert
+    expect(prompt.meta.stale).toBe(true);
+    expect(onError).toHaveBeenCalled();
+  });
+
+  it.each([
+    [
+      'throws',
+      () => {
+        throw new Error('logger broke');
+      },
+    ],
+    [
+      'rejects',
+      async () => {
+        throw new Error('logger broke');
+      },
+    ],
+  ])('leaves no unhandled rejection when a store write fails and onError %s', async (_, fn) => {
+    // Arrange
+    const unhandled = vi.fn();
+    let calls = 0;
+    // Not a vi.fn: a spy handles the promise it returns, which hides the rejection
+    const onError = (): unknown => {
+      calls++;
+      return fn();
+    };
+    const store: PromptCacheStore = {
+      get: async () => undefined,
+      set: async () => {
+        throw new Error('disk full');
+      },
+    };
+    process.on('unhandledRejection', unhandled);
+
+    // Act
+    let prompt: Prompt | undefined;
+    try {
+      prompt = await client(releases(), { cache: { store }, onError }).get(ID);
+      await flush();
+    } finally {
+      process.off('unhandledRejection', unhandled);
+    }
+
+    // Assert
+    expect(prompt?.contentHash).toBe(hashOf(v1));
+    // The label and the bundle write both fail
+    expect(calls).toBe(2);
+    expect(unhandled).not.toHaveBeenCalled();
+  });
+
+  it('keeps the label the source gave over an older one in the store', async () => {
+    // Arrange
+    const source = releases();
+    source.set(bundlePath(v2), text(v2));
+    source.set('prod.json', labelOf('prod', [v2]));
+    const store = memoryStore();
+    const onError = vi.fn();
+    const prompts = client(source, { cache: { store }, onError });
+    await prompts.get(ID);
+    await flush();
+    // Another instance saved an older label, or the newer write failed
+    store.data.set(`${source.name}|prod.json`, labelOf('prod', [v1]));
+    store.data.set(`${source.name}|${bundlePath(v1)}`, text(v1));
+    source.down = true;
+    later(60_000);
+    await prompts.get(ID);
+    await flush();
+    later(60_000);
+    await prompts.get(ID);
+    await flush();
+
+    // Act
+    const prompt = await prompts.get(ID);
+
+    // Assert
+    expect(prompt.contentHash).toBe(hashOf(v2));
+    expect(prompt.meta.stale).toBe(true);
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ code: 'timeout' }));
+  });
+
+  it('refuses a not-modified answer to a pointer read sent without an ETag', async () => {
+    // Arrange
+    let pointerReads = 0;
+    const source: PromptSource = {
+      name: 'no-etag',
+      read: async (path) => {
+        if (path !== 'prod.json') return { text: text(v1) };
+        pointerReads++;
+        return pointerReads === 1 ? { text: labelOf('prod', [v1]) } : 'not-modified';
+      },
+    };
+    const prompts = client(source, { failMode: 'closed' });
+    await prompts.get(ID);
+    later(60_000);
+
+    // Act
+    const error = await failure(prompts.get(ID));
+
+    // Assert
+    expect(error.code).toBe('source-error');
+    expect(error.message).toContain('answered not modified to a plain read');
+  });
+
+  it('forgets a prompt evicted by maxPrompts, so it is not served stale', async () => {
+    // Arrange
+    const source = releases();
+    const prompts = client(source, { cache: { maxPrompts: 1 } });
+    await prompts.get(ID);
+    await prompts.get('acme-support/other');
+    source.down = true;
+    later(60_000);
+
+    // Act
+    const error = await failure(prompts.get(ID));
+
+    // Assert
+    expect(error.code).toBe('timeout');
+  });
+
+  it.each([
+    ['a reference above 512 characters', `acme-support/${'x'.repeat(500)}`],
+    ['a line break', `${ID}\r\nX-Injected: yes`],
+    ['a line separator', `${ID}\u2028X-Injected: yes`],
+    ['a next line character', `${ID}\u0085X-Injected: yes`],
+    ['a bidi override', `${ID}\u202Eyes`],
+  ])('refuses %s without a read, an echo or a cached miss', async (_name, ref) => {
+    // Arrange
+    const source = releases();
+    const prompts = client(source);
+
+    // Act
+    const first = await failure(prompts.get(ref));
+    const second = await failure(prompts.get(ref));
+
+    // Assert
+    expect(first.code).toBe('not-found');
+    expect(first.message).toBe('Prompt reference is not valid.');
+    expect(second).not.toBe(first);
+    expect(source.reads).toEqual([]);
+  });
+
+  it('retries an unpinned index-mismatch on the next get', async () => {
+    // Arrange
+    // A CDN that serves the new index before the new prompt file
+    const source = fakeSource({ 'index.json': indexOf([v2]), 'refund-reply.json': text(v1) });
+    const prompts = createPromptClient({ source });
+    const error = await failure(prompts.get(ID));
+    source.set('refund-reply.json', text(v2));
+
+    // Act
+    const prompt = await prompts.get(ID);
+
+    // Assert
+    expect(error.code).toBe('index-mismatch');
+    expect(prompt.contentHash).toBe(hashOf(v2));
+  });
+
+  it.each([
+    ['of 512 characters', `acme-support/${'x'.repeat(499)}`],
+    ['with a plain space', 'acme-support/refund reply'],
+  ])('still looks up a reference %s', async (_name, ref) => {
+    const source = releases();
+
+    const error = await failure(client(source).get(ref));
+
+    expect(error.message).toContain('is not listed');
+    expect(source.reads).toEqual(['prod.json']);
+  });
+
+  it.each([NaN, -1, Infinity, 1.5])('refuses %s as cache.ttlMs or cache.maxPrompts', (value) => {
+    expect(() => client(releases(), { cache: { ttlMs: value } })).toThrow(
+      expect.objectContaining({
+        name: 'RangeError',
+        message: 'cache.ttlMs must be a whole number of 0 or more.',
+      })
+    );
+    expect(() => client(releases(), { cache: { maxPrompts: value } })).toThrow(
+      expect.objectContaining({
+        name: 'RangeError',
+        message: 'cache.maxPrompts must be a whole number of 1 or more.',
+      })
+    );
   });
 
   it('wraps an error from a custom source', async () => {

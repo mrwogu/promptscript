@@ -1,7 +1,7 @@
 import { PromptLoadError, PromptRuntimeError } from './errors.js';
 import { PROMPT_BUNDLE_INDEX_SCHEMA_URL } from './internal/prompt-bundle-hash.js';
 import { HASH_PATTERN, isObject, toPrompt, verifyBundle, type VerifiedBundle } from './load.js';
-import { assertFilePath } from './paths.js';
+import { assertFilePath, wholeNumber } from './paths.js';
 import type {
   Prompt,
   PromptCacheStore,
@@ -12,19 +12,23 @@ import type {
 
 const LABEL_SCHEMA_URL = 'https://getpromptscript.dev/schema/prompt-release-label/v1.json';
 const ENVIRONMENT = /^[a-z][a-z\d-]{0,31}$/;
-const RESERVED_LABELS = /^(?:index|manifest|con|prn|aux|nul|com[1-9]|lpt[1-9])$/;
+// Windows reserves COM0-COM9 and LPT0-LPT9 as device names
+const RESERVED_LABELS = /^(?:index|manifest|con|prn|aux|nul|com\d|lpt\d)$/;
 const DEFAULT_TTL_MS = 60_000;
 const DEFAULT_MAX_PROMPTS = 256;
+const MAX_REF_LENGTH = 512;
+// Control and format characters (C0, DEL, C1, bidi overrides) and the two line separators
+const UNSAFE_CHARACTER = /[\p{Cc}\p{Cf}\u2028\u2029]/u;
 
 type Entries = ReadonlyMap<string, { readonly hash: string; readonly file: string }>;
 
 interface Pointer {
   readonly entries: Entries;
   readonly etag?: string;
-  /** Time of the last read that confirmed it; never fresh when it came from the store */
+  /** Time of the last read that confirmed it; never fresh after a failed read */
   readonly fetchedAt: number;
   readonly confirmedAt: string;
-  /** The source failure, when the text came from the store */
+  /** The source failure, when the text came from the store or the last read failed */
   readonly failure?: PromptRuntimeError;
 }
 
@@ -122,6 +126,8 @@ class CachingPromptClient implements PromptClient {
   private readonly misses = new Map<string, { until: number; error: PromptLoadError }>();
   private pointer: Pointer | undefined;
   private pointerFlight: Promise<Pointer> | undefined;
+  /** Set once the source gave the pointer; from then on the store is never read for it */
+  private confirmed = false;
 
   constructor(options: PromptClientOptions) {
     const { label } = options;
@@ -135,8 +141,12 @@ class CachingPromptClient implements PromptClient {
     this.label = label;
     this.onError = options.onError;
     this.store = options.cache?.store;
-    this.ttl = options.cache?.ttlMs ?? DEFAULT_TTL_MS;
-    this.maxPrompts = options.cache?.maxPrompts ?? DEFAULT_MAX_PROMPTS;
+    this.ttl = wholeNumber('cache.ttlMs', options.cache?.ttlMs ?? DEFAULT_TTL_MS, 0);
+    this.maxPrompts = wholeNumber(
+      'cache.maxPrompts',
+      options.cache?.maxPrompts ?? DEFAULT_MAX_PROMPTS,
+      1
+    );
     this.open = options.failMode !== 'closed';
     this.pointerPath = label === undefined ? 'index.json' : `${label}.json`;
     const kind = label === undefined ? 'Prompt index' : `Label ${label}`;
@@ -144,20 +154,30 @@ class CachingPromptClient implements PromptClient {
   }
 
   async get(ref: string): Promise<Prompt> {
+    // A ref can come from a request: a long one or one with a line break is not echoed or kept
+    if (ref.length > MAX_REF_LENGTH || UNSAFE_CHARACTER.test(ref)) {
+      throw new PromptLoadError('not-found', 'Prompt reference is not valid.');
+    }
     const at = ref.lastIndexOf('@');
     const pinned = at > 0 && HASH_PATTERN.test(ref.slice(at + 1)) ? ref.slice(at + 1) : undefined;
     const id = pinned === undefined ? ref : ref.slice(0, at);
+    // A pinned hash with a label reads the bundle directly and never goes stale
+    const direct = pinned !== undefined && this.label !== undefined;
     const miss = this.misses.get(ref);
     if (miss && Date.now() < miss.until) throw miss.error;
     try {
-      if (pinned !== undefined && this.label !== undefined) {
-        // A pinned hash with a label reads the bundle directly and never goes stale
+      if (direct) {
         const loaded = await this.loadBundle(`bundles/${pinned}.json`, id, pinned);
         return this.serve(loaded.bundle, loaded.readAt, loaded.failure);
       }
       return await this.getListed(ref, id, pinned);
     } catch (error) {
-      if (error instanceof PromptLoadError && error.code === 'not-found') {
+      // A missing prompt and a wrong id with a pinned hash stay final until the ttl ends. Any
+      // other mismatch can be a CDN with the new pointer but the old bundle, so it is retried.
+      const final =
+        error instanceof PromptLoadError &&
+        (error.code === 'not-found' || (direct && error.code === 'index-mismatch'));
+      if (final) {
         remember(this.misses, ref, { until: Date.now() + this.ttl, error }, this.maxPrompts);
       }
       throw error;
@@ -219,7 +239,7 @@ class CachingPromptClient implements PromptClient {
       ...(failure && { error: failure }),
       attemptAt: Date.now(),
     };
-    this.served.set(ref, record);
+    remember(this.served, ref, record, this.maxPrompts);
     return record;
   }
 
@@ -229,7 +249,7 @@ class CachingPromptClient implements PromptClient {
     error?: PromptRuntimeError,
     label?: string
   ): Prompt {
-    if (error) this.onError?.(error);
+    if (error) this.report(error);
     return toPrompt(bundle, {
       id: bundle.id,
       contentHash: bundle.contentHash,
@@ -256,13 +276,25 @@ class CachingPromptClient implements PromptClient {
 
   private async fetchPointer(): Promise<Pointer> {
     const previous = this.pointer;
-    const read = await this.readText(
-      this.pointerPath,
-      previous?.failure ? undefined : previous?.etag
-    );
+    const etag = previous?.failure ? undefined : previous?.etag;
+    let read: Read;
+    try {
+      // The store can hold an older pointer, so it only helps before the source answered
+      read = await this.readText(this.pointerPath, etag, !this.confirmed);
+    } catch (error) {
+      if (!this.open || !this.confirmed || !previous || !(error instanceof PromptRuntimeError)) {
+        throw error;
+      }
+      // Keep the pointer the source gave; it is not fresh, so the next get reads it again
+      this.pointer = { ...previous, fetchedAt: -Infinity, failure: error };
+      return this.pointer;
+    }
     const confirmedAt = new Date().toISOString();
     if (read === 'not-modified') {
-      if (!previous) throw this.notModified(this.pointerWhere, this.pointerPath);
+      // Only a read that sent an ETag may be answered with not modified
+      if (etag === undefined || !previous) {
+        throw this.notModified(this.pointerWhere, this.pointerPath);
+      }
       this.pointer = { ...previous, fetchedAt: Date.now(), confirmedAt };
       return this.pointer;
     }
@@ -274,40 +306,40 @@ class CachingPromptClient implements PromptClient {
       confirmedAt,
       ...(read.failure && { failure: read.failure }),
     };
-    if (!read.failure) this.save(this.pointerPath, read.text);
+    if (!read.failure) {
+      this.confirmed = true;
+      this.save(this.pointerPath, read.text);
+    }
     return this.pointer;
   }
 
-  private loadBundle(path: string, id: string, hash: string): Promise<Loaded> {
-    const key = `${id}@${hash}`;
-    const cached = this.bundles.get(key);
-    if (cached) return Promise.resolve(cached);
-    let flight = this.loading.get(key);
-    if (!flight) {
-      flight = this.readBundle(path, id, hash)
-        .then((loaded) => {
-          // A copy read from the store is not cached, so the next get tries the source again
-          if (!loaded.failure) remember(this.bundles, key, loaded, this.maxPrompts);
-          return loaded;
-        })
-        .finally(() => this.loading.delete(key));
-      this.loading.set(key, flight);
+  private async loadBundle(path: string, id: string, hash: string): Promise<Loaded> {
+    // Bundle files are content-addressed and the hash covers the id, so the hash is the key
+    let loaded = this.bundles.get(hash);
+    if (!loaded) {
+      let flight = this.loading.get(hash);
+      if (!flight) {
+        flight = this.readBundle(path, hash)
+          .then((read) => {
+            // A copy read from the store is not cached, so the next get tries the source again
+            if (!read.failure) remember(this.bundles, hash, read, this.maxPrompts);
+            return read;
+          })
+          .finally(() => this.loading.delete(hash));
+        this.loading.set(hash, flight);
+      }
+      loaded = await flight;
     }
-    return flight;
+    if (loaded.bundle.id !== id) throw this.mismatch(path, loaded.bundle, `${id}@${hash}`);
+    return loaded;
   }
 
-  private async readBundle(path: string, id: string, hash: string): Promise<Loaded> {
+  private async readBundle(path: string, hash: string): Promise<Loaded> {
     const where = `Prompt file ${path} from ${this.source.name}`;
     const read = await this.readText(path);
     if (read === 'not-modified') throw this.notModified(where, path);
     const bundle = verifyBundle(parseJson(read.text, 'invalid-bundle', where, path), where, path);
-    if (bundle.id !== id || bundle.contentHash !== hash) {
-      throw new PromptLoadError(
-        'index-mismatch',
-        `${where} holds ${bundle.id}@${bundle.contentHash}, but ${id}@${hash} was expected. Rebuild the release files.`,
-        path
-      );
-    }
+    if (bundle.contentHash !== hash) throw this.mismatch(path, bundle, hash);
     if (!read.failure) this.save(path, read.text);
     return {
       bundle,
@@ -317,7 +349,7 @@ class CachingPromptClient implements PromptClient {
   }
 
   /** Read a file from the source; in open mode, fall back to the store when the source fails. */
-  private async readText(path: string, etag?: string): Promise<Read> {
+  private async readText(path: string, etag?: string, useStore = true): Promise<Read> {
     try {
       const file = await this.source.read(path, etag);
       return file === 'not-modified' ? file : { text: file.text, etag: file.etag };
@@ -331,7 +363,7 @@ class CachingPromptClient implements PromptClient {
               path
             );
       const store = this.store;
-      if (this.open && store) {
+      if (this.open && store && useStore) {
         const text = await Promise.resolve()
           .then(() => store.get(`${this.source.name}|${path}`))
           .catch(() => undefined);
@@ -348,8 +380,26 @@ class CachingPromptClient implements PromptClient {
       .then(() => store.set(`${this.source.name}|${path}`, text))
       .catch(() => {
         const message = `Could not save ${path} to the cache store.`;
-        this.onError?.(new PromptLoadError('source-error', message, path));
+        this.report(new PromptLoadError('source-error', message, path));
       });
+  }
+
+  /** Call onError. A callback that throws or rejects never fails a get or the process. */
+  private report(error: PromptRuntimeError): void {
+    try {
+      const result: unknown = this.onError?.(error);
+      if (result instanceof Promise) result.catch(() => undefined);
+    } catch {
+      // The prompt is served all the same
+    }
+  }
+
+  private mismatch(path: string, bundle: VerifiedBundle, expected: string): PromptLoadError {
+    return new PromptLoadError(
+      'index-mismatch',
+      `Prompt file ${path} from ${this.source.name} holds ${bundle.id}@${bundle.contentHash}, but ${expected} was expected. Rebuild the release files.`,
+      path
+    );
   }
 
   private notModified(where: string, path: string): PromptLoadError {
@@ -373,13 +423,17 @@ class CachingPromptClient implements PromptClient {
  * Pointer files are cached for `cache.ttlMs` and revalidated with their ETag after it.
  * In `failMode: 'open'` (the default) a known prompt is served at once while a refresh runs
  * in the background, and a failed refresh serves the last verified prompt with
- * `meta.stale: true` and calls `onError`. A pointer that loads and verifies but no longer
- * lists the id is final: the cached prompt is dropped and `get` throws `not-found`. In
- * `failMode: 'closed'` every refresh is awaited and every failure throws.
+ * `meta.stale: true` and calls `onError`. Once the source gave the pointer, a failed refresh
+ * keeps it and never takes the copy from `cache.store`, which can be older. A pointer that
+ * loads and verifies but no longer lists the id is final: the cached prompt is dropped and
+ * `get` throws `not-found`. In `failMode: 'closed'` every refresh is awaited and every
+ * failure throws. A reference above 512 characters or with a control, format or line
+ * separator character throws `not-found` without a read.
  *
  * @param options - Source, label, cache, fail mode and error callback
  * @returns The client
  * @throws {PromptLoadError} `invalid-index` when `label` is not an environment name
+ * @throws {RangeError} when `cache.ttlMs` or `cache.maxPrompts` is not a whole number in range
  *
  * @example
  * const client = createPromptClient({ source: httpSource(releasesUrl), label: 'prod' });
