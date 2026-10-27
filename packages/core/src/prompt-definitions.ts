@@ -13,6 +13,7 @@ import type {
   Value,
   ValueNode,
 } from './types/index.js';
+import { compareCodeUnits } from './utils/canonical-json.js';
 import { findClosestMatch } from './utils/levenshtein.js';
 
 /** One problem found while reading a `@prompts` entry. */
@@ -489,6 +490,37 @@ export function validateGovernanceFields(fields: Record<string, Value>): string[
  */
 export function readMetaGovernance(fields: Record<string, Value>): GovernanceMeta {
   return readMetaGovernanceWith(fields, () => undefined);
+}
+
+function sortedUnique(values: readonly string[]): string[] {
+  return [...new Set(values)].sort(compareCodeUnits);
+}
+
+/**
+ * Effective governance of a prompt: `risk`, `owner` and `domain` from the entry, else
+ * the `@meta` default; `dataClasses` joined; entry `reviewers` replace the default.
+ * Lists are sorted and deduplicated. This is the value a prompt bundle carries.
+ *
+ * @param entry - Governance authored on the entry
+ * @param defaults - Governance defaults of `@meta`
+ * @returns The effective governance, without unset fields
+ */
+export function effectiveGovernance(
+  entry: GovernanceMeta,
+  defaults: GovernanceMeta
+): GovernanceMeta {
+  const dataClasses = sortedUnique([...(defaults.dataClasses ?? []), ...(entry.dataClasses ?? [])]);
+  const reviewers = sortedUnique(entry.reviewers ?? defaults.reviewers ?? []);
+  const risk = entry.risk ?? defaults.risk;
+  const owner = entry.owner ?? defaults.owner;
+  const domain = entry.domain ?? defaults.domain;
+  return {
+    ...(risk !== undefined ? { risk } : {}),
+    ...(owner !== undefined ? { owner } : {}),
+    ...(domain !== undefined ? { domain } : {}),
+    ...(dataClasses.length > 0 ? { dataClasses } : {}),
+    ...(reviewers.length > 0 ? { reviewers } : {}),
+  };
 }
 
 function readCompose(raw: Raw, blocks: ReadonlySet<string>, bad: Report): ComposableBlock[] {

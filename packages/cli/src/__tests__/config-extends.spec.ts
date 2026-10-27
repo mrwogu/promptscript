@@ -205,6 +205,181 @@ describe('config extends', () => {
     );
   });
 
+  it('should join governance admins and role owners with the base ones', async () => {
+    const root = project({
+      'org.yaml': [
+        'governance:',
+        "  admins: ['@acme/platform']",
+        '  roles:',
+        "    legal: ['@acme/legal']",
+        "    security: ['@acme/appsec']",
+        '  dataClasses: [pii, internal]',
+        '  codeowners:',
+        '    output: CODEOWNERS',
+      ].join('\n'),
+      'team.yaml': [
+        'extends: ./org.yaml',
+        'governance:',
+        "  admins: ['@acme/support-leads', '@acme/platform']",
+        '  roles:',
+        "    legal: ['@acme/support-legal']",
+      ].join('\n'),
+      'promptscript.yaml': [
+        'id: app',
+        'extends: ./team.yaml',
+        'governance:',
+        '  roles:',
+        "    privacy: ['@acme/dpo']",
+        '  dataClasses: [pii]',
+        '  codeowners:',
+        '    prompts: false',
+      ].join('\n'),
+    });
+
+    const config = await loadConfig(join(root, 'promptscript.yaml'));
+
+    expect(config.governance).toEqual({
+      admins: ['@acme/platform', '@acme/support-leads'],
+      roles: {
+        legal: ['@acme/legal', '@acme/support-legal'],
+        security: ['@acme/appsec'],
+        privacy: ['@acme/dpo'],
+      },
+      dataClasses: ['pii'],
+      codeowners: { output: 'CODEOWNERS', prompts: false },
+    });
+  });
+
+  it('should join protected paths and let the project change other codeowners keys', async () => {
+    const root = project({
+      'base.yaml': [
+        'governance:',
+        '  codeowners:',
+        '    output: CODEOWNERS',
+        "    protect: ['.github/workflows']",
+      ].join('\n'),
+      'promptscript.yaml': [
+        'id: app',
+        'extends: ./base.yaml',
+        'governance:',
+        '  codeowners:',
+        '    output: .gitlab/CODEOWNERS',
+        "    protect: ['scripts/release', '.github/workflows']",
+        '    prompts: false',
+      ].join('\n'),
+    });
+
+    const config = await loadConfig(join(root, 'promptscript.yaml'));
+
+    expect(config.governance?.codeowners).toEqual({
+      output: '.gitlab/CODEOWNERS',
+      protect: ['.github/workflows', 'scripts/release'],
+      prompts: false,
+    });
+  });
+
+  it('should accept a bare codeowners key when the base protects no path', async () => {
+    const root = project({
+      'base.yaml': 'governance:\n  codeowners:\n    output: CODEOWNERS\n',
+      'promptscript.yaml': 'id: app\nextends: ./base.yaml\ngovernance:\n  codeowners:\n',
+    });
+
+    const config = await loadConfig(join(root, 'promptscript.yaml'));
+
+    expect(config.governance).toEqual({ codeowners: null });
+  });
+
+  it('should keep base governance when the project declares none', async () => {
+    const root = project({
+      'base.yaml': "governance:\n  admins: ['@acme/platform']\n",
+      'promptscript.yaml': 'id: app\nextends: ./base.yaml\ntargets: [github]\n',
+    });
+
+    const config = await loadConfig(join(root, 'promptscript.yaml'));
+
+    expect(config.governance).toEqual({ admins: ['@acme/platform'] });
+  });
+
+  it('should accept a bare governance key when no base in the chain has owners', async () => {
+    const root = project({
+      'base.yaml': "syntax: '1.4.0'\ngovernance:\n  dataClasses: [pii]\n",
+      'promptscript.yaml': 'id: app\nextends: ./base.yaml\ngovernance:\n',
+    });
+
+    const config = await loadConfig(join(root, 'promptscript.yaml'));
+
+    expect(config.governance).toBeNull();
+  });
+
+  it('should accept bare owner keys when the base sets no governance', async () => {
+    const root = project({
+      'base.yaml': "syntax: '1.4.0'\n",
+      'promptscript.yaml': 'id: app\nextends: ./base.yaml\ngovernance:\n  admins:\n  roles:\n',
+    });
+
+    const config = await loadConfig(join(root, 'promptscript.yaml'));
+
+    expect(config.governance).toEqual({ admins: null, roles: null });
+  });
+
+  it.each([
+    ['governance set to null', 'governance: null', /"governance" in .* is null, which would drop/],
+    ['admins set to null', 'governance:\n  admins: null', /"governance.admins" in .* is null/],
+    ['admins as a string', "governance:\n  admins: '@acme/x'", /"governance.admins" .* a string/],
+    ['roles set to null', 'governance:\n  roles: null', /"governance.roles" in .* is null/],
+    ['roles as a list', "governance:\n  roles: ['@acme/x']", /"governance.roles" .* a list/],
+    [
+      'a role set to null',
+      'governance:\n  roles:\n    legal: null',
+      /"governance.roles.legal" in .* is null/,
+    ],
+    [
+      'a __proto__ role',
+      "governance:\n  roles:\n    __proto__: ['@acme/x']",
+      /"governance.roles" in .* has a "__proto__" key/,
+    ],
+    [
+      'codeowners set to null',
+      'governance:\n  codeowners: null',
+      /"governance.codeowners" in .* is null/,
+    ],
+    [
+      'protect set to null',
+      'governance:\n  codeowners:\n    protect: null',
+      /"governance.codeowners.protect" in .* is null/,
+    ],
+    [
+      'a __proto__ key in codeowners',
+      'governance:\n  codeowners:\n    __proto__: { prompts: false }',
+      /"governance.codeowners" in .* has a "__proto__" key/,
+    ],
+  ])('should reject %s under extends', async (_name, governance, message) => {
+    const root = project({
+      'base.yaml': [
+        'governance:',
+        "  admins: ['@acme/platform']",
+        '  roles:',
+        "    legal: ['@acme/legal']",
+        '  codeowners:',
+        "    protect: ['.github/workflows']",
+      ].join('\n'),
+      'promptscript.yaml': `id: app\nextends: ./base.yaml\n${governance}\n`,
+    });
+
+    await expect(loadConfig(join(root, 'promptscript.yaml'))).rejects.toThrow(message);
+  });
+
+  it('should name both files when a project would drop base owners', async () => {
+    const root = project({
+      'base.yaml': "governance:\n  admins: ['@acme/platform']\n",
+      'promptscript.yaml': 'id: app\nextends: ./base.yaml\ngovernance:\n  admins: null\n',
+    });
+
+    await expect(loadConfig(join(root, 'promptscript.yaml'))).rejects.toThrow(
+      `"governance.admins" in ${join(root, 'promptscript.yaml')} is null, which would drop entries set in ${join(root, 'base.yaml')} or a config it extends.`
+    );
+  });
+
   it('should reject a circular extends chain', async () => {
     const root = project({
       'a.yaml': 'extends: ./b.yaml\n',

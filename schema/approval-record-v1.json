@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/approval-record/v1.json",
+  "title": "PromptScript Approval Record v1",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://getpromptscript.dev/schema/approval-record/v1.json",
+      "description": "Schema URL, the version tag of the record.",
+      "examples": [
+        "https://getpromptscript.dev/schema/approval-record/v1.json"
+      ]
+    },
+    "prompt": {
+      "type": "string",
+      "description": "Prompt id, `<@meta.id>/<key>`. No segment ends with a dot.",
+      "examples": [
+        "acme-support/refund-reply"
+      ],
+      "pattern": "^(?!.*\\.\\.)(?:@?[A-Za-z0-9][A-Za-z0-9_.-]{0,63}(?<!\\.)/)+[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+    },
+    "contentHash": {
+      "type": "string",
+      "description": "Content hash of the approved bundle.",
+      "pattern": "^sha256-[0-9a-f]{64}$"
+    },
+    "role": {
+      "$ref": "#/definitions/GovernanceRoleName",
+      "description": "Approval role from `governance.roles`"
+    },
+    "approver": {
+      "$ref": "#/definitions/ApprovalApproverV1",
+      "description": "Who approved"
+    },
+    "createdAt": {
+      "type": "string",
+      "description": "Creation time, self-asserted and never used to decide.",
+      "examples": [
+        "2026-10-22T09:14:03.120Z"
+      ],
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    },
+    "environment": {
+      "$ref": "#/definitions/ReleaseEnvironmentName",
+      "description": "The only environment the approval counts for. Absent means every environment."
+    },
+    "comment": {
+      "type": "string",
+      "description": "Note of the approver, without control characters except newline and without lone surrogates.",
+      "maxLength": 2000,
+      "pattern": "^(?:[^\\p{Cc}\\p{Cs}]|\\n){0,2000}$"
+    },
+    "signatureType": {
+      "type": "string",
+      "const": "ssh",
+      "description": "Signature format, see `signature`. Reserved, not written or read in this version."
+    },
+    "signature": {
+      "type": "string",
+      "description": "Armored SSH signature over the UTF-8 bytes of the RFC 8785 canonical JSON (`canonicalizeJson`) of the record without `signature`; `signatureType` is included. The signing namespace is `promptscript-approval-<role>`. Reserved, not written or read in this version.",
+      "maxLength": 8192,
+      "pattern": "^-----BEGIN SSH SIGNATURE-----\\n[A-Za-z0-9+/=\\n]{1,8192}-----END SSH SIGNATURE-----\\n?$"
+    }
+  },
+  "required": [
+    "$schema",
+    "prompt",
+    "contentHash",
+    "role",
+    "approver",
+    "createdAt"
+  ],
+  "additionalProperties": false,
+  "description": "Approval of one exact prompt version by one approver in one role, version 1. Unsigned: the record is a claim until the change adding it is reviewed.",
+  "definitions": {
+    "GovernanceRoleName": {
+      "type": "string",
+      "description": "Name of an approval role: lowercase letters, digits and hyphens, starting with a letter. Windows device names are refused, since a role names a directory.",
+      "pattern": "^(?!(?:con|prn|aux|nul|com[0-9]|lpt[0-9])$)[a-z][a-z0-9-]{0,31}$"
+    },
+    "ApprovalApproverV1": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "const": "asserted",
+          "description": "`asserted`: the identity is a claim, it binds through the review of the change that adds the record"
+        },
+        "value": {
+          "type": "string",
+          "description": "Git host user handle.",
+          "examples": [
+            "@jane"
+          ],
+          "pattern": "^@[A-Za-z0-9][A-Za-z0-9-]{0,38}$"
+        }
+      },
+      "required": [
+        "source",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "Who approved, as the record states it."
+    },
+    "ReleaseEnvironmentName": {
+      "type": "string",
+      "description": "Name of a release environment.",
+      "pattern": "^[a-z][a-z0-9-]{0,31}$"
+    }
+  }
+}

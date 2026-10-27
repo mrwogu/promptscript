@@ -105,6 +105,13 @@ const GENERATED_SCHEMAS: SchemaTarget[] = [
     title: 'PromptScript Eval Comparison v1',
     output: '../schema/eval-comparison-v1.json',
   },
+  {
+    source: 'approval.ts',
+    type: 'ApprovalRecordV1',
+    schemaId: 'https://getpromptscript.dev/schema/approval-record/v1.json',
+    title: 'PromptScript Approval Record v1',
+    output: '../schema/approval-record-v1.json',
+  },
 ];
 
 /**

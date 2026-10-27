@@ -222,6 +222,78 @@ export interface ReleasesConfig {
   environments: ReleaseEnvironmentName[];
 }
 
+/**
+ * Name of an approval role: lowercase letters, digits and hyphens, starting with a
+ * letter. Windows device names are refused, since a role names a directory.
+ * @pattern ^(?!(?:con|prn|aux|nul|com[0-9]|lpt[0-9])$)[a-z][a-z0-9-]{0,31}$
+ */
+export type GovernanceRoleName = string & { readonly __brand?: 'GovernanceRoleName' };
+
+/**
+ * Git host identity of an owner, in a form CODEOWNERS accepts: a user (`@jane`),
+ * a team (`@acme/legal`, GitLab subgroups allowed) or an email address.
+ * @pattern ^(?:@[A-Za-z0-9][A-Za-z0-9-]{0,38}|@[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})$
+ * @maxLength 254
+ */
+export type GovernanceOwner = string & { readonly __brand?: 'GovernanceOwner' };
+
+/**
+ * Owners that review one approval role, at least one.
+ * @minItems 1
+ * @uniqueItems true
+ */
+export type GovernanceRoleOwners = GovernanceOwner[];
+
+/** Settings of the generated CODEOWNERS file. */
+export interface GovernanceCodeownersConfig {
+  /**
+   * Path of the CODEOWNERS file, relative to the repository root.
+   * @default ".github/CODEOWNERS"
+   */
+  output?: '.github/CODEOWNERS' | 'CODEOWNERS' | 'docs/CODEOWNERS' | '.gitlab/CODEOWNERS';
+  /**
+   * More paths owned by the admins, relative to the repository root.
+   * Under `extends` the lists are joined and cannot shrink.
+   * @example ['.github/workflows']
+   */
+  protect?: string[];
+  /**
+   * Write lines for the `.prs` files that define prompts.
+   * @default true
+   */
+  prompts?: boolean;
+}
+
+/**
+ * Governance settings (`governance` in promptscript.yaml): who owns the setup and
+ * which teams review each approval role.
+ */
+export interface GovernanceConfig {
+  /**
+   * Owners of the config, the approvals root and the releases.
+   * Under `extends` the lists are joined and cannot shrink.
+   * @example ['@acme/prompt-platform']
+   * @uniqueItems true
+   */
+  admins?: GovernanceOwner[];
+  /**
+   * Approval roles by name, each with the owners that review it. At most 32 roles.
+   * Under `extends` each role's list is joined with the base list and cannot shrink.
+   * @example { legal: ['@acme/legal'], security: ['@acme/appsec'] }
+   * @maxProperties 32
+   * @propertyNames { "pattern": "^(?!(?:con|prn|aux|nul|com[0-9]|lpt[0-9])$)[a-z][a-z0-9-]{0,31}$" }
+   */
+  roles?: Record<string, GovernanceRoleOwners>;
+  /**
+   * Data class names the project uses.
+   * @example ['pii', 'phi', 'financial', 'credentials', 'internal', 'public']
+   * @uniqueItems true
+   */
+  dataClasses?: string[];
+  /** Generated CODEOWNERS settings */
+  codeowners?: GovernanceCodeownersConfig;
+}
+
 /** Request and response format of an eval provider. */
 export type EvalProviderKind = 'anthropic' | 'openai-compatible';
 
@@ -522,6 +594,15 @@ export interface PromptScriptConfig {
    *     anthropic: { kind: anthropic, apiKeyEnvVar: ANTHROPIC_API_KEY }
    */
   eval?: EvalConfig;
+
+  /**
+   * Governance settings: admins and approval roles.
+   * @example
+   * governance:
+   *   admins: ['@acme/prompt-platform']
+   *   roles: { legal: ['@acme/legal'] }
+   */
+  governance?: GovernanceConfig;
 
   /**
    * Universal directory for auto-discovering skills and commands.

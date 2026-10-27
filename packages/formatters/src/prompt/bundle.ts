@@ -5,6 +5,7 @@ import {
   PROMPT_BUNDLE_SCHEMA_URL,
   compareCodeUnits,
   compareVersions,
+  effectiveGovernance,
   isValidVersion,
   extractPromptDefinitions,
   getModelCatalog,
@@ -12,7 +13,6 @@ import {
   normalizeProvenanceFiles,
   readMetaGovernance,
   type ComposableBlock,
-  type GovernanceMeta,
   type ModelParams,
   type Program,
   type PromptBundleInput,
@@ -65,10 +65,6 @@ export class PromptFormatError extends PSError {
   }
 }
 
-function sortedUnique(values: readonly string[]): string[] {
-  return [...new Set(values)].sort(compareCodeUnits);
-}
-
 function deepNormalize<T>(value: T): T {
   if (typeof value === 'string') return normalizeNewlines(value) as T;
   if (Array.isArray(value)) return value.map((item: unknown) => deepNormalize(item)) as T;
@@ -111,25 +107,6 @@ function metaId(program: Program): string {
     );
   }
   return id;
-}
-
-/** Governance of a prompt: its own value, else the `@meta` default. */
-export function effectiveGovernance(
-  entry: GovernanceMeta,
-  defaults: GovernanceMeta
-): GovernanceMeta {
-  const dataClasses = sortedUnique([...(defaults.dataClasses ?? []), ...(entry.dataClasses ?? [])]);
-  const reviewers = sortedUnique(entry.reviewers ?? defaults.reviewers ?? []);
-  const risk = entry.risk ?? defaults.risk;
-  const owner = entry.owner ?? defaults.owner;
-  const domain = entry.domain ?? defaults.domain;
-  return {
-    ...(risk !== undefined ? { risk } : {}),
-    ...(owner !== undefined ? { owner } : {}),
-    ...(domain !== undefined ? { domain } : {}),
-    ...(dataClasses.length > 0 ? { dataClasses } : {}),
-    ...(reviewers.length > 0 ? { reviewers } : {}),
-  };
 }
 
 function buildInputs(prompt: PromptDefinition): Record<string, PromptBundleInput> {

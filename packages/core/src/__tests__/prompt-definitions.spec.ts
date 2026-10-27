@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeProgram } from '../canonical-ast.js';
 import {
+  effectiveGovernance,
   extractPromptDefinitions,
   readMetaGovernance,
   validateGovernanceFields,
@@ -631,5 +632,35 @@ describe('readMetaGovernance', () => {
     expect(readMetaGovernance({ risk: 'huge', owner: 3, domain: 'ops' })).toEqual({
       domain: 'ops',
     });
+  });
+});
+
+describe('effectiveGovernance', () => {
+  it('takes scalars from the entry, else from @meta', () => {
+    const entry = { risk: 'low' as const };
+    const defaults = { risk: 'high' as const, owner: '@acme/support', domain: 'payments' };
+
+    expect(effectiveGovernance(entry, defaults)).toEqual({
+      risk: 'low',
+      owner: '@acme/support',
+      domain: 'payments',
+    });
+  });
+
+  it('joins data classes and lets entry reviewers replace the default', () => {
+    const entry = { dataClasses: ['pii', 'financial'], reviewers: ['@bob', '@ann', '@bob'] };
+    const defaults = { dataClasses: ['pii', 'internal'], reviewers: ['@acme/legal'] };
+
+    expect(effectiveGovernance(entry, defaults)).toEqual({
+      dataClasses: ['financial', 'internal', 'pii'],
+      reviewers: ['@ann', '@bob'],
+    });
+  });
+
+  it('keeps the default reviewers and leaves out empty lists', () => {
+    expect(effectiveGovernance({ dataClasses: [] }, { reviewers: ['@b', '@a'] })).toEqual({
+      reviewers: ['@a', '@b'],
+    });
+    expect(effectiveGovernance({}, {})).toEqual({});
   });
 });
