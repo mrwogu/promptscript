@@ -69,7 +69,10 @@ export interface ReleaseDiagnostic {
   location?: ReleaseLocation;
 }
 
-/** The file, line and column of a source location, and nothing else the report omits. */
+/**
+ * The file, line and column of a source location, and nothing else the report omits.
+ * A parse error at the end of a file has line and column -1; those are left out.
+ */
 export function toReleaseLocation(
   location: { file?: string; line?: number; column?: number } | undefined
 ): { location?: ReleaseLocation } {
@@ -78,8 +81,8 @@ export function toReleaseLocation(
   return {
     location: {
       ...(file === undefined ? {} : { file }),
-      ...(line === undefined ? {} : { line }),
-      ...(column === undefined ? {} : { column }),
+      ...(line === undefined || line < 1 ? {} : { line }),
+      ...(column === undefined || column < 1 ? {} : { column }),
     },
   };
 }

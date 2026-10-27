@@ -1,5 +1,5 @@
-import { constants } from 'node:fs';
-import { lstat, mkdir, open, readdir } from 'node:fs/promises';
+import { closeSync, constants, fstatSync, lstatSync, openSync, readSync } from 'node:fs';
+import { lstat, mkdir, readdir } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
 import {
   PROMPT_BUNDLE_INDEX_SCHEMA_URL,
@@ -136,38 +136,72 @@ function releaseFileError(path: string, problem: string): ReleaseError {
   );
 }
 
+/** A file that cannot be read as a plain regular file. The message completes "<path> ...". */
+export class UnreadableFileError extends Error {
+  constructor(problem: string) {
+    super(problem);
+    this.name = 'UnreadableFileError';
+  }
+}
+
 /**
- * The text of a release file, or undefined when it does not exist. The file is opened
- * without following a link where the platform allows it, checked on the open handle and
- * read up to its size, so a swap after the check cannot feed it another file.
+ * The bytes of a regular file, or undefined when it does not exist. The file is opened
+ * without following a link where the platform allows it, checked on the open descriptor
+ * and read up to its size, so a swap after the check cannot feed it another file.
+ * Synchronous, so a caller that reads many files holds one descriptor at a time.
+ * @throws UnreadableFileError for a link, a file that is not regular, one larger than
+ * `maxBytes` and one that changed while it was read
  */
-export async function readReleaseText(path: string): Promise<string | undefined> {
-  // Without O_NOFOLLOW (Windows) the lstat check is the guard against a link.
-  if (constants.O_NOFOLLOW === undefined) await assertRegularPath(path, 'file');
-  let handle;
+export function readRegularFile(path: string, maxBytes: number): Buffer | undefined {
+  // Without O_NOFOLLOW (Windows) the lstat check is the guard against a link; open and
+  // fstat below report every other problem.
+  if (
+    constants.O_NOFOLLOW === undefined &&
+    lstatSync(path, { throwIfNoEntry: false })?.isSymbolicLink()
+  ) {
+    throw new UnreadableFileError('is a symbolic link');
+  }
+  let descriptor: number;
   try {
     // O_NONBLOCK keeps a planted FIFO from hanging the open; the fstat below refuses it.
     const flags = constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0) | (constants.O_NONBLOCK ?? 0);
-    handle = await open(path, flags);
+    descriptor = openSync(path, flags);
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
     if (code === 'ENOENT') return undefined;
-    if (code === 'ELOOP') throw releaseFileError(path, 'is a symbolic link');
+    if (code === 'ELOOP') throw new UnreadableFileError('is a symbolic link');
     throw error;
   }
   try {
-    const details = await handle.stat();
-    if (!details.isFile()) throw releaseFileError(path, 'is not a regular file');
-    if (details.size > MAX_RELEASE_FILE_BYTES) {
-      throw releaseFileError(path, `is larger than ${MAX_RELEASE_FILE_BYTES} bytes`);
+    const details = fstatSync(descriptor);
+    if (!details.isFile()) throw new UnreadableFileError('is not a regular file');
+    if (details.size > maxBytes) {
+      throw new UnreadableFileError(`is larger than ${maxBytes} bytes`);
     }
-    // One byte more than the size shows a file that grew while it was read.
+    // A read may return fewer bytes than asked without any change (a network file system),
+    // so read until end of file. One byte more than the size shows a file that grew.
     const buffer = Buffer.alloc(details.size + 1);
-    const { bytesRead } = await handle.read(buffer, 0, buffer.length, 0);
-    if (bytesRead !== details.size) throw releaseFileError(path, 'changed while it was read');
-    return buffer.toString('utf-8', 0, bytesRead);
+    let total = 0;
+    let bytesRead = -1;
+    while (bytesRead !== 0 && total < buffer.length) {
+      bytesRead = readSync(descriptor, buffer, total, buffer.length - total, total);
+      total += bytesRead;
+    }
+    if (total !== details.size) throw new UnreadableFileError('changed while it was read');
+    return buffer.subarray(0, total);
   } finally {
-    await handle.close();
+    closeSync(descriptor);
+  }
+}
+
+/** The text of a release file, or undefined when it does not exist. See {@link readRegularFile}. */
+export function readReleaseText(path: string): Promise<string | undefined> {
+  try {
+    return Promise.resolve(readRegularFile(path, MAX_RELEASE_FILE_BYTES)?.toString('utf-8'));
+  } catch (error) {
+    const failure =
+      error instanceof UnreadableFileError ? releaseFileError(path, error.message) : error;
+    return Promise.reject(failure as Error);
   }
 }
 

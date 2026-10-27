@@ -431,6 +431,11 @@ through the environments you list in `releases.environments`, such as `staging` 
 promotion is a Git change you review. See the
 [releases guide](https://getpromptscript.dev/guides/releases/).
 
+`prs approve` records that a person approved one exact bundle hash in a role from
+`governance.roles`, as a JSON file under `.promptscript/approvals/`. The record is a claim; the
+review of the pull request that adds it is what binds it. See
+[approvals](https://getpromptscript.dev/guides/releases/#approvals).
+
 ## Built for Repositories and Organizations
 
 - **Runs locally** - PromptScript is a compiler, not a service. No hosted backend and no proxy

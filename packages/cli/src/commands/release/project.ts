@@ -37,7 +37,7 @@ import {
 /** Environment names the files of the release directory already use. */
 const RESERVED_ENVIRONMENT_NAMES = new Set(['index', 'manifest']);
 /** Windows device names, which no file system there can hold as `<name>.json`. */
-const WINDOWS_DEVICE_NAME_RE = /^(con|prn|aux|nul|com\d|lpt\d)$/;
+export const WINDOWS_DEVICE_NAME_RE = /^(con|prn|aux|nul|com\d|lpt\d)$/;
 const ENVIRONMENT_NAME_RE = /^[a-z][a-z0-9-]{0,31}$/;
 const MAX_ENVIRONMENTS = 16;
 

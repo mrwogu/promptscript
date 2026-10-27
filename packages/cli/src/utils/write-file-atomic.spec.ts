@@ -7,11 +7,12 @@ import {
   readFileSync,
   rmSync,
   statSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { writeFileAtomic } from './write-file-atomic.js';
+import { createFileExclusive, writeFileAtomic } from './write-file-atomic.js';
 
 describe('writeFileAtomic', () => {
   const dirs: string[] = [];
@@ -53,5 +54,46 @@ describe('writeFileAtomic', () => {
 
     expect(() => writeFileAtomic(target, 'new', 0o644)).toThrow();
     expect(readdirSync(dir)).toEqual(['target']);
+  });
+});
+
+describe('createFileExclusive', () => {
+  const dirs: string[] = [];
+  const tempDir = (): string => {
+    const dir = mkdtempSync(join(tmpdir(), 'prs-exclusive-'));
+    dirs.push(dir);
+    return dir;
+  };
+
+  afterEach(() => {
+    for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('creates the file with the mode and leaves no temporary file', () => {
+    const dir = tempDir();
+    const file = join(dir, 'record.json');
+
+    createFileExclusive(file, '{}\n', 0o644);
+
+    expect(readFileSync(file, 'utf-8')).toBe('{}\n');
+    expect(statSync(file).mode & 0o7777).toBe(0o644);
+    expect(readdirSync(dir)).toEqual(['record.json']);
+  });
+
+  it('refuses an existing file or link with EEXIST and keeps it', () => {
+    const dir = tempDir();
+    const file = join(dir, 'record.json');
+    writeFileSync(file, 'old');
+    const link = join(dir, 'link.json');
+    symlinkSync(join(dir, 'nowhere.json'), link);
+
+    expect(() => createFileExclusive(file, 'new', 0o644)).toThrow(
+      expect.objectContaining({ code: 'EEXIST' })
+    );
+    expect(() => createFileExclusive(link, 'new', 0o644)).toThrow(
+      expect.objectContaining({ code: 'EEXIST' })
+    );
+    expect(readFileSync(file, 'utf-8')).toBe('old');
+    expect(readdirSync(dir).sort()).toEqual(['link.json', 'record.json']);
   });
 });

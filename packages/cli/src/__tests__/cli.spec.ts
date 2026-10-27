@@ -43,6 +43,10 @@ vi.mock('../commands/release/index', () => ({
   registerReleaseCommands: vi.fn(),
 }));
 
+vi.mock('../commands/approve/index', () => ({
+  registerApproveCommand: vi.fn(),
+}));
+
 const mockPrepareCliTelemetry = vi.fn().mockResolvedValue(undefined);
 const mockFinishCliTelemetry = vi.fn();
 const mockFlushCliTelemetry = vi.fn().mockResolvedValue(undefined);
@@ -280,6 +284,14 @@ describe('cli', () => {
 
       expect(mockCommand).toHaveBeenCalledWith('release');
       expect(registerReleaseCommands).toHaveBeenCalled();
+    });
+
+    it('should register the approve command', async () => {
+      const { run } = await import('../cli.js');
+      const { registerApproveCommand } = await import('../commands/approve/index.js');
+      run(['node', 'prs', 'approve']);
+
+      expect(registerApproveCommand).toHaveBeenCalled();
     });
 
     it('should register skills command group', async () => {

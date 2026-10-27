@@ -18,7 +18,7 @@ Complete reference for the PromptScript command-line interface.
 | Understand the result         | [`prs explain`](#prs-explain), [`prs inspect`](#prs-inspect), [`prs resolve`](#prs-resolve)                    |
 | Share and pin dependencies    | [`prs registry`](#prs-registry), [`prs pull`](#prs-pull), [`prs lock`](#prs-lock), [`prs update`](#prs-update) |
 | Work offline                  | [`prs vendor`](#prs-vendor)                                                                                    |
-| Release application prompts   | [`prs release`](#prs-release)                                                                                  |
+| Release application prompts   | [`prs release`](#prs-release), [`prs approve`](#prs-approve)                                                   |
 | Manage skills                 | [`prs skills`](#prs-skills)                                                                                    |
 | Connect AI tool hooks         | [`prs hooks`](#prs-hooks), [`prs hook`](cli/hook.md)                                                           |
 | Edit in the online playground | [`prs serve`](#prs-serve)                                                                                      |
@@ -1268,6 +1268,49 @@ verifies. Exits with code 1 when a referenced bundle is missing or does not veri
 
 ```bash
 prs release status --history 5
+```
+
+### prs approve
+
+Record that you approve one exact prompt version in one role, or list the approval records. Needs
+[`releases`](config.md#releases) and `governance.roles` in `promptscript.yaml`. See
+[Approvals](../guides/releases.md#approvals) in the releases guide.
+
+```bash
+prs approve <id>@<hash> --role <role> --approver @<handle> (--env <env> | --all-environments) [options]
+prs approve --list [<id>] [options]
+```
+
+| Option                | Description                                                   | Default |
+| --------------------- | ------------------------------------------------------------- | ------- |
+| `--role <role>`       | Approval role from `governance.roles` (required to approve)   | -       |
+| `--approver <handle>` | Your Git host user handle, like `@jane` (required to approve) | -       |
+| `--env <env>`         | The one environment the approval counts for                   | -       |
+| `--all-environments`  | Let the approval count for every environment                  | -       |
+| `--comment <text>`    | Note in the record, at most 2000 characters                   | -       |
+| `--list`              | List records with their scope and state                       | -       |
+| `--format <format>`   | `text` or `json`                                              | `text`  |
+| `-c, --config <path>` | Path to a custom config file                                  | -       |
+| `--cwd <dir>`         | Working directory (project root)                              | -       |
+
+`<hash>` is the full `sha256-<64 hex>`. It must be what the source builds now or a release bundle of
+that prompt. Give `--env` or `--all-environments`, one of the two. Before writing, the command
+prints the description, governance values, model, inputs, output and messages of the hash to
+stderr, with invisible characters shown as `<U+XXXX>`. It writes
+`.promptscript/approvals/<role>/<id>/<hash>.<approver>.json` and, the first time,
+`.promptscript/approvals/.gitattributes`. An existing record is never replaced: the command fails
+with `PS5105` and exit code 2. Other errors exit with code 1.
+
+`--list` prints per prompt the hash the checkout builds and every record as `current`,
+`labelled:<env>`, `stale`, `untracked`, `modified`, `misplaced` or `unknown-role`. It compares the
+path and the bytes Git has for each record, so with record files it needs Git and a repository
+(`PS5108`). Invalid, modified, misplaced and unknown-role records get a `PS5109` warning.
+With `--format json`, stdout holds one document that matches
+`https://getpromptscript.dev/schema/approval-report/v1.json`.
+
+```bash
+prs approve --list acme-support/refund-reply
+prs approve acme-support/refund-reply@sha256-<64 hex> --role legal --approver @jane --env prod
 ```
 
 ---

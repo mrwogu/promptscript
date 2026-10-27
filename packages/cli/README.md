@@ -318,6 +318,11 @@ through the environments you list in `releases.environments`, such as `staging` 
 promotion is a Git change you review. See the
 [releases guide](https://getpromptscript.dev/guides/releases/).
 
+`prs approve` records that a person approved one exact bundle hash in a role from
+`governance.roles`, as a JSON file under `.promptscript/approvals/`. The record is a claim; the
+review of the pull request that adds it is what binds it. See
+[approvals](https://getpromptscript.dev/guides/releases/#approvals).
+
 ## Skills from Local Files, Registries, or Git
 
 ```promptscript
@@ -533,6 +538,7 @@ the build, not the agent. See the
 | `prs registry <init\|validate\|publish\|list\|add>` | Manage registries and aliases                             |
 | `prs pull`                                          | Pull updates from the registry                            |
 | `prs release <build\|promote\|rollback\|status>`    | Release prompt bundles through environments               |
+| `prs approve <id>@<hash>` / `prs approve --list`    | Record or list approvals of one prompt version            |
 | `prs lock` / `prs update`                           | Pin or refresh remote dependencies                        |
 | `prs vendor sync` / `prs vendor check`              | Prepare and verify offline dependencies                   |
 | `prs resolve <import>`                              | Explain import resolution                                 |

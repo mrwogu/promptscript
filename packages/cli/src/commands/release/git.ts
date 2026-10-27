@@ -1,4 +1,4 @@
-import { execFile } from 'node:child_process';
+import { execFile, type ExecException } from 'node:child_process';
 import { statSync } from 'node:fs';
 import { win32 } from 'node:path';
 import { DEFAULT_GIT_TIMEOUT_MS, GIT_TIMEOUT_ENV_VAR } from '@promptscript/resolver';
@@ -66,12 +66,27 @@ export interface GitResult {
   status: number;
 }
 
+/** What a Git failure that is no exit status means, and what to do about it. */
+function failureDetail(args: string[], error: ExecException, maxBuffer: number): string {
+  if (error.code === 'ENOENT') {
+    return 'git is not installed or not on PATH. Install Git and run the command again.';
+  }
+  if (error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') {
+    return `git ${args[0]} printed more than ${maxBuffer} bytes, more than this command reads. Remove what the repository no longer needs and run the command again.`;
+  }
+  return `git ${args[0]} failed: ${stripControlCharacters(error.message)}. Check PROMPTSCRIPT_GIT_TIMEOUT and run the command again.`;
+}
+
 /**
  * Run Git in the project with an argument array, no prompts, no pager, no fsmonitor hook
- * and no optional index refresh. Paths must follow `--` in `args`. Spawn failures and
- * timeouts throw.
+ * and no optional index refresh. Paths must follow `--` in `args`. Spawn failures,
+ * timeouts and more output than `maxBuffer` bytes (1 MiB by default) throw.
  */
-export function runGit(args: string[], cwd: string): Promise<GitResult> {
+export function runGit(
+  args: string[],
+  cwd: string,
+  { maxBuffer = MAX_GIT_OUTPUT_BYTES }: { maxBuffer?: number } = {}
+): Promise<GitResult> {
   return new Promise((resolvePromise, reject) => {
     execFile(
       // The user's own Git is the one to run, on their own checkout; Windows gets an absolute path.
@@ -80,7 +95,7 @@ export function runGit(args: string[], cwd: string): Promise<GitResult> {
       {
         cwd,
         timeout: gitTimeout(),
-        maxBuffer: MAX_GIT_OUTPUT_BYTES,
+        maxBuffer,
         encoding: 'utf-8',
         env: {
           ...process.env,
@@ -95,10 +110,7 @@ export function runGit(args: string[], cwd: string): Promise<GitResult> {
           return;
         }
         if (error) {
-          const detail =
-            error.code === 'ENOENT'
-              ? 'git is not installed or not on PATH. Install Git and run the command again.'
-              : `git ${args[0]} failed: ${stripControlCharacters(error.message)}. Check PROMPTSCRIPT_GIT_TIMEOUT and run the command again.`;
+          const detail = failureDetail(args, error, maxBuffer);
           reject(new ReleaseError(PS5006_ROLLBACK_UNAVAILABLE, detail, undefined, error));
           return;
         }

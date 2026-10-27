@@ -1255,6 +1255,8 @@ prs release build           # Write content-hashed prompt bundles to .promptscri
 prs release promote <id> --to <env> # Point an environment at a bundle (in releases.environments order)
 prs release rollback <env>  # Restore the label before its last commit (from Git)
 prs release status          # List released prompts per environment and verify them
+prs approve <id>@<hash> --role legal --approver @jane --env prod # Record an approval of one exact version
+prs approve --list          # Show approval records per prompt and their state, by the path Git tracks
 prs resolve @alias/path     # Debug: show how an import resolves
 prs registry list           # Show configured registries and aliases
 prs registry add <alias> <url>  # Add a registry alias

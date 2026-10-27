@@ -10,6 +10,7 @@ import {
   type ReleaseReport,
 } from '../../utils/release-report.js';
 import { PS5007_RELEASE_LOCKED, ReleaseError } from './errors.js';
+import { stripControlCharacters } from './git.js';
 import type { ReleasePaths } from './layout.js';
 import { ReleaseCompileError } from './project.js';
 
@@ -28,7 +29,7 @@ export interface ReleaseOutput {
   success(message: string): void;
 }
 
-function createOutput(json: boolean): ReleaseOutput {
+export function createOutput(json: boolean): ReleaseOutput {
   return {
     json,
     info: (message) => (json ? console.error(message) : ConsoleOutput.info(message)),
@@ -44,12 +45,17 @@ export function toDiagnostic(error: unknown): ReleaseDiagnostic {
   return { message: error instanceof Error ? error.message : String(error) };
 }
 
-function formatDiagnostic(diagnostic: ReleaseDiagnostic): string {
+/**
+ * One diagnostic as text: code, message and file. Messages can echo values from source or
+ * file names, so control characters are stripped here, line by line.
+ */
+export function formatDiagnostic(diagnostic: ReleaseDiagnostic): string {
   const code = diagnostic.code === undefined ? '' : `${diagnostic.code}: `;
+  const message = diagnostic.message.split('\n').map(stripControlCharacters).join('\n');
   const file = diagnostic.location?.file;
   return file === undefined
-    ? `${code}${diagnostic.message}`
-    : `${code}${diagnostic.message} (${file})`;
+    ? `${code}${message}`
+    : `${code}${message} (${stripControlCharacters(file)})`;
 }
 
 /**
@@ -62,7 +68,9 @@ export async function runReleaseCommand(
   body: (output: ReleaseOutput) => Promise<Partial<ReleaseReport>>
 ): Promise<void> {
   if (options.format !== undefined && options.format !== 'text' && options.format !== 'json') {
-    ConsoleOutput.error(`Invalid output format: ${options.format}. Expected text or json.`);
+    ConsoleOutput.error(
+      `Invalid output format: ${stripControlCharacters(options.format)}. Expected text or json.`
+    );
     process.exitCode = 1;
     return;
   }

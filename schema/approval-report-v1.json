@@ -1,0 +1,154 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/approval-report/v1.json",
+  "title": "PromptScript Approval Report",
+  "description": "Machine-readable report emitted by prs approve --format json.",
+  "type": "object",
+  "required": ["$schema", "version", "command", "success", "warnings", "errors"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "const": "https://getpromptscript.dev/schema/approval-report/v1.json"
+    },
+    "version": {
+      "const": 1
+    },
+    "command": {
+      "type": "string",
+      "enum": ["approve", "list"],
+      "description": "approve writes a record, list is prs approve --list."
+    },
+    "success": {
+      "type": "boolean",
+      "description": "False when the command failed."
+    },
+    "record": {
+      "$ref": "https://getpromptscript.dev/schema/approval-record/v1.json",
+      "description": "The record approve wrote."
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Project-relative path of the record approve wrote."
+    },
+    "prompts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Prompt"
+      },
+      "description": "Filled by list: every prompt of the source and every prompt a record names."
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Diagnostic"
+      },
+      "description": "PS5109 names every invalid or misplaced record."
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Diagnostic"
+      }
+    }
+  },
+  "definitions": {
+    "Prompt": {
+      "type": "object",
+      "required": ["id", "records"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256-[0-9a-f]{64}$",
+          "description": "Hash the checkout builds. Absent when the source has no such prompt."
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Record"
+          }
+        }
+      }
+    },
+    "Record": {
+      "type": "object",
+      "required": ["path", "state", "labels", "record"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Project-relative path of the record file on disk."
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "current",
+            "labelled",
+            "stale",
+            "untracked",
+            "modified",
+            "misplaced",
+            "unknown-role"
+          ],
+          "description": "current: the hash the checkout builds. labelled: a hash an environment label holds. stale: neither. These never count: untracked (not added to Git yet), modified (the bytes on disk are not the ones Git has), misplaced (Git tracks it at another path than its fields give) and unknown-role (the role is not in governance.roles)."
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Environments whose label holds this hash for the prompt."
+        },
+        "expectedPath": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Where a misplaced record belongs."
+        },
+        "trackedPath": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The path Git tracks for the file, when it differs from the path on disk."
+        },
+        "record": {
+          "$ref": "https://getpromptscript.dev/schema/approval-record/v1.json"
+        }
+      }
+    },
+    "Diagnostic": {
+      "type": "object",
+      "required": ["message"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "location": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "type": "string"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "column": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}
