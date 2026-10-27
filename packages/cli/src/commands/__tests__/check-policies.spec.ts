@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { checkCommand } from '../check.js';
+import { validateCommand } from '../validate.js';
 
 const CONFIG = `id: policy-demo
 syntax: '1.5.0'
@@ -81,6 +82,34 @@ describe('prs check with policies', () => {
     process.exitCode = undefined;
     rmSync(dir, { recursive: true, force: true });
     vi.restoreAllMocks();
+  });
+
+  it.each([
+    ['prs check', () => checkCommand({})],
+    ['prs validate', () => validateCommand({})],
+  ])('%s fails when policies is a mapping instead of a list', async (_name, run) => {
+    // Arrange
+    const mapping = CONFIG.replace(
+      /policies:[\s\S]*$/,
+      `policies:
+  name: approved-registries
+  kind: registry-allowlist
+  severity: error
+  allowed: ['@core', '@team']
+`
+    );
+    writeFileSync(join(dir, 'promptscript.yaml'), mapping);
+    const log = vi.mocked(console.log);
+
+    // Act
+    await run();
+
+    // Assert
+    const output = [...errorLog.mock.calls, ...log.mock.calls]
+      .map((call: unknown[]) => String(call[0]))
+      .join('\n');
+    expect(output).toContain('"policies" must be a list. Start each policy with "- name:".');
+    expect(process.exitCode).toBe(1);
   });
 
   it('reports a PS030 violation even when the config sets validation.skipPolicies', async () => {

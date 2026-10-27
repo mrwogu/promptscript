@@ -519,13 +519,13 @@ prs validate [options] [files...]
 
 **Options:**
 
-| Option              | Description                                 |
-| ------------------- | ------------------------------------------- |
-| `--strict`          | Treat warnings as errors                    |
-| `--format <format>` | Output format (text, json)                  |
-| `--fix`             | Auto-fix syntax version issues              |
-| `--skip-policies`   | Skip extension compliance policy evaluation |
-| `--ignore-hashes`   | Skip reference integrity hash verification  |
+| Option              | Description                                |
+| ------------------- | ------------------------------------------ |
+| `--strict`          | Treat warnings as errors                   |
+| `--format <format>` | Output format (text, json)                 |
+| `--fix`             | Auto-fix syntax version issues             |
+| `--skip-policies`   | Skip policy evaluation                     |
+| `--ignore-hashes`   | Skip reference integrity hash verification |
 
 **Examples:**
 

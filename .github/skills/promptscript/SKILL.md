@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-10-26T23:06:59.524Z | source: .promptscript/project.prs | target: github
+# promptscript-generated: 2026-10-27T11:51:51.153Z | source: .promptscript/project.prs | target: github
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -1079,6 +1079,40 @@ Policy kinds: `layer-boundary` (controls layer distance), `property-protection`
 Severity: `error` (fails validation) or `warning` (reported only).
 Skip with `--skip-policies` during development (never in CI).
 
+Prompt kinds read `@prompts` entries with their effective governance:
+
+```yaml
+policies:
+  - name: data-floor # raises policy risk from data classes or free-text inputs
+    kind: risk-floor
+    severity: error
+    floors:
+      - { dataClasses: [pii, financial], minimum: high }
+      - { inputTypes: [string], minimum: medium }
+  - name: governance-fields
+    kind: required-metadata
+    severity: error
+    match: { minRisk: high } # also domains, dataClasses; keys combine with AND
+    fields: [owner, reviewers]
+  - name: high-risk-models
+    kind: model-allowlist
+    severity: error
+    match: { minRisk: high }
+    models: [claude-opus-5-5]
+  - name: payments-content
+    kind: content-rules
+    severity: error
+    match: { domains: [payments] }
+    checks: [suspicious-urls] # PS005, PS010, PS011, PS012, PS014 by name or id
+    deny: ['guaranteed refund'] # a tripwire, not a filter: NFKC, lowercase, whitespace folded
+```
+
+Policy risk is the higher of the effective `risk` (unset counts as `low`) and every
+`risk-floor`. `required-approvals` and `required-evals` are parsed and checked
+(roles from `governance.roles`, environments from `releases.environments`, `count` 1 only),
+but validation does not evaluate them. With `governance.dataClasses` set, data classes in `match`
+and in floors must be in it, or PS030 fails.
+
 ## Syntax Version Validation
 
 The `syntax` field in `@meta` declares the PromptScript language version (semver).
@@ -1154,7 +1188,8 @@ sections without changing filenames, frontmatter, XML tags, or structured keys:
 - **PS027 (`valid-skill-composition`)**: warns about conflicting phase names or excessive phases in composed skills.
 - **PS028 (`valid-append-negation`)**: warns when negation prefix `!` appears in base skill definitions (only effective in `@extend`).
 - **PS029 (`valid-sealed-property`)**: warns when `sealed` contains non-replace-strategy property names.
-- **PS030 (`policy-compliance`)**: validates skill extensions against organizational policies defined in `promptscript.yaml`.
+- **PS030 (`policy-compliance`)**: validates skill extensions and `@prompts` entries against the policies defined in `promptscript.yaml`. Prompt findings point at the entry. An unknown policy kind is an error, and so is an unknown key in a prompt kind (skill kinds ignore unknown keys).
+- **PS047 (`governance-values`)**: with a `governance` section in `promptscript.yaml`, warns on a prompt `owner` or reviewer that is not a Git host identity (`@user`, `@org/team` or an email) and on data classes outside `governance.dataClasses`.
 - **PS034 (`valid-hooks`)**: validates portable hook events, commands/scripts, paths, interpreters, timeouts, cwd, and target overrides.
 
 Target formatters report **PS4002** when a hook event or field has no native equivalent,

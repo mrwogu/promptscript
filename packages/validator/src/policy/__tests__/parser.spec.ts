@@ -13,6 +13,28 @@ describe('parsePolicies', () => {
       expect(result.errors).toEqual([]);
     });
 
+    it('returns empty result for null, a bare policies key', () => {
+      // Arrange / Act
+      const result = parsePolicies(null);
+
+      // Assert
+      expect(result).toEqual({ policies: [], errors: [] });
+    });
+
+    it('returns an error for policies written as a mapping instead of a list', () => {
+      // Arrange
+      const input = { name: 'approved', kind: 'registry-allowlist', severity: 'error' };
+
+      // Act
+      const result = parsePolicies(input);
+
+      // Assert
+      expect(result).toEqual({
+        policies: [],
+        errors: ['"policies" must be a list. Start each policy with "- name:".'],
+      });
+    });
+
     it('returns empty result for empty array', () => {
       // Arrange / Act
       const result = parsePolicies([]);

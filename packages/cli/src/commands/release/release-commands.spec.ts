@@ -368,6 +368,46 @@ describe('prs release build', () => {
     expect(errorCodes(result)).toContain('PS030');
     expect(existsSync(releases(root))).toBe(false);
   });
+
+  it('parses required-approvals against governance.roles and releases.environments', async () => {
+    const policy = `policies:
+  - name: signoff
+    kind: required-approvals
+    severity: error
+    environments: [prod]
+    approvals: [{ role: legal }]
+`;
+    const withRole = await project(
+      `${CONFIG}governance:\n  roles:\n    legal: ['@acme/legal']\n${policy}`
+    );
+    const withoutRole = await project(`${CONFIG}${policy}`);
+
+    const passed = await build(withRole);
+    const refused = await build(withoutRole);
+
+    expect(passed.errors).toEqual([]);
+    expect(passed.success).toBe(true);
+    expect(errorCodes(refused)).toEqual(['PS5001']);
+    expect(refused.errors[0]?.message).toContain('role "legal" is not in governance.roles');
+  });
+
+  it('parses a model-allowlist that names a custom profile from models.profiles', async () => {
+    const root = await project(`${CONFIG}models:
+  profiles:
+    acme-model: { provider: openai, family: acme }
+policies:
+  - name: models
+    kind: model-allowlist
+    severity: error
+    match: { minRisk: critical }
+    models: [acme-model]
+`);
+
+    const result = await build(root);
+
+    expect(result.errors).toEqual([]);
+    expect(result.success).toBe(true);
+  });
 });
 
 /** A project whose overlay breaks a registry allowlist, with policies "skipped" in YAML. */

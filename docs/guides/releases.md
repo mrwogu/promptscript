@@ -25,7 +25,9 @@ Without `releases`, every `prs release` command fails with `PS5001` and shows th
 [`releases`](../reference/config.md#releases) for the name rules.
 
 `policies` are read by every release command. A policy with an unknown kind fails the command, it is
-never skipped.
+never skipped. Policies parse the same way as in `prs validate`, against `governance.roles`,
+`releases.environments` and the model catalog with `models.profiles`, so a role, environment or model
+that `validate` refuses fails a release command too.
 
 ## Files
 

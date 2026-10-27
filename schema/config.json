@@ -360,7 +360,7 @@
       "items": {
         "$ref": "#/definitions/PolicyDefinition"
       },
-      "description": "Extension compliance policies"
+      "description": "Policies for skill extensions and prompts"
     }
   },
   "required": [
