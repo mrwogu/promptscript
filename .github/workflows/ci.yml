@@ -32,6 +32,8 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
+          # The runner cache can lag a patch behind; astro needs the newest 22.x
+          check-latest: true
           cache: 'pnpm'
 
       - name: Install dependencies
