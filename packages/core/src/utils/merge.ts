@@ -1,4 +1,12 @@
+import { ErrorCode, PSError } from '../errors/base.js';
 import type { TextContent } from '../types/index.js';
+
+/**
+ * Keys a merge refuses. Assigning `__proto__` sets the prototype of the merged object
+ * instead of adding a key, so a value from YAML or JSON would hide in the prototype;
+ * `constructor` and `prototype` are the other names prototype pollution goes through.
+ */
+const RESERVED_KEYS: ReadonlySet<string> = new Set(['__proto__', 'constructor', 'prototype']);
 
 /**
  * Options for deep merge behavior.
@@ -32,10 +40,14 @@ export const DEFAULT_MERGE_OPTIONS: MergeOptions = {
  * - TextContent: concatenate (parent + child)
  * - Primitives: child wins
  *
+ * Only own properties are read and written, so nothing comes from or goes to a prototype.
+ *
  * @param parent - Parent object
  * @param child - Child object (takes precedence)
  * @param options - Merge options
  * @returns Merged object
+ * @throws PSError (`INVALID_VALUE`) when either side has a `__proto__`, `constructor` or
+ * `prototype` key in an object that is merged, at the top or at a path both sides share
  */
 export function deepMerge<T extends Record<string, unknown>>(
   parent: T,
@@ -43,9 +55,31 @@ export function deepMerge<T extends Record<string, unknown>>(
   options: Partial<MergeOptions> = {}
 ): T {
   const opts = { ...DEFAULT_MERGE_OPTIONS, ...options };
-  const result = { ...parent };
+  return mergeObjects(parent, child, opts, '') as T;
+}
 
-  for (const key of Object.keys(child) as Array<keyof T>) {
+function refuseReservedKeys(value: Record<string, unknown>, path: string): void {
+  const key = Object.keys(value).find((name) => RESERVED_KEYS.has(name));
+  if (key === undefined) return;
+  const where = path === '' ? 'at the top level' : `under "${path}"`;
+  throw new PSError(
+    `The key "${key}" ${where} is reserved, so it cannot be merged. Rename or remove it.`,
+    ErrorCode.INVALID_VALUE
+  );
+}
+
+function mergeObjects(
+  parent: Record<string, unknown>,
+  child: Record<string, unknown>,
+  opts: MergeOptions,
+  path: string
+): Record<string, unknown> {
+  refuseReservedKeys(parent, path);
+  refuseReservedKeys(child, path);
+  // Spread copies own properties only; every key that can reach it is checked above.
+  const result: Record<string, unknown> = { ...parent };
+
+  for (const key of Object.keys(child)) {
     const childVal = child[key];
 
     // Skip undefined child values
@@ -53,7 +87,9 @@ export function deepMerge<T extends Record<string, unknown>>(
       continue;
     }
 
-    result[key] = mergeValue(parent[key], childVal, opts) as T[keyof T];
+    const parentVal = Object.hasOwn(parent, key) ? parent[key] : undefined;
+    const keyPath = path === '' ? key : `${path}.${key}`;
+    result[key] = mergeValue(parentVal, childVal, opts, keyPath);
   }
 
   return result;
@@ -62,7 +98,12 @@ export function deepMerge<T extends Record<string, unknown>>(
 /**
  * Merge a single value based on its type.
  */
-function mergeValue(parentVal: unknown, childVal: unknown, opts: MergeOptions): unknown {
+function mergeValue(
+  parentVal: unknown,
+  childVal: unknown,
+  opts: MergeOptions,
+  path: string
+): unknown {
   // Null explicitly overwrites
   if (childVal === null) {
     return null;
@@ -81,11 +122,7 @@ function mergeValue(parentVal: unknown, childVal: unknown, opts: MergeOptions): 
   // Objects (recursive merge)
   if (isPlainObject(childVal)) {
     if (isPlainObject(parentVal)) {
-      return deepMerge(
-        parentVal as Record<string, unknown>,
-        childVal as Record<string, unknown>,
-        opts
-      );
+      return mergeObjects(parentVal, childVal, opts, path);
     }
     return childVal;
   }
@@ -196,7 +233,17 @@ export function deepClone<T>(value: T): T {
 
   const result: Record<string, unknown> = {};
   for (const [key, val] of Object.entries(value)) {
-    result[key] = deepClone(val);
+    if (key === '__proto__') {
+      // An own "__proto__" key stays an own key; assigning it would set the prototype.
+      Object.defineProperty(result, key, {
+        value: deepClone(val),
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    } else {
+      result[key] = deepClone(val);
+    }
   }
   return result as T;
 }

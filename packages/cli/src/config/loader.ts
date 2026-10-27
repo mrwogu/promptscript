@@ -122,7 +122,16 @@ async function loadConfigFile(
     throw new Error(`Extended config not found: ${baseFile} (from ${configFile})`);
   }
   const base = await loadConfigFile(baseFile, [...chain, absolutePath]);
-  const merged = deepMerge(base, own, { arrayStrategy: 'replace' });
+  // Keys with their own rules go first, so their errors name the key and both files
+  const policies =
+    own['policies'] === undefined
+      ? undefined
+      : mergePolicies(base['policies'], own['policies'], baseFile, absolutePath);
+  const governance =
+    own['governance'] === undefined
+      ? undefined
+      : mergeGovernance(base['governance'], own['governance'], baseFile, absolutePath);
+  const merged = mergeConfigPair(base, own, baseFile, absolutePath);
   // Registry backends follow the same rules as the other config levels
   if (base['registry'] !== undefined && own['registry'] !== undefined) {
     merged['registry'] = deepMergeRegistry(
@@ -130,18 +139,28 @@ async function loadConfigFile(
       own['registry'] as PromptScriptConfig['registry']
     );
   }
-  if (own['policies'] !== undefined) {
-    merged['policies'] = mergePolicies(base['policies'], own['policies'], baseFile, absolutePath);
-  }
-  if (own['governance'] !== undefined) {
-    merged['governance'] = mergeGovernance(
-      base['governance'],
-      own['governance'],
-      baseFile,
-      absolutePath
+  if (policies !== undefined) merged['policies'] = policies;
+  if (governance !== undefined) merged['governance'] = governance;
+  return merged;
+}
+
+/** Merge an extended config pair; a reserved key is reported at the extending file. */
+function mergeConfigPair(
+  base: Record<string, unknown>,
+  own: Record<string, unknown>,
+  baseFile: string,
+  configFile: string
+): Record<string, unknown> {
+  try {
+    return deepMerge(base, own, { arrayStrategy: 'replace' });
+  } catch (error) {
+    if (!(error instanceof PSError)) throw error;
+    throw new PSError(
+      `${error.message} Found while merging ${configFile} over ${baseFile}.`,
+      error.code,
+      { location: { file: configFile, line: 1, column: 1 }, cause: error }
     );
   }
-  return merged;
 }
 
 /**
@@ -220,7 +239,13 @@ function mergeGovernance(
     ownGovernance['codeowners'] === undefined
       ? undefined
       : mergeCodeowners(baseCodeowners, ownGovernance['codeowners'], baseFile, configFile);
-  const merged = deepMerge(baseGovernance, ownGovernance, { arrayStrategy: 'replace' });
+  // Wrapped in its key, so a reserved key is reported under "governance" at the config file
+  const merged = mergeConfigPair(
+    { governance: baseGovernance },
+    { governance: ownGovernance },
+    baseFile,
+    configFile
+  )['governance'] as Record<string, unknown>;
   const admins = unionEntries(
     'governance.admins',
     baseGovernance['admins'],
