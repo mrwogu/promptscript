@@ -17,6 +17,7 @@ import { updateCheckCommand } from './commands/update-check.js';
 import { registerRegistryCommands } from './commands/registry/index.js';
 import { registerReleaseCommands } from './commands/release/index.js';
 import { registerApproveCommand } from './commands/approve/index.js';
+import { registerGovernanceCommands } from './commands/governance/index.js';
 import { lockCommand } from './commands/lock.js';
 import { updateCommand } from './commands/update.js';
 import { vendorSyncCommand, vendorCheckCommand } from './commands/vendor.js';
@@ -401,6 +402,7 @@ const release = program
 registerReleaseCommands(release);
 
 registerApproveCommand(program);
+registerGovernanceCommands(program);
 
 /**
  * Run the CLI.

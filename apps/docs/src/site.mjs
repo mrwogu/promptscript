@@ -71,6 +71,7 @@ export const SIDEBAR = [
     items: [
       { label: 'Enterprise Setup', slug: 'guides/enterprise' },
       { label: 'Policy Engine', slug: 'guides/policy-engine' },
+      { label: 'CODEOWNERS from Governance', slug: 'guides/codeowners' },
       { label: 'Guard Dependencies', slug: 'guides/guard-dependencies' },
       { label: 'Security', slug: 'guides/security' },
       { label: 'CI/CD Integration', slug: 'guides/ci' },

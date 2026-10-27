@@ -19,6 +19,7 @@ Complete reference for the PromptScript command-line interface.
 | Share and pin dependencies    | [`prs registry`](#prs-registry), [`prs pull`](#prs-pull), [`prs lock`](#prs-lock), [`prs update`](#prs-update) |
 | Work offline                  | [`prs vendor`](#prs-vendor)                                                                                    |
 | Release application prompts   | [`prs release`](#prs-release), [`prs approve`](#prs-approve)                                                   |
+| Make governance binding       | [`prs governance`](#prs-governance)                                                                            |
 | Manage skills                 | [`prs skills`](#prs-skills)                                                                                    |
 | Connect AI tool hooks         | [`prs hooks`](#prs-hooks), [`prs hook`](cli/hook.md)                                                           |
 | Edit in the online playground | [`prs serve`](#prs-serve)                                                                                      |
@@ -1287,7 +1288,9 @@ prs release status --base refs/remotes/origin/main
 ### prs approve
 
 Record that you approve one exact prompt version in one role, or list the approval records. Needs
-[`releases`](config.md#releases) and `governance.roles` in `promptscript.yaml`. See
+[`releases`](config.md#releases) and `governance.roles` in `promptscript.yaml`. Before it writes a
+record it checks the whole [`governance`](config.md#governance) section, and a problem there is
+`PS5101`. See
 [Approvals](../guides/releases.md#approvals) in the releases guide.
 
 ```bash
@@ -1325,6 +1328,41 @@ With `--format json`, stdout holds one document that matches
 ```bash
 prs approve --list acme-support/refund-reply
 prs approve acme-support/refund-reply@sha256-<64 hex> --role legal --approver @jane --env prod
+```
+
+---
+
+### prs governance
+
+Make the `governance` section of `promptscript.yaml` binding on the Git host.
+
+#### prs governance codeowners
+
+Write the CODEOWNERS lines for the prompt files, the approval roles, the releases and the config
+files. A `.prs` file goes to the owners of its prompts; a file that holds prompts of different
+owners, or feeds a prompt of other owners, goes to the admins with a warning. See
+[CODEOWNERS from Governance](../guides/codeowners.md).
+
+```bash
+prs governance codeowners [options]
+```
+
+| Option                | Description                                                                   | Default                                        |
+| --------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------- |
+| `--output <path>`     | `.github/CODEOWNERS`, `CODEOWNERS`, `docs/CODEOWNERS` or `.gitlab/CODEOWNERS` | `codeowners.output`, else `.github/CODEOWNERS` |
+| `--check`             | Write nothing, exit 1 when the file is not up to date                         | -                                              |
+| `--format <format>`   | `text` or `json`                                                              | `text`                                         |
+| `-c, --config <path>` | Path to a custom config file                                                  | -                                              |
+| `--cwd <dir>`         | Working directory (project root)                                              | -                                              |
+
+The command runs in a Git checkout and keeps every line above its marker line. Exit code 0 means
+written or current, 1 an error or an outdated file with `--check`, 2 a file that prs does not manage
+(`PS5106`). With `--check`, `PS5106` exits with code 1 like every other failure. Other errors are `PS5101` (governance config), `PS5107` (owner or path refused) and
+`PS5108` (Git).
+
+```bash
+prs governance codeowners
+prs governance codeowners --check
 ```
 
 ---

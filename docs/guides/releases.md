@@ -458,7 +458,9 @@ Run `prs release status --base` as a required check, and keep review on the rele
 
 - Add `.promptscript/releases/`, `promptscript.yaml`, every config file it reaches through
   `extends`, `.github/workflows/`, `package.json` and the lockfile to `CODEOWNERS`, and require the
-  review.
+  review. `prs governance codeowners` writes these lines for the admins, see
+  [CODEOWNERS from Governance](codeowners.md); add `.github/workflows`, `package.json` and the
+  lockfile to `governance.codeowners.protect`.
 - Protect the branch the applications read from with a ruleset: require the
   `prs release status --base` check, allow only squash merges or merge commits (no rebase merging,
   no fast-forward of branches with several commits) and no direct pushes. The rollback rule

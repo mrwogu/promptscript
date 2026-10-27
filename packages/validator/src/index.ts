@@ -58,6 +58,9 @@ export {
   importExcludes,
 } from './rules/index.js';
 
+// Owner forms of governance values (PS047), shared with the CODEOWNERS generator
+export { isGitHostIdentity } from './rules/governance-values.js';
+
 // Import exclusion helpers
 export {
   normalizeImportKey,

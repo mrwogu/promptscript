@@ -32,22 +32,30 @@ describe('PS047: governance-values', () => {
     expect(runRule(governanceValues, ast, { governance: GOVERNANCE })).toEqual([]);
   });
 
-  it.each(['@jane', '@acme/legal', '@acme/emea/legal', 'jane.doe+prompts@acme.example.com'])(
-    'accepts the identity %s',
-    (owner) => {
-      // Arrange
-      const ast = promptProgram({ owner, reviewers: [owner] });
+  it.each([
+    '@jane',
+    '@jane.doe',
+    '@name_shortcode',
+    '@acme/legal',
+    '@acme/emea/legal',
+    'jane.doe+prompts@acme.example.com',
+  ])('accepts the identity %s', (owner) => {
+    // Arrange
+    const ast = promptProgram({ owner, reviewers: [owner] });
 
-      // Act / Assert
-      expect(runRule(governanceValues, ast, { governance: {} })).toEqual([]);
-    }
-  );
+    // Act / Assert
+    expect(runRule(governanceValues, ast, { governance: {} })).toEqual([]);
+  });
 
   it.each([
     'Jane Doe',
     'jane',
     '@-jane',
-    `@${'a'.repeat(40)}`,
+    '@.x',
+    '@_x',
+    '@jane doe',
+    '@jane/',
+    `@${'a'.repeat(254)}`,
     'jane@acme',
     'jane@acme.c',
     'a@b@acme.com',

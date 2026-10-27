@@ -8,7 +8,8 @@ import { dataClassVocabulary } from '../policy/parser.js';
 import type { RuleContext, ValidationRule } from '../types.js';
 import { getPromptExtraction, hasPromptEntries } from './prompt-rule-utils.js';
 
-const HANDLE = /^@[A-Za-z0-9][A-Za-z0-9-]{0,38}$/;
+// GitLab users may hold `.` and `_`, and GitHub managed users end in `_<shortcode>`.
+const HANDLE = /^@[A-Za-z0-9][\w.-]*$/;
 const TEAM = /^@[A-Za-z0-9][\w.-]*(?:\/[A-Za-z0-9][\w.-]*)+$/;
 const EMAIL_LOCAL = /^[\w.%+-]+$/;
 const EMAIL_HOST = /^[A-Za-z0-9.-]+$/;
@@ -31,8 +32,11 @@ function isEmail(value: string): boolean {
   );
 }
 
-/** A user (`@jane`), a team (`@acme/legal`) or an email address, as CODEOWNERS takes them. */
-function isIdentity(value: string): boolean {
+/**
+ * A user (`@jane`), a team (`@acme/legal`, GitLab subgroups allowed) or an email
+ * address of at most 254 characters, the owner forms CODEOWNERS takes.
+ */
+export function isGitHostIdentity(value: string): boolean {
   return (
     value.length <= MAX_IDENTITY_LENGTH &&
     (HANDLE.test(value) || TEAM.test(value) || isEmail(value))
@@ -51,7 +55,7 @@ function checkValues(
     ...(governance.reviewers ?? []).map((value) => ({ key: 'reviewer', value })),
   ];
   for (const { key, value } of people) {
-    if (isIdentity(value)) continue;
+    if (isGitHostIdentity(value)) continue;
     ctx.report({
       message: `${where}: ${key} "${value}" is not a Git host identity`,
       location,

@@ -63,10 +63,15 @@ export function findConfigFile(customPath?: string): string | null {
  * Load the PromptScript configuration.
  * Follows `extends` chains, see {@link loadConfigFile}.
  * @param customPath - Optional custom config file path.
+ * @param files - Receives the absolute path of the config file and of every file its
+ * `extends` chain reads, the config file first.
  * @returns The parsed configuration.
  * @throws Error if no config file is found or parsing fails.
  */
-export async function loadConfig(customPath?: string): Promise<PromptScriptConfig> {
+export async function loadConfig(
+  customPath?: string,
+  files: string[] = []
+): Promise<PromptScriptConfig> {
   const configFile = findConfigFile(customPath);
 
   if (!configFile) {
@@ -76,7 +81,7 @@ export async function loadConfig(customPath?: string): Promise<PromptScriptConfi
     throw new Error('No PromptScript configuration found. Run: prs init');
   }
 
-  return loadConfigFileWith(configFile, readWorkingTreeFile);
+  return loadConfigFileWith(configFile, readWorkingTreeFile, files);
 }
 
 /**
@@ -99,12 +104,14 @@ async function readWorkingTreeFile(path: string): Promise<string | undefined> {
 /**
  * Load one config file and its `extends` chain through `read`, with the same merge rules as
  * {@link loadConfig} and without the user, system or environment layers.
+ * `files` receives the files of the chain, see {@link loadConfig}.
  */
 export async function loadConfigFileWith(
   configFile: string,
-  read: ConfigFileReader
+  read: ConfigFileReader,
+  files: string[] = []
 ): Promise<PromptScriptConfig> {
-  const config: unknown = await loadConfigFile(configFile, [], read);
+  const config: unknown = await loadConfigFile(configFile, [], read, undefined, files);
   return config as PromptScriptConfig;
 }
 
@@ -120,12 +127,14 @@ async function loadConfigFile(
   configFile: string,
   chain: string[],
   read: ConfigFileReader = readWorkingTreeFile,
-  extendedFrom?: string
+  extendedFrom?: string,
+  files: string[] = []
 ): Promise<Record<string, unknown>> {
   const absolutePath = resolve(configFile);
   if (chain.includes(absolutePath)) {
     throw new Error(`Circular config extends: ${[...chain, absolutePath].join(' -> ')}`);
   }
+  files.push(absolutePath);
 
   const text = await read(configFile);
   if (text === undefined) {
@@ -158,7 +167,7 @@ async function loadConfigFile(
   const own = { ...config };
   delete own['extends'];
   const baseFile = resolve(dirname(absolutePath), basePath);
-  const base = await loadConfigFile(baseFile, [...chain, absolutePath], read, configFile);
+  const base = await loadConfigFile(baseFile, [...chain, absolutePath], read, configFile, files);
   // Keys with their own rules go first, so their errors name the key and both files
   const policies =
     own['policies'] === undefined
@@ -411,14 +420,16 @@ function describeValue(value: unknown): string {
  *
  * @param customPath - Optional custom project config file path.
  * @param cliFlags - Optional CLI flag overrides.
+ * @param files - Receives the project config file and its `extends` chain, see {@link loadConfig}.
  * @returns The merged configuration.
  */
 export async function loadEffectiveConfig(
   customPath?: string,
-  cliFlags?: Partial<PromptScriptConfig>
+  cliFlags?: Partial<PromptScriptConfig>,
+  files: string[] = []
 ): Promise<PromptScriptConfig> {
   const userConfig = await loadUserAndSystemConfig();
-  const projectConfig = await loadConfig(customPath);
+  const projectConfig = await loadConfig(customPath, files);
   const envOverrides = loadEnvOverrides();
 
   return mergeConfigs(userConfig, projectConfig, envOverrides, cliFlags);
