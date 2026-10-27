@@ -16,6 +16,7 @@ import { checkCommand } from './commands/check.js';
 import { updateCheckCommand } from './commands/update-check.js';
 import { registerRegistryCommands } from './commands/registry/index.js';
 import { registerReleaseCommands } from './commands/release/index.js';
+import { registerApproveCommand } from './commands/approve/index.js';
 import { lockCommand } from './commands/lock.js';
 import { updateCommand } from './commands/update.js';
 import { vendorSyncCommand, vendorCheckCommand } from './commands/vendor.js';
@@ -398,6 +399,8 @@ const release = program
   .command('release')
   .description('Build, promote and roll back prompt releases');
 registerReleaseCommands(release);
+
+registerApproveCommand(program);
 
 /**
  * Run the CLI.

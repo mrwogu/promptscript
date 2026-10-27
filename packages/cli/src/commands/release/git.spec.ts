@@ -63,6 +63,13 @@ describe('runGit', () => {
     await expect(runGit(['status'], missing)).rejects.toMatchObject({ code: 'PS5006' });
   });
 
+  it('rejects with PS5006 and names the limit when Git prints more than maxBuffer', async () => {
+    await expect(runGit(['--version'], tmpdir(), { maxBuffer: 4 })).rejects.toMatchObject({
+      code: 'PS5006',
+      message: expect.stringContaining('git --version printed more than 4 bytes'),
+    });
+  });
+
   it('rejects with PS5006 when Git runs past PROMPTSCRIPT_GIT_TIMEOUT', async () => {
     process.env['PROMPTSCRIPT_GIT_TIMEOUT'] = '1';
 

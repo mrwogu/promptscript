@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import * as fs from 'node:fs';
 import { mkdir, mkdtemp, open, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -16,10 +17,17 @@ import {
   parseManifest,
   readLabel,
   readManifest,
+  readRegularFile,
   releasePaths,
   shortHash,
   verifyBundleText,
 } from './layout.js';
+
+// readSync passes through to the real one unless a test replaces one call.
+vi.mock('node:fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs')>();
+  return { ...actual, readSync: vi.fn(actual.readSync) };
+});
 
 const HASH = `sha256-${'0123456789abcdef'.repeat(4)}`;
 const directories: string[] = [];
@@ -204,6 +212,44 @@ describe('assertExactCase', () => {
     if ((await readdir(paths.directory)).length < 2) context.skip();
 
     await expect(assertExactCase(paths, ['prod'])).rejects.toMatchObject({ code: 'PS5004' });
+  });
+});
+
+describe('readRegularFile', () => {
+  async function file(content: string): Promise<string> {
+    const path = join(await temporaryDirectory(), 'record.json');
+    await writeFile(path, content);
+    return path;
+  }
+
+  it('reads on after a short read that is not the end of the file', async () => {
+    const path = await file('{"a": "whole file"}\n');
+    const actual = await vi.importActual<typeof import('node:fs')>('node:fs');
+    const shortRead = (descriptor: number, buffer: NodeJS.ArrayBufferView): number =>
+      actual.readSync(descriptor, buffer, 0, 3, 0);
+    vi.mocked(fs.readSync).mockImplementationOnce(shortRead as typeof fs.readSync);
+
+    const bytes = readRegularFile(path, 1024);
+
+    expect(bytes?.toString('utf-8')).toBe('{"a": "whole file"}\n');
+    expect(vi.mocked(fs.readSync).mock.calls.length).toBeGreaterThan(1);
+  });
+
+  it('refuses a file that ends before its size or has more bytes than its size', async () => {
+    const path = await file('0123456789');
+    vi.mocked(fs.readSync).mockImplementationOnce(() => 0);
+    let shrank: unknown;
+    try {
+      readRegularFile(path, 1024);
+    } catch (error) {
+      shrank = error;
+    }
+    const fullBuffer = (_descriptor: number, buffer: NodeJS.ArrayBufferView): number =>
+      buffer.byteLength;
+    vi.mocked(fs.readSync).mockImplementationOnce(fullBuffer as typeof fs.readSync);
+
+    expect(() => readRegularFile(path, 1024)).toThrow('changed while it was read');
+    expect(shrank).toMatchObject({ message: 'changed while it was read' });
   });
 });
 

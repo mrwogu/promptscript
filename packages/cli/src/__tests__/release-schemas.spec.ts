@@ -5,6 +5,7 @@ import {
   createReleaseReport,
   RELEASE_REPORT_SCHEMA_URL,
   RELEASE_REPORT_VERSION,
+  toReleaseLocation,
 } from '../utils/release-report.js';
 import { validateLabel, validateReleaseReport } from './prompt-bundle-validators.js';
 
@@ -111,6 +112,20 @@ describe('prompt release label schema', () => {
 describe('release report schema', () => {
   const validate = validateReleaseReport;
   const hash = `sha256-${'0123456789abcdef'.repeat(4)}`;
+
+  it('leaves out the -1 line and column of an error at the end of a file', () => {
+    const report = createReleaseReport('build', {
+      errors: [
+        {
+          message: 'Unexpected end of input',
+          ...toReleaseLocation({ file: 'project.prs', line: -1, column: -1 }),
+        },
+      ],
+    });
+
+    expect(report.errors[0]?.location).toEqual({ file: 'project.prs' });
+    expect(validate(report), JSON.stringify(validate.errors)).toBe(true);
+  });
 
   it('accepts an empty report of every command', () => {
     for (const command of ['build', 'promote', 'rollback', 'status'] as const) {

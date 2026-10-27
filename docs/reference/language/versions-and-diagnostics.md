@@ -108,6 +108,18 @@ their replacement, models outside `models.supported`, and inconsistent
 | PS5006     | Rollback not possible                        | Commit the label or git restore an older one |
 | PS5007     | Another release command holds the lock       | Wait, then run the command again             |
 | PS5008     | Compile output inside the release directory  | Point the target output elsewhere            |
+| PS5101     | Approval role missing or not configured      | Add the role to `governance.roles`           |
+| PS5102     | Approval reference is not `<id>@<full hash>` | Give the full `sha256-<64 hex>` hash         |
+| PS5103     | Approved hash is not built or released       | Approve the hash `prs approve --list` shows  |
+| PS5104     | Approver is not a user handle                | Use your handle, like `@jane`                |
+| PS5105     | Approval record exists                       | Delete it in a commit to withdraw it         |
+| PS5108     | `prs approve --list` cannot run Git          | Run it in a Git checkout with git on PATH    |
+| PS5109     | Approval record invalid or misplaced         | Fix, move or delete it in a commit           |
+
+PS5109 is a warning when `prs approve --list` reads such a record, or a modified one (its bytes are
+not the ones Git has) or one with a role that is not in `governance.roles`. It is an error, with
+exit code 1, when the path `prs approve` writes to has a symbolic link, a file where a directory
+goes, or a name that differs only in case from an existing one.
 
 ## Release Gate
 
