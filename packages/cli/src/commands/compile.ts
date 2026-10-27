@@ -1,4 +1,4 @@
-import { resolve, isAbsolute, relative } from 'node:path';
+import { basename, resolve, isAbsolute, relative } from 'node:path';
 import { homedir } from 'node:os';
 import { readFile } from 'node:fs/promises';
 import { existsSync, lstatSync } from 'node:fs';
@@ -15,7 +15,7 @@ import type {
 import { ErrorCode, isValidLockfile, PSError } from '@promptscript/core';
 
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
-import { loadEffectiveConfig, CONFIG_FILES } from '../config/loader.js';
+import { loadEffectiveConfig } from '../config/loader.js';
 import { resolvePrettierOptions } from '../prettier/loader.js';
 import { createSpinner, ConsoleOutput, isVerbose, isDebug } from '../output/console.js';
 import { Compiler } from '@promptscript/compiler';
@@ -27,6 +27,7 @@ import { stripMarkers } from '../utils/markers.js';
 import {
   detectOutputConflicts,
   isPathInsideDir,
+  isPathInsideDirFolded,
   validateOutputPath,
 } from '../utils/conflict-detector.js';
 import {
@@ -52,6 +53,15 @@ import { filterOutputsByResources, parseResourceSelection } from '../utils/resou
 import { describeProtectedUserFile } from '../utils/global-output-safety.js';
 import { getBuildProfile, getBuildProfiles } from '../utils/build-profile.js';
 import { parseTargetEntries } from '../utils/target-config.js';
+import {
+  registryReferenceRoots,
+  resolveProjectConfigPath,
+  resolveProjectPath,
+  resolveProjectRoot,
+  resolveUniversalDir,
+} from '../utils/project-config.js';
+import { PS5008_OUTPUT_IN_RELEASE_DIRECTORY, ReleaseError } from './release/errors.js';
+import { RELEASE_DIRECTORY } from './release/layout.js';
 
 async function loadCompileLockfile(
   projectRoot: string,
@@ -72,19 +82,6 @@ async function loadCompileLockfile(
   } catch (error) {
     throw new Error(`Unable to read lockfile: ${lockfilePath}`, { cause: error });
   }
-}
-
-/**
- * Find a config file in the given directory by checking all known config file names.
- */
-function findConfigInDir(dir: string): string | undefined {
-  for (const file of CONFIG_FILES) {
-    const fullPath = resolve(dir, file);
-    if (existsSync(fullPath)) {
-      return fullPath;
-    }
-  }
-  return undefined;
 }
 
 /**
@@ -152,10 +149,6 @@ function resolveOutputBase(projectRoot: string, output: string | undefined): str
   return isAbsolute(output) ? output : resolve(projectRoot, output);
 }
 
-function resolveProjectPath(projectRoot: string, path: string): string {
-  return isAbsolute(path) ? path : resolve(projectRoot, path);
-}
-
 function validateWritePathSymlinks(outputPath: string, outputRoot: string): string | undefined {
   const root = resolve(outputRoot);
   const candidate = resolve(root, outputPath);
@@ -183,26 +176,6 @@ function validateWritePathSymlinks(outputPath: string, outputRoot: string): stri
     }
   }
   return undefined;
-}
-
-function resolveCompileConfigPath(
-  projectRoot: string,
-  options: Pick<CompileOptions, 'config' | 'cwd'>
-): string | undefined {
-  if (options.config) {
-    return resolveProjectPath(projectRoot, options.config);
-  }
-
-  const environmentConfig = process.env['PROMPTSCRIPT_CONFIG'];
-  if (options.cwd && environmentConfig) {
-    return resolveProjectPath(projectRoot, environmentConfig);
-  }
-
-  const configPath = options.cwd ? findConfigInDir(projectRoot) : undefined;
-  if (options.cwd && !configPath) {
-    throw new Error(`No PromptScript configuration found in ${projectRoot}. Run: prs init`);
-  }
-  return configPath;
 }
 
 /**
@@ -240,19 +213,6 @@ async function promptForOverwrite(
     default: 'no' as const,
   });
   return response;
-}
-
-/**
- * Resolve universalDir config to NativeSkillOptions.
- * Default (undefined/true) → '.agents', false → disabled, string → custom path.
- */
-function resolveUniversalDir(
-  universalDir: string | boolean | undefined
-): { universalDir: string } | undefined {
-  if (universalDir === false) return undefined;
-  if (typeof universalDir === 'string') return { universalDir };
-  // Default: enabled with '.agents'
-  return { universalDir: '.agents' };
 }
 
 /**
@@ -716,8 +676,8 @@ function printWarnings(warnings: CompileResult['warnings']): void {
  */
 async function compileAllBuilds(options: CompileOptions, services: CliServices): Promise<boolean> {
   const logger = createCliLogger();
-  const projectRoot = options.cwd ? resolve(options.cwd) : process.cwd();
-  const configPath = resolveCompileConfigPath(projectRoot, options);
+  const projectRoot = resolveProjectRoot(options);
+  const configPath = resolveProjectConfigPath(projectRoot, options);
   const config = await loadEffectiveConfig(configPath);
 
   const buildNames = Object.keys(getBuildProfiles(config));
@@ -814,10 +774,10 @@ async function compileCommandWithResult(
 
   try {
     // Resolve project root from --cwd option or current working directory
-    const projectRoot = options.cwd ? resolve(options.cwd) : process.cwd();
+    const projectRoot = resolveProjectRoot(options);
 
     logger.verbose('Loading configuration...');
-    const configPath = resolveCompileConfigPath(projectRoot, options);
+    const configPath = resolveProjectConfigPath(projectRoot, options);
     const config = await loadEffectiveConfig(configPath);
     const buildProfile = getBuildProfile(config, options.build);
 
@@ -898,10 +858,7 @@ async function compileCommandWithResult(
       spinner.text = 'Resolving registry...';
       const registry = await resolveRegistryPath(config, { vendorDir, lockfile });
       registryPath = resolveProjectPath(projectRoot, registry.path);
-      referenceRoots =
-        registry.repositoryUrl && registry.repositoryPath
-          ? { [registry.repositoryUrl]: [registry.repositoryPath] }
-          : undefined;
+      referenceRoots = registryReferenceRoots(registry);
       if (registry.isRemote) {
         logger.verbose(`Using cached git registry: ${registryPath}`);
       }
@@ -1033,6 +990,21 @@ async function compileCommandWithResult(
       ConsoleOutput.info(
         `Resource-only compile: kept ${filtered.kept} file(s), omitted ${filtered.dropped}`
       );
+    }
+    // Release files are written only by prs release, so a target output there would let
+    // overwrite protection and cleanup own them.
+    const releaseDirectory = resolve(projectRoot, RELEASE_DIRECTORY);
+    const configFile = configPath ?? resolve(projectRoot, 'promptscript.yaml');
+    for (const output of effectiveOutputs.values()) {
+      const outputPath = resolve(effectiveOptions.output, output.path);
+      if (isPathInsideDirFolded(outputPath, releaseDirectory)) {
+        throw new ReleaseError(
+          PS5008_OUTPUT_IN_RELEASE_DIRECTORY,
+          `PS5008: Output "${output.path}" lies inside ${RELEASE_DIRECTORY}, which belongs to prs release. ` +
+            `Point the target output elsewhere in ${basename(configFile)}.`,
+          configFile
+        );
+      }
     }
     const writeResult = await writeOutputs(effectiveOutputs, effectiveOptions, config, services);
     if (legacyMigration) {
@@ -1182,7 +1154,12 @@ const DEFAULT_WATCH_INCLUDE = [
   '.promptscriptrc.yml',
   'promptscript.lock',
 ];
-const DEFAULT_WATCH_EXCLUDE = ['**/node_modules/**', '**/.git/**', '.promptscript/vendor/**'];
+const DEFAULT_WATCH_EXCLUDE = [
+  '**/node_modules/**',
+  '**/.git/**',
+  '.promptscript/vendor/**',
+  '.promptscript/releases/**',
+];
 
 function watchForChanges(
   projectRoot: string,

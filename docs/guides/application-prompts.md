@@ -318,6 +318,7 @@ the build.
 ## See Also
 
 - [Application prompt examples](../examples/application-prompts.md)
+- [Releasing application prompts](releases.md) - promote bundles through environments with `prs release`
 - [`@prompts` in the language reference](../reference/language.md#prompts)
 - [Bundle formatter](../reference/formatters/bundle.md) and [prompt-text formatter](../reference/formatters/prompt-text.md)
 - [Security guide](security.md)

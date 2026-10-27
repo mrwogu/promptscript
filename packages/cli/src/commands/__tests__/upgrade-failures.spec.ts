@@ -108,7 +108,7 @@ describe('upgradeCommand failure coverage', () => {
     expect(mocks.writeFileSync).toHaveBeenCalledWith(
       expect.stringContaining('.tmp'),
       '@meta { syntax: "2.0.0" }',
-      { encoding: 'utf-8', mode: 0o640 }
+      { encoding: 'utf-8', mode: 0o640, flag: 'wx' }
     );
     expect(mocks.renameSync).toHaveBeenCalled();
     expect(mocks.error).not.toHaveBeenCalled();

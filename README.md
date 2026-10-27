@@ -426,6 +426,11 @@ the [application prompts guide](https://getpromptscript.dev/guides/application-p
 ship a bundle. Four runnable [application prompt examples](https://getpromptscript.dev/examples/application-prompts/)
 show typed inputs, enum outputs, defaults and citations.
 
+`prs release` stores bundles under their content hash in `.promptscript/releases/` and promotes them
+through the environments you list in `releases.environments`, such as `staging` then `prod`. Every
+promotion is a Git change you review. See the
+[releases guide](https://getpromptscript.dev/guides/releases/).
+
 ## Built for Repositories and Organizations
 
 - **Runs locally** - PromptScript is a compiler, not a service. No hosted backend and no proxy

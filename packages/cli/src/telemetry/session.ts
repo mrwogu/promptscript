@@ -28,8 +28,8 @@ export function normalizedCommandName(command: Command): string {
   if (parentName === 'vendor' || parentName === 'skills') {
     return `${parentName}-${name}`;
   }
-  if (parentName === 'registry') {
-    return 'registry';
+  if (parentName === 'registry' || parentName === 'release') {
+    return parentName;
   }
   return name;
 }

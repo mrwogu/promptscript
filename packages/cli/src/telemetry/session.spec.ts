@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { afterEach, describe, expect, it } from 'vitest';
+import { sanitizeCommand } from '@promptscript/telemetry';
 import { commandFeatures, exitOutcome, normalizedCommandName } from './session.js';
 
 const originalCi = process.env['CI'];
@@ -24,6 +25,16 @@ describe('CLI telemetry command normalization', () => {
     expect(normalizedCommandName(add)).toBe('skills-add');
     expect(normalizedCommandName(sync)).toBe('vendor-sync');
     expect(normalizedCommandName(publish)).toBe('registry');
+  });
+
+  it('reports every release subcommand as other, never as a top-level command', () => {
+    const release = new Command('release');
+    const build = release.command('build');
+    const status = release.command('status');
+
+    expect(normalizedCommandName(build)).toBe('release');
+    expect(sanitizeCommand(normalizedCommandName(build))).toBe('other');
+    expect(sanitizeCommand(normalizedCommandName(status))).toBe('other');
   });
 
   it('extracts only allowlisted command features', () => {

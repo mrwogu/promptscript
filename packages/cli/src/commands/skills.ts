@@ -6,7 +6,6 @@ import {
   rm,
   rename,
   chmod,
-  open,
   lstat,
   stat,
   cp,
@@ -24,6 +23,7 @@ import { createSpinner, ConsoleOutput } from '../output/console.js';
 import type { Lockfile, LockfileDependency } from '@promptscript/core';
 import { LOCKFILE_VERSION, isValidLockfile } from '@promptscript/core';
 import { LOCKFILE_PATH, resolveRemoteDependency } from './lock.js';
+import { acquireProjectLock, type ProjectLock } from '../utils/project-lock.js';
 import { collectRemoteImports, type RemoteImport } from './lock-scanner.js';
 import {
   PENDING_INTEGRITY,
@@ -487,22 +487,6 @@ function printValidationIssues(issues: readonly SkillValidationIssue[]): void {
  */
 const HEADER_DIRECTIVES = ['@use ', '@inherit ', '@meta '];
 const SKILLS_ADD_LOCK_PATH = '.promptscript-skills-add.lock';
-const SKILLS_ADD_LOCK_STALE_MS = 30 * 60 * 1000;
-
-interface SkillsAddLockHandle {
-  path: string;
-  token: string;
-  file: {
-    close(): Promise<void>;
-    writeFile(data: string, encoding: BufferEncoding): Promise<void>;
-  };
-}
-
-interface SkillsAddLockMetadata {
-  acquiredAt: number;
-  pid: number;
-  token: string;
-}
 
 function getErrorCode(error: unknown): string | undefined {
   if (error instanceof Error && 'code' in error) {
@@ -512,125 +496,11 @@ function getErrorCode(error: unknown): string | undefined {
   return undefined;
 }
 
-function isProcessAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch (error) {
-    return getErrorCode(error) === 'EPERM';
-  }
-}
-
-function isSkillsAddLockMetadata(value: unknown): value is SkillsAddLockMetadata {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'acquiredAt' in value &&
-    typeof value.acquiredAt === 'number' &&
-    'pid' in value &&
-    typeof value.pid === 'number' &&
-    'token' in value &&
-    typeof value.token === 'string'
+async function acquireSkillsAddLock(): Promise<ProjectLock> {
+  return acquireProjectLock(
+    resolve(SKILLS_ADD_LOCK_PATH),
+    'Another "prs skills add" is already running for this project. Try again after it finishes.'
   );
-}
-
-async function isStaleSkillsAddLock(lockPath: string): Promise<boolean> {
-  let metadata: SkillsAddLockMetadata | undefined;
-  try {
-    const raw = await readFile(lockPath, 'utf-8');
-    const parsed: unknown = JSON.parse(raw);
-    if (isSkillsAddLockMetadata(parsed)) {
-      metadata = parsed;
-    }
-  } catch (error) {
-    if (getErrorCode(error) === 'ENOENT') {
-      return false;
-    }
-  }
-
-  if (metadata && Number.isInteger(metadata.pid) && metadata.pid > 0) {
-    if (!isProcessAlive(metadata.pid)) {
-      return true;
-    }
-    // A recycled PID can look alive forever, so age still expires the lock.
-    return (
-      Number.isFinite(metadata.acquiredAt) &&
-      Date.now() - metadata.acquiredAt > SKILLS_ADD_LOCK_STALE_MS
-    );
-  }
-
-  try {
-    const details = await stat(lockPath);
-    return Date.now() - details.mtimeMs > SKILLS_ADD_LOCK_STALE_MS;
-  } catch (error) {
-    return getErrorCode(error) === 'ENOENT';
-  }
-}
-
-async function acquireSkillsAddLock(): Promise<SkillsAddLockHandle> {
-  const lockPath = resolve(SKILLS_ADD_LOCK_PATH);
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const file = await open(lockPath, 'wx', 0o600);
-      const metadata: SkillsAddLockMetadata = {
-        acquiredAt: Date.now(),
-        pid: process.pid,
-        token: `${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      };
-      try {
-        await file.writeFile(JSON.stringify(metadata), 'utf-8');
-      } catch (error) {
-        await file.close().catch(() => {
-          // Best-effort close must not hide the write error.
-        });
-        await rm(lockPath, { force: true }).catch(() => {
-          // Best-effort cleanup must not hide the write error.
-        });
-        throw error;
-      }
-      return { path: lockPath, token: metadata.token, file };
-    } catch (error) {
-      if (getErrorCode(error) !== 'EEXIST') {
-        throw error;
-      }
-      if (!(await isStaleSkillsAddLock(lockPath))) {
-        throw new Error(
-          `Another "prs skills add" is already running for this project. Try again after it finishes.`,
-          { cause: error }
-        );
-      }
-      const quarantinePath = `${lockPath}.stale-${process.pid}-${Date.now()}-${Math.random()
-        .toString(36)
-        .slice(2)}`;
-      try {
-        await rename(lockPath, quarantinePath);
-      } catch (renameError) {
-        if (getErrorCode(renameError) === 'ENOENT') {
-          continue;
-        }
-        throw renameError;
-      }
-      await rm(quarantinePath, { force: true });
-    }
-  }
-  throw new Error(`Cannot acquire skills add lock: ${resolve(SKILLS_ADD_LOCK_PATH)}`);
-}
-
-async function releaseSkillsAddLock(lock: SkillsAddLockHandle): Promise<void> {
-  try {
-    await lock.file.close();
-  } catch {
-    // Best-effort close must not leave the project lock behind.
-  }
-  try {
-    const raw = await readFile(lock.path, 'utf-8');
-    const metadata: unknown = JSON.parse(raw);
-    if (isSkillsAddLockMetadata(metadata) && metadata.token === lock.token) {
-      await rm(lock.path, { force: true });
-    }
-  } catch {
-    // Best-effort cleanup allows stale-lock recovery on the next invocation.
-  }
 }
 
 /**
@@ -1421,7 +1291,7 @@ async function addLocalSkill(
   options: SkillsAddOptions,
   spinner: Ora
 ): Promise<void> {
-  let transactionLock: SkillsAddLockHandle | undefined;
+  let transactionLock: ProjectLock | undefined;
 
   try {
     if (!options.dryRun) {
@@ -1504,7 +1374,7 @@ async function addLocalSkill(
     reportLocalSkillError(error, spinner);
   } finally {
     if (transactionLock) {
-      await releaseSkillsAddLock(transactionLock);
+      await transactionLock.release();
     }
   }
 }
@@ -1527,7 +1397,7 @@ export async function skillsAddCommand(
 ): Promise<void> {
   const spinner = createSpinner('Adding skill...').start();
   let rollbackState: SkillsAddRollbackState | undefined;
-  let transactionLock: SkillsAddLockHandle | undefined;
+  let transactionLock: ProjectLock | undefined;
 
   try {
     // Reject plain HTTP early (security): git over plaintext exposes the
@@ -1756,7 +1626,7 @@ export async function skillsAddCommand(
     process.exitCode = 1;
   } finally {
     if (transactionLock) {
-      await releaseSkillsAddLock(transactionLock);
+      await transactionLock.release();
     }
   }
 }

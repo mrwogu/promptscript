@@ -243,6 +243,7 @@ includePromptScriptSkill: true # default: true
 | `validation`               | object                  | No       | Guard and validation rule settings              |
 | `models`                   | object                  | No       | Supported model set and model profiles          |
 | `policies`                 | array                   | No       | Extension compliance policies                   |
+| `releases`                 | object                  | No       | Release environments for prompt bundles         |
 
 `id` and `syntax` are required even when `input.entry` uses its default.
 
@@ -1233,6 +1234,24 @@ universalDir: false
 | `true`   | boolean | `true`      | Use default `.agents/` directory     |
 | `false`  | boolean | -           | Disable universal directory          |
 | (string) | string  | `'.agents'` | Custom path relative to project root |
+
+### releases
+
+Opts in to `prs release`. Lists the release environments in promotion order, first to last.
+
+```yaml
+releases:
+  environments: [staging, prod]
+```
+
+| Field          | Type     | Required | Description                               |
+| -------------- | -------- | -------- | ----------------------------------------- |
+| `environments` | string[] | Yes      | Environment names, first to last, 1 to 16 |
+
+Each name matches `^[a-z][a-z0-9-]{0,31}$` and appears once. The names `index` and `manifest`, and
+the Windows device names `con`, `prn`, `aux`, `nul`, `com1` to `com9` and `lpt1` to `lpt9`, are
+refused because each environment is a file named `<name>.json`. Without `releases` every
+`prs release` command fails with `PS5001`. See the [releases guide](../guides/releases.md).
 
 ### includePromptScriptSkill
 

@@ -60,6 +60,10 @@ temp/
 /.promptscript-skills-add.lock
 /.promptscript-skills-add.lock.stale-*
 
+# prs release lock
+/.promptscript-release.lock
+/.promptscript-release.lock.stale-*
+
 # Misc
 /.sass-cache
 /connect.lock

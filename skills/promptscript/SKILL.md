@@ -1216,6 +1216,10 @@ prs update                  # Re-resolve all remote imports to latest
 prs update <url>            # Update a specific registry
 prs vendor sync             # Copy cached deps to .promptscript/vendor/
 prs vendor check            # Verify vendor matches lockfile
+prs release build           # Write content-hashed prompt bundles to .promptscript/releases/
+prs release promote <id> --to <env> # Point an environment at a bundle (in releases.environments order)
+prs release rollback <env>  # Restore the label before its last commit (from Git)
+prs release status          # List released prompts per environment and verify them
 prs resolve @alias/path     # Debug: show how an import resolves
 prs registry list           # Show configured registries and aliases
 prs registry add <alias> <url>  # Add a registry alias
