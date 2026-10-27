@@ -12,7 +12,7 @@
     "@fastify/websocket": "^11.3.4",
     "@swc/helpers": "~0.5.23",
     "@types/ws": "^8.18.2",
-    "chokidar": "^5.0.0",
+    "chokidar": "^6.0.0",
     "fast-glob": "^3.3.0",
     "fastify": "^5.12.7",
     "ws": "^8.22.0",
