@@ -12,7 +12,7 @@ import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
  * merged into this list and every spec would run twice.
  */
 const INTEGRATION_SPECS = [
-  'src/**/*.integration.spec.ts',
+  '{src,tests}/**/*.integration.spec.ts',
   // A real compile, of a temp project or of the fixtures
   'src/__tests__/application-prompt-examples.spec.ts',
   'src/__tests__/application-prompts-guide.spec.ts',
