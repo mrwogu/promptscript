@@ -26,6 +26,11 @@ CHANGELOG.md
 /.factory/mcp.json
 /.factory/plugins.json
 
+# Release files written by `prs release`, and the output the runtime example prints.
+# CI compares both byte for byte with what the CLI and the example write.
+/examples/runtime-node/.promptscript/releases
+/examples/runtime-node/expected-output.json
+
 # Vendored third-party skill assets (HTML copied verbatim from upstream)
 **/skills/skill-creator/**/*.html
 

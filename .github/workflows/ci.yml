@@ -146,6 +146,38 @@ jobs:
       - name: Build
         run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t build
 
+      - name: Runtime example against the packed runtime
+        if: matrix.node-version == '25.x'
+        run: |
+          pnpm nx build runtime
+          work="$(mktemp -d)"
+          npm pack dist/packages/runtime --pack-destination "$work"
+          cp -R examples/runtime-node "$work/example"
+          cd "$work/example"
+          # The runtime is not published to npm: --offline fails if anything asks the registry
+          npm install --offline --no-audit --no-fund "$work"/promptscript-runtime-*.tgz
+          node index.mjs > "$work/output.json"
+          if ! diff -u "$GITHUB_WORKSPACE/examples/runtime-node/expected-output.json" "$work/output.json"; then
+            echo "::error::examples/runtime-node/index.mjs does not print expected-output.json."
+            exit 1
+          fi
+
+      - name: Runtime example release matches the CLI
+        if: matrix.node-version == '25.x'
+        run: |
+          # The cli spec that compares the copy only runs when cli is affected, this runs always
+          if ! diff -r -x releases packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/.promptscript examples/runtime-node/.promptscript; then
+            echo "::error::examples/runtime-node/.promptscript must stay a byte copy of the support-refund-reply fixture."
+            exit 1
+          fi
+          pnpm prs release build --cwd examples/runtime-node
+          if ! git diff --exit-code -- examples/runtime-node || [ -n "$(git status --porcelain -- examples/runtime-node)" ]; then
+            git status --short -- examples/runtime-node
+            echo "::error::The release files in examples/runtime-node are not what 'prs release build' writes. Run it there and commit the result."
+            exit 1
+          fi
+          pnpm prs release status --cwd examples/runtime-node
+
       - name: Analyze CLI bundle
         if: matrix.node-version == '25.x'
         run: pnpm nx run cli:analyze-bundle

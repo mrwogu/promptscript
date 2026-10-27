@@ -1,0 +1,12 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/prompt-bundle-index/v1.json",
+  "source": ".promptscript/project.prs",
+  "prompts": [
+    {
+      "id": "acme-support/refund-reply",
+      "file": "bundles/sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824.json",
+      "description": "Decide on a refund request and write the reply",
+      "contentHash": "sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824"
+    }
+  ]
+}

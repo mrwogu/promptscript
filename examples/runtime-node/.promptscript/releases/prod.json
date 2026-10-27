@@ -1,0 +1,10 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v1.json",
+  "environment": "prod",
+  "prompts": [
+    {
+      "id": "acme-support/refund-reply",
+      "contentHash": "sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824"
+    }
+  ]
+}

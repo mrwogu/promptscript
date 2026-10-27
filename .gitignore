@@ -106,3 +106,6 @@ notebook-lm-sources/
 # Astro docs site
 apps/docs/.astro/
 apps/docs/public/schema/
+
+# npm install in the runtime example writes a lockfile
+examples/runtime-node/package-lock.json

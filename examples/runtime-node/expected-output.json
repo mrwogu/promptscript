@@ -1,0 +1,39 @@
+{
+  "model": "claude-sonnet-5-5",
+  "max_tokens": 600,
+  "system": "You are a support agent at Acme, an online shop.\nYou write short and polite replies in plain English.\n\n## Standards\n\n- tone: Calm and direct\n- length: At most 120 words\n\n## Restrictions\n\n- Never promise a refund that the policy does not allow.\n- Never ask the customer for a full card number.\n\nRefunds are allowed within 30 days of delivery.\nSend anything above 500 EUR to a human by choosing escalate.",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Order total: 42.5 EUR\nDays since delivery: 12\nCustomer wrote: The kettle arrived broken. Can I get my money back?"
+    }
+  ],
+  "output_config": {
+    "format": {
+      "type": "json_schema",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "description": "What happens to the refund request",
+            "enum": [
+              "approve",
+              "escalate",
+              "deny"
+            ]
+          },
+          "reply": {
+            "type": "string",
+            "description": "The reply to send to the customer"
+          }
+        },
+        "required": [
+          "decision",
+          "reply"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}
