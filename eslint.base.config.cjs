@@ -47,6 +47,11 @@ const moduleBoundaryRules = [
     sourceTag: 'scope:telemetry',
     onlyDependOnLibsWithTags: [],
   },
+  // Runtime is a published leaf with no workspace dependencies
+  {
+    sourceTag: 'scope:runtime',
+    onlyDependOnLibsWithTags: [],
+  },
   // Parser depends only on core
   {
     sourceTag: 'scope:parser',
@@ -96,6 +101,7 @@ const moduleBoundaryRules = [
       'scope:importer',
       'scope:server',
       'scope:telemetry',
+      'scope:runtime',
     ],
   },
   // Browser compiler depends on core, parser, validator, formatters

@@ -730,6 +730,12 @@ jobs:
       - name: Deno integration suite
         run: pnpm deno:suite
 
+      - name: Build runtime package
+        run: pnpm nx build runtime
+
+      - name: Runtime on Deno (read permission only)
+        run: deno run --allow-read scripts/runtime-deno-smoke.mjs
+
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest

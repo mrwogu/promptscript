@@ -4,7 +4,7 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext"
   },
-  "entryPoints": ["packages/*/src/index.ts"],
+  "entryPoints": ["packages/*/src/index.ts", "packages/runtime/src/node.ts"],
   "out": "docs/api-reference",
   "plugin": ["typedoc-plugin-markdown"],
   "entryPointStrategy": "resolve",

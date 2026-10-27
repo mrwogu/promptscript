@@ -41,6 +41,7 @@ COPY packages/playground/package.json packages/playground/
 COPY packages/importer/package.json packages/importer/
 COPY packages/cli/package.json packages/cli/
 COPY packages/server/package.json packages/server/
+COPY packages/runtime/package.json packages/runtime/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile

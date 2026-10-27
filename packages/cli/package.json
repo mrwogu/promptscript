@@ -46,6 +46,7 @@
     "@promptscript/core": "workspace:^",
     "@promptscript/parser": "workspace:^",
     "@promptscript/resolver": "workspace:^",
+    "@promptscript/runtime": "workspace:^",
     "@promptscript/validator": "workspace:^",
     "ajv": "^8.20.0",
     "chalk": "^6.0.1",
