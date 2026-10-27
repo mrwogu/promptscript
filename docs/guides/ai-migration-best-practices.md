@@ -297,6 +297,12 @@ restrictions in `@restrictions` so migrations preserve intent across targets.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344EU8ManFlQKsdZikw5DjgiIBVODsAFUc0GABlRmoINCwIumbwkAA5GAA3GGpeNw6xVkcI4L5OnCVjZVFqeCwhxiwINjiAXR98kHzLhk5jx3wiUnIYKloQBnnac9Y+FSdyAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 **Preferred:**
 
 ```promptscript
