@@ -1921,15 +1921,15 @@ Use double or single quotes for short, single-line values:
 }
 ```
 
-Supported escapes are `\n`, `\t`, `\r`, `\"`, `\'`, and `\\`. Each escape is
-decoded once, from left to right. For example, `"C:\\new"` produces the literal
-path `C:\new`, not a newline. This applies to both quote styles.
-
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344HGZqLEY3U15Aq3CQAHpqGAA3CBhzCJSQACU2jvMdZikVct4ARzcMKBNHMU9eACN4LHs1RiwIRng84IjGnBgoNG7eAHIAZTKhjFaMaAwl2GGSEgxPOHOffJB8gF0GJwsNRHPgiKRyDAqLQQAxWjBaBA2PhUn8gA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
+
+Supported escapes are `\n`, `\t`, `\r`, `\"`, `\'`, and `\\`. Each escape is
+decoded once, from left to right. For example, `"C:\\new"` produces the literal
+path `C:\new`, not a newline. This applies to both quote styles.
 
 #### Multi-line Strings
 
