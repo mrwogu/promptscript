@@ -83,9 +83,10 @@ export async function loadConfig(customPath?: string): Promise<PromptScriptConfi
 /**
  * Parse one config file and merge it over the file named in its `extends`.
  * The base path is relative to the file that extends it. Objects merge deeply,
- * arrays and scalars from the extending file replace the base ones. The one
- * exception is `policies`: base policies are kept and the extending file's
- * policies are appended, see {@link mergePolicies}.
+ * arrays and scalars from the extending file replace the base ones. The
+ * exceptions are `policies`: base policies are kept and the extending file's
+ * policies are appended, see {@link mergePolicies}; and the owner lists of
+ * `governance`, which are joined, see {@link mergeGovernance}.
  */
 async function loadConfigFile(
   configFile: string,
@@ -132,6 +133,14 @@ async function loadConfigFile(
   if (own['policies'] !== undefined) {
     merged['policies'] = mergePolicies(base['policies'], own['policies'], baseFile, absolutePath);
   }
+  if (own['governance'] !== undefined) {
+    merged['governance'] = mergeGovernance(
+      base['governance'],
+      own['governance'],
+      baseFile,
+      absolutePath
+    );
+  }
   return merged;
 }
 
@@ -173,6 +182,165 @@ function mergePolicies(base: unknown, own: unknown, baseFile: string, configFile
 
 function policyName(policy: unknown): string | undefined {
   return isPlainObject(policy) && typeof policy['name'] === 'string' ? policy['name'] : undefined;
+}
+
+/**
+ * Merge the `governance` of an extended config pair. Base admins, role owners and
+ * `codeowners.protect` paths are a floor like base policies: the extending file can add
+ * to `admins`, add roles, add owners to a role and add protected paths, but cannot
+ * remove any. Other governance keys merge like the rest of the config. A bare key
+ * (parsed as null) is accepted only when the base has nothing under it.
+ * @throws PSError when a value would drop base entries or a map has a `__proto__` key.
+ */
+function mergeGovernance(
+  base: unknown,
+  own: unknown,
+  baseFile: string,
+  configFile: string
+): unknown {
+  const baseGovernance = isPlainObject(base) ? base : {};
+  const baseRoles = isPlainObject(baseGovernance['roles']) ? baseGovernance['roles'] : {};
+  const baseCodeowners = isPlainObject(baseGovernance['codeowners'])
+    ? baseGovernance['codeowners']
+    : {};
+  const hasFloor =
+    hasEntries(baseGovernance['admins']) ||
+    Object.keys(baseRoles).length > 0 ||
+    hasEntries(baseCodeowners['protect']);
+  if (own === null && !hasFloor) {
+    return null;
+  }
+  const ownGovernance = ownMap(own, 'governance', baseFile, configFile);
+  // Maps first: they refuse a "__proto__" key before deepMerge would assign it
+  const roles =
+    ownGovernance['roles'] === undefined
+      ? undefined
+      : mergeRoles(baseRoles, ownGovernance['roles'], baseFile, configFile);
+  const codeowners =
+    ownGovernance['codeowners'] === undefined
+      ? undefined
+      : mergeCodeowners(baseCodeowners, ownGovernance['codeowners'], baseFile, configFile);
+  const merged = deepMerge(baseGovernance, ownGovernance, { arrayStrategy: 'replace' });
+  const admins = unionEntries(
+    'governance.admins',
+    baseGovernance['admins'],
+    ownGovernance['admins'],
+    baseFile,
+    configFile
+  );
+  if (admins !== undefined) merged['admins'] = admins;
+  if (roles !== undefined) merged['roles'] = roles;
+  if (codeowners !== undefined) merged['codeowners'] = codeowners;
+  return merged;
+}
+
+function hasEntries(value: unknown): boolean {
+  return Array.isArray(value) && value.length > 0;
+}
+
+function mergeCodeowners(
+  baseCodeowners: Record<string, unknown>,
+  own: unknown,
+  baseFile: string,
+  configFile: string
+): unknown {
+  if (own === null && !hasEntries(baseCodeowners['protect'])) {
+    return null;
+  }
+  const ownCodeowners = ownMap(own, 'governance.codeowners', baseFile, configFile);
+  const merged: Record<string, unknown> = { ...baseCodeowners, ...ownCodeowners };
+  const protect = unionEntries(
+    'governance.codeowners.protect',
+    baseCodeowners['protect'],
+    ownCodeowners['protect'],
+    baseFile,
+    configFile
+  );
+  if (protect !== undefined) merged['protect'] = protect;
+  return merged;
+}
+
+function mergeRoles(
+  baseRoles: Record<string, unknown>,
+  own: unknown,
+  baseFile: string,
+  configFile: string
+): unknown {
+  if (own === null && Object.keys(baseRoles).length === 0) {
+    return null;
+  }
+  const ownRoles = ownMap(own, 'governance.roles', baseFile, configFile);
+  const merged: Record<string, unknown> = { ...baseRoles };
+  for (const role of Object.keys(ownRoles)) {
+    const baseOwners = Object.hasOwn(baseRoles, role) ? baseRoles[role] : undefined;
+    merged[role] = unionEntries(
+      `governance.roles.${role}`,
+      baseOwners,
+      ownRoles[role],
+      baseFile,
+      configFile
+    );
+  }
+  return merged;
+}
+
+/** Base entries first, then the extending file's new ones. */
+function unionEntries(
+  key: string,
+  base: unknown,
+  own: unknown,
+  baseFile: string,
+  configFile: string
+): unknown {
+  if (own === undefined) {
+    return base;
+  }
+  const baseOwners = Array.isArray(base) ? base : [];
+  if (own === null && baseOwners.length === 0) {
+    return null;
+  }
+  if (!Array.isArray(own)) {
+    throw droppedEntries(key, own, baseFile, configFile);
+  }
+  return [...new Set([...baseOwners, ...own])];
+}
+
+function ownMap(
+  value: unknown,
+  key: string,
+  baseFile: string,
+  configFile: string
+): Record<string, unknown> {
+  if (!isPlainObject(value)) {
+    throw droppedEntries(key, value, baseFile, configFile);
+  }
+  if (Object.hasOwn(value, '__proto__')) {
+    throw new PSError(
+      `"${key}" in ${configFile} has a "__proto__" key. Remove it: the name is reserved.`,
+      ErrorCode.INVALID_VALUE,
+      { location: { file: configFile, line: 1, column: 1 } }
+    );
+  }
+  return value;
+}
+
+function droppedEntries(
+  key: string,
+  value: unknown,
+  baseFile: string,
+  configFile: string
+): PSError {
+  return new PSError(
+    `"${key}" in ${configFile} is ${describeValue(value)}, which would drop entries set in ${baseFile} or a config it extends. ` +
+      'Base admins, role owners and protected paths cannot be removed: delete the key to keep them or list the entries to add.',
+    ErrorCode.INVALID_VALUE,
+    { location: { file: configFile, line: 1, column: 1 } }
+  );
+}
+
+function describeValue(value: unknown): string {
+  if (value === null) return 'null';
+  return Array.isArray(value) ? 'a list' : `a ${typeof value}`;
 }
 
 /**

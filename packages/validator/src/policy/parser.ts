@@ -8,11 +8,14 @@ import type {
 } from '@promptscript/core';
 import type { ParsedPolicies } from './types.js';
 
-const VALID_KINDS: readonly PolicyKind[] = [
+// The parser handles only these kinds; the prompt policy kinds of core are unknown here
+const VALID_KINDS = [
   'layer-boundary',
   'property-protection',
   'registry-allowlist',
-];
+] as const satisfies readonly PolicyKind[];
+
+type ParsedPolicyKind = (typeof VALID_KINDS)[number];
 
 const VALID_SEVERITIES: readonly PolicySeverity[] = ['error', 'warning'];
 
@@ -24,7 +27,7 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === 'string');
 }
 
-function isPolicyKind(value: unknown): value is PolicyKind {
+function isPolicyKind(value: unknown): value is ParsedPolicyKind {
   return typeof value === 'string' && (VALID_KINDS as readonly string[]).includes(value);
 }
 

@@ -31,7 +31,7 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 | **types/ast**            | AST interfaces (`Program`, `Block`, `Value`, `BlockContent`, etc.)                                           |
 | **canonical-ast**        | Immutable canonical AST factories and legacy compatibility projections                                       |
 | **block-merge**          | Shared inheritance and import block merge policies                                                           |
-| **types/config**         | Configuration schema (`PromptScriptConfig`, input/output/registry types)                                     |
+| **types/config**         | Configuration schema (`PromptScriptConfig`, `GovernanceConfig`, input/output/registry types)                 |
 | **types/models**         | Model configuration and profile types (`ModelsConfig`, `ModelProfile`)                                       |
 | **types/constants**      | Shared constants (block names, syntax version)                                                               |
 | **types/convention**     | Convention type definitions for formatter output                                                             |
@@ -39,6 +39,8 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 | **types/source**         | Source location and mapping types                                                                            |
 | **types/prompts**        | Prompt entry types (`PromptDefinition`, `PromptInput`, `GovernanceMeta`, `ModelParams`, `PromptComposition`) |
 | **types/prompt-bundle**  | Prompt bundle and index types (`PromptBundleV1`, `PromptBundleIndexV1`)                                      |
+| **types/policy**         | Policy definitions, the prompt policy kinds and `PolicySubject`, the prompt view a policy reads              |
+| **types/approval**       | Approval record v1 (`ApprovalRecordV1`), its guard, exact serialization and file path                        |
 | **types/prettier**       | Prettier configuration types                                                                                 |
 | **structured-output**    | Shared structured merge plan types for generated settings files                                              |
 | **output-plan**          | Deterministic output path normalization, collision resolution, and ownership data                            |
@@ -135,20 +137,25 @@ Compatibility timeline:
 The `bundle` and `prompt-text` targets belong to the `prompt` family and use the `general` section
 profile. No default selection includes them.
 
-| Export                           | Description                                                                                                     |
-| :------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
-| `SECTION_PROFILES`               | Section contracts per profile. `coding` is the existing registry, `general` has five                            |
-| `SectionProfile`                 | `'coding'` or `'general'`. Every target reports its profile as `sectionProfile`                                 |
-| `isPromptTarget(name)`           | True for a built-in target of the `prompt` family                                                               |
-| `CODING_TARGETS`                 | Every known target except the prompt family                                                                     |
-| `compareCodeUnits(a, b)`         | Compares two strings by UTF-16 code units, the order RFC 8785 requires, whatever the locale                     |
-| `PROMPT_BUNDLE_SCHEMA_URL`       | Schema URL of a prompt bundle, the version tag inside the hash                                                  |
-| `PROMPT_BUNDLE_INDEX_SCHEMA_URL` | Schema URL of a prompt bundle index                                                                             |
-| `hashPromptBundle(bundle)`       | `sha256-` plus SHA-256 over the canonical JSON without `contentHash` and `provenance`                           |
-| `refuseUrl(url, options)`        | Why a remote prompt file URL is refused, or `undefined`. `allowPrivate: true` lets private hosts pass           |
-| `normalizeProvenanceFiles(...)`  | Rewrites a trace: authored reference for a pack, relative path in the root, else `external:` plus the base name |
-| `readMetaGovernance(fields)`     | Reads the governance defaults of `@meta`                                                                        |
-| `extractPromptDefinitions(...)`  | Reads the `@prompts` entries of a program into typed definitions                                                |
+| Export                                 | Description                                                                                                     |
+| :------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| `SECTION_PROFILES`                     | Section contracts per profile. `coding` is the existing registry, `general` has five                            |
+| `SectionProfile`                       | `'coding'` or `'general'`. Every target reports its profile as `sectionProfile`                                 |
+| `isPromptTarget(name)`                 | True for a built-in target of the `prompt` family                                                               |
+| `CODING_TARGETS`                       | Every known target except the prompt family                                                                     |
+| `compareCodeUnits(a, b)`               | Compares two strings by UTF-16 code units, the order RFC 8785 requires, whatever the locale                     |
+| `PROMPT_BUNDLE_SCHEMA_URL`             | Schema URL of a prompt bundle, the version tag inside the hash                                                  |
+| `PROMPT_BUNDLE_INDEX_SCHEMA_URL`       | Schema URL of a prompt bundle index                                                                             |
+| `hashPromptBundle(bundle)`             | `sha256-` plus SHA-256 over the canonical JSON without `contentHash` and `provenance`                           |
+| `refuseUrl(url, options)`              | Why a remote prompt file URL is refused, or `undefined`. `allowPrivate: true` lets private hosts pass           |
+| `normalizeProvenanceFiles(...)`        | Rewrites a trace: authored reference for a pack, relative path in the root, else `external:` plus the base name |
+| `readMetaGovernance(fields)`           | Reads the governance defaults of `@meta`                                                                        |
+| `effectiveGovernance(entry, defaults)` | Governance a bundle carries: entry value, else the `@meta` default; data classes joined, lists sorted           |
+| `isApprovalRecordV1(value)`            | Checks the keys and every field pattern of an approval record                                                   |
+| `serializeApprovalRecord(record)`      | The exact bytes of a record file: fixed key order, two-space indent, trailing newline                           |
+| `parseApprovalRecord(bytes)`           | Reads record file bytes; refuses invalid UTF-8 and bytes that differ from its own serialization                 |
+| `approvalRecordPath(record)`           | `.promptscript/approvals/<role>/<prompt id>/<contentHash>.<approver slug>.json`; throws on an invalid record    |
+| `extractPromptDefinitions(...)`        | Reads the `@prompts` entries of a program into typed definitions                                                |
 
 `normalizeProvenanceFiles` is pure. It takes an optional `realpath` function and works for POSIX
 and Windows paths. It covers every file in a trace: entries, history steps, chain links, nested
