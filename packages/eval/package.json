@@ -8,6 +8,7 @@
   "types": "./src/index.d.ts",
   "dependencies": {
     "@promptscript/core": "workspace:^",
+    "@promptscript/runtime": "workspace:^",
     "@promptscript/validator": "workspace:^",
     "@swc/helpers": "~0.5.23",
     "ajv": "^8.20.0",

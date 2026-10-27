@@ -12,6 +12,7 @@ import {
 import { EVAL_CODES, EvalDatasetError, type EvalCode } from '../errors.js';
 import { parseDocumentText } from '../parse-document.js';
 import { projectRelative } from '../paths.js';
+import { isRecord } from '../shape.js';
 import { parseCsv } from './csv.js';
 
 /** One dataset row with its id filled in and the line it starts on. */
@@ -65,10 +66,6 @@ function datasetError(at: At, code: EvalCode, problem: string): EvalDatasetError
   return new EvalDatasetError(`Dataset ${at.file}, line ${at.line}: ${problem}`, code, {
     location: { file: at.file, line: at.line, column: at.column ?? 1 },
   });
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 // Key names come from the dataset, so messages show at most 64 characters of them.

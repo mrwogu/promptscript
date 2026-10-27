@@ -3,6 +3,7 @@ import { EvalProviderError } from './errors.js';
 import { createMockProvider, type EvalRequest } from './provider.js';
 
 const request: EvalRequest = {
+  promptId: 'acme-support/refund-reply',
   provider: 'anthropic',
   apiId: 'claude-sonnet-5-5',
   modelRef: 'claude-sonnet-5-5',

@@ -1,4 +1,13 @@
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import {
+  chmodSync,
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -60,6 +69,7 @@ describe('loadSuites', () => {
     expect(suites[0]?.datasetFile).toBe(join(evals, 'datasets', 'rows.jsonl'));
     expect(suites[0]?.labelsFile).toBe(join(evals, 'labels', 'rows.jsonl'));
     expect(suites[2]?.suite.assertions).toEqual([{ id: 'same', kind: 'equals' }]);
+    expect(suites[2]?.hash).toBe(`sha256-${createHash('sha256').update(SUITE).digest('hex')}`);
   });
 
   it('returns nothing when the project has no evals directory', async () => {
@@ -125,6 +135,27 @@ describe('loadSuites', () => {
       'Suite .promptscript/evals/big.eval.yaml is larger than 1048576 bytes.',
       'Suite .promptscript/evals/bytes.eval.yaml is not valid UTF-8.',
     ]);
+  });
+
+  it('makes a suite that cannot be read a finding, not a failed load', async () => {
+    suiteFile('locked.eval.yaml', SUITE);
+    suiteFile('open.eval.yaml', SUITE);
+    chmodSync(join(evals, 'locked.eval.yaml'), 0o000);
+
+    try {
+      const { suites, findings } = await loadSuites({ projectRoot: root });
+
+      expect(suites.map((suite) => suite.name)).toEqual(['open']);
+      expect(findings).toEqual([
+        expect.objectContaining({
+          code: 'PS6200',
+          message: 'Suite .promptscript/evals/locked.eval.yaml could not be read: EACCES.',
+          file: '.promptscript/evals/locked.eval.yaml',
+        }),
+      ]);
+    } finally {
+      chmodSync(join(evals, 'locked.eval.yaml'), 0o600);
+    }
   });
 
   it('reads JSON suites with JSON.parse, so comments are refused', async () => {

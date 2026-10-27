@@ -302,6 +302,9 @@ importers:
       '@promptscript/core':
         specifier: workspace:^
         version: link:../core
+      '@promptscript/runtime':
+        specifier: workspace:^
+        version: link:../runtime
       '@promptscript/validator':
         specifier: workspace:^
         version: link:../validator

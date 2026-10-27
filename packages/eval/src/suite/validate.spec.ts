@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { Ajv } from 'ajv';
 import { describe, expect, it } from 'vitest';
-import { formatPath, validateSuite } from './validate.js';
+import { formatPath } from '../shape.js';
+import { validateSuite } from './validate.js';
 
 type Doc = Record<string, unknown>;
 

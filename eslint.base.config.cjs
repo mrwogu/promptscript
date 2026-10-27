@@ -77,10 +77,11 @@ const moduleBoundaryRules = [
     sourceTag: 'scope:formatters',
     onlyDependOnLibsWithTags: ['scope:core'],
   },
-  // Eval depends on core and validator (the dataset scan reuses validator rules)
+  // Eval depends on core, validator (the dataset scan reuses validator rules) and runtime
+  // (rendering and the provider request mappers)
   {
     sourceTag: 'scope:eval',
-    onlyDependOnLibsWithTags: ['scope:core', 'scope:validator'],
+    onlyDependOnLibsWithTags: ['scope:core', 'scope:validator', 'scope:runtime'],
   },
   // Compiler depends on core, resolver, validator, formatters
   {

@@ -1,5 +1,6 @@
 import { Buffer } from 'node:buffer';
 import { Ajv, type ValidateFunction } from 'ajv';
+import { isRecord } from './shape.js';
 import type {
   EvalAssertion,
   EvalAssertionResultV1,
@@ -28,11 +29,18 @@ export interface AssertionContext {
   output?: PromptBundleOutput;
   /** Expected value of the row, the default value of `equals` */
   expected?: string | Record<string, EvalExpectedValue>;
+  /**
+   * Ids of assertions whose patterns ran out of time on an earlier case. They
+   * fail at once, and an assertion that runs out is added, so a slow pattern
+   * costs its time budget once per run instead of once per case.
+   */
+  timedOut?: Set<string>;
 }
 
 interface Outcome {
   passed: boolean;
   reason?: string;
+  timedOut?: true;
 }
 
 type Target = { ok: true; value: unknown } | { ok: false; reason: string };
@@ -70,10 +78,6 @@ export function compileJsonSchema(schema: object): ValidateFunction {
 function show(value: unknown): string {
   const text = typeof value === 'string' ? value : (JSON.stringify(value) ?? String(value));
   return JSON.stringify(text.length > MAX_VALUE ? `${text.slice(0, MAX_VALUE)}...` : text);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 // Trim, unwrap one fenced block, parse; only a JSON object counts.
@@ -180,10 +184,14 @@ function checkRegex(assertion: EvalRegexAssertion, actual: unknown): Outcome {
     matched = timedRegexTest(assertion.pattern, assertion.flags ?? '', actual);
   } catch (error) {
     // checkSuites refuses bad patterns; a direct caller still gets a failed case
-    const reason = isRegexTimeout(error)
-      ? `Regex ran longer than ${REGEX_TIMEOUT_MS} ms`
-      : 'Regex pattern or flags are not valid';
-    return { passed: false, reason };
+    if (isRegexTimeout(error)) {
+      return {
+        passed: false,
+        reason: `Regex ran longer than ${REGEX_TIMEOUT_MS} ms`,
+        timedOut: true,
+      };
+    }
+    return { passed: false, reason: 'Regex pattern or flags are not valid' };
   }
   const passed = matched !== (assertion.negate ?? false);
   if (passed) return { passed };
@@ -217,10 +225,14 @@ function checkJsonSchema(
     valid = validate(actual);
   } catch (error) {
     // A slow schema pattern, or a recursive schema on a very deep response
-    const reason = isRegexTimeout(error)
-      ? `Schema patterns ran longer than ${REGEX_TIMEOUT_MS} ms`
-      : 'Schema check could not finish on this response';
-    return { passed: false, reason };
+    if (isRegexTimeout(error)) {
+      return {
+        passed: false,
+        reason: `Schema patterns ran longer than ${REGEX_TIMEOUT_MS} ms`,
+        timedOut: true,
+      };
+    }
+    return { passed: false, reason: 'Schema check could not finish on this response' };
   }
   if (valid) return { passed: true };
   const error = validate.errors?.[0];
@@ -280,11 +292,22 @@ export function evaluateAssertions(
     return { ok: true, value: object[assertion.field] };
   };
 
-  return assertions.map((assertion) => {
+  const evaluate = (assertion: DeterministicAssertion): Outcome => {
+    if (context.timedOut?.has(assertion.id)) {
+      return {
+        passed: false,
+        reason: 'Patterns ran out of time on an earlier case; not run again',
+      };
+    }
     const found = target(assertion);
-    const outcome = found.ok
-      ? withRegexBudget(REGEX_TIMEOUT_MS, () => check(assertion, found.value, context))
-      : { passed: false, reason: found.reason };
+    if (!found.ok) return { passed: false, reason: found.reason };
+    const outcome = withRegexBudget(REGEX_TIMEOUT_MS, () => check(assertion, found.value, context));
+    if (outcome.timedOut) context.timedOut?.add(assertion.id);
+    return outcome;
+  };
+
+  return assertions.map((assertion) => {
+    const outcome = evaluate(assertion);
     return {
       id: assertion.id,
       kind: assertion.kind,

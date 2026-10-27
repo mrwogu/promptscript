@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { compareCodeUnits, type EvalSuiteV1 } from '@promptscript/core';
 import { EVAL_CODES, type EvalCode, type EvalFinding } from '../errors.js';
@@ -17,6 +18,8 @@ export interface LoadedSuite {
   datasetFile: string;
   /** Real path of the label file, when the suite names one */
   labelsFile?: string;
+  /** SHA-256 of the suite file bytes, `sha256-` plus 64 hex characters */
+  hash: string;
 }
 
 /** Options of {@link loadSuites}. */
@@ -95,9 +98,19 @@ async function loadSuite(
     );
     return undefined;
   }
+  let bytes: Buffer;
+  try {
+    bytes = await readFile(real);
+  } catch (error) {
+    const reason = (error as NodeJS.ErrnoException).code ?? 'an unknown error';
+    findings.push(
+      finding(EVAL_CODES.SUITE_INVALID, `Suite ${file} could not be read: ${reason}.`, file)
+    );
+    return undefined;
+  }
   let text: string;
   try {
-    text = new TextDecoder('utf-8', { fatal: true }).decode(await readFile(real));
+    text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
   } catch {
     findings.push(finding(EVAL_CODES.SUITE_INVALID, `Suite ${file} is not valid UTF-8.`, file));
     return undefined;
@@ -141,15 +154,16 @@ async function loadSuite(
     }
     return target;
   };
-  return withPaths(entry, file, suite, resolveIn);
+  const hash = `sha256-${createHash('sha256').update(bytes).digest('hex')}`;
+  return withPaths(entry, { file, suite, hash }, resolveIn);
 }
 
 function withPaths(
   entry: string,
-  file: string,
-  suite: EvalSuiteV1,
+  read: Pick<LoadedSuite, 'file' | 'suite' | 'hash'>,
   resolveIn: (key: 'dataset' | 'labels', value: string) => string | undefined
 ): LoadedSuite | undefined {
+  const { suite } = read;
   const datasetFile = resolveIn(
     'dataset',
     typeof suite.dataset === 'string' ? suite.dataset : suite.dataset.path
@@ -159,7 +173,7 @@ function withPaths(
     return undefined;
   }
   const name = SUITE_FILE.exec(entry)?.[1] ?? entry;
-  return { name, file, suite, datasetFile, ...(labelsFile === undefined ? {} : { labelsFile }) };
+  return { name, ...read, datasetFile, ...(labelsFile === undefined ? {} : { labelsFile }) };
 }
 
 // Suite file names by suite name; a file with a bad name becomes a finding.

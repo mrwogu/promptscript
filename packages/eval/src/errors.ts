@@ -2,7 +2,7 @@ import { PSError, type EvalFindingSeverity, type SourceLocation } from '@prompts
 
 /**
  * Codes of eval errors and findings: `PS61xx` datasets, `PS62xx` suites,
- * `PS63xx` providers, `PS65xx` cost.
+ * `PS63xx` providers and the run, `PS64xx` cache, `PS65xx` cost, `PS66xx` judge.
  */
 export const EVAL_CODES = {
   /** Dataset file cannot be read or parsed, or a row has the wrong shape */
@@ -45,10 +45,50 @@ export const EVAL_CODES = {
   REGEX_RISK: 'PS6210',
   /** A dataset allow entry without a deterministic assertion */
   ALLOW_WITHOUT_ASSERTION: 'PS6213',
+  /** An assertion could not run on a case */
+  ASSERTION_ERROR: 'PS6214',
   /** A provider call failed */
   PROVIDER_FAILED: 'PS6300',
+  /** A model's provider has no entry in `eval.providers` and no built-in default */
+  PROVIDER_UNCONFIGURED: 'PS6301',
+  /** A provider URL is refused, or a provider answered with a redirect */
+  URL_REFUSED: 'PS6302',
+  /** `eval.providers` holds a key that is not allowed, such as `apiKey` */
+  CONFIG_KEY_REFUSED: 'PS6303',
+  /** A provider refused the request with a 4xx status */
+  PROVIDER_REJECTED: 'PS6304',
+  /** A provider response body is larger than the cap */
+  RESPONSE_TOO_LARGE: 'PS6305',
+  /** The environment variable of a provider key is not set */
+  KEY_MISSING: 'PS6306',
+  /** The value of a provider key appears in the eval config */
+  KEY_IN_CONFIG: 'PS6307',
+  /** The run stopped before the case ran */
+  RUN_STOPPED: 'PS6308',
+  /** A run option is out of range, such as a concurrency that is not a positive integer */
+  RUN_OPTION_INVALID: 'PS6309',
+  /** A cache entry is unreadable or does not match its key; it counts as a miss */
+  CACHE_ENTRY_INVALID: 'PS6401',
+  /** Replay found no cache entry for a call */
+  CACHE_MISS: 'PS6402',
+  /** The cache tree holds something that is not a plain directory or file */
+  CACHE_TREE_INVALID: 'PS6403',
+  /** The cache could not be read or written, such as a full disk or a denied directory */
+  CACHE_IO_FAILED: 'PS6404',
+  /** A cache entry is over the 1 MiB read cap, so it is not written */
+  CACHE_ENTRY_TOO_LARGE: 'PS6405',
   /** A cost threshold needs a price the catalog does not have */
   PRICING_MISSING: 'PS6501',
+  /** A provider response has no valid token counts */
+  USAGE_INVALID: 'PS6502',
+  /** The budget does not cover the planned or the next call */
+  BUDGET_EXCEEDED: 'PS6503',
+  /** A live cache mode runs without a budget */
+  BUDGET_REQUIRED: 'PS6504',
+  /** A project price is lower than the built-in price of the same model */
+  PRICE_LOWERED: 'PS6505',
+  /** The suite has an llm-judge assertion, which this version cannot run */
+  JUDGE_UNSUPPORTED: 'PS6600',
 } as const;
 
 /** One eval code. */
@@ -86,8 +126,19 @@ export class EvalDatasetError extends EvalError {
 
 /** A provider call failed. */
 export class EvalProviderError extends EvalError {
-  constructor(message: string, code: EvalCode) {
+  /** HTTP status of the failed call, when the provider answered */
+  readonly status?: number;
+  /** Delay the provider asked for in `retry-after`, in milliseconds */
+  readonly retryAfterMs?: number;
+
+  constructor(
+    message: string,
+    code: EvalCode,
+    details: { status?: number; retryAfterMs?: number } = {}
+  ) {
     super(message, code);
     this.name = 'EvalProviderError';
+    this.status = details.status;
+    this.retryAfterMs = details.retryAfterMs;
   }
 }
