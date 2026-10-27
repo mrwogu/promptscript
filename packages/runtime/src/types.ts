@@ -146,7 +146,10 @@ export interface PromptCacheStore {
 export interface PromptCacheOptions {
   /** Time a pointer file is served without a check, in milliseconds. Default 60000. */
   readonly ttlMs?: number;
-  /** Most bundles kept in memory. Default 256. */
+  /**
+   * Most entries kept in memory, for bundles, served prompts and misses each. A prompt that
+   * dropped out is not served stale when the source fails. Default 256.
+   */
   readonly maxPrompts?: number;
   /** Store that survives the process, for serving after the source is down */
   readonly store?: PromptCacheStore;

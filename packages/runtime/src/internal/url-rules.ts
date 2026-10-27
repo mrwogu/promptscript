@@ -20,7 +20,8 @@ function ipv4Kind([a, b, c, d]: Ipv4): string | undefined {
     a === 0 ||
     a === 127 ||
     (a === 169 && b === 254) ||
-    (a === 100 && b === 100 && c === 100 && d === 200)
+    (a === 100 && b === 100 && c === 100 && d === 200) ||
+    (a === 168 && b === 63 && c === 129 && d === 16)
   ) {
     return LOCAL;
   }
@@ -51,20 +52,29 @@ function ipv6Kind([h0, h1, h2, h3, h4, h5, h6, h7]: Ipv6): string | undefined {
     return ipv4Kind(embedded);
   }
   const nat64 = h0 === 0x64 && h1 === 0xff9b && h2 === 0 && h3 === 0 && h4 === 0 && h5 === 0;
-  const awsMetadata = h0 === 0xfd00 && h1 === 0xec2 && h7 === 0x254 && h2 + h3 + h4 + h5 + h6 === 0;
-  if (nat64 || awsMetadata || (h0 & 0xffc0) === 0xfe80) return LOCAL;
+  // fd00:ec2::254 is AWS, fd20:ce::254 Google Cloud on IPv6-only instances
+  const metadataPrefix = (h0 === 0xfd00 && h1 === 0xec2) || (h0 === 0xfd20 && h1 === 0xce);
+  const metadata = metadataPrefix && h7 === 0x254 && h2 + h3 + h4 + h5 + h6 === 0;
+  if (nat64 || metadata || (h0 & 0xffc0) === 0xfe80) return LOCAL;
   return (h0 & 0xfe00) === 0xfc00 ? PRIVATE : undefined;
 }
 
+// Loopback names from common hosts files, and the metadata names
+const LOCAL_NAMES = new Set([
+  'localhost',
+  'localhost4',
+  'localhost4.localdomain4',
+  'localhost6',
+  'localhost6.localdomain6',
+  'localhost.localdomain',
+  'ip6-localhost',
+  'ip6-loopback',
+  'metadata.goog',
+  'metadata.google.internal',
+]);
+
 function nameKind(host: string): string | undefined {
-  if (
-    host === 'localhost' ||
-    host.endsWith('.localhost') ||
-    host === 'metadata.goog' ||
-    host === 'metadata.google.internal'
-  ) {
-    return LOCAL;
-  }
+  if (LOCAL_NAMES.has(host) || host.endsWith('.localhost')) return LOCAL;
   return host.endsWith('.local') || host.endsWith('.internal') ? PRIVATE : undefined;
 }
 
@@ -81,12 +91,15 @@ function hostKind(hostname: string): string | undefined {
  *
  * The URL must parse, use `https` and carry no user name, password, query or fragment.
  * Its host must not be loopback, unspecified, link-local, NAT64 or a metadata endpoint:
- * `0/8`, `127/8`, `169.254/16`, `100.100.100.200`, `::`, `::1`, `fe80::/10`,
- * `64:ff9b::/96`, `fd00:ec2::254`, the IPv4-mapped forms, `localhost`, `*.localhost`,
- * `metadata.goog` and `metadata.google.internal`. With `allowPrivate: false` it must not
- * be private either: `10/8`, `100.64/10`, `172.16/12`, `192.168/16`, `fc00::/7`,
- * `*.local` and `*.internal`. Hosts are compared lowercased with one trailing dot
- * stripped, and IP literals in any form the URL parser accepts are checked as bytes.
+ * `0/8`, `127/8`, `169.254/16`, `100.100.100.200`, `168.63.129.16`, `::`, `::1`,
+ * `fe80::/10`, `64:ff9b::/96`, `fd00:ec2::254`, `fd20:ce::254`, the IPv4-mapped forms,
+ * `localhost`, `*.localhost`, `localhost4`, `localhost6`, `localhost.localdomain`,
+ * `localhost4.localdomain4`, `localhost6.localdomain6`, `ip6-localhost`, `ip6-loopback`,
+ * `metadata.goog` and `metadata.google.internal`.
+ * With `allowPrivate: false` it must not be private either: `10/8`, `100.64/10`,
+ * `172.16/12`, `192.168/16`, `fc00::/7`, `*.local` and `*.internal`. Hosts are compared
+ * lowercased with one trailing dot stripped, and IP literals in any form the URL parser
+ * accepts are checked as bytes.
  * Names are not resolved, so a public name that points at a private address passes.
  *
  * This file is kept identical in `packages/core/src/url-rules.ts` and

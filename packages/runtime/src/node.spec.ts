@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import {
   chmodSync,
   mkdirSync,
@@ -69,6 +70,24 @@ describe('directorySource', () => {
     const expected = process.getuid?.() === 0 ? 'ok' : 'source-error';
 
     expect(await codeOf('locked.json')).toBe(expected);
+  });
+
+  it.skipIf(process.platform === 'win32')(
+    'refuses a FIFO without waiting for a writer',
+    async () => {
+      execFileSync('mkfifo', [join(root, 'pipe.json')]);
+
+      expect(await codeOf('pipe.json')).toBe('not-found');
+    }
+  );
+
+  it.each([NaN, -1, Infinity, 1.5, 0])('refuses %s as maxBytes', (value) => {
+    expect(() => directorySource(root, { maxBytes: value })).toThrow(
+      expect.objectContaining({
+        name: 'RangeError',
+        message: 'maxBytes must be a whole number of 1 or more.',
+      })
+    );
   });
 
   it('refuses a file above maxBytes', async () => {

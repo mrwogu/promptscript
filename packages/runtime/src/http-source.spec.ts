@@ -223,6 +223,27 @@ describe('httpSource', () => {
     expect(cancel).toHaveBeenCalledTimes(2);
   });
 
+  it('does not wait for a cancel that never settles', async () => {
+    // Arrange
+    const cancel = vi.fn((): Promise<void> => new Promise(() => undefined));
+    const body = {
+      getReader: () => ({ read: async () => ({ done: false, value: new Uint8Array(4) }), cancel }),
+    };
+    const missing = { status: 404, headers: new Headers(), body };
+    const declared = { status: 200, headers: new Headers({ 'Content-Length': '100' }), body };
+    const streamed = { status: 200, headers: new Headers(), body };
+    const read = (response: RuntimeResponse) =>
+      failure(httpSource(BASE, { fetch: fetchReturning(response), maxBytes: 10 }).read('a.json'));
+
+    // Act
+    const codes = [(await read(missing)).code, (await read(declared)).code];
+    codes.push((await read(streamed)).code);
+
+    // Assert
+    expect(codes).toEqual(['not-found', 'too-large', 'too-large']);
+    expect(cancel).toHaveBeenCalledTimes(3);
+  });
+
   it('ignores a body that fails to cancel', async () => {
     const cancel = vi.fn(() => Promise.reject(new Error('stream broken')));
     const body = { getReader: () => ({ read: async () => ({ done: true }), cancel }) };
@@ -270,6 +291,67 @@ describe('httpSource', () => {
     // Assert
     expect(headers.code).toBe('timeout');
     expect(body.code).toBe('timeout');
+  });
+
+  it('times out when the fetch ignores the signal', async () => {
+    // Arrange
+    const never = (): Promise<never> => new Promise(() => undefined);
+    const cancel = vi.fn(() => Promise.reject(new Error('stream broken')));
+    const noHeaders = vi.fn<RuntimeFetch>(never);
+    const endlessBody = fetchReturning({
+      status: 200,
+      headers: new Headers(),
+      body: { getReader: () => ({ read: never, cancel }) },
+    });
+
+    // Act
+    const headers = await failure(
+      httpSource(BASE, { fetch: noHeaders, timeoutMs: 10 }).read('a.json')
+    );
+    const body = await failure(
+      httpSource(BASE, { fetch: endlessBody, timeoutMs: 10 }).read('a.json')
+    );
+
+    // Assert
+    expect(headers.code).toBe('timeout');
+    expect(body.code).toBe('timeout');
+    expect(cancel).toHaveBeenCalled();
+  });
+
+  it('cancels a response that arrives after the timeout', async () => {
+    // Arrange
+    const cancel = vi.fn(async () => undefined);
+    let answer: (response: RuntimeResponse) => void = () => undefined;
+    const fetch = vi.fn<RuntimeFetch>(
+      () =>
+        new Promise((resolve) => {
+          answer = resolve;
+        })
+    );
+
+    // Act
+    const error = await failure(httpSource(BASE, { fetch, timeoutMs: 10 }).read('a.json'));
+    answer({
+      status: 200,
+      headers: new Headers(),
+      body: { getReader: () => ({ read: async () => ({ done: true }), cancel }) },
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Assert
+    expect(error.code).toBe('timeout');
+    expect(cancel).toHaveBeenCalled();
+  });
+
+  it.each([NaN, -1, Infinity, 1.5, 0])('refuses %s as timeoutMs or maxBytes', (value) => {
+    for (const option of ['timeoutMs', 'maxBytes']) {
+      expect(() => httpSource(BASE, { [option]: value })).toThrow(
+        expect.objectContaining({
+          name: 'RangeError',
+          message: `${option} must be a whole number of 1 or more.`,
+        })
+      );
+    }
   });
 
   it('reports a network failure without the original error or any header', async () => {

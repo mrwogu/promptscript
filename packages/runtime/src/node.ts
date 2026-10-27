@@ -3,10 +3,10 @@
  *
  * @packageDocumentation
  */
-import { open, realpath, type FileHandle } from 'node:fs/promises';
+import { constants, open, realpath, type FileHandle } from 'node:fs/promises';
 import { resolve, sep } from 'node:path';
 import { PromptLoadError } from './errors.js';
-import { assertFilePath, decodeUtf8, DEFAULT_MAX_BYTES } from './paths.js';
+import { assertFilePath, decodeUtf8, DEFAULT_MAX_BYTES, wholeNumber } from './paths.js';
 import type { DirectorySourceOptions, PromptSource, SourceFile } from './types.js';
 
 export type { DirectorySourceOptions } from './types.js';
@@ -30,7 +30,9 @@ async function openBelow(root: string, path: string, fail: Failure): Promise<Fil
     if (!real.startsWith(`${realRoot}${sep}`)) {
       throw fail('source-error', 'leads outside the directory.');
     }
-    return await open(real, 'r');
+    // A plain open() of a FIFO waits for a writer forever. With O_NONBLOCK it returns at
+    // once and the fstat in readBelow refuses it. Windows has no O_NONBLOCK and no FIFOs.
+    return await open(real, constants.O_RDONLY | (constants.O_NONBLOCK ?? 0));
   } catch (error) {
     if (error instanceof PromptLoadError) throw error;
     if (errorCode(error) === 'ENOENT') throw fail('not-found', 'does not exist.');
@@ -71,6 +73,7 @@ async function readBelow(root: string, path: string, maxBytes: number): Promise<
  * @param root - Directory that holds the prompt files
  * @param options - Size limit
  * @returns A source for `createPromptClient`
+ * @throws {RangeError} when `maxBytes` is not a whole number of 1 or more
  *
  * @example
  * const client = createPromptClient({
@@ -80,6 +83,6 @@ async function readBelow(root: string, path: string, maxBytes: number): Promise<
  */
 export function directorySource(root: string, options: DirectorySourceOptions = {}): PromptSource {
   const name = resolve(root);
-  const maxBytes = options.maxBytes ?? DEFAULT_MAX_BYTES;
+  const maxBytes = wholeNumber('maxBytes', options.maxBytes ?? DEFAULT_MAX_BYTES, 1);
   return { name, read: (path) => readBelow(name, path, maxBytes) };
 }

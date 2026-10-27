@@ -167,6 +167,53 @@
     "host is local or a metadata endpoint",
     "host is local or a metadata endpoint"
   ],
+  [
+    "https://localhost4/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://localhost6./",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://localhost.localdomain/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://localhost4.localdomain4/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://LOCALHOST6.localdomain6./",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://ip6-localhost/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://ip6-loopback/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  [
+    "https://168.63.129.16/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  ["https://168.63.129.17/", null, null],
+  [
+    "https://[fd20:ce::254]/",
+    "host is local or a metadata endpoint",
+    "host is local or a metadata endpoint"
+  ],
+  ["https://[fd20:ce::255]/", "host is private", null],
   ["https://10.0.0.1/", "host is private", null],
   ["https://100.64.0.1/", "host is private", null],
   ["https://100.127.255.255/", "host is private", null],
