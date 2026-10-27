@@ -46,6 +46,7 @@ import { unresolvedPromptSlot } from './unresolved-prompt-slot.js';
 import { unusedPromptDeclaration } from './unused-prompt-declaration.js';
 import { unresolvedTemplateVariable } from './unresolved-template-variable.js';
 import { slotInSystemMessage } from './slot-in-system-message.js';
+import { governanceValues } from './governance-values.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -123,6 +124,7 @@ export { unresolvedPromptSlot } from './unresolved-prompt-slot.js';
 export { unusedPromptDeclaration } from './unused-prompt-declaration.js';
 export { unresolvedTemplateVariable } from './unresolved-template-variable.js';
 export { slotInSystemMessage } from './slot-in-system-message.js';
+export { governanceValues } from './governance-values.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -209,6 +211,8 @@ export const allRules: ValidationRule[] = [
   unresolvedTemplateVariable,
   // Slot in system message (PS046)
   slotInSystemMessage,
+  // Governance values against the governance config (PS047)
+  governanceValues,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,

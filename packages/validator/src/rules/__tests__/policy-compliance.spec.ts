@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import type { Block, ObjectContent, Program, SourceLocation } from '@promptscript/core';
 import { policyCompliance } from '../policy-compliance.js';
 import type { ValidationMessage, ValidatorConfig } from '../../types.js';
+import { createValidator } from '../../validator.js';
+import { PROMPT_LOC, promptProgram } from '../../__tests__/prompt-helper.js';
 
 // ============================================================
 // Test helpers
@@ -235,5 +237,101 @@ describe('policy-compliance (PS030)', () => {
     expect(messages).toHaveLength(1);
     expect(messages[0]!.suggestion).toBeDefined();
     expect(messages[0]!.suggestion).toContain('@core');
+  });
+});
+
+describe('policy-compliance (PS030) on prompts', () => {
+  const CONTENT: ValidatorConfig['policies'] = [
+    { name: 'no-http', kind: 'content-rules', severity: 'error', checks: ['suspicious-urls'] },
+  ];
+
+  it('reports a prompt policy at the entry that breaks it', () => {
+    // Arrange
+    const ast = promptProgram({ risk: 'high' });
+
+    // Act
+    const messages = validate(ast, {
+      policies: [
+        { name: 'fields', kind: 'required-metadata', severity: 'error', fields: ['owner'] },
+      ],
+    });
+
+    // Assert
+    expect(messages).toEqual([
+      expect.objectContaining({
+        ruleId: 'PS030',
+        severity: 'error',
+        message: '[fields] Prompt "acme-support/review" has risk "high" but no owner',
+        suggestion: 'Add owner to the entry or to @meta.',
+        location: PROMPT_LOC,
+      }),
+    ]);
+  });
+
+  it('checks roles and environments against the governance and releases config', () => {
+    // Arrange
+    const policies: ValidatorConfig['policies'] = [
+      {
+        name: 'signoff',
+        kind: 'required-approvals',
+        severity: 'error',
+        environments: ['prod'],
+        approvals: [{ role: 'legal' }],
+      },
+    ];
+
+    // Act
+    const withConfig = validate(promptProgram(), {
+      policies,
+      governance: { roles: { legal: ['@acme/legal'] } },
+      releases: { environments: ['staging', 'prod'] },
+    });
+    const withoutConfig = validate(promptProgram(), { policies });
+
+    // Assert
+    expect(withConfig).toEqual([]);
+    expect(withoutConfig.map((message) => message.message)).toEqual([
+      'Policy "signoff": environment "prod" is not in releases.environments. Add it there or fix the name.',
+      'Policy "signoff": approvals[0]: role "legal" is not in governance.roles. Add it there with the teams that review it.',
+    ]);
+  });
+
+  it('fails closed on a kind this version does not know', () => {
+    // Act
+    const messages = validate(promptProgram(), {
+      policies: [{ name: 'later', kind: 'required-signatures', severity: 'warning' }] as never,
+    });
+
+    // Assert
+    expect(messages).toEqual([
+      expect.objectContaining({
+        severity: 'error',
+        message: expect.stringContaining('unknown kind'),
+      }),
+    ]);
+  });
+
+  it('runs content checks even when the project disables the rule they name', () => {
+    // Arrange
+    const ast = promptProgram({ system: 'Read http://evil.example first.' });
+    const validator = createValidator({
+      policies: CONTENT,
+      disableRules: ['suspicious-urls'],
+      rules: { PS010: 'off' },
+    });
+
+    // Act
+    const result = validator.validate(ast);
+
+    // Assert
+    expect(result.all.filter((message) => message.ruleId === 'PS010')).toEqual([]);
+    expect(result.errors.filter((message) => message.ruleId === 'PS030')).toEqual([
+      expect.objectContaining({
+        message: expect.stringMatching(
+          /^\[no-http\] Prompt "acme-support\/review": suspicious-urls: .* in the system message$/
+        ),
+        location: PROMPT_LOC,
+      }),
+    ]);
   });
 });

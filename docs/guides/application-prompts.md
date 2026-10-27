@@ -230,7 +230,9 @@ PromptScript does not render slots, so nothing in this guide describes how an ap
 
 A prompt takes its own `risk`, `owner`, `domain`, `dataClasses` and `reviewers`, and falls back to
 the values in `@meta`. `dataClasses` is the union of both. Lists are sorted by UTF-16 code units and
-have no duplicates.
+have no duplicates. [Prompt policies](policy-engine.md#prompt-policies) in `promptscript.yaml` read
+these values: they can require fields, raise the risk from data classes, limit models and check
+the text.
 
 ### Model
 

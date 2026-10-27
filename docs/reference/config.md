@@ -242,7 +242,7 @@ includePromptScriptSkill: true # default: true
 | `includePromptScriptSkill` | boolean                 | No       | Include the bundled language skill              |
 | `validation`               | object                  | No       | Guard and validation rule settings              |
 | `models`                   | object                  | No       | Supported model set and model profiles          |
-| `policies`                 | array                   | No       | Extension compliance policies                   |
+| `policies`                 | array                   | No       | Policies for skill extensions and prompts       |
 | `releases`                 | object                  | No       | Release environments for prompt bundles         |
 
 `id` and `syntax` are required even when `input.entry` uses its default.

@@ -63,6 +63,14 @@ from that version a `{{name}}` that nothing bound is reported instead of being
 printed silently. Fenced code blocks, inline code spans and escaped `\{{` are
 skipped, so documentation of template syntax stays quiet. No target emits prompt definitions.
 
+Policies in `promptscript.yaml` act on the entries through PS030, located at the entry: a
+missing governance field, a risk below a `risk-floor`, a model outside a `model-allowlist`,
+or a content check or denied phrase of `content-rules`. A `policies` value that is not a
+list, a policy definition with an unknown kind or key, an unknown role, environment or model, a data class outside `governance.dataClasses`, or an approval `count` above 1 is a
+PS030 error too. With a `governance` section, PS047 warns on owners and reviewers that are
+not a Git host identity and on data classes outside `governance.dataClasses`. See the
+[Policy Engine guide](../../guides/policy-engine.md#prompt-policies).
+
 ## Model Versions
 
 `@meta.syntax` does not track AI models. Agent and skill `model` values resolve
@@ -79,6 +87,7 @@ their replacement, models outside `models.supported`, and inconsistent
 | ---------- | -------------------------------------------- | -------------------------------------------- |
 | PS018      | Used feature requires newer syntax           | Run `prs validate --fix` or `prs upgrade`    |
 | PS019      | Unknown built-in block name                  | Correct typo or confirm custom block intent  |
+| PS030      | Policy from `promptscript.yaml` not met      | Fix the prompt, skill or policy it names     |
 | PS034      | Invalid hook executable or option            | Fix command, script, or target override      |
 | PS037      | Invalid contextual section header            | Fix owner, key, title, or duplicate          |
 | PS038      | Unsupported or risky built-in block shape    | Convert to canonical shape                   |
@@ -88,6 +97,7 @@ their replacement, models outside `models.supported`, and inconsistent
 | PS044      | Declared prompt input is never used          | Use the input or remove it                   |
 | PS045      | `{{name}}` left in text (syntax 1.6.0+)      | Bind it with a parameter or remove it        |
 | PS046      | Runtime slot in the system message           | Move the slot to the user message            |
+| PS047      | Owner, reviewer or data class off the config | Use a Git host identity or a listed class    |
 | PS4002     | Target cannot preserve requested capability  | Use documented target fallback               |
 | PS4004     | Target cannot run or write the model         | Pick another model or set a target name      |
 | PS5001     | `releases` missing or invalid                | Add `releases.environments`                  |

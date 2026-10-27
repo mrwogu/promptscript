@@ -24,6 +24,26 @@ describe('buildValidatorConfig', () => {
     expect(validation.skipPolicies).toBe(true);
   });
 
+  it('passes governance and releases on, so policies can check roles and environments', () => {
+    // Arrange
+    const governance = { roles: { legal: ['@acme/legal'] }, dataClasses: ['pii'] };
+    const releases = { environments: ['staging', 'prod'] };
+    const config = {
+      id: 'app',
+      syntax: '1.6.0',
+      targets: [],
+      governance,
+      releases,
+    } as unknown as PromptScriptConfig;
+
+    // Act
+    const validator = buildValidatorConfig(config);
+
+    // Assert
+    expect(validator.governance).toBe(governance);
+    expect(validator.releases).toBe(releases);
+  });
+
   it('returns only the policies when the config has no validation block', () => {
     // Arrange
     const config = { id: 'app', syntax: '1.6.0', targets: [] } as unknown as PromptScriptConfig;

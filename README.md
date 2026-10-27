@@ -31,7 +31,7 @@ files for every tool._
 
 PromptScript is an open-source compiler for AI coding agent rules. `.prs` sources
 define instructions, project standards, restrictions, skills, agents, MCP servers, hooks, and
-workflows, while `promptscript.yaml` configures targets and extension-compliance policies. The
+workflows, while `promptscript.yaml` configures targets and the policies for skill extensions and prompts. The
 compiler turns them into the native files each AI tool already knows: `CLAUDE.md` for Claude Code,
 `.github/copilot-instructions.md` for GitHub Copilot, `.cursor/rules` for Cursor, and 47 more
 targets.

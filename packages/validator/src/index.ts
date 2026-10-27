@@ -157,8 +157,14 @@ export {
  * ```
  */
 // Policy engine
-export { parsePolicies, evaluatePolicies } from './policy/index.js';
-export type { ParsedPolicies } from './policy/index.js';
+export {
+  parsePolicies,
+  evaluatePolicies,
+  evaluatePromptPolicies,
+  promptPolicySubjects,
+  normalizeDenyText,
+} from './policy/index.js';
+export type { ParsedPolicies, PolicyContext } from './policy/index.js';
 
 export function validate(ast: ProgramInput, options: ValidateOptions = {}): ValidationResult {
   const { validator, ...config } = options;

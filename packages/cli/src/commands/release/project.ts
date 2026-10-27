@@ -139,7 +139,12 @@ export async function loadReleaseProject(options: ProjectPathOptions): Promise<R
       configPath
     );
   }
-  const parsed = parsePolicies(policies);
+  // Same settings as validate, so a role, environment or custom model parses the same way.
+  const parsed = parsePolicies(policies, {
+    governance: config.governance,
+    releases: config.releases,
+    models: config.models,
+  });
   if (parsed.errors.length > 0) {
     throw configError(
       `policies in ${configPath} cannot be evaluated, so no release can run: ${parsed.errors.join('; ')}. Fix the policy definitions.`,

@@ -275,4 +275,6 @@ export interface PolicyViolation {
   suggestion?: string;
   /** Source file/skill where the violation occurred */
   source?: string;
+  /** Location of the prompt that breaks a prompt policy */
+  location?: SourceLocation;
 }

@@ -666,7 +666,7 @@ export interface PromptScriptConfig {
     allowedPatterns?: string[];
   };
 
-  /** Extension compliance policies */
+  /** Policies for skill extensions and prompts */
   policies?: PolicyDefinition[];
 }
 

@@ -1,11 +1,13 @@
 import type {
   CanonicalProgram,
+  GovernanceConfig,
   Logger,
   ModelsConfig,
   Program,
   SourceLocation,
   PolicyDefinition,
   Lockfile,
+  ReleasesConfig,
   ValidationExclude,
 } from '@promptscript/core';
 
@@ -101,7 +103,7 @@ export interface ValidatorConfig {
   customRules?: ValidationRule[];
   /** Logger for verbose/debug output */
   logger?: Logger;
-  /** Extension compliance policies */
+  /** Policies for skill extensions and prompts */
   policies?: PolicyDefinition[];
   /** Skip policy evaluation */
   skipPolicies?: boolean;
@@ -147,6 +149,16 @@ export interface ValidatorConfig {
    * extend the catalog; `supported` enables model set checks.
    */
   models?: ModelsConfig;
+  /**
+   * Governance settings from promptscript.yaml (`governance`). Policies check
+   * approval roles against it; PS047 runs only when it is set.
+   */
+  governance?: GovernanceConfig;
+  /**
+   * Release settings from promptscript.yaml (`releases`). Policies check their
+   * `environments` against it.
+   */
+  releases?: ReleasesConfig;
 }
 
 /**

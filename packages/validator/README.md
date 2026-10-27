@@ -41,7 +41,7 @@ This is an internal package bundled into `@promptscript/cli`. It is not publishe
 | PS027 | valid-skill-composition      | warning  | Skill composition must be valid: no conflicting phase names, no excessive phases        |
 | PS028 | valid-append-negation        | warning  | Negation prefix ! in append properties is only effective in @extend blocks              |
 | PS029 | valid-sealed-property        | warning  | Sealed property names must be replace-strategy properties                               |
-| PS030 | policy-compliance            | error    | Extension compliance policies must be satisfied                                         |
+| PS030 | policy-compliance            | error    | Policies from promptscript.yaml must be satisfied (skill extensions and prompts)        |
 | PS031 | reference-integrity          | warning  | Registry reference files must have integrity hashes in lockfile                         |
 | PS032 | valid-skill-resources        | warning  | Skill scripts and references must have safe paths                                       |
 | PS033 | valid-agent-config           | warning  | Agent fields must match portable and target-specific schemas                            |
@@ -58,8 +58,36 @@ This is an internal package bundled into `@promptscript/cli`. It is not publishe
 | PS044 | unused-prompt-declaration    | warning  | Declared prompt inputs should be used in the prompt text                                |
 | PS045 | unresolved-template-variable | warning  | Template variables left in resolved text are printed literally                          |
 | PS046 | slot-in-system-message       | warning  | Runtime slots belong in the user message, not the system message                        |
+| PS047 | governance-values            | warning  | Prompt owners, reviewers and data classes must match the governance config              |
 
 The table is taken from `src/rules/index.ts`. PS005, PS010, PS011, PS012 and PS014 also scan the text of `@prompts` entries.
+
+## Policies
+
+PS030 parses the `policies` of promptscript.yaml once and runs two evaluators on the
+resolved program:
+
+```text
+promptscript.yaml policies
+          |
+     parsePolicies(policies, { governance, releases, models })
+          |               (unknown kind or key = PS030 error)
+          +---------------------------+
+          |                           |
+ evaluatePolicies(ast)      evaluatePromptPolicies(promptPolicySubjects(ast))
+ layer-boundary             required-metadata, risk-floor,
+ property-protection        model-allowlist, content-rules
+ registry-allowlist         (required-approvals, required-evals: parsed only)
+          |                           |
+          +------------ PS030 --------+
+                 (prompt findings at the entry)
+```
+
+Prompt policies match on policy risk, the higher of the effective `risk` (unset counts as
+`low`) and every `risk-floor`. `content-rules` calls PS005, PS010, PS011, PS012 and PS014
+directly on the entry text, so `disableRules` and rule severities do not turn it off.
+PS047 runs only when the config has a `governance` section. See the
+[Policy Engine guide](https://getpromptscript.dev/guides/policy-engine/).
 
 ## License
 
