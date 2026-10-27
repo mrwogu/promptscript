@@ -908,6 +908,49 @@ describe('prs release rollback', () => {
     expect(await readFile(releases(root, 'staging.json'), 'utf8')).toBe(before);
   });
 
+  it('reports a restored entry as created and a dropped one as removed', async () => {
+    const refund = source('You answer refund requests.');
+    const twoPrompts = `${refund.slice(0, refund.lastIndexOf('}'))}  triage: {
+    description: "Triage a ticket"
+    system: "You triage tickets."
+    user: "Ticket: {{input.ticket}}"
+    inputs: { ticket: { type: "string", description: "Ticket text" } }
+  }
+}
+`;
+    const root = await project(CONFIG, twoPrompts);
+    await repository(root);
+    await build(root);
+    await promote(root, ID, 'staging');
+    await commit(root, 'refund only');
+    const triage = (
+      (await readJson(releases(root, 'manifest.json')))['prompts'] as {
+        id: string;
+        contentHash: string;
+      }[]
+    ).find((entry) => entry.id === 'acme-support/triage');
+    await writeFile(
+      releases(root, 'staging.json'),
+      `${JSON.stringify(
+        {
+          $schema: 'https://getpromptscript.dev/schema/prompt-release-label/v1.json',
+          environment: 'staging',
+          prompts: [triage ? { id: triage.id, contentHash: triage.contentHash } : {}],
+        },
+        null,
+        2
+      )}\n`
+    );
+    await commit(root, 'triage only');
+
+    const result = await rollback(root, 'staging');
+
+    expect(result.changes.slice(1).map((change) => [change.id, change.action])).toEqual([
+      [ID, 'created'],
+      ['acme-support/triage', 'removed'],
+    ]);
+  });
+
   it('refuses to restore a label whose bundle is gone', async () => {
     const { root, first } = await twoReleases();
     await rm(releases(root, 'bundles', `${first}.json`));
@@ -1126,12 +1169,682 @@ describe('prs release status', () => {
   });
 });
 
+const statusBase = (
+  cwd: string,
+  base: string,
+  extra: { config?: string } = {}
+): Promise<ReleaseReport> =>
+  report(() => releaseStatusCommand({ cwd, format: 'json', base, ...extra }));
+
+/** A repository whose commit tagged `base` has staging released, and a working tree on top. */
+async function baseRepository(config = CONFIG): Promise<string> {
+  const root = await project(config);
+  await repository(root);
+  await build(root);
+  await promote(root, ID, 'staging');
+  await commit(root, 'release one');
+  git(root, 'tag', 'base');
+  return root;
+}
+
+async function labelHash(root: string, environment: string): Promise<string | undefined> {
+  const label = await readJson(releases(root, `${environment}.json`));
+  return (label['prompts'] as { contentHash: string }[])[0]?.contentHash;
+}
+
+async function setLabel(root: string, environment: string, contentHash: string): Promise<void> {
+  await writeFile(
+    releases(root, `${environment}.json`),
+    `${JSON.stringify(
+      {
+        $schema: 'https://getpromptscript.dev/schema/prompt-release-label/v1.json',
+        environment,
+        prompts: [{ id: ID, contentHash }],
+      },
+      null,
+      2
+    )}\n`
+  );
+}
+
+/**
+ * A repository whose base has a registry allowlist and a clean source, and a working tree
+ * that brings in an overlay the allowlist refuses and drops the policy from its own config.
+ */
+async function policyRepository(baseConfigName = 'promptscript.yaml'): Promise<string> {
+  const root = await policyProject();
+  const policyConfig = await readFile(join(root, 'promptscript.yaml'), 'utf8');
+  // The overlay alone does not touch the prompt, so the text changes too and the label moves.
+  const overlaySource = (
+    await readFile(join(root, '.promptscript', 'project.prs'), 'utf8')
+  ).replace('You answer refund requests.', 'You answer refunds.');
+  await rm(join(root, 'promptscript.yaml'));
+  await writeFile(join(root, baseConfigName), policyConfig);
+  await writeFile(
+    join(root, '.promptscript', 'project.prs'),
+    source('You answer refund requests.')
+  );
+  await repository(root);
+  await build(root);
+  await promote(root, ID, 'staging');
+  await commit(root, 'release one');
+  git(root, 'tag', 'base');
+
+  const relaxed = policyConfig.replace(/policies:[\s\S]*$/, '');
+  await writeFile(join(root, 'promptscript.yaml'), relaxed);
+  if (baseConfigName !== 'promptscript.yaml') await rm(join(root, baseConfigName));
+  await writeFile(join(root, '.promptscript', 'project.prs'), overlaySource);
+  await build(root);
+  await promote(root, ID, 'staging');
+  await commit(root, 'drop the allowlist and use the overlay');
+  return root;
+}
+
+describe('prs release status --base', () => {
+  it('passes a promotion made with the commands and lists what changed', async () => {
+    const root = await baseRepository();
+    const before = await labelHash(root, 'staging');
+    await writeFile(join(root, '.promptscript', 'project.prs'), source('You answer refunds.'));
+    await build(root);
+    await promote(root, ID, 'staging');
+    await promote(root, ID, 'prod');
+    await commit(root, 'release two');
+
+    const result = await statusBase(root, 'base');
+
+    expect(result.success).toBe(true);
+    expect(result.base?.ref).toBe('base');
+    expect(result.base?.commit).toBe(git(root, 'rev-parse', 'base').trim());
+    expect(result.changes).toEqual([
+      {
+        path: '.promptscript/releases/staging.json',
+        action: 'updated',
+        id: ID,
+        contentHash: await labelHash(root, 'staging'),
+        previousContentHash: before,
+      },
+      {
+        path: '.promptscript/releases/prod.json',
+        action: 'created',
+        id: ID,
+        contentHash: await labelHash(root, 'staging'),
+      },
+    ]);
+  });
+
+  it('passes when no label changed, and lists a removed entry without failing', async () => {
+    const root = await baseRepository();
+
+    const unchanged = await statusBase(root, 'base');
+    await rm(releases(root, 'staging.json'));
+    const removed = await statusBase(root, 'base');
+
+    expect(unchanged.success).toBe(true);
+    expect(unchanged.changes).toEqual([]);
+    expect(removed.success).toBe(true);
+    expect(removed.changes[0]).toMatchObject({ id: ID, action: 'removed' });
+    expect(removed.changes[0]?.contentHash).toBeUndefined();
+  });
+
+  it('refuses a first environment two releases back, which is no rollback', async () => {
+    const root = await baseRepository();
+    const old = (await labelHash(root, 'staging')) ?? '';
+    for (const system of ['You answer refunds.', 'You answer refunds fast.']) {
+      await writeFile(join(root, '.promptscript', 'project.prs'), source(system));
+      await build(root);
+      await promote(root, ID, 'staging');
+      await commit(root, `release ${system}`);
+    }
+    git(root, 'tag', '-f', 'base');
+    await setLabel(root, 'staging', old);
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5004']);
+    expect(result.errors[0]?.message).toContain('with the policies and validation of base');
+    expect(result.errors[0]?.message).toContain('prs release rollback staging');
+  });
+
+  it('refuses a later environment that skips the one before it', async () => {
+    const root = await baseRepository();
+    const first = (await labelHash(root, 'staging')) ?? '';
+    await writeFile(join(root, '.promptscript', 'project.prs'), source('You answer refunds.'));
+    await build(root);
+    await promote(root, ID, 'staging');
+    await setLabel(root, 'prod', first);
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5005']);
+    expect(result.errors[0]?.message).toContain('Promote it to staging first');
+  });
+
+  it('refuses a changed entry whose bundle is missing', async () => {
+    const root = await baseRepository();
+    await setLabel(root, 'prod', `sha256-${'0'.repeat(64)}`);
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5003']);
+  });
+
+  it('refuses an entry in an environment the base does not configure', async () => {
+    const root = await baseRepository();
+    await writeFile(
+      join(root, 'promptscript.yaml'),
+      CONFIG.replace('[staging, prod]', '[staging, prod, edge]')
+    );
+    await setLabel(root, 'edge', (await labelHash(root, 'staging')) ?? '');
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5002']);
+  });
+
+  it('accepts a first release with no releases config at the base, until a label changes', async () => {
+    const root = await project(CONFIG.replace(/releases:[\s\S]*$/, ''));
+    await repository(root);
+    git(root, 'tag', 'base');
+    await writeFile(join(root, 'promptscript.yaml'), CONFIG);
+    await build(root);
+
+    const bootstrap = await statusBase(root, 'base');
+    await promote(root, ID, 'staging');
+    const labelled = await statusBase(root, 'base');
+
+    expect(bootstrap.success).toBe(true);
+    expect(errorCodes(labelled)).toEqual(['PS5002']);
+  });
+
+  it('checks with the policies of the base, whatever the checkout and -c say', async () => {
+    const root = await policyRepository();
+    const previous = process.env['PROMPTSCRIPT_CONFIG'];
+    process.env['PROMPTSCRIPT_CONFIG'] = 'missing.yaml';
+
+    try {
+      const result = await statusBase(root, 'base', { config: 'missing.yaml' });
+
+      expect(errorCodes(result)).toContain('PS030');
+      expect(result.warnings[0]?.message).toContain(
+        '-c and PROMPTSCRIPT_CONFIG are ignored with --base'
+      );
+    } finally {
+      if (previous === undefined) delete process.env['PROMPTSCRIPT_CONFIG'];
+      else process.env['PROMPTSCRIPT_CONFIG'] = previous;
+    }
+  });
+
+  it('finds the base config by name, so a new promptscript.yaml cannot shadow it', async () => {
+    const root = await policyRepository('promptscript.yml');
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toContain('PS030');
+  });
+
+  it('reads the extends chain at the base too', async () => {
+    const root = await policyProject();
+    const policyConfig = await readFile(join(root, 'promptscript.yaml'), 'utf8');
+    const overlaySource = (
+      await readFile(join(root, '.promptscript', 'project.prs'), 'utf8')
+    ).replace('You answer refund requests.', 'You answer refunds.');
+    const org = policyConfig.replace(CONFIG, '');
+    await writeFile(join(root, 'org.yaml'), org);
+    await writeFile(join(root, 'promptscript.yaml'), `extends: ./org.yaml\n${CONFIG}`);
+    await writeFile(
+      join(root, '.promptscript', 'project.prs'),
+      source('You answer refund requests.')
+    );
+    await repository(root);
+    await build(root);
+    await promote(root, ID, 'staging');
+    await commit(root, 'release one');
+    git(root, 'tag', 'base');
+    await writeFile(join(root, 'org.yaml'), org.replace(/policies:[\s\S]*$/, ''));
+    await writeFile(join(root, '.promptscript', 'project.prs'), overlaySource);
+    await build(root);
+    await promote(root, ID, 'staging');
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toContain('PS030');
+  });
+
+  it('refuses a first environment entry for a prompt the source no longer has', async () => {
+    const root = await baseRepository();
+    await writeFile(join(root, '.promptscript', 'project.prs'), source('You answer refunds.'));
+    await build(root);
+    const [newer] = (
+      (await readJson(releases(root, 'manifest.json')))['prompts'] as {
+        contentHash: string;
+      }[]
+    ).map((entry) => entry.contentHash);
+    await writeFile(
+      join(root, '.promptscript', 'project.prs'),
+      '@meta {\n  id: "acme-support"\n  syntax: "1.6.0"\n}\n'
+    );
+    await setLabel(root, 'staging', newer ?? '');
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5003']);
+    expect(result.errors[0]?.message).toContain('the source has no prompt');
+  });
+
+  it('refuses every change when the base has no config yet', async () => {
+    const root = await project();
+    await rm(join(root, 'promptscript.yaml'));
+    await repository(root);
+    git(root, 'tag', 'base');
+    await writeFile(join(root, 'promptscript.yaml'), CONFIG);
+    await build(root);
+    await promote(root, ID, 'staging');
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5002']);
+  });
+
+  it('fails with PS5001 when the config at the base cannot be loaded', async () => {
+    const root = await project();
+    await writeFile(join(root, 'promptscript.yaml'), 'releases: [unclosed\n');
+    await repository(root);
+    git(root, 'tag', 'base');
+    await writeFile(join(root, 'promptscript.yaml'), CONFIG);
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5001']);
+    expect(result.errors[0]?.message).toContain('promptscript.yaml at base cannot be loaded');
+  });
+
+  it('fails with PS5001 when the config at the base is empty', async () => {
+    const root = await project();
+    await writeFile(join(root, 'promptscript.yaml'), '# releases come later\n');
+    await repository(root);
+    git(root, 'tag', 'base');
+    await writeFile(join(root, 'promptscript.yaml'), CONFIG);
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5001']);
+    expect(result.errors[0]?.message).toContain('it is empty or not a YAML mapping');
+  });
+
+  it('reports a label in the checkout that does not parse once, as plain status does', async () => {
+    const root = await baseRepository();
+    await writeFile(releases(root, 'staging.json'), '[]\n');
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5004']);
+    expect(result.changes[0]).toMatchObject({ id: ID, action: 'removed' });
+  });
+
+  /** A base with staging and prod released twice, H1 then H2, tagged `base`. */
+  async function twoReleaseBase(): Promise<{ root: string; first: string; second: string }> {
+    const root = await baseRepository();
+    await promote(root, ID, 'prod');
+    await commit(root, 'prod one');
+    const first = (await labelHash(root, 'prod')) ?? '';
+    await writeFile(join(root, '.promptscript', 'project.prs'), source('You answer refunds.'));
+    await build(root);
+    await promote(root, ID, 'staging');
+    await promote(root, ID, 'prod');
+    await commit(root, 'release two');
+    git(root, 'tag', '-f', 'base');
+    return { root, first, second: (await labelHash(root, 'prod')) ?? '' };
+  }
+
+  it('passes a rollback of prod alone to the label before its last change', async () => {
+    const { root, first } = await twoReleaseBase();
+    await setLabel(root, 'prod', first);
+
+    const result = await statusBase(root, 'base');
+
+    expect(result.success).toBe(true);
+    expect(result.changes).toEqual([
+      expect.objectContaining({ id: ID, action: 'updated', contentHash: first }),
+    ]);
+  });
+
+  it('does not let a rollback bring back an entry the base removed', async () => {
+    const root = await baseRepository();
+    await promote(root, ID, 'prod');
+    await commit(root, 'prod one');
+    const held = (await labelHash(root, 'prod')) ?? '';
+    const empty = (environment: string): string =>
+      `${JSON.stringify(
+        {
+          $schema: 'https://getpromptscript.dev/schema/prompt-release-label/v1.json',
+          environment,
+          prompts: [],
+        },
+        null,
+        2
+      )}\n`;
+    await writeFile(releases(root, 'staging.json'), empty('staging'));
+    await writeFile(releases(root, 'prod.json'), empty('prod'));
+    await commit(root, 'take it down');
+    git(root, 'tag', '-f', 'base');
+    await setLabel(root, 'prod', held);
+
+    const result = await statusBase(root, 'base');
+
+    expect(result.changes).toEqual([
+      expect.objectContaining({ id: ID, action: 'created', contentHash: held }),
+    ]);
+    expect(errorCodes(result)).toEqual(['PS5005']);
+  });
+
+  // Root reads any file, so the unreadable label would read fine there.
+  it.skipIf(process.getuid?.() === 0)(
+    'fails on a label file it cannot read, configured or not',
+    async () => {
+      const root = await baseRepository();
+      await writeFile(releases(root, 'qa.json'), '{}\n');
+      await chmod(releases(root, 'qa.json'), 0o000);
+
+      try {
+        const result = await statusBase(root, 'base');
+
+        expect(result.success).toBe(false);
+        expect(result.errors[0]?.message).toContain('EACCES');
+      } finally {
+        await chmod(releases(root, 'qa.json'), 0o644);
+      }
+    }
+  );
+
+  it('refuses a prod change two releases back, which is no rollback', async () => {
+    const { root, first } = await twoReleaseBase();
+    await writeFile(join(root, '.promptscript', 'project.prs'), source('You answer quickly.'));
+    await build(root);
+    await promote(root, ID, 'staging');
+    await promote(root, ID, 'prod');
+    await commit(root, 'release three');
+    git(root, 'tag', '-f', 'base');
+    await setLabel(root, 'prod', first);
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5005']);
+    expect(result.errors[0]?.message).toContain('prs release rollback prod');
+  });
+
+  it('checks a label the checkout config dropped, even with a byte order mark', async () => {
+    const root = await baseRepository();
+    await writeFile(
+      join(root, 'promptscript.yaml'),
+      CONFIG.replace('[staging, prod]', '[staging]')
+    );
+    const label = await readFile(releases(root, 'staging.json'), 'utf8');
+    await writeFile(releases(root, 'prod.json'), `\uFEFF${label.replace('"staging"', '"prod"')}`);
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5004']);
+    expect(result.errors[0]?.location?.file).toBe(releases(root, 'prod.json'));
+  });
+
+  it('checks a dropped environment whose label is a link', async () => {
+    const root = await baseRepository();
+    await writeFile(
+      join(root, 'promptscript.yaml'),
+      CONFIG.replace('[staging, prod]', '[staging]')
+    );
+    const label = await readFile(releases(root, 'staging.json'), 'utf8');
+    await writeFile(join(root, 'elsewhere.json'), label.replace('"staging"', '"prod"'));
+    await symlink(join(root, 'elsewhere.json'), releases(root, 'prod.json'));
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5004']);
+  });
+
+  it('refuses a new label file of an environment nobody configured', async () => {
+    const root = await baseRepository();
+    const label = await readFile(releases(root, 'staging.json'), 'utf8');
+    await writeFile(releases(root, 'canary.json'), label.replace('"staging"', '"canary"'));
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5002']);
+  });
+
+  it('lets an unchanged broken file in the release directory pass', async () => {
+    const root = await baseRepository();
+    await writeFile(releases(root, 'notes.json'), 'not a label\n');
+    await commit(root, 'notes');
+    git(root, 'tag', '-f', 'base');
+
+    const result = await statusBase(root, 'base');
+
+    expect(result.success).toBe(true);
+  });
+
+  it('reads a base label larger than the default Git output limit', async () => {
+    const root = await baseRepository();
+    const prompts = Array.from({ length: 12_000 }, (_, i) => ({
+      id: `acme-support/archived-${i}`,
+      contentHash: `sha256-${'0'.repeat(64)}`,
+    }));
+    await writeFile(
+      releases(root, 'archive.json'),
+      JSON.stringify({
+        $schema: 'https://getpromptscript.dev/schema/prompt-release-label/v1.json',
+        environment: 'archive',
+        prompts,
+      })
+    );
+    await commit(root, 'archive');
+    git(root, 'tag', '-f', 'base');
+
+    const result = await statusBase(root, 'base');
+
+    expect(result.success).toBe(true);
+  });
+
+  it('counts a base label that is a link as empty, so every entry is checked', async () => {
+    const root = await baseRepository();
+    const label = await readFile(releases(root, 'staging.json'), 'utf8');
+    await writeFile(join(root, 'kept.json'), label);
+    await rm(releases(root, 'staging.json'));
+    await symlink('../../kept.json', releases(root, 'staging.json'));
+    await commit(root, 'link');
+    git(root, 'tag', '-f', 'base');
+    await rm(releases(root, 'staging.json'));
+    await writeFile(releases(root, 'staging.json'), label);
+
+    const result = await statusBase(root, 'base');
+
+    expect(result.success).toBe(true);
+    expect(result.changes.map((change) => change.action)).toEqual(['created']);
+  });
+
+  it('refuses a short ref that names more than one ref', async () => {
+    const root = await baseRepository();
+    git(root, 'branch', 'base');
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5006']);
+    expect(result.errors[0]?.message).toContain('refs/heads/base, refs/tags/base');
+    expect(result.errors[0]?.message).toContain('Pass the full name');
+  });
+
+  it('takes models.supported from the base, so a pull request cannot widen it', async () => {
+    const config = `${CONFIG}models:\n  supported: [claude-opus-5-5]\nvalidation:\n  rules:\n    valid-model-reference: error\n`;
+    const root = await baseRepository(config);
+    await writeFile(
+      join(root, 'promptscript.yaml'),
+      config.replace('[claude-opus-5-5]', '[claude-opus-5-5, claude-sonnet-5-5]')
+    );
+    await writeFile(
+      join(root, '.promptscript', 'project.prs'),
+      source('You answer refund requests.').replace(
+        '    system:',
+        '    model: { ref: "claude-sonnet-5-5" }\n    system:'
+      )
+    );
+    await build(root);
+    await promote(root, ID, 'staging');
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toContain('PS041');
+  });
+
+  it('uses the first base config name and never reads a lower one', async () => {
+    const root = await project();
+    await mkdir(join(root, 'promptscript.yml'));
+    await writeFile(join(root, 'promptscript.yml', 'keep'), '');
+    await repository(root);
+    await build(root);
+    await promote(root, ID, 'staging');
+    await commit(root, 'release one');
+    git(root, 'tag', 'base');
+
+    const result = await statusBase(root, 'base');
+
+    expect(result.success).toBe(true);
+  });
+
+  it('passes the changed entries through the gates', async () => {
+    const root = await baseRepository();
+    await writeFile(join(root, '.promptscript', 'project.prs'), source('You answer refunds.'));
+    await build(root);
+    await promote(root, ID, 'staging');
+    gate.next = { passed: false, findings: [{ message: 'needs an approval' }] };
+
+    const result = await statusBase(root, 'base');
+
+    expect(result.errors).toEqual([{ message: 'needs an approval' }]);
+  });
+
+  it('counts every entry as changed when the base label does not parse', async () => {
+    const root = await baseRepository();
+    const held = (await labelHash(root, 'staging')) ?? '';
+    await writeFile(releases(root, 'staging.json'), '[]\n');
+    await commit(root, 'broken label');
+    git(root, 'tag', '-f', 'base');
+    await setLabel(root, 'staging', held);
+
+    const result = await statusBase(root, 'base');
+
+    expect(result.success).toBe(true);
+    expect(result.changes.map((change) => change.action)).toEqual(['created']);
+  });
+
+  it.each([
+    ['an option', '--output=x', 'is not a Git ref'],
+    ['a missing ref', 'nope', 'is not a commit in this repository'],
+    ['a tree', 'base^{tree}', 'is not a commit.'],
+  ])('refuses %s as the base with PS5006', async (_name, ref, message) => {
+    const root = await baseRepository();
+
+    const result = await statusBase(root, ref);
+
+    expect(errorCodes(result)).toEqual(['PS5006']);
+    expect(result.errors[0]?.message).toContain(message);
+  });
+
+  it('reports a Git failure as it is, not as a missing ref', async () => {
+    const root = await project();
+
+    const result = await statusBase(root, 'main');
+
+    expect(errorCodes(result)).toEqual(['PS5006']);
+    expect(result.errors[0]?.message).toContain('Git cannot resolve main');
+    expect(result.errors[0]?.message).not.toContain('Fetch it first');
+  });
+
+  it('says what to fetch in a shallow checkout', async () => {
+    const root = await baseRepository();
+    await commit(root, 'one more');
+    const clone = await mkdtemp(join(tmpdir(), 'promptscript-release-clone-'));
+    directories.push(clone);
+    git(clone, 'clone', '-q', '--depth', '1', `file://${root}`, '.');
+
+    const result = await statusBase(clone, git(root, 'rev-parse', 'base').trim());
+
+    expect(errorCodes(result)).toEqual(['PS5006']);
+    expect(result.errors[0]?.message).toContain('This checkout is shallow');
+  });
+
+  it('refuses a config at the base that is a link', async () => {
+    const root = await project();
+    await writeFile(join(root, 'real.yaml'), CONFIG);
+    await rm(join(root, 'promptscript.yaml'));
+    await symlink('real.yaml', join(root, 'promptscript.yaml'));
+    await repository(root);
+    git(root, 'tag', 'base');
+    await rm(join(root, 'promptscript.yaml'));
+    await writeFile(join(root, 'promptscript.yaml'), CONFIG);
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5001']);
+    expect(result.errors[0]?.message).toContain('is a link, a directory or a submodule');
+  });
+
+  it('refuses an extends target outside the repository at the base', async () => {
+    const root = await project(`extends: ../outside.yaml\n${CONFIG}`);
+    await repository(root);
+    git(root, 'tag', 'base');
+    await writeFile(join(root, 'promptscript.yaml'), CONFIG);
+
+    const result = await statusBase(root, 'base');
+
+    expect(errorCodes(result)).toEqual(['PS5006']);
+    expect(result.errors[0]?.message).toContain('Only files inside the repository');
+  });
+
+  it('needs a config file by name in the project root', async () => {
+    const root = await baseRepository();
+    await rm(join(root, 'promptscript.yaml'));
+    await writeFile(join(root, 'custom.yaml'), CONFIG);
+
+    const result = await statusBase(root, 'base', { config: 'custom.yaml' });
+
+    expect(errorCodes(result)).toEqual(['PS5001']);
+    expect(result.errors[0]?.message).toContain('No PromptScript configuration found');
+  });
+
+  it('prints the changes as text', async () => {
+    const root = await baseRepository();
+    await writeFile(join(root, '.promptscript', 'project.prs'), source('You answer refunds.'));
+    await build(root);
+    await promote(root, ID, 'staging');
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await releaseStatusCommand({ cwd: root, base: 'base' });
+
+    const text = log.mock.calls.map((call) => String(call[0])).join('\n');
+    expect(process.exitCode).toBe(0);
+    expect(text).toContain('Changes since base');
+    expect(text).toContain(`.promptscript/releases/staging.json  ${ID}  sha256-`);
+  });
+
+  it('says so when nothing changed', async () => {
+    const root = await baseRepository();
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await releaseStatusCommand({ cwd: root, base: 'base' });
+
+    expect(log.mock.calls.map((call) => String(call[0])).join('\n')).toContain(
+      'no label entry changed'
+    );
+  });
+});
+
 describe('release command output', () => {
   it.each([
     [['build', '--dry-run']],
     [['promote', ID, '--to', 'staging']],
     [['rollback', 'staging']],
     [['status', '--history', '2']],
+    [['status', '--base', 'HEAD']],
   ])('runs release %j through the command line', async (args) => {
     const root = await project(CONFIG.replace(/releases:[\s\S]*$/, ''));
     const program = new Command('prs');

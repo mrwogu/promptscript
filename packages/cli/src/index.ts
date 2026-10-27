@@ -39,6 +39,7 @@ export { releaseStatusCommand } from './commands/release/status.js';
 export { RELEASE_REPORT_SCHEMA_URL, RELEASE_REPORT_VERSION } from './utils/release-report.js';
 export type {
   ReleaseChange,
+  ReleaseBaseRef,
   ReleaseChangeAction,
   ReleaseCommandName,
   ReleaseDiagnostic,

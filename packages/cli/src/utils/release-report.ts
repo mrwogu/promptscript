@@ -11,7 +11,7 @@ export const RELEASE_REPORT_VERSION = 1 as const;
 export type ReleaseCommandName = 'build' | 'promote' | 'rollback' | 'status';
 
 /** What a command did, or would do under `--dry-run`, to one file entry. */
-export type ReleaseChangeAction = 'created' | 'updated' | 'unchanged';
+export type ReleaseChangeAction = 'created' | 'updated' | 'unchanged' | 'removed';
 
 export interface ReleaseChange {
   /** Project-relative path of the file */
@@ -87,6 +87,14 @@ export function toReleaseLocation(
   };
 }
 
+/** The commit `prs release status --base` compared the labels with. */
+export interface ReleaseBaseRef {
+  /** The ref as given */
+  ref: string;
+  /** The commit it named */
+  commit: string;
+}
+
 export interface ReleaseReport {
   $schema: typeof RELEASE_REPORT_SCHEMA_URL;
   version: typeof RELEASE_REPORT_VERSION;
@@ -96,6 +104,8 @@ export interface ReleaseReport {
   changes: ReleaseChange[];
   environments: ReleaseEnvironmentStatus[];
   history?: ReleaseEnvironmentHistory[];
+  /** Present when status runs with --base */
+  base?: ReleaseBaseRef;
   warnings: ReleaseDiagnostic[];
   errors: ReleaseDiagnostic[];
 }
@@ -115,6 +125,7 @@ export function createReleaseReport(
     changes: partial.changes ?? [],
     environments: partial.environments ?? [],
     ...(partial.history === undefined ? {} : { history: partial.history }),
+    ...(partial.base === undefined ? {} : { base: partial.base }),
     warnings: partial.warnings ?? [],
     errors,
   };

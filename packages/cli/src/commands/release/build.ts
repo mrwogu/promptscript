@@ -16,11 +16,12 @@ import {
 import { compileRelease, loadReleaseProject, type CompiledBundle } from './project.js';
 import { runReleaseCommand, withReleaseLock, type ReleaseCommandOptions } from './run.js';
 
-const ACTION_LABEL = {
+const ACTION_LABEL: Record<ReleaseChange['action'], string> = {
   created: 'created  ',
   updated: 'updated  ',
   unchanged: 'unchanged',
-} as const;
+  removed: 'removed  ',
+};
 
 function buildSummary(dryRun: boolean, written: number, prompts: number): string {
   if (dryRun) return `Dry run: ${written} file(s) would be written under ${RELEASE_DIRECTORY}.`;

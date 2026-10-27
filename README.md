@@ -428,7 +428,9 @@ show typed inputs, enum outputs, defaults and citations.
 
 `prs release` stores bundles under their content hash in `.promptscript/releases/` and promotes them
 through the environments you list in `releases.environments`, such as `staging` then `prod`. Every
-promotion is a Git change you review. See the
+promotion is a Git change you review, and
+`prs release status --base refs/remotes/origin/main` checks the label changes of a pull request
+with the rules of the base branch. See the
 [releases guide](https://getpromptscript.dev/guides/releases/).
 
 `prs approve` records that a person approved one exact bundle hash in a role from

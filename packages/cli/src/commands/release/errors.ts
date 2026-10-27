@@ -10,7 +10,7 @@ export const PS5003_BUNDLE_MISSING = 'PS5003';
 export const PS5004_VERIFICATION_FAILED = 'PS5004';
 /** A promotion skips the previous environment. */
 export const PS5005_PROMOTION_ORDER = 'PS5005';
-/** No previous label can be restored from Git. */
+/** The Git history a command needs is not there: no earlier label, or no base commit. */
 export const PS5006_ROLLBACK_UNAVAILABLE = 'PS5006';
 /** Another release command holds the lock. */
 export const PS5007_RELEASE_LOCKED = 'PS5007';

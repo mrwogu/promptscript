@@ -45,5 +45,9 @@ export function registerReleaseCommands(release: Command): void {
       .command('status')
       .description('List the released prompts of every environment')
       .option('--history <n>', 'Show the last n commits of each label')
+      .option(
+        '--base <ref>',
+        'Check the label entries changed since <ref> against the promotion rules of <ref>'
+      )
   ).action((opts) => releaseStatusCommand(opts));
 }

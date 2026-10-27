@@ -1,11 +1,11 @@
-import { compareCodeUnits, type PromptReleaseLabelV1 } from '@promptscript/core';
-import type { ReleaseChange } from '../../utils/release-report.js';
+import type { PromptReleaseLabelV1 } from '@promptscript/core';
 import { PS5006_ROLLBACK_UNAVAILABLE, ReleaseError } from './errors.js';
 import { checkPromotionGates } from './gates.js';
 import { runGit, stripControlCharacters } from './git.js';
 import {
   PROMPT_RELEASE_LABEL_SCHEMA_URL,
   fileAction,
+  labelChanges,
   labelText,
   parseLabel,
   readReleaseText,
@@ -98,31 +98,6 @@ async function labelBeforeLastChange(
   return { label, commit, subject: stripControlCharacters(subject) };
 }
 
-/** The label entries that differ between two labels, with both hashes. */
-function changedEntries(
-  path: string,
-  current: PromptReleaseLabelV1,
-  restored: PromptReleaseLabelV1
-): ReleaseChange[] {
-  const before = new Map(current.prompts.map((entry) => [entry.id, entry.contentHash]));
-  const after = new Map(restored.prompts.map((entry) => [entry.id, entry.contentHash]));
-  const ids = [...new Set([...before.keys(), ...after.keys()])].sort(compareCodeUnits);
-  const changes: ReleaseChange[] = [];
-  for (const id of ids) {
-    const contentHash = after.get(id);
-    const previousContentHash = before.get(id);
-    if (contentHash === previousContentHash) continue;
-    changes.push({
-      path,
-      action: 'updated',
-      id,
-      ...(contentHash === undefined ? {} : { contentHash }),
-      ...(previousContentHash === undefined ? {} : { previousContentHash }),
-    });
-  }
-  return changes;
-}
-
 /**
  * Undo the last committed change of an environment's label. Every bundle the restored
  * label points at must exist and verify. A committed rollback is undone by a second one.
@@ -152,7 +127,11 @@ export async function releaseRollbackCommand(
         )
       );
 
-      const entries = changedEntries(relativePath, current, previous.label);
+      const entries = labelChanges(
+        relativePath,
+        new Map(current.prompts.map((entry) => [entry.id, entry.contentHash])),
+        new Map(previous.label.prompts.map((entry) => [entry.id, entry.contentHash]))
+      );
       const gates = checkPromotionGates({
         command: 'rollback',
         projectRoot: paths.root,

@@ -40,7 +40,7 @@
       "items": {
         "$ref": "#/definitions/Change"
       },
-      "description": "Files and label entries the command wrote, or would write under --dry-run."
+      "description": "Files and label entries the command wrote, or would write under --dry-run. For status --base, the label entries that differ from the base."
     },
     "environments": {
       "type": "array",
@@ -55,6 +55,10 @@
         "$ref": "#/definitions/EnvironmentHistory"
       },
       "description": "Present when status runs with --history."
+    },
+    "base": {
+      "$ref": "#/definitions/Base",
+      "description": "Present when status runs with --base: the ref and the commit it named."
     },
     "warnings": {
       "type": "array",
@@ -86,7 +90,7 @@
         },
         "action": {
           "type": "string",
-          "enum": ["created", "updated", "unchanged"]
+          "enum": ["created", "updated", "unchanged", "removed"]
         },
         "id": {
           "type": "string",
@@ -191,6 +195,21 @@
         },
         "subject": {
           "type": "string"
+        }
+      }
+    },
+    "Base": {
+      "type": "object",
+      "required": ["ref", "commit"],
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$"
         }
       }
     },

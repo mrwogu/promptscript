@@ -15,6 +15,7 @@ import { loadEffectiveConfig } from '../../config/loader.js';
 import { resolveRegistryPath } from '../../utils/registry-resolver.js';
 import { hasPromptBundleSchemaLine } from '../../utils/prompt-bundle-ownership.js';
 import {
+  findConfigInDir,
   loadProjectLockfile,
   registryReferenceRoots,
   resolveProjectConfigPath,
@@ -114,17 +115,11 @@ function checkEnvironments(value: unknown, configPath: string): string[] {
 }
 
 /**
- * Load the project configuration and check `releases`.
- *
- * `policies` are always parsed, so a policy with an unknown kind fails every release
- * command closed instead of being skipped.
+ * Check `releases` and `policies` of a loaded config. `policies` are always parsed, so a
+ * policy with an unknown kind fails every release command closed instead of being skipped.
+ * @returns The environments in promotion order
  */
-export async function loadReleaseProject(options: ProjectPathOptions): Promise<ReleaseProject> {
-  const root = resolveProjectRoot(options);
-  const configPath =
-    resolveProjectConfigPath(root, { ...options, cwd: options.cwd ?? root }) ??
-    resolve(root, 'promptscript.yaml');
-  const config = await loadEffectiveConfig(configPath);
+export function checkReleaseConfig(config: PromptScriptConfig, configPath: string): string[] {
   if (config.releases === undefined || config.releases === null) {
     throw configError(
       `Releases are not configured. Add the environments in promotion order to ${configPath}:\n${CONFIG_EXAMPLE}`,
@@ -151,6 +146,37 @@ export async function loadReleaseProject(options: ProjectPathOptions): Promise<R
       configPath
     );
   }
+  return environments;
+}
+
+/** The config file of the project root by name, ignoring `-c` and PROMPTSCRIPT_CONFIG. */
+function discoveredConfigPath(root: string): string {
+  const found = findConfigInDir(root);
+  if (found === undefined) {
+    throw configError(
+      `No PromptScript configuration found in ${root}. Run prs init, or run the command in the project root.`,
+      resolve(root, 'promptscript.yaml')
+    );
+  }
+  return found;
+}
+
+/**
+ * Load the project configuration and check it with {@link checkReleaseConfig}.
+ * With `discover`, `-c` and PROMPTSCRIPT_CONFIG are ignored and the config file is found
+ * by name in the project root, so nothing outside the repository picks the policies.
+ */
+export async function loadReleaseProject(
+  options: ProjectPathOptions,
+  { discover = false }: { discover?: boolean } = {}
+): Promise<ReleaseProject> {
+  const root = resolveProjectRoot(options);
+  const found = discover
+    ? discoveredConfigPath(root)
+    : resolveProjectConfigPath(root, { ...options, cwd: options.cwd ?? root });
+  const configPath = found ?? resolve(root, 'promptscript.yaml');
+  const config = await loadEffectiveConfig(configPath);
+  const environments = checkReleaseConfig(config, configPath);
   const paths = releasePaths(root);
   // Reads follow the same rule as writes: no release file is read through a link.
   await assertReleaseDirectories(paths);
