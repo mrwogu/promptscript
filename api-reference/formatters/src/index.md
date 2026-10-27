@@ -15,6 +15,7 @@ from the compiled PromptScript AST.
 
 - [AntigravityFormatter](https://getpromptscript.dev/api-reference/formatters/src/classes/AntigravityFormatter/index.md)
 - [BaseFormatter](https://getpromptscript.dev/api-reference/formatters/src/classes/BaseFormatter/index.md)
+- [BundleFormatter](https://getpromptscript.dev/api-reference/formatters/src/classes/BundleFormatter/index.md)
 - [ClaudeFormatter](https://getpromptscript.dev/api-reference/formatters/src/classes/ClaudeFormatter/index.md)
 - [CodexFormatter](https://getpromptscript.dev/api-reference/formatters/src/classes/CodexFormatter/index.md)
 - [ContinueFormatter](https://getpromptscript.dev/api-reference/formatters/src/classes/ContinueFormatter/index.md)
@@ -28,6 +29,8 @@ from the compiled PromptScript AST.
 - [KiroFormatter](https://getpromptscript.dev/api-reference/formatters/src/classes/KiroFormatter/index.md)
 - [MarkdownInstructionFormatter](https://getpromptscript.dev/api-reference/formatters/src/classes/MarkdownInstructionFormatter/index.md)
 - [OpenCodeFormatter](https://getpromptscript.dev/api-reference/formatters/src/classes/OpenCodeFormatter/index.md)
+- [PromptFormatError](https://getpromptscript.dev/api-reference/formatters/src/classes/PromptFormatError/index.md)
+- [PromptTextFormatter](https://getpromptscript.dev/api-reference/formatters/src/classes/PromptTextFormatter/index.md)
 - [TraeFormatter](https://getpromptscript.dev/api-reference/formatters/src/classes/TraeFormatter/index.md)
 - [WindsurfFormatter](https://getpromptscript.dev/api-reference/formatters/src/classes/WindsurfFormatter/index.md)
 - [ZencoderFormatter](https://getpromptscript.dev/api-reference/formatters/src/classes/ZencoderFormatter/index.md)
@@ -73,6 +76,7 @@ from the compiled PromptScript AST.
 - [AmpVersion](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/AmpVersion/index.md)
 - [AntigravityVersion](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/AntigravityVersion/index.md)
 - [AugmentVersion](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/AugmentVersion/index.md)
+- [BundleVersion](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/BundleVersion/index.md)
 - [ClineVersion](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/ClineVersion/index.md)
 - [CodeBuddyVersion](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/CodeBuddyVersion/index.md)
 - [CodexVersion](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/CodexVersion/index.md)
@@ -114,6 +118,7 @@ from the compiled PromptScript AST.
 - [PiVersion](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/PiVersion/index.md)
 - [PochiVersion](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/PochiVersion/index.md)
 - [PortableHookEvent](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/PortableHookEvent/index.md)
+- [PromptTextVersion](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/PromptTextVersion/index.md)
 - [QoderVersion](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/QoderVersion/index.md)
 - [QwenCodeVersion](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/QwenCodeVersion/index.md)
 - [RooVersion](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/RooVersion/index.md)
@@ -139,6 +144,7 @@ from the compiled PromptScript AST.
 - [AUGMENT\_VERSIONS](https://getpromptscript.dev/api-reference/formatters/src/variables/AUGMENT_VERSIONS/index.md)
 - [AugmentFormatter](https://getpromptscript.dev/api-reference/formatters/src/variables/AugmentFormatter/index.md)
 - [BUILTIN\_FORMATTERS](https://getpromptscript.dev/api-reference/formatters/src/variables/BUILTIN_FORMATTERS/index.md)
+- [BUNDLE\_VERSIONS](https://getpromptscript.dev/api-reference/formatters/src/variables/BUNDLE_VERSIONS/index.md)
 - [CLAUDE\_VERSIONS](https://getpromptscript.dev/api-reference/formatters/src/variables/CLAUDE_VERSIONS/index.md)
 - [CLINE\_VERSIONS](https://getpromptscript.dev/api-reference/formatters/src/variables/CLINE_VERSIONS/index.md)
 - [ClineFormatter](https://getpromptscript.dev/api-reference/formatters/src/variables/ClineFormatter/index.md)
@@ -207,6 +213,7 @@ from the compiled PromptScript AST.
 - [PiFormatter](https://getpromptscript.dev/api-reference/formatters/src/variables/PiFormatter/index.md)
 - [POCHI\_VERSIONS](https://getpromptscript.dev/api-reference/formatters/src/variables/POCHI_VERSIONS/index.md)
 - [PochiFormatter](https://getpromptscript.dev/api-reference/formatters/src/variables/PochiFormatter/index.md)
+- [PROMPT\_TEXT\_VERSIONS](https://getpromptscript.dev/api-reference/formatters/src/variables/PROMPT_TEXT_VERSIONS/index.md)
 - [QODER\_VERSIONS](https://getpromptscript.dev/api-reference/formatters/src/variables/QODER_VERSIONS/index.md)
 - [QoderFormatter](https://getpromptscript.dev/api-reference/formatters/src/variables/QoderFormatter/index.md)
 - [QWEN\_CODE\_VERSIONS](https://getpromptscript.dev/api-reference/formatters/src/variables/QWEN_CODE_VERSIONS/index.md)
@@ -227,6 +234,7 @@ from the compiled PromptScript AST.
 - [appendTargetHookCapabilityWarnings](https://getpromptscript.dev/api-reference/formatters/src/functions/appendTargetHookCapabilityWarnings/index.md)
 - [applyHookTargetOverrides](https://getpromptscript.dev/api-reference/formatters/src/functions/applyHookTargetOverrides/index.md)
 - [applyMergeOperations](https://getpromptscript.dev/api-reference/formatters/src/functions/applyMergeOperations/index.md)
+- [buildPromptBundles](https://getpromptscript.dev/api-reference/formatters/src/functions/buildPromptBundles/index.md)
 - [convertTimeout](https://getpromptscript.dev/api-reference/formatters/src/functions/convertTimeout/index.md)
 - [createConventionRenderer](https://getpromptscript.dev/api-reference/formatters/src/functions/createConventionRenderer/index.md)
 - [createSimpleMarkdownFormatter](https://getpromptscript.dev/api-reference/formatters/src/functions/createSimpleMarkdownFormatter/index.md)
@@ -345,6 +353,18 @@ Re-exports [OutputPlanManagedPaths](https://getpromptscript.dev/api-reference/co
 ### OutputPlanPathError
 
 Re-exports [OutputPlanPathError](https://getpromptscript.dev/api-reference/core/src/classes/OutputPlanPathError/index.md)
+
+***
+
+### PROMPT\_BUNDLE\_INDEX\_SCHEMA
+
+Renames and re-exports [PROMPT_BUNDLE_INDEX_SCHEMA_URL](https://getpromptscript.dev/api-reference/core/src/variables/PROMPT_BUNDLE_INDEX_SCHEMA_URL/index.md)
+
+***
+
+### PROMPT\_BUNDLE\_SCHEMA
+
+Renames and re-exports [PROMPT_BUNDLE_SCHEMA_URL](https://getpromptscript.dev/api-reference/core/src/variables/PROMPT_BUNDLE_SCHEMA_URL/index.md)
 
 ***
 

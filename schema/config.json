@@ -277,6 +277,21 @@
       "description": "Model catalog settings: the model set the instructions are written for and custom model profiles.",
       "example": "models:\n  supported: [claude-opus-5-5, gpt-6-sol]"
     },
+    "releases": {
+      "$ref": "#/definitions/ReleasesConfig",
+      "description": "Release settings for prompt bundles.",
+      "example": "releases:\n  environments: [staging, prod]"
+    },
+    "eval": {
+      "$ref": "#/definitions/EvalConfig",
+      "description": "Eval settings: providers and run limits.",
+      "example": "eval:\n  providers:\n    anthropic: { kind: anthropic, apiKeyEnvVar: ANTHROPIC_API_KEY }"
+    },
+    "governance": {
+      "$ref": "#/definitions/GovernanceConfig",
+      "description": "Governance settings: admins and approval roles.",
+      "example": "governance:\n  admins: ['@acme/prompt-platform']\n  roles: { legal: ['@acme/legal'] }"
+    },
     "universalDir": {
       "type": [
         "string",
@@ -345,7 +360,7 @@
       "items": {
         "$ref": "#/definitions/PolicyDefinition"
       },
-      "description": "Extension compliance policies"
+      "description": "Policies for skill extensions and prompts"
     }
   },
   "required": [
@@ -589,6 +604,12 @@
             },
             "gitlab-duo": {
               "$ref": "#/definitions/TargetConfig"
+            },
+            "bundle": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "prompt-text": {
+              "$ref": "#/definitions/TargetConfig"
             }
           },
           "additionalProperties": {
@@ -661,7 +682,9 @@
         "deep-agents",
         "forgecode",
         "hermes",
-        "gitlab-duo"
+        "gitlab-duo",
+        "bundle",
+        "prompt-text"
       ],
       "description": "Known built-in output targets. These are the targets with first-class formatter support."
     },
@@ -1037,6 +1060,10 @@
           },
           "description": "Native model names per target. A target listed here always receives this name, even when its naming scheme or provider list would not map the model. Keys are target names, matched case-insensitively. Only targets that write a native model field use them; validation reports other keys.",
           "example": "targets:\n  github: Claude Opus 9 (Preview)"
+        },
+        "pricing": {
+          "$ref": "#/definitions/ModelPricing",
+          "description": "List price per million tokens, for cost estimates"
         }
       },
       "additionalProperties": false,
@@ -1052,6 +1079,283 @@
         "retired"
       ],
       "description": "Lifecycle status of a model profile.\n- `current`: recommended for new instructions\n- `legacy`: still served, but superseded by a newer version\n- `deprecated`: the provider announced a retirement date\n- `retired`: the provider no longer serves the model"
+    },
+    "ModelPricing": {
+      "type": "object",
+      "properties": {
+        "inputUsdPerMillion": {
+          "type": "number",
+          "description": "Price of one million input tokens in USD.",
+          "minimum": 0
+        },
+        "outputUsdPerMillion": {
+          "type": "number",
+          "description": "Price of one million output tokens in USD.",
+          "minimum": 0
+        },
+        "checkedOn": {
+          "type": "string",
+          "description": "Date the price was checked against the provider, YYYY-MM-DD.",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [
+        "inputUsdPerMillion",
+        "outputUsdPerMillion",
+        "checkedOn"
+      ],
+      "additionalProperties": false,
+      "description": "List price of a model, in USD per million tokens. Cache, batch and long-context tiers are ignored, so a cost computed from it is an estimate."
+    },
+    "ReleasesConfig": {
+      "type": "object",
+      "properties": {
+        "environments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReleaseEnvironmentName"
+          },
+          "description": "Environment names in promotion order, first to last. Each name is lowercase letters, digits and hyphens, starting with a letter.",
+          "examples": [
+            [
+              "staging",
+              "prod"
+            ]
+          ],
+          "example": [
+            "staging",
+            "prod"
+          ],
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "environments"
+      ],
+      "additionalProperties": false,
+      "description": "Release configuration (`releases` in promptscript.yaml)."
+    },
+    "ReleaseEnvironmentName": {
+      "type": "string",
+      "description": "Name of a release environment.",
+      "pattern": "^[a-z][a-z0-9-]{0,31}$"
+    },
+    "EvalConfig": {
+      "type": "object",
+      "properties": {
+        "providers": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/EvalProviderConfig"
+          },
+          "description": "Providers by name. The name matches the `provider` of the resolved model profile, such as `anthropic` or `openai`.",
+          "example": "providers:\n  anthropic: { kind: anthropic, apiKeyEnvVar: ANTHROPIC_API_KEY }"
+        },
+        "timeoutMs": {
+          "type": "integer",
+          "description": "Time limit of one model call in milliseconds, response body included.",
+          "minimum": 1,
+          "default": 60000
+        },
+        "maxOutputTokens": {
+          "type": "integer",
+          "description": "Output token cap of a model call when the prompt sets no `maxTokens`.",
+          "minimum": 1,
+          "default": 1024
+        },
+        "maxCases": {
+          "type": "integer",
+          "description": "Largest number of dataset rows a suite runs.",
+          "minimum": 1,
+          "default": 1000
+        },
+        "reportDir": {
+          "type": "string",
+          "description": "Directory for eval reports, relative to the project root.",
+          "examples": [
+            ".promptscript/eval-reports"
+          ],
+          "example": ".promptscript/eval-reports"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Eval settings (`eval` in promptscript.yaml): the providers eval suites call and the limits of a run."
+    },
+    "EvalProviderConfig": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/EvalProviderKind",
+          "description": "Request and response format: the Anthropic Messages API or an OpenAI-compatible chat API"
+        },
+        "baseUrl": {
+          "type": "string",
+          "description": "Base URL of the provider API.",
+          "examples": [
+            "https://llm.corp.example/v1"
+          ],
+          "example": "https://llm.corp.example/v1"
+        },
+        "apiKeyEnvVar": {
+          "type": "string",
+          "description": "Environment variable that holds the provider API key. The key itself is never read from the config.",
+          "examples": [
+            "ANTHROPIC_API_KEY"
+          ],
+          "pattern": "^[A-Z_][A-Z0-9_]*$",
+          "example": "ANTHROPIC_API_KEY"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false,
+      "description": "One model provider that eval suites can call."
+    },
+    "EvalProviderKind": {
+      "type": "string",
+      "enum": [
+        "anthropic",
+        "openai-compatible"
+      ],
+      "description": "Request and response format of an eval provider."
+    },
+    "GovernanceConfig": {
+      "type": "object",
+      "properties": {
+        "admins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GovernanceOwner"
+          },
+          "description": "Owners of the config, the approvals root and the releases. Under `extends` the lists are joined and cannot shrink.",
+          "examples": [
+            [
+              "@acme/prompt-platform"
+            ]
+          ],
+          "example": [
+            "@acme/prompt-platform"
+          ],
+          "uniqueItems": true
+        },
+        "roles": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/GovernanceRoleOwners"
+          },
+          "description": "Approval roles by name, each with the owners that review it. At most 32 roles. Under `extends` each role's list is joined with the base list and cannot shrink.",
+          "examples": [
+            {
+              "legal": [
+                "@acme/legal"
+              ],
+              "security": [
+                "@acme/appsec"
+              ]
+            }
+          ],
+          "example": {
+            "legal": [
+              "@acme/legal"
+            ],
+            "security": [
+              "@acme/appsec"
+            ]
+          },
+          "maxProperties": 32,
+          "propertyNames": {
+            "pattern": "^(?!(?:con|prn|aux|nul|com[0-9]|lpt[0-9])$)[a-z][a-z0-9-]{0,31}$"
+          }
+        },
+        "dataClasses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Data class names the project uses.",
+          "examples": [
+            [
+              "pii",
+              "phi",
+              "financial",
+              "credentials",
+              "internal",
+              "public"
+            ]
+          ],
+          "example": [
+            "pii",
+            "phi",
+            "financial",
+            "credentials",
+            "internal",
+            "public"
+          ],
+          "uniqueItems": true
+        },
+        "codeowners": {
+          "$ref": "#/definitions/GovernanceCodeownersConfig",
+          "description": "Generated CODEOWNERS settings"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Governance settings (`governance` in promptscript.yaml): who owns the setup and which teams review each approval role."
+    },
+    "GovernanceOwner": {
+      "type": "string",
+      "description": "Git host identity of an owner, in a form CODEOWNERS accepts: a user (`@jane`), a team (`@acme/legal`, GitLab subgroups allowed) or an email address.",
+      "pattern": "^(?:@[A-Za-z0-9][A-Za-z0-9-]{0,38}|@[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})$",
+      "maxLength": 254
+    },
+    "GovernanceRoleOwners": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/GovernanceOwner"
+      },
+      "description": "Owners that review one approval role, at least one.",
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "GovernanceCodeownersConfig": {
+      "type": "object",
+      "properties": {
+        "output": {
+          "type": "string",
+          "enum": [
+            ".github/CODEOWNERS",
+            "CODEOWNERS",
+            "docs/CODEOWNERS",
+            ".gitlab/CODEOWNERS"
+          ],
+          "description": "Path of the CODEOWNERS file, relative to the repository root.",
+          "default": ".github/CODEOWNERS"
+        },
+        "protect": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "More paths owned by the admins, relative to the repository root. Under `extends` the lists are joined and cannot shrink.",
+          "examples": [
+            [
+              ".github/workflows"
+            ]
+          ],
+          "example": [
+            ".github/workflows"
+          ]
+        },
+        "prompts": {
+          "type": "boolean",
+          "description": "Write lines for the `.prs` files that define prompts.",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "description": "Settings of the generated CODEOWNERS file."
     },
     "ValidationExclude": {
       "type": "object",
@@ -1089,6 +1393,24 @@
         },
         {
           "$ref": "#/definitions/RegistryAllowlistPolicy"
+        },
+        {
+          "$ref": "#/definitions/RequiredMetadataPolicy"
+        },
+        {
+          "$ref": "#/definitions/RiskFloorPolicy"
+        },
+        {
+          "$ref": "#/definitions/ModelAllowlistPolicy"
+        },
+        {
+          "$ref": "#/definitions/RequiredApprovalsPolicy"
+        },
+        {
+          "$ref": "#/definitions/RequiredEvalsPolicy"
+        },
+        {
+          "$ref": "#/definitions/ContentRulesPolicy"
         }
       ],
       "description": "Union of all policy definition types."
@@ -1219,6 +1541,409 @@
       ],
       "additionalProperties": false,
       "description": "Registry-allowlist policy: restricts which registries can provide extensions."
+    },
+    "RequiredMetadataPolicy": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique policy name within the config"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "kind": {
+          "type": "string",
+          "const": "required-metadata",
+          "description": "Policy kind discriminator"
+        },
+        "severity": {
+          "$ref": "#/definitions/PolicySeverity",
+          "description": "Violation severity"
+        },
+        "match": {
+          "$ref": "#/definitions/PromptPolicyMatch",
+          "description": "Prompts the policy applies to"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "risk",
+              "owner",
+              "domain",
+              "dataClasses",
+              "reviewers"
+            ]
+          },
+          "description": "Governance fields every matched prompt must have",
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "fields",
+        "kind",
+        "name",
+        "severity"
+      ],
+      "additionalProperties": false,
+      "description": "Required-metadata policy: matched prompts must set governance fields."
+    },
+    "PromptPolicyMatch": {
+      "type": "object",
+      "properties": {
+        "minRisk": {
+          "$ref": "#/definitions/RiskLevel",
+          "description": "Policy risk is at or above this level"
+        },
+        "domains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Effective domain is one of these",
+          "minItems": 1
+        },
+        "dataClasses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Any effective data class is one of these",
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "description": "Selects the prompts a policy applies to. Keys combine with AND; no `match` selects every prompt."
+    },
+    "RiskLevel": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "description": "Risk classification of a prompt."
+    },
+    "RiskFloorPolicy": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique policy name within the config"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "kind": {
+          "type": "string",
+          "const": "risk-floor",
+          "description": "Policy kind discriminator"
+        },
+        "severity": {
+          "$ref": "#/definitions/PolicySeverity",
+          "description": "Violation severity"
+        },
+        "floors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RiskFloorRow"
+          },
+          "description": "Rows; the floor is the highest `minimum` of the matching rows",
+          "minItems": 1
+        }
+      },
+      "required": [
+        "floors",
+        "kind",
+        "name",
+        "severity"
+      ],
+      "additionalProperties": false,
+      "description": "Risk-floor policy: derives a minimum risk from data classes, domains and input types. Every other policy matches on the higher of authored risk and this floor."
+    },
+    "RiskFloorRow": {
+      "type": "object",
+      "properties": {
+        "dataClasses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Any effective data class is one of these",
+          "minItems": 1
+        },
+        "domains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Effective domain is one of these",
+          "minItems": 1
+        },
+        "inputTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PromptScalarType"
+          },
+          "description": "Any input has one of these types",
+          "minItems": 1
+        },
+        "minimum": {
+          "$ref": "#/definitions/RiskLevel",
+          "description": "Lowest policy risk of a matching prompt"
+        }
+      },
+      "required": [
+        "minimum"
+      ],
+      "additionalProperties": false,
+      "description": "One row of a risk floor. The row matches when any of its conditions matches.",
+      "minProperties": 2
+    },
+    "PromptScalarType": {
+      "type": "string",
+      "enum": [
+        "string",
+        "number",
+        "boolean",
+        "enum"
+      ],
+      "description": "Scalar value types allowed for prompt inputs and output fields."
+    },
+    "ModelAllowlistPolicy": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique policy name within the config"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "kind": {
+          "type": "string",
+          "const": "model-allowlist",
+          "description": "Policy kind discriminator"
+        },
+        "severity": {
+          "$ref": "#/definitions/PolicySeverity",
+          "description": "Violation severity"
+        },
+        "match": {
+          "$ref": "#/definitions/PromptPolicyMatch",
+          "description": "Prompts the policy applies to"
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Model catalog ids or aliases",
+          "minItems": 1
+        }
+      },
+      "required": [
+        "kind",
+        "models",
+        "name",
+        "severity"
+      ],
+      "additionalProperties": false,
+      "description": "Model-allowlist policy: matched prompts must use one of the listed models."
+    },
+    "RequiredApprovalsPolicy": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique policy name within the config"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "kind": {
+          "type": "string",
+          "const": "required-approvals",
+          "description": "Policy kind discriminator"
+        },
+        "severity": {
+          "$ref": "#/definitions/PolicySeverity",
+          "description": "Violation severity"
+        },
+        "match": {
+          "$ref": "#/definitions/PromptPolicyMatch",
+          "description": "Prompts the policy applies to"
+        },
+        "environments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReleaseEnvironmentName"
+          },
+          "description": "Environments from `releases.environments` the policy applies to. Absent means all.",
+          "minItems": 1
+        },
+        "approvals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RequiredApproval"
+          },
+          "description": "Approvals per role",
+          "minItems": 1
+        }
+      },
+      "required": [
+        "approvals",
+        "kind",
+        "name",
+        "severity"
+      ],
+      "additionalProperties": false,
+      "description": "Required-approvals policy: matched prompts need approvals before promotion."
+    },
+    "RequiredApproval": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "$ref": "#/definitions/GovernanceRoleName",
+          "description": "Role from `governance.roles`"
+        },
+        "count": {
+          "type": "integer",
+          "description": "Distinct approvers needed. Only 1 is accepted while approval records are unsigned, since unsigned records cannot tell two approvers apart under one review.",
+          "minimum": 1,
+          "maximum": 1,
+          "default": 1
+        }
+      },
+      "required": [
+        "role"
+      ],
+      "additionalProperties": false,
+      "description": "Approvals one role must give."
+    },
+    "GovernanceRoleName": {
+      "type": "string",
+      "description": "Name of an approval role: lowercase letters, digits and hyphens, starting with a letter. Windows device names are refused, since a role names a directory.",
+      "pattern": "^(?!(?:con|prn|aux|nul|com[0-9]|lpt[0-9])$)[a-z][a-z0-9-]{0,31}$"
+    },
+    "RequiredEvalsPolicy": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique policy name within the config"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "kind": {
+          "type": "string",
+          "const": "required-evals",
+          "description": "Policy kind discriminator"
+        },
+        "severity": {
+          "$ref": "#/definitions/PolicySeverity",
+          "description": "Violation severity"
+        },
+        "match": {
+          "$ref": "#/definitions/PromptPolicyMatch",
+          "description": "Prompts the policy applies to"
+        },
+        "environments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReleaseEnvironmentName"
+          },
+          "description": "Environments from `releases.environments` the policy applies to. Absent means all.",
+          "minItems": 1
+        }
+      },
+      "required": [
+        "kind",
+        "name",
+        "severity"
+      ],
+      "additionalProperties": false,
+      "description": "Required-evals policy: matched prompts need passing evals before promotion."
+    },
+    "ContentRulesPolicy": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique policy name within the config"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "kind": {
+          "type": "string",
+          "const": "content-rules",
+          "description": "Policy kind discriminator"
+        },
+        "severity": {
+          "$ref": "#/definitions/PolicySeverity",
+          "description": "Violation severity"
+        },
+        "match": {
+          "$ref": "#/definitions/PromptPolicyMatch",
+          "description": "Prompts the policy applies to"
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContentRuleCheck"
+          },
+          "description": "Validation rules to run on the prompt text"
+        },
+        "deny": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Literal phrases the prompt text must not contain"
+        },
+        "allow": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Blocked-pattern sources exempt for matched prompts, as exact source text"
+        }
+      },
+      "required": [
+        "kind",
+        "name",
+        "severity"
+      ],
+      "additionalProperties": false,
+      "description": "Content-rules policy: runs content checks and denied phrases on matched prompts."
+    },
+    "ContentRuleCheck": {
+      "type": "string",
+      "enum": [
+        "blocked-patterns",
+        "suspicious-urls",
+        "authority-injection",
+        "obfuscated-content",
+        "unicode-security",
+        "PS005",
+        "PS010",
+        "PS011",
+        "PS012",
+        "PS014"
+      ],
+      "description": "Content check of a content-rules policy, by rule name or id."
     }
   },
   "allOf": [

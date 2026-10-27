@@ -8,7 +8,7 @@
 
 > **createVisitor**(): `PromptScriptVisitor`
 
-Defined in: [parser/src/grammar/visitor.ts:1392](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/parser/src/grammar/visitor.ts#L1392)
+Defined in: [parser/src/grammar/visitor.ts:1426](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/parser/src/grammar/visitor.ts#L1426)
 
 Create an isolated visitor instance for one parse request.
 

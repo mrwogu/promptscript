@@ -8,7 +8,7 @@
 
 > **composeBlockBodies**(`baseBody`, `incomingBody`, `baseContent`, `incomingContent`, `mergedContent`, `blockName?`): [`BlockBody`](https://getpromptscript.dev/api-reference/core/src/interfaces/BlockBody/index.md)
 
-Defined in: [core/src/canonical-ast.ts:922](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/canonical-ast.ts#L922)
+Defined in: [core/src/canonical-ast.ts:927](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/canonical-ast.ts#L927)
 
 ## Parameters
 

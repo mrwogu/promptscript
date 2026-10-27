@@ -6,7 +6,7 @@
 
 # Interface: FormatOptions
 
-Defined in: [compiler/src/types.ts:42](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L42)
+Defined in: [compiler/src/types.ts:46](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L46)
 
 Options for formatting.
 
@@ -16,7 +16,7 @@ Options for formatting.
 
 > `optional` **convention?**: `string` \| [`OutputConvention`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputConvention/index.md)
 
-Defined in: [compiler/src/types.ts:44](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L44)
+Defined in: [compiler/src/types.ts:48](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L48)
 
 Output convention to use
 
@@ -26,7 +26,7 @@ Output convention to use
 
 > `optional` **models?**: [`ModelsConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelsConfig/index.md)
 
-Defined in: [compiler/src/types.ts:62](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L62)
+Defined in: [compiler/src/types.ts:66](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L66)
 
 Model catalog settings from promptscript.yaml, used to map agent models.
 
@@ -36,7 +36,7 @@ Model catalog settings from promptscript.yaml, used to map agent models.
 
 > `optional` **outputPath?**: `string`
 
-Defined in: [compiler/src/types.ts:46](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L46)
+Defined in: [compiler/src/types.ts:50](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L50)
 
 Custom output path
 
@@ -46,9 +46,20 @@ Custom output path
 
 > `optional` **prettier?**: [`PrettierMarkdownOptions`](https://getpromptscript.dev/api-reference/core/src/interfaces/PrettierMarkdownOptions/index.md)
 
-Defined in: [compiler/src/types.ts:56](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L56)
+Defined in: [compiler/src/types.ts:60](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L60)
 
 Prettier formatting options for markdown output.
+
+***
+
+### provenance?
+
+> `optional` **provenance?**: [`ProvenanceTrace`](https://getpromptscript.dev/api-reference/core/src/interfaces/ProvenanceTrace/index.md)
+
+Defined in: [compiler/src/types.ts:72](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L72)
+
+Provenance of the resolved program, with every file rewritten so no machine path remains.
+Passed only to the prompt targets.
 
 ***
 
@@ -56,7 +67,7 @@ Prettier formatting options for markdown output.
 
 > `optional` **targetConfig?**: [`TargetConfig`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/TargetConfig/index.md)
 
-Defined in: [compiler/src/types.ts:59](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L59)
+Defined in: [compiler/src/types.ts:63](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L63)
 
 Full target configuration, passed through from promptscript.yaml.
 
@@ -66,7 +77,7 @@ Full target configuration, passed through from promptscript.yaml.
 
 > `optional` **version?**: `string`
 
-Defined in: [compiler/src/types.ts:52](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L52)
+Defined in: [compiler/src/types.ts:56](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L56)
 
 Target version or format variant.
 Use 'legacy' for deprecated formats.

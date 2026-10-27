@@ -6,7 +6,7 @@
 
 # Interface: BasePolicyDefinition
 
-Defined in: [core/src/types/policy.ts:14](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/policy.ts#L14)
+Defined in: [core/src/types/policy.ts:27](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L27)
 
 Base policy definition shared by all kinds.
 
@@ -15,6 +15,12 @@ Base policy definition shared by all kinds.
 - [`LayerBoundaryPolicy`](https://getpromptscript.dev/api-reference/core/src/interfaces/LayerBoundaryPolicy/index.md)
 - [`PropertyProtectionPolicy`](https://getpromptscript.dev/api-reference/core/src/interfaces/PropertyProtectionPolicy/index.md)
 - [`RegistryAllowlistPolicy`](https://getpromptscript.dev/api-reference/core/src/interfaces/RegistryAllowlistPolicy/index.md)
+- [`RequiredMetadataPolicy`](https://getpromptscript.dev/api-reference/core/src/interfaces/RequiredMetadataPolicy/index.md)
+- [`RiskFloorPolicy`](https://getpromptscript.dev/api-reference/core/src/interfaces/RiskFloorPolicy/index.md)
+- [`ModelAllowlistPolicy`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelAllowlistPolicy/index.md)
+- [`RequiredApprovalsPolicy`](https://getpromptscript.dev/api-reference/core/src/interfaces/RequiredApprovalsPolicy/index.md)
+- [`RequiredEvalsPolicy`](https://getpromptscript.dev/api-reference/core/src/interfaces/RequiredEvalsPolicy/index.md)
+- [`ContentRulesPolicy`](https://getpromptscript.dev/api-reference/core/src/interfaces/ContentRulesPolicy/index.md)
 
 ## Properties
 
@@ -22,7 +28,7 @@ Base policy definition shared by all kinds.
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/policy.ts:18](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/policy.ts#L18)
+Defined in: [core/src/types/policy.ts:31](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L31)
 
 Human-readable description
 
@@ -32,7 +38,7 @@ Human-readable description
 
 > **kind**: [`PolicyKind`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicyKind/index.md)
 
-Defined in: [core/src/types/policy.ts:20](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/policy.ts#L20)
+Defined in: [core/src/types/policy.ts:33](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L33)
 
 Policy kind discriminator
 
@@ -42,7 +48,7 @@ Policy kind discriminator
 
 > **name**: `string`
 
-Defined in: [core/src/types/policy.ts:16](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/policy.ts#L16)
+Defined in: [core/src/types/policy.ts:29](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L29)
 
 Unique policy name within the config
 
@@ -52,6 +58,6 @@ Unique policy name within the config
 
 > **severity**: [`PolicySeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicySeverity/index.md)
 
-Defined in: [core/src/types/policy.ts:22](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/policy.ts#L22)
+Defined in: [core/src/types/policy.ts:35](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L35)
 
 Violation severity

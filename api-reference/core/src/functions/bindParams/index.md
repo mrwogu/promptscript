@@ -8,7 +8,7 @@
 
 > **bindParams**(`args`, `defs`, `templatePath`, `callLocation?`): `Map`\<`string`, [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)\>
 
-Defined in: [core/src/template.ts:136](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/template.ts#L136)
+Defined in: [core/src/template.ts:136](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/template.ts#L136)
 
 Bind parameter arguments to parameter definitions.
 

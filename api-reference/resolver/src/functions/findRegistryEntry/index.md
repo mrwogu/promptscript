@@ -8,7 +8,7 @@
 
 > **findRegistryEntry**(`repoUrl`, `registries`): [`RegistryAliasEntry`](https://getpromptscript.dev/api-reference/core/src/interfaces/RegistryAliasEntry/index.md) \| `undefined`
 
-Defined in: [resolver/src/alias-resolver.ts:259](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/resolver/src/alias-resolver.ts#L259)
+Defined in: [resolver/src/alias-resolver.ts:259](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/alias-resolver.ts#L259)
 
 Find the extended registry entry for a given repository URL.
 

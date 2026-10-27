@@ -6,8 +6,8 @@
 
 # Type Alias: PolicyKind
 
-> **PolicyKind** = `"layer-boundary"` \| `"property-protection"` \| `"registry-allowlist"`
+> **PolicyKind** = `"layer-boundary"` \| `"property-protection"` \| `"registry-allowlist"` \| `"required-metadata"` \| `"risk-floor"` \| `"model-allowlist"` \| `"required-approvals"` \| `"required-evals"` \| `"content-rules"`
 
-Defined in: [core/src/types/policy.ts:9](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/policy.ts#L9)
+Defined in: [core/src/types/policy.ts:13](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L13)
 
 Supported policy kinds.

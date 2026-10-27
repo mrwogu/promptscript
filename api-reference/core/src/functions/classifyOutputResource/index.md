@@ -8,7 +8,7 @@
 
 > **classifyOutputResource**(`target`, `path`, `skillBaseDir?`): [`OutputResourceKind`](https://getpromptscript.dev/api-reference/core/src/type-aliases/OutputResourceKind/index.md)
 
-Defined in: [core/src/output-resources.ts:125](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/output-resources.ts#L125)
+Defined in: [core/src/output-resources.ts:125](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-resources.ts#L125)
 
 Classify a planned output path by the target's catalog resources.
 

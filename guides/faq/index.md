@@ -9,7 +9,8 @@ Cursor rules. New to the terms? See the [Glossary](https://getpromptscript.dev/g
 
 ## How many AI tools are supported?
 
-PromptScript currently compiles to **50 AI coding agent targets**. See the full list in
+PromptScript currently compiles to **50 AI coding agent targets**, plus two targets for
+[application prompts](https://getpromptscript.dev/guides/application-prompts/index.md). See the full list in
 [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) or the
 [formatter matrix](https://getpromptscript.dev/reference/formatters/index.md).
 

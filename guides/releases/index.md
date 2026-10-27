@@ -1,0 +1,595 @@
+# Releasing Application Prompts
+
+The `bundle` target writes a prompt bundle for every `@prompts` entry. `prs release` turns those
+bundles into releases. It stores each bundle under its content hash, and it records which hash each
+environment, such as `staging` or `prod`, serves. An application reads the label of its
+environment, then the bundle file the label points at.
+
+Read [Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md) first. This page covers only the release flow.
+
+## Configuration
+
+Releases are opt-in. List the environments in promotion order, first to last:
+
+```yaml
+releases:
+  environments: [staging, prod]
+```
+
+Without `releases`, every `prs release` command fails with `PS5001` and shows this snippet. See
+[`releases`](https://getpromptscript.dev/reference/config/index.md#releases) for the name rules.
+
+`policies` are read by every release command. A policy with an unknown kind fails the command, it is
+never skipped. Policies parse the same way as in `prs validate`, against `governance.roles`,
+`releases.environments` and the model catalog with `models.profiles`, so a role, environment or model
+that `validate` refuses fails a release command too.
+
+## Files
+
+All release files live in `.promptscript/releases/` and belong in Git:
+
+```text
+.promptscript/releases/
+  manifest.json                bundle index of the latest build
+  bundles/sha256-<hex>.json    one immutable file per content hash
+  staging.json                 label of the staging environment
+  prod.json                    label of the prod environment
+```
+
+- A bundle file has exactly the bytes the `bundle` target writes. A release never rewrites it and
+  never deletes it.
+- The manifest is a bundle index of the latest build. Its `file` entries point into `bundles/`.
+- A label has one entry per prompt, sorted by id, and lists each id once. The `$schema` is
+  `https://getpromptscript.dev/schema/prompt-release-label/v1.json`.
+
+```json
+{
+  "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v1.json",
+  "environment": "prod",
+  "prompts": [
+    {
+      "id": "acme-support/refund-reply",
+      "contentHash": "sha256-<64 hex digits>"
+    }
+  ]
+}
+```
+
+Release files must be regular files. A symbolic link in `.promptscript`, `.promptscript/releases`,
+`bundles/`, or for a release file itself is refused. Names must match in case exactly: a
+`Prod.json` or `Manifest.json` is refused, because a case-insensitive disk would read it as the
+real file. A manifest or label that does not parse as one is never overwritten, the error tells
+you to restore it from Git.
+
+`prs compile` refuses any output inside `.promptscript/releases/` (`PS5008`), and watch mode ignores
+that directory. Compile cleanup never removes release files.
+
+## The flow
+
+```mermaid
+flowchart LR
+  src[.prs source] -->|prs release build| bundles[bundles/ and manifest.json]
+  bundles -->|promote --to staging| staging[staging.json]
+  staging -->|promote --to prod| prod[prod.json]
+```
+
+### Build
+
+```bash
+prs release build
+```
+
+Build compiles the source in memory. It never reads the compiled `prompts/` directory, and it works
+whether or not `bundle` is in `targets`. It writes each new bundle file, checks the ones that exist,
+and writes the manifest only when its bytes change. A second run writes nothing. A program without
+prompts gives `prompts: []`.
+
+A build always runs with these settings, so a release cannot ship what a normal compile would flag:
+
+- Policies are on. `validation.skipPolicies: true` and `validation.ignoreHashes` in the YAML are
+  ignored. Each policy keeps its own `severity`, so only a policy with `severity: error` fails the
+  build.
+- The security rules PS005 `blocked-patterns`, PS010 `suspicious-urls`, PS011
+  `authority-injection`, PS012 `obfuscated-content`, PS013 `path-traversal` and PS014
+  `unicode-security` run as errors, whatever `validation.rules` and `validation.disableRules` say.
+  When the config switched one off, the error says so.
+- `validation.excludes` do not apply to these rules in a release, and imported text is scanned
+  like local text. An import excluded from a rule in `prs validate` is still checked when it ships.
+  `validation.allowedPatterns` does apply, like in every other command, so a pattern exempted
+  there stays exempted.
+
+An existing bundle file that does not verify fails with `PS5004` and the advice to restore it from
+Git. Use `--dry-run` to see what would be written.
+
+### Promote
+
+```bash
+prs release promote acme-support/refund-reply --to staging
+prs release promote acme-support/refund-reply --to prod
+```
+
+Promote points an environment at a bundle. The argument is `<id>` or `<id>@<hash>`. The hash is the
+full `sha256-<64 hex>` or a prefix of at least 8 hex digits, with or without `sha256-`, matched
+among the bundle files of that id. An ambiguous prefix lists the candidates.
+
+The promotion order is fixed and has no escape:
+
+- The first environment recompiles the source like build does and accepts only the fresh hash. A
+  hash you give must equal it. Without a hash, the manifest entry must equal it. Otherwise the
+  command fails with `PS5004` and tells you to run `prs release build`.
+- A later environment accepts only the hash the previous environment holds now. Otherwise the
+  command fails with `PS5005` and prints the exact promote command for the previous environment.
+
+There is no `--force`, `--skip-policies` or `--ignore-hashes`. The bundle file must exist (`PS5003`)
+and verify with that id (`PS5004`).
+
+Promote warns, without failing, when the new bundle changes inputs compared with the bundle the
+environment holds now: a new required input, an input that became required, a removed input, or a
+changed type or options. Callers need an update before the release reaches them.
+
+Before the label is written, inside the lock, the prompt version must pass the
+[release gates](#release-gates). The label is written atomically. Promoting the hash an
+environment already holds is a no-op with exit code 0.
+
+### Roll back
+
+```bash
+prs release rollback prod
+```
+
+Rollback undoes the last committed change of a label. It reads Git history, there is no history
+field in the label.
+
+- The label must have no uncommitted change, else `PS5006` tells you to commit it or run
+  `git restore`.
+- It takes the label as it was before its last commit. At the first promotion nothing is before it,
+  and `PS5006` says so.
+- In a shallow checkout the commit before may be missing. `PS5006` then tells you to run
+  `git fetch --unshallow`.
+- The restored label must parse and every hash in it must verify.
+- Every hash the rollback brings back must pass the [release gates](#release-gates) with the
+  records committed now. An entry the rollback leaves as it is is not judged again.
+
+A committed rollback is undone by a second rollback, like `helm rollback`. Rollback does not check
+the promotion order.
+
+To go further back, restore the label from an older commit with Git. Promote cannot do it: the
+first environment takes only the fresh build and every later one only the hash of the environment
+before it. Find the commit with `prs release status --history` or `git log`, restore the file, check
+it, and commit it in a pull request like any other label change:
+
+```bash
+prs release status --history 10
+git restore --source=<commit> -- .promptscript/releases/prod.json
+prs release status
+```
+
+Every rollback `PS5006` message points to this.
+
+### Status
+
+```bash
+prs release status
+prs release status --history 5
+```
+
+Status lists every environment with the prompt id, the hash (12 hex digits), whether the hash is in
+the latest build (equals the manifest) and whether the bundle verifies. A missing label means an
+empty environment. A label file for an environment that is not configured gives a warning.
+
+Every referenced bundle is verified, and a failure exits with code 1, so CI can run it.
+`--history <n>` (1 to 1000) adds the commit, date and subject of the last n commits of each label.
+It shows no author names.
+
+With prompt policies, status also runs the [release gates](#release-gates) on every entry and adds
+an `approvals` column: `ok`, `missing: <roles>`, or `-` when no `required-approvals` policy applies.
+Plain status only reports: a gate that fails is a warning and the exit code does not change. The
+check that fails on it is `--base`.
+
+## One pull request per promotion
+
+Every promotion is a reviewed pull request, and Git history is the release log:
+
+1. Change the prompts and run `prs release build`.
+2. Commit the changed `.prs` source, `promptscript.yaml` and every config file it reaches through
+   `extends` together with the new bundle files and the manifest. Open a pull request and merge it.
+   Promotion to the first environment recompiles the source with the config on the branch, so a
+   build without them fails with `PS5004`.
+3. Run `prs release promote <id> --to staging`, commit the label, open a pull request.
+4. When staging looks right, run `prs release promote <id> --to prod` in a new pull request.
+
+Roll back the same way: run `prs release rollback prod`, commit the label, open a pull request.
+`prs release status --base` lets that pass, see below. Going back further than the last change is a
+new promotion under the promote rules.
+
+Promote, build and rollback take a project lock, `.promptscript-release.lock`. Another release
+command that holds it fails with `PS5007`. A stale lock is broken after its process is gone or after
+30 minutes. Dry runs take no lock. Add the lock file to `.gitignore`.
+
+## Approvals
+
+An approval is a small JSON file that says one person approved one exact prompt version in one
+role. `prs approve` writes it. The version is the content hash, so a record covers the messages,
+the model and the governance values of that bundle, nothing else.
+
+Approvals need `releases` and the roles under `governance.roles`, each with the teams that review
+it:
+
+```yaml
+releases:
+  environments: [staging, prod]
+governance:
+  roles:
+    legal: ['@acme/legal']
+    security: ['@acme/appsec']
+```
+
+Approve the full hash, for one environment or for all of them:
+
+```bash
+prs approve --list acme-support/refund-reply
+prs approve acme-support/refund-reply@sha256-<64 hex digits> --role legal --approver @jane --env prod
+prs approve acme-support/refund-reply@sha256-<64 hex digits> --role security --approver @bob --all-environments --comment "Checked in PR 123"
+```
+
+`--list` prints the hash the checkout builds. The command checks, and fails without writing:
+
+- the role is in `governance.roles` (`PS5101`). A role named like a Windows device (`con`, `nul`,
+  `com1`, ...) is refused, since it names a directory.
+- the reference is `<id>@sha256-<64 hex>` with a valid prompt id (`PS5102`). A prefix is not
+  enough, and no id segment may end with a dot.
+- `--env` is a configured environment (`PS5002`), or `--all-environments` is given. One of the two
+  is required.
+- `--comment` has at most 2000 characters, no control characters except newlines and no invisible
+  format characters such as bidi marks.
+- `--approver` is a Git host user handle like `@jane` (`PS5104`). An email address or a team is
+  refused, so no address ends up in a file name.
+- the hash is real (`PS5103`): a bundle in `.promptscript/releases/bundles/` of that prompt that
+  verifies, or what the source builds right now. A stored bundle that does not verify is `PS5004`.
+
+Before it writes, the command prints what the hash holds to stderr: the description, governance
+values, model, inputs with their defaults and options, output contract and messages. Invisible
+characters, such as tag characters or bidi marks, show as `<U+XXXX>`. Read the preview. If it is not
+what you meant to approve, delete the record file before you commit it. The command shows no diff
+against an earlier version: the pull request diff is that diff. Link it in `--comment` or in the
+pull request.
+
+### Record files
+
+```text
+.promptscript/approvals/<role>/<prompt id>/<content hash>.<approver>.json
+.promptscript/approvals/legal/acme-support/refund-reply/sha256-3f9a...jane.json
+```
+
+The approver part is the handle without `@`, lowercased. There is one file per approver, role and
+hash. The file holds exactly these bytes, with `environment` only when `--env` was given and
+`comment` only when one was given:
+
+```json
+{
+  "$schema": "https://getpromptscript.dev/schema/approval-record/v1.json",
+  "prompt": "acme-support/refund-reply",
+  "contentHash": "sha256-<64 hex digits>",
+  "role": "legal",
+  "approver": {
+    "source": "asserted",
+    "value": "@jane"
+  },
+  "createdAt": "2026-10-22T09:14:03.120Z",
+  "environment": "prod",
+  "comment": "Checked in PR 123"
+}
+```
+
+A record is never overwritten. When the file exists, the command fails with `PS5105` and exit code 2. To withdraw an approval, delete the file in a commit. To change its environment or comment,
+delete it in a commit and approve again.
+
+A record counts only with these exact bytes. The first `prs approve` writes
+`.promptscript/approvals/.gitattributes` with `* -text`, so a checkout with `core.autocrlf` never
+changes its line endings. Commit that file too. When the file exists without that line, the command
+warns and leaves it alone.
+
+The path that counts is the one Git tracks, because CODEOWNERS matches that path, and the bytes
+must equal the ones Git has for that path, because those are the reviewed ones. On a
+case-insensitive disk, as on macOS and Windows, `Legal/` and `legal/` are one directory, so a record
+committed as `Legal/...` shows up under `legal/`, and two such paths share one file on disk.
+`--list` therefore compares the path in Git and the blob Git has for it, not only what the disk
+shows.
+
+The writer walks the record path from the project root. A symbolic link, a file where a directory
+should be, or a name that differs only in case, like `Legal/` next to `legal`, fails with `PS5109`.
+It creates the record from a temporary file and links it into place, so an existing name is never
+replaced. It takes the release lock `.promptscript-release.lock`, like build and promote.
+
+### Listing approvals
+
+```bash
+prs approve --list
+prs approve --list acme-support/refund-reply --format json
+```
+
+`--list` compiles the source in memory, reads every record, asks Git with `git ls-files -s` which
+paths it tracks and which blob each holds, and prints, per prompt, the hash the checkout builds and
+each record with its role, approver, scope (`prod` or `all environments`) and state. When there are
+record files, it needs Git and a repository, else `PS5108`.
+
+| State            | Meaning                                                          |
+| ---------------- | ---------------------------------------------------------------- |
+| `current`        | The record approves the hash the checkout builds                 |
+| `labelled:<env>` | Not the current hash, but the label of that environment holds it |
+| `stale`          | Neither: the prompt changed since                                |
+| `untracked`      | Not added to Git yet. A staged record already counts as tracked  |
+| `modified`       | The bytes on disk are not the ones Git has for the path          |
+| `misplaced`      | Git tracks the file at another path than its fields give         |
+| `unknown-role`   | The role is not in `governance.roles`                            |
+
+Only `current` and `labelled` records can count. A file that is no valid record, for example one
+with CRLF line endings, gets a `PS5109` warning, and so do modified, misplaced and unknown-role
+records. The file name is never trusted alone: the fields decide, and the path in Git must match
+them. A record with a `signature` gets a warning, since signatures are not checked in this version.
+Links are never followed. At most 10000 files and directories, files of up to 64 KiB each, and 8
+directory levels below `.promptscript/approvals/` are read. Git's list of record paths may take up
+to 10 MiB; a longer one fails with `PS5108`.
+
+With `--format json`, stdout holds one document that matches
+`https://getpromptscript.dev/schema/approval-report/v1.json`.
+
+### What an approval proves
+
+In this version a record is a claim. The approver is whatever `--approver` said, and `createdAt` is
+the clock of the machine that wrote it. The [release gates](#release-gates) count records, but only
+committed ones at their own path.
+
+The binding review is the one on the Git host: the pull request that adds the record, at the path
+Git has for it. Give each role directory its own code owners, so a record under `legal/` cannot
+merge without a review from `@acme/legal`. `prs governance codeowners` writes these lines from
+`governance`, see [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/index.md). By hand they look like this:
+
+```text
+/promptscript.yaml @acme/prompt-platform
+/shared/base.yaml @acme/prompt-platform
+/.promptscript/releases @acme/prompt-platform
+/.github/CODEOWNERS @acme/prompt-platform
+/.promptscript/approvals @acme/prompt-platform
+/.promptscript/approvals/legal @acme/legal
+/.promptscript/approvals/security @acme/appsec
+```
+
+The admin lines cover what decides which review a record needs: the config and every file its
+`extends` reaches (here `shared/base.yaml`), the release files and the CODEOWNERS file itself.
+
+Turn on required code owner review for the branch. The host also stops a pull request author from
+approving their own pull request; the CLI does not check that. For "who approved this for prod",
+read the review of the pull request that added the record.
+
+## Release gates
+
+The gates are the prompt policies, run on the prompt version a label is about to hold. They run
+in `prs release promote` before the label is written, in `prs release rollback` for every hash it
+brings back, in `prs release status --base` for every entry that changed, and in plain
+`prs release status` for every entry, where they only warn. There is no flag or setting around
+them: they call the policy evaluators themselves, so `validation.disableRules`,
+`validation.rules`, custom rules and `--skip-policies` do not apply. `validation.blockedPatterns`
+and `validation.allowedPatterns` do apply, like everywhere else.
+
+Without a prompt policy the gates pass and nothing else runs. With one:
+
+- The policies are parsed again. A policy that does not parse fails every gate.
+- The source is built in memory, with the same settings as `prs release build`. A source that does
+  not build fails the gates, also for a rollback: fix the source, or change the policy in a
+  reviewed pull request.
+- The policy risk is the highest of the bundle's risk, the source's risk and the floors of both.
+  `match` sees the domain of either and the data classes of both. A bundle file only verifies
+  against its own hash, so a bundle with lowered governance values still falls under the policies
+  the source falls under.
+- `required-metadata`, `risk-floor`, `model-allowlist` and `content-rules` judge the bundle that
+  ships: its governance, model, inputs and messages.
+- `required-approvals` counts approval records for that prompt, hash and environment. `required-evals`
+  is `unavailable`, see [Policy Engine](https://getpromptscript.dev/guides/policy-engine/index.md#required-approvals-and-required-evals).
+
+A check of severity `error` that fails, or is `unavailable`, fails the command with a `PS030` error
+that names the policy and what to do. A check of severity `warning` is a warning. The skill policy
+kinds are not part of the gates, they run as `PS030` in the source build.
+
+### Which approvals count
+
+The gates read the records committed at `HEAD`, with `git ls-tree -r HEAD`, never the disk or the
+index. A record that is only staged, or edited and not committed, does not count. `prs approve
+--list` reads the index, so it shows a staged record as `current` while the gates do not count it
+yet.
+
+`status --base` on a pull request counts the records the pull request adds, and the gate cannot
+tell who wrote them. A record binds only through review: each `.promptscript/approvals/<role>/`
+needs that role's team as code owners, with required code owner review on the branch (see
+[What an approval proves](#what-an-approval-proves)). `prs governance codeowners` writes those
+lines, see [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/index.md). Without it, any author can add a record in
+another person's name and pass the gate.
+
+A record counts for one approver when:
+
+- its fields name the prompt, the hash and the role, and `environment` is the one promoted to, or
+  absent;
+- its committed path is the one its fields give, `.promptscript/approvals/<role>/<prompt id>/...`.
+  CODEOWNERS protects records by that path, so a record anywhere else had the wrong reviewers;
+- the role is still in `governance.roles`;
+- the bytes are a valid v1 record.
+
+An approver counts once per role, compared lowercased. A record of the same prompt and role for
+another hash shows as stale. Two committed paths under `.promptscript/approvals/` that differ only
+in case fail the gates with `PS5109`: a case-insensitive disk keeps one of them. A committed file
+over 64 KiB is no record and does not count. When Git cannot list or read the records, for example
+git is not on PATH or an object is missing, the gates fail with `PS5108` and do not count zero
+approvals.
+
+`prs release status --base <ref>` takes the policies, governance and releases of `<ref>`, and the
+records committed at `HEAD`.
+
+### Output
+
+```text
+Gates for acme-support/refund-reply@sha256-3f9a1c2b4d5e to prod (policy risk: high)
+  passed       high-risk-models  model-allowlist
+  failed       high-risk-signoff  legal 0 of 1 (stale: @bob for sha256-91bc0d2e1a2b)
+  unavailable  prod-evals  acme-support/refund-reply needs passing evals for prod, but release gates do not read eval results in this version of prs
+Promotion refused. Label prod is unchanged.
+```
+
+With `--format json`, the report holds every result under `gates`, with the status, message and,
+for approvals, the approvers found and the stale records per role.
+
+## In CI
+
+```bash
+set -e
+prs release build
+test -z "$(git status --porcelain -- .promptscript/releases)"
+prs release status --base refs/remotes/origin/main
+```
+
+Build writes whatever the committed release files miss, so the `test -z` check fails when a pull
+request changes prompts without the build. It also catches new bundle files, which
+`git diff --exit-code` would not see because they are untracked. `status` fails when a label points
+at a bundle that is missing or does not verify. All four commands accept
+`--format json`, which prints one document on stdout that matches
+`https://getpromptscript.dev/schema/release-report/v1.json`, and prints the human text on stderr.
+
+### Check label changes with `--base`
+
+`prs release status --base <ref>` compares the label files in the checkout with the labels at
+`<ref>`, usually the branch the pull request goes into. It looks at every label file: the
+environments configured at `<ref>`, the ones configured in the checkout and every other `*.json`
+file in `.promptscript/releases/` except `manifest.json`. A file whose text did not change passes.
+A changed file that does not read or parse as a label fails. Every entry that is new or changed
+must pass the promotion rules of `<ref>`:
+
+- The environment is in `releases.environments` at `<ref>`.
+- The bundle file exists and verifies for that prompt id.
+- The entry is a rollback: the label at `<ref>` holds the entry, and its new hash is the one the
+  label held before its last change at `<ref>`, the label `prs release rollback` restores. This
+  also covers a `git revert` of the last promotion of one environment. An entry that `<ref>`
+  removed is not brought back this way; adding it again goes through the other rules.
+- Or, in the first environment, the hash is what the source in the checkout compiles to with the
+  `policies`, `validation` and `models.supported` of `<ref>` and the forced security rules, the
+  same compile `prs release promote` runs.
+- Or, in a later environment, the hash is the one the environment before it holds in the checkout.
+
+A rollback skips the promotion order and the compare with the fresh hash. That is safe only when
+every commit on `<ref>` is the result of a pull request this check ran on, see the precondition
+below: then the hash passed the rules when it was promoted. The [release gates](#release-gates)
+still run for it, so the hash a rollback restores needs its approvals. A rollback can also restore a hash that the compile
+rules at `<ref>` (`validation`, the forced security rules, `models.supported`) reject today; the
+gates catch only what the prompt policies check, and review the rest. So when you take a prompt down after a rule
+change, do it in two pull requests: remove the entry, then promote the fixed version. Deleting
+the old bundle file does not help, a pull request can add it back from history. Reviewers should
+look at a rollback like at any other label change. A removed entry ships nothing; it is listed with `action: "removed"` and not
+checked.
+
+Any failure exits with code 1. The config is read at `<ref>`: the first of `promptscript.yaml`,
+`promptscript.yml`, `.promptscriptrc.yaml` and `.promptscriptrc.yml` that exists in the project
+root, the same order the loader uses, with its `extends` chain read at the same commit. `-c` and
+`PROMPTSCRIPT_CONFIG` are ignored with `--base`, with a warning. So a pull request cannot loosen the
+rules it is checked with: a new policy, a removed policy, a wider `models.supported` or a new
+environment takes effect after the merge. Add a new environment in a pull request of its own,
+before the first label for it.
+
+The rest of the config comes from the checkout: `registry`, `registries`, `input.entry`,
+`models.profiles` (they describe the models and reach the bundle hash), and the lockfile and the
+vendor directory. A pull request can change those, so review them with the labels.
+
+`<ref>` must name one ref. A short name that matches a tag and a branch, for example a tag called
+`origin/main` next to the remote branch, fails with `PS5006`; pass the full name such as
+`refs/remotes/origin/main`.
+
+In GitHub Actions, run it on `pull_request` events. Check out the history so the base exists, pass
+the base branch through `env`, not inline in `run`, and run the CLI version the lockfile pins:
+
+```yaml
+on: pull_request
+
+jobs:
+  releases:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: npm ci
+      - run: npx prs release status --base "refs/remotes/origin/$BASE_REF"
+        env:
+          BASE_REF: ${{ github.base_ref }}
+```
+
+What `--base` does not do:
+
+- Entries that did not change are not checked again, even when the rules at `<ref>` changed since
+  they were promoted.
+- Going back further than the last change of a label is no rollback. It needs a new promotion under
+  the promote rules, in the first environment with the source reverted.
+- Config files and label files at `<ref>` must be regular files. A config that is a link or a
+  directory fails with `PS5001`; a label that is a link counts as empty, so every entry in the
+  checkout is checked.
+- A config file that `extends` reaches outside the repository cannot be read at `<ref>`; the
+  check fails with `PS5006`.
+- It trusts `<ref>`. Point it at the protected branch the applications read from.
+- The rollback rule trusts the history of `<ref>`: every commit on its first-parent chain must be
+  the result of a pull request this check ran on. With rebase merging, or a fast-forward of a
+  branch with several commits, an unchecked commit lands on that chain, and its label becomes a
+  valid rollback target. Allow only squash or merge commits on that branch, see below. Label
+  history from before the check was required counts as unchecked too: a label whose last change
+  predates the check has an unchecked rollback target until its next change.
+- In a `pull_request` run the pull request controls the workflow file, `package.json` and the
+  lockfile, so it can swap the CLI that runs the check. Protect them as below, or run the check
+  as a required workflow from a repository ruleset.
+
+## What protects the labels
+
+Run `prs release status --base` as a required check, and keep review on the release files:
+
+- Add `.promptscript/releases/`, `promptscript.yaml`, every config file it reaches through
+  `extends`, `.github/workflows/`, `package.json` and the lockfile to `CODEOWNERS`, and require the
+  review. `prs governance codeowners` writes these lines for the admins, see
+  [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/index.md); add `.github/workflows`, `package.json` and the
+  lockfile to `governance.codeowners.protect`.
+- Protect the branch the applications read from with a ruleset: require the
+  `prs release status --base` check, allow only squash merges or merge commits (no rebase merging,
+  no fast-forward of branches with several commits) and no direct pushes. The rollback rule
+  relies on that.
+- An older label served from a cache, or a label on a rewritten branch, cannot be detected in this
+  version.
+
+Applications read the label file of their environment and the bundle file it names. Recompute the
+content hash before use, as described in [Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md#content-hash).
+
+## Error codes
+
+| Code   | Meaning                                                           |
+| ------ | ----------------------------------------------------------------- |
+| PS5001 | `releases` is missing or invalid                                  |
+| PS5002 | The environment is not in `releases.environments`                 |
+| PS5003 | A bundle or prompt is missing, or a hash prefix matches nothing   |
+| PS5004 | A release file does not verify, or the hash is not the fresh hash |
+| PS5005 | The promotion skips the previous environment                      |
+| PS5006 | Git cannot give rollback or `--base` the ref, commit or file      |
+| PS5007 | Another release command holds the lock                            |
+| PS5008 | A compile output lies inside `.promptscript/releases/`            |
+
+`prs approve` uses these codes:
+
+| Code   | Meaning                                                                                        |
+| ------ | ---------------------------------------------------------------------------------------------- |
+| PS5101 | `governance.roles` is missing or invalid, or the role is not in it                             |
+| PS5102 | The reference is not `<id>@sha256-<64 hex>` with a valid prompt id                             |
+| PS5103 | The hash is neither what the checkout builds nor a bundle of that prompt                       |
+| PS5104 | `--approver` is missing or not a user handle like `@jane`                                      |
+| PS5105 | The record exists (exit code 2)                                                                |
+| PS5108 | `--list` cannot run Git, or the project is not in a repository                                 |
+| PS5109 | A record is invalid, modified, misplaced or has an unknown role, or the record path has a link |
+
+## See Also
+
+- [`prs release` in the CLI reference](https://getpromptscript.dev/reference/cli/index.md#prs-release)
+- [`releases` in the configuration reference](https://getpromptscript.dev/reference/config/index.md#releases)
+- [Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md)
+- [Bundle formatter](https://getpromptscript.dev/reference/formatters/bundle/index.md)
+- [Policy Engine](https://getpromptscript.dev/guides/policy-engine/index.md)
+- [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/index.md)

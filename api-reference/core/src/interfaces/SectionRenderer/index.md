@@ -6,7 +6,7 @@
 
 # Interface: SectionRenderer
 
-Defined in: [core/src/types/convention.ts:23](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/convention.ts#L23)
+Defined in: [core/src/types/convention.ts:23](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/convention.ts#L23)
 
 Section rendering configuration.
 
@@ -16,7 +16,7 @@ Section rendering configuration.
 
 > `optional` **end?**: `string`
 
-Defined in: [core/src/types/convention.ts:40](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/convention.ts#L40)
+Defined in: [core/src/types/convention.ts:40](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/convention.ts#L40)
 
 Template for section end (optional, for paired tags).
 Variables: {{name}}
@@ -37,7 +37,7 @@ Markdown: "" (empty - no closing tag)
 
 > `optional` **indent?**: `string`
 
-Defined in: [core/src/types/convention.ts:52](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/convention.ts#L52)
+Defined in: [core/src/types/convention.ts:52](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/convention.ts#L52)
 
 Indentation per level.
 
@@ -51,9 +51,9 @@ Indentation per level.
 
 ### nameTransform?
 
-> `optional` **nameTransform?**: `"none"` \| `"kebab-case"` \| `"camelCase"` \| `"PascalCase"`
+> `optional` **nameTransform?**: `"kebab-case"` \| `"camelCase"` \| `"PascalCase"` \| `"none"`
 
-Defined in: [core/src/types/convention.ts:46](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/convention.ts#L46)
+Defined in: [core/src/types/convention.ts:46](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/convention.ts#L46)
 
 Whether to convert section names.
 
@@ -69,7 +69,7 @@ Whether to convert section names.
 
 > **start**: `string`
 
-Defined in: [core/src/types/convention.ts:31](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/convention.ts#L31)
+Defined in: [core/src/types/convention.ts:31](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/convention.ts#L31)
 
 Template for section start.
 Variables: {{name}}, {{level}}, {{content}}

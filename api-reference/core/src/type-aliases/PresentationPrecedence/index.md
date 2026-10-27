@@ -8,4 +8,4 @@
 
 > **PresentationPrecedence** = `"base"` \| `"incoming"`
 
-Defined in: [core/src/presentation.ts:5](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/presentation.ts#L5)
+Defined in: [core/src/presentation.ts:5](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/presentation.ts#L5)

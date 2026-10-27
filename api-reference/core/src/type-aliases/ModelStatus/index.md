@@ -8,7 +8,7 @@
 
 > **ModelStatus** = `"current"` \| `"legacy"` \| `"deprecated"` \| `"retired"`
 
-Defined in: [core/src/types/models.ts:8](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/models.ts#L8)
+Defined in: [core/src/types/models.ts:8](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L8)
 
 Lifecycle status of a model profile.
 - `current`: recommended for new instructions

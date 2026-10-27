@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/prompt-bundle-index/v1.json",
+  "title": "PromptScript Prompt Bundle Index v1",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://getpromptscript.dev/schema/prompt-bundle-index/v1.json",
+      "description": "Schema URL, the version tag of the index.",
+      "examples": [
+        "https://getpromptscript.dev/schema/prompt-bundle-index/v1.json"
+      ]
+    },
+    "source": {
+      "type": "string",
+      "description": "Entry file of the compilation.",
+      "examples": [
+        ".promptscript/project.prs"
+      ]
+    },
+    "prompts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PromptBundleIndexEntry"
+      },
+      "description": "Prompts sorted by id"
+    }
+  },
+  "required": [
+    "$schema",
+    "source",
+    "prompts"
+  ],
+  "additionalProperties": false,
+  "description": "Index of the prompt bundles of one compilation, version 1.",
+  "definitions": {
+    "PromptBundleIndexEntry": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Prompt id.",
+          "examples": [
+            "acme-support/refund-reply"
+          ]
+        },
+        "file": {
+          "type": "string",
+          "description": "Bundle file, relative to the index.",
+          "examples": [
+            "refund-reply.json"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "What the prompt does"
+        },
+        "contentHash": {
+          "type": "string",
+          "description": "Content hash of the bundle.",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "id",
+        "file",
+        "description",
+        "contentHash"
+      ],
+      "additionalProperties": false,
+      "description": "One prompt listed in a bundle index."
+    }
+  }
+}

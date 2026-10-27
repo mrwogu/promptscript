@@ -8,7 +8,7 @@
 
 > `const` **FLOATING\_MODEL\_ALIASES**: `Readonly`\<`Record`\<`string`, `string`\>\>
 
-Defined in: [core/src/model-catalog.ts:19](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-catalog.ts#L19)
+Defined in: [core/src/model-catalog.ts:25](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-catalog.ts#L25)
 
 Short names that always point at the newest release of a model family.
 Claude Code understands them natively; other targets get the release.

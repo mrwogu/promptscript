@@ -17,5 +17,5 @@ Complete reference documentation for PromptScript.
 - [CLI Reference](https://getpromptscript.dev/reference/cli/index.md): All commands and options for the PromptScript CLI - compile, validate, pull, and more.
 - [Configuration](https://getpromptscript.dev/reference/config/index.md): Configuration file format and options - targets, registry, validation, and output settings.
 - [Model Catalog](https://getpromptscript.dev/reference/models/index.md): Built-in model profiles, floating aliases, and the model name each target writes.
-- [Formatters](https://getpromptscript.dev/reference/formatters/index.md): All 50 supported AI agent targets - output paths, features, quirks, and examples.
+- [Formatters](https://getpromptscript.dev/reference/formatters/index.md): All 50 supported AI agent targets and two prompt targets - output paths, features, quirks, and examples.
 

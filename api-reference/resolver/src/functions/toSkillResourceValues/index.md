@@ -8,7 +8,7 @@
 
 > **toSkillResourceValues**(`resources`): [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)[]
 
-Defined in: [resolver/src/skill-resources.ts:117](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/resolver/src/skill-resources.ts#L117)
+Defined in: [resolver/src/skill-resources.ts:117](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/skill-resources.ts#L117)
 
 Convert resources into the AST value shape stored on a skill definition.
 

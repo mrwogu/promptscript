@@ -1,8 +1,8 @@
 # Target Platforms
 
-PromptScript includes 50 built-in output targets. All targets receive project instructions. Rich
-formatters additionally emit native skills, agents, commands, MCP configuration, hooks, workflows,
-or plugin manifests when their platform supports those concepts.
+PromptScript includes 50 coding agent targets and two prompt targets. All coding agent targets
+receive project instructions. Rich formatters additionally emit native skills, agents, commands, MCP
+configuration, hooks, workflows, or plugin manifests when their platform supports those concepts.
 
 ## Platform Families
 
@@ -204,15 +204,16 @@ instructions. See the official [context-files documentation](https://hermes-agen
 | Supported instruction blocks             | `AGENTS.md`   | `@identity`, `@context`, `@standards`, `@knowledge`, `@restrictions`, and `@examples` render into the single file                                                  |
 | `simple`, `multifile`, `full`            | `AGENTS.md`   | All aliases intentionally emit the same file                                                                                                                       |
 | Skills                                   | None          | No verified project-local Hermes skill output path; see the official [skills documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills) |
-| Agents, commands, workflows, and prompts | None          | No verified project-local native contract                                                                                                                          |
+| Agents, commands, and workflows          | None          | No verified project-local native contract                                                                                                                          |
+| Prompt definitions (`@prompts`)          | None          | Not instructions for a coding agent, so the block is skipped without a warning                                                                                     |
 | Scoped rules (`@guards`) and local files | None          | No verified project-local native contract                                                                                                                          |
 | Hooks, MCP servers, plugins              | None          | No verified project-local native contract; `PS4002` compatibility warnings include source locations                                                                |
 
 PromptScript does not create `.hermes.md`, native skill directories, agent
 files, command files, workflow files, prompt files, hook files, MCP
 configuration, or plugin manifests.
-Unsupported blocks are omitted with actionable non-fatal compatibility
-warnings. Move required guidance into supported `AGENTS.md` instruction
+Unsupported blocks other than `@prompts` are omitted with actionable non-fatal
+compatibility warnings. Move required guidance into supported `AGENTS.md` instruction
 blocks.
 
 ### GitLab Duo
@@ -231,10 +232,26 @@ GitLab UI surfaces the instructions from GitLab 18.11. See the official
 | Scoped rules (`@guards`) and local files | None              | No verified project-local native contract                                                           |
 | Hooks, MCP servers, plugins              | None              | No verified project-local native contract; `PS4002` compatibility warnings include source locations |
 
+## Prompt Targets
+
+Two further targets are not coding agent targets. They compile the prompts of an application. See
+[Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md).
+
+| Target        | Output                                        | Content                                             |
+| ------------- | --------------------------------------------- | --------------------------------------------------- |
+| `bundle`      | `prompts/<key>.json` and `prompts/index.json` | One content-hashed JSON bundle per `@prompts` entry |
+| `prompt-text` | `prompts/<key>.md` and `prompts/README.md`    | A Markdown preview of each composed system message  |
+
+Prompt targets are opt-in. No default selection includes them: not `compile()`, not `compileAll`,
+not the browser compiler, and not the `prs init` target picker. Name them in `targets` to use
+them. They write nothing for a program without `@prompts` entries, and they need syntax `1.6.0`.
+They have one version, `v1`, and no skills, agents, commands, hooks, or other resources.
+
 ## Related Documentation
 
 - [Supported Formatters](https://getpromptscript.dev/reference/formatters/index.md)
 - [Configuration: Targets](https://getpromptscript.dev/reference/config/index.md#targets)
+- [Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md)
 - [Agents](https://getpromptscript.dev/features/agents/index.md)
 - [Skills and Resources](https://getpromptscript.dev/features/skills/index.md)
 - [MCP Servers and Plugins](https://getpromptscript.dev/features/integrations/index.md)

@@ -8,7 +8,7 @@
 
 > `const` **BLOCK\_SHAPE\_CONTRACTS**: `object`
 
-Defined in: [core/src/block-shapes.ts:31](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/block-shapes.ts#L31)
+Defined in: [core/src/block-shapes.ts:31](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/block-shapes.ts#L31)
 
 Canonical and compatibility shapes for every built-in block.
 
@@ -26,7 +26,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### agents.example
 
-> `readonly` **example**: "@agents \{ reviewer: \{ description: \"Review code\" content: \"\"\"Review changes.\"\"\" \} \}" = `'@agents { reviewer: { description: "Review code" content: """Review changes.""" } }'`
+> `readonly` **example**: "@agents \{ reviewer: \{ description: \\"Review code\\" content: \\"\\"\\"Review changes.\\"\\"\\" \} \}" = `'@agents { reviewer: { description: "Review code" content: """Review changes.""" } }'`
 
 #### agents.legacyShapes
 
@@ -46,7 +46,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### commands.example
 
-> `readonly` **example**: "@commands \{ \"/test\": \{ content: \"\"\"Run tests.\"\"\" \} \}" = `'@commands { "/test": { content: """Run tests.""" } }'`
+> `readonly` **example**: "@commands \{ \\"/test\\": \{ content: \\"\\"\\"Run tests.\\"\\"\\" \} \}" = `'@commands { "/test": { content: """Run tests.""" } }'`
 
 #### commands.legacyShapes
 
@@ -66,7 +66,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### context.example
 
-> `readonly` **example**: "@context \{ project: \"Example\" \"\"\"Additional project context.\"\"\" \}" = `'@context { project: "Example" """Additional project context.""" }'`
+> `readonly` **example**: "@context \{ project: \\"Example\\" \\"\\"\\"Additional project context.\\"\\"\\" \}" = `'@context { project: "Example" """Additional project context.""" }'`
 
 #### context.legacyShapes
 
@@ -86,7 +86,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### examples.example
 
-> `readonly` **example**: "@examples \{ basic: \{ input: \"Before\" output: \"After\" \} \}" = `'@examples { basic: { input: "Before" output: "After" } }'`
+> `readonly` **example**: "@examples \{ basic: \{ input: \\"Before\\" output: \\"After\\" \} \}" = `'@examples { basic: { input: "Before" output: "After" } }'`
 
 #### examples.legacyShapes
 
@@ -106,7 +106,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### guards.example
 
-> `readonly` **example**: "@guards \{ globs: \[\"\*\*/\*.ts\"\] \}" = `'@guards { globs: ["**/*.ts"] }'`
+> `readonly` **example**: "@guards \{ globs: \[\\"\*\*/\*.ts\\"\] \}" = `'@guards { globs: ["**/*.ts"] }'`
 
 #### guards.legacyShapes
 
@@ -126,7 +126,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### hooks.example
 
-> `readonly` **example**: "@hooks \{ validate: \{ event: \"pre-tool-use\" command: \[\"pnpm\", \"test\"\] \} \}" = `'@hooks { validate: { event: "pre-tool-use" command: ["pnpm", "test"] } }'`
+> `readonly` **example**: "@hooks \{ validate: \{ event: \\"pre-tool-use\\" command: \[\\"pnpm\\", \\"test\\"\] \} \}" = `'@hooks { validate: { event: "pre-tool-use" command: ["pnpm", "test"] } }'`
 
 #### hooks.legacyShapes
 
@@ -146,7 +146,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### identity.example
 
-> `readonly` **example**: "@identity \{ \"\"\"You are a helpful assistant.\"\"\" \}" = `'@identity { """You are a helpful assistant.""" }'`
+> `readonly` **example**: "@identity \{ \\"\\"\\"You are a helpful assistant.\\"\\"\\" \}" = `'@identity { """You are a helpful assistant.""" }'`
 
 #### identity.legacyShapes
 
@@ -166,7 +166,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### knowledge.example
 
-> `readonly` **example**: "@knowledge \{ \"\"\"Project reference material.\"\"\" \}" = `'@knowledge { """Project reference material.""" }'`
+> `readonly` **example**: "@knowledge \{ \\"\\"\\"Project reference material.\\"\\"\\" \}" = `'@knowledge { """Project reference material.""" }'`
 
 #### knowledge.legacyShapes
 
@@ -186,7 +186,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### local.example
 
-> `readonly` **example**: "@local \{ \"\"\"Private project instructions.\"\"\" \}" = `'@local { """Private project instructions.""" }'`
+> `readonly` **example**: "@local \{ \\"\\"\\"Private project instructions.\\"\\"\\" \}" = `'@local { """Private project instructions.""" }'`
 
 #### local.legacyShapes
 
@@ -206,7 +206,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### mcpServers.example
 
-> `readonly` **example**: "@mcpServers \{ local: \{ transport: \"stdio\" command: \[\"node\", \"server.mjs\"\] \} \}" = `'@mcpServers { local: { transport: "stdio" command: ["node", "server.mjs"] } }'`
+> `readonly` **example**: "@mcpServers \{ local: \{ transport: \\"stdio\\" command: \[\\"node\\", \\"server.mjs\\"\] \} \}" = `'@mcpServers { local: { transport: "stdio" command: ["node", "server.mjs"] } }'`
 
 #### mcpServers.legacyShapes
 
@@ -246,7 +246,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### plugins.example
 
-> `readonly` **example**: "@plugins \{ quality: \{ skills: \[\"review\"\] \} \}" = `'@plugins { quality: { skills: ["review"] } }'`
+> `readonly` **example**: "@plugins \{ quality: \{ skills: \[\\"review\\"\] \} \}" = `'@plugins { quality: { skills: ["review"] } }'`
 
 #### plugins.legacyShapes
 
@@ -266,7 +266,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### prompts.example
 
-> `readonly` **example**: "@prompts \{ review: \{ content: \"\"\"Review changes.\"\"\" \} \}" = `'@prompts { review: { content: """Review changes.""" } }'`
+> `readonly` **example**: "@prompts \{ review: \{ description: \\"Review a change\\" user: \\"Review \{\{input.diff\}\}\\" inputs: \{ diff: \{ type: \\"string\\" description: \\"The change\\" \} \} \} \}" = `'@prompts { review: { description: "Review a change" user: "Review {{input.diff}}" inputs: { diff: { type: "string" description: "The change" } } } }'`
 
 #### prompts.legacyShapes
 
@@ -286,7 +286,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### restrictions.example
 
-> `readonly` **example**: "@restrictions \{ - \"Never expose secrets\" \}" = `'@restrictions { - "Never expose secrets" }'`
+> `readonly` **example**: "@restrictions \{ - \\"Never expose secrets\\" \}" = `'@restrictions { - "Never expose secrets" }'`
 
 #### restrictions.legacyShapes
 
@@ -306,7 +306,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### shortcuts.example
 
-> `readonly` **example**: "@shortcuts \{ \"/test\": \{ content: \"\"\"Run tests.\"\"\" \} \}" = `'@shortcuts { "/test": { content: """Run tests.""" } }'`
+> `readonly` **example**: "@shortcuts \{ \\"/test\\": \{ content: \\"\\"\\"Run tests.\\"\\"\\" \} \}" = `'@shortcuts { "/test": { content: """Run tests.""" } }'`
 
 #### shortcuts.legacyShapes
 
@@ -326,7 +326,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### skills.example
 
-> `readonly` **example**: "@skills \{ review: \{ description: \"Review code\" content: \"\"\"Review changes.\"\"\" \} \}" = `'@skills { review: { description: "Review code" content: """Review changes.""" } }'`
+> `readonly` **example**: "@skills \{ review: \{ description: \\"Review code\\" content: \\"\\"\\"Review changes.\\"\\"\\" \} \}" = `'@skills { review: { description: "Review code" content: """Review changes.""" } }'`
 
 #### skills.legacyShapes
 
@@ -346,7 +346,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### standards.example
 
-> `readonly` **example**: "@standards \{ code: \[\"Use strict TypeScript\"\] \}" = `'@standards { code: ["Use strict TypeScript"] }'`
+> `readonly` **example**: "@standards \{ code: \[\\"Use strict TypeScript\\"\] \}" = `'@standards { code: ["Use strict TypeScript"] }'`
 
 #### standards.legacyShapes
 
@@ -366,7 +366,7 @@ Custom blocks intentionally remain open-world and are absent from this registry.
 
 #### workflows.example
 
-> `readonly` **example**: "@workflows \{ release: \{ description: \"Prepare release\" content: \"\"\"Run checks.\"\"\" \} \}" = `'@workflows { release: { description: "Prepare release" content: """Run checks.""" } }'`
+> `readonly` **example**: "@workflows \{ release: \{ description: \\"Prepare release\\" content: \\"\\"\\"Run checks.\\"\\"\\" \} \}" = `'@workflows { release: { description: "Prepare release" content: """Run checks.""" } }'`
 
 #### workflows.legacyShapes
 

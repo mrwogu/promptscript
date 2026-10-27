@@ -8,7 +8,7 @@
 
 > **discoverNativeContent**(`dir`, `logger?`): `Promise`\<[`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md) \| `null`\>
 
-Defined in: [resolver/src/auto-discovery.ts:317](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/resolver/src/auto-discovery.ts#L317)
+Defined in: [resolver/src/auto-discovery.ts:317](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/auto-discovery.ts#L317)
 
 ## Parameters
 

@@ -8,7 +8,7 @@
 
 > `const` **HOOK\_CAPABILITIES**: `object`
 
-Defined in: [core/src/hook-capabilities.ts:66](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/hook-capabilities.ts#L66)
+Defined in: [core/src/hook-capabilities.ts:66](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/hook-capabilities.ts#L66)
 
 Audited lifecycle-hook capabilities for every built-in formatter target.
 
@@ -255,6 +255,46 @@ custom agent, which would change target behavior beyond hook installation.
 > `readonly` **status**: `"unsupported"` = `'unsupported'`
 
 #### augment.timeoutUnit
+
+> `readonly` **timeoutUnit**: `"none"` = `'none'`
+
+### bundle
+
+> `readonly` **bundle**: `object` = `UNSUPPORTED_CAPABILITY`
+
+#### bundle.commandFormat
+
+> `readonly` **commandFormat**: `"none"` = `'none'`
+
+#### bundle.configPath
+
+> `readonly` **configPath**: `null` = `null`
+
+#### bundle.documentationUrl
+
+> `readonly` **documentationUrl**: `"https://promptscript.dev/docs/guides/hooks/"` = `'https://promptscript.dev/docs/guides/hooks/'`
+
+#### bundle.events
+
+> `readonly` **events**: readonly \[\] = `[]`
+
+#### bundle.fallback
+
+> `readonly` **fallback**: `` "Run `prs compile --watch` when automatic regeneration is required." `` = `` 'Run `prs compile --watch` when automatic regeneration is required.' ``
+
+#### bundle.platforms
+
+> `readonly` **platforms**: readonly \[\] = `[]`
+
+#### bundle.projectRootStrategy
+
+> `readonly` **projectRootStrategy**: `"none"` = `'none'`
+
+#### bundle.status
+
+> `readonly` **status**: `"unsupported"` = `'unsupported'`
+
+#### bundle.timeoutUnit
 
 > `readonly` **timeoutUnit**: `"none"` = `'none'`
 
@@ -1839,6 +1879,46 @@ custom agent, which would change target behavior beyond hook installation.
 > `readonly` **status**: `"unsupported"` = `'unsupported'`
 
 #### pochi.timeoutUnit
+
+> `readonly` **timeoutUnit**: `"none"` = `'none'`
+
+### prompt-text
+
+> `readonly` **prompt-text**: `object` = `UNSUPPORTED_CAPABILITY`
+
+#### prompt-text.commandFormat
+
+> `readonly` **commandFormat**: `"none"` = `'none'`
+
+#### prompt-text.configPath
+
+> `readonly` **configPath**: `null` = `null`
+
+#### prompt-text.documentationUrl
+
+> `readonly` **documentationUrl**: `"https://promptscript.dev/docs/guides/hooks/"` = `'https://promptscript.dev/docs/guides/hooks/'`
+
+#### prompt-text.events
+
+> `readonly` **events**: readonly \[\] = `[]`
+
+#### prompt-text.fallback
+
+> `readonly` **fallback**: `` "Run `prs compile --watch` when automatic regeneration is required." `` = `` 'Run `prs compile --watch` when automatic regeneration is required.' ``
+
+#### prompt-text.platforms
+
+> `readonly` **platforms**: readonly \[\] = `[]`
+
+#### prompt-text.projectRootStrategy
+
+> `readonly` **projectRootStrategy**: `"none"` = `'none'`
+
+#### prompt-text.status
+
+> `readonly` **status**: `"unsupported"` = `'unsupported'`
+
+#### prompt-text.timeoutUnit
 
 > `readonly` **timeoutUnit**: `"none"` = `'none'`
 

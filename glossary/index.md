@@ -31,7 +31,8 @@ A named section of a `.prs` file that starts with `@`, for example `@identity`,
 ### Target
 
 One AI tool that PromptScript compiles for, such as `claude`, `github`, `cursor`, or
-`codex`. There are 50 built-in targets. See [Supported Formatters](https://getpromptscript.dev/reference/formatters/index.md).
+`codex`. There are 50 coding agent targets and two prompt targets, `bundle` and `prompt-text`. See
+[Supported Formatters](https://getpromptscript.dev/reference/formatters/index.md).
 
 ### Formatter
 
@@ -172,6 +173,48 @@ require other guards. See [Guard Dependencies](https://getpromptscript.dev/guide
 
 A catalog entry that maps one model name to the name each target expects. See
 [Model Catalog](https://getpromptscript.dev/reference/models/index.md).
+
+## Application Prompts
+
+### Prompt bundle
+
+The JSON file the `bundle` target writes for one `@prompts` entry: its messages, inputs, output
+contract, model and governance values. See [Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md).
+
+### Runtime slot
+
+A `{{input.name}}` marker in a prompt for a value the application supplies when it calls the
+model. PromptScript keeps the slot as written and does not render it. See
+[Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md#runtime-slots).
+
+### Content hash
+
+The `sha256-` digest in a bundle's `contentHash`, computed over its canonical JSON without
+`contentHash` and `provenance`. A program that reads a bundle recomputes it before use. See
+[Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md#content-hash).
+
+### Environment
+
+A named stage of a release, such as `staging` or `prod`, listed in `releases.environments` in
+promotion order. Each environment has one release label. See
+[Releasing Application Prompts](https://getpromptscript.dev/guides/releases/index.md).
+
+### Release label
+
+The file `.promptscript/releases/<env>.json`. It says which bundle hash each prompt has in that
+environment. An application reads it, then reads the bundle file it names. See
+[Releasing Application Prompts](https://getpromptscript.dev/guides/releases/index.md#files).
+
+### Release manifest
+
+The file `.promptscript/releases/manifest.json`, a bundle index of the latest `prs release build`.
+See [Releasing Application Prompts](https://getpromptscript.dev/guides/releases/index.md#build).
+
+### `prompt-text`
+
+The opt-in target that writes a Markdown preview of each composed system message under
+`prompts/`. It is for reading, not an approved artifact. See
+[Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md#previews).
 
 ## Teams and Organization
 

@@ -8,7 +8,7 @@
 
 > **displacedProfile**(`candidate`, `profiles`): [`ModelProfile`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelProfile/index.md) \| `undefined`
 
-Defined in: [core/src/model-drift.ts:267](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-drift.ts#L267)
+Defined in: [core/src/model-drift.ts:296](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-drift.ts#L296)
 
 The catalog entry a candidate displaces: the current release of its
 family that carries no successor yet.

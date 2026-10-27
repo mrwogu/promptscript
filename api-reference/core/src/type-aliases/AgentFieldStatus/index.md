@@ -8,7 +8,7 @@
 
 > **AgentFieldStatus** = `"emitted"` \| `"transformed"` \| `"not-supported"`
 
-Defined in: [core/src/agent-capabilities.ts:46](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/agent-capabilities.ts#L46)
+Defined in: [core/src/agent-capabilities.ts:46](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/agent-capabilities.ts#L46)
 
 How a target handles a canonical agent field:
 - `emitted`: written to the native agent file under the same name

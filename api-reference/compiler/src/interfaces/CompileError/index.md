@@ -6,7 +6,7 @@
 
 # Interface: CompileError
 
-Defined in: [compiler/src/types.ts:185](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L185)
+Defined in: [compiler/src/types.ts:195](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L195)
 
 Compilation error with additional metadata.
 
@@ -16,7 +16,7 @@ Compilation error with additional metadata.
 
 > `optional` **agentName?**: `string`
 
-Defined in: [compiler/src/types.ts:203](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L203)
+Defined in: [compiler/src/types.ts:213](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L213)
 
 First agent name included in the diagnostic
 
@@ -26,7 +26,7 @@ First agent name included in the diagnostic
 
 > **code**: `string`
 
-Defined in: [compiler/src/types.ts:189](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L189)
+Defined in: [compiler/src/types.ts:199](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L199)
 
 Error code or rule ID
 
@@ -36,7 +36,7 @@ Error code or rule ID
 
 > `optional` **conflicts?**: [`AgentConflict`](https://getpromptscript.dev/api-reference/core/src/interfaces/AgentConflict/index.md)[]
 
-Defined in: [compiler/src/types.ts:201](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L201)
+Defined in: [compiler/src/types.ts:211](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L211)
 
 All agent conflicts included in the diagnostic
 
@@ -46,7 +46,7 @@ All agent conflicts included in the diagnostic
 
 > `optional` **format?**: () => `string`
 
-Defined in: [compiler/src/types.ts:205](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L205)
+Defined in: [compiler/src/types.ts:215](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L215)
 
 Format error for display
 
@@ -60,7 +60,7 @@ Format error for display
 
 > `optional` **location?**: `object`
 
-Defined in: [compiler/src/types.ts:193](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L193)
+Defined in: [compiler/src/types.ts:203](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L203)
 
 Source location
 
@@ -82,7 +82,7 @@ Source location
 
 > **message**: `string`
 
-Defined in: [compiler/src/types.ts:191](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L191)
+Defined in: [compiler/src/types.ts:201](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L201)
 
 Error message
 
@@ -92,7 +92,7 @@ Error message
 
 > **name**: `string`
 
-Defined in: [compiler/src/types.ts:187](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L187)
+Defined in: [compiler/src/types.ts:197](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L197)
 
 Error name/type
 
@@ -102,6 +102,6 @@ Error name/type
 
 > `optional` **provenance?**: [`AgentProvenance`](https://getpromptscript.dev/api-reference/core/src/interfaces/AgentProvenance/index.md)[]
 
-Defined in: [compiler/src/types.ts:199](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L199)
+Defined in: [compiler/src/types.ts:209](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L209)
 
 Agent provenance when resolution reports a name conflict

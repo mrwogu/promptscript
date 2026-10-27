@@ -17,6 +17,7 @@ Handles the lexical analysis and parsing of `.prs` files into the Abstract Synta
 ## Interfaces
 
 - [CanonicalParseResult](https://getpromptscript.dev/api-reference/parser/src/interfaces/CanonicalParseResult/index.md)
+- [Comment](https://getpromptscript.dev/api-reference/parser/src/interfaces/Comment/index.md)
 - [ParseOptions](https://getpromptscript.dev/api-reference/parser/src/interfaces/ParseOptions/index.md)
 - [ParseResult](https://getpromptscript.dev/api-reference/parser/src/interfaces/ParseResult/index.md)
 - [VisitorDiagnostic](https://getpromptscript.dev/api-reference/parser/src/interfaces/VisitorDiagnostic/index.md)
@@ -34,6 +35,7 @@ Handles the lexical analysis and parsing of `.prs` files into the Abstract Synta
 - [BooleanType](https://getpromptscript.dev/api-reference/parser/src/variables/BooleanType/index.md)
 - [Colon](https://getpromptscript.dev/api-reference/parser/src/variables/Colon/index.md)
 - [Comma](https://getpromptscript.dev/api-reference/parser/src/variables/Comma/index.md)
+- [COMMENT\_GROUP](https://getpromptscript.dev/api-reference/parser/src/variables/COMMENT_GROUP/index.md)
 - [Dash](https://getpromptscript.dev/api-reference/parser/src/variables/Dash/index.md)
 - [Dot](https://getpromptscript.dev/api-reference/parser/src/variables/Dot/index.md)
 - [DotDot](https://getpromptscript.dev/api-reference/parser/src/variables/DotDot/index.md)
@@ -88,4 +90,5 @@ Handles the lexical analysis and parsing of `.prs` files into the Abstract Synta
 - [parseFileCanonicalOrThrow](https://getpromptscript.dev/api-reference/parser/src/functions/parseFileCanonicalOrThrow/index.md)
 - [parseFileOrThrow](https://getpromptscript.dev/api-reference/parser/src/functions/parseFileOrThrow/index.md)
 - [parseOrThrow](https://getpromptscript.dev/api-reference/parser/src/functions/parseOrThrow/index.md)
+- [printProgram](https://getpromptscript.dev/api-reference/parser/src/functions/printProgram/index.md)
 - [tokenize](https://getpromptscript.dev/api-reference/parser/src/functions/tokenize/index.md)

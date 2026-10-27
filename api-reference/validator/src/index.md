@@ -20,6 +20,7 @@ required fields, and other constraints.
 - [FormatValidationOptions](https://getpromptscript.dev/api-reference/validator/src/interfaces/FormatValidationOptions/index.md)
 - [ImportRoot](https://getpromptscript.dev/api-reference/validator/src/interfaces/ImportRoot/index.md)
 - [ParsedPolicies](https://getpromptscript.dev/api-reference/validator/src/interfaces/ParsedPolicies/index.md)
+- [PromptPolicyScope](https://getpromptscript.dev/api-reference/validator/src/interfaces/PromptPolicyScope/index.md)
 - [ResolvedImportDependency](https://getpromptscript.dev/api-reference/validator/src/interfaces/ResolvedImportDependency/index.md)
 - [RuleContext](https://getpromptscript.dev/api-reference/validator/src/interfaces/RuleContext/index.md)
 - [ValidateOptions](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidateOptions/index.md)
@@ -31,6 +32,7 @@ required fields, and other constraints.
 
 ## Type Aliases
 
+- [PolicyContext](https://getpromptscript.dev/api-reference/validator/src/type-aliases/PolicyContext/index.md)
 - [Severity](https://getpromptscript.dev/api-reference/validator/src/type-aliases/Severity/index.md)
 - [SupportedLanguage](https://getpromptscript.dev/api-reference/validator/src/type-aliases/SupportedLanguage/index.md)
 
@@ -94,6 +96,7 @@ required fields, and other constraints.
 - [createMultilingualConfig](https://getpromptscript.dev/api-reference/validator/src/functions/createMultilingualConfig/index.md)
 - [createValidator](https://getpromptscript.dev/api-reference/validator/src/functions/createValidator/index.md)
 - [evaluatePolicies](https://getpromptscript.dev/api-reference/validator/src/functions/evaluatePolicies/index.md)
+- [evaluatePromptPolicies](https://getpromptscript.dev/api-reference/validator/src/functions/evaluatePromptPolicies/index.md)
 - [findLockfileDependency](https://getpromptscript.dev/api-reference/validator/src/functions/findLockfileDependency/index.md)
 - [formatValidationMessage](https://getpromptscript.dev/api-reference/validator/src/functions/formatValidationMessage/index.md)
 - [formatValidationMessages](https://getpromptscript.dev/api-reference/validator/src/functions/formatValidationMessages/index.md)
@@ -105,12 +108,17 @@ required fields, and other constraints.
 - [getSupportedLanguages](https://getpromptscript.dev/api-reference/validator/src/functions/getSupportedLanguages/index.md)
 - [hasContent](https://getpromptscript.dev/api-reference/validator/src/functions/hasContent/index.md)
 - [hasPathTraversal](https://getpromptscript.dev/api-reference/validator/src/functions/hasPathTraversal/index.md)
+- [isGitHostIdentity](https://getpromptscript.dev/api-reference/validator/src/functions/isGitHostIdentity/index.md)
 - [isRuleExcludedForLocation](https://getpromptscript.dev/api-reference/validator/src/functions/isRuleExcludedForLocation/index.md)
 - [isValidPath](https://getpromptscript.dev/api-reference/validator/src/functions/isValidPath/index.md)
 - [isValidSemver](https://getpromptscript.dev/api-reference/validator/src/functions/isValidSemver/index.md)
+- [normalizeDenyText](https://getpromptscript.dev/api-reference/validator/src/functions/normalizeDenyText/index.md)
 - [normalizeImportKey](https://getpromptscript.dev/api-reference/validator/src/functions/normalizeImportKey/index.md)
 - [offsetLocation](https://getpromptscript.dev/api-reference/validator/src/functions/offsetLocation/index.md)
 - [parsePolicies](https://getpromptscript.dev/api-reference/validator/src/functions/parsePolicies/index.md)
+- [promptPolicyMatches](https://getpromptscript.dev/api-reference/validator/src/functions/promptPolicyMatches/index.md)
+- [promptPolicyRisk](https://getpromptscript.dev/api-reference/validator/src/functions/promptPolicyRisk/index.md)
+- [promptPolicySubjects](https://getpromptscript.dev/api-reference/validator/src/functions/promptPolicySubjects/index.md)
 - [validate](https://getpromptscript.dev/api-reference/validator/src/functions/validate/index.md)
 - [walkBlocks](https://getpromptscript.dev/api-reference/validator/src/functions/walkBlocks/index.md)
 - [walkText](https://getpromptscript.dev/api-reference/validator/src/functions/walkText/index.md)

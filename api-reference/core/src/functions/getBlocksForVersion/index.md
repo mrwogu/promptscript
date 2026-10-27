@@ -8,7 +8,7 @@
 
 > **getBlocksForVersion**(`version`): readonly `string`[] \| `undefined`
 
-Defined in: [core/src/syntax-versions.ts:190](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/syntax-versions.ts#L190)
+Defined in: [core/src/syntax-versions.ts:232](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/syntax-versions.ts#L232)
 
 Get the list of valid blocks for a known syntax version.
 

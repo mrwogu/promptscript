@@ -8,7 +8,7 @@
 
 > `const` **formatDiagnostics**: (`messages`, `options`) => `string` = `formatValidationMessages`
 
-Defined in: [validator/src/format.ts:144](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/format.ts#L144)
+Defined in: [validator/src/format.ts:144](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/format.ts#L144)
 
 Alias for formatValidationMessages (for consistency with docs).
 

@@ -6,18 +6,24 @@
 
 # Function: formatProfileEntry()
 
-> **formatProfileEntry**(`candidate`): `string`
+> **formatProfileEntry**(`candidate`, `pricesCheckedOn`): `string`
 
-Defined in: [core/src/model-drift.ts:284](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-drift.ts#L284)
+Defined in: [core/src/model-drift.ts:315](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-drift.ts#L315)
 
 Draft text for model-profiles.ts: the helper call for one candidate,
-with the fields OpenRouter knows about.
+with the fields OpenRouter knows about. A price is dated with the day
+of the run, `pricesCheckedOn`, for a human to verify against the
+provider page.
 
 ## Parameters
 
 ### candidate
 
 [`ModelDriftCandidate`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelDriftCandidate/index.md)
+
+### pricesCheckedOn
+
+`string`
 
 ## Returns
 

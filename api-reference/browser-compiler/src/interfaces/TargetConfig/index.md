@@ -6,7 +6,7 @@
 
 # Interface: TargetConfig
 
-Defined in: [browser-compiler/src/compiler.ts:35](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/browser-compiler/src/compiler.ts#L35)
+Defined in: [browser-compiler/src/compiler.ts:39](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/browser-compiler/src/compiler.ts#L39)
 
 Configuration for a single target.
 
@@ -16,7 +16,7 @@ Configuration for a single target.
 
 > `optional` **convention?**: `string`
 
-Defined in: [browser-compiler/src/compiler.ts:41](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/browser-compiler/src/compiler.ts#L41)
+Defined in: [browser-compiler/src/compiler.ts:45](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/browser-compiler/src/compiler.ts#L45)
 
 Output convention ('xml', 'markdown', or custom name)
 
@@ -26,7 +26,7 @@ Output convention ('xml', 'markdown', or custom name)
 
 > `optional` **enabled?**: `boolean`
 
-Defined in: [browser-compiler/src/compiler.ts:37](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/browser-compiler/src/compiler.ts#L37)
+Defined in: [browser-compiler/src/compiler.ts:41](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/browser-compiler/src/compiler.ts#L41)
 
 Whether this target is enabled
 
@@ -36,7 +36,7 @@ Whether this target is enabled
 
 > `optional` **includeSkills?**: `boolean` \| `string`[]
 
-Defined in: [browser-compiler/src/compiler.ts:52](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/browser-compiler/src/compiler.ts#L52)
+Defined in: [browser-compiler/src/compiler.ts:56](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/browser-compiler/src/compiler.ts#L56)
 
 Controls which skills are emitted for this target
 
@@ -46,7 +46,7 @@ Controls which skills are emitted for this target
 
 > `optional` **output?**: `string`
 
-Defined in: [browser-compiler/src/compiler.ts:39](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/browser-compiler/src/compiler.ts#L39)
+Defined in: [browser-compiler/src/compiler.ts:43](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/browser-compiler/src/compiler.ts#L43)
 
 Custom output path
 
@@ -56,7 +56,7 @@ Custom output path
 
 > `optional` **rulesMode?**: [`FactoryRulesMode`](https://getpromptscript.dev/api-reference/core/src/type-aliases/FactoryRulesMode/index.md)
 
-Defined in: [browser-compiler/src/compiler.ts:48](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/browser-compiler/src/compiler.ts#L48)
+Defined in: [browser-compiler/src/compiler.ts:52](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/browser-compiler/src/compiler.ts#L52)
 
 Factory always-on rules output mode.
 Split mode requires Factory's `multifile` or `full` version.
@@ -67,7 +67,7 @@ Split mode requires Factory's `multifile` or `full` version.
 
 > `optional` **skillBaseDir?**: `string`
 
-Defined in: [browser-compiler/src/compiler.ts:50](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/browser-compiler/src/compiler.ts#L50)
+Defined in: [browser-compiler/src/compiler.ts:54](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/browser-compiler/src/compiler.ts#L54)
 
 Custom base directory for generated skill files
 
@@ -77,6 +77,6 @@ Custom base directory for generated skill files
 
 > `optional` **version?**: `string`
 
-Defined in: [browser-compiler/src/compiler.ts:43](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/browser-compiler/src/compiler.ts#L43)
+Defined in: [browser-compiler/src/compiler.ts:47](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/browser-compiler/src/compiler.ts#L47)
 
 Target version or format variant

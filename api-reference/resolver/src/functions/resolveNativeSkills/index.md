@@ -8,7 +8,7 @@
 
 > **resolveNativeSkills**(`ast`, `registryPath`, `sourceFile`, `localPath?`, `options?`): `Promise`\<[`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md)\>
 
-Defined in: [resolver/src/skills.ts:1934](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/resolver/src/skills.ts#L1934)
+Defined in: [resolver/src/skills.ts:1936](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/skills.ts#L1936)
 
 Resolve native SKILL.md files for skills defined in the AST.
 

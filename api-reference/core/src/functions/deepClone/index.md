@@ -8,7 +8,7 @@
 
 > **deepClone**\<`T`\>(`value`): `T`
 
-Defined in: [core/src/utils/merge.ts:188](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/utils/merge.ts#L188)
+Defined in: [core/src/utils/merge.ts:225](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/merge.ts#L225)
 
 Deep clone a value.
 

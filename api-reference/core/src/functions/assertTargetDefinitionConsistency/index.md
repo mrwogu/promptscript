@@ -8,7 +8,7 @@
 
 > **assertTargetDefinitionConsistency**(`definitions?`): `void`
 
-Defined in: [core/src/target-catalog.ts:839](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/target-catalog.ts#L839)
+Defined in: [core/src/target-catalog.ts:870](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-catalog.ts#L870)
 
 Throw when target definitions contradict the canonical output and feature metadata.
 

@@ -8,7 +8,7 @@
 
 > **isInModelSet**(`resolution`, `set`): `boolean`
 
-Defined in: [core/src/model-catalog.ts:475](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-catalog.ts#L475)
+Defined in: [core/src/model-catalog.ts:497](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-catalog.ts#L497)
 
 Whether a resolved reference belongs to a model set. `inherit` always
 does: it defers to whatever model the tool already runs.

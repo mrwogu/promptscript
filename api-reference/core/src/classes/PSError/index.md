@@ -6,7 +6,7 @@
 
 # Class: PSError
 
-Defined in: [core/src/errors/base.ts:50](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/errors/base.ts#L50)
+Defined in: [core/src/errors/base.ts:50](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/errors/base.ts#L50)
 
 Base error class for all PromptScript errors.
 
@@ -25,6 +25,8 @@ Base error class for all PromptScript errors.
 - [`UndefinedVariableError`](https://getpromptscript.dev/api-reference/core/src/classes/UndefinedVariableError/index.md)
 - [`TargetCapabilitiesError`](https://getpromptscript.dev/api-reference/core/src/classes/TargetCapabilitiesError/index.md)
 - [`OutputPlanPathError`](https://getpromptscript.dev/api-reference/core/src/classes/OutputPlanPathError/index.md)
+- [`EvalError`](https://getpromptscript.dev/api-reference/eval/src/classes/EvalError/index.md)
+- [`PromptFormatError`](https://getpromptscript.dev/api-reference/formatters/src/classes/PromptFormatError/index.md)
 
 ## Constructors
 
@@ -32,7 +34,7 @@ Base error class for all PromptScript errors.
 
 > **new PSError**(`message`, `code`, `options?`): `PSError`
 
-Defined in: [core/src/errors/base.ts:58](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/errors/base.ts#L58)
+Defined in: [core/src/errors/base.ts:58](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/errors/base.ts#L58)
 
 #### Parameters
 
@@ -68,7 +70,7 @@ Defined in: [core/src/errors/base.ts:58](https://github.com/mrwogu/promptscript/
 
 > `readonly` `optional` **cause?**: `Error`
 
-Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/errors/base.ts#L56)
+Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/errors/base.ts#L56)
 
 Original error if wrapping another error
 
@@ -82,7 +84,7 @@ Original error if wrapping another error
 
 > `readonly` **code**: `string`
 
-Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/errors/base.ts#L52)
+Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/errors/base.ts#L52)
 
 Error code
 
@@ -92,7 +94,7 @@ Error code
 
 > `readonly` `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/errors/base.ts#L54)
+Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/errors/base.ts#L54)
 
 Source location where error occurred
 
@@ -102,7 +104,7 @@ Source location where error occurred
 
 > **format**(): `string`
 
-Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/errors/base.ts#L79)
+Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/errors/base.ts#L79)
 
 Format error for display.
 
@@ -116,7 +118,7 @@ Format error for display.
 
 > **toJSON**(): `Record`\<`string`, `unknown`\>
 
-Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/errors/base.ts#L92)
+Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/errors/base.ts#L92)
 
 Convert to JSON-serializable object.
 

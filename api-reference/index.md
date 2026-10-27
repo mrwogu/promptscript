@@ -12,6 +12,7 @@
 - [cli/src](https://getpromptscript.dev/api-reference/cli/src/index.md)
 - [compiler/src](https://getpromptscript.dev/api-reference/compiler/src/index.md)
 - [core/src](https://getpromptscript.dev/api-reference/core/src/index.md)
+- [eval/src](https://getpromptscript.dev/api-reference/eval/src/index.md)
 - [formatters/src](https://getpromptscript.dev/api-reference/formatters/src/index.md)
 - [importer/src](https://getpromptscript.dev/api-reference/importer/src/index.md)
 - [parser/src](https://getpromptscript.dev/api-reference/parser/src/index.md)

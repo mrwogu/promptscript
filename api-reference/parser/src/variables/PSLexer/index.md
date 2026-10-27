@@ -8,7 +8,7 @@
 
 > `const` **PSLexer**: `Lexer`
 
-Defined in: [parser/src/lexer/lexer.ts:8](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/parser/src/lexer/lexer.ts#L8)
+Defined in: [parser/src/lexer/lexer.ts:8](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/parser/src/lexer/lexer.ts#L8)
 
 PromptScript Lexer instance.
 Uses full position tracking for accurate source locations.

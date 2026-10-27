@@ -8,4 +8,4 @@
 
 > `const` **DEFAULT\_OUTPUT\_PATHS**: *typeof* `DEFAULT_OUTPUT_PATH_VALUES` & `DefaultOutputPathMap` = `DEFAULT_OUTPUT_PATH_VALUES`
 
-Defined in: [core/src/target-output-paths.ts:69](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/target-output-paths.ts#L69)
+Defined in: [core/src/target-output-paths.ts:72](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-output-paths.ts#L72)

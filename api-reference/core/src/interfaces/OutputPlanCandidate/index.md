@@ -6,7 +6,7 @@
 
 # Interface: OutputPlanCandidate
 
-Defined in: [core/src/output-plan.ts:33](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/output-plan.ts#L33)
+Defined in: [core/src/output-plan.ts:38](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L38)
 
 A formatter artifact submitted to the planner.
 
@@ -16,7 +16,7 @@ A formatter artifact submitted to the planner.
 
 > **output**: [`OutputArtifact`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputArtifact/index.md)
 
-Defined in: [core/src/output-plan.ts:35](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/output-plan.ts#L35)
+Defined in: [core/src/output-plan.ts:40](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L40)
 
 Artifact to flatten into the plan.
 
@@ -26,7 +26,7 @@ Artifact to flatten into the plan.
 
 > **owner**: `string`
 
-Defined in: [core/src/output-plan.ts:37](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/output-plan.ts#L37)
+Defined in: [core/src/output-plan.ts:42](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L42)
 
 Formatter or adapter that owns the artifact.
 
@@ -36,6 +36,6 @@ Formatter or adapter that owns the artifact.
 
 > `optional` **role?**: [`OutputPlanArtifactRole`](https://getpromptscript.dev/api-reference/core/src/type-aliases/OutputPlanArtifactRole/index.md)
 
-Defined in: [core/src/output-plan.ts:39](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/output-plan.ts#L39)
+Defined in: [core/src/output-plan.ts:44](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L44)
 
 Collision precedence role. Defaults to primary.

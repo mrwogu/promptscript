@@ -8,7 +8,7 @@
 
 > **getImportAlias**(`blockName`): `string` \| `undefined`
 
-Defined in: [resolver/src/imports.ts:22](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/resolver/src/imports.ts#L22)
+Defined in: [resolver/src/imports.ts:22](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/imports.ts#L22)
 
 Get the alias from an import marker block name.
 

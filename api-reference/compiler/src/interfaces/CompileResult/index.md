@@ -6,17 +6,27 @@
 
 # Interface: CompileResult
 
-Defined in: [compiler/src/types.ts:225](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L225)
+Defined in: [compiler/src/types.ts:235](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L235)
 
 Result of a compilation.
 
 ## Properties
 
+### composition?
+
+> `optional` **composition?**: [`PromptComposition`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptComposition/index.md)[]
+
+Defined in: [compiler/src/types.ts:253](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L253)
+
+Blocks each prompt composed into its system message, when a prompt target ran
+
+***
+
 ### errors
 
 > **errors**: [`CompileError`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/CompileError/index.md)[]
 
-Defined in: [compiler/src/types.ts:237](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L237)
+Defined in: [compiler/src/types.ts:247](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L247)
 
 Errors encountered during compilation
 
@@ -26,7 +36,7 @@ Errors encountered during compilation
 
 > `optional` **outputPlan?**: [`OutputPlan`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputPlan/index.md)
 
-Defined in: [compiler/src/types.ts:235](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L235)
+Defined in: [compiler/src/types.ts:245](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L245)
 
 Shared filesystem-independent output plan.
 
@@ -38,7 +48,7 @@ Optional for compatibility with manually constructed compile results.
 
 > **outputs**: `Map`\<`string`, [`FormatterOutput`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/FormatterOutput/index.md)\>
 
-Defined in: [compiler/src/types.ts:229](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L229)
+Defined in: [compiler/src/types.ts:239](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L239)
 
 Formatter outputs keyed by normalized output path
 
@@ -48,7 +58,7 @@ Formatter outputs keyed by normalized output path
 
 > **stats**: [`CompileStats`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/CompileStats/index.md)
 
-Defined in: [compiler/src/types.ts:241](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L241)
+Defined in: [compiler/src/types.ts:251](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L251)
 
 Compilation statistics
 
@@ -58,7 +68,7 @@ Compilation statistics
 
 > **success**: `boolean`
 
-Defined in: [compiler/src/types.ts:227](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L227)
+Defined in: [compiler/src/types.ts:237](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L237)
 
 Whether compilation succeeded
 
@@ -68,6 +78,6 @@ Whether compilation succeeded
 
 > **warnings**: [`ValidationMessage`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationMessage/index.md)[]
 
-Defined in: [compiler/src/types.ts:239](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L239)
+Defined in: [compiler/src/types.ts:249](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L249)
 
 Warnings from validation

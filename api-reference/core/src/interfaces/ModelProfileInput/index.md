@@ -6,7 +6,7 @@
 
 # Interface: ModelProfileInput
 
-Defined in: [core/src/types/models.ts:28](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/models.ts#L28)
+Defined in: [core/src/types/models.ts:50](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L50)
 
 Model profile declared in promptscript.yaml.
 
@@ -34,7 +34,7 @@ models:
 
 > `optional` **aliases?**: `string`[]
 
-Defined in: [core/src/types/models.ts:43](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/models.ts#L43)
+Defined in: [core/src/types/models.ts:65](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L65)
 
 Additional names that resolve to this profile
 
@@ -44,7 +44,7 @@ Additional names that resolve to this profile
 
 > `optional` **apiId?**: `string`
 
-Defined in: [core/src/types/models.ts:41](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/models.ts#L41)
+Defined in: [core/src/types/models.ts:63](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L63)
 
 Provider API model identifier
 
@@ -54,7 +54,7 @@ Provider API model identifier
 
 > `optional` **displayName?**: `string`
 
-Defined in: [core/src/types/models.ts:39](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/models.ts#L39)
+Defined in: [core/src/types/models.ts:61](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L61)
 
 Human-readable name (e.g. 'Claude Opus 4.5')
 
@@ -64,10 +64,20 @@ Human-readable name (e.g. 'Claude Opus 4.5')
 
 > `optional` **family?**: `string`
 
-Defined in: [core/src/types/models.ts:35](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/models.ts#L35)
+Defined in: [core/src/types/models.ts:57](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L57)
 
 Family grouping the versions of one model line (e.g. 'claude-opus').
 The newest non-retired release of a family backs its floating alias.
+
+***
+
+### pricing?
+
+> `optional` **pricing?**: [`ModelPricing`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelPricing/index.md)
+
+Defined in: [core/src/types/models.ts:85](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L85)
+
+List price per million tokens, for cost estimates
 
 ***
 
@@ -75,7 +85,7 @@ The newest non-retired release of a family backs its floating alias.
 
 > `optional` **provider?**: `string`
 
-Defined in: [core/src/types/models.ts:30](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/models.ts#L30)
+Defined in: [core/src/types/models.ts:52](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L52)
 
 Model provider (e.g. 'anthropic', 'openai', 'google', 'xai')
 
@@ -85,7 +95,7 @@ Model provider (e.g. 'anthropic', 'openai', 'google', 'xai')
 
 > `optional` **releaseDate?**: `string`
 
-Defined in: [core/src/types/models.ts:49](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/models.ts#L49)
+Defined in: [core/src/types/models.ts:71](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L71)
 
 Release date in YYYY-MM-DD format
 
@@ -95,7 +105,7 @@ Release date in YYYY-MM-DD format
 
 > `optional` **retirementDate?**: `string`
 
-Defined in: [core/src/types/models.ts:51](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/models.ts#L51)
+Defined in: [core/src/types/models.ts:73](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L73)
 
 Date the provider stops (or stopped) serving the model, in YYYY-MM-DD format
 
@@ -105,7 +115,7 @@ Date the provider stops (or stopped) serving the model, in YYYY-MM-DD format
 
 > `optional` **status?**: [`ModelStatus`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ModelStatus/index.md)
 
-Defined in: [core/src/types/models.ts:45](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/models.ts#L45)
+Defined in: [core/src/types/models.ts:67](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L67)
 
 Lifecycle status
 
@@ -115,7 +125,7 @@ Lifecycle status
 
 > `optional` **successor?**: `string`
 
-Defined in: [core/src/types/models.ts:47](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/models.ts#L47)
+Defined in: [core/src/types/models.ts:69](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L69)
 
 Profile id of the recommended replacement
 
@@ -125,7 +135,7 @@ Profile id of the recommended replacement
 
 > `optional` **targets?**: `Record`\<`string`, `string`\>
 
-Defined in: [core/src/types/models.ts:61](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/models.ts#L61)
+Defined in: [core/src/types/models.ts:83](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L83)
 
 Native model names per target. A target listed here always receives this
 name, even when its naming scheme or provider list would not map the model.
@@ -145,6 +155,6 @@ targets:
 
 > `optional` **version?**: `string`
 
-Defined in: [core/src/types/models.ts:37](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/models.ts#L37)
+Defined in: [core/src/types/models.ts:59](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/models.ts#L59)
 
 Version inside the family (e.g. '4.5')

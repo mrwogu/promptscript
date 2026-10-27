@@ -8,7 +8,7 @@
 
 > `const` **SYNTAX\_FEATURES**: `object`
 
-Defined in: [core/src/syntax-versions.ts:7](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/syntax-versions.ts#L7)
+Defined in: [core/src/syntax-versions.ts:7](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/syntax-versions.ts#L7)
 
 Syntax features that are versioned independently from block availability.
 
@@ -25,6 +25,10 @@ Syntax features that are versioned independently from block availability.
 ### ORDERED\_OPERATIONS
 
 > `readonly` **ORDERED\_OPERATIONS**: `"ordered-operations"` = `'ordered-operations'`
+
+### PROMPT\_DEFINITIONS
+
+> `readonly` **PROMPT\_DEFINITIONS**: `"prompt-definitions"` = `'prompt-definitions'`
 
 ### REGULAR\_BLOCK\_REPLACE
 

@@ -6,7 +6,7 @@
 
 # Class: OutputPlanPathError
 
-Defined in: [core/src/output-plan.ts:119](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/output-plan.ts#L119)
+Defined in: [core/src/output-plan.ts:140](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L140)
 
 Error raised when a formatter emits a path that cannot be represented as a
 project-relative output.
@@ -21,7 +21,7 @@ project-relative output.
 
 > **new OutputPlanPathError**(`path`): `OutputPlanPathError`
 
-Defined in: [core/src/output-plan.ts:123](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/output-plan.ts#L123)
+Defined in: [core/src/output-plan.ts:144](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L144)
 
 #### Parameters
 
@@ -43,7 +43,7 @@ Defined in: [core/src/output-plan.ts:123](https://github.com/mrwogu/promptscript
 
 > `readonly` `optional` **cause?**: `Error`
 
-Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/errors/base.ts#L56)
+Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/errors/base.ts#L56)
 
 Original error if wrapping another error
 
@@ -57,7 +57,7 @@ Original error if wrapping another error
 
 > `readonly` **code**: `string`
 
-Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/errors/base.ts#L52)
+Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/errors/base.ts#L52)
 
 Error code
 
@@ -71,7 +71,7 @@ Error code
 
 > `readonly` `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/errors/base.ts#L54)
+Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/errors/base.ts#L54)
 
 Source location where error occurred
 
@@ -85,7 +85,7 @@ Source location where error occurred
 
 > `readonly` **path**: `string`
 
-Defined in: [core/src/output-plan.ts:121](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/output-plan.ts#L121)
+Defined in: [core/src/output-plan.ts:142](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L142)
 
 Invalid formatter path.
 
@@ -95,7 +95,7 @@ Invalid formatter path.
 
 > **format**(): `string`
 
-Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/errors/base.ts#L79)
+Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/errors/base.ts#L79)
 
 Format error for display.
 
@@ -113,7 +113,7 @@ Format error for display.
 
 > **toJSON**(): `Record`\<`string`, `unknown`\>
 
-Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/errors/base.ts#L92)
+Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/errors/base.ts#L92)
 
 Convert to JSON-serializable object.
 

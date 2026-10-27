@@ -8,7 +8,7 @@
 
 > **createHttpRegistry**(`options`): [`HttpRegistry`](https://getpromptscript.dev/api-reference/resolver/src/classes/HttpRegistry/index.md)
 
-Defined in: [resolver/src/registry.ts:435](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/resolver/src/registry.ts#L435)
+Defined in: [resolver/src/registry.ts:435](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/registry.ts#L435)
 
 Create an HTTP-based registry.
 

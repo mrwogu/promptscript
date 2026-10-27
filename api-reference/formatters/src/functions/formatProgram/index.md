@@ -8,7 +8,7 @@
 
 > **formatProgram**(`formatter`, `ast`, `options?`): [`FormatterOutput`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterOutput/index.md)
 
-Defined in: [formatters/src/formatter-adapter.ts:31](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/formatter-adapter.ts#L31)
+Defined in: [formatters/src/formatter-adapter.ts:31](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/formatter-adapter.ts#L31)
 
 Format a program and report authored resource blocks the target drops.
 

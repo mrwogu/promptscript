@@ -130,7 +130,11 @@ PromptScript includes built-in validation rules to detect potential prompt injec
 | PS011   | `authority-injection` | Detects authoritative override phrases                       | error            |
 | PS012   | `obfuscated-content`  | Sanitization pipeline for encoded malicious content          | warning          |
 | PS013   | `path-traversal`      | Detects path traversal attacks in use declarations           | error            |
-| PS014   | `unicode-security`    | Detects RTL override, invisible chars, homoglyphs            | warning          |
+| PS014   | `unicode-security`    | Detects RTL override, invisible chars, homoglyphs            | error            |
+
+The text rules (PS005, PS010, PS011, PS012, PS014) scan every block, including values under a key named `resources`. They skip only the `resources` entries of `@skills.<name>`, also when that path is reached through `@extend` or `@override`. Only reference files (under `references/`) are checked, by PS026, for PromptScript directives.
+
+The same five text rules scan `@prompts` entries: the `system` and `user` text and the descriptions of inputs and outputs. They check authored text only. Runtime input values do not exist at validation time and are never scanned, so a prompt that takes user input has to treat those values as untrusted. PS043 rejects malformed or undeclared slots, and PS046 warns when a slot sits in the system message.
 
 PS011 detects imperative `skip` or `bypass` instructions and phrases qualified by `all` or `safety`. Suppression-pattern matches in top-level Markdown list items under defensive ATX headings such as `Don'ts`, `Do not`, `Forbidden`, or `Restrictions` are treated as defensive guidance. Tab-indented, nested, continuation-line, prose, arbitrary-heading, setext-heading, and thematic-break content remains fail-closed and is scanned. Authority or execute patterns remain errors. Unclosed fenced code blocks are scanned.
 
@@ -162,7 +166,7 @@ The pipeline also avoids false positives for legitimate content like MD5/SHA256 
 
 Long uppercase runs over the nucleotide alphabet (`ACGTUN`) are treated as DNA data, not Base64. Amino-acid one-letter codes cover every uppercase letter, so a run of them counts as protein data only when the surrounding text has biological context (for example "protein sequence" or "residues"). Reference files shipped with scientific skills regularly carry such sequences.
 
-**Imported content:** the speculative "long Base64" heuristic and the reference-content check (PS026) skip content that was inlined from the registry cache or a vendored repository, because the importing project cannot fix findings in someone else's skill and `--strict` would turn them into hard failures. Findings that decode to concrete malicious payloads always scan imported content. To scan imported content with the heuristics as well, set `validation.scanExternalContent: true` in `promptscript.yaml`.
+**Imported content:** the speculative "long Base64" heuristic and the reference-content check (PS026) skip content that was inlined from the registry cache or a vendored repository, because the importing project cannot fix findings in someone else's skill and `--strict` would turn them into hard failures. Findings that decode to concrete malicious payloads always scan imported content. To scan imported content with the heuristics as well, set `validation.scanExternalContent: true` in `promptscript.yaml`. The content scans skip the records the resolver keeps on a skill for `@extend` and composition (`__baseSource`, `__layerTrace`, `__composedFrom`). They hold file paths and merge steps, no output contains them, and a random-looking project path in them would otherwise be reported as Base64. The skill text itself, extended or imported, is scanned as before.
 
 #### Suppressing false positives on imported content
 
@@ -387,7 +391,7 @@ Template variables come from parent stacks or passed parameters:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4ANQwoNwNdO1VmEl5zHGYYADcYams4EXYIbANbBRhovp9+CFYcdpMBLoxGAGs4AHoMNDQAChpmACsYRiwAOVIYFJASRwBaVbQIgEoQfLp0bDxEEH5ZheXrqloQBhY7E4WB4vAAym41lAINJZPIBkRSOQ7NQPMpJtQYBReAdmFh7BhqPjmGAFJNeOJmIw3FoRFgIGw6GJPLxWHixLxMeUCQsNFjRkIRLxAlYQqcPiIvis1nlgnAEiJkuEQOksrkQHESBBCOMwlhUTA4pg1CQ4GERcFgltdvsjkIAPxhLrUcbqXgAXmViOiho1osKBVGs08hPEygtOmYUjCyAiAAUoHMYE0oFIOsHxKGIgBdOIcLqumPxxOMZPMVPtWTdTPUbwgXOB3yY50QfYM1jhuIXZUJpMptOc+D61v0th5fIPbMMYHURz4b3I370EBtWjt-CpB5AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fHz4ANQwoNwNdO1VmEl5zHGYYADcYams4EXYIbANbBRhovp9+CFYcdpMBLoxGAGs4AHoMNDQAChpmACsYRiwAOVIYFJASRwBaVbQIgEoQfLp0bDxEEH5ZheXrqloQBhY7E4WB4vAAym41lAINJZPIBkRSOQ7NQPMpJtQYBReAdmFh7BhqPjmGAFJNeOJmIw3FoRFgIGw6GJPLxWHixLxMeUCQsNFjRkIRLxAlYQqcPiIvis1nlgnAEiJkuEQOksrkQHESBBCOMwlhUTA4pg1CQ4GERcFgltdvsjkIAPxhLrUcbqXgAXmViOiho1osKBVGs08hPEygtOmYUjCyAiAAUoHMYE0oFIOsHxKGIgBdOIcLqumPxxOMZPMVPtWTdTPUbwgXOB3yY50QfYM1jhuIXZUJpMptOc+D61v0th5fIPbMMYHURz4b3I370EBtWjt-CpB5AA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

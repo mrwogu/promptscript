@@ -9,10 +9,12 @@ Complete reference for the PromptScript command-line interface.
 | Start a project               | [`prs init`](#prs-init)                                                                                        |
 | Bring existing instructions   | [`prs import`](#prs-import), [`prs migrate`](#prs-migrate)                                                     |
 | Generate native files         | [`prs compile`](#prs-compile), [`prs build`](#prs-build)                                                       |
-| Check before commit or in CI  | [`prs validate`](#prs-validate), [`prs check`](#prs-check), [`prs diff`](#prs-diff)                            |
+| Check before commit or in CI  | [`prs validate`](#prs-validate), [`prs fmt`](#prs-fmt), [`prs check`](#prs-check), [`prs diff`](#prs-diff)     |
 | Understand the result         | [`prs explain`](#prs-explain), [`prs inspect`](#prs-inspect), [`prs resolve`](#prs-resolve)                    |
 | Share and pin dependencies    | [`prs registry`](#prs-registry), [`prs pull`](#prs-pull), [`prs lock`](#prs-lock), [`prs update`](#prs-update) |
 | Work offline                  | [`prs vendor`](#prs-vendor)                                                                                    |
+| Release application prompts   | [`prs release`](#prs-release), [`prs approve`](#prs-approve)                                                   |
+| Make governance binding       | [`prs governance`](#prs-governance)                                                                            |
 | Manage skills                 | [`prs skills`](#prs-skills)                                                                                    |
 | Connect AI tool hooks         | [`prs hooks`](#prs-hooks), [`prs hook`](https://getpromptscript.dev/reference/cli/hook/index.md)                                                           |
 | Edit in the online playground | [`prs serve`](#prs-serve)                                                                                      |
@@ -460,7 +462,8 @@ Instead of running `prs compile --watch` in a terminal, you can let your AI tool
 | `gemini`      | `GEMINI.md`                       | Gemini CLI         |
 | `factory`     | `AGENTS.md`                       | Factory AI         |
 
-See [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) for all 50 built-in targets.
+See [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) for all 50 coding agent targets and the two
+prompt targets.
 
 ### prs build
 
@@ -512,13 +515,13 @@ prs validate [options] [files...]
 
 **Options:**
 
-| Option              | Description                                 |
-| ------------------- | ------------------------------------------- |
-| `--strict`          | Treat warnings as errors                    |
-| `--format <format>` | Output format (text, json)                  |
-| `--fix`             | Auto-fix syntax version issues              |
-| `--skip-policies`   | Skip extension compliance policy evaluation |
-| `--ignore-hashes`   | Skip reference integrity hash verification  |
+| Option              | Description                                |
+| ------------------- | ------------------------------------------ |
+| `--strict`          | Treat warnings as errors                   |
+| `--format <format>` | Output format (text, json)                 |
+| `--fix`             | Auto-fix syntax version issues             |
+| `--skip-policies`   | Skip policy evaluation                     |
+| `--ignore-hashes`   | Skip reference integrity hash verification |
 
 **Examples:**
 
@@ -543,6 +546,78 @@ prs validate --format json
 | 0    | Validation passed                         |
 | 1    | Validation errors found                   |
 | 2    | Validation warnings found (with --strict) |
+
+---
+
+### prs fmt
+
+Rewrite `.prs` files in canonical form. Each file is parsed and printed back, and
+written only when the output differs from the current content.
+
+```bash
+prs fmt [options] [paths...]
+```
+
+A path may be a file or a directory. Directories are walked for `*.prs`, skipping
+`node_modules`, `vendor` and `.cache`. That skip applies only when walking a
+directory, so naming `.promptscript/vendor` explicitly formats the vendored files. A
+file path without the `.prs` extension is skipped with a warning and is not counted,
+so `prs fmt .promptscript/*` leaves `.md` and `.sh` files alone. Symbolic links, to files or
+directories, are skipped with a warning and are not counted, whether named directly,
+found while walking or used as the default `.promptscript`. A link is never replaced by
+a regular file and never followed out of the project. Non-regular files such as named pipes are ignored when found while walking. With
+no paths, `prs fmt` formats every `.prs` file under `.promptscript`.
+
+**Options:**
+
+| Option    | Description                                                             |
+| --------- | ----------------------------------------------------------------------- |
+| `--check` | Write nothing, list files that would change, exit 1 if any would change |
+
+**Examples:**
+
+```bash
+# Format the project in place
+prs fmt
+
+# Format one file and one directory
+prs fmt .promptscript/project.prs shared/
+
+# CI: fail when a file is not formatted
+prs fmt --check
+```
+
+A file that does not parse is reported with its first error and location, is never
+written, and makes the exit code 1. A file that cannot be read or written is
+reported the same way, and so is a directory that cannot be read during a walk (the
+rest of the walk continues), a named path that is not a regular file, and a read-only
+file, which is never rewritten. Files are written atomically (temporary file, then rename,
+keeping the original mode), and the printed output is parsed again before writing;
+if it does not parse the file is left untouched and reported as failed. Other files
+are still processed. The last line summarizes how many files were formatted (or would
+change with `--check`), how many were unchanged and how many failed.
+
+`--check` lists the files that would change through the normal output, so `--quiet`
+hides the list; the exit code still reports the result. This repo runs `prs fmt --check` in CI and in
+the pre-commit hook.
+
+**Known limits of the printer:**
+
+The printer keeps comments and declaration order.
+
+- A blank line between entries is kept. Several in a row become one. Blank lines at
+  the start or end of a block, object, array or file are dropped.
+- Arrays that do not fit in 100 characters print one element per line.
+- Blank lines inside `@meta` and inside `@use` and `@inherit` parameter lists are dropped.
+- Comments inside `@meta` move before its closing brace.
+- Comments inside `@use` and `@inherit` parameter lists move to their own line.
+
+**Exit Codes:**
+
+| Code | Meaning                                                                                                                                                        |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0    | All files formatted or unchanged (`--check`: nothing would change)                                                                                             |
+| 1    | A path was not found or is not a regular file, a directory or file cannot be read, a file failed to parse or write, or `--check` found files that would change |
 
 ---
 
@@ -851,7 +926,7 @@ prs serve --read-only
 | `/api/health`  | GET                 | Health check                                              |
 | `/api/config`  | GET                 | Server config and project settings from promptscript.yaml |
 | `/api/files`   | GET                 | List `.prs` and config files                              |
-| `/api/files/*` | GET/PUT/POST/DELETE | Read, update, create, delete files                        |
+| `/api/files/*` | GET/PUT/POST/DELETE | Read, update, create, delete `.prs` and config files      |
 | `/ws`          | WebSocket           | Real-time file change events                              |
 
 :::note[Privacy]
@@ -859,7 +934,7 @@ All compilation happens locally in your browser - no data is sent to any externa
 :::
 
 :::note[Security]
-The server only accepts requests from `https://getpromptscript.dev` by default (CORS). Use `--cors-origin` to allow other origins. Use `--read-only` to prevent file modifications.
+The server only accepts requests from `https://getpromptscript.dev` by default (CORS). Use `--cors-origin` to allow other origins. Use `--read-only` to prevent file modifications. The file routes reach only the files the listing shows: `.prs` files in the source directory and `promptscript.yaml` / `promptscript.yml`. Other workspace files, such as `.env`, return 403, and so does a symlink that points outside the source files.
 :::
 
 ---
@@ -1020,7 +1095,7 @@ or Git working tree.
 
 #### prs registry list
 
-List configured registry alias mappings, showing the merged project and global user result.
+List configured registry alias mappings, showing the merged project, global user and system result.
 
 ```bash
 prs registry list [options]
@@ -1049,9 +1124,10 @@ prs registry list --format json
 **Example output:**
 
 ```
-  @company  →  github.com/acme/promptscript-base  (project)
-  @team     →  github.com/acme/team-frontend      (project)
-  @shared   →  github.com/acme/shared-libs        (global)
+  @security  →  github.com/acme/security-standards  (system)
+  @shared    →  github.com/acme/shared-libs  (global)
+  @company   →  github.com/acme/promptscript-base  (project)
+  @team      →  github.com/acme/team-frontend  (project)
 ```
 
 #### prs registry add
@@ -1083,6 +1159,214 @@ prs registry add @company github.com/acme/promptscript-base
 
 # Add alias to user config (available across all projects)
 prs registry add @company github.com/acme/promptscript-base --global
+```
+
+---
+
+### prs release
+
+Build, promote, roll back and inspect content-hashed prompt bundles per environment. Releases need
+[`releases`](https://getpromptscript.dev/reference/config/index.md#releases) in `promptscript.yaml`; without it every subcommand fails with
+`PS5001`. See the [releases guide](https://getpromptscript.dev/guides/releases/index.md) for the flow.
+
+All four subcommands take these options:
+
+| Option                | Description                      | Default |
+| --------------------- | -------------------------------- | ------- |
+| `--format <format>`   | `text` or `json` (see below)     | `text`  |
+| `-c, --config <path>` | Path to a custom config file     | -       |
+| `--cwd <dir>`         | Working directory (project root) | -       |
+
+With `--format json`, stdout holds one document that matches
+`https://getpromptscript.dev/schema/release-report/v1.json` and the human text goes to stderr. Exit
+code 0 means success or a no-op. Exit code 1 means an error or a failed verification.
+
+Errors use the codes `PS5001` to `PS5008`, listed in the
+[releases guide](https://getpromptscript.dev/guides/releases/index.md#error-codes).
+
+#### prs release build
+
+Compile the source in memory and store each prompt as a bundle file under its content hash.
+
+```bash
+prs release build [options]
+```
+
+| Option      | Description                                |
+| ----------- | ------------------------------------------ |
+| `--dry-run` | Show what would be written without writing |
+
+Writes new files to `.promptscript/releases/bundles/`, verifies existing ones, and writes
+`.promptscript/releases/manifest.json` only when it changes. Policies always run, each with its own
+severity. The security rules PS005, PS010, PS011, PS012, PS013 and PS014 always run as errors. Takes
+the project lock `.promptscript-release.lock`; a dry run does not.
+
+```bash
+prs release build
+prs release build --dry-run --format json
+```
+
+#### prs release promote
+
+Point an environment at a bundle.
+
+```bash
+prs release promote <id>[@<hash>] --to <env> [options]
+```
+
+| Option       | Description                                  |
+| ------------ | -------------------------------------------- |
+| `--to <env>` | Environment to promote to (required)         |
+| `--dry-run`  | Show the promotion without writing the label |
+
+`<hash>` is the full `sha256-<64 hex>` or a prefix of at least 8 hex digits. The first environment
+takes only what the source compiles to now. Every later environment takes only the hash the
+previous one holds. Then the [release gates](https://getpromptscript.dev/guides/releases/index.md#release-gates) run: every prompt
+policy on the bundle, and `required-approvals` against the approval records committed at `HEAD`.
+A gate of severity `error` that fails refuses the promotion with `PS030` and leaves the label
+unchanged. `required-evals` reports `unavailable` in the gates and blocks at severity `error`.
+There is no flag to skip the order or the gates.
+
+```bash
+prs release promote acme-support/refund-reply --to staging
+prs release promote acme-support/refund-reply --to prod
+```
+
+#### prs release rollback
+
+Restore the label of an environment to its state before the last commit that changed it.
+
+```bash
+prs release rollback <env> [options]
+```
+
+| Option      | Description                                 |
+| ----------- | ------------------------------------------- |
+| `--dry-run` | Show the rollback without writing the label |
+
+Reads Git history, so the label must have no uncommitted change. Fails with `PS5006` at the first
+promotion, and in a shallow checkout (run `git fetch --unshallow`). Every hash the rollback brings
+back must pass the [release gates](https://getpromptscript.dev/guides/releases/index.md#release-gates).
+
+```bash
+prs release rollback prod
+```
+
+#### prs release status
+
+List the released prompts of every environment and verify their bundles.
+
+```bash
+prs release status [options]
+```
+
+| Option          | Description                                                             |
+| --------------- | ----------------------------------------------------------------------- |
+| `--history <n>` | Show commit, date and subject of the last n label commits (1-1000)      |
+| `--base <ref>`  | Check every label entry changed since `<ref>` with the rules of `<ref>` |
+
+Shows, per environment, the prompt id, the hash, whether it is in the latest build and whether it
+verifies. Exits with code 1 when a referenced bundle is missing or does not verify. With prompt
+policies it also runs the [release gates](https://getpromptscript.dev/guides/releases/index.md#release-gates) on every entry and
+shows an `approvals` column (`ok`, `missing: <roles>` or `-`); a failed gate is a warning there.
+
+With `--base <ref>`, every label file in the checkout and at `<ref>` is compared, configured or
+not, and every entry that is new or changed must pass the promotion rules of `<ref>`: the
+environment is configured there, the bundle verifies, and the entry is a rollback of the label's
+last change at `<ref>` (of an entry `<ref>` still holds; this trusts that every commit on `<ref>`
+went through the check), or the first environment holds what the source compiles to with the
+`policies`, `validation` and `models.supported` of `<ref>`, or a later one holds what the
+environment before it holds. Every new or changed entry also goes through the release gates with
+the policies, governance and releases of `<ref>` and the approval records committed at `HEAD`, a
+rollback too. A removed entry is listed as `removed` and not checked. The config is
+read at `<ref>`; `-c` and `PROMPTSCRIPT_CONFIG` are ignored with a warning. Any failure exits with
+code 1. A ref that is missing, not a commit, ambiguous (pass the full name, such as
+`refs/remotes/origin/main`) or not fetched in a shallow checkout fails with `PS5006`. See
+[Check label changes with `--base`](https://getpromptscript.dev/guides/releases/index.md#check-label-changes-with---base).
+
+```bash
+prs release status --history 5
+prs release status --base refs/remotes/origin/main
+```
+
+### prs approve
+
+Record that you approve one exact prompt version in one role, or list the approval records. Needs
+[`releases`](https://getpromptscript.dev/reference/config/index.md#releases) and `governance.roles` in `promptscript.yaml`. Before it writes a
+record it checks the whole [`governance`](https://getpromptscript.dev/reference/config/index.md#governance) section, and a problem there is
+`PS5101`. See
+[Approvals](https://getpromptscript.dev/guides/releases/index.md#approvals) in the releases guide.
+
+```bash
+prs approve <id>@<hash> --role <role> --approver @<handle> (--env <env> | --all-environments) [options]
+prs approve --list [<id>] [options]
+```
+
+| Option                | Description                                                   | Default |
+| --------------------- | ------------------------------------------------------------- | ------- |
+| `--role <role>`       | Approval role from `governance.roles` (required to approve)   | -       |
+| `--approver <handle>` | Your Git host user handle, like `@jane` (required to approve) | -       |
+| `--env <env>`         | The one environment the approval counts for                   | -       |
+| `--all-environments`  | Let the approval count for every environment                  | -       |
+| `--comment <text>`    | Note in the record, at most 2000 characters                   | -       |
+| `--list`              | List records with their scope and state                       | -       |
+| `--format <format>`   | `text` or `json`                                              | `text`  |
+| `-c, --config <path>` | Path to a custom config file                                  | -       |
+| `--cwd <dir>`         | Working directory (project root)                              | -       |
+
+`<hash>` is the full `sha256-<64 hex>`. It must be what the source builds now or a release bundle of
+that prompt. Give `--env` or `--all-environments`, one of the two. Before writing, the command
+prints the description, governance values, model, inputs, output and messages of the hash to
+stderr, with invisible characters shown as `<U+XXXX>`. It writes
+`.promptscript/approvals/<role>/<id>/<hash>.<approver>.json` and, the first time,
+`.promptscript/approvals/.gitattributes`. An existing record is never replaced: the command fails
+with `PS5105` and exit code 2. Other errors exit with code 1.
+
+`--list` prints per prompt the hash the checkout builds and every record as `current`,
+`labelled:<env>`, `stale`, `untracked`, `modified`, `misplaced` or `unknown-role`. It compares the
+path and the bytes Git has for each record, so with record files it needs Git and a repository
+(`PS5108`). Invalid, modified, misplaced and unknown-role records get a `PS5109` warning.
+With `--format json`, stdout holds one document that matches
+`https://getpromptscript.dev/schema/approval-report/v1.json`.
+
+```bash
+prs approve --list acme-support/refund-reply
+prs approve acme-support/refund-reply@sha256-<64 hex> --role legal --approver @jane --env prod
+```
+
+---
+
+### prs governance
+
+Make the `governance` section of `promptscript.yaml` binding on the Git host.
+
+#### prs governance codeowners
+
+Write the CODEOWNERS lines for the prompt files, the approval roles, the releases and the config
+files. A `.prs` file goes to the owners of its prompts; a file that holds prompts of different
+owners, or feeds a prompt of other owners, goes to the admins with a warning. See
+[CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/index.md).
+
+```bash
+prs governance codeowners [options]
+```
+
+| Option                | Description                                                                   | Default                                        |
+| --------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------- |
+| `--output <path>`     | `.github/CODEOWNERS`, `CODEOWNERS`, `docs/CODEOWNERS` or `.gitlab/CODEOWNERS` | `codeowners.output`, else `.github/CODEOWNERS` |
+| `--check`             | Write nothing, exit 1 when the file is not up to date                         | -                                              |
+| `--format <format>`   | `text` or `json`                                                              | `text`                                         |
+| `-c, --config <path>` | Path to a custom config file                                                  | -                                              |
+| `--cwd <dir>`         | Working directory (project root)                                              | -                                              |
+
+The command runs in a Git checkout and keeps every line above its marker line. Exit code 0 means
+written or current, 1 an error or an outdated file with `--check`, 2 a file that prs does not manage
+(`PS5106`). With `--check`, `PS5106` exits with code 1 like every other failure. Other errors are `PS5101` (governance config), `PS5107` (owner or path refused) and
+`PS5108` (Git).
+
+```bash
+prs governance codeowners
+prs governance codeowners --check
 ```
 
 ---

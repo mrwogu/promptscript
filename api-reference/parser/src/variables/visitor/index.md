@@ -8,7 +8,7 @@
 
 > `const` **visitor**: `PromptScriptVisitor`
 
-Defined in: [parser/src/grammar/visitor.ts:1406](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/parser/src/grammar/visitor.ts#L1406)
+Defined in: [parser/src/grammar/visitor.ts:1440](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/parser/src/grammar/visitor.ts#L1440)
 
 Legacy visitor instance kept for direct consumers of the parser API.
 

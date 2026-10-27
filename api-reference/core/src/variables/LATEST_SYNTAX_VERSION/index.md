@@ -6,8 +6,8 @@
 
 # Variable: LATEST\_SYNTAX\_VERSION
 
-> `const` **LATEST\_SYNTAX\_VERSION**: `"1.5.0"` = `'1.5.0'`
+> `const` **LATEST\_SYNTAX\_VERSION**: `"1.6.0"` = `'1.6.0'`
 
-Defined in: [core/src/syntax-versions.ts:170](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/syntax-versions.ts#L170)
+Defined in: [core/src/syntax-versions.ts:201](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/syntax-versions.ts#L201)
 
 Latest known syntax version.

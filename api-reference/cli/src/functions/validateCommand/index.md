@@ -8,7 +8,7 @@
 
 > **validateCommand**(`options`): `Promise`\<`void`\>
 
-Defined in: [cli/src/commands/validate.ts:315](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/cli/src/commands/validate.ts#L315)
+Defined in: [cli/src/commands/validate.ts:316](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/commands/validate.ts#L316)
 
 Validate PromptScript files without generating output.
 

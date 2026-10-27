@@ -8,7 +8,7 @@
 
 > **mergeSections**(`sections`): [`MergeResult`](https://getpromptscript.dev/api-reference/importer/src/interfaces/MergeResult/index.md)
 
-Defined in: [importer/src/merger.ts:21](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/importer/src/merger.ts#L21)
+Defined in: [importer/src/merger.ts:21](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/importer/src/merger.ts#L21)
 
 ## Parameters
 

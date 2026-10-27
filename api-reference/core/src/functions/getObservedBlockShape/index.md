@@ -6,9 +6,9 @@
 
 # Function: getObservedBlockShape()
 
-> **getObservedBlockShape**(`block`): `"object"` \| `"array"` \| `"text"` \| `"mixed"`
+> **getObservedBlockShape**(`block`): `"object"` \| `"text"` \| `"array"` \| `"mixed"`
 
-Defined in: [core/src/block-shapes.ts:153](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/block-shapes.ts#L153)
+Defined in: [core/src/block-shapes.ts:154](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/block-shapes.ts#L154)
 
 Return the observed shape from canonical or compatibility AST input.
 
@@ -20,4 +20,4 @@ Return the observed shape from canonical or compatibility AST input.
 
 ## Returns
 
-`"object"` \| `"array"` \| `"text"` \| `"mixed"`
+`"object"` \| `"text"` \| `"array"` \| `"mixed"`

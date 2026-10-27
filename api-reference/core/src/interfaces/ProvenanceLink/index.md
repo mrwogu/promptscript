@@ -6,7 +6,7 @@
 
 # Interface: ProvenanceLink
 
-Defined in: [core/src/types/provenance.ts:18](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/provenance.ts#L18)
+Defined in: [core/src/types/provenance.ts:18](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/provenance.ts#L18)
 
 Link in the source chain that led to a resolved value.
 
@@ -16,15 +16,15 @@ Link in the source chain that led to a resolved value.
 
 > `readonly` `optional` **alias?**: `string`
 
-Defined in: [core/src/types/provenance.ts:23](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/provenance.ts#L23)
+Defined in: [core/src/types/provenance.ts:23](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/provenance.ts#L23)
 
 ***
 
 ### operation
 
-> `readonly` **operation**: `"override"` \| `"inherit"` \| `"use"` \| `"extend"` \| `"compose"`
+> `readonly` **operation**: `"inherit"` \| `"use"` \| `"extend"` \| `"override"` \| `"compose"`
 
-Defined in: [core/src/types/provenance.ts:19](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/provenance.ts#L19)
+Defined in: [core/src/types/provenance.ts:19](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/provenance.ts#L19)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [core/src/types/provenance.ts:19](https://github.com/mrwogu/promptsc
 
 > `readonly` `optional` **reference?**: `string`
 
-Defined in: [core/src/types/provenance.ts:22](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/provenance.ts#L22)
+Defined in: [core/src/types/provenance.ts:22](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/provenance.ts#L22)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [core/src/types/provenance.ts:22](https://github.com/mrwogu/promptsc
 
 > `readonly` **source**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/provenance.ts:20](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/provenance.ts#L20)
+Defined in: [core/src/types/provenance.ts:20](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/provenance.ts#L20)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [core/src/types/provenance.ts:20](https://github.com/mrwogu/promptsc
 
 > `readonly` `optional` **target?**: `string`
 
-Defined in: [core/src/types/provenance.ts:21](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/provenance.ts#L21)
+Defined in: [core/src/types/provenance.ts:21](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/provenance.ts#L21)

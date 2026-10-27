@@ -6,7 +6,7 @@
 
 # Interface: TelemetryConfigInput
 
-Defined in: [telemetry/src/types.ts:51](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/telemetry/src/types.ts#L51)
+Defined in: [telemetry/src/types.ts:51](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L51)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [telemetry/src/types.ts:51](https://github.com/mrwogu/promptscript/b
 
 > `optional` **cacheDirectory?**: `string`
 
-Defined in: [telemetry/src/types.ts:57](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/telemetry/src/types.ts#L57)
+Defined in: [telemetry/src/types.ts:58](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L58)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [telemetry/src/types.ts:57](https://github.com/mrwogu/promptscript/b
 
 > `optional` **configurationValid?**: `boolean`
 
-Defined in: [telemetry/src/types.ts:55](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/telemetry/src/types.ts#L55)
+Defined in: [telemetry/src/types.ts:56](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L56)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [telemetry/src/types.ts:55](https://github.com/mrwogu/promptscript/b
 
 > `optional` **endpoint?**: `string`
 
-Defined in: [telemetry/src/types.ts:56](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/telemetry/src/types.ts#L56)
+Defined in: [telemetry/src/types.ts:57](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L57)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [telemetry/src/types.ts:56](https://github.com/mrwogu/promptscript/b
 
 > `optional` **environment?**: `ProcessEnv`
 
-Defined in: [telemetry/src/types.ts:52](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/telemetry/src/types.ts#L52)
+Defined in: [telemetry/src/types.ts:52](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L52)
 
 ***
 
@@ -46,7 +46,15 @@ Defined in: [telemetry/src/types.ts:52](https://github.com/mrwogu/promptscript/b
 
 > `optional` **projectEnabled?**: `boolean`
 
-Defined in: [telemetry/src/types.ts:54](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/telemetry/src/types.ts#L54)
+Defined in: [telemetry/src/types.ts:55](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L55)
+
+***
+
+### systemEnabled?
+
+> `optional` **systemEnabled?**: `boolean`
+
+Defined in: [telemetry/src/types.ts:53](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L53)
 
 ***
 
@@ -54,4 +62,4 @@ Defined in: [telemetry/src/types.ts:54](https://github.com/mrwogu/promptscript/b
 
 > `optional` **userEnabled?**: `boolean`
 
-Defined in: [telemetry/src/types.ts:53](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/telemetry/src/types.ts#L53)
+Defined in: [telemetry/src/types.ts:54](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L54)

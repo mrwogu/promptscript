@@ -6,6 +6,10 @@ PromptScript treats instructions, skills, agents, commands, MCP servers, hooks, 
 plugins as platform capabilities. See [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) for
 the platform-family model.
 
+Two more targets, `bundle` and `prompt-text`, compile the prompts of an application instead of
+instructions for a coding agent. They are opt-in and appear in the table below with the tier
+Prompt. See [Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md).
+
 ## Rich Native Formatters
 
 Hand-crafted output logic for agents with unique file formats, skills, agents, and commands.
@@ -77,6 +81,8 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
 | [Warp](https://getpromptscript.dev/reference/formatters/warp/index.md)                 | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | [Zed](https://getpromptscript.dev/reference/formatters/zed/index.md)                   | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | [Zencoder](https://getpromptscript.dev/reference/formatters/zencoder/index.md)         | Tier 3 | `.zencoder/rules/project.md`      | Yes    | No     | No    | No       |
+| [Prompt Bundle](https://getpromptscript.dev/reference/formatters/bundle/index.md)      | Prompt | `prompts/index.json`              | No     | No     | No    | No       |
+| [Prompt Text](https://getpromptscript.dev/reference/formatters/prompt-text/index.md)   | Prompt | `prompts/README.md`               | No     | No     | No    | No       |
 
 <!-- generated:end:formatter-table -->
 

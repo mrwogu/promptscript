@@ -8,7 +8,7 @@
 
 > **compile**(`entryPath`, `options?`): `Promise`\<[`CompileResult`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/CompileResult/index.md)\>
 
-Defined in: [compiler/src/compiler.ts:1485](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/compiler.ts#L1485)
+Defined in: [compiler/src/compiler.ts:1518](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/compiler.ts#L1518)
 
 Compile a PromptScript file using default or specified options.
 

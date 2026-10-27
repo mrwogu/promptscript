@@ -8,7 +8,7 @@
 
 > **collectProvenanceEvents**(`body`, `targetPath`, `operation`, `source`, `action`, `strategy?`, `options?`): [`ProvenanceEvent`](https://getpromptscript.dev/api-reference/core/src/interfaces/ProvenanceEvent/index.md)[]
 
-Defined in: [core/src/provenance.ts:420](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/provenance.ts#L420)
+Defined in: [core/src/provenance.ts:420](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/provenance.ts#L420)
 
 Create operation events for an extension or replacement body.
 
@@ -27,7 +27,7 @@ formatters unless a formatter explicitly consumes the public trace.
 
 ### operation
 
-`"override"` \| `"extend"`
+`"extend"` \| `"override"`
 
 ### source
 

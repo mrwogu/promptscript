@@ -6,7 +6,7 @@
 
 # Interface: RoundtripResult
 
-Defined in: [importer/src/roundtrip.ts:4](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/importer/src/roundtrip.ts#L4)
+Defined in: [importer/src/roundtrip.ts:4](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/importer/src/roundtrip.ts#L4)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [importer/src/roundtrip.ts:4](https://github.com/mrwogu/promptscript
 
 > **errors**: `string`[]
 
-Defined in: [importer/src/roundtrip.ts:6](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/importer/src/roundtrip.ts#L6)
+Defined in: [importer/src/roundtrip.ts:6](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/importer/src/roundtrip.ts#L6)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [importer/src/roundtrip.ts:6](https://github.com/mrwogu/promptscript
 
 > **hasMeta**: `boolean`
 
-Defined in: [importer/src/roundtrip.ts:9](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/importer/src/roundtrip.ts#L9)
+Defined in: [importer/src/roundtrip.ts:9](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/importer/src/roundtrip.ts#L9)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [importer/src/roundtrip.ts:9](https://github.com/mrwogu/promptscript
 
 > **sectionCount**: `object`
 
-Defined in: [importer/src/roundtrip.ts:8](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/importer/src/roundtrip.ts#L8)
+Defined in: [importer/src/roundtrip.ts:8](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/importer/src/roundtrip.ts#L8)
 
 #### imported
 
@@ -46,7 +46,7 @@ Defined in: [importer/src/roundtrip.ts:8](https://github.com/mrwogu/promptscript
 
 > **valid**: `boolean`
 
-Defined in: [importer/src/roundtrip.ts:5](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/importer/src/roundtrip.ts#L5)
+Defined in: [importer/src/roundtrip.ts:5](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/importer/src/roundtrip.ts#L5)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [importer/src/roundtrip.ts:5](https://github.com/mrwogu/promptscript
 
 > **warnings**: `string`[]
 
-Defined in: [importer/src/roundtrip.ts:7](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/importer/src/roundtrip.ts#L7)
+Defined in: [importer/src/roundtrip.ts:7](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/importer/src/roundtrip.ts#L7)

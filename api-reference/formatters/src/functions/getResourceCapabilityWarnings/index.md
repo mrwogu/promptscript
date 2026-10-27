@@ -8,7 +8,7 @@
 
 > **getResourceCapabilityWarnings**(`ast`, `target`, `version`): [`FormatterWarning`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterWarning/index.md)[]
 
-Defined in: [formatters/src/resource-capability-warnings.ts:37](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/resource-capability-warnings.ts#L37)
+Defined in: [formatters/src/resource-capability-warnings.ts:38](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/resource-capability-warnings.ts#L38)
 
 Warn when `@skills`, `@mcpServers` or `@plugins` is authored but the target,
 or the resolved target version, cannot emit it.

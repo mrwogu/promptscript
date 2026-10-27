@@ -8,7 +8,7 @@
 
 > **deepMerge**\<`T`\>(`parent`, `child`, `options?`): `T`
 
-Defined in: [core/src/utils/merge.ts:40](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/utils/merge.ts#L40)
+Defined in: [core/src/utils/merge.ts:52](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/merge.ts#L52)
 
 Deep merge two objects following PromptScript inheritance rules.
 
@@ -17,6 +17,8 @@ Rules:
 - Arrays: strategy-dependent (default: unique concat)
 - TextContent: concatenate (parent + child)
 - Primitives: child wins
+
+Only own properties are read and written, so nothing comes from or goes to a prototype.
 
 ## Type Parameters
 
@@ -49,3 +51,8 @@ Merge options
 `T`
 
 Merged object
+
+## Throws
+
+PSError (`INVALID_VALUE`) when either side has a `__proto__`, `constructor` or
+`prototype` key in an object that is merged, at the top or at a path both sides share

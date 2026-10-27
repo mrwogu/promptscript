@@ -6,7 +6,7 @@
 
 # Interface: ParsedPolicies
 
-Defined in: [validator/src/policy/types.ts:6](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/policy/types.ts#L6)
+Defined in: [validator/src/policy/types.ts:7](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/policy/types.ts#L7)
 
 Result of parsing policy definitions from config.
 
@@ -16,7 +16,7 @@ Result of parsing policy definitions from config.
 
 > **errors**: `string`[]
 
-Defined in: [validator/src/policy/types.ts:10](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/policy/types.ts#L10)
+Defined in: [validator/src/policy/types.ts:11](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/policy/types.ts#L11)
 
 Parse/validation errors
 
@@ -26,6 +26,6 @@ Parse/validation errors
 
 > **policies**: [`PolicyDefinition`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicyDefinition/index.md)[]
 
-Defined in: [validator/src/policy/types.ts:8](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/policy/types.ts#L8)
+Defined in: [validator/src/policy/types.ts:9](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/policy/types.ts#L9)
 
 Successfully parsed policies

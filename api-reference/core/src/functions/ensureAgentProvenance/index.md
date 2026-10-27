@@ -8,7 +8,7 @@
 
 > **ensureAgentProvenance**(`program`, `source`, `action?`): [`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md)
 
-Defined in: [core/src/agent-names.ts:121](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/agent-names.ts#L121)
+Defined in: [core/src/agent-names.ts:121](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/agent-names.ts#L121)
 
 Add fallback provenance for agent definitions that have no recorded origin.
 
@@ -24,7 +24,7 @@ Add fallback provenance for agent definitions that have no recorded origin.
 
 ### action?
 
-`"local"` \| `"imported"` \| `"qualified"` \| `"native"`
+`"local"` \| `"imported"` \| `"qualified"` \| `"native"` = `'local'`
 
 ## Returns
 

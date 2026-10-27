@@ -6,7 +6,7 @@
 
 # Interface: WalkTextOptions
 
-Defined in: [validator/src/walker.ts:32](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/walker.ts#L32)
+Defined in: [validator/src/walker.ts:32](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/walker.ts#L32)
 
 Options for walkText.
 
@@ -16,7 +16,20 @@ Options for walkText.
 
 > `optional` **excludeProperties?**: `string`[]
 
-Defined in: [validator/src/walker.ts:37](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/walker.ts#L37)
+Defined in: [validator/src/walker.ts:38](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/walker.ts#L38)
 
-Property names to exclude from walking.
-Useful for skipping non-instructional content like skill resource files.
+Property names to exclude from walking, at every depth under every block.
+For skill resource lists use `skipSkillResources`, which is scoped to
+`@skills.<name>.resources`.
+
+***
+
+### skipSkillResources?
+
+> `optional` **skipSkillResources?**: `boolean`
+
+Defined in: [validator/src/walker.ts:44](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/walker.ts#L44)
+
+Skip skill resource lists (`@skills.<name>.resources`, including the same
+path reached through `@extend` and `@override`). The `resources` key under
+any other block or property is still scanned.

@@ -6,7 +6,7 @@
 
 # Interface: SimpleFormatterResult
 
-Defined in: [formatters/src/create-simple-formatter.ts:63](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/create-simple-formatter.ts#L63)
+Defined in: [formatters/src/create-simple-formatter.ts:63](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/create-simple-formatter.ts#L63)
 
 Return type from the factory: the class itself (with static
 `getSupportedVersions()`) plus the pre-built VERSIONS constant.
@@ -15,9 +15,9 @@ Return type from the factory: the class itself (with static
 
 ### Formatter
 
-> **Formatter**: \{(): [`MarkdownInstructionFormatter`](https://getpromptscript.dev/api-reference/formatters/src/classes/MarkdownInstructionFormatter/index.md); `getSupportedVersions`: [`SimpleFormatterVersions`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/SimpleFormatterVersions/index.md); \}
+> **Formatter**: \{new (): [`MarkdownInstructionFormatter`](https://getpromptscript.dev/api-reference/formatters/src/classes/MarkdownInstructionFormatter/index.md); `getSupportedVersions`(): [`SimpleFormatterVersions`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/SimpleFormatterVersions/index.md); \}
 
-Defined in: [formatters/src/create-simple-formatter.ts:65](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/create-simple-formatter.ts#L65)
+Defined in: [formatters/src/create-simple-formatter.ts:65](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/create-simple-formatter.ts#L65)
 
 Concrete formatter class (instantiable via `new`)
 
@@ -39,6 +39,6 @@ Concrete formatter class (instantiable via `new`)
 
 > **VERSIONS**: [`SimpleFormatterVersions`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/SimpleFormatterVersions/index.md)
 
-Defined in: [formatters/src/create-simple-formatter.ts:70](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/create-simple-formatter.ts#L70)
+Defined in: [formatters/src/create-simple-formatter.ts:70](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/create-simple-formatter.ts#L70)
 
 Pre-built version map, exported as `<NAME>_VERSIONS`

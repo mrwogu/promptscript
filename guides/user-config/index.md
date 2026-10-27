@@ -58,6 +58,16 @@ Default registry configuration used when no project-level registry is configured
 | `registry.cache.enabled`        | Enable caching (default: `true`)         |
 | `registry.cache.ttl`            | Cache TTL in milliseconds                |
 
+### `registries`
+
+Registry aliases available in every project. A project alias with the same name
+wins. `prs registry add --global` writes here.
+
+```yaml
+registries:
+  '@company': github.com/acme/promptscript-base
+```
+
 ### `defaults`
 
 Default values used by `prs init --yes` when no CLI flags are provided.
@@ -67,6 +77,19 @@ Default values used by `prs init --yes` when no CLI flags are provided.
 | `defaults.targets` | Default compilation targets |
 | `defaults.team`    | Default team namespace      |
 
+## System Config
+
+IT or platform teams can provision a config file with the same format at
+`/etc/promptscript/config.yaml` (`%ProgramData%\promptscript\config.yaml` on
+Windows). It sits under the user config:
+
+- user values win, and `registries` and `defaults` merge key by key
+- a user `registry.git` or `registry.url` replaces the system registry backend
+- `telemetry: false` at any layer is a hard opt-out, so a system `false` cannot be
+  turned back on by the user, a project or a CLI flag
+
+`prs registry list` shows system aliases with `(system)`.
+
 ## Priority Order
 
 Configuration is merged from multiple sources with this priority (highest wins):
@@ -75,6 +98,7 @@ Configuration is merged from multiple sources with this priority (highest wins):
 2. **Environment variables** (`PROMPTSCRIPT_REGISTRY_GIT_URL`, etc.)
 3. **Project config** (`promptscript.yaml`)
 4. **User config** (`~/.promptscript/config.yaml`)
+5. **System config** (`/etc/promptscript/config.yaml`)
 
 ## Environment Variables
 
@@ -100,7 +124,7 @@ PROMPTSCRIPT_REGISTRY_GIT_URL=https://github.com/my-org/reg.git prs init --yes
 
 When running `prs init --yes`:
 
-1. Loads user config from `~/.promptscript/config.yaml`
+1. Loads user config from `~/.promptscript/config.yaml`, with the system config merged under it
 2. Uses `registry` from user config if no `--registry` flag provided
 3. Uses `defaults.targets` if no `--targets` flag provided
 4. Uses `defaults.team` if no `--team` flag provided

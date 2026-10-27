@@ -8,7 +8,7 @@
 
 > **assertValidTargetCapabilities**(`capabilities`): `void`
 
-Defined in: [core/src/target-capabilities.ts:1758](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/target-capabilities.ts#L1758)
+Defined in: [core/src/target-capabilities.ts:1780](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L1780)
 
 Throw when a capability registry contains missing or contradictory metadata.
 

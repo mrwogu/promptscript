@@ -8,4 +8,4 @@
 
 > `const` **VSCODE\_HOOK\_CAPABILITY**: [`HookCapability`](https://getpromptscript.dev/api-reference/core/src/interfaces/HookCapability/index.md)
 
-Defined in: [core/src/hook-capabilities.ts:316](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/hook-capabilities.ts#L316)
+Defined in: [core/src/hook-capabilities.ts:318](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/hook-capabilities.ts#L318)

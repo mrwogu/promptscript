@@ -8,7 +8,7 @@
 
 > **findConfigFile**(`customPath?`): `string` \| `null`
 
-Defined in: [cli/src/config/loader.ts:34](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/cli/src/config/loader.ts#L34)
+Defined in: [cli/src/config/loader.ts:41](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/config/loader.ts#L41)
 
 Find the config file in the current directory.
 

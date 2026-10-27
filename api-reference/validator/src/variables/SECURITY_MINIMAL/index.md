@@ -8,7 +8,7 @@
 
 > `const` **SECURITY\_MINIMAL**: [`ValidatorConfig`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidatorConfig/index.md)
 
-Defined in: [validator/src/presets.ts:237](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/presets.ts#L237)
+Defined in: [validator/src/presets.ts:237](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/presets.ts#L237)
 
 Minimal security preset for trusted environments.
 

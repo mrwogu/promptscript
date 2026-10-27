@@ -6,12 +6,13 @@
 
 # Type Alias: TargetFamily
 
-> **TargetFamily** = `"base"` \| `"markdown-instruction"` \| `"simple"` \| `"agents-md-only"`
+> **TargetFamily** = `"base"` \| `"markdown-instruction"` \| `"simple"` \| `"agents-md-only"` \| `"prompt"`
 
-Defined in: [core/src/target-catalog.ts:31](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/target-catalog.ts#L31)
+Defined in: [core/src/target-catalog.ts:33](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-catalog.ts#L33)
 
 Target family classification.
 - `base`: Formatters extending BaseFormatter directly (GitHub, Cursor, Claude, Antigravity)
 - `markdown-instruction`: Formatters extending MarkdownInstructionFormatter
 - `simple`: Formatters created via createSimpleMarkdownFormatter
 - `agents-md-only`: Targets using the project-local AGENTS.md contract
+- `prompt`: Application prompt targets, opt-in only, never part of an "all formatters" default

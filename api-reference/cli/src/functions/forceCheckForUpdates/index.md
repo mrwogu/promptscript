@@ -8,7 +8,7 @@
 
 > **forceCheckForUpdates**(`currentVersion`): `Promise`\<\{ `error`: `boolean`; `info`: [`UpdateInfo`](https://getpromptscript.dev/api-reference/cli/src/interfaces/UpdateInfo/index.md) \| `null`; \}\>
 
-Defined in: [cli/src/utils/version-check.ts:270](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/cli/src/utils/version-check.ts#L270)
+Defined in: [cli/src/utils/version-check.ts:270](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/version-check.ts#L270)
 
 Force check for updates (ignores cache).
 Used by the update-check command.

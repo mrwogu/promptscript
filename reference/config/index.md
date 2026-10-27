@@ -237,7 +237,9 @@ includePromptScriptSkill: true # default: true
 | `includePromptScriptSkill` | boolean                 | No       | Include the bundled language skill              |
 | `validation`               | object                  | No       | Guard and validation rule settings              |
 | `models`                   | object                  | No       | Supported model set and model profiles          |
-| `policies`                 | array                   | No       | Extension compliance policies                   |
+| `policies`                 | array                   | No       | Policies for skill extensions and prompts       |
+| `releases`                 | object                  | No       | Release environments for prompt bundles         |
+| `governance`               | object                  | No       | Admins, approval roles and CODEOWNERS settings  |
 
 `id` and `syntax` are required even when `input.entry` uses its default.
 
@@ -411,7 +413,7 @@ The `registries` field is resolved by merging three sources in priority order:
 | Middle   | `~/.promptscript/config.yaml`   | User-level    |
 | Lowest   | `/etc/promptscript/config.yaml` | System-level  |
 
-Project aliases override user aliases, which override system aliases. This allows IT to provision company-wide aliases (system level) while teams or projects can add or override specific aliases.
+Project aliases override user aliases, which override system aliases. This allows IT to provision company-wide aliases (system level) while teams or projects can add or override specific aliases. On Windows the system file is `%ProgramData%\promptscript\config.yaml`.
 
 #### User-Level Config (`~/.promptscript/config.yaml`)
 
@@ -448,7 +450,7 @@ Once aliases are configured, use them in any import path:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoAVgoABljWAF8fHz4AJXhmKAA3A35dTFZHBXl1Exw3ACMKXQB6DEYhbppmMlNGagg0LABadow4GB9+CFYcGHGsATqMBu7+Zmp1btn5otY+ADU1uAg2aTEoCDnjMn2sRbd5zeH6x124EUYAGs4N1qDA+lh+AA9dLZHIgfJ0dDYPCIEC1b7bX57A5HOYwKi0EAMFjsThYHi8ADKbjQ5AgdzkClWvCIpHIdmoHmUqzBFF4ADlmBtMNQNswwMy7OJmIw3FoRFgbqw6GJPLxWMKxLwwRgoPY+oCNATFkIRLxAlYQil0VsdjjDscFiA4nAEiJkuEQOksrkXVaSBBCMswlguQsCot-ttxBhqOJlJbgiwpGFkBEAApQPowHAVKTUWQiTxx7wgAC6cQ4-2W6jTmezjFz+bWRZjpYilcjvjB-3GjCVbETcSmXqzObzUALOvgYYgA+VeXyCKRIEwuHwGLIWL+AOBoPBA+hsJyhPoTDYHC4aL4NLpD0Z8lsrKiHJ13N4vIJgq1ovFkufGU5QVbBlVVGMNS1URdX1TAgWNChTX8C04ggUIvS3H5d0NEFdSPGFTz9V13SSG0fRyPJgkDYNWFDcMfEKXxoxLeNhytFMYHrEBxybSdp2Y2N407KtZ1rLieObKdWwEjsKwYxZeznBchxQq1RwbCcW0LRT+0HVglwRcsGHJahHHwNlogJGhz2qWhlXwVIESAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fHz4AJXhmKAA3A35dTFZHBXl1Exw3ACMKXQB6DEYhbppmMlNGagg0LABadow4GB9+CFYcGHGsATqMBu7+Zmp1btn5otY+ADU1uAg2aTEoCDnjMn2sRbd5zeH6x124EUYAGs4N1qDA+lh+AA9dLZHIgfJ0dDYPCIEC1b7bX57A5HOYwKi0EAMFjsThYHi8ADKbjQ5AgdzkClWvCIpHIdmoHmUqzBFF4ADlmBtMNQNswwMy7OJmIw3FoRFgbqw6GJPLxWMKxLwwRgoPY+oCNATFkIRLxAlYQil0VsdjjDscFiA4nAEiJkuEQOksrkXVaSBBCMswlguQsCot-ttxBhqOJlJbgiwpGFkBEAApQPowHAVKTUWQiTxx7wgAC6cQ4-2W6jTmezjFz+bWRZjpYilcjvjB-3GjCVbETcSmXqzObzUALOvgYYgA+VeXyCKRIEwuHwGLIWL+AOBoPBA+hsJyhPoTDYHC4aL4NLpD0Z8lsrKiHJ13N4vIJgq1ovFkufGU5QVbBlVVGMNS1URdX1TAgWNChTX8C04ggUIvS3H5d0NEFdSPGFTz9V13SSG0fRyPJgkDYNWFDcMfEKXxoxLeNhytFMYHrEBxybSdp2Y2N407KtZ1rLieObKdWwEjsKwYxZeznBchxQq1RwbCcW0LRT+0HVglwRcsGHJahHHwNlogJGhz2qWhlXwVIESAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -481,8 +483,9 @@ targets:
 
 **Available Targets:**
 
-PromptScript ships 50 built-in targets. See [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) for
-platform families and [Supported Formatters](https://getpromptscript.dev/reference/formatters/index.md) for the full capability matrix.
+PromptScript ships 50 coding agent targets and two prompt targets. See
+[Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md) for platform families and
+[Supported Formatters](https://getpromptscript.dev/reference/formatters/index.md) for the full capability matrix.
 
 | Target         | Default Output                    | Default Convention | Supported Versions                             |
 | -------------- | --------------------------------- | ------------------ | ---------------------------------------------- |
@@ -536,6 +539,14 @@ platform families and [Supported Formatters](https://getpromptscript.dev/referen
 | `deep-agents`  | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `forgecode`    | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 | `hermes`       | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `bundle`       | `prompts/index.json`              | -                  | v1                                             |
+| `prompt-text`  | `prompts/README.md`               | -                  | v1                                             |
+
+`bundle` and `prompt-text` compile `@prompts` entries for applications, not instructions for a
+coding agent. They are opt-in: no default selection includes them, so name them in `targets`. A
+target `output` moves the primary file, and the other files sit next to it. The target owns that
+directory, so `output` must name one. They write nothing for a program without prompts and need
+syntax `1.6.0`. See [Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md).
 
 ### MCP, Hooks, and Plugins Support
 
@@ -1220,6 +1231,56 @@ universalDir: false
 | `false`  | boolean | -           | Disable universal directory          |
 | (string) | string  | `'.agents'` | Custom path relative to project root |
 
+### releases
+
+Opts in to `prs release`. Lists the release environments in promotion order, first to last.
+
+```yaml
+releases:
+  environments: [staging, prod]
+```
+
+| Field          | Type     | Required | Description                               |
+| -------------- | -------- | -------- | ----------------------------------------- |
+| `environments` | string[] | Yes      | Environment names, first to last, 1 to 16 |
+
+Each name matches `^[a-z][a-z0-9-]{0,31}$` and appears once. The names `index` and `manifest`, and
+the Windows device names `con`, `prn`, `aux`, `nul`, `com1` to `com9` and `lpt1` to `lpt9`, are
+refused because each environment is a file named `<name>.json`. Without `releases` every
+`prs release` command fails with `PS5001`. See the [releases guide](https://getpromptscript.dev/guides/releases/index.md).
+
+### governance
+
+Who owns the setup and which teams review each approval role. `prs governance codeowners` turns it
+into CODEOWNERS lines, and PS047 checks prompt owners and data classes against it.
+
+```yaml
+governance:
+  admins: ['@acme/prompt-platform']
+  roles:
+    legal: ['@acme/legal']
+  dataClasses: [pii, phi, financial, credentials, internal, public]
+  codeowners:
+    output: .github/CODEOWNERS
+    protect: [.github/workflows]
+    prompts: true
+```
+
+| Field                | Type     | Required | Description                                                                           |
+| -------------------- | -------- | -------- | ------------------------------------------------------------------------------------- |
+| `admins`             | string[] | No       | Owners of the config, the approvals root, the releases and the CODEOWNERS files       |
+| `roles`              | object   | No       | Approval roles, each with a non-empty list of owners. At most 32 roles                |
+| `dataClasses`        | string[] | No       | Data class names the project uses (PS047, and the data classes of policies)           |
+| `codeowners.output`  | string   | No       | `.github/CODEOWNERS` (default), `CODEOWNERS`, `docs/CODEOWNERS`, `.gitlab/CODEOWNERS` |
+| `codeowners.protect` | string[] | No       | More paths the admins own, relative to the repository root                            |
+| `codeowners.prompts` | boolean  | No       | Write CODEOWNERS lines for the `.prs` files that define prompts. Default `true`       |
+
+Owners are a user (`@jane`), a team (`@acme/legal`) or an email address of at most 254 characters.
+Role names match `^[a-z][a-z0-9-]{0,31}$` and are not a Windows device name, because a role names a
+directory. Unknown keys are refused with the closest key. `prs governance codeowners` needs
+`admins`; a problem in this section is `PS5101`. See
+[CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/index.md).
+
 ### includePromptScriptSkill
 
 Controls whether the bundled PromptScript language skill is included in compilation output. When
@@ -1277,19 +1338,37 @@ targets:
 
 ## Extending Configuration
 
-You can extend another configuration file:
+You can extend another configuration file, for example one shared by every project in a monorepo:
 
 ```yaml
-id: extended-project
+# shared/base.config.yaml
 syntax: '1.4.0'
-extends: ./base.config.yaml
+registries:
+  '@company': github.com/acme/promptscript-base
+targets:
+  - claude
+```
+
+```yaml
+# app/promptscript.yaml
+id: extended-project
+extends: ../shared/base.config.yaml
 
 targets:
   - github:
       output: custom/path.md
 ```
 
-Extended configurations are deep-merged.
+How the merge works:
+
+- The `extends` path is relative to the file that declares it. A base file can extend another file. A circular chain is an error.
+- Objects merge deeply and the extending file wins. Arrays such as `targets` are replaced, not joined, so the example above compiles only `github`.
+- A `__proto__`, `constructor` or `prototype` key in an object that both files set is a config error (`PS3002`) that names the key. The merge reads and writes own keys only, so no value goes through a prototype.
+- `policies` is joined: the base policies come first and the extending file's policies are appended. A base policy cannot be removed or redefined, so a policy with the same `name` as a base policy is a config error, and so is a `policies` value that is not a list, such as `policies: null` (a bare `policies:` key is accepted only when the base has no policies). Setting `validation.rules.policy-compliance` to `off` still turns PS030 off, including from an extending file.
+- `governance.admins` and each owner list under `governance.roles` are joined the same way: base owners come first, the extending file's new owners are appended and duplicates are dropped. The extending file can add roles and owners, but cannot remove one. `governance.codeowners.protect` is joined the same way, so a protected path set in a base file stays protected. A value of the wrong type for `governance`, `governance.admins`, `governance.roles`, one role, `governance.codeowners` or `governance.codeowners.protect` is a config error, and so is `null` when the base sets entries there (a bare key is accepted only when the base has none). A `__proto__` key under `governance`, `governance.roles` or `governance.codeowners` is refused. Other keys under `governance` merge like the rest of the file.
+- `registry` merges like the other config levels: if the extending file picks another backend (for example `registry.path` over a base `registry.git`), the base backend is dropped.
+- Paths inside a base file, like `input.entry` or `registry.path`, stay relative to the project, not to the base file.
+- `prs migrate` and `prs serve` read only the project file.
 
 ## Schema Validation
 

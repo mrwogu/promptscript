@@ -6,7 +6,7 @@
 
 # Interface: TargetCapabilitySeed
 
-Defined in: [core/src/target-capabilities.ts:1434](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/target-capabilities.ts#L1434)
+Defined in: [core/src/target-capabilities.ts:1454](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L1454)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [core/src/target-capabilities.ts:1434](https://github.com/mrwogu/pro
 
 > `readonly` **features**: `object`
 
-Defined in: [core/src/target-capabilities.ts:1437](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/target-capabilities.ts#L1437)
+Defined in: [core/src/target-capabilities.ts:1457](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L1457)
 
 #### defaultVersion
 
@@ -38,7 +38,15 @@ Defined in: [core/src/target-capabilities.ts:1437](https://github.com/mrwogu/pro
 
 > `readonly` **outputPath**: `string`
 
-Defined in: [core/src/target-capabilities.ts:1435](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/target-capabilities.ts#L1435)
+Defined in: [core/src/target-capabilities.ts:1455](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L1455)
+
+***
+
+### sectionProfile?
+
+> `readonly` `optional` **sectionProfile?**: [`SectionProfile`](https://getpromptscript.dev/api-reference/core/src/type-aliases/SectionProfile/index.md)
+
+Defined in: [core/src/target-capabilities.ts:1463](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L1463)
 
 ***
 
@@ -46,7 +54,7 @@ Defined in: [core/src/target-capabilities.ts:1435](https://github.com/mrwogu/pro
 
 > `readonly` **skillPath**: `object`
 
-Defined in: [core/src/target-capabilities.ts:1436](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/target-capabilities.ts#L1436)
+Defined in: [core/src/target-capabilities.ts:1456](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L1456)
 
 #### basePath
 

@@ -90,6 +90,14 @@ version: '1'
 telemetry: false
 ```
 
+System-level opt-out in `/etc/promptscript/config.yaml`
+(`%ProgramData%\promptscript\config.yaml` on Windows), for IT-managed machines:
+
+```yaml
+version: '1'
+telemetry: false
+```
+
 Environment opt-out:
 
 ```bash
@@ -99,7 +107,7 @@ export DO_NOT_TRACK=1
 ```
 
 Any opt-out is a hard veto. `PROMPTSCRIPT_TELEMETRY=true` cannot override
-`DO_NOT_TRACK`, project config, or user config.
+`DO_NOT_TRACK`, project config, user config, or system config.
 
 Manage user-level configuration:
 

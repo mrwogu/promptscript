@@ -8,7 +8,7 @@
 
 > `const` **TARGET\_CAPABILITIES**: `object`
 
-Defined in: [core/src/target-catalog.ts:769](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/target-catalog.ts#L769)
+Defined in: [core/src/target-catalog.ts:800](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-catalog.ts#L800)
 
 Capability-only view of the canonical target definitions.
 
@@ -37,6 +37,10 @@ Capability-only view of the canonical target definitions.
 ### augment
 
 > **augment**: [`TargetCapability`](https://getpromptscript.dev/api-reference/core/src/interfaces/TargetCapability/index.md)
+
+### bundle
+
+> **bundle**: [`TargetCapability`](https://getpromptscript.dev/api-reference/core/src/interfaces/TargetCapability/index.md)
 
 ### claude
 
@@ -181,6 +185,10 @@ Capability-only view of the canonical target definitions.
 ### pochi
 
 > **pochi**: [`TargetCapability`](https://getpromptscript.dev/api-reference/core/src/interfaces/TargetCapability/index.md)
+
+### prompt-text
+
+> **prompt-text**: [`TargetCapability`](https://getpromptscript.dev/api-reference/core/src/interfaces/TargetCapability/index.md)
 
 ### qoder
 

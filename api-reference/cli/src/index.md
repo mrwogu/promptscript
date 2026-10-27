@@ -30,6 +30,15 @@ main entry point for the CLI application.
 - [ImportCommandOptions](https://getpromptscript.dev/api-reference/cli/src/interfaces/ImportCommandOptions/index.md)
 - [InitOptions](https://getpromptscript.dev/api-reference/cli/src/interfaces/InitOptions/index.md)
 - [PullOptions](https://getpromptscript.dev/api-reference/cli/src/interfaces/PullOptions/index.md)
+- [ReleaseBaseRef](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseBaseRef/index.md)
+- [ReleaseChange](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseChange/index.md)
+- [ReleaseDiagnostic](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseDiagnostic/index.md)
+- [ReleaseEnvironmentHistory](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseEnvironmentHistory/index.md)
+- [ReleaseEnvironmentStatus](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseEnvironmentStatus/index.md)
+- [ReleaseHistoryCommit](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseHistoryCommit/index.md)
+- [ReleaseLocation](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseLocation/index.md)
+- [ReleasePromptStatus](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleasePromptStatus/index.md)
+- [ReleaseReport](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseReport/index.md)
 - [UpdateInfo](https://getpromptscript.dev/api-reference/cli/src/interfaces/UpdateInfo/index.md)
 - [ValidateOptions](https://getpromptscript.dev/api-reference/cli/src/interfaces/ValidateOptions/index.md)
 
@@ -37,6 +46,8 @@ main entry point for the CLI application.
 
 - [DiffChangeKind](https://getpromptscript.dev/api-reference/cli/src/type-aliases/DiffChangeKind/index.md)
 - [DiffOwnership](https://getpromptscript.dev/api-reference/cli/src/type-aliases/DiffOwnership/index.md)
+- [ReleaseChangeAction](https://getpromptscript.dev/api-reference/cli/src/type-aliases/ReleaseChangeAction/index.md)
+- [ReleaseCommandName](https://getpromptscript.dev/api-reference/cli/src/type-aliases/ReleaseCommandName/index.md)
 
 ## Variables
 
@@ -44,6 +55,8 @@ main entry point for the CLI application.
 - [ConsoleOutput](https://getpromptscript.dev/api-reference/cli/src/variables/ConsoleOutput/index.md)
 - [DIFF\_SCHEMA\_URL](https://getpromptscript.dev/api-reference/cli/src/variables/DIFF_SCHEMA_URL/index.md)
 - [DIFF\_SCHEMA\_VERSION](https://getpromptscript.dev/api-reference/cli/src/variables/DIFF_SCHEMA_VERSION/index.md)
+- [RELEASE\_REPORT\_SCHEMA\_URL](https://getpromptscript.dev/api-reference/cli/src/variables/RELEASE_REPORT_SCHEMA_URL/index.md)
+- [RELEASE\_REPORT\_VERSION](https://getpromptscript.dev/api-reference/cli/src/variables/RELEASE_REPORT_VERSION/index.md)
 
 ## Functions
 
@@ -67,6 +80,10 @@ main entry point for the CLI application.
 - [loadConfig](https://getpromptscript.dev/api-reference/cli/src/functions/loadConfig/index.md)
 - [printUpdateNotification](https://getpromptscript.dev/api-reference/cli/src/functions/printUpdateNotification/index.md)
 - [pullCommand](https://getpromptscript.dev/api-reference/cli/src/functions/pullCommand/index.md)
+- [releaseBuildCommand](https://getpromptscript.dev/api-reference/cli/src/functions/releaseBuildCommand/index.md)
+- [releasePromoteCommand](https://getpromptscript.dev/api-reference/cli/src/functions/releasePromoteCommand/index.md)
+- [releaseRollbackCommand](https://getpromptscript.dev/api-reference/cli/src/functions/releaseRollbackCommand/index.md)
+- [releaseStatusCommand](https://getpromptscript.dev/api-reference/cli/src/functions/releaseStatusCommand/index.md)
 - [run](https://getpromptscript.dev/api-reference/cli/src/functions/run/index.md)
 - [setContext](https://getpromptscript.dev/api-reference/cli/src/functions/setContext/index.md)
 - [updateCheckCommand](https://getpromptscript.dev/api-reference/cli/src/functions/updateCheckCommand/index.md)

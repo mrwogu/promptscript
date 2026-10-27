@@ -8,4 +8,4 @@
 
 > `const` **TELEMETRY\_EVENT\_SCHEMA**: `1`
 
-Defined in: [telemetry/src/schema.ts:4](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/telemetry/src/schema.ts#L4)
+Defined in: [telemetry/src/schema.ts:4](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/schema.ts#L4)

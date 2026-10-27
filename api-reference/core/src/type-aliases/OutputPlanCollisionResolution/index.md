@@ -8,6 +8,6 @@
 
 > **OutputPlanCollisionResolution** = `"preserve-existing"` \| `"replace-existing"` \| `"merge-identical"`
 
-Defined in: [core/src/output-plan.ts:59](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/output-plan.ts#L59)
+Defined in: [core/src/output-plan.ts:64](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L64)
 
 Collision resolution selected by the planner.

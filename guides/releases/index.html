@@ -1,0 +1,564 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-arfjrgph"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Releasing Application Prompts | PromptScript</title><link rel="canonical" href="https://getpromptscript.dev/guides/releases/"/><link rel="sitemap" href="/sitemap-index.xml"/><script src="/init-demo.js" defer></script><link rel="shortcut icon" href="/assets/images/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="Releasing Application Prompts"/><meta property="og:type" content="article"/><meta property="og:url" content="https://getpromptscript.dev/guides/releases/"/><meta property="og:locale" content="en"/><meta property="og:description" content="Promote content-hashed prompt bundles through staging and production environments with prs release, and keep Git history as the release log."/><meta property="og:site_name" content="PromptScript"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="Promote content-hashed prompt bundles through staging and production environments with prs release, and keep Git history as the release log."/><meta property="og:image" content="https://getpromptscript.dev/assets/images/og-image.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://getpromptscript.dev/assets/images/og-image.png"/><link rel="alternate" type="text/markdown" href="https://getpromptscript.dev/guides/releases/index.md"/><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Releasing Application Prompts","description":"Promote content-hashed prompt bundles through staging and production environments with prs release, and keep Git history as the release log.","url":"https://getpromptscript.dev/guides/releases/","dateModified":"2026-10-27T19:23:38.000Z","inLanguage":"en","isPartOf":{"@id":"https://getpromptscript.dev/#website"},"publisher":{"@type":"Organization","name":"PromptScript","url":"https://getpromptscript.dev/","logo":"https://getpromptscript.dev/assets/images/logo.svg","sameAs":["https://github.com/mrwogu/promptscript","https://www.npmjs.com/org/promptscript"]}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"PromptScript","item":"https://getpromptscript.dev/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://getpromptscript.dev/features/"},{"@type":"ListItem","position":3,"name":"Releasing Application Prompts","item":"https://getpromptscript.dev/guides/releases/"}]}]}</script><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/_astro/middleware.B7FqrQNQ.css"><script type="module" src="/_astro/page.XK7eScLE.js"></script></head><body class="astro-arfjrgph"><a class="sl-skip-link astro-24ubvvmw" href="#_top">Skip to content</a><div class="page sl-flex astro-hijp77xt"><header class="header astro-hijp77xt"><div class="ps-header"><div class="ps-header__main"><div class="header astro-nu66vnpa"><div class="title-wrapper sl-flex astro-nu66vnpa"><a href="/" class="site-title sl-flex astro-v2htbv4j"><img class="astro-v2htbv4j" alt src="/_astro/logo.uBmWggjC.svg" width="256" height="256"><span class="astro-v2htbv4j" translate="no">PromptScript</span></a></div><div class="sl-flex print:hidden astro-nu66vnpa"><site-search class="astro-nu66vnpa astro-723qjj6n" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-723qjj6n"><svg aria-hidden="true" class="astro-723qjj6n astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-723qjj6n" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-723qjj6n" style="display: none;"><kbd class="astro-723qjj6n">Ctrl</kbd><kbd class="astro-723qjj6n">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-723qjj6n"><div class="dialog-frame sl-flex astro-723qjj6n"><button data-close-modal class="sl-flex md:sl-hidden astro-723qjj6n">Cancel</button><div class="search-container astro-723qjj6n"><div id="starlight__search" class="astro-723qjj6n"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.BOTS06Pe.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-nu66vnpa"><div class="sl-flex social-icons astro-nu66vnpa"><a class="ps-stars astro-o2gh7vpa" href="https://github.com/mrwogu/promptscript"><span aria-hidden="true" class="astro-o2gh7vpa">★</span> 378<span class="sr-only astro-o2gh7vpa">GitHub stars</span></a><a href="https://github.com/mrwogu/promptscript" rel="me" class="sl-flex astro-q67lgtik"><span class="sr-only astro-q67lgtik">GitHub</span><svg aria-hidden="true" class="astro-q67lgtik astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><a href="https://www.npmjs.com/org/promptscript" rel="me" class="sl-flex astro-q67lgtik"><span class="sr-only astro-q67lgtik">npm</span><svg aria-hidden="true" class="astro-q67lgtik astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M1.76 0h20.48a1.76 1.76 0 0 1 1.76 1.76v20.48a1.76 1.76 0 0 1-1.76 1.76H1.76A1.76 1.76 0 0 1 0 22.24V1.76A1.76 1.76 0 0 1 1.76 0zM5.11 19.16h6.93V8.8h3.47v10.36h3.47V5.34H5.13v13.82z"></path></svg></a></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-7yb5bu6g"><span class="sr-only astro-7yb5bu6g">Select theme</span><svg aria-hidden="true" class="icon label-icon astro-7yb5bu6g astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-7yb5bu6g"><option value="dark" class="astro-7yb5bu6g">Dark</option><option value="light" class="astro-7yb5bu6g">Light</option><option value="auto" selected class="astro-7yb5bu6g">Auto</option></select><svg aria-hidden="true" class="icon caret astro-7yb5bu6g astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></div><nav class="ps-tabs-nav" aria-label="Documentation sections"><ul><li><a href="/getting-started/">Get Started</a></li><li><a href="/features/" aria-current="page">Guides</a></li><li><a href="/reference/formatters/">Targets</a></li><li><a href="/reference/">Reference</a></li><li><a href="/examples/">Examples</a></li><li><a href="/guides/formatter-architecture/">Contributing</a></li><li><a href="/playground/">Playground</a></li><li><a href="https://github.com/mrwogu/promptscript/releases" rel="noopener" target="_blank">Changelog</a></li></ul></nav></div></header><nav class="sidebar print:hidden astro-hijp77xt" aria-label="Main"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-plecep77"><svg aria-hidden="true" class="open-menu astro-plecep77 astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-plecep77 astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-plecep77">Menu</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-hijp77xt"><div class="sidebar-content sl-flex astro-hijp77xt"><sl-sidebar-state-persist data-hash="1ydqszb" class="astro-a37le3ft"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-bp47dye5"><li class="astro-bp47dye5"><details open class="astro-bp47dye5"><summary class="astro-bp47dye5"><span class="group-label astro-bp47dye5"><span class="large astro-bp47dye5">Core Features</span></span><svg aria-hidden="true" class="caret astro-bp47dye5 astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-bp47dye5"><li class="astro-bp47dye5"><a href="/features/" class="astro-bp47dye5"><span class="astro-bp47dye5">Overview</span></a></li><li class="astro-bp47dye5"><a href="/features/agents/" class="astro-bp47dye5"><span class="astro-bp47dye5">Agents</span></a></li><li class="astro-bp47dye5"><a href="/features/skills/" class="astro-bp47dye5"><span class="astro-bp47dye5">Skills and Resources</span></a></li><li class="astro-bp47dye5"><a href="/features/integrations/" class="astro-bp47dye5"><span class="astro-bp47dye5">MCP Servers and Plugins</span></a></li><li class="astro-bp47dye5"><a href="/features/automation/" class="astro-bp47dye5"><span class="astro-bp47dye5">Hooks and Workflows</span></a></li><li class="astro-bp47dye5"><a href="/features/target-platforms/" class="astro-bp47dye5"><span class="astro-bp47dye5">Target Output Families</span></a></li><li class="astro-bp47dye5"><a href="/guides/application-prompts/" class="astro-bp47dye5"><span class="astro-bp47dye5">Application Prompts</span></a></li><li class="astro-bp47dye5"><a href="/guides/releases/" aria-current="page" class="astro-bp47dye5"><span class="astro-bp47dye5">Releasing Prompts</span></a></li><li class="astro-bp47dye5"><a href="/guides/hooks/" class="astro-bp47dye5"><span class="astro-bp47dye5">AI Tool Hooks</span></a></li><li class="astro-bp47dye5"><a href="/guides/examples/" class="astro-bp47dye5"><span class="astro-bp47dye5">Examples (Few-Shot)</span></a></li></ul></details></li><li class="astro-bp47dye5"><details class="astro-bp47dye5"><summary class="astro-bp47dye5"><span class="group-label astro-bp47dye5"><span class="large astro-bp47dye5">Skills</span></span><svg aria-hidden="true" class="caret astro-bp47dye5 astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-bp47dye5"><li class="astro-bp47dye5"><a href="/guides/building-skills/" class="astro-bp47dye5"><span class="astro-bp47dye5">Building Skills</span></a></li><li class="astro-bp47dye5"><a href="/guides/skill-composition/" class="astro-bp47dye5"><span class="astro-bp47dye5">Skill Composition</span></a></li><li class="astro-bp47dye5"><a href="/guides/skill-overlays/" class="astro-bp47dye5"><span class="astro-bp47dye5">Skill Overlays</span></a></li><li class="astro-bp47dye5"><a href="/guides/local-skills/" class="astro-bp47dye5"><span class="astro-bp47dye5">Local Skills</span></a></li><li class="astro-bp47dye5"><a href="/guides/skill-contracts/" class="astro-bp47dye5"><span class="astro-bp47dye5">Skill Contracts</span></a></li><li class="astro-bp47dye5"><a href="/guides/shared-resources/" class="astro-bp47dye5"><span class="astro-bp47dye5">Shared Resources</span></a></li><li class="astro-bp47dye5"><a href="/guides/npx-skills/" class="astro-bp47dye5"><span class="astro-bp47dye5">Using npx skills</span></a></li></ul></details></li><li class="astro-bp47dye5"><details class="astro-bp47dye5"><summary class="astro-bp47dye5"><span class="group-label astro-bp47dye5"><span class="large astro-bp47dye5">Compose and Reuse</span></span><svg aria-hidden="true" class="caret astro-bp47dye5 astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-bp47dye5"><li class="astro-bp47dye5"><a href="/guides/" class="astro-bp47dye5"><span class="astro-bp47dye5">Overview</span></a></li><li class="astro-bp47dye5"><a href="/guides/inheritance/" class="astro-bp47dye5"><span class="astro-bp47dye5">Inheritance</span></a></li><li class="astro-bp47dye5"><a href="/guides/multi-file/" class="astro-bp47dye5"><span class="astro-bp47dye5">Multi-File Organization</span></a></li><li class="astro-bp47dye5"><a href="/guides/markdown-imports/" class="astro-bp47dye5"><span class="astro-bp47dye5">Markdown Imports</span></a></li><li class="astro-bp47dye5"><a href="/guides/registry/" class="astro-bp47dye5"><span class="astro-bp47dye5">Build Your Registry</span></a></li></ul></details></li><li class="astro-bp47dye5"><details class="astro-bp47dye5"><summary class="astro-bp47dye5"><span class="group-label astro-bp47dye5"><span class="large astro-bp47dye5">Teams and Enterprise</span></span><svg aria-hidden="true" class="caret astro-bp47dye5 astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-bp47dye5"><li class="astro-bp47dye5"><a href="/guides/enterprise/" class="astro-bp47dye5"><span class="astro-bp47dye5">Enterprise Setup</span></a></li><li class="astro-bp47dye5"><a href="/guides/policy-engine/" class="astro-bp47dye5"><span class="astro-bp47dye5">Policy Engine</span></a></li><li class="astro-bp47dye5"><a href="/guides/codeowners/" class="astro-bp47dye5"><span class="astro-bp47dye5">CODEOWNERS from Governance</span></a></li><li class="astro-bp47dye5"><a href="/guides/guard-dependencies/" class="astro-bp47dye5"><span class="astro-bp47dye5">Guard Dependencies</span></a></li><li class="astro-bp47dye5"><a href="/guides/security/" class="astro-bp47dye5"><span class="astro-bp47dye5">Security</span></a></li><li class="astro-bp47dye5"><a href="/guides/ci/" class="astro-bp47dye5"><span class="astro-bp47dye5">CI/CD Integration</span></a></li><li class="astro-bp47dye5"><a href="/guides/docker/" class="astro-bp47dye5"><span class="astro-bp47dye5">Docker</span></a></li><li class="astro-bp47dye5"><a href="/guides/user-config/" class="astro-bp47dye5"><span class="astro-bp47dye5">User Configuration</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-q5leejgp"><div class="social-icons astro-q5leejgp"><a class="ps-stars astro-o2gh7vpa" href="https://github.com/mrwogu/promptscript"><span aria-hidden="true" class="astro-o2gh7vpa">★</span> 378<span class="sr-only astro-o2gh7vpa">GitHub stars</span></a><a href="https://github.com/mrwogu/promptscript" rel="me" class="sl-flex astro-q67lgtik"><span class="sr-only astro-q67lgtik">GitHub</span><svg aria-hidden="true" class="astro-q67lgtik astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><a href="https://www.npmjs.com/org/promptscript" rel="me" class="sl-flex astro-q67lgtik"><span class="sr-only astro-q67lgtik">npm</span><svg aria-hidden="true" class="astro-q67lgtik astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M1.76 0h20.48a1.76 1.76 0 0 1 1.76 1.76v20.48a1.76 1.76 0 0 1-1.76 1.76H1.76A1.76 1.76 0 0 1 0 22.24V1.76A1.76 1.76 0 0 1 1.76 0zM5.11 19.16h6.93V8.8h3.47v10.36h3.47V5.34H5.13v13.82z"></path></svg></a></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-7yb5bu6g"><span class="sr-only astro-7yb5bu6g">Select theme</span><svg aria-hidden="true" class="icon label-icon astro-7yb5bu6g astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-7yb5bu6g"><option value="dark" class="astro-7yb5bu6g">Dark</option><option value="light" class="astro-7yb5bu6g">Light</option><option value="auto" selected class="astro-7yb5bu6g">Auto</option></select><svg aria-hidden="true" class="icon caret astro-7yb5bu6g astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-hijp77xt"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-yabkhcur"><aside class="right-sidebar-container print:hidden astro-yabkhcur"><div class="right-sidebar astro-yabkhcur"><div class="lg:sl-hidden astro-a6bjuyxt"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-dnwbdw43"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-dnwbdw43"><details id="starlight__mobile-toc" class="astro-dnwbdw43"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-dnwbdw43"><span class="toggle sl-flex astro-dnwbdw43">On this page<svg aria-hidden="true" class="caret astro-dnwbdw43 astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-dnwbdw43"></span></summary><div class="dropdown astro-dnwbdw43"><ul class="isMobile astro-oswi5ycn" style="--depth: 0;"><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#_top" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">Overview</span></a></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#configuration" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">Configuration</span></a></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#files" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">Files</span></a></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#the-flow" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">The flow</span></a><ul class="isMobile astro-oswi5ycn" style="--depth: 1;"><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#build" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Build</span></a></li><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#promote" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Promote</span></a></li><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#roll-back" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Roll back</span></a></li><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#status" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Status</span></a></li></ul></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#one-pull-request-per-promotion" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">One pull request per promotion</span></a></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#approvals" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">Approvals</span></a><ul class="isMobile astro-oswi5ycn" style="--depth: 1;"><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#record-files" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Record files</span></a></li><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#listing-approvals" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Listing approvals</span></a></li><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#what-an-approval-proves" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">What an approval proves</span></a></li></ul></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#release-gates" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">Release gates</span></a><ul class="isMobile astro-oswi5ycn" style="--depth: 1;"><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#which-approvals-count" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Which approvals count</span></a></li><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#output" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Output</span></a></li></ul></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#in-ci" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">In CI</span></a><ul class="isMobile astro-oswi5ycn" style="--depth: 1;"><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#check-label-changes-with---base" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Check label changes with --base</span></a></li></ul></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#what-protects-the-labels" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">What protects the labels</span></a></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#error-codes" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">Error codes</span></a></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#see-also" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">See Also</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-a6bjuyxt"><div class="sl-container astro-a6bjuyxt"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-oswi5ycn" style="--depth: 0;"><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#_top" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">Overview</span></a></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#configuration" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">Configuration</span></a></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#files" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">Files</span></a></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#the-flow" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">The flow</span></a><ul class="astro-oswi5ycn" style="--depth: 1;"><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#build" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Build</span></a></li><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#promote" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Promote</span></a></li><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#roll-back" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Roll back</span></a></li><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#status" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Status</span></a></li></ul></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#one-pull-request-per-promotion" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">One pull request per promotion</span></a></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#approvals" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">Approvals</span></a><ul class="astro-oswi5ycn" style="--depth: 1;"><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#record-files" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Record files</span></a></li><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#listing-approvals" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Listing approvals</span></a></li><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#what-an-approval-proves" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">What an approval proves</span></a></li></ul></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#release-gates" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">Release gates</span></a><ul class="astro-oswi5ycn" style="--depth: 1;"><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#which-approvals-count" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Which approvals count</span></a></li><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#output" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Output</span></a></li></ul></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#in-ci" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">In CI</span></a><ul class="astro-oswi5ycn" style="--depth: 1;"><li style="--depth: 1;" class="astro-oswi5ycn"><a href="#check-label-changes-with---base" style="--depth: 1;" class="astro-oswi5ycn"><span style="--depth: 1;" class="astro-oswi5ycn">Check label changes with --base</span></a></li></ul></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#what-protects-the-labels" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">What protects the labels</span></a></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#error-codes" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">Error codes</span></a></li><li style="--depth: 0;" class="astro-oswi5ycn"><a href="#see-also" style="--depth: 0;" class="astro-oswi5ycn"><span style="--depth: 0;" class="astro-oswi5ycn">See Also</span></a></li></ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-yabkhcur"><main data-pagefind-body class="astro-arfjrgph" lang="en" dir="ltr"><div class="content-panel astro-5j3f4rtd"><div class="sl-container astro-5j3f4rtd"><h1 id="_top" class="astro-eihgazik">Releasing Application Prompts</h1><div class="ps-page-actions astro-u72m6wot"><button type="button" data-copy-page="https://getpromptscript.dev/guides/releases/index.md" class="astro-u72m6wot">Copy page</button><a href="https://getpromptscript.dev/guides/releases/index.md" class="astro-u72m6wot">View as Markdown</a></div><script type="module">document.querySelectorAll(`[data-copy-page]`).forEach(e=>{let t=e.textContent;e.addEventListener(`click`,async()=>{try{let t=new URL(e.dataset.copyPage??``).pathname,n=await fetch(t);if(!n.ok)throw Error(`HTTP ${n.status}`);await navigator.clipboard.writeText(await n.text()),e.textContent=`Copied`}catch{e.textContent=`Copy failed`}setTimeout(()=>e.textContent=t,2e3)})});</script></div></div><div class="content-panel astro-5j3f4rtd"><div class="sl-container astro-5j3f4rtd"><div class="sl-markdown-content"><p>The <code>bundle</code> target writes a prompt bundle for every <code>@prompts</code> entry. <code>prs release</code> turns those
+bundles into releases. It stores each bundle under its content hash, and it records which hash each
+environment, such as <code>staging</code> or <code>prod</code>, serves. An application reads the label of its
+environment, then the bundle file the label points at.</p>
+<p>Read <a href="/guides/application-prompts/">Application Prompts</a> first. This page covers only the release flow.</p>
+<h2 id="configuration">Configuration</h2>
+<p>Releases are opt-in. List the environments in promotion order, first to last:</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.8nqtp.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="yaml"><code><div class="ec-line"><div class="code"><span style="--0:#7EE787;--1:#116329">releases</span><span style="--0:#E6EDF3;--1:#1F2328">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">environments</span><span style="--0:#E6EDF3;--1:#1F2328">: [</span><span style="--0:#A5D6FF;--1:#0A3069">staging</span><span style="--0:#E6EDF3;--1:#1F2328">, </span><span style="--0:#A5D6FF;--1:#0A3069">prod</span><span style="--0:#E6EDF3;--1:#1F2328">]</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="releases:  environments: [staging, prod]"><div></div></button></div></figure></div>
+<p>Without <code>releases</code>, every <code>prs release</code> command fails with <code>PS5001</code> and shows this snippet. See
+<a href="/reference/config/#releases"><code>releases</code></a> for the name rules.</p>
+<p><code>policies</code> are read by every release command. A policy with an unknown kind fails the command, it is
+never skipped. Policies parse the same way as in <code>prs validate</code>, against <code>governance.roles</code>,
+<code>releases.environments</code> and the model catalog with <code>models.profiles</code>, so a role, environment or model
+that <code>validate</code> refuses fails a release command too.</p>
+<h2 id="files">Files</h2>
+<p>All release files live in <code>.promptscript/releases/</code> and belong in Git:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#e6edf3;--1:#1f2328">.promptscript/releases/</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#e6edf3;--1:#1f2328">  </span></span><span style="--0:#e6edf3;--1:#1f2328">manifest.json                bundle index of the latest build</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#e6edf3;--1:#1f2328">  </span></span><span style="--0:#e6edf3;--1:#1f2328">bundles/sha256-&#x3C;hex>.json    one immutable file per content hash</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#e6edf3;--1:#1f2328">  </span></span><span style="--0:#e6edf3;--1:#1f2328">staging.json                 label of the staging environment</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#e6edf3;--1:#1f2328">  </span></span><span style="--0:#e6edf3;--1:#1f2328">prod.json                    label of the prod environment</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code=".promptscript/releases/  manifest.json                bundle index of the latest build  bundles/sha256-<hex>.json    one immutable file per content hash  staging.json                 label of the staging environment  prod.json                    label of the prod environment"><div></div></button></div></figure></div>
+<ul>
+<li>A bundle file has exactly the bytes the <code>bundle</code> target writes. A release never rewrites it and
+never deletes it.</li>
+<li>The manifest is a bundle index of the latest build. Its <code>file</code> entries point into <code>bundles/</code>.</li>
+<li>A label has one entry per prompt, sorted by id, and lists each id once. The <code>$schema</code> is
+<code>https://getpromptscript.dev/schema/prompt-release-label/v1.json</code>.</li>
+</ul>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="json"><code><div class="ec-line"><div class="code"><span style="--0:#E6EDF3;--1:#1F2328">{</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">"$schema"</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">"https://getpromptscript.dev/schema/prompt-release-label/v1.json"</span><span style="--0:#E6EDF3;--1:#1F2328">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">"environment"</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">"prod"</span><span style="--0:#E6EDF3;--1:#1F2328">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">"prompts"</span><span style="--0:#E6EDF3;--1:#1F2328">: [</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#E6EDF3;--1:#1F2328">    </span></span><span style="--0:#E6EDF3;--1:#1F2328">{</span></div></div><div class="ec-line"><div class="code"><span class="indent">      </span><span style="--0:#7EE787;--1:#116329">"id"</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">"acme-support/refund-reply"</span><span style="--0:#E6EDF3;--1:#1F2328">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">      </span><span style="--0:#7EE787;--1:#116329">"contentHash"</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">"sha256-&#x3C;64 hex digits>"</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#E6EDF3;--1:#1F2328">    </span></span><span style="--0:#E6EDF3;--1:#1F2328">}</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#E6EDF3;--1:#1F2328">  </span></span><span style="--0:#E6EDF3;--1:#1F2328">]</span></div></div><div class="ec-line"><div class="code"><span style="--0:#E6EDF3;--1:#1F2328">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="{  &#x22;$schema&#x22;: &#x22;https://getpromptscript.dev/schema/prompt-release-label/v1.json&#x22;,  &#x22;environment&#x22;: &#x22;prod&#x22;,  &#x22;prompts&#x22;: [    {      &#x22;id&#x22;: &#x22;acme-support/refund-reply&#x22;,      &#x22;contentHash&#x22;: &#x22;sha256-<64 hex digits>&#x22;    }  ]}"><div></div></button></div></figure></div>
+<p>Release files must be regular files. A symbolic link in <code>.promptscript</code>, <code>.promptscript/releases</code>,
+<code>bundles/</code>, or for a release file itself is refused. Names must match in case exactly: a
+<code>Prod.json</code> or <code>Manifest.json</code> is refused, because a case-insensitive disk would read it as the
+real file. A manifest or label that does not parse as one is never overwritten, the error tells
+you to restore it from Git.</p>
+<p><code>prs compile</code> refuses any output inside <code>.promptscript/releases/</code> (<code>PS5008</code>), and watch mode ignores
+that directory. Compile cleanup never removes release files.</p>
+<h2 id="the-flow">The flow</h2>
+<pre class="mermaid">flowchart LR
+  src[.prs source] -->|prs release build| bundles[bundles/ and manifest.json]
+  bundles -->|promote --to staging| staging[staging.json]
+  staging -->|promote --to prod| prod[prod.json]</pre>
+<h3 id="build">Build</h3>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">release</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">build</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="prs release build"><div></div></button></div></figure></div>
+<p>Build compiles the source in memory. It never reads the compiled <code>prompts/</code> directory, and it works
+whether or not <code>bundle</code> is in <code>targets</code>. It writes each new bundle file, checks the ones that exist,
+and writes the manifest only when its bytes change. A second run writes nothing. A program without
+prompts gives <code>prompts: []</code>.</p>
+<p>A build always runs with these settings, so a release cannot ship what a normal compile would flag:</p>
+<ul>
+<li>Policies are on. <code>validation.skipPolicies: true</code> and <code>validation.ignoreHashes</code> in the YAML are
+ignored. Each policy keeps its own <code>severity</code>, so only a policy with <code>severity: error</code> fails the
+build.</li>
+<li>The security rules PS005 <code>blocked-patterns</code>, PS010 <code>suspicious-urls</code>, PS011
+<code>authority-injection</code>, PS012 <code>obfuscated-content</code>, PS013 <code>path-traversal</code> and PS014
+<code>unicode-security</code> run as errors, whatever <code>validation.rules</code> and <code>validation.disableRules</code> say.
+When the config switched one off, the error says so.</li>
+<li><code>validation.excludes</code> do not apply to these rules in a release, and imported text is scanned
+like local text. An import excluded from a rule in <code>prs validate</code> is still checked when it ships.
+<code>validation.allowedPatterns</code> does apply, like in every other command, so a pattern exempted
+there stays exempted.</li>
+</ul>
+<p>An existing bundle file that does not verify fails with <code>PS5004</code> and the advice to restore it from
+Git. Use <code>--dry-run</code> to see what would be written.</p>
+<h3 id="promote">Promote</h3>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">release</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">promote</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">acme-support/refund-reply</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--to</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">staging</span></div></div><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">release</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">promote</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">acme-support/refund-reply</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--to</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">prod</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="prs release promote acme-support/refund-reply --to stagingprs release promote acme-support/refund-reply --to prod"><div></div></button></div></figure></div>
+<p>Promote points an environment at a bundle. The argument is <code>&#x3C;id></code> or <code>&#x3C;id>@&#x3C;hash></code>. The hash is the
+full <code>sha256-&#x3C;64 hex></code> or a prefix of at least 8 hex digits, with or without <code>sha256-</code>, matched
+among the bundle files of that id. An ambiguous prefix lists the candidates.</p>
+<p>The promotion order is fixed and has no escape:</p>
+<ul>
+<li>The first environment recompiles the source like build does and accepts only the fresh hash. A
+hash you give must equal it. Without a hash, the manifest entry must equal it. Otherwise the
+command fails with <code>PS5004</code> and tells you to run <code>prs release build</code>.</li>
+<li>A later environment accepts only the hash the previous environment holds now. Otherwise the
+command fails with <code>PS5005</code> and prints the exact promote command for the previous environment.</li>
+</ul>
+<p>There is no <code>--force</code>, <code>--skip-policies</code> or <code>--ignore-hashes</code>. The bundle file must exist (<code>PS5003</code>)
+and verify with that id (<code>PS5004</code>).</p>
+<p>Promote warns, without failing, when the new bundle changes inputs compared with the bundle the
+environment holds now: a new required input, an input that became required, a removed input, or a
+changed type or options. Callers need an update before the release reaches them.</p>
+<p>Before the label is written, inside the lock, the prompt version must pass the
+<a href="#release-gates">release gates</a>. The label is written atomically. Promoting the hash an
+environment already holds is a no-op with exit code 0.</p>
+<h3 id="roll-back">Roll back</h3>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">release</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">rollback</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">prod</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="prs release rollback prod"><div></div></button></div></figure></div>
+<p>Rollback undoes the last committed change of a label. It reads Git history, there is no history
+field in the label.</p>
+<ul>
+<li>The label must have no uncommitted change, else <code>PS5006</code> tells you to commit it or run
+<code>git restore</code>.</li>
+<li>It takes the label as it was before its last commit. At the first promotion nothing is before it,
+and <code>PS5006</code> says so.</li>
+<li>In a shallow checkout the commit before may be missing. <code>PS5006</code> then tells you to run
+<code>git fetch --unshallow</code>.</li>
+<li>The restored label must parse and every hash in it must verify.</li>
+<li>Every hash the rollback brings back must pass the <a href="#release-gates">release gates</a> with the
+records committed now. An entry the rollback leaves as it is is not judged again.</li>
+</ul>
+<p>A committed rollback is undone by a second rollback, like <code>helm rollback</code>. Rollback does not check
+the promotion order.</p>
+<p>To go further back, restore the label from an older commit with Git. Promote cannot do it: the
+first environment takes only the fresh build and every later one only the hash of the environment
+before it. Find the commit with <code>prs release status --history</code> or <code>git log</code>, restore the file, check
+it, and commit it in a pull request like any other label change:</p>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">release</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">status</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--history</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">10</span></div></div><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">git</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">restore</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--source=&#x3C;commit></span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">.promptscript/releases/prod.json</span></div></div><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">release</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">status</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="prs release status --history 10git restore --source=<commit> -- .promptscript/releases/prod.jsonprs release status"><div></div></button></div></figure></div>
+<p>Every rollback <code>PS5006</code> message points to this.</p>
+<h3 id="status">Status</h3>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">release</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">status</span></div></div><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">release</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">status</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--history</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">5</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="prs release statusprs release status --history 5"><div></div></button></div></figure></div>
+<p>Status lists every environment with the prompt id, the hash (12 hex digits), whether the hash is in
+the latest build (equals the manifest) and whether the bundle verifies. A missing label means an
+empty environment. A label file for an environment that is not configured gives a warning.</p>
+<p>Every referenced bundle is verified, and a failure exits with code 1, so CI can run it.
+<code>--history &#x3C;n></code> (1 to 1000) adds the commit, date and subject of the last n commits of each label.
+It shows no author names.</p>
+<p>With prompt policies, status also runs the <a href="#release-gates">release gates</a> on every entry and adds
+an <code>approvals</code> column: <code>ok</code>, <code>missing: &#x3C;roles></code>, or <code>-</code> when no <code>required-approvals</code> policy applies.
+Plain status only reports: a gate that fails is a warning and the exit code does not change. The
+check that fails on it is <code>--base</code>.</p>
+<h2 id="one-pull-request-per-promotion">One pull request per promotion</h2>
+<p>Every promotion is a reviewed pull request, and Git history is the release log:</p>
+<ol>
+<li>Change the prompts and run <code>prs release build</code>.</li>
+<li>Commit the changed <code>.prs</code> source, <code>promptscript.yaml</code> and every config file it reaches through
+<code>extends</code> together with the new bundle files and the manifest. Open a pull request and merge it.
+Promotion to the first environment recompiles the source with the config on the branch, so a
+build without them fails with <code>PS5004</code>.</li>
+<li>Run <code>prs release promote &#x3C;id> --to staging</code>, commit the label, open a pull request.</li>
+<li>When staging looks right, run <code>prs release promote &#x3C;id> --to prod</code> in a new pull request.</li>
+</ol>
+<p>Roll back the same way: run <code>prs release rollback prod</code>, commit the label, open a pull request.
+<code>prs release status --base</code> lets that pass, see below. Going back further than the last change is a
+new promotion under the promote rules.</p>
+<p>Promote, build and rollback take a project lock, <code>.promptscript-release.lock</code>. Another release
+command that holds it fails with <code>PS5007</code>. A stale lock is broken after its process is gone or after
+30 minutes. Dry runs take no lock. Add the lock file to <code>.gitignore</code>.</p>
+<h2 id="approvals">Approvals</h2>
+<p>An approval is a small JSON file that says one person approved one exact prompt version in one
+role. <code>prs approve</code> writes it. The version is the content hash, so a record covers the messages,
+the model and the governance values of that bundle, nothing else.</p>
+<p>Approvals need <code>releases</code> and the roles under <code>governance.roles</code>, each with the teams that review
+it:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="yaml"><code><div class="ec-line"><div class="code"><span style="--0:#7EE787;--1:#116329">releases</span><span style="--0:#E6EDF3;--1:#1F2328">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">environments</span><span style="--0:#E6EDF3;--1:#1F2328">: [</span><span style="--0:#A5D6FF;--1:#0A3069">staging</span><span style="--0:#E6EDF3;--1:#1F2328">, </span><span style="--0:#A5D6FF;--1:#0A3069">prod</span><span style="--0:#E6EDF3;--1:#1F2328">]</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7EE787;--1:#116329">governance</span><span style="--0:#E6EDF3;--1:#1F2328">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">roles</span><span style="--0:#E6EDF3;--1:#1F2328">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7EE787;--1:#116329">legal</span><span style="--0:#E6EDF3;--1:#1F2328">: [</span><span style="--0:#A5D6FF;--1:#0A3069">'@acme/legal'</span><span style="--0:#E6EDF3;--1:#1F2328">]</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7EE787;--1:#116329">security</span><span style="--0:#E6EDF3;--1:#1F2328">: [</span><span style="--0:#A5D6FF;--1:#0A3069">'@acme/appsec'</span><span style="--0:#E6EDF3;--1:#1F2328">]</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="releases:  environments: [staging, prod]governance:  roles:    legal: [&#x27;@acme/legal&#x27;]    security: [&#x27;@acme/appsec&#x27;]"><div></div></button></div></figure></div>
+<p>Approve the full hash, for one environment or for all of them:</p>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">approve</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--list</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">acme-support/refund-reply</span></div></div><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">approve</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">acme-support/refund-reply@sha256-&#x3C;64</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">hex</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">digits></span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--role</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">legal</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--approver</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">@jane</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--env</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">prod</span></div></div><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">approve</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">acme-support/refund-reply@sha256-&#x3C;64</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">hex</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">digits></span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--role</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">security</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--approver</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">@bob</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--all-environments</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--comment</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">"Checked in PR 123"</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="prs approve --list acme-support/refund-replyprs approve acme-support/refund-reply@sha256-<64 hex digits> --role legal --approver @jane --env prodprs approve acme-support/refund-reply@sha256-<64 hex digits> --role security --approver @bob --all-environments --comment &#x22;Checked in PR 123&#x22;"><div></div></button></div></figure></div>
+<p><code>--list</code> prints the hash the checkout builds. The command checks, and fails without writing:</p>
+<ul>
+<li>the role is in <code>governance.roles</code> (<code>PS5101</code>). A role named like a Windows device (<code>con</code>, <code>nul</code>,
+<code>com1</code>, …) is refused, since it names a directory.</li>
+<li>the reference is <code>&#x3C;id>@sha256-&#x3C;64 hex></code> with a valid prompt id (<code>PS5102</code>). A prefix is not
+enough, and no id segment may end with a dot.</li>
+<li><code>--env</code> is a configured environment (<code>PS5002</code>), or <code>--all-environments</code> is given. One of the two
+is required.</li>
+<li><code>--comment</code> has at most 2000 characters, no control characters except newlines and no invisible
+format characters such as bidi marks.</li>
+<li><code>--approver</code> is a Git host user handle like <code>@jane</code> (<code>PS5104</code>). An email address or a team is
+refused, so no address ends up in a file name.</li>
+<li>the hash is real (<code>PS5103</code>): a bundle in <code>.promptscript/releases/bundles/</code> of that prompt that
+verifies, or what the source builds right now. A stored bundle that does not verify is <code>PS5004</code>.</li>
+</ul>
+<p>Before it writes, the command prints what the hash holds to stderr: the description, governance
+values, model, inputs with their defaults and options, output contract and messages. Invisible
+characters, such as tag characters or bidi marks, show as <code>&#x3C;U+XXXX></code>. Read the preview. If it is not
+what you meant to approve, delete the record file before you commit it. The command shows no diff
+against an earlier version: the pull request diff is that diff. Link it in <code>--comment</code> or in the
+pull request.</p>
+<h3 id="record-files">Record files</h3>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#e6edf3;--1:#1f2328">.promptscript/approvals/&#x3C;role>/&#x3C;prompt id>/&#x3C;content hash>.&#x3C;approver>.json</span></div></div><div class="ec-line"><div class="code"><span style="--0:#e6edf3;--1:#1f2328">.promptscript/approvals/legal/acme-support/refund-reply/sha256-3f9a...jane.json</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code=".promptscript/approvals/<role>/<prompt id>/<content hash>.<approver>.json.promptscript/approvals/legal/acme-support/refund-reply/sha256-3f9a...jane.json"><div></div></button></div></figure></div>
+<p>The approver part is the handle without <code>@</code>, lowercased. There is one file per approver, role and
+hash. The file holds exactly these bytes, with <code>environment</code> only when <code>--env</code> was given and
+<code>comment</code> only when one was given:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="json"><code><div class="ec-line"><div class="code"><span style="--0:#E6EDF3;--1:#1F2328">{</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">"$schema"</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">"https://getpromptscript.dev/schema/approval-record/v1.json"</span><span style="--0:#E6EDF3;--1:#1F2328">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">"prompt"</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">"acme-support/refund-reply"</span><span style="--0:#E6EDF3;--1:#1F2328">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">"contentHash"</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">"sha256-&#x3C;64 hex digits>"</span><span style="--0:#E6EDF3;--1:#1F2328">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">"role"</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">"legal"</span><span style="--0:#E6EDF3;--1:#1F2328">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">"approver"</span><span style="--0:#E6EDF3;--1:#1F2328">: {</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7EE787;--1:#116329">"source"</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">"asserted"</span><span style="--0:#E6EDF3;--1:#1F2328">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7EE787;--1:#116329">"value"</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">"@jane"</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#E6EDF3;--1:#1F2328">  </span></span><span style="--0:#E6EDF3;--1:#1F2328">},</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">"createdAt"</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">"2026-10-22T09:14:03.120Z"</span><span style="--0:#E6EDF3;--1:#1F2328">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">"environment"</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">"prod"</span><span style="--0:#E6EDF3;--1:#1F2328">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">"comment"</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">"Checked in PR 123"</span></div></div><div class="ec-line"><div class="code"><span style="--0:#E6EDF3;--1:#1F2328">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="{  &#x22;$schema&#x22;: &#x22;https://getpromptscript.dev/schema/approval-record/v1.json&#x22;,  &#x22;prompt&#x22;: &#x22;acme-support/refund-reply&#x22;,  &#x22;contentHash&#x22;: &#x22;sha256-<64 hex digits>&#x22;,  &#x22;role&#x22;: &#x22;legal&#x22;,  &#x22;approver&#x22;: {    &#x22;source&#x22;: &#x22;asserted&#x22;,    &#x22;value&#x22;: &#x22;@jane&#x22;  },  &#x22;createdAt&#x22;: &#x22;2026-10-22T09:14:03.120Z&#x22;,  &#x22;environment&#x22;: &#x22;prod&#x22;,  &#x22;comment&#x22;: &#x22;Checked in PR 123&#x22;}"><div></div></button></div></figure></div>
+<p>A record is never overwritten. When the file exists, the command fails with <code>PS5105</code> and exit code 2. To withdraw an approval, delete the file in a commit. To change its environment or comment,
+delete it in a commit and approve again.</p>
+<p>A record counts only with these exact bytes. The first <code>prs approve</code> writes
+<code>.promptscript/approvals/.gitattributes</code> with <code>* -text</code>, so a checkout with <code>core.autocrlf</code> never
+changes its line endings. Commit that file too. When the file exists without that line, the command
+warns and leaves it alone.</p>
+<p>The path that counts is the one Git tracks, because CODEOWNERS matches that path, and the bytes
+must equal the ones Git has for that path, because those are the reviewed ones. On a
+case-insensitive disk, as on macOS and Windows, <code>Legal/</code> and <code>legal/</code> are one directory, so a record
+committed as <code>Legal/...</code> shows up under <code>legal/</code>, and two such paths share one file on disk.
+<code>--list</code> therefore compares the path in Git and the blob Git has for it, not only what the disk
+shows.</p>
+<p>The writer walks the record path from the project root. A symbolic link, a file where a directory
+should be, or a name that differs only in case, like <code>Legal/</code> next to <code>legal</code>, fails with <code>PS5109</code>.
+It creates the record from a temporary file and links it into place, so an existing name is never
+replaced. It takes the release lock <code>.promptscript-release.lock</code>, like build and promote.</p>
+<h3 id="listing-approvals">Listing approvals</h3>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">approve</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--list</span></div></div><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">approve</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--list</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">acme-support/refund-reply</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--format</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">json</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="prs approve --listprs approve --list acme-support/refund-reply --format json"><div></div></button></div></figure></div>
+<p><code>--list</code> compiles the source in memory, reads every record, asks Git with <code>git ls-files -s</code> which
+paths it tracks and which blob each holds, and prints, per prompt, the hash the checkout builds and
+each record with its role, approver, scope (<code>prod</code> or <code>all environments</code>) and state. When there are
+record files, it needs Git and a repository, else <code>PS5108</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>State</th><th>Meaning</th></tr></thead><tbody><tr><td><code>current</code></td><td>The record approves the hash the checkout builds</td></tr><tr><td><code>labelled:&#x3C;env></code></td><td>Not the current hash, but the label of that environment holds it</td></tr><tr><td><code>stale</code></td><td>Neither: the prompt changed since</td></tr><tr><td><code>untracked</code></td><td>Not added to Git yet. A staged record already counts as tracked</td></tr><tr><td><code>modified</code></td><td>The bytes on disk are not the ones Git has for the path</td></tr><tr><td><code>misplaced</code></td><td>Git tracks the file at another path than its fields give</td></tr><tr><td><code>unknown-role</code></td><td>The role is not in <code>governance.roles</code></td></tr></tbody></table>
+<p>Only <code>current</code> and <code>labelled</code> records can count. A file that is no valid record, for example one
+with CRLF line endings, gets a <code>PS5109</code> warning, and so do modified, misplaced and unknown-role
+records. The file name is never trusted alone: the fields decide, and the path in Git must match
+them. A record with a <code>signature</code> gets a warning, since signatures are not checked in this version.
+Links are never followed. At most 10000 files and directories, files of up to 64 KiB each, and 8
+directory levels below <code>.promptscript/approvals/</code> are read. Git’s list of record paths may take up
+to 10 MiB; a longer one fails with <code>PS5108</code>.</p>
+<p>With <code>--format json</code>, stdout holds one document that matches
+<code>https://getpromptscript.dev/schema/approval-report/v1.json</code>.</p>
+<h3 id="what-an-approval-proves">What an approval proves</h3>
+<p>In this version a record is a claim. The approver is whatever <code>--approver</code> said, and <code>createdAt</code> is
+the clock of the machine that wrote it. The <a href="#release-gates">release gates</a> count records, but only
+committed ones at their own path.</p>
+<p>The binding review is the one on the Git host: the pull request that adds the record, at the path
+Git has for it. Give each role directory its own code owners, so a record under <code>legal/</code> cannot
+merge without a review from <code>@acme/legal</code>. <code>prs governance codeowners</code> writes these lines from
+<code>governance</code>, see <a href="/guides/codeowners/">CODEOWNERS from Governance</a>. By hand they look like this:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#e6edf3;--1:#1f2328">/promptscript.yaml @acme/prompt-platform</span></div></div><div class="ec-line"><div class="code"><span style="--0:#e6edf3;--1:#1f2328">/shared/base.yaml @acme/prompt-platform</span></div></div><div class="ec-line"><div class="code"><span style="--0:#e6edf3;--1:#1f2328">/.promptscript/releases @acme/prompt-platform</span></div></div><div class="ec-line"><div class="code"><span style="--0:#e6edf3;--1:#1f2328">/.github/CODEOWNERS @acme/prompt-platform</span></div></div><div class="ec-line"><div class="code"><span style="--0:#e6edf3;--1:#1f2328">/.promptscript/approvals @acme/prompt-platform</span></div></div><div class="ec-line"><div class="code"><span style="--0:#e6edf3;--1:#1f2328">/.promptscript/approvals/legal @acme/legal</span></div></div><div class="ec-line"><div class="code"><span style="--0:#e6edf3;--1:#1f2328">/.promptscript/approvals/security @acme/appsec</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="/promptscript.yaml @acme/prompt-platform/shared/base.yaml @acme/prompt-platform/.promptscript/releases @acme/prompt-platform/.github/CODEOWNERS @acme/prompt-platform/.promptscript/approvals @acme/prompt-platform/.promptscript/approvals/legal @acme/legal/.promptscript/approvals/security @acme/appsec"><div></div></button></div></figure></div>
+<p>The admin lines cover what decides which review a record needs: the config and every file its
+<code>extends</code> reaches (here <code>shared/base.yaml</code>), the release files and the CODEOWNERS file itself.</p>
+<p>Turn on required code owner review for the branch. The host also stops a pull request author from
+approving their own pull request; the CLI does not check that. For “who approved this for prod”,
+read the review of the pull request that added the record.</p>
+<h2 id="release-gates">Release gates</h2>
+<p>The gates are the prompt policies, run on the prompt version a label is about to hold. They run
+in <code>prs release promote</code> before the label is written, in <code>prs release rollback</code> for every hash it
+brings back, in <code>prs release status --base</code> for every entry that changed, and in plain
+<code>prs release status</code> for every entry, where they only warn. There is no flag or setting around
+them: they call the policy evaluators themselves, so <code>validation.disableRules</code>,
+<code>validation.rules</code>, custom rules and <code>--skip-policies</code> do not apply. <code>validation.blockedPatterns</code>
+and <code>validation.allowedPatterns</code> do apply, like everywhere else.</p>
+<p>Without a prompt policy the gates pass and nothing else runs. With one:</p>
+<ul>
+<li>The policies are parsed again. A policy that does not parse fails every gate.</li>
+<li>The source is built in memory, with the same settings as <code>prs release build</code>. A source that does
+not build fails the gates, also for a rollback: fix the source, or change the policy in a
+reviewed pull request.</li>
+<li>The policy risk is the highest of the bundle’s risk, the source’s risk and the floors of both.
+<code>match</code> sees the domain of either and the data classes of both. A bundle file only verifies
+against its own hash, so a bundle with lowered governance values still falls under the policies
+the source falls under.</li>
+<li><code>required-metadata</code>, <code>risk-floor</code>, <code>model-allowlist</code> and <code>content-rules</code> judge the bundle that
+ships: its governance, model, inputs and messages.</li>
+<li><code>required-approvals</code> counts approval records for that prompt, hash and environment. <code>required-evals</code>
+is <code>unavailable</code>, see <a href="/guides/policy-engine/#required-approvals-and-required-evals">Policy Engine</a>.</li>
+</ul>
+<p>A check of severity <code>error</code> that fails, or is <code>unavailable</code>, fails the command with a <code>PS030</code> error
+that names the policy and what to do. A check of severity <code>warning</code> is a warning. The skill policy
+kinds are not part of the gates, they run as <code>PS030</code> in the source build.</p>
+<h3 id="which-approvals-count">Which approvals count</h3>
+<p>The gates read the records committed at <code>HEAD</code>, with <code>git ls-tree -r HEAD</code>, never the disk or the
+index. A record that is only staged, or edited and not committed, does not count. <code>prs approve --list</code> reads the index, so it shows a staged record as <code>current</code> while the gates do not count it
+yet.</p>
+<p><code>status --base</code> on a pull request counts the records the pull request adds, and the gate cannot
+tell who wrote them. A record binds only through review: each <code>.promptscript/approvals/&#x3C;role>/</code>
+needs that role’s team as code owners, with required code owner review on the branch (see
+<a href="#what-an-approval-proves">What an approval proves</a>). <code>prs governance codeowners</code> writes those
+lines, see <a href="/guides/codeowners/">CODEOWNERS from Governance</a>. Without it, any author can add a record in
+another person’s name and pass the gate.</p>
+<p>A record counts for one approver when:</p>
+<ul>
+<li>its fields name the prompt, the hash and the role, and <code>environment</code> is the one promoted to, or
+absent;</li>
+<li>its committed path is the one its fields give, <code>.promptscript/approvals/&#x3C;role>/&#x3C;prompt id>/...</code>.
+CODEOWNERS protects records by that path, so a record anywhere else had the wrong reviewers;</li>
+<li>the role is still in <code>governance.roles</code>;</li>
+<li>the bytes are a valid v1 record.</li>
+</ul>
+<p>An approver counts once per role, compared lowercased. A record of the same prompt and role for
+another hash shows as stale. Two committed paths under <code>.promptscript/approvals/</code> that differ only
+in case fail the gates with <code>PS5109</code>: a case-insensitive disk keeps one of them. A committed file
+over 64 KiB is no record and does not count. When Git cannot list or read the records, for example
+git is not on PATH or an object is missing, the gates fail with <code>PS5108</code> and do not count zero
+approvals.</p>
+<p><code>prs release status --base &#x3C;ref></code> takes the policies, governance and releases of <code>&#x3C;ref></code>, and the
+records committed at <code>HEAD</code>.</p>
+<h3 id="output">Output</h3>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#e6edf3;--1:#1f2328">Gates for acme-support/refund-reply@sha256-3f9a1c2b4d5e to prod (policy risk: high)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#e6edf3;--1:#1f2328">  </span></span><span style="--0:#e6edf3;--1:#1f2328">passed       high-risk-models  model-allowlist</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#e6edf3;--1:#1f2328">  </span></span><span style="--0:#e6edf3;--1:#1f2328">failed       high-risk-signoff  legal 0 of 1 (stale: @bob for sha256-91bc0d2e1a2b)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#e6edf3;--1:#1f2328">  </span></span><span style="--0:#e6edf3;--1:#1f2328">unavailable  prod-evals  acme-support/refund-reply needs passing evals for prod, but release gates do not read eval results in this version of prs</span></div></div><div class="ec-line"><div class="code"><span style="--0:#e6edf3;--1:#1f2328">Promotion refused. Label prod is unchanged.</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Gates for acme-support/refund-reply@sha256-3f9a1c2b4d5e to prod (policy risk: high)  passed       high-risk-models  model-allowlist  failed       high-risk-signoff  legal 0 of 1 (stale: @bob for sha256-91bc0d2e1a2b)  unavailable  prod-evals  acme-support/refund-reply needs passing evals for prod, but release gates do not read eval results in this version of prsPromotion refused. Label prod is unchanged."><div></div></button></div></figure></div>
+<p>With <code>--format json</code>, the report holds every result under <code>gates</code>, with the status, message and,
+for approvals, the approvers found and the stale records per role.</p>
+<h2 id="in-ci">In CI</h2>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#79C0FF;--1:#0550AE">set</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">-e</span></div></div><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">release</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">build</span></div></div><div class="ec-line"><div class="code"><span style="--0:#79C0FF;--1:#0550AE">test</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">-z</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">"$(</span><span style="--0:#FFA657;--1:#953800">git</span><span style="--0:#A5D6FF;--1:#0A3069"> status </span><span style="--0:#79C0FF;--1:#0550AE">--porcelain</span><span style="--0:#A5D6FF;--1:#0A3069"> </span><span style="--0:#79C0FF;--1:#0550AE">--</span><span style="--0:#A5D6FF;--1:#0A3069"> .promptscript/releases)"</span></div></div><div class="ec-line"><div class="code"><span style="--0:#FFA657;--1:#953800">prs</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">release</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">status</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#79C0FF;--1:#0550AE">--base</span><span style="--0:#E6EDF3;--1:#1F2328"> </span><span style="--0:#A5D6FF;--1:#0A3069">refs/remotes/origin/main</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="set -eprs release buildtest -z &#x22;$(git status --porcelain -- .promptscript/releases)&#x22;prs release status --base refs/remotes/origin/main"><div></div></button></div></figure></div>
+<p>Build writes whatever the committed release files miss, so the <code>test -z</code> check fails when a pull
+request changes prompts without the build. It also catches new bundle files, which
+<code>git diff --exit-code</code> would not see because they are untracked. <code>status</code> fails when a label points
+at a bundle that is missing or does not verify. All four commands accept
+<code>--format json</code>, which prints one document on stdout that matches
+<code>https://getpromptscript.dev/schema/release-report/v1.json</code>, and prints the human text on stderr.</p>
+<h3 id="check-label-changes-with---base">Check label changes with <code>--base</code></h3>
+<p><code>prs release status --base &#x3C;ref></code> compares the label files in the checkout with the labels at
+<code>&#x3C;ref></code>, usually the branch the pull request goes into. It looks at every label file: the
+environments configured at <code>&#x3C;ref></code>, the ones configured in the checkout and every other <code>*.json</code>
+file in <code>.promptscript/releases/</code> except <code>manifest.json</code>. A file whose text did not change passes.
+A changed file that does not read or parse as a label fails. Every entry that is new or changed
+must pass the promotion rules of <code>&#x3C;ref></code>:</p>
+<ul>
+<li>The environment is in <code>releases.environments</code> at <code>&#x3C;ref></code>.</li>
+<li>The bundle file exists and verifies for that prompt id.</li>
+<li>The entry is a rollback: the label at <code>&#x3C;ref></code> holds the entry, and its new hash is the one the
+label held before its last change at <code>&#x3C;ref></code>, the label <code>prs release rollback</code> restores. This
+also covers a <code>git revert</code> of the last promotion of one environment. An entry that <code>&#x3C;ref></code>
+removed is not brought back this way; adding it again goes through the other rules.</li>
+<li>Or, in the first environment, the hash is what the source in the checkout compiles to with the
+<code>policies</code>, <code>validation</code> and <code>models.supported</code> of <code>&#x3C;ref></code> and the forced security rules, the
+same compile <code>prs release promote</code> runs.</li>
+<li>Or, in a later environment, the hash is the one the environment before it holds in the checkout.</li>
+</ul>
+<p>A rollback skips the promotion order and the compare with the fresh hash. That is safe only when
+every commit on <code>&#x3C;ref></code> is the result of a pull request this check ran on, see the precondition
+below: then the hash passed the rules when it was promoted. The <a href="#release-gates">release gates</a>
+still run for it, so the hash a rollback restores needs its approvals. A rollback can also restore a hash that the compile
+rules at <code>&#x3C;ref></code> (<code>validation</code>, the forced security rules, <code>models.supported</code>) reject today; the
+gates catch only what the prompt policies check, and review the rest. So when you take a prompt down after a rule
+change, do it in two pull requests: remove the entry, then promote the fixed version. Deleting
+the old bundle file does not help, a pull request can add it back from history. Reviewers should
+look at a rollback like at any other label change. A removed entry ships nothing; it is listed with <code>action: "removed"</code> and not
+checked.</p>
+<p>Any failure exits with code 1. The config is read at <code>&#x3C;ref></code>: the first of <code>promptscript.yaml</code>,
+<code>promptscript.yml</code>, <code>.promptscriptrc.yaml</code> and <code>.promptscriptrc.yml</code> that exists in the project
+root, the same order the loader uses, with its <code>extends</code> chain read at the same commit. <code>-c</code> and
+<code>PROMPTSCRIPT_CONFIG</code> are ignored with <code>--base</code>, with a warning. So a pull request cannot loosen the
+rules it is checked with: a new policy, a removed policy, a wider <code>models.supported</code> or a new
+environment takes effect after the merge. Add a new environment in a pull request of its own,
+before the first label for it.</p>
+<p>The rest of the config comes from the checkout: <code>registry</code>, <code>registries</code>, <code>input.entry</code>,
+<code>models.profiles</code> (they describe the models and reach the bundle hash), and the lockfile and the
+vendor directory. A pull request can change those, so review them with the labels.</p>
+<p><code>&#x3C;ref></code> must name one ref. A short name that matches a tag and a branch, for example a tag called
+<code>origin/main</code> next to the remote branch, fails with <code>PS5006</code>; pass the full name such as
+<code>refs/remotes/origin/main</code>.</p>
+<p>In GitHub Actions, run it on <code>pull_request</code> events. Check out the history so the base exists, pass
+the base branch through <code>env</code>, not inline in <code>run</code>, and run the CLI version the lockfile pins:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="yaml"><code><div class="ec-line"><div class="code"><span style="--0:#79C0FF;--1:#0550AE">on</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">pull_request</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#7EE787;--1:#116329">jobs</span><span style="--0:#E6EDF3;--1:#1F2328">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7EE787;--1:#116329">releases</span><span style="--0:#E6EDF3;--1:#1F2328">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7EE787;--1:#116329">runs-on</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">ubuntu-latest</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7EE787;--1:#116329">steps</span><span style="--0:#E6EDF3;--1:#1F2328">:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#E6EDF3;--1:#1F2328">      </span></span><span style="--0:#E6EDF3;--1:#1F2328">- </span><span style="--0:#7EE787;--1:#116329">uses</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">actions/checkout@v4</span></div></div><div class="ec-line"><div class="code"><span class="indent">        </span><span style="--0:#7EE787;--1:#116329">with</span><span style="--0:#E6EDF3;--1:#1F2328">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">          </span><span style="--0:#7EE787;--1:#116329">fetch-depth</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#79C0FF;--1:#0550AE">0</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#E6EDF3;--1:#1F2328">      </span></span><span style="--0:#E6EDF3;--1:#1F2328">- </span><span style="--0:#7EE787;--1:#116329">run</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">npm ci</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#E6EDF3;--1:#1F2328">      </span></span><span style="--0:#E6EDF3;--1:#1F2328">- </span><span style="--0:#7EE787;--1:#116329">run</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">npx prs release status --base "refs/remotes/origin/$BASE_REF"</span></div></div><div class="ec-line"><div class="code"><span class="indent">        </span><span style="--0:#7EE787;--1:#116329">env</span><span style="--0:#E6EDF3;--1:#1F2328">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">          </span><span style="--0:#7EE787;--1:#116329">BASE_REF</span><span style="--0:#E6EDF3;--1:#1F2328">: </span><span style="--0:#A5D6FF;--1:#0A3069">${{ github.base_ref }}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="on: pull_requestjobs:  releases:    runs-on: ubuntu-latest    steps:      - uses: actions/checkout@v4        with:          fetch-depth: 0      - run: npm ci      - run: npx prs release status --base &#x22;refs/remotes/origin/$BASE_REF&#x22;        env:          BASE_REF: ${{ github.base_ref }}"><div></div></button></div></figure></div>
+<p>What <code>--base</code> does not do:</p>
+<ul>
+<li>Entries that did not change are not checked again, even when the rules at <code>&#x3C;ref></code> changed since
+they were promoted.</li>
+<li>Going back further than the last change of a label is no rollback. It needs a new promotion under
+the promote rules, in the first environment with the source reverted.</li>
+<li>Config files and label files at <code>&#x3C;ref></code> must be regular files. A config that is a link or a
+directory fails with <code>PS5001</code>; a label that is a link counts as empty, so every entry in the
+checkout is checked.</li>
+<li>A config file that <code>extends</code> reaches outside the repository cannot be read at <code>&#x3C;ref></code>; the
+check fails with <code>PS5006</code>.</li>
+<li>It trusts <code>&#x3C;ref></code>. Point it at the protected branch the applications read from.</li>
+<li>The rollback rule trusts the history of <code>&#x3C;ref></code>: every commit on its first-parent chain must be
+the result of a pull request this check ran on. With rebase merging, or a fast-forward of a
+branch with several commits, an unchecked commit lands on that chain, and its label becomes a
+valid rollback target. Allow only squash or merge commits on that branch, see below. Label
+history from before the check was required counts as unchecked too: a label whose last change
+predates the check has an unchecked rollback target until its next change.</li>
+<li>In a <code>pull_request</code> run the pull request controls the workflow file, <code>package.json</code> and the
+lockfile, so it can swap the CLI that runs the check. Protect them as below, or run the check
+as a required workflow from a repository ruleset.</li>
+</ul>
+<h2 id="what-protects-the-labels">What protects the labels</h2>
+<p>Run <code>prs release status --base</code> as a required check, and keep review on the release files:</p>
+<ul>
+<li>Add <code>.promptscript/releases/</code>, <code>promptscript.yaml</code>, every config file it reaches through
+<code>extends</code>, <code>.github/workflows/</code>, <code>package.json</code> and the lockfile to <code>CODEOWNERS</code>, and require the
+review. <code>prs governance codeowners</code> writes these lines for the admins, see
+<a href="/guides/codeowners/">CODEOWNERS from Governance</a>; add <code>.github/workflows</code>, <code>package.json</code> and the
+lockfile to <code>governance.codeowners.protect</code>.</li>
+<li>Protect the branch the applications read from with a ruleset: require the
+<code>prs release status --base</code> check, allow only squash merges or merge commits (no rebase merging,
+no fast-forward of branches with several commits) and no direct pushes. The rollback rule
+relies on that.</li>
+<li>An older label served from a cache, or a label on a rewritten branch, cannot be detected in this
+version.</li>
+</ul>
+<p>Applications read the label file of their environment and the bundle file it names. Recompute the
+content hash before use, as described in <a href="/guides/application-prompts/#content-hash">Application Prompts</a>.</p>
+<h2 id="error-codes">Error codes</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody><tr><td>PS5001</td><td><code>releases</code> is missing or invalid</td></tr><tr><td>PS5002</td><td>The environment is not in <code>releases.environments</code></td></tr><tr><td>PS5003</td><td>A bundle or prompt is missing, or a hash prefix matches nothing</td></tr><tr><td>PS5004</td><td>A release file does not verify, or the hash is not the fresh hash</td></tr><tr><td>PS5005</td><td>The promotion skips the previous environment</td></tr><tr><td>PS5006</td><td>Git cannot give rollback or <code>--base</code> the ref, commit or file</td></tr><tr><td>PS5007</td><td>Another release command holds the lock</td></tr><tr><td>PS5008</td><td>A compile output lies inside <code>.promptscript/releases/</code></td></tr></tbody></table>
+<p><code>prs approve</code> uses these codes:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody><tr><td>PS5101</td><td><code>governance.roles</code> is missing or invalid, or the role is not in it</td></tr><tr><td>PS5102</td><td>The reference is not <code>&#x3C;id>@sha256-&#x3C;64 hex></code> with a valid prompt id</td></tr><tr><td>PS5103</td><td>The hash is neither what the checkout builds nor a bundle of that prompt</td></tr><tr><td>PS5104</td><td><code>--approver</code> is missing or not a user handle like <code>@jane</code></td></tr><tr><td>PS5105</td><td>The record exists (exit code 2)</td></tr><tr><td>PS5108</td><td><code>--list</code> cannot run Git, or the project is not in a repository</td></tr><tr><td>PS5109</td><td>A record is invalid, modified, misplaced or has an unknown role, or the record path has a link</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="/reference/cli/#prs-release"><code>prs release</code> in the CLI reference</a></li>
+<li><a href="/reference/config/#releases"><code>releases</code> in the configuration reference</a></li>
+<li><a href="/guides/application-prompts/">Application Prompts</a></li>
+<li><a href="/reference/formatters/bundle/">Bundle formatter</a></li>
+<li><a href="/guides/policy-engine/">Policy Engine</a></li>
+<li><a href="/guides/codeowners/">CODEOWNERS from Governance</a></li>
+</ul></div><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.CxCZfLF-.js"></script><footer class="sl-flex astro-fgllqbht"><div class="meta sl-flex astro-fgllqbht"><a href="https://github.com/mrwogu/promptscript/edit/main/docs/guides/releases.md" class="sl-flex print:hidden astro-4ypfjkr6"><svg aria-hidden="true" class="astro-4ypfjkr6 astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a><p>Last updated: <time datetime="2026-10-27T19:23:38.000Z">Oct 27, 2026</time></p></div><div class="pagination-links print:hidden astro-6hdawqvk" dir="ltr"><a href="/guides/application-prompts/" rel="prev" class="astro-6hdawqvk"><svg aria-hidden="true" class="astro-6hdawqvk astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg><span class="astro-6hdawqvk">Previous<br class="astro-6hdawqvk"><span class="link-title astro-6hdawqvk">Application Prompts</span></span></a><a href="/guides/hooks/" rel="next" class="astro-6hdawqvk"><svg aria-hidden="true" class="astro-6hdawqvk astro-frs2sqej" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg><span class="astro-6hdawqvk">Next<br class="astro-6hdawqvk"><span class="link-title astro-6hdawqvk">AI Tool Hooks</span></span></a></div></footer><div class="ps-footer astro-jo6i4kqk"><p class="ps-footer__love astro-jo6i4kqk">Loved by a growing community of developers and AI enthusiasts around the world.</p><p class="astro-jo6i4kqk">Created by <a href="https://github.com/mrwogu" rel="author" class="astro-jo6i4kqk">Wojciech Guziak</a> - Released under the <a href="https://github.com/mrwogu/promptscript/blob/main/LICENSE" class="astro-jo6i4kqk">MIT License</a></p><p class="ps-footer__links astro-jo6i4kqk"><a href="https://github.com/mrwogu/promptscript" class="astro-jo6i4kqk">GitHub</a><a href="https://www.linkedin.com/in/wojciechguziak/" rel="author" class="astro-jo6i4kqk">LinkedIn</a><a href="https://www.npmjs.com/org/promptscript" class="astro-jo6i4kqk">npm</a><a href="https://github.com/mrwogu/promptscript/releases" class="astro-jo6i4kqk">Changelog</a><a href="/playground/" class="astro-jo6i4kqk">Playground</a></p></div></div></div></main></div></div></div></div></body></html>

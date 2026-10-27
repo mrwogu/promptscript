@@ -8,7 +8,7 @@
 
 > **interpolateText**(`text`, `ctx`): `string`
 
-Defined in: [core/src/template.ts:220](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/template.ts#L220)
+Defined in: [core/src/template.ts:226](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/template.ts#L226)
 
 Interpolate template variables in a text string.
 

@@ -6,7 +6,7 @@
 
 # Interface: CanonicalParseResult
 
-Defined in: [parser/src/parse.ts:52](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/parser/src/parse.ts#L52)
+Defined in: [parser/src/parse.ts:55](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/parser/src/parse.ts#L55)
 
 Result of parsing PromptScript into the immutable canonical AST.
 
@@ -16,9 +16,19 @@ Result of parsing PromptScript into the immutable canonical AST.
 
 > **ast**: [`CanonicalProgram`](https://getpromptscript.dev/api-reference/core/src/interfaces/CanonicalProgram/index.md) \| `null`
 
-Defined in: [parser/src/parse.ts:54](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/parser/src/parse.ts#L54)
+Defined in: [parser/src/parse.ts:57](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/parser/src/parse.ts#L57)
 
 The canonical AST, or null if parsing failed with tolerant=false.
+
+***
+
+### comments
+
+> **comments**: readonly [`Comment`](https://getpromptscript.dev/api-reference/parser/src/interfaces/Comment/index.md)[]
+
+Defined in: [parser/src/parse.ts:61](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/parser/src/parse.ts#L61)
+
+Comments in source order. They are not part of the AST.
 
 ***
 
@@ -26,6 +36,6 @@ The canonical AST, or null if parsing failed with tolerant=false.
 
 > **errors**: [`ParseError`](https://getpromptscript.dev/api-reference/core/src/classes/ParseError/index.md)[]
 
-Defined in: [parser/src/parse.ts:56](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/parser/src/parse.ts#L56)
+Defined in: [parser/src/parse.ts:59](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/parser/src/parse.ts#L59)
 
 List of errors encountered during parsing.

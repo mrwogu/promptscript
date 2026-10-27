@@ -8,7 +8,7 @@
 
 > **mapModelToTarget**(`reference`, `target`, `catalog?`): [`TargetModel`](https://getpromptscript.dev/api-reference/core/src/interfaces/TargetModel/index.md)
 
-Defined in: [core/src/model-catalog.ts:612](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-catalog.ts#L612)
+Defined in: [core/src/model-catalog.ts:634](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-catalog.ts#L634)
 
 Map a model reference from `.prs` source to a target's native model name.
 

@@ -8,7 +8,7 @@
 
 > **buildCompilationDiff**(`options`): `Promise`\<[`CompilationDiffReport`](https://getpromptscript.dev/api-reference/cli/src/interfaces/CompilationDiffReport/index.md)\>
 
-Defined in: [cli/src/utils/diff-report.ts:399](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/cli/src/utils/diff-report.ts#L399)
+Defined in: [cli/src/utils/diff-report.ts:402](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/diff-report.ts#L402)
 
 ## Parameters
 

@@ -8,7 +8,7 @@
 
 > **resolveAgentTargetPath**(`pathParts`, `agentsIndex`, `namespace`, `agentProperties`): `string`[] \| `undefined`
 
-Defined in: [core/src/agent-names.ts:75](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/agent-names.ts#L75)
+Defined in: [core/src/agent-names.ts:75](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/agent-names.ts#L75)
 
 Resolve an agent property path after an `agents` target segment.
 

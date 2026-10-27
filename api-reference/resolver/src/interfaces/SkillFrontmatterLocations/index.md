@@ -6,7 +6,7 @@
 
 # Interface: SkillFrontmatterLocations
 
-Defined in: [resolver/src/skills.ts:103](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/resolver/src/skills.ts#L103)
+Defined in: [resolver/src/skills.ts:103](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/skills.ts#L103)
 
 Source locations for fields declared in a SKILL.md frontmatter block.
 
@@ -16,7 +16,7 @@ Source locations for fields declared in a SKILL.md frontmatter block.
 
 > **fields**: `ReadonlyMap`\<`string`, [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)\>
 
-Defined in: [resolver/src/skills.ts:105](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/resolver/src/skills.ts#L105)
+Defined in: [resolver/src/skills.ts:105](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/skills.ts#L105)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [resolver/src/skills.ts:105](https://github.com/mrwogu/promptscript/
 
 > **frontmatter**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [resolver/src/skills.ts:104](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/resolver/src/skills.ts#L104)
+Defined in: [resolver/src/skills.ts:104](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/skills.ts#L104)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [resolver/src/skills.ts:104](https://github.com/mrwogu/promptscript/
 
 > **items**: `ReadonlyMap`\<`string`, readonly [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)[]\>
 
-Defined in: [resolver/src/skills.ts:106](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/resolver/src/skills.ts#L106)
+Defined in: [resolver/src/skills.ts:106](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/skills.ts#L106)

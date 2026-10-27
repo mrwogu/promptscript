@@ -8,7 +8,7 @@
 
 > **applyOverride**(`ast`, `override`, `options?`): [`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md)
 
-Defined in: [core/src/block-override.ts:531](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/block-override.ts#L531)
+Defined in: [core/src/block-override.ts:531](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/block-override.ts#L531)
 
 Atomically replace one existing block or nested value.
 

@@ -1,0 +1,864 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/eval-report/v1.json",
+  "title": "PromptScript Eval Report v1",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://getpromptscript.dev/schema/eval-report/v1.json",
+      "description": "Schema URL, the version tag of the report.",
+      "examples": [
+        "https://getpromptscript.dev/schema/eval-report/v1.json"
+      ]
+    },
+    "outcome": {
+      "$ref": "#/definitions/EvalOutcome",
+      "description": "Outcome of the run"
+    },
+    "passed": {
+      "type": "boolean",
+      "description": "Whether every suite passed and nothing else went wrong"
+    },
+    "cache": {
+      "$ref": "#/definitions/EvalReportCacheV1",
+      "description": "Cache summary"
+    },
+    "usage": {
+      "$ref": "#/definitions/EvalUsageV1",
+      "description": "Calls and tokens of the run"
+    },
+    "costUsd": {
+      "type": "number",
+      "description": "Cost of the run in USD, when every model used has a price.",
+      "minimum": 0
+    },
+    "budget": {
+      "$ref": "#/definitions/EvalBudgetV1",
+      "description": "Budget of the run, when one applied"
+    },
+    "suites": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/EvalSuiteResultV1"
+      },
+      "description": "Suite results sorted by name"
+    },
+    "comparison": {
+      "$ref": "#/definitions/EvalComparisonV1",
+      "description": "Comparison against a baseline report"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/EvalReportErrorV1"
+      },
+      "description": "Errors not tied to one case"
+    }
+  },
+  "required": [
+    "$schema",
+    "outcome",
+    "passed",
+    "cache",
+    "usage",
+    "suites",
+    "errors"
+  ],
+  "additionalProperties": false,
+  "description": "Report of one eval run, version 1. Deterministic: no timestamps, no wall-clock durations, no absolute paths, arrays sorted by suite name, model order and case id.",
+  "definitions": {
+    "EvalOutcome": {
+      "type": "string",
+      "enum": [
+        "passed",
+        "failed",
+        "regression",
+        "budget-exceeded",
+        "error"
+      ],
+      "description": "Outcome of a run."
+    },
+    "EvalReportCacheV1": {
+      "type": "object",
+      "properties": {
+        "replayed": {
+          "type": "integer",
+          "description": "Calls answered from the cache.",
+          "minimum": 0
+        },
+        "live": {
+          "type": "integer",
+          "description": "Calls made to a provider.",
+          "minimum": 0
+        },
+        "mode": {
+          "$ref": "#/definitions/EvalCacheMode",
+          "description": "Cache mode of the run"
+        },
+        "digest": {
+          "type": "string",
+          "description": "Digest of the consumed cache entries. Take the unique keys of every case's `cacheKeys`, sorted ascending; for each key the lowercase hex SHA-256 of its entry file bytes; join those with `\\n` and take the SHA-256 of the result. An empty set gives the SHA-256 of the empty string.",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "digest",
+        "live",
+        "mode",
+        "replayed"
+      ],
+      "additionalProperties": false,
+      "description": "Cache summary of a run."
+    },
+    "EvalCacheMode": {
+      "type": "string",
+      "enum": [
+        "replay",
+        "record",
+        "refresh",
+        "off"
+      ],
+      "description": "How a run uses the cache."
+    },
+    "EvalUsageV1": {
+      "type": "object",
+      "properties": {
+        "inputTokens": {
+          "type": "integer",
+          "description": "Input tokens.",
+          "minimum": 0
+        },
+        "outputTokens": {
+          "type": "integer",
+          "description": "Output tokens.",
+          "minimum": 0
+        },
+        "calls": {
+          "type": "integer",
+          "description": "Model calls, cache hits included.",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "calls",
+        "inputTokens",
+        "outputTokens"
+      ],
+      "additionalProperties": false,
+      "description": "Calls and tokens of a run, a model entry or a case."
+    },
+    "EvalBudgetV1": {
+      "type": "object",
+      "properties": {
+        "maxUsd": {
+          "type": "number",
+          "description": "Spending limit in USD.",
+          "minimum": 0
+        },
+        "spentUsd": {
+          "type": "number",
+          "description": "Amount spent in USD.",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "maxUsd",
+        "spentUsd"
+      ],
+      "additionalProperties": false,
+      "description": "Budget of a run."
+    },
+    "EvalSuiteResultV1": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Suite name"
+        },
+        "suiteHash": {
+          "type": "string",
+          "description": "SHA-256 of the suite file bytes.",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        },
+        "prompt": {
+          "$ref": "#/definitions/EvalPromptRefV1",
+          "description": "Prompt under test"
+        },
+        "dataset": {
+          "$ref": "#/definitions/EvalDatasetRefV1",
+          "description": "Dataset the suite ran on"
+        },
+        "judges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EvalJudgeRefV1"
+          },
+          "description": "Judge rubrics the suite used, sorted by rubric id"
+        },
+        "passed": {
+          "type": "boolean",
+          "description": "Whether every threshold held"
+        },
+        "thresholds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EvalThresholdResultV1"
+          },
+          "description": "Threshold checks"
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EvalFindingV1"
+          },
+          "description": "Dataset findings"
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EvalModelResultV1"
+          },
+          "description": "Model entries in suite order"
+        }
+      },
+      "required": [
+        "name",
+        "suiteHash",
+        "prompt",
+        "dataset",
+        "passed",
+        "thresholds",
+        "findings",
+        "models"
+      ],
+      "additionalProperties": false,
+      "description": "Result of one suite."
+    },
+    "EvalPromptRefV1": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Prompt id"
+        },
+        "contentHash": {
+          "type": "string",
+          "description": "Content hash of the bundle.",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "id",
+        "contentHash"
+      ],
+      "additionalProperties": false,
+      "description": "Prompt under test as the run saw it."
+    },
+    "EvalDatasetRefV1": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Dataset file, relative to the project root"
+        },
+        "rows": {
+          "type": "integer",
+          "description": "Rows read.",
+          "minimum": 0
+        },
+        "hash": {
+          "type": "string",
+          "description": "SHA-256 of the dataset file bytes.",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "rows",
+        "hash"
+      ],
+      "additionalProperties": false,
+      "description": "Dataset as the run saw it."
+    },
+    "EvalJudgeRefV1": {
+      "type": "object",
+      "properties": {
+        "rubric": {
+          "type": "string",
+          "description": "Rubric prompt id"
+        },
+        "contentHash": {
+          "type": "string",
+          "description": "Content hash of the rubric bundle.",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "rubric",
+        "contentHash"
+      ],
+      "additionalProperties": false,
+      "description": "A judge rubric the run used."
+    },
+    "EvalThresholdResultV1": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/definitions/EvalThresholdName",
+          "description": "Threshold name"
+        },
+        "model": {
+          "type": "string",
+          "description": "Model entry the check applies to; absent for a suite-wide limit"
+        },
+        "limit": {
+          "type": "number",
+          "description": "Limit from the suite"
+        },
+        "actual": {
+          "type": "number",
+          "description": "Value of the run"
+        },
+        "passed": {
+          "type": "boolean",
+          "description": "Whether the limit held"
+        }
+      },
+      "required": [
+        "name",
+        "limit",
+        "actual",
+        "passed"
+      ],
+      "additionalProperties": false,
+      "description": "One threshold check of a suite."
+    },
+    "EvalThresholdName": {
+      "type": "string",
+      "enum": [
+        "passRate",
+        "maxCostUsd",
+        "maxCostPerCaseUsd",
+        "latencyMs.p50",
+        "latencyMs.p95"
+      ],
+      "description": "Name of a suite threshold."
+    },
+    "EvalFindingV1": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Eval code of the finding.",
+          "examples": [
+            "PS6110"
+          ],
+          "pattern": "^PS\\d{3,4}$"
+        },
+        "rule": {
+          "type": "string",
+          "description": "Validator rule that fired, for a scan finding.",
+          "examples": [
+            "PS005"
+          ],
+          "pattern": "^PS\\d{3,4}$"
+        },
+        "ruleName": {
+          "type": "string",
+          "description": "Validator rule name, for a scan finding.",
+          "examples": [
+            "blocked-patterns"
+          ]
+        },
+        "severity": {
+          "$ref": "#/definitions/EvalFindingSeverity",
+          "description": "Severity after any downgrade"
+        },
+        "rowId": {
+          "type": "string",
+          "description": "Dataset row id"
+        },
+        "path": {
+          "type": "string",
+          "description": "JSON path of the value inside the row.",
+          "examples": [
+            "inputs.message"
+          ]
+        },
+        "line": {
+          "type": "integer",
+          "description": "Line of the row in the dataset file.",
+          "minimum": 1
+        },
+        "allowedBecause": {
+          "type": "string",
+          "description": "Reason from the suite's allow entry when the finding was downgraded"
+        }
+      },
+      "required": [
+        "code",
+        "severity"
+      ],
+      "additionalProperties": false,
+      "description": "One finding of the dataset scan."
+    },
+    "EvalFindingSeverity": {
+      "type": "string",
+      "enum": [
+        "error",
+        "warning"
+      ],
+      "description": "Severity of a dataset finding."
+    },
+    "EvalModelResultV1": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "Model reference as written"
+        },
+        "provider": {
+          "type": "string",
+          "description": "Provider name"
+        },
+        "apiId": {
+          "type": "string",
+          "description": "Provider API model identifier"
+        },
+        "passRate": {
+          "type": "number",
+          "description": "Passed cases over all cases.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "usage": {
+          "$ref": "#/definitions/EvalUsageV1",
+          "description": "Calls and tokens of the entry"
+        },
+        "costUsd": {
+          "type": "number",
+          "description": "Cost of the entry in USD.",
+          "minimum": 0
+        },
+        "latencyMs": {
+          "$ref": "#/definitions/EvalLatencyV1",
+          "description": "Latency percentiles of the entry"
+        },
+        "judgeAgreement": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EvalJudgeAgreementV1"
+          },
+          "description": "Agreement with human labels per judge assertion, in assertion order"
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EvalCaseResultV1"
+          },
+          "description": "Case results sorted by id"
+        }
+      },
+      "required": [
+        "ref",
+        "provider",
+        "apiId",
+        "passRate",
+        "usage",
+        "latencyMs",
+        "cases"
+      ],
+      "additionalProperties": false,
+      "description": "Result of one model entry of a suite."
+    },
+    "EvalLatencyV1": {
+      "type": "object",
+      "properties": {
+        "p50": {
+          "type": "integer",
+          "description": "Median latency in milliseconds.",
+          "minimum": 0
+        },
+        "p95": {
+          "type": "integer",
+          "description": "95th percentile latency in milliseconds.",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "p50",
+        "p95"
+      ],
+      "additionalProperties": false,
+      "description": "Latency percentiles over the recorded latencies, nearest rank."
+    },
+    "EvalJudgeAgreementV1": {
+      "type": "object",
+      "properties": {
+        "assertion": {
+          "type": "string",
+          "description": "Judge assertion id"
+        },
+        "labelled": {
+          "type": "integer",
+          "description": "Cases with a human label.",
+          "minimum": 0
+        },
+        "agreed": {
+          "type": "integer",
+          "description": "Labelled cases where the judge agreed with the label.",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "assertion",
+        "labelled",
+        "agreed"
+      ],
+      "additionalProperties": false,
+      "description": "Agreement between a judge assertion and the human labels."
+    },
+    "EvalCaseResultV1": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Dataset row id"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Row tags"
+        },
+        "status": {
+          "$ref": "#/definitions/EvalCaseStatus",
+          "description": "Case status"
+        },
+        "assertions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EvalAssertionResultV1"
+          },
+          "description": "Assertion results in suite order"
+        },
+        "usage": {
+          "$ref": "#/definitions/EvalUsageV1",
+          "description": "Calls and tokens of the case, judge runs included"
+        },
+        "costUsd": {
+          "type": "number",
+          "description": "Cost of the case in USD.",
+          "minimum": 0
+        },
+        "latencyMs": {
+          "type": "integer",
+          "description": "Latency of the case call in milliseconds.",
+          "minimum": 0
+        },
+        "cache": {
+          "$ref": "#/definitions/EvalCacheUseV1",
+          "description": "Cache use of the case"
+        },
+        "cacheKeys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EvalCacheKey"
+          },
+          "description": "Cache keys of every call or hit the case consumed, judge runs included, in call order"
+        },
+        "error": {
+          "$ref": "#/definitions/EvalCaseErrorV1",
+          "description": "Error that stopped the case"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "assertions",
+        "usage",
+        "latencyMs",
+        "cache",
+        "cacheKeys"
+      ],
+      "additionalProperties": false,
+      "description": "Result of one case on one model entry."
+    },
+    "EvalCaseStatus": {
+      "type": "string",
+      "enum": [
+        "passed",
+        "failed",
+        "error"
+      ],
+      "description": "Status of one case."
+    },
+    "EvalAssertionResultV1": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Assertion id"
+        },
+        "kind": {
+          "$ref": "#/definitions/EvalAssertionKind",
+          "description": "Assertion kind"
+        },
+        "passed": {
+          "type": "boolean",
+          "description": "Whether the assertion passed"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why it failed, with at most 80 characters of the actual value.",
+          "maxLength": 160
+        },
+        "judge": {
+          "$ref": "#/definitions/EvalJudgeResultV1",
+          "description": "Judge runs, for llm-judge assertions"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "passed"
+      ],
+      "additionalProperties": false,
+      "description": "Result of one assertion on one case."
+    },
+    "EvalAssertionKind": {
+      "type": "string",
+      "enum": [
+        "equals",
+        "contains",
+        "regex",
+        "json-schema",
+        "llm-judge"
+      ],
+      "description": "Kind of an eval assertion."
+    },
+    "EvalJudgeResultV1": {
+      "type": "object",
+      "properties": {
+        "verdicts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EvalVerdict"
+          },
+          "description": "Verdict of each run, in run order"
+        },
+        "runs": {
+          "type": "integer",
+          "description": "Runs made.",
+          "minimum": 1
+        },
+        "costUsd": {
+          "type": "number",
+          "description": "Cost of the judge runs in USD.",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "verdicts",
+        "runs"
+      ],
+      "additionalProperties": false,
+      "description": "Judge runs behind one llm-judge assertion result."
+    },
+    "EvalVerdict": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "description": "Verdict of a judge run or a human label."
+    },
+    "EvalCacheUseV1": {
+      "type": "object",
+      "properties": {
+        "replayed": {
+          "type": "integer",
+          "description": "Calls answered from the cache.",
+          "minimum": 0
+        },
+        "live": {
+          "type": "integer",
+          "description": "Calls made to a provider.",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "replayed",
+        "live"
+      ],
+      "additionalProperties": false,
+      "description": "How many calls came from the cache and how many went to a provider."
+    },
+    "EvalCacheKey": {
+      "type": "string",
+      "description": "Cache key: the SHA-256 of the canonical JSON of a cache request, 64 lowercase hex characters.",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "EvalCaseErrorV1": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Error code.",
+          "pattern": "^PS\\d{3,4}$"
+        },
+        "message": {
+          "type": "string",
+          "description": "What went wrong and what to do"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "additionalProperties": false,
+      "description": "Error that stopped one case."
+    },
+    "EvalComparisonV1": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "const": "https://getpromptscript.dev/schema/eval-comparison/v1.json",
+          "description": "Schema URL, the version tag of a standalone comparison; absent inside a report.",
+          "examples": [
+            "https://getpromptscript.dev/schema/eval-comparison/v1.json"
+          ]
+        },
+        "tolerance": {
+          "type": "number",
+          "description": "Pass-rate drop that counts as a regression.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "regression": {
+          "type": "boolean",
+          "description": "Whether any case regressed or a pass rate dropped beyond the tolerance"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EvalComparisonEntryV1"
+          },
+          "description": "Entries sorted by suite name, then model order"
+        }
+      },
+      "required": [
+        "tolerance",
+        "regression",
+        "entries"
+      ],
+      "additionalProperties": false,
+      "description": "Comparison of a candidate report against a baseline, version 1: the JSON output of a standalone compare, or `comparison` inside a report."
+    },
+    "EvalComparisonEntryV1": {
+      "type": "object",
+      "properties": {
+        "suite": {
+          "type": "string",
+          "description": "Suite name"
+        },
+        "model": {
+          "type": "string",
+          "description": "Model reference"
+        },
+        "passRateDelta": {
+          "type": "number",
+          "description": "Candidate pass rate minus baseline pass rate"
+        },
+        "costUsdDelta": {
+          "type": "number",
+          "description": "Candidate cost minus baseline cost in USD, when both reports carry a cost"
+        },
+        "latencyP95MsDelta": {
+          "type": "number",
+          "description": "Candidate p95 latency minus baseline p95 latency in milliseconds"
+        },
+        "regressions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Cases that passed in the baseline and not in the candidate"
+        },
+        "fixes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Cases that passed in the candidate and not in the baseline"
+        },
+        "onlyInBaseline": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Case ids only the baseline has"
+        },
+        "onlyInCandidate": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Case ids only the candidate has"
+        },
+        "datasetChanged": {
+          "type": "boolean",
+          "description": "Whether the dataset hashes differ"
+        }
+      },
+      "required": [
+        "suite",
+        "model",
+        "passRateDelta",
+        "latencyP95MsDelta",
+        "regressions",
+        "fixes",
+        "onlyInBaseline",
+        "onlyInCandidate",
+        "datasetChanged"
+      ],
+      "additionalProperties": false,
+      "description": "Comparison of one suite and model entry between two reports."
+    },
+    "EvalReportErrorV1": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Error code.",
+          "examples": [
+            "PS6202"
+          ],
+          "pattern": "^PS\\d{3,4}$"
+        },
+        "message": {
+          "type": "string",
+          "description": "What went wrong and what to do"
+        },
+        "file": {
+          "type": "string",
+          "description": "File the error is about, relative to the project root"
+        },
+        "line": {
+          "type": "integer",
+          "description": "Line in the file.",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "additionalProperties": false,
+      "description": "An error of a run that is not tied to one case."
+    }
+  }
+}

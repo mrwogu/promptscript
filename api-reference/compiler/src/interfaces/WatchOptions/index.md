@@ -6,7 +6,7 @@
 
 # Interface: WatchOptions
 
-Defined in: [compiler/src/types.ts:252](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L252)
+Defined in: [compiler/src/types.ts:264](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L264)
 
 Options for watch mode.
 
@@ -16,7 +16,7 @@ Options for watch mode.
 
 > `optional` **debounce?**: `number`
 
-Defined in: [compiler/src/types.ts:258](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L258)
+Defined in: [compiler/src/types.ts:270](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L270)
 
 Debounce delay in milliseconds. Defaults to 300.
 
@@ -26,7 +26,7 @@ Debounce delay in milliseconds. Defaults to 300.
 
 > `optional` **exclude?**: `string`[]
 
-Defined in: [compiler/src/types.ts:256](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L256)
+Defined in: [compiler/src/types.ts:268](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L268)
 
 Glob patterns to exclude. Defaults to node_modules.
 
@@ -36,7 +36,7 @@ Glob patterns to exclude. Defaults to node_modules.
 
 > `optional` **include?**: `string`[]
 
-Defined in: [compiler/src/types.ts:254](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L254)
+Defined in: [compiler/src/types.ts:266](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L266)
 
 Glob patterns for primary files. Resolved dependencies are watched automatically.
 
@@ -46,7 +46,7 @@ Glob patterns for primary files. Resolved dependencies are watched automatically
 
 > `optional` **onCompile?**: [`WatchCallback`](https://getpromptscript.dev/api-reference/compiler/src/type-aliases/WatchCallback/index.md)
 
-Defined in: [compiler/src/types.ts:260](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L260)
+Defined in: [compiler/src/types.ts:272](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L272)
 
 Callback invoked on each recompilation
 
@@ -56,7 +56,7 @@ Callback invoked on each recompilation
 
 > `optional` **onError?**: (`error`) => `void`
 
-Defined in: [compiler/src/types.ts:262](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/compiler/src/types.ts#L262)
+Defined in: [compiler/src/types.ts:274](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/compiler/src/types.ts#L274)
 
 Callback invoked on errors
 

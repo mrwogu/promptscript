@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/eval-comparison/v1.json",
+  "title": "PromptScript Eval Comparison v1",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://getpromptscript.dev/schema/eval-comparison/v1.json",
+      "description": "Schema URL, the version tag of a standalone comparison; absent inside a report.",
+      "examples": [
+        "https://getpromptscript.dev/schema/eval-comparison/v1.json"
+      ]
+    },
+    "tolerance": {
+      "type": "number",
+      "description": "Pass-rate drop that counts as a regression.",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "regression": {
+      "type": "boolean",
+      "description": "Whether any case regressed or a pass rate dropped beyond the tolerance"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/EvalComparisonEntryV1"
+      },
+      "description": "Entries sorted by suite name, then model order"
+    }
+  },
+  "required": [
+    "tolerance",
+    "regression",
+    "entries"
+  ],
+  "additionalProperties": false,
+  "description": "Comparison of a candidate report against a baseline, version 1: the JSON output of a standalone compare, or `comparison` inside a report.",
+  "definitions": {
+    "EvalComparisonEntryV1": {
+      "type": "object",
+      "properties": {
+        "suite": {
+          "type": "string",
+          "description": "Suite name"
+        },
+        "model": {
+          "type": "string",
+          "description": "Model reference"
+        },
+        "passRateDelta": {
+          "type": "number",
+          "description": "Candidate pass rate minus baseline pass rate"
+        },
+        "costUsdDelta": {
+          "type": "number",
+          "description": "Candidate cost minus baseline cost in USD, when both reports carry a cost"
+        },
+        "latencyP95MsDelta": {
+          "type": "number",
+          "description": "Candidate p95 latency minus baseline p95 latency in milliseconds"
+        },
+        "regressions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Cases that passed in the baseline and not in the candidate"
+        },
+        "fixes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Cases that passed in the candidate and not in the baseline"
+        },
+        "onlyInBaseline": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Case ids only the baseline has"
+        },
+        "onlyInCandidate": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Case ids only the candidate has"
+        },
+        "datasetChanged": {
+          "type": "boolean",
+          "description": "Whether the dataset hashes differ"
+        }
+      },
+      "required": [
+        "suite",
+        "model",
+        "passRateDelta",
+        "latencyP95MsDelta",
+        "regressions",
+        "fixes",
+        "onlyInBaseline",
+        "onlyInCandidate",
+        "datasetChanged"
+      ],
+      "additionalProperties": false,
+      "description": "Comparison of one suite and model entry between two reports."
+    }
+  }
+}

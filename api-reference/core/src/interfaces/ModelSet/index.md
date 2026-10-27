@@ -6,7 +6,7 @@
 
 # Interface: ModelSet
 
-Defined in: [core/src/model-catalog.ts:441](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-catalog.ts#L441)
+Defined in: [core/src/model-catalog.ts:463](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-catalog.ts#L463)
 
 Model set from `models.supported`, resolved against a catalog.
 
@@ -16,7 +16,7 @@ Model set from `models.supported`, resolved against a catalog.
 
 > `readonly` **floatingAliases**: `ReadonlySet`\<`string`\>
 
-Defined in: [core/src/model-catalog.ts:445](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-catalog.ts#L445)
+Defined in: [core/src/model-catalog.ts:467](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-catalog.ts#L467)
 
 Floating aliases in the set
 
@@ -26,7 +26,7 @@ Floating aliases in the set
 
 > `readonly` **profileIds**: `ReadonlySet`\<`string`\>
 
-Defined in: [core/src/model-catalog.ts:443](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-catalog.ts#L443)
+Defined in: [core/src/model-catalog.ts:465](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-catalog.ts#L465)
 
 Profile ids in the set, including the releases behind floating aliases
 
@@ -36,6 +36,6 @@ Profile ids in the set, including the releases behind floating aliases
 
 > `readonly` **unknown**: readonly `string`[]
 
-Defined in: [core/src/model-catalog.ts:447](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/model-catalog.ts#L447)
+Defined in: [core/src/model-catalog.ts:469](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-catalog.ts#L469)
 
 Entries that match no catalog model

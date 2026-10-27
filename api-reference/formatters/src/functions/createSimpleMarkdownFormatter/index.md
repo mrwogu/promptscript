@@ -8,7 +8,7 @@
 
 > **createSimpleMarkdownFormatter**(`opts`): [`SimpleFormatterResult`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/SimpleFormatterResult/index.md)
 
-Defined in: [formatters/src/create-simple-formatter.ts:178](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/create-simple-formatter.ts#L178)
+Defined in: [formatters/src/create-simple-formatter.ts:178](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/create-simple-formatter.ts#L178)
 
 Factory that creates a concrete `MarkdownInstructionFormatter` subclass
 and its companion `VERSIONS` constant from a small set of parameters.

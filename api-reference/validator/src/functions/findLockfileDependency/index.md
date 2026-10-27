@@ -8,7 +8,7 @@
 
 > **findLockfileDependency**(`importSource`, `lockfile`): [`ResolvedImportDependency`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ResolvedImportDependency/index.md) \| `undefined`
 
-Defined in: [validator/src/import-exclusions.ts:184](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/import-exclusions.ts#L184)
+Defined in: [validator/src/import-exclusions.ts:184](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/import-exclusions.ts#L184)
 
 Resolve an exclude's import source against lockfile dependency keys.
 

@@ -8,7 +8,7 @@
 
 > `const` **OWNERSHIP\_KEY**: `"_promptscript"` = `'_promptscript'`
 
-Defined in: [formatters/src/structured-output.ts:26](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/structured-output.ts#L26)
+Defined in: [formatters/src/structured-output.ts:26](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/structured-output.ts#L26)
 
 Ownership marker key. Set to `true` on every object that PromptScript
 owns in a merged settings file.

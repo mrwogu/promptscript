@@ -8,4 +8,4 @@
 
 > `const` **RParen**: `TokenType`
 
-Defined in: [parser/src/lexer/tokens.ts:221](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/parser/src/lexer/tokens.ts#L221)
+Defined in: [parser/src/lexer/tokens.ts:225](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/parser/src/lexer/tokens.ts#L225)

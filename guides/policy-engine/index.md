@@ -1,7 +1,7 @@
 # Policy Engine
 
-The policy engine validates skill extensions against declarative organizational rules.
-Policies are evaluated during `prs validate` and optionally during `prs compile`.
+The policy engine checks skill extensions and `@prompts` entries against declarative organizational rules.
+Policies are evaluated by `prs validate` and `prs check`. `prs compile` does not evaluate them.
 
 ## Configuration
 
@@ -31,6 +31,8 @@ policies:
 
 ## Policy Kinds
 
+Three kinds check skill extensions: `layer-boundary`, `property-protection` and `registry-allowlist`. Six more check prompts, see [Prompt Policies](#prompt-policies).
+
 ### Layer Boundary
 
 Controls which layers can extend which, based on distance in a defined layer hierarchy.
@@ -40,17 +42,9 @@ Controls which layers can extend which, based on distance in a defined layer hie
 | `layers`      | `string[]` | Yes      | Ordered list of layers from base to leaf |
 | `maxDistance` | `number`   | No       | Maximum allowed distance (default: 1)    |
 
-Example: with `layers: ['@core', '@team', '@project']` and `maxDistance: 1`, a `@project` extension cannot directly modify a `@core` skill — it must go through `@team`.
+Example: with `layers: ['@core', '@team', '@project']` and `maxDistance: 1`, a `@project` extension cannot directly modify a `@core` skill - it must go through `@team`.
 
-:::caution[Currently schematic]
-
-Layer-boundary distance is measured against the skill's base-definition
-provenance (`__baseSource`), which the resolver does not attach to plain
-`@use` + `@extend` chains yet. On a normal `prs validate` run today this
-policy kind does not produce violations - the scenario above is schematic.
-Property-protection and registry-allowlist do fire end to end (see
-[Runnable Walkthrough](#runnable-walkthrough)).
-:::
+The distance is measured between the registry of the file that defines the skill and the registry of the file that extends it. Sources outside the `layers` list, like the project's own `.prs` files, are not checked.
 
 ### Property Protection
 
@@ -73,10 +67,312 @@ Restricts which registries can provide extensions.
 
 Any extension sourced from a registry not in the `allowed` list produces a violation.
 
+## Prompt Policies
+
+Six kinds read the `@prompts` entries of the resolved program: `required-metadata`, `risk-floor`, `model-allowlist`, `content-rules`, `required-approvals` and `required-evals`.
+
+### What a policy sees
+
+For each valid entry a policy sees:
+
+- the id `<@meta.id>/<key>`;
+- the effective governance: `risk`, `owner` and `domain` from the entry, else from `@meta`, the `dataClasses` of both joined, and entry `reviewers` instead of the `@meta` ones. These are the values the prompt bundle carries, see [Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md#governance);
+- `model.ref`, and the inputs with their types;
+- the entry's own `system` and `user` text. Composed blocks are not part of it. Only the project's own rules PS005, PS010-PS012 and PS014 scan them, with the project's rule settings.
+
+A finding is a PS030 message at the location of the entry, so `prs validate --format json` gives the file and the line.
+
+The release gates see a prompt version the other way round: the bundle that ships, with its composed messages, model and governance, see [Release gates](https://getpromptscript.dev/guides/releases/index.md#release-gates).
+
+### Policy risk and `match`
+
+Every prompt kind except `risk-floor` takes an optional `match`:
+
+| Key           | Selects a prompt when                       |
+| ------------- | ------------------------------------------- |
+| `minRisk`     | its policy risk is at or above this level   |
+| `domains`     | its effective domain is one of these        |
+| `dataClasses` | any of its effective data classes is listed |
+
+Keys combine with AND. A policy without `match` selects every prompt. Domains and data classes compare lowercased.
+
+When `governance.dataClasses` is set, every data class in a `match` or in a `risk-floor` row must be in it. Another value is a PS030 error that names the closest one, because a typo would make the selector or the floor match nothing. Without `governance.dataClasses` these values are not checked, and a typo matches no prompt.
+
+Policy risk is the higher of the effective `risk` and the floor of every `risk-floor` policy, whatever the severity of that policy. A prompt without `risk` counts as `low`.
+
+Keep in mind who controls what. The author of a prompt writes its `risk` and `domain`, and a child file can lower `risk` or change `domain` of what it inherits. Use them to select prompts, not as the boundary. Data classes in `@meta` are joined through `@inherit`, so a child file cannot drop them. Data classes on an entry are not safe the same way: a child file that replaces the whole entry with `@override` sets its own. So the boundary is a `risk-floor` on data classes set in the `@meta` of the parent, plus `required-metadata`, which makes the fields a floor reads mandatory, plus review of the files that can override entries.
+
+### Required Metadata
+
+Matched prompts must set governance fields.
+
+| Field    | Type       | Required | Description                                                  |
+| -------- | ---------- | -------- | ------------------------------------------------------------ |
+| `match`  | object     | No       | Prompts the policy applies to                                |
+| `fields` | `string[]` | Yes      | Any of `risk`, `owner`, `domain`, `dataClasses`, `reviewers` |
+
+An empty list or an empty string counts as missing.
+
+```yaml
+policies:
+  - name: governance-fields
+    kind: required-metadata
+    severity: error
+    match: { minRisk: high }
+    fields: [owner, reviewers]
+```
+
+### Risk Floor
+
+Derives a minimum risk from what a prompt handles. Each row lists conditions and a `minimum`. A row matches when any of its conditions matches, and the floor is the highest `minimum` of the matching rows. The policy reports a prompt whose effective risk is below its floor. It takes no `match`.
+
+| Row key       | Type       | Matches when                                                                     |
+| ------------- | ---------- | -------------------------------------------------------------------------------- |
+| `dataClasses` | `string[]` | any effective data class is listed                                               |
+| `domains`     | `string[]` | the effective domain is listed                                                   |
+| `inputTypes`  | `string[]` | any input has one of the types (a `string` input is free text, an `enum` is not) |
+| `minimum`     | string     | required: `low`, `medium`, `high` or `critical`                                  |
+
+A row needs at least one condition. A starter table, not built in:
+
+| Condition                        | Minimum  |
+| -------------------------------- | -------- |
+| `phi` or `credentials`           | critical |
+| `pii` or `financial`             | high     |
+| `internal`, or a free-text input | medium   |
+| `public` or no data class        | low      |
+
+```yaml
+policies:
+  - name: data-floor
+    kind: risk-floor
+    severity: error
+    floors:
+      - { dataClasses: [phi, credentials], minimum: critical }
+      - { dataClasses: [pii, financial], minimum: high }
+      - { dataClasses: [internal], minimum: medium }
+      - { inputTypes: [string], minimum: medium }
+```
+
+### Model Allowlist
+
+Matched prompts must run on one of the listed models.
+
+| Field    | Type       | Required | Description                                                                               |
+| -------- | ---------- | -------- | ----------------------------------------------------------------------------------------- |
+| `match`  | object     | No       | Prompts the policy applies to                                                             |
+| `models` | `string[]` | Yes      | Catalog ids or aliases, resolved like [`models.supported`](https://getpromptscript.dev/reference/config/index.md#models) |
+
+An entry that is not in the model catalog is a policy error that names the closest id, and so is `inherit`. A prompt without a model, or with `inherit`, fails: the application would pick the model. PS042 still makes a floating alias an error when the effective `risk` is `high` or `critical`. It does not read the policy risk, so a floor that raises a prompt to `high` does not make PS042 stricter; list pinned ids in `models` for that.
+
+```yaml
+policies:
+  - name: high-risk-models
+    kind: model-allowlist
+    severity: error
+    match: { minRisk: high }
+    models: [claude-opus-5-5]
+```
+
+### Content Rules
+
+Runs content checks and denied phrases on the text of matched prompts.
+
+| Field    | Type       | Required           | Description                                        |
+| -------- | ---------- | ------------------ | -------------------------------------------------- |
+| `match`  | object     | No                 | Prompts the policy applies to                      |
+| `checks` | `string[]` | `checks` or `deny` | Content rules to run, by name or id                |
+| `deny`   | `string[]` | `checks` or `deny` | Phrases the text must not contain                  |
+| `allow`  | `string[]` | No                 | Blocked-pattern sources exempt for matched prompts |
+
+`checks` takes `blocked-patterns` (PS005), `suspicious-urls` (PS010), `authority-injection` (PS011), `obfuscated-content` (PS012) and `unicode-security` (PS014). `path-traversal` (PS013) is refused, it checks `@inherit` and `@use` paths, not prompt text. A check runs on the entry's own `system` and `user` text and reports at the policy severity, also when the project turns that rule off with `validation.rules` or `validation.disableRules`. Turning off PS030 itself, with `policy-compliance: off` under `validation.rules` or with `policy-compliance` or `PS030` in `validation.disableRules`, stops every policy, its content checks included. `validation.allowedPatterns` still applies. `allow` removes blocked patterns for the matched prompts by exact source text, like `allowedPatterns`.
+
+`deny` matches after normalization of both the phrase and the text: NFKC, default-ignorable code points (such as zero-width characters) removed, whitespace collapsed, lowercase. It is a tripwire, not a filter. It catches a plain copy of a phrase, but anyone who writes the prompt can phrase around it. It also does not read the sentence, so "Never promise a guaranteed refund" contains "guaranteed refund".
+
+```yaml
+policies:
+  - name: payments-content
+    kind: content-rules
+    severity: error
+    match: { domains: [payments] }
+    checks: [suspicious-urls, obfuscated-content]
+    deny: ['guaranteed refund']
+```
+
+### Required Approvals and Required Evals
+
+`required-approvals` and `required-evals` describe what a prompt needs before release. `prs validate`, `prs check` and `prs release build` check the definitions only. The release gates evaluate them: `prs release promote`, `prs release rollback` and `prs release status --base` refuse a prompt version whose `required-approvals` policy finds no committed approval record for that hash and environment, see [Release gates](https://getpromptscript.dev/guides/releases/index.md#release-gates). `required-evals` is `unavailable` in the gates, because they do not read eval results in this version: at severity `error` it blocks every matching release, at `warning` it only warns. A record binds only through review: [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/index.md) gives each approval role directory to its team.
+
+| Kind                 | Field          | Type       | Required | Description                                                        |
+| -------------------- | -------------- | ---------- | -------- | ------------------------------------------------------------------ |
+| both                 | `match`        | object     | No       | Prompts the policy applies to                                      |
+| both                 | `environments` | `string[]` | No       | Names from `releases.environments`. Absent means all               |
+| `required-approvals` | `approvals`    | list       | Yes      | `{ role, count }` rows. `role` must be a key of `governance.roles` |
+
+`count` is optional and only `1` is accepted: approval records are unsigned, so two records cannot prove two different approvers under one review.
+
+```yaml
+governance:
+  roles:
+    legal: ['@acme/legal']
+releases:
+  environments: [staging, prod]
+policies:
+  - name: high-risk-signoff
+    kind: required-approvals
+    severity: error
+    match: { minRisk: high }
+    environments: [prod]
+    approvals: [{ role: legal }]
+```
+
+### Typos and unknown kinds
+
+Prompt kinds reject unknown keys with the closest key, at every level, because a typo such as `minrisk` would quietly change what a policy selects. An unknown `kind` is a PS030 error, so a policy this version cannot evaluate never passes in silence. A `__proto__` key is refused in every policy. `policies` must be a list: written as a mapping, without the `-` before `name`, it is a PS030 error and not a project without policies.
+
+### Starter configuration
+
+```yaml
+governance:
+  roles:
+    legal: ['@acme/legal']
+  dataClasses: [pii, phi, financial, credentials, internal, public]
+
+policies:
+  - name: risk-set
+    kind: required-metadata
+    severity: error
+    fields: [risk, dataClasses]
+
+  - name: data-floor
+    kind: risk-floor
+    severity: error
+    floors:
+      - { dataClasses: [phi, credentials], minimum: critical }
+      - { dataClasses: [pii, financial], minimum: high }
+      - { dataClasses: [internal], minimum: medium }
+      - { inputTypes: [string], minimum: medium }
+
+  - name: governance-fields
+    kind: required-metadata
+    severity: error
+    match: { minRisk: high }
+    fields: [owner, reviewers]
+```
+
+`risk-set` makes every prompt state its risk and data classes, so unset risk does not quietly count as `low`.
+
+### Example
+
+A prompt that handles `pii` but says `risk: "medium"`. The project uses `data-floor`, `governance-fields`, `high-risk-models` and `payments-content` from above, and the `governance` section of the starter configuration:
+
+```promptscript
+@meta {
+  id: "acme"
+  syntax: "1.6.0"
+  owner: "Support team"
+}
+
+@prompts {
+  refund-reply: {
+    description: "Answer a refund request"
+    domain: "payments"
+    dataClasses: ["pii"]
+    risk: "medium"
+    model: { ref: "claude-sonnet-5-5" }
+    system: "You answer refund requests. Policy: http://acme.example/refunds"
+    user: "Customer wrote: {{input.message}}. Never promise a guaranteed refund."
+    inputs: {
+      message: { type: "string", description: "Customer message" }
+    }
+  }
+}
+```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMjPvLES4AT3YZCs+QEYKANgoAGFeMHMA7qxjVdIAMoBXNGmbUsgjqXMBfMTFuGmYyLDhhVUFqGDBnVikAWhjydVlRCwkpeEZqCDQsCDYHAEFWOCs7QSEYuITomABHZ3gscwks0IwIVgdMdT52OHaOqWwMAGEoDDg4eFlkeTQICHkAXSiJPLgAawc+KQhnEhGJEmZsqHSGsAdGaedsxLg2WyxEgFZP+UEAzMENHAOCQHABNZjOarlSrUG7xKQNZqtOAUQQABWYUAgjDSghwWCwaEQAHpiYo+BQiKRyDBibV4cMQJtBM45vY5CAJqysKEqlZqMwOOlgD00M4sBQ+LMMABzGB+PyogByMAAblUQiQIHNqoIZc4MNQMOwYDAEfSEhRTpJWGLwulmWd4HBZTBrlh1Gg3RygXlWDL5HRBNk4Ll8oVihyuUDebCpS65T8-h1flE-n4QH41gxOFhqOp8FSyJQaPQQOraEVWPg9JmgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+```text
+$ prs validate
+- Loading configuration...
+✖ Validation failed
+
+Errors (5):
+  ✗ [data-floor] Prompt "acme/refund-reply" has risk "medium", below "high" required for data class "pii"
+    at .promptscript/project.prs:8:3
+  ✗ [governance-fields] Prompt "acme/refund-reply" has risk "high" but no reviewers
+    at .promptscript/project.prs:8:3
+  ✗ [high-risk-models] Prompt "acme/refund-reply" uses "claude-sonnet-5-5", which is not allowed at risk "high"
+    at .promptscript/project.prs:8:3
+  ✗ [payments-content] Prompt "acme/refund-reply": suspicious-urls: Insecure HTTP URL detected: http://acme.example/refunds in the system message
+    at .promptscript/project.prs:8:3
+  ✗ [payments-content] Prompt "acme/refund-reply" contains the denied phrase "guaranteed refund" in the user message
+    at .promptscript/project.prs:8:3
+
+Warnings (2):
+  ⚠ PS047: @meta: owner "Support team" is not a Git host identity
+    at .promptscript/project.prs:1:1
+    suggestion: Use a user (@jane), a team (@acme/legal) or an email address.
+  ⚠ PS010: Insecure HTTP URL detected: http://acme.example/refunds
+    at .promptscript/project.prs:7:10
+    suggestion: Use HTTPS instead of HTTP for secure communication
+```
+
+The floor lifts the policy risk to `high`, so `governance-fields` and `high-risk-models` select the prompt although it says `medium`. Paths are shortened here, the CLI prints absolute paths.
+
+## Governance Values (PS047)
+
+PS047 (`governance-values`) runs when `promptscript.yaml` has a `governance` section and the program has `@prompts` entries. It warns on values authored on an entry or in `@meta`:
+
+- an `owner` or a reviewer that is not a Git host identity: a user (`@jane`), a team (`@acme/legal`, GitLab subgroups allowed) or an email address of at most 254 characters;
+- when `governance.dataClasses` is set, a data class outside that list, with the closest match. Values compare lowercased. Without `governance.dataClasses` data classes are not checked.
+
+Owners and reviewers stay free strings in the language, so PS047 is a warning. Prefer teams: they change less often, and governance values are part of the content hash of a prompt bundle, so a changed owner changes the hash. A team also keeps personal data out of the bundle.
+
+A recommended data class vocabulary:
+
+| Data class    | Meaning                                |
+| ------------- | -------------------------------------- |
+| `pii`         | Data about an identifiable person      |
+| `phi`         | Health information                     |
+| `financial`   | Payment, account or card data          |
+| `credentials` | Passwords, keys and tokens             |
+| `internal`    | Company information that is not public |
+| `public`      | Information that is already public     |
+
 ## Severity
 
 - **`error`**: Validation fails (non-zero exit code)
 - **`warning`**: Reported but does not fail validation (unless `--strict`)
+
+## Policies in Extended Configs
+
+When `promptscript.yaml` uses `extends`, the policies of the base file are kept and the project's own policies are appended after them:
+
+```yaml
+# shared/org.yaml
+policies:
+  - name: approved-registries
+    kind: registry-allowlist
+    severity: error
+    allowed: ['@core', '@team']
+```
+
+```yaml
+# app/promptscript.yaml
+id: app
+extends: ../shared/org.yaml
+policies:
+  - name: protect-content
+    kind: property-protection
+    severity: warning
+    properties: ['content']
+```
+
+The project is validated against both `approved-registries` and `protect-content`. A base policy cannot be removed or redefined from the extending file: a policy with the same `name` as a base policy is a config error, and so is a `policies` value that is not a list, such as `policies: null` (a bare `policies:` key is accepted only when the base has no policies). See [Extending Configuration](https://getpromptscript.dev/reference/config/index.md#extending-configuration) for the other merge rules.
 
 ## Skipping Policies
 
@@ -85,6 +381,8 @@ For development, use `--skip-policies`:
 ```bash
 prs validate --skip-policies
 ```
+
+The flag skips policies for one run of `prs validate`. A `skipPolicies` key under `validation` in `promptscript.yaml` is ignored by both commands. Setting `validation.rules.policy-compliance` to `off` still turns PS030 off, including from an extending file.
 
 > **Note:** Never use `--skip-policies` in CI pipelines.
 
@@ -163,7 +461,7 @@ policies:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAE1MAOYQ4WagE8A9AAEOpScwBuMalAziqtADqtpJGFgy9gO3rwgATRLy0hZMeUpVrxt07zjj2GQtdsBGCgBWCgAGN1YAXx0daQBXOBheaRYBSTgAa2goOBjdIg5WCw8sqByKFgsYAFoBRQgYAHdjdxZ2Tiw-EDdu1jMzABUHEmq4NBhGCEhGfhh6pt5GHAmMqBEsXkaIXF4AIwxWLNZBReYyNYPGJNEYNDgKdx6IyJBIunRsPEQ7VJh00vKNHoTDYhSwPF4AGU4mhyA1inBmLxcEkiKRyElqHFWHBeMsBBReAA5ZgbTDUDbMMDI5a8CzMRhxfTeLAQNh0XgHYqsUmc2YYKC8TCMDIYQQwB66fSGFp9cxWGw-ZhpTLZXK9Myeby+RWBELhDW8EgQQgQVjWMRxGA6aK6URcjDUCy4kxyyowazIWwABTUVxwzCgVWoHkMRUdFlsAF13BxRGbBJ6fX6YAGgypQw6ndGbbEBKJqBBGKy2C73NVFb6MP7A8HZgWiyXWM9XlGGB0JPg0ecJUCQAxlLQ2ax8P5XkA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAE1MAOYQ4WagE8A9AAEOpScwBuMalAziqtADqtpJGFgy9gO3rwgATRLy0hZMeUpVrxt07zjj2GQtdsBGCgBWCgAGN1YAXx0daQBXOBheaRYBSTgAa2goOBjdIg5WCw8sqByKFgsYAFoBRQgYAHdjdxZ2Tiw-EDdu1jMzABUHEmq4NBhGCEhGfhh6pt5GHAmMqBEsXkaIXF4AIwxWLNZBReYyNYPGJNEYNDgKdx6IyJBIunRsPEQ7VJh00vKNHoTDYhSwPF4AGU4mhyA1inBmLxcEkiKRyElqHFWHBeMsBBReAA5ZgbTDUDbMMDI5a8CzMRhxfTeLAQNh0XgHYqsUmc2YYKC8TCMDIYQQwB66fSGFp9cxWGw-ZhpTLZXK9Myeby+RWBABsYQiZhIEEIEFY1jEcRgOmiulEXIw1AsuJMcsqMGsyFsAAU1FccMwoFVqB5DEUnRZbABddwcUTmwRe33+mCB4MqMOO50x22xASiagQRistiu9zVRV+jABoMh2aF4ul1jPV7RhgdCT4NHnCVAkAMZS0NmsfD+V5AA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -179,7 +477,7 @@ policies:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1UgTMEswC0shUsuHecAJ7sMhc5YCMFACsFAAMLqwAvurqGgCucDC8GhykUswAbjDUUBjuIBF06Nh4iCDJMKkZWTnuKiAMLOycWDy8AMqxaOQQMCZuzLy4iUSk5InUsaxwvDhZMBS8AHLMWLyY1KvMYIOzvCbMjLHaXlgQbHS8GKx9rCuXvNQVUGsYjADWGADm8zHauvquUy+MopEhpTLZXLhIweLw+CwgALBMIgVwkCCECCscxYCYwdRRTRwXTXDDUEzTAysIwsazmZCWAAKOUYMBwzCg1mobhJJjJJksAF1XBxiVjPvSmSy2RyuTyrnzyUKCTFHsTxEozlMAdTeHYEczXjLOVkHvBcRBNWxwhF8oKGM1qHlSiMyJQaPQQBC4Fr8H58kA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1UgTMEswC0shUsuHecAJ7sMhc5YCMFACsFAAMLqwAvurqGgCucDC8GhykUswAbjDUUBjuIBF06Nh4iCDJMKkZWTnuKiAMLOycWDy8AMqxaOQQMCZuzLy4iUSk5InUsaxwvDhZMBS8AHLMWLyY1KvMYIOzvCbMjLHaXlgQbHS8GKx9rCuXvNQVUGsYjADWGADm8zHauvquUy+MopEhpTLZXLhIweLw+CwgAIANlC0N4JAghAgrHMWAmMHUUU0cF01ww1BM0wMrCMLGs5mQlgACjlGDAcMwoNZqG5SSZySZLABdVwcEnYz4M5ms9mc7m8q78inCwkxR4k8RKM5TAE03h2BEs16yrlZB7wPEQLVscIRfJChjNah5UojMiUGj0EAQuDa-B+fJAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -221,7 +519,9 @@ Re-run and the error is gone - validation succeeds with exit code 0, leaving onl
 
 ## How It Works
 
-The policy engine operates on the resolved AST after all `@extend` and `@use` declarations have been applied. It inspects the `__layerTrace` metadata that the resolver attaches to each skill during composition. This trace records which property was modified, by which source file, and with which merge strategy.
+Prompt kinds read the `@prompts` entries as described in [What a policy sees](#what-a-policy-sees). The skill kinds work as follows.
+
+The policy engine operates on the resolved AST after all `@extend` and `@use` declarations have been applied. It inspects the `__layerTrace` metadata that the resolver attaches to each skill during composition. This trace records which property was modified, by which source file, and with which merge strategy. The resolver also records `__baseSource`, the file that first defined the skill, which `layer-boundary` uses as the base layer.
 
 For each configured policy, the engine:
 
@@ -272,7 +572,7 @@ This ensures:
 
 ## Validation Rule
 
-The policy engine is implemented as validation rule **PS030** (`policy-compliance`). It can be configured like any other rule:
+The policy engine is implemented as validation rule **PS030** (`policy-compliance`), for skill and prompt kinds alike. It can be configured like any other rule:
 
 ```yaml
 validation:
@@ -280,7 +580,7 @@ validation:
     policy-compliance: error # default
 ```
 
-Set to `off` to disable all policy checks:
+Set to `off` to disable all policy checks, prompt kinds included:
 
 ```yaml
 validation:
@@ -299,9 +599,16 @@ import { parse as parseYaml } from 'yaml';
 import { Resolver } from '@promptscript/resolver';
 import { parsePolicies, evaluatePolicies } from '@promptscript/validator';
 
-// Parse and validate policy definitions from promptscript.yaml
+// Parse and validate policy definitions from promptscript.yaml. The context lets
+// the parser check the roles, environments and model ids of prompt policies.
 const config = parseYaml(readFileSync('promptscript.yaml', 'utf-8'));
-const { policies, errors } = parsePolicies(config.policies);
+const context = {
+  governance: config.governance,
+  releases: config.releases,
+  models: config.models,
+  allowedPatterns: config.validation?.allowedPatterns,
+};
+const { policies, errors } = parsePolicies(config.policies, context);
 if (errors.length > 0) {
   throw new Error(`Policy definition errors:\n${errors.join('\n')}`);
 }
@@ -322,5 +629,21 @@ for (const violation of violations) {
   console.log(`[${violation.policyName}] ${violation.message}`);
 }
 ```
+
+Prompt kinds have their own evaluator. It takes the same context, for the model catalog and `allowedPatterns`. Give it the canonical AST, so each finding points at its entry and not at the `@prompts` block:
+
+```typescript
+import { evaluatePromptPolicies, promptPolicySubjects } from '@promptscript/validator';
+
+const subjects = promptPolicySubjects(resolved.canonicalAst ?? resolved.ast);
+for (const violation of evaluatePromptPolicies(policies, subjects, context)) {
+  const where = violation.location ? `${violation.location.file}:${violation.location.line}` : '';
+  console.log(`${where} [${violation.policyName}] ${violation.message}`);
+}
+```
+
+`config`, `context`, `policies` and `resolved` are the ones of the snippet above.
+
+`promptPolicyRisk(subject, policies)` returns the policy risk of one subject, and `promptPolicyMatches(match, subject, risk)` whether a `match` selects it. A fourth argument of `evaluatePromptPolicies`, `{ risk, selects }`, replaces the subject's own risk and selection; the release gates use it to judge a bundle with the higher risk of bundle and source.
 
 Requires the workspace packages (`@promptscript/resolver`, `@promptscript/validator`) and `yaml` (v2) as dependencies.

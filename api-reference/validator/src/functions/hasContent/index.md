@@ -8,7 +8,7 @@
 
 > **hasContent**(`content`): `boolean`
 
-Defined in: [validator/src/walker.ts:247](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/walker.ts#L247)
+Defined in: [validator/src/walker.ts:338](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/walker.ts#L338)
 
 Check if a block has any meaningful content.
 

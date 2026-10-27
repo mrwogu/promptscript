@@ -31,6 +31,12 @@ Real-world PromptScript configuration examples.
 | Combine skills, agents, MCP, hooks, and workflows | [Agent Platform](https://getpromptscript.dev/examples/agent-platform/index.md)               |
 | Define specialized workers                        | [Agents](https://getpromptscript.dev/examples/agents/index.md)                               |
 
+### Build Applications
+
+| Goal                                       | Example                                       |
+| ------------------------------------------ | --------------------------------------------- |
+| Compile prompts for an application to JSON | [Application Prompts](https://getpromptscript.dev/examples/application-prompts/index.md) |
+
 ### Scale Organization
 
 | Goal                                   | Example                                        |
@@ -48,6 +54,7 @@ Real-world PromptScript configuration examples.
 - [Enterprise](https://getpromptscript.dev/examples/enterprise/index.md): Full enterprise deployment with governance, private registries, and compliance.
 - [Skills & Local](https://getpromptscript.dev/examples/skills-and-local/index.md): Advanced AI skills and private local memory for specialized workflows.
 - [Agent Platform](https://getpromptscript.dev/examples/agent-platform/index.md): Runnable examples for MCP, hooks, workflows, plugins, field replacement, skills, and build profiles.
+- [Application Prompts](https://getpromptscript.dev/examples/application-prompts/index.md): Four prompts for applications with typed inputs, enum outputs, defaults, and citations, compiled to content-hashed JSON bundles.
 - [Agents](https://getpromptscript.dev/examples/agents/index.md): Define portable AI subagents with custom tools, models, skills, and MCP access.
 - [Git Registry](https://getpromptscript.dev/examples/git-registry/index.md): Use Git repositories as shared registries with version control and authentication.
 

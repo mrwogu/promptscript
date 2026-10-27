@@ -8,7 +8,7 @@
 
 > **hasPathTraversal**(`path`): `boolean`
 
-Defined in: [validator/src/rules/path-traversal.ts:50](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/validator/src/rules/path-traversal.ts#L50)
+Defined in: [validator/src/rules/path-traversal.ts:50](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/rules/path-traversal.ts#L50)
 
 Check if a path contains dangerous traversal patterns.
 

@@ -8,7 +8,7 @@
 
 > **applyExtends**(`ast`, `logger?`): [`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md)
 
-Defined in: [resolver/src/extensions.ts:135](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/resolver/src/extensions.ts#L135)
+Defined in: [resolver/src/extensions.ts:136](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/extensions.ts#L136)
 
 Apply all
 

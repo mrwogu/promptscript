@@ -8,4 +8,4 @@
 
 > **DiffOwnership** = `"promptscript"` \| `"user"` \| `"unknown"`
 
-Defined in: [cli/src/utils/diff-report.ts:22](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/cli/src/utils/diff-report.ts#L22)
+Defined in: [cli/src/utils/diff-report.ts:23](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/diff-report.ts#L23)

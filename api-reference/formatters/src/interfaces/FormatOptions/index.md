@@ -6,7 +6,7 @@
 
 # Interface: FormatOptions
 
-Defined in: [formatters/src/types.ts:43](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/types.ts#L43)
+Defined in: [formatters/src/types.ts:47](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/types.ts#L47)
 
 Options for formatting.
 
@@ -20,7 +20,7 @@ Options for formatting.
 
 > `optional` **convention?**: `string` \| [`OutputConvention`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputConvention/index.md)
 
-Defined in: [formatters/src/types.ts:48](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/types.ts#L48)
+Defined in: [formatters/src/types.ts:52](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/types.ts#L52)
 
 Output convention to use.
 Can be a built-in convention name ('xml', 'markdown') or a custom OutputConvention.
@@ -31,7 +31,7 @@ Can be a built-in convention name ('xml', 'markdown') or a custom OutputConventi
 
 > `optional` **models?**: [`ModelsConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelsConfig/index.md)
 
-Defined in: [formatters/src/types.ts:71](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/types.ts#L71)
+Defined in: [formatters/src/types.ts:75](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/types.ts#L75)
 
 Model catalog settings from promptscript.yaml, used to map agent models.
 
@@ -41,7 +41,7 @@ Model catalog settings from promptscript.yaml, used to map agent models.
 
 > `optional` **outputPath?**: `string`
 
-Defined in: [formatters/src/types.ts:53](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/types.ts#L53)
+Defined in: [formatters/src/types.ts:57](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/types.ts#L57)
 
 Custom output path (overrides default).
 
@@ -51,9 +51,20 @@ Custom output path (overrides default).
 
 > `optional` **prettier?**: [`PrettierMarkdownOptions`](https://getpromptscript.dev/api-reference/core/src/interfaces/PrettierMarkdownOptions/index.md)
 
-Defined in: [formatters/src/types.ts:65](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/types.ts#L65)
+Defined in: [formatters/src/types.ts:69](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/types.ts#L69)
 
 Prettier formatting options for markdown output.
+
+***
+
+### provenance?
+
+> `optional` **provenance?**: [`ProvenanceTrace`](https://getpromptscript.dev/api-reference/core/src/interfaces/ProvenanceTrace/index.md)
+
+Defined in: [formatters/src/types.ts:81](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/types.ts#L81)
+
+Provenance of the resolved program. Only the prompt targets read it, and the compilers pass
+it only to them, after rewriting every file so no machine path remains.
 
 ***
 
@@ -61,7 +72,7 @@ Prettier formatting options for markdown output.
 
 > `optional` **targetConfig?**: [`TargetConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/TargetConfig/index.md)
 
-Defined in: [formatters/src/types.ts:68](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/types.ts#L68)
+Defined in: [formatters/src/types.ts:72](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/types.ts#L72)
 
 Full target configuration, passed through from promptscript.yaml.
 
@@ -71,7 +82,7 @@ Full target configuration, passed through from promptscript.yaml.
 
 > `optional` **version?**: `string`
 
-Defined in: [formatters/src/types.ts:60](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/formatters/src/types.ts#L60)
+Defined in: [formatters/src/types.ts:64](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/types.ts#L64)
 
 Target version or format variant.
 Use 'legacy' for deprecated formats (e.g., Cursor's .cursorrules).

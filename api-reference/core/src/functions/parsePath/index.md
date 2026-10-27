@@ -8,7 +8,7 @@
 
 > **parsePath**(`path`): `ParsedPath`
 
-Defined in: [core/src/utils/path.ts:35](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/utils/path.ts#L35)
+Defined in: [core/src/utils/path.ts:35](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/path.ts#L35)
 
 Parse a PromptScript path reference.
 

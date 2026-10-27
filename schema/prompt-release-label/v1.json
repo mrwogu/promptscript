@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/prompt-release-label/v1.json",
+  "title": "PromptScript Prompt Release Label v1",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://getpromptscript.dev/schema/prompt-release-label/v1.json",
+      "description": "Schema URL, the version tag of the label.",
+      "examples": [
+        "https://getpromptscript.dev/schema/prompt-release-label/v1.json"
+      ]
+    },
+    "environment": {
+      "$ref": "#/definitions/ReleaseEnvironmentName",
+      "description": "Environment name.",
+      "examples": [
+        "prod"
+      ]
+    },
+    "prompts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PromptReleaseLabelEntry"
+      },
+      "description": "Released prompts sorted by id"
+    }
+  },
+  "required": [
+    "$schema",
+    "environment",
+    "prompts"
+  ],
+  "additionalProperties": false,
+  "description": "Label of one release environment: the bundle each prompt id has there, version 1.",
+  "definitions": {
+    "ReleaseEnvironmentName": {
+      "type": "string",
+      "description": "Name of a release environment.",
+      "pattern": "^[a-z][a-z0-9-]{0,31}$"
+    },
+    "PromptReleaseLabelEntry": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Prompt id.",
+          "examples": [
+            "acme-support/refund-reply"
+          ]
+        },
+        "contentHash": {
+          "type": "string",
+          "description": "Content hash of the released bundle.",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "id",
+        "contentHash"
+      ],
+      "additionalProperties": false,
+      "description": "One prompt a release label points at."
+    }
+  }
+}

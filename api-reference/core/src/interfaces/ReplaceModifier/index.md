@@ -6,7 +6,7 @@
 
 # Interface: ReplaceModifier
 
-Defined in: [core/src/types/ast.ts:390](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/ast.ts#L390)
+Defined in: [core/src/types/ast.ts:390](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/ast.ts#L390)
 
 Explicit replacement modifier on a regular block field within @extend.
 
@@ -28,7 +28,7 @@ Explicit replacement modifier on a regular block field within @extend.
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -42,7 +42,7 @@ Source location
 
 > **property**: `string`
 
-Defined in: [core/src/types/ast.ts:393](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/ast.ts#L393)
+Defined in: [core/src/types/ast.ts:393](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/ast.ts#L393)
 
 Property whose prior value is replaced
 
@@ -52,7 +52,7 @@ Property whose prior value is replaced
 
 > `readonly` **type**: `"ReplaceModifier"`
 
-Defined in: [core/src/types/ast.ts:391](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/types/ast.ts#L391)
+Defined in: [core/src/types/ast.ts:391](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/ast.ts#L391)
 
 Node type discriminator
 

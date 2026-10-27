@@ -8,7 +8,7 @@
 
 > `const` **TARGET\_DEFINITIONS**: `object`
 
-Defined in: [core/src/target-catalog.ts:756](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/target-catalog.ts#L756)
+Defined in: [core/src/target-catalog.ts:787](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-catalog.ts#L787)
 
 Complete target definitions with version, section, feature, hook, and
 resource capabilities attached to the compatibility catalog.
@@ -38,6 +38,10 @@ resource capabilities attached to the compatibility catalog.
 ### augment
 
 > **augment**: [`TargetDefinition`](https://getpromptscript.dev/api-reference/core/src/interfaces/TargetDefinition/index.md)
+
+### bundle
+
+> **bundle**: [`TargetDefinition`](https://getpromptscript.dev/api-reference/core/src/interfaces/TargetDefinition/index.md)
 
 ### claude
 
@@ -182,6 +186,10 @@ resource capabilities attached to the compatibility catalog.
 ### pochi
 
 > **pochi**: [`TargetDefinition`](https://getpromptscript.dev/api-reference/core/src/interfaces/TargetDefinition/index.md)
+
+### prompt-text
+
+> **prompt-text**: [`TargetDefinition`](https://getpromptscript.dev/api-reference/core/src/interfaces/TargetDefinition/index.md)
 
 ### qoder
 

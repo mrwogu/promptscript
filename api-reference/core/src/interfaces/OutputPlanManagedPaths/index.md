@@ -6,7 +6,7 @@
 
 # Interface: OutputPlanManagedPaths
 
-Defined in: [core/src/output-plan.ts:81](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/output-plan.ts#L81)
+Defined in: [core/src/output-plan.ts:86](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L86)
 
 Managed paths captured by an output plan.
 
@@ -16,7 +16,7 @@ Managed paths captured by an output plan.
 
 > **directories**: `string`[]
 
-Defined in: [core/src/output-plan.ts:83](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/output-plan.ts#L83)
+Defined in: [core/src/output-plan.ts:88](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L88)
 
 Normalized managed directories.
 
@@ -26,6 +26,6 @@ Normalized managed directories.
 
 > **files**: `string`[]
 
-Defined in: [core/src/output-plan.ts:85](https://github.com/mrwogu/promptscript/blob/c034efd2ff22b5feace7485154a193a44950eeb3/packages/core/src/output-plan.ts#L85)
+Defined in: [core/src/output-plan.ts:90](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L90)
 
 Normalized managed files.
