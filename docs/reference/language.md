@@ -1914,6 +1914,10 @@ PromptScript supports two string syntaxes:
 
 Use double or single quotes for short, single-line values:
 
+Supported escapes are `\n`, `\t`, `\r`, `\"`, `\'`, and `\\`. Each escape is
+decoded once, from left to right. For example, `"C:\\new"` produces the literal
+path `C:\new`, not a newline. This applies to both quote styles.
+
 ```promptscript
 @shortcuts {
   "/review": "Review code for quality and best practices"

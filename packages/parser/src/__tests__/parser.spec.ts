@@ -115,6 +115,28 @@ describe('parse', () => {
     });
   });
 
+  describe('string escapes', () => {
+    it.each([
+      ['literalNewline', 'C:\\new'],
+      ['literalTab', 'C:\\temp'],
+      ['literalReturn', 'C:\\reports'],
+      ['mixed', 'C:\\new\nnext'],
+      ['newline', 'first\nsecond'],
+      ['tab', 'first\tsecond'],
+      ['carriageReturn', 'first\rsecond'],
+      ['quote', 'say "hi"'],
+      ['escapedQuote', 'a\\"b'],
+      ['unknown', '\\q'],
+    ])('decodes %s once from left to right', (field, expected) => {
+      const source = loadFixture('string-escapes.prs');
+
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.ast?.meta?.fields[field]).toBe(expected);
+    });
+  });
+
   describe('text content', () => {
     it('should parse text blocks', () => {
       const source = `

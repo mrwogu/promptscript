@@ -1,0 +1,12 @@
+@meta {
+  literalNewline: "C:\\new"
+  literalTab: "C:\\temp"
+  literalReturn: 'C:\\reports'
+  mixed: "C:\\new\nnext"
+  newline: "first\nsecond"
+  tab: 'first\tsecond'
+  carriageReturn: "first\rsecond"
+  quote: "say \"hi\""
+  escapedQuote: "a\\\"b"
+  unknown: "\q"
+}
