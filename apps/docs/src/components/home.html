@@ -667,6 +667,7 @@
         <a href="guides/enterprise/">Enterprise setup</a>
         <a href="guides/registry/">Git registry</a>
         <a href="guides/security/">Security model</a>
+        <a href="guides/policy-engine/">Policy engine</a>
       </div>
     </div>
     <div
@@ -738,6 +739,42 @@
       <div class="home-scale__outputs">
         <span>Policies</span><span>Skills</span><span>Agents</span><span>Native files</span>
       </div>
+    </div>
+  </section>
+  <section class="home-section" id="prompt-releases">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">Prompts for applications</div>
+      <h2>Release application prompts like code</h2>
+      <p>
+        Compile <code>@prompts</code> to content-hashed bundles, promote them from staging to prod
+        in reviewed pull requests, and require sign-off before a version ships.
+      </p>
+    </div>
+    <div class="home-capability-grid">
+      <a href="guides/releases/" class="home-capability">
+        <span class="home-capability__token">release</span>
+        <h3>Promote by content hash</h3>
+        <p>
+          <code>prs release promote</code> moves one label per environment. Rollback is a Git
+          change, and the history is the release log.
+        </p>
+      </a>
+      <a href="guides/releases/#approvals" class="home-capability">
+        <span class="home-capability__token">approval</span>
+        <h3>Sign-off for one exact version</h3>
+        <p>
+          <code>prs approve</code> records that legal or security approved one hash. Release gates
+          refuse a version without the approvals your policy asks for.
+        </p>
+      </a>
+      <a href="guides/codeowners/" class="home-capability">
+        <span class="home-capability__token">ownership</span>
+        <h3>CODEOWNERS from governance</h3>
+        <p>
+          <code>prs governance codeowners</code> makes the right team review prompt files, approval
+          records, and release labels.
+        </p>
+      </a>
     </div>
   </section>
   <section class="home-section" id="ai-skill">

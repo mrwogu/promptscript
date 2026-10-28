@@ -212,6 +212,12 @@ The file `.promptscript/releases/<env>.json`. It says which bundle hash each pro
 environment. An application reads it, then reads the bundle file it names. See
 [Releasing Application Prompts](guides/releases.md#files).
 
+### Prompt runtime
+
+The `@promptscript/runtime` package. It loads a release label and its bundle, checks the content hash
+and renders the messages for an application. It is not published to npm yet. See
+[Releasing Application Prompts](guides/releases.md#read-a-release-in-your-application).
+
 ### Release manifest
 
 The file `.promptscript/releases/manifest.json`, a bundle index of the latest `prs release build`.

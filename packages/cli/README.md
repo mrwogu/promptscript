@@ -333,6 +333,10 @@ code owner review of its role directory. See
 prompt files go to their owners, approval directories to their role teams, and the config and
 release files to the admins. See [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/).
 
+Applications read the released bundles with `@promptscript/runtime`, which checks the content
+hash on every load. It is not published to npm yet. See
+[Read a release in your application](https://getpromptscript.dev/guides/releases/#read-a-release-in-your-application).
+
 ## Skills from Local Files, Registries, or Git
 
 ```promptscript

@@ -597,6 +597,42 @@ git push origin v1.0.0
 | Team Lead | Team namespace write   |
 | Developer | Read-only, PR creation |
 
+### Shared Config File with `extends`
+
+A platform team can keep one base `promptscript.yaml` and let every repository extend it:
+
+```yaml
+# promptscript.yaml in a project
+extends: ../shared/base.config.yaml
+targets:
+  - claude
+```
+
+Policies and governance owners from the base are kept. A project can add to them, it cannot
+remove them. See [Extending Configuration](../reference/config.md#extending-configuration).
+
+## Governed Application Prompts
+
+When teams ship prompts inside applications (`@prompts`, syntax `1.6.0`), the same Git-native
+review applies to them. Three pieces work together:
+
+| Piece                                       | What it does                                                                                     |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `prs release build/promote/rollback/status` | Store bundles under their content hash and move `staging` and `prod` labels in reviewed PRs      |
+| `prs approve`                               | Record that a role (for example `legal`) approved one exact bundle hash                          |
+| `prs governance codeowners`                 | Write CODEOWNERS so the right team must review prompt files, approval records and release labels |
+
+Prompt policies such as `required-approvals`, `risk-floor` and `model-allowlist` run as release
+gates. There is no flag that skips them, so a version without the required approval cannot be
+promoted. `prs release status --base refs/remotes/origin/main` checks a pull request with the
+rules of the base branch, which makes it a good CI check.
+
+Read next:
+
+- [Releasing Application Prompts](releases.md) - the flow, approvals and release gates
+- [CODEOWNERS from Governance](codeowners.md) - turn `governance` into review rules
+- [Policy Engine](policy-engine.md) - the policy kinds and prompt policies
+
 ## Rollout Strategy
 
 ### Phase 1: Pilot (2-4 weeks)

@@ -33,6 +33,16 @@ export const HOME_FAQ: readonly FaqItem[] = [
       'Publish a Git registry with prs registry init and prs registry publish, then inherit it in every project with @inherit. Remote imports are pinned by commit and sha256 hash in promptscript.lock, and prs vendor sync copies them for offline builds.',
   },
   {
+    question: 'Can IT roll out one configuration to every developer?',
+    answer:
+      'Yes. A system config at /etc/promptscript/config.yaml (or %ProgramData% on Windows) provisions registry aliases and telemetry settings, a user config sits above it, and a project promptscript.yaml can extend a shared base file. Policies from the base are kept.',
+  },
+  {
+    question: 'Can PromptScript manage prompts inside my applications?',
+    answer:
+      'Yes. With syntax 1.6.0 the @prompts block defines typed prompts, and the bundle target compiles them to content-hashed JSON. prs release promotes bundles through environments, prs approve records approvals of one exact hash, and prs governance codeowners writes the CODEOWNERS lines for reviewers.',
+  },
+  {
     question: 'Does PromptScript send my prompts anywhere?',
     answer:
       'No. Compilation runs on your machine or in your CI. Anonymous usage telemetry is on by default and never includes source, prompts, compiled output, file paths, or project names. Turn it off with prs telemetry disable or DO_NOT_TRACK=1.',
