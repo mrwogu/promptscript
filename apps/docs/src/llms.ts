@@ -5,7 +5,7 @@ import { rewriteDocLinkFrom } from './plugins/remark-mkdocs-compat.mjs';
 import { DOCS_BASE, SIDEBAR, SITE } from './site.mjs';
 
 export const LLMS_SUMMARY =
-  'PromptScript is an agent platform configuration language. It defines instructions, skills, agents, MCP servers, plugins, hooks, workflows, and policies once, then compiles native output for 50 AI coding agent targets.';
+  'PromptScript is an agent platform configuration language. It defines instructions, skills, agents, MCP servers, plugins, hooks, workflows, and policies once, then compiles native output for 50 AI coding agent targets. It also compiles application prompts (@prompts) to content-hashed bundles, with prs release, prs approve, and CODEOWNERS generation for governed releases.';
 
 /** The part of a docs collection entry this module needs. */
 export interface DocPage {

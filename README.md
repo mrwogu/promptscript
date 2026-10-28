@@ -446,6 +446,10 @@ code owner review of its role directory. See
 prompt files go to their owners, approval directories to their role teams, and the config and
 release files to the admins. See [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/).
 
+The `@promptscript/runtime` package in this repository loads, verifies and renders the released
+bundles in an application, with no dependencies. It is not published to npm yet and its API can
+still change. See the [releases guide](https://getpromptscript.dev/guides/releases/#read-a-release-in-your-application).
+
 ## Built for Repositories and Organizations
 
 - **Runs locally** - PromptScript is a compiler, not a service. No hosted backend and no proxy
@@ -458,6 +462,14 @@ release files to the admins. See [CODEOWNERS from Governance](https://getprompts
   SSH and token-based authentication.
 - **Policy engine** - enforce layer boundaries, property protection, and registry allowlists after
   resolution.
+- **Layered configuration** - IT provisions a system config, developers keep a user config, and a
+  project `promptscript.yaml` can `extends` a shared base file. Base policies are kept. See
+  [user configuration](https://getpromptscript.dev/guides/user-config/).
+- **Governed prompt releases** - `prs release promote` and `prs release rollback` move application
+  prompt labels through environments. `prs approve` records approvals that the release gates check,
+  and `prs governance codeowners` writes CODEOWNERS lines that route prompt files, approvals and
+  release labels to the right teams. Turn on required code-owner review in branch protection. See
+  [enterprise setup](https://getpromptscript.dev/guides/enterprise/#governed-application-prompts).
 - **Reproducible builds** - lockfile hashes, version pins, vendor mode, and strict validation.
 - **Safe automation** - lifecycle hook commands use arrays, while generated-file protection keeps
   agents pointed at `.prs` source.

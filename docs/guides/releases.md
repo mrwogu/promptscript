@@ -546,6 +546,31 @@ What `--base` does not do:
   lockfile, so it can swap the CLI that runs the check. Protect them as below, or run the check
   as a required workflow from a repository ruleset.
 
+## Read a release in your application
+
+The `@promptscript/runtime` package loads the bundles this flow writes. It has no dependencies. It
+is not published to npm yet and its API can still change, so it is in the repository only.
+
+```typescript
+import { createPromptClient, toAnthropicMessages } from '@promptscript/runtime';
+import { directorySource } from '@promptscript/runtime/node';
+
+const client = createPromptClient({
+  source: directorySource('.promptscript/releases'),
+  label: 'prod',
+});
+
+const prompt = await client.get('acme-support/refund-reply');
+const body = toAnthropicMessages(prompt.render({ message: 'Where is my refund?' }), {
+  maxTokens: 1024,
+});
+```
+
+Every load checks the schema, the structure and the `contentHash`, and verification cannot be turned
+off. `render()` inserts input values as plain text. See the
+[runtime README](https://github.com/mrwogu/promptscript/blob/main/packages/runtime/README.md) for
+the cache, the fail modes and the transport rules of `httpSource`.
+
 ## What protects the labels
 
 Run `prs release status --base` as a required check, and keep review on the release files:
