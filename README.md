@@ -467,8 +467,8 @@ still change. See the [releases guide](https://getpromptscript.dev/guides/releas
   [user configuration](https://getpromptscript.dev/guides/user-config/).
 - **Governed prompt releases** - `prs release promote` and `prs release rollback` move application
   prompt labels through environments. `prs approve` records approvals that the release gates check,
-  and `prs governance codeowners` writes CODEOWNERS lines so the right teams review prompt files,
-  approvals and release labels. See
+  and `prs governance codeowners` writes CODEOWNERS lines that route prompt files, approvals and
+  release labels to the right teams. Turn on required code-owner review in branch protection. See
   [enterprise setup](https://getpromptscript.dev/guides/enterprise/#governed-application-prompts).
 - **Reproducible builds** - lockfile hashes, version pins, vendor mode, and strict validation.
 - **Safe automation** - lifecycle hook commands use arrays, while generated-file protection keeps
