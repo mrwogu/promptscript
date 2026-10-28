@@ -19,6 +19,7 @@ import { registerReleaseCommands } from './commands/release/index.js';
 import { registerEvalCommands } from './commands/eval/register.js';
 import { registerApproveCommand } from './commands/approve/index.js';
 import { registerGovernanceCommands } from './commands/governance/index.js';
+import { registerAuditCommands } from './commands/audit/index.js';
 import { lockCommand } from './commands/lock.js';
 import { updateCommand } from './commands/update.js';
 import { vendorSyncCommand, vendorCheckCommand } from './commands/vendor.js';
@@ -407,6 +408,7 @@ registerEvalCommands(evalCommand);
 
 registerApproveCommand(program);
 registerGovernanceCommands(program);
+registerAuditCommands(program);
 
 /**
  * Run the CLI.

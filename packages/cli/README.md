@@ -333,6 +333,9 @@ code owner review of its role directory. See
 prompt files go to their owners, approval directories to their role teams, and the config and
 release files to the admins. See [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/).
 
+`prs audit log` reads who changed, approved, promoted or rolled back a prompt from the Git history,
+as text, JSON or CEF for a SIEM. See [Audit log](https://getpromptscript.dev/guides/releases/#audit-log).
+
 Applications read the released bundles with `@promptscript/runtime`, which checks the content
 hash on every load. It is not published to npm yet. See
 [Read a release in your application](https://getpromptscript.dev/guides/releases/#read-a-release-in-your-application).
@@ -554,6 +557,7 @@ the build, not the agent. See the
 | `prs release <build\|promote\|rollback\|status>`    | Release prompt bundles through environments               |
 | `prs approve <id>@<hash>` / `prs approve --list`    | Record or list approvals of one prompt version            |
 | `prs governance codeowners`                         | Write CODEOWNERS lines from the governance config         |
+| `prs audit log`                                     | List approvals, promotions and prompt changes from Git    |
 | `prs lock` / `prs update`                           | Pin or refresh remote dependencies                        |
 | `prs vendor sync` / `prs vendor check`              | Prepare and verify offline dependencies                   |
 | `prs resolve <import>`                              | Explain import resolution                                 |

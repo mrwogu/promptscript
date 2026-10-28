@@ -213,7 +213,8 @@ export function parseApprovalReference(reference: string | undefined): {
   return { id, contentHash };
 }
 
-function checkPromptId(id: string): void {
+/** A prompt id as an approval names it, or PS5102. */
+export function checkPromptId(id: string): void {
   // The role takes one directory level, each id segment one more.
   if (!PROMPT_ID_RE.test(id) || id.split('/').length > MAX_APPROVAL_DEPTH - 1) {
     throw new GovernanceError(

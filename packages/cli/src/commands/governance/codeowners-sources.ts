@@ -223,6 +223,24 @@ function demote(
 }
 
 /**
+ * The repository paths of the files each prompt of the checkout is built from: the file
+ * that defines it, the blocks it composes and the `@meta` of its `@inherit` chain.
+ */
+export async function promptSourceFiles(
+  repo: Repository,
+  config: PromptScriptConfig,
+  configPath: string
+): Promise<Map<string, string[]>> {
+  const project = await resolveProject(repo, config, configPath);
+  return new Map(
+    governedPrompts(project, repo).map((prompt) => [
+      prompt.id,
+      sortedUnique([...(prompt.file === undefined ? [] : [prompt.file]), ...prompt.contributors]),
+    ])
+  );
+}
+
+/**
  * Lines for the `.prs` files that define prompts, and admin lines for every other file
  * the project reads: inherited parents, `@use` imports and composed blocks.
  */

@@ -5,6 +5,11 @@ import { DEFAULT_GIT_TIMEOUT_MS, GIT_TIMEOUT_ENV_VAR } from '@promptscript/resol
 import { PS5006_ROLLBACK_UNAVAILABLE, ReleaseError } from './errors.js';
 
 const MAX_GIT_OUTPUT_BYTES = 1024 * 1024;
+/** A path below a device, which no file can have, so Git reads no grafts. */
+const NO_GRAFT_FILE =
+  process.platform === 'win32'
+    ? String.raw`\\.\NUL\promptscript-no-grafts`
+    : '/dev/null/promptscript-no-grafts';
 /** Names of the Git binary that Windows runs for `git`. */
 const WINDOWS_GIT_NAMES = ['git.exe', 'git.com'];
 
@@ -108,6 +113,8 @@ export function runGit(
           // fetch from the network.
           GIT_NO_REPLACE_OBJECTS: '1',
           GIT_NO_LAZY_FETCH: '1',
+          // Nor may a grafts file in .git/info cut or rewrite the history.
+          GIT_GRAFT_FILE: NO_GRAFT_FILE,
         },
       },
       (error, stdout, stderr) => {
