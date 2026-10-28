@@ -2,7 +2,8 @@ import { PSError, type EvalFindingSeverity, type SourceLocation } from '@prompts
 
 /**
  * Codes of eval errors and findings: `PS61xx` datasets, `PS62xx` suites,
- * `PS63xx` providers and the run, `PS64xx` cache, `PS65xx` cost, `PS66xx` judge.
+ * `PS63xx` providers and the run, `PS64xx` cache, `PS65xx` cost, `PS66xx` judge,
+ * `PS67xx` reports.
  */
 export const EVAL_CODES = {
   /** Dataset file cannot be read or parsed, or a row has the wrong shape */
@@ -67,6 +68,8 @@ export const EVAL_CODES = {
   RUN_STOPPED: 'PS6308',
   /** A run option is out of range, such as a concurrency that is not a positive integer */
   RUN_OPTION_INVALID: 'PS6309',
+  /** The project config cannot be loaded, or the project does not compile */
+  PROJECT_INVALID: 'PS6310',
   /** A cache entry is unreadable or does not match its key; it counts as a miss */
   CACHE_ENTRY_INVALID: 'PS6401',
   /** Replay found no cache entry for a call */
@@ -89,6 +92,10 @@ export const EVAL_CODES = {
   PRICE_LOWERED: 'PS6505',
   /** The suite has an llm-judge assertion, which this version cannot run */
   JUDGE_UNSUPPORTED: 'PS6600',
+  /** A report file cannot be read or is not an eval report of this version */
+  REPORT_INVALID: 'PS6701',
+  /** A report directory or file cannot be written */
+  REPORT_WRITE_FAILED: 'PS6702',
 } as const;
 
 /** One eval code. */

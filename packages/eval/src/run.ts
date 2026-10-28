@@ -862,7 +862,8 @@ function checkPlanCost(plans: readonly SuitePlan[], context: RunContext, add: Ad
 
 // Suites, datasets, cache, providers and the budget plan, all before any call
 async function setUp(
-  options: RunEvalOptions
+  options: RunEvalOptions,
+  withProviders = true
 ): Promise<{ plans: SuitePlan[]; context: RunContext; errors: EvalFinding[] }> {
   const errors: EvalFinding[] = [];
   const add = collector(errors);
@@ -905,8 +906,20 @@ async function setUp(
   checkPlanCost(plans, context, add);
   if (errors.length > 0) return { plans, context, errors };
   // Providers last, so a run that stops here never announces where a key would go
-  setUpProviders(plans, context, add);
+  if (withProviders) setUpProviders(plans, context, add);
   return { plans, context, errors };
+}
+
+/** What {@link runEvalDetailed} gives back. */
+export interface EvalRun {
+  /** The report of the whole run */
+  report: EvalReportV1;
+  /**
+   * One report per suite, built from that suite's cases alone, in suite name
+   * order: its own outcome, usage, cache summary and digest, no budget and no
+   * errors. Empty when setup failed.
+   */
+  suiteReports: EvalReportV1[];
 }
 
 /**
@@ -921,13 +934,20 @@ async function setUp(
  * The engine reads no environment and prints nothing.
  *
  * @param options - Suites, bundles, catalog, providers, cache, budget and limits
- * @returns The report of the run
+ * @returns The report of the run, and one report per suite
  */
-export async function runEval(options: RunEvalOptions): Promise<EvalReportV1> {
+export async function runEvalDetailed(options: RunEvalOptions): Promise<EvalRun> {
   const { plans, context, errors } = await setUp(options);
   const budget = context.budget === undefined ? {} : { budget: context.budget };
   if (errors.length > 0) {
-    return buildReport({ plans: [], outcomes: new Map(), mode: context.mode, errors, ...budget });
+    const report = buildReport({
+      plans: [],
+      outcomes: new Map(),
+      mode: context.mode,
+      errors,
+      ...budget,
+    });
+    return { report, suiteReports: [] };
   }
   const outcomes = new Map<CasePlan, CaseOutcome>();
   const work = plans.flatMap((suite) => suite.cases.map((plan) => ({ suite, plan })));
@@ -943,5 +963,149 @@ export async function runEval(options: RunEvalOptions): Promise<EvalReportV1> {
       status: outcome.result.status,
     });
   });
-  return buildReport({ plans, outcomes, mode: context.mode, errors, ...budget });
+  const report = buildReport({ plans, outcomes, mode: context.mode, errors, ...budget });
+  const suiteReports = [...plans]
+    .sort((a, b) => compareCodeUnits(a.loaded.name, b.loaded.name))
+    .map((plan) => {
+      const mine = new Set(plan.cases);
+      const own = new Map([...outcomes].filter(([key]) => mine.has(key)));
+      return buildReport({ plans: [plan], outcomes: own, mode: context.mode, errors: [] });
+    });
+  return { report, suiteReports };
+}
+
+/**
+ * Run suites and return the report of the whole run.
+ *
+ * @param options - Suites, bundles, catalog, providers, cache, budget and limits
+ * @returns The report of the run
+ * @see runEvalDetailed
+ */
+export async function runEval(options: RunEvalOptions): Promise<EvalReportV1> {
+  return (await runEvalDetailed(options)).report;
+}
+
+/** Where the price of a model comes from. */
+export type PriceSource = 'built-in' | 'project';
+
+/** One model entry of a suite in a {@link EvalPlan}. */
+export interface EvalPlanModel {
+  ref: string;
+  provider: string;
+  apiId: string;
+  /** Cases: rows of the dataset */
+  cases: number;
+  /** Cases the cache answers */
+  hits: number;
+  /** Cases the cache does not answer */
+  misses: number;
+  /** Calls a record or off run would make: misses, rows with one request counted once */
+  calls: number;
+  /** Price source, when the run is priced */
+  priceSource?: PriceSource;
+  /** Worst-case cost of its calls in USD, when the run is priced */
+  worstCaseUsd?: number;
+}
+
+/** One suite in a {@link EvalPlan}. */
+export interface EvalPlanSuite {
+  name: string;
+  prompt: string;
+  rows: number;
+  models: EvalPlanModel[];
+}
+
+/** What a run would do, without any call. */
+export interface EvalPlan {
+  mode: EvalCacheMode;
+  /** Empty when setup found errors */
+  suites: EvalPlanSuite[];
+  hits: number;
+  misses: number;
+  calls: number;
+  /** Worst case of every planned call in USD, when a budget applies */
+  worstCaseUsd?: number;
+  /** The `--max-cost` limit, when given */
+  budgetUsd?: number;
+  /** Setup errors: the same a run would stop at */
+  errors: EvalFinding[];
+}
+
+// The price comes from the project when it differs from the built-in price of the model
+function priceSourceOf(model: ModelPlan): PriceSource | undefined {
+  const { pricing } = model;
+  if (pricing === undefined) return undefined;
+  const same = [model.ref, model.apiId, undated(model.apiId)]
+    .map((id) => builtInPrice(id))
+    .some(
+      (built) =>
+        built?.inputUsdPerMillion === pricing.inputUsdPerMillion &&
+        built?.outputUsdPerMillion === pricing.outputUsdPerMillion
+    );
+  return same ? 'built-in' : 'project';
+}
+
+function planModel(suite: SuitePlan, model: ModelPlan, mode: EvalCacheMode): EvalPlanModel {
+  const cases = suite.cases.filter((plan) => plan.model === model);
+  const hits = cases.filter((plan) => plan.hit !== undefined).length;
+  // Replay never calls: a miss there is an error of the run, not a call
+  const calls = new Map(
+    mode === 'replay'
+      ? []
+      : cases.filter((plan) => plan.hit === undefined).map((plan) => [plan.key, plan.worstCaseUsd])
+  );
+  const source = priceSourceOf(model);
+  return {
+    ref: model.ref,
+    provider: model.provider,
+    apiId: model.apiId,
+    cases: cases.length,
+    hits,
+    misses: cases.length - hits,
+    calls: calls.size,
+    ...(source === undefined ? {} : { priceSource: source }),
+    ...(model.pricing === undefined || mode === 'replay'
+      ? {}
+      : { worstCaseUsd: roundUsd([...calls.values()].reduce((sum, usd) => sum + usd, 0)) }),
+  };
+}
+
+/**
+ * Plan a run without calling anything: the same checks as {@link runEval},
+ * the cache lookups, and the worst-case cost of every miss. It creates no
+ * provider, so it needs no key and announces no host. It needs no budget: without
+ * one the worst case is still estimated, from the prices, and checked against nothing.
+ *
+ * @param options - The options a run would get
+ * @returns Hits, misses, calls and worst-case cost per suite and model entry
+ */
+export async function planEval(options: RunEvalOptions): Promise<EvalPlan> {
+  // A plan needs prices to estimate, but no budget: stand in a limit that never fires
+  const estimating: RunEvalOptions =
+    options.budget === undefined && options.cache.mode !== 'replay'
+      ? { ...options, budget: { maxCostUsd: Number.MAX_SAFE_INTEGER } }
+      : options;
+  const { plans, context, errors } = await setUp(estimating, false);
+  const suites = errors.length > 0 ? [] : [...plans];
+  suites.sort((a, b) => compareCodeUnits(a.loaded.name, b.loaded.name));
+  const described = suites.map((suite): EvalPlanSuite => ({
+    name: suite.loaded.name,
+    prompt: suite.bundle.id,
+    rows: suite.dataset.rows,
+    models: suite.models.map((model) => planModel(suite, model, context.mode)),
+  }));
+  const models = described.flatMap((suite) => suite.models);
+  const sum = (pick: (model: EvalPlanModel) => number): number =>
+    models.reduce((total, model) => total + pick(model), 0);
+  const priced = models.some((model) => model.worstCaseUsd !== undefined);
+  return {
+    mode: context.mode,
+    suites: described,
+    hits: sum((model) => model.hits),
+    misses: sum((model) => model.misses),
+    calls: sum((model) => model.calls),
+    ...(priced ? { worstCaseUsd: roundUsd(sum((model) => model.worstCaseUsd ?? 0)) } : {}),
+    ...(options.budget === undefined ? {} : { budgetUsd: options.budget.maxCostUsd }),
+    errors,
+  };
 }

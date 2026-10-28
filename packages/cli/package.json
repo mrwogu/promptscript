@@ -39,6 +39,7 @@
     "@inquirer/prompts": "^8.7.4",
     "@promptscript/browser-compiler": "workspace:^",
     "@promptscript/compiler": "workspace:^",
+    "@promptscript/eval": "workspace:^",
     "@promptscript/importer": "workspace:^",
     "@promptscript/formatters": "workspace:^",
     "@promptscript/server": "workspace:^",

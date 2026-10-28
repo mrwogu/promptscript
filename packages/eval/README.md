@@ -3,7 +3,8 @@
 > Part of the [PromptScript](https://github.com/mrwogu/promptscript) monorepo.
 
 Eval suites, datasets, assertions and the runner for PromptScript prompts. The package is private
-and not published to npm. No CLI command uses it yet.
+and not published to npm. `prs eval run` and `prs eval compare` in `@promptscript/cli` use it; see
+the [CLI reference](https://getpromptscript.dev/reference/cli/#prs-eval).
 
 ## What it does
 
@@ -127,6 +128,19 @@ no built-in price. During the run each call reserves its
 worst case; the actual cost replaces it after a success, a refused call (400, 401, 403, 404, 413, 429) gives it back, and any other failure keeps it as spent. 429, 500, 502, 503 and 529 are tried
 again at most twice, with `retry-after` up to 30 seconds. A slow regex fails fast on later cases
 once it ran out of time.
+
+## Reports
+
+`runEvalDetailed` gives the report of the whole run and one report per suite, each built from its own
+cases with its own outcome, cache summary and digest, for a report directory. `planEval` is a run
+that stops before any call: the same checks, the cache lookups, and per suite and model entry the
+hits, misses, calls, price source and worst-case cost. It creates no provider.
+
+`formatReport` prints a report as `text`, `json`, `markdown` or `junit`. Every string is normalized
+first in all four: CR and LF become a space, control and bidi characters are removed. Markdown shows
+model text only inside code spans, with a fence one backtick longer than the longest run inside, and
+JUnit is XML 1.0 safe. `compareReports` matches suites by name, models by `ref` and cases by id;
+`readReport` checks a report file before a comparison reads it (PS6701).
 
 ## Providers
 
