@@ -465,8 +465,10 @@ still change. See the [releases guide](https://getpromptscript.dev/guides/releas
 - **Layered configuration** - IT provisions a system config, developers keep a user config, and a
   project `promptscript.yaml` can `extends` a shared base file. Base policies are kept. See
   [user configuration](https://getpromptscript.dev/guides/user-config/).
-- **Governed prompt releases** - `prs release`, `prs approve` and `prs governance codeowners`
-  promote application prompts through environments with approvals and release gates. See
+- **Governed prompt releases** - `prs release promote` and `prs release rollback` move application
+  prompt labels through environments. `prs approve` records approvals that the release gates check,
+  and `prs governance codeowners` writes CODEOWNERS lines so the right teams review prompt files,
+  approvals and release labels. See
   [enterprise setup](https://getpromptscript.dev/guides/enterprise/#governed-application-prompts).
 - **Reproducible builds** - lockfile hashes, version pins, vendor mode, and strict validation.
 - **Safe automation** - lifecycle hook commands use arrays, while generated-file protection keeps

@@ -35,7 +35,7 @@ export const HOME_FAQ: readonly FaqItem[] = [
   {
     question: 'Can IT roll out one configuration to every developer?',
     answer:
-      'Yes. A system config at /etc/promptscript/config.yaml (or %ProgramData% on Windows) provisions registry aliases and telemetry settings, a user config sits above it, and a project promptscript.yaml can extend a shared base file. Policies from the base are kept.',
+      'Yes. A system config at /etc/promptscript/config.yaml (or %ProgramData%\\promptscript\\config.yaml on Windows) provisions registry aliases and telemetry settings, a user config sits above it, and a project promptscript.yaml can extend a shared base file. Policies from the base are kept.',
   },
   {
     question: 'Can PromptScript manage prompts inside my applications?',
