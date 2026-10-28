@@ -616,13 +616,14 @@ remove them. See [Extending Configuration](../reference/config.md#extending-conf
 When teams ship prompts inside applications (`@prompts`, syntax `1.6.0`), the same Git-native
 review applies to them. Three pieces work together:
 
-| Piece                                         | What it does                                                                                     |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `prs release build`                           | Store bundles under their content hash                                                           |
-| `prs release promote`, `prs release rollback` | Move the `staging` and `prod` labels in reviewed PRs                                             |
-| `prs release status`                          | Report the release state and check label changes of a pull request                               |
-| `prs approve`                                 | Record that a role (for example `legal`) approved one exact bundle hash                          |
-| `prs governance codeowners`                   | Write CODEOWNERS so the right team must review prompt files, approval records and release labels |
+| Piece                       | What it does                                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------------------------ |
+| `prs release build`         | Store bundles under their content hash                                                           |
+| `prs release promote`       | Move an environment label (for example `staging` or `prod`) to a bundle hash in a reviewed PR    |
+| `prs release rollback`      | Restore a previous state of an environment label                                                 |
+| `prs release status`        | Verify and report the release state, never changes labels                                        |
+| `prs approve`               | Record that a role (for example `legal`) approved one exact bundle hash                          |
+| `prs governance codeowners` | Write CODEOWNERS so the right team must review prompt files, approval records and release labels |
 
 Prompt policies such as `required-approvals`, `risk-floor` and `model-allowlist` run as release
 gates. There is no flag that skips them, so a version without the required approval cannot be
