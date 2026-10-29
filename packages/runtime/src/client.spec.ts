@@ -193,6 +193,7 @@ describe('createPromptClient', () => {
       'Prod',
       'index',
       'manifest',
+      'pricing',
       'com0',
       'com1',
       'lpt0',

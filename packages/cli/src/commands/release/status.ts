@@ -13,6 +13,7 @@ import { PS5003_BUNDLE_MISSING, ReleaseError } from './errors.js';
 import { runGit, stripControlCharacters, type GitResult } from './git.js';
 import {
   MANIFEST_FILE,
+  PRICING_FILE,
   RELEASE_DIRECTORY,
   parseLabel,
   readManifest,
@@ -60,6 +61,7 @@ async function strayLabels(project: ReleaseProject): Promise<ReleaseDiagnostic[]
       (name) =>
         name.endsWith('.json') &&
         name !== MANIFEST_FILE &&
+        name !== PRICING_FILE &&
         !project.environments.includes(name.slice(0, -'.json'.length))
     )
     .map((name) => ({

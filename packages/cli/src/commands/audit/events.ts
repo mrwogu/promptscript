@@ -5,7 +5,7 @@ import {
   type ApprovalRecordV1,
 } from '@promptscript/core';
 import { gitBlobId } from '../approve/records.js';
-import { parseLabel, RELEASE_DIRECTORY } from '../release/layout.js';
+import { parseLabel, RELEASE_DIRECTORY, RESERVED_RELEASE_NAMES } from '../release/layout.js';
 import {
   isNullBlob,
   isRegularMode,
@@ -94,8 +94,6 @@ export function approvalsDirectory(sources: AuditSources): string {
   return `${sources.projectPrefix}.promptscript/approvals/`;
 }
 
-/** Label file names that are release files of another kind. */
-const RESERVED_LABEL_NAMES = new Set(['index', 'manifest']);
 const LABEL_NAME_RE = /^([a-z][a-z0-9-]{0,31})\.json$/;
 
 /** The environment of a label path, configured or not, or undefined for other paths. */
@@ -103,7 +101,7 @@ export function labelEnvironment(path: string, sources: AuditSources): string | 
   const directory = `${sources.projectPrefix}${RELEASE_DIRECTORY}/`;
   if (!path.startsWith(directory)) return undefined;
   const environment = LABEL_NAME_RE.exec(path.slice(directory.length))?.[1];
-  return environment === undefined || RESERVED_LABEL_NAMES.has(environment)
+  return environment === undefined || RESERVED_RELEASE_NAMES.has(environment)
     ? undefined
     : environment;
 }

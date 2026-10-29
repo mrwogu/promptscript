@@ -82,6 +82,8 @@ jobs:
           cp schema/prompt-bundle-index-v1.json apps/docs/public/schema/prompt-bundle-index/v1.json
           cp schema/prompt-release-label-v1.json apps/docs/public/schema/prompt-release-label/v1.json
           cp schema/prompt-release-label-v2.json apps/docs/public/schema/prompt-release-label/v2.json
+          mkdir -p apps/docs/public/schema/prompt-release-pricing
+          cp schema/prompt-release-pricing-v1.json apps/docs/public/schema/prompt-release-pricing/v1.json
           mkdir -p apps/docs/public/schema/eval-dataset-row apps/docs/public/schema/eval-suite apps/docs/public/schema/eval-label-row apps/docs/public/schema/eval-cache-entry apps/docs/public/schema/eval-report apps/docs/public/schema/eval-comparison
           cp schema/eval-dataset-row-v1.json apps/docs/public/schema/eval-dataset-row/v1.json
           cp schema/eval-suite-v1.json apps/docs/public/schema/eval-suite/v1.json

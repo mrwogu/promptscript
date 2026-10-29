@@ -37,6 +37,19 @@ export const PROMPT_RELEASE_LABEL_SCHEMA_URL =
 export const PROMPT_RELEASE_LABEL_V2_SCHEMA_URL =
   'https://getpromptscript.dev/schema/prompt-release-label/v2.json';
 
+/** Prices of the models the bundles use; outside every content hash. */
+export const PRICING_FILE = 'pricing.json';
+/** Schema URL of the release pricing file. */
+export const PROMPT_RELEASE_PRICING_SCHEMA_URL =
+  'https://getpromptscript.dev/schema/prompt-release-pricing/v1.json';
+
+/** Names in the release directory that are release files of another kind, not environments. */
+export const RESERVED_RELEASE_NAMES: ReadonlySet<string> = new Set([
+  'index',
+  'manifest',
+  'pricing',
+]);
+
 /** A full content hash. */
 export const CONTENT_HASH_RE = /^sha256-[0-9a-f]{64}$/;
 /** Largest release file the commands read. */
@@ -47,6 +60,7 @@ export interface ReleasePaths {
   root: string;
   directory: string;
   manifest: string;
+  pricing: string;
   bundles: string;
   lock: string;
   label(environment: string): string;
@@ -63,6 +77,7 @@ export function releasePaths(projectRoot: string): ReleasePaths {
     root,
     directory,
     manifest: join(directory, MANIFEST_FILE),
+    pricing: join(directory, PRICING_FILE),
     bundles,
     lock: join(root, RELEASE_LOCK_FILE),
     label: (environment) => join(directory, `${environment}.json`),
@@ -254,6 +269,7 @@ export async function assertExactCase(paths: ReleasePaths, environments: string[
   }
   const expected = new Set([
     MANIFEST_FILE,
+    PRICING_FILE,
     BUNDLES_DIRECTORY,
     ...environments.map((name) => `${name}.json`),
   ]);
@@ -520,6 +536,37 @@ export function parseManifest(text: string, path: string): PromptBundleIndexV1 {
     );
   }
   return parsed as unknown as PromptBundleIndexV1;
+}
+
+/** Refuse to overwrite a `pricing.json` that is not a pricing file. */
+export function assertPricingText(text: string, path: string): void {
+  const parsed = parseJson(text, path, 'release pricing file');
+  const valid =
+    typeof parsed === 'object' &&
+    parsed !== null &&
+    !Array.isArray(parsed) &&
+    (parsed as Record<string, unknown>)['$schema'] === PROMPT_RELEASE_PRICING_SCHEMA_URL;
+  if (!valid) {
+    throw new ReleaseError(
+      PS5004_VERIFICATION_FAILED,
+      `${path} is not a release pricing file. Restore it from Git or delete it and run prs release build.`,
+      path
+    );
+  }
+}
+
+/** Content hashes of the bundle files in the bundles directory, sorted. */
+export async function listBundleHashes(paths: ReleasePaths): Promise<string[]> {
+  let names: string[];
+  try {
+    names = await readdir(paths.bundles);
+  } catch {
+    return [];
+  }
+  return names
+    .filter((name) => name.endsWith('.json') && CONTENT_HASH_RE.test(name.slice(0, -5)))
+    .map((name) => name.slice(0, -'.json'.length))
+    .sort(compareCodeUnits);
 }
 
 /** The label of an environment, or undefined when none was written yet. */

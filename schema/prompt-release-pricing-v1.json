@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/prompt-release-pricing/v1.json",
+  "title": "PromptScript Prompt Release Pricing v1",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://getpromptscript.dev/schema/prompt-release-pricing/v1.json",
+      "description": "Schema URL, the version tag of the file.",
+      "examples": [
+        "https://getpromptscript.dev/schema/prompt-release-pricing/v1.json"
+      ]
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PromptReleasePricingModel"
+      },
+      "description": "Priced models sorted by ref. Models without a known price are left out."
+    }
+  },
+  "required": [
+    "$schema",
+    "models"
+  ],
+  "additionalProperties": false,
+  "description": "List prices of the models that the bundles of a release use, version 1. Outside every content hash: a price update never changes a bundle. The prices are estimates, cache, batch and tier discounts are ignored.",
+  "definitions": {
+    "PromptReleasePricingModel": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "Catalog profile id of the model.",
+          "examples": [
+            "claude-sonnet-5-5"
+          ]
+        },
+        "apiId": {
+          "type": "string",
+          "description": "Provider API model identifier, as the bundles carry it.",
+          "examples": [
+            "claude-sonnet-5-5"
+          ]
+        },
+        "provider": {
+          "type": "string",
+          "description": "Model provider.",
+          "examples": [
+            "anthropic"
+          ]
+        },
+        "inputUsdPerMillion": {
+          "type": "number",
+          "description": "Price of one million input tokens in USD.",
+          "minimum": 0
+        },
+        "outputUsdPerMillion": {
+          "type": "number",
+          "description": "Price of one million output tokens in USD.",
+          "minimum": 0
+        },
+        "checkedOn": {
+          "type": "string",
+          "description": "Date the price was checked against the provider, YYYY-MM-DD.",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [
+        "ref",
+        "apiId",
+        "provider",
+        "inputUsdPerMillion",
+        "outputUsdPerMillion",
+        "checkedOn"
+      ],
+      "additionalProperties": false,
+      "description": "One priced model of a release, as `prs release build` writes it."
+    }
+  }
+}

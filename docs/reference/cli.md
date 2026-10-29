@@ -1203,9 +1203,11 @@ prs release build [options]
 | `--dry-run` | Show what would be written without writing |
 
 Writes new files to `.promptscript/releases/bundles/`, verifies existing ones, and writes
-`.promptscript/releases/manifest.json` only when it changes. Policies always run, each with its own
-severity. The security rules PS005, PS010, PS011, PS012, PS013 and PS014 always run as errors. Takes
-the project lock `.promptscript-release.lock`; a dry run does not.
+`.promptscript/releases/manifest.json` and `.promptscript/releases/pricing.json` only when they
+change. `pricing.json` holds the list prices of the models the bundles use, from the model catalog;
+models without a price are left out. Policies always run, each with its own severity. The security
+rules PS005, PS010, PS011, PS012, PS013 and PS014 always run as errors. Takes the project lock
+`.promptscript-release.lock`; a dry run does not.
 
 ```bash
 prs release build

@@ -29,14 +29,13 @@ import { buildValidatorConfig } from '../../utils/validator-config.js';
 import { createDiffLogger } from '../diff.js';
 import { PS5001_RELEASE_CONFIG, PS5002_UNKNOWN_ENVIRONMENT, ReleaseError } from './errors.js';
 import {
+  RESERVED_RELEASE_NAMES,
   assertExactCase,
   assertReleaseDirectories,
   releasePaths,
   type ReleasePaths,
 } from './layout.js';
 
-/** Environment names the files of the release directory already use. */
-const RESERVED_ENVIRONMENT_NAMES = new Set(['index', 'manifest']);
 /** Windows device names, which no file system there can hold as `<name>.json`. */
 export const WINDOWS_DEVICE_NAME_RE = /^(con|prn|aux|nul|com\d|lpt\d)$/;
 const ENVIRONMENT_NAME_RE = /^[a-z][a-z0-9-]{0,31}$/;
@@ -97,7 +96,13 @@ function checkEnvironments(value: unknown, configPath: string): string[] {
         configPath
       );
     }
-    if (RESERVED_ENVIRONMENT_NAMES.has(entry) || WINDOWS_DEVICE_NAME_RE.test(entry)) {
+    if (entry === 'pricing') {
+      throw configError(
+        'releases.environments entry "pricing" is reserved for the pricing file. Rename the environment and move .promptscript/releases/pricing.json to the new name.',
+        configPath
+      );
+    }
+    if (RESERVED_RELEASE_NAMES.has(entry) || WINDOWS_DEVICE_NAME_RE.test(entry)) {
       throw configError(
         `releases.environments entry "${entry}" is reserved as a file name. Choose another environment name.`,
         configPath

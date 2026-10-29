@@ -5,13 +5,13 @@ It prints the request body for the Anthropic Messages API. It makes no API call 
 
 ## Files
 
-| Path                     | What it is                                                                 |
-| :----------------------- | :------------------------------------------------------------------------- |
-| `.promptscript/`         | The PromptScript source, one prompt: `acme-support/refund-reply`           |
-| `promptscript.yaml`      | Project config with two environments, `staging` and `prod`                 |
-| `.promptscript/releases` | The release the CLI built: `manifest.json`, the bundle and one label each  |
-| `index.mjs`              | Loads the `prod` label, renders the prompt with sample inputs, prints JSON |
-| `expected-output.json`   | What `index.mjs` prints                                                    |
+| Path                     | What it is                                                                                |
+| :----------------------- | :---------------------------------------------------------------------------------------- |
+| `.promptscript/`         | The PromptScript source, one prompt: `acme-support/refund-reply`                          |
+| `promptscript.yaml`      | Project config with two environments, `staging` and `prod`                                |
+| `.promptscript/releases` | The release the CLI built: `manifest.json`, `pricing.json`, the bundle and one label each |
+| `index.mjs`              | Loads the `prod` label, renders the prompt with sample inputs, prints JSON                |
+| `expected-output.json`   | What `index.mjs` prints                                                                   |
 
 The release files were made with these commands, run from the repository root as CI does:
 

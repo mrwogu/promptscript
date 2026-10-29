@@ -25,6 +25,7 @@ import { checkPromotionGates } from './gates.js';
 import { runGit, stripControlCharacters } from './git.js';
 import {
   MANIFEST_FILE,
+  PRICING_FILE,
   addedOrChangedExperiments,
   labelChanges,
   removedExperiments,
@@ -399,7 +400,7 @@ async function labelNames(project: ReleaseProject, environments: string[]): Prom
     // No release directory in the checkout: only the configured names.
   }
   const stray = files
-    .filter((file) => file.endsWith('.json') && file !== MANIFEST_FILE)
+    .filter((file) => file.endsWith('.json') && file !== MANIFEST_FILE && file !== PRICING_FILE)
     .map((file) => file.slice(0, -'.json'.length));
   return [...new Set([...environments, ...project.environments, ...stray])];
 }
