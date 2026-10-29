@@ -234,7 +234,7 @@ export type GovernanceRoleName = string & { readonly __brand?: 'GovernanceRoleNa
  * a team (`@acme/legal`, GitLab subgroups allowed) or an email address. A user may
  * hold `.`, `_` and `-` between letters or digits, like GitLab users (`@jane.doe`) and
  * GitHub managed users (`@jane_acme`).
- * @pattern ^(?:@[A-Za-z0-9](?:[A-Za-z0-9]|[_.-](?=[A-Za-z0-9]))*|@[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})$
+ * @pattern ^(?:@[A-Za-z0-9]+(?:[_.-][A-Za-z0-9]+)*|@[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})$
  * @maxLength 254
  */
 export type GovernanceOwner = string & { readonly __brand?: 'GovernanceOwner' };

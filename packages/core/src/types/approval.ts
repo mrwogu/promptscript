@@ -11,7 +11,7 @@ export interface ApprovalApproverV1 {
   source: 'asserted';
   /**
    * Git host user handle, at most 100 characters after the `@`.
-   * @pattern ^@[A-Za-z0-9](?:[A-Za-z0-9]|[_.-](?=[A-Za-z0-9]))*$
+   * @pattern ^@[A-Za-z0-9]+(?:[_.-][A-Za-z0-9]+)*$
    * @maxLength 101
    * @example "@jane"
    */
@@ -76,10 +76,11 @@ export interface ApprovalRecordV1 {
  * with no two of `_.-` in a row and none at the end. GitLab users may hold `.` and `_`,
  * and GitHub managed users end in `_<shortcode>`. Hosts never issue other handles, and
  * CODEOWNERS ignores an invalid user, so it would drop the rule's protection silently.
- * Governance owners and approvers share this rule. Each character matches one branch
- * and the lookahead reads one character, so the match stays linear.
+ * Governance owners and approvers share this rule. `_.-` never matches a letter or digit,
+ * so each character has one way to match and the match stays linear. No lookahead,
+ * because TypeDoc reads `](` in the pattern as a Markdown link.
  */
-export const GIT_HOST_USER_PATTERN = /^@[A-Za-z0-9](?:[A-Za-z0-9]|[_.-](?=[A-Za-z0-9]))*$/;
+export const GIT_HOST_USER_PATTERN = /^@[A-Za-z0-9]+(?:[_.-][A-Za-z0-9]+)*$/;
 
 /**
  * Longest approver handle, `@` included. The handle is part of the record file name,
