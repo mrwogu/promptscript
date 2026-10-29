@@ -21,3 +21,4 @@ export const validateReleaseReport = ajv.compile(readSchema('release-report-v1.j
 const approvalAjv = new Ajv({ strict: true, allowUnionTypes: true });
 approvalAjv.addSchema(readSchema('approval-record-v1.json'));
 export const validateApprovalReport = approvalAjv.compile(readSchema('approval-report-v1.json'));
+export const validateAuditLog = ajv.compile(readSchema('audit-log-v1.json'));

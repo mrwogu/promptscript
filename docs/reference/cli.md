@@ -1498,6 +1498,46 @@ prs governance codeowners --check
 
 ---
 
+### prs audit
+
+Read the governance history of the project from Git.
+
+#### prs audit log
+
+List prompt file changes, approvals, promotions, rollbacks, label entries removed, config changes
+and changes of the generated CODEOWNERS section, newest commit first, merges and side branches
+included, plus the changes a merge dropped from a parent. See [Audit log](../guides/releases.md#audit-log)
+in the releases guide.
+
+```bash
+prs audit log [options]
+```
+
+| Option                | Description                                                                       | Default |
+| --------------------- | --------------------------------------------------------------------------------- | ------- |
+| `--prompt <id>`       | Only events of this prompt id                                                     | -       |
+| `--env <environment>` | Only events of this environment; approvals for every environment match            | -       |
+| `--hash <prefix>`     | Only events whose content hash starts with these hex digits (at least 4)          | -       |
+| `--since <date>`      | Only events committed at or after this ISO date or date and time                  | -       |
+| `--until <date>`      | Only events committed at or before it; a date alone means the end of that UTC day | -       |
+| `--limit <n>`         | Keep the newest `n` events, at most 100000                                        | -       |
+| `--format <format>`   | `text`, `json` or `cef`                                                           | `text`  |
+| `-c, --config <path>` | Path to a custom config file                                                      | -       |
+| `--cwd <dir>`         | Working directory (project root)                                                  | -       |
+
+The command runs in a Git checkout with the full history; a shallow clone, no repository, a Git
+failure or a history the log cannot explain is `PS5108`. A malformed `--prompt` or `--hash` is `PS5102`. Exit code 0 means the log was
+read, 1 an error. With `--format json`, stdout holds one document that matches
+`https://getpromptscript.dev/schema/audit-log/v1.json`, with `head`, the commit the log was read
+from. `--format cef` prints one CEF line per event.
+
+```bash
+prs audit log --prompt acme-support/refund-reply --env prod --hash 850dce44
+prs audit log --since 2026-10-01 --format cef
+```
+
+---
+
 ### prs lock
 
 Generate or update the `promptscript.lock` lockfile. The lockfile records the exact resolved commit for every remote import, enabling reproducible builds.

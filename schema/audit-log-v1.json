@@ -1,0 +1,555 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/audit-log/v1.json",
+  "title": "PromptScript Audit Log",
+  "description": "Machine-readable export of prs audit log --format json.",
+  "type": "object",
+  "required": ["$schema", "version", "success", "filters", "events", "warnings", "errors"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "const": "https://getpromptscript.dev/schema/audit-log/v1.json"
+    },
+    "version": {
+      "const": 1
+    },
+    "success": {
+      "type": "boolean",
+      "description": "False when the command failed; events is empty then."
+    },
+    "head": {
+      "type": "string",
+      "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$",
+      "description": "The commit the log was read from, so two exports can be compared. Required on success."
+    },
+    "filters": {
+      "$ref": "#/definitions/Filters"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Event"
+      },
+      "description": "Newest first."
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Diagnostic"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Diagnostic"
+      }
+    }
+  },
+  "if": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "const": true
+      }
+    },
+    "required": ["success"]
+  },
+  "then": {
+    "type": "object",
+    "properties": {
+      "head": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "required": ["head"]
+  },
+  "definitions": {
+    "Filters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prompt": {
+          "type": "string"
+        },
+        "environment": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256-[0-9a-f]{4,64}$"
+        },
+        "since": {
+          "type": "string"
+        },
+        "until": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        }
+      }
+    },
+    "Person": {
+      "type": "object",
+      "required": ["name", "email"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      },
+      "description": "As Git records it, self-asserted."
+    },
+    "Event": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "A project .prs file, or the config or one of its extends files, changed.",
+          "required": ["type", "commit", "at", "author", "committer", "path", "change", "mainline"],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["changed", "config-changed"]
+            },
+            "commit": {
+              "type": "string",
+              "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$",
+              "description": "Commit that made the change."
+            },
+            "at": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Committer date, ISO 8601."
+            },
+            "author": {
+              "$ref": "#/definitions/Person"
+            },
+            "committer": {
+              "$ref": "#/definitions/Person"
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Path relative to the repository top level."
+            },
+            "change": {
+              "type": "string",
+              "enum": ["A", "M", "D"],
+              "description": "Added, modified or deleted."
+            },
+            "viaMerge": {
+              "const": true,
+              "description": "The commit is a merge; the change is what it brought to its first parent."
+            },
+            "mainline": {
+              "type": "boolean",
+              "description": "The commit is on the first-parent chain of head. Off it, the event is history of a branch and may never have reached head."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "description": "An approval record added, or deleted (read from the parent commit).",
+          "required": ["type", "commit", "at", "author", "committer", "path", "state", "mainline"],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["approved", "approval-removed"]
+            },
+            "commit": {
+              "type": "string",
+              "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$",
+              "description": "Commit that made the change."
+            },
+            "at": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Committer date, ISO 8601."
+            },
+            "author": {
+              "$ref": "#/definitions/Person"
+            },
+            "committer": {
+              "$ref": "#/definitions/Person"
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Path relative to the repository top level."
+            },
+            "prompt": {
+              "type": "string",
+              "minLength": 1
+            },
+            "contentHash": {
+              "type": "string",
+              "pattern": "^sha256-[0-9a-f]{64}$"
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1
+            },
+            "environment": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Absent: the approval counts for every environment."
+            },
+            "approver": {
+              "type": "string",
+              "minLength": 1
+            },
+            "approverSource": {
+              "const": "asserted",
+              "description": "The approver is a claim; the host review of the commit binds it."
+            },
+            "recordCreatedAt": {
+              "type": "string",
+              "minLength": 1,
+              "description": "createdAt of the record, self-asserted."
+            },
+            "comment": {
+              "type": "string"
+            },
+            "state": {
+              "type": "string",
+              "enum": ["well-formed", "misplaced", "invalid"],
+              "description": "From the record and its path alone: well-formed sits at the path its fields give. Well-formed does not mean a gate accepts it. An invalid record has no other record fields."
+            },
+            "viaMerge": {
+              "const": true,
+              "description": "The commit is a merge; the change is what it brought to its first parent."
+            },
+            "mainline": {
+              "type": "boolean",
+              "description": "The commit is on the first-parent chain of head. Off it, the event is history of a branch and may never have reached head."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "description": "A label entry added or changed; rolled-back when set to a hash it held before in that label.",
+          "required": [
+            "type",
+            "commit",
+            "at",
+            "author",
+            "committer",
+            "path",
+            "environment",
+            "prompt",
+            "contentHash",
+            "mainline"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["promoted", "rolled-back"]
+            },
+            "commit": {
+              "type": "string",
+              "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$",
+              "description": "Commit that made the change."
+            },
+            "at": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Committer date, ISO 8601."
+            },
+            "author": {
+              "$ref": "#/definitions/Person"
+            },
+            "committer": {
+              "$ref": "#/definitions/Person"
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Path relative to the repository top level."
+            },
+            "environment": {
+              "type": "string",
+              "minLength": 1
+            },
+            "prompt": {
+              "type": "string",
+              "minLength": 1
+            },
+            "contentHash": {
+              "type": "string",
+              "pattern": "^sha256-[0-9a-f]{64}$"
+            },
+            "previousContentHash": {
+              "type": "string",
+              "pattern": "^sha256-[0-9a-f]{64}$"
+            },
+            "viaMerge": {
+              "const": true,
+              "description": "The commit is a merge; the change is what it brought to its first parent."
+            },
+            "configured": {
+              "const": false,
+              "description": "The label belongs to an environment that is not in releases.environments."
+            },
+            "mainline": {
+              "type": "boolean",
+              "description": "The commit is on the first-parent chain of head. Off it, the event is history of a branch and may never have reached head."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "description": "A label entry removed, or a label file deleted; previousContentHash is the hash it held.",
+          "required": [
+            "type",
+            "commit",
+            "at",
+            "author",
+            "committer",
+            "path",
+            "environment",
+            "prompt",
+            "previousContentHash",
+            "mainline"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "label-removed"
+            },
+            "commit": {
+              "type": "string",
+              "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$",
+              "description": "Commit that made the change."
+            },
+            "at": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Committer date, ISO 8601."
+            },
+            "author": {
+              "$ref": "#/definitions/Person"
+            },
+            "committer": {
+              "$ref": "#/definitions/Person"
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Path relative to the repository top level."
+            },
+            "environment": {
+              "type": "string",
+              "minLength": 1
+            },
+            "prompt": {
+              "type": "string",
+              "minLength": 1
+            },
+            "previousContentHash": {
+              "type": "string",
+              "pattern": "^sha256-[0-9a-f]{64}$"
+            },
+            "viaMerge": {
+              "const": true,
+              "description": "The commit is a merge; the change is what it brought to its first parent."
+            },
+            "configured": {
+              "const": false,
+              "description": "The label belongs to an environment that is not in releases.environments."
+            },
+            "mainline": {
+              "type": "boolean",
+              "description": "The commit is on the first-parent chain of head. Off it, the event is history of a branch and may never have reached head."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "description": "A merge did not keep a change of a parent after the first: an approval record, a label entry or the generated CODEOWNERS section that parent changed since the merge base.",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "merge-dropped"
+            },
+            "commit": {
+              "type": "string",
+              "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$",
+              "description": "Commit that made the change."
+            },
+            "at": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Committer date, ISO 8601."
+            },
+            "author": {
+              "$ref": "#/definitions/Person"
+            },
+            "committer": {
+              "$ref": "#/definitions/Person"
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Path relative to the repository top level."
+            },
+            "prompt": {
+              "type": "string",
+              "minLength": 1
+            },
+            "contentHash": {
+              "type": "string",
+              "pattern": "^sha256-[0-9a-f]{64}$",
+              "description": "The hash the merge kept. Absent when the merge has no entry or record."
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1
+            },
+            "environment": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Absent: the approval counts for every environment."
+            },
+            "approver": {
+              "type": "string",
+              "minLength": 1
+            },
+            "approverSource": {
+              "const": "asserted",
+              "description": "The approver is a claim; the host review of the commit binds it."
+            },
+            "recordCreatedAt": {
+              "type": "string",
+              "minLength": 1,
+              "description": "createdAt of the record, self-asserted."
+            },
+            "comment": {
+              "type": "string"
+            },
+            "state": {
+              "type": "string",
+              "enum": ["well-formed", "misplaced", "invalid"],
+              "description": "From the record and its path alone: well-formed sits at the path its fields give. Well-formed does not mean a gate accepts it. An invalid record has no other record fields."
+            },
+            "viaMerge": {
+              "const": true
+            },
+            "mainline": {
+              "type": "boolean",
+              "description": "The commit is on the first-parent chain of head. Off it, the event is history of a branch and may never have reached head."
+            },
+            "configured": {
+              "const": false,
+              "description": "The label belongs to an environment that is not in releases.environments."
+            },
+            "change": {
+              "type": "string",
+              "enum": ["A", "M", "D"],
+              "description": "What the parent did to the file: added, modified or deleted."
+            },
+            "parent": {
+              "type": "string",
+              "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$",
+              "description": "The parent whose change the merge dropped."
+            },
+            "droppedContentHash": {
+              "type": "string",
+              "pattern": "^sha256-[0-9a-f]{64}$",
+              "description": "Label entries: the hash the parent had. Absent when the parent removed the entry."
+            }
+          },
+          "required": [
+            "type",
+            "commit",
+            "at",
+            "author",
+            "committer",
+            "path",
+            "mainline",
+            "viaMerge",
+            "parent"
+          ]
+        },
+        {
+          "type": "object",
+          "description": "The marked CODEOWNERS section of this project changed.",
+          "required": ["type", "commit", "at", "author", "committer", "path", "mainline"],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "generated"
+            },
+            "commit": {
+              "type": "string",
+              "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$",
+              "description": "Commit that made the change."
+            },
+            "at": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Committer date, ISO 8601."
+            },
+            "author": {
+              "$ref": "#/definitions/Person"
+            },
+            "committer": {
+              "$ref": "#/definitions/Person"
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Path relative to the repository top level."
+            },
+            "viaMerge": {
+              "const": true,
+              "description": "The commit is a merge; the change is what it brought to its first parent."
+            },
+            "mainline": {
+              "type": "boolean",
+              "description": "The commit is on the first-parent chain of head. Off it, the event is history of a branch and may never have reached head."
+            }
+          }
+        }
+      ]
+    },
+    "Diagnostic": {
+      "type": "object",
+      "required": ["message"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "location": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "type": "string"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "column": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}
