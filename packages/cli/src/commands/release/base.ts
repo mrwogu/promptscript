@@ -27,6 +27,7 @@ import {
   MANIFEST_FILE,
   addedOrChangedExperiments,
   labelChanges,
+  removedExperiments,
   parseLabel,
   readReleaseText,
   readVerifiedBundle,
@@ -53,6 +54,8 @@ export interface BaseCheck {
   gates: ReleaseGateResult[];
   warnings: ReleaseDiagnostic[];
   errors: ReleaseDiagnostic[];
+  /** How many entries keep their hash but lose their experiment */
+  endedExperiments: number;
 }
 
 function historyError(message: string): ReleaseError {
@@ -267,8 +270,10 @@ interface LabelPair {
   previous: Entries;
   /** A read or parse error of the checkout label that plain status does not report */
   error?: ReleaseError;
-  /** Ids whose experiment differs between the base and the checkout */
+  /** Ids whose experiment the checkout adds or changes */
   experiments: string[];
+  /** Ids whose experiment the checkout drops */
+  removed: string[];
 }
 
 /** Everything the checks of one base need, loaded once. */
@@ -414,11 +419,11 @@ async function labelPair(
   const unreadable = (error: unknown): LabelPair => {
     // Plain status reports a broken label of a configured environment itself.
     if (project.environments.includes(name)) {
-      return { name, head: new Map(), previous: atBase.entries, experiments: [] };
+      return { name, head: new Map(), previous: atBase.entries, experiments: [], removed: [] };
     }
     // Anything but a release file error (a permission problem, say) fails the command.
     if (!(error instanceof ReleaseError)) throw error;
-    return { name, head: new Map(), previous: atBase.entries, experiments: [], error };
+    return { name, head: new Map(), previous: atBase.entries, experiments: [], removed: [], error };
   };
   let text: string | undefined;
   try {
@@ -427,14 +432,15 @@ async function labelPair(
     return unreadable(error);
   }
   if (text === atBase.text) {
-    return { name, head: atBase.entries, previous: atBase.entries, experiments: [] };
+    return { name, head: atBase.entries, previous: atBase.entries, experiments: [], removed: [] };
   }
   if (text === undefined) {
     return {
       name,
       head: new Map(),
       previous: atBase.entries,
-      experiments: addedOrChangedExperiments(atBase.label, undefined),
+      experiments: [],
+      removed: [],
     };
   }
   try {
@@ -444,6 +450,7 @@ async function labelPair(
       head: entriesOf(head),
       previous: atBase.entries,
       experiments: addedOrChangedExperiments(atBase.label, head),
+      removed: removedExperiments(atBase.label, head),
     };
   } catch (error) {
     return unreadable(error);
@@ -507,7 +514,11 @@ export async function checkAgainstBase(
     base,
     changes: checked.flatMap((result) => result.changes),
     gates: checked.flatMap((result) => result.gates),
-    warnings: unique(checked.flatMap((result) => result.warnings)),
+    warnings: unique([
+      ...labels.flatMap((label) => endedExperimentWarnings(project, label)),
+      ...checked.flatMap((result) => result.warnings),
+    ]),
+    endedExperiments: labels.reduce((sum, label) => sum + endedExperimentIds(label).length, 0),
     errors: unique([
       ...labels.flatMap((label) =>
         label.error === undefined ? [] : [shownDiagnostic(label.error)]
@@ -533,6 +544,19 @@ function experimentDiagnostics(project: ReleaseProject, label: LabelPair): Relea
       )
     )
   );
+}
+
+/** Ids that lose an experiment and stay in the label, so their traffic goes to the entry hash. */
+function endedExperimentIds(label: LabelPair): string[] {
+  return label.removed.filter((id) => label.head.has(id));
+}
+
+/** A removed experiment is not a failure, but it stops traffic to the arms, so it is reported. */
+function endedExperimentWarnings(project: ReleaseProject, label: LabelPair): ReleaseDiagnostic[] {
+  const path = project.paths.relative(project.paths.label(label.name));
+  return endedExperimentIds(label).map((id) => ({
+    message: `${path}: the experiment of ${id} was removed; all traffic goes to ${label.head.get(id)}.`,
+  }));
 }
 
 /** One source build serves every environment, so its diagnostics would repeat per label. */

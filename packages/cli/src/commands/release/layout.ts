@@ -489,6 +489,15 @@ export function addedOrChangedExperiments(
   return [...right.keys()].filter((id) => left.get(id) !== right.get(id)).sort(compareCodeUnits);
 }
 
+/** Ids whose experiment the before label has and the after label drops, sorted. */
+export function removedExperiments(
+  before: PromptReleaseLabel | undefined,
+  after: PromptReleaseLabel | undefined
+): string[] {
+  const right = experimentsOf(after);
+  return [...experimentsOf(before).keys()].filter((id) => !right.has(id)).sort(compareCodeUnits);
+}
+
 /** Parse the text of the manifest, a bundle index. */
 export function parseManifest(text: string, path: string): PromptBundleIndexV1 {
   const parsed = parseJson(text, path, 'release manifest');

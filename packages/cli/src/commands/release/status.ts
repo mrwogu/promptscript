@@ -301,7 +301,13 @@ function ignoredConfigWarnings(options: ReleaseStatusOptions): ReleaseDiagnostic
 function printBaseCheck(check: BaseCheck): void {
   const { base, changes } = check;
   ConsoleOutput.header(`Changes since ${base.ref} (${base.commit.slice(0, 12)})`);
-  if (changes.length === 0) ConsoleOutput.info('  no label entry changed');
+  if (changes.length === 0) {
+    ConsoleOutput.info(
+      check.endedExperiments > 0
+        ? '  no label entry hash changed, an experiment was removed'
+        : '  no label entry changed'
+    );
+  }
   for (const change of changes) {
     const from =
       change.previousContentHash === undefined ? 'none' : shortHash(change.previousContentHash);

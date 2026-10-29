@@ -1400,6 +1400,29 @@ describe('prs release status --base', () => {
     const result = await statusBase(root, 'base');
 
     expect(result.success).toBe(true);
+    expect(result.warnings.map((warning) => warning.message)).toContain(
+      `.promptscript/releases/staging.json: the experiment of ${ID} was removed; all traffic goes to ${hash}.`
+    );
+  });
+
+  it('prints a removed experiment in the text summary', async () => {
+    const root = await baseRepository();
+    const hash = (await labelHash(root, 'staging')) ?? '';
+    await writeExperimentLabel(root, 'staging', [{ id: ID, contentHash: hash }]);
+    await commit(root, 'experiment');
+    git(root, 'tag', '-f', 'base');
+    await setLabel(root, 'staging', hash);
+    const lines: string[] = [];
+    const info = vi.spyOn(console, 'log').mockImplementation((line) => {
+      lines.push(String(line));
+    });
+    process.exitCode = undefined;
+
+    await releaseStatusCommand({ cwd: root, base: 'base' });
+    info.mockRestore();
+
+    expect(lines.join('\n')).toContain('an experiment was removed');
+    expect(lines.join('\n')).not.toContain('no label entry changed');
   });
 
   it('fails when a hand-added experiment arm changes the label', async () => {
