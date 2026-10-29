@@ -241,7 +241,7 @@ export class CatFileBatchParser {
       this.result.tooLarge.add(current.id);
     } else {
       const content = Buffer.concat(current.kept);
-      this.result.blobs.set(current.id, content.subarray(0, content.length - 1));
+      this.result.blobs.set(current.id, content.subarray(0, -1));
     }
     return true;
   }
@@ -276,20 +276,16 @@ export function readBlobs(
     const parser = new CatFileBatchParser(maxBytes, new Set(asked));
     let stderr = '';
     let settled = false;
-    const settle = (error: Error | undefined, result?: BlobBatch): void => {
+    const refuse = (error: ReleaseError): void => {
       if (settled) return;
       settled = true;
-      if (error === undefined && result !== undefined) {
-        resolvePromise(result);
-        return;
-      }
       // A grandchild that holds the pipes must not keep this waiting.
       child.stdout.destroy();
       child.stderr.destroy();
       reject(error);
     };
     const fail = (detail: string, cause?: Error): void => {
-      settle(
+      refuse(
         new ReleaseError(
           PS5006_ROLLBACK_UNAVAILABLE,
           `git cat-file --batch failed: ${stripControlCharacters(detail)}.`,
@@ -306,7 +302,7 @@ export function readBlobs(
     );
     child.on('error', (error: NodeJS.ErrnoException) => {
       if (error.code === 'ENOENT') {
-        settle(
+        refuse(
           new ReleaseError(
             PS5006_ROLLBACK_UNAVAILABLE,
             'git is not installed or not on PATH. Install Git and run the command again.',
@@ -322,11 +318,11 @@ export function readBlobs(
     // Git that exits early closes stdin; the exit status says why.
     child.stdin.on('error', () => undefined);
     child.stdout.on('data', (chunk: Buffer) => {
-      if (settled) return;
+      // A refused read destroys stdout, so no chunk comes after it.
       try {
         parser.push(chunk);
       } catch (error) {
-        fail(error instanceof Error ? error.message : String(error));
+        fail(errorMessage(error));
         child.kill();
       }
     });
@@ -351,14 +347,23 @@ export function readBlobs(
         const unanswered = asked.filter(
           (id) => !result.blobs.has(id) && !result.tooLarge.has(id) && !result.missing.has(id)
         );
-        if (unanswered.length > 0) throw new Error(`no answer for ${unanswered.join(', ')}`);
-        settle(undefined, result);
+        if (unanswered.length > 0) {
+          const more = unanswered.length > 1 ? ` and ${unanswered.length - 1} more` : '';
+          throw new Error(`no answer for ${unanswered[0]}${more}`);
+        }
+        settled = true;
+        resolvePromise(result);
       } catch (error) {
-        fail(error instanceof Error ? error.message : String(error));
+        fail(errorMessage(error));
       }
     });
     child.stdin.end(`${asked.join('\n')}\n`);
   });
+}
+
+/** The message of a thrown value, which need not be an Error. */
+export function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 /**

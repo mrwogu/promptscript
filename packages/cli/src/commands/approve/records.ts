@@ -17,6 +17,7 @@ import {
 import type { ReleaseDiagnostic } from '../../utils/release-report.js';
 import { createFileExclusive } from '../../utils/write-file-atomic.js';
 import {
+  errorMessage,
   readBlobs,
   runGit,
   stripControlCharacters,
@@ -399,7 +400,7 @@ export async function committedRecords(
       { maxBytes: MAX_RECORD_BYTES }
     );
   } catch (error) {
-    throw gitError(error instanceof Error ? error.message : String(error), root);
+    throw gitError(errorMessage(error), root);
   }
   if (read.missing.size > 0) {
     throw gitError(`Git has no blob ${[...read.missing].join(', ')}. ${MISSING_BLOB_FIX}`, root);

@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   CatFileBatchParser,
+  errorMessage,
   readBlobs,
   resolveWindowsGit,
   runGit,
@@ -204,6 +205,68 @@ describe('readBlobs', () => {
       expect(Date.now() - started).toBeLessThan(5000);
     });
 
+    it('rejects with PS5006 when git is on PATH but cannot run', async () => {
+      const directory = await fakeGit('exit 0');
+      await chmod(join(directory, 'git'), 0o644);
+
+      await expect(readBlobs(['a'.repeat(40)], directory, { maxBytes: 1 })).rejects.toMatchObject({
+        code: 'PS5006',
+        message: expect.stringContaining('git cat-file --batch failed'),
+      });
+    });
+
+    it('refuses git that exits before it reads the ids, and so closes stdin', async () => {
+      const directory = await fakeGit('exit 0');
+      const ids = Array.from({ length: 20_000 }, (_, index) =>
+        index.toString(16).padStart(40, '0')
+      );
+
+      const read = readBlobs(ids, directory, { maxBytes: 1 });
+
+      await expect(read).rejects.toMatchObject({
+        code: 'PS5006',
+        message: `git cat-file --batch failed: no answer for ${ids[0]} and 19999 more.`,
+      });
+    });
+
+    it('names the exit status when git fails without a word', async () => {
+      const directory = await fakeGit('/bin/cat > /dev/null; exit 3');
+
+      await expect(readBlobs(['a'.repeat(40)], directory, { maxBytes: 1 })).rejects.toMatchObject({
+        code: 'PS5006',
+        message: 'git cat-file --batch failed: exit status 3.',
+      });
+    });
+
+    it('keeps at most about 1 MiB of what git prints to stderr', async () => {
+      const directory = await fakeGit(
+        "/bin/cat > /dev/null; /usr/bin/head -c 3000000 /dev/zero | /usr/bin/tr '\\0' x >&2; exit 1"
+      );
+
+      const read = readBlobs(['a'.repeat(40)], directory, { maxBytes: 1 });
+
+      await expect(read).rejects.toMatchObject({ code: 'PS5006' });
+      const message = await read.then(
+        () => '',
+        (error: unknown) => errorMessage(error)
+      );
+      expect(message.length).toBeGreaterThan(1024 * 1024);
+      expect(message.length).toBeLessThan(2 * 1024 * 1024);
+    });
+
+    it('stops git at once on output it does not print, and keeps that reason', async () => {
+      const directory = await fakeGit('echo garbage; exec /bin/sleep 5');
+      const started = Date.now();
+
+      const read = readBlobs(['a'.repeat(40)], directory, { maxBytes: 1 });
+
+      await expect(read).rejects.toMatchObject({
+        code: 'PS5006',
+        message: expect.stringContaining('unexpected header'),
+      });
+      expect(Date.now() - started).toBeLessThan(4000);
+    });
+
     it.each([
       ['no answer at all', '/bin/cat > /dev/null', 'no answer for'],
       ['a header Git does not print', '/bin/cat > /dev/null; echo garbage', 'unexpected header'],
@@ -225,6 +288,13 @@ describe('readBlobs', () => {
         message: expect.stringContaining('PROMPTSCRIPT_GIT_TIMEOUT'),
       });
     });
+  });
+});
+
+describe('errorMessage', () => {
+  it('takes the message of an Error and the text of anything else', () => {
+    expect(errorMessage(new Error('broken'))).toBe('broken');
+    expect(errorMessage('plain')).toBe('plain');
   });
 });
 
