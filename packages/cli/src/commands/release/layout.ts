@@ -560,8 +560,14 @@ export async function listBundleHashes(paths: ReleasePaths): Promise<string[]> {
   let names: string[];
   try {
     names = await readdir(paths.bundles);
-  } catch {
-    return [];
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return [];
+    // An incomplete list would leave models out of pricing.json.
+    throw new ReleaseError(
+      PS5003_BUNDLE_MISSING,
+      `${paths.relative(paths.bundles)} cannot be listed (${(error as Error).message}). Fix the directory and run prs release build again.`,
+      paths.bundles
+    );
   }
   return names
     .filter((name) => name.endsWith('.json') && CONTENT_HASH_RE.test(name.slice(0, -5)))

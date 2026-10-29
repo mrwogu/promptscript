@@ -769,6 +769,25 @@ describe('prs release build pricing file', () => {
     expect(messages.filter((message) => message.startsWith('Profiles '))).toHaveLength(1);
   });
 
+  it.skipIf(process.getuid?.() === 0 || process.platform === 'win32')(
+    'stops when bundles/ cannot be listed and writes nothing',
+    async () => {
+      const root = await project(CONFIG, PROMPTS);
+      await mkdir(releases(root, 'bundles'), { recursive: true });
+      await chmod(releases(root, 'bundles'), 0o000);
+
+      try {
+        const result = await build(root);
+
+        expect(errorCodes(result)).toEqual(['PS5003']);
+        expect(result.errors[0]?.message).toContain('cannot be listed');
+        expect(existsSync(releases(root, 'pricing.json'))).toBe(false);
+      } finally {
+        await chmod(releases(root, 'bundles'), 0o755);
+      }
+    }
+  );
+
   it('stops on a stored bundle that does not verify and writes nothing', async () => {
     const root = await project(CONFIG, PROMPTS);
     await mkdir(releases(root, 'bundles'), { recursive: true });
