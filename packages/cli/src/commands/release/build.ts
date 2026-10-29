@@ -12,6 +12,7 @@ import {
   fileAction,
   listBundleHashes,
   parseManifest,
+  readVerifiedBundle,
   readReleaseText,
   shortHash,
   toReleaseJson,
@@ -57,15 +58,10 @@ async function storeBundle(
   };
 }
 
-/** The verified bundles that already sit in the bundles directory. */
+/** The verified bundles that already sit in the bundles directory, in hash order. */
 async function storedBundles(paths: ReleasePaths): Promise<PromptBundleV1[]> {
-  const bundles: PromptBundleV1[] = [];
-  for (const hash of await listBundleHashes(paths)) {
-    const path = paths.bundle(hash);
-    const text = await readReleaseText(path);
-    if (text !== undefined) bundles.push(verifyBundleText(text, hash, path));
-  }
-  return bundles;
+  const hashes = await listBundleHashes(paths);
+  return Promise.all(hashes.map((hash) => readVerifiedBundle(paths, hash)));
 }
 
 /**

@@ -707,6 +707,68 @@ describe('prs release build pricing file', () => {
     ]);
   });
 
+  it('stops on a stored bundle that is a dangling link', async () => {
+    const root = await project(CONFIG, PROMPTS);
+    await mkdir(releases(root, 'bundles'), { recursive: true });
+    const orphan = `sha256-${'b'.repeat(64)}`;
+    await symlink(join(root, 'missing.json'), releases(root, 'bundles', `${orphan}.json`));
+
+    const result = await build(root);
+
+    expect(errorCodes(result)).toEqual(['PS5004']);
+    expect(existsSync(releases(root, 'manifest.json'))).toBe(false);
+  });
+
+  it('breaks a tie of two API ids under one profile by provider and API id', async () => {
+    const profile = (apiId: string): string => `${CONFIG}models:
+  profiles:
+    acme-a:
+      provider: anthropic
+      family: acme
+      apiId: ${apiId}
+      pricing: { inputUsdPerMillion: 1, outputUsdPerMillion: 3, checkedOn: '2026-10-01' }
+`;
+    const prs = PROMPTS.replaceAll('"claude-sonnet-5-5"', '"acme-a"').replace(
+      '"claude-opus-5-5"',
+      '"acme-a"'
+    );
+    const root = await project(profile('acme-2'), prs);
+    await build(root);
+    await writeFile(join(root, 'promptscript.yaml'), profile('acme-1'));
+
+    await build(root);
+    const pricing = await readJson(releases(root, 'pricing.json'));
+
+    const apiIds = (pricing['models'] as { apiId: string }[]).map((model) => model.apiId);
+    expect(apiIds).toEqual(['acme-1', 'acme-2']);
+  });
+
+  it('warns when two profiles for one API id differ only in the output price', async () => {
+    const config = `${CONFIG}models:
+  profiles:
+    acme-b:
+      provider: anthropic
+      family: acme
+      apiId: acme-1
+      pricing: { inputUsdPerMillion: 1, outputUsdPerMillion: 4, checkedOn: '2026-10-01' }
+    acme-a:
+      provider: anthropic
+      family: acme
+      apiId: acme-1
+      pricing: { inputUsdPerMillion: 1, outputUsdPerMillion: 3, checkedOn: '2026-10-01' }
+`;
+    const prs = PROMPTS.replace('"claude-opus-5-5"', '"acme-b"').replaceAll(
+      '"claude-sonnet-5-5"',
+      '"acme-a"'
+    );
+    const root = await project(config, prs);
+
+    const result = await build(root);
+
+    const messages = result.warnings.map((warning) => warning.message);
+    expect(messages.filter((message) => message.startsWith('Profiles '))).toHaveLength(1);
+  });
+
   it('stops on a stored bundle that does not verify and writes nothing', async () => {
     const root = await project(CONFIG, PROMPTS);
     await mkdir(releases(root, 'bundles'), { recursive: true });
