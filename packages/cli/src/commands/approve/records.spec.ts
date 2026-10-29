@@ -11,7 +11,8 @@ import {
 } from '@promptscript/core';
 import {
   committedApprovalFiles,
-  committedApprovals,
+  committedRecords,
+  approvalFilesOf,
   ensureApprovalAttributes,
   findApprovalRecords,
   gitBlobId,
@@ -275,7 +276,7 @@ describe('Git path identity', () => {
   );
 });
 
-describe('committedApprovals', () => {
+describe('committedRecords', () => {
   const git = (cwd: string, ...args: string[]): string =>
     execFileSync(
       'git',
@@ -307,7 +308,10 @@ describe('committedApprovals', () => {
     await writeFile(join(project, path), '{}');
 
     const files = await committedApprovalFiles(project);
-    const found = await committedApprovals(project, files, RECORD.prompt, ['legal', 'security']);
+    const found = await committedRecords(
+      project,
+      approvalFilesOf(files, [RECORD.prompt], ['legal', 'security'])
+    );
 
     expect(found.sort((a, b) => a.path.localeCompare(b.path))).toEqual([
       { path: path.replace(/[^/]+$/, 'big.json') },
@@ -324,16 +328,15 @@ describe('committedApprovals', () => {
     git(project, 'add', '-A');
     git(project, 'commit', '-q', '-m', 'records');
     const files = await committedApprovalFiles(project);
-    const gone = [{ path, blob: '0'.repeat(40) }];
+    const gone = [{ path, blob: '0'.repeat(40), size: 10 }];
 
-    await expect(committedApprovals(project, gone, RECORD.prompt, ['legal'])).rejects.toMatchObject(
-      { code: 'PS5108', message: expect.stringContaining('0000000000') }
-    );
+    await expect(committedRecords(project, gone)).rejects.toMatchObject({
+      code: 'PS5108',
+      message: expect.stringContaining('0000000000'),
+    });
     try {
       vi.stubEnv('PATH', '');
-      await expect(
-        committedApprovals(project, files, RECORD.prompt, ['legal'])
-      ).rejects.toMatchObject({
+      await expect(committedRecords(project, files)).rejects.toMatchObject({
         code: 'PS5108',
         message: expect.stringContaining('git is not installed'),
       });

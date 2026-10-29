@@ -1,13 +1,21 @@
-import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { execFileSync } from 'node:child_process';
+import { chmod, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { resolveWindowsGit, runGit, stripControlCharacters } from './git.js';
+import {
+  CatFileBatchParser,
+  readBlobs,
+  resolveWindowsGit,
+  runGit,
+  stripControlCharacters,
+} from './git.js';
 
 const originalTimeout = process.env['PROMPTSCRIPT_GIT_TIMEOUT'];
 const directories: string[] = [];
 
 afterEach(async () => {
+  vi.unstubAllEnvs();
   if (originalTimeout === undefined) {
     delete process.env['PROMPTSCRIPT_GIT_TIMEOUT'];
   } else {
@@ -76,5 +84,189 @@ describe('runGit', () => {
     await expect(runGit(['hash-object', '--stdin'], tmpdir())).rejects.toMatchObject({
       code: 'PS5006',
     });
+  });
+});
+
+async function repository(): Promise<string> {
+  const directory = await mkdtemp(join(tmpdir(), 'promptscript-release-git-'));
+  directories.push(directory);
+  execFileSync('git', ['init', '-q'], { cwd: directory, stdio: 'ignore' });
+  return directory;
+}
+
+/** Write each content as a blob and return the blob ids in order. */
+async function blobs(directory: string, contents: (string | Buffer)[]): Promise<string[]> {
+  const names = await Promise.all(
+    contents.map(async (content, index) => {
+      const name = `blob-${index}`;
+      await writeFile(join(directory, name), content);
+      return name;
+    })
+  );
+  return execFileSync('git', ['hash-object', '-w', '--', ...names], {
+    cwd: directory,
+    encoding: 'utf-8',
+  })
+    .trim()
+    .split('\n');
+}
+
+describe('readBlobs', () => {
+  it('reads many blobs with one process, byte for byte, newlines and all', async () => {
+    const directory = await repository();
+    const contents = Array.from({ length: 300 }, (_, index) => `{\n  "n": ${index}\n}\n`);
+    contents.push('', '\n\n', 'no line feed at the end');
+    const binary = Buffer.from([0, 10, 255, 10, 13, 10]);
+    const ids = await blobs(directory, [...contents, binary]);
+
+    const read = await readBlobs([...ids, ids[0] ?? ''], directory, { maxBytes: 64 });
+
+    expect(read.missing.size).toBe(0);
+    expect(read.tooLarge.size).toBe(0);
+    expect(read.blobs.size).toBe(ids.length);
+    contents.forEach((content, index) => {
+      expect(read.blobs.get(ids[index] ?? '')?.toString('utf-8')).toBe(content);
+    });
+    expect(read.blobs.get(ids.at(-1) ?? '')).toEqual(binary);
+  });
+
+  it('lists ids Git has no blob for as missing and keeps no content over maxBytes', async () => {
+    const directory = await repository();
+    const [small, large] = await blobs(directory, ['small', 'x'.repeat(100)]);
+    const tree = execFileSync('git', ['write-tree'], { cwd: directory, encoding: 'utf-8' }).trim();
+    const gone = '0'.repeat(40);
+
+    const read = await readBlobs([small ?? '', large ?? '', gone, tree], directory, {
+      maxBytes: 99,
+    });
+
+    expect([...read.blobs.keys()]).toEqual([small]);
+    expect([...read.tooLarge]).toEqual([large]);
+    expect([...read.missing].sort()).toEqual([gone, tree].sort());
+  });
+
+  it('starts no process for no ids', async () => {
+    const missing = join(tmpdir(), 'promptscript-release-git-missing', 'nowhere');
+
+    const read = await readBlobs([], missing, { maxBytes: 1 });
+
+    expect(read.blobs.size + read.tooLarge.size + read.missing.size).toBe(0);
+  });
+
+  it('refuses an id that is no object id, so stdin holds nothing else', async () => {
+    const directory = await repository();
+
+    await expect(
+      readBlobs([`${'a'.repeat(40)}\nHEAD`], directory, { maxBytes: 1 })
+    ).rejects.toMatchObject({ code: 'PS5006', message: expect.stringContaining('not a Git') });
+  });
+
+  it('rejects with PS5006 when Git cannot start or is not in a repository', async () => {
+    const missing = join(tmpdir(), 'promptscript-release-git-missing', 'nowhere');
+    const outside = await mkdtemp(join(tmpdir(), 'promptscript-release-git-'));
+    directories.push(outside);
+    vi.stubEnv('GIT_CEILING_DIRECTORIES', tmpdir());
+
+    await expect(readBlobs(['a'.repeat(40)], missing, { maxBytes: 1 })).rejects.toMatchObject({
+      code: 'PS5006',
+    });
+    await expect(readBlobs(['a'.repeat(40)], outside, { maxBytes: 1 })).rejects.toMatchObject({
+      code: 'PS5006',
+      message: expect.stringContaining('git cat-file --batch failed'),
+    });
+  });
+
+  describe.skipIf(process.platform === 'win32')('with a fake git on PATH', () => {
+    /** A directory whose only `git` is this shell script. */
+    async function fakeGit(script: string): Promise<string> {
+      const directory = await mkdtemp(join(tmpdir(), 'promptscript-fake-git-'));
+      directories.push(directory);
+      await writeFile(join(directory, 'git'), `#!/bin/sh\n${script}\n`);
+      await chmod(join(directory, 'git'), 0o755);
+      vi.stubEnv('PATH', directory);
+      return directory;
+    }
+
+    it.each([
+      ['git itself', 'exec /bin/sleep 5'],
+      ['a process git started, which holds the output open', '/bin/sleep 5; true'],
+    ])('stops at PROMPTSCRIPT_GIT_TIMEOUT when %s hangs', async (_name, script) => {
+      const directory = await fakeGit(script);
+      vi.stubEnv('PROMPTSCRIPT_GIT_TIMEOUT', '200');
+      const started = Date.now();
+
+      const read = readBlobs(['a'.repeat(40)], directory, { maxBytes: 1 });
+
+      await expect(read).rejects.toMatchObject({
+        code: 'PS5006',
+        message: expect.stringMatching(/stopped with SIGTERM.*PROMPTSCRIPT_GIT_TIMEOUT/),
+      });
+      expect(Date.now() - started).toBeLessThan(5000);
+    });
+
+    it.each([
+      ['no answer at all', '/bin/cat > /dev/null', 'no answer for'],
+      ['a header Git does not print', '/bin/cat > /dev/null; echo garbage', 'unexpected header'],
+      [
+        'an answer for an id it was not asked for',
+        `/bin/cat > /dev/null; echo ${'b'.repeat(40)} missing`,
+        'not asked for',
+      ],
+    ])('refuses %s, even with exit status 0', async (_name, script, message) => {
+      const directory = await fakeGit(script);
+
+      const read = readBlobs(['a'.repeat(40)], directory, { maxBytes: 1 });
+
+      await expect(read).rejects.toMatchObject({
+        code: 'PS5006',
+        message: expect.stringContaining(message),
+      });
+      await expect(read).rejects.not.toMatchObject({
+        message: expect.stringContaining('PROMPTSCRIPT_GIT_TIMEOUT'),
+      });
+    });
+  });
+});
+
+describe('CatFileBatchParser', () => {
+  const id = 'a'.repeat(40);
+
+  it('reads output split at any byte', () => {
+    const output = Buffer.from(`${id} blob 3\na\nb\n${'b'.repeat(40)} missing\n`);
+    const parser = new CatFileBatchParser(10);
+
+    for (const byte of output) parser.push(Buffer.from([byte]));
+    const result = parser.finish();
+
+    expect(result.blobs.get(id)?.toString('utf-8')).toBe('a\nb');
+    expect([...result.missing]).toEqual(['b'.repeat(40)]);
+  });
+
+  it.each([
+    ['output cut in an object', `${id} blob 5\nab`, 'ended in the middle'],
+    ['output cut in a header', `${id} blob`, 'ended in the middle'],
+    ['a header Git does not print', 'fatal: not a git repository\n', 'unexpected header'],
+    ['content without its line feed', `${id} blob 1\nab`, 'does not end with a line feed'],
+  ])('throws on %s', (_name, output, message) => {
+    const parser = new CatFileBatchParser(10);
+
+    expect(() => {
+      parser.push(Buffer.from(output));
+      parser.finish();
+    }).toThrow(message);
+  });
+
+  it('throws on an answer for an id that was not asked for', () => {
+    const parser = new CatFileBatchParser(10, new Set([id]));
+
+    expect(() => parser.push(Buffer.from(`${'b'.repeat(40)} blob 1\na\n`))).toThrow(
+      'not asked for'
+    );
+  });
+
+  it('throws on a header longer than Git prints', () => {
+    const parser = new CatFileBatchParser(10);
+
+    expect(() => parser.push(Buffer.alloc(300, 'a'))).toThrow('header is too long');
   });
 });
