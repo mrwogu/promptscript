@@ -8,7 +8,7 @@
 
 > `const` **BUNDLED\_REGISTRY**: `Record`\<`string`, `string`\>
 
-Defined in: [browser-compiler/src/registry.ts:158](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/browser-compiler/src/registry.ts#L158)
+Defined in: [browser-compiler/src/registry.ts:158](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/browser-compiler/src/registry.ts#L158)
 
 Map of all bundled registry files.
 Keys are the virtual paths, values are the file contents.

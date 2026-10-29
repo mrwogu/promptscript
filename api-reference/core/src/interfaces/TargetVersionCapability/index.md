@@ -6,7 +6,7 @@
 
 # Interface: TargetVersionCapability
 
-Defined in: [core/src/target-capabilities.ts:13](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L13)
+Defined in: [core/src/target-capabilities.ts:13](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L13)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [core/src/target-capabilities.ts:13](https://github.com/mrwogu/promp
 
 > `readonly` **description**: `string`
 
-Defined in: [core/src/target-capabilities.ts:15](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L15)
+Defined in: [core/src/target-capabilities.ts:15](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L15)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [core/src/target-capabilities.ts:15](https://github.com/mrwogu/promp
 
 > `readonly` **name**: `string`
 
-Defined in: [core/src/target-capabilities.ts:14](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L14)
+Defined in: [core/src/target-capabilities.ts:14](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L14)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [core/src/target-capabilities.ts:14](https://github.com/mrwogu/promp
 
 > `readonly` **outputPath**: `string`
 
-Defined in: [core/src/target-capabilities.ts:16](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L16)
+Defined in: [core/src/target-capabilities.ts:16](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L16)

@@ -8,7 +8,7 @@
 
 > **getSecurityPreset**(`environment`): [`ValidatorConfig`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidatorConfig/index.md)
 
-Defined in: [validator/src/presets.ts:274](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/presets.ts#L274)
+Defined in: [validator/src/presets.ts:274](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/validator/src/presets.ts#L274)
 
 Get the recommended security preset based on environment.
 

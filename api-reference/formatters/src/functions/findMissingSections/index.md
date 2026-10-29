@@ -8,7 +8,7 @@
 
 > **findMissingSections**(`outputSections`, `expectedSections`): `string`[]
 
-Defined in: [formatters/src/section-registry.ts:73](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/section-registry.ts#L73)
+Defined in: [formatters/src/section-registry.ts:73](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/section-registry.ts#L73)
 
 Find sections that are missing from output but expected.
 

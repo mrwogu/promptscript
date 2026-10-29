@@ -6,7 +6,7 @@
 
 # Interface: TargetCapabilitySeed
 
-Defined in: [core/src/target-capabilities.ts:1454](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L1454)
+Defined in: [core/src/target-capabilities.ts:1454](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L1454)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [core/src/target-capabilities.ts:1454](https://github.com/mrwogu/pro
 
 > `readonly` **features**: `object`
 
-Defined in: [core/src/target-capabilities.ts:1457](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L1457)
+Defined in: [core/src/target-capabilities.ts:1457](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L1457)
 
 #### defaultVersion
 
@@ -38,7 +38,7 @@ Defined in: [core/src/target-capabilities.ts:1457](https://github.com/mrwogu/pro
 
 > `readonly` **outputPath**: `string`
 
-Defined in: [core/src/target-capabilities.ts:1455](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L1455)
+Defined in: [core/src/target-capabilities.ts:1455](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L1455)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [core/src/target-capabilities.ts:1455](https://github.com/mrwogu/pro
 
 > `readonly` `optional` **sectionProfile?**: [`SectionProfile`](https://getpromptscript.dev/api-reference/core/src/type-aliases/SectionProfile/index.md)
 
-Defined in: [core/src/target-capabilities.ts:1463](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L1463)
+Defined in: [core/src/target-capabilities.ts:1463](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L1463)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [core/src/target-capabilities.ts:1463](https://github.com/mrwogu/pro
 
 > `readonly` **skillPath**: `object`
 
-Defined in: [core/src/target-capabilities.ts:1456](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L1456)
+Defined in: [core/src/target-capabilities.ts:1456](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L1456)
 
 #### basePath
 

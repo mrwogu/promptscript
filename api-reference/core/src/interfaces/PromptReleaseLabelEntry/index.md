@@ -6,7 +6,7 @@
 
 # Interface: PromptReleaseLabelEntry
 
-Defined in: [core/src/types/prompt-bundle.ts:186](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompt-bundle.ts#L186)
+Defined in: [core/src/types/prompt-bundle.ts:186](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L186)
 
 One prompt a release label points at.
 
@@ -16,7 +16,7 @@ One prompt a release label points at.
 
 > **contentHash**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:196](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompt-bundle.ts#L196)
+Defined in: [core/src/types/prompt-bundle.ts:196](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L196)
 
 Content hash of the released bundle.
 
@@ -30,7 +30,7 @@ Content hash of the released bundle.
 
 > **id**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:191](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompt-bundle.ts#L191)
+Defined in: [core/src/types/prompt-bundle.ts:191](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L191)
 
 Prompt id.
 

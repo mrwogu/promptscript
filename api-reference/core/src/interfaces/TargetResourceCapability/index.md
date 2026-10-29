@@ -6,7 +6,7 @@
 
 # Interface: TargetResourceCapability
 
-Defined in: [core/src/target-capabilities.ts:38](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L38)
+Defined in: [core/src/target-capabilities.ts:38](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L38)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [core/src/target-capabilities.ts:38](https://github.com/mrwogu/promp
 
 > `readonly` `optional` **conditional?**: `boolean`
 
-Defined in: [core/src/target-capabilities.ts:46](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L46)
+Defined in: [core/src/target-capabilities.ts:46](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L46)
 
 Whether the resource depends on a corresponding source block or setting.
 
@@ -24,7 +24,7 @@ Whether the resource depends on a corresponding source block or setting.
 
 > `readonly` **kind**: `"commands"` \| `"skills"` \| `"agents"` \| `"hooks"` \| `"plugins"` \| `"main"` \| `"mcp"`
 
-Defined in: [core/src/target-capabilities.ts:40](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L40)
+Defined in: [core/src/target-capabilities.ts:40](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L40)
 
 Resource category and generated file contract.
 
@@ -34,7 +34,7 @@ Resource category and generated file contract.
 
 > `readonly` **path**: `string`
 
-Defined in: [core/src/target-capabilities.ts:42](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L42)
+Defined in: [core/src/target-capabilities.ts:42](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L42)
 
 Relative path; `<name>` denotes a generated entry name.
 
@@ -44,6 +44,6 @@ Relative path; `<name>` denotes a generated entry name.
 
 > `readonly` **versions**: readonly `string`[]
 
-Defined in: [core/src/target-capabilities.ts:44](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-capabilities.ts#L44)
+Defined in: [core/src/target-capabilities.ts:44](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-capabilities.ts#L44)
 
 Formatter versions that can emit this resource.

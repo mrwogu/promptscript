@@ -8,7 +8,7 @@
 
 > **extractPromptDefinitions**(`program`): [`PromptExtraction`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptExtraction/index.md)
 
-Defined in: [core/src/prompt-definitions.ts:714](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/prompt-definitions.ts#L714)
+Defined in: [core/src/prompt-definitions.ts:714](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/prompt-definitions.ts#L714)
 
 Read every `@prompts` entry of a program into typed definitions.
 

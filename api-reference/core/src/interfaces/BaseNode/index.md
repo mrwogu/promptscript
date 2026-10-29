@@ -6,7 +6,7 @@
 
 # Interface: BaseNode
 
-Defined in: [core/src/types/ast.ts:12](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/ast.ts#L12)
+Defined in: [core/src/types/ast.ts:12](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L12)
 
 Base interface for all AST nodes.
 
@@ -38,7 +38,7 @@ Base interface for all AST nodes.
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -48,6 +48,6 @@ Source location
 
 > `readonly` **type**: `string`
 
-Defined in: [core/src/types/ast.ts:14](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/ast.ts#L14)
+Defined in: [core/src/types/ast.ts:14](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L14)
 
 Node type discriminator

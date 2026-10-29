@@ -8,7 +8,7 @@
 
 > **checkSuites**(`suites`, `context`): [`EvalFinding`](https://getpromptscript.dev/api-reference/eval/src/interfaces/EvalFinding/index.md)[]
 
-Defined in: [eval/src/suite/check.ts:256](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/eval/src/suite/check.ts#L256)
+Defined in: [eval/src/suite/check.ts:256](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/suite/check.ts#L256)
 
 Check loaded suites against the compiled prompts and the model catalog:
 the prompt exists (else the five nearest ids), fields are declared output

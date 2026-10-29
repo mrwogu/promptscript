@@ -8,7 +8,7 @@
 
 > **resolvePath**(`path`, `options`): `string`
 
-Defined in: [core/src/utils/path.ts:101](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/path.ts#L101)
+Defined in: [core/src/utils/path.ts:101](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/utils/path.ts#L101)
 
 Resolve a path to a filesystem location.
 

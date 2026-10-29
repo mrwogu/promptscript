@@ -6,7 +6,7 @@
 
 # Interface: TextContent
 
-Defined in: [core/src/types/ast.ts:408](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/ast.ts#L408)
+Defined in: [core/src/types/ast.ts:408](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L408)
 
 Pure text content (triple-quoted strings).
 
@@ -20,7 +20,7 @@ Pure text content (triple-quoted strings).
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -34,7 +34,7 @@ Source location
 
 > `readonly` **type**: `"TextContent"`
 
-Defined in: [core/src/types/ast.ts:409](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/ast.ts#L409)
+Defined in: [core/src/types/ast.ts:409](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L409)
 
 Node type discriminator
 
@@ -48,6 +48,6 @@ Node type discriminator
 
 > **value**: `string`
 
-Defined in: [core/src/types/ast.ts:411](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/ast.ts#L411)
+Defined in: [core/src/types/ast.ts:411](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L411)
 
 Text value (without delimiters)

@@ -8,7 +8,7 @@
 
 > **parse**(`source`, `options?`): [`ParseResult`](https://getpromptscript.dev/api-reference/parser/src/interfaces/ParseResult/index.md)
 
-Defined in: [parser/src/parse.ts:193](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/parser/src/parse.ts#L193)
+Defined in: [parser/src/parse.ts:193](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/parser/src/parse.ts#L193)
 
 Parse PromptScript source code into the mutable legacy AST.
 

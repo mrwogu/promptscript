@@ -6,7 +6,7 @@
 
 # Interface: OpenRouterModelEntry
 
-Defined in: [core/src/model-drift.ts:30](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-drift.ts#L30)
+Defined in: [core/src/model-drift.ts:30](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/model-drift.ts#L30)
 
 A model entry parsed out of OpenRouter's /api/v1/models response.
 
@@ -16,7 +16,7 @@ A model entry parsed out of OpenRouter's /api/v1/models response.
 
 > `readonly` **displayName**: `string`
 
-Defined in: [core/src/model-drift.ts:36](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-drift.ts#L36)
+Defined in: [core/src/model-drift.ts:36](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/model-drift.ts#L36)
 
 Display name with the provider prefix cut off.
 
@@ -26,7 +26,7 @@ Display name with the provider prefix cut off.
 
 > `readonly` `optional` **pricing?**: [`OpenRouterPricing`](https://getpromptscript.dev/api-reference/core/src/type-aliases/OpenRouterPricing/index.md)
 
-Defined in: [core/src/model-drift.ts:42](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-drift.ts#L42)
+Defined in: [core/src/model-drift.ts:42](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/model-drift.ts#L42)
 
 List price, when OpenRouter carries one.
 
@@ -36,7 +36,7 @@ List price, when OpenRouter carries one.
 
 > `readonly` **provider**: `string`
 
-Defined in: [core/src/model-drift.ts:34](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-drift.ts#L34)
+Defined in: [core/src/model-drift.ts:34](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/model-drift.ts#L34)
 
 Catalog provider the entry belongs to.
 
@@ -46,7 +46,7 @@ Catalog provider the entry belongs to.
 
 > `readonly` **releaseDate**: `string`
 
-Defined in: [core/src/model-drift.ts:38](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-drift.ts#L38)
+Defined in: [core/src/model-drift.ts:38](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/model-drift.ts#L38)
 
 Release date approximation: the day OpenRouter listed the model.
 
@@ -56,7 +56,7 @@ Release date approximation: the day OpenRouter listed the model.
 
 > `readonly` `optional` **retirementDate?**: `string`
 
-Defined in: [core/src/model-drift.ts:40](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-drift.ts#L40)
+Defined in: [core/src/model-drift.ts:40](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/model-drift.ts#L40)
 
 Retirement hint, when OpenRouter carries an expiration date.
 
@@ -66,6 +66,6 @@ Retirement hint, when OpenRouter carries an expiration date.
 
 > `readonly` **slug**: `string`
 
-Defined in: [core/src/model-drift.ts:32](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/model-drift.ts#L32)
+Defined in: [core/src/model-drift.ts:32](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/model-drift.ts#L32)
 
 Base id without the provider prefix (e.g. 'claude-opus-5.5').

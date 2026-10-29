@@ -6,7 +6,7 @@
 
 # Interface: AgentConflict
 
-Defined in: [core/src/agent-names.ts:7](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/agent-names.ts#L7)
+Defined in: [core/src/agent-names.ts:7](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/agent-names.ts#L7)
 
 A group of agent definitions that use the same resolved name.
 
@@ -16,7 +16,7 @@ A group of agent definitions that use the same resolved name.
 
 > **name**: `string`
 
-Defined in: [core/src/agent-names.ts:9](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/agent-names.ts#L9)
+Defined in: [core/src/agent-names.ts:9](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/agent-names.ts#L9)
 
 Conflicting resolved name
 
@@ -26,6 +26,6 @@ Conflicting resolved name
 
 > **provenance**: [`AgentProvenance`](https://getpromptscript.dev/api-reference/core/src/interfaces/AgentProvenance/index.md)[]
 
-Defined in: [core/src/agent-names.ts:11](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/agent-names.ts#L11)
+Defined in: [core/src/agent-names.ts:11](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/agent-names.ts#L11)
 
 Definitions that contributed the name

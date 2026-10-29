@@ -8,7 +8,7 @@
 
 > **evaluateAssertions**(`assertions`, `response`, `context`): [`EvalAssertionResultV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalAssertionResultV1/index.md)[]
 
-Defined in: [eval/src/assertions.ts:274](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/eval/src/assertions.ts#L274)
+Defined in: [eval/src/assertions.ts:274](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/assertions.ts#L274)
 
 Check a response with the four deterministic assertion kinds: `equals`,
 `contains`, `regex` and `json-schema`. A `field` reads one property of the

@@ -1,0 +1,45 @@
+# compareReports()
+
+[**PromptScript API**](https://getpromptscript.dev/api-reference/index.md)
+
+***
+
+# Function: compareReports()
+
+> **compareReports**(`baseline`, `candidate`, `options`): [`EvalComparisonV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalComparisonV1/index.md)
+
+Defined in: [eval/src/compare.ts:228](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/compare.ts#L228)
+
+Compare a candidate report with a baseline. Suites match by name, models
+by `ref`, cases by id. A case regressed when it passed in the baseline and
+does not pass in the candidate; only ids both reports have are compared.
+A suite or model one report lacks gets an entry that lists its cases under
+`onlyInBaseline` or `onlyInCandidate`, and never counts as a regression.
+`regression` is true when a case regressed or a pass rate dropped by more
+than the tolerance.
+
+## Parameters
+
+### baseline
+
+[`EvalReportV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalReportV1/index.md)
+
+The earlier report
+
+### candidate
+
+[`EvalReportV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalReportV1/index.md)
+
+The report under test
+
+### options
+
+[`CompareOptions`](https://getpromptscript.dev/api-reference/eval/src/interfaces/CompareOptions/index.md)
+
+Tolerance
+
+## Returns
+
+[`EvalComparisonV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalComparisonV1/index.md)
+
+The comparison, entries sorted by suite name, then model order

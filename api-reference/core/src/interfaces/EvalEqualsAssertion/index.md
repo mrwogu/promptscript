@@ -6,7 +6,7 @@
 
 # Interface: EvalEqualsAssertion
 
-Defined in: [core/src/types/eval.ts:109](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L109)
+Defined in: [core/src/types/eval.ts:109](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L109)
 
 Passes when the target equals `value`, else the row's expected value.
 
@@ -20,7 +20,7 @@ Passes when the target equals `value`, else the row's expected value.
 
 > `optional` **field?**: `string`
 
-Defined in: [core/src/types/eval.ts:105](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L105)
+Defined in: [core/src/types/eval.ts:105](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L105)
 
 Output property the assertion reads; absent means the whole response text
 
@@ -34,7 +34,7 @@ Output property the assertion reads; absent means the whole response text
 
 > **id**: `string`
 
-Defined in: [core/src/types/eval.ts:103](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L103)
+Defined in: [core/src/types/eval.ts:103](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L103)
 
 Assertion id, unique in the suite.
 
@@ -58,7 +58,7 @@ Assertion id, unique in the suite.
 
 > `optional` **ignoreCase?**: `boolean`
 
-Defined in: [core/src/types/eval.ts:116](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L116)
+Defined in: [core/src/types/eval.ts:116](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L116)
 
 Compare case-insensitively
 
@@ -68,7 +68,7 @@ Compare case-insensitively
 
 > **kind**: `"equals"`
 
-Defined in: [core/src/types/eval.ts:110](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L110)
+Defined in: [core/src/types/eval.ts:110](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L110)
 
 ***
 
@@ -76,7 +76,7 @@ Defined in: [core/src/types/eval.ts:110](https://github.com/mrwogu/promptscript/
 
 > `optional` **negate?**: `boolean`
 
-Defined in: [core/src/types/eval.ts:112](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L112)
+Defined in: [core/src/types/eval.ts:112](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L112)
 
 Inverts the result
 
@@ -86,7 +86,7 @@ Inverts the result
 
 > `optional` **trim?**: `boolean`
 
-Defined in: [core/src/types/eval.ts:118](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L118)
+Defined in: [core/src/types/eval.ts:118](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L118)
 
 Trim both sides before comparing; default true
 
@@ -96,6 +96,6 @@ Trim both sides before comparing; default true
 
 > `optional` **value?**: `string`
 
-Defined in: [core/src/types/eval.ts:114](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L114)
+Defined in: [core/src/types/eval.ts:114](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L114)
 
 Value to compare with; absent means the row's expected value

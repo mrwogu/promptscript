@@ -6,7 +6,7 @@
 
 # Interface: DefaultFeatureProfile
 
-Defined in: [core/src/target-catalog.ts:50](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-catalog.ts#L50)
+Defined in: [core/src/target-catalog.ts:50](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-catalog.ts#L50)
 
 Default feature profile for a target.
 Used by the Playground to initialize target settings.
@@ -17,7 +17,7 @@ Used by the Playground to initialize target settings.
 
 > **defaultEnabled**: `boolean`
 
-Defined in: [core/src/target-catalog.ts:52](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-catalog.ts#L52)
+Defined in: [core/src/target-catalog.ts:52](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-catalog.ts#L52)
 
 Whether the target is enabled by default in the Playground
 
@@ -27,7 +27,7 @@ Whether the target is enabled by default in the Playground
 
 > **defaultVersion**: `string`
 
-Defined in: [core/src/target-catalog.ts:54](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-catalog.ts#L54)
+Defined in: [core/src/target-catalog.ts:54](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-catalog.ts#L54)
 
 Default version string for the Playground
 
@@ -37,7 +37,7 @@ Default version string for the Playground
 
 > **hasAgents**: `boolean`
 
-Defined in: [core/src/target-catalog.ts:58](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-catalog.ts#L58)
+Defined in: [core/src/target-catalog.ts:58](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-catalog.ts#L58)
 
 Whether the target supports agent definitions
 
@@ -47,7 +47,7 @@ Whether the target supports agent definitions
 
 > **hasCommands**: `boolean`
 
-Defined in: [core/src/target-catalog.ts:60](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-catalog.ts#L60)
+Defined in: [core/src/target-catalog.ts:60](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-catalog.ts#L60)
 
 Whether the target supports slash commands
 
@@ -57,6 +57,6 @@ Whether the target supports slash commands
 
 > **hasSkills**: `boolean`
 
-Defined in: [core/src/target-catalog.ts:56](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/target-catalog.ts#L56)
+Defined in: [core/src/target-catalog.ts:56](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-catalog.ts#L56)
 
 Whether the target supports skills

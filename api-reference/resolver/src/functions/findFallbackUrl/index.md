@@ -8,7 +8,7 @@
 
 > **findFallbackUrl**(`repoUrl`, `registries`): `string` \| `undefined`
 
-Defined in: [resolver/src/alias-resolver.ts:226](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/alias-resolver.ts#L226)
+Defined in: [resolver/src/alias-resolver.ts:226](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/alias-resolver.ts#L226)
 
 Find the fallback URL for a given repository URL by scanning the registries config.
 

@@ -6,7 +6,7 @@
 
 # Interface: FileSystemRegistryOptions
 
-Defined in: [resolver/src/registry.ts:38](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/registry.ts#L38)
+Defined in: [resolver/src/registry.ts:38](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry.ts#L38)
 
 Options for FileSystemRegistry.
 
@@ -16,6 +16,6 @@ Options for FileSystemRegistry.
 
 > **rootPath**: `string`
 
-Defined in: [resolver/src/registry.ts:40](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/registry.ts#L40)
+Defined in: [resolver/src/registry.ts:40](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry.ts#L40)
 
 Root directory for the registry

@@ -8,7 +8,7 @@
 
 > **readDataset**(`file`, `options`): `AsyncIterable`\<[`DatasetRecord`](https://getpromptscript.dev/api-reference/eval/src/interfaces/DatasetRecord/index.md)\>
 
-Defined in: [eval/src/dataset/read.ts:457](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/eval/src/dataset/read.ts#L457)
+Defined in: [eval/src/dataset/read.ts:457](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/dataset/read.ts#L457)
 
 Read a dataset file row by row: JSONL, CSV or YAML by the extension of the
 path as written. JSONL streams, so reading stops at the row limit without

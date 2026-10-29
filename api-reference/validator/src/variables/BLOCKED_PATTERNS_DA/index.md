@@ -8,6 +8,6 @@
 
 > `const` **BLOCKED\_PATTERNS\_DA**: `RegExp`[]
 
-Defined in: [validator/src/rules/blocked-patterns.ts:280](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/rules/blocked-patterns.ts#L280)
+Defined in: [validator/src/rules/blocked-patterns.ts:280](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/validator/src/rules/blocked-patterns.ts#L280)
 
 Danish (Dansk) prompt injection patterns.

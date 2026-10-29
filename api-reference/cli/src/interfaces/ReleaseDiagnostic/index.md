@@ -6,7 +6,7 @@
 
 # Interface: ReleaseDiagnostic
 
-Defined in: [cli/src/utils/release-report.ts:67](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/release-report.ts#L67)
+Defined in: [cli/src/utils/release-report.ts:67](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L67)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/release-report.ts:67](https://github.com/mrwogu/promp
 
 > `optional` **code?**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:68](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/release-report.ts#L68)
+Defined in: [cli/src/utils/release-report.ts:68](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L68)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [cli/src/utils/release-report.ts:68](https://github.com/mrwogu/promp
 
 > `optional` **location?**: [`ReleaseLocation`](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseLocation/index.md)
 
-Defined in: [cli/src/utils/release-report.ts:70](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/release-report.ts#L70)
+Defined in: [cli/src/utils/release-report.ts:70](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L70)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [cli/src/utils/release-report.ts:70](https://github.com/mrwogu/promp
 
 > **message**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:69](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/release-report.ts#L69)
+Defined in: [cli/src/utils/release-report.ts:69](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L69)

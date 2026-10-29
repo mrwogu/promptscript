@@ -8,7 +8,7 @@
 
 > `const` **pathTraversal**: [`ValidationRule`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationRule/index.md)
 
-Defined in: [validator/src/rules/path-traversal.ts:86](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/rules/path-traversal.ts#L86)
+Defined in: [validator/src/rules/path-traversal.ts:86](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/validator/src/rules/path-traversal.ts#L86)
 
 PS013: Detect path traversal attacks in path references.
 

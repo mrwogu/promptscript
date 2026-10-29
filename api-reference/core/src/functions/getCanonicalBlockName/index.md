@@ -8,7 +8,7 @@
 
 > **getCanonicalBlockName**(`name`): `string`
 
-Defined in: [core/src/block-aliases.ts:18](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/block-aliases.ts#L18)
+Defined in: [core/src/block-aliases.ts:18](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/block-aliases.ts#L18)
 
 Return the canonical internal name for a built-in alias or custom name.
 

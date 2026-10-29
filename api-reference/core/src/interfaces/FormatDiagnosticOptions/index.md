@@ -6,7 +6,7 @@
 
 # Interface: FormatDiagnosticOptions
 
-Defined in: [core/src/utils/diagnostic.ts:27](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/diagnostic.ts#L27)
+Defined in: [core/src/utils/diagnostic.ts:27](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/utils/diagnostic.ts#L27)
 
 Options for formatting diagnostics.
 
@@ -16,7 +16,7 @@ Options for formatting diagnostics.
 
 > `optional` **color?**: `boolean`
 
-Defined in: [core/src/utils/diagnostic.ts:29](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/diagnostic.ts#L29)
+Defined in: [core/src/utils/diagnostic.ts:29](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/utils/diagnostic.ts#L29)
 
 Include color codes (ANSI)
 
@@ -26,7 +26,7 @@ Include color codes (ANSI)
 
 > `optional` **context?**: `boolean`
 
-Defined in: [core/src/utils/diagnostic.ts:31](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/diagnostic.ts#L31)
+Defined in: [core/src/utils/diagnostic.ts:31](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/utils/diagnostic.ts#L31)
 
 Include source context lines
 
@@ -36,6 +36,6 @@ Include source context lines
 
 > `optional` **contextLines?**: `number`
 
-Defined in: [core/src/utils/diagnostic.ts:33](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/diagnostic.ts#L33)
+Defined in: [core/src/utils/diagnostic.ts:33](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/utils/diagnostic.ts#L33)
 
 Number of context lines to show

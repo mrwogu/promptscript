@@ -8,10 +8,11 @@
 
 > `const` **EVAL\_CODES**: `object`
 
-Defined in: [eval/src/errors.ts:7](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/eval/src/errors.ts#L7)
+Defined in: [eval/src/errors.ts:8](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/errors.ts#L8)
 
 Codes of eval errors and findings: `PS61xx` datasets, `PS62xx` suites,
-`PS63xx` providers and the run, `PS64xx` cache, `PS65xx` cost, `PS66xx` judge.
+`PS63xx` providers and the run, `PS64xx` cache, `PS65xx` cost, `PS66xx` judge,
+`PS67xx` reports.
 
 ## Type Declaration
 
@@ -159,6 +160,12 @@ A project price is lower than the built-in price of the same model
 
 A cost threshold needs a price the catalog does not have
 
+### PROJECT\_INVALID
+
+> `readonly` **PROJECT\_INVALID**: `"PS6310"` = `'PS6310'`
+
+The project config cannot be loaded, or the project does not compile
+
 ### PROVIDER\_FAILED
 
 > `readonly` **PROVIDER\_FAILED**: `"PS6300"` = `'PS6300'`
@@ -182,6 +189,18 @@ A model's provider has no entry in `eval.providers` and no built-in default
 > `readonly` **REGEX\_RISK**: `"PS6210"` = `'PS6210'`
 
 A regex assertion repeats a group that holds a quantifier
+
+### REPORT\_INVALID
+
+> `readonly` **REPORT\_INVALID**: `"PS6701"` = `'PS6701'`
+
+A report file cannot be read or is not an eval report of this version
+
+### REPORT\_WRITE\_FAILED
+
+> `readonly` **REPORT\_WRITE\_FAILED**: `"PS6702"` = `'PS6702'`
+
+A report directory or file cannot be written
 
 ### RESPONSE\_TOO\_LARGE
 

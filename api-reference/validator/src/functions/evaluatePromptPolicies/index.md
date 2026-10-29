@@ -8,7 +8,7 @@
 
 > **evaluatePromptPolicies**(`policies`, `subjects`, `context?`, `scope?`): [`PolicyViolation`](https://getpromptscript.dev/api-reference/core/src/interfaces/PolicyViolation/index.md)[]
 
-Defined in: [validator/src/policy/prompt-evaluator.ts:246](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/validator/src/policy/prompt-evaluator.ts#L246)
+Defined in: [validator/src/policy/prompt-evaluator.ts:246](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/validator/src/policy/prompt-evaluator.ts#L246)
 
 Evaluate the prompt policy kinds on prompts.
 

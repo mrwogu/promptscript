@@ -6,7 +6,7 @@
 
 # Interface: HookDefinition
 
-Defined in: [formatters/src/hook-adapters.ts:51](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/hook-adapters.ts#L51)
+Defined in: [formatters/src/hook-adapters.ts:51](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L51)
 
 A parsed hook definition from the
 
@@ -20,7 +20,7 @@ block.
 
 > `optional` **command?**: `string`[]
 
-Defined in: [formatters/src/hook-adapters.ts:59](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/hook-adapters.ts#L59)
+Defined in: [formatters/src/hook-adapters.ts:59](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L59)
 
 Command arguments (non-empty array).
 
@@ -30,7 +30,7 @@ Command arguments (non-empty array).
 
 > `optional` **continueOnFailure?**: `boolean`
 
-Defined in: [formatters/src/hook-adapters.ts:69](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/hook-adapters.ts#L69)
+Defined in: [formatters/src/hook-adapters.ts:69](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L69)
 
 Whether to continue if the hook fails.
 
@@ -40,7 +40,7 @@ Whether to continue if the hook fails.
 
 > `optional` **cwd?**: `string`
 
-Defined in: [formatters/src/hook-adapters.ts:63](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/hook-adapters.ts#L63)
+Defined in: [formatters/src/hook-adapters.ts:63](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L63)
 
 Project-root or project-relative working directory.
 
@@ -50,7 +50,7 @@ Project-root or project-relative working directory.
 
 > `optional` **enabled?**: `boolean`
 
-Defined in: [formatters/src/hook-adapters.ts:71](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/hook-adapters.ts#L71)
+Defined in: [formatters/src/hook-adapters.ts:71](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L71)
 
 Whether the hook is enabled.
 
@@ -60,7 +60,7 @@ Whether the hook is enabled.
 
 > **event**: [`PortableHookEvent`](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/PortableHookEvent/index.md)
 
-Defined in: [formatters/src/hook-adapters.ts:55](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/hook-adapters.ts#L55)
+Defined in: [formatters/src/hook-adapters.ts:55](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L55)
 
 Portable event name.
 
@@ -70,7 +70,7 @@ Portable event name.
 
 > **id**: `string`
 
-Defined in: [formatters/src/hook-adapters.ts:53](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/hook-adapters.ts#L53)
+Defined in: [formatters/src/hook-adapters.ts:53](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L53)
 
 Stable hook ID (from object key).
 
@@ -80,7 +80,7 @@ Stable hook ID (from object key).
 
 > `optional` **matcher?**: `string`
 
-Defined in: [formatters/src/hook-adapters.ts:57](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/hook-adapters.ts#L57)
+Defined in: [formatters/src/hook-adapters.ts:57](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L57)
 
 Tool name matcher pattern (optional).
 
@@ -90,7 +90,7 @@ Tool name matcher pattern (optional).
 
 > `optional` **script?**: [`HookScriptDefinition`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/HookScriptDefinition/index.md)
 
-Defined in: [formatters/src/hook-adapters.ts:61](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/hook-adapters.ts#L61)
+Defined in: [formatters/src/hook-adapters.ts:61](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L61)
 
 Portable repository-local script.
 
@@ -100,7 +100,7 @@ Portable repository-local script.
 
 > `optional` **statusMessage?**: `string`
 
-Defined in: [formatters/src/hook-adapters.ts:67](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/hook-adapters.ts#L67)
+Defined in: [formatters/src/hook-adapters.ts:67](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L67)
 
 Status message shown during execution.
 
@@ -110,7 +110,7 @@ Status message shown during execution.
 
 > `optional` **targets?**: `Partial`\<`Record`\<[`HookTarget`](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/HookTarget/index.md), [`HookTargetOverride`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/HookTargetOverride/index.md)\>\>
 
-Defined in: [formatters/src/hook-adapters.ts:73](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/hook-adapters.ts#L73)
+Defined in: [formatters/src/hook-adapters.ts:73](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L73)
 
 Target-specific overrides merged on top of the portable definition.
 
@@ -120,6 +120,6 @@ Target-specific overrides merged on top of the portable definition.
 
 > `optional` **timeoutMs?**: `number`
 
-Defined in: [formatters/src/hook-adapters.ts:65](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/hook-adapters.ts#L65)
+Defined in: [formatters/src/hook-adapters.ts:65](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L65)
 
 Timeout in milliseconds.

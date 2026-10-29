@@ -6,7 +6,7 @@
 
 # Interface: EvalModelEntry
 
-Defined in: [core/src/types/eval.ts:73](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L73)
+Defined in: [core/src/types/eval.ts:73](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L73)
 
 One model a suite runs, with parameters merged over the prompt's own.
 
@@ -16,7 +16,7 @@ One model a suite runs, with parameters merged over the prompt's own.
 
 > `optional` **params?**: [`ModelParams`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelParams/index.md)
 
-Defined in: [core/src/types/eval.ts:80](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L80)
+Defined in: [core/src/types/eval.ts:80](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L80)
 
 Parameters that override the prompt's parameters for this entry only
 
@@ -26,7 +26,7 @@ Parameters that override the prompt's parameters for this entry only
 
 > **ref**: `string`
 
-Defined in: [core/src/types/eval.ts:78](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L78)
+Defined in: [core/src/types/eval.ts:78](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L78)
 
 Model reference: profile id, alias or API id.
 

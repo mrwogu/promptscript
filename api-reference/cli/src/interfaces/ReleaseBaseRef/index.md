@@ -6,7 +6,7 @@
 
 # Interface: ReleaseBaseRef
 
-Defined in: [cli/src/utils/release-report.ts:127](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/release-report.ts#L127)
+Defined in: [cli/src/utils/release-report.ts:127](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L127)
 
 The commit `prs release status --base` compared the labels with.
 
@@ -16,7 +16,7 @@ The commit `prs release status --base` compared the labels with.
 
 > **commit**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:131](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/release-report.ts#L131)
+Defined in: [cli/src/utils/release-report.ts:131](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L131)
 
 The commit it named
 
@@ -26,6 +26,6 @@ The commit it named
 
 > **ref**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:129](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/release-report.ts#L129)
+Defined in: [cli/src/utils/release-report.ts:129](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L129)
 
 The ref as given

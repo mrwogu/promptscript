@@ -8,7 +8,7 @@
 
 > **createServer**(`options`): `Promise`\<`FastifyInstance`\<`RawServerDefault`, `IncomingMessage`, `ServerResponse`\<`IncomingMessage`\>, `FastifyBaseLogger`, `FastifyTypeProviderDefault`\>\>
 
-Defined in: [server/src/server.ts:13](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/server/src/server.ts#L13)
+Defined in: [server/src/server.ts:13](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/server/src/server.ts#L13)
 
 ## Parameters
 

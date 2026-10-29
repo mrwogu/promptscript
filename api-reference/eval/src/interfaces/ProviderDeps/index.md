@@ -6,7 +6,7 @@
 
 # Interface: ProviderDeps
 
-Defined in: [eval/src/http-provider.ts:33](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/eval/src/http-provider.ts#L33)
+Defined in: [eval/src/http-provider.ts:33](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/http-provider.ts#L33)
 
 What a provider needs from its host.
 
@@ -20,7 +20,7 @@ What a provider needs from its host.
 
 > `optional` **fetch?**: (`input`, `init?`) => `Promise`\<`Response`\>
 
-Defined in: [eval/src/http-provider.ts:35](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/eval/src/http-provider.ts#L35)
+Defined in: [eval/src/http-provider.ts:35](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/http-provider.ts#L35)
 
 Fetch to use instead of the global one
 

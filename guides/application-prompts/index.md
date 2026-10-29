@@ -219,7 +219,8 @@ resolved program.
 
 `{{input.name}}` marks a value the application supplies when it calls the model. The name must be
 a declared input. The bundle keeps the slot as written. `\{{` stands for two literal braces.
-PromptScript does not render slots, so nothing in this guide describes how an application fills them.
+The toolchain renders slots only inside `prs eval`, to call a model with a dataset row. An application
+fills them itself, through the runtime, and nothing in this guide describes how.
 
 ### Governance
 
@@ -295,15 +296,19 @@ Read this before you ship a bundle.
 - **Input values.** PromptScript never escapes, delimits or filters the values an application puts
   into a slot. Text a user supplies reaches the model as written. Treat it as untrusted.
 - **Responses.** Output schemas are not enforced. The application validates the response of the
-  model.
+  model. `prs eval` checks a response against the schema with a `json-schema` assertion, in tests
+  only; the application still validates in production.
 - **Secrecy.** A system prompt is extractable by a user who interacts with the model. Composed
   text is public once shipped, so do not compose a block that holds anything you would not
   publish. The compile prints which blocks it composed for this reason.
 - **Text blocks.** A line that starts with `#` inside `"""` is prompt text, not a comment.
 - **Environment variables.** The bundle targets never interpolate `${VAR}`. It stays text in the
-  message.
+  message. `prs eval` does not interpolate it in suites or datasets either.
 - **Checks on authored text.** The security rules of `prs validate` look at the text you wrote.
-  They do not look at the values an application supplies at run time.
+  They do not look at the values an application supplies at run time. `prs eval` scans the values
+  of its dataset files with the same rules, which covers the test data and nothing else.
+- **Online experiments.** Traffic splitting, production sampling and live A/B tests are out of
+  scope. `prs eval` runs a fixed dataset offline.
 - **Provenance.** It is informational. File names can reveal internal git hosts and project
   layout. A policy must evaluate the recompiled source, never the provenance of an artifact.
 - **Personal data.** `owner` and `reviewers` put names or addresses into production artifacts.

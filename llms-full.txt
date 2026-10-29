@@ -1,6 +1,6 @@
 # PromptScript
 
-> PromptScript is an agent platform configuration language. It defines instructions, skills, agents, MCP servers, plugins, hooks, workflows, and policies once, then compiles native output for 50 AI coding agent targets.
+> PromptScript is an agent platform configuration language. It defines instructions, skills, agents, MCP servers, plugins, hooks, workflows, and policies once, then compiles native output for 50 AI coding agent targets. It also compiles application prompts (@prompts) to content-hashed bundles, with prs release, prs approve, and CODEOWNERS generation for governed releases.
 
 ---
 
@@ -1866,6 +1866,12 @@ promotion order. Each environment has one release label. See
 The file `.promptscript/releases/<env>.json`. It says which bundle hash each prompt has in that
 environment. An application reads it, then reads the bundle file it names. See
 [Releasing Application Prompts](https://getpromptscript.dev/guides/releases/index.md#files).
+
+### Prompt runtime
+
+The `@promptscript/runtime` package. It loads a release label and its bundle, checks the content hash
+and renders the messages for an application. It is not published to npm yet. See
+[Releasing Application Prompts](https://getpromptscript.dev/guides/releases/index.md#read-a-release-in-your-application).
 
 ### Release manifest
 
@@ -6009,7 +6015,8 @@ resolved program.
 
 `{{input.name}}` marks a value the application supplies when it calls the model. The name must be
 a declared input. The bundle keeps the slot as written. `\{{` stands for two literal braces.
-PromptScript does not render slots, so nothing in this guide describes how an application fills them.
+The toolchain renders slots only inside `prs eval`, to call a model with a dataset row. An application
+fills them itself, through the runtime, and nothing in this guide describes how.
 
 ### Governance
 
@@ -6085,15 +6092,19 @@ Read this before you ship a bundle.
 - **Input values.** PromptScript never escapes, delimits or filters the values an application puts
   into a slot. Text a user supplies reaches the model as written. Treat it as untrusted.
 - **Responses.** Output schemas are not enforced. The application validates the response of the
-  model.
+  model. `prs eval` checks a response against the schema with a `json-schema` assertion, in tests
+  only; the application still validates in production.
 - **Secrecy.** A system prompt is extractable by a user who interacts with the model. Composed
   text is public once shipped, so do not compose a block that holds anything you would not
   publish. The compile prints which blocks it composed for this reason.
 - **Text blocks.** A line that starts with `#` inside `"""` is prompt text, not a comment.
 - **Environment variables.** The bundle targets never interpolate `${VAR}`. It stays text in the
-  message.
+  message. `prs eval` does not interpolate it in suites or datasets either.
 - **Checks on authored text.** The security rules of `prs validate` look at the text you wrote.
-  They do not look at the values an application supplies at run time.
+  They do not look at the values an application supplies at run time. `prs eval` scans the values
+  of its dataset files with the same rules, which covers the test data and nothing else.
+- **Online experiments.** Traffic splitting, production sampling and live A/B tests are out of
+  scope. `prs eval` runs a fixed dataset offline.
 - **Provenance.** It is informational. File names can reveal internal git hosts and project
   layout. A policy must evaluate the recompiled source, never the provenance of an artifact.
 - **Personal data.** `owner` and `reviewers` put names or addresses into production artifacts.
@@ -6475,7 +6486,10 @@ The admin lines cover what decides which review a record needs: the config and e
 
 Turn on required code owner review for the branch. The host also stops a pull request author from
 approving their own pull request; the CLI does not check that. For "who approved this for prod",
-read the review of the pull request that added the record.
+[`prs audit log`](#audit-log) names the record and the commit that added it; read the review of
+the pull request of that commit. A `well-formed` record there only has the right bytes at the
+right path. It does not mean a gate accepts it, and the review by the role team lives in the
+review log of the Git host, not in Git.
 
 ## Release gates
 
@@ -6656,6 +6670,31 @@ What `--base` does not do:
   lockfile, so it can swap the CLI that runs the check. Protect them as below, or run the check
   as a required workflow from a repository ruleset.
 
+## Read a release in your application
+
+The `@promptscript/runtime` package loads the bundles this flow writes. It has no dependencies. It
+is not published to npm yet and its API can still change, so it is in the repository only.
+
+```typescript
+import { createPromptClient, toAnthropicMessages } from '@promptscript/runtime';
+import { directorySource } from '@promptscript/runtime/node';
+
+const client = createPromptClient({
+  source: directorySource('.promptscript/releases'),
+  label: 'prod',
+});
+
+const prompt = await client.get('acme-support/refund-reply');
+const body = toAnthropicMessages(prompt.render({ message: 'Where is my refund?' }), {
+  maxTokens: 1024,
+});
+```
+
+Every load checks the schema, the structure and the `contentHash`, and verification cannot be turned
+off. `render()` inserts input values as plain text. See the
+[runtime README](https://github.com/mrwogu/promptscript/blob/main/packages/runtime/README.md) for
+the cache, the fail modes and the transport rules of `httpSource`.
+
 ## What protects the labels
 
 Run `prs release status --base` as a required check, and keep review on the release files:
@@ -6674,6 +6713,167 @@ Run `prs release status --base` as a required check, and keep review on the rele
 
 Applications read the label file of their environment and the bundle file it names. Recompute the
 content hash before use, as described in [Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md#content-hash).
+
+## Audit log
+
+`prs audit log` reads the governance history of the project from Git: who changed a prompt file,
+who approved which hash, who promoted, rolled back or removed a label entry, and who changed the
+config or the generated CODEOWNERS section. Nothing is stored besides the repository, so the log is as good as
+the history on the branch.
+
+```bash
+prs audit log --prompt acme-support/refund-reply --env prod --hash 850dce44
+```
+
+```text
+head 4452d509b67930043f5155036a07f5e1f52d9183
+sha256-850dce44fbd1...2b73  2026-10-22T09:15:40Z  promoted  4452d509b679  acme-support/refund-reply  env=prod  previous=-  by Ann Lee <ann@acme.example>
+sha256-850dce44fbd1...2b73  2026-10-21T14:02:11Z  approved  9ffb3347d0a8  acme-support/refund-reply  role=legal  approver=@jane (asserted)  env=prod  state=well-formed  .promptscript/approvals/legal/acme-support/refund-reply/sha256-850dce44fbd1...2b73.jane.json  by Jane Roe <jane@acme.example>
+    comment: Refund wording checked
+```
+
+The hashes are shortened here; the command prints them in full. That is the answer to "who approved
+this hash for prod": the `approved` line names the approver the record claims and the commit that
+added it. The binding reviewer is in the review log of the Git host, for the pull request of that
+commit.
+
+### Events
+
+Events come newest commit first; inside one commit they follow the path order of Git. Each one
+has `type`, `commit`, `at` (committer date), `author`, `committer` (name and email as Git has
+them), `path` (relative to the repository top level) and `mainline`. `mainline` is `true` for a
+commit on the first-parent chain of `HEAD`. An event with `mainline: false` is history of a branch:
+its change may never have reached `HEAD`, or reached it only through a merge.
+
+| Type               | When                                                                   | Extra fields                                                                                                        |
+| ------------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `changed`          | a `.prs` file of the project was added, modified or deleted            | `change` (`A`, `M`, `D`)                                                                                            |
+| `approved`         | an approval record was added                                           | `prompt`, `contentHash`, `role`, `environment`, `approver`, `approverSource`, `recordCreatedAt`, `comment`, `state` |
+| `approval-removed` | an approval record was deleted, read from the parent commit            | the same                                                                                                            |
+| `promoted`         | a label entry was added or changed                                     | `environment`, `prompt`, `contentHash`, `previousContentHash`                                                       |
+| `rolled-back`      | a label entry was set to a hash it held before in that label           | the same                                                                                                            |
+| `label-removed`    | a label entry was removed, or the label file deleted                   | `environment`, `prompt`, `previousContentHash`                                                                      |
+| `merge-dropped`    | a merge did not keep a change of a parent after the first              | `parent`, `change`, and the record fields, or `environment`, `prompt`, `contentHash`, `droppedContentHash`          |
+| `config-changed`   | a config file name of the project, the config or its `extends` changed | `change`                                                                                                            |
+| `generated`        | the CODEOWNERS section under this project's marker changed             | none                                                                                                                |
+
+A record file changed in place shows as `approval-removed` with the old content and `approved`
+with the new. `state` comes from the record bytes and the path alone: `well-formed` at the path
+its fields give, `misplaced` at another path, `invalid` when the file is no v1 record in the exact
+form `prs approve` writes, is a link or a submodule, or is larger than 1 MiB (an invalid record
+has no record fields). Well-formed does not mean a gate accepts the record: the gate also needs
+the role in `governance.roles` and the scope, and the review by the role team lives in the review
+log of the Git host. A misplaced or invalid record never counts in a gate. `approverSource` is
+always `asserted`.
+
+Commits of merged side branches are read too, each with its own events. A merge commit is read
+against its first parent: its events are what it brought to the branch it was merged into, and
+they carry `viaMerge: true`. So a promotion made on a side branch shows twice, once on the side
+commit and once on the merge with `viaMerge`. A merge that takes an older version over from the
+side, such as a revoked record or an older label hash, shows that as `approved` or `rolled-back`
+on the merge. Whether a label entry is `rolled-back` is decided by the hashes the label held on
+the first-parent chain, so a side branch never makes a later promotion look like a rollback.
+Side branches a merge discarded, for example with `-s ours`, still show their own events.
+
+The first-parent diff cannot show what a merge threw away from its other parents. So for every
+merge and every parent after the first, the log compares that parent with the merge base and with
+the merge result. When the parent changed an approval record, a label entry or the generated
+CODEOWNERS section and the merge result does not have that change, the merge gets a
+`merge-dropped` event naming the `parent`. A revoked record that a merge brings back, or a
+promotion it resolves away, shows up this way even when the branch is fast-forwarded later, and
+for octopus merges too. For a label the event names the hash the parent had
+(`droppedContentHash`) and the hash the merge kept (`contentHash`); for a record, `change` says
+what the parent did (`A`, `M` or `D`) and the record fields come from the parent's version, or
+from the merge's when the parent deleted it.
+
+After reading the history, the command replays the `mainline` events and compares the result with
+the approval records and label entries at `HEAD`. Any difference fails with `PS5108`: the history
+has a change the log cannot explain, and the log is not printed as if it were complete. Labels
+that did not parse at some commit are left out of this check.
+
+The log reads the whole project directory, keeping the `.prs` files, `.promptscript/approvals/`,
+every `.promptscript/releases/<environment>.json` label, every config file name in the project
+root, and outside the directory the config and its `extends` files inside the repository, the
+files a `--prompt` prompt is built from and the four CODEOWNERS locations. A label of an
+environment that is not in `releases.environments` is read too, with a warning, and its events
+carry `configured: false`, so a look-alike file such as `prodd.json` stands apart from `prod`.
+
+### Filters
+
+| Option            | Keeps                                                                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--prompt <id>`   | approval and release events of the prompt, and `changed` events of the files it is built from in the checkout                                                                  |
+| `--env <env>`     | release events of the environment, and approvals for it or for every environment                                                                                               |
+| `--hash <prefix>` | events whose `contentHash` (for `label-removed`, `previousContentHash`; for `merge-dropped`, either hash) starts with these hex digits (`sha256-` optional, at least 4 digits) |
+| `--since <date>`  | events committed at or after the ISO date or date and time                                                                                                                     |
+| `--until <date>`  | events committed at or before it; a date alone means the end of that day, UTC                                                                                                  |
+| `--limit <n>`     | the newest `n` events after the other filters, at most 100000                                                                                                                  |
+
+An event without the filtered field does not match: with `--hash`, only approval and release
+events remain. `--prompt` finds the files of a prompt by resolving the checkout, so a prompt file
+of an older layout is not matched; an invalid record matches when it lies in the prompt's
+directory under a role. Filters apply after the whole history is read, so `rolled-back` stays
+right inside a time window.
+
+### Formats
+
+`--format text` (the default) prints a `head <commit>` line, then one line per event with the
+content hash first (`-` for events without one), `(asserted)` after the approver, and
+`[via merge]`, `[side branch]` or `[environment not configured]` where they apply.
+`--format json` prints one document that matches
+`https://getpromptscript.dev/schema/audit-log/v1.json`: `$schema`, `version`, `success`, `head`
+(always there on success), `filters`, `events`, `warnings` and `errors`. C1 control, bidi and
+zero-width characters in strings are written as `\uXXXX` escapes.
+
+`--format cef` prints one ArcSight CEF line per event for a SIEM:
+
+```text
+CEF:0|PromptScript|prs|<cli version>|prs-approved|Prompt approved|5|rt=1792591331000 act=approved suser=jane@acme.example duser=@jane filePath=... cs1=acme-support/refund-reply cs1Label=prompt cs2=sha256-... cs2Label=contentHash cs3=legal cs3Label=role cs4=prod cs4Label=environment cs5=9ffb3347... cs5Label=commit outcome=well-formed msg=Refund wording checked flexString1=4452d509... flexString1Label=head flexString2=asserted flexString2Label=approverSource
+```
+
+| Key            | Value                                                                                                 |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| `rt`           | commit time in milliseconds                                                                           |
+| `act`          | event type                                                                                            |
+| `suser`        | author email                                                                                          |
+| `duser`        | approver                                                                                              |
+| `filePath`     | path                                                                                                  |
+| `cs1` to `cs6` | prompt, contentHash, role, environment, commit, previous contentHash (the parent for `merge-dropped`) |
+| `outcome`      | record `state`, or `added`, `modified`, `deleted` for file changes                                    |
+| `msg`          | record comment                                                                                        |
+| `flexString1`  | `head`, the commit the log was read from                                                              |
+| `flexString2`  | `approverSource`, always `asserted`, on approval events                                               |
+| `cn1`          | `1` with `cn1Label=viaMerge` on events of a merge                                                     |
+| `cn2`          | `0` with `cn2Label=configured` on labels of unconfigured environments                                 |
+| `cn3`          | `1` or `0` with `cn3Label=mainline`                                                                   |
+| `oldFileHash`  | `droppedContentHash` of a `merge-dropped` label entry                                                 |
+
+Severities: `changed` and `generated` 3, `approved` 5, `approval-removed`, `promoted` and
+`config-changed` 6, `rolled-back`, `label-removed` and `merge-dropped` 7. Header values escape `\` and `|`; extension values escape `\`
+and `=`, line breaks become `\n`, and other control characters are dropped. Text and CEF output
+drop control, bidi and zero-width characters from Git and record fields.
+
+### Limits
+
+- Author, committer and approver are what the commit and the record say. Git does not check them.
+  The committer date is set by the committer's machine too, so `--since` and `--until` filter on a
+  claim.
+- A squash merge shows the person who merged, not the authors of the branch.
+- The log reads the project directory where it is now. History from before the directory moved is
+  not read: after a move the log starts at the move commit, and approvals, labels and prompt files
+  from before it show up as added there, by the person who moved them.
+- The review identity of the Git host is not in Git. Join on the commit to read it.
+- Rewriting history changes the log. Block force pushes on the branch, and ship exports to a SIEM
+  on a schedule; `head` in every export tells two exports apart.
+- The log reads the project directory as a whole. For a project at the repository root that is
+  every commit of the repository, and a very large monorepo can pass the 256 MiB the command
+  reads from `git log`, which fails with `PS5108`.
+- A shallow clone, a missing `git`, a timeout or a blob a partial clone would fetch fails with
+  `PS5108`. In CI check out the full history, for example `actions/checkout` with
+  `fetch-depth: 0`.
+- Git runs with replace refs and grafts off, so a `git replace` ref or a `.git/info/grafts` file
+  cannot change what the log shows.
+- The output holds email addresses. Treat exports like other personal data.
 
 ## Error codes
 
@@ -6699,6 +6899,10 @@ content hash before use, as described in [Application Prompts](https://getprompt
 | PS5105 | The record exists (exit code 2)                                                                |
 | PS5108 | `--list` cannot run Git, or the project is not in a repository                                 |
 | PS5109 | A record is invalid, modified, misplaced or has an unknown role, or the record path has a link |
+
+`prs audit log` uses `PS5102` for a `--prompt` or `--hash` value of the wrong shape and `PS5108`
+when Git cannot give the history: no repository, no commit, a shallow clone, a timeout, a
+missing blob, or a history whose mainline events do not lead to the records and labels at `HEAD`.
 
 ## See Also
 
@@ -13010,6 +13214,48 @@ git push origin v1.0.0
 | Admin     | Full registry access   |
 | Team Lead | Team namespace write   |
 | Developer | Read-only, PR creation |
+
+### Shared Config File with `extends`
+
+A platform team can keep one base `promptscript.yaml` and let every repository extend it:
+
+```yaml
+# promptscript.yaml in a project
+extends: ../shared/base.config.yaml
+targets:
+  - claude
+```
+
+Policies and governance owners from the base are kept. A project can add to them, it cannot
+remove them. See [Extending Configuration](https://getpromptscript.dev/reference/config/index.md#extending-configuration).
+
+## Governed Application Prompts
+
+When teams ship prompts inside applications (`@prompts`, syntax `1.6.0`), the same Git-native
+review applies to them. Three pieces work together:
+
+| Piece                       | What it does                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------------- |
+| `prs release build`         | Store bundles under their content hash                                                        |
+| `prs release promote`       | Move an environment label (for example `staging` or `prod`) to a bundle hash in a reviewed PR |
+| `prs release rollback`      | Restore a previous state of an environment label                                              |
+| `prs release status`        | Verify and report the release state, never changes labels                                     |
+| `prs approve`               | Record that a role (for example `legal`) approved one exact bundle hash                       |
+| `prs governance codeowners` | Write CODEOWNERS lines that route prompt files, approval records and release labels to a team |
+
+Prompt policies such as `required-approvals`, `risk-floor` and `model-allowlist` run as release
+gates. There is no flag that skips them, so a version without the required approval cannot be
+promoted. `prs release status --base refs/remotes/origin/main` checks a pull request with the
+rules of the base branch, which makes it a good CI check.
+
+CODEOWNERS only routes reviews. Turn on required code-owner review in branch protection, or a
+pull request can merge without the assigned team.
+
+Read next:
+
+- [Releasing Application Prompts](https://getpromptscript.dev/guides/releases/index.md) - the flow, approvals and release gates
+- [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/index.md) - turn `governance` into review rules
+- [Policy Engine](https://getpromptscript.dev/guides/policy-engine/index.md) - the policy kinds and prompt policies
 
 ## Rollout Strategy
 
@@ -25016,40 +25262,40 @@ their replacement, models outside `models.supported`, and inconsistent
 
 ## Key Diagnostics
 
-| Diagnostic | Meaning                                      | Action                                       |
-| ---------- | -------------------------------------------- | -------------------------------------------- |
-| PS018      | Used feature requires newer syntax           | Run `prs validate --fix` or `prs upgrade`    |
-| PS019      | Unknown built-in block name                  | Correct typo or confirm custom block intent  |
-| PS030      | Policy from `promptscript.yaml` not met      | Fix the prompt, skill or policy it names     |
-| PS034      | Invalid hook executable or option            | Fix command, script, or target override      |
-| PS037      | Invalid contextual section header            | Fix owner, key, title, or duplicate          |
-| PS038      | Unsupported or risky built-in block shape    | Convert to canonical shape                   |
-| PS041      | Unsupported model or invalid model profile   | Switch model or update `models` config       |
-| PS042      | Invalid `@prompts` entry or governance value | Fix the entry as the message describes       |
-| PS043      | Undeclared or malformed runtime slot         | Declare the input or fix the slot            |
-| PS044      | Declared prompt input is never used          | Use the input or remove it                   |
-| PS045      | `{{name}}` left in text (syntax 1.6.0+)      | Bind it with a parameter or remove it        |
-| PS046      | Runtime slot in the system message           | Move the slot to the user message            |
-| PS047      | Owner, reviewer or data class off the config | Use a Git host identity or a listed class    |
-| PS4002     | Target cannot preserve requested capability  | Use documented target fallback               |
-| PS4004     | Target cannot run or write the model         | Pick another model or set a target name      |
-| PS5001     | `releases` missing or invalid                | Add `releases.environments`                  |
-| PS5002     | Environment not in `releases.environments`   | Use a configured environment                 |
-| PS5003     | Release bundle or prompt missing             | Run `prs release build` or restore the file  |
-| PS5004     | Release file does not verify                 | Restore it from Git, or run the build        |
-| PS5005     | Promotion skips the previous environment     | Promote to the previous environment first    |
-| PS5006     | Git history, base file or ref is not usable  | Commit the label, fetch base, use a full ref |
-| PS5007     | Another release command holds the lock       | Wait, then run the command again             |
-| PS5008     | Compile output inside the release directory  | Point the target output elsewhere            |
-| PS5101     | `governance` missing or invalid, or no role  | Fix the section or add the role              |
-| PS5102     | Approval reference is not `<id>@<full hash>` | Give the full `sha256-<64 hex>` hash         |
-| PS5103     | Approved hash is not built or released       | Approve the hash `prs approve --list` shows  |
-| PS5104     | Approver is not a user handle                | Use your handle, like `@jane`                |
-| PS5105     | Approval record exists                       | Delete it in a commit to withdraw it         |
-| PS5106     | CODEOWNERS not managed by this project       | Add the marker line the message names        |
-| PS5107     | CODEOWNERS owner or path refused             | Use Git host identities and plain paths      |
-| PS5108     | Git missing, no repository or Git failed     | Run it in a Git checkout with git on PATH    |
-| PS5109     | Approval record invalid or misplaced         | Fix, move or delete it in a commit           |
+| Diagnostic | Meaning                                                                                         | Action                                                                 |
+| ---------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| PS018      | Used feature requires newer syntax                                                              | Run `prs validate --fix` or `prs upgrade`                              |
+| PS019      | Unknown built-in block name                                                                     | Correct typo or confirm custom block intent                            |
+| PS030      | Policy from `promptscript.yaml` not met                                                         | Fix the prompt, skill or policy it names                               |
+| PS034      | Invalid hook executable or option                                                               | Fix command, script, or target override                                |
+| PS037      | Invalid contextual section header                                                               | Fix owner, key, title, or duplicate                                    |
+| PS038      | Unsupported or risky built-in block shape                                                       | Convert to canonical shape                                             |
+| PS041      | Unsupported model or invalid model profile                                                      | Switch model or update `models` config                                 |
+| PS042      | Invalid `@prompts` entry or governance value                                                    | Fix the entry as the message describes                                 |
+| PS043      | Undeclared or malformed runtime slot                                                            | Declare the input or fix the slot                                      |
+| PS044      | Declared prompt input is never used                                                             | Use the input or remove it                                             |
+| PS045      | `{{name}}` left in text (syntax 1.6.0+)                                                         | Bind it with a parameter or remove it                                  |
+| PS046      | Runtime slot in the system message                                                              | Move the slot to the user message                                      |
+| PS047      | Owner, reviewer or data class off the config                                                    | Use a Git host identity or a listed class                              |
+| PS4002     | Target cannot preserve requested capability                                                     | Use documented target fallback                                         |
+| PS4004     | Target cannot run or write the model                                                            | Pick another model or set a target name                                |
+| PS5001     | `releases` missing or invalid                                                                   | Add `releases.environments`                                            |
+| PS5002     | Environment not in `releases.environments`                                                      | Use a configured environment                                           |
+| PS5003     | Release bundle or prompt missing                                                                | Run `prs release build` or restore the file                            |
+| PS5004     | Release file does not verify                                                                    | Restore it from Git, or run the build                                  |
+| PS5005     | Promotion skips the previous environment                                                        | Promote to the previous environment first                              |
+| PS5006     | Git history, base file or ref is not usable                                                     | Commit the label, fetch base, use a full ref                           |
+| PS5007     | Another release command holds the lock                                                          | Wait, then run the command again                                       |
+| PS5008     | Compile output inside the release directory                                                     | Point the target output elsewhere                                      |
+| PS5101     | `governance` missing or invalid, or no role                                                     | Fix the section or add the role                                        |
+| PS5102     | Approval reference, prompt id or hash filter malformed                                          | Use `<id>@sha256-<64 hex>`, a hash filter takes 4+ hex digits          |
+| PS5103     | Approved hash is not built or released                                                          | Approve the hash `prs approve --list` shows                            |
+| PS5104     | Approver is not a user handle                                                                   | Use your handle, like `@jane`                                          |
+| PS5105     | Approval record exists                                                                          | Delete it in a commit to withdraw it                                   |
+| PS5106     | CODEOWNERS not managed by this project                                                          | Add the marker line the message names                                  |
+| PS5107     | CODEOWNERS owner or path refused                                                                | Use Git host identities and plain paths                                |
+| PS5108     | Git missing, no repository, shallow history, Git failed or history that does not explain `HEAD` | Run it in a full Git checkout with git on PATH, see the releases guide |
+| PS5109     | Approval record invalid or misplaced                                                            | Fix, move or delete it in a commit                                     |
 
 PS5109 is a warning when `prs approve --list` reads such a record, or a modified one (its bytes are
 not the ones Git has) or one with a role that is not in `governance.roles`. It is an error, with
@@ -25387,6 +25633,7 @@ Complete reference for the PromptScript command-line interface.
 | Share and pin dependencies    | [`prs registry`](#prs-registry), [`prs pull`](#prs-pull), [`prs lock`](#prs-lock), [`prs update`](#prs-update) |
 | Work offline                  | [`prs vendor`](#prs-vendor)                                                                                    |
 | Release application prompts   | [`prs release`](#prs-release), [`prs approve`](#prs-approve)                                                   |
+| Test prompts against a model  | [`prs eval`](#prs-eval)                                                                                        |
 | Make governance binding       | [`prs governance`](#prs-governance)                                                                            |
 | Manage skills                 | [`prs skills`](#prs-skills)                                                                                    |
 | Connect AI tool hooks         | [`prs hooks`](#prs-hooks), [`prs hook`](https://getpromptscript.dev/reference/cli/hook/index.md)                                                           |
@@ -26709,6 +26956,127 @@ prs approve acme-support/refund-reply@sha256-<64 hex> --role legal --approver @j
 
 ---
 
+### prs eval
+
+Run eval suites against the prompts of the project and compare two reports. A suite is a file
+`<name>.eval.yaml`, `.eval.yml` or `.eval.json` under `.promptscript/evals/` that names a prompt, a
+dataset and assertions. The prompts come from a fresh in-memory compile of the source, with the
+`bundle` target. The settings are in [`eval`](https://getpromptscript.dev/reference/config/index.md#eval).
+
+#### prs eval run
+
+```bash
+prs eval run [suite...] [options]
+```
+
+No suite name means every suite under `.promptscript/evals/`.
+
+| Option                     | Description                                                                                     | Default  |
+| -------------------------- | ----------------------------------------------------------------------------------------------- | -------- |
+| `--format <format>`        | `text`, `json`, `markdown` or `junit`                                                           | `text`   |
+| `--out <file>`             | Also write the formatted report to a file, with the same bytes as stdout                        | -        |
+| `--report-dir <dir>`       | Write `<dir>/<suite>.<hash12>.json` for each suite, inside the project                          | -        |
+| `--baseline <report.json>` | Compare with an earlier report                                                                  | -        |
+| `--fail-on-regression`     | Exit 1 when the baseline shows a regression. Needs `--baseline`                                 | -        |
+| `--cache <mode>`           | `replay`, `record`, `refresh` or `off`                                                          | `replay` |
+| `--max-cost <usd>`         | Spending limit in USD. Every mode that calls a provider needs it                                | -        |
+| `--max-cases <n>`          | Largest number of dataset rows a suite runs                                                     | 1000     |
+| `--concurrency <n>`        | Calls in flight at once, at most 16                                                             | 4        |
+| `--model <ref>`            | Run every suite against this model only                                                         | -        |
+| `--allow-host <host>`      | Allow a provider host besides the built-in ones. Repeat it for more hosts                       | -        |
+| `--allow-local`            | Allow loopback hosts (`127.0.0.0/8`, `::1`, `localhost`, `*.localhost`), http too               | -        |
+| `--dry-run`                | Print the plan, the cache hits and the worst-case cost, and call nothing. Needs no `--max-cost` | -        |
+| `--strict`                 | Exit 2 when the run passed with warnings                                                        | -        |
+| `-c, --config <path>`      | Path to a custom config file                                                                    | -        |
+| `--cwd <dir>`              | Working directory (project root)                                                                | -        |
+
+**Cache modes.** The cache is `.promptscript/eval-cache/`. `replay` answers from it and never calls
+a provider; a call with no entry is a case error `PS6402`. `record` answers from it and calls the
+provider for the rest, then stores the answers. `refresh` calls for every case and overwrites the
+entries. `off` calls for every case and stores nothing.
+
+**Spending.** `record`, `refresh` and `off` call a provider and need `--max-cost`, else the run stops
+with `PS6504`. Every model needs a price, from the model catalog or from `models.profiles` in the
+config (`PS6501`). Before the first call the run adds up the worst case of every call that is not in
+the cache, and stops with `PS6503` when it passes `--max-cost`. During the run each call reserves its
+worst case first; when the budget runs out, the remaining cases are errors and the outcome is
+`budget-exceeded`. Live modes, the budget and extra hosts come from these flags only. No config key
+turns them on. `PROMPTSCRIPT_EVAL_ALLOWED_HOSTS` (comma-separated) adds hosts like `--allow-host`.
+
+**Keys.** A key is read from an environment variable at call time, never from the config. Before the
+first live call stderr prints `sending <VAR> to <host>` for each provider of the run. A key sent to
+a host that is not a built-in default needs `--allow-host`.
+
+**Output.** With `json`, `markdown` or `junit`, stdout holds exactly one document. The JSON report
+matches `https://getpromptscript.dev/schema/eval-report/v1.json` and holds no timestamp, so two replay
+runs give the same bytes. Progress, warnings and `sending` lines go to stderr. In JSON mode errors are
+inside the document, under `errors`. Control and bidi characters are removed from every string that
+comes from a model, a provider or a dataset, in all formats. Reports hold no responses, but a
+reason can quote a fragment of one.
+
+`--dry-run` prints text only. It checks the suites like a run does, reads the cache, and creates no
+provider, so it needs no key and no `--max-cost`: without a budget it shows the estimate and checks
+it against nothing. Ctrl+C during a dry run exits 130.
+
+`--report-dir` writes the report of one suite per file, named after the suite and the first 12 hex
+digits of the prompt content hash. Nothing is written there unless the flag or `eval.reportDir` is
+set. `--report-dir` cannot be combined with `--model` or `--max-cases`, also when the directory comes
+from `eval.reportDir`, so a report of a partial run never stands in for the full run. After Ctrl+C
+nothing is written there. A report is a claim about one run, not a proof: replay it at the commit you
+gate to check it.
+
+With `--baseline`, suites and models that the baseline has and the run lacks are not regressions, but
+they are listed as a warning: on stderr for `json` and `junit`, inside the document for `text` and
+`markdown`. They count as a warning for `--strict`.
+
+| Exit code | Outcome (`outcome` in JSON)                                                           |
+| --------- | ------------------------------------------------------------------------------------- |
+| 0         | `passed`: every suite passed and there is no regression with `--fail-on-regression`   |
+| 1         | `failed`: an assertion or a threshold failed, or a case ended in an error             |
+| 1         | `regression`: the run passed, but the baseline regressed, with `--fail-on-regression` |
+| 1         | `budget-exceeded`: the budget refused or stopped a call                               |
+| 1         | `error`: a config, suite, dataset, provider, cache or option error, or a replay miss  |
+| 2         | `passed` with warnings, with `--strict`                                               |
+| 130       | Interrupted with Ctrl+C. New calls stop and the finished cases stay in the report     |
+
+```bash
+prs eval run
+prs eval run refund --format markdown
+prs eval run --cache record --max-cost 0.5
+prs eval run --dry-run --cache record --max-cost 0.5
+prs eval run --baseline main-report.json --fail-on-regression --format json --out report.json
+```
+
+#### prs eval compare
+
+Compare two reports offline. The first is the baseline, the second the candidate.
+
+```bash
+prs eval compare <baseline.json> <candidate.json> [options]
+```
+
+| Option                 | Description                                             | Default |
+| ---------------------- | ------------------------------------------------------- | ------- |
+| `--format <format>`    | `text`, `json` or `markdown`                            | `text`  |
+| `--fail-on-regression` | Exit 1 when the candidate regressed                     | -       |
+| `--tolerance <n>`      | Pass-rate drop that counts as a regression, from 0 to 1 | 0       |
+| `--cwd <dir>`          | Directory the report paths are relative to              | -       |
+
+Report paths are relative to `--cwd` when it is given, else to the current directory. Suites match by
+name, models by `ref` and cases by id. A case regressed when it passed in the
+baseline and does not pass in the candidate. A drop of the pass rate above the tolerance is a
+regression too. Only cases both reports have are compared. When the dataset hash differs, that is
+noted, and a suite or model that only one report has is listed with its cases and is not a
+regression, but it is shown as a warning: on stderr for `json`, inside the document for `text` and
+`markdown`. With `--format json`, stdout holds one document that matches
+`https://getpromptscript.dev/schema/eval-comparison/v1.json`. A comparison has no place for errors,
+so an unreadable report or a bad option goes to stderr in every format, with exit code 1.
+
+```bash
+prs eval compare main-report.json pr-report.json
+prs eval compare main-report.json pr-report.json --fail-on-regression --tolerance 0.05
+```
+
 ### prs governance
 
 Make the `governance` section of `promptscript.yaml` binding on the Git host.
@@ -26740,6 +27108,46 @@ written or current, 1 an error or an outdated file with `--check`, 2 a file that
 ```bash
 prs governance codeowners
 prs governance codeowners --check
+```
+
+---
+
+### prs audit
+
+Read the governance history of the project from Git.
+
+#### prs audit log
+
+List prompt file changes, approvals, promotions, rollbacks, label entries removed, config changes
+and changes of the generated CODEOWNERS section, newest commit first, merges and side branches
+included, plus the changes a merge dropped from a parent. See [Audit log](https://getpromptscript.dev/guides/releases/index.md#audit-log)
+in the releases guide.
+
+```bash
+prs audit log [options]
+```
+
+| Option                | Description                                                                       | Default |
+| --------------------- | --------------------------------------------------------------------------------- | ------- |
+| `--prompt <id>`       | Only events of this prompt id                                                     | -       |
+| `--env <environment>` | Only events of this environment; approvals for every environment match            | -       |
+| `--hash <prefix>`     | Only events whose content hash starts with these hex digits (at least 4)          | -       |
+| `--since <date>`      | Only events committed at or after this ISO date or date and time                  | -       |
+| `--until <date>`      | Only events committed at or before it; a date alone means the end of that UTC day | -       |
+| `--limit <n>`         | Keep the newest `n` events, at most 100000                                        | -       |
+| `--format <format>`   | `text`, `json` or `cef`                                                           | `text`  |
+| `-c, --config <path>` | Path to a custom config file                                                      | -       |
+| `--cwd <dir>`         | Working directory (project root)                                                  | -       |
+
+The command runs in a Git checkout with the full history; a shallow clone, no repository, a Git
+failure or a history the log cannot explain is `PS5108`. A malformed `--prompt` or `--hash` is `PS5102`. Exit code 0 means the log was
+read, 1 an error. With `--format json`, stdout holds one document that matches
+`https://getpromptscript.dev/schema/audit-log/v1.json`, with `head`, the commit the log was read
+from. `--format cef` prints one CEF line per event.
+
+```bash
+prs audit log --prompt acme-support/refund-reply --env prod --hash 850dce44
+prs audit log --since 2026-10-01 --format cef
 ```
 
 ---
@@ -27133,6 +27541,8 @@ See the [Configuration Reference](https://getpromptscript.dev/reference/config/i
 | 1    | Error occurred          |
 | 2    | Warning (with --strict) |
 | 130  | Interrupted (Ctrl+C)    |
+
+`prs eval run` maps its outcomes onto these codes; see [`prs eval run`](#prs-eval-run).
 
 ## Troubleshooting
 
@@ -27710,6 +28120,7 @@ includePromptScriptSkill: true # default: true
 | `models`                   | object                  | No       | Supported model set and model profiles          |
 | `policies`                 | array                   | No       | Policies for skill extensions and prompts       |
 | `releases`                 | object                  | No       | Release environments for prompt bundles         |
+| `eval`                     | object                  | No       | Providers and limits of `prs eval`              |
 | `governance`               | object                  | No       | Admins, approval roles and CODEOWNERS settings  |
 
 `id` and `syntax` are required even when `input.entry` uses its default.
@@ -28719,6 +29130,39 @@ Each name matches `^[a-z][a-z0-9-]{0,31}$` and appears once. The names `index` a
 the Windows device names `con`, `prn`, `aux`, `nul`, `com1` to `com9` and `lpt1` to `lpt9`, are
 refused because each environment is a file named `<name>.json`. Without `releases` every
 `prs release` command fails with `PS5001`. See the [releases guide](https://getpromptscript.dev/guides/releases/index.md).
+
+### eval
+
+Settings of [`prs eval`](https://getpromptscript.dev/reference/cli/index.md#prs-eval). They name the providers and set limits. They never
+turn on a live run: the cache mode, the budget and extra hosts come from command-line flags only.
+
+```yaml
+eval:
+  providers:
+    anthropic: { kind: anthropic, apiKeyEnvVar: ANTHROPIC_API_KEY }
+    gateway:
+      { kind: openai-compatible, baseUrl: 'https://llm.corp.example/v1', apiKeyEnvVar: GATEWAY_KEY }
+  timeoutMs: 60000
+  maxOutputTokens: 1024
+  maxCases: 1000
+  reportDir: .promptscript/eval-reports
+```
+
+| Field             | Type    | Required | Description                                                                   |
+| ----------------- | ------- | -------- | ----------------------------------------------------------------------------- |
+| `providers`       | object  | No       | Providers by name, matching the `provider` of a model profile                 |
+| `timeoutMs`       | integer | No       | Time limit of one model call, response body included. Default 60000           |
+| `maxOutputTokens` | integer | No       | Output token cap when a prompt sets no `maxTokens`. Default 1024              |
+| `maxCases`        | integer | No       | Largest number of dataset rows a suite runs. Default 1000. `--max-cases` wins |
+| `reportDir`       | string  | No       | Directory for reports, relative to the project root. `--report-dir` wins      |
+
+A provider entry has `kind` (`anthropic` or `openai-compatible`), `baseUrl` and `apiKeyEnvVar`, the
+name of the environment variable that holds the key. `anthropic` and `openai` have built-in URLs
+and key variables, so they need no entry. Any other provider needs one. The config never holds a
+key: a run stops with `PS6307` when the value of a key variable, or of a variable named like a
+secret, appears anywhere in `eval` or in a model profile. A provider key goes only to
+`api.anthropic.com`, `api.openai.com` and the hosts you pass with `--allow-host`, so review a change
+to `apiKeyEnvVar` like code.
 
 ### governance
 

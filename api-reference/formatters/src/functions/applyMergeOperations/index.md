@@ -8,7 +8,7 @@
 
 > **applyMergeOperations**(`target`, `plan`): `Record`\<`string`, `unknown`\>
 
-Defined in: [formatters/src/structured-output.ts:49](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/structured-output.ts#L49)
+Defined in: [formatters/src/structured-output.ts:49](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/structured-output.ts#L49)
 
 Apply merge operations to a parsed settings object.
 

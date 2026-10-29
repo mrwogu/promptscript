@@ -6,7 +6,7 @@
 
 # Interface: CompilationDiffSummary
 
-Defined in: [cli/src/utils/diff-report.ts:51](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/diff-report.ts#L51)
+Defined in: [cli/src/utils/diff-report.ts:51](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/diff-report.ts#L51)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/diff-report.ts:51](https://github.com/mrwogu/promptsc
 
 > **added**: `number`
 
-Defined in: [cli/src/utils/diff-report.ts:53](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/diff-report.ts#L53)
+Defined in: [cli/src/utils/diff-report.ts:53](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/diff-report.ts#L53)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [cli/src/utils/diff-report.ts:53](https://github.com/mrwogu/promptsc
 
 > **changed**: `number`
 
-Defined in: [cli/src/utils/diff-report.ts:54](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/diff-report.ts#L54)
+Defined in: [cli/src/utils/diff-report.ts:54](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/diff-report.ts#L54)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [cli/src/utils/diff-report.ts:54](https://github.com/mrwogu/promptsc
 
 > **removed**: `number`
 
-Defined in: [cli/src/utils/diff-report.ts:55](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/diff-report.ts#L55)
+Defined in: [cli/src/utils/diff-report.ts:55](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/diff-report.ts#L55)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [cli/src/utils/diff-report.ts:55](https://github.com/mrwogu/promptsc
 
 > **total**: `number`
 
-Defined in: [cli/src/utils/diff-report.ts:52](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/diff-report.ts#L52)
+Defined in: [cli/src/utils/diff-report.ts:52](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/diff-report.ts#L52)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [cli/src/utils/diff-report.ts:52](https://github.com/mrwogu/promptsc
 
 > **unchanged**: `number`
 
-Defined in: [cli/src/utils/diff-report.ts:58](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/diff-report.ts#L58)
+Defined in: [cli/src/utils/diff-report.ts:58](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/diff-report.ts#L58)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [cli/src/utils/diff-report.ts:58](https://github.com/mrwogu/promptsc
 
 > **unsupported**: `number`
 
-Defined in: [cli/src/utils/diff-report.ts:56](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/diff-report.ts#L56)
+Defined in: [cli/src/utils/diff-report.ts:56](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/diff-report.ts#L56)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [cli/src/utils/diff-report.ts:56](https://github.com/mrwogu/promptsc
 
 > **userOwned**: `number`
 
-Defined in: [cli/src/utils/diff-report.ts:57](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/cli/src/utils/diff-report.ts#L57)
+Defined in: [cli/src/utils/diff-report.ts:57](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/diff-report.ts#L57)

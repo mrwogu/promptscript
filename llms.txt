@@ -2,7 +2,7 @@
 
 > Open-source compiler for AI coding agent rules. Write instructions, skills, agents, and MCP servers once and get native files for 50 tools.
 
-PromptScript is an agent platform configuration language. It defines instructions, skills, agents, MCP servers, plugins, hooks, workflows, and policies once, then compiles native output for 50 AI coding agent targets.
+PromptScript is an agent platform configuration language. It defines instructions, skills, agents, MCP servers, plugins, hooks, workflows, and policies once, then compiles native output for 50 AI coding agent targets. It also compiles application prompts (@prompts) to content-hashed bundles, with prs release, prs approve, and CODEOWNERS generation for governed releases.
 
 Every page below is plain Markdown. The whole documentation in one file: https://getpromptscript.dev/llms-full.txt
 

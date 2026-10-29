@@ -6,7 +6,7 @@
 
 # Interface: PolicyViolation
 
-Defined in: [core/src/types/policy.ts:265](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L265)
+Defined in: [core/src/types/policy.ts:265](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L265)
 
 A single policy violation.
 
@@ -16,7 +16,7 @@ A single policy violation.
 
 > **kind**: [`PolicyKind`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicyKind/index.md)
 
-Defined in: [core/src/types/policy.ts:269](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L269)
+Defined in: [core/src/types/policy.ts:269](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L269)
 
 Policy kind
 
@@ -26,7 +26,7 @@ Policy kind
 
 > `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/policy.ts:279](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L279)
+Defined in: [core/src/types/policy.ts:279](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L279)
 
 Location of the prompt that breaks a prompt policy
 
@@ -36,7 +36,7 @@ Location of the prompt that breaks a prompt policy
 
 > **message**: `string`
 
-Defined in: [core/src/types/policy.ts:273](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L273)
+Defined in: [core/src/types/policy.ts:273](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L273)
 
 Human-readable violation message
 
@@ -46,7 +46,7 @@ Human-readable violation message
 
 > **policyName**: `string`
 
-Defined in: [core/src/types/policy.ts:267](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L267)
+Defined in: [core/src/types/policy.ts:267](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L267)
 
 Name of the violated policy
 
@@ -56,7 +56,7 @@ Name of the violated policy
 
 > **severity**: [`PolicySeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicySeverity/index.md)
 
-Defined in: [core/src/types/policy.ts:271](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L271)
+Defined in: [core/src/types/policy.ts:271](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L271)
 
 Severity of the violation
 
@@ -66,7 +66,7 @@ Severity of the violation
 
 > `optional` **source?**: `string`
 
-Defined in: [core/src/types/policy.ts:277](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L277)
+Defined in: [core/src/types/policy.ts:277](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L277)
 
 Source file/skill where the violation occurred
 
@@ -76,6 +76,6 @@ Source file/skill where the violation occurred
 
 > `optional` **suggestion?**: `string`
 
-Defined in: [core/src/types/policy.ts:275](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/policy.ts#L275)
+Defined in: [core/src/types/policy.ts:275](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L275)
 
 Suggested remediation

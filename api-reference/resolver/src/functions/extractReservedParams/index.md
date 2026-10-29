@@ -8,7 +8,7 @@
 
 > **extractReservedParams**(`params`): [`ReservedParamsResult`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/ReservedParamsResult/index.md)
 
-Defined in: [resolver/src/imports.ts:73](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/imports.ts#L73)
+Defined in: [resolver/src/imports.ts:73](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/imports.ts#L73)
 
 Extract reserved parameters (only, exclude, includes, excludes) from
 

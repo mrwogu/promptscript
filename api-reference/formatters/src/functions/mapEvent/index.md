@@ -8,7 +8,7 @@
 
 > **mapEvent**(`event`, `target`): `string` \| `null`
 
-Defined in: [formatters/src/hook-adapters.ts:580](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/hook-adapters.ts#L580)
+Defined in: [formatters/src/hook-adapters.ts:580](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L580)
 
 Get the target-native event name for a portable event.
 

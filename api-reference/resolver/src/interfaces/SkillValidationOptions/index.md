@@ -6,7 +6,7 @@
 
 # Interface: SkillValidationOptions
 
-Defined in: [resolver/src/skill-validation.ts:39](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/skill-validation.ts#L39)
+Defined in: [resolver/src/skill-validation.ts:39](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skill-validation.ts#L39)
 
 Options for `validateSkillFrontmatter`.
 
@@ -16,7 +16,7 @@ Options for `validateSkillFrontmatter`.
 
 > `optional` **existingNames?**: `ReadonlySet`\<`string`\>
 
-Defined in: [resolver/src/skill-validation.ts:50](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/skill-validation.ts#L50)
+Defined in: [resolver/src/skill-validation.ts:50](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skill-validation.ts#L50)
 
 Names already registered in the current project. Used to detect
 collisions (two skills resolving to the same output folder).
@@ -27,7 +27,7 @@ collisions (two skills resolving to the same output folder).
 
 > `optional` **filePath?**: `string`
 
-Defined in: [resolver/src/skill-validation.ts:45](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/skill-validation.ts#L45)
+Defined in: [resolver/src/skill-validation.ts:45](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skill-validation.ts#L45)
 
 Absolute path to the SKILL.md file being validated. When provided,
 enables checks that depend on the surrounding directory (name ↔ folder

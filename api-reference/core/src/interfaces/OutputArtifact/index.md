@@ -6,7 +6,7 @@
 
 # Interface: OutputArtifact
 
-Defined in: [core/src/output-plan.ts:10](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L10)
+Defined in: [core/src/output-plan.ts:10](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/output-plan.ts#L10)
 
 Formatter output shape understood by the shared output planner.
 
@@ -24,7 +24,7 @@ must only depend on these portable fields.
 
 > `optional` **additionalFiles?**: `OutputArtifact`[]
 
-Defined in: [core/src/output-plan.ts:20](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L20)
+Defined in: [core/src/output-plan.ts:20](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/output-plan.ts#L20)
 
 Nested resources emitted with this artifact.
 
@@ -34,7 +34,7 @@ Nested resources emitted with this artifact.
 
 > **content**: `string`
 
-Defined in: [core/src/output-plan.ts:14](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L14)
+Defined in: [core/src/output-plan.ts:14](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/output-plan.ts#L14)
 
 File contents.
 
@@ -44,7 +44,7 @@ File contents.
 
 > `optional` **managedOutputDirectories?**: `string`[]
 
-Defined in: [core/src/output-plan.ts:22](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L22)
+Defined in: [core/src/output-plan.ts:22](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/output-plan.ts#L22)
 
 Relative directories managed by this artifact.
 
@@ -54,7 +54,7 @@ Relative directories managed by this artifact.
 
 > `optional` **managedOutputFiles?**: `string`[]
 
-Defined in: [core/src/output-plan.ts:24](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L24)
+Defined in: [core/src/output-plan.ts:24](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/output-plan.ts#L24)
 
 Relative files managed by this artifact.
 
@@ -64,7 +64,7 @@ Relative files managed by this artifact.
 
 > `optional` **merge?**: [`StructuredMergePlan`](https://getpromptscript.dev/api-reference/core/src/interfaces/StructuredMergePlan/index.md)
 
-Defined in: [core/src/output-plan.ts:18](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L18)
+Defined in: [core/src/output-plan.ts:18](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/output-plan.ts#L18)
 
 Optional structured merge instructions.
 
@@ -74,7 +74,7 @@ Optional structured merge instructions.
 
 > `optional` **mode?**: `number`
 
-Defined in: [core/src/output-plan.ts:16](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L16)
+Defined in: [core/src/output-plan.ts:16](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/output-plan.ts#L16)
 
 Optional Unix file mode.
 
@@ -84,7 +84,7 @@ Optional Unix file mode.
 
 > `optional` **omit?**: `boolean`
 
-Defined in: [core/src/output-plan.ts:29](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L29)
+Defined in: [core/src/output-plan.ts:29](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/output-plan.ts#L29)
 
 Plan nothing for this artifact. A formatter sets it when it has no file to write,
 for example a prompt target in a program without prompts.
@@ -95,6 +95,6 @@ for example a prompt target in a program without prompts.
 
 > **path**: `string`
 
-Defined in: [core/src/output-plan.ts:12](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/output-plan.ts#L12)
+Defined in: [core/src/output-plan.ts:12](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/output-plan.ts#L12)
 
 Relative output path.

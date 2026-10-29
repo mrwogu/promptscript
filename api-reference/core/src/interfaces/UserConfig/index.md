@@ -6,7 +6,7 @@
 
 # Interface: UserConfig
 
-Defined in: [core/src/types/config.ts:677](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/config.ts#L677)
+Defined in: [core/src/types/config.ts:677](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/config.ts#L677)
 
 User-level configuration stored at ~/.promptscript/config.yaml.
 Provides defaults that can be overridden by project config, env vars, or CLI flags.
@@ -17,7 +17,7 @@ Provides defaults that can be overridden by project config, env vars, or CLI fla
 
 > `optional` **defaults?**: `object`
 
-Defined in: [core/src/types/config.ts:701](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/config.ts#L701)
+Defined in: [core/src/types/config.ts:701](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/config.ts#L701)
 
 #### targets?
 
@@ -33,7 +33,7 @@ Defined in: [core/src/types/config.ts:701](https://github.com/mrwogu/promptscrip
 
 > `optional` **registries?**: [`RegistriesConfig`](https://getpromptscript.dev/api-reference/core/src/type-aliases/RegistriesConfig/index.md)
 
-Defined in: [core/src/types/config.ts:700](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/config.ts#L700)
+Defined in: [core/src/types/config.ts:700](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/config.ts#L700)
 
 ***
 
@@ -41,7 +41,7 @@ Defined in: [core/src/types/config.ts:700](https://github.com/mrwogu/promptscrip
 
 > `optional` **registry?**: `object`
 
-Defined in: [core/src/types/config.ts:681](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/config.ts#L681)
+Defined in: [core/src/types/config.ts:681](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/config.ts#L681)
 
 #### cache?
 
@@ -105,7 +105,7 @@ Defined in: [core/src/types/config.ts:681](https://github.com/mrwogu/promptscrip
 
 > `optional` **telemetry?**: `boolean`
 
-Defined in: [core/src/types/config.ts:680](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/config.ts#L680)
+Defined in: [core/src/types/config.ts:680](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/config.ts#L680)
 
 Enable anonymous aggregate usage telemetry by default
 
@@ -115,4 +115,4 @@ Enable anonymous aggregate usage telemetry by default
 
 > **version**: `"1"`
 
-Defined in: [core/src/types/config.ts:678](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/config.ts#L678)
+Defined in: [core/src/types/config.ts:678](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/config.ts#L678)

@@ -360,7 +360,10 @@ The admin lines cover what decides which review a record needs: the config and e
 
 Turn on required code owner review for the branch. The host also stops a pull request author from
 approving their own pull request; the CLI does not check that. For "who approved this for prod",
-read the review of the pull request that added the record.
+[`prs audit log`](#audit-log) names the record and the commit that added it; read the review of
+the pull request of that commit. A `well-formed` record there only has the right bytes at the
+right path. It does not mean a gate accepts it, and the review by the role team lives in the
+review log of the Git host, not in Git.
 
 ## Release gates
 
@@ -541,6 +544,31 @@ What `--base` does not do:
   lockfile, so it can swap the CLI that runs the check. Protect them as below, or run the check
   as a required workflow from a repository ruleset.
 
+## Read a release in your application
+
+The `@promptscript/runtime` package loads the bundles this flow writes. It has no dependencies. It
+is not published to npm yet and its API can still change, so it is in the repository only.
+
+```typescript
+import { createPromptClient, toAnthropicMessages } from '@promptscript/runtime';
+import { directorySource } from '@promptscript/runtime/node';
+
+const client = createPromptClient({
+  source: directorySource('.promptscript/releases'),
+  label: 'prod',
+});
+
+const prompt = await client.get('acme-support/refund-reply');
+const body = toAnthropicMessages(prompt.render({ message: 'Where is my refund?' }), {
+  maxTokens: 1024,
+});
+```
+
+Every load checks the schema, the structure and the `contentHash`, and verification cannot be turned
+off. `render()` inserts input values as plain text. See the
+[runtime README](https://github.com/mrwogu/promptscript/blob/main/packages/runtime/README.md) for
+the cache, the fail modes and the transport rules of `httpSource`.
+
 ## What protects the labels
 
 Run `prs release status --base` as a required check, and keep review on the release files:
@@ -559,6 +587,167 @@ Run `prs release status --base` as a required check, and keep review on the rele
 
 Applications read the label file of their environment and the bundle file it names. Recompute the
 content hash before use, as described in [Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md#content-hash).
+
+## Audit log
+
+`prs audit log` reads the governance history of the project from Git: who changed a prompt file,
+who approved which hash, who promoted, rolled back or removed a label entry, and who changed the
+config or the generated CODEOWNERS section. Nothing is stored besides the repository, so the log is as good as
+the history on the branch.
+
+```bash
+prs audit log --prompt acme-support/refund-reply --env prod --hash 850dce44
+```
+
+```text
+head 4452d509b67930043f5155036a07f5e1f52d9183
+sha256-850dce44fbd1...2b73  2026-10-22T09:15:40Z  promoted  4452d509b679  acme-support/refund-reply  env=prod  previous=-  by Ann Lee <ann@acme.example>
+sha256-850dce44fbd1...2b73  2026-10-21T14:02:11Z  approved  9ffb3347d0a8  acme-support/refund-reply  role=legal  approver=@jane (asserted)  env=prod  state=well-formed  .promptscript/approvals/legal/acme-support/refund-reply/sha256-850dce44fbd1...2b73.jane.json  by Jane Roe <jane@acme.example>
+    comment: Refund wording checked
+```
+
+The hashes are shortened here; the command prints them in full. That is the answer to "who approved
+this hash for prod": the `approved` line names the approver the record claims and the commit that
+added it. The binding reviewer is in the review log of the Git host, for the pull request of that
+commit.
+
+### Events
+
+Events come newest commit first; inside one commit they follow the path order of Git. Each one
+has `type`, `commit`, `at` (committer date), `author`, `committer` (name and email as Git has
+them), `path` (relative to the repository top level) and `mainline`. `mainline` is `true` for a
+commit on the first-parent chain of `HEAD`. An event with `mainline: false` is history of a branch:
+its change may never have reached `HEAD`, or reached it only through a merge.
+
+| Type               | When                                                                   | Extra fields                                                                                                        |
+| ------------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `changed`          | a `.prs` file of the project was added, modified or deleted            | `change` (`A`, `M`, `D`)                                                                                            |
+| `approved`         | an approval record was added                                           | `prompt`, `contentHash`, `role`, `environment`, `approver`, `approverSource`, `recordCreatedAt`, `comment`, `state` |
+| `approval-removed` | an approval record was deleted, read from the parent commit            | the same                                                                                                            |
+| `promoted`         | a label entry was added or changed                                     | `environment`, `prompt`, `contentHash`, `previousContentHash`                                                       |
+| `rolled-back`      | a label entry was set to a hash it held before in that label           | the same                                                                                                            |
+| `label-removed`    | a label entry was removed, or the label file deleted                   | `environment`, `prompt`, `previousContentHash`                                                                      |
+| `merge-dropped`    | a merge did not keep a change of a parent after the first              | `parent`, `change`, and the record fields, or `environment`, `prompt`, `contentHash`, `droppedContentHash`          |
+| `config-changed`   | a config file name of the project, the config or its `extends` changed | `change`                                                                                                            |
+| `generated`        | the CODEOWNERS section under this project's marker changed             | none                                                                                                                |
+
+A record file changed in place shows as `approval-removed` with the old content and `approved`
+with the new. `state` comes from the record bytes and the path alone: `well-formed` at the path
+its fields give, `misplaced` at another path, `invalid` when the file is no v1 record in the exact
+form `prs approve` writes, is a link or a submodule, or is larger than 1 MiB (an invalid record
+has no record fields). Well-formed does not mean a gate accepts the record: the gate also needs
+the role in `governance.roles` and the scope, and the review by the role team lives in the review
+log of the Git host. A misplaced or invalid record never counts in a gate. `approverSource` is
+always `asserted`.
+
+Commits of merged side branches are read too, each with its own events. A merge commit is read
+against its first parent: its events are what it brought to the branch it was merged into, and
+they carry `viaMerge: true`. So a promotion made on a side branch shows twice, once on the side
+commit and once on the merge with `viaMerge`. A merge that takes an older version over from the
+side, such as a revoked record or an older label hash, shows that as `approved` or `rolled-back`
+on the merge. Whether a label entry is `rolled-back` is decided by the hashes the label held on
+the first-parent chain, so a side branch never makes a later promotion look like a rollback.
+Side branches a merge discarded, for example with `-s ours`, still show their own events.
+
+The first-parent diff cannot show what a merge threw away from its other parents. So for every
+merge and every parent after the first, the log compares that parent with the merge base and with
+the merge result. When the parent changed an approval record, a label entry or the generated
+CODEOWNERS section and the merge result does not have that change, the merge gets a
+`merge-dropped` event naming the `parent`. A revoked record that a merge brings back, or a
+promotion it resolves away, shows up this way even when the branch is fast-forwarded later, and
+for octopus merges too. For a label the event names the hash the parent had
+(`droppedContentHash`) and the hash the merge kept (`contentHash`); for a record, `change` says
+what the parent did (`A`, `M` or `D`) and the record fields come from the parent's version, or
+from the merge's when the parent deleted it.
+
+After reading the history, the command replays the `mainline` events and compares the result with
+the approval records and label entries at `HEAD`. Any difference fails with `PS5108`: the history
+has a change the log cannot explain, and the log is not printed as if it were complete. Labels
+that did not parse at some commit are left out of this check.
+
+The log reads the whole project directory, keeping the `.prs` files, `.promptscript/approvals/`,
+every `.promptscript/releases/<environment>.json` label, every config file name in the project
+root, and outside the directory the config and its `extends` files inside the repository, the
+files a `--prompt` prompt is built from and the four CODEOWNERS locations. A label of an
+environment that is not in `releases.environments` is read too, with a warning, and its events
+carry `configured: false`, so a look-alike file such as `prodd.json` stands apart from `prod`.
+
+### Filters
+
+| Option            | Keeps                                                                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--prompt <id>`   | approval and release events of the prompt, and `changed` events of the files it is built from in the checkout                                                                  |
+| `--env <env>`     | release events of the environment, and approvals for it or for every environment                                                                                               |
+| `--hash <prefix>` | events whose `contentHash` (for `label-removed`, `previousContentHash`; for `merge-dropped`, either hash) starts with these hex digits (`sha256-` optional, at least 4 digits) |
+| `--since <date>`  | events committed at or after the ISO date or date and time                                                                                                                     |
+| `--until <date>`  | events committed at or before it; a date alone means the end of that day, UTC                                                                                                  |
+| `--limit <n>`     | the newest `n` events after the other filters, at most 100000                                                                                                                  |
+
+An event without the filtered field does not match: with `--hash`, only approval and release
+events remain. `--prompt` finds the files of a prompt by resolving the checkout, so a prompt file
+of an older layout is not matched; an invalid record matches when it lies in the prompt's
+directory under a role. Filters apply after the whole history is read, so `rolled-back` stays
+right inside a time window.
+
+### Formats
+
+`--format text` (the default) prints a `head <commit>` line, then one line per event with the
+content hash first (`-` for events without one), `(asserted)` after the approver, and
+`[via merge]`, `[side branch]` or `[environment not configured]` where they apply.
+`--format json` prints one document that matches
+`https://getpromptscript.dev/schema/audit-log/v1.json`: `$schema`, `version`, `success`, `head`
+(always there on success), `filters`, `events`, `warnings` and `errors`. C1 control, bidi and
+zero-width characters in strings are written as `\uXXXX` escapes.
+
+`--format cef` prints one ArcSight CEF line per event for a SIEM:
+
+```text
+CEF:0|PromptScript|prs|<cli version>|prs-approved|Prompt approved|5|rt=1792591331000 act=approved suser=jane@acme.example duser=@jane filePath=... cs1=acme-support/refund-reply cs1Label=prompt cs2=sha256-... cs2Label=contentHash cs3=legal cs3Label=role cs4=prod cs4Label=environment cs5=9ffb3347... cs5Label=commit outcome=well-formed msg=Refund wording checked flexString1=4452d509... flexString1Label=head flexString2=asserted flexString2Label=approverSource
+```
+
+| Key            | Value                                                                                                 |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| `rt`           | commit time in milliseconds                                                                           |
+| `act`          | event type                                                                                            |
+| `suser`        | author email                                                                                          |
+| `duser`        | approver                                                                                              |
+| `filePath`     | path                                                                                                  |
+| `cs1` to `cs6` | prompt, contentHash, role, environment, commit, previous contentHash (the parent for `merge-dropped`) |
+| `outcome`      | record `state`, or `added`, `modified`, `deleted` for file changes                                    |
+| `msg`          | record comment                                                                                        |
+| `flexString1`  | `head`, the commit the log was read from                                                              |
+| `flexString2`  | `approverSource`, always `asserted`, on approval events                                               |
+| `cn1`          | `1` with `cn1Label=viaMerge` on events of a merge                                                     |
+| `cn2`          | `0` with `cn2Label=configured` on labels of unconfigured environments                                 |
+| `cn3`          | `1` or `0` with `cn3Label=mainline`                                                                   |
+| `oldFileHash`  | `droppedContentHash` of a `merge-dropped` label entry                                                 |
+
+Severities: `changed` and `generated` 3, `approved` 5, `approval-removed`, `promoted` and
+`config-changed` 6, `rolled-back`, `label-removed` and `merge-dropped` 7. Header values escape `\` and `|`; extension values escape `\`
+and `=`, line breaks become `\n`, and other control characters are dropped. Text and CEF output
+drop control, bidi and zero-width characters from Git and record fields.
+
+### Limits
+
+- Author, committer and approver are what the commit and the record say. Git does not check them.
+  The committer date is set by the committer's machine too, so `--since` and `--until` filter on a
+  claim.
+- A squash merge shows the person who merged, not the authors of the branch.
+- The log reads the project directory where it is now. History from before the directory moved is
+  not read: after a move the log starts at the move commit, and approvals, labels and prompt files
+  from before it show up as added there, by the person who moved them.
+- The review identity of the Git host is not in Git. Join on the commit to read it.
+- Rewriting history changes the log. Block force pushes on the branch, and ship exports to a SIEM
+  on a schedule; `head` in every export tells two exports apart.
+- The log reads the project directory as a whole. For a project at the repository root that is
+  every commit of the repository, and a very large monorepo can pass the 256 MiB the command
+  reads from `git log`, which fails with `PS5108`.
+- A shallow clone, a missing `git`, a timeout or a blob a partial clone would fetch fails with
+  `PS5108`. In CI check out the full history, for example `actions/checkout` with
+  `fetch-depth: 0`.
+- Git runs with replace refs and grafts off, so a `git replace` ref or a `.git/info/grafts` file
+  cannot change what the log shows.
+- The output holds email addresses. Treat exports like other personal data.
 
 ## Error codes
 
@@ -584,6 +773,10 @@ content hash before use, as described in [Application Prompts](https://getprompt
 | PS5105 | The record exists (exit code 2)                                                                |
 | PS5108 | `--list` cannot run Git, or the project is not in a repository                                 |
 | PS5109 | A record is invalid, modified, misplaced or has an unknown role, or the record path has a link |
+
+`prs audit log` uses `PS5102` for a `--prompt` or `--hash` value of the wrong shape and `PS5108`
+when Git cannot give the history: no repository, no commit, a shallow clone, a timeout, a
+missing blob, or a history whose mainline events do not lead to the records and labels at `HEAD`.
 
 ## See Also
 

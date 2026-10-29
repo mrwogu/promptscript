@@ -6,7 +6,7 @@
 
 # Interface: EvalJudgeRefV1
 
-Defined in: [core/src/types/eval.ts:683](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L683)
+Defined in: [core/src/types/eval.ts:683](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L683)
 
 A judge rubric the run used.
 
@@ -16,7 +16,7 @@ A judge rubric the run used.
 
 > **contentHash**: `string`
 
-Defined in: [core/src/types/eval.ts:690](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L690)
+Defined in: [core/src/types/eval.ts:690](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L690)
 
 Content hash of the rubric bundle.
 
@@ -30,6 +30,6 @@ Content hash of the rubric bundle.
 
 > **rubric**: `string`
 
-Defined in: [core/src/types/eval.ts:685](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/eval.ts#L685)
+Defined in: [core/src/types/eval.ts:685](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L685)
 
 Rubric prompt id

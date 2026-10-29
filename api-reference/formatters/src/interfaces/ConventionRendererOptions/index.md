@@ -6,7 +6,7 @@
 
 # Interface: ConventionRendererOptions
 
-Defined in: [formatters/src/convention-renderer.ts:16](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/convention-renderer.ts#L16)
+Defined in: [formatters/src/convention-renderer.ts:16](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/convention-renderer.ts#L16)
 
 Options for creating a ConventionRenderer.
 
@@ -16,7 +16,7 @@ Options for creating a ConventionRenderer.
 
 > `optional` **convention?**: `string` \| [`OutputConvention`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputConvention/index.md)
 
-Defined in: [formatters/src/convention-renderer.ts:20](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/convention-renderer.ts#L20)
+Defined in: [formatters/src/convention-renderer.ts:20](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/convention-renderer.ts#L20)
 
 Output convention to use.
 
@@ -26,6 +26,6 @@ Output convention to use.
 
 > `optional` **prettier?**: [`PrettierMarkdownOptions`](https://getpromptscript.dev/api-reference/core/src/interfaces/PrettierMarkdownOptions/index.md)
 
-Defined in: [formatters/src/convention-renderer.ts:24](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/convention-renderer.ts#L24)
+Defined in: [formatters/src/convention-renderer.ts:24](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/convention-renderer.ts#L24)
 
 Prettier formatting options.

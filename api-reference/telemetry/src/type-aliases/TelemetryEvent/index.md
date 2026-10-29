@@ -8,4 +8,4 @@
 
 > **TelemetryEvent** = `CommandTelemetryEvent` \| `FeatureTelemetryEvent`
 
-Defined in: [telemetry/src/types.ts:24](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L24)
+Defined in: [telemetry/src/types.ts:24](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/types.ts#L24)

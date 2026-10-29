@@ -6,7 +6,7 @@
 
 # Interface: VendorManifest
 
-Defined in: [resolver/src/vendor-manifest.ts:24](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/vendor-manifest.ts#L24)
+Defined in: [resolver/src/vendor-manifest.ts:24](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/vendor-manifest.ts#L24)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [resolver/src/vendor-manifest.ts:24](https://github.com/mrwogu/promp
 
 > **dependencies**: `Record`\<`string`, [`VendorManifestEntry`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/VendorManifestEntry/index.md)\>
 
-Defined in: [resolver/src/vendor-manifest.ts:26](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/vendor-manifest.ts#L26)
+Defined in: [resolver/src/vendor-manifest.ts:26](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/vendor-manifest.ts#L26)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [resolver/src/vendor-manifest.ts:26](https://github.com/mrwogu/promp
 
 > **version**: `1`
 
-Defined in: [resolver/src/vendor-manifest.ts:25](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/vendor-manifest.ts#L25)
+Defined in: [resolver/src/vendor-manifest.ts:25](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/vendor-manifest.ts#L25)

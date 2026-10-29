@@ -6,7 +6,7 @@
 
 # Interface: StructuredMergeOperation
 
-Defined in: [core/src/structured-output.ts:11](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/structured-output.ts#L11)
+Defined in: [core/src/structured-output.ts:11](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/structured-output.ts#L11)
 
 A single merge operation to apply to a structured settings file.
 
@@ -16,7 +16,7 @@ A single merge operation to apply to a structured settings file.
 
 > **path**: `string`
 
-Defined in: [core/src/structured-output.ts:13](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/structured-output.ts#L13)
+Defined in: [core/src/structured-output.ts:13](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/structured-output.ts#L13)
 
 Dotted path to the target key.
 
@@ -26,6 +26,6 @@ Dotted path to the target key.
 
 > **value**: `unknown`
 
-Defined in: [core/src/structured-output.ts:15](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/structured-output.ts#L15)
+Defined in: [core/src/structured-output.ts:15](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/structured-output.ts#L15)
 
 Value to set, or undefined to remove an owned value.

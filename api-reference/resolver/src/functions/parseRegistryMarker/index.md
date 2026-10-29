@@ -8,7 +8,7 @@
 
 > **parseRegistryMarker**(`marker`): \{ `path`: `string`; `repoUrl`: `string`; `version`: `string`; \} \| `null`
 
-Defined in: [resolver/src/loader.ts:26](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/loader.ts#L26)
+Defined in: [resolver/src/loader.ts:26](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/loader.ts#L26)
 
 Parse a registry marker string back into its components.
 

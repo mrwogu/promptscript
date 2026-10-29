@@ -6,7 +6,7 @@
 
 # Interface: ApprovalApproverV1
 
-Defined in: [core/src/types/approval.ts:9](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/approval.ts#L9)
+Defined in: [core/src/types/approval.ts:9](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L9)
 
 Who approved, as the record states it.
 
@@ -16,7 +16,7 @@ Who approved, as the record states it.
 
 > **source**: `"asserted"`
 
-Defined in: [core/src/types/approval.ts:11](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/approval.ts#L11)
+Defined in: [core/src/types/approval.ts:11](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L11)
 
 `asserted`: the identity is a claim, it binds through the review of the change that adds the record
 
@@ -26,7 +26,7 @@ Defined in: [core/src/types/approval.ts:11](https://github.com/mrwogu/promptscri
 
 > **value**: `string`
 
-Defined in: [core/src/types/approval.ts:17](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/approval.ts#L17)
+Defined in: [core/src/types/approval.ts:17](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L17)
 
 Git host user handle.
 

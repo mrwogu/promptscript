@@ -8,7 +8,7 @@
 
 > `const` **BUILTIN\_FORMATTERS**: `object`
 
-Defined in: [formatters/src/builtin-formatters.ts:82](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/builtin-formatters.ts#L82)
+Defined in: [formatters/src/builtin-formatters.ts:82](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/builtin-formatters.ts#L82)
 
 Exhaustive map of built-in target names to their formatter classes.
 `satisfies Record<KnownTarget, FormatterClass>` ensures every known

@@ -8,7 +8,7 @@
 
 > **getObservedBlockShape**(`block`): `"object"` \| `"text"` \| `"array"` \| `"mixed"`
 
-Defined in: [core/src/block-shapes.ts:154](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/block-shapes.ts#L154)
+Defined in: [core/src/block-shapes.ts:154](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/block-shapes.ts#L154)
 
 Return the observed shape from canonical or compatibility AST input.
 

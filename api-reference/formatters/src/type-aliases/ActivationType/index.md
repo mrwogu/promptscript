@@ -8,6 +8,6 @@
 
 > **ActivationType** = `"manual"` \| `"always"` \| `"model"` \| `"glob"`
 
-Defined in: [formatters/src/formatters/antigravity.ts:21](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/formatters/antigravity.ts#L21)
+Defined in: [formatters/src/formatters/antigravity.ts:21](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/formatters/antigravity.ts#L21)
 
 Activation types for Antigravity rules.

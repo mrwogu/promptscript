@@ -6,7 +6,7 @@
 
 # Interface: PromptBundleModel
 
-Defined in: [core/src/types/prompt-bundle.ts:60](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompt-bundle.ts#L60)
+Defined in: [core/src/types/prompt-bundle.ts:60](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L60)
 
 Model identity of a prompt bundle: the authored reference plus what it resolved to.
 
@@ -16,7 +16,7 @@ Model identity of a prompt bundle: the authored reference plus what it resolved 
 
 > **apiId**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:77](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompt-bundle.ts#L77)
+Defined in: [core/src/types/prompt-bundle.ts:77](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L77)
 
 Resolved provider API model identifier.
 
@@ -32,7 +32,7 @@ Resolved provider API model identifier.
 
 > **params**: [`ModelParams`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelParams/index.md)
 
-Defined in: [core/src/types/prompt-bundle.ts:79](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompt-bundle.ts#L79)
+Defined in: [core/src/types/prompt-bundle.ts:79](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L79)
 
 Invocation parameters
 
@@ -42,7 +42,7 @@ Invocation parameters
 
 > `optional` **profile?**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:67](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompt-bundle.ts#L67)
+Defined in: [core/src/types/prompt-bundle.ts:67](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L67)
 
 Catalog profile id the reference resolved to, when one matched
 
@@ -52,7 +52,7 @@ Catalog profile id the reference resolved to, when one matched
 
 > **provider**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:72](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompt-bundle.ts#L72)
+Defined in: [core/src/types/prompt-bundle.ts:72](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L72)
 
 Resolved model provider.
 
@@ -68,7 +68,7 @@ Resolved model provider.
 
 > **ref**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:65](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompt-bundle.ts#L65)
+Defined in: [core/src/types/prompt-bundle.ts:65](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L65)
 
 Reference as authored.
 

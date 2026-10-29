@@ -8,7 +8,7 @@
 
 > **skillNameFromPath**(`filePath`): `string`
 
-Defined in: [resolver/src/skills.ts:191](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/skills.ts#L191)
+Defined in: [resolver/src/skills.ts:191](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L191)
 
 Derive a skill name from a file path by stripping the .md extension.
 

@@ -6,7 +6,7 @@
 
 # Interface: Diagnostic
 
-Defined in: [core/src/utils/diagnostic.ts:11](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/diagnostic.ts#L11)
+Defined in: [core/src/utils/diagnostic.ts:11](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/utils/diagnostic.ts#L11)
 
 A diagnostic message with location information.
 
@@ -16,7 +16,7 @@ A diagnostic message with location information.
 
 > `optional` **code?**: `string`
 
-Defined in: [core/src/utils/diagnostic.ts:19](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/diagnostic.ts#L19)
+Defined in: [core/src/utils/diagnostic.ts:19](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/utils/diagnostic.ts#L19)
 
 Optional diagnostic code
 
@@ -26,7 +26,7 @@ Optional diagnostic code
 
 > `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/utils/diagnostic.ts:17](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/diagnostic.ts#L17)
+Defined in: [core/src/utils/diagnostic.ts:17](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/utils/diagnostic.ts#L17)
 
 Source location
 
@@ -36,7 +36,7 @@ Source location
 
 > **message**: `string`
 
-Defined in: [core/src/utils/diagnostic.ts:13](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/diagnostic.ts#L13)
+Defined in: [core/src/utils/diagnostic.ts:13](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/utils/diagnostic.ts#L13)
 
 Diagnostic message
 
@@ -46,7 +46,7 @@ Diagnostic message
 
 > **severity**: [`DiagnosticSeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/DiagnosticSeverity/index.md)
 
-Defined in: [core/src/utils/diagnostic.ts:15](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/diagnostic.ts#L15)
+Defined in: [core/src/utils/diagnostic.ts:15](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/utils/diagnostic.ts#L15)
 
 Severity level
 
@@ -56,6 +56,6 @@ Severity level
 
 > `optional` **source?**: `string`
 
-Defined in: [core/src/utils/diagnostic.ts:21](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/utils/diagnostic.ts#L21)
+Defined in: [core/src/utils/diagnostic.ts:21](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/utils/diagnostic.ts#L21)
 
 Optional source (e.g., rule name)

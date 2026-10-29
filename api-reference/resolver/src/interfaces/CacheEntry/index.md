@@ -6,7 +6,7 @@
 
 # Interface: CacheEntry
 
-Defined in: [resolver/src/git-cache-manager.ts:39](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/git-cache-manager.ts#L39)
+Defined in: [resolver/src/git-cache-manager.ts:39](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/git-cache-manager.ts#L39)
 
 Cache entry with metadata and path information.
 
@@ -16,7 +16,7 @@ Cache entry with metadata and path information.
 
 > **isStale**: `boolean`
 
-Defined in: [resolver/src/git-cache-manager.ts:45](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/git-cache-manager.ts#L45)
+Defined in: [resolver/src/git-cache-manager.ts:45](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/git-cache-manager.ts#L45)
 
 Whether the cache is stale (beyond TTL)
 
@@ -26,7 +26,7 @@ Whether the cache is stale (beyond TTL)
 
 > **metadata**: [`CacheMetadata`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/CacheMetadata/index.md)
 
-Defined in: [resolver/src/git-cache-manager.ts:43](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/git-cache-manager.ts#L43)
+Defined in: [resolver/src/git-cache-manager.ts:43](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/git-cache-manager.ts#L43)
 
 Cache metadata
 
@@ -36,6 +36,6 @@ Cache metadata
 
 > **path**: `string`
 
-Defined in: [resolver/src/git-cache-manager.ts:41](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/git-cache-manager.ts#L41)
+Defined in: [resolver/src/git-cache-manager.ts:41](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/git-cache-manager.ts#L41)
 
 Path to the cached repository

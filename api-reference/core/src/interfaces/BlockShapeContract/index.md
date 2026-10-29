@@ -6,7 +6,7 @@
 
 # Interface: BlockShapeContract
 
-Defined in: [core/src/block-shapes.ts:13](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/block-shapes.ts#L13)
+Defined in: [core/src/block-shapes.ts:13](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/block-shapes.ts#L13)
 
 Shape contract for one built-in block.
 
@@ -16,7 +16,7 @@ Shape contract for one built-in block.
 
 > `readonly` **canonicalShape**: `"object"` \| `"text"` \| `"array"` \| `"mixed"`
 
-Defined in: [core/src/block-shapes.ts:15](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/block-shapes.ts#L15)
+Defined in: [core/src/block-shapes.ts:15](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/block-shapes.ts#L15)
 
 Preferred shape for new files and examples
 
@@ -26,7 +26,7 @@ Preferred shape for new files and examples
 
 > `readonly` **example**: `string`
 
-Defined in: [core/src/block-shapes.ts:21](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/block-shapes.ts#L21)
+Defined in: [core/src/block-shapes.ts:21](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/block-shapes.ts#L21)
 
 Minimal canonical replacement used by diagnostics
 
@@ -36,7 +36,7 @@ Minimal canonical replacement used by diagnostics
 
 > `readonly` **legacyShapes**: readonly (`"object"` \| `"text"` \| `"array"` \| `"mixed"`)[]
 
-Defined in: [core/src/block-shapes.ts:19](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/block-shapes.ts#L19)
+Defined in: [core/src/block-shapes.ts:19](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/block-shapes.ts#L19)
 
 Supported shapes that may be formatter-sensitive
 
@@ -46,6 +46,6 @@ Supported shapes that may be formatter-sensitive
 
 > `readonly` **supportedShapes**: readonly (`"object"` \| `"text"` \| `"array"` \| `"mixed"`)[]
 
-Defined in: [core/src/block-shapes.ts:17](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/block-shapes.ts#L17)
+Defined in: [core/src/block-shapes.ts:17](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/block-shapes.ts#L17)
 
 Shapes that retain defined behavior

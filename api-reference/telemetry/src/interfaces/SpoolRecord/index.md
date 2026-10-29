@@ -6,7 +6,7 @@
 
 # Interface: SpoolRecord
 
-Defined in: [telemetry/src/types.ts:33](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L33)
+Defined in: [telemetry/src/types.ts:33](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/types.ts#L33)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [telemetry/src/types.ts:33](https://github.com/mrwogu/promptscript/b
 
 > **app\_version**: `string`
 
-Defined in: [telemetry/src/types.ts:27](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L27)
+Defined in: [telemetry/src/types.ts:27](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/types.ts#L27)
 
 #### Inherited from
 
@@ -30,7 +30,7 @@ Defined in: [telemetry/src/types.ts:27](https://github.com/mrwogu/promptscript/b
 
 > **arch**: `"other"` \| `"arm64"` \| `"x86_64"`
 
-Defined in: [telemetry/src/types.ts:30](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L30)
+Defined in: [telemetry/src/types.ts:30](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/types.ts#L30)
 
 #### Inherited from
 
@@ -42,7 +42,7 @@ Defined in: [telemetry/src/types.ts:30](https://github.com/mrwogu/promptscript/b
 
 > **event**: [`TelemetryEvent`](https://getpromptscript.dev/api-reference/telemetry/src/type-aliases/TelemetryEvent/index.md)
 
-Defined in: [telemetry/src/types.ts:35](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L35)
+Defined in: [telemetry/src/types.ts:35](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/types.ts#L35)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [telemetry/src/types.ts:35](https://github.com/mrwogu/promptscript/b
 
 > **os**: `"windows"` \| `"other"` \| `"darwin"` \| `"linux"`
 
-Defined in: [telemetry/src/types.ts:29](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L29)
+Defined in: [telemetry/src/types.ts:29](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/types.ts#L29)
 
 #### Inherited from
 
@@ -62,7 +62,7 @@ Defined in: [telemetry/src/types.ts:29](https://github.com/mrwogu/promptscript/b
 
 > **runtime**: [`TelemetryRuntime`](https://getpromptscript.dev/api-reference/telemetry/src/type-aliases/TelemetryRuntime/index.md)
 
-Defined in: [telemetry/src/types.ts:34](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L34)
+Defined in: [telemetry/src/types.ts:34](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/types.ts#L34)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [telemetry/src/types.ts:34](https://github.com/mrwogu/promptscript/b
 
 > **runtime\_version**: `string`
 
-Defined in: [telemetry/src/types.ts:28](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/telemetry/src/types.ts#L28)
+Defined in: [telemetry/src/types.ts:28](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/types.ts#L28)
 
 #### Inherited from
 

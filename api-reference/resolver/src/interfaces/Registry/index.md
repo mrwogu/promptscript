@@ -6,7 +6,7 @@
 
 # Interface: Registry
 
-Defined in: [resolver/src/registry.ts:8](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/registry.ts#L8)
+Defined in: [resolver/src/registry.ts:8](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry.ts#L8)
 
 Registry interface for fetching PromptScript files.
 
@@ -16,7 +16,7 @@ Registry interface for fetching PromptScript files.
 
 > **exists**(`path`): `Promise`\<`boolean`\>
 
-Defined in: [resolver/src/registry.ts:24](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/registry.ts#L24)
+Defined in: [resolver/src/registry.ts:24](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry.ts#L24)
 
 Check if a file exists in the registry.
 
@@ -40,7 +40,7 @@ True if the file exists
 
 > **fetch**(`path`): `Promise`\<`string`\>
 
-Defined in: [resolver/src/registry.ts:16](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/registry.ts#L16)
+Defined in: [resolver/src/registry.ts:16](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry.ts#L16)
 
 Fetch the content of a file from the registry.
 
@@ -68,7 +68,7 @@ FileNotFoundError if the file doesn't exist
 
 > **list**(`path`): `Promise`\<`string`[]\>
 
-Defined in: [resolver/src/registry.ts:32](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/resolver/src/registry.ts#L32)
+Defined in: [resolver/src/registry.ts:32](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry.ts#L32)
 
 List files in a directory.
 

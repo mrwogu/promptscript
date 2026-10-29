@@ -6,7 +6,7 @@
 
 # Interface: PromptOutputField
 
-Defined in: [core/src/types/prompts.ts:69](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompts.ts#L69)
+Defined in: [core/src/types/prompts.ts:69](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L69)
 
 One field of a prompt output.
 
@@ -16,7 +16,7 @@ One field of a prompt output.
 
 > **description**: `string`
 
-Defined in: [core/src/types/prompts.ts:71](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompts.ts#L71)
+Defined in: [core/src/types/prompts.ts:71](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L71)
 
 Description of the field
 
@@ -26,7 +26,7 @@ Description of the field
 
 > `optional` **items?**: `object`
 
-Defined in: [core/src/types/prompts.ts:77](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompts.ts#L77)
+Defined in: [core/src/types/prompts.ts:77](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L77)
 
 Item type of a list
 
@@ -44,7 +44,7 @@ Item type of a list
 
 > `optional` **options?**: `string`[]
 
-Defined in: [core/src/types/prompts.ts:75](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompts.ts#L75)
+Defined in: [core/src/types/prompts.ts:75](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L75)
 
 Options for enum type
 
@@ -54,6 +54,6 @@ Options for enum type
 
 > **type**: `"string"` \| `"number"` \| `"boolean"` \| `"list"` \| `"enum"`
 
-Defined in: [core/src/types/prompts.ts:73](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/prompts.ts#L73)
+Defined in: [core/src/types/prompts.ts:73](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L73)
 
 Value type, `list` holds items of one scalar type

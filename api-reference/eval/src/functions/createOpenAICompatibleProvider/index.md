@@ -8,7 +8,7 @@
 
 > **createOpenAICompatibleProvider**(`config`, `deps?`): [`EvalProvider`](https://getpromptscript.dev/api-reference/eval/src/type-aliases/EvalProvider/index.md)
 
-Defined in: [eval/src/http-provider.ts:392](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/eval/src/http-provider.ts#L392)
+Defined in: [eval/src/http-provider.ts:392](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/http-provider.ts#L392)
 
 Create a provider for an OpenAI-compatible Chat Completions API, with the
 same transport rules as [createAnthropicProvider](https://getpromptscript.dev/api-reference/eval/src/functions/createAnthropicProvider/index.md). The request body

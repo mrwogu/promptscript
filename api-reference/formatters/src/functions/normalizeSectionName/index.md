@@ -8,7 +8,7 @@
 
 > **normalizeSectionName**(`name`): `string`
 
-Defined in: [formatters/src/section-registry.ts:85](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/section-registry.ts#L85)
+Defined in: [formatters/src/section-registry.ts:85](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/section-registry.ts#L85)
 
 Normalize section names for comparison.
 Handles variations like "donts" vs "restrictions", "code-style" vs "code-standards".

@@ -86,12 +86,18 @@ detectors, and checks responses with deterministic assertions.</p>
 <ul>
 <li><a href="/api-reference/eval/src/interfaces/AssertionContext/">AssertionContext</a></li>
 <li><a href="/api-reference/eval/src/interfaces/CheckContext/">CheckContext</a></li>
+<li><a href="/api-reference/eval/src/interfaces/CompareOptions/">CompareOptions</a></li>
 <li><a href="/api-reference/eval/src/interfaces/DatasetCheckContext/">DatasetCheckContext</a></li>
 <li><a href="/api-reference/eval/src/interfaces/DatasetRecord/">DatasetRecord</a></li>
 <li><a href="/api-reference/eval/src/interfaces/EvalFinding/">EvalFinding</a></li>
+<li><a href="/api-reference/eval/src/interfaces/EvalPlan/">EvalPlan</a></li>
+<li><a href="/api-reference/eval/src/interfaces/EvalPlanModel/">EvalPlanModel</a></li>
+<li><a href="/api-reference/eval/src/interfaces/EvalPlanSuite/">EvalPlanSuite</a></li>
 <li><a href="/api-reference/eval/src/interfaces/EvalProviderContext/">EvalProviderContext</a></li>
 <li><a href="/api-reference/eval/src/interfaces/EvalProviderLookup/">EvalProviderLookup</a></li>
 <li><a href="/api-reference/eval/src/interfaces/EvalRequest/">EvalRequest</a></li>
+<li><a href="/api-reference/eval/src/interfaces/EvalRun/">EvalRun</a></li>
+<li><a href="/api-reference/eval/src/interfaces/FormatOptions/">FormatOptions</a></li>
 <li><a href="/api-reference/eval/src/interfaces/LoadedSuite/">LoadedSuite</a></li>
 <li><a href="/api-reference/eval/src/interfaces/LoadSuitesOptions/">LoadSuitesOptions</a></li>
 <li><a href="/api-reference/eval/src/interfaces/LoadSuitesResult/">LoadSuitesResult</a></li>
@@ -108,12 +114,15 @@ detectors, and checks responses with deterministic assertions.</p>
 <ul>
 <li><a href="/api-reference/eval/src/type-aliases/DeterministicAssertion/">DeterministicAssertion</a></li>
 <li><a href="/api-reference/eval/src/type-aliases/EvalCode/">EvalCode</a></li>
+<li><a href="/api-reference/eval/src/type-aliases/EvalComparisonFormat/">EvalComparisonFormat</a></li>
 <li><a href="/api-reference/eval/src/type-aliases/EvalProgress/">EvalProgress</a></li>
 <li><a href="/api-reference/eval/src/type-aliases/EvalProvider/">EvalProvider</a></li>
+<li><a href="/api-reference/eval/src/type-aliases/EvalReportFormat/">EvalReportFormat</a></li>
 <li><a href="/api-reference/eval/src/type-aliases/EvalResponse/">EvalResponse</a></li>
 <li><a href="/api-reference/eval/src/type-aliases/MockAnswer/">MockAnswer</a></li>
 <li><a href="/api-reference/eval/src/type-aliases/MockProvider/">MockProvider</a></li>
 <li><a href="/api-reference/eval/src/type-aliases/MockScript/">MockScript</a></li>
+<li><a href="/api-reference/eval/src/type-aliases/PriceSource/">PriceSource</a></li>
 </ul>
 <h2 id="variables">Variables</h2>
 <ul>
@@ -124,15 +133,25 @@ detectors, and checks responses with deterministic assertions.</p>
 <ul>
 <li><a href="/api-reference/eval/src/functions/checkDatasetRow/">checkDatasetRow</a></li>
 <li><a href="/api-reference/eval/src/functions/checkSuites/">checkSuites</a></li>
+<li><a href="/api-reference/eval/src/functions/cleanText/">cleanText</a></li>
+<li><a href="/api-reference/eval/src/functions/compareReports/">compareReports</a></li>
 <li><a href="/api-reference/eval/src/functions/createAnthropicProvider/">createAnthropicProvider</a></li>
 <li><a href="/api-reference/eval/src/functions/createMockProvider/">createMockProvider</a></li>
 <li><a href="/api-reference/eval/src/functions/createOpenAICompatibleProvider/">createOpenAICompatibleProvider</a></li>
 <li><a href="/api-reference/eval/src/functions/createProviderFactory/">createProviderFactory</a></li>
 <li><a href="/api-reference/eval/src/functions/evaluateAssertions/">evaluateAssertions</a></li>
+<li><a href="/api-reference/eval/src/functions/formatComparison/">formatComparison</a></li>
+<li><a href="/api-reference/eval/src/functions/formatPlan/">formatPlan</a></li>
+<li><a href="/api-reference/eval/src/functions/formatReport/">formatReport</a></li>
 <li><a href="/api-reference/eval/src/functions/loadSuites/">loadSuites</a></li>
+<li><a href="/api-reference/eval/src/functions/missingFromCandidate/">missingFromCandidate</a></li>
+<li><a href="/api-reference/eval/src/functions/planEval/">planEval</a></li>
 <li><a href="/api-reference/eval/src/functions/readDataset/">readDataset</a></li>
+<li><a href="/api-reference/eval/src/functions/readReport/">readReport</a></li>
 <li><a href="/api-reference/eval/src/functions/refuseProviderUrl/">refuseProviderUrl</a></li>
+<li><a href="/api-reference/eval/src/functions/reportFileName/">reportFileName</a></li>
 <li><a href="/api-reference/eval/src/functions/resolveProjectPath/">resolveProjectPath</a></li>
 <li><a href="/api-reference/eval/src/functions/runEval/">runEval</a></li>
+<li><a href="/api-reference/eval/src/functions/runEvalDetailed/">runEvalDetailed</a></li>
 <li><a href="/api-reference/eval/src/functions/scanDatasetRow/">scanDatasetRow</a></li>
 </ul></div><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.CxCZfLF-.js"></script><footer class="sl-flex astro-fgllqbht"><div class="meta sl-flex astro-fgllqbht"></div><div class="pagination-links print:hidden astro-6hdawqvk" dir="ltr"></div></footer><div class="ps-footer astro-jo6i4kqk"><p class="ps-footer__love astro-jo6i4kqk">Loved by a growing community of developers and AI enthusiasts around the world.</p><p class="astro-jo6i4kqk">Created by <a href="https://github.com/mrwogu" rel="author" class="astro-jo6i4kqk">Wojciech Guziak</a> - Released under the <a href="https://github.com/mrwogu/promptscript/blob/main/LICENSE" class="astro-jo6i4kqk">MIT License</a></p><p class="ps-footer__links astro-jo6i4kqk"><a href="https://github.com/mrwogu/promptscript" class="astro-jo6i4kqk">GitHub</a><a href="https://www.linkedin.com/in/wojciechguziak/" rel="author" class="astro-jo6i4kqk">LinkedIn</a><a href="https://www.npmjs.com/org/promptscript" class="astro-jo6i4kqk">npm</a><a href="https://github.com/mrwogu/promptscript/releases" class="astro-jo6i4kqk">Changelog</a><a href="/playground/" class="astro-jo6i4kqk">Playground</a></p></div></div></div></main></div></div></div></div></body></html>

@@ -14,6 +14,7 @@ Complete reference for the PromptScript command-line interface.
 | Share and pin dependencies    | [`prs registry`](#prs-registry), [`prs pull`](#prs-pull), [`prs lock`](#prs-lock), [`prs update`](#prs-update) |
 | Work offline                  | [`prs vendor`](#prs-vendor)                                                                                    |
 | Release application prompts   | [`prs release`](#prs-release), [`prs approve`](#prs-approve)                                                   |
+| Test prompts against a model  | [`prs eval`](#prs-eval)                                                                                        |
 | Make governance binding       | [`prs governance`](#prs-governance)                                                                            |
 | Manage skills                 | [`prs skills`](#prs-skills)                                                                                    |
 | Connect AI tool hooks         | [`prs hooks`](#prs-hooks), [`prs hook`](https://getpromptscript.dev/reference/cli/hook/index.md)                                                           |
@@ -1336,6 +1337,127 @@ prs approve acme-support/refund-reply@sha256-<64 hex> --role legal --approver @j
 
 ---
 
+### prs eval
+
+Run eval suites against the prompts of the project and compare two reports. A suite is a file
+`<name>.eval.yaml`, `.eval.yml` or `.eval.json` under `.promptscript/evals/` that names a prompt, a
+dataset and assertions. The prompts come from a fresh in-memory compile of the source, with the
+`bundle` target. The settings are in [`eval`](https://getpromptscript.dev/reference/config/index.md#eval).
+
+#### prs eval run
+
+```bash
+prs eval run [suite...] [options]
+```
+
+No suite name means every suite under `.promptscript/evals/`.
+
+| Option                     | Description                                                                                     | Default  |
+| -------------------------- | ----------------------------------------------------------------------------------------------- | -------- |
+| `--format <format>`        | `text`, `json`, `markdown` or `junit`                                                           | `text`   |
+| `--out <file>`             | Also write the formatted report to a file, with the same bytes as stdout                        | -        |
+| `--report-dir <dir>`       | Write `<dir>/<suite>.<hash12>.json` for each suite, inside the project                          | -        |
+| `--baseline <report.json>` | Compare with an earlier report                                                                  | -        |
+| `--fail-on-regression`     | Exit 1 when the baseline shows a regression. Needs `--baseline`                                 | -        |
+| `--cache <mode>`           | `replay`, `record`, `refresh` or `off`                                                          | `replay` |
+| `--max-cost <usd>`         | Spending limit in USD. Every mode that calls a provider needs it                                | -        |
+| `--max-cases <n>`          | Largest number of dataset rows a suite runs                                                     | 1000     |
+| `--concurrency <n>`        | Calls in flight at once, at most 16                                                             | 4        |
+| `--model <ref>`            | Run every suite against this model only                                                         | -        |
+| `--allow-host <host>`      | Allow a provider host besides the built-in ones. Repeat it for more hosts                       | -        |
+| `--allow-local`            | Allow loopback hosts (`127.0.0.0/8`, `::1`, `localhost`, `*.localhost`), http too               | -        |
+| `--dry-run`                | Print the plan, the cache hits and the worst-case cost, and call nothing. Needs no `--max-cost` | -        |
+| `--strict`                 | Exit 2 when the run passed with warnings                                                        | -        |
+| `-c, --config <path>`      | Path to a custom config file                                                                    | -        |
+| `--cwd <dir>`              | Working directory (project root)                                                                | -        |
+
+**Cache modes.** The cache is `.promptscript/eval-cache/`. `replay` answers from it and never calls
+a provider; a call with no entry is a case error `PS6402`. `record` answers from it and calls the
+provider for the rest, then stores the answers. `refresh` calls for every case and overwrites the
+entries. `off` calls for every case and stores nothing.
+
+**Spending.** `record`, `refresh` and `off` call a provider and need `--max-cost`, else the run stops
+with `PS6504`. Every model needs a price, from the model catalog or from `models.profiles` in the
+config (`PS6501`). Before the first call the run adds up the worst case of every call that is not in
+the cache, and stops with `PS6503` when it passes `--max-cost`. During the run each call reserves its
+worst case first; when the budget runs out, the remaining cases are errors and the outcome is
+`budget-exceeded`. Live modes, the budget and extra hosts come from these flags only. No config key
+turns them on. `PROMPTSCRIPT_EVAL_ALLOWED_HOSTS` (comma-separated) adds hosts like `--allow-host`.
+
+**Keys.** A key is read from an environment variable at call time, never from the config. Before the
+first live call stderr prints `sending <VAR> to <host>` for each provider of the run. A key sent to
+a host that is not a built-in default needs `--allow-host`.
+
+**Output.** With `json`, `markdown` or `junit`, stdout holds exactly one document. The JSON report
+matches `https://getpromptscript.dev/schema/eval-report/v1.json` and holds no timestamp, so two replay
+runs give the same bytes. Progress, warnings and `sending` lines go to stderr. In JSON mode errors are
+inside the document, under `errors`. Control and bidi characters are removed from every string that
+comes from a model, a provider or a dataset, in all formats. Reports hold no responses, but a
+reason can quote a fragment of one.
+
+`--dry-run` prints text only. It checks the suites like a run does, reads the cache, and creates no
+provider, so it needs no key and no `--max-cost`: without a budget it shows the estimate and checks
+it against nothing. Ctrl+C during a dry run exits 130.
+
+`--report-dir` writes the report of one suite per file, named after the suite and the first 12 hex
+digits of the prompt content hash. Nothing is written there unless the flag or `eval.reportDir` is
+set. `--report-dir` cannot be combined with `--model` or `--max-cases`, also when the directory comes
+from `eval.reportDir`, so a report of a partial run never stands in for the full run. After Ctrl+C
+nothing is written there. A report is a claim about one run, not a proof: replay it at the commit you
+gate to check it.
+
+With `--baseline`, suites and models that the baseline has and the run lacks are not regressions, but
+they are listed as a warning: on stderr for `json` and `junit`, inside the document for `text` and
+`markdown`. They count as a warning for `--strict`.
+
+| Exit code | Outcome (`outcome` in JSON)                                                           |
+| --------- | ------------------------------------------------------------------------------------- |
+| 0         | `passed`: every suite passed and there is no regression with `--fail-on-regression`   |
+| 1         | `failed`: an assertion or a threshold failed, or a case ended in an error             |
+| 1         | `regression`: the run passed, but the baseline regressed, with `--fail-on-regression` |
+| 1         | `budget-exceeded`: the budget refused or stopped a call                               |
+| 1         | `error`: a config, suite, dataset, provider, cache or option error, or a replay miss  |
+| 2         | `passed` with warnings, with `--strict`                                               |
+| 130       | Interrupted with Ctrl+C. New calls stop and the finished cases stay in the report     |
+
+```bash
+prs eval run
+prs eval run refund --format markdown
+prs eval run --cache record --max-cost 0.5
+prs eval run --dry-run --cache record --max-cost 0.5
+prs eval run --baseline main-report.json --fail-on-regression --format json --out report.json
+```
+
+#### prs eval compare
+
+Compare two reports offline. The first is the baseline, the second the candidate.
+
+```bash
+prs eval compare <baseline.json> <candidate.json> [options]
+```
+
+| Option                 | Description                                             | Default |
+| ---------------------- | ------------------------------------------------------- | ------- |
+| `--format <format>`    | `text`, `json` or `markdown`                            | `text`  |
+| `--fail-on-regression` | Exit 1 when the candidate regressed                     | -       |
+| `--tolerance <n>`      | Pass-rate drop that counts as a regression, from 0 to 1 | 0       |
+| `--cwd <dir>`          | Directory the report paths are relative to              | -       |
+
+Report paths are relative to `--cwd` when it is given, else to the current directory. Suites match by
+name, models by `ref` and cases by id. A case regressed when it passed in the
+baseline and does not pass in the candidate. A drop of the pass rate above the tolerance is a
+regression too. Only cases both reports have are compared. When the dataset hash differs, that is
+noted, and a suite or model that only one report has is listed with its cases and is not a
+regression, but it is shown as a warning: on stderr for `json`, inside the document for `text` and
+`markdown`. With `--format json`, stdout holds one document that matches
+`https://getpromptscript.dev/schema/eval-comparison/v1.json`. A comparison has no place for errors,
+so an unreadable report or a bad option goes to stderr in every format, with exit code 1.
+
+```bash
+prs eval compare main-report.json pr-report.json
+prs eval compare main-report.json pr-report.json --fail-on-regression --tolerance 0.05
+```
+
 ### prs governance
 
 Make the `governance` section of `promptscript.yaml` binding on the Git host.
@@ -1367,6 +1489,46 @@ written or current, 1 an error or an outdated file with `--check`, 2 a file that
 ```bash
 prs governance codeowners
 prs governance codeowners --check
+```
+
+---
+
+### prs audit
+
+Read the governance history of the project from Git.
+
+#### prs audit log
+
+List prompt file changes, approvals, promotions, rollbacks, label entries removed, config changes
+and changes of the generated CODEOWNERS section, newest commit first, merges and side branches
+included, plus the changes a merge dropped from a parent. See [Audit log](https://getpromptscript.dev/guides/releases/index.md#audit-log)
+in the releases guide.
+
+```bash
+prs audit log [options]
+```
+
+| Option                | Description                                                                       | Default |
+| --------------------- | --------------------------------------------------------------------------------- | ------- |
+| `--prompt <id>`       | Only events of this prompt id                                                     | -       |
+| `--env <environment>` | Only events of this environment; approvals for every environment match            | -       |
+| `--hash <prefix>`     | Only events whose content hash starts with these hex digits (at least 4)          | -       |
+| `--since <date>`      | Only events committed at or after this ISO date or date and time                  | -       |
+| `--until <date>`      | Only events committed at or before it; a date alone means the end of that UTC day | -       |
+| `--limit <n>`         | Keep the newest `n` events, at most 100000                                        | -       |
+| `--format <format>`   | `text`, `json` or `cef`                                                           | `text`  |
+| `-c, --config <path>` | Path to a custom config file                                                      | -       |
+| `--cwd <dir>`         | Working directory (project root)                                                  | -       |
+
+The command runs in a Git checkout with the full history; a shallow clone, no repository, a Git
+failure or a history the log cannot explain is `PS5108`. A malformed `--prompt` or `--hash` is `PS5102`. Exit code 0 means the log was
+read, 1 an error. With `--format json`, stdout holds one document that matches
+`https://getpromptscript.dev/schema/audit-log/v1.json`, with `head`, the commit the log was read
+from. `--format cef` prints one CEF line per event.
+
+```bash
+prs audit log --prompt acme-support/refund-reply --env prod --hash 850dce44
+prs audit log --since 2026-10-01 --format cef
 ```
 
 ---
@@ -1760,6 +1922,8 @@ See the [Configuration Reference](https://getpromptscript.dev/reference/config/i
 | 1    | Error occurred          |
 | 2    | Warning (with --strict) |
 | 130  | Interrupted (Ctrl+C)    |
+
+`prs eval run` maps its outcomes onto these codes; see [`prs eval run`](#prs-eval-run).
 
 ## Troubleshooting
 

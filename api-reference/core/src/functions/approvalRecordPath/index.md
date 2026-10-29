@@ -8,7 +8,7 @@
 
 > **approvalRecordPath**(`record`): `string`
 
-Defined in: [core/src/types/approval.ts:188](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/core/src/types/approval.ts#L188)
+Defined in: [core/src/types/approval.ts:188](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L188)
 
 Path of an approval record relative to the project root, with `/` separators:
 `.promptscript/approvals/<role>/<prompt id>/<contentHash>.<approver slug>.json`.

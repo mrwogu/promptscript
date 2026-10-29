@@ -8,7 +8,7 @@
 
 > **FormatterName** = [`KnownTarget`](https://getpromptscript.dev/api-reference/core/src/type-aliases/KnownTarget/index.md)
 
-Defined in: [formatters/src/parity-matrix.ts:22](https://github.com/mrwogu/promptscript/blob/c571f6501535aeefaef91013b9847d45ad53061d/packages/formatters/src/parity-matrix.ts#L22)
+Defined in: [formatters/src/parity-matrix.ts:22](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/parity-matrix.ts#L22)
 
 Formatter names that are subject to parity testing.
 
