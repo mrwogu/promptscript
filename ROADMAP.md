@@ -22,6 +22,13 @@
 - [x] **Skill contracts** — `inputs`/`outputs` typed fields (`string`, `number`, `boolean`, `enum`), PS017 validation
 - [x] **Skill Overlay / Extends — Phase 1 (MVP)** — `references` property on skills; skill-aware `@extend` semantics (replace/append/shallow-merge per property); `references` in SKILL.md frontmatter; PS025 (valid-skill-references) and PS026 (safe-reference-content) validator rules; formatter support for directory mode (Claude, GitHub, Factory) and inline mode (Cursor, Antigravity)
 
+### Skill Overlay / Extends - Phase 3
+
+**Goal:** Supply-chain integrity and enterprise policy controls for skill overlays.
+
+- [x] **Integrity hashes in lockfile** - Content hashes for `references` files are recorded in `promptscript.lock` (#225)
+- [x] **Policy engine** - Org-level `layer-boundary`, `property-protection` and `registry-allowlist` policies on skill extensions, evaluated by `prs validate` and `prs check` ([guide](docs/guides/policy-engine.md))
+
 ### Web Playground
 
 **Goal:** Try PromptScript without installing anything.
@@ -76,6 +83,16 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [x] **Playground preview** - preview prompt bundles in the browser with the Support Refund Reply example; four runnable [examples](docs/examples/application-prompts.md) in the docs
 - [x] **Prompt policies** - required metadata, risk floors, model allowlists and content rules on `@prompts` entries through PS030, owner, reviewer and data class checks through PS047 ([guide](docs/guides/policy-engine.md#prompt-policies))
 - [x] **CODEOWNERS from governance** - `prs governance codeowners` gives prompt files to their owners, approval roles to their teams and config and release files to the admins ([guide](docs/guides/codeowners.md))
+- [x] **Releases** - `prs release build`, `promote`, `rollback` and `status` store bundles under their content hash and record which hash each environment serves, `status --base` checks labels against a base ref ([guide](docs/guides/releases.md))
+- [x] **Approvals and promotion gates** - `prs approve` writes approval records bound to the content hash, and `prs release promote` refuses a prompt version that its `required-approvals` policy finds no record for
+
+### Formatting and Configuration Layers
+
+**Goal:** Keep `.prs` files consistent and share configuration across teams.
+
+- [x] **`prs fmt`** - Formats `.prs` files with a canonical printer that keeps blank lines and round-trips the source
+- [x] **Config `extends`** - `promptscript.yaml` can extend a base configuration file, with base policies kept ([reference](docs/reference/config.md))
+- [x] **System config** - `/etc/promptscript/config.yaml` is read under the user config ([guide](docs/guides/user-config.md))
 
 ---
 
@@ -110,14 +127,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [x] **`sealed` modifier** — Mark a skill property as non-overridable by downstream overlays via `@extend`
 - [x] **Overlay-aware suggestions** — `prs init` detects @extend relationships between suggested skills and collapses overlays
 
-### 2. Skill Overlay / Extends — Phase 3
-
-**Goal:** Supply-chain integrity and enterprise policy controls for skill overlays.
-
-- [ ] **Integrity hashes in lockfile** — Record content hashes for `references` files in `promptscript.lock`
-- [ ] **Policy engine** — Org-level rules: require approved base skills, block unsafe reference types, enforce overlay constraints
-
-### 3. CI/CD Integration
+### 2. CI/CD Integration
 
 **Goal:** Make it effortless to integrate PromptScript into existing workflows.
 
@@ -134,7 +144,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [ ] **GitLab CI template**
 - [ ] **Azure DevOps task**
 
-### 4. Developer Experience
+### 3. Developer Experience
 
 **Goal:** Improve internal development velocity and quality safeguards.
 
@@ -213,8 +223,8 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 
 - [ ] **Policy enforcement**
   - Required sections in all projects
-  - Forbidden patterns (regex blacklist)
-  - Mandatory inheritance from approved bases
+  - [x] Forbidden patterns (regex blacklist) on prompts through `content-rules`
+  - [x] Mandatory inheritance from approved bases for skill extensions through `registry-allowlist`
   - Compliance templates (SOC2, HIPAA, PCI-DSS)
 
 - [ ] **Audit logging**
