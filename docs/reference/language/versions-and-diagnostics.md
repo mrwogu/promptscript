@@ -108,6 +108,7 @@ their replacement, models outside `models.supported`, and inconsistent
 | PS5006     | Git history, base file or ref is not usable                                                     | Commit the label, fetch base, use a full ref                           |
 | PS5007     | Another release command holds the lock                                                          | Wait, then run the command again                                       |
 | PS5008     | Compile output inside the release directory                                                     | Point the target output elsewhere                                      |
+| PS5010     | Promote on an entry with a running experiment                                                   | Remove the experiment from the label first                             |
 | PS5101     | `governance` missing or invalid, or no role                                                     | Fix the section or add the role                                        |
 | PS5102     | Approval reference, prompt id or hash filter malformed                                          | Use `<id>@sha256-<64 hex>`, a hash filter takes 4+ hex digits          |
 | PS5103     | Approved hash is not built or released                                                          | Approve the hash `prs approve --list` shows                            |

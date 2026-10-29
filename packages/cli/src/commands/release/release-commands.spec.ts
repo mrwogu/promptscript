@@ -141,6 +141,41 @@ const status = (cwd: string, history?: string): Promise<ReleaseReport> =>
 const releases = (root: string, ...parts: string[]): string =>
   join(root, '.promptscript', 'releases', ...parts);
 
+const V2_URL = 'https://getpromptscript.dev/schema/prompt-release-label/v2.json';
+const ARM_HASH = `sha256-${'ab'.repeat(32)}`;
+
+/** A v2 label with a 90/10 experiment on every id given; the arm hash is not a bundle. */
+async function writeExperimentLabel(
+  root: string,
+  environment: string,
+  entries: { id: string; contentHash: string; experiment?: boolean }[]
+): Promise<void> {
+  const prompts = entries.map(({ id, contentHash, experiment }) => ({
+    id,
+    contentHash,
+    ...(experiment === false
+      ? {}
+      : {
+          experiment: {
+            name: 'warm-tone',
+            arms: [
+              { variant: 'control', contentHash, weight: 9000 },
+              { variant: 'warm', contentHash: ARM_HASH, weight: 1000 },
+            ],
+          },
+        }),
+  }));
+  await writeFile(
+    releases(root, `${environment}.json`),
+    `${JSON.stringify({ $schema: V2_URL, environment, prompts }, null, 2)}\n`
+  );
+}
+
+async function heldHash(root: string, environment: string): Promise<string> {
+  const label = await readJson(releases(root, `${environment}.json`));
+  return (label['prompts'] as { contentHash: string }[])[0]?.contentHash ?? '';
+}
+
 async function readJson(path: string): Promise<Record<string, unknown>> {
   return JSON.parse(await readFile(path, 'utf8')) as Record<string, unknown>;
 }
@@ -537,6 +572,43 @@ describe('prs release promote', () => {
     expect(again.changes[0]?.action).toBe('unchanged');
   });
 
+  it('writes a v1 label byte for byte, also over a label that holds another prompt', async () => {
+    const root = await project();
+    await build(root);
+    const other = { id: 'acme/other', contentHash: `sha256-${'ab'.repeat(32)}` };
+    await writeFile(
+      releases(root, 'staging.json'),
+      `${JSON.stringify(
+        {
+          $schema: 'https://getpromptscript.dev/schema/prompt-release-label/v1.json',
+          environment: 'staging',
+          prompts: [other],
+        },
+        null,
+        2
+      )}\n`
+    );
+
+    await promote(root, ID, 'staging');
+
+    const [file] = await bundleFiles(root);
+    const text = await readFile(releases(root, 'staging.json'), 'utf8');
+    const prompts = [other, { id: ID, contentHash: file?.replace('.json', '') }].sort((x, y) =>
+      x.id < y.id ? -1 : 1
+    );
+    expect(text).toBe(
+      `${JSON.stringify(
+        {
+          $schema: 'https://getpromptscript.dev/schema/prompt-release-label/v1.json',
+          environment: 'staging',
+          prompts,
+        },
+        null,
+        2
+      )}\n`
+    );
+  });
+
   it('accepts a hash prefix of 8 hex digits', async () => {
     const root = await project();
     await build(root);
@@ -725,6 +797,53 @@ describe('prs release promote', () => {
 
     expect(errorCodes(result)).toEqual(['PS5004']);
     expect(await readFile(releases(root, 'staging.json'), 'utf8')).toBe('{"mine":true}\n');
+  });
+
+  it('refuses a promote on an entry with a running experiment, also for the same hash', async () => {
+    const root = await project();
+    await build(root);
+    await promote(root, ID, 'staging');
+    await writeExperimentLabel(root, 'staging', [
+      { id: ID, contentHash: await heldHash(root, 'staging') },
+    ]);
+    const before = await readFile(releases(root, 'staging.json'), 'utf8');
+
+    const same = await promote(root, ID, 'staging');
+    await writeFile(join(root, '.promptscript', 'project.prs'), source('You answer refunds.'));
+    await build(root);
+    const changed = await promote(root, ID, 'staging');
+
+    expect(errorCodes(same)).toEqual(['PS5010']);
+    expect(errorCodes(changed)).toEqual(['PS5010']);
+    expect(changed.errors[0]?.message).toContain('Remove the experiment from');
+    expect(changed.errors[0]?.message).not.toContain('split');
+    expect(await readFile(releases(root, 'staging.json'), 'utf8')).toBe(before);
+  });
+
+  it('keeps the experiment of another prompt when it promotes', async () => {
+    const root = await project();
+    await build(root);
+    await promote(root, ID, 'staging');
+    const hash = await heldHash(root, 'staging');
+    await writeExperimentLabel(root, 'staging', [
+      { id: ID, contentHash: hash, experiment: false },
+      { id: 'zeta/other', contentHash: hash },
+    ]);
+    await writeFile(join(root, '.promptscript', 'project.prs'), source('You answer refunds.'));
+    await build(root);
+
+    const result = await promote(root, ID, 'staging');
+
+    expect(result.success).toBe(true);
+    const label = await readJson(releases(root, 'staging.json'));
+    const prompts = label['prompts'] as {
+      id: string;
+      contentHash: string;
+      experiment?: { name: string };
+    }[];
+    expect(label['$schema']).toBe(V2_URL);
+    expect(prompts[0]?.contentHash).not.toBe(hash);
+    expect(prompts[1]?.experiment?.name).toBe('warm-tone');
   });
 
   it.each(['--skip-policies', '--ignore-hashes', '--force'])('has no %s option', async (flag) => {
@@ -951,6 +1070,33 @@ describe('prs release rollback', () => {
       [ID, 'created'],
       ['acme-support/triage', 'removed'],
     ]);
+  });
+
+  it('undoes a hand-added experiment and writes the v1 label byte for byte', async () => {
+    const { root, second } = await twoReleases();
+    const v1 = await readFile(releases(root, 'staging.json'), 'utf8');
+    await writeExperimentLabel(root, 'staging', [{ id: ID, contentHash: second }]);
+    await commit(root, 'add an experiment by hand');
+
+    const result = await rollback(root, 'staging');
+
+    expect(result.success).toBe(true);
+    expect(await readFile(releases(root, 'staging.json'), 'utf8')).toBe(v1);
+  });
+
+  it('refuses a rollback that would bring an experiment back', async () => {
+    const { root, second } = await twoReleases();
+    await writeExperimentLabel(root, 'staging', [{ id: ID, contentHash: second }]);
+    await commit(root, 'add an experiment by hand');
+    await setLabel(root, 'staging', second);
+    await commit(root, 'end the experiment');
+    const before = await readFile(releases(root, 'staging.json'), 'utf8');
+
+    const result = await rollback(root, 'staging');
+
+    expect(errorCodes(result)).toEqual(['PS5006']);
+    expect(result.errors[0]?.message).toContain('experiment');
+    expect(await readFile(releases(root, 'staging.json'), 'utf8')).toBe(before);
   });
 
   it('refuses to restore a label whose bundle is gone', async () => {
@@ -1243,6 +1389,32 @@ async function policyRepository(baseConfigName = 'promptscript.yaml'): Promise<s
 }
 
 describe('prs release status --base', () => {
+  it('passes when the checkout ends an experiment the base had', async () => {
+    const root = await baseRepository();
+    const hash = (await labelHash(root, 'staging')) ?? '';
+    await writeExperimentLabel(root, 'staging', [{ id: ID, contentHash: hash }]);
+    await commit(root, 'experiment');
+    git(root, 'tag', '-f', 'base');
+    await setLabel(root, 'staging', hash);
+
+    const result = await statusBase(root, 'base');
+
+    expect(result.success).toBe(true);
+  });
+
+  it('fails when a hand-added experiment arm changes the label', async () => {
+    const root = await baseRepository();
+    await writeExperimentLabel(root, 'staging', [
+      { id: ID, contentHash: (await labelHash(root, 'staging')) ?? '' },
+    ]);
+
+    const result = await statusBase(root, 'base');
+
+    expect(result.success).toBe(false);
+    expect(errorCodes(result)).toEqual(['PS5004']);
+    expect(result.errors[0]?.message).toContain(`the experiment of ${ID} was added or changed`);
+  });
+
   it('passes a promotion made with the commands and lists what changed', async () => {
     const root = await baseRepository();
     const before = await labelHash(root, 'staging');

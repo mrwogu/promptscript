@@ -2,7 +2,7 @@ import { readdir } from 'node:fs/promises';
 import { relative, resolve, sep } from 'node:path';
 import {
   compareCodeUnits,
-  type PromptReleaseLabelV1,
+  type PromptReleaseLabel,
   type PromptScriptConfig,
 } from '@promptscript/core';
 import { CONFIG_FILES, loadConfigFileWith } from '../../config/loader.js';
@@ -25,6 +25,7 @@ import { checkPromotionGates } from './gates.js';
 import { runGit, stripControlCharacters } from './git.js';
 import {
   MANIFEST_FILE,
+  addedOrChangedExperiments,
   labelChanges,
   parseLabel,
   readReleaseText,
@@ -198,7 +199,7 @@ export async function loadBaseConfig(
 /** Prompt ids and hashes of one label. */
 type Entries = Map<string, string>;
 
-function entriesOf(label: PromptReleaseLabelV1 | undefined): Entries {
+function entriesOf(label: PromptReleaseLabel | undefined): Entries {
   return new Map((label?.prompts ?? []).map((entry) => [entry.id, entry.contentHash]));
 }
 
@@ -207,12 +208,13 @@ async function entriesAtCommit(
   project: ReleaseProject,
   base: ReleaseBaseRef,
   environment: string
-): Promise<{ text?: string; entries: Entries }> {
+): Promise<{ text?: string; entries: Entries; label?: PromptReleaseLabel }> {
   const path = project.paths.label(environment);
   const file = await readFileAtCommit(project.root, base, path);
   if (file.kind !== 'file') return { entries: new Map() };
   try {
-    return { text: file.text, entries: entriesOf(parseLabel(file.text, environment, path)) };
+    const label = parseLabel(file.text, environment, path);
+    return { text: file.text, entries: entriesOf(label), label };
   } catch {
     // An unreadable base label makes every entry in the checkout a change, so all are checked.
     return { text: file.text, entries: new Map() };
@@ -265,6 +267,8 @@ interface LabelPair {
   previous: Entries;
   /** A read or parse error of the checkout label that plain status does not report */
   error?: ReleaseError;
+  /** Ids whose experiment differs between the base and the checkout */
+  experiments: string[];
 }
 
 /** Everything the checks of one base need, loaded once. */
@@ -410,11 +414,11 @@ async function labelPair(
   const unreadable = (error: unknown): LabelPair => {
     // Plain status reports a broken label of a configured environment itself.
     if (project.environments.includes(name)) {
-      return { name, head: new Map(), previous: atBase.entries };
+      return { name, head: new Map(), previous: atBase.entries, experiments: [] };
     }
     // Anything but a release file error (a permission problem, say) fails the command.
     if (!(error instanceof ReleaseError)) throw error;
-    return { name, head: new Map(), previous: atBase.entries, error };
+    return { name, head: new Map(), previous: atBase.entries, experiments: [], error };
   };
   let text: string | undefined;
   try {
@@ -422,10 +426,25 @@ async function labelPair(
   } catch (error) {
     return unreadable(error);
   }
-  if (text === atBase.text) return { name, head: atBase.entries, previous: atBase.entries };
-  if (text === undefined) return { name, head: new Map(), previous: atBase.entries };
+  if (text === atBase.text) {
+    return { name, head: atBase.entries, previous: atBase.entries, experiments: [] };
+  }
+  if (text === undefined) {
+    return {
+      name,
+      head: new Map(),
+      previous: atBase.entries,
+      experiments: addedOrChangedExperiments(atBase.label, undefined),
+    };
+  }
   try {
-    return { name, head: entriesOf(parseLabel(text, name, path)), previous: atBase.entries };
+    const head = parseLabel(text, name, path);
+    return {
+      name,
+      head: entriesOf(head),
+      previous: atBase.entries,
+      experiments: addedOrChangedExperiments(atBase.label, head),
+    };
   } catch (error) {
     return unreadable(error);
   }
@@ -493,9 +512,27 @@ export async function checkAgainstBase(
       ...labels.flatMap((label) =>
         label.error === undefined ? [] : [shownDiagnostic(label.error)]
       ),
+      ...labels.flatMap((label) => experimentDiagnostics(project, label)),
       ...checked.flatMap((result) => result.errors),
     ]),
   };
+}
+
+/**
+ * An experiment that differs from the base is an error: its arm hashes are not verified or
+ * gated by this prs, so a label that adds or changes one must not pass the check.
+ */
+function experimentDiagnostics(project: ReleaseProject, label: LabelPair): ReleaseDiagnostic[] {
+  const path = project.paths.label(label.name);
+  return label.experiments.map((id) =>
+    shownDiagnostic(
+      new ReleaseError(
+        PS5004_VERIFICATION_FAILED,
+        `${project.paths.relative(path)}: the experiment of ${id} was added or changed. This prs does not check experiments, so remove it from the label.`,
+        path
+      )
+    )
+  );
 }
 
 /** One source build serves every environment, so its diagnostics would repeat per label. */

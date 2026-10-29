@@ -1,9 +1,10 @@
-import type { PromptReleaseLabelV1 } from '@promptscript/core';
+import type { PromptReleaseLabel } from '@promptscript/core';
 import { PS5006_ROLLBACK_UNAVAILABLE, ReleaseError } from './errors.js';
 import { checkPromotionGates, gateLines } from './gates.js';
 import { runGit, stripControlCharacters } from './git.js';
 import {
   PROMPT_RELEASE_LABEL_SCHEMA_URL,
+  addedOrChangedExperiments,
   fileAction,
   labelChanges,
   labelText,
@@ -23,7 +24,7 @@ import {
 import { runReleaseCommand, withReleaseLock, type ReleaseCommandOptions } from './run.js';
 
 interface PreviousLabel {
-  label: PromptReleaseLabelV1;
+  label: PromptReleaseLabel;
   commit: string;
   subject: string;
 }
@@ -106,6 +107,8 @@ async function labelBeforeLastChange(
 /**
  * Undo the last committed change of an environment's label. Every bundle the restored
  * label points at must exist and verify. A committed rollback is undone by a second one.
+ * A rollback that would add or change the experiment of an entry is refused, because this
+ * command does not verify or gate experiment arms. One that removes an experiment is allowed.
  */
 export async function releaseRollbackCommand(
   environment: string,
@@ -121,11 +124,19 @@ export async function releaseRollbackCommand(
       const labelPath = paths.label(environment);
       const relativePath = paths.relative(labelPath);
       const currentText = await readReleaseText(labelPath);
-      const current: PromptReleaseLabelV1 =
+      const current: PromptReleaseLabel =
         currentText === undefined
           ? { $schema: PROMPT_RELEASE_LABEL_SCHEMA_URL, environment, prompts: [] }
           : parseLabel(currentText, environment, labelPath);
       const previous = await labelBeforeLastChange(paths, environment);
+      const experiments = addedOrChangedExperiments(current, previous.label);
+      if (experiments.length > 0) {
+        throw new ReleaseError(
+          PS5006_ROLLBACK_UNAVAILABLE,
+          `${relativePath} would add or change the experiment of ${experiments.map(stripControlCharacters).join(', ')}. This prs does not verify or gate experiment arms, so rollback is refused. Edit the label by hand in a reviewed change.`,
+          labelPath
+        );
+      }
       await Promise.all(
         previous.label.prompts.map((entry) =>
           readVerifiedBundle(paths, entry.contentHash, entry.id)

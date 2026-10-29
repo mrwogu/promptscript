@@ -8,7 +8,9 @@ import {
   hashPromptBundle,
   type PromptBundleIndexV1,
   type PromptBundleV1,
-  type PromptReleaseLabelV1,
+  type PromptReleaseExperiment,
+  type PromptReleaseLabel,
+  type PromptReleaseLabelEntryV2,
 } from '@promptscript/core';
 import type { ReleaseChange, ReleaseChangeAction } from '../../utils/release-report.js';
 import { writeFileAtomic } from '../../utils/write-file-atomic.js';
@@ -18,6 +20,7 @@ import {
   ReleaseError,
   type ReleaseErrorCode,
 } from './errors.js';
+import { stripControlCharacters } from './git.js';
 
 /** Release files live here, next to the source. */
 export const RELEASE_DIRECTORY = '.promptscript/releases';
@@ -30,6 +33,9 @@ export const BUNDLES_DIRECTORY = 'bundles';
 /** Schema URL of a release label. */
 export const PROMPT_RELEASE_LABEL_SCHEMA_URL =
   'https://getpromptscript.dev/schema/prompt-release-label/v1.json';
+/** Schema URL of a release label with experiments. */
+export const PROMPT_RELEASE_LABEL_V2_SCHEMA_URL =
+  'https://getpromptscript.dev/schema/prompt-release-label/v2.json';
 
 /** A full content hash. */
 export const CONTENT_HASH_RE = /^sha256-[0-9a-f]{64}$/;
@@ -293,34 +299,165 @@ function parseJson(text: string, path: string, what: string): unknown {
   }
 }
 
+const EXPERIMENT_NAME_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
+const VARIANT_NAME_RE = /^[a-z][a-z0-9-]{0,31}$/;
+const LABEL_KEYS = ['$schema', 'environment', 'prompts'];
+const ENTRY_KEYS = ['id', 'contentHash', 'experiment'];
+const EXPERIMENT_KEYS = ['name', 'arms'];
+const ARM_KEYS = ['variant', 'contentHash', 'weight'];
+const TOTAL_WEIGHT = 10000;
+const LABEL_SCHEMA_PREFIX = 'https://getpromptscript.dev/schema/prompt-release-label/';
+
+function hasOnlyKeys(value: Record<string, unknown>, keys: string[]): boolean {
+  return Object.keys(value).every((key) => keys.includes(key));
+}
+
+function hasContentHash(value: Record<string, unknown>): boolean {
+  return typeof value['contentHash'] === 'string' && CONTENT_HASH_RE.test(value['contentHash']);
+}
+
+/** The experiment of a v2 entry, or undefined when it breaks a rule of the label. */
+function readExperiment(value: unknown, entryHash: string): PromptReleaseExperiment | undefined {
+  if (!isRecord(value) || !hasOnlyKeys(value, EXPERIMENT_KEYS)) return undefined;
+  const { name, arms } = value;
+  if (typeof name !== 'string' || !EXPERIMENT_NAME_RE.test(name)) return undefined;
+  if (!Array.isArray(arms) || arms.length < 2 || arms.length > 4) return undefined;
+  const variants = new Set<string>();
+  const hashes = new Set<string>();
+  const read: { variant: string; contentHash: string; weight: number }[] = [];
+  let total = 0;
+  for (const [index, arm] of arms.entries()) {
+    if (!isRecord(arm) || !hasOnlyKeys(arm, ARM_KEYS) || !hasContentHash(arm)) return undefined;
+    const { variant, contentHash, weight } = arm;
+    const control = index === 0;
+    if (typeof variant !== 'string' || variants.has(variant)) return undefined;
+    if (control ? variant !== 'control' : variant === 'control' || !VARIANT_NAME_RE.test(variant))
+      return undefined;
+    if (typeof contentHash !== 'string' || hashes.has(contentHash)) return undefined;
+    if (control && contentHash !== entryHash) return undefined;
+    if (!Number.isInteger(weight)) return undefined;
+    if (typeof weight !== 'number' || weight < (control ? 1 : 0) || weight > TOTAL_WEIGHT)
+      return undefined;
+    variants.add(variant);
+    hashes.add(contentHash);
+    total += weight;
+    // Canonical key order, so a written label does not depend on the order it was read in.
+    read.push({ variant, contentHash, weight });
+  }
+  if (total !== TOTAL_WEIGHT) return undefined;
+  // The arm count is checked above, so the list has the length the tuple type asks for.
+  return { name, arms: read as unknown as PromptReleaseExperiment['arms'] };
+}
+
+/** The entries of a v2 label, or undefined when one of them breaks a rule. */
+function readV2Entries(prompts: unknown[]): PromptReleaseLabelEntryV2[] | undefined {
+  const entries: PromptReleaseLabelEntryV2[] = [];
+  for (const entry of prompts) {
+    if (!isHashEntry(entry) || !hasOnlyKeys(entry as Record<string, unknown>, ENTRY_KEYS)) {
+      return undefined;
+    }
+    const { id, contentHash } = entry;
+    const experiment = (entry as Record<string, unknown>)['experiment'];
+    if (experiment === undefined) {
+      entries.push({ id, contentHash });
+      continue;
+    }
+    const read = readExperiment(experiment, contentHash);
+    if (read === undefined) return undefined;
+    entries.push({ id, contentHash, experiment: read });
+  }
+  return entries;
+}
+
 /**
- * Parse the text of a label of the given environment. A file that is not a label is never
- * overwritten by a release command, so the error asks for a Git restore.
+ * Parse the text of a label of the given environment, version 1 or 2. A v2 entry keeps its
+ * experiment. A file that is not a label is never overwritten by a release command, so the
+ * error asks for a Git restore.
  */
 export function parseLabel(
   text: string,
   environment: string,
   path: string,
   code: ReleaseErrorCode = PS5004_VERIFICATION_FAILED
-): PromptReleaseLabelV1 {
+): PromptReleaseLabel {
   const parsed = parseJson(text, path, 'release label');
+  const schema = isRecord(parsed) ? parsed['$schema'] : undefined;
+  if (
+    typeof schema === 'string' &&
+    schema.startsWith(LABEL_SCHEMA_PREFIX) &&
+    schema !== PROMPT_RELEASE_LABEL_SCHEMA_URL &&
+    schema !== PROMPT_RELEASE_LABEL_V2_SCHEMA_URL
+  ) {
+    const shown = stripControlCharacters(schema);
+    const version = /\/v(\d+)\.json$/.exec(schema)?.[1];
+    const problem =
+      version !== undefined && Number(version) > 2
+        ? `uses a newer label format (${shown}); upgrade prs.`
+        : `uses an unknown label format (${shown}).`;
+    throw new ReleaseError(code, `${path} ${problem}`, path);
+  }
+  const version = schema === PROMPT_RELEASE_LABEL_V2_SCHEMA_URL ? 2 : 1;
   const valid =
     isRecord(parsed) &&
-    parsed['$schema'] === PROMPT_RELEASE_LABEL_SCHEMA_URL &&
+    (version === 2
+      ? hasOnlyKeys(parsed, LABEL_KEYS)
+      : schema === PROMPT_RELEASE_LABEL_SCHEMA_URL) &&
     parsed['environment'] === environment &&
     Array.isArray(parsed['prompts']) &&
     parsed['prompts'].every(isHashEntry);
-  const entries = valid ? (parsed['prompts'] as { id: string; contentHash: string }[]) : [];
+  const raw = valid ? (parsed['prompts'] as unknown[]) : [];
+  const withExperiment = version === 1 && raw.some((entry) => 'experiment' in (entry as object));
+  if (withExperiment) {
+    throw new ReleaseError(
+      code,
+      `${path} has an experiment in a v1 label. Set $schema to ${PROMPT_RELEASE_LABEL_V2_SCHEMA_URL} or remove the experiment.`,
+      path
+    );
+  }
+  const entries = version === 2 ? readV2Entries(raw) : undefined;
+  const ids = raw.map((entry) => (entry as { id: string }).id);
   // A reader of the label refuses it whole when an id appears twice, so the CLI does too.
-  const unique = new Set(entries.map((entry) => entry.id)).size === entries.length;
-  if (!valid || !unique) {
-    const problem = valid
-      ? 'lists a prompt id twice'
-      : `is not a release label of the ${environment} environment`;
+  const unique = new Set(ids).size === ids.length;
+  if (!valid || !unique || (version === 2 && entries === undefined)) {
+    const problem = !valid
+      ? `is not a release label of the ${environment} environment`
+      : !unique
+        ? 'lists a prompt id twice'
+        : 'has an entry or experiment that breaks the label rules';
     throw new ReleaseError(code, `${path} ${problem}. Restore it from Git.`, path);
   }
-  const prompts = entries.map(({ id, contentHash }) => ({ id, contentHash }));
+  if (entries !== undefined) {
+    return { $schema: PROMPT_RELEASE_LABEL_V2_SCHEMA_URL, environment, prompts: entries };
+  }
+  const prompts = (raw as { id: string; contentHash: string }[]).map(({ id, contentHash }) => ({
+    id,
+    contentHash,
+  }));
   return { $schema: PROMPT_RELEASE_LABEL_SCHEMA_URL, environment, prompts };
+}
+
+/** The experiment of every entry that has one, as text, for comparing two labels. */
+export function experimentsOf(label: PromptReleaseLabel | undefined): Map<string, string> {
+  const found = new Map<string, string>();
+  for (const entry of label?.prompts ?? []) {
+    if ('experiment' in entry && entry.experiment !== undefined) {
+      found.set(entry.id, JSON.stringify(entry.experiment));
+    }
+  }
+  return found;
+}
+
+/**
+ * Ids whose experiment the after label adds or changes, sorted. An experiment the after
+ * label drops is not listed: removing one only cuts exposure.
+ */
+export function addedOrChangedExperiments(
+  before: PromptReleaseLabel | undefined,
+  after: PromptReleaseLabel | undefined
+): string[] {
+  const left = experimentsOf(before);
+  const right = experimentsOf(after);
+  return [...right.keys()].filter((id) => left.get(id) !== right.get(id)).sort(compareCodeUnits);
 }
 
 /** Parse the text of the manifest, a bundle index. */
@@ -351,7 +488,7 @@ export function parseManifest(text: string, path: string): PromptBundleIndexV1 {
 export async function readLabel(
   paths: ReleasePaths,
   environment: string
-): Promise<PromptReleaseLabelV1 | undefined> {
+): Promise<PromptReleaseLabel | undefined> {
   const path = paths.label(environment);
   const text = await readReleaseText(path);
   return text === undefined ? undefined : parseLabel(text, environment, path);
@@ -363,14 +500,26 @@ export async function readManifest(paths: ReleasePaths): Promise<PromptBundleInd
   return text === undefined ? undefined : parseManifest(text, paths.manifest);
 }
 
-/** A label with its prompts sorted by id, ready to write. */
-export function labelText(label: PromptReleaseLabelV1): string {
+/**
+ * A label with its prompts sorted by id, ready to write. Experiments are kept so a read
+ * label is never written back without them; the file is v2 only while one is present.
+ */
+export function labelText(label: PromptReleaseLabel): string {
+  const prompts = [...label.prompts]
+    .map((entry) => {
+      const experiment = 'experiment' in entry ? entry.experiment : undefined;
+      return {
+        id: entry.id,
+        contentHash: entry.contentHash,
+        ...(experiment === undefined ? {} : { experiment }),
+      };
+    })
+    .sort((a, b) => compareCodeUnits(a.id, b.id));
+  const experiments = prompts.some((entry) => entry.experiment !== undefined);
   return toReleaseJson({
-    $schema: PROMPT_RELEASE_LABEL_SCHEMA_URL,
+    $schema: experiments ? PROMPT_RELEASE_LABEL_V2_SCHEMA_URL : PROMPT_RELEASE_LABEL_SCHEMA_URL,
     environment: label.environment,
-    prompts: [...label.prompts]
-      .map(({ id, contentHash }) => ({ id, contentHash }))
-      .sort((a, b) => compareCodeUnits(a.id, b.id)),
+    prompts,
   });
 }
 

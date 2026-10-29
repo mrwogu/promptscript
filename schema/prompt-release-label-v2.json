@@ -1,0 +1,196 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+  "title": "PromptScript Prompt Release Label v2",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+      "description": "Schema URL, the version tag of the label.",
+      "examples": [
+        "https://getpromptscript.dev/schema/prompt-release-label/v2.json"
+      ]
+    },
+    "environment": {
+      "$ref": "#/definitions/ReleaseEnvironmentName",
+      "description": "Environment name.",
+      "examples": [
+        "prod"
+      ]
+    },
+    "prompts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PromptReleaseLabelEntryV2"
+      },
+      "description": "Released prompts sorted by id"
+    }
+  },
+  "required": [
+    "$schema",
+    "environment",
+    "prompts"
+  ],
+  "additionalProperties": false,
+  "description": "Label of one release environment with optional weighted variants, version 2.",
+  "definitions": {
+    "ReleaseEnvironmentName": {
+      "type": "string",
+      "description": "Name of a release environment.",
+      "pattern": "^[a-z][a-z0-9-]{0,31}$"
+    },
+    "PromptReleaseLabelEntryV2": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Prompt id.",
+          "examples": [
+            "acme-support/refund-reply"
+          ]
+        },
+        "contentHash": {
+          "type": "string",
+          "description": "Content hash of the released bundle.",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        },
+        "experiment": {
+          "$ref": "#/definitions/PromptReleaseExperiment",
+          "description": "Arms assigned by key. Without a key, readers serve `contentHash`."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "contentHash",
+        "id"
+      ],
+      "description": "One prompt a v2 release label points at, with an optional experiment."
+    },
+    "PromptReleaseExperiment": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Experiment name.",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+        },
+        "arms": {
+          "anyOf": [
+            {
+              "type": "array",
+              "minItems": 2,
+              "items": [
+                {
+                  "$ref": "#/definitions/PromptReleaseControlArm"
+                },
+                {
+                  "$ref": "#/definitions/PromptReleaseVariantArm"
+                }
+              ],
+              "maxItems": 2
+            },
+            {
+              "type": "array",
+              "minItems": 3,
+              "items": [
+                {
+                  "$ref": "#/definitions/PromptReleaseControlArm"
+                },
+                {
+                  "$ref": "#/definitions/PromptReleaseVariantArm"
+                },
+                {
+                  "$ref": "#/definitions/PromptReleaseVariantArm"
+                }
+              ],
+              "maxItems": 3
+            },
+            {
+              "type": "array",
+              "minItems": 4,
+              "items": [
+                {
+                  "$ref": "#/definitions/PromptReleaseControlArm"
+                },
+                {
+                  "$ref": "#/definitions/PromptReleaseVariantArm"
+                },
+                {
+                  "$ref": "#/definitions/PromptReleaseVariantArm"
+                },
+                {
+                  "$ref": "#/definitions/PromptReleaseVariantArm"
+                }
+              ],
+              "maxItems": 4
+            }
+          ],
+          "description": "The control arm first, then 1 to 3 variants. Weights are integers and sum to 10000; arm names and hashes are unique. Readers check what the schema cannot."
+        }
+      },
+      "required": [
+        "name",
+        "arms"
+      ],
+      "additionalProperties": false,
+      "description": "Weighted arms an entry of a v2 label splits its traffic over."
+    },
+    "PromptReleaseControlArm": {
+      "type": "object",
+      "properties": {
+        "variant": {
+          "type": "string",
+          "const": "control",
+          "description": "Arm name, always `control` for the first arm."
+        },
+        "contentHash": {
+          "type": "string",
+          "description": "Content hash of the bundle, equal to the entry hash.",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        },
+        "weight": {
+          "type": "integer",
+          "description": "Share of the assigned traffic in basis points.",
+          "minimum": 1,
+          "maximum": 10000
+        }
+      },
+      "required": [
+        "variant",
+        "contentHash",
+        "weight"
+      ],
+      "additionalProperties": false,
+      "description": "The first arm of an experiment: the entry hash, with at least 1 basis point of traffic."
+    },
+    "PromptReleaseVariantArm": {
+      "type": "object",
+      "properties": {
+        "variant": {
+          "type": "string",
+          "description": "Arm name, unique within the experiment and never `control`.",
+          "pattern": "^(?!control$)[a-z][a-z0-9-]{0,31}$"
+        },
+        "contentHash": {
+          "type": "string",
+          "description": "Content hash of the bundle.",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        },
+        "weight": {
+          "type": "integer",
+          "description": "Share of the assigned traffic in basis points.",
+          "minimum": 0,
+          "maximum": 10000
+        }
+      },
+      "required": [
+        "variant",
+        "contentHash",
+        "weight"
+      ],
+      "additionalProperties": false,
+      "description": "A non-control arm of an experiment. A weight of 0 keeps the arm listed without traffic."
+    }
+  }
+}
