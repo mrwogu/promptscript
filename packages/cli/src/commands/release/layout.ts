@@ -316,57 +316,104 @@ function hasContentHash(value: Record<string, unknown>): boolean {
   return typeof value['contentHash'] === 'string' && CONTENT_HASH_RE.test(value['contentHash']);
 }
 
+interface ReadArm {
+  variant: string;
+  contentHash: string;
+  weight: number;
+}
+
+function isVariantName(variant: string, control: boolean): boolean {
+  if (control) return variant === 'control';
+  return variant !== 'control' && VARIANT_NAME_RE.test(variant);
+}
+
+function isArmWeight(weight: unknown, control: boolean): weight is number {
+  return (
+    typeof weight === 'number' &&
+    Number.isInteger(weight) &&
+    weight >= (control ? 1 : 0) &&
+    weight <= TOTAL_WEIGHT
+  );
+}
+
+/** One arm, or undefined when it breaks a rule. `seen` holds the names and hashes before it. */
+function readArm(
+  arm: unknown,
+  control: boolean,
+  entryHash: string,
+  seen: { variants: Set<string>; hashes: Set<string> }
+): ReadArm | undefined {
+  if (!isRecord(arm) || !hasOnlyKeys(arm, ARM_KEYS) || !hasContentHash(arm)) return undefined;
+  const { variant, contentHash, weight } = arm;
+  if (typeof variant !== 'string' || !isVariantName(variant, control)) return undefined;
+  if (typeof contentHash !== 'string' || !isArmWeight(weight, control)) return undefined;
+  if (seen.variants.has(variant) || seen.hashes.has(contentHash)) return undefined;
+  if (control && contentHash !== entryHash) return undefined;
+  seen.variants.add(variant);
+  seen.hashes.add(contentHash);
+  // Canonical key order, so a written label does not depend on the order it was read in.
+  return { variant, contentHash, weight };
+}
+
 /** The experiment of a v2 entry, or undefined when it breaks a rule of the label. */
 function readExperiment(value: unknown, entryHash: string): PromptReleaseExperiment | undefined {
   if (!isRecord(value) || !hasOnlyKeys(value, EXPERIMENT_KEYS)) return undefined;
   const { name, arms } = value;
   if (typeof name !== 'string' || !EXPERIMENT_NAME_RE.test(name)) return undefined;
   if (!Array.isArray(arms) || arms.length < 2 || arms.length > 4) return undefined;
-  const variants = new Set<string>();
-  const hashes = new Set<string>();
-  const read: { variant: string; contentHash: string; weight: number }[] = [];
-  let total = 0;
-  for (const [index, arm] of arms.entries()) {
-    if (!isRecord(arm) || !hasOnlyKeys(arm, ARM_KEYS) || !hasContentHash(arm)) return undefined;
-    const { variant, contentHash, weight } = arm;
-    const control = index === 0;
-    if (typeof variant !== 'string' || variants.has(variant)) return undefined;
-    if (control ? variant !== 'control' : variant === 'control' || !VARIANT_NAME_RE.test(variant))
-      return undefined;
-    if (typeof contentHash !== 'string' || hashes.has(contentHash)) return undefined;
-    if (control && contentHash !== entryHash) return undefined;
-    if (!Number.isInteger(weight)) return undefined;
-    if (typeof weight !== 'number' || weight < (control ? 1 : 0) || weight > TOTAL_WEIGHT)
-      return undefined;
-    variants.add(variant);
-    hashes.add(contentHash);
-    total += weight;
-    // Canonical key order, so a written label does not depend on the order it was read in.
-    read.push({ variant, contentHash, weight });
-  }
-  if (total !== TOTAL_WEIGHT) return undefined;
+  const seen = { variants: new Set<string>(), hashes: new Set<string>() };
+  const read = arms.map((arm, index) => readArm(arm, index === 0, entryHash, seen));
+  const complete = read.filter((arm): arm is ReadArm => arm !== undefined);
+  if (complete.length !== read.length) return undefined;
+  if (complete.reduce((total, arm) => total + arm.weight, 0) !== TOTAL_WEIGHT) return undefined;
   // The arm count is checked above, so the list has the length the tuple type asks for.
-  return { name, arms: read as unknown as PromptReleaseExperiment['arms'] };
+  return { name, arms: complete as unknown as PromptReleaseExperiment['arms'] };
+}
+
+/** One entry of a v2 label, or undefined when it breaks a rule. */
+function readV2Entry(entry: unknown): PromptReleaseLabelEntryV2 | undefined {
+  if (!isHashEntry(entry) || !hasOnlyKeys(entry as Record<string, unknown>, ENTRY_KEYS)) {
+    return undefined;
+  }
+  const { id, contentHash } = entry;
+  const experiment = (entry as Record<string, unknown>)['experiment'];
+  if (experiment === undefined) return { id, contentHash };
+  const read = readExperiment(experiment, contentHash);
+  return read === undefined ? undefined : { id, contentHash, experiment: read };
 }
 
 /** The entries of a v2 label, or undefined when one of them breaks a rule. */
 function readV2Entries(prompts: unknown[]): PromptReleaseLabelEntryV2[] | undefined {
-  const entries: PromptReleaseLabelEntryV2[] = [];
-  for (const entry of prompts) {
-    if (!isHashEntry(entry) || !hasOnlyKeys(entry as Record<string, unknown>, ENTRY_KEYS)) {
-      return undefined;
-    }
-    const { id, contentHash } = entry;
-    const experiment = (entry as Record<string, unknown>)['experiment'];
-    if (experiment === undefined) {
-      entries.push({ id, contentHash });
-      continue;
-    }
-    const read = readExperiment(experiment, contentHash);
-    if (read === undefined) return undefined;
-    entries.push({ id, contentHash, experiment: read });
+  const entries = prompts.map(readV2Entry);
+  return entries.every((entry) => entry !== undefined)
+    ? (entries as PromptReleaseLabelEntryV2[])
+    : undefined;
+}
+
+/** Refuse a label url under ours that this reader does not know. */
+function checkKnownSchema(schema: unknown, path: string, code: ReleaseErrorCode): void {
+  if (
+    typeof schema !== 'string' ||
+    !schema.startsWith(LABEL_SCHEMA_PREFIX) ||
+    schema === PROMPT_RELEASE_LABEL_SCHEMA_URL ||
+    schema === PROMPT_RELEASE_LABEL_V2_SCHEMA_URL
+  ) {
+    return;
   }
-  return entries;
+  const shown = stripControlCharacters(schema);
+  const version = /\/v(\d+)\.json$/.exec(schema)?.[1];
+  const newer = version !== undefined && Number(version) > 2;
+  const problem = newer
+    ? `uses a newer label format (${shown}); upgrade prs.`
+    : `uses an unknown label format (${shown}).`;
+  throw new ReleaseError(code, `${path} ${problem}`, path);
+}
+
+/** What is wrong with a label that failed to read, as the end of the error message. */
+function labelProblem(valid: boolean, unique: boolean, environment: string): string {
+  if (!valid) return `is not a release label of the ${environment} environment`;
+  if (!unique) return 'lists a prompt id twice';
+  return 'has an entry or experiment that breaks the label rules';
 }
 
 /**
@@ -382,20 +429,7 @@ export function parseLabel(
 ): PromptReleaseLabel {
   const parsed = parseJson(text, path, 'release label');
   const schema = isRecord(parsed) ? parsed['$schema'] : undefined;
-  if (
-    typeof schema === 'string' &&
-    schema.startsWith(LABEL_SCHEMA_PREFIX) &&
-    schema !== PROMPT_RELEASE_LABEL_SCHEMA_URL &&
-    schema !== PROMPT_RELEASE_LABEL_V2_SCHEMA_URL
-  ) {
-    const shown = stripControlCharacters(schema);
-    const version = /\/v(\d+)\.json$/.exec(schema)?.[1];
-    const problem =
-      version !== undefined && Number(version) > 2
-        ? `uses a newer label format (${shown}); upgrade prs.`
-        : `uses an unknown label format (${shown}).`;
-    throw new ReleaseError(code, `${path} ${problem}`, path);
-  }
+  checkKnownSchema(schema, path, code);
   const version = schema === PROMPT_RELEASE_LABEL_V2_SCHEMA_URL ? 2 : 1;
   const valid =
     isRecord(parsed) &&
@@ -406,8 +440,7 @@ export function parseLabel(
     Array.isArray(parsed['prompts']) &&
     parsed['prompts'].every(isHashEntry);
   const raw = valid ? (parsed['prompts'] as unknown[]) : [];
-  const withExperiment = version === 1 && raw.some((entry) => 'experiment' in (entry as object));
-  if (withExperiment) {
+  if (version === 1 && raw.some((entry) => 'experiment' in (entry as object))) {
     throw new ReleaseError(
       code,
       `${path} has an experiment in a v1 label. Set $schema to ${PROMPT_RELEASE_LABEL_V2_SCHEMA_URL} or remove the experiment.`,
@@ -419,11 +452,7 @@ export function parseLabel(
   // A reader of the label refuses it whole when an id appears twice, so the CLI does too.
   const unique = new Set(ids).size === ids.length;
   if (!valid || !unique || (version === 2 && entries === undefined)) {
-    const problem = !valid
-      ? `is not a release label of the ${environment} environment`
-      : !unique
-        ? 'lists a prompt id twice'
-        : 'has an entry or experiment that breaks the label rules';
+    const problem = labelProblem(valid, unique, environment);
     throw new ReleaseError(code, `${path} ${problem}. Restore it from Git.`, path);
   }
   if (entries !== undefined) {
