@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   APPROVAL_RECORD_SCHEMA_URL,
   approvalRecordPath,
+  GIT_HOST_USER_PATTERN,
   isApprovalRecordV1,
+  isApproverHandle,
+  MAX_APPROVER_LENGTH,
   parseApprovalRecord,
   serializeApprovalRecord,
   type ApprovalRecordV1,
@@ -22,7 +25,51 @@ function record(overrides: Partial<ApprovalRecordV1> = {}): ApprovalRecordV1 {
   };
 }
 
+const as = (value: string): ApprovalRecordV1['approver'] => ({ source: 'asserted', value });
+
+describe('isApproverHandle', () => {
+  it.each(['@jane', '@Jane-Doe', '@jane.doe', '@name_shortcode', '@a-b-c', `@${'a'.repeat(100)}`])(
+    'accepts %s',
+    (value) => {
+      expect(isApproverHandle(value)).toBe(true);
+    }
+  );
+
+  it.each([
+    ['no @', 'jane'],
+    ['only @', '@'],
+    ['a leading dot', '@.jane'],
+    ['two dots', '@..'],
+    ['two dots in a row', '@a..b'],
+    ['two hyphens in a row', '@a--b'],
+    ['a dot and an underscore in a row', '@a._b'],
+    ['a trailing dot', '@jane.'],
+    ['a trailing hyphen', '@jane-'],
+    ['a leading underscore', '@_jane'],
+    ['a slash', '@jane/x'],
+    ['a parent segment', '@jane/../x'],
+    ['a backslash', '@jane\\x'],
+    ['a space', '@jane doe'],
+    ['a trailing newline', '@jane\n'],
+    ['a non-ASCII letter', '@j\u0430ne'],
+    ['101 characters after @', `@${'a'.repeat(MAX_APPROVER_LENGTH)}`],
+  ])('refuses %s', (_name, value) => {
+    expect(isApproverHandle(value)).toBe(false);
+  });
+
+  it('follows the governance user rule, only with a length bound', () => {
+    const long = `@${'a'.repeat(200)}`;
+
+    expect(GIT_HOST_USER_PATTERN.test(long)).toBe(true);
+    expect(isApproverHandle(long)).toBe(false);
+  });
+});
+
 describe('isApprovalRecordV1', () => {
+  it.each(['@jane.doe', '@name_shortcode'])('accepts the approver %s', (value) => {
+    expect(isApprovalRecordV1(record({ approver: as(value) }))).toBe(true);
+  });
+
   it('accepts a minimal record', () => {
     expect(isApprovalRecordV1(record())).toBe(true);
   });
@@ -66,6 +113,8 @@ describe('isApprovalRecordV1', () => {
     ['a role of 33 characters', { ...record(), role: 'a'.repeat(33) }],
     ['an email approver', { ...record(), approver: { source: 'asserted', value: 'jane@acme.io' } }],
     ['a team approver', { ...record(), approver: { source: 'asserted', value: '@acme/legal' } }],
+    ['an approver with a leading dot', { ...record(), approver: as('@.jane') }],
+    ['an approver of 101 characters', { ...record(), approver: as(`@${'a'.repeat(101)}`) }],
     [
       'a homoglyph approver',
       { ...record(), approver: { source: 'asserted', value: '@j\u0430ne' } },
@@ -185,6 +234,19 @@ describe('approvalRecordPath', () => {
     expect(approvalRecordPath(value)).toBe(
       `.promptscript/approvals/security/@acme/support/refund-reply/${HASH}.jane-doe.json`
     );
+  });
+
+  it.each([
+    ['@Jane.Doe', 'jane.doe'],
+    ['@name_shortcode', 'name_shortcode'],
+    ['@a-b-c', 'a-b-c'],
+  ])('keeps the approver %s in the file name, never in a segment of its own', (value, slug) => {
+    const path = approvalRecordPath(record({ approver: as(value) }));
+
+    expect(path).toBe(
+      `.promptscript/approvals/legal/acme-support/refund-reply/${HASH}.${slug}.json`
+    );
+    expect(path.split('/').filter((segment) => segment === '..' || segment === '.')).toEqual([]);
   });
 
   it('refuses a record that fails the guard instead of building a path', () => {

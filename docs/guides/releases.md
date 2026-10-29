@@ -247,8 +247,11 @@ prs approve acme-support/refund-reply@sha256-<64 hex digits> --role security --a
   is required.
 - `--comment` has at most 2000 characters, no control characters except newlines and no invisible
   format characters such as bidi marks.
-- `--approver` is a Git host user handle like `@jane` (`PS5104`). An email address or a team is
-  refused, so no address ends up in a file name.
+- `--approver` is a Git host user handle like `@jane` (`PS5104`): `@`, a letter or digit, then
+  letters, digits, `_`, `.` or `-`, never two of `_.-` in a row and none at the end. Approver handles
+  are limited to 100 characters after the `@`, since the handle is part of the file name. That is the same rule as a
+  user owner in `governance`, so GitLab handles like `@jane.doe` and GitHub managed user handles like
+  `@jane_acme` work. An email address or a team is refused, so no address ends up in a file name.
 - the hash is real (`PS5103`): a bundle in `.promptscript/releases/bundles/` of that prompt that
   verifies, or what the source builds right now. A stored bundle that does not verify is `PS5004`.
 
@@ -266,9 +269,14 @@ pull request.
 .promptscript/approvals/legal/acme-support/refund-reply/sha256-3f9a...jane.json
 ```
 
-The approver part is the handle without `@`, lowercased. There is one file per approver, role and
-hash. The file holds exactly these bytes, with `environment` only when `--env` was given and
-`comment` only when one was given:
+The approver part is the handle without `@`, lowercased, so `@Jane.Doe` writes
+`<content hash>.jane.doe.json`. There is one file per approver, role and hash.
+
+On Windows a long prompt id plus a long handle can go over the 260 character `MAX_PATH` limit. Run
+`git config core.longpaths true` in the repository if Git can not check out or add a record.
+
+The file holds exactly these bytes, with `environment` only when `--env` was given and `comment` only
+when one was given:
 
 ```json
 {

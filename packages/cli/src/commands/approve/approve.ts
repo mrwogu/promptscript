@@ -2,7 +2,9 @@ import {
   APPROVAL_RECORD_SCHEMA_URL,
   approvalRecordPath,
   compareCodeUnits,
+  isApproverHandle,
   isPlainObject,
+  MAX_APPROVER_LENGTH,
   PSError,
   serializeApprovalRecord,
   type ApprovalRecordV1,
@@ -63,7 +65,6 @@ export const APPROVAL_REPORT_SCHEMA_URL =
 const PROMPT_ID_RE =
   /^(?!.*\.\.)(?:@?[A-Za-z0-9][A-Za-z0-9_.-]{0,63}(?<!\.)\/)+[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/u;
 const ROLE_RE = /^[a-z][a-z0-9-]{0,31}$/;
-const USER_RE = /^@[A-Za-z0-9][A-Za-z0-9-]{0,38}$/u;
 // Stricter than the core guard: format characters (bidi, BOM, zero-width) are refused too.
 const COMMENT_RE = /^(?:[^\p{Cc}\p{Cs}\p{Cf}]|\n){0,2000}$/u;
 
@@ -252,7 +253,7 @@ function checkComment(comment: string | undefined): string | undefined {
 
 /** The approver in the user form `@handle`, or PS5104. */
 function checkApprover(approver: string | undefined): string {
-  if (approver !== undefined && USER_RE.test(approver)) return approver;
+  if (approver !== undefined && isApproverHandle(approver)) return approver;
   let problem: string;
   if (approver === undefined) {
     problem = 'Give your Git host user handle with --approver, for example --approver @jane.';
@@ -260,7 +261,7 @@ function checkApprover(approver: string | undefined): string {
     problem =
       '--approver takes a Git host user handle like @jane, not an email address, so no address lands in a file name. Use your handle.';
   } else {
-    problem = `"${stripControlCharacters(approver)}" is not a Git host user handle. Use @ and up to 39 letters, digits or hyphens, for example @jane; a person approves, not a team.`;
+    problem = `"${stripControlCharacters(approver)}" is not a Git host user handle. Use @, a letter or digit, then letters, digits, "_", "." or "-" (never two in a row or at the end), up to ${MAX_APPROVER_LENGTH - 1} characters, for example @jane or @jane.doe; a person approves, not a team.`;
   }
   throw new GovernanceError(PS5104_APPROVER_IDENTITY, problem);
 }

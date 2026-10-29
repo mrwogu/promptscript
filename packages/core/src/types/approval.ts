@@ -10,8 +10,9 @@ export interface ApprovalApproverV1 {
   /** `asserted`: the identity is a claim, it binds through the review of the change that adds the record */
   source: 'asserted';
   /**
-   * Git host user handle.
-   * @pattern ^@[A-Za-z0-9][A-Za-z0-9-]{0,38}$
+   * Git host user handle, at most 100 characters after the `@`.
+   * @pattern ^@[A-Za-z0-9](?:[A-Za-z0-9]|[_.-](?=[A-Za-z0-9]))*$
+   * @maxLength 101
    * @example "@jane"
    */
   value: string;
@@ -70,12 +71,32 @@ export interface ApprovalRecordV1 {
   signature?: string;
 }
 
+/**
+ * A Git host user handle: `@`, a letter or digit, then letters, digits, `_`, `.` or `-`,
+ * with no two of `_.-` in a row and none at the end. GitLab users may hold `.` and `_`,
+ * and GitHub managed users end in `_<shortcode>`. Hosts never issue other handles, and
+ * CODEOWNERS ignores an invalid user, so it would drop the rule's protection silently.
+ * Governance owners and approvers share this rule. Each character matches one branch
+ * and the lookahead reads one character, so the match stays linear.
+ */
+export const GIT_HOST_USER_PATTERN = /^@[A-Za-z0-9](?:[A-Za-z0-9]|[_.-](?=[A-Za-z0-9]))*$/;
+
+/**
+ * Longest approver handle, `@` included. The handle is part of the record file name,
+ * so it stays far below the 255 byte limit of a file name.
+ */
+export const MAX_APPROVER_LENGTH = 101;
+
+/** An approver handle: a {@link GIT_HOST_USER_PATTERN} user of at most {@link MAX_APPROVER_LENGTH} characters. */
+export function isApproverHandle(value: string): boolean {
+  return value.length <= MAX_APPROVER_LENGTH && GIT_HOST_USER_PATTERN.test(value);
+}
+
 // Same patterns as the schema JSDoc; the schema spec checks that both agree.
 const PROMPT_ID =
   /^(?!.*\.\.)(?:@?[A-Za-z0-9][A-Za-z0-9_.-]{0,63}(?<!\.)\/)+[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/u;
 const CONTENT_HASH = /^sha256-[0-9a-f]{64}$/u;
 const ROLE = /^(?!(?:con|prn|aux|nul|com\d|lpt\d)$)[a-z][a-z0-9-]{0,31}$/u;
-const USER = /^@[A-Za-z0-9][A-Za-z0-9-]{0,38}$/u;
 const CREATED_AT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u;
 const ENVIRONMENT = /^[a-z][a-z0-9-]{0,31}$/u;
 const COMMENT = /^(?:[^\p{Cc}\p{Cs}]|\n){0,2000}$/u;
@@ -108,7 +129,8 @@ function isApprover(value: unknown): boolean {
     isRecord(value) &&
     Object.keys(value).every((key) => key === 'source' || key === 'value') &&
     value['source'] === 'asserted' &&
-    matches(value['value'], USER)
+    typeof value['value'] === 'string' &&
+    isApproverHandle(value['value'])
   );
 }
 
@@ -181,7 +203,8 @@ export function parseApprovalRecord(content: Uint8Array): ApprovalRecordV1 | und
  * Path of an approval record relative to the project root, with `/` separators:
  * `.promptscript/approvals/<role>/<prompt id>/<contentHash>.<approver slug>.json`.
  * The slug is the approver handle without its `@`, lowercased, so one approver
- * has one file per role and hash on every file system.
+ * has one file per role and hash on every file system. It holds no `/` and always
+ * follows `<contentHash>.`, so a `.` in a handle never makes a `.` or `..` segment.
  * @throws PSError when the record fails {@link isApprovalRecordV1}, since its
  * fields would not make a safe path.
  */
