@@ -211,6 +211,9 @@ importers:
       '@promptscript/core':
         specifier: workspace:^
         version: link:../core
+      '@promptscript/eval':
+        specifier: workspace:^
+        version: link:../eval
       '@promptscript/formatters':
         specifier: workspace:^
         version: link:../formatters

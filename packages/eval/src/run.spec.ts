@@ -28,7 +28,13 @@ import { roundUsd, worstCaseCost } from './cost.js';
 import { EvalProviderError } from './errors.js';
 import { createMockProvider, type EvalProvider, type MockScript } from './provider.js';
 import { createProviderFactory } from './provider-setup.js';
-import { runEval, type EvalProgress, type RunEvalOptions } from './run.js';
+import {
+  planEval,
+  runEval,
+  runEvalDetailed,
+  type EvalProgress,
+  type RunEvalOptions,
+} from './run.js';
 import { loadSuites, type LoadedSuite } from './suite/load.js';
 
 const PRICE = { inputUsdPerMillion: 1, outputUsdPerMillion: 1, checkedOn: '2026-10-01' };
@@ -1271,5 +1277,129 @@ describe('runEval', () => {
     expect(again.mock.calls).toHaveLength(1);
     expect(report.cache).toMatchObject({ replayed: 1, live: 1 });
     expect(statSync(first ?? '').size).toBeGreaterThan(100);
+  });
+  it('plans a record run without creating a provider or writing the cache', async () => {
+    const providers = (): EvalProvider => {
+      throw new Error('a plan must not create a provider');
+    };
+
+    const plan = await planEval(
+      await options({
+        providers,
+        cache: { mode: 'record', dir: '.promptscript/eval-cache' },
+        budget: { maxCostUsd: 1 },
+      })
+    );
+
+    expect(plan.errors).toEqual([]);
+    expect(plan).toMatchObject({ mode: 'record', hits: 0, misses: 2, calls: 2, budgetUsd: 1 });
+    expect(plan.worstCaseUsd).toBeGreaterThan(0);
+    expect(plan.suites).toEqual([
+      expect.objectContaining({
+        name: 'refund',
+        prompt: 'acme-support/refund-reply',
+        rows: 2,
+        models: [
+          expect.objectContaining({
+            ref: 'test-model',
+            cases: 2,
+            hits: 0,
+            misses: 2,
+            calls: 2,
+            priceSource: 'project',
+          }),
+        ],
+      }),
+    ]);
+    expect(cacheFiles()).toEqual([]);
+  });
+
+  it('counts cache hits in a plan and plans calls for the misses only', async () => {
+    const recorder = withMock();
+    await runEval(
+      await options({
+        providers: recorder.providers,
+        cache: { mode: 'record', dir: '.promptscript/eval-cache' },
+        budget: { maxCostUsd: 1 },
+      })
+    );
+    const [first] = cacheFiles();
+    rmSync(first ?? '');
+
+    const plan = await planEval(
+      await options({
+        cache: { mode: 'record', dir: '.promptscript/eval-cache' },
+        budget: { maxCostUsd: 1 },
+      })
+    );
+
+    expect(plan).toMatchObject({ hits: 1, misses: 1, calls: 1 });
+  });
+
+  it('plans replay with misses but no calls and no cost', async () => {
+    const plan = await planEval(await options());
+
+    expect(plan).toMatchObject({ mode: 'replay', hits: 0, misses: 2, calls: 0 });
+    expect(plan).not.toHaveProperty('worstCaseUsd');
+  });
+
+  it('plans a live mode without a budget: the estimate is shown and nothing is refused', async () => {
+    const plan = await planEval(
+      await options({ cache: { mode: 'record', dir: '.promptscript/eval-cache' } })
+    );
+
+    expect(plan.errors).toEqual([]);
+    expect(plan).toMatchObject({ mode: 'record', misses: 2, calls: 2 });
+    expect(plan.worstCaseUsd).toBeGreaterThan(0);
+    expect(plan).not.toHaveProperty('budgetUsd');
+  });
+
+  it('reports setup errors in a plan and the plan check of the budget', async () => {
+    const plan = await planEval(
+      await options({
+        cache: { mode: 'record', dir: '.promptscript/eval-cache' },
+        budget: { maxCostUsd: 0.000001 },
+      })
+    );
+
+    expect(plan.errors).toEqual([expect.objectContaining({ code: 'PS6503' })]);
+    expect(plan.suites).toEqual([]);
+  });
+
+  it('gives one report per suite from its own cases', async () => {
+    writeFileSync(
+      join(evals, 'second.eval.yaml'),
+      SUITE.replace('kind: equals, field: decision', 'kind: contains, values: [nope]')
+    );
+    const { providers } = withMock();
+
+    const run = await runEvalDetailed(
+      await options({
+        providers,
+        cache: { mode: 'off', dir: 'x' },
+        budget: { maxCostUsd: 1 },
+      })
+    );
+
+    expect(run.suiteReports.map((entry) => entry.suites.map((suite) => suite.name))).toEqual([
+      ['refund'],
+      ['second'],
+    ]);
+    const [refund, second] = run.suiteReports;
+    expectValid(refund as EvalReportV1);
+    expect(refund).toMatchObject({ outcome: 'passed', passed: true, usage: { calls: 2 } });
+    expect(second).toMatchObject({ outcome: 'failed', passed: false });
+    expect(run.report.outcome).toBe('failed');
+    expect(refund).not.toHaveProperty('budget');
+    expect(run.report.usage.calls).toBe(4);
+  });
+
+  it('gives no suite reports when setup failed', async () => {
+    const run = await runEvalDetailed(
+      await options({ cache: { mode: 'replay', dir: '../elsewhere' } })
+    );
+
+    expect(run.report.outcome).toBe('error');
+    expect(run.suiteReports).toEqual([]);
   });
 });

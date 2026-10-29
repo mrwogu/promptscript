@@ -7,7 +7,6 @@ import type { FormatterOutput } from '@promptscript/compiler';
 import { loadEffectiveConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput, isVerbose, isDebug } from '../output/console.js';
 import { createPager, Pager } from '../output/pager.js';
-import { Compiler } from '@promptscript/compiler';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { stripMarkers } from '../utils/markers.js';
 import { resolvePrettierOptions } from '../prettier/loader.js';
@@ -21,11 +20,8 @@ import { prepareLegacyFactoryMigration } from '../utils/legacy-factory-hooks.js'
 import { finalizeOutputPlan } from '../utils/output-plan.js';
 import { getBuildProfile } from '../utils/build-profile.js';
 import { parseTargetEntries } from '../utils/target-config.js';
-import {
-  loadProjectLockfile,
-  registryReferenceRoots,
-  resolveUniversalDir,
-} from '../utils/project-config.js';
+import { loadProjectLockfile } from '../utils/project-config.js';
+import { createProjectCompiler } from '../utils/project-compiler.js';
 import chalk from 'chalk';
 
 /**
@@ -215,25 +211,14 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       config.includePromptScriptSkill === false ? undefined : await loadBundledSkillContent(logger);
     const outputRoot = resolve(projectRoot, buildProfile?.output ?? config.output?.baseDir ?? '.');
 
-    const compiler = new Compiler({
-      resolver: {
-        registryPath: registry.path,
-        localPath: resolve(projectRoot, '.promptscript'),
-        projectRoot,
-        vendorDir,
-        readOnly: true,
-        referenceRoots: registryReferenceRoots(registry),
-        lockfile,
-        registries: config.registries,
-        skillTargets: config.skillTargets,
-        skills: resolveUniversalDir(config.universalDir),
-      },
-      validator: config.validation,
+    const compiler = createProjectCompiler(config, {
+      projectRoot,
+      registry,
+      vendorDir,
+      lockfile,
       formatters: targets,
-      customConventions: config.customConventions,
-      prettier: prettierOptions,
-      models: config.models,
       logger,
+      prettier: prettierOptions,
       skillContent,
     });
 

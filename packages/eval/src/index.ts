@@ -32,7 +32,34 @@ export {
   type AssertionContext,
   type DeterministicAssertion,
 } from './assertions.js';
-export { runEval, type EvalProgress, type RunEvalOptions } from './run.js';
+export {
+  planEval,
+  runEval,
+  runEvalDetailed,
+  type EvalPlan,
+  type EvalPlanModel,
+  type EvalPlanSuite,
+  type EvalProgress,
+  type EvalRun,
+  type PriceSource,
+  type RunEvalOptions,
+} from './run.js';
+export {
+  compareReports,
+  missingFromCandidate,
+  readReport,
+  type CompareOptions,
+} from './compare.js';
+export {
+  formatComparison,
+  formatPlan,
+  formatReport,
+  reportFileName,
+  type EvalComparisonFormat,
+  type EvalReportFormat,
+  type FormatOptions,
+} from './format.js';
+export { cleanText } from './sanitize.js';
 export {
   createAnthropicProvider,
   createOpenAICompatibleProvider,

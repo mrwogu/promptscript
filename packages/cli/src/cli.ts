@@ -16,6 +16,7 @@ import { checkCommand } from './commands/check.js';
 import { updateCheckCommand } from './commands/update-check.js';
 import { registerRegistryCommands } from './commands/registry/index.js';
 import { registerReleaseCommands } from './commands/release/index.js';
+import { registerEvalCommands } from './commands/eval/register.js';
 import { registerApproveCommand } from './commands/approve/index.js';
 import { registerGovernanceCommands } from './commands/governance/index.js';
 import { lockCommand } from './commands/lock.js';
@@ -400,6 +401,9 @@ const release = program
   .command('release')
   .description('Build, promote and roll back prompt releases');
 registerReleaseCommands(release);
+
+const evalCommand = program.command('eval').description('Run and compare prompt evals');
+registerEvalCommands(evalCommand);
 
 registerApproveCommand(program);
 registerGovernanceCommands(program);

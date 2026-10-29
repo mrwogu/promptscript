@@ -244,6 +244,7 @@ includePromptScriptSkill: true # default: true
 | `models`                   | object                  | No       | Supported model set and model profiles          |
 | `policies`                 | array                   | No       | Policies for skill extensions and prompts       |
 | `releases`                 | object                  | No       | Release environments for prompt bundles         |
+| `eval`                     | object                  | No       | Providers and limits of `prs eval`              |
 | `governance`               | object                  | No       | Admins, approval roles and CODEOWNERS settings  |
 
 `id` and `syntax` are required even when `input.entry` uses its default.
@@ -1253,6 +1254,39 @@ Each name matches `^[a-z][a-z0-9-]{0,31}$` and appears once. The names `index` a
 the Windows device names `con`, `prn`, `aux`, `nul`, `com1` to `com9` and `lpt1` to `lpt9`, are
 refused because each environment is a file named `<name>.json`. Without `releases` every
 `prs release` command fails with `PS5001`. See the [releases guide](../guides/releases.md).
+
+### eval
+
+Settings of [`prs eval`](cli.md#prs-eval). They name the providers and set limits. They never
+turn on a live run: the cache mode, the budget and extra hosts come from command-line flags only.
+
+```yaml
+eval:
+  providers:
+    anthropic: { kind: anthropic, apiKeyEnvVar: ANTHROPIC_API_KEY }
+    gateway:
+      { kind: openai-compatible, baseUrl: 'https://llm.corp.example/v1', apiKeyEnvVar: GATEWAY_KEY }
+  timeoutMs: 60000
+  maxOutputTokens: 1024
+  maxCases: 1000
+  reportDir: .promptscript/eval-reports
+```
+
+| Field             | Type    | Required | Description                                                                   |
+| ----------------- | ------- | -------- | ----------------------------------------------------------------------------- |
+| `providers`       | object  | No       | Providers by name, matching the `provider` of a model profile                 |
+| `timeoutMs`       | integer | No       | Time limit of one model call, response body included. Default 60000           |
+| `maxOutputTokens` | integer | No       | Output token cap when a prompt sets no `maxTokens`. Default 1024              |
+| `maxCases`        | integer | No       | Largest number of dataset rows a suite runs. Default 1000. `--max-cases` wins |
+| `reportDir`       | string  | No       | Directory for reports, relative to the project root. `--report-dir` wins      |
+
+A provider entry has `kind` (`anthropic` or `openai-compatible`), `baseUrl` and `apiKeyEnvVar`, the
+name of the environment variable that holds the key. `anthropic` and `openai` have built-in URLs
+and key variables, so they need no entry. Any other provider needs one. The config never holds a
+key: a run stops with `PS6307` when the value of a key variable, or of a variable named like a
+secret, appears anywhere in `eval` or in a model profile. A provider key goes only to
+`api.anthropic.com`, `api.openai.com` and the hosts you pass with `--allow-host`, so review a change
+to `apiKeyEnvVar` like code.
 
 ### governance
 
