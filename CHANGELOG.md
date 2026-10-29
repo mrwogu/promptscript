@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.24.0](https://github.com/mrwogu/promptscript/compare/v1.23.0...v1.24.0) (2026-10-29)
+
+
+### Features
+
+* **cli:** add prs audit log ([#638](https://github.com/mrwogu/promptscript/issues/638)) ([b4b7477](https://github.com/mrwogu/promptscript/commit/b4b7477b34bcfcc04ea2441b00086dc51d5aec55))
+* **cli:** add prs eval run and compare ([#637](https://github.com/mrwogu/promptscript/issues/637)) ([fe298df](https://github.com/mrwogu/promptscript/commit/fe298dfe986041f46674206f82877c614efe6c24))
+
 ## [1.23.0](https://github.com/mrwogu/promptscript/compare/v1.22.0...v1.23.0) (2026-10-27)
 
 
