@@ -22,6 +22,13 @@
 - [x] **Skill contracts** — `inputs`/`outputs` typed fields (`string`, `number`, `boolean`, `enum`), PS017 validation
 - [x] **Skill Overlay / Extends — Phase 1 (MVP)** — `references` property on skills; skill-aware `@extend` semantics (replace/append/shallow-merge per property); `references` in SKILL.md frontmatter; PS025 (valid-skill-references) and PS026 (safe-reference-content) validator rules; formatter support for directory mode (Claude, GitHub, Factory) and inline mode (Cursor, Antigravity)
 
+### Skill Overlay / Extends - Phase 3
+
+**Goal:** Supply-chain integrity and enterprise policy controls for skill overlays.
+
+- [x] **Integrity hashes in lockfile** - Content hashes for `references` files are recorded in `promptscript.lock` (#225)
+- [x] **Policy engine** - Org-level `layer-boundary`, `property-protection` and `registry-allowlist` policies on skill extensions, evaluated by `prs validate` and `prs check` ([guide](docs/guides/policy-engine.md))
+
 ### Web Playground
 
 **Goal:** Try PromptScript without installing anything.
@@ -76,6 +83,16 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [x] **Playground preview** - preview prompt bundles in the browser with the Support Refund Reply example; four runnable [examples](docs/examples/application-prompts.md) in the docs
 - [x] **Prompt policies** - required metadata, risk floors, model allowlists and content rules on `@prompts` entries through PS030, owner, reviewer and data class checks through PS047 ([guide](docs/guides/policy-engine.md#prompt-policies))
 - [x] **CODEOWNERS from governance** - `prs governance codeowners` gives prompt files to their owners, approval roles to their teams and config and release files to the admins ([guide](docs/guides/codeowners.md))
+- [x] **Releases** - `prs release build`, `promote`, `rollback` and `status` store bundles under their content hash and record which hash each environment serves, `status --base` checks labels against a base ref ([guide](docs/guides/releases.md))
+- [x] **Approvals and promotion gates** - `prs approve` writes approval records bound to the content hash, and `prs release promote` refuses a prompt version when a `required-approvals` policy at severity `error` finds no record for it (a `warning` is reported, not blocking)
+
+### Formatting and Configuration Layers
+
+**Goal:** Keep `.prs` files consistent and share configuration across teams.
+
+- [x] **`prs fmt`** - Formats `.prs` files with a canonical printer that keeps blank lines and round-trips the source
+- [x] **Config `extends`** - `promptscript.yaml` can extend a base configuration file, with base policies kept ([reference](docs/reference/config.md))
+- [x] **System config** - `/etc/promptscript/config.yaml` is read under the user config ([guide](docs/guides/user-config.md))
 
 ---
 
@@ -110,14 +127,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [x] **`sealed` modifier** — Mark a skill property as non-overridable by downstream overlays via `@extend`
 - [x] **Overlay-aware suggestions** — `prs init` detects @extend relationships between suggested skills and collapses overlays
 
-### 2. Skill Overlay / Extends — Phase 3
-
-**Goal:** Supply-chain integrity and enterprise policy controls for skill overlays.
-
-- [ ] **Integrity hashes in lockfile** — Record content hashes for `references` files in `promptscript.lock`
-- [ ] **Policy engine** — Org-level rules: require approved base skills, block unsafe reference types, enforce overlay constraints
-
-### 3. CI/CD Integration
+### 2. CI/CD Integration
 
 **Goal:** Make it effortless to integrate PromptScript into existing workflows.
 
@@ -134,7 +144,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [ ] **GitLab CI template**
 - [ ] **Azure DevOps task**
 
-### 4. Developer Experience
+### 3. Developer Experience
 
 **Goal:** Improve internal development velocity and quality safeguards.
 
@@ -153,7 +163,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 
 ## 🔮 Future — IDE Integration & Registry
 
-### 3. Language Server Protocol (LSP)
+### 4. Language Server Protocol (LSP)
 
 **Goal:** World-class editing experience in any editor.
 
@@ -165,7 +175,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
   - Code actions (quick fixes)
   - Rename refactoring
 
-### 4. VS Code Extension — Phase 2 (LSP & Intelligence)
+### 5. VS Code Extension — Phase 2 (LSP & Intelligence)
 
 **Goal:** Rich editing experience beyond syntax highlighting.
 
@@ -179,7 +189,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [ ] **Preview pane** — compiled output side-by-side
 - [ ] **Outline view** — navigate sections easily
 
-### 5. Public Registry
+### 6. Public Registry
 
 **Goal:** Enable sharing and reusing rule sets across organizations.
 
@@ -205,7 +215,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 
 ## 🏢 Future — Enterprise & Security
 
-### 6. Enterprise Features
+### 7. Enterprise Features
 
 **Goal:** Make PromptScript production-ready for large organizations.
 
@@ -213,16 +223,16 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 
 - [ ] **Policy enforcement**
   - Required sections in all projects
-  - Forbidden patterns (regex blacklist)
-  - Mandatory inheritance from approved bases
+  - [x] Forbidden patterns (regex blacklist) on prompts through `content-rules`
+  - [x] Mandatory inheritance from approved bases for skill extensions through `registry-allowlist`
   - Compliance templates (SOC2, HIPAA, PCI-DSS)
 
-- [ ] **Audit logging**
-  - Track who changed what and when
-  - Git-native audit trail
-  - Export to SIEM systems
+- [x] **Audit logging** - `prs audit log` reads prompt changes, approvals, promotions, rollbacks and config changes from Git history, with merge-aware events and a check against `HEAD` ([guide](docs/guides/releases.md#audit-log))
+  - [x] Track who changed what and when
+  - [x] Git-native audit trail
+  - [x] Export to SIEM systems (JSON and CEF)
 
-### 7. Security & Compliance
+### 8. Security & Compliance
 
 **Goal:** Ensure prompts don't introduce security risks.
 
@@ -240,7 +250,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
   - Track dependencies in prompt inheritance
   - Export as CycloneDX/SPDX
 
-### 8. Analytics & Insights
+### 9. Analytics & Insights
 
 **Goal:** Understand how prompts are being used.
 
@@ -261,7 +271,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 
 ## 🌐 Future — Ecosystem & Community
 
-### 9. Plugin System
+### 10. Plugin System
 
 **Goal:** Make PromptScript extensible.
 
@@ -276,7 +286,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [ ] **Hooks system**
   - Pre-compile, post-compile, pre-validate
 
-### 10. AI-Specific Features
+### 11. AI-Specific Features
 
 **Goal:** Optimize prompts for different models.
 
@@ -286,9 +296,9 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
   - Context window management
 
 - [ ] **Prompt testing framework**
-  - Define test cases for prompts
-  - Run against multiple models
-  - Score effectiveness
+  - [x] Define test cases for prompts - eval suites with JSONL, CSV or YAML datasets and assertions
+  - [x] Run against multiple models - `prs eval run` with a replay cache and a cost budget, `prs eval compare` for reports
+  - [ ] Score effectiveness with an LLM judge
 
 - [ ] **Model version targeting**
   - [x] Model catalog with lifecycle status, successors, and per-target model names (`models` in `promptscript.yaml`)
@@ -297,7 +307,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
   - [ ] Model-specific guidance rules - emphasis, redundant reasoning prompts, instruction budget
   - [ ] Different outputs per model version (conditional content variants)
 
-### 11. Documentation & Community
+### 12. Documentation & Community
 
 **Goal:** Build a thriving community.
 
