@@ -1,5 +1,6 @@
 import {
   findClosestMatch,
+  GIT_HOST_USER_PATTERN,
   readMetaGovernance,
   type GovernanceMeta,
   type SourceLocation,
@@ -8,8 +9,6 @@ import { dataClassVocabulary } from '../policy/parser.js';
 import type { RuleContext, ValidationRule } from '../types.js';
 import { getPromptExtraction, hasPromptEntries } from './prompt-rule-utils.js';
 
-// GitLab users may hold `.` and `_`, and GitHub managed users end in `_<shortcode>`.
-const HANDLE = /^@[A-Za-z0-9][\w.-]*$/;
 const TEAM = /^@[A-Za-z0-9][\w.-]*(?:\/[A-Za-z0-9][\w.-]*)+$/;
 const EMAIL_LOCAL = /^[\w.%+-]+$/;
 const EMAIL_HOST = /^[A-Za-z0-9.-]+$/;
@@ -39,7 +38,7 @@ function isEmail(value: string): boolean {
 export function isGitHostIdentity(value: string): boolean {
   return (
     value.length <= MAX_IDENTITY_LENGTH &&
-    (HANDLE.test(value) || TEAM.test(value) || isEmail(value))
+    (GIT_HOST_USER_PATTERN.test(value) || TEAM.test(value) || isEmail(value))
   );
 }
 

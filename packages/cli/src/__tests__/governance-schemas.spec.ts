@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { Ajv } from 'ajv';
 import { describe, expect, it } from 'vitest';
 import { isApprovalRecordV1 } from '@promptscript/core';
+import { isGitHostIdentity } from '@promptscript/validator';
 import { compileSchema } from './prompt-bundle-validators.js';
 
 type Doc = Record<string, unknown>;
@@ -40,10 +41,22 @@ describe('config schema governance key', () => {
     expect(validate(config({ roles }))).toBe(true);
   });
 
+  it('accepts users with a dot or underscore, like the owner check of prs', () => {
+    const governance = { admins: ['@jane.doe'], roles: { legal: ['@name_shortcode'] } };
+
+    expect(validate(config(governance)), JSON.stringify(validate.errors)).toBe(true);
+    expect(isGitHostIdentity('@jane.doe') && isGitHostIdentity('@name_shortcode')).toBe(true);
+  });
+
   it.each([
     ['an unknown key', { owners: ['@acme/x'] }],
     ['an owner without @', { admins: ['acme/legal'] }],
-    ['a user handle of 40 characters', { admins: [`@${'a'.repeat(40)}`] }],
+    ['a user handle with a leading dot', { admins: ['@.jane'] }],
+    ['a user handle with a leading underscore', { roles: { legal: ['@_jane'] } }],
+    ['a user handle with a trailing dot', { admins: ['@jane.'] }],
+    ['a user handle with a trailing hyphen', { admins: ['@jane-'] }],
+    ['a user handle with two hyphens in a row', { roles: { legal: ['@a--b'] } }],
+    ['a user handle with a dot and underscore in a row', { roles: { legal: ['@a._b'] } }],
     ['an email without a domain suffix', { admins: ['jane@acme'] }],
     ['an owner of 255 characters', { admins: [`${'a'.repeat(247)}@acme.io`] }],
     ['a duplicate admin', { admins: ['@acme/x', '@acme/x'] }],
@@ -157,6 +170,15 @@ describe('approval record schema', () => {
     ['the example record', record()],
     ['a record without environment and comment', { ...without('environment'), comment: 'ok' }],
     ['a scoped meta id', { ...record(), prompt: '@acme/support/refund-reply' }],
+    ['a GitLab approver', { ...record(), approver: { source: 'asserted', value: '@jane.doe' } }],
+    [
+      'a GitHub managed user approver',
+      { ...record(), approver: { source: 'asserted', value: '@name_shortcode' } },
+    ],
+    [
+      'an approver of 100 characters',
+      { ...record(), approver: { source: 'asserted', value: `@${'a'.repeat(100)}` } },
+    ],
     ['a comment with newlines', { ...record(), comment: 'line one\nline two' }],
     ['a comment of 2000 code points', { ...record(), comment: '\u{1F600}'.repeat(2000) }],
     ['the reserved signature fields', { ...record(), signatureType: 'ssh', signature }],
@@ -183,6 +205,22 @@ describe('approval record schema', () => {
       { ...record(), approver: { source: 'asserted', value: '@j\u0430ne' } },
     ],
     ['a signed approver', { ...record(), approver: { source: 'ssh-key', value: '@jane' } }],
+    [
+      'an approver with two dots in a row',
+      { ...record(), approver: { source: 'asserted', value: '@a..b' } },
+    ],
+    [
+      'an approver with a trailing dot',
+      { ...record(), approver: { source: 'asserted', value: '@jane.' } },
+    ],
+    [
+      'an approver with a leading dot',
+      { ...record(), approver: { source: 'asserted', value: '@.j' } },
+    ],
+    [
+      'an approver of 101 characters',
+      { ...record(), approver: { source: 'asserted', value: `@${'a'.repeat(101)}` } },
+    ],
     ['an approver extra key', { ...record(), approver: { source: 'asserted', value: '@j', x: 1 } }],
     ['a date without milliseconds', { ...record(), createdAt: '2026-10-22T09:14:03Z' }],
     ['an uppercase environment', { ...record(), environment: 'Prod' }],
