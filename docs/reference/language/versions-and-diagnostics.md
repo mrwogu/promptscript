@@ -83,40 +83,40 @@ their replacement, models outside `models.supported`, and inconsistent
 
 ## Key Diagnostics
 
-| Diagnostic | Meaning                                                   | Action                                       |
-| ---------- | --------------------------------------------------------- | -------------------------------------------- |
-| PS018      | Used feature requires newer syntax                        | Run `prs validate --fix` or `prs upgrade`    |
-| PS019      | Unknown built-in block name                               | Correct typo or confirm custom block intent  |
-| PS030      | Policy from `promptscript.yaml` not met                   | Fix the prompt, skill or policy it names     |
-| PS034      | Invalid hook executable or option                         | Fix command, script, or target override      |
-| PS037      | Invalid contextual section header                         | Fix owner, key, title, or duplicate          |
-| PS038      | Unsupported or risky built-in block shape                 | Convert to canonical shape                   |
-| PS041      | Unsupported model or invalid model profile                | Switch model or update `models` config       |
-| PS042      | Invalid `@prompts` entry or governance value              | Fix the entry as the message describes       |
-| PS043      | Undeclared or malformed runtime slot                      | Declare the input or fix the slot            |
-| PS044      | Declared prompt input is never used                       | Use the input or remove it                   |
-| PS045      | `{{name}}` left in text (syntax 1.6.0+)                   | Bind it with a parameter or remove it        |
-| PS046      | Runtime slot in the system message                        | Move the slot to the user message            |
-| PS047      | Owner, reviewer or data class off the config              | Use a Git host identity or a listed class    |
-| PS4002     | Target cannot preserve requested capability               | Use documented target fallback               |
-| PS4004     | Target cannot run or write the model                      | Pick another model or set a target name      |
-| PS5001     | `releases` missing or invalid                             | Add `releases.environments`                  |
-| PS5002     | Environment not in `releases.environments`                | Use a configured environment                 |
-| PS5003     | Release bundle or prompt missing                          | Run `prs release build` or restore the file  |
-| PS5004     | Release file does not verify                              | Restore it from Git, or run the build        |
-| PS5005     | Promotion skips the previous environment                  | Promote to the previous environment first    |
-| PS5006     | Git history, base file or ref is not usable               | Commit the label, fetch base, use a full ref |
-| PS5007     | Another release command holds the lock                    | Wait, then run the command again             |
-| PS5008     | Compile output inside the release directory               | Point the target output elsewhere            |
-| PS5101     | `governance` missing or invalid, or no role               | Fix the section or add the role              |
-| PS5102     | Approval reference is not `<id>@<full hash>`              | Give the full `sha256-<64 hex>` hash         |
-| PS5103     | Approved hash is not built or released                    | Approve the hash `prs approve --list` shows  |
-| PS5104     | Approver is not a user handle                             | Use your handle, like `@jane`                |
-| PS5105     | Approval record exists                                    | Delete it in a commit to withdraw it         |
-| PS5106     | CODEOWNERS not managed by this project                    | Add the marker line the message names        |
-| PS5107     | CODEOWNERS owner or path refused                          | Use Git host identities and plain paths      |
-| PS5108     | Git missing, no repository, shallow history or Git failed | Run it in a Git checkout with git on PATH    |
-| PS5109     | Approval record invalid or misplaced                      | Fix, move or delete it in a commit           |
+| Diagnostic | Meaning                                                                                         | Action                                                                 |
+| ---------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| PS018      | Used feature requires newer syntax                                                              | Run `prs validate --fix` or `prs upgrade`                              |
+| PS019      | Unknown built-in block name                                                                     | Correct typo or confirm custom block intent                            |
+| PS030      | Policy from `promptscript.yaml` not met                                                         | Fix the prompt, skill or policy it names                               |
+| PS034      | Invalid hook executable or option                                                               | Fix command, script, or target override                                |
+| PS037      | Invalid contextual section header                                                               | Fix owner, key, title, or duplicate                                    |
+| PS038      | Unsupported or risky built-in block shape                                                       | Convert to canonical shape                                             |
+| PS041      | Unsupported model or invalid model profile                                                      | Switch model or update `models` config                                 |
+| PS042      | Invalid `@prompts` entry or governance value                                                    | Fix the entry as the message describes                                 |
+| PS043      | Undeclared or malformed runtime slot                                                            | Declare the input or fix the slot                                      |
+| PS044      | Declared prompt input is never used                                                             | Use the input or remove it                                             |
+| PS045      | `{{name}}` left in text (syntax 1.6.0+)                                                         | Bind it with a parameter or remove it                                  |
+| PS046      | Runtime slot in the system message                                                              | Move the slot to the user message                                      |
+| PS047      | Owner, reviewer or data class off the config                                                    | Use a Git host identity or a listed class                              |
+| PS4002     | Target cannot preserve requested capability                                                     | Use documented target fallback                                         |
+| PS4004     | Target cannot run or write the model                                                            | Pick another model or set a target name                                |
+| PS5001     | `releases` missing or invalid                                                                   | Add `releases.environments`                                            |
+| PS5002     | Environment not in `releases.environments`                                                      | Use a configured environment                                           |
+| PS5003     | Release bundle or prompt missing                                                                | Run `prs release build` or restore the file                            |
+| PS5004     | Release file does not verify                                                                    | Restore it from Git, or run the build                                  |
+| PS5005     | Promotion skips the previous environment                                                        | Promote to the previous environment first                              |
+| PS5006     | Git history, base file or ref is not usable                                                     | Commit the label, fetch base, use a full ref                           |
+| PS5007     | Another release command holds the lock                                                          | Wait, then run the command again                                       |
+| PS5008     | Compile output inside the release directory                                                     | Point the target output elsewhere                                      |
+| PS5101     | `governance` missing or invalid, or no role                                                     | Fix the section or add the role                                        |
+| PS5102     | Approval reference, prompt id or hash filter malformed                                          | Use `<id>@sha256-<64 hex>`, a hash filter takes 4+ hex digits          |
+| PS5103     | Approved hash is not built or released                                                          | Approve the hash `prs approve --list` shows                            |
+| PS5104     | Approver is not a user handle                                                                   | Use your handle, like `@jane`                                          |
+| PS5105     | Approval record exists                                                                          | Delete it in a commit to withdraw it                                   |
+| PS5106     | CODEOWNERS not managed by this project                                                          | Add the marker line the message names                                  |
+| PS5107     | CODEOWNERS owner or path refused                                                                | Use Git host identities and plain paths                                |
+| PS5108     | Git missing, no repository, shallow history, Git failed or history that does not explain `HEAD` | Run it in a full Git checkout with git on PATH, see the releases guide |
+| PS5109     | Approval record invalid or misplaced                                                            | Fix, move or delete it in a commit                                     |
 
 PS5109 is a warning when `prs approve --list` reads such a record, or a modified one (its bytes are
 not the ones Git has) or one with a role that is not in `governance.roles`. It is an error, with
