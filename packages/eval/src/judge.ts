@@ -1,6 +1,7 @@
 import { Buffer } from 'node:buffer';
 import {
   canonicalizeJson,
+  compareCodeUnits,
   findRuntimeSlots,
   sha256Hex,
   type EvalAssertionResultV1,
@@ -81,7 +82,7 @@ export function readVerdict(text: string): JudgeVerdict | undefined {
   const parsed = parseDocumentText(unwrapResponse(text), true);
   if (!parsed.ok || !isRecord(parsed.value)) return undefined;
   const object = parsed.value;
-  const keys = Object.keys(object).sort();
+  const keys = Object.keys(object).sort(compareCodeUnits);
   if (keys.length !== 2 || keys[0] !== 'reason' || keys[1] !== 'verdict') return undefined;
   const { verdict, reason } = object;
   if ((verdict !== 'pass' && verdict !== 'fail') || typeof reason !== 'string') return undefined;

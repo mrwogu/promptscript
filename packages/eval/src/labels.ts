@@ -1,5 +1,5 @@
 import { extname } from 'node:path';
-import type { EvalVerdict } from '@promptscript/core';
+import { compareCodeUnits, type EvalVerdict } from '@promptscript/core';
 import { parseCsv } from './dataset/csv.js';
 import { checkFile, readText } from './dataset/read.js';
 import { EVAL_CODES, EvalDatasetError, EvalError, type EvalFinding } from './errors.js';
@@ -261,7 +261,7 @@ export function unmatchedLabels(
   rowIds: ReadonlySet<string>,
   suiteFile: string
 ): EvalFinding[] {
-  const missing = [...labels.keys()].filter((id) => !rowIds.has(id)).sort();
+  const missing = [...labels.keys()].filter((id) => !rowIds.has(id)).sort(compareCodeUnits);
   if (missing.length === 0) return [];
   const names = missing.slice(0, 5).join(', ');
   const more = missing.length > 5 ? ` and ${missing.length - 5} more` : '';

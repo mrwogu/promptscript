@@ -1,4 +1,5 @@
 import {
+  compareCodeUnits,
   findRuntimeSlots,
   type EvalLlmJudgeAssertion,
   type EvalSuiteV1,
@@ -99,7 +100,7 @@ function checkSlots(assertion: EvalLlmJudgeAssertion, rubric: PromptBundleV1, ad
   const refused = new Set(
     system.filter((slot) => UNTRUSTED_INPUTS.has(slot.name)).map((slot) => slot.name)
   );
-  for (const name of [...refused].sort()) {
+  for (const name of [...refused].sort(compareCodeUnits)) {
     add(
       EVAL_CODES.RUBRIC_SLOT_IN_SYSTEM,
       `rubric "${rubric.id}" of assertion "${id}" puts "${name}" in a system message, where text under test would read as instructions; move it to a user message`
@@ -117,7 +118,7 @@ function checkSlots(assertion: EvalLlmJudgeAssertion, rubric: PromptBundleV1, ad
         .filter((slot) => UNTRUSTED_INPUTS.has(slot.name) && !fenced(slot))
         .map((slot) => slot.name)
     ),
-  ].sort();
+  ].sort(compareCodeUnits);
   if (loose.length > 0) {
     add(
       EVAL_CODES.RUBRIC_UNFENCED,
@@ -130,10 +131,10 @@ function checkSlots(assertion: EvalLlmJudgeAssertion, rubric: PromptBundleV1, ad
 function hasVerdictContract(rubric: PromptBundleV1): boolean {
   const properties = rubric.output?.properties;
   if (properties === undefined) return false;
-  const names = Object.keys(properties).sort();
+  const names = Object.keys(properties).sort(compareCodeUnits);
   const verdict = properties['verdict'];
   const reason = properties['reason'];
-  const options = [...(verdict?.enum ?? [])].sort();
+  const options = [...(verdict?.enum ?? [])].sort(compareCodeUnits);
   return (
     names.length === 2 &&
     names[0] === 'reason' &&
