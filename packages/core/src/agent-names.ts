@@ -32,6 +32,8 @@ function agentValuesEqual(left: Value, right: Value): boolean {
 
 /**
  * Build a qualified agent name from an import namespace.
+ *
+ * @internal Agent name helper, not part of the API.
  */
 export function qualifyAgentName(namespace: string, name: string): string {
   return `${namespace}.${name}`;
@@ -42,6 +44,8 @@ export function qualifyAgentName(namespace: string, name: string): string {
  *
  * Dots are namespace separators in qualified names, so native targets use
  * hyphens to avoid target-specific nested-path semantics.
+ *
+ * @internal Used by the resolver and formatters for agent name handling.
  */
 export function toNativeAgentName(name: string): string {
   return name.replace(/\./g, '-');
@@ -49,6 +53,8 @@ export function toNativeAgentName(name: string): string {
 
 /**
  * Create a deterministic, collision-safe native name map.
+ *
+ * @internal Used by the resolver and formatters for agent name handling.
  */
 export function createNativeAgentNameMap(names: readonly string[]): ReadonlyMap<string, string> {
   const result = new Map<string, string>();
@@ -71,6 +77,8 @@ export function createNativeAgentNameMap(names: readonly string[]): ReadonlyMap<
 
 /**
  * Resolve an agent property path after an `agents` target segment.
+ *
+ * @internal Used by the resolver and formatters for agent name handling.
  */
 export function resolveAgentTargetPath(
   pathParts: readonly string[],
@@ -117,6 +125,8 @@ export function getAgentProvenanceEntries(program: Program, name: string): Agent
 
 /**
  * Add fallback provenance for agent definitions that have no recorded origin.
+ *
+ * @internal Used by the resolver and formatters for agent name handling.
  */
 export function ensureAgentProvenance(
   program: Program,
@@ -147,6 +157,8 @@ export function ensureAgentProvenance(
 
 /**
  * Collect conflicting agent definitions before a merge.
+ *
+ * @internal Used by the resolver and formatters for agent name handling.
  */
 export function findAgentConflicts(
   target: Program,
@@ -195,6 +207,8 @@ export function findAgentConflicts(
 
 /**
  * Replace agent property names with an import-qualified namespace.
+ *
+ * @internal Agent name helper, not part of the API.
  */
 export function qualifyAgentProperties(
   content: ObjectContent | MixedContent,

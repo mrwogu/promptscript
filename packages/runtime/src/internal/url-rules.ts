@@ -1,4 +1,8 @@
-/** Options of {@link refuseUrl}. */
+/**
+ * Options of {@link refuseUrl}.
+ *
+ * @internal Used by eval providers for URL checks.
+ */
 export interface UrlRuleOptions {
   /**
    * When true, private network addresses and names are allowed: `10/8`, `100.64/10`,
@@ -113,6 +117,7 @@ function hostKind(hostname: string): string | undefined {
  * refuseUrl('http://example.com/', { allowPrivate: true }); // 'scheme is not https'
  * refuseUrl('https://10.0.0.1/', { allowPrivate: false }); // 'host is private'
  * refuseUrl('https://10.0.0.1/', { allowPrivate: true }); // undefined
+ * @internal Used by eval providers for URL checks.
  */
 export function refuseUrl(url: string | URL, options: UrlRuleOptions): string | undefined {
   let parsed: URL;

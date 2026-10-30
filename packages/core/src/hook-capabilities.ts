@@ -365,10 +365,12 @@ export const PORTABLE_HOOK_INTERPRETERS = [
 
 export type PortableHookInterpreter = (typeof PORTABLE_HOOK_INTERPRETERS)[number];
 
+/** @internal Used by the validator and formatters for hook checks. */
 export function isPortableHookInterpreter(value: string): value is PortableHookInterpreter {
   return (PORTABLE_HOOK_INTERPRETERS as readonly string[]).includes(value);
 }
 
+/** @internal Used by the validator and formatters for hook checks. */
 export function isPortablePathSegment(segment: string): boolean {
   if (
     segment.length === 0 ||
@@ -385,6 +387,7 @@ export function isPortablePathSegment(segment: string): boolean {
   return !/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/.test(basename);
 }
 
+/** @internal Used by the validator and formatters for hook checks. */
 export function isPortableHookScriptPath(value: string): boolean {
   if (!value.startsWith('.promptscript/scripts/')) return false;
   if (

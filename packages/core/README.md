@@ -65,6 +65,10 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 | **logger**               | `Logger` interface for verbose/debug output                                                                  |
 | **template**             | Template interpolation for parameterized skills                                                              |
 
+The modules `block-merge`, `url-rules`, `provenance-files`, `model-profiles`, `utils/diagnostic`,
+`utils/merge`, `utils/package`, `utils/path`, `utils/version`, `utils/levenshtein`,
+`utils/canonical-json` and `utils/sha256` are shared helpers marked `@internal`.
+
 ## API Reference
 
 ### Syntax version registry
@@ -94,13 +98,6 @@ The version string is the key in `SYNTAX_VERSIONS`, not a property of `SyntaxVer
 | `getMinimumVersionForFeature(feature)` | Returns the earliest version that introduced non-block syntax `feature`    |
 | `getSyntaxFeatureUsages(ast)`          | Returns versioned non-block syntax usage retained in a parsed/resolved AST |
 
-### String-matching utilities
-
-| Export                                              | Description                                                                                                       |
-| :-------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
-| `levenshteinDistance(a, b)`                         | Calculates the Levenshtein edit distance between strings `a` and `b`                                              |
-| `findClosestMatch(input, candidates, maxDistance?)` | Returns the closest candidate to `input` within `maxDistance` edits (default 2), or `undefined` if none qualifies |
-
 ### Canonical AST
 
 `CanonicalProgram` is the immutable, source-ordered AST. Its
@@ -121,46 +118,36 @@ Compatibility timeline:
 3. Next major release: legacy-only entry points may be removed after formatter
    and integration migration is complete.
 
-| Export                                | Description                                                        |
-| :------------------------------------ | :----------------------------------------------------------------- |
-| `createCanonicalProgram(init)`        | Creates and deeply freezes a canonical program                     |
-| `updateCanonicalProgramOperations()`  | Returns a frozen program with a replacement operation sequence     |
-| `updateCanonicalBlockBody()`          | Returns a frozen block with a replacement ordered body             |
-| `normalizeProgram(input)`             | Converts canonical or legacy input to a canonical program          |
-| `toLegacyProgram(program)`            | Creates a detached mutable compatibility projection                |
-| `getCanonicalBlocks(program)`         | Reads blocks from either AST representation                        |
-| `mergeBlockContent(base, next, rule)` | Applies a shared inheritance or import content policy              |
-| `mergeBlockCollections(...)`          | Merges one cross-layer match while retaining same-layer duplicates |
+| Export                               | Description                                                    |
+| :----------------------------------- | :------------------------------------------------------------- |
+| `createCanonicalProgram(init)`       | Creates and deeply freezes a canonical program                 |
+| `updateCanonicalProgramOperations()` | Returns a frozen program with a replacement operation sequence |
+| `updateCanonicalBlockBody()`         | Returns a frozen block with a replacement ordered body         |
+| `normalizeProgram(input)`            | Converts canonical or legacy input to a canonical program      |
+| `toLegacyProgram(program)`           | Creates a detached mutable compatibility projection            |
+| `getCanonicalBlocks(program)`        | Reads blocks from either AST representation                    |
 
 ### Prompt targets
 
 The `bundle` and `prompt-text` targets belong to the `prompt` family and use the `general` section
 profile. No default selection includes them.
 
-| Export                                 | Description                                                                                                     |
-| :------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
-| `SECTION_PROFILES`                     | Section contracts per profile. `coding` is the existing registry, `general` has five                            |
-| `SectionProfile`                       | `'coding'` or `'general'`. Every target reports its profile as `sectionProfile`                                 |
-| `isPromptTarget(name)`                 | True for a built-in target of the `prompt` family                                                               |
-| `CODING_TARGETS`                       | Every known target except the prompt family                                                                     |
-| `compareCodeUnits(a, b)`               | Compares two strings by UTF-16 code units, the order RFC 8785 requires, whatever the locale                     |
-| `PROMPT_BUNDLE_SCHEMA_URL`             | Schema URL of a prompt bundle, the version tag inside the hash                                                  |
-| `PROMPT_BUNDLE_INDEX_SCHEMA_URL`       | Schema URL of a prompt bundle index                                                                             |
-| `hashPromptBundle(bundle)`             | `sha256-` plus SHA-256 over the canonical JSON without `contentHash` and `provenance`                           |
-| `refuseUrl(url, options)`              | Why a remote prompt file URL is refused, or `undefined`. `allowPrivate: true` lets private hosts pass           |
-| `normalizeProvenanceFiles(...)`        | Rewrites a trace: authored reference for a pack, relative path in the root, else `external:` plus the base name |
-| `readMetaGovernance(fields)`           | Reads the governance defaults of `@meta`                                                                        |
-| `effectiveGovernance(entry, defaults)` | Governance a bundle carries: entry value, else the `@meta` default; data classes joined, lists sorted           |
-| `isApprovalRecordV1(value)`            | Checks the keys and every field pattern of an approval record                                                   |
-| `serializeApprovalRecord(record)`      | The exact bytes of a record file: fixed key order, two-space indent, trailing newline                           |
-| `parseApprovalRecord(bytes)`           | Reads record file bytes; refuses invalid UTF-8 and bytes that differ from its own serialization                 |
-| `approvalRecordPath(record)`           | `.promptscript/approvals/<role>/<prompt id>/<contentHash>.<approver slug>.json`; throws on an invalid record    |
-| `extractPromptDefinitions(...)`        | Reads the `@prompts` entries of a program into typed definitions                                                |
-
-`normalizeProvenanceFiles` is pure. It takes an optional `realpath` function and works for POSIX
-and Windows paths. It covers every file in a trace: entries, history steps, chain links, nested
-traces and absolute targets. Anything that would still be absolute, climb above the root or carry a
-drive letter becomes `external:<basename>`.
+| Export                                 | Description                                                                                                  |
+| :------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
+| `SECTION_PROFILES`                     | Section contracts per profile. `coding` is the existing registry, `general` has five                         |
+| `SectionProfile`                       | `'coding'` or `'general'`. Every target reports its profile as `sectionProfile`                              |
+| `isPromptTarget(name)`                 | True for a built-in target of the `prompt` family                                                            |
+| `CODING_TARGETS`                       | Every known target except the prompt family                                                                  |
+| `PROMPT_BUNDLE_SCHEMA_URL`             | Schema URL of a prompt bundle, the version tag inside the hash                                               |
+| `PROMPT_BUNDLE_INDEX_SCHEMA_URL`       | Schema URL of a prompt bundle index                                                                          |
+| `hashPromptBundle(bundle)`             | `sha256-` plus SHA-256 over the canonical JSON without `contentHash` and `provenance`                        |
+| `readMetaGovernance(fields)`           | Reads the governance defaults of `@meta`                                                                     |
+| `effectiveGovernance(entry, defaults)` | Governance a bundle carries: entry value, else the `@meta` default; data classes joined, lists sorted        |
+| `isApprovalRecordV1(value)`            | Checks the keys and every field pattern of an approval record                                                |
+| `serializeApprovalRecord(record)`      | The exact bytes of a record file: fixed key order, two-space indent, trailing newline                        |
+| `parseApprovalRecord(bytes)`           | Reads record file bytes; refuses invalid UTF-8 and bytes that differ from its own serialization              |
+| `approvalRecordPath(record)`           | `.promptscript/approvals/<role>/<prompt id>/<contentHash>.<approver slug>.json`; throws on an invalid record |
+| `extractPromptDefinitions(...)`        | Reads the `@prompts` entries of a program into typed definitions                                             |
 
 An `OutputArtifact` with `omit` set is skipped by `createOutputPlan`. A formatter uses it when it has
 no file to write. The plan still records the managed directories of such an artifact in
@@ -216,14 +203,16 @@ import type { Program, Block, Value } from '@promptscript/core';
 import { ParseError, ValidationError } from '@promptscript/core';
 
 // Utilities
-import { parsePath, parseVersion, deepMerge } from '@promptscript/core';
+import { collectProvenance, extractPromptDefinitions } from '@promptscript/core';
 
 // Logger
 import type { Logger } from '@promptscript/core';
 
 // Template
-import { interpolateTemplate } from '@promptscript/core';
+import { interpolateText } from '@promptscript/core';
 ```
+
+Exports tagged `@internal` are shared between PromptScript packages and are not a stable API.
 
 ## License
 

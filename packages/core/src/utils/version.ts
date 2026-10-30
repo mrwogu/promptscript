@@ -21,6 +21,7 @@ export type CompareResult = -1 | 0 | 1;
  * @param version - Version string (e.g., "1.2.3", "1.0.0-beta.1")
  * @returns Parsed version object
  * @throws {Error} If version format is invalid
+ * @internal Shared semver helper.
  */
 export function parseVersion(version: string): SemVer {
   const match = version.match(/^(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.-]+))?$/);
@@ -42,6 +43,7 @@ export function parseVersion(version: string): SemVer {
  * Compare two semantic versions.
  *
  * @returns -1 if a < b, 0 if a === b, 1 if a > b
+ * @internal Shared semver helper.
  */
 export function compareVersions(a: string, b: string): CompareResult {
   const va = parseVersion(a);
@@ -85,6 +87,8 @@ function comparePrerelease(a: string | undefined, b: string | undefined): Compar
 
 /**
  * Check if a version string is valid semantic version.
+ *
+ * @internal Shared semver helper.
  */
 export function isValidVersion(version: string): boolean {
   try {
@@ -97,6 +101,8 @@ export function isValidVersion(version: string): boolean {
 
 /**
  * Format a SemVer object to string.
+ *
+ * @internal Shared semver helper.
  */
 export function formatVersion(version: SemVer): string {
   let result = `${version.major}.${version.minor}.${version.patch}`;
@@ -108,6 +114,8 @@ export function formatVersion(version: SemVer): string {
 
 /**
  * Increment a version.
+ *
+ * @internal Shared semver helper.
  */
 export function incrementVersion(version: string, type: 'major' | 'minor' | 'patch'): string {
   const v = parseVersion(version);

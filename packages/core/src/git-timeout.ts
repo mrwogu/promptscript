@@ -6,6 +6,8 @@
  * branch names are stripped first: a repository or ref literally called
  * "timeout" must not be mistaken for a timed-out operation, because callers use
  * this classification to stop retrying with other credentials.
+ *
+ * @internal Used by the CLI and resolver for git handling.
  */
 export function isGitTimeoutError(error: Error): boolean {
   const errorWithCode = error as Error & { code?: unknown; cause?: unknown };
