@@ -6,7 +6,7 @@
 
 # Interface: ParityReport
 
-Defined in: [formatters/src/parity-matrix.ts:364](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/parity-matrix.ts#L364)
+Defined in: [formatters/src/parity-matrix.ts:364](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/parity-matrix.ts#L364)
 
 Generate a parity report comparing formatter outputs.
 
@@ -16,7 +16,7 @@ Generate a parity report comparing formatter outputs.
 
 > **contentIssues**: `object`[]
 
-Defined in: [formatters/src/parity-matrix.ts:369](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/parity-matrix.ts#L369)
+Defined in: [formatters/src/parity-matrix.ts:369](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/parity-matrix.ts#L369)
 
 #### issue
 
@@ -32,7 +32,7 @@ Defined in: [formatters/src/parity-matrix.ts:369](https://github.com/mrwogu/prom
 
 > **extraSections**: `string`[]
 
-Defined in: [formatters/src/parity-matrix.ts:368](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/parity-matrix.ts#L368)
+Defined in: [formatters/src/parity-matrix.ts:368](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/parity-matrix.ts#L368)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [formatters/src/parity-matrix.ts:368](https://github.com/mrwogu/prom
 
 > **formatter**: [`KnownTarget`](https://getpromptscript.dev/api-reference/core/src/type-aliases/KnownTarget/index.md)
 
-Defined in: [formatters/src/parity-matrix.ts:365](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/parity-matrix.ts#L365)
+Defined in: [formatters/src/parity-matrix.ts:365](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/parity-matrix.ts#L365)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [formatters/src/parity-matrix.ts:365](https://github.com/mrwogu/prom
 
 > **missingSections**: `string`[]
 
-Defined in: [formatters/src/parity-matrix.ts:367](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/parity-matrix.ts#L367)
+Defined in: [formatters/src/parity-matrix.ts:367](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/parity-matrix.ts#L367)
 
 ***
 
@@ -56,4 +56,4 @@ Defined in: [formatters/src/parity-matrix.ts:367](https://github.com/mrwogu/prom
 
 > **presentSections**: `string`[]
 
-Defined in: [formatters/src/parity-matrix.ts:366](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/parity-matrix.ts#L366)
+Defined in: [formatters/src/parity-matrix.ts:366](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/parity-matrix.ts#L366)

@@ -6,7 +6,7 @@
 
 # Interface: PromptBundleV1
 
-Defined in: [core/src/types/prompt-bundle.ts:112](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L112)
+Defined in: [core/src/types/prompt-bundle.ts:112](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L112)
 
 A portable, content-hashed prompt bundle, version 1.
 
@@ -19,7 +19,7 @@ except `contentHash` and `provenance`.
 
 > **$schema**: `"https://getpromptscript.dev/schema/prompt-bundle/v1.json"`
 
-Defined in: [core/src/types/prompt-bundle.ts:117](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L117)
+Defined in: [core/src/types/prompt-bundle.ts:117](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L117)
 
 Schema URL, the version tag of the bundle.
 
@@ -35,7 +35,7 @@ Schema URL, the version tag of the bundle.
 
 > **contentHash**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:129](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L129)
+Defined in: [core/src/types/prompt-bundle.ts:129](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L129)
 
 Content hash: `sha256-` plus 64 lowercase hex characters.
 
@@ -49,7 +49,7 @@ Content hash: `sha256-` plus 64 lowercase hex characters.
 
 > **description**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:124](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L124)
+Defined in: [core/src/types/prompt-bundle.ts:124](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L124)
 
 What the prompt does
 
@@ -59,7 +59,7 @@ What the prompt does
 
 > **governance**: [`GovernanceMeta`](https://getpromptscript.dev/api-reference/core/src/interfaces/GovernanceMeta/index.md)
 
-Defined in: [core/src/types/prompt-bundle.ts:143](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L143)
+Defined in: [core/src/types/prompt-bundle.ts:143](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L143)
 
 Effective governance: the entry value, else the file-level default. Lists are sorted and deduplicated.
 
@@ -69,7 +69,7 @@ Effective governance: the entry value, else the file-level default. Lists are so
 
 > **id**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:122](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L122)
+Defined in: [core/src/types/prompt-bundle.ts:122](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L122)
 
 Prompt id, `<@meta.id>/<key>`.
 
@@ -85,7 +85,7 @@ Prompt id, `<@meta.id>/<key>`.
 
 > **inputs**: `Record`\<`string`, [`PromptBundleInput`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptBundleInput/index.md)\>
 
-Defined in: [core/src/types/prompt-bundle.ts:137](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L137)
+Defined in: [core/src/types/prompt-bundle.ts:137](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L137)
 
 Declared runtime inputs by name
 
@@ -95,7 +95,7 @@ Declared runtime inputs by name
 
 > **messages**: [`PromptBundleMessage`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptBundleMessage/index.md)[]
 
-Defined in: [core/src/types/prompt-bundle.ts:135](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L135)
+Defined in: [core/src/types/prompt-bundle.ts:135](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L135)
 
 One or two messages, system first.
 
@@ -113,7 +113,7 @@ One or two messages, system first.
 
 > `optional` **model?**: [`PromptBundleModel`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptBundleModel/index.md)
 
-Defined in: [core/src/types/prompt-bundle.ts:141](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L141)
+Defined in: [core/src/types/prompt-bundle.ts:141](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L141)
 
 Model identity and parameters
 
@@ -123,7 +123,7 @@ Model identity and parameters
 
 > `optional` **output?**: [`PromptBundleOutput`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptBundleOutput/index.md)
 
-Defined in: [core/src/types/prompt-bundle.ts:139](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L139)
+Defined in: [core/src/types/prompt-bundle.ts:139](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L139)
 
 Output contract
 
@@ -133,6 +133,6 @@ Output contract
 
 > **provenance**: [`PromptBundleProvenance`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptBundleProvenance/index.md)
 
-Defined in: [core/src/types/prompt-bundle.ts:145](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompt-bundle.ts#L145)
+Defined in: [core/src/types/prompt-bundle.ts:145](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L145)
 
 Provenance of the messages

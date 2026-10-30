@@ -8,7 +8,7 @@
 
 > **parseApprovalRecord**(`content`): [`ApprovalRecordV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/ApprovalRecordV1/index.md) \| `undefined`
 
-Defined in: [core/src/types/approval.ts:166](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L166)
+Defined in: [core/src/types/approval.ts:189](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L189)
 
 Read an approval record file. The bytes must be valid UTF-8, pass
 [isApprovalRecordV1](https://getpromptscript.dev/api-reference/core/src/functions/isApprovalRecordV1/index.md) and equal the UTF-8 bytes of

@@ -8,7 +8,7 @@
 
 > **FormatterVersionMap** = `Readonly`\<`Record`\<`string`, [`FormatterVersionInfo`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterVersionInfo/index.md)\>\>
 
-Defined in: [formatters/src/types.ts:190](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/types.ts#L190)
+Defined in: [formatters/src/types.ts:190](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/types.ts#L190)
 
 Version configuration map returned by getSupportedVersions().
 Maps version name to its configuration.

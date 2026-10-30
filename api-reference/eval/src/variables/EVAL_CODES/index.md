@@ -8,11 +8,11 @@
 
 > `const` **EVAL\_CODES**: `object`
 
-Defined in: [eval/src/errors.ts:8](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/errors.ts#L8)
+Defined in: [eval/src/errors.ts:8](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/errors.ts#L8)
 
 Codes of eval errors and findings: `PS61xx` datasets, `PS62xx` suites,
 `PS63xx` providers and the run, `PS64xx` cache, `PS65xx` cost, `PS66xx` judge,
-`PS67xx` reports.
+`PS67xx` reports and sample imports.
 
 ## Type Declaration
 
@@ -94,11 +94,35 @@ Dataset file cannot be read or parsed, or a row has the wrong shape
 
 Dataset breaks a size or row limit
 
-### JUDGE\_UNSUPPORTED
+### IMPORT\_OUT\_REFUSED
 
-> `readonly` **JUDGE\_UNSUPPORTED**: `"PS6600"` = `'PS6600'`
+> `readonly` **IMPORT\_OUT\_REFUSED**: `"PS6713"` = `'PS6713'`
 
-The suite has an llm-judge assertion, which this version cannot run
+The import output path exists or is refused
+
+### JUDGE\_MODEL\_MISSING
+
+> `readonly` **JUDGE\_MODEL\_MISSING**: `"PS6209"` = `'PS6209'`
+
+No judge model on the assertion, the suite or the rubric
+
+### JUDGE\_SAME\_MODEL
+
+> `readonly` **JUDGE\_SAME\_MODEL**: `"PS6215"` = `'PS6215'`
+
+The judge runs on a model under test
+
+### JUDGE\_TARGET\_TOO\_LONG
+
+> `readonly` **JUDGE\_TARGET\_TOO\_LONG**: `"PS6602"` = `'PS6602'`
+
+The judged text is over 64 KiB
+
+### JUDGE\_UNPARSABLE
+
+> `readonly` **JUDGE\_UNPARSABLE**: `"PS6601"` = `'PS6601'`
+
+More than half of the judge runs of a case gave no valid verdict
 
 ### KEY\_IN\_CONFIG
 
@@ -112,11 +136,41 @@ The value of a provider key appears in the eval config
 
 The environment variable of a provider key is not set
 
+### LABEL\_ASSERTION
+
+> `readonly` **LABEL\_ASSERTION**: `"PS6211"` = `'PS6211'`
+
+A label names an assertion that is not an llm-judge assertion of the suite
+
+### LABEL\_PROMPT\_MISSING
+
+> `readonly` **LABEL\_PROMPT\_MISSING**: `"PS6311"` = `'PS6311'`
+
+A suite's prompt is not in the release label, or has no arm of the variant
+
+### LABELS\_INVALID
+
+> `readonly` **LABELS\_INVALID**: `"PS6603"` = `'PS6603'`
+
+A label file cannot be read, is too big, or holds a bad or duplicate row
+
+### LABELS\_UNMATCHED
+
+> `readonly` **LABELS\_UNMATCHED**: `"PS6604"` = `'PS6604'`
+
+Labels name rows the run did not read
+
 ### MODEL\_REF
 
 > `readonly` **MODEL\_REF**: `"PS6206"` = `'PS6206'`
 
 A model reference does not resolve, is retired or deprecated
+
+### NO\_SAMPLE\_MATCHED
+
+> `readonly` **NO\_SAMPLE\_MATCHED**: `"PS6715"` = `'PS6715'`
+
+No sample matched the suite
 
 ### NO\_SCHEMA
 
@@ -226,6 +280,30 @@ Row id is malformed or used twice
 
 An equals assertion has no value and the row has no expected value for it
 
+### RUBRIC\_INVALID
+
+> `readonly` **RUBRIC\_INVALID**: `"PS6207"` = `'PS6207'`
+
+A judge rubric is the prompt under test, or its inputs do not fit the judge call
+
+### RUBRIC\_OUTPUT
+
+> `readonly` **RUBRIC\_OUTPUT**: `"PS6208"` = `'PS6208'`
+
+A judge rubric output is not exactly a `verdict` of pass or fail and a `reason`
+
+### RUBRIC\_SLOT\_IN\_SYSTEM
+
+> `readonly` **RUBRIC\_SLOT\_IN\_SYSTEM**: `"PS6212"` = `'PS6212'`
+
+A judge rubric system message holds the response, the case inputs or the expected value
+
+### RUBRIC\_UNFENCED
+
+> `readonly` **RUBRIC\_UNFENCED**: `"PS6216"` = `'PS6216'`
+
+A judge rubric shows the response, case inputs or expected value outside a boundary fence
+
 ### RUN\_OPTION\_INVALID
 
 > `readonly` **RUN\_OPTION\_INVALID**: `"PS6309"` = `'PS6309'`
@@ -238,6 +316,24 @@ A run option is out of range, such as a concurrency that is not a positive integ
 
 The run stopped before the case ran
 
+### SAMPLE\_INVALID
+
+> `readonly` **SAMPLE\_INVALID**: `"PS6711"` = `'PS6711'`
+
+A sample file cannot be read, or has a shape the import cannot use
+
+### SAMPLE\_LIMIT
+
+> `readonly` **SAMPLE\_LIMIT**: `"PS6712"` = `'PS6712'`
+
+A sample file has more lines than the import reads
+
+### SAMPLE\_TRACKED
+
+> `readonly` **SAMPLE\_TRACKED**: `"PS6716"` = `'PS6716'`
+
+The sample file is tracked by Git
+
 ### SCAN\_ERROR
 
 > `readonly` **SCAN\_ERROR**: `"PS6110"` = `'PS6110'`
@@ -249,6 +345,12 @@ A validator rule reports an error in a dataset value
 > `readonly` **SCAN\_WARNING**: `"PS6111"` = `'PS6111'`
 
 A validator rule reports a warning in a dataset value
+
+### SCRUB\_LEFT\_PII
+
+> `readonly` **SCRUB\_LEFT\_PII**: `"PS6714"` = `'PS6714'`
+
+The scrub left personal data in a value
 
 ### SUITE\_DUPLICATE
 

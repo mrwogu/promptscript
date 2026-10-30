@@ -6,7 +6,7 @@
 
 # Interface: EvalDatasetAllow
 
-Defined in: [core/src/types/eval.ts:34](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L34)
+Defined in: [core/src/types/eval.ts:34](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L34)
 
 A dataset scan rule the suite owner expects to fire, with the reason.
 
@@ -16,7 +16,7 @@ A dataset scan rule the suite owner expects to fire, with the reason.
 
 > **reason**: `string`
 
-Defined in: [core/src/types/eval.ts:46](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L46)
+Defined in: [core/src/types/eval.ts:46](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L46)
 
 Why the content is expected; copied into the report.
 
@@ -34,7 +34,7 @@ Why the content is expected; copied into the report.
 
 > **rule**: `string`
 
-Defined in: [core/src/types/eval.ts:40](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L40)
+Defined in: [core/src/types/eval.ts:40](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L40)
 
 Validator rule id whose findings are expected in the dataset.
 

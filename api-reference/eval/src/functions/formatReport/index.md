@@ -8,7 +8,7 @@
 
 > **formatReport**(`report`, `format`, `options?`): `string`
 
-Defined in: [eval/src/format.ts:405](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/format.ts#L405)
+Defined in: [eval/src/format.ts:433](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/format.ts#L433)
 
 Format a report. Every string is normalized first: line breaks fold to a
 space and control and bidi characters go, in all four formats, on and off a

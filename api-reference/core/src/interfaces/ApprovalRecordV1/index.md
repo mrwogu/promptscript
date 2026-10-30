@@ -6,7 +6,7 @@
 
 # Interface: ApprovalRecordV1
 
-Defined in: [core/src/types/approval.ts:24](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L24)
+Defined in: [core/src/types/approval.ts:25](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L25)
 
 Approval of one exact prompt version by one approver in one role, version 1.
 Unsigned: the record is a claim until the change adding it is reviewed.
@@ -17,7 +17,7 @@ Unsigned: the record is a claim until the change adding it is reviewed.
 
 > **$schema**: `"https://getpromptscript.dev/schema/approval-record/v1.json"`
 
-Defined in: [core/src/types/approval.ts:29](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L29)
+Defined in: [core/src/types/approval.ts:30](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L30)
 
 Schema URL, the version tag of the record.
 
@@ -33,7 +33,7 @@ Schema URL, the version tag of the record.
 
 > **approver**: [`ApprovalApproverV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/ApprovalApproverV1/index.md)
 
-Defined in: [core/src/types/approval.ts:44](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L44)
+Defined in: [core/src/types/approval.ts:45](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L45)
 
 Who approved
 
@@ -43,7 +43,7 @@ Who approved
 
 > `optional` **comment?**: `string`
 
-Defined in: [core/src/types/approval.ts:59](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L59)
+Defined in: [core/src/types/approval.ts:60](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L60)
 
 Note of the approver, without control characters except newline and
 without lone surrogates.
@@ -62,7 +62,7 @@ without lone surrogates.
 
 > **contentHash**: `string`
 
-Defined in: [core/src/types/approval.ts:40](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L40)
+Defined in: [core/src/types/approval.ts:41](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L41)
 
 Content hash of the approved bundle.
 
@@ -76,7 +76,7 @@ Content hash of the approved bundle.
 
 > **createdAt**: `string`
 
-Defined in: [core/src/types/approval.ts:50](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L50)
+Defined in: [core/src/types/approval.ts:51](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L51)
 
 Creation time, self-asserted and never used to decide.
 
@@ -96,7 +96,7 @@ Creation time, self-asserted and never used to decide.
 
 > `optional` **environment?**: [`ReleaseEnvironmentName`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ReleaseEnvironmentName/index.md)
 
-Defined in: [core/src/types/approval.ts:52](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L52)
+Defined in: [core/src/types/approval.ts:53](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L53)
 
 The only environment the approval counts for. Absent means every environment.
 
@@ -106,7 +106,7 @@ The only environment the approval counts for. Absent means every environment.
 
 > **prompt**: `string`
 
-Defined in: [core/src/types/approval.ts:35](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L35)
+Defined in: [core/src/types/approval.ts:36](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L36)
 
 Prompt id, `<@meta.id>/<key>`. No segment ends with a dot.
 
@@ -126,7 +126,7 @@ Prompt id, `<@meta.id>/<key>`. No segment ends with a dot.
 
 > **role**: [`GovernanceRoleName`](https://getpromptscript.dev/api-reference/core/src/type-aliases/GovernanceRoleName/index.md)
 
-Defined in: [core/src/types/approval.ts:42](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L42)
+Defined in: [core/src/types/approval.ts:43](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L43)
 
 Approval role from `governance.roles`
 
@@ -136,7 +136,7 @@ Approval role from `governance.roles`
 
 > `optional` **signature?**: `string`
 
-Defined in: [core/src/types/approval.ts:70](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L70)
+Defined in: [core/src/types/approval.ts:71](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L71)
 
 Armored SSH signature over the UTF-8 bytes of the RFC 8785 canonical JSON
 (`canonicalizeJson`) of the record without `signature`; `signatureType` is
@@ -157,6 +157,6 @@ Reserved, not written or read in this version.
 
 > `optional` **signatureType?**: `"ssh"`
 
-Defined in: [core/src/types/approval.ts:61](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L61)
+Defined in: [core/src/types/approval.ts:62](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L62)
 
 Signature format, see `signature`. Reserved, not written or read in this version.

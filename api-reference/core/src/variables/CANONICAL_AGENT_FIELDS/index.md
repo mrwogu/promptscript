@@ -8,6 +8,6 @@
 
 > `const` **CANONICAL\_AGENT\_FIELDS**: readonly \[`"description"`, `"content"`, `"tools"`, `"model"`, `"reasoningEffort"`, `"specModel"`, `"specReasoningEffort"`, `"disallowedTools"`, `"permissionMode"`, `"skills"`, `"mcpServers"`, `"sandboxMode"`, `"nicknameCandidates"`, `"handoffs"`, `"maxTurns"`, `"memory"`, `"background"`, `"isolation"`\]
 
-Defined in: [core/src/agent-capabilities.ts:17](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/agent-capabilities.ts#L17)
+Defined in: [core/src/agent-capabilities.ts:17](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/agent-capabilities.ts#L17)
 
 Canonical, portable `@agents` fields understood by the toolchain.

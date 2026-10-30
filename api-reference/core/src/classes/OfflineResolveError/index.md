@@ -6,7 +6,7 @@
 
 # Class: OfflineResolveError
 
-Defined in: [core/src/errors/registry.ts:82](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/errors/registry.ts#L82)
+Defined in: [core/src/errors/registry.ts:82](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/errors/registry.ts#L82)
 
 Cannot resolve import while offline with no cached version.
 
@@ -20,7 +20,7 @@ Cannot resolve import while offline with no cached version.
 
 > **new OfflineResolveError**(`importPath`, `location?`): `OfflineResolveError`
 
-Defined in: [core/src/errors/registry.ts:85](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/errors/registry.ts#L85)
+Defined in: [core/src/errors/registry.ts:85](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/errors/registry.ts#L85)
 
 #### Parameters
 
@@ -46,7 +46,7 @@ Defined in: [core/src/errors/registry.ts:85](https://github.com/mrwogu/promptscr
 
 > `readonly` `optional` **cause?**: `Error`
 
-Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/errors/base.ts#L56)
+Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/errors/base.ts#L56)
 
 Original error if wrapping another error
 
@@ -60,7 +60,7 @@ Original error if wrapping another error
 
 > `readonly` **code**: `string`
 
-Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/errors/base.ts#L52)
+Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/errors/base.ts#L52)
 
 Error code
 
@@ -74,7 +74,7 @@ Error code
 
 > `readonly` **importPath**: `string`
 
-Defined in: [core/src/errors/registry.ts:83](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/errors/registry.ts#L83)
+Defined in: [core/src/errors/registry.ts:83](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/errors/registry.ts#L83)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: [core/src/errors/registry.ts:83](https://github.com/mrwogu/promptscr
 
 > `readonly` `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/errors/base.ts#L54)
+Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/errors/base.ts#L54)
 
 Source location where error occurred
 
@@ -96,7 +96,7 @@ Source location where error occurred
 
 > **format**(): `string`
 
-Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/errors/base.ts#L79)
+Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/errors/base.ts#L79)
 
 Format error for display.
 
@@ -114,7 +114,7 @@ Format error for display.
 
 > **toJSON**(): `Record`\<`string`, `unknown`\>
 
-Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/errors/base.ts#L92)
+Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/errors/base.ts#L92)
 
 Convert to JSON-serializable object.
 

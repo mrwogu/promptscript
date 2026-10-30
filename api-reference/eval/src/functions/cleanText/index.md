@@ -8,7 +8,7 @@
 
 > **cleanText**(`text`): `string`
 
-Defined in: [eval/src/sanitize.ts:17](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/sanitize.ts#L17)
+Defined in: [eval/src/sanitize.ts:17](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/sanitize.ts#L17)
 
 Normalize a string that comes from a model, a provider or a dataset before
 it is shown or written: line breaks become a space, control and bidi

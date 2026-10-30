@@ -8,7 +8,7 @@
 
 > **compileFor**(`files`, `entryPath`, `formatter`): `Promise`\<[`CompileResult`](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/CompileResult/index.md)\>
 
-Defined in: [browser-compiler/src/index.ts:198](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/browser-compiler/src/index.ts#L198)
+Defined in: [browser-compiler/src/index.ts:198](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/index.ts#L198)
 
 Compile PromptScript files for a specific formatter.
 

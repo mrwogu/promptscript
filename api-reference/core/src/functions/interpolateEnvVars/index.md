@@ -8,7 +8,7 @@
 
 > **interpolateEnvVars**(`text`, `environmentProvider`): `string`
 
-Defined in: [core/src/utils/interpolate-env.ts:7](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/utils/interpolate-env.ts#L7)
+Defined in: [core/src/utils/interpolate-env.ts:7](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/utils/interpolate-env.ts#L7)
 
 Interpolate environment variables without regex backtracking.
 Supports ${VAR} and ${VAR:-default} syntax.
@@ -21,7 +21,7 @@ Supports ${VAR} and ${VAR:-default} syntax.
 
 ### environmentProvider
 
-`EnvironmentVariableProvider`
+[`EnvironmentVariableProvider`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EnvironmentVariableProvider/index.md)
 
 ## Returns
 

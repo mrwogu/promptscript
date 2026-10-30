@@ -8,13 +8,14 @@
 
 > **evaluatePromptPolicies**(`policies`, `subjects`, `context?`, `scope?`): [`PolicyViolation`](https://getpromptscript.dev/api-reference/core/src/interfaces/PolicyViolation/index.md)[]
 
-Defined in: [validator/src/policy/prompt-evaluator.ts:246](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/validator/src/policy/prompt-evaluator.ts#L246)
+Defined in: [validator/src/policy/prompt-evaluator.ts:248](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/policy/prompt-evaluator.ts#L248)
 
 Evaluate the prompt policy kinds on prompts.
 
 Every policy matches on policy risk: the higher of the effective risk (unset
 counts as low) and the floor of every risk-floor policy, whatever its
-severity. `required-approvals` and `required-evals` are not evaluated here.
+severity. `required-approvals`, `required-evals` and `max-experiment-weight` are not
+evaluated here.
 
 ## Parameters
 

@@ -6,7 +6,7 @@
 
 # Interface: GovernanceMeta
 
-Defined in: [core/src/types/prompts.ts:18](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L18)
+Defined in: [core/src/types/prompts.ts:18](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompts.ts#L18)
 
 Governance metadata of a prompt.
 
@@ -16,7 +16,7 @@ Governance metadata of a prompt.
 
 > `optional` **dataClasses?**: `string`[]
 
-Defined in: [core/src/types/prompts.ts:26](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L26)
+Defined in: [core/src/types/prompts.ts:26](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompts.ts#L26)
 
 Classes of data the prompt handles (e.g. 'pii')
 
@@ -26,7 +26,7 @@ Classes of data the prompt handles (e.g. 'pii')
 
 > `optional` **domain?**: `string`
 
-Defined in: [core/src/types/prompts.ts:24](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L24)
+Defined in: [core/src/types/prompts.ts:24](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompts.ts#L24)
 
 Business domain of the prompt
 
@@ -36,7 +36,7 @@ Business domain of the prompt
 
 > `optional` **owner?**: `string`
 
-Defined in: [core/src/types/prompts.ts:22](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L22)
+Defined in: [core/src/types/prompts.ts:22](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompts.ts#L22)
 
 Team or person accountable for the prompt
 
@@ -46,7 +46,7 @@ Team or person accountable for the prompt
 
 > `optional` **reviewers?**: `string`[]
 
-Defined in: [core/src/types/prompts.ts:28](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L28)
+Defined in: [core/src/types/prompts.ts:28](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompts.ts#L28)
 
 People or teams that review changes
 
@@ -56,6 +56,6 @@ People or teams that review changes
 
 > `optional` **risk?**: [`RiskLevel`](https://getpromptscript.dev/api-reference/core/src/type-aliases/RiskLevel/index.md)
 
-Defined in: [core/src/types/prompts.ts:20](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L20)
+Defined in: [core/src/types/prompts.ts:20](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompts.ts#L20)
 
 Risk classification

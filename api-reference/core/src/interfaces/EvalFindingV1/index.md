@@ -6,7 +6,7 @@
 
 # Interface: EvalFindingV1
 
-Defined in: [core/src/types/eval.ts:634](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L634)
+Defined in: [core/src/types/eval.ts:634](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L634)
 
 One finding of the dataset scan.
 
@@ -16,7 +16,7 @@ One finding of the dataset scan.
 
 > `optional` **allowedBecause?**: `string`
 
-Defined in: [core/src/types/eval.ts:668](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L668)
+Defined in: [core/src/types/eval.ts:668](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L668)
 
 Reason from the suite's allow entry when the finding was downgraded
 
@@ -26,7 +26,7 @@ Reason from the suite's allow entry when the finding was downgraded
 
 > **code**: `string`
 
-Defined in: [core/src/types/eval.ts:640](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L640)
+Defined in: [core/src/types/eval.ts:640](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L640)
 
 Eval code of the finding.
 
@@ -46,7 +46,7 @@ Eval code of the finding.
 
 > `optional` **line?**: `number`
 
-Defined in: [core/src/types/eval.ts:666](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L666)
+Defined in: [core/src/types/eval.ts:666](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L666)
 
 Line of the row in the dataset file.
 
@@ -64,7 +64,7 @@ integer
 
 > `optional` **path?**: `string`
 
-Defined in: [core/src/types/eval.ts:660](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L660)
+Defined in: [core/src/types/eval.ts:660](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L660)
 
 JSON path of the value inside the row.
 
@@ -80,7 +80,7 @@ JSON path of the value inside the row.
 
 > `optional` **rowId?**: `string`
 
-Defined in: [core/src/types/eval.ts:655](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L655)
+Defined in: [core/src/types/eval.ts:655](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L655)
 
 Dataset row id
 
@@ -90,7 +90,7 @@ Dataset row id
 
 > `optional` **rule?**: `string`
 
-Defined in: [core/src/types/eval.ts:646](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L646)
+Defined in: [core/src/types/eval.ts:646](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L646)
 
 Validator rule that fired, for a scan finding.
 
@@ -110,7 +110,7 @@ Validator rule that fired, for a scan finding.
 
 > `optional` **ruleName?**: `string`
 
-Defined in: [core/src/types/eval.ts:651](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L651)
+Defined in: [core/src/types/eval.ts:651](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L651)
 
 Validator rule name, for a scan finding.
 
@@ -126,6 +126,6 @@ Validator rule name, for a scan finding.
 
 > **severity**: [`EvalFindingSeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EvalFindingSeverity/index.md)
 
-Defined in: [core/src/types/eval.ts:653](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L653)
+Defined in: [core/src/types/eval.ts:653](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L653)
 
 Severity after any downgrade

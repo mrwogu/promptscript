@@ -8,7 +8,7 @@
 
 > **getExpectedSections**(`availableBlocks`): `string`[]
 
-Defined in: [formatters/src/section-registry.ts:40](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/section-registry.ts#L40)
+Defined in: [formatters/src/section-registry.ts:40](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/section-registry.ts#L40)
 
 Get section IDs that a formatter should generate given available source blocks.
 

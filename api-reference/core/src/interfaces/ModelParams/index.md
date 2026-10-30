@@ -6,7 +6,7 @@
 
 # Interface: ModelParams
 
-Defined in: [core/src/types/prompts.ts:32](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L32)
+Defined in: [core/src/types/prompts.ts:32](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompts.ts#L32)
 
 Invocation parameters of a model.
 
@@ -16,7 +16,7 @@ Invocation parameters of a model.
 
 > `optional` **maxTokens?**: `number`
 
-Defined in: [core/src/types/prompts.ts:48](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L48)
+Defined in: [core/src/types/prompts.ts:48](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompts.ts#L48)
 
 Maximum number of tokens to generate.
 
@@ -34,7 +34,7 @@ integer
 
 > `optional` **seed?**: `number`
 
-Defined in: [core/src/types/prompts.ts:57](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L57)
+Defined in: [core/src/types/prompts.ts:57](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompts.ts#L57)
 
 Sampling seed, at most 2^53-1.
 
@@ -56,7 +56,7 @@ integer
 
 > `optional` **stop?**: `string`[]
 
-Defined in: [core/src/types/prompts.ts:50](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L50)
+Defined in: [core/src/types/prompts.ts:50](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompts.ts#L50)
 
 Stop sequences, in authored order
 
@@ -66,7 +66,7 @@ Stop sequences, in authored order
 
 > `optional` **temperature?**: `number`
 
-Defined in: [core/src/types/prompts.ts:34](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L34)
+Defined in: [core/src/types/prompts.ts:34](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompts.ts#L34)
 
 Sampling temperature
 
@@ -76,7 +76,7 @@ Sampling temperature
 
 > `optional` **topK?**: `number`
 
-Defined in: [core/src/types/prompts.ts:42](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L42)
+Defined in: [core/src/types/prompts.ts:42](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompts.ts#L42)
 
 Top-k sampling cutoff.
 
@@ -94,6 +94,6 @@ integer
 
 > `optional` **topP?**: `number`
 
-Defined in: [core/src/types/prompts.ts:36](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/prompts.ts#L36)
+Defined in: [core/src/types/prompts.ts:36](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompts.ts#L36)
 
 Nucleus sampling threshold

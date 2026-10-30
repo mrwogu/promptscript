@@ -6,7 +6,7 @@
 
 # Interface: ModelDriftReport
 
-Defined in: [core/src/model-drift.ts:62](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/model-drift.ts#L62)
+Defined in: [core/src/model-drift.ts:62](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/model-drift.ts#L62)
 
 Result of comparing OpenRouter's model list with the catalog.
 
@@ -16,7 +16,7 @@ Result of comparing OpenRouter's model list with the catalog.
 
 > `readonly` **absent**: readonly `string`[]
 
-Defined in: [core/src/model-drift.ts:68](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/model-drift.ts#L68)
+Defined in: [core/src/model-drift.ts:68](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/model-drift.ts#L68)
 
 Catalog releases OpenRouter does not list (informational).
 
@@ -26,7 +26,7 @@ Catalog releases OpenRouter does not list (informational).
 
 > `readonly` **candidates**: readonly [`ModelDriftCandidate`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelDriftCandidate/index.md)[]
 
-Defined in: [core/src/model-drift.ts:64](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/model-drift.ts#L64)
+Defined in: [core/src/model-drift.ts:64](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/model-drift.ts#L64)
 
 New releases of known families, oldest first.
 
@@ -36,6 +36,6 @@ New releases of known families, oldest first.
 
 > `readonly` **unmatched**: readonly `string`[]
 
-Defined in: [core/src/model-drift.ts:66](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/model-drift.ts#L66)
+Defined in: [core/src/model-drift.ts:66](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/model-drift.ts#L66)
 
 OpenRouter models no catalog family matches (informational).

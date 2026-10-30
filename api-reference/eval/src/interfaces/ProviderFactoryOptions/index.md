@@ -6,7 +6,7 @@
 
 # Interface: ProviderFactoryOptions
 
-Defined in: [eval/src/provider-setup.ts:23](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/provider-setup.ts#L23)
+Defined in: [eval/src/provider-setup.ts:23](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider-setup.ts#L23)
 
 Options of [createProviderFactory](https://getpromptscript.dev/api-reference/eval/src/functions/createProviderFactory/index.md).
 
@@ -20,7 +20,7 @@ Options of [createProviderFactory](https://getpromptscript.dev/api-reference/eva
 
 > `optional` **allowedHosts?**: readonly `string`[]
 
-Defined in: [eval/src/provider-setup.ts:29](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/provider-setup.ts#L29)
+Defined in: [eval/src/provider-setup.ts:29](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider-setup.ts#L29)
 
 Hosts allowed besides the built-in defaults, from `--allow-host`
 
@@ -30,7 +30,7 @@ Hosts allowed besides the built-in defaults, from `--allow-host`
 
 > `optional` **allowLocal?**: `boolean`
 
-Defined in: [eval/src/provider-setup.ts:31](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/provider-setup.ts#L31)
+Defined in: [eval/src/provider-setup.ts:31](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider-setup.ts#L31)
 
 Allow loopback hosts and plain http for them, from `--allow-local`
 
@@ -40,7 +40,7 @@ Allow loopback hosts and plain http for them, from `--allow-local`
 
 > `optional` **config?**: [`EvalConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalConfig/index.md)
 
-Defined in: [eval/src/provider-setup.ts:25](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/provider-setup.ts#L25)
+Defined in: [eval/src/provider-setup.ts:25](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider-setup.ts#L25)
 
 The `eval` section of promptscript.yaml
 
@@ -50,7 +50,7 @@ The `eval` section of promptscript.yaml
 
 > **env**: `Readonly`\<`Record`\<`string`, `string` \| `undefined`\>\>
 
-Defined in: [eval/src/provider-setup.ts:27](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/provider-setup.ts#L27)
+Defined in: [eval/src/provider-setup.ts:27](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider-setup.ts#L27)
 
 Environment the key variables are read from, at call time
 
@@ -60,7 +60,7 @@ Environment the key variables are read from, at call time
 
 > `optional` **fetch?**: (`input`, `init?`) => `Promise`\<`Response`\>
 
-Defined in: [eval/src/http-provider.ts:35](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/http-provider.ts#L35)
+Defined in: [eval/src/http-provider.ts:35](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/http-provider.ts#L35)
 
 Fetch to use instead of the global one
 
@@ -88,7 +88,7 @@ Fetch to use instead of the global one
 
 > `optional` **onUse?**: (`use`) => `void`
 
-Defined in: [eval/src/provider-setup.ts:37](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/provider-setup.ts#L37)
+Defined in: [eval/src/provider-setup.ts:37](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider-setup.ts#L37)
 
 Called once per provider before it is used, so the CLI can print where the
 key goes. The config names the variable in `apiKeyEnvVar`, so it decides

@@ -8,10 +8,10 @@
 
 > **formatPlan**(`plan`, `options?`): `string`
 
-Defined in: [eval/src/format.ts:540](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/format.ts#L540)
+Defined in: [eval/src/format.ts:571](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/format.ts#L571)
 
 Format the plan of a dry run as text: per suite and model entry the cases,
-cache hits and misses, calls, price source and worst-case cost, then the
+cache hits and misses, calls, judge hits and calls, price source and worst-case cost, then the
 totals and any setup errors. Strings are cleaned like in a report.
 
 ## Parameters

@@ -6,7 +6,7 @@
 
 # Interface: CompareOptions
 
-Defined in: [eval/src/compare.ts:17](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/compare.ts#L17)
+Defined in: [eval/src/compare.ts:17](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/compare.ts#L17)
 
 Options of [compareReports](https://getpromptscript.dev/api-reference/eval/src/functions/compareReports/index.md).
 
@@ -16,6 +16,6 @@ Options of [compareReports](https://getpromptscript.dev/api-reference/eval/src/f
 
 > **tolerance**: `number`
 
-Defined in: [eval/src/compare.ts:19](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/compare.ts#L19)
+Defined in: [eval/src/compare.ts:19](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/compare.ts#L19)
 
 Pass-rate drop that counts as a regression, 0 to 1

@@ -6,7 +6,7 @@
 
 # Interface: EvalThresholdResultV1
 
-Defined in: [core/src/types/eval.ts:617](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L617)
+Defined in: [core/src/types/eval.ts:617](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L617)
 
 One threshold check of a suite.
 
@@ -16,7 +16,7 @@ One threshold check of a suite.
 
 > **actual**: `number`
 
-Defined in: [core/src/types/eval.ts:625](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L625)
+Defined in: [core/src/types/eval.ts:625](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L625)
 
 Value of the run
 
@@ -26,7 +26,7 @@ Value of the run
 
 > **limit**: `number`
 
-Defined in: [core/src/types/eval.ts:623](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L623)
+Defined in: [core/src/types/eval.ts:623](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L623)
 
 Limit from the suite
 
@@ -36,7 +36,7 @@ Limit from the suite
 
 > `optional` **model?**: `string`
 
-Defined in: [core/src/types/eval.ts:621](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L621)
+Defined in: [core/src/types/eval.ts:621](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L621)
 
 Model entry the check applies to; absent for a suite-wide limit
 
@@ -46,7 +46,7 @@ Model entry the check applies to; absent for a suite-wide limit
 
 > **name**: [`EvalThresholdName`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EvalThresholdName/index.md)
 
-Defined in: [core/src/types/eval.ts:619](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L619)
+Defined in: [core/src/types/eval.ts:619](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L619)
 
 Threshold name
 
@@ -56,6 +56,6 @@ Threshold name
 
 > **passed**: `boolean`
 
-Defined in: [core/src/types/eval.ts:627](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L627)
+Defined in: [core/src/types/eval.ts:627](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L627)
 
 Whether the limit held

@@ -8,7 +8,7 @@
 
 > **validate**(`ast`, `options?`): [`ValidationResult`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationResult/index.md)
 
-Defined in: [validator/src/index.ts:174](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/validator/src/index.ts#L174)
+Defined in: [validator/src/index.ts:175](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/index.ts#L175)
 
 ## Parameters
 

@@ -6,7 +6,7 @@
 
 # Interface: ReleasePromptStatus
 
-Defined in: [cli/src/utils/release-report.ts:29](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L29)
+Defined in: [cli/src/utils/release-report.ts:61](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L61)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/release-report.ts:29](https://github.com/mrwogu/promp
 
 > **contentHash**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:31](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L31)
+Defined in: [cli/src/utils/release-report.ts:63](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L63)
 
 ***
 
@@ -22,7 +22,17 @@ Defined in: [cli/src/utils/release-report.ts:31](https://github.com/mrwogu/promp
 
 > **exists**: `boolean`
 
-Defined in: [cli/src/utils/release-report.ts:34](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L34)
+Defined in: [cli/src/utils/release-report.ts:66](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L66)
+
+***
+
+### experiment?
+
+> `optional` **experiment?**: `ReleaseExperimentStatus`
+
+Defined in: [cli/src/utils/release-report.ts:71](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L71)
+
+Present while the entry runs an experiment
 
 ***
 
@@ -30,7 +40,7 @@ Defined in: [cli/src/utils/release-report.ts:34](https://github.com/mrwogu/promp
 
 > **file**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:33](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L33)
+Defined in: [cli/src/utils/release-report.ts:65](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L65)
 
 Project-relative path of the bundle file
 
@@ -40,7 +50,7 @@ Project-relative path of the bundle file
 
 > **id**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:30](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L30)
+Defined in: [cli/src/utils/release-report.ts:62](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L62)
 
 ***
 
@@ -48,7 +58,7 @@ Defined in: [cli/src/utils/release-report.ts:30](https://github.com/mrwogu/promp
 
 > **inBuild**: `boolean`
 
-Defined in: [cli/src/utils/release-report.ts:37](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L37)
+Defined in: [cli/src/utils/release-report.ts:69](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L69)
 
 Whether the manifest of the latest build holds this hash for the id
 
@@ -58,4 +68,4 @@ Whether the manifest of the latest build holds this hash for the id
 
 > **verified**: `boolean`
 
-Defined in: [cli/src/utils/release-report.ts:35](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L35)
+Defined in: [cli/src/utils/release-report.ts:67](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L67)

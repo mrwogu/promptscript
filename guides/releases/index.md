@@ -31,6 +31,7 @@ All release files live in `.promptscript/releases/` and belong in Git:
 ```text
 .promptscript/releases/
   manifest.json                bundle index of the latest build
+  pricing.json                 list prices of the models the bundles use
   bundles/sha256-<hex>.json    one immutable file per content hash
   staging.json                 label of the staging environment
   prod.json                    label of the prod environment
@@ -39,6 +40,19 @@ All release files live in `.promptscript/releases/` and belong in Git:
 - A bundle file has exactly the bytes the `bundle` target writes. A release never rewrites it and
   never deletes it.
 - The manifest is a bundle index of the latest build. Its `file` entries point into `bundles/`.
+- `pricing.json` lists, for each model that a bundle in `bundles/` uses and that has a price in the
+  model catalog (built-in profiles plus `models.profiles` of the project), `ref`, `apiId`,
+  `provider`, `inputUsdPerMillion`, `outputUsdPerMillion` and `checkedOn`, sorted by `ref`. The
+  `ref` is the catalog profile id, not the reference the prompt author wrote. Older bundles stay
+  in the list, so a label that still serves one keeps its price. A model without a price is left
+  out. When two profiles share a provider and API id with different prices, the lowest profile id
+  wins and the build warns. The file is not part of any content hash, so a price change never
+  changes a bundle, an approval or a gate. It has no timestamp, so the same sources and catalog
+  give the same bytes, and `prs release build` plus `git diff --exit-code` in CI shows a hand edit.
+  Prices are list prices and ignore cache and batch discounts, so treat them as an estimate. Its
+  `$schema` is `https://getpromptscript.dev/schema/prompt-release-pricing/v1.json`. The name
+  `pricing` cannot be an environment. A project that already has an environment called `pricing`
+  renames it and moves `.promptscript/releases/pricing.json` to the new name.
 - A label has one entry per prompt, sorted by id, and lists each id once. The `$schema` is
   `https://getpromptscript.dev/schema/prompt-release-label/v1.json`.
 
@@ -55,11 +69,40 @@ All release files live in `.promptscript/releases/` and belong in Git:
 }
 ```
 
+While an entry runs an experiment (see [Split](#split)), the label is version 2. Its `$schema` is
+`https://getpromptscript.dev/schema/prompt-release-label/v2.json` and the entry has an
+`experiment` with its arms. Weights are basis points and add up to 10000. The label goes back to
+version 1, byte for byte what a plain label looks like, when the last experiment ends.
+
+```json
+{
+  "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+  "environment": "prod",
+  "prompts": [
+    {
+      "id": "acme-support/refund-reply",
+      "contentHash": "sha256-<64 hex digits of control>",
+      "experiment": {
+        "name": "warm-tone-2026-11",
+        "arms": [
+          {
+            "variant": "control",
+            "contentHash": "sha256-<64 hex digits of control>",
+            "weight": 9000
+          },
+          { "variant": "warm", "contentHash": "sha256-<64 hex digits of warm>", "weight": 1000 }
+        ]
+      }
+    }
+  ]
+}
+```
+
 Release files must be regular files. A symbolic link in `.promptscript`, `.promptscript/releases`,
 `bundles/`, or for a release file itself is refused. Names must match in case exactly: a
 `Prod.json` or `Manifest.json` is refused, because a case-insensitive disk would read it as the
-real file. A manifest or label that does not parse as one is never overwritten, the error tells
-you to restore it from Git.
+real file. A manifest, pricing file or label that does not parse as one is never overwritten, the
+error tells you to restore it from Git.
 
 `prs compile` refuses any output inside `.promptscript/releases/` (`PS5008`), and watch mode ignores
 that directory. Compile cleanup never removes release files.
@@ -81,8 +124,9 @@ prs release build
 
 Build compiles the source in memory. It never reads the compiled `prompts/` directory, and it works
 whether or not `bundle` is in `targets`. It writes each new bundle file, checks the ones that exist,
-and writes the manifest only when its bytes change. A second run writes nothing. A program without
-prompts gives `prompts: []`.
+reads every `sha256-*.json` in `bundles/` for `pricing.json` and stops with PS5004, before it
+writes anything, on one that does not verify, and writes the manifest and `pricing.json` only when
+their bytes change. A second run writes nothing. A program without prompts gives `prompts: []`.
 
 A build always runs with these settings, so a release cannot ship what a normal compile would flag:
 
@@ -147,8 +191,11 @@ field in the label.
 - In a shallow checkout the commit before may be missing. `PS5006` then tells you to run
   `git fetch --unshallow`.
 - The restored label must parse and every hash in it must verify.
-- Every hash the rollback brings back must pass the [release gates](#release-gates) with the
-  records committed now. An entry the rollback leaves as it is is not judged again.
+- The label comes back whole, version 1 or version 2. Every hash of a changed entry, experiment
+  arms included, is verified and goes through the [release gates](#release-gates) with the records
+  committed now: the entry hash and every arm with traffic. An entry the rollback leaves as it is
+  is not judged again.
+- An experiment is never brought back into the first environment (`PS5009`).
 
 A committed rollback is undone by a second rollback, like `helm rollback`. Rollback does not check
 the promotion order.
@@ -166,6 +213,91 @@ prs release status
 
 Every rollback `PS5006` message points to this.
 
+### Split
+
+**Before the first `prs release split` in an environment, every application reading that
+environment must run a runtime that reads label v2.** An older runtime keeps serving stale prompts
+and calls `onError` on every refresh. An older `prs` refuses a v2 label with `PS5004`.
+
+```bash
+# Start: 10 % of the keys get the version staging holds, control keeps the rest
+prs release split acme-support/refund-reply --env prod --name warm-tone-2026-11 \
+  --arm warm@sha256-1a2b3c4d=10
+
+# Change the share, or add an arm; --arm lists every arm that stays
+prs release split acme-support/refund-reply --env prod --name warm-tone-2026-11 \
+  --arm warm@sha256-1a2b3c4d=25
+
+# End: back to the entry hash, or keep an arm as the entry
+prs release split acme-support/refund-reply --env prod --end
+prs release split acme-support/refund-reply --env prod --end --keep warm
+```
+
+Split sends a share of the traffic of one prompt to another version that the previous environment already runs. Control is
+the entry hash of the label and gets the rest of the traffic, at least 0.01 %. An arm is
+`<variant>@<hash>=<percent>`; the hash is a full hash or a prefix of at least 8 hex digits, matched
+among the bundle files of the id. `--dry-run` shows the result without writing.
+
+Rules of the arms:
+
+- No experiment in the first environment (`PS5009`). It follows the source. A project with one
+  environment adds a later one first, for example `staging`.
+- At most 4 arms with control, so at most 3 `--arm`. Percents have at most two decimals and are
+  stored as basis points.
+- `--arm` lists every arm that stays. An arm left out is removed. Arms that stay keep their order
+  and new ones go to the end, so a key keeps its bucket when you add an arm.
+- A variant keeps its hash for the life of the experiment. To serve another version, use a new arm
+  name and leave the old one out or at weight 0.
+- `--name` is required when you start or change an experiment. A running experiment cannot get
+  another name: end it first.
+- An arm cannot use the entry hash or the hash of another arm.
+
+Order, like promote:
+
+- A new arm must be the entry of the previous environment or an arm with traffic there.
+- An arm that is only an arm upstream runs at most its upstream weight here. An arm that is the
+  entry of the previous environment can run up to 99.99 %.
+- `--end --keep <variant>` makes an arm the entry, so that hash must be the entry of the previous
+  environment.
+- When the previous environment stops an arm, the next write here must pause it (weight 0) or
+  remove it. Weight 0 always passes this rule.
+
+Every write passes the checks in this order, then the label is written under the lock: the bundle
+of every hash exists and verifies (`PS5003`, `PS5004`), the order rules (`PS5005`), the
+[release gates](#release-gates). The gates run for the entry hash and for every arm with traffic,
+also when only a weight changed. An arm at weight 0 serves nothing and is judged the moment a
+write gives it traffic. `--end` runs the gates for the entry hash, so a revoked approval of it
+blocks ending too. A no-op, the same split again, exits with code 0.
+
+Which versions can be an arm is decided by the previous environment, not by what you built. In
+staging the only arm with traffic is the version dev holds now. In prod arms come from the staging
+entry or from the staging arm. The recommended path is a canary: promote the new version X to
+staging, run `split --env prod --arm warm@X=<percent>` up to 99.99 %, and when it holds, end it with
+`--end --keep warm` once staging is the entry. A promote upstream freezes the experiment
+downstream: the next write there must pause or end it. "At most 4 arms" is a limit of the label; in
+a short chain of environments the extra arms can only sit at weight 0.
+
+If the approval of control is revoked while an experiment runs, `--end` is blocked too (it judges
+the entry hash). Re-approve control, or end the experiment onto an approved hash. A hand edit of
+the label that keeps the entry hash is gated the same way and fails like `--end`.
+
+Approvals and evals bind to a hash, not to a weight. Without an exposure policy, moving an arm from
+1 % to 99 % passes when 1 % did. Treat a weight change as a release: put CODEOWNERS on
+`.promptscript/releases/` and review it. `max-experiment-weight` is parsed, but the release gates
+do not judge weights in this version. An arm with traffic that such a policy selects is
+`unavailable`: it fails split, rollback and `status --base` at severity `error` and warns at
+`warning`. An arm at weight 0 is not judged.
+
+A promote on an entry with a running experiment is refused with `PS5010`, so it can never drop
+arms. End the experiment first.
+
+Traffic is assigned by the runtime. The bucket of a key is the first 8 hex digits of
+`sha256("promptscript-assign-v1\0" + experiment + "\0" + id + "\0" + key)` as a 32-bit integer
+modulo 10000, and the arm is the first one in label order whose cumulative weight is above the
+bucket. A read without a key gets the entry hash, untagged. The modulo bias is below 3e-6. The
+exact rules and test vectors are in the
+[conformance vectors](https://github.com/mrwogu/promptscript/blob/main/conformance/prompt-release-label/v2/README.md).
+
 ### Status
 
 ```bash
@@ -177,7 +309,8 @@ Status lists every environment with the prompt id, the hash (12 hex digits), whe
 the latest build (equals the manifest) and whether the bundle verifies. A missing label means an
 empty environment. A label file for an environment that is not configured gives a warning.
 
-Every referenced bundle is verified, and a failure exits with code 1, so CI can run it.
+Under an entry with an experiment status lists every arm with its weight. Every referenced bundle,
+arms included, is verified, and a failure exits with code 1, so CI can run it.
 `--history <n>` (1 to 1000) adds the commit, date and subject of the last n commits of each label.
 It shows no author names.
 
@@ -202,7 +335,7 @@ Roll back the same way: run `prs release rollback prod`, commit the label, open 
 `prs release status --base` lets that pass, see below. Going back further than the last change is a
 new promotion under the promote rules.
 
-Promote, build and rollback take a project lock, `.promptscript-release.lock`. Another release
+Promote, split, build and rollback take a project lock, `.promptscript-release.lock`. Another release
 command that holds it fails with `PS5007`. A stale lock is broken after its process is gone or after
 30 minutes. Dry runs take no lock. Add the lock file to `.gitignore`.
 
@@ -242,8 +375,11 @@ prs approve acme-support/refund-reply@sha256-<64 hex digits> --role security --a
   is required.
 - `--comment` has at most 2000 characters, no control characters except newlines and no invisible
   format characters such as bidi marks.
-- `--approver` is a Git host user handle like `@jane` (`PS5104`). An email address or a team is
-  refused, so no address ends up in a file name.
+- `--approver` is a Git host user handle like `@jane` (`PS5104`): `@`, a letter or digit, then
+  letters, digits, `_`, `.` or `-`, never two of `_.-` in a row and none at the end. Approver handles
+  are limited to 100 characters after the `@`, since the handle is part of the file name. That is the same rule as a
+  user owner in `governance`, so GitLab handles like `@jane.doe` and GitHub managed user handles like
+  `@jane_acme` work. An email address or a team is refused, so no address ends up in a file name.
 - the hash is real (`PS5103`): a bundle in `.promptscript/releases/bundles/` of that prompt that
   verifies, or what the source builds right now. A stored bundle that does not verify is `PS5004`.
 
@@ -261,9 +397,14 @@ pull request.
 .promptscript/approvals/legal/acme-support/refund-reply/sha256-3f9a...jane.json
 ```
 
-The approver part is the handle without `@`, lowercased. There is one file per approver, role and
-hash. The file holds exactly these bytes, with `environment` only when `--env` was given and
-`comment` only when one was given:
+The approver part is the handle without `@`, lowercased, so `@Jane.Doe` writes
+`<content hash>.jane.doe.json`. There is one file per approver, role and hash.
+
+On Windows a long prompt id plus a long handle can go over the 260 character `MAX_PATH` limit. Run
+`git config core.longpaths true` in the repository if Git can not check out or add a record.
+
+The file holds exactly these bytes, with `environment` only when `--env` was given and `comment` only
+when one was given:
 
 ```json
 {
@@ -368,10 +509,11 @@ review log of the Git host, not in Git.
 ## Release gates
 
 The gates are the prompt policies, run on the prompt version a label is about to hold. They run
-in `prs release promote` before the label is written, in `prs release rollback` for every hash it
-brings back, in `prs release status --base` for every entry that changed, and in plain
-`prs release status` for every entry, where they only warn. There is no flag or setting around
-them: they call the policy evaluators themselves, so `validation.disableRules`,
+in `prs release promote` and `prs release split` before the label is written, in
+`prs release rollback` for every hash it brings back, in `prs release status --base` for every
+entry that changed, and in plain `prs release status` for every entry, where they only warn. For an
+entry with an experiment they judge the entry hash and every arm with traffic. There is no flag or
+setting around them: they call the policy evaluators themselves, so `validation.disableRules`,
 `validation.rules`, custom rules and `--skip-policies` do not apply. `validation.blockedPatterns`
 and `validation.allowedPatterns` do apply, like everywhere else.
 
@@ -452,7 +594,7 @@ prs release status --base refs/remotes/origin/main
 Build writes whatever the committed release files miss, so the `test -z` check fails when a pull
 request changes prompts without the build. It also catches new bundle files, which
 `git diff --exit-code` would not see because they are untracked. `status` fails when a label points
-at a bundle that is missing or does not verify. All four commands accept
+at a bundle that is missing or does not verify. All five commands accept
 `--format json`, which prints one document on stdout that matches
 `https://getpromptscript.dev/schema/release-report/v1.json`, and prints the human text on stderr.
 
@@ -461,9 +603,9 @@ at a bundle that is missing or does not verify. All four commands accept
 `prs release status --base <ref>` compares the label files in the checkout with the labels at
 `<ref>`, usually the branch the pull request goes into. It looks at every label file: the
 environments configured at `<ref>`, the ones configured in the checkout and every other `*.json`
-file in `.promptscript/releases/` except `manifest.json`. A file whose text did not change passes.
-A changed file that does not read or parse as a label fails. Every entry that is new or changed
-must pass the promotion rules of `<ref>`:
+file in `.promptscript/releases/` except `manifest.json` and `pricing.json`. A file whose text did
+not change passes. A changed file that does not read or parse as a label fails. Every entry that
+is new or changed must pass the promotion rules of `<ref>`:
 
 - The environment is in `releases.environments` at `<ref>`.
 - The bundle file exists and verifies for that prompt id.
@@ -475,6 +617,12 @@ must pass the promotion rules of `<ref>`:
   `policies`, `validation` and `models.supported` of `<ref>` and the forced security rules, the
   same compile `prs release promote` runs.
 - Or, in a later environment, the hash is the one the environment before it holds in the checkout.
+  The entry hash is compared this way only when it changed.
+- An experiment is judged with the rules of [Split](#split): the first environment holds none
+  (`PS5009`), a new arm runs in the environment before it, no arm runs more than it does there.
+  "New" means the hash is not in the entry at `<ref>`. The arms are checked when only a weight
+  changed too, and every arm with traffic goes through the gates.
+- The rollback rule compares the whole entry, arms and weights included.
 
 A rollback skips the promotion order and the compare with the fresh hash. That is safe only when
 every commit on `<ref>` is the result of a pull request this check ran on, see the precondition
@@ -524,6 +672,7 @@ jobs:
 
 What `--base` does not do:
 
+- Lowering the weight of an arm upstream does not check an unchanged entry downstream again.
 - Entries that did not change are not checked again, even when the rules at `<ref>` changed since
   they were promoted.
 - Going back further than the last change of a label is no rollback. It needs a new promotion under
@@ -543,6 +692,19 @@ What `--base` does not do:
 - In a `pull_request` run the pull request controls the workflow file, `package.json` and the
   lockfile, so it can swap the CLI that runs the check. Protect them as below, or run the check
   as a required workflow from a repository ruleset.
+
+## Eval what an environment serves
+
+`prs eval run --label <env>` runs your eval suites against the bundles a label points at, not
+against a fresh compile of the source. Each bundle is verified against its hash first, so the run
+uses what the environment serves even when the source has moved on. For an experiment it runs the
+entry hash, and `--variant <name>` runs one arm. Every result carries the hash that ran, in
+`prompt.contentHash`. See [prs eval run](https://getpromptscript.dev/reference/cli/index.md#prs-eval-run).
+
+```bash
+prs eval run --label prod
+prs eval run --label prod --variant warm --cache record --max-cost 0.5
+```
 
 ## Read a release in your application
 
@@ -748,19 +910,23 @@ drop control, bidi and zero-width characters from Git and record fields.
 - Git runs with replace refs and grafts off, so a `git replace` ref or a `.git/info/grafts` file
   cannot change what the log shows.
 - The output holds email addresses. Treat exports like other personal data.
+- Experiment arms and weights are not listed in the log yet, and an experiment change that keeps
+  the entry hash shows no event. Read the label history with `git log -p` on the label.
 
 ## Error codes
 
-| Code   | Meaning                                                           |
-| ------ | ----------------------------------------------------------------- |
-| PS5001 | `releases` is missing or invalid                                  |
-| PS5002 | The environment is not in `releases.environments`                 |
-| PS5003 | A bundle or prompt is missing, or a hash prefix matches nothing   |
-| PS5004 | A release file does not verify, or the hash is not the fresh hash |
-| PS5005 | The promotion skips the previous environment                      |
-| PS5006 | Git cannot give rollback or `--base` the ref, commit or file      |
-| PS5007 | Another release command holds the lock                            |
-| PS5008 | A compile output lies inside `.promptscript/releases/`            |
+| Code   | Meaning                                                                              |
+| ------ | ------------------------------------------------------------------------------------ |
+| PS5001 | `releases` is missing or invalid                                                     |
+| PS5002 | The environment is not in `releases.environments`                                    |
+| PS5003 | A bundle or prompt is missing, or a hash prefix matches nothing                      |
+| PS5004 | A release file does not verify, or the hash is not the fresh hash                    |
+| PS5005 | The promotion skips the previous environment, or an arm runs more here than upstream |
+| PS5006 | Git cannot give rollback or `--base` the ref, commit or file                         |
+| PS5007 | Another release command holds the lock                                               |
+| PS5008 | A compile output lies inside `.promptscript/releases/`                               |
+| PS5009 | A split breaks the experiment rules, or targets the first environment                |
+| PS5010 | A promote on an entry with a running experiment                                      |
 
 `prs approve` uses these codes:
 

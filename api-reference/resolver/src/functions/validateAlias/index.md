@@ -8,7 +8,7 @@
 
 > **validateAlias**(`alias`): `boolean`
 
-Defined in: [resolver/src/alias-resolver.ts:65](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/alias-resolver.ts#L65)
+Defined in: [resolver/src/alias-resolver.ts:65](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/alias-resolver.ts#L65)
 
 Validate that an alias name conforms to the required format.
 

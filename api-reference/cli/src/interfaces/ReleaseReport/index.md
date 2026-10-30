@@ -6,7 +6,7 @@
 
 # Interface: ReleaseReport
 
-Defined in: [cli/src/utils/release-report.ts:134](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L134)
+Defined in: [cli/src/utils/release-report.ts:168](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L168)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/release-report.ts:134](https://github.com/mrwogu/prom
 
 > **$schema**: `"https://getpromptscript.dev/schema/release-report/v1.json"`
 
-Defined in: [cli/src/utils/release-report.ts:135](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L135)
+Defined in: [cli/src/utils/release-report.ts:169](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L169)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [cli/src/utils/release-report.ts:135](https://github.com/mrwogu/prom
 
 > `optional` **base?**: [`ReleaseBaseRef`](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseBaseRef/index.md)
 
-Defined in: [cli/src/utils/release-report.ts:144](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L144)
+Defined in: [cli/src/utils/release-report.ts:178](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L178)
 
 Present when status runs with --base
 
@@ -32,7 +32,7 @@ Present when status runs with --base
 
 > **changes**: [`ReleaseChange`](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseChange/index.md)[]
 
-Defined in: [cli/src/utils/release-report.ts:140](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L140)
+Defined in: [cli/src/utils/release-report.ts:174](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L174)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [cli/src/utils/release-report.ts:140](https://github.com/mrwogu/prom
 
 > **command**: [`ReleaseCommandName`](https://getpromptscript.dev/api-reference/cli/src/type-aliases/ReleaseCommandName/index.md)
 
-Defined in: [cli/src/utils/release-report.ts:137](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L137)
+Defined in: [cli/src/utils/release-report.ts:171](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L171)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [cli/src/utils/release-report.ts:137](https://github.com/mrwogu/prom
 
 > **dryRun**: `boolean`
 
-Defined in: [cli/src/utils/release-report.ts:139](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L139)
+Defined in: [cli/src/utils/release-report.ts:173](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L173)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [cli/src/utils/release-report.ts:139](https://github.com/mrwogu/prom
 
 > **environments**: [`ReleaseEnvironmentStatus`](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseEnvironmentStatus/index.md)[]
 
-Defined in: [cli/src/utils/release-report.ts:141](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L141)
+Defined in: [cli/src/utils/release-report.ts:175](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L175)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [cli/src/utils/release-report.ts:141](https://github.com/mrwogu/prom
 
 > **errors**: [`ReleaseDiagnostic`](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseDiagnostic/index.md)[]
 
-Defined in: [cli/src/utils/release-report.ts:148](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L148)
+Defined in: [cli/src/utils/release-report.ts:182](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L182)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [cli/src/utils/release-report.ts:148](https://github.com/mrwogu/prom
 
 > `optional` **gates?**: `ReleaseGateResult`[]
 
-Defined in: [cli/src/utils/release-report.ts:146](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L146)
+Defined in: [cli/src/utils/release-report.ts:180](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L180)
 
 The gates of every prompt version a policy applies to; absent without prompt policies
 
@@ -82,7 +82,7 @@ The gates of every prompt version a policy applies to; absent without prompt pol
 
 > `optional` **history?**: [`ReleaseEnvironmentHistory`](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseEnvironmentHistory/index.md)[]
 
-Defined in: [cli/src/utils/release-report.ts:142](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L142)
+Defined in: [cli/src/utils/release-report.ts:176](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L176)
 
 ***
 
@@ -90,7 +90,7 @@ Defined in: [cli/src/utils/release-report.ts:142](https://github.com/mrwogu/prom
 
 > **success**: `boolean`
 
-Defined in: [cli/src/utils/release-report.ts:138](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L138)
+Defined in: [cli/src/utils/release-report.ts:172](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L172)
 
 ***
 
@@ -98,7 +98,7 @@ Defined in: [cli/src/utils/release-report.ts:138](https://github.com/mrwogu/prom
 
 > **version**: `1`
 
-Defined in: [cli/src/utils/release-report.ts:136](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L136)
+Defined in: [cli/src/utils/release-report.ts:170](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L170)
 
 ***
 
@@ -106,4 +106,4 @@ Defined in: [cli/src/utils/release-report.ts:136](https://github.com/mrwogu/prom
 
 > **warnings**: [`ReleaseDiagnostic`](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseDiagnostic/index.md)[]
 
-Defined in: [cli/src/utils/release-report.ts:147](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/release-report.ts#L147)
+Defined in: [cli/src/utils/release-report.ts:181](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L181)

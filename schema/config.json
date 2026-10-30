@@ -1306,8 +1306,8 @@
     },
     "GovernanceOwner": {
       "type": "string",
-      "description": "Git host identity of an owner, in a form CODEOWNERS accepts: a user (`@jane`), a team (`@acme/legal`, GitLab subgroups allowed) or an email address.",
-      "pattern": "^(?:@[A-Za-z0-9][A-Za-z0-9-]{0,38}|@[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})$",
+      "description": "Git host identity of an owner, in a form CODEOWNERS accepts: a user (`@jane`), a team (`@acme/legal`, GitLab subgroups allowed) or an email address. A user may hold `.`, `_` and `-` between letters or digits, like GitLab users (`@jane.doe`) and GitHub managed users (`@jane_acme`).",
+      "pattern": "^(?:@[A-Za-z0-9]+(?:[_.-][A-Za-z0-9]+)*|@[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})$",
       "maxLength": 254
     },
     "GovernanceRoleOwners": {
@@ -1411,6 +1411,9 @@
         },
         {
           "$ref": "#/definitions/ContentRulesPolicy"
+        },
+        {
+          "$ref": "#/definitions/MaxExperimentWeightPolicy"
         }
       ],
       "description": "Union of all policy definition types."
@@ -1944,6 +1947,68 @@
         "PS014"
       ],
       "description": "Content check of a content-rules policy, by rule name or id."
+    },
+    "MaxExperimentWeightPolicy": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique policy name within the config"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "kind": {
+          "type": "string",
+          "const": "max-experiment-weight",
+          "description": "Policy kind discriminator"
+        },
+        "severity": {
+          "$ref": "#/definitions/PolicySeverity",
+          "description": "Violation severity"
+        },
+        "match": {
+          "$ref": "#/definitions/PromptPolicyMatch",
+          "description": "Prompts the policy applies to"
+        },
+        "environments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReleaseEnvironmentName"
+          },
+          "description": "Environments from `releases.environments` the policy applies to. Absent means all.",
+          "minItems": 1
+        },
+        "maxWeight": {
+          "type": "number",
+          "description": "Percent of traffic an arm may get without extra approvals, at most two decimals",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "approvals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RequiredApproval"
+          },
+          "description": "Approvals per role an arm above `maxWeight` needs. Absent means the cap is hard.",
+          "minItems": 1
+        },
+        "ceiling": {
+          "type": "number",
+          "description": "Percent above which no arm passes, at most two decimals and at least `maxWeight`. Only with `approvals`.",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "kind",
+        "maxWeight",
+        "name",
+        "severity"
+      ],
+      "additionalProperties": false,
+      "description": "Max-experiment-weight policy: caps the traffic share of a non-control arm of a label experiment. Arms above `maxWeight` need `approvals`, and nothing passes above `ceiling`."
     }
   },
   "allOf": [

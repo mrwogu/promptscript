@@ -8,7 +8,7 @@
 
 > `const` **ConsoleOutput**: `object`
 
-Defined in: [cli/src/output/console.ts:104](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/output/console.ts#L104)
+Defined in: [cli/src/output/console.ts:104](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/output/console.ts#L104)
 
 Console output utilities for formatted CLI output.
 Respects the global log level settings.

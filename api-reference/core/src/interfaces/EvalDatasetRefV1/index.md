@@ -6,7 +6,7 @@
 
 # Interface: EvalDatasetRefV1
 
-Defined in: [core/src/types/eval.ts:694](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L694)
+Defined in: [core/src/types/eval.ts:694](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L694)
 
 Dataset as the run saw it.
 
@@ -16,7 +16,7 @@ Dataset as the run saw it.
 
 > **hash**: `string`
 
-Defined in: [core/src/types/eval.ts:707](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L707)
+Defined in: [core/src/types/eval.ts:707](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L707)
 
 SHA-256 of the dataset file bytes.
 
@@ -30,7 +30,7 @@ SHA-256 of the dataset file bytes.
 
 > **path**: `string`
 
-Defined in: [core/src/types/eval.ts:696](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L696)
+Defined in: [core/src/types/eval.ts:696](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L696)
 
 Dataset file, relative to the project root
 
@@ -40,7 +40,7 @@ Dataset file, relative to the project root
 
 > **rows**: `number`
 
-Defined in: [core/src/types/eval.ts:702](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L702)
+Defined in: [core/src/types/eval.ts:702](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L702)
 
 Rows read.
 

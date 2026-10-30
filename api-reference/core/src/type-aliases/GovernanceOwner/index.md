@@ -8,10 +8,12 @@
 
 > **GovernanceOwner** = `string` & `object`
 
-Defined in: [core/src/types/config.ts:238](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/config.ts#L238)
+Defined in: [core/src/types/config.ts:240](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L240)
 
 Git host identity of an owner, in a form CODEOWNERS accepts: a user (`@jane`),
-a team (`@acme/legal`, GitLab subgroups allowed) or an email address.
+a team (`@acme/legal`, GitLab subgroups allowed) or an email address. A user may
+hold `.`, `_` and `-` between letters or digits, like GitLab users (`@jane.doe`) and
+GitHub managed users (`@jane_acme`).
 
 ## Type Declaration
 
@@ -21,7 +23,7 @@ a team (`@acme/legal`, GitLab subgroups allowed) or an email address.
 
 ## Pattern
 
-^(?:@[A-Za-z0-9][A-Za-z0-9-]{0,38}|@[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})$
+^(?:@[A-Za-z0-9]+(?:[_.-][A-Za-z0-9]+)*|@[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})$
 
 ## Max Length
 

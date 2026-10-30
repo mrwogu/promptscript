@@ -6,7 +6,7 @@
 
 # Interface: LockfileDependency
 
-Defined in: [core/src/types/lockfile.ts:4](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/lockfile.ts#L4)
+Defined in: [core/src/types/lockfile.ts:4](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/lockfile.ts#L4)
 
 A single locked dependency.
 
@@ -16,7 +16,7 @@ A single locked dependency.
 
 > **commit**: `string`
 
-Defined in: [core/src/types/lockfile.ts:8](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/lockfile.ts#L8)
+Defined in: [core/src/types/lockfile.ts:8](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/lockfile.ts#L8)
 
 Exact commit hash
 
@@ -26,7 +26,7 @@ Exact commit hash
 
 > `optional` **fetchedAt?**: `string`
 
-Defined in: [core/src/types/lockfile.ts:14](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/lockfile.ts#L14)
+Defined in: [core/src/types/lockfile.ts:14](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/lockfile.ts#L14)
 
 ISO timestamp of last fetch (informational)
 
@@ -36,7 +36,7 @@ ISO timestamp of last fetch (informational)
 
 > `optional` **gitUrl?**: `string`
 
-Defined in: [core/src/types/lockfile.ts:18](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/lockfile.ts#L18)
+Defined in: [core/src/types/lockfile.ts:18](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/lockfile.ts#L18)
 
 Original SSH clone URL for repositories that require SSH transport
 
@@ -46,7 +46,7 @@ Original SSH clone URL for repositories that require SSH transport
 
 > **integrity**: `string`
 
-Defined in: [core/src/types/lockfile.ts:10](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/lockfile.ts#L10)
+Defined in: [core/src/types/lockfile.ts:10](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/lockfile.ts#L10)
 
 Content integrity hash
 
@@ -56,7 +56,7 @@ Content integrity hash
 
 > `optional` **skills?**: `string`[]
 
-Defined in: [core/src/types/lockfile.ts:16](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/lockfile.ts#L16)
+Defined in: [core/src/types/lockfile.ts:16](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/lockfile.ts#L16)
 
 Discovered skill names for directory imports (advisory)
 
@@ -66,7 +66,7 @@ Discovered skill names for directory imports (advisory)
 
 > `optional` **source?**: `"md"`
 
-Defined in: [core/src/types/lockfile.ts:12](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/lockfile.ts#L12)
+Defined in: [core/src/types/lockfile.ts:12](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/lockfile.ts#L12)
 
 Source discriminator for .md-sourced dependencies
 
@@ -76,6 +76,6 @@ Source discriminator for .md-sourced dependencies
 
 > **version**: `string`
 
-Defined in: [core/src/types/lockfile.ts:6](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/lockfile.ts#L6)
+Defined in: [core/src/types/lockfile.ts:6](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/lockfile.ts#L6)
 
 Resolved version (tag name or branch)

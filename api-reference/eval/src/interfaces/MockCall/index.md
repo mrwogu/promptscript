@@ -6,7 +6,7 @@
 
 # Interface: MockCall
 
-Defined in: [eval/src/provider.ts:68](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/provider.ts#L68)
+Defined in: [eval/src/provider.ts:70](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider.ts#L70)
 
 One call the mock received.
 
@@ -16,7 +16,7 @@ One call the mock received.
 
 > **caseId**: `string`
 
-Defined in: [eval/src/provider.ts:69](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/provider.ts#L69)
+Defined in: [eval/src/provider.ts:71](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider.ts#L71)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [eval/src/provider.ts:69](https://github.com/mrwogu/promptscript/blo
 
 > **request**: [`EvalRequest`](https://getpromptscript.dev/api-reference/eval/src/interfaces/EvalRequest/index.md)
 
-Defined in: [eval/src/provider.ts:70](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/provider.ts#L70)
+Defined in: [eval/src/provider.ts:72](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider.ts#L72)

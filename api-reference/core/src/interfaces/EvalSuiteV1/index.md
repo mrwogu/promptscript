@@ -6,7 +6,7 @@
 
 # Interface: EvalSuiteV1
 
-Defined in: [core/src/types/eval.ts:229](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L229)
+Defined in: [core/src/types/eval.ts:229](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L229)
 
 An eval suite file, version 1.
 
@@ -16,7 +16,7 @@ An eval suite file, version 1.
 
 > `optional` **$schema?**: `"https://getpromptscript.dev/schema/eval-suite/v1.json"`
 
-Defined in: [core/src/types/eval.ts:234](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L234)
+Defined in: [core/src/types/eval.ts:234](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L234)
 
 Schema URL, the version tag of the suite.
 
@@ -32,7 +32,7 @@ Schema URL, the version tag of the suite.
 
 > **assertions**: [`EvalAssertion`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EvalAssertion/index.md)[]
 
-Defined in: [core/src/types/eval.ts:260](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L260)
+Defined in: [core/src/types/eval.ts:260](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L260)
 
 Assertions every case must pass.
 
@@ -50,7 +50,7 @@ Assertions every case must pass.
 
 > **dataset**: `string` \| [`EvalDatasetRef`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalDatasetRef/index.md)
 
-Defined in: [core/src/types/eval.ts:241](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L241)
+Defined in: [core/src/types/eval.ts:241](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L241)
 
 Dataset file relative to the suite file, or a reference with review decisions
 
@@ -60,7 +60,7 @@ Dataset file relative to the suite file, or a reference with review decisions
 
 > `optional` **judge?**: [`EvalJudgeConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalJudgeConfig/index.md)
 
-Defined in: [core/src/types/eval.ts:254](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L254)
+Defined in: [core/src/types/eval.ts:254](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L254)
 
 Judge settings shared by the llm-judge assertions
 
@@ -70,7 +70,7 @@ Judge settings shared by the llm-judge assertions
 
 > `optional` **labels?**: `string`
 
-Defined in: [core/src/types/eval.ts:246](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L246)
+Defined in: [core/src/types/eval.ts:246](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L246)
 
 Human label file, relative to the suite file.
 
@@ -86,7 +86,7 @@ Human label file, relative to the suite file.
 
 > `optional` **models?**: (`string` \| [`EvalModelEntry`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalModelEntry/index.md))[]
 
-Defined in: [core/src/types/eval.ts:252](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L252)
+Defined in: [core/src/types/eval.ts:252](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L252)
 
 Models to run the whole dataset on; absent means the prompt's own model.
 
@@ -104,7 +104,7 @@ Models to run the whole dataset on; absent means the prompt's own model.
 
 > **prompt**: `string`
 
-Defined in: [core/src/types/eval.ts:239](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L239)
+Defined in: [core/src/types/eval.ts:239](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L239)
 
 Prompt id under test.
 
@@ -120,6 +120,6 @@ Prompt id under test.
 
 > `optional` **thresholds?**: [`EvalThresholds`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalThresholds/index.md)
 
-Defined in: [core/src/types/eval.ts:262](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L262)
+Defined in: [core/src/types/eval.ts:262](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L262)
 
 Limits the run must meet

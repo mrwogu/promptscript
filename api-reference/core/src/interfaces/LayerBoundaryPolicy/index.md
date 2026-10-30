@@ -6,7 +6,7 @@
 
 # Interface: LayerBoundaryPolicy
 
-Defined in: [core/src/types/policy.ts:41](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L41)
+Defined in: [core/src/types/policy.ts:42](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/policy.ts#L42)
 
 Layer-boundary policy: controls which layers can extend which.
 
@@ -20,7 +20,7 @@ Layer-boundary policy: controls which layers can extend which.
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/policy.ts:31](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L31)
+Defined in: [core/src/types/policy.ts:32](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/policy.ts#L32)
 
 Human-readable description
 
@@ -34,7 +34,7 @@ Human-readable description
 
 > **kind**: `"layer-boundary"`
 
-Defined in: [core/src/types/policy.ts:42](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L42)
+Defined in: [core/src/types/policy.ts:43](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/policy.ts#L43)
 
 Policy kind discriminator
 
@@ -48,7 +48,7 @@ Policy kind discriminator
 
 > **layers**: `string`[]
 
-Defined in: [core/src/types/policy.ts:44](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L44)
+Defined in: [core/src/types/policy.ts:45](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/policy.ts#L45)
 
 Ordered list of layers from base to leaf
 
@@ -58,7 +58,7 @@ Ordered list of layers from base to leaf
 
 > `optional` **maxDistance?**: `number`
 
-Defined in: [core/src/types/policy.ts:46](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L46)
+Defined in: [core/src/types/policy.ts:47](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/policy.ts#L47)
 
 Maximum allowed distance between source and target layers (default: 1)
 
@@ -68,7 +68,7 @@ Maximum allowed distance between source and target layers (default: 1)
 
 > **name**: `string`
 
-Defined in: [core/src/types/policy.ts:29](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L29)
+Defined in: [core/src/types/policy.ts:30](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/policy.ts#L30)
 
 Unique policy name within the config
 
@@ -82,7 +82,7 @@ Unique policy name within the config
 
 > **severity**: [`PolicySeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicySeverity/index.md)
 
-Defined in: [core/src/types/policy.ts:35](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/policy.ts#L35)
+Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/policy.ts#L36)
 
 Violation severity
 

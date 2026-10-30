@@ -8,15 +8,16 @@
 
 > **checkSuites**(`suites`, `context`): [`EvalFinding`](https://getpromptscript.dev/api-reference/eval/src/interfaces/EvalFinding/index.md)[]
 
-Defined in: [eval/src/suite/check.ts:256](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/suite/check.ts#L256)
+Defined in: [eval/src/suite/check.ts:211](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/suite/check.ts#L211)
 
 Check loaded suites against the compiled prompts and the model catalog:
 the prompt exists (else the five nearest ids), fields are declared output
 properties, `json-schema` has a schema that compiles, every model in
 `models` resolves and is not retired, cost thresholds have a price for
 every model the suite runs, regexes do not nest quantifiers, and a dataset
-`allow` comes with a deterministic assertion. Judge models are not checked:
-`llm-judge` assertions get only the structure and field checks.
+`allow` comes with a deterministic assertion. Each `llm-judge` assertion
+needs a rubric prompt that fits the judge call (inputs, slots, output) and a
+judge model that resolves.
 
 ## Parameters
 

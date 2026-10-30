@@ -6,7 +6,7 @@
 
 # Class: RegistryCache
 
-Defined in: [resolver/src/registry-cache.ts:27](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry-cache.ts#L27)
+Defined in: [resolver/src/registry-cache.ts:27](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry-cache.ts#L27)
 
 Hierarchical cache for registry imports.
 Layout: <baseDir>/registries/<host>/<owner>/<repo>/<version>/
@@ -18,7 +18,7 @@ Separate from the existing GitCacheManager flat hash cache.
 
 > **new RegistryCache**(`baseDir`): `RegistryCache`
 
-Defined in: [resolver/src/registry-cache.ts:28](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry-cache.ts#L28)
+Defined in: [resolver/src/registry-cache.ts:28](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry-cache.ts#L28)
 
 #### Parameters
 
@@ -36,7 +36,7 @@ Defined in: [resolver/src/registry-cache.ts:28](https://github.com/mrwogu/prompt
 
 > **getCachePath**(`repoUrl`, `version`): `string`
 
-Defined in: [resolver/src/registry-cache.ts:30](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry-cache.ts#L30)
+Defined in: [resolver/src/registry-cache.ts:30](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry-cache.ts#L30)
 
 #### Parameters
 
@@ -58,7 +58,7 @@ Defined in: [resolver/src/registry-cache.ts:30](https://github.com/mrwogu/prompt
 
 > **getMeta**(`repoUrl`, `version`): `Promise`\<`CacheMeta` \| `null`\>
 
-Defined in: [resolver/src/registry-cache.ts:92](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry-cache.ts#L92)
+Defined in: [resolver/src/registry-cache.ts:92](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry-cache.ts#L92)
 
 #### Parameters
 
@@ -80,7 +80,7 @@ Defined in: [resolver/src/registry-cache.ts:92](https://github.com/mrwogu/prompt
 
 > **getTagsMeta**(`repoUrl`): `Promise`\<\{ `fetchedAt`: `number`; `tags`: `string`[]; \} \| `null`\>
 
-Defined in: [resolver/src/registry-cache.ts:104](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry-cache.ts#L104)
+Defined in: [resolver/src/registry-cache.ts:104](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry-cache.ts#L104)
 
 Get cached tag list for a repo (for semver range resolution)
 
@@ -100,7 +100,7 @@ Get cached tag list for a repo (for semver range resolution)
 
 > **has**(`repoUrl`, `version`): `Promise`\<`boolean`\>
 
-Defined in: [resolver/src/registry-cache.ts:42](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry-cache.ts#L42)
+Defined in: [resolver/src/registry-cache.ts:42](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry-cache.ts#L42)
 
 #### Parameters
 
@@ -122,7 +122,7 @@ Defined in: [resolver/src/registry-cache.ts:42](https://github.com/mrwogu/prompt
 
 > **isStale**(`repoUrl`, `version`, `ttlMs`): `Promise`\<`boolean`\>
 
-Defined in: [resolver/src/registry-cache.ts:76](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry-cache.ts#L76)
+Defined in: [resolver/src/registry-cache.ts:76](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry-cache.ts#L76)
 
 #### Parameters
 
@@ -148,7 +148,7 @@ Defined in: [resolver/src/registry-cache.ts:76](https://github.com/mrwogu/prompt
 
 > **set**(`repoUrl`, `version`, `commit`): `Promise`\<`string`\>
 
-Defined in: [resolver/src/registry-cache.ts:52](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry-cache.ts#L52)
+Defined in: [resolver/src/registry-cache.ts:52](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry-cache.ts#L52)
 
 #### Parameters
 
@@ -174,7 +174,7 @@ Defined in: [resolver/src/registry-cache.ts:52](https://github.com/mrwogu/prompt
 
 > **setTagsMeta**(`repoUrl`, `tags`): `Promise`\<`void`\>
 
-Defined in: [resolver/src/registry-cache.ts:117](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/registry-cache.ts#L117)
+Defined in: [resolver/src/registry-cache.ts:117](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry-cache.ts#L117)
 
 Cache tag list for a repo
 

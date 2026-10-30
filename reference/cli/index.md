@@ -1166,11 +1166,11 @@ prs registry add @company github.com/acme/promptscript-base --global
 
 ### prs release
 
-Build, promote, roll back and inspect content-hashed prompt bundles per environment. Releases need
+Build, promote, split, roll back and inspect content-hashed prompt bundles per environment. Releases need
 [`releases`](https://getpromptscript.dev/reference/config/index.md#releases) in `promptscript.yaml`; without it every subcommand fails with
 `PS5001`. See the [releases guide](https://getpromptscript.dev/guides/releases/index.md) for the flow.
 
-All four subcommands take these options:
+All five subcommands take these options:
 
 | Option                | Description                      | Default |
 | --------------------- | -------------------------------- | ------- |
@@ -1182,7 +1182,7 @@ With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/release-report/v1.json` and the human text goes to stderr. Exit
 code 0 means success or a no-op. Exit code 1 means an error or a failed verification.
 
-Errors use the codes `PS5001` to `PS5008`, listed in the
+Errors use the codes `PS5001` to `PS5010`, listed in the
 [releases guide](https://getpromptscript.dev/guides/releases/index.md#error-codes).
 
 #### prs release build
@@ -1198,9 +1198,11 @@ prs release build [options]
 | `--dry-run` | Show what would be written without writing |
 
 Writes new files to `.promptscript/releases/bundles/`, verifies existing ones, and writes
-`.promptscript/releases/manifest.json` only when it changes. Policies always run, each with its own
-severity. The security rules PS005, PS010, PS011, PS012, PS013 and PS014 always run as errors. Takes
-the project lock `.promptscript-release.lock`; a dry run does not.
+`.promptscript/releases/manifest.json` and `.promptscript/releases/pricing.json` only when they
+change. `pricing.json` holds the list prices of the models the bundles use, from the model catalog;
+models without a price are left out. Policies always run, each with its own severity. The security
+rules PS005, PS010, PS011, PS012, PS013 and PS014 always run as errors. Takes the project lock
+`.promptscript-release.lock`; a dry run does not.
 
 ```bash
 prs release build
@@ -1226,7 +1228,8 @@ previous one holds. Then the [release gates](https://getpromptscript.dev/guides/
 policy on the bundle, and `required-approvals` against the approval records committed at `HEAD`.
 A gate of severity `error` that fails refuses the promotion with `PS030` and leaves the label
 unchanged. `required-evals` reports `unavailable` in the gates and blocks at severity `error`.
-There is no flag to skip the order or the gates.
+There is no flag to skip the order or the gates. An entry with a running experiment is refused with
+`PS5010`: end the experiment with `prs release split --end` first.
 
 ```bash
 prs release promote acme-support/refund-reply --to staging
@@ -1247,10 +1250,43 @@ prs release rollback <env> [options]
 
 Reads Git history, so the label must have no uncommitted change. Fails with `PS5006` at the first
 promotion, and in a shallow checkout (run `git fetch --unshallow`). Every hash the rollback brings
-back must pass the [release gates](https://getpromptscript.dev/guides/releases/index.md#release-gates).
+back, experiment arms included, must pass the [release gates](https://getpromptscript.dev/guides/releases/index.md#release-gates).
 
 ```bash
 prs release rollback prod
+```
+
+#### prs release split
+
+Send a share of the traffic of a prompt to other versions in a later environment.
+
+```bash
+prs release split <id> --env <env> --name <experiment> --arm <variant>@<hash>=<percent> [options]
+prs release split <id> --env <env> --end [--keep <variant>] [options]
+```
+
+| Option                         | Description                                      |
+| ------------------------------ | ------------------------------------------------ |
+| `--env <env>`                  | Environment that runs the experiment (required)  |
+| `--name <experiment>`          | Experiment name, required to start or change one |
+| `--arm <variant@hash=percent>` | Arm besides control, repeat for each (at most 3) |
+| `--end`                        | End the experiment of the entry                  |
+| `--keep <variant>`             | With `--end`, make this arm the entry hash       |
+| `--dry-run`                    | Show the split without writing the label         |
+
+Control is the entry hash and keeps the rest of the traffic, at least 0.01 %. `--arm` lists every
+arm that stays. The first environment runs no experiment (`PS5009`). A new arm must run in the
+previous environment, an arm that only runs there as an arm gets at most its weight there, and
+`--keep` needs the entry hash of the previous environment (`PS5005`). Every write runs the
+[release gates](https://getpromptscript.dev/guides/releases/index.md#release-gates) for the entry hash and every arm with traffic.
+There is no flag to skip them. An arm must be a version the previous environment already runs, so
+in a short chain only the version of the previous environment is available. See [Split](https://getpromptscript.dev/guides/releases/index.md#split) before the first use: the
+applications that read the environment need a runtime that reads label v2.
+
+```bash
+prs release split acme-support/refund-reply --env prod --name warm-tone-2026-11 \
+  --arm warm@sha256-1a2b3c4d=10
+prs release split acme-support/refund-reply --env prod --end --keep warm
 ```
 
 #### prs release status
@@ -1267,7 +1303,8 @@ prs release status [options]
 | `--base <ref>`  | Check every label entry changed since `<ref>` with the rules of `<ref>` |
 
 Shows, per environment, the prompt id, the hash, whether it is in the latest build and whether it
-verifies. Exits with code 1 when a referenced bundle is missing or does not verify. With prompt
+verifies. Under an entry with an experiment it lists the arms with their weights and verifies each
+arm bundle. Exits with code 1 when a referenced bundle is missing or does not verify. With prompt
 policies it also runs the [release gates](https://getpromptscript.dev/guides/releases/index.md#release-gates) on every entry and
 shows an `approvals` column (`ok`, `missing: <roles>` or `-`); a failed gate is a warning there.
 
@@ -1279,7 +1316,9 @@ went through the check), or the first environment holds what the source compiles
 `policies`, `validation` and `models.supported` of `<ref>`, or a later one holds what the
 environment before it holds. Every new or changed entry also goes through the release gates with
 the policies, governance and releases of `<ref>` and the approval records committed at `HEAD`, a
-rollback too. A removed entry is listed as `removed` and not checked. The config is
+rollback too. An experiment is checked like a split: its arms follow the order and weight rules and
+every arm with traffic goes through the gates. A removed entry is listed as `removed` and not
+checked. The config is
 read at `<ref>`; `-c` and `PROMPTSCRIPT_CONFIG` are ignored with a warning. Any failure exits with
 code 1. A ref that is missing, not a commit, ambiguous (pass the full name, such as
 `refs/remotes/origin/main`) or not fetched in a shallow checkout fails with `PS5006`. See
@@ -1303,17 +1342,17 @@ prs approve <id>@<hash> --role <role> --approver @<handle> (--env <env> | --all-
 prs approve --list [<id>] [options]
 ```
 
-| Option                | Description                                                   | Default |
-| --------------------- | ------------------------------------------------------------- | ------- |
-| `--role <role>`       | Approval role from `governance.roles` (required to approve)   | -       |
-| `--approver <handle>` | Your Git host user handle, like `@jane` (required to approve) | -       |
-| `--env <env>`         | The one environment the approval counts for                   | -       |
-| `--all-environments`  | Let the approval count for every environment                  | -       |
-| `--comment <text>`    | Note in the record, at most 2000 characters                   | -       |
-| `--list`              | List records with their scope and state                       | -       |
-| `--format <format>`   | `text` or `json`                                              | `text`  |
-| `-c, --config <path>` | Path to a custom config file                                  | -       |
-| `--cwd <dir>`         | Working directory (project root)                              | -       |
+| Option                | Description                                                                  | Default |
+| --------------------- | ---------------------------------------------------------------------------- | ------- |
+| `--role <role>`       | Approval role from `governance.roles` (required to approve)                  | -       |
+| `--approver <handle>` | Your Git host user handle, like `@jane` or `@jane.doe` (required to approve) | -       |
+| `--env <env>`         | The one environment the approval counts for                                  | -       |
+| `--all-environments`  | Let the approval count for every environment                                 | -       |
+| `--comment <text>`    | Note in the record, at most 2000 characters                                  | -       |
+| `--list`              | List records with their scope and state                                      | -       |
+| `--format <format>`   | `text` or `json`                                                             | `text`  |
+| `-c, --config <path>` | Path to a custom config file                                                 | -       |
+| `--cwd <dir>`         | Working directory (project root)                                             | -       |
 
 `<hash>` is the full `sha256-<64 hex>`. It must be what the source builds now or a release bundle of
 that prompt. Give `--env` or `--all-environments`, one of the two. Before writing, the command
@@ -1339,7 +1378,8 @@ prs approve acme-support/refund-reply@sha256-<64 hex> --role legal --approver @j
 
 ### prs eval
 
-Run eval suites against the prompts of the project and compare two reports. A suite is a file
+Run eval suites against the prompts of the project, compare two reports and import production
+samples into a dataset. A suite is a file
 `<name>.eval.yaml`, `.eval.yml` or `.eval.json` under `.promptscript/evals/` that names a prompt, a
 dataset and assertions. The prompts come from a fresh in-memory compile of the source, with the
 `bundle` target. The settings are in [`eval`](https://getpromptscript.dev/reference/config/index.md#eval).
@@ -1352,24 +1392,26 @@ prs eval run [suite...] [options]
 
 No suite name means every suite under `.promptscript/evals/`.
 
-| Option                     | Description                                                                                     | Default  |
-| -------------------------- | ----------------------------------------------------------------------------------------------- | -------- |
-| `--format <format>`        | `text`, `json`, `markdown` or `junit`                                                           | `text`   |
-| `--out <file>`             | Also write the formatted report to a file, with the same bytes as stdout                        | -        |
-| `--report-dir <dir>`       | Write `<dir>/<suite>.<hash12>.json` for each suite, inside the project                          | -        |
-| `--baseline <report.json>` | Compare with an earlier report                                                                  | -        |
-| `--fail-on-regression`     | Exit 1 when the baseline shows a regression. Needs `--baseline`                                 | -        |
-| `--cache <mode>`           | `replay`, `record`, `refresh` or `off`                                                          | `replay` |
-| `--max-cost <usd>`         | Spending limit in USD. Every mode that calls a provider needs it                                | -        |
-| `--max-cases <n>`          | Largest number of dataset rows a suite runs                                                     | 1000     |
-| `--concurrency <n>`        | Calls in flight at once, at most 16                                                             | 4        |
-| `--model <ref>`            | Run every suite against this model only                                                         | -        |
-| `--allow-host <host>`      | Allow a provider host besides the built-in ones. Repeat it for more hosts                       | -        |
-| `--allow-local`            | Allow loopback hosts (`127.0.0.0/8`, `::1`, `localhost`, `*.localhost`), http too               | -        |
-| `--dry-run`                | Print the plan, the cache hits and the worst-case cost, and call nothing. Needs no `--max-cost` | -        |
-| `--strict`                 | Exit 2 when the run passed with warnings                                                        | -        |
-| `-c, --config <path>`      | Path to a custom config file                                                                    | -        |
-| `--cwd <dir>`              | Working directory (project root)                                                                | -        |
+| Option                     | Description                                                                                         | Default  |
+| -------------------------- | --------------------------------------------------------------------------------------------------- | -------- |
+| `--format <format>`        | `text`, `json`, `markdown` or `junit`                                                               | `text`   |
+| `--out <file>`             | Also write the formatted report to a file, with the same bytes as stdout                            | -        |
+| `--report-dir <dir>`       | Write `<dir>/<suite>.<hash12>.json` for each suite, inside the project                              | -        |
+| `--baseline <report.json>` | Compare with an earlier report                                                                      | -        |
+| `--fail-on-regression`     | Exit 1 when the baseline shows a regression. Needs `--baseline`                                     | -        |
+| `--cache <mode>`           | `replay`, `record`, `refresh` or `off`                                                              | `replay` |
+| `--max-cost <usd>`         | Spending limit in USD. Every mode that calls a provider needs it                                    | -        |
+| `--max-cases <n>`          | Largest number of dataset rows a suite runs                                                         | 1000     |
+| `--concurrency <n>`        | Calls in flight at once, at most 16                                                                 | 4        |
+| `--model <ref>`            | Run every suite against this model only                                                             | -        |
+| `--label <env>`            | Run the prompts that release environment `<env>` serves, from its label, instead of a fresh compile | -        |
+| `--variant <name>`         | With `--label`, run the experiment arm `<name>` instead of the entry hash                           | -        |
+| `--allow-host <host>`      | Allow a provider host besides the built-in ones. Repeat it for more hosts                           | -        |
+| `--allow-local`            | Allow loopback hosts (`127.0.0.0/8`, `::1`, `localhost`, `*.localhost`), http too                   | -        |
+| `--dry-run`                | Print the plan, the cache hits and the worst-case cost, and call nothing. Needs no `--max-cost`     | -        |
+| `--strict`                 | Exit 2 when the run passed with warnings                                                            | -        |
+| `-c, --config <path>`      | Path to a custom config file                                                                        | -        |
+| `--cwd <dir>`              | Working directory (project root)                                                                    | -        |
 
 **Cache modes.** The cache is `.promptscript/eval-cache/`. `replay` answers from it and never calls
 a provider; a call with no entry is a case error `PS6402`. `record` answers from it and calls the
@@ -1383,10 +1425,48 @@ the cache, and stops with `PS6503` when it passes `--max-cost`. During the run e
 worst case first; when the budget runs out, the remaining cases are errors and the outcome is
 `budget-exceeded`. Live modes, the budget and extra hosts come from these flags only. No config key
 turns them on. `PROMPTSCRIPT_EVAL_ALLOWED_HOSTS` (comma-separated) adds hosts like `--allow-host`.
+Judge calls count like any other call: each reserves its worst case, judge models need a price, and
+case costs and `maxCostPerCaseUsd` include them. Before a case is answered, the plan estimates its
+judge calls at 4 bytes per output token of the model under test.
 
 **Keys.** A key is read from an environment variable at call time, never from the config. Before the
 first live call stderr prints `sending <VAR> to <host>` for each provider of the run. A key sent to
 a host that is not a built-in default needs `--allow-host`.
+
+**LLM judge.** An `llm-judge` assertion sends the response, or its `field`, to a rubric: a prompt of
+the project with a `verdict` (`pass` or `fail`) and a `reason` as output. It makes 1, 3 or 5 runs
+(default 3), each a separate call with its own cache entry. The assertion passes when more than half
+of the runs say pass, and the case is an error when more than half give no valid verdict (`PS6601`).
+The judge model is the one of the assertion, else the suite `judge`, else the rubric's own model;
+`--model` does not change it. The rubric gets `response`, `case_inputs`, `expected`, `criteria` and
+`boundary`, the ones it declares. It must keep the first three out of its system message (`PS6212`),
+and should wrap the response, and the case inputs and expected value if it shows them, in a fence made with `boundary`. Case inputs are untrusted text too, since a dataset can come from `prs eval import`:
+
+```
+<response-{{input.boundary}}>{{input.response}}</response-{{input.boundary}}>
+```
+
+Text over 64 KiB is not judged (`PS6602`). A judge can be steered by the text it reads. Majority
+voting removes noise, not that, so keep deterministic assertions next to it.
+
+**Labels.** The `labels` file of a suite (JSONL, CSV or YAML with `id`, `assertion`, `verdict` and
+`note`) holds human verdicts for judge assertions. Labels never change a result. Each model in the
+report gets `judgeAgreement`, with `labelled` and `agreed` cases per judge assertion; text and
+Markdown print it as a count and a percentage.
+
+| Code     | Meaning                                                                         |
+| -------- | ------------------------------------------------------------------------------- |
+| `PS6207` | The rubric is the prompt under test, or its inputs do not fit the judge call    |
+| `PS6208` | The rubric output is not exactly a `verdict` of `pass` or `fail` and a `reason` |
+| `PS6209` | No judge model on the assertion, the suite or the rubric                        |
+| `PS6211` | A label names an assertion that is not an `llm-judge` assertion of the suite    |
+| `PS6212` | `response`, `case_inputs` or `expected` in a system message of the rubric       |
+| `PS6215` | Warning: the judge model is also a model under test                             |
+| `PS6216` | Warning: the response or case data is shown outside a `boundary` fence          |
+| `PS6601` | More than half of the judge runs gave no valid verdict                          |
+| `PS6602` | The judged text is over 64 KiB                                                  |
+| `PS6603` | A label file cannot be read, is too big, or has a bad or duplicate row          |
+| `PS6604` | Warning: labels name rows the run did not read                                  |
 
 **Output.** With `json`, `markdown` or `junit`, stdout holds exactly one document. The JSON report
 matches `https://getpromptscript.dev/schema/eval-report/v1.json` and holds no timestamp, so two replay
@@ -1410,15 +1490,30 @@ With `--baseline`, suites and models that the baseline has and the run lacks are
 they are listed as a warning: on stderr for `json` and `junit`, inside the document for `text` and
 `markdown`. They count as a warning for `--strict`.
 
-| Exit code | Outcome (`outcome` in JSON)                                                           |
-| --------- | ------------------------------------------------------------------------------------- |
-| 0         | `passed`: every suite passed and there is no regression with `--fail-on-regression`   |
-| 1         | `failed`: an assertion or a threshold failed, or a case ended in an error             |
-| 1         | `regression`: the run passed, but the baseline regressed, with `--fail-on-regression` |
-| 1         | `budget-exceeded`: the budget refused or stopped a call                               |
-| 1         | `error`: a config, suite, dataset, provider, cache or option error, or a replay miss  |
-| 2         | `passed` with warnings, with `--strict`                                               |
-| 130       | Interrupted with Ctrl+C. New calls stop and the finished cases stay in the report     |
+**Run against a label.** With `--label <env>` the prompts are not compiled. The run reads
+`.promptscript/releases/<env>.json` and the bundle of each hash from `bundles/`, and checks that
+each bundle verifies against its hash (`PS5003` when the label or a bundle is missing, `PS5004` when it does not
+verify). `<env>` must be in `releases.environments` (`PS5002`). For an entry with an experiment the
+run uses the entry hash, which is what readers serve without an assignment key; `--variant <name>`
+runs that arm instead, only for prompts that have it. One run covers one arm, because a report holds
+each suite once. A suite whose prompt is not in the label, or has no such arm, is skipped with a
+warning `PS6311`, which counts for `--strict`. A suite you name on the command line is an error
+instead, and so is a run where every suite is skipped. The report records the hash of every suite
+under `prompt.contentHash`, and `--report-dir` names files after that hash. The cache is keyed by
+the hash too: replay answers only from entries recorded for that hash, so a label that is behind the
+source needs `--cache record` once, or `--cache off --max-cost <usd>` for a live check of what the
+environment serves. Release gates do not read eval reports, so a report of a label run is not gate
+evidence.
+
+| Exit code | Outcome (`outcome` in JSON)                                                                   |
+| --------- | --------------------------------------------------------------------------------------------- |
+| 0         | `passed`: every suite passed and there is no regression with `--fail-on-regression`           |
+| 1         | `failed`: an assertion or a threshold failed, or a case ended in an error                     |
+| 1         | `regression`: the run passed, but the baseline regressed, with `--fail-on-regression`         |
+| 1         | `budget-exceeded`: the budget refused or stopped a call                                       |
+| 1         | `error`: a config, release, suite, dataset, provider, cache or option error, or a replay miss |
+| 2         | `passed` with warnings, with `--strict`                                                       |
+| 130       | Interrupted with Ctrl+C. New calls stop and the finished cases stay in the report             |
 
 ```bash
 prs eval run
@@ -1426,6 +1521,8 @@ prs eval run refund --format markdown
 prs eval run --cache record --max-cost 0.5
 prs eval run --dry-run --cache record --max-cost 0.5
 prs eval run --baseline main-report.json --fail-on-regression --format json --out report.json
+prs eval run --label prod
+prs eval run --label prod --variant warm --cache record --max-cost 0.5
 ```
 
 #### prs eval compare
@@ -1456,6 +1553,130 @@ so an unreadable report or a bad option goes to stderr in every format, with exi
 ```bash
 prs eval compare main-report.json pr-report.json
 prs eval compare main-report.json pr-report.json --fail-on-regression --tolerance 0.05
+```
+
+#### prs eval import
+
+Turn production samples into a dataset for a suite. The command reads a JSONL file, scrubs it,
+and writes a new dataset file. It calls no model and needs no key.
+
+```bash
+prs eval import <samples.jsonl> --suite <name> --out <dataset.jsonl> [options]
+```
+
+| Option                   | Description                                                           | Default |
+| ------------------------ | --------------------------------------------------------------------- | ------- |
+| `--suite <name>`         | Suite the dataset is for; its prompt picks the samples                | -       |
+| `--out <file>`           | New dataset file, `.jsonl`, inside the project; must not exist        | -       |
+| `--max-rows <n>`         | Most rows to keep, 1 to 1000                                          | 200     |
+| `--seed <n>`             | Seed of the row sampling, so a rerun gives the same rows              | 1       |
+| `--max-score <n>`        | Keep only samples with a feedback score at or below `n`               | -       |
+| `--label <label>`        | Keep only samples with this feedback label; repeatable                | -       |
+| `--redact-input <name>`  | Replace a string input with `[redacted]` before the scrub; repeatable | -       |
+| `--expected-from-output` | Copy the scrubbed `output` of a sample as the row's `expected`        | off     |
+| `--format <format>`      | `text` or `json`                                                      | `text`  |
+| `--dry-run`              | Print the counts and write nothing                                    | -       |
+| `--cwd <dir>`            | Working directory (project root)                                      | -       |
+| `-c, --config <path>`    | Path to custom config file                                            | -       |
+
+**Sample format.** One JSON object per line, checked against
+`https://getpromptscript.dev/schema/eval-sample/v1.json`:
+
+```json
+{
+  "prompt": "acme-support/refund-reply",
+  "contentHash": "sha256-aaaa...",
+  "variant": "warm",
+  "inputs": { "message": "...", "orderTotal": 120 },
+  "output": "...",
+  "feedback": { "name": "user.thumbs", "score": 0, "label": "negative" }
+}
+```
+
+`prompt` and `inputs` are required. The schema is closed at every level. There is no field for a
+feedback comment, an assignment key, a user, a session or a trace, so a line that has one is
+skipped. Input values are strings, numbers or booleans; a nested value skips the line. A line is
+limited to 1 MiB and a string to 64 KiB, and the file to 100000 lines (`PS6712`). A line that fails
+is counted by reason and its content is never printed.
+
+**What the command does**, in this order, all before anything is written:
+
+1. Refuses a sample file that Git tracks, or that sits in a Git repository and is neither tracked
+   nor ignored (`PS6716`). Raw samples hold personal data that was never scrubbed, so only the
+   dataset belongs in Git, and a later `git add .` must not be able to pick the file up. Put it
+   outside the repository or in `.gitignore`. The command also refuses when Git cannot say (it
+   cannot be run, or answers with an error); the message names the exit status. A file outside
+   every repository is fine.
+2. Keeps the samples of the suite's prompt and applies `--max-score` and `--label`. A sample
+   without a score fails `--max-score`; a sample without a label fails `--label`.
+3. Checks the inputs against the prompt. The contract is the verified bundle of the sample's
+   `contentHash` under `.promptscript/releases/bundles/` when that file exists, else the current
+   compile. A bundle file that does not verify is not used, and the summary warns. An input the
+   prompt does not declare skips the whole sample, as does an input of another type or a missing
+   required input. The inputs must fit the current compile as well, because `prs eval run` checks
+   rows against it; a sample that fits only an older bundle is skipped as `staleContract`. Nothing
+   is repaired or passed through.
+4. Scrubs every string input and, with `--expected-from-output`, the output. Emails, payment card
+   numbers (Luhn check) and IBANs (mod-97 check) become `[email]`, `[card]` and `[iban]`. The same
+   detectors then run on the result, and a value that still matches stops the import with `PS6714`
+   and writes nothing. A number input with 13 or more digits skips the sample (`numericPii`), since
+   it could be a card number and cannot be replaced without changing its type. A millisecond
+   timestamp is such a number; pass it as a string input instead. A string that hides
+   a value from the detectors with zero-width or other invisible characters, fullwidth forms
+   (`＠`, fullwidth digits) or dots between card groups also skips the sample (`obfuscatedPii`).
+   The scrub reads email addresses of any script, IBANs in any case with spaces or dashes between
+   groups, and card numbers with up to three spaces, dashes, underscores, slashes or commas between digits,
+   or with other digits next to them. A run of 13 to 19 digits that passes the Luhn check is
+   replaced as `[card]` as a whole, so about 1 in 10 plain ids of that length is replaced too, and a
+   number of 20 to 64 digits is nearly always replaced, since every 13 to 19 digit part of it is tried.
+   There is no option to turn the scrub off.
+5. Drops duplicates (same scrubbed inputs). The row id is `imp-` plus 12 hex digits of the hash of
+   the scrubbed inputs. Tags are `imported`, plus `variant:<name>` when the sample has one.
+6. Samples down to `--max-rows` with a seeded reservoir, and keeps the file order.
+7. Runs the dataset security scan on the rows. Findings are printed with the row id and the path,
+   never the value, and do not stop the import. Production text can hold injection attempts; the
+   suite that uses the dataset decides with `allow` entries.
+8. Writes `--out` atomically, with mode 0600. It must stay inside the project and must not exist
+   (`PS6713`), so an import never replaces a reviewed dataset. The file is not added to any suite;
+   name it in the `dataset` field of one. When the suite has an `equals` assertion without a value
+   and the rows have no `expected`, `prs eval run` would refuse the dataset (`PS6105`); the summary
+   warns with a count, and `--expected-from-output` or hand-written values fix it.
+
+**The scrub lowers risk, it does not remove it.** It catches emails, card numbers and IBANs only.
+Names, phone numbers, postal addresses and ids in free text stay in the dataset, and so do values
+that are encoded (URL-encoded or base64 text, `jan%40example.com`) or spelled out with spaces
+around the at sign. The second pass
+with the same detectors is a check on the replacer, not a second line of defence. The person who
+reviews the dataset in the pull request decides whether it is fit to commit. Use `--redact-input`
+for inputs that hold free text about a person. A name given to it must be a string input of the
+prompt, so a typo is an error and never a silent no-op.
+
+The summary, also under `--dry-run`, gives counts per step, per skip reason and per kind of
+replacement, such as `email: 14, card: 2, iban: 0, redacted: 31`. Replacements are counted for every
+sample that reached the scrub, including those dropped later as duplicates or by sampling. It never holds
+a sample value. With `--format json`, stdout holds one document that matches
+`https://getpromptscript.dev/schema/eval-import-summary/v1.json`. Strings that come from a sample or
+a finding have control and bidi characters removed. Errors go to stderr in both formats.
+
+Exit code 0 when the import ran, also under `--dry-run`. Exit 1 for a bad flag (`PS6309`), an
+unknown suite (`PS6200`), a project that does not load or compile (`PS6310`) or a prompt it does
+not compile (`PS6203`), a refused path or
+sample file, a scrub failure, or when no sample matched the suite (`PS6715`; the counts are still
+printed).
+
+| Code     | Meaning                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------- |
+| `PS6711` | The sample file does not exist or is not a regular file                                           |
+| `PS6712` | The sample file has more than 100000 lines                                                        |
+| `PS6713` | The output path exists, is not `.jsonl`, or leaves the project                                    |
+| `PS6714` | The scrub left personal data in a value; nothing was written                                      |
+| `PS6715` | No sample matched the suite                                                                       |
+| `PS6716` | The sample file is tracked by Git, sits in a repository without an ignore rule, or Git cannot say |
+
+```bash
+prs eval import samples.jsonl --suite refund --out .promptscript/evals/datasets/prod.jsonl --dry-run
+prs eval import ~/samples.jsonl --suite refund --out .promptscript/evals/datasets/prod.jsonl --max-score 0
+prs eval import ~/samples.jsonl --suite refund --out .promptscript/evals/datasets/prod.jsonl --redact-input message
 ```
 
 ### prs governance
@@ -1502,7 +1723,8 @@ Read the governance history of the project from Git.
 List prompt file changes, approvals, promotions, rollbacks, label entries removed, config changes
 and changes of the generated CODEOWNERS section, newest commit first, merges and side branches
 included, plus the changes a merge dropped from a parent. See [Audit log](https://getpromptscript.dev/guides/releases/index.md#audit-log)
-in the releases guide.
+in the releases guide. Experiment arms and weights are not listed yet: read the label history with
+`git log -p`.
 
 ```bash
 prs audit log [options]
@@ -1923,7 +2145,8 @@ See the [Configuration Reference](https://getpromptscript.dev/reference/config/i
 | 2    | Warning (with --strict) |
 | 130  | Interrupted (Ctrl+C)    |
 
-`prs eval run` maps its outcomes onto these codes; see [`prs eval run`](#prs-eval-run).
+`prs eval run` maps its outcomes onto these codes; see [`prs eval run`](#prs-eval-run). `prs eval import`
+uses 0 and 1; see [`prs eval import`](#prs-eval-import).
 
 ## Troubleshooting
 

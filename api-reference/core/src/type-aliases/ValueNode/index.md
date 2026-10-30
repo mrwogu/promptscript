@@ -8,6 +8,6 @@
 
 > **ValueNode** = [`ScalarValueNode`](https://getpromptscript.dev/api-reference/core/src/interfaces/ScalarValueNode/index.md) \| [`TextValueNode`](https://getpromptscript.dev/api-reference/core/src/interfaces/TextValueNode/index.md) \| [`TemplateValueNode`](https://getpromptscript.dev/api-reference/core/src/interfaces/TemplateValueNode/index.md) \| [`TypeExpressionValueNode`](https://getpromptscript.dev/api-reference/core/src/interfaces/TypeExpressionValueNode/index.md) \| [`ArrayValueNode`](https://getpromptscript.dev/api-reference/core/src/interfaces/ArrayValueNode/index.md) \| [`ObjectValueNode`](https://getpromptscript.dev/api-reference/core/src/interfaces/ObjectValueNode/index.md)
 
-Defined in: [core/src/types/ast.ts:568](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L568)
+Defined in: [core/src/types/ast.ts:568](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L568)
 
 Canonical value representation that retains nested source locations.

@@ -8,7 +8,7 @@
 
 > **formatValidationMessages**(`messages`, `options?`): `string`
 
-Defined in: [validator/src/format.ts:129](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/validator/src/format.ts#L129)
+Defined in: [validator/src/format.ts:129](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/format.ts#L129)
 
 Format multiple validation messages for display.
 

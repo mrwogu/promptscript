@@ -8,7 +8,7 @@
 
 > **checkForUpdates**(`currentVersion`): `Promise`\<[`UpdateInfo`](https://getpromptscript.dev/api-reference/cli/src/interfaces/UpdateInfo/index.md) \| `null`\>
 
-Defined in: [cli/src/utils/version-check.ts:213](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/cli/src/utils/version-check.ts#L213)
+Defined in: [cli/src/utils/version-check.ts:213](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/version-check.ts#L213)
 
 Check for updates automatically (respects cache).
 Called from preAction hook.

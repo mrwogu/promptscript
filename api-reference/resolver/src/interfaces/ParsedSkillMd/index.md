@@ -6,7 +6,7 @@
 
 # Interface: ParsedSkillMd
 
-Defined in: [resolver/src/skills.ts:47](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L47)
+Defined in: [resolver/src/skills.ts:47](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L47)
 
 Result of parsing a native SKILL.md file.
 
@@ -16,7 +16,7 @@ Result of parsing a native SKILL.md file.
 
 > `optional` **allowedTools?**: `string`[]
 
-Defined in: [resolver/src/skills.ts:59](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L59)
+Defined in: [resolver/src/skills.ts:59](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L59)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [resolver/src/skills.ts:59](https://github.com/mrwogu/promptscript/b
 
 > `optional` **compatibility?**: `string`
 
-Defined in: [resolver/src/skills.ts:57](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L57)
+Defined in: [resolver/src/skills.ts:57](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L57)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [resolver/src/skills.ts:57](https://github.com/mrwogu/promptscript/b
 
 > **content**: `string`
 
-Defined in: [resolver/src/skills.ts:50](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L50)
+Defined in: [resolver/src/skills.ts:50](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L50)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [resolver/src/skills.ts:50](https://github.com/mrwogu/promptscript/b
 
 > `optional` **description?**: `string`
 
-Defined in: [resolver/src/skills.ts:49](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L49)
+Defined in: [resolver/src/skills.ts:49](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L49)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [resolver/src/skills.ts:49](https://github.com/mrwogu/promptscript/b
 
 > `optional` **inputs?**: `Record`\<`string`, [`SkillContractField`](https://getpromptscript.dev/api-reference/core/src/interfaces/SkillContractField/index.md)\>
 
-Defined in: [resolver/src/skills.ts:52](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L52)
+Defined in: [resolver/src/skills.ts:52](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L52)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [resolver/src/skills.ts:52](https://github.com/mrwogu/promptscript/b
 
 > `optional` **license?**: `string`
 
-Defined in: [resolver/src/skills.ts:56](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L56)
+Defined in: [resolver/src/skills.ts:56](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L56)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [resolver/src/skills.ts:56](https://github.com/mrwogu/promptscript/b
 
 > `optional` **metadata?**: `Record`\<`string`, `string`\>
 
-Defined in: [resolver/src/skills.ts:58](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L58)
+Defined in: [resolver/src/skills.ts:58](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L58)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [resolver/src/skills.ts:58](https://github.com/mrwogu/promptscript/b
 
 > `optional` **name?**: `string`
 
-Defined in: [resolver/src/skills.ts:48](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L48)
+Defined in: [resolver/src/skills.ts:48](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L48)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [resolver/src/skills.ts:48](https://github.com/mrwogu/promptscript/b
 
 > `optional` **outputs?**: `Record`\<`string`, [`SkillContractField`](https://getpromptscript.dev/api-reference/core/src/interfaces/SkillContractField/index.md)\>
 
-Defined in: [resolver/src/skills.ts:53](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L53)
+Defined in: [resolver/src/skills.ts:53](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L53)
 
 ***
 
@@ -88,7 +88,7 @@ Defined in: [resolver/src/skills.ts:53](https://github.com/mrwogu/promptscript/b
 
 > `optional` **params?**: [`ParamDefinition`](https://getpromptscript.dev/api-reference/core/src/interfaces/ParamDefinition/index.md)[]
 
-Defined in: [resolver/src/skills.ts:51](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L51)
+Defined in: [resolver/src/skills.ts:51](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L51)
 
 ***
 
@@ -96,7 +96,7 @@ Defined in: [resolver/src/skills.ts:51](https://github.com/mrwogu/promptscript/b
 
 > `optional` **rawFrontmatter?**: `string`
 
-Defined in: [resolver/src/skills.ts:60](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L60)
+Defined in: [resolver/src/skills.ts:60](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L60)
 
 ***
 
@@ -104,7 +104,7 @@ Defined in: [resolver/src/skills.ts:60](https://github.com/mrwogu/promptscript/b
 
 > `optional` **references?**: `string`[]
 
-Defined in: [resolver/src/skills.ts:54](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L54)
+Defined in: [resolver/src/skills.ts:54](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L54)
 
 ***
 
@@ -112,4 +112,4 @@ Defined in: [resolver/src/skills.ts:54](https://github.com/mrwogu/promptscript/b
 
 > `optional` **scripts?**: `string`[]
 
-Defined in: [resolver/src/skills.ts:55](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skills.ts#L55)
+Defined in: [resolver/src/skills.ts:55](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L55)

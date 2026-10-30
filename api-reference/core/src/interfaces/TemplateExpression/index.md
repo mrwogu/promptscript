@@ -6,7 +6,7 @@
 
 # Interface: TemplateExpression
 
-Defined in: [core/src/types/ast.ts:95](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L95)
+Defined in: [core/src/types/ast.ts:95](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L95)
 
 Template expression for variable interpolation.
 
@@ -28,7 +28,7 @@ Template expression for variable interpolation.
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -42,7 +42,7 @@ Source location
 
 > **name**: `string`
 
-Defined in: [core/src/types/ast.ts:98](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L98)
+Defined in: [core/src/types/ast.ts:98](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L98)
 
 Variable name to interpolate
 
@@ -52,7 +52,7 @@ Variable name to interpolate
 
 > `readonly` **type**: `"TemplateExpression"`
 
-Defined in: [core/src/types/ast.ts:96](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L96)
+Defined in: [core/src/types/ast.ts:96](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L96)
 
 Node type discriminator
 

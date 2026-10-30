@@ -6,7 +6,7 @@
 
 # Interface: FormatterWarning
 
-Defined in: [formatters/src/types.ts:13](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/types.ts#L13)
+Defined in: [formatters/src/types.ts:13](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/types.ts#L13)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [formatters/src/types.ts:13](https://github.com/mrwogu/promptscript/
 
 > **code**: `string`
 
-Defined in: [formatters/src/types.ts:15](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/types.ts#L15)
+Defined in: [formatters/src/types.ts:15](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/types.ts#L15)
 
 Stable warning code
 
@@ -24,7 +24,7 @@ Stable warning code
 
 > `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [formatters/src/types.ts:23](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/types.ts#L23)
+Defined in: [formatters/src/types.ts:23](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/types.ts#L23)
 
 Source location that caused the compatibility warning
 
@@ -34,7 +34,7 @@ Source location that caused the compatibility warning
 
 > **message**: `string`
 
-Defined in: [formatters/src/types.ts:19](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/types.ts#L19)
+Defined in: [formatters/src/types.ts:19](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/types.ts#L19)
 
 Actionable compatibility message
 
@@ -44,7 +44,7 @@ Actionable compatibility message
 
 > `optional` **ruleName?**: `string`
 
-Defined in: [formatters/src/types.ts:17](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/types.ts#L17)
+Defined in: [formatters/src/types.ts:17](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/types.ts#L17)
 
 Rule name reported to compile consumers (defaults per code family)
 
@@ -54,6 +54,6 @@ Rule name reported to compile consumers (defaults per code family)
 
 > `optional` **suggestion?**: `string`
 
-Defined in: [formatters/src/types.ts:21](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/types.ts#L21)
+Defined in: [formatters/src/types.ts:21](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/types.ts#L21)
 
 Optional remediation

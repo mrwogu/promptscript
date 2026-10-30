@@ -6,7 +6,7 @@
 
 # Interface: RegistryAliasEntry
 
-Defined in: [core/src/types/registries.ts:4](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/registries.ts#L4)
+Defined in: [core/src/types/registries.ts:4](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/registries.ts#L4)
 
 Extended registry alias entry for monorepos or custom roots.
 
@@ -16,7 +16,7 @@ Extended registry alias entry for monorepos or custom roots.
 
 > `optional` **fallbackUrl?**: `string`
 
-Defined in: [core/src/types/registries.ts:18](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/registries.ts#L18)
+Defined in: [core/src/types/registries.ts:18](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/registries.ts#L18)
 
 Fallback Git URL to try when the primary `url` fails with an auth error.
 Useful when registries reference HTTPS URLs but the user authenticates
@@ -37,7 +37,7 @@ registries:
 
 > `optional` **root?**: `string`
 
-Defined in: [core/src/types/registries.ts:20](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/registries.ts#L20)
+Defined in: [core/src/types/registries.ts:20](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/registries.ts#L20)
 
 Base path within the repository
 
@@ -47,7 +47,7 @@ Base path within the repository
 
 > `optional` **timeout?**: `number`
 
-Defined in: [core/src/types/registries.ts:33](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/registries.ts#L33)
+Defined in: [core/src/types/registries.ts:33](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/registries.ts#L33)
 
 Maximum wall-clock time in milliseconds for each Git operation
 (clone, fetch, ls-remote) against this repository.
@@ -69,6 +69,6 @@ registries:
 
 > **url**: `string`
 
-Defined in: [core/src/types/registries.ts:6](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/registries.ts#L6)
+Defined in: [core/src/types/registries.ts:6](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/registries.ts#L6)
 
 Git repository URL (HTTPS or SSH)

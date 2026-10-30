@@ -6,6 +6,6 @@
 
 # Variable: DEFAULT\_OUTPUT\_PATHS
 
-> `const` **DEFAULT\_OUTPUT\_PATHS**: *typeof* `DEFAULT_OUTPUT_PATH_VALUES` & `DefaultOutputPathMap` = `DEFAULT_OUTPUT_PATH_VALUES`
+> `const` **DEFAULT\_OUTPUT\_PATHS**: [`DefaultOutputPathMap`](https://getpromptscript.dev/api-reference/core/src/type-aliases/DefaultOutputPathMap/index.md) = `DEFAULT_OUTPUT_PATH_VALUES`
 
-Defined in: [core/src/target-output-paths.ts:72](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/target-output-paths.ts#L72)
+Defined in: [core/src/target-output-paths.ts:72](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/target-output-paths.ts#L72)

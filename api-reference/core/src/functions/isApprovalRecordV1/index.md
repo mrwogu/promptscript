@@ -8,7 +8,7 @@
 
 > **isApprovalRecordV1**(`value`): `value is ApprovalRecordV1`
 
-Defined in: [core/src/types/approval.ts:119](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L119)
+Defined in: [core/src/types/approval.ts:142](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L142)
 
 Type guard for an approval record: exact keys, every field pattern of the schema.
 Use [parseApprovalRecord](https://getpromptscript.dev/api-reference/core/src/functions/parseApprovalRecord/index.md) on file content, it also checks the exact bytes.

@@ -116,6 +116,7 @@ required fields, and other constraints.
 - [normalizeImportKey](https://getpromptscript.dev/api-reference/validator/src/functions/normalizeImportKey/index.md)
 - [offsetLocation](https://getpromptscript.dev/api-reference/validator/src/functions/offsetLocation/index.md)
 - [parsePolicies](https://getpromptscript.dev/api-reference/validator/src/functions/parsePolicies/index.md)
+- [percentToBasisPoints](https://getpromptscript.dev/api-reference/validator/src/functions/percentToBasisPoints/index.md)
 - [promptPolicyMatches](https://getpromptscript.dev/api-reference/validator/src/functions/promptPolicyMatches/index.md)
 - [promptPolicyRisk](https://getpromptscript.dev/api-reference/validator/src/functions/promptPolicyRisk/index.md)
 - [promptPolicySubjects](https://getpromptscript.dev/api-reference/validator/src/functions/promptPolicySubjects/index.md)

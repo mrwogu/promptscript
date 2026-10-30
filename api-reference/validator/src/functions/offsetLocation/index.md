@@ -8,7 +8,7 @@
 
 > **offsetLocation**(`baseLoc`, `text`, `charIndex`): [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [validator/src/walker.ts:310](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/validator/src/walker.ts#L310)
+Defined in: [validator/src/walker.ts:310](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/walker.ts#L310)
 
 Compute the actual source location of a character offset within a text block.
 Given the text block's starting location and a character index within the text,

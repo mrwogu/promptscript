@@ -6,7 +6,7 @@
 
 # Interface: RuleContext
 
-Defined in: [validator/src/types.ts:56](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/validator/src/types.ts#L56)
+Defined in: [validator/src/types.ts:56](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/types.ts#L56)
 
 Context provided to validation rules.
 
@@ -16,7 +16,7 @@ Context provided to validation rules.
 
 > **ast**: [`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md)
 
-Defined in: [validator/src/types.ts:58](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/validator/src/types.ts#L58)
+Defined in: [validator/src/types.ts:58](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/types.ts#L58)
 
 The AST being validated
 
@@ -26,7 +26,7 @@ The AST being validated
 
 > `optional` **canonicalAst?**: [`CanonicalProgram`](https://getpromptscript.dev/api-reference/core/src/interfaces/CanonicalProgram/index.md)
 
-Defined in: [validator/src/types.ts:65](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/validator/src/types.ts#L65)
+Defined in: [validator/src/types.ts:65](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/types.ts#L65)
 
 Immutable canonical AST for rules that need ordered entries or provenance.
 
@@ -39,7 +39,7 @@ custom rules can migrate independently.
 
 > **config**: [`ValidatorConfig`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidatorConfig/index.md)
 
-Defined in: [validator/src/types.ts:67](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/validator/src/types.ts#L67)
+Defined in: [validator/src/types.ts:67](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/types.ts#L67)
 
 Validator configuration
 
@@ -49,7 +49,7 @@ Validator configuration
 
 > **report**: (`msg`) => `void`
 
-Defined in: [validator/src/types.ts:69](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/validator/src/types.ts#L69)
+Defined in: [validator/src/types.ts:69](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/types.ts#L69)
 
 Report a validation issue
 

@@ -6,7 +6,7 @@
 
 # Interface: ApprovalApproverV1
 
-Defined in: [core/src/types/approval.ts:9](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L9)
+Defined in: [core/src/types/approval.ts:9](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L9)
 
 Who approved, as the record states it.
 
@@ -16,7 +16,7 @@ Who approved, as the record states it.
 
 > **source**: `"asserted"`
 
-Defined in: [core/src/types/approval.ts:11](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L11)
+Defined in: [core/src/types/approval.ts:11](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L11)
 
 `asserted`: the identity is a claim, it binds through the review of the change that adds the record
 
@@ -26,13 +26,17 @@ Defined in: [core/src/types/approval.ts:11](https://github.com/mrwogu/promptscri
 
 > **value**: `string`
 
-Defined in: [core/src/types/approval.ts:17](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L17)
+Defined in: [core/src/types/approval.ts:18](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L18)
 
-Git host user handle.
+Git host user handle, at most 100 characters after the `@`.
 
 #### Pattern
 
-^@[A-Za-z0-9][A-Za-z0-9-]{0,38}$
+^@[A-Za-z0-9]+(?:[_.-][A-Za-z0-9]+)*$
+
+#### Max Length
+
+101
 
 #### Example
 

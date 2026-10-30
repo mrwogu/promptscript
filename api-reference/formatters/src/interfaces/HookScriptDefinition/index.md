@@ -6,7 +6,7 @@
 
 # Interface: HookScriptDefinition
 
-Defined in: [formatters/src/hook-adapters.ts:76](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L76)
+Defined in: [formatters/src/hook-adapters.ts:76](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/hook-adapters.ts#L76)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [formatters/src/hook-adapters.ts:76](https://github.com/mrwogu/promp
 
 > **args**: `string`[]
 
-Defined in: [formatters/src/hook-adapters.ts:82](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L82)
+Defined in: [formatters/src/hook-adapters.ts:82](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/hook-adapters.ts#L82)
 
 Additional script arguments.
 
@@ -24,7 +24,7 @@ Additional script arguments.
 
 > **interpreter**: `"python3"` \| `"python"` \| `"node"` \| `"deno"` \| `"bun"` \| `"ruby"` \| `"php"` \| `"perl"` \| `"bash"` \| `"sh"` \| `"zsh"` \| `"pwsh"` \| `"powershell"`
 
-Defined in: [formatters/src/hook-adapters.ts:80](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L80)
+Defined in: [formatters/src/hook-adapters.ts:80](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/hook-adapters.ts#L80)
 
 Portable interpreter name.
 
@@ -34,6 +34,6 @@ Portable interpreter name.
 
 > **path**: `string`
 
-Defined in: [formatters/src/hook-adapters.ts:78](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/hook-adapters.ts#L78)
+Defined in: [formatters/src/hook-adapters.ts:78](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/hook-adapters.ts#L78)
 
 Script path under .promptscript/scripts/.

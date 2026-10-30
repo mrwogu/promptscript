@@ -8,7 +8,7 @@
 
 > **detectModelDrift**(`entries`, `profiles`): [`ModelDriftReport`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelDriftReport/index.md)
 
-Defined in: [core/src/model-drift.ts:255](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/model-drift.ts#L255)
+Defined in: [core/src/model-drift.ts:255](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/model-drift.ts#L255)
 
 Compare OpenRouter models with the catalog. A model counts as a
 candidate when its provider is tracked, its slug fits the id pattern of

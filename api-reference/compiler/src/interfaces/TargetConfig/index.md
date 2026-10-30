@@ -6,7 +6,7 @@
 
 # Interface: TargetConfig
 
-Defined in: [compiler/src/types.ts:126](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/compiler/src/types.ts#L126)
+Defined in: [compiler/src/types.ts:126](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/types.ts#L126)
 
 Configuration for a single target.
 
@@ -16,7 +16,7 @@ Configuration for a single target.
 
 > `optional` **convention?**: `string`
 
-Defined in: [compiler/src/types.ts:132](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/compiler/src/types.ts#L132)
+Defined in: [compiler/src/types.ts:132](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/types.ts#L132)
 
 Output convention ('xml', 'markdown', or custom name)
 
@@ -26,7 +26,7 @@ Output convention ('xml', 'markdown', or custom name)
 
 > `optional` **enabled?**: `boolean`
 
-Defined in: [compiler/src/types.ts:128](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/compiler/src/types.ts#L128)
+Defined in: [compiler/src/types.ts:128](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/types.ts#L128)
 
 Whether this target is enabled
 
@@ -36,7 +36,7 @@ Whether this target is enabled
 
 > `optional` **guardsAsSkills?**: `boolean`
 
-Defined in: [compiler/src/types.ts:148](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/compiler/src/types.ts#L148)
+Defined in: [compiler/src/types.ts:148](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/types.ts#L148)
 
 Generate skills from
 
@@ -56,7 +56,7 @@ true
 
 > `optional` **guardsSkillsListing?**: `boolean`
 
-Defined in: [compiler/src/types.ts:151](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/compiler/src/types.ts#L151)
+Defined in: [compiler/src/types.ts:151](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/types.ts#L151)
 
 List generated guard skills in main output file (Factory).
 
@@ -72,7 +72,7 @@ true
 
 > `optional` **includeSkills?**: `boolean` \| `string`[]
 
-Defined in: [compiler/src/types.ts:157](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/compiler/src/types.ts#L157)
+Defined in: [compiler/src/types.ts:157](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/types.ts#L157)
 
 Controls which skills are emitted for this target.
 
@@ -82,7 +82,7 @@ Controls which skills are emitted for this target.
 
 > `optional` **output?**: `string`
 
-Defined in: [compiler/src/types.ts:130](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/compiler/src/types.ts#L130)
+Defined in: [compiler/src/types.ts:130](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/types.ts#L130)
 
 Custom output path
 
@@ -92,7 +92,7 @@ Custom output path
 
 > `optional` **rulesMode?**: [`FactoryRulesMode`](https://getpromptscript.dev/api-reference/core/src/type-aliases/FactoryRulesMode/index.md)
 
-Defined in: [compiler/src/types.ts:145](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/compiler/src/types.ts#L145)
+Defined in: [compiler/src/types.ts:145](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/types.ts#L145)
 
 Factory always-on rules output mode.
 Split mode requires Factory's `multifile` or `full` version.
@@ -109,7 +109,7 @@ Split mode requires Factory's `multifile` or `full` version.
 
 > `optional` **skillBaseDir?**: `string`
 
-Defined in: [compiler/src/types.ts:154](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/compiler/src/types.ts#L154)
+Defined in: [compiler/src/types.ts:154](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/types.ts#L154)
 
 Custom base directory for generated skill files.
 
@@ -119,7 +119,7 @@ Custom base directory for generated skill files.
 
 > `optional` **version?**: `string`
 
-Defined in: [compiler/src/types.ts:138](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/compiler/src/types.ts#L138)
+Defined in: [compiler/src/types.ts:138](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/types.ts#L138)
 
 Target version or format variant.
 Use 'legacy' for deprecated formats.

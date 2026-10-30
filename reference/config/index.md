@@ -1309,7 +1309,7 @@ governance:
 | `codeowners.protect` | string[] | No       | More paths the admins own, relative to the repository root                            |
 | `codeowners.prompts` | boolean  | No       | Write CODEOWNERS lines for the `.prs` files that define prompts. Default `true`       |
 
-Owners are a user (`@jane`), a team (`@acme/legal`) or an email address of at most 254 characters.
+Owners are a user (`@jane`; `.`, `_` and `-` allowed between letters or digits, like `@jane.doe`), a team (`@acme/legal`) or an email address of at most 254 characters.
 Role names match `^[a-z][a-z0-9-]{0,31}$` and are not a Windows device name, because a role names a
 directory. Unknown keys are refused with the closest key. `prs governance codeowners` needs
 `admins`; a problem in this section is `PS5101`. See

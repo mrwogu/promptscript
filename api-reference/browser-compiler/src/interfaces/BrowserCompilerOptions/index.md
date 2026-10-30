@@ -6,7 +6,7 @@
 
 # Interface: BrowserCompilerOptions
 
-Defined in: [browser-compiler/src/compiler.ts:62](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/browser-compiler/src/compiler.ts#L62)
+Defined in: [browser-compiler/src/compiler.ts:62](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/compiler.ts#L62)
 
 Options for the browser compiler.
 
@@ -16,7 +16,7 @@ Options for the browser compiler.
 
 > `optional` **cache?**: `boolean`
 
-Defined in: [browser-compiler/src/compiler.ts:76](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/browser-compiler/src/compiler.ts#L76)
+Defined in: [browser-compiler/src/compiler.ts:76](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/compiler.ts#L76)
 
 Whether to cache resolved ASTs. Defaults to true.
 
@@ -26,7 +26,7 @@ Whether to cache resolved ASTs. Defaults to true.
 
 > `optional` **customConventions?**: `Record`\<`string`, [`OutputConvention`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputConvention/index.md)\>
 
-Defined in: [browser-compiler/src/compiler.ts:70](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/browser-compiler/src/compiler.ts#L70)
+Defined in: [browser-compiler/src/compiler.ts:70](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/compiler.ts#L70)
 
 Custom convention definitions
 
@@ -36,7 +36,7 @@ Custom convention definitions
 
 > `optional` **envVars?**: `Record`\<`string`, `string`\>
 
-Defined in: [browser-compiler/src/compiler.ts:84](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/browser-compiler/src/compiler.ts#L84)
+Defined in: [browser-compiler/src/compiler.ts:84](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/compiler.ts#L84)
 
 Simulated environment variables for interpolation.
 When provided, ${VAR} and ${VAR:-default} syntax in source files
@@ -48,7 +48,7 @@ will be replaced with values from this map.
 
 > `optional` **formatters?**: (`string` \| [`Formatter`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/Formatter/index.md) \| \{ `config?`: [`TargetConfig`](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/TargetConfig/index.md); `name`: `string`; \})[]
 
-Defined in: [browser-compiler/src/compiler.ts:68](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/browser-compiler/src/compiler.ts#L68)
+Defined in: [browser-compiler/src/compiler.ts:68](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/compiler.ts#L68)
 
 Formatters to use (names, instances, or configs)
 
@@ -58,7 +58,7 @@ Formatters to use (names, instances, or configs)
 
 > **fs**: [`VirtualFileSystem`](https://getpromptscript.dev/api-reference/browser-compiler/src/classes/VirtualFileSystem/index.md)
 
-Defined in: [browser-compiler/src/compiler.ts:64](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/browser-compiler/src/compiler.ts#L64)
+Defined in: [browser-compiler/src/compiler.ts:64](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/compiler.ts#L64)
 
 Virtual file system containing all files
 
@@ -68,7 +68,7 @@ Virtual file system containing all files
 
 > `optional` **logger?**: [`Logger`](https://getpromptscript.dev/api-reference/core/src/interfaces/Logger/index.md)
 
-Defined in: [browser-compiler/src/compiler.ts:74](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/browser-compiler/src/compiler.ts#L74)
+Defined in: [browser-compiler/src/compiler.ts:74](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/compiler.ts#L74)
 
 Logger for verbose/debug output
 
@@ -78,7 +78,7 @@ Logger for verbose/debug output
 
 > `optional` **prettier?**: [`PrettierMarkdownOptions`](https://getpromptscript.dev/api-reference/core/src/interfaces/PrettierMarkdownOptions/index.md)
 
-Defined in: [browser-compiler/src/compiler.ts:72](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/browser-compiler/src/compiler.ts#L72)
+Defined in: [browser-compiler/src/compiler.ts:72](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/compiler.ts#L72)
 
 Prettier formatting options for markdown output
 
@@ -88,7 +88,7 @@ Prettier formatting options for markdown output
 
 > `optional` **projectRoot?**: `string`
 
-Defined in: [browser-compiler/src/compiler.ts:78](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/browser-compiler/src/compiler.ts#L78)
+Defined in: [browser-compiler/src/compiler.ts:78](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/compiler.ts#L78)
 
 Virtual project root containing .promptscript/scripts.
 
@@ -98,6 +98,6 @@ Virtual project root containing .promptscript/scripts.
 
 > `optional` **validator?**: [`ValidatorConfig`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidatorConfig/index.md)
 
-Defined in: [browser-compiler/src/compiler.ts:66](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/browser-compiler/src/compiler.ts#L66)
+Defined in: [browser-compiler/src/compiler.ts:66](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/compiler.ts#L66)
 
 Validator configuration

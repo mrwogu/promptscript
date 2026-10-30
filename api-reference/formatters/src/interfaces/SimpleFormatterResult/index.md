@@ -6,7 +6,7 @@
 
 # Interface: SimpleFormatterResult
 
-Defined in: [formatters/src/create-simple-formatter.ts:63](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/create-simple-formatter.ts#L63)
+Defined in: [formatters/src/create-simple-formatter.ts:63](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/create-simple-formatter.ts#L63)
 
 Return type from the factory: the class itself (with static
 `getSupportedVersions()`) plus the pre-built VERSIONS constant.
@@ -17,7 +17,7 @@ Return type from the factory: the class itself (with static
 
 > **Formatter**: \{new (): [`MarkdownInstructionFormatter`](https://getpromptscript.dev/api-reference/formatters/src/classes/MarkdownInstructionFormatter/index.md); `getSupportedVersions`(): [`SimpleFormatterVersions`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/SimpleFormatterVersions/index.md); \}
 
-Defined in: [formatters/src/create-simple-formatter.ts:65](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/create-simple-formatter.ts#L65)
+Defined in: [formatters/src/create-simple-formatter.ts:65](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/create-simple-formatter.ts#L65)
 
 Concrete formatter class (instantiable via `new`)
 
@@ -39,6 +39,6 @@ Concrete formatter class (instantiable via `new`)
 
 > **VERSIONS**: [`SimpleFormatterVersions`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/SimpleFormatterVersions/index.md)
 
-Defined in: [formatters/src/create-simple-formatter.ts:70](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/create-simple-formatter.ts#L70)
+Defined in: [formatters/src/create-simple-formatter.ts:70](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/create-simple-formatter.ts#L70)
 
 Pre-built version map, exported as `<NAME>_VERSIONS`

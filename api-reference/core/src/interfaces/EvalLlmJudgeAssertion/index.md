@@ -6,7 +6,7 @@
 
 # Interface: EvalLlmJudgeAssertion
 
-Defined in: [core/src/types/eval.ts:167](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L167)
+Defined in: [core/src/types/eval.ts:167](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L167)
 
 Passes when the majority of judge runs say pass. The rubric receives
 the inputs `response`, `case_inputs`, `expected`, `criteria` and the
@@ -14,7 +14,7 @@ reserved `boundary`.
 
 ## Extends
 
-- `EvalAssertionBase`
+- [`EvalAssertionBase`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalAssertionBase/index.md)
 
 ## Properties
 
@@ -22,7 +22,7 @@ reserved `boundary`.
 
 > `optional` **criteria?**: `string`
 
-Defined in: [core/src/types/eval.ts:175](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L175)
+Defined in: [core/src/types/eval.ts:175](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L175)
 
 Extra criteria passed to the rubric as its `criteria` input
 
@@ -32,13 +32,13 @@ Extra criteria passed to the rubric as its `criteria` input
 
 > `optional` **field?**: `string`
 
-Defined in: [core/src/types/eval.ts:105](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L105)
+Defined in: [core/src/types/eval.ts:105](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L105)
 
 Output property the assertion reads; absent means the whole response text
 
 #### Inherited from
 
-`EvalAssertionBase.field`
+[`EvalAssertionBase`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalAssertionBase/index.md).[`field`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalAssertionBase/index.md#field)
 
 ***
 
@@ -46,7 +46,7 @@ Output property the assertion reads; absent means the whole response text
 
 > **id**: `string`
 
-Defined in: [core/src/types/eval.ts:103](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L103)
+Defined in: [core/src/types/eval.ts:103](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L103)
 
 Assertion id, unique in the suite.
 
@@ -62,7 +62,7 @@ Assertion id, unique in the suite.
 
 #### Inherited from
 
-`EvalAssertionBase.id`
+[`EvalAssertionBase`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalAssertionBase/index.md).[`id`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalAssertionBase/index.md#id)
 
 ***
 
@@ -70,7 +70,7 @@ Assertion id, unique in the suite.
 
 > **kind**: `"llm-judge"`
 
-Defined in: [core/src/types/eval.ts:168](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L168)
+Defined in: [core/src/types/eval.ts:168](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L168)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [core/src/types/eval.ts:168](https://github.com/mrwogu/promptscript/
 
 > `optional` **model?**: `string`
 
-Defined in: [core/src/types/eval.ts:177](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L177)
+Defined in: [core/src/types/eval.ts:177](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L177)
 
 Model reference the judge runs on; absent means the suite judge, then the rubric's own model
 
@@ -88,7 +88,7 @@ Model reference the judge runs on; absent means the suite judge, then the rubric
 
 > **rubric**: `string`
 
-Defined in: [core/src/types/eval.ts:173](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L173)
+Defined in: [core/src/types/eval.ts:173](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L173)
 
 Prompt id of the rubric.
 
@@ -104,6 +104,6 @@ Prompt id of the rubric.
 
 > `optional` **runs?**: [`EvalJudgeRuns`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EvalJudgeRuns/index.md)
 
-Defined in: [core/src/types/eval.ts:179](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/eval.ts#L179)
+Defined in: [core/src/types/eval.ts:179](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L179)
 
 Judge runs per case; absent means the suite judge setting

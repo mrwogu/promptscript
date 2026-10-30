@@ -6,7 +6,7 @@
 
 # Interface: InlineUseEntry
 
-Defined in: [core/src/types/ast.ts:606](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L606)
+Defined in: [core/src/types/ast.ts:606](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L606)
 
 Canonical inline import entry.
 
@@ -20,7 +20,7 @@ Canonical inline import entry.
 
 > `readonly` **declaration**: `object`
 
-Defined in: [core/src/types/ast.ts:608](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L608)
+Defined in: [core/src/types/ast.ts:608](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L608)
 
 #### alias?
 
@@ -152,7 +152,7 @@ Version constraint
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L497)
+Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L497)
 
 #### column
 
@@ -188,7 +188,7 @@ Byte offset from start of file
 
 > `readonly` **type**: `"InlineUseEntry"`
 
-Defined in: [core/src/types/ast.ts:607](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L607)
+Defined in: [core/src/types/ast.ts:607](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L607)
 
 #### Overrides
 

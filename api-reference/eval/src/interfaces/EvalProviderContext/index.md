@@ -6,7 +6,7 @@
 
 # Interface: EvalProviderContext
 
-Defined in: [eval/src/provider.ts:33](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/provider.ts#L33)
+Defined in: [eval/src/provider.ts:33](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider.ts#L33)
 
 Per-call context of a provider.
 
@@ -16,9 +16,19 @@ Per-call context of a provider.
 
 > **caseId**: `string`
 
-Defined in: [eval/src/provider.ts:37](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/provider.ts#L37)
+Defined in: [eval/src/provider.ts:37](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider.ts#L37)
 
 Dataset row id of the case the call is for
+
+***
+
+### sample?
+
+> `optional` **sample?**: `number`
+
+Defined in: [eval/src/provider.ts:39](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider.ts#L39)
+
+Run index of a judge call, from 1; 0 for the call of a case
 
 ***
 
@@ -26,6 +36,6 @@ Dataset row id of the case the call is for
 
 > **signal**: `AbortSignal`
 
-Defined in: [eval/src/provider.ts:35](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/provider.ts#L35)
+Defined in: [eval/src/provider.ts:35](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider.ts#L35)
 
 Aborts the call

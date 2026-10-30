@@ -6,7 +6,7 @@
 
 # Interface: SkillValidationIssue
 
-Defined in: [resolver/src/skill-validation.ts:17](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skill-validation.ts#L17)
+Defined in: [resolver/src/skill-validation.ts:17](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skill-validation.ts#L17)
 
 A single validation finding for a SKILL.md file.
 
@@ -16,7 +16,7 @@ A single validation finding for a SKILL.md file.
 
 > **code**: `string`
 
-Defined in: [resolver/src/skill-validation.ts:20](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skill-validation.ts#L20)
+Defined in: [resolver/src/skill-validation.ts:20](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skill-validation.ts#L20)
 
 Stable identifier (e.g. `SK001`) for documentation and suppression
 
@@ -26,7 +26,7 @@ Stable identifier (e.g. `SK001`) for documentation and suppression
 
 > `optional` **field?**: `string`
 
-Defined in: [resolver/src/skill-validation.ts:23](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skill-validation.ts#L23)
+Defined in: [resolver/src/skill-validation.ts:23](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skill-validation.ts#L23)
 
 Frontmatter field the issue relates to (when applicable)
 
@@ -36,7 +36,7 @@ Frontmatter field the issue relates to (when applicable)
 
 > `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [resolver/src/skill-validation.ts:25](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skill-validation.ts#L25)
+Defined in: [resolver/src/skill-validation.ts:25](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skill-validation.ts#L25)
 
 Source location for parser and frontmatter diagnostics, when available
 
@@ -46,7 +46,7 @@ Source location for parser and frontmatter diagnostics, when available
 
 > **message**: `string`
 
-Defined in: [resolver/src/skill-validation.ts:21](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skill-validation.ts#L21)
+Defined in: [resolver/src/skill-validation.ts:21](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skill-validation.ts#L21)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [resolver/src/skill-validation.ts:21](https://github.com/mrwogu/prom
 
 > **severity**: [`SkillValidationSeverity`](https://getpromptscript.dev/api-reference/resolver/src/type-aliases/SkillValidationSeverity/index.md)
 
-Defined in: [resolver/src/skill-validation.ts:18](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/skill-validation.ts#L18)
+Defined in: [resolver/src/skill-validation.ts:18](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skill-validation.ts#L18)

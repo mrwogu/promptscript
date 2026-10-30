@@ -6,7 +6,7 @@
 
 # Interface: TelemetrySessionOptions
 
-Defined in: [telemetry/src/reporter.ts:16](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/reporter.ts#L16)
+Defined in: [telemetry/src/reporter.ts:16](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/telemetry/src/reporter.ts#L16)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [telemetry/src/reporter.ts:16](https://github.com/mrwogu/promptscrip
 
 > **command**: `string`
 
-Defined in: [telemetry/src/reporter.ts:21](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/reporter.ts#L21)
+Defined in: [telemetry/src/reporter.ts:21](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/telemetry/src/reporter.ts#L21)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [telemetry/src/reporter.ts:21](https://github.com/mrwogu/promptscrip
 
 > **config**: [`ResolvedTelemetryConfig`](https://getpromptscript.dev/api-reference/telemetry/src/interfaces/ResolvedTelemetryConfig/index.md)
 
-Defined in: [telemetry/src/reporter.ts:17](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/reporter.ts#L17)
+Defined in: [telemetry/src/reporter.ts:17](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/telemetry/src/reporter.ts#L17)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [telemetry/src/reporter.ts:17](https://github.com/mrwogu/promptscrip
 
 > `optional` **features?**: `string`[]
 
-Defined in: [telemetry/src/reporter.ts:22](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/reporter.ts#L22)
+Defined in: [telemetry/src/reporter.ts:22](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/telemetry/src/reporter.ts#L22)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [telemetry/src/reporter.ts:22](https://github.com/mrwogu/promptscrip
 
 > **metadata**: [`RuntimeMetadata`](https://getpromptscript.dev/api-reference/telemetry/src/interfaces/RuntimeMetadata/index.md)
 
-Defined in: [telemetry/src/reporter.ts:18](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/reporter.ts#L18)
+Defined in: [telemetry/src/reporter.ts:18](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/telemetry/src/reporter.ts#L18)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [telemetry/src/reporter.ts:18](https://github.com/mrwogu/promptscrip
 
 > **runtime**: [`TelemetryRuntime`](https://getpromptscript.dev/api-reference/telemetry/src/type-aliases/TelemetryRuntime/index.md)
 
-Defined in: [telemetry/src/reporter.ts:20](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/reporter.ts#L20)
+Defined in: [telemetry/src/reporter.ts:20](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/telemetry/src/reporter.ts#L20)
 
 Runtime hosting the CLI, passed in by the CLI (telemetry is a leaf).
 
@@ -56,4 +56,4 @@ Runtime hosting the CLI, passed in by the CLI (telemetry is a leaf).
 
 > `optional` **startTime?**: `number`
 
-Defined in: [telemetry/src/reporter.ts:23](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/telemetry/src/reporter.ts#L23)
+Defined in: [telemetry/src/reporter.ts:23](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/telemetry/src/reporter.ts#L23)

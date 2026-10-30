@@ -6,7 +6,7 @@
 
 # Interface: ScalarValueNode
 
-Defined in: [core/src/types/ast.ts:503](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L503)
+Defined in: [core/src/types/ast.ts:503](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L503)
 
 Canonical scalar value with its exact source location.
 
@@ -20,7 +20,7 @@ Canonical scalar value with its exact source location.
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L497)
+Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L497)
 
 #### column
 
@@ -56,7 +56,7 @@ Byte offset from start of file
 
 > `readonly` **type**: `"ScalarValueNode"`
 
-Defined in: [core/src/types/ast.ts:504](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L504)
+Defined in: [core/src/types/ast.ts:504](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L504)
 
 #### Overrides
 
@@ -68,4 +68,4 @@ Defined in: [core/src/types/ast.ts:504](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **value**: [`PrimitiveValue`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PrimitiveValue/index.md)
 
-Defined in: [core/src/types/ast.ts:505](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/ast.ts#L505)
+Defined in: [core/src/types/ast.ts:505](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L505)

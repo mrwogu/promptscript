@@ -6,7 +6,7 @@
 
 # Interface: FeatureCoverageSummary
 
-Defined in: [formatters/src/feature-matrix.ts:339](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/feature-matrix.ts#L339)
+Defined in: [formatters/src/feature-matrix.ts:339](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/feature-matrix.ts#L339)
 
 Get feature coverage summary for a tool.
 
@@ -16,7 +16,7 @@ Get feature coverage summary for a tool.
 
 > **coveragePercent**: `number`
 
-Defined in: [formatters/src/feature-matrix.ts:346](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/feature-matrix.ts#L346)
+Defined in: [formatters/src/feature-matrix.ts:346](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/feature-matrix.ts#L346)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [formatters/src/feature-matrix.ts:346](https://github.com/mrwogu/pro
 
 > **notSupported**: `number`
 
-Defined in: [formatters/src/feature-matrix.ts:344](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/feature-matrix.ts#L344)
+Defined in: [formatters/src/feature-matrix.ts:344](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/feature-matrix.ts#L344)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [formatters/src/feature-matrix.ts:344](https://github.com/mrwogu/pro
 
 > **partial**: `number`
 
-Defined in: [formatters/src/feature-matrix.ts:342](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/feature-matrix.ts#L342)
+Defined in: [formatters/src/feature-matrix.ts:342](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/feature-matrix.ts#L342)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [formatters/src/feature-matrix.ts:342](https://github.com/mrwogu/pro
 
 > **planned**: `number`
 
-Defined in: [formatters/src/feature-matrix.ts:343](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/feature-matrix.ts#L343)
+Defined in: [formatters/src/feature-matrix.ts:343](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/feature-matrix.ts#L343)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [formatters/src/feature-matrix.ts:343](https://github.com/mrwogu/pro
 
 > **supported**: `number`
 
-Defined in: [formatters/src/feature-matrix.ts:341](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/feature-matrix.ts#L341)
+Defined in: [formatters/src/feature-matrix.ts:341](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/feature-matrix.ts#L341)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [formatters/src/feature-matrix.ts:341](https://github.com/mrwogu/pro
 
 > **tool**: [`KnownTarget`](https://getpromptscript.dev/api-reference/core/src/type-aliases/KnownTarget/index.md)
 
-Defined in: [formatters/src/feature-matrix.ts:340](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/feature-matrix.ts#L340)
+Defined in: [formatters/src/feature-matrix.ts:340](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/feature-matrix.ts#L340)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: [formatters/src/feature-matrix.ts:340](https://github.com/mrwogu/pro
 
 > **total**: `number`
 
-Defined in: [formatters/src/feature-matrix.ts:345](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/formatters/src/feature-matrix.ts#L345)
+Defined in: [formatters/src/feature-matrix.ts:345](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/feature-matrix.ts#L345)

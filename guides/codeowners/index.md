@@ -26,7 +26,7 @@ governance:
 | `codeowners.protect` | string[] | No       | More paths the admins own, relative to the repository root (`tools` or `./tools`)       |
 | `codeowners.prompts` | boolean  | No       | Write a line for each `.prs` file that defines prompts. Default `true`                  |
 
-Owners are Git host identities: a user (`@jane`), a team (`@acme/legal`, GitLab subgroups allowed) or an email address of at most 254 characters. Prefer teams, they change less often. Role names are lowercase letters, digits and `-`, starting with a letter, at most 32 characters, and no Windows device name such as `con`.
+Owners are Git host identities: a user (`@jane`; `.`, `_` and `-` allowed between letters or digits, like `@jane.doe`), a team (`@acme/legal`, GitLab subgroups allowed) or an email address of at most 254 characters. Prefer teams, they change less often. Role names are lowercase letters, digits and `-`, starting with a letter, at most 32 characters, and no Windows device name such as `con`.
 
 Under `extends`, `admins`, each role's owners and `codeowners.protect` are joined with the base file, so a project can add owners but not remove them. `codeowners.prompts` and `codeowners.output` can be set by the extending file. See [Extending Configuration](https://getpromptscript.dev/reference/config/index.md#extending-configuration).
 

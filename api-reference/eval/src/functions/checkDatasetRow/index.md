@@ -8,7 +8,7 @@
 
 > **checkDatasetRow**(`record`, `context`): [`EvalFinding`](https://getpromptscript.dev/api-reference/eval/src/interfaces/EvalFinding/index.md)[]
 
-Defined in: [eval/src/dataset/check.ts:73](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/dataset/check.ts#L73)
+Defined in: [eval/src/dataset/check.ts:73](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/dataset/check.ts#L73)
 
 Check one dataset row against the prompt contract and the suite: no
 undeclared inputs, an `expected` value that fits the output contract, and

@@ -8,6 +8,6 @@
 
 > **EvalCode** = *typeof* [`EVAL_CODES`](https://getpromptscript.dev/api-reference/eval/src/variables/EVAL_CODES/index.md)\[keyof *typeof* [`EVAL_CODES`](https://getpromptscript.dev/api-reference/eval/src/variables/EVAL_CODES/index.md)\]
 
-Defined in: [eval/src/errors.ts:102](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/eval/src/errors.ts#L102)
+Defined in: [eval/src/errors.ts:136](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/errors.ts#L136)
 
 One eval code.

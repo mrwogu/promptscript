@@ -8,6 +8,6 @@
 
 > `const` **MODEL\_PROFILES**: readonly [`ModelProfile`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelProfile/index.md)[]
 
-Defined in: [core/src/model-profiles.ts:116](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/model-profiles.ts#L116)
+Defined in: [core/src/model-profiles.ts:116](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/model-profiles.ts#L116)
 
 Built-in model profiles, grouped by provider and family, oldest first.

@@ -6,7 +6,7 @@
 
 # Interface: BlockFilterOptions
 
-Defined in: [resolver/src/imports.ts:104](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/imports.ts#L104)
+Defined in: [resolver/src/imports.ts:104](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/imports.ts#L104)
 
 Filter options for block-level
 
@@ -20,7 +20,7 @@ filtering.
 
 > `optional` **exclude?**: `string`[]
 
-Defined in: [resolver/src/imports.ts:108](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/imports.ts#L108)
+Defined in: [resolver/src/imports.ts:108](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/imports.ts#L108)
 
 Remove these block names
 
@@ -30,6 +30,6 @@ Remove these block names
 
 > `optional` **only?**: `string`[]
 
-Defined in: [resolver/src/imports.ts:106](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/imports.ts#L106)
+Defined in: [resolver/src/imports.ts:106](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/imports.ts#L106)
 
 Keep only these block names

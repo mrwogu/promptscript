@@ -8,7 +8,7 @@
 
 > `const` **REGISTRY\_MARKER\_PREFIX**: `"__registry__:"` = `'__registry__:'`
 
-Defined in: [resolver/src/loader.ts:15](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/resolver/src/loader.ts#L15)
+Defined in: [resolver/src/loader.ts:15](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/loader.ts#L15)
 
 Prefix used for registry marker paths returned by resolveRef.
 Format: `__registry__:<base64(JSON({repoUrl, path, version}))>`

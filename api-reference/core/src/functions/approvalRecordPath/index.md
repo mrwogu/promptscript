@@ -8,12 +8,13 @@
 
 > **approvalRecordPath**(`record`): `string`
 
-Defined in: [core/src/types/approval.ts:188](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/approval.ts#L188)
+Defined in: [core/src/types/approval.ts:212](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/approval.ts#L212)
 
 Path of an approval record relative to the project root, with `/` separators:
 `.promptscript/approvals/<role>/<prompt id>/<contentHash>.<approver slug>.json`.
 The slug is the approver handle without its `@`, lowercased, so one approver
-has one file per role and hash on every file system.
+has one file per role and hash on every file system. It holds no `/` and always
+follows `<contentHash>.`, so a `.` in a handle never makes a `.` or `..` segment.
 
 ## Parameters
 

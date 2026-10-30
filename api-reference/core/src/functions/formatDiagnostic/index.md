@@ -8,7 +8,7 @@
 
 > **formatDiagnostic**(`diagnostic`, `options?`): `string`
 
-Defined in: [core/src/utils/diagnostic.ts:89](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/utils/diagnostic.ts#L89)
+Defined in: [core/src/utils/diagnostic.ts:89](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/utils/diagnostic.ts#L89)
 
 Format a diagnostic for display.
 

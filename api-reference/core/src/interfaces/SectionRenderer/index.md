@@ -6,7 +6,7 @@
 
 # Interface: SectionRenderer
 
-Defined in: [core/src/types/convention.ts:23](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/convention.ts#L23)
+Defined in: [core/src/types/convention.ts:23](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/convention.ts#L23)
 
 Section rendering configuration.
 
@@ -16,7 +16,7 @@ Section rendering configuration.
 
 > `optional` **end?**: `string`
 
-Defined in: [core/src/types/convention.ts:40](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/convention.ts#L40)
+Defined in: [core/src/types/convention.ts:40](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/convention.ts#L40)
 
 Template for section end (optional, for paired tags).
 Variables: {{name}}
@@ -37,7 +37,7 @@ Markdown: "" (empty - no closing tag)
 
 > `optional` **indent?**: `string`
 
-Defined in: [core/src/types/convention.ts:52](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/convention.ts#L52)
+Defined in: [core/src/types/convention.ts:52](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/convention.ts#L52)
 
 Indentation per level.
 
@@ -53,7 +53,7 @@ Indentation per level.
 
 > `optional` **nameTransform?**: `"kebab-case"` \| `"camelCase"` \| `"PascalCase"` \| `"none"`
 
-Defined in: [core/src/types/convention.ts:46](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/convention.ts#L46)
+Defined in: [core/src/types/convention.ts:46](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/convention.ts#L46)
 
 Whether to convert section names.
 
@@ -69,7 +69,7 @@ Whether to convert section names.
 
 > **start**: `string`
 
-Defined in: [core/src/types/convention.ts:31](https://github.com/mrwogu/promptscript/blob/e7e00ba1ca8ae28ce2faac3d48c7e8b14c93ddd0/packages/core/src/types/convention.ts#L31)
+Defined in: [core/src/types/convention.ts:31](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/convention.ts#L31)
 
 Template for section start.
 Variables: {{name}}, {{level}}, {{content}}
