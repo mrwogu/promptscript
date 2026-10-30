@@ -1,0 +1,17 @@
+{
+  "name": "promptscript-runtime-otel-example",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Sends OpenTelemetry spans for a two-arm prompt experiment with @promptscript/runtime",
+  "type": "module",
+  "dependencies": {
+    "@opentelemetry/api": "1.9.1",
+    "@opentelemetry/context-async-hooks": "2.12.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "0.223.0",
+    "@opentelemetry/resources": "2.12.0",
+    "@opentelemetry/sdk-trace": "2.12.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
