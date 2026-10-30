@@ -133,6 +133,9 @@ no exception event.
 A failure of the tracer never changes the call. It goes to `onError` as `telemetry-failed`, with
 a fixed message and no cause.
 
+The [`examples/runtime-otel`](https://github.com/mrwogu/promptscript/tree/main/examples/runtime-otel)
+example sends these spans and the feedback to Phoenix, and CI checks them there.
+
 ## Experiments
 
 While an entry of a label runs an experiment (`prs release split`), the label is version 2 and
