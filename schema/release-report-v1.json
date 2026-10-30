@@ -134,7 +134,8 @@
             "model-allowlist",
             "required-approvals",
             "required-evals",
-            "content-rules"
+            "content-rules",
+            "max-experiment-weight"
           ]
         },
         "severity": {

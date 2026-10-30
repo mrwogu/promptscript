@@ -168,6 +168,7 @@ export {
   promptPolicyRisk,
   promptPolicySubjects,
   normalizeDenyText,
+  percentToBasisPoints,
 } from './policy/index.js';
 export type { ParsedPolicies, PolicyContext, PromptPolicyScope } from './policy/index.js';
 

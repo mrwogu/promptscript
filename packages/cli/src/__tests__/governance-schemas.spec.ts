@@ -113,6 +113,17 @@ describe('config schema prompt policies', () => {
     ],
     ['required-evals', { kind: 'required-evals', environments: ['prod'] }],
     [
+      'max-experiment-weight',
+      {
+        kind: 'max-experiment-weight',
+        match: { minRisk: 'high' },
+        environments: ['prod'],
+        maxWeight: 5,
+        approvals: [{ role: 'product' }, { role: 'security' }],
+        ceiling: 25,
+      },
+    ],
+    [
       'content-rules',
       {
         kind: 'content-rules',
@@ -142,6 +153,13 @@ describe('config schema prompt policies', () => {
     ],
     ['an approval without a role', { kind: 'required-approvals', approvals: [{ count: 1 }] }],
     ['the path-traversal check', { kind: 'content-rules', checks: ['path-traversal'] }],
+    ['an exposure policy without maxWeight', { kind: 'max-experiment-weight' }],
+    ['a maxWeight above 100', { kind: 'max-experiment-weight', maxWeight: 101 }],
+    ['a negative ceiling', { kind: 'max-experiment-weight', maxWeight: 0, ceiling: -1 }],
+    [
+      'an exposure approval count of 2',
+      { kind: 'max-experiment-weight', maxWeight: 5, approvals: [{ role: 'legal', count: 2 }] },
+    ],
   ])('rejects %s', (_name, policy) => {
     expect(validate(config(policy))).toBe(false);
   });

@@ -51,10 +51,27 @@ const PROMPT_KINDS: ReadonlySet<PolicyDefinition['kind']> = new Set([
   'required-approvals',
   'required-evals',
   'content-rules',
+  'max-experiment-weight',
 ]);
 
 /** Code of a failed gate check: the gates are the policies, run on a prompt version. */
 const POLICY_CODE = 'PS030';
+
+/** The arm of a label experiment a prompt version serves, set for non-control arms only. */
+export interface GateExposure {
+  experiment: string;
+  variant: string;
+  /** Share of traffic in basis points, 0 to 10000 */
+  weight: number;
+}
+
+/** A prompt version the gates judge. */
+export interface GateEntry {
+  id: string;
+  contentHash: string;
+  /** Absent for the entry hash and the control arm */
+  exposure?: GateExposure;
+}
 
 /**
  * What promote and rollback are about to write, or the label entries status judges, for
@@ -71,7 +88,7 @@ export interface PromotionGateContext {
   configFile: string;
   environment: string;
   /** Entries the label holds after the command */
-  prompts: Array<{ id: string; contentHash: string }>;
+  prompts: GateEntry[];
   /** The fresh in-memory build of the source under `config`, shared by the caller */
   source: () => Promise<CompiledRelease>;
 }
@@ -230,7 +247,7 @@ function shippedModelProblem(
 
 /** Everything one prompt version is judged with. */
 interface Judged {
-  entry: { id: string; contentHash: string };
+  entry: GateEntry;
   bundle: PromptBundleV1;
   shipped: PolicySubject;
   risk: RiskLevel;
@@ -293,6 +310,21 @@ async function checkOf(
       suggestion: 'Remove the policy or set severity: warning.',
     };
   }
+  if (policy.kind === 'max-experiment-weight') {
+    const { exposure } = judged.entry;
+    // An arm at weight 0 gets no traffic; the entry hash and control are promotions.
+    if (exposure === undefined || exposure.weight === 0) return undefined;
+    if (!judged.selects(policy.match) || !appliesTo(policy.environments, context.environment)) {
+      return undefined;
+    }
+    return {
+      ...base,
+      status: 'unavailable',
+      message: `${exposure.variant} of ${judged.entry.id} runs ${exposure.weight / 100} % in ${context.environment}, but release gates do not judge experiment weights in this version of prs`,
+      suggestion:
+        'This version of prs cannot judge the arm. Keep it at weight 0, narrow the policy with match or environments, or set severity: warning to only warn.',
+    };
+  }
   // A risk floor applies to every prompt; the other kinds where their match selects, and
   // no match selects every prompt.
   const match = 'match' in policy ? policy.match : undefined;
@@ -332,7 +364,7 @@ interface GateRun {
 async function gateOf(
   context: PromotionGateContext,
   run: GateRun,
-  entry: { id: string; contentHash: string }
+  entry: GateEntry
 ): Promise<ReleaseGateResult> {
   const { policies, evaluation, source } = run;
   const { paths } = context.project;
@@ -413,7 +445,8 @@ async function judgeEntries(
  * not apply. Policies are parsed fresh, and a parse error fails the gates. Static kinds
  * judge the bundle that ships; policy risk and selection take the higher risk and the
  * union of domains and data classes of the bundle and the fresh source build. Approvals
- * are the records committed at HEAD. `required-evals` is `unavailable`, never a pass.
+ * are the records committed at HEAD. `required-evals` is `unavailable`, never a pass, and
+ * so is `max-experiment-weight` for an arm with traffic.
  *
  * Without a prompt policy the gates pass without building the source.
  */
@@ -427,7 +460,7 @@ export async function checkPromotionGates(
     return refused(
       parsed.errors.map((error) => ({
         code: POLICY_CODE,
-        message: `The policies cannot be evaluated, so no gate passes: ${error}. Fix the policy definitions.`,
+        message: `The policies cannot be evaluated, so no gate passes: ${error.replace(/\.$/, '')}. Fix the policy definitions.`,
         location,
       }))
     );

@@ -85,4 +85,50 @@ describe('prs validate --strict on prompt definitions', () => {
       'requires syntax >= 1.6.0'
     );
   });
+
+  it('reports a max-experiment-weight policy that does not parse', async () => {
+    writeFileSync(
+      join(dir, 'promptscript.yaml'),
+      [
+        "id: 'prompts-test'",
+        "syntax: '1.6.0'",
+        'input:',
+        '  entry: prompts.prs',
+        'targets:',
+        '  - claude',
+        'releases:',
+        '  environments: [staging, prod]',
+        'governance:',
+        '  roles:',
+        "    product: ['@acme/product']",
+        'policies:',
+        '  - name: high-risk-exposure',
+        '    kind: max-experiment-weight',
+        '    severity: warning',
+        '    environments: [production]',
+        '    maxWeight: 10',
+        '    approvals: [{ role: product }]',
+        '    ceiling: 2.5',
+        '',
+      ].join('\n')
+    );
+
+    const output = JSON.parse(await validateSource(readFileSync(FIXTURE, 'utf-8'))) as {
+      success: boolean;
+      errors: Array<{ message: string }>;
+    };
+
+    expect(output.success).toBe(false);
+    expect(output.errors).toEqual([
+      expect.objectContaining({
+        message:
+          'Policy "high-risk-exposure": environment "production" is not in releases.environments. Add it there or fix the name.',
+      }),
+      expect.objectContaining({
+        message:
+          'Policy "high-risk-exposure": "ceiling" (2.5) is below "maxWeight" (10). Set it to at least 10.',
+      }),
+    ]);
+    expect(process.exitCode).toBe(1);
+  });
 });
