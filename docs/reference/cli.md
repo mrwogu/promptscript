@@ -1360,24 +1360,26 @@ prs eval run [suite...] [options]
 
 No suite name means every suite under `.promptscript/evals/`.
 
-| Option                     | Description                                                                                     | Default  |
-| -------------------------- | ----------------------------------------------------------------------------------------------- | -------- |
-| `--format <format>`        | `text`, `json`, `markdown` or `junit`                                                           | `text`   |
-| `--out <file>`             | Also write the formatted report to a file, with the same bytes as stdout                        | -        |
-| `--report-dir <dir>`       | Write `<dir>/<suite>.<hash12>.json` for each suite, inside the project                          | -        |
-| `--baseline <report.json>` | Compare with an earlier report                                                                  | -        |
-| `--fail-on-regression`     | Exit 1 when the baseline shows a regression. Needs `--baseline`                                 | -        |
-| `--cache <mode>`           | `replay`, `record`, `refresh` or `off`                                                          | `replay` |
-| `--max-cost <usd>`         | Spending limit in USD. Every mode that calls a provider needs it                                | -        |
-| `--max-cases <n>`          | Largest number of dataset rows a suite runs                                                     | 1000     |
-| `--concurrency <n>`        | Calls in flight at once, at most 16                                                             | 4        |
-| `--model <ref>`            | Run every suite against this model only                                                         | -        |
-| `--allow-host <host>`      | Allow a provider host besides the built-in ones. Repeat it for more hosts                       | -        |
-| `--allow-local`            | Allow loopback hosts (`127.0.0.0/8`, `::1`, `localhost`, `*.localhost`), http too               | -        |
-| `--dry-run`                | Print the plan, the cache hits and the worst-case cost, and call nothing. Needs no `--max-cost` | -        |
-| `--strict`                 | Exit 2 when the run passed with warnings                                                        | -        |
-| `-c, --config <path>`      | Path to a custom config file                                                                    | -        |
-| `--cwd <dir>`              | Working directory (project root)                                                                | -        |
+| Option                     | Description                                                                                         | Default  |
+| -------------------------- | --------------------------------------------------------------------------------------------------- | -------- |
+| `--format <format>`        | `text`, `json`, `markdown` or `junit`                                                               | `text`   |
+| `--out <file>`             | Also write the formatted report to a file, with the same bytes as stdout                            | -        |
+| `--report-dir <dir>`       | Write `<dir>/<suite>.<hash12>.json` for each suite, inside the project                              | -        |
+| `--baseline <report.json>` | Compare with an earlier report                                                                      | -        |
+| `--fail-on-regression`     | Exit 1 when the baseline shows a regression. Needs `--baseline`                                     | -        |
+| `--cache <mode>`           | `replay`, `record`, `refresh` or `off`                                                              | `replay` |
+| `--max-cost <usd>`         | Spending limit in USD. Every mode that calls a provider needs it                                    | -        |
+| `--max-cases <n>`          | Largest number of dataset rows a suite runs                                                         | 1000     |
+| `--concurrency <n>`        | Calls in flight at once, at most 16                                                                 | 4        |
+| `--model <ref>`            | Run every suite against this model only                                                             | -        |
+| `--label <env>`            | Run the prompts that release environment `<env>` serves, from its label, instead of a fresh compile | -        |
+| `--variant <name>`         | With `--label`, run the experiment arm `<name>` instead of the entry hash                           | -        |
+| `--allow-host <host>`      | Allow a provider host besides the built-in ones. Repeat it for more hosts                           | -        |
+| `--allow-local`            | Allow loopback hosts (`127.0.0.0/8`, `::1`, `localhost`, `*.localhost`), http too                   | -        |
+| `--dry-run`                | Print the plan, the cache hits and the worst-case cost, and call nothing. Needs no `--max-cost`     | -        |
+| `--strict`                 | Exit 2 when the run passed with warnings                                                            | -        |
+| `-c, --config <path>`      | Path to a custom config file                                                                        | -        |
+| `--cwd <dir>`              | Working directory (project root)                                                                    | -        |
 
 **Cache modes.** The cache is `.promptscript/eval-cache/`. `replay` answers from it and never calls
 a provider; a call with no entry is a case error `PS6402`. `record` answers from it and calls the
@@ -1418,15 +1420,30 @@ With `--baseline`, suites and models that the baseline has and the run lacks are
 they are listed as a warning: on stderr for `json` and `junit`, inside the document for `text` and
 `markdown`. They count as a warning for `--strict`.
 
-| Exit code | Outcome (`outcome` in JSON)                                                           |
-| --------- | ------------------------------------------------------------------------------------- |
-| 0         | `passed`: every suite passed and there is no regression with `--fail-on-regression`   |
-| 1         | `failed`: an assertion or a threshold failed, or a case ended in an error             |
-| 1         | `regression`: the run passed, but the baseline regressed, with `--fail-on-regression` |
-| 1         | `budget-exceeded`: the budget refused or stopped a call                               |
-| 1         | `error`: a config, suite, dataset, provider, cache or option error, or a replay miss  |
-| 2         | `passed` with warnings, with `--strict`                                               |
-| 130       | Interrupted with Ctrl+C. New calls stop and the finished cases stay in the report     |
+**Run against a label.** With `--label <env>` the prompts are not compiled. The run reads
+`.promptscript/releases/<env>.json` and the bundle of each hash from `bundles/`, and checks that
+each bundle verifies against its hash (`PS5003` when the label or a bundle is missing, `PS5004` when it does not
+verify). `<env>` must be in `releases.environments` (`PS5002`). For an entry with an experiment the
+run uses the entry hash, which is what readers serve without an assignment key; `--variant <name>`
+runs that arm instead, only for prompts that have it. One run covers one arm, because a report holds
+each suite once. A suite whose prompt is not in the label, or has no such arm, is skipped with a
+warning `PS6311`, which counts for `--strict`. A suite you name on the command line is an error
+instead, and so is a run where every suite is skipped. The report records the hash of every suite
+under `prompt.contentHash`, and `--report-dir` names files after that hash. The cache is keyed by
+the hash too: replay answers only from entries recorded for that hash, so a label that is behind the
+source needs `--cache record` once, or `--cache off --max-cost <usd>` for a live check of what the
+environment serves. Release gates do not read eval reports, so a report of a label run is not gate
+evidence.
+
+| Exit code | Outcome (`outcome` in JSON)                                                                   |
+| --------- | --------------------------------------------------------------------------------------------- |
+| 0         | `passed`: every suite passed and there is no regression with `--fail-on-regression`           |
+| 1         | `failed`: an assertion or a threshold failed, or a case ended in an error                     |
+| 1         | `regression`: the run passed, but the baseline regressed, with `--fail-on-regression`         |
+| 1         | `budget-exceeded`: the budget refused or stopped a call                                       |
+| 1         | `error`: a config, release, suite, dataset, provider, cache or option error, or a replay miss |
+| 2         | `passed` with warnings, with `--strict`                                                       |
+| 130       | Interrupted with Ctrl+C. New calls stop and the finished cases stay in the report             |
 
 ```bash
 prs eval run
@@ -1434,6 +1451,8 @@ prs eval run refund --format markdown
 prs eval run --cache record --max-cost 0.5
 prs eval run --dry-run --cache record --max-cost 0.5
 prs eval run --baseline main-report.json --fail-on-regression --format json --out report.json
+prs eval run --label prod
+prs eval run --label prod --variant warm --cache record --max-cost 0.5
 ```
 
 #### prs eval compare

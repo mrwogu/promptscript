@@ -22,6 +22,8 @@ export interface EvalRunOptions extends ProjectPathOptions {
   strict?: boolean;
   allowHost?: string[];
   allowLocal?: boolean;
+  label?: string;
+  variant?: string;
 }
 
 /** Options of `prs eval compare`. */
@@ -141,6 +143,29 @@ export function hostsFromEnv(value: string | undefined): string[] {
     .filter((host) => host !== '');
 }
 
+// Environment and variant names share one rule, so a flag value is safe in a path or a message
+const RELEASE_NAME_RE = /^[a-z][a-z0-9-]{0,31}$/;
+
+/** Problems of `--label` and `--variant`: their shape, and `--variant` without `--label`. */
+export function labelProblems(options: Pick<EvalRunOptions, 'label' | 'variant'>): string[] {
+  const problems: string[] = [];
+  const { label, variant } = options;
+  if (label !== undefined && !RELEASE_NAME_RE.test(label)) {
+    problems.push(
+      '--label must be an environment name: lowercase letters, digits and hyphens, starting with a letter.'
+    );
+  }
+  if (variant !== undefined && !RELEASE_NAME_RE.test(variant)) {
+    problems.push(
+      '--variant must be a variant name: lowercase letters, digits and hyphens, starting with a letter.'
+    );
+  }
+  if (variant !== undefined && label === undefined) {
+    problems.push('--variant needs --label <env>.');
+  }
+  return problems;
+}
+
 /**
  * Check the flags of `eval run`. A flag that is not a plain number or a known name is
  * a problem, never a default, so a typo cannot switch a limit off.
@@ -173,6 +198,7 @@ export function parseRunOptions(
   if (options.dryRun === true && format !== undefined && format !== 'text') {
     problems.push('--dry-run prints a text plan; leave out --format or use --format text.');
   }
+  problems.push(...labelProblems(options));
   if (problems.length > 0 || format === undefined || cache === undefined) return { problems };
   return {
     problems,

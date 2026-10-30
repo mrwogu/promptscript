@@ -51,7 +51,9 @@ import {
   writeOut,
   writeSuiteReports,
 } from './output.js';
+import { loadLabelProject, selectAtLabel, type LabelSelection } from './label.js';
 import { compileBundles, loadEvalProject, type EvalProject } from './project.js';
+import type { ReleaseProject } from '../release/project.js';
 
 /** What `eval run` can be given besides the CLI services, for tests. */
 export interface EvalCommandServices extends CliServices {
@@ -115,7 +117,8 @@ function plural(count: number, word: string): string {
  *
  * Exit 0 when everything passed, 1 for a failed case, threshold, regression, budget or
  * setup error, 2 for a pass with warnings under `--strict`, 130 on Ctrl+C. Live modes,
- * the budget and extra provider hosts come from flags only.
+ * the budget and extra provider hosts come from flags only. With `--label` the prompts are
+ * the verified bundles a release environment serves, not a fresh compile.
  */
 export async function evalRunCommand(
   names: string[],
@@ -226,6 +229,7 @@ interface Inputs {
   baseline?: EvalReportV1;
   project: EvalProject;
   bundles: PromptBundleV1[];
+  release?: ReleaseProject;
   reportDir?: string;
 }
 
@@ -248,16 +252,95 @@ function chooseReportDir(
   return checked;
 }
 
+// The project and the prompts it runs: compiled from source, or none yet with a label
+async function loadProject(
+  options: EvalRunOptions
+): Promise<{ project: EvalProject; bundles: PromptBundleV1[]; release?: ReleaseProject }> {
+  const { label } = options;
+  if (label !== undefined) {
+    // The label and its bundles are read later, once the suites are known
+    const release = await orStop(EVAL_CODES.PROJECT_INVALID, () =>
+      loadLabelProject(options, label)
+    );
+    return { project: { root: release.root, config: release.config }, bundles: [], release };
+  }
+  const project = await orStop(EVAL_CODES.PROJECT_INVALID, () => loadEvalProject(options));
+  const bundles = await orStop(EVAL_CODES.PROJECT_INVALID, () => compileBundles(project));
+  return { project, bundles };
+}
+
 // The baseline, the project and its prompts, and the report directory, all before any call
 async function loadInputs(options: EvalRunOptions, root: string): Promise<Inputs> {
   const { baseline: file } = options;
   const baseline = await orStop(EVAL_CODES.REPORT_INVALID, () =>
     file === undefined ? undefined : readBaseline(file, root)
   );
-  const project = await orStop(EVAL_CODES.PROJECT_INVALID, () => loadEvalProject(options));
-  const bundles = await orStop(EVAL_CODES.PROJECT_INVALID, () => compileBundles(project));
+  const { project, bundles, release } = await loadProject(options);
   const reportDir = chooseReportDir(options, project.config.eval?.reportDir, root);
-  return { ...maybe('baseline', baseline), project, bundles, ...maybe('reportDir', reportDir) };
+  return {
+    ...maybe('baseline', baseline),
+    project,
+    bundles,
+    ...maybe('release', release),
+    ...maybe('reportDir', reportDir),
+  };
+}
+
+// What a suite load reported as an error, in the shape of a report error
+function loadErrors(loaded: LoadSuitesResult): EvalReportErrorV1[] {
+  return loaded.findings
+    .filter((finding) => finding.severity === 'error')
+    .map(({ code, message, file, line }) => ({
+      code,
+      message,
+      ...maybe('file', file),
+      ...maybe('line', line),
+    }));
+}
+
+// With --label the suites and bundles come from the label; a suite that did not load is still
+// reported when the label step fails
+async function withLabel(
+  context: RunContext,
+  inputs: Inputs,
+  loaded: LoadSuitesResult
+): Promise<LabelSelection> {
+  const { release } = inputs;
+  const { label, variant } = context.options;
+  if (release === undefined || label === undefined) {
+    return { suites: loaded.suites, bundles: inputs.bundles, runs: [], skipped: [] };
+  }
+  const target = { environment: label, ...maybe('variant', variant) };
+  try {
+    return await orStop(EVAL_CODES.PROJECT_INVALID, () =>
+      selectAtLabel(release, target, loaded.suites, context.names.length > 0)
+    );
+  } catch (error) {
+    // orStop turns every failure of the step into a StopRun
+    throw new StopRun([...loadErrors(loaded), ...(error as StopRun).errors]);
+  }
+}
+
+// Printed once the run is sure to go on, so a stopped run shows no "runs" lines
+function announceLabel(context: RunContext, selection: LabelSelection): void {
+  for (const line of selection.skipped) {
+    context.reporter.warnings += 1;
+    say(`warning ${EVAL_CODES.LABEL_PROMPT_MISSING}: ${line}`);
+  }
+  for (const line of selection.runs) say(line);
+}
+
+// A scheduled job must never pass with nothing run
+function requireLabelSuites(options: EvalRunOptions, before: number, after: number): void {
+  const { label, variant } = options;
+  if (label === undefined || before === 0 || after > 0) return;
+  const arm = variant === undefined ? '' : ` with variant ${variant}`;
+  throw new StopRun([
+    reportError(
+      EVAL_CODES.LABEL_PROMPT_MISSING,
+      `No suite can run against label ${label}${arm}: their prompts are not in it. Promote the prompts first, or check --variant.`
+    ),
+  ]);
 }
 
 function buildProviders(context: RunContext, config: PromptScriptConfig): EvalProviderLookup {
@@ -394,9 +477,13 @@ async function runChecked(context: RunContext): Promise<void> {
   const root = resolveProjectRoot(options);
   const inputs = await loadInputs(options, root);
   const loaded = await loadSuites({ projectRoot: root, ...(names.length > 0 ? { names } : {}) });
+  const selection = await withLabel(context, inputs, loaded);
+  const { suites, bundles } = selection;
   const providers = buildProviders(context, inputs.project.config);
-  const runOptions = buildRunOptions(context, inputs, loaded.suites, providers);
-  await stopOnLoadErrors(loaded, runOptions);
+  const runOptions = buildRunOptions(context, { ...inputs, bundles }, suites, providers);
+  await stopOnLoadErrors({ ...loaded, suites }, runOptions);
+  requireLabelSuites(options, loaded.suites.length, suites.length);
+  announceLabel(context, selection);
   if (options.dryRun === true) {
     await dryRun(context, runOptions);
     return;
