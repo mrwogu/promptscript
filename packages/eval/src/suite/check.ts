@@ -1,26 +1,16 @@
 import {
-  compareCodeUnits,
-  levenshteinDistance,
   type EvalAssertion,
   type EvalSuiteV1,
   type ModelCatalog,
-  type ModelProfile,
-  type PromptBundleModel,
   type PromptBundleV1,
 } from '@promptscript/core';
 import { compileJsonSchema } from '../assertions.js';
-import { EVAL_CODES, type EvalCode, type EvalFinding } from '../errors.js';
+import { EVAL_CODES, type EvalFinding } from '../errors.js';
+import { nearestIds, ownProfile, resolveModel, type Add, type CheckContext } from './common.js';
 import type { LoadedSuite } from './load.js';
+import { checkJudges } from './rubric.js';
 
-/** What suites are checked against. */
-export interface CheckContext {
-  /** Prompt bundles the project compiles */
-  bundles: readonly PromptBundleV1[];
-  /** Model catalog with the project's profiles */
-  catalog: ModelCatalog;
-}
-
-type Add = (code: EvalCode, message: string, severity?: 'error' | 'warning') => void;
+export type { CheckContext };
 
 const QUANTIFIERS = new Set(['*', '+', '{']);
 
@@ -77,16 +67,6 @@ function compiles(pattern: string, flags = ''): boolean {
   } catch {
     return false;
   }
-}
-
-function nearestIds(id: string, bundles: readonly PromptBundleV1[]): string[] {
-  // A suite can hold a huge prompt string; the distance matrix grows with it
-  const probe = id.slice(0, 200);
-  return bundles
-    .map((bundle) => ({ id: bundle.id, distance: levenshteinDistance(probe, bundle.id) }))
-    .sort((a, b) => a.distance - b.distance || compareCodeUnits(a.id, b.id))
-    .slice(0, 5)
-    .map((entry) => entry.id);
 }
 
 function checkAssertions(
@@ -146,33 +126,6 @@ function checkPattern(id: string, pattern: string, flags: string | undefined, ad
       'warning'
     );
   }
-}
-
-function resolveModel(ref: string, catalog: ModelCatalog, add: Add): ModelProfile | undefined {
-  const resolution = catalog.resolve(ref);
-  if (resolution === undefined || resolution.kind === 'inherit') {
-    add(
-      EVAL_CODES.MODEL_REF,
-      `model "${ref}" is not in the model catalog; use a profile id, alias or API id, or add it under models.profiles in promptscript.yaml`
-    );
-    return undefined;
-  }
-  const { profile } = resolution;
-  if (profile.status === 'retired' || profile.status === 'deprecated') {
-    const replacement = catalog.getReplacement(profile.id);
-    const advice = replacement === undefined ? '' : `; use ${replacement.id}`;
-    add(
-      EVAL_CODES.MODEL_REF,
-      `model "${ref}" is ${profile.status}${advice}`,
-      profile.status === 'retired' ? 'error' : 'warning'
-    );
-  }
-  return profile;
-}
-
-function ownProfile(model: PromptBundleModel, catalog: ModelCatalog): ModelProfile | undefined {
-  const resolution = catalog.resolve(model.profile ?? model.ref);
-  return resolution === undefined || resolution.kind === 'inherit' ? undefined : resolution.profile;
 }
 
 function checkModels(
@@ -236,6 +189,7 @@ function checkSuite(loaded: LoadedSuite, context: CheckContext): EvalFinding[] {
     return findings;
   }
   checkAssertions(suite.assertions, bundle, add);
+  checkJudges(suite, bundle, context, add);
   checkModels(suite, bundle, context.catalog, add);
   return findings;
 }
@@ -246,8 +200,9 @@ function checkSuite(loaded: LoadedSuite, context: CheckContext): EvalFinding[] {
  * properties, `json-schema` has a schema that compiles, every model in
  * `models` resolves and is not retired, cost thresholds have a price for
  * every model the suite runs, regexes do not nest quantifiers, and a dataset
- * `allow` comes with a deterministic assertion. Judge models are not checked:
- * `llm-judge` assertions get only the structure and field checks.
+ * `allow` comes with a deterministic assertion. Each `llm-judge` assertion
+ * needs a rubric prompt that fits the judge call (inputs, slots, output) and a
+ * judge model that resolves.
  *
  * @param suites - Suites from `loadSuites`
  * @param context - Compiled bundles and the model catalog

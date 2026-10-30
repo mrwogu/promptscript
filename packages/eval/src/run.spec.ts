@@ -903,20 +903,6 @@ describe('runEval', () => {
     }
   });
 
-  it('refuses llm-judge assertions in this version', async () => {
-    writeFileSync(
-      join(evals, 'refund.eval.yaml'),
-      `${SUITE}  - { id: tone, kind: llm-judge, rubric: acme-support/judge }\n`
-    );
-
-    const report = await runEval(await options());
-
-    expect(report.errors.map((error) => error.code)).toEqual(['PS6600']);
-    expect(report.errors[0]?.message).toContain(
-      'llm-judge assertion "tone" cannot run in this version of eval'
-    );
-  });
-
   it('refuses a bundle that does not verify', async () => {
     const tampered = { ...makeBundle(), description: 'Changed after hashing' };
 
