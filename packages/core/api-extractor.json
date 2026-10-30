@@ -1,0 +1,20 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+  "extends": "../../api-extractor.base.json",
+  "projectFolder": ".",
+  "mainEntryPointFilePath": "<projectFolder>/../../dist/packages/core/src/index.d.ts",
+  "compiler": {
+    "overrideTsconfig": {
+      "compilerOptions": {
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "target": "ES2022",
+        "lib": ["ES2022"],
+        "types": ["node"],
+        "strict": true,
+        "skipLibCheck": true
+      },
+      "files": ["../../dist/packages/core/src/index.d.ts"]
+    }
+  }
+}

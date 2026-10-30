@@ -148,6 +148,14 @@ jobs:
       - name: Build
         run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t build
 
+      - name: API Report Check
+        if: matrix.node-version == '25.x'
+        run: |
+          if ! pnpm api:check; then
+            echo "::error::API report check failed, see the log above. If the API changed on purpose, run 'pnpm api:update' and commit packages/*/api/."
+            exit 1
+          fi
+
       - name: Runtime example against the packed runtime
         if: matrix.node-version == '25.x'
         run: |

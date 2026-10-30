@@ -16,6 +16,9 @@ docs/getting-started.md
 **/__golden__/**
 **/__snapshots__/**
 
+# API reports - written by api-extractor, compared by pnpm api:check
+packages/*/api/*.api.md
+
 # PromptScript generated files - managed by prs compile
 CHANGELOG.md
 
