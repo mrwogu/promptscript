@@ -39,7 +39,7 @@ function toPrice(model: unknown, path: string): PromptModelPrice {
  * prototype. When two entries share a provider and an API id, the higher price of each side
  * is kept, which makes a cost an upper estimate.
  *
- * @param content - Content of `pricing.json`, at most 256 KiB
+ * @param content - Content of `pricing.json`, at most 262,144 characters (UTF-16 code units)
  * @returns A frozen table with `find(provider, apiId)`
  * @throws {PromptRuntimeError} `invalid-pricing` when the text is not a valid pricing file
  *
