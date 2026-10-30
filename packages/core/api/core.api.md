@@ -81,6 +81,7 @@ export interface ApprovalRecordV1 {
     contentHash: string;
     createdAt: string;
     environment?: ReleaseEnvironmentName;
+    maxWeight?: number;
     prompt: string;
     role: GovernanceRoleName;
     signature?: string;
