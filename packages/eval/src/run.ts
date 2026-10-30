@@ -1,10 +1,9 @@
 import { Buffer } from 'node:buffer';
-import { createHash, randomInt } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import {
   compareCodeUnits,
   getModelCatalog,
-  type EvalCacheEntryV1,
   type EvalCacheMode,
   type EvalCaseStatus,
   type EvalFindingV1,
@@ -17,29 +16,15 @@ import {
 } from '@promptscript/core';
 import { loadPrompt, type Prompt, type PromptMessage } from '@promptscript/runtime';
 import { evaluateAssertions, type DeterministicAssertion } from './assertions.js';
-import {
-  CACHE_ENTRY_SCHEMA,
-  MAX_TOKENS,
-  cacheKey,
-  entryText,
-  inputsHash,
-  readCacheEntry,
-  writeCacheEntry,
-  type CacheRead,
-} from './cache.js';
+import { MAX_TOKENS, cacheKey, inputsHash } from './cache.js';
+import { messageOf, obtain, pool, searchCache, type Add, type RunContext } from './calls.js';
 import { Budget, callCost, roundUsd, worstCaseCost } from './cost.js';
 import { checkDatasetRow } from './dataset/check.js';
 import { readDataset, type DatasetRecord } from './dataset/read.js';
 import { scanDatasetRow } from './dataset/scan.js';
-import {
-  EVAL_CODES,
-  EvalError,
-  EvalProviderError,
-  type EvalCode,
-  type EvalFinding,
-} from './errors.js';
+import { EVAL_CODES, EvalError, type EvalCode, type EvalFinding } from './errors.js';
 import { projectRelative, resolveProjectPath } from './paths.js';
-import type { EvalProvider, EvalProviderLookup, EvalResponse } from './provider.js';
+import type { EvalProviderLookup, EvalResponse } from './provider.js';
 import {
   buildReport,
   type CaseOutcome,
@@ -47,7 +32,6 @@ import {
   type ModelPlan,
   type SuitePlan,
 } from './report.js';
-import { isRecord } from './shape.js';
 import { checkSuites } from './suite/check.js';
 import type { LoadedSuite } from './suite/load.js';
 
@@ -93,35 +77,6 @@ export interface RunEvalOptions {
 const DEFAULT_MAX_OUTPUT_TOKENS = 1024;
 const DEFAULT_CONCURRENCY = 4;
 const MAX_CONCURRENCY = 16;
-const MAX_RETRIES = 2;
-const MAX_RETRY_AFTER_MS = 30_000;
-// Statuses worth another try, and statuses a provider refuses before billing
-const RETRIED = new Set([429, 500, 502, 503, 529]);
-const RELEASED = new Set([400, 401, 403, 404, 413, 429]);
-
-type Add = (code: EvalCode, message: string, file?: string, line?: number) => void;
-
-interface RunContext {
-  options: RunEvalOptions;
-  mode: EvalCacheMode;
-  cacheDir?: string;
-  providers: Map<string, EvalProvider>;
-  budget?: Budget;
-  /** One answer per cache key, so rows with the same request pay once */
-  answers: Map<string, Promise<Answer>>;
-  /** Receives progress; dropped after it throws once */
-  notify: (event: EvalProgress) => void;
-}
-
-/** Why a case has no answer. */
-interface Failure {
-  code: EvalCode;
-  message: string;
-  flags?: Partial<CaseOutcome>;
-}
-
-/** A provider answer written to the cache, or why there is none. */
-type Answer = { response: EvalResponse; bytes: Buffer } | Failure;
 
 function collector(errors: EvalFinding[]): Add {
   return (code, message, file, line) => {
@@ -132,20 +87,6 @@ function collector(errors: EvalFinding[]): Add {
       ...(file === undefined ? {} : { file }),
       ...(line === undefined ? {} : { line }),
     });
-  };
-}
-
-function messageOf(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
-// File system errors name absolute paths, and reports hold none: only the code is kept
-function fileProblem(error: unknown): { code: EvalCode; message: string } {
-  if (error instanceof EvalError) return { code: error.code as EvalCode, message: error.message };
-  const reason = (error as NodeJS.ErrnoException | undefined)?.code ?? 'an unknown error';
-  return {
-    code: EVAL_CODES.CACHE_IO_FAILED,
-    message: `The eval cache could not be used: ${reason}.`,
   };
 }
 
@@ -476,55 +417,13 @@ async function prepareSuite(
   };
 }
 
-const LOOKUP_CONCURRENCY = 16;
-
-type Read = { value: CacheRead } | { error: unknown };
-
-// A few reads at a time; the results stay in case order, so errors come in a stable order
-async function readAll(cases: readonly CasePlan[], cacheDir: string): Promise<Read[]> {
-  const reads: Read[] = [];
-  const items = cases.map((plan, index) => ({ plan, index }));
-  await pool(items, LOOKUP_CONCURRENCY, async ({ plan, index }) => {
-    try {
-      reads[index] = { value: await readCacheEntry(cacheDir, plan.key) };
-    } catch (error) {
-      reads[index] = { error };
-    }
-  });
-  return reads;
-}
-
-// Cache lookups for every case, before any call. Refresh walks the tree too,
-// so a bad entry stops the run before a paid call, but it uses no hit.
+// Cache lookups for every case, before any call
 async function lookUp(plans: readonly SuitePlan[], context: RunContext, add: Add): Promise<void> {
-  const { cacheDir, options } = context;
-  if (cacheDir === undefined) return;
-  const cases = plans.flatMap((plan) => plan.cases);
-  const reads = await readAll(cases, cacheDir);
-  const refused = new Set<string>();
-  for (const [index, plan] of cases.entries()) {
-    const read = reads[index];
-    if (read === undefined || 'error' in read) {
-      const { code, message } = fileProblem(read?.error);
-      if (!refused.has(message)) add(code, message);
-      refused.add(message);
-    } else if (context.mode === 'refresh') {
-      continue;
-    } else if (read.value.found) {
-      plan.hit = { response: read.value.entry.response, bytes: read.value.bytes };
-    } else if (read.value.invalid) {
-      const file = `${projectRelative(options.projectRoot, cacheDir)}/${plan.key.slice(0, 2)}/${plan.key}.json`;
-      context.notify({
-        type: 'warning',
-        finding: {
-          code: EVAL_CODES.CACHE_ENTRY_INVALID,
-          severity: 'warning',
-          message: `Cache entry ${file} is unreadable or does not match its key; it counts as a miss.`,
-          file,
-        },
-      });
-    }
-  }
+  await searchCache(
+    plans.flatMap((plan) => plan.cases),
+    context,
+    add
+  );
 }
 
 function setUpProviders(plans: readonly SuitePlan[], context: RunContext, add: Add): void {
@@ -567,148 +466,12 @@ function errored(
   };
 }
 
-// The listener goes away with the timer, so retries do not pile them up on the run signal
-function sleep(ms: number, signal: AbortSignal | undefined): Promise<void> {
-  return new Promise((resolve) => {
-    const done = (): void => {
-      clearTimeout(timer);
-      signal?.removeEventListener('abort', done);
-      resolve();
-    };
-    const timer = setTimeout(done, ms);
-    signal?.addEventListener('abort', done, { once: true });
-  });
-}
-
-// A provider built in code may answer anything; only whole token counts pass
-function validUsage(response: unknown): boolean {
-  if (!isRecord(response) || !isRecord(response['usage'])) return false;
-  const { inputTokens, outputTokens } = response['usage'];
-  return [inputTokens, outputTokens].every(
-    (value) =>
-      typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= MAX_TOKENS
-  );
-}
-
-type Called = { response: EvalResponse } | Failure;
-
-// Delay before the next try, or undefined when the failure is final
-function retryDelay(error: unknown, attempt: number, context: RunContext): number | undefined {
-  if (!(error instanceof EvalProviderError) || error.status === undefined) return undefined;
-  if (attempt >= MAX_RETRIES || !RETRIED.has(error.status) || context.options.signal?.aborted) {
-    return undefined;
-  }
-  if (error.retryAfterMs !== undefined) return Math.min(error.retryAfterMs, MAX_RETRY_AFTER_MS);
-  const base = context.options.retryBaseMs ?? 500;
-  return base * 2 ** attempt + randomInt(base + 1);
-}
-
-// A refused call gives its reservation back; any other failure may have been billed
-function settleFailure(error: unknown, reserved: number, budget: Budget | undefined): void {
-  const status = error instanceof EvalProviderError ? error.status : undefined;
-  if (status !== undefined && RELEASED.has(status)) budget?.release(reserved);
-  else budget?.keep(reserved);
-}
-
-// One call with its reservation, retried for 429 and 5xx up to twice
-async function call(plan: CasePlan, context: RunContext, attempt = 0): Promise<Called> {
-  const { budget, options } = context;
-  const provider = context.providers.get(plan.model.provider);
-  const reserved = plan.worstCaseUsd;
-  if (provider === undefined) {
-    const message = `Provider ${plan.model.provider} is not set up.`;
-    return { code: EVAL_CODES.PROVIDER_UNCONFIGURED, message };
-  }
-  if (budget !== undefined && !budget.reserve(reserved)) {
-    const message = `The next call could pass --max-cost ${budget.maxUsd} USD, so the case did not run; raise --max-cost to run it.`;
-    return { code: EVAL_CODES.BUDGET_EXCEEDED, message, flags: { budgetHit: true } };
-  }
-  let response: EvalResponse;
-  try {
-    const signal = options.signal ?? new AbortController().signal;
-    response = await provider(plan.request, { signal, caseId: plan.row.id });
-  } catch (error) {
-    settleFailure(error, reserved, budget);
-    const delay = retryDelay(error, attempt, context);
-    if (delay !== undefined) {
-      await sleep(delay, options.signal);
-      if (options.signal?.aborted) {
-        return { code: EVAL_CODES.RUN_STOPPED, message: 'The run stopped before the next try.' };
-      }
-      return call(plan, context, attempt + 1);
-    }
-    const code = error instanceof EvalError ? (error.code as EvalCode) : EVAL_CODES.PROVIDER_FAILED;
-    return { code, message: messageOf(error) };
-  }
-  if (!validUsage(response)) {
-    budget?.keep(reserved);
-    const message = `Provider ${plan.model.provider} answered without valid token counts.`;
-    return { code: EVAL_CODES.USAGE_INVALID, message };
-  }
-  const pricing = plan.model.pricing;
-  budget?.settle(reserved, pricing === undefined ? 0 : callCost(response.usage, pricing));
-  return { response };
-}
-
-function entryOf(plan: CasePlan, response: EvalResponse): EvalCacheEntryV1 {
-  // Keys in schema order, so the file bytes do not depend on the provider
-  return {
-    $schema: CACHE_ENTRY_SCHEMA,
-    key: plan.key,
-    request: plan.cacheRequest,
-    response: {
-      text: response.text,
-      usage: { inputTokens: response.usage.inputTokens, outputTokens: response.usage.outputTokens },
-      latencyMs: Math.max(0, Math.round(response.latencyMs)),
-      status: response.status,
-      ...(response.stopReason === undefined ? {} : { stopReason: response.stopReason }),
-    },
-  };
-}
-
-// Call the provider and write the entry; the cache gets one entry per key
-async function answer(plan: CasePlan, context: RunContext): Promise<Answer> {
-  const called = await call(plan, context);
-  if ('code' in called) return called;
-  const entry = entryOf(plan, called.response);
-  try {
-    // off writes nothing; its digest covers the entries as they would have been written
-    const bytes =
-      context.mode === 'off' || context.cacheDir === undefined
-        ? Buffer.from(entryText(entry), 'utf8')
-        : await writeCacheEntry(context.cacheDir, entry);
-    return { response: entry.response, bytes };
-  } catch (error) {
-    const { code, message } = fileProblem(error);
-    return { code, message: `The cache entry ${plan.key} was not written. ${message}` };
-  }
-}
-
 async function respond(
   plan: CasePlan,
   context: RunContext
 ): Promise<{ response: EvalResponse; bytes: Buffer; live: boolean } | CaseOutcome> {
-  if (plan.hit !== undefined) return { ...plan.hit, live: false };
-  if (context.mode === 'replay') {
-    return errored(
-      plan,
-      EVAL_CODES.CACHE_MISS,
-      `No cache entry ${plan.key} for row "${plan.row.id}" on ${plan.model.ref}; record it with prs eval run --cache record --max-cost <usd>.`,
-      { cacheMiss: true }
-    );
-  }
-  // Rows with the same request share one call; the later ones count as replayed
-  const pending = context.answers.get(plan.key);
-  const answered =
-    pending ??
-    answer(plan, context).catch((error: unknown): Answer => ({
-      code: EVAL_CODES.PROVIDER_FAILED,
-      message: messageOf(error),
-    }));
-  if (pending === undefined) context.answers.set(plan.key, answered);
-  const got = await answered;
-  if ('code' in got) return errored(plan, got.code, got.message, got.flags);
-  return { response: got.response, bytes: got.bytes, live: pending === undefined };
+  const got = await obtain(plan, plan.row.id, context);
+  return 'code' in got ? errored(plan, got.code, got.message, got.flags) : got;
 }
 
 async function runCase(
@@ -755,21 +518,6 @@ async function runCase(
       cacheKeys: [plan.key],
     },
   };
-}
-
-async function pool<T>(
-  items: readonly T[],
-  size: number,
-  work: (item: T) => Promise<void>
-): Promise<void> {
-  let next = 0;
-  const worker = async (): Promise<void> => {
-    const item = items[next++];
-    if (item === undefined) return;
-    await work(item);
-    return worker();
-  };
-  await Promise.all(Array.from({ length: Math.min(size, items.length) }, worker));
 }
 
 // A limit that is not a plain number would switch off the check that uses it

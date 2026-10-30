@@ -41,9 +41,8 @@ export interface ModelPlan {
   pricing?: ModelPricing;
 }
 
-/** One case: a dataset row on a model entry, ready to call or replay. */
-export interface CasePlan {
-  row: DatasetRecord['row'];
+/** The fields a provider call needs; a case call and a judge call both have them. */
+export interface CallPlan {
   model: ModelPlan;
   request: EvalRequest;
   cacheRequest: EvalCacheRequestV1;
@@ -52,6 +51,13 @@ export interface CasePlan {
   worstCaseUsd: number;
   /** Cache entry found before the run, with its file bytes */
   hit?: { response: EvalCacheResponseV1; bytes: Buffer };
+  /** The cache was already searched for this key, so a miss is final */
+  searched?: boolean;
+}
+
+/** One case: a dataset row on a model entry, ready to call or replay. */
+export interface CasePlan extends CallPlan {
+  row: DatasetRecord['row'];
 }
 
 /** One suite, checked and ready to run. */
