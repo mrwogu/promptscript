@@ -1,7 +1,7 @@
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ConsoleOutput } from '../../output/console.js';
-import type { PromptBundleIndexV1 } from '@promptscript/core';
+import type { PromptBundleIndexV1, PromptReleaseLabelEntryV2 } from '@promptscript/core';
 import type {
   ReleaseDiagnostic,
   ReleaseEnvironmentHistory,
@@ -23,7 +23,7 @@ import {
   type ReleasePaths,
 } from './layout.js';
 import { checkAgainstBase, type BaseCheck } from './base.js';
-import { checkPromotionGates, gateLines } from './gates.js';
+import { checkPromotionGates, gateLines, type GateEntry } from './gates.js';
 import {
   compileRelease,
   loadReleaseProject,
@@ -158,24 +158,51 @@ async function promptStatus(
   };
 }
 
+/** One environment, and the experiment arms of its label for the gates. */
+interface EnvironmentCheck extends Checked<ReleaseEnvironmentStatus> {
+  /** The non-control arms with traffic; the report lists entries only */
+  arms: GateEntry[];
+}
+
+/** The arms an entry's experiment serves besides control, without the ones at weight 0. */
+function armsOf(entry: PromptReleaseLabelEntryV2): GateEntry[] {
+  const experiment = entry.experiment;
+  if (experiment === undefined) return [];
+  return experiment.arms.slice(1).flatMap(({ variant, contentHash, weight }) =>
+    weight === 0
+      ? []
+      : [
+          {
+            id: entry.id,
+            contentHash,
+            exposure: { experiment: experiment.name, variant, weight },
+          },
+        ]
+  );
+}
+
 /** One environment: a missing label is an empty environment. */
 async function environmentStatus(
   paths: ReleasePaths,
   name: string,
   manifest: PromptBundleIndexV1 | undefined
-): Promise<Checked<ReleaseEnvironmentStatus>> {
+): Promise<EnvironmentCheck> {
   const labelPath = paths.label(name);
   const path = paths.relative(labelPath);
-  let entries: { id: string; contentHash: string }[];
+  let entries: PromptReleaseLabelEntryV2[];
   try {
     const text = await readReleaseText(labelPath);
     if (text === undefined) {
-      return { value: { name, path, exists: false, prompts: [] }, errors: [] };
+      return { value: { name, path, exists: false, prompts: [] }, errors: [], arms: [] };
     }
     entries = parseLabel(text, name, labelPath).prompts;
   } catch (error) {
     // A label that cannot be read or parsed fails this environment, not the whole report.
-    return { value: { name, path, exists: true, prompts: [] }, errors: [toDiagnostic(error)] };
+    return {
+      value: { name, path, exists: true, prompts: [] },
+      errors: [toDiagnostic(error)],
+      arms: [],
+    };
   }
   const checked = await Promise.all(
     entries.map((entry) => promptStatus(paths, name, entry, manifest))
@@ -183,6 +210,7 @@ async function environmentStatus(
   return {
     value: { name, path, exists: true, prompts: checked.map((entry) => entry.value) },
     errors: checked.flatMap((entry) => entry.errors),
+    arms: entries.flatMap(armsOf),
   };
 }
 
@@ -242,12 +270,13 @@ function printStatus(
 }
 
 /**
- * The gates of every verified label entry under the checkout's config. Plain status only
- * reports them: a failure is a warning, the exit code stays. `--base` is the check.
+ * The gates of every verified label entry and every experiment arm with traffic under the
+ * checkout's config. Plain status only reports them: a failure is a warning, the exit code
+ * stays. `--base` is the check.
  */
 async function labelGates(
   project: ReleaseProject,
-  environments: readonly ReleaseEnvironmentStatus[],
+  environments: readonly EnvironmentCheck[],
   machineReadable: boolean
 ): Promise<{ gates: ReleaseGateResult[]; warnings: ReleaseDiagnostic[] }> {
   let compiled: Promise<CompiledRelease> | undefined;
@@ -260,15 +289,19 @@ async function labelGates(
     warnings.set(JSON.stringify(diagnostic), diagnostic);
   };
   const results = await Promise.all(
-    environments.map((environment) =>
+    environments.map(({ value: environment, arms }) =>
       checkPromotionGates({
         project,
         config: project.config,
         configFile: project.paths.relative(project.configPath),
         environment: environment.name,
-        prompts: environment.prompts
-          .filter((prompt) => prompt.verified)
-          .map(({ id, contentHash }) => ({ id, contentHash })),
+        // Arms after the entries, so the approvals column finds the entry's gate first.
+        prompts: [
+          ...environment.prompts
+            .filter((prompt) => prompt.verified)
+            .map(({ id, contentHash }) => ({ id, contentHash })),
+          ...arms,
+        ],
         source,
       }).catch((error: unknown) => {
         // Git missing, say: status still reports what it verified.
@@ -357,7 +390,7 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
         : await checkAgainstBase(project, options.base, output.json);
     const gateRun =
       baseCheck === undefined
-        ? await labelGates(project, environments, output.json)
+        ? await labelGates(project, checked, output.json)
         : { gates: baseCheck.gates, warnings: baseCheck.warnings };
     warnings.push(...gateRun.warnings);
 
