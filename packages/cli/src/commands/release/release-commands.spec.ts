@@ -1167,8 +1167,7 @@ describe('prs release promote', () => {
 
     expect(errorCodes(same)).toEqual(['PS5010']);
     expect(errorCodes(changed)).toEqual(['PS5010']);
-    expect(changed.errors[0]?.message).toContain('Remove the experiment from');
-    expect(changed.errors[0]?.message).not.toContain('split');
+    expect(changed.errors[0]?.message).toContain('prs release split');
     expect(await readFile(releases(root, 'staging.json'), 'utf8')).toBe(before);
   });
 
@@ -1436,7 +1435,7 @@ describe('prs release rollback', () => {
     expect(await readFile(releases(root, 'staging.json'), 'utf8')).toBe(v1);
   });
 
-  it('refuses a rollback that would bring an experiment back', async () => {
+  it('refuses a rollback that would bring an experiment back into the first environment', async () => {
     const { root, second } = await twoReleases();
     await writeExperimentLabel(root, 'staging', [{ id: ID, contentHash: second }]);
     await commit(root, 'add an experiment by hand');
@@ -1446,8 +1445,8 @@ describe('prs release rollback', () => {
 
     const result = await rollback(root, 'staging');
 
-    expect(errorCodes(result)).toEqual(['PS5006']);
-    expect(result.errors[0]?.message).toContain('experiment');
+    expect(errorCodes(result)).toEqual(['PS5009']);
+    expect(result.errors[0]?.message).toContain('first environment');
     expect(await readFile(releases(root, 'staging.json'), 'utf8')).toBe(before);
   });
 
@@ -1769,6 +1768,11 @@ describe('prs release status --base', () => {
     expect(result.warnings.map((warning) => warning.message)).toContain(
       `.promptscript/releases/staging.json: the experiment of ${ID} was removed; all traffic goes to ${hash}.`
     );
+    expect(result.changes.map((change) => [change.action, change.experiment?.variant])).toEqual([
+      ['unchanged', undefined],
+      ['removed', 'control'],
+      ['removed', 'warm'],
+    ]);
   });
 
   it('prints a removed experiment in the text summary', async () => {
@@ -1787,11 +1791,12 @@ describe('prs release status --base', () => {
     await releaseStatusCommand({ cwd: root, base: 'base' });
     info.mockRestore();
 
-    expect(lines.join('\n')).toContain('an experiment was removed');
+    expect(lines.join('\n')).toContain('control 90 % -> removed');
+    expect(lines.join('\n')).toContain('warm 10 % -> removed');
     expect(lines.join('\n')).not.toContain('no label entry changed');
   });
 
-  it('fails when a hand-added experiment arm changes the label', async () => {
+  it('fails when a hand-added experiment arm has no bundle', async () => {
     const root = await baseRepository();
     await writeExperimentLabel(root, 'staging', [
       { id: ID, contentHash: (await labelHash(root, 'staging')) ?? '' },
@@ -1800,8 +1805,8 @@ describe('prs release status --base', () => {
     const result = await statusBase(root, 'base');
 
     expect(result.success).toBe(false);
-    expect(errorCodes(result)).toEqual(['PS5004']);
-    expect(result.errors[0]?.message).toContain(`the experiment of ${ID} was added or changed`);
+    expect(errorCodes(result)).toEqual(['PS5003']);
+    expect(result.errors[0]?.message).toContain(ARM_HASH);
   });
 
   it('passes a promotion made with the commands and lists what changed', async () => {

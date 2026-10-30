@@ -39,27 +39,30 @@ describe('cli module wiring', () => {
   });
 
   // The release gates call the policy evaluators themselves; no flag may get around them.
-  it.each([['check'], ['release', 'promote'], ['release', 'rollback'], ['release', 'status']])(
-    'defines no option that skips a check on %s',
-    async (...command) => {
-      const { run } = await import('../cli.js');
-      const chunks: string[] = [];
-      vi.spyOn(process.stdout, 'write').mockImplementation((chunk) => {
-        chunks.push(String(chunk));
-        return true;
-      });
-      // Throwing stops Commander after the help, so no command runs.
-      vi.spyOn(process, 'exit').mockImplementation(() => {
-        throw new Error('exit');
-      });
+  it.each([
+    ['check'],
+    ['release', 'promote'],
+    ['release', 'rollback'],
+    ['release', 'split'],
+    ['release', 'status'],
+  ])('defines no option that skips a check on %s', async (...command) => {
+    const { run } = await import('../cli.js');
+    const chunks: string[] = [];
+    vi.spyOn(process.stdout, 'write').mockImplementation((chunk) => {
+      chunks.push(String(chunk));
+      return true;
+    });
+    // Throwing stops Commander after the help, so no command runs.
+    vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('exit');
+    });
 
-      await run(['node', 'prs', ...command, '--help']).catch(() => undefined);
+    await run(['node', 'prs', ...command, '--help']).catch(() => undefined);
 
-      const help = chunks.join('');
-      expect(help).toContain(`Usage: prs ${command.join(' ')}`);
-      for (const flag of ['--skip-policies', '--ignore-hashes', '--force', '--no-gates']) {
-        expect(help).not.toContain(flag);
-      }
+    const help = chunks.join('');
+    expect(help).toContain(`Usage: prs ${command.join(' ')}`);
+    for (const flag of ['--skip-policies', '--ignore-hashes', '--force', '--no-gates']) {
+      expect(help).not.toContain(flag);
     }
-  );
+  });
 });

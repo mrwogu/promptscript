@@ -480,7 +480,8 @@ ${policy}`;
         message: `warm of ${ID} runs 10 % in prod, but release gates do not judge experiment weights in this version of prs`,
       }),
     ]);
-    expect(report.warnings).toEqual([
+    // The hand-made arm is not in staging, so status also warns about the order.
+    expect(report.warnings.filter((warning) => warning.code === 'PS030')).toEqual([
       expect.objectContaining({
         code: 'PS030',
         message: expect.stringContaining(`[high-risk-exposure] warm of ${ID} runs 10 % in prod`),
@@ -498,7 +499,10 @@ ${policy}`;
       passed: true,
       checks: [{ kind: 'max-experiment-weight', status: 'unavailable' }],
     });
-    expect(report.warnings.map((warning) => warning.code)).toEqual(['PS030']);
+    expect(report.warnings.flatMap((warning) => warning.code ?? [])).toEqual(['PS030']);
+    expect(report.warnings.map((warning) => warning.message)).toEqual(
+      expect.arrayContaining([expect.stringContaining('but staging no longer runs it')])
+    );
   });
 
   it('changes nothing without a prompt policy', async () => {
@@ -508,6 +512,8 @@ ${policy}`;
 
     expect(report.success).toBe(true);
     expect(report.gates).toBeUndefined();
-    expect(report.warnings).toEqual([]);
+    expect(report.warnings.map((warning) => warning.message)).toEqual([
+      expect.stringContaining('but staging no longer runs it'),
+    ]);
   });
 });
