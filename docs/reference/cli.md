@@ -1308,17 +1308,17 @@ prs approve <id>@<hash> --role <role> --approver @<handle> (--env <env> | --all-
 prs approve --list [<id>] [options]
 ```
 
-| Option                | Description                                                   | Default |
-| --------------------- | ------------------------------------------------------------- | ------- |
-| `--role <role>`       | Approval role from `governance.roles` (required to approve)   | -       |
-| `--approver <handle>` | Your Git host user handle, like `@jane` (required to approve) | -       |
-| `--env <env>`         | The one environment the approval counts for                   | -       |
-| `--all-environments`  | Let the approval count for every environment                  | -       |
-| `--comment <text>`    | Note in the record, at most 2000 characters                   | -       |
-| `--list`              | List records with their scope and state                       | -       |
-| `--format <format>`   | `text` or `json`                                              | `text`  |
-| `-c, --config <path>` | Path to a custom config file                                  | -       |
-| `--cwd <dir>`         | Working directory (project root)                              | -       |
+| Option                | Description                                                                  | Default |
+| --------------------- | ---------------------------------------------------------------------------- | ------- |
+| `--role <role>`       | Approval role from `governance.roles` (required to approve)                  | -       |
+| `--approver <handle>` | Your Git host user handle, like `@jane` or `@jane.doe` (required to approve) | -       |
+| `--env <env>`         | The one environment the approval counts for                                  | -       |
+| `--all-environments`  | Let the approval count for every environment                                 | -       |
+| `--comment <text>`    | Note in the record, at most 2000 characters                                  | -       |
+| `--list`              | List records with their scope and state                                      | -       |
+| `--format <format>`   | `text` or `json`                                                             | `text`  |
+| `-c, --config <path>` | Path to a custom config file                                                 | -       |
+| `--cwd <dir>`         | Working directory (project root)                                             | -       |
 
 `<hash>` is the full `sha256-<64 hex>`. It must be what the source builds now or a release bundle of
 that prompt. Give `--env` or `--all-environments`, one of the two. Before writing, the command

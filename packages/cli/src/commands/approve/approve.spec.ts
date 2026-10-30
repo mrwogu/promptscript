@@ -288,6 +288,26 @@ describe('prs approve', () => {
   });
 
   it.each([
+    ['a GitLab handle with a dot', '@Jane.Doe', 'jane.doe'],
+    ['a GitHub managed user handle', '@name_shortcode', 'name_shortcode'],
+    ['a handle of 100 characters', `@${'a'.repeat(100)}`, 'a'.repeat(100)],
+    ['a handle with hyphens', '@a-b-c', 'a-b-c'],
+  ])('accepts %s and keeps the record in one file name', async (_name, approver, slug) => {
+    const root = await project();
+    const hash = await storedBundle(root, ID, 'Stored');
+
+    const { report } = await run(`${ID}@${hash}`, approval(root, { approver }));
+
+    expect(report.success).toBe(true);
+    expect(report.path).toBe(`.promptscript/approvals/legal/${ID}/${hash}.${slug}.json`);
+    expect(await readdir(join(root, '.promptscript/approvals/legal', ID))).toEqual([
+      `${hash}.${slug}.json`,
+    ]);
+    const listed = await run(undefined, { cwd: root, list: true });
+    expect(listed.report.prompts?.[0]?.records[0]?.record.approver.value).toBe(approver);
+  });
+
+  it.each([
     ['no governance section', `${CONFIG.replace(GOVERNANCE, '')}`, 'legal', 'No approval roles'],
     ['an unknown role', CONFIG, 'finance', 'is not a role in governance.roles'],
     ['an uppercase role', CONFIG, 'Legal', 'is not a role in governance.roles'],
@@ -414,7 +434,14 @@ describe('prs approve', () => {
   it.each([
     ['an email address', 'jane@acme.io', 'not an email address'],
     ['a team', '@acme/legal', 'a person approves, not a team'],
-    ['a handle of 40 characters', `@${'a'.repeat(40)}`, 'is not a Git host user handle'],
+    ['a handle of 101 characters', `@${'a'.repeat(101)}`, 'up to 100 characters'],
+    ['a handle starting with a dot', '@.jane', 'is not a Git host user handle'],
+    ['a handle of two dots', '@..', 'is not a Git host user handle'],
+    ['a handle with two dots in a row', '@a..b', 'is not a Git host user handle'],
+    ['a handle with a trailing dot', '@jane.', 'is not a Git host user handle'],
+    ['a handle with a slash', '@jane/../x', 'a person approves, not a team'],
+    ['a handle with a backslash', '@jane\\x', 'is not a Git host user handle'],
+    ['a handle with a non-ASCII letter', '@j\u0430ne', 'is not a Git host user handle'],
     ['no approver', undefined, 'Give your Git host user handle'],
   ])('refuses %s with PS5104', async (_name, approver, message) => {
     const root = await project();
