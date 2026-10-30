@@ -774,6 +774,7 @@ drop control, bidi and zero-width characters from Git and record fields.
 | PS5006 | Git cannot give rollback or `--base` the ref, commit or file      |
 | PS5007 | Another release command holds the lock                            |
 | PS5008 | A compile output lies inside `.promptscript/releases/`            |
+| PS5010 | A promote on an entry with a running experiment                   |
 
 `prs approve` uses these codes:
 

@@ -9,7 +9,7 @@ import {
   serializeApprovalRecord,
   type ApprovalRecordV1,
   type PromptBundleV1,
-  type PromptReleaseLabelV1,
+  type PromptReleaseLabel,
 } from '@promptscript/core';
 import { ConsoleOutput } from '../../output/console.js';
 import {
@@ -480,7 +480,7 @@ function printList(prompts: ApprovalPromptStatus[]): void {
 
 interface EnvironmentLabel {
   environment: string;
-  label: PromptReleaseLabelV1 | undefined;
+  label: PromptReleaseLabel | undefined;
 }
 
 /** What decides the state of a record. */

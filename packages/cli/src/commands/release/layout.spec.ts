@@ -10,8 +10,10 @@ import {
 } from '@promptscript/core';
 import {
   PROMPT_RELEASE_LABEL_SCHEMA_URL,
+  PROMPT_RELEASE_LABEL_V2_SCHEMA_URL,
   assertExactCase,
   assertRegularPath,
+  addedOrChangedExperiments,
   labelText,
   parseLabel,
   parseManifest,
@@ -295,4 +297,190 @@ describe('release file reads', () => {
       code: 'PS5004',
     });
   });
+});
+
+describe('label v2', () => {
+  const ARMS = [
+    { variant: 'control', contentHash: HASH, weight: 9000 },
+    { variant: 'warm', contentHash: `sha256-${'ab'.repeat(32)}`, weight: 1000 },
+  ];
+  const v2 = (): { $schema: string; environment: string; prompts: unknown[] } => ({
+    $schema: PROMPT_RELEASE_LABEL_V2_SCHEMA_URL,
+    environment: 'prod',
+    prompts: [
+      { id: 'a', contentHash: HASH, experiment: { name: 'warm-tone', arms: ARMS } },
+      { id: 'b', contentHash: HASH },
+    ],
+  });
+
+  it('round-trips through parseLabel and labelText with the arms intact', () => {
+    const text = `${JSON.stringify(v2(), null, 2)}\n`;
+
+    const label = parseLabel(text, 'prod', 'prod.json');
+
+    expect(label.$schema).toBe(PROMPT_RELEASE_LABEL_V2_SCHEMA_URL);
+    expect(label).toEqual(v2());
+    expect(labelText(label)).toBe(text);
+  });
+
+  it('writes v1 again when no entry has an experiment', () => {
+    const label = parseLabel(
+      JSON.stringify({ ...v2(), prompts: [{ id: 'b', contentHash: HASH }] }),
+      'prod',
+      'prod.json'
+    );
+
+    expect(JSON.parse(labelText(label))['$schema']).toBe(PROMPT_RELEASE_LABEL_SCHEMA_URL);
+  });
+
+  it('leaves a v1 label byte for byte the same', () => {
+    const text = labelText({
+      $schema: PROMPT_RELEASE_LABEL_SCHEMA_URL,
+      environment: 'prod',
+      prompts: [{ id: 'a', contentHash: HASH }],
+    });
+
+    expect(labelText(parseLabel(text, 'prod', 'prod.json'))).toBe(text);
+  });
+
+  it('refuses an experiment in a v1 label and says how to fix it', () => {
+    const text = JSON.stringify({
+      $schema: PROMPT_RELEASE_LABEL_SCHEMA_URL,
+      environment: 'prod',
+      prompts: [{ id: 'a', contentHash: HASH, experiment: { name: 'x', arms: ARMS } }],
+    });
+
+    expect(() => parseLabel(text, 'prod', 'prod.json')).toThrow(
+      expect.objectContaining({
+        code: 'PS5004',
+        message: expect.stringContaining(PROMPT_RELEASE_LABEL_V2_SCHEMA_URL),
+      })
+    );
+  });
+
+  it('still drops other unknown keys of a v1 entry, as before', () => {
+    const text = JSON.stringify({
+      $schema: PROMPT_RELEASE_LABEL_SCHEMA_URL,
+      environment: 'prod',
+      prompts: [{ id: 'a', contentHash: HASH, note: 'x' }],
+    });
+
+    expect(parseLabel(text, 'prod', 'prod.json').prompts).toEqual([{ id: 'a', contentHash: HASH }]);
+  });
+
+  it('names a newer label format instead of asking for a restore', () => {
+    const url = 'https://getpromptscript.dev/schema/prompt-release-label/v3.json';
+    const text = JSON.stringify({ $schema: url, environment: 'prod', prompts: [] });
+
+    expect(() => parseLabel(text, 'prod', 'prod.json')).toThrow(
+      expect.objectContaining({
+        message: `prod.json uses a newer label format (${url}); upgrade prs.`,
+      })
+    );
+  });
+
+  it('calls an unknown label url unknown, not newer', () => {
+    const url = 'https://getpromptscript.dev/schema/prompt-release-label/beta.json';
+    const text = JSON.stringify({ $schema: url, environment: 'prod', prompts: [] });
+
+    expect(() => parseLabel(text, 'prod', 'prod.json')).toThrow(
+      expect.objectContaining({
+        message: `prod.json uses an unknown label format (${url}).`,
+      })
+    );
+  });
+
+  describe('addedOrChangedExperiments', () => {
+    const labelWith = (arms: unknown[]): ReturnType<typeof parseLabel> =>
+      parseLabel(
+        JSON.stringify({
+          ...v2(),
+          prompts: [{ id: 'a', contentHash: HASH, experiment: { name: 'warm-tone', arms } }],
+        }),
+        'prod',
+        'prod.json'
+      );
+    const [control, warm] = ARMS;
+    const cool = { variant: 'cool', contentHash: `sha256-${'cd'.repeat(32)}` };
+
+    it('does not list an equal experiment', () => {
+      expect(addedOrChangedExperiments(labelWith(ARMS), labelWith(ARMS))).toEqual([]);
+    });
+
+    it('lists a weight change and an arm reorder', () => {
+      const heavier = [
+        { ...control, weight: 8000 },
+        { ...warm, weight: 2000 },
+      ];
+      const three = [
+        { ...control, weight: 8000 },
+        { ...warm, weight: 1000 },
+        { ...cool, weight: 1000 },
+      ];
+      const swapped = [three[0], three[2], three[1]];
+
+      expect(addedOrChangedExperiments(labelWith(ARMS), labelWith(heavier))).toEqual(['a']);
+      expect(addedOrChangedExperiments(labelWith(three), labelWith(swapped))).toEqual(['a']);
+    });
+
+    it('lists an added experiment', () => {
+      expect(addedOrChangedExperiments(undefined, labelWith(ARMS))).toEqual(['a']);
+    });
+
+    it('does not list an experiment the after label drops', () => {
+      const plain = parseLabel(
+        JSON.stringify({ ...v2(), prompts: [{ id: 'a', contentHash: HASH }] }),
+        'prod',
+        'prod.json'
+      );
+
+      expect(addedOrChangedExperiments(labelWith(ARMS), plain)).toEqual([]);
+      expect(addedOrChangedExperiments(labelWith(ARMS), undefined)).toEqual([]);
+    });
+  });
+
+  it('writes arm keys in canonical order', () => {
+    const arms = ARMS.map(({ weight, contentHash, variant }) => ({ weight, contentHash, variant }));
+    const text = JSON.stringify({
+      ...v2(),
+      prompts: [{ id: 'a', contentHash: HASH, experiment: { name: 'warm-tone', arms } }],
+    });
+
+    const written = labelText(parseLabel(text, 'prod', 'prod.json'));
+
+    expect(Object.keys(JSON.parse(written).prompts[0].experiment.arms[0])).toEqual([
+      'variant',
+      'contentHash',
+      'weight',
+    ]);
+  });
+
+  interface LabelVectors {
+    valid: { name: string; label: unknown }[];
+    invalid: { name: string; label: unknown }[];
+  }
+  const vectors = JSON.parse(
+    fs.readFileSync(
+      new URL('../../../../../conformance/prompt-release-label/v2/labels.json', import.meta.url),
+      'utf8'
+    )
+  ) as LabelVectors;
+
+  it.each(vectors.valid.map((vector) => [vector.name, vector.label]))(
+    'reads the valid vector: %s',
+    (_name, label) => {
+      expect(parseLabel(JSON.stringify(label), 'prod', 'prod.json').prompts).toEqual(
+        (label as { prompts: unknown[] }).prompts
+      );
+    }
+  );
+
+  it.each(vectors.invalid.map((vector) => [vector.name, vector.label]))(
+    'refuses the invalid vector: %s',
+    (_name, label) => {
+      expect(() => parseLabel(JSON.stringify(label), 'prod', 'prod.json')).toThrow(
+        expect.objectContaining({ code: 'PS5004' })
+      );
+    }
+  );
 });

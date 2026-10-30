@@ -211,3 +211,89 @@ export interface PromptReleaseLabelV1 {
   /** Released prompts sorted by id */
   prompts: PromptReleaseLabelEntry[];
 }
+
+/** The first arm of an experiment: the entry hash, with at least 1 basis point of traffic. */
+export interface PromptReleaseControlArm {
+  /** Arm name, always `control` for the first arm. */
+  variant: 'control';
+  /**
+   * Content hash of the bundle, equal to the entry hash.
+   * @pattern ^sha256-[0-9a-f]{64}$
+   */
+  contentHash: string;
+  /**
+   * Share of the assigned traffic in basis points.
+   * @asType integer
+   * @minimum 1
+   * @maximum 10000
+   */
+  weight: number;
+}
+
+/** A non-control arm of an experiment. A weight of 0 keeps the arm listed without traffic. */
+export interface PromptReleaseVariantArm {
+  /**
+   * Arm name, unique within the experiment and never `control`.
+   * @pattern ^(?!control$)[a-z][a-z0-9-]{0,31}$
+   */
+  variant: string;
+  /**
+   * Content hash of the bundle.
+   * @pattern ^sha256-[0-9a-f]{64}$
+   */
+  contentHash: string;
+  /**
+   * Share of the assigned traffic in basis points.
+   * @asType integer
+   * @minimum 0
+   * @maximum 10000
+   */
+  weight: number;
+}
+
+/** Weighted arms an entry of a v2 label splits its traffic over. */
+export interface PromptReleaseExperiment {
+  /**
+   * Experiment name.
+   * @pattern ^[a-z0-9][a-z0-9-]{0,63}$
+   */
+  name: string;
+  /**
+   * The control arm first, then 1 to 3 variants. Weights are integers and sum to 10000;
+   * arm names and hashes are unique. Readers check what the schema cannot.
+   */
+  arms:
+    | [PromptReleaseControlArm, PromptReleaseVariantArm]
+    | [PromptReleaseControlArm, PromptReleaseVariantArm, PromptReleaseVariantArm]
+    | [
+        PromptReleaseControlArm,
+        PromptReleaseVariantArm,
+        PromptReleaseVariantArm,
+        PromptReleaseVariantArm,
+      ];
+}
+
+/** One prompt a v2 release label points at, with an optional experiment. */
+export interface PromptReleaseLabelEntryV2 extends PromptReleaseLabelEntry {
+  /** Arms assigned by key. Without a key, readers serve `contentHash`. */
+  experiment?: PromptReleaseExperiment;
+}
+
+/** Label of one release environment with optional weighted variants, version 2. */
+export interface PromptReleaseLabelV2 {
+  /**
+   * Schema URL, the version tag of the label.
+   * @example "https://getpromptscript.dev/schema/prompt-release-label/v2.json"
+   */
+  $schema: 'https://getpromptscript.dev/schema/prompt-release-label/v2.json';
+  /**
+   * Environment name.
+   * @example "prod"
+   */
+  environment: ReleaseEnvironmentName;
+  /** Released prompts sorted by id */
+  prompts: PromptReleaseLabelEntryV2[];
+}
+
+/** A release label of any version the readers accept. */
+export type PromptReleaseLabel = PromptReleaseLabelV1 | PromptReleaseLabelV2;

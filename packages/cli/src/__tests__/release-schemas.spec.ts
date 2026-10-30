@@ -7,7 +7,11 @@ import {
   RELEASE_REPORT_VERSION,
   toReleaseLocation,
 } from '../utils/release-report.js';
-import { validateLabel, validateReleaseReport } from './prompt-bundle-validators.js';
+import {
+  validateLabel,
+  validateLabelV2,
+  validateReleaseReport,
+} from './prompt-bundle-validators.js';
 
 const readSchema = (name: string): object =>
   JSON.parse(
@@ -235,5 +239,51 @@ describe('release report schema', () => {
     ['no errors list', { ...createReleaseReport('build'), errors: undefined }],
   ])('rejects %s', (_name, value) => {
     expect(validate(value)).toBe(false);
+  });
+});
+
+describe('prompt release label v2 schema', () => {
+  interface LabelVectors {
+    valid: { name: string; label: unknown }[];
+    invalid: { name: string; schema: boolean; label: unknown }[];
+  }
+  const vectors = JSON.parse(
+    readFileSync(
+      new URL('../../../../conformance/prompt-release-label/v2/labels.json', import.meta.url),
+      'utf8'
+    )
+  ) as LabelVectors;
+
+  it.each(vectors.valid.map((vector) => [vector.name, vector.label]))(
+    'accepts the valid vector: %s',
+    (_name, label) => {
+      expect(validateLabelV2(label), JSON.stringify(validateLabelV2.errors)).toBe(true);
+    }
+  );
+
+  it.each(vectors.invalid.filter((vector) => vector.schema).map((v) => [v.name, v.label]))(
+    'refuses the invalid vector: %s',
+    (_name, label) => {
+      expect(validateLabelV2(label)).toBe(false);
+    }
+  );
+
+  it('refuses control at weight 0', () => {
+    const vector = vectors.invalid.find((item) => item.name === 'control with weight 0');
+
+    expect(vector?.schema).toBe(true);
+    expect(validateLabelV2(vector?.label)).toBe(false);
+  });
+
+  it('keeps v1 closed to the experiment field', () => {
+    const entry = { id: 'a/b', contentHash: `sha256-${'0'.repeat(64)}`, experiment: {} };
+
+    expect(
+      validateLabel({
+        $schema: 'https://getpromptscript.dev/schema/prompt-release-label/v1.json',
+        environment: 'prod',
+        prompts: [entry],
+      })
+    ).toBe(false);
   });
 });

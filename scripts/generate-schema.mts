@@ -64,6 +64,13 @@ const GENERATED_SCHEMAS: SchemaTarget[] = [
     output: '../schema/prompt-release-label-v1.json',
   },
   {
+    source: 'prompt-bundle.ts',
+    type: 'PromptReleaseLabelV2',
+    schemaId: 'https://getpromptscript.dev/schema/prompt-release-label/v2.json',
+    title: 'PromptScript Prompt Release Label v2',
+    output: '../schema/prompt-release-label-v2.json',
+  },
+  {
     source: 'eval.ts',
     type: 'EvalDatasetRowV1',
     schemaId: 'https://getpromptscript.dev/schema/eval-dataset-row/v1.json',

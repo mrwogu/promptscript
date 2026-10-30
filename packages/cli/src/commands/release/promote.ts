@@ -3,13 +3,15 @@ import {
   compareCodeUnits,
   type PromptBundleInput,
   type PromptBundleV1,
-  type PromptReleaseLabelV1,
+  type PromptReleaseLabel,
+  type PromptReleaseLabelEntryV2,
 } from '@promptscript/core';
 import type { ReleaseChange, ReleaseDiagnostic } from '../../utils/release-report.js';
 import {
   PS5003_BUNDLE_MISSING,
   PS5004_VERIFICATION_FAILED,
   PS5005_PROMOTION_ORDER,
+  PS5010_PROMOTE_ON_EXPERIMENT,
   ReleaseError,
 } from './errors.js';
 import { checkPromotionGates, gateLines } from './gates.js';
@@ -290,12 +292,23 @@ export async function releasePromoteCommand(
 
       const labelPath = paths.label(environment);
       const existing = await readLabel(paths, environment);
-      const label: PromptReleaseLabelV1 = existing ?? {
+      const label: PromptReleaseLabel = existing ?? {
         $schema: PROMPT_RELEASE_LABEL_SCHEMA_URL,
         environment,
         prompts: [],
       };
-      const previousContentHash = label.prompts.find((entry) => entry.id === id)?.contentHash;
+      const held: PromptReleaseLabelEntryV2 | undefined = label.prompts.find(
+        (entry) => entry.id === id
+      );
+      const running = held?.experiment;
+      if (running !== undefined) {
+        throw new ReleaseError(
+          PS5010_PROMOTE_ON_EXPERIMENT,
+          `${id} in ${environment} has a running experiment ${running.name}. Remove the experiment from ${paths.relative(labelPath)} first, then promote again.`,
+          labelPath
+        );
+      }
+      const previousContentHash = held?.contentHash;
       const entry = {
         id,
         contentHash,
@@ -325,7 +338,7 @@ export async function releasePromoteCommand(
         return { success: false, errors: gates.findings, warnings, gates: gates.gates };
       }
 
-      const next: PromptReleaseLabelV1 = {
+      const next: PromptReleaseLabel = {
         ...label,
         prompts: [...label.prompts.filter((held) => held.id !== id), { id, contentHash }],
       };

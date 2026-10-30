@@ -1,0 +1,1009 @@
+{
+  "description": "Release labels of version 2. \"schema\": true means the JSON schema refuses the label too; false means only a reader can, because the rule cannot be written in JSON Schema (weight sum, unique names and hashes, control hash equal to the entry hash). Every reader refuses every invalid label.",
+  "valid": [
+    {
+      "name": "experiment with a 90/10 split",
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ]
+            }
+          },
+          {
+            "id": "acme-support/triage",
+            "contentHash": "sha256-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+          }
+        ]
+      }
+    },
+    {
+      "name": "entries without experiments",
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ]
+      }
+    },
+    {
+      "name": "no entries",
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": []
+      }
+    },
+    {
+      "name": "paused variant with weight 0",
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 10000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 0
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "control at the lowest weight",
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 1
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 9999
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "four arms",
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 4000
+                },
+                {
+                  "variant": "a1",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 3000
+                },
+                {
+                  "variant": "a2",
+                  "contentHash": "sha256-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                  "weight": 2000
+                },
+                {
+                  "variant": "a3",
+                  "contentHash": "sha256-dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "experiment name of 64 characters",
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 5000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 5000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "control with weight 0",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 0
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 10000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "weights sum to 9999",
+      "schema": false,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 999
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "weights sum to 10001",
+      "schema": false,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1001
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "weight above 10000",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 1
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 10001
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "negative weight",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 10001
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": -1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "fractional weight",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000.5
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 999.5
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "weight as a string",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": "1000"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "a single arm",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 10000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "five arms",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 2000
+                },
+                {
+                  "variant": "a1",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 2000
+                },
+                {
+                  "variant": "a2",
+                  "contentHash": "sha256-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                  "weight": 2000
+                },
+                {
+                  "variant": "a3",
+                  "contentHash": "sha256-dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                  "weight": 2000
+                },
+                {
+                  "variant": "a4",
+                  "contentHash": "sha256-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                  "weight": 2000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "first arm is not control",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                },
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "control hash differs from the entry hash",
+      "schema": false,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "a second arm named control",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate variant name",
+      "schema": false,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 8000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate hash",
+      "schema": false,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "uppercase variant name",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "Warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "variant name of 33 characters",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "variant name with a NUL character",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "wa\u0000rm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "uppercase experiment name",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "Warm",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "experiment name of 65 characters",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "experiment name with a NUL character",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm\u0000tone",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "empty experiment name",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "arm hash that is not a content hash",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-abc",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "extra key on an arm",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000,
+                  "note": "x"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "extra key on the experiment",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ],
+              "owner": "x"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "experiment without arms",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "another $schema",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v3.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "extra key on an entry",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ]
+            }
+          },
+          {
+            "id": "acme-support/triage",
+            "contentHash": "sha256-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "note": "x"
+          }
+        ]
+      }
+    },
+    {
+      "name": "extra top-level key",
+      "schema": true,
+      "label": {
+        "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+        "environment": "prod",
+        "prompts": [
+          {
+            "id": "acme-support/refund-reply",
+            "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "experiment": {
+              "name": "warm-tone-2026-11",
+              "arms": [
+                {
+                  "variant": "control",
+                  "contentHash": "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "weight": 9000
+                },
+                {
+                  "variant": "warm",
+                  "contentHash": "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "weight": 1000
+                }
+              ]
+            }
+          },
+          {
+            "id": "acme-support/triage",
+            "contentHash": "sha256-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+          }
+        ],
+        "extra": true
+      }
+    }
+  ]
+}

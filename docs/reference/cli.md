@@ -1187,7 +1187,7 @@ With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/release-report/v1.json` and the human text goes to stderr. Exit
 code 0 means success or a no-op. Exit code 1 means an error or a failed verification.
 
-Errors use the codes `PS5001` to `PS5008`, listed in the
+Errors use the codes `PS5001` to `PS5008` and `PS5010`, listed in the
 [releases guide](../guides/releases.md#error-codes).
 
 #### prs release build
