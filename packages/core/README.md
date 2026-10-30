@@ -151,7 +151,7 @@ profile. No default selection includes them.
 | `normalizeProvenanceFiles(...)`        | Rewrites a trace: authored reference for a pack, relative path in the root, else `external:` plus the base name |
 | `readMetaGovernance(fields)`           | Reads the governance defaults of `@meta`                                                                        |
 | `effectiveGovernance(entry, defaults)` | Governance a bundle carries: entry value, else the `@meta` default; data classes joined, lists sorted           |
-| `isApprovalRecordV1(value)`            | Checks the keys and every field pattern of an approval record                                                   |
+| `isApprovalRecordV1(value)`            | Checks the keys, every field pattern and the maxWeight range of an approval record                              |
 | `serializeApprovalRecord(record)`      | The exact bytes of a record file: fixed key order, two-space indent, trailing newline                           |
 | `parseApprovalRecord(bytes)`           | Reads record file bytes; refuses invalid UTF-8 and bytes that differ from its own serialization                 |
 | `approvalRecordPath(record)`           | `.promptscript/approvals/<role>/<prompt id>/<contentHash>.<approver slug>.json`; throws on an invalid record    |

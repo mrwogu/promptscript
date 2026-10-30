@@ -58,6 +58,14 @@ export interface ApprovalRecordV1 {
    * @pattern ^(?:[^\p{Cc}\p{Cs}]|\n){0,2000}$
    */
   comment?: string;
+  /**
+   * Highest arm weight, in basis points, the approval counts for. A record with it never
+   * approves the entry hash and names its `environment`. Absent: a full approval.
+   * @asType integer
+   * @minimum 1
+   * @maximum 10000
+   */
+  maxWeight?: number;
   /** Signature format, see `signature`. Reserved, not written or read in this version. */
   signatureType?: 'ssh';
   /**
@@ -113,6 +121,7 @@ const RECORD_KEYS: ReadonlySet<string> = new Set([
   'createdAt',
   'environment',
   'comment',
+  'maxWeight',
   'signatureType',
   'signature',
 ]);
@@ -123,6 +132,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function matches(value: unknown, pattern: RegExp): boolean {
   return typeof value === 'string' && pattern.test(value);
+}
+
+function isCeiling(value: unknown): boolean {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 10000;
 }
 
 function isApprover(value: unknown): boolean {
@@ -136,7 +149,7 @@ function isApprover(value: unknown): boolean {
 }
 
 /**
- * Type guard for an approval record: exact keys, every field pattern of the schema.
+ * Type guard for an approval record: exact keys, every field pattern and the `maxWeight` range of the schema.
  * Use {@link parseApprovalRecord} on file content, it also checks the exact bytes.
  */
 export function isApprovalRecordV1(value: unknown): value is ApprovalRecordV1 {
@@ -152,6 +165,9 @@ export function isApprovalRecordV1(value: unknown): value is ApprovalRecordV1 {
     matches(value['createdAt'], CREATED_AT) &&
     optional('environment', ENVIRONMENT) &&
     optional('comment', COMMENT) &&
+    // A ceiling counts in one environment only, so it comes with `environment`
+    (!Object.hasOwn(value, 'maxWeight') ||
+      (isCeiling(value['maxWeight']) && Object.hasOwn(value, 'environment'))) &&
     (!Object.hasOwn(value, 'signatureType') || value['signatureType'] === 'ssh') &&
     optional('signature', SIGNATURE)
   );
@@ -171,6 +187,7 @@ export function serializeApprovalRecord(record: ApprovalRecordV1): string {
     createdAt: record.createdAt,
     environment: record.environment,
     comment: record.comment,
+    maxWeight: record.maxWeight,
     signatureType: record.signatureType,
     signature: record.signature,
   };
