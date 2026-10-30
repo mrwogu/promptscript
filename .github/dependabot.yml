@@ -34,3 +34,29 @@ updates:
     labels:
       - 'ci'
       - 'dependencies'
+
+  # Phoenix image of the OpenTelemetry example (pinned by digest)
+  - package-ecosystem: 'docker-compose'
+    directory: '/examples/runtime-otel/phoenix'
+    schedule:
+      interval: 'monthly'
+    commit-message:
+      prefix: 'chore(ci)'
+    labels:
+      - 'ci'
+      - 'dependencies'
+
+  # OpenTelemetry packages of the example (own lockfile, not a workspace member)
+  - package-ecosystem: 'npm'
+    directory: '/examples/runtime-otel'
+    schedule:
+      interval: 'monthly'
+    groups:
+      opentelemetry:
+        patterns:
+          - '@opentelemetry/*'
+    commit-message:
+      prefix: 'chore(ci)'
+    labels:
+      - 'ci'
+      - 'dependencies'
