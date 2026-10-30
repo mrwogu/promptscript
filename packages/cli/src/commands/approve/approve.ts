@@ -25,11 +25,12 @@ import {
 import { checkGovernanceConfig } from '../../utils/governance-config.js';
 import type { ProjectPathOptions } from '../../utils/project-config.js';
 import type { ReleaseDiagnostic } from '../../utils/release-report.js';
-import { parsePercent, percentText, shortened } from '../release/experiment.js';
+import { parsePercent, shortened } from '../release/experiment.js';
 import { stripControlCharacters } from '../release/git.js';
 import {
   CONTENT_HASH_RE,
   checkBundleFields,
+  percentText,
   readLabel,
   readReleaseText,
   shortHash,

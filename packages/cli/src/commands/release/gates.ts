@@ -35,7 +35,7 @@ import {
 } from '../approve/records.js';
 import { ReleaseError } from './errors.js';
 import { stripControlCharacters } from './git.js';
-import { checkBundleFields, readVerifiedBundle, shortHash } from './layout.js';
+import { checkBundleFields, percentText, readVerifiedBundle, shortHash } from './layout.js';
 import {
   ReleaseCompileError,
   releaseValidatorConfig,
@@ -179,16 +179,22 @@ function appliesTo(environments: readonly string[] | undefined, environment: str
   return environments === undefined || environments.includes(environment);
 }
 
-/** The committed approvals of one role for one prompt version and environment (spec 3.4). */
+/**
+ * The committed approvals of one role for one prompt version and environment (spec 3.4).
+ * A record with `maxWeight` counts only for an arm at or under its ceiling: for the entry
+ * hash, the control arm or any other item without exposure it is listed as capped and never
+ * counts. A record without `maxWeight` counts everywhere, as a ceiling of 10000.
+ */
 function countApprovals(
   records: readonly CommittedApproval[],
-  entry: { id: string; contentHash: string },
+  entry: GateEntry,
   role: string,
   required: number,
   environment: string,
   roles: ReadonlySet<string>
 ): ReleaseGateApprovals {
   const found = new Map<string, string>();
+  const capped = new Map<string, string>();
   const stale = new Set<string>();
   for (const { path, record } of records) {
     // Invalid, of another prompt or role, at another path than its fields give (its
@@ -198,10 +204,15 @@ function countApprovals(
     if (approvalRecordPath(record) !== path || !roles.has(role)) continue;
     if (record.environment !== undefined && record.environment !== environment) continue;
     const approver = record.approver.value;
-    if (record.contentHash === entry.contentHash) {
+    if (record.contentHash !== entry.contentHash) {
+      stale.add(`${approver} for ${shortHash(record.contentHash)}`);
+    } else if (
+      record.maxWeight === undefined ||
+      (entry.exposure !== undefined && record.maxWeight >= entry.exposure.weight)
+    ) {
       found.set(approver.toLowerCase(), approver);
     } else {
-      stale.add(`${approver} for ${shortHash(record.contentHash)}`);
+      capped.set(approver.toLowerCase(), `${approver} up to ${percentText(record.maxWeight)}`);
     }
   }
   return {
@@ -209,6 +220,7 @@ function countApprovals(
     required,
     found: [...found.values()].sort(compareCodeUnits),
     stale: [...stale].sort(compareCodeUnits),
+    ...(capped.size === 0 ? {} : { capped: [...capped.values()].sort(compareCodeUnits) }),
   };
 }
 
@@ -257,6 +269,27 @@ interface Judged {
   approvals: () => Promise<CommittedApproval[]>;
 }
 
+/** `warm of <id>@<hash> at 30 %` for an arm, `<id>@<hash>` for an item without exposure. */
+function judgedName(entry: GateEntry): string {
+  const name = `${entry.id}@${shortHash(entry.contentHash)}`;
+  const { exposure } = entry;
+  return exposure === undefined
+    ? name
+    : `${exposure.variant} of ${name} at ${percentText(exposure.weight)}`;
+}
+
+/** The option that gives an arm the approval it needs: its own weight as the ceiling. */
+function maxWeightOption(entry: GateEntry): string {
+  return entry.exposure === undefined ? '' : ` --max-weight ${entry.exposure.weight / 100}`;
+}
+
+/** The ` (stale: ...)` and ` (capped: ...)` notes of a role, for the gate text. */
+function approvalNotes(stale: readonly string[], capped: readonly string[] | undefined): string {
+  const staleText = stale.length === 0 ? '' : ` (stale: ${stale.join(', ')})`;
+  const cappedText = capped === undefined ? '' : ` (capped: ${capped.join(', ')})`;
+  return `${staleText}${cappedText}`;
+}
+
 function approvalsCheck(
   policy: RequiredApprovalsPolicy,
   judged: Judged,
@@ -274,14 +307,13 @@ function approvalsCheck(
   const [first] = missing;
   if (first === undefined) return { ...base, status: 'passed' };
   const message = missing
-    .map(({ role, required, found, stale }) => {
-      const staleText = stale.length === 0 ? '' : ` (stale: ${stale.join(', ')})`;
-      return `${entry.id}@${shortHash(entry.contentHash)} needs ${required} ${role} approval for ${environment}, found ${found.length}${staleText}`;
+    .map(({ role, required, found, stale, capped }) => {
+      return `${judgedName(entry)} needs ${required} ${role} approval for ${environment}, found ${found.length}${approvalNotes(stale, capped)}`;
     })
     .join('; ');
   const commands = missing.map(
     ({ role }) =>
-      `prs approve ${entry.id}@${entry.contentHash} --role ${role} --approver @<you> --env ${environment}`
+      `prs approve ${entry.id}@${entry.contentHash} --role ${role} --approver @<you> --env ${environment}${maxWeightOption(entry)}`
   );
   return { ...base, status: 'failed', message, suggestion: `Run: ${commands.join('; ')}` };
 }
@@ -528,10 +560,10 @@ function checkLine(check: ReleaseGateCheck): string {
   if (check.status !== 'passed' && check.approvals !== undefined) {
     detail = check.approvals
       .filter((approval) => approval.found.length < approval.required)
-      .map(({ role, required, found, stale }) => {
-        const staleText = stale.length === 0 ? '' : ` (stale: ${stale.join(', ')})`;
-        return `${role} ${found.length} of ${required}${staleText}`;
-      })
+      .map(
+        ({ role, required, found, stale, capped }) =>
+          `${role} ${found.length} of ${required}${approvalNotes(stale, capped)}`
+      )
       .join(', ');
   } else if (check.status !== 'passed') {
     detail = check.message ?? check.kind;

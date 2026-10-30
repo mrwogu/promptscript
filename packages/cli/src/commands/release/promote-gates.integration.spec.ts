@@ -114,14 +114,20 @@ const promote = (cwd: string, to: string): Promise<ReleaseReport> =>
 const rollback = (cwd: string, env: string): Promise<ReleaseReport> =>
   json(() => releaseRollbackCommand(env, { cwd, format: 'json' }));
 
-async function approve(cwd: string, hash: string, env?: string): Promise<void> {
+async function approve(
+  cwd: string,
+  hash: string,
+  env?: string,
+  extra: { approver?: string; maxWeight?: string } = {}
+): Promise<void> {
   await capture(() =>
     approveCommand(`${ID}@${hash}`, {
       cwd,
       role: 'legal',
-      approver: '@jane',
+      approver: extra.approver ?? '@jane',
       format: 'json',
       ...(env === undefined ? { allEnvironments: true } : { env }),
+      ...(extra.maxWeight === undefined ? {} : { maxWeight: extra.maxWeight }),
     })
   );
   expect(process.exitCode).toBe(0);
@@ -172,6 +178,28 @@ describe('prs release promote gates', () => {
     expect(approved.success).toBe(true);
     expect(approved.gates?.[0]).toMatchObject({ passed: true, policyRisk: 'high' });
     expect(existsSync(label(root, 'prod'))).toBe(true);
+  });
+
+  it('never lets a capped record approve a promote, even one at 100 %', async () => {
+    const root = await project(config('', PROD_ONLY));
+    await build(root);
+    await promote(root, 'staging');
+    commit(root, 'staging');
+    const hash = await builtHash(root);
+    await approve(root, hash, 'prod', { maxWeight: '100' });
+    commit(root, 'capped approval');
+
+    const capped = await promote(root, 'prod');
+    await approve(root, hash, 'prod', { approver: '@bob' });
+    commit(root, 'full approval');
+    const approved = await promote(root, 'prod');
+
+    expect(capped.success).toBe(false);
+    expect(capped.gates?.[0]?.checks[0]?.approvals?.[0]).toMatchObject({
+      found: [],
+      capped: ['@jane up to 100 %'],
+    });
+    expect(approved.success).toBe(true);
   });
 
   it('does not count a staging record for prod', async () => {
@@ -244,6 +272,36 @@ describe('prs release rollback gates', () => {
     expect(refused.success).toBe(false);
     expect(refused.gates?.map((gate) => gate.contentHash)).toEqual([first]);
     expect(unchanged).toBe(before);
+    expect(restored.success).toBe(true);
+  });
+});
+
+describe('prs release rollback with a capped record', () => {
+  it('never lets a capped record bring a hash back', async () => {
+    const root = await project(config());
+    await build(root);
+    const first = await builtHash(root);
+    await approve(root, first);
+    commit(root, 'approve first');
+    await promote(root, 'staging');
+    commit(root, 'staging first');
+    await writeFile(join(root, '.promptscript', 'project.prs'), source('You answer refunds.'));
+    await build(root);
+    await approve(root, await builtHash(root));
+    commit(root, 'approve second');
+    await promote(root, 'staging');
+    commit(root, 'staging second');
+    await rm(join(root, '.promptscript', 'approvals', 'legal', ID, `${first}.jane.json`));
+    await approve(root, first, 'staging', { maxWeight: '100' });
+    commit(root, 'replace the approval of first by a capped one');
+
+    const refused = await rollback(root, 'staging');
+    await approve(root, first, 'staging', { approver: '@bob' });
+    commit(root, 'a full approval of first');
+    const restored = await rollback(root, 'staging');
+
+    expect(refused.success).toBe(false);
+    expect(refused.gates?.[0]?.checks[0]?.approvals?.[0]?.capped).toEqual(['@jane up to 100 %']);
     expect(restored.success).toBe(true);
   });
 });

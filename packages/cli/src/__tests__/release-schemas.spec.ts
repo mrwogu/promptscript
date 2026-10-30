@@ -170,6 +170,33 @@ describe('release report schema', () => {
     expect(validate(skipped)).toBe(false);
   });
 
+  it('accepts capped approvals of strings only', () => {
+    const gate = (capped: unknown): unknown => ({
+      prompt: 'acme-support/refund-reply',
+      contentHash: hash,
+      environment: 'prod',
+      policyRisk: 'high',
+      passed: false,
+      checks: [
+        {
+          policy: 'high-risk-signoff',
+          kind: 'required-approvals',
+          severity: 'error',
+          status: 'failed',
+          approvals: [{ role: 'legal', required: 1, found: [], stale: [], capped }],
+        },
+      ],
+    });
+    const report = (capped: unknown): unknown => ({
+      ...createReleaseReport('promote'),
+      gates: [gate(capped)],
+    });
+
+    expect(validate(report(['@bob up to 5 %'])), JSON.stringify(validate.errors)).toBe(true);
+    expect(validate(report([5]))).toBe(false);
+    expect(validate(report('@bob up to 5 %'))).toBe(false);
+  });
+
   it('accepts an empty report of every command', () => {
     for (const command of ['build', 'promote', 'rollback', 'split', 'status'] as const) {
       const report = createReleaseReport(command);

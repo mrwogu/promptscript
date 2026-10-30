@@ -485,6 +485,127 @@ describe('checkPromotionGates', () => {
     ]);
   });
 
+  describe('capped approvals under required-approvals', () => {
+    const arm = (weight: number): GateEntryOverride => ({
+      exposure: { experiment: 'tone', variant: 'warm', weight },
+    });
+    type GateEntryOverride = Partial<PromotionGateContext['prompts'][number]>;
+
+    async function judge(
+      root: string,
+      shipped: PromptBundleV1,
+      entry: GateEntryOverride
+    ): Promise<Awaited<ReturnType<typeof checkPromotionGates>>> {
+      const loaded = await loadReleaseProject({ cwd: root });
+      return checkPromotionGates({
+        project: loaded,
+        config: loaded.config,
+        configFile: loaded.paths.relative(loaded.configPath),
+        environment: 'prod',
+        prompts: [{ id: shipped.id, contentHash: shipped.contentHash, ...entry }],
+        source: built(shipped),
+      });
+    }
+
+    async function capped(maxWeight: number): Promise<[string, PromptBundleV1]> {
+      const root = await project(config(SIGNOFF));
+      const shipped = await bundle(root, { risk: 'high' });
+      await record(root, {
+        contentHash: shipped.contentHash,
+        approver: { source: 'asserted', value: '@bob' },
+        environment: 'prod',
+        maxWeight,
+      });
+      commitAll(root);
+      return [root, shipped];
+    }
+
+    it('never lets a capped record approve the entry hash, even at 10000', async () => {
+      const [root, shipped] = await capped(10000);
+
+      const result = await judge(root, shipped, {});
+
+      expect(result.passed).toBe(false);
+      expect(result.gates[0]?.checks[0]?.approvals).toEqual([
+        { role: 'legal', required: 1, found: [], stale: [], capped: ['@bob up to 100 %'] },
+      ]);
+      expect(result.gates[0]?.checks[0]?.message).toBe(
+        `${ID}@${shipped.contentHash.slice(0, 19)} needs 1 legal approval for prod, found 0 (capped: @bob up to 100 %)`
+      );
+      expect(result.gates[0]?.checks[0]?.suggestion).toBe(
+        `Run: prs approve ${ID}@${shipped.contentHash} --role legal --approver @<you> --env prod`
+      );
+    });
+
+    it('counts a capped record for an arm at or under its ceiling', async () => {
+      const [root, shipped] = await capped(2500);
+
+      const under = await judge(root, shipped, arm(1000));
+      const equal = await judge(root, shipped, arm(2500));
+
+      expect(under.passed).toBe(true);
+      expect(equal.passed).toBe(true);
+      expect(equal.gates[0]?.checks[0]?.approvals?.[0]).toEqual({
+        role: 'legal',
+        required: 1,
+        found: ['@bob'],
+        stale: [],
+      });
+    });
+
+    it('never counts a capped record for an arm above its ceiling', async () => {
+      const [root, shipped] = await capped(2500);
+
+      const result = await judge(root, shipped, arm(3000));
+
+      expect(result.passed).toBe(false);
+      expect(result.gates[0]?.checks[0]).toMatchObject({
+        message: `warm of ${ID}@${shipped.contentHash.slice(0, 19)} at 30 % needs 1 legal approval for prod, found 0 (capped: @bob up to 25 %)`,
+        suggestion: `Run: prs approve ${ID}@${shipped.contentHash} --role legal --approver @<you> --env prod --max-weight 30`,
+        approvals: [
+          { role: 'legal', required: 1, found: [], stale: [], capped: ['@bob up to 25 %'] },
+        ],
+      });
+      expect(gateLines(result.gates[0] as NonNullable<(typeof result.gates)[number]>)).toContain(
+        '  failed       high-risk-signoff  legal 0 of 1 (capped: @bob up to 25 %)'
+      );
+    });
+
+    it('still counts a record without a ceiling for an arm and for the entry hash', async () => {
+      const root = await project(config(SIGNOFF));
+      const shipped = await bundle(root, { risk: 'high' });
+      await record(root, { contentHash: shipped.contentHash, environment: 'prod' });
+      commitAll(root);
+
+      const entry = await judge(root, shipped, {});
+      const warm = await judge(root, shipped, arm(10000));
+
+      expect(entry.passed).toBe(true);
+      expect(warm.passed).toBe(true);
+      expect(entry.gates[0]?.checks[0]?.approvals?.[0]).not.toHaveProperty('capped');
+    });
+
+    it('never counts a hand-written capped record without environment', async () => {
+      const root = await project(config(SIGNOFF));
+      const shipped = await bundle(root, { risk: 'high' });
+      const fields = { contentHash: shipped.contentHash };
+      await record(root, { ...fields, maxWeight: 500 }, approvalRecordPath(fieldsOf(fields)));
+      commitAll(root);
+
+      const entry = await judge(root, shipped, {});
+      const warm = await judge(root, shipped, arm(500));
+
+      expect(entry.passed).toBe(false);
+      expect(warm.passed).toBe(false);
+      expect(warm.gates[0]?.checks[0]?.approvals?.[0]).toEqual({
+        role: 'legal',
+        required: 1,
+        found: [],
+        stale: [],
+      });
+    });
+  });
+
   it('reports required-evals as unavailable, which only a warning severity lets pass', async () => {
     const evals = (severity: string): string =>
       `  - name: prod-evals\n    kind: required-evals\n    severity: ${severity}\n    environments: [prod]\n`;

@@ -149,14 +149,19 @@ function end(cwd: string, env: string, keep?: string): Promise<ReleaseReport> {
   );
 }
 
-async function approve(cwd: string, hash: string): Promise<void> {
+async function approve(
+  cwd: string,
+  hash: string,
+  extra: { approver?: string; maxWeight?: string } = {}
+): Promise<void> {
   await capture(() =>
     approveCommand(`${ID}@${hash}`, {
       cwd,
       role: 'legal',
-      approver: '@jane',
+      approver: extra.approver ?? '@jane',
       format: 'json',
       env: 'prod',
+      ...(extra.maxWeight === undefined ? {} : { maxWeight: extra.maxWeight }),
     })
   );
   expect(process.exitCode).toBe(0);
@@ -382,6 +387,30 @@ describe('prs release split order', () => {
     expect(first.success).toBe(true);
     expect(codes(result)).toEqual(['PS030']);
     expect(await labelFile(root, 'prod')).toBe(before);
+  });
+
+  it('refuses --end --keep of an arm that only a capped record approved', async () => {
+    const { root, b } = await fixture('approvals');
+    await split(root, 'staging', 'warm-tone', [`warm@${b}=10`]);
+    await approve(root, b, { maxWeight: '10' });
+    commit(root, 'staging and a capped approval');
+    const running = await split(root, 'prod', 'warm-tone', [`warm@${b}=10`]);
+    commit(root, 'prod');
+    await end(root, 'staging', 'warm');
+    commit(root, 'staging keeps warm');
+    const before = await labelFile(root, 'prod');
+
+    const kept = await end(root, 'prod', 'warm');
+    const unchanged = await labelFile(root, 'prod');
+    await approve(root, b, { approver: '@bob' });
+    commit(root, 'a full approval');
+    const approved = await end(root, 'prod', 'warm');
+
+    expect(running.success).toBe(true);
+    expect(codes(kept)).toEqual(['PS030']);
+    expect(kept.gates?.[0]?.checks[0]?.approvals?.[0]?.capped).toEqual(['@jane up to 10 %']);
+    expect(unchanged).toBe(before);
+    expect(approved.success).toBe(true);
   });
 
   it('refuses --end --keep of a hash that only ran as an upstream arm', async () => {
