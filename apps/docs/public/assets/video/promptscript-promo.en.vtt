@@ -1,0 +1,75 @@
+WEBVTT
+
+00:00.300 --> 00:03.420
+Claude Code. Copilot. Cursor.
+
+00:04.140 --> 00:06.790
+Every AI agent wants its own rules file.
+
+00:07.290 --> 00:10.410
+Copy them by hand, and they quietly drift apart.
+
+00:11.800 --> 00:13.380
+PromptScript fixes that.
+
+00:13.910 --> 00:17.520
+Write your AI rules once, and every agent follows them.
+
+00:18.600 --> 00:21.700
+Start from your company base, add shared fragments,
+
+00:21.960 --> 00:26.150
+then describe who the agent is, your standards, and your hard limits.
+
+00:26.610 --> 00:28.630
+All in one small source file.
+
+00:29.600 --> 00:31.940
+Run prs compile.
+
+00:32.550 --> 00:35.970
+PromptScript writes native files for fifty AI coding tools.
+
+00:36.610 --> 00:41.820
+CLAUDE.md, Copilot instructions, Cursor rules, AGENTS.md.
+
+00:42.470 --> 00:44.670
+Each in the format its tool expects.
+
+00:45.700 --> 00:47.580
+Rules inherit like code.
+
+00:48.180 --> 00:54.140
+Your organization sets the base, teams extend it,
+and projects override only what they need.
+
+00:54.810 --> 00:58.130
+Change a policy once, and it reaches every repo.
+
+00:59.100 --> 01:03.260
+Before anything ships, strict validation catches prompt injection,
+
+01:03.560 --> 01:07.400
+encoded payloads, invisible Unicode, and suspicious links.
+
+01:07.960 --> 01:10.330
+Bad rules never reach your agents.
+
+01:11.300 --> 01:14.570
+Install skills like packages, from any Git repo.
+
+01:15.110 --> 01:19.010
+They are pinned in a lockfile, and land natively in every agent.
+
+01:20.500 --> 01:23.380
+For your own apps, release prompts like code.
+
+01:23.970 --> 01:29.590
+Content-hashed bundles move from staging to prod,
+with sign-off for one exact version.
+
+01:30.600 --> 01:34.580
+PromptScript. One source of truth for every AI agent.
+
+01:35.080 --> 01:38.230
+Open source, at getpromptscript.dev.
