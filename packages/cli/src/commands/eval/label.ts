@@ -1,4 +1,4 @@
-import type { PromptBundleV1, PromptReleaseLabel } from '@promptscript/core';
+import { compareCodeUnits, type PromptBundleV1, type PromptReleaseLabel } from '@promptscript/core';
 import { EVAL_CODES, EvalError, type LoadedSuite } from '@promptscript/eval';
 import type { ProjectPathOptions } from '../../utils/project-config.js';
 import { PS5003_BUNDLE_MISSING, ReleaseError } from '../release/errors.js';
@@ -103,16 +103,25 @@ function pickSuites(
   return { picked, skipped };
 }
 
-// One read per hash, in order, so the first error is always the same one
+async function readBundle(project: ReleaseProject, item: Picked): Promise<PromptBundleV1> {
+  const bundle = await readVerifiedBundle(project.paths, item.hash, item.id);
+  checkBundleFields(bundle, project.paths.relative(project.paths.bundle(item.hash)));
+  return bundle;
+}
+
+// Every (hash, id) pair is verified, since a file verifies for one id only. The pairs are
+// sorted and the first failure in that order is thrown, so the error does not depend on timing.
 async function readBundles(project: ReleaseProject, picked: Picked[]): Promise<PromptBundleV1[]> {
-  const bundles = new Map<string, PromptBundleV1>();
-  for (const { hash, id } of picked) {
-    if (bundles.has(hash)) continue;
-    const bundle = await readVerifiedBundle(project.paths, hash, id);
-    checkBundleFields(bundle, project.paths.relative(project.paths.bundle(hash)));
-    bundles.set(hash, bundle);
+  const pairs = new Map<string, Picked>();
+  for (const item of picked) pairs.set(`${item.hash} ${item.id}`, item);
+  const unique = [...pairs.entries()].sort(([a], [b]) => compareCodeUnits(a, b));
+  const settled = await Promise.allSettled(unique.map(([, item]) => readBundle(project, item)));
+  const bundles: PromptBundleV1[] = [];
+  for (const result of settled) {
+    if (result.status === 'rejected') throw result.reason;
+    bundles.push(result.value);
   }
-  return [...bundles.values()];
+  return bundles;
 }
 
 function runLine(target: LabelTarget, item: Picked): string {

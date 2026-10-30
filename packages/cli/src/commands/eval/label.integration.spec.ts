@@ -481,6 +481,54 @@ describe('prs eval run --label', () => {
     ).toBe(false);
   });
 
+  it('verifies a bundle for every prompt of the label that names its hash', async () => {
+    const root = await project();
+    const label = {
+      $schema: V2,
+      environment: 'prod',
+      prompts: [
+        { id: 'acme-support/triage', contentHash: control.contentHash },
+        { id: ID, contentHash: control.contentHash },
+      ],
+    };
+    await writeFile(
+      join(root, '.promptscript', 'releases', 'prod.json'),
+      `${JSON.stringify(label, null, 2)}\n`
+    );
+
+    const result = await run(root, [], { label: 'prod', format: 'json' }, noProvider);
+
+    expect(result.code).toBe(1);
+    expect(errorCodes(result)).toEqual(['PS5004']);
+    expect(JSON.parse(result.stdout).errors[0].message).toContain('acme-support/triage');
+  });
+
+  it('runs and reports every suite when two prompts have their own bundles', async () => {
+    const root = await project();
+    const unhashed = { ...control, id: 'acme-support/triage' };
+    const triage = { ...unhashed, contentHash: hashPromptBundle(unhashed) };
+    const directory = join(root, '.promptscript', 'releases');
+    await writeFile(join(directory, 'bundles', `${triage.contentHash}.json`), text(triage));
+    const label = {
+      $schema: V2,
+      environment: 'prod',
+      prompts: [
+        { id: 'acme-support/triage', contentHash: triage.contentHash },
+        { id: ID, contentHash: control.contentHash },
+      ],
+    };
+    await writeFile(join(directory, 'prod.json'), `${JSON.stringify(label, null, 2)}\n`);
+    await record(root, { label: 'prod' });
+
+    const result = await run(root, [], { label: 'prod', format: 'json' }, noProvider);
+
+    expect(result.code).toBe(0);
+    const hashes = (JSON.parse(result.stdout).suites as { prompt: { contentHash: string } }[])
+      .map((suite) => suite.prompt.contentHash)
+      .sort();
+    expect(hashes).toEqual([control.contentHash, triage.contentHash].sort());
+  });
+
   it('reads the bundle once for two suites of one prompt', async () => {
     const root = await project({ suites: { refund: REFUND, 'refund-copy': REFUND } });
     await record(root, { label: 'prod' });

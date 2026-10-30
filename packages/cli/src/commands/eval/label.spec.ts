@@ -32,7 +32,7 @@ describe('labelProblems', () => {
     expect(problems[0]).toContain('--variant needs --label');
   });
 
-  it.each(['Prod', '../prod', 'prod‮', '', '1prod', 'a'.repeat(33)])(
+  it.each(['Prod', '../prod', 'prod\u202e', '', '1prod', 'a'.repeat(33)])(
     'refuses the environment name %j',
     (label) => {
       expect(labelProblems({ label })[0]).toContain('--label must be');
