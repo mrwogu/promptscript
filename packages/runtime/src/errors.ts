@@ -22,9 +22,16 @@ export type PromptMapErrorCode = 'provider-mismatch' | 'missing-model' | 'missin
 /** Code of the error thrown for a bad assignment key. */
 export type PromptKeyErrorCode = 'invalid-key';
 
+/** Codes of errors the telemetry entry throws or reports. */
+export type PromptTelemetryErrorCode = 'invalid-feedback' | 'invalid-pricing' | 'telemetry-failed';
+
 /** Every runtime error code. */
 export type PromptErrorCode =
-  PromptRenderErrorCode | PromptLoadErrorCode | PromptMapErrorCode | PromptKeyErrorCode;
+  | PromptRenderErrorCode
+  | PromptLoadErrorCode
+  | PromptMapErrorCode
+  | PromptKeyErrorCode
+  | PromptTelemetryErrorCode;
 
 /** Base of every error the runtime throws. Messages name keys and paths, never values. */
 export class PromptRuntimeError extends Error {

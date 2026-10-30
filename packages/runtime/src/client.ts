@@ -16,11 +16,11 @@ import type {
 const LABEL_SCHEMA_PREFIX = 'https://getpromptscript.dev/schema/prompt-release-label/';
 const LABEL_SCHEMA_URL = `${LABEL_SCHEMA_PREFIX}v1.json`;
 const LABEL_V2_SCHEMA_URL = `${LABEL_SCHEMA_PREFIX}v2.json`;
-const EXPERIMENT_NAME = /^[a-z\d][a-z\d-]{0,63}$/;
-const VARIANT_NAME = /^[a-z][a-z\d-]{0,31}$/;
+export const EXPERIMENT_NAME = /^[a-z\d][a-z\d-]{0,63}$/;
+export const VARIANT_NAME = /^[a-z][a-z\d-]{0,31}$/;
 const TOTAL_WEIGHT = 10_000;
 const MAX_KEY_LENGTH = 256;
-const ENVIRONMENT = /^[a-z][a-z\d-]{0,31}$/;
+export const ENVIRONMENT = /^[a-z][a-z\d-]{0,31}$/;
 // Windows reserves COM0-COM9 and LPT0-LPT9 as device names
 const RESERVED_LABELS = /^(?:index|manifest|pricing|con|prn|aux|nul|com\d|lpt\d)$/;
 const DEFAULT_TTL_MS = 60_000;
@@ -30,7 +30,7 @@ const MAX_REF_LENGTH = 512;
 const UNSAFE_CHARACTER = /[\p{Cc}\p{Cf}\u2028\u2029]/u;
 // A key is also refused with a lone surrogate, which UTF-8 cannot encode; a format character
 // such as U+200D is refused like in a ref
-const UNSAFE_KEY = /[\p{Cc}\p{Cf}\p{Cs}\u2028\u2029]/u;
+export const UNSAFE_KEY = /[\p{Cc}\p{Cf}\p{Cs}\u2028\u2029]/u;
 
 interface Arm {
   readonly variant: string;
