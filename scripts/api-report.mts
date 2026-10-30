@@ -31,16 +31,21 @@ if (names.length === 0) {
 }
 
 // The report is built from the real build output. Nx cache makes this cheap.
-// pnpm is a .cmd shim on Windows, so it needs a shell there. Arguments are fixed.
-const build = spawnSync('pnpm', ['nx', 'run-many', '-t', 'build', '-p', names.join(',')], {
-  cwd: root,
-  stdio: 'inherit',
-  shell: process.platform === 'win32',
-}); // NOSONAR
+// pnpm sets npm_execpath to its own entry (a JS file, or a standalone binary), so the
+// build starts from an absolute path and needs no PATH lookup.
+const pnpmEntry = process.env.npm_execpath;
+if (!pnpmEntry) {
+  console.error('Run this through pnpm (pnpm api:check or pnpm api:update).');
+  process.exit(1);
+}
+const buildArgs = ['nx', 'run-many', '-t', 'build', '-p', names.join(',')];
+const isScript = /\.[cm]?js$/.test(pnpmEntry);
+const build = isScript
+  ? spawnSync(process.execPath, [pnpmEntry, ...buildArgs], { cwd: root, stdio: 'inherit' })
+  : spawnSync(pnpmEntry, buildArgs, { cwd: root, stdio: 'inherit' });
 if (build.status !== 0) {
-  console.error(
-    `Build failed, cannot analyze the API.${build.error ? ` ${build.error.message}` : ''}`
-  );
+  const reason = build.error ? ` ${build.error.message}` : '';
+  console.error(`Build failed, cannot analyze the API.${reason}`);
   process.exit(1);
 }
 

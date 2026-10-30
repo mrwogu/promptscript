@@ -274,8 +274,6 @@ export interface BlockBody extends CanonicalNode {
 
 // @public (undocumented)
 export interface BlockBodyOptions {
-    // Warning: (ae-forgotten-export) The symbol "LegacyContentType" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     readonly projection?: LegacyContentType;
     // (undocumented)
@@ -643,11 +641,8 @@ export type DeepReadonly<T> = T extends PrimitiveValue ? T : T extends readonly 
 // @internal
 export const DEFAULT_MERGE_OPTIONS: MergeOptions;
 
-// Warning: (ae-forgotten-export) The symbol "DEFAULT_OUTPUT_PATH_VALUES" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "DefaultOutputPathMap" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-export const DEFAULT_OUTPUT_PATHS: typeof DEFAULT_OUTPUT_PATH_VALUES & DefaultOutputPathMap;
+export const DEFAULT_OUTPUT_PATHS: DefaultOutputPathMap;
 
 // @public
 export const DEFAULT_PRETTIER_OPTIONS: Required<PrettierMarkdownOptions>;
@@ -660,6 +655,9 @@ export interface DefaultFeatureProfile {
     hasCommands: boolean;
     hasSkills: boolean;
 }
+
+// @public
+export type DefaultOutputPathMap = Readonly<Record<KnownTarget, string>> & Readonly<Record<string, string>>;
 
 // @public
 export interface DetectionHints {
@@ -696,6 +694,9 @@ export function emptyProvenance(entry?: string): ProvenanceTrace;
 
 // @public
 export function ensureAgentProvenance(program: Program, source: string, action?: AgentProvenance['action']): Program;
+
+// @public (undocumented)
+export type EnvironmentVariableProvider = (name: string) => string | undefined;
 
 // @internal
 export enum ErrorCode {
@@ -759,6 +760,12 @@ export enum ErrorCode {
 
 // @public
 export type EvalAssertion = EvalEqualsAssertion | EvalContainsAssertion | EvalRegexAssertion | EvalJsonSchemaAssertion | EvalLlmJudgeAssertion;
+
+// @public (undocumented)
+export interface EvalAssertionBase {
+    field?: string;
+    id: string;
+}
 
 // @public
 export type EvalAssertionKind = 'equals' | 'contains' | 'regex' | 'json-schema' | 'llm-judge';
@@ -872,8 +879,6 @@ export interface EvalConfig {
     timeoutMs?: number;
 }
 
-// Warning: (ae-forgotten-export) The symbol "EvalAssertionBase" needs to be exported by the entry point index.d.ts
-//
 // @public
 export interface EvalContainsAssertion extends EvalAssertionBase {
     ignoreCase?: boolean;
@@ -2855,8 +2860,6 @@ export function interpolateAST(ast: Program, ctx: TemplateContext): Program;
 // @public
 export function interpolateContent(content: BlockContent, ctx: TemplateContext): BlockContent;
 
-// Warning: (ae-forgotten-export) The symbol "EnvironmentVariableProvider" needs to be exported by the entry point index.d.ts
-//
 // @public
 export function interpolateEnvVars(text: string, environmentProvider: EnvironmentVariableProvider): string;
 
@@ -2951,6 +2954,9 @@ export interface LayerBoundaryPolicy extends BasePolicyDefinition {
     layers: string[];
     maxDistance?: number;
 }
+
+// @public (undocumented)
+export type LegacyContentType = BlockContent['type'];
 
 // @public
 export type LegacyProgram = Program;
