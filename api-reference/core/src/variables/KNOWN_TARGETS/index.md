@@ -8,7 +8,7 @@
 
 > `const` **KNOWN\_TARGETS**: readonly \[`"github"`, `"claude"`, `"cursor"`, `"antigravity"`, `"factory"`, `"opencode"`, `"gemini"`, `"windsurf"`, `"cline"`, `"roo"`, `"codex"`, `"continue"`, `"augment"`, `"goose"`, `"kilo"`, `"amp"`, `"trae"`, `"junie"`, `"kiro"`, `"cortex"`, `"crush"`, `"command-code"`, `"kode"`, `"mcpjam"`, `"mistral-vibe"`, `"mux"`, `"openhands"`, `"pi"`, `"qoder"`, `"qwen-code"`, `"zencoder"`, `"neovate"`, `"pochi"`, `"adal"`, `"iflow"`, `"openclaw"`, `"codebuddy"`, `"aider"`, `"amazon-q"`, `"warp"`, `"zed"`, `"jules"`, `"devin"`, `"grok"`, `"kimi"`, `"mimo"`, `"deep-agents"`, `"forgecode"`, `"hermes"`, `"gitlab-duo"`, `"bundle"`, `"prompt-text"`\]
 
-Defined in: [core/src/types/config.ts:801](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L801)
+Defined in: [core/src/types/config.ts:801](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L801)
 
 Runtime array of all known target names.
 Useful for validation and iteration.

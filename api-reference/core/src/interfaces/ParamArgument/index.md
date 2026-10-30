@@ -6,7 +6,7 @@
 
 # Interface: ParamArgument
 
-Defined in: [core/src/types/ast.ts:77](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L77)
+Defined in: [core/src/types/ast.ts:77](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L77)
 
 Parameter argument when calling a template.
 
@@ -26,7 +26,7 @@ Parameter argument when calling a template.
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -40,7 +40,7 @@ Source location
 
 > **name**: `string`
 
-Defined in: [core/src/types/ast.ts:80](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L80)
+Defined in: [core/src/types/ast.ts:80](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L80)
 
 Argument name
 
@@ -50,7 +50,7 @@ Argument name
 
 > `readonly` **type**: `"ParamArgument"`
 
-Defined in: [core/src/types/ast.ts:78](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L78)
+Defined in: [core/src/types/ast.ts:78](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L78)
 
 Node type discriminator
 
@@ -64,6 +64,6 @@ Node type discriminator
 
 > **value**: [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)
 
-Defined in: [core/src/types/ast.ts:82](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L82)
+Defined in: [core/src/types/ast.ts:82](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L82)
 
 Argument value

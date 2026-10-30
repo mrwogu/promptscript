@@ -8,7 +8,7 @@
 
 > **GovernanceOwner** = `string` & `object`
 
-Defined in: [core/src/types/config.ts:240](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L240)
+Defined in: [core/src/types/config.ts:240](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L240)
 
 Git host identity of an owner, in a form CODEOWNERS accepts: a user (`@jane`),
 a team (`@acme/legal`, GitLab subgroups allowed) or an email address. A user may

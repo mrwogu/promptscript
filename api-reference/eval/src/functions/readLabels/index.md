@@ -8,7 +8,7 @@
 
 > **readLabels**(`file`, `path`, `context`): `Promise`\<[`ReadLabels`](https://getpromptscript.dev/api-reference/eval/src/interfaces/ReadLabels/index.md)\>
 
-Defined in: [eval/src/labels.ts:225](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/labels.ts#L225)
+Defined in: [eval/src/labels.ts:225](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/labels.ts#L225)
 
 Read human labels of judge assertions from a JSONL, CSV or YAML file, by the
 extension of the path as written. Each label has an `id` (the dataset row),

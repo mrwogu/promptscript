@@ -6,7 +6,7 @@
 
 # Interface: ResolvedAST
 
-Defined in: [resolver/src/resolver.ts:354](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/resolver.ts#L354)
+Defined in: [resolver/src/resolver.ts:354](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/resolver.ts#L354)
 
 Result of resolving a PromptScript file.
 
@@ -16,7 +16,7 @@ Result of resolving a PromptScript file.
 
 > **ast**: [`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md) \| `null`
 
-Defined in: [resolver/src/resolver.ts:366](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/resolver.ts#L366)
+Defined in: [resolver/src/resolver.ts:366](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/resolver.ts#L366)
 
 Mutable compatibility projection for legacy integrations.
 
@@ -30,7 +30,7 @@ Use `canonicalAst` for new consumers.
 
 > **canonicalAst**: [`CanonicalProgram`](https://getpromptscript.dev/api-reference/core/src/interfaces/CanonicalProgram/index.md) \| `null`
 
-Defined in: [resolver/src/resolver.ts:360](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/resolver.ts#L360)
+Defined in: [resolver/src/resolver.ts:360](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/resolver.ts#L360)
 
 Immutable canonical AST used by compiler and validator stages.
 
@@ -42,7 +42,7 @@ This is the primary resolved representation.
 
 > `optional` **dependencies?**: `string`[]
 
-Defined in: [resolver/src/resolver.ts:372](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/resolver.ts#L372)
+Defined in: [resolver/src/resolver.ts:372](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/resolver.ts#L372)
 
 Files and directories read while resolving the AST
 
@@ -52,7 +52,7 @@ Files and directories read while resolving the AST
 
 > **errors**: [`ResolveError`](https://getpromptscript.dev/api-reference/core/src/classes/ResolveError/index.md)[]
 
-Defined in: [resolver/src/resolver.ts:374](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/resolver.ts#L374)
+Defined in: [resolver/src/resolver.ts:374](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/resolver.ts#L374)
 
 List of errors encountered during resolution
 
@@ -62,7 +62,7 @@ List of errors encountered during resolution
 
 > **provenance**: [`ProvenanceTrace`](https://getpromptscript.dev/api-reference/core/src/interfaces/ProvenanceTrace/index.md)
 
-Defined in: [resolver/src/resolver.ts:370](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/resolver.ts#L370)
+Defined in: [resolver/src/resolver.ts:370](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/resolver.ts#L370)
 
 Public source and composition provenance for final values
 
@@ -72,6 +72,6 @@ Public source and composition provenance for final values
 
 > **sources**: `string`[]
 
-Defined in: [resolver/src/resolver.ts:368](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/resolver.ts#L368)
+Defined in: [resolver/src/resolver.ts:368](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/resolver.ts#L368)
 
 List of all source files involved in resolution

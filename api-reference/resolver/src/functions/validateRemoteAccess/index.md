@@ -8,7 +8,7 @@
 
 > **validateRemoteAccess**(`repoUrl`, `ref?`, `options?`): `Promise`\<[`RemoteValidation`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/RemoteValidation/index.md)\>
 
-Defined in: [resolver/src/git-registry.ts:1330](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/git-registry.ts#L1330)
+Defined in: [resolver/src/git-registry.ts:1330](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/git-registry.ts#L1330)
 
 Validate that a remote Git repository is accessible via `git ls-remote`.
 

@@ -8,7 +8,7 @@
 
 > **buildPromptBundles**(`program`, `options`, `target`): `BuiltPrompts`
 
-Defined in: [formatters/src/prompt/bundle.ts:297](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/prompt/bundle.ts#L297)
+Defined in: [formatters/src/prompt/bundle.ts:297](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/prompt/bundle.ts#L297)
 
 Build the bundles of every prompt in a resolved program.
 

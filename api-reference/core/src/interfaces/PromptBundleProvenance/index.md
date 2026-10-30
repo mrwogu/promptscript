@@ -6,7 +6,7 @@
 
 # Interface: PromptBundleProvenance
 
-Defined in: [core/src/types/prompt-bundle.ts:96](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L96)
+Defined in: [core/src/types/prompt-bundle.ts:96](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L96)
 
 Provenance of a prompt bundle. Informational, outside the hash.
 
@@ -16,7 +16,7 @@ Provenance of a prompt bundle. Informational, outside the hash.
 
 > **entry**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:101](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L101)
+Defined in: [core/src/types/prompt-bundle.ts:101](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L101)
 
 Entry file of the compilation.
 
@@ -32,6 +32,6 @@ Entry file of the compilation.
 
 > **segments**: [`PromptBundleSegment`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptBundleSegment/index.md)[]
 
-Defined in: [core/src/types/prompt-bundle.ts:103](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L103)
+Defined in: [core/src/types/prompt-bundle.ts:103](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L103)
 
 Message segments with their source files

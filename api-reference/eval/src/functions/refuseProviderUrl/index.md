@@ -8,7 +8,7 @@
 
 > **refuseProviderUrl**(`url`, `options`): `string` \| `undefined`
 
-Defined in: [eval/src/http-provider.ts:68](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/http-provider.ts#L68)
+Defined in: [eval/src/http-provider.ts:68](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/http-provider.ts#L68)
 
 Check a provider URL. The host must be a built-in default or in
 `allowedHosts`, and pass the core URL rules without private addresses.

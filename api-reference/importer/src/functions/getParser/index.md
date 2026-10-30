@@ -8,7 +8,7 @@
 
 > **getParser**(`format`): [`FormatParser`](https://getpromptscript.dev/api-reference/importer/src/interfaces/FormatParser/index.md)
 
-Defined in: [importer/src/detector.ts:27](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/importer/src/detector.ts#L27)
+Defined in: [importer/src/detector.ts:27](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/importer/src/detector.ts#L27)
 
 ## Parameters
 

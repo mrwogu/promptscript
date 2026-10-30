@@ -6,7 +6,7 @@
 
 # Interface: CompileOptions
 
-Defined in: [compiler/src/compiler.ts:1446](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/compiler.ts#L1446)
+Defined in: [compiler/src/compiler.ts:1446](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/compiler/src/compiler.ts#L1446)
 
 Options for the standalone compile function.
 
@@ -16,7 +16,7 @@ Options for the standalone compile function.
 
 > `optional` **customConventions?**: `Record`\<`string`, [`OutputConvention`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputConvention/index.md)\>
 
-Defined in: [compiler/src/compiler.ts:1472](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/compiler.ts#L1472)
+Defined in: [compiler/src/compiler.ts:1472](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/compiler/src/compiler.ts#L1472)
 
 Custom conventions for formatters.
 
@@ -26,7 +26,7 @@ Custom conventions for formatters.
 
 > `optional` **formatters?**: (`string` \| [`Formatter`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/Formatter/index.md) \| \{ `config?`: [`TargetConfig`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/TargetConfig/index.md); `name`: `string`; \})[]
 
-Defined in: [compiler/src/compiler.ts:1468](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/compiler.ts#L1468)
+Defined in: [compiler/src/compiler.ts:1468](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/compiler/src/compiler.ts#L1468)
 
 Formatters to use. If not specified, all built-in formatters are used.
 
@@ -36,7 +36,7 @@ Formatters to use. If not specified, all built-in formatters are used.
 
 > `optional` **models?**: [`ModelsConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelsConfig/index.md)
 
-Defined in: [compiler/src/compiler.ts:1480](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/compiler.ts#L1480)
+Defined in: [compiler/src/compiler.ts:1480](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/compiler/src/compiler.ts#L1480)
 
 Model catalog settings (`models` in promptscript.yaml).
 
@@ -46,7 +46,7 @@ Model catalog settings (`models` in promptscript.yaml).
 
 > `optional` **prettier?**: [`PrettierMarkdownOptions`](https://getpromptscript.dev/api-reference/core/src/interfaces/PrettierMarkdownOptions/index.md)
 
-Defined in: [compiler/src/compiler.ts:1476](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/compiler.ts#L1476)
+Defined in: [compiler/src/compiler.ts:1476](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/compiler/src/compiler.ts#L1476)
 
 Prettier formatting options for markdown output.
 
@@ -56,7 +56,7 @@ Prettier formatting options for markdown output.
 
 > `optional` **resolver?**: `object`
 
-Defined in: [compiler/src/compiler.ts:1451](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/compiler.ts#L1451)
+Defined in: [compiler/src/compiler.ts:1451](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/compiler/src/compiler.ts#L1451)
 
 Resolver options for resolving imports and inheritance.
 If not provided, defaults to current working directory.
@@ -91,7 +91,7 @@ Base path for registry lookups (@namespace/...). Defaults to cwd.
 
 > `optional` **skillContent?**: `string`
 
-Defined in: [compiler/src/compiler.ts:1484](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/compiler.ts#L1484)
+Defined in: [compiler/src/compiler.ts:1484](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/compiler/src/compiler.ts#L1484)
 
 Content of the PromptScript SKILL.md to inject into compilation output.
 
@@ -101,6 +101,6 @@ Content of the PromptScript SKILL.md to inject into compilation output.
 
 > `optional` **validator?**: [`ValidatorConfig`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidatorConfig/index.md)
 
-Defined in: [compiler/src/compiler.ts:1464](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/compiler/src/compiler.ts#L1464)
+Defined in: [compiler/src/compiler.ts:1464](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/compiler/src/compiler.ts#L1464)
 
 Validator configuration.

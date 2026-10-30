@@ -6,7 +6,7 @@
 
 # Interface: SourceAttribution
 
-Defined in: [core/src/types/manifest.ts:45](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/manifest.ts#L45)
+Defined in: [core/src/types/manifest.ts:45](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L45)
 
 Source attribution for migrated content.
 
@@ -16,7 +16,7 @@ Source attribution for migrated content.
 
 > `optional` **author?**: `string`
 
-Defined in: [core/src/types/manifest.ts:51](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/manifest.ts#L51)
+Defined in: [core/src/types/manifest.ts:51](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L51)
 
 Original author if known
 
@@ -26,7 +26,7 @@ Original author if known
 
 > `optional` **license?**: `string`
 
-Defined in: [core/src/types/manifest.ts:49](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/manifest.ts#L49)
+Defined in: [core/src/types/manifest.ts:49](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L49)
 
 License of the original content
 
@@ -36,6 +36,6 @@ License of the original content
 
 > **repository**: `string`
 
-Defined in: [core/src/types/manifest.ts:47](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/manifest.ts#L47)
+Defined in: [core/src/types/manifest.ts:47](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L47)
 
 Original repository URL

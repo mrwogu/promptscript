@@ -6,7 +6,7 @@
 
 # Interface: EvalSampleFeedbackV1
 
-Defined in: [core/src/types/eval-import.ts:4](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval-import.ts#L4)
+Defined in: [core/src/types/eval-import.ts:4](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L4)
 
 Feedback attached to a production sample. There is no free-text field on purpose.
 
@@ -16,7 +16,7 @@ Feedback attached to a production sample. There is no free-text field on purpose
 
 > `optional` **label?**: `string`
 
-Defined in: [core/src/types/eval-import.ts:18](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval-import.ts#L18)
+Defined in: [core/src/types/eval-import.ts:18](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L18)
 
 Feedback label.
 
@@ -36,7 +36,7 @@ Feedback label.
 
 > **name**: `string`
 
-Defined in: [core/src/types/eval-import.ts:10](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval-import.ts#L10)
+Defined in: [core/src/types/eval-import.ts:10](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L10)
 
 Feedback name.
 
@@ -56,6 +56,6 @@ Feedback name.
 
 > `optional` **score?**: `number`
 
-Defined in: [core/src/types/eval-import.ts:12](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval-import.ts#L12)
+Defined in: [core/src/types/eval-import.ts:12](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L12)
 
 Score, any finite number

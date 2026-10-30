@@ -8,7 +8,7 @@
 
 > **resolveInheritance**(`parent`, `child`): [`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md)
 
-Defined in: [resolver/src/inheritance.ts:26](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/inheritance.ts#L26)
+Defined in: [resolver/src/inheritance.ts:26](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/inheritance.ts#L26)
 
 Resolve inheritance by merging a parent program into a child program.
 

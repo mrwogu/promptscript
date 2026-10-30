@@ -6,7 +6,7 @@
 
 # Interface: PromptBundleSegment
 
-Defined in: [core/src/types/prompt-bundle.ts:83](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L83)
+Defined in: [core/src/types/prompt-bundle.ts:83](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L83)
 
 Where one message segment came from. Informational, outside the hash.
 
@@ -16,7 +16,7 @@ Where one message segment came from. Informational, outside the hash.
 
 > **files**: `string`[]
 
-Defined in: [core/src/types/prompt-bundle.ts:92](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L92)
+Defined in: [core/src/types/prompt-bundle.ts:92](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L92)
 
 Distinct source files of the segment, in trace order
 
@@ -26,7 +26,7 @@ Distinct source files of the segment, in trace order
 
 > **message**: [`PromptBundleRole`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PromptBundleRole/index.md)
 
-Defined in: [core/src/types/prompt-bundle.ts:85](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L85)
+Defined in: [core/src/types/prompt-bundle.ts:85](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L85)
 
 Message the segment belongs to
 
@@ -36,7 +36,7 @@ Message the segment belongs to
 
 > **path**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:90](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L90)
+Defined in: [core/src/types/prompt-bundle.ts:90](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L90)
 
 Block path of the segment.
 

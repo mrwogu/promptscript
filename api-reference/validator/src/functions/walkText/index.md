@@ -8,7 +8,7 @@
 
 > **walkText**(`ast`, `callback`, `options?`): `void`
 
-Defined in: [validator/src/walker.ts:51](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/walker.ts#L51)
+Defined in: [validator/src/walker.ts:51](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/walker.ts#L51)
 
 Walk all text content in the AST.
 Visits text in blocks, extend blocks, override replacements, and nested content.

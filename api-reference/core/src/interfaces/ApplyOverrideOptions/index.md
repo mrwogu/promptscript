@@ -6,7 +6,7 @@
 
 # Interface: ApplyOverrideOptions
 
-Defined in: [core/src/block-override.ts:524](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/block-override.ts#L524)
+Defined in: [core/src/block-override.ts:524](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/block-override.ts#L524)
 
 ## Properties
 
@@ -14,4 +14,4 @@ Defined in: [core/src/block-override.ts:524](https://github.com/mrwogu/promptscr
 
 > `readonly` `optional` **importMarkerPrefix?**: `string`
 
-Defined in: [core/src/block-override.ts:525](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/block-override.ts#L525)
+Defined in: [core/src/block-override.ts:525](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/block-override.ts#L525)

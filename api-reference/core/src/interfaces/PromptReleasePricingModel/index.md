@@ -6,7 +6,7 @@
 
 # Interface: PromptReleasePricingModel
 
-Defined in: [core/src/types/prompt-pricing.ts:2](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-pricing.ts#L2)
+Defined in: [core/src/types/prompt-pricing.ts:2](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-pricing.ts#L2)
 
 One priced model of a release, as `prs release build` writes it.
 
@@ -16,7 +16,7 @@ One priced model of a release, as `prs release build` writes it.
 
 > **apiId**: `string`
 
-Defined in: [core/src/types/prompt-pricing.ts:12](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-pricing.ts#L12)
+Defined in: [core/src/types/prompt-pricing.ts:12](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-pricing.ts#L12)
 
 Provider API model identifier, as the bundles carry it.
 
@@ -32,7 +32,7 @@ Provider API model identifier, as the bundles carry it.
 
 > **checkedOn**: `string`
 
-Defined in: [core/src/types/prompt-pricing.ts:32](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-pricing.ts#L32)
+Defined in: [core/src/types/prompt-pricing.ts:32](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-pricing.ts#L32)
 
 Date the price was checked against the provider, YYYY-MM-DD.
 
@@ -46,7 +46,7 @@ Date the price was checked against the provider, YYYY-MM-DD.
 
 > **inputUsdPerMillion**: `number`
 
-Defined in: [core/src/types/prompt-pricing.ts:22](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-pricing.ts#L22)
+Defined in: [core/src/types/prompt-pricing.ts:22](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-pricing.ts#L22)
 
 Price of one million input tokens in USD.
 
@@ -60,7 +60,7 @@ Price of one million input tokens in USD.
 
 > **outputUsdPerMillion**: `number`
 
-Defined in: [core/src/types/prompt-pricing.ts:27](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-pricing.ts#L27)
+Defined in: [core/src/types/prompt-pricing.ts:27](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-pricing.ts#L27)
 
 Price of one million output tokens in USD.
 
@@ -74,7 +74,7 @@ Price of one million output tokens in USD.
 
 > **provider**: `string`
 
-Defined in: [core/src/types/prompt-pricing.ts:17](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-pricing.ts#L17)
+Defined in: [core/src/types/prompt-pricing.ts:17](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-pricing.ts#L17)
 
 Model provider.
 
@@ -90,7 +90,7 @@ Model provider.
 
 > **ref**: `string`
 
-Defined in: [core/src/types/prompt-pricing.ts:7](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-pricing.ts#L7)
+Defined in: [core/src/types/prompt-pricing.ts:7](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-pricing.ts#L7)
 
 Catalog profile id of the model.
 

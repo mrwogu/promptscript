@@ -8,7 +8,7 @@
 
 > **validateTargetDefinitionConsistency**(`definitions?`): `string`[]
 
-Defined in: [core/src/target-catalog.ts:809](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/target-catalog.ts#L809)
+Defined in: [core/src/target-catalog.ts:809](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-catalog.ts#L809)
 
 Return contradictions between the target catalog and its capability data.
 

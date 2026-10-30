@@ -8,7 +8,7 @@
 
 > **resolveGuardRequires**(`ast`, `options`): [`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md)
 
-Defined in: [resolver/src/guard-requires.ts:127](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/guard-requires.ts#L127)
+Defined in: [resolver/src/guard-requires.ts:127](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/guard-requires.ts#L127)
 
 Resolve guard `requires` dependencies by injecting `__resolvedRequires`
 into guard entries that declare dependencies.

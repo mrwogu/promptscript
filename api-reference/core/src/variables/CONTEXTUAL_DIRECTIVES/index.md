@@ -8,6 +8,6 @@
 
 > `const` **CONTEXTUAL\_DIRECTIVES**: readonly \[`"@header"`\]
 
-Defined in: [core/src/section-registry.ts:4](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/section-registry.ts#L4)
+Defined in: [core/src/section-registry.ts:4](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/section-registry.ts#L4)
 
 Browser-safe contract for a generated human-readable section.

@@ -6,7 +6,7 @@
 
 # Interface: ResolvedImportDependency
 
-Defined in: [validator/src/import-exclusions.ts:170](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/import-exclusions.ts#L170)
+Defined in: [validator/src/import-exclusions.ts:170](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/import-exclusions.ts#L170)
 
 Lockfile dependency resolved for an exclude's import source.
 
@@ -16,7 +16,7 @@ Lockfile dependency resolved for an exclude's import source.
 
 > **commit**: `string`
 
-Defined in: [validator/src/import-exclusions.ts:174](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/import-exclusions.ts#L174)
+Defined in: [validator/src/import-exclusions.ts:174](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/import-exclusions.ts#L174)
 
 Commit SHA pinned for the dependency
 
@@ -26,6 +26,6 @@ Commit SHA pinned for the dependency
 
 > **key**: `string`
 
-Defined in: [validator/src/import-exclusions.ts:172](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/import-exclusions.ts#L172)
+Defined in: [validator/src/import-exclusions.ts:172](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/import-exclusions.ts#L172)
 
 Lockfile dependency key the exclude bound to

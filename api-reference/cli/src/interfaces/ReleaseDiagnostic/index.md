@@ -6,7 +6,7 @@
 
 # Interface: ReleaseDiagnostic
 
-Defined in: [cli/src/utils/release-report.ts:101](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L101)
+Defined in: [cli/src/utils/release-report.ts:101](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/cli/src/utils/release-report.ts#L101)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/release-report.ts:101](https://github.com/mrwogu/prom
 
 > `optional` **code?**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:102](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L102)
+Defined in: [cli/src/utils/release-report.ts:102](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/cli/src/utils/release-report.ts#L102)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [cli/src/utils/release-report.ts:102](https://github.com/mrwogu/prom
 
 > `optional` **location?**: [`ReleaseLocation`](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseLocation/index.md)
 
-Defined in: [cli/src/utils/release-report.ts:104](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L104)
+Defined in: [cli/src/utils/release-report.ts:104](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/cli/src/utils/release-report.ts#L104)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [cli/src/utils/release-report.ts:104](https://github.com/mrwogu/prom
 
 > **message**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:103](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L103)
+Defined in: [cli/src/utils/release-report.ts:103](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/cli/src/utils/release-report.ts#L103)

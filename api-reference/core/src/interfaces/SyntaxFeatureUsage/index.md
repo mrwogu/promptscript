@@ -6,7 +6,7 @@
 
 # Interface: SyntaxFeatureUsage
 
-Defined in: [core/src/syntax-versions.ts:21](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/syntax-versions.ts#L21)
+Defined in: [core/src/syntax-versions.ts:21](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/syntax-versions.ts#L21)
 
 A syntax feature found in a parsed program.
 
@@ -16,7 +16,7 @@ A syntax feature found in a parsed program.
 
 > **feature**: [`SyntaxFeature`](https://getpromptscript.dev/api-reference/core/src/type-aliases/SyntaxFeature/index.md)
 
-Defined in: [core/src/syntax-versions.ts:22](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/syntax-versions.ts#L22)
+Defined in: [core/src/syntax-versions.ts:22](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/syntax-versions.ts#L22)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [core/src/syntax-versions.ts:22](https://github.com/mrwogu/promptscr
 
 > **location**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/syntax-versions.ts:23](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/syntax-versions.ts#L23)
+Defined in: [core/src/syntax-versions.ts:23](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/syntax-versions.ts#L23)

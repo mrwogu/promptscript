@@ -6,7 +6,7 @@
 
 # Interface: BlockBody
 
-Defined in: [core/src/types/ast.ts:632](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L632)
+Defined in: [core/src/types/ast.ts:632](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L632)
 
 Uniform canonical body shared by every block type.
 
@@ -20,7 +20,7 @@ Uniform canonical body shared by every block type.
 
 > `readonly` **entries**: readonly [`BlockEntry`](https://getpromptscript.dev/api-reference/core/src/type-aliases/BlockEntry/index.md)[]
 
-Defined in: [core/src/types/ast.ts:635](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L635)
+Defined in: [core/src/types/ast.ts:635](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L635)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [core/src/types/ast.ts:635](https://github.com/mrwogu/promptscript/b
 
 > `readonly` `optional` **legacyProjection?**: `"TextContent"` \| `"ObjectContent"` \| `"ArrayContent"` \| `"MixedContent"`
 
-Defined in: [core/src/types/ast.ts:637](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L637)
+Defined in: [core/src/types/ast.ts:637](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L637)
 
 Original legacy projection, retained across immutable updates
 
@@ -38,7 +38,7 @@ Original legacy projection, retained across immutable updates
 
 > `readonly` `optional` **legacyText?**: `object`
 
-Defined in: [core/src/types/ast.ts:639](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L639)
+Defined in: [core/src/types/ast.ts:639](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L639)
 
 Exact resolved text projection when entries retain multiple source fragments
 
@@ -90,7 +90,7 @@ Text value (without delimiters)
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L497)
+Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L497)
 
 #### column
 
@@ -126,7 +126,7 @@ Byte offset from start of file
 
 > `readonly` **shape**: `"object"` \| `"text"` \| `"array"` \| `"mixed"`
 
-Defined in: [core/src/types/ast.ts:634](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L634)
+Defined in: [core/src/types/ast.ts:634](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L634)
 
 ***
 
@@ -134,7 +134,7 @@ Defined in: [core/src/types/ast.ts:634](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **type**: `"BlockBody"`
 
-Defined in: [core/src/types/ast.ts:633](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L633)
+Defined in: [core/src/types/ast.ts:633](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L633)
 
 #### Overrides
 

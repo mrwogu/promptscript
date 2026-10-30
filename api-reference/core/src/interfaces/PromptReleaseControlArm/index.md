@@ -6,7 +6,7 @@
 
 # Interface: PromptReleaseControlArm
 
-Defined in: [core/src/types/prompt-bundle.ts:216](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L216)
+Defined in: [core/src/types/prompt-bundle.ts:216](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L216)
 
 The first arm of an experiment: the entry hash, with at least 1 basis point of traffic.
 
@@ -16,7 +16,7 @@ The first arm of an experiment: the entry hash, with at least 1 basis point of t
 
 > **contentHash**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:223](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L223)
+Defined in: [core/src/types/prompt-bundle.ts:223](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L223)
 
 Content hash of the bundle, equal to the entry hash.
 
@@ -30,7 +30,7 @@ Content hash of the bundle, equal to the entry hash.
 
 > **variant**: `"control"`
 
-Defined in: [core/src/types/prompt-bundle.ts:218](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L218)
+Defined in: [core/src/types/prompt-bundle.ts:218](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L218)
 
 Arm name, always `control` for the first arm.
 
@@ -40,7 +40,7 @@ Arm name, always `control` for the first arm.
 
 > **weight**: `number`
 
-Defined in: [core/src/types/prompt-bundle.ts:230](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L230)
+Defined in: [core/src/types/prompt-bundle.ts:230](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L230)
 
 Share of the assigned traffic in basis points.
 

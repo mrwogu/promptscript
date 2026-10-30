@@ -6,7 +6,7 @@
 
 # Interface: PromptBundleOutput
 
-Defined in: [core/src/types/prompt-bundle.ts:48](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L48)
+Defined in: [core/src/types/prompt-bundle.ts:48](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L48)
 
 Output contract of a prompt bundle, a JSON Schema subset.
 
@@ -16,7 +16,7 @@ Output contract of a prompt bundle, a JSON Schema subset.
 
 > **additionalProperties**: `false`
 
-Defined in: [core/src/types/prompt-bundle.ts:56](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L56)
+Defined in: [core/src/types/prompt-bundle.ts:56](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L56)
 
 Always false
 
@@ -26,7 +26,7 @@ Always false
 
 > **properties**: `Record`\<`string`, [`PromptBundleOutputProperty`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptBundleOutputProperty/index.md)\>
 
-Defined in: [core/src/types/prompt-bundle.ts:52](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L52)
+Defined in: [core/src/types/prompt-bundle.ts:52](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L52)
 
 Properties by name
 
@@ -36,7 +36,7 @@ Properties by name
 
 > **required**: `string`[]
 
-Defined in: [core/src/types/prompt-bundle.ts:54](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L54)
+Defined in: [core/src/types/prompt-bundle.ts:54](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L54)
 
 Names of required properties, sorted. All properties are required.
 
@@ -46,6 +46,6 @@ Names of required properties, sorted. All properties are required.
 
 > **type**: `"object"`
 
-Defined in: [core/src/types/prompt-bundle.ts:50](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/prompt-bundle.ts#L50)
+Defined in: [core/src/types/prompt-bundle.ts:50](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompt-bundle.ts#L50)
 
 Always `object`

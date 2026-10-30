@@ -8,4 +8,4 @@
 
 > **MultiImportOptions** = [`ModularEmitOptions`](https://getpromptscript.dev/api-reference/importer/src/interfaces/ModularEmitOptions/index.md)
 
-Defined in: [importer/src/multi-importer.ts:6](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/importer/src/multi-importer.ts#L6)
+Defined in: [importer/src/multi-importer.ts:6](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/importer/src/multi-importer.ts#L6)

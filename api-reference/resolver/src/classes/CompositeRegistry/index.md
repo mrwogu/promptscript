@@ -6,7 +6,7 @@
 
 # Class: CompositeRegistry
 
-Defined in: [resolver/src/registry.ts:360](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry.ts#L360)
+Defined in: [resolver/src/registry.ts:360](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/registry.ts#L360)
 
 Registry that combines multiple registries with fallback.
 
@@ -20,7 +20,7 @@ Registry that combines multiple registries with fallback.
 
 > **new CompositeRegistry**(`options`): `CompositeRegistry`
 
-Defined in: [resolver/src/registry.ts:363](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry.ts#L363)
+Defined in: [resolver/src/registry.ts:363](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/registry.ts#L363)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ Defined in: [resolver/src/registry.ts:363](https://github.com/mrwogu/promptscrip
 
 > **exists**(`path`): `Promise`\<`boolean`\>
 
-Defined in: [resolver/src/registry.ts:382](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry.ts#L382)
+Defined in: [resolver/src/registry.ts:382](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/registry.ts#L382)
 
 Check if a file exists in the registry.
 
@@ -66,7 +66,7 @@ True if the file exists
 
 > **fetch**(`path`): `Promise`\<`string`\>
 
-Defined in: [resolver/src/registry.ts:367](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry.ts#L367)
+Defined in: [resolver/src/registry.ts:367](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/registry.ts#L367)
 
 Fetch the content of a file from the registry.
 
@@ -98,7 +98,7 @@ FileNotFoundError if the file doesn't exist
 
 > **list**(`path`): `Promise`\<`string`[]\>
 
-Defined in: [resolver/src/registry.ts:391](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry.ts#L391)
+Defined in: [resolver/src/registry.ts:391](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/registry.ts#L391)
 
 List files in a directory.
 

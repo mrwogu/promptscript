@@ -6,7 +6,7 @@
 
 # Class: BundleFormatter
 
-Defined in: [formatters/src/formatters/bundle.ts:26](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/formatters/bundle.ts#L26)
+Defined in: [formatters/src/formatters/bundle.ts:26](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/formatters/bundle.ts#L26)
 
 Compiles `@prompts` entries to portable, content-hashed JSON bundles.
 
@@ -23,7 +23,7 @@ Writes nothing for a program without prompts.
 
 > **new BundleFormatter**(): `BundleFormatter`
 
-Defined in: [formatters/src/formatters/bundle.ts:27](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/formatters/bundle.ts#L27)
+Defined in: [formatters/src/formatters/bundle.ts:27](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/formatters/bundle.ts#L27)
 
 #### Returns
 
@@ -39,7 +39,7 @@ Defined in: [formatters/src/formatters/bundle.ts:27](https://github.com/mrwogu/p
 
 > `readonly` **defaultConvention**: `"markdown"` = `'markdown'`
 
-Defined in: [formatters/src/prompt/prompt-formatter.ts:68](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/prompt/prompt-formatter.ts#L68)
+Defined in: [formatters/src/prompt/prompt-formatter.ts:68](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/prompt/prompt-formatter.ts#L68)
 
 Default convention for this formatter
 
@@ -53,7 +53,7 @@ Default convention for this formatter
 
 > `readonly` **description**: `string`
 
-Defined in: [formatters/src/prompt/prompt-formatter.ts:73](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/prompt/prompt-formatter.ts#L73)
+Defined in: [formatters/src/prompt/prompt-formatter.ts:73](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/prompt/prompt-formatter.ts#L73)
 
 #### Inherited from
 
@@ -65,7 +65,7 @@ Defined in: [formatters/src/prompt/prompt-formatter.ts:73](https://github.com/mr
 
 > `readonly` **name**: `string`
 
-Defined in: [formatters/src/prompt/prompt-formatter.ts:71](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/prompt/prompt-formatter.ts#L71)
+Defined in: [formatters/src/prompt/prompt-formatter.ts:71](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/prompt/prompt-formatter.ts#L71)
 
 #### Inherited from
 
@@ -77,7 +77,7 @@ Defined in: [formatters/src/prompt/prompt-formatter.ts:71](https://github.com/mr
 
 > `readonly` **outputPath**: `string`
 
-Defined in: [formatters/src/prompt/prompt-formatter.ts:72](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/prompt/prompt-formatter.ts#L72)
+Defined in: [formatters/src/prompt/prompt-formatter.ts:72](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/prompt/prompt-formatter.ts#L72)
 
 #### Inherited from
 
@@ -89,7 +89,7 @@ Defined in: [formatters/src/prompt/prompt-formatter.ts:72](https://github.com/mr
 
 > **format**(`ast`, `options?`): [`FormatterOutput`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterOutput/index.md)
 
-Defined in: [formatters/src/prompt/prompt-formatter.ts:78](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/prompt/prompt-formatter.ts#L78)
+Defined in: [formatters/src/prompt/prompt-formatter.ts:78](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/prompt/prompt-formatter.ts#L78)
 
 Transform AST to target format
 
@@ -117,7 +117,7 @@ Transform AST to target format
 
 > **getSkillBasePath**(): `string` \| `null`
 
-Defined in: [formatters/src/prompt/prompt-formatter.ts:120](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/prompt/prompt-formatter.ts#L120)
+Defined in: [formatters/src/prompt/prompt-formatter.ts:120](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/prompt/prompt-formatter.ts#L120)
 
 Base path for skills (e.g., '.claude/skills'), or null if no skill support
 
@@ -135,7 +135,7 @@ Base path for skills (e.g., '.claude/skills'), or null if no skill support
 
 > **getSkillFileName**(): `string` \| `null`
 
-Defined in: [formatters/src/prompt/prompt-formatter.ts:124](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/prompt/prompt-formatter.ts#L124)
+Defined in: [formatters/src/prompt/prompt-formatter.ts:124](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/prompt/prompt-formatter.ts#L124)
 
 Skill file name (e.g., 'SKILL.md' or 'skill.md'), or null if no skill support
 
@@ -153,7 +153,7 @@ Skill file name (e.g., 'SKILL.md' or 'skill.md'), or null if no skill support
 
 > **referencesMode**(): `"none"`
 
-Defined in: [formatters/src/prompt/prompt-formatter.ts:128](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/prompt/prompt-formatter.ts#L128)
+Defined in: [formatters/src/prompt/prompt-formatter.ts:128](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/prompt/prompt-formatter.ts#L128)
 
 How this formatter handles skill references: 'directory', 'inline', or 'none'
 
@@ -171,7 +171,7 @@ How this formatter handles skill references: 'directory', 'inline', or 'none'
 
 > `protected` **render**(`built`): `PromptRender`
 
-Defined in: [formatters/src/formatters/bundle.ts:35](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/formatters/bundle.ts#L35)
+Defined in: [formatters/src/formatters/bundle.ts:35](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/formatters/bundle.ts#L35)
 
 #### Parameters
 
@@ -193,7 +193,7 @@ Defined in: [formatters/src/formatters/bundle.ts:35](https://github.com/mrwogu/p
 
 > `static` **getSupportedVersions**(): [`FormatterVersionMap`](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/FormatterVersionMap/index.md)
 
-Defined in: [formatters/src/formatters/bundle.ts:31](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/formatters/bundle.ts#L31)
+Defined in: [formatters/src/formatters/bundle.ts:31](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/formatters/bundle.ts#L31)
 
 #### Returns
 

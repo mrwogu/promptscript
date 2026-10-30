@@ -6,7 +6,7 @@
 
 # Class: FileSystemRegistry
 
-Defined in: [resolver/src/registry.ts:46](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry.ts#L46)
+Defined in: [resolver/src/registry.ts:46](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/registry.ts#L46)
 
 Registry implementation backed by the local filesystem.
 
@@ -20,7 +20,7 @@ Registry implementation backed by the local filesystem.
 
 > **new FileSystemRegistry**(`options`): `FileSystemRegistry`
 
-Defined in: [resolver/src/registry.ts:49](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry.ts#L49)
+Defined in: [resolver/src/registry.ts:49](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/registry.ts#L49)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ Defined in: [resolver/src/registry.ts:49](https://github.com/mrwogu/promptscript
 
 > **exists**(`path`): `Promise`\<`boolean`\>
 
-Defined in: [resolver/src/registry.ts:74](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry.ts#L74)
+Defined in: [resolver/src/registry.ts:74](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/registry.ts#L74)
 
 Check if a file exists in the registry.
 
@@ -66,7 +66,7 @@ True if the file exists
 
 > **fetch**(`path`): `Promise`\<`string`\>
 
-Defined in: [resolver/src/registry.ts:60](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry.ts#L60)
+Defined in: [resolver/src/registry.ts:60](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/registry.ts#L60)
 
 Fetch the content of a file from the registry.
 
@@ -98,7 +98,7 @@ FileNotFoundError if the file doesn't exist
 
 > **list**(`path`): `Promise`\<`string`[]\>
 
-Defined in: [resolver/src/registry.ts:79](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/registry.ts#L79)
+Defined in: [resolver/src/registry.ts:79](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/registry.ts#L79)
 
 List files in a directory.
 

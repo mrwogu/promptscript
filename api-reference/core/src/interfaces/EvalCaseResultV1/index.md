@@ -6,7 +6,7 @@
 
 # Interface: EvalCaseResultV1
 
-Defined in: [core/src/types/eval.ts:519](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L519)
+Defined in: [core/src/types/eval.ts:519](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L519)
 
 Result of one case on one model entry.
 
@@ -16,7 +16,7 @@ Result of one case on one model entry.
 
 > **assertions**: [`EvalAssertionResultV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalAssertionResultV1/index.md)[]
 
-Defined in: [core/src/types/eval.ts:527](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L527)
+Defined in: [core/src/types/eval.ts:527](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L527)
 
 Assertion results in suite order
 
@@ -26,7 +26,7 @@ Assertion results in suite order
 
 > **cache**: [`EvalCacheUseV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalCacheUseV1/index.md)
 
-Defined in: [core/src/types/eval.ts:542](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L542)
+Defined in: [core/src/types/eval.ts:542](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L542)
 
 Cache use of the case
 
@@ -36,7 +36,7 @@ Cache use of the case
 
 > **cacheKeys**: `string`[]
 
-Defined in: [core/src/types/eval.ts:544](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L544)
+Defined in: [core/src/types/eval.ts:544](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L544)
 
 Cache keys of every call or hit the case consumed, judge runs included, in call order
 
@@ -46,7 +46,7 @@ Cache keys of every call or hit the case consumed, judge runs included, in call 
 
 > `optional` **costUsd?**: `number`
 
-Defined in: [core/src/types/eval.ts:534](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L534)
+Defined in: [core/src/types/eval.ts:534](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L534)
 
 Cost of the case in USD.
 
@@ -60,7 +60,7 @@ Cost of the case in USD.
 
 > `optional` **error?**: [`EvalCaseErrorV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalCaseErrorV1/index.md)
 
-Defined in: [core/src/types/eval.ts:546](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L546)
+Defined in: [core/src/types/eval.ts:546](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L546)
 
 Error that stopped the case
 
@@ -70,7 +70,7 @@ Error that stopped the case
 
 > **id**: `string`
 
-Defined in: [core/src/types/eval.ts:521](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L521)
+Defined in: [core/src/types/eval.ts:521](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L521)
 
 Dataset row id
 
@@ -80,7 +80,7 @@ Dataset row id
 
 > **latencyMs**: `number`
 
-Defined in: [core/src/types/eval.ts:540](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L540)
+Defined in: [core/src/types/eval.ts:540](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L540)
 
 Latency of the case call in milliseconds.
 
@@ -98,7 +98,7 @@ integer
 
 > **status**: [`EvalCaseStatus`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EvalCaseStatus/index.md)
 
-Defined in: [core/src/types/eval.ts:525](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L525)
+Defined in: [core/src/types/eval.ts:525](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L525)
 
 Case status
 
@@ -108,7 +108,7 @@ Case status
 
 > `optional` **tags?**: `string`[]
 
-Defined in: [core/src/types/eval.ts:523](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L523)
+Defined in: [core/src/types/eval.ts:523](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L523)
 
 Row tags
 
@@ -118,6 +118,6 @@ Row tags
 
 > **usage**: [`EvalUsageV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalUsageV1/index.md)
 
-Defined in: [core/src/types/eval.ts:529](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L529)
+Defined in: [core/src/types/eval.ts:529](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L529)
 
 Calls and tokens of the case, judge runs included

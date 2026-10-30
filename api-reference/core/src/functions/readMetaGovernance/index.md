@@ -8,7 +8,7 @@
 
 > **readMetaGovernance**(`fields`): [`GovernanceMeta`](https://getpromptscript.dev/api-reference/core/src/interfaces/GovernanceMeta/index.md)
 
-Defined in: [core/src/prompt-definitions.ts:491](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/prompt-definitions.ts#L491)
+Defined in: [core/src/prompt-definitions.ts:491](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/prompt-definitions.ts#L491)
 
 Read the governance defaults of `@meta`. Invalid values are left out, see
 [validateGovernanceFields](https://getpromptscript.dev/api-reference/core/src/functions/validateGovernanceFields/index.md) for the messages.

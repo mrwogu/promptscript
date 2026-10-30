@@ -8,6 +8,6 @@
 
 > **BlockContent** = [`TextContent`](https://getpromptscript.dev/api-reference/core/src/interfaces/TextContent/index.md) \| [`ObjectContent`](https://getpromptscript.dev/api-reference/core/src/interfaces/ObjectContent/index.md) \| [`ArrayContent`](https://getpromptscript.dev/api-reference/core/src/interfaces/ArrayContent/index.md) \| [`MixedContent`](https://getpromptscript.dev/api-reference/core/src/interfaces/MixedContent/index.md)
 
-Defined in: [core/src/types/ast.ts:403](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L403)
+Defined in: [core/src/types/ast.ts:403](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L403)
 
 Union of all possible block content types.

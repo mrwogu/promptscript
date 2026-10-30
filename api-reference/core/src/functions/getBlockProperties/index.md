@@ -8,7 +8,7 @@
 
 > **getBlockProperties**(`block`): `Record`\<`string`, [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)\>
 
-Defined in: [core/src/canonical-ast.ts:1605](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/canonical-ast.ts#L1605)
+Defined in: [core/src/canonical-ast.ts:1605](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/canonical-ast.ts#L1605)
 
 ## Parameters
 

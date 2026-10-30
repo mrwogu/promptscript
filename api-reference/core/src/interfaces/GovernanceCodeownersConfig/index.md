@@ -6,7 +6,7 @@
 
 # Interface: GovernanceCodeownersConfig
 
-Defined in: [core/src/types/config.ts:250](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L250)
+Defined in: [core/src/types/config.ts:250](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L250)
 
 Settings of the generated CODEOWNERS file.
 
@@ -16,7 +16,7 @@ Settings of the generated CODEOWNERS file.
 
 > `optional` **output?**: `".github/CODEOWNERS"` \| `"CODEOWNERS"` \| `"docs/CODEOWNERS"` \| `".gitlab/CODEOWNERS"`
 
-Defined in: [core/src/types/config.ts:255](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L255)
+Defined in: [core/src/types/config.ts:255](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L255)
 
 Path of the CODEOWNERS file, relative to the repository root.
 
@@ -32,7 +32,7 @@ Path of the CODEOWNERS file, relative to the repository root.
 
 > `optional` **prompts?**: `boolean`
 
-Defined in: [core/src/types/config.ts:266](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L266)
+Defined in: [core/src/types/config.ts:266](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L266)
 
 Write lines for the `.prs` files that define prompts.
 
@@ -48,7 +48,7 @@ true
 
 > `optional` **protect?**: `string`[]
 
-Defined in: [core/src/types/config.ts:261](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L261)
+Defined in: [core/src/types/config.ts:261](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L261)
 
 More paths owned by the admins, relative to the repository root.
 Under `extends` the lists are joined and cannot shrink.

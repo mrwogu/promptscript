@@ -6,7 +6,7 @@
 
 # Interface: SkillValidationResult
 
-Defined in: [resolver/src/skill-validation.ts:31](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skill-validation.ts#L31)
+Defined in: [resolver/src/skill-validation.ts:31](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/skill-validation.ts#L31)
 
 Aggregate result of validating a SKILL.md file.
 
@@ -16,7 +16,7 @@ Aggregate result of validating a SKILL.md file.
 
 > **issues**: [`SkillValidationIssue`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/SkillValidationIssue/index.md)[]
 
-Defined in: [resolver/src/skill-validation.ts:33](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skill-validation.ts#L33)
+Defined in: [resolver/src/skill-validation.ts:33](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/skill-validation.ts#L33)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [resolver/src/skill-validation.ts:33](https://github.com/mrwogu/prom
 
 > **valid**: `boolean`
 
-Defined in: [resolver/src/skill-validation.ts:32](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skill-validation.ts#L32)
+Defined in: [resolver/src/skill-validation.ts:32](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/skill-validation.ts#L32)

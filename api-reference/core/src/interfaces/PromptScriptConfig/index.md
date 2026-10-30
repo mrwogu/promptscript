@@ -6,7 +6,7 @@
 
 # Interface: PromptScriptConfig
 
-Defined in: [core/src/types/config.ts:364](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L364)
+Defined in: [core/src/types/config.ts:364](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L364)
 
 PromptScript configuration file (promptscript.yaml).
 
@@ -16,7 +16,7 @@ PromptScript configuration file (promptscript.yaml).
 
 > `optional` **builds?**: `Record`\<`string`, [`BuildProfileConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/BuildProfileConfig/index.md)\>
 
-Defined in: [core/src/types/config.ts:523](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L523)
+Defined in: [core/src/types/config.ts:523](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L523)
 
 Named per-command build profiles.
 Profiles let one repository build multiple instruction artifacts to
@@ -28,7 +28,7 @@ different target directories without changing the default project compile.
 
 > `optional` **customConventions?**: `Record`\<`string`, [`OutputConvention`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputConvention/index.md)\>
 
-Defined in: [core/src/types/config.ts:572](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L572)
+Defined in: [core/src/types/config.ts:572](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L572)
 
 Custom convention definitions.
 Register custom conventions that can be referenced by name in targets.
@@ -39,7 +39,7 @@ Register custom conventions that can be referenced by name in targets.
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/config.ts:372](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L372)
+Defined in: [core/src/types/config.ts:372](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L372)
 
 Project description
 
@@ -49,7 +49,7 @@ Project description
 
 > `optional` **eval?**: [`EvalConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalConfig/index.md)
 
-Defined in: [core/src/types/config.ts:598](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L598)
+Defined in: [core/src/types/config.ts:598](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L598)
 
 Eval settings: providers and run limits.
 
@@ -67,7 +67,7 @@ eval:
 
 > `optional` **extends?**: `string`
 
-Defined in: [core/src/types/config.ts:382](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L382)
+Defined in: [core/src/types/config.ts:382](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L382)
 
 Extend another configuration file.
 Paths are resolved relative to the current config file.
@@ -84,7 +84,7 @@ extends: '../base-config.yaml'
 
 > `optional` **formatting?**: [`FormattingConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/FormattingConfig/index.md)
 
-Defined in: [core/src/types/config.ts:550](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L550)
+Defined in: [core/src/types/config.ts:550](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L550)
 
 Formatting configuration.
 Controls how generated markdown files are formatted.
@@ -106,7 +106,7 @@ formatting:
 
 > `optional` **governance?**: [`GovernanceConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/GovernanceConfig/index.md)
 
-Defined in: [core/src/types/config.ts:607](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L607)
+Defined in: [core/src/types/config.ts:607](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L607)
 
 Governance settings: admins and approval roles.
 
@@ -124,7 +124,7 @@ governance:
 
 > **id**: `string`
 
-Defined in: [core/src/types/config.ts:366](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L366)
+Defined in: [core/src/types/config.ts:366](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L366)
 
 Project identifier
 
@@ -134,7 +134,7 @@ Project identifier
 
 > `optional` **includePromptScriptSkill?**: `boolean`
 
-Defined in: [core/src/types/config.ts:631](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L631)
+Defined in: [core/src/types/config.ts:631](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L631)
 
 Include the bundled PromptScript language skill in compilation output.
 When enabled, the SKILL.md that teaches AI agents how to work with .prs files
@@ -152,7 +152,7 @@ true
 
 > `optional` **inherit?**: `string`
 
-Defined in: [core/src/types/config.ts:385](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L385)
+Defined in: [core/src/types/config.ts:385](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L385)
 
 Inheritance path
 
@@ -162,7 +162,7 @@ Inheritance path
 
 > `optional` **input?**: `object`
 
-Defined in: [core/src/types/config.ts:391](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L391)
+Defined in: [core/src/types/config.ts:391](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L391)
 
 Input file configuration.
 Controls which PromptScript files to compile.
@@ -191,7 +191,7 @@ Glob patterns for additional files to include
 
 > `optional` **models?**: [`ModelsConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelsConfig/index.md)
 
-Defined in: [core/src/types/config.ts:581](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L581)
+Defined in: [core/src/types/config.ts:581](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L581)
 
 Model catalog settings: the model set the instructions are written for
 and custom model profiles.
@@ -209,7 +209,7 @@ models:
 
 > `optional` **output?**: `object`
 
-Defined in: [core/src/types/config.ts:503](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L503)
+Defined in: [core/src/types/config.ts:503](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L503)
 
 Output configuration.
 Global output settings applied to all targets.
@@ -246,7 +246,7 @@ directories without unrelated root instruction files.
 
 > `optional` **policies?**: [`PolicyDefinition`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicyDefinition/index.md)[]
 
-Defined in: [core/src/types/config.ts:672](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L672)
+Defined in: [core/src/types/config.ts:672](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L672)
 
 Policies for skill extensions and prompts
 
@@ -256,7 +256,7 @@ Policies for skill extensions and prompts
 
 > `optional` **registries?**: [`RegistriesConfig`](https://getpromptscript.dev/api-reference/core/src/type-aliases/RegistriesConfig/index.md)
 
-Defined in: [core/src/types/config.ts:482](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L482)
+Defined in: [core/src/types/config.ts:482](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L482)
 
 Named registry aliases for multi-source imports.
 Maps alias names to Git repository URLs.
@@ -268,7 +268,7 @@ Coexists with `registry` - aliases take precedence for matching paths.
 
 > `optional` **registry?**: `object`
 
-Defined in: [core/src/types/config.ts:401](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L401)
+Defined in: [core/src/types/config.ts:401](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L401)
 
 Registry configuration
 
@@ -431,7 +431,7 @@ Remote URL (HTTP registry)
 
 > `optional` **releases?**: [`ReleasesConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/ReleasesConfig/index.md)
 
-Defined in: [core/src/types/config.ts:589](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L589)
+Defined in: [core/src/types/config.ts:589](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L589)
 
 Release settings for prompt bundles.
 
@@ -448,7 +448,7 @@ releases:
 
 > `optional` **skillTargets?**: `Record`\<`string`, `string`\>
 
-Defined in: [core/src/types/config.ts:537](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L537)
+Defined in: [core/src/types/config.ts:537](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L537)
 
 Per-source output directories for `@use` imports.
 
@@ -470,7 +470,7 @@ skillTargets:
 
 > **syntax**: `string`
 
-Defined in: [core/src/types/config.ts:369](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L369)
+Defined in: [core/src/types/config.ts:369](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L369)
 
 PromptScript syntax version
 
@@ -480,7 +480,7 @@ PromptScript syntax version
 
 > `optional` **targets?**: [`TargetEntry`](https://getpromptscript.dev/api-reference/core/src/type-aliases/TargetEntry/index.md)[]
 
-Defined in: [core/src/types/config.ts:566](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L566)
+Defined in: [core/src/types/config.ts:566](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L566)
 
 Output targets.
 
@@ -505,7 +505,7 @@ targets:
 
 > `optional` **telemetry?**: `boolean`
 
-Defined in: [core/src/types/config.ts:375](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L375)
+Defined in: [core/src/types/config.ts:375](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L375)
 
 Enable anonymous aggregate usage telemetry for this project
 
@@ -515,7 +515,7 @@ Enable anonymous aggregate usage telemetry for this project
 
 > `optional` **universalDir?**: `string` \| `boolean`
 
-Defined in: [core/src/types/config.ts:623](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L623)
+Defined in: [core/src/types/config.ts:623](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L623)
 
 Universal directory for auto-discovering skills and commands.
 Skills are discovered from `<universalDir>/skills/` and commands from `<universalDir>/commands/`.
@@ -544,7 +544,7 @@ universalDir: false          # Disable
 
 > `optional` **validation?**: `object`
 
-Defined in: [core/src/types/config.ts:634](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L634)
+Defined in: [core/src/types/config.ts:634](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L634)
 
 Validation settings
 
@@ -615,7 +615,7 @@ false
 
 > `optional` **watch?**: `object`
 
-Defined in: [core/src/types/config.ts:488](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/config.ts#L488)
+Defined in: [core/src/types/config.ts:488](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/config.ts#L488)
 
 Watch mode configuration.
 Settings for `prs compile --watch`.

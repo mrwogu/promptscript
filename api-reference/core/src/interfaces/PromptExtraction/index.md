@@ -6,7 +6,7 @@
 
 # Interface: PromptExtraction
 
-Defined in: [core/src/prompt-definitions.ts:32](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/prompt-definitions.ts#L32)
+Defined in: [core/src/prompt-definitions.ts:32](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/prompt-definitions.ts#L32)
 
 Result of reading every `@prompts` entry of a program.
 
@@ -16,7 +16,7 @@ Result of reading every `@prompts` entry of a program.
 
 > **issues**: [`PromptExtractionIssue`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptExtractionIssue/index.md)[]
 
-Defined in: [core/src/prompt-definitions.ts:36](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/prompt-definitions.ts#L36)
+Defined in: [core/src/prompt-definitions.ts:36](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/prompt-definitions.ts#L36)
 
 Everything wrong with the entries
 
@@ -26,6 +26,6 @@ Everything wrong with the entries
 
 > **prompts**: [`PromptDefinition`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptDefinition/index.md)[]
 
-Defined in: [core/src/prompt-definitions.ts:34](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/prompt-definitions.ts#L34)
+Defined in: [core/src/prompt-definitions.ts:34](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/prompt-definitions.ts#L34)
 
 Entries with a usable key. Invalid parts are left out, see `issues`.

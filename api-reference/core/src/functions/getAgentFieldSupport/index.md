@@ -8,7 +8,7 @@
 
 > **getAgentFieldSupport**(`target`): `Readonly`\<`Record`\<[`CanonicalAgentField`](https://getpromptscript.dev/api-reference/core/src/type-aliases/CanonicalAgentField/index.md), [`AgentFieldStatus`](https://getpromptscript.dev/api-reference/core/src/type-aliases/AgentFieldStatus/index.md)\>\>
 
-Defined in: [core/src/agent-capabilities.ts:144](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/agent-capabilities.ts#L144)
+Defined in: [core/src/agent-capabilities.ts:144](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/agent-capabilities.ts#L144)
 
 Return every canonical field status for one target.
 

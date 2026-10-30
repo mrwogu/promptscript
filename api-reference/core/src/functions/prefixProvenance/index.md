@@ -8,7 +8,7 @@
 
 > **prefixProvenance**(`trace`, `link`): [`ProvenanceTrace`](https://getpromptscript.dev/api-reference/core/src/interfaces/ProvenanceTrace/index.md)
 
-Defined in: [core/src/provenance.ts:683](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/provenance.ts#L683)
+Defined in: [core/src/provenance.ts:683](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/provenance.ts#L683)
 
 Prefix every history step with an import or inheritance link.
 

@@ -6,7 +6,7 @@
 
 # Interface: EvalUsageV1
 
-Defined in: [core/src/types/eval.ts:399](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L399)
+Defined in: [core/src/types/eval.ts:399](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L399)
 
 Calls and tokens of a run, a model entry or a case.
 
@@ -20,7 +20,7 @@ Calls and tokens of a run, a model entry or a case.
 
 > **calls**: `number`
 
-Defined in: [core/src/types/eval.ts:405](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L405)
+Defined in: [core/src/types/eval.ts:405](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L405)
 
 Model calls, cache hits included.
 
@@ -38,7 +38,7 @@ integer
 
 > **inputTokens**: `number`
 
-Defined in: [core/src/types/eval.ts:339](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L339)
+Defined in: [core/src/types/eval.ts:339](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L339)
 
 Input tokens.
 
@@ -60,7 +60,7 @@ integer
 
 > **outputTokens**: `number`
 
-Defined in: [core/src/types/eval.ts:345](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L345)
+Defined in: [core/src/types/eval.ts:345](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L345)
 
 Output tokens.
 

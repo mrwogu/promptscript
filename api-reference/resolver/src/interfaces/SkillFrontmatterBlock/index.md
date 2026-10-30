@@ -6,7 +6,7 @@
 
 # Interface: SkillFrontmatterBlock
 
-Defined in: [resolver/src/skills.ts:93](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L93)
+Defined in: [resolver/src/skills.ts:93](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/skills.ts#L93)
 
 A parsed SKILL.md frontmatter block with source offsets preserved.
 
@@ -16,7 +16,7 @@ A parsed SKILL.md frontmatter block with source offsets preserved.
 
 > **body**: `string`
 
-Defined in: [resolver/src/skills.ts:95](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L95)
+Defined in: [resolver/src/skills.ts:95](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/skills.ts#L95)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [resolver/src/skills.ts:95](https://github.com/mrwogu/promptscript/b
 
 > **location**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [resolver/src/skills.ts:96](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L96)
+Defined in: [resolver/src/skills.ts:96](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/skills.ts#L96)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [resolver/src/skills.ts:96](https://github.com/mrwogu/promptscript/b
 
 > **raw**: `string`
 
-Defined in: [resolver/src/skills.ts:94](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L94)
+Defined in: [resolver/src/skills.ts:94](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/skills.ts#L94)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [resolver/src/skills.ts:94](https://github.com/mrwogu/promptscript/b
 
 > **yamlLocation**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [resolver/src/skills.ts:97](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skills.ts#L97)
+Defined in: [resolver/src/skills.ts:97](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/skills.ts#L97)

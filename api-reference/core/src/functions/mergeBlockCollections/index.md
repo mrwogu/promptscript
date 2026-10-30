@@ -8,7 +8,7 @@
 
 > **mergeBlockCollections**(`base`, `incoming`, `policy`): [`Block`](https://getpromptscript.dev/api-reference/core/src/interfaces/Block/index.md)[]
 
-Defined in: [core/src/block-merge.ts:573](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/block-merge.ts#L573)
+Defined in: [core/src/block-merge.ts:573](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/block-merge.ts#L573)
 
 Compose one matching block across source layers while preserving same-layer duplicates.
 

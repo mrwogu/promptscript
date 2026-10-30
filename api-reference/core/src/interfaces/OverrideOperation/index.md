@@ -6,7 +6,7 @@
 
 # Interface: OverrideOperation
 
-Defined in: [core/src/types/ast.ts:711](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L711)
+Defined in: [core/src/types/ast.ts:711](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L711)
 
 Canonical explicit replacement operation.
 
@@ -20,7 +20,7 @@ Canonical explicit replacement operation.
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L497)
+Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L497)
 
 #### column
 
@@ -56,7 +56,7 @@ Byte offset from start of file
 
 > `readonly` **override**: [`CanonicalOverrideBlock`](https://getpromptscript.dev/api-reference/core/src/interfaces/CanonicalOverrideBlock/index.md)
 
-Defined in: [core/src/types/ast.ts:713](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L713)
+Defined in: [core/src/types/ast.ts:713](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L713)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [core/src/types/ast.ts:713](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **sourceLayerId**: `string`
 
-Defined in: [core/src/types/ast.ts:714](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L714)
+Defined in: [core/src/types/ast.ts:714](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L714)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [core/src/types/ast.ts:714](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **type**: `"OverrideOperation"`
 
-Defined in: [core/src/types/ast.ts:712](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L712)
+Defined in: [core/src/types/ast.ts:712](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L712)
 
 #### Overrides
 

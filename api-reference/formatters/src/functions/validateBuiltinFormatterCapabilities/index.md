@@ -8,7 +8,7 @@
 
 > **validateBuiltinFormatterCapabilities**(): `string`[]
 
-Defined in: [formatters/src/target-capability-consistency.ts:25](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/target-capability-consistency.ts#L25)
+Defined in: [formatters/src/target-capability-consistency.ts:25](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/target-capability-consistency.ts#L25)
 
 Find drift between canonical target metadata and formatter registrations.
 

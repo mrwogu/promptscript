@@ -6,13 +6,13 @@
 
 # Interface: EvalProviderLookup()
 
-Defined in: [eval/src/provider.ts:52](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider.ts#L52)
+Defined in: [eval/src/provider.ts:52](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/provider.ts#L52)
 
 Provider lookup of a run, by provider name.
 
 > **EvalProviderLookup**(`name`): [`EvalProvider`](https://getpromptscript.dev/api-reference/eval/src/type-aliases/EvalProvider/index.md)
 
-Defined in: [eval/src/provider.ts:53](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider.ts#L53)
+Defined in: [eval/src/provider.ts:53](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/provider.ts#L53)
 
 Provider lookup of a run, by provider name.
 
@@ -32,7 +32,7 @@ Provider lookup of a run, by provider name.
 
 > `optional` **secretIn?**: (`text`) => `string` \| `undefined`
 
-Defined in: [eval/src/provider.ts:58](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/provider.ts#L58)
+Defined in: [eval/src/provider.ts:58](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/provider.ts#L58)
 
 Name of the secret variable whose value appears in `text`, if any. The run
 checks every model of a suite with it, so a `${VAR}` in a profile stops it.

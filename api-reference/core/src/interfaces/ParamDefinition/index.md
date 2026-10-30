@@ -6,7 +6,7 @@
 
 # Interface: ParamDefinition
 
-Defined in: [core/src/types/ast.ts:57](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L57)
+Defined in: [core/src/types/ast.ts:57](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L57)
 
 Parameter definition in
 
@@ -36,7 +36,7 @@ Parameter definition in
 
 > `optional` **defaultValue?**: [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)
 
-Defined in: [core/src/types/ast.ts:66](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L66)
+Defined in: [core/src/types/ast.ts:66](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L66)
 
 Default value if optional
 
@@ -46,7 +46,7 @@ Default value if optional
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -60,7 +60,7 @@ Source location
 
 > **name**: `string`
 
-Defined in: [core/src/types/ast.ts:60](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L60)
+Defined in: [core/src/types/ast.ts:60](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L60)
 
 Parameter name
 
@@ -70,7 +70,7 @@ Parameter name
 
 > **optional**: `boolean`
 
-Defined in: [core/src/types/ast.ts:64](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L64)
+Defined in: [core/src/types/ast.ts:64](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L64)
 
 Whether the parameter is optional
 
@@ -80,7 +80,7 @@ Whether the parameter is optional
 
 > **paramType**: [`ParamType`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ParamType/index.md)
 
-Defined in: [core/src/types/ast.ts:62](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L62)
+Defined in: [core/src/types/ast.ts:62](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L62)
 
 Parameter type
 
@@ -90,7 +90,7 @@ Parameter type
 
 > `readonly` **type**: `"ParamDefinition"`
 
-Defined in: [core/src/types/ast.ts:58](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L58)
+Defined in: [core/src/types/ast.ts:58](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L58)
 
 Node type discriminator
 

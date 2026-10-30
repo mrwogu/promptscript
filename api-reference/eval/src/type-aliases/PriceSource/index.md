@@ -8,6 +8,6 @@
 
 > **PriceSource** = `"built-in"` \| `"project"`
 
-Defined in: [eval/src/run.ts:995](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/run.ts#L995)
+Defined in: [eval/src/run.ts:995](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L995)
 
 Where the price of a model comes from.

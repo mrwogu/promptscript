@@ -8,7 +8,7 @@
 
 > `const` **KNOWN\_SECTIONS**: [`SectionInfo`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/SectionInfo/index.md)[]
 
-Defined in: [formatters/src/section-registry.ts:29](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/section-registry.ts#L29)
+Defined in: [formatters/src/section-registry.ts:29](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/section-registry.ts#L29)
 
 All known sections that formatters should support.
 This is the source of truth for section parity.

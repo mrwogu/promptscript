@@ -8,7 +8,7 @@
 
 > **SpawnDetached** = (`command`, `args`, `options`) => [`DetachedChild`](https://getpromptscript.dev/api-reference/telemetry/src/interfaces/DetachedChild/index.md)
 
-Defined in: [telemetry/src/reporter.ts:30](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/telemetry/src/reporter.ts#L30)
+Defined in: [telemetry/src/reporter.ts:30](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/telemetry/src/reporter.ts#L30)
 
 ## Parameters
 

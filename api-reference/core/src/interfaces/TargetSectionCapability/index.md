@@ -6,7 +6,7 @@
 
 # Interface: TargetSectionCapability
 
-Defined in: [core/src/target-capabilities.ts:29](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/target-capabilities.ts#L29)
+Defined in: [core/src/target-capabilities.ts:29](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L29)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [core/src/target-capabilities.ts:29](https://github.com/mrwogu/promp
 
 > `readonly` **headers**: `string` \| readonly `string`[]
 
-Defined in: [core/src/target-capabilities.ts:31](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/target-capabilities.ts#L31)
+Defined in: [core/src/target-capabilities.ts:31](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L31)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [core/src/target-capabilities.ts:31](https://github.com/mrwogu/promp
 
 > `readonly` **support**: [`TargetSectionSupport`](https://getpromptscript.dev/api-reference/core/src/type-aliases/TargetSectionSupport/index.md)
 
-Defined in: [core/src/target-capabilities.ts:30](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/target-capabilities.ts#L30)
+Defined in: [core/src/target-capabilities.ts:30](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L30)

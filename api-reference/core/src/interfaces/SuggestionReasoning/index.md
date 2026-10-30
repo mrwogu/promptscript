@@ -6,7 +6,7 @@
 
 # Interface: SuggestionReasoning
 
-Defined in: [core/src/types/manifest.ts:195](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/manifest.ts#L195)
+Defined in: [core/src/types/manifest.ts:195](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L195)
 
 Explanation for why a suggestion was made.
 
@@ -16,7 +16,7 @@ Explanation for why a suggestion was made.
 
 > `optional` **matchedValue?**: `string`
 
-Defined in: [core/src/types/manifest.ts:203](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/manifest.ts#L203)
+Defined in: [core/src/types/manifest.ts:203](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L203)
 
 The specific value that matched (file name, dependency, etc.)
 
@@ -26,7 +26,7 @@ The specific value that matched (file name, dependency, etc.)
 
 > **reason**: `string`
 
-Defined in: [core/src/types/manifest.ts:199](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/manifest.ts#L199)
+Defined in: [core/src/types/manifest.ts:199](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L199)
 
 Why it was suggested
 
@@ -36,7 +36,7 @@ Why it was suggested
 
 > **suggestion**: `string`
 
-Defined in: [core/src/types/manifest.ts:197](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/manifest.ts#L197)
+Defined in: [core/src/types/manifest.ts:197](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L197)
 
 The suggestion that was made
 
@@ -46,6 +46,6 @@ The suggestion that was made
 
 > **trigger**: `"file"` \| `"always"` \| `"dependency"` \| `"language"` \| `"framework"`
 
-Defined in: [core/src/types/manifest.ts:201](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/manifest.ts#L201)
+Defined in: [core/src/types/manifest.ts:201](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L201)
 
 What triggered the suggestion

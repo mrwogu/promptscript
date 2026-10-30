@@ -8,7 +8,7 @@
 
 > **sha256Hex**(`text`): `string`
 
-Defined in: [core/src/utils/sha256.ts:33](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/utils/sha256.ts#L33)
+Defined in: [core/src/utils/sha256.ts:33](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/utils/sha256.ts#L33)
 
 SHA-256 of a string, as 64 lowercase hex characters.
 

@@ -6,7 +6,7 @@
 
 # Class: BrowserResolver
 
-Defined in: [browser-compiler/src/resolver.ts:339](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/resolver.ts#L339)
+Defined in: [browser-compiler/src/resolver.ts:339](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/browser-compiler/src/resolver.ts#L339)
 
 Browser-compatible resolver for PromptScript files with inheritance and import support.
 
@@ -18,7 +18,7 @@ This resolver uses an in-memory virtual file system instead of Node.js fs.
 
 > **new BrowserResolver**(`options`): `BrowserResolver`
 
-Defined in: [browser-compiler/src/resolver.ts:347](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/resolver.ts#L347)
+Defined in: [browser-compiler/src/resolver.ts:347](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/browser-compiler/src/resolver.ts#L347)
 
 #### Parameters
 
@@ -36,7 +36,7 @@ Defined in: [browser-compiler/src/resolver.ts:347](https://github.com/mrwogu/pro
 
 > **clearCache**(): `void`
 
-Defined in: [browser-compiler/src/resolver.ts:1137](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/resolver.ts#L1137)
+Defined in: [browser-compiler/src/resolver.ts:1137](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/browser-compiler/src/resolver.ts#L1137)
 
 Clear the resolution cache.
 
@@ -50,7 +50,7 @@ Clear the resolution cache.
 
 > **resolve**(`entryPath`): `Promise`\<[`ResolvedAST`](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/ResolvedAST/index.md)\>
 
-Defined in: [browser-compiler/src/resolver.ts:362](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/browser-compiler/src/resolver.ts#L362)
+Defined in: [browser-compiler/src/resolver.ts:362](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/browser-compiler/src/resolver.ts#L362)
 
 Resolve a PromptScript file and all its dependencies.
 

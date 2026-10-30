@@ -8,7 +8,7 @@
 
 > **portableRealpathSync**(`path`): `string`
 
-Defined in: [core/src/utils/realpath.ts:16](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/utils/realpath.ts#L16)
+Defined in: [core/src/utils/realpath.ts:16](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/utils/realpath.ts#L16)
 
 realpathSync that works across runtimes. Node exposes the faster
 realpathSync.native binding, but Deno only implements realpathSync, so the

@@ -8,7 +8,7 @@
 
 > **PortableHookEvent** = `"pre-terminal-command"` \| `"pre-tool-use"` \| `"post-tool-use"` \| `"session-start"` \| `"setup"` \| `"subagent-start"` \| `"notification"` \| `"stop"`
 
-Defined in: [formatters/src/hook-adapters.ts:14](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/formatters/src/hook-adapters.ts#L14)
+Defined in: [formatters/src/hook-adapters.ts:14](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/hook-adapters.ts#L14)
 
 Portable hook event names (kebab-case).
 These map to target-native event names per target contract.

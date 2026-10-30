@@ -8,6 +8,6 @@
 
 > `const` **PROMPT\_INPUT\_NAME\_PATTERN**: `RegExp`
 
-Defined in: [core/src/prompt-definitions.ts:91](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/prompt-definitions.ts#L91)
+Defined in: [core/src/prompt-definitions.ts:91](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/prompt-definitions.ts#L91)
 
 Pattern of an input name. A slot can only name such an input.

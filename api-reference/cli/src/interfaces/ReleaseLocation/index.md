@@ -6,7 +6,7 @@
 
 # Interface: ReleaseLocation
 
-Defined in: [cli/src/utils/release-report.ts:95](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L95)
+Defined in: [cli/src/utils/release-report.ts:95](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/cli/src/utils/release-report.ts#L95)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/release-report.ts:95](https://github.com/mrwogu/promp
 
 > `optional` **column?**: `number`
 
-Defined in: [cli/src/utils/release-report.ts:98](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L98)
+Defined in: [cli/src/utils/release-report.ts:98](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/cli/src/utils/release-report.ts#L98)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [cli/src/utils/release-report.ts:98](https://github.com/mrwogu/promp
 
 > `optional` **file?**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:96](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L96)
+Defined in: [cli/src/utils/release-report.ts:96](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/cli/src/utils/release-report.ts#L96)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [cli/src/utils/release-report.ts:96](https://github.com/mrwogu/promp
 
 > `optional` **line?**: `number`
 
-Defined in: [cli/src/utils/release-report.ts:97](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/cli/src/utils/release-report.ts#L97)
+Defined in: [cli/src/utils/release-report.ts:97](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/cli/src/utils/release-report.ts#L97)

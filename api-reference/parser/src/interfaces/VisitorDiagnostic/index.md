@@ -6,7 +6,7 @@
 
 # Interface: VisitorDiagnostic
 
-Defined in: [parser/src/grammar/visitor.ts:267](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/parser/src/grammar/visitor.ts#L267)
+Defined in: [parser/src/grammar/visitor.ts:267](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/parser/src/grammar/visitor.ts#L267)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [parser/src/grammar/visitor.ts:267](https://github.com/mrwogu/prompt
 
 > `readonly` **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [parser/src/grammar/visitor.ts:269](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/parser/src/grammar/visitor.ts#L269)
+Defined in: [parser/src/grammar/visitor.ts:269](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/parser/src/grammar/visitor.ts#L269)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [parser/src/grammar/visitor.ts:269](https://github.com/mrwogu/prompt
 
 > `readonly` **message**: `string`
 
-Defined in: [parser/src/grammar/visitor.ts:268](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/parser/src/grammar/visitor.ts#L268)
+Defined in: [parser/src/grammar/visitor.ts:268](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/parser/src/grammar/visitor.ts#L268)

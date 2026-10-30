@@ -8,7 +8,7 @@
 
 > `const` **importExcludes**: [`ValidationRule`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationRule/index.md)
 
-Defined in: [validator/src/rules/import-excludes.ts:55](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/rules/import-excludes.ts#L55)
+Defined in: [validator/src/rules/import-excludes.ts:55](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/rules/import-excludes.ts#L55)
 
 PS040: Per-import validation excludes must stay bound to the pinned commit.
 

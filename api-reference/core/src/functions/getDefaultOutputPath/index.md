@@ -8,7 +8,7 @@
 
 > **getDefaultOutputPath**(`name`): `string`
 
-Defined in: [core/src/target-catalog.ts:931](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/target-catalog.ts#L931)
+Defined in: [core/src/target-catalog.ts:931](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-catalog.ts#L931)
 
 Get the default output path for a known target.
 

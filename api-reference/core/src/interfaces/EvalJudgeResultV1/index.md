@@ -6,7 +6,7 @@
 
 # Interface: EvalJudgeResultV1
 
-Defined in: [core/src/types/eval.ts:474](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L474)
+Defined in: [core/src/types/eval.ts:474](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L474)
 
 Judge runs behind one llm-judge assertion result.
 
@@ -16,7 +16,7 @@ Judge runs behind one llm-judge assertion result.
 
 > `optional` **costUsd?**: `number`
 
-Defined in: [core/src/types/eval.ts:487](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L487)
+Defined in: [core/src/types/eval.ts:487](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L487)
 
 Cost of the judge runs in USD.
 
@@ -30,7 +30,7 @@ Cost of the judge runs in USD.
 
 > **runs**: `number`
 
-Defined in: [core/src/types/eval.ts:482](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L482)
+Defined in: [core/src/types/eval.ts:482](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L482)
 
 Runs made.
 
@@ -48,6 +48,6 @@ integer
 
 > **verdicts**: [`EvalVerdict`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EvalVerdict/index.md)[]
 
-Defined in: [core/src/types/eval.ts:476](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L476)
+Defined in: [core/src/types/eval.ts:476](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L476)
 
 Verdict of each run, in run order

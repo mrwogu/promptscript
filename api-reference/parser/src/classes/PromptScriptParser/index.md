@@ -6,7 +6,7 @@
 
 # Class: PromptScriptParser
 
-Defined in: [parser/src/grammar/parser.ts:52](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/parser/src/grammar/parser.ts#L52)
+Defined in: [parser/src/grammar/parser.ts:52](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/parser/src/grammar/parser.ts#L52)
 
 PromptScript CST Parser.
 
@@ -23,7 +23,7 @@ Uses Chevrotain's CstParser with error recovery enabled.
 
 > **new PromptScriptParser**(): `PromptScriptParser`
 
-Defined in: [parser/src/grammar/parser.ts:53](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/parser/src/grammar/parser.ts#L53)
+Defined in: [parser/src/grammar/parser.ts:53](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/parser/src/grammar/parser.ts#L53)
 
 #### Returns
 
@@ -39,7 +39,7 @@ Defined in: [parser/src/grammar/parser.ts:53](https://github.com/mrwogu/promptsc
 
 > **program**: `ParserMethod`\<\[\], `CstNode`\>
 
-Defined in: [parser/src/grammar/parser.ts:66](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/parser/src/grammar/parser.ts#L66)
+Defined in: [parser/src/grammar/parser.ts:66](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/parser/src/grammar/parser.ts#L66)
 
 program
   : metaBlock? (inheritDecl | useDecl | extendBlock | overrideBlock | block)*

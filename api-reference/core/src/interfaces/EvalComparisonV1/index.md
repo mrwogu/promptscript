@@ -6,7 +6,7 @@
 
 # Interface: EvalComparisonV1
 
-Defined in: [core/src/types/eval.ts:763](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L763)
+Defined in: [core/src/types/eval.ts:763](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L763)
 
 Comparison of a candidate report against a baseline, version 1: the
 JSON output of a standalone compare, or `comparison` inside a report.
@@ -17,7 +17,7 @@ JSON output of a standalone compare, or `comparison` inside a report.
 
 > `optional` **$schema?**: `"https://getpromptscript.dev/schema/eval-comparison/v1.json"`
 
-Defined in: [core/src/types/eval.ts:769](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L769)
+Defined in: [core/src/types/eval.ts:769](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L769)
 
 Schema URL, the version tag of a standalone comparison; absent inside
 a report.
@@ -34,7 +34,7 @@ a report.
 
 > **entries**: [`EvalComparisonEntryV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalComparisonEntryV1/index.md)[]
 
-Defined in: [core/src/types/eval.ts:779](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L779)
+Defined in: [core/src/types/eval.ts:779](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L779)
 
 Entries sorted by suite name, then model order
 
@@ -44,7 +44,7 @@ Entries sorted by suite name, then model order
 
 > **regression**: `boolean`
 
-Defined in: [core/src/types/eval.ts:777](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L777)
+Defined in: [core/src/types/eval.ts:777](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L777)
 
 Whether any case regressed or a pass rate dropped beyond the tolerance
 
@@ -54,7 +54,7 @@ Whether any case regressed or a pass rate dropped beyond the tolerance
 
 > **tolerance**: `number`
 
-Defined in: [core/src/types/eval.ts:775](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/eval.ts#L775)
+Defined in: [core/src/types/eval.ts:775](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L775)
 
 Pass-rate drop that counts as a regression.
 

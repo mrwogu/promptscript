@@ -6,7 +6,7 @@
 
 # Interface: SkillFilterOptions
 
-Defined in: [resolver/src/imports.ts:132](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/imports.ts#L132)
+Defined in: [resolver/src/imports.ts:132](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/imports.ts#L132)
 
 Filter options for skill-level
 
@@ -20,7 +20,7 @@ filtering.
 
 > `optional` **excludes?**: `string`[]
 
-Defined in: [resolver/src/imports.ts:136](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/imports.ts#L136)
+Defined in: [resolver/src/imports.ts:136](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/imports.ts#L136)
 
 Remove these skill names
 
@@ -30,6 +30,6 @@ Remove these skill names
 
 > `optional` **includes?**: `string`[]
 
-Defined in: [resolver/src/imports.ts:134](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/imports.ts#L134)
+Defined in: [resolver/src/imports.ts:134](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/imports.ts#L134)
 
 Keep only these skill names

@@ -8,7 +8,7 @@
 
 > **compareReports**(`baseline`, `candidate`, `options`): [`EvalComparisonV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalComparisonV1/index.md)
 
-Defined in: [eval/src/compare.ts:228](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/compare.ts#L228)
+Defined in: [eval/src/compare.ts:228](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/compare.ts#L228)
 
 Compare a candidate report with a baseline. Suites match by name, models
 by `ref`, cases by id. A case regressed when it passed in the baseline and

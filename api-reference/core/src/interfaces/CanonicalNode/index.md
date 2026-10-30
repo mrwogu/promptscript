@@ -6,7 +6,7 @@
 
 # Interface: CanonicalNode
 
-Defined in: [core/src/types/ast.ts:495](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L495)
+Defined in: [core/src/types/ast.ts:495](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L495)
 
 Base interface for immutable canonical AST nodes.
 
@@ -42,7 +42,7 @@ Base interface for immutable canonical AST nodes.
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L497)
+Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L497)
 
 #### column
 
@@ -74,4 +74,4 @@ Byte offset from start of file
 
 > `readonly` **type**: `string`
 
-Defined in: [core/src/types/ast.ts:496](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/ast.ts#L496)
+Defined in: [core/src/types/ast.ts:496](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L496)

@@ -8,7 +8,7 @@
 
 > **isGitUrl**(`url`): `boolean`
 
-Defined in: [resolver/src/git-url-utils.ts:84](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/git-url-utils.ts#L84)
+Defined in: [resolver/src/git-url-utils.ts:84](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/git-url-utils.ts#L84)
 
 Check if a URL is a Git repository URL.
 

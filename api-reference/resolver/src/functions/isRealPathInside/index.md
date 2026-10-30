@@ -8,7 +8,7 @@
 
 > **isRealPathInside**(`filePath`, `cachePath`): `Promise`\<`boolean`\>
 
-Defined in: [resolver/src/reference-hasher.ts:39](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/reference-hasher.ts#L39)
+Defined in: [resolver/src/reference-hasher.ts:39](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/reference-hasher.ts#L39)
 
 ## Parameters
 

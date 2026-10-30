@@ -8,7 +8,7 @@
 
 > **normalizeDenyText**(`text`): `string`
 
-Defined in: [validator/src/policy/content-rules.ts:35](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/validator/src/policy/content-rules.ts#L35)
+Defined in: [validator/src/policy/content-rules.ts:35](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/policy/content-rules.ts#L35)
 
 Normalize text for `deny` matching: NFKC, default-ignorable code points
 removed, whitespace collapsed, lowercase. It catches plain variants of a

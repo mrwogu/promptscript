@@ -8,7 +8,7 @@
 
 > **postTelemetry**(`endpoint`, `payload`, `timeoutMs`, `fetchImplementation?`): `Promise`\<[`SendResult`](https://getpromptscript.dev/api-reference/telemetry/src/type-aliases/SendResult/index.md)\>
 
-Defined in: [telemetry/src/transport.ts:17](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/telemetry/src/transport.ts#L17)
+Defined in: [telemetry/src/transport.ts:17](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/telemetry/src/transport.ts#L17)
 
 ## Parameters
 

@@ -8,7 +8,7 @@
 
 > **createAnthropicProvider**(`config`, `deps?`): [`EvalProvider`](https://getpromptscript.dev/api-reference/eval/src/type-aliases/EvalProvider/index.md)
 
-Defined in: [eval/src/http-provider.ts:354](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/eval/src/http-provider.ts#L354)
+Defined in: [eval/src/http-provider.ts:354](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/http-provider.ts#L354)
 
 Create a provider for the Anthropic Messages API. The body comes from the
 runtime mapper; this adds the URL, the fixed headers and the transport

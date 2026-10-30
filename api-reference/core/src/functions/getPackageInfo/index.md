@@ -8,7 +8,7 @@
 
 > **getPackageInfo**(`baseDir`, `relativePath?`): `PackageInfo`
 
-Defined in: [core/src/utils/package.ts:31](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/utils/package.ts#L31)
+Defined in: [core/src/utils/package.ts:31](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/utils/package.ts#L31)
 
 Get package information from a package.json file.
 

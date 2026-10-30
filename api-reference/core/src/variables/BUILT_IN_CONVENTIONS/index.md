@@ -8,6 +8,6 @@
 
 > `const` **BUILT\_IN\_CONVENTIONS**: `Record`\<[`BuiltInConventionName`](https://getpromptscript.dev/api-reference/core/src/type-aliases/BuiltInConventionName/index.md), [`OutputConvention`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputConvention/index.md)\>
 
-Defined in: [core/src/types/convention.ts:149](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/core/src/types/convention.ts#L149)
+Defined in: [core/src/types/convention.ts:149](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/convention.ts#L149)
 
 Registry of built-in conventions.

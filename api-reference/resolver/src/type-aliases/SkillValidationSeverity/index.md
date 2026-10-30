@@ -8,7 +8,7 @@
 
 > **SkillValidationSeverity** = `"error"` \| `"warning"`
 
-Defined in: [resolver/src/skill-validation.ts:12](https://github.com/mrwogu/promptscript/blob/7de2fced4e580154b82fc17ad4152659742399c3/packages/resolver/src/skill-validation.ts#L12)
+Defined in: [resolver/src/skill-validation.ts:12](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/skill-validation.ts#L12)
 
 Severity of a skill validation issue.
 - `error`: violates the Agent Skills specification — must be fixed
