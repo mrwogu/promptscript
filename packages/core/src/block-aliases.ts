@@ -28,6 +28,7 @@ function mergeAliasCollision(base: Block, incoming: Block): Block {
   return mergeBlockCollections([base], [incoming], ALIAS_MERGE_POLICY)[0]!;
 }
 
+/** @internal Used by the resolver for block alias normalization. */
 export interface NormalizeBlockAliasOptions {
   readonly preserveDeclarationOrder?: boolean;
 }
@@ -46,6 +47,8 @@ function precedes(
  *
  * Repeated canonical blocks remain distinct for compatibility. A collision is
  * merged only when at least one declaration used an alias.
+ *
+ * @internal Used by the resolver for block alias normalization.
  */
 export function normalizeBlockAliases(
   ast: Program,
