@@ -15,8 +15,8 @@ the [CLI reference](https://getpromptscript.dev/reference/cli/#prs-eval).
   loadSuites ──────► structure, file names, dataset and label paths
         │            PS6200-PS6202
         ▼
-  checkSuites ─────► prompt id, fields, schemas, models, prices
-        │            PS6203-PS6206, PS6210, PS6213, PS6501
+  checkSuites ─────► prompt id, fields, schemas, models, prices, judge rubrics
+        │            PS6203-PS6209, PS6210, PS6212, PS6213, PS6215, PS6216, PS6501
         │            (the compiled bundles and the model catalog come in)
         ▼
   readDataset ─────► JSONL, CSV or YAML rows, ids, size and row limits
@@ -26,14 +26,17 @@ the [CLI reference](https://getpromptscript.dev/reference/cli/#prs-eval).
         └─► scanDatasetRow    validator security rules and PII
                               PS6110-PS6114
 
+  readLabels ──► JSONL, CSV or YAML human verdicts for judge assertions
+                 PS6211, PS6603, PS6604
+
   runEval ─────► all of the above for every suite, then the cache lookups and
         │        the budget plan; any error stops here, before any call
         ▼
   each case ──► cache hit, or a provider call with a reservation and retries
         │
         ▼
-  evaluateAssertions ──► equals, contains, regex, json-schema on the response
-        │
+  evaluateAssertions ──► equals, contains, regex, json-schema on the response,
+        │                then the llm-judge calls
         ▼
   EvalReportV1 (schema/eval-report-v1.json)
 ```
@@ -83,18 +86,73 @@ records that personal data is expected.
 | `contains`    | the target contains all values, or any with `mode: any`                          |
 | `regex`       | the pattern matches; a target over 64 KiB fails instead of running               |
 | `json-schema` | Ajv in strict mode accepts the parsed response; no remote `$ref`                 |
+| `llm-judge`   | more than half of the judge runs say `pass`; see "Judge and labels" below        |
 
 `field` reads one property of the response parsed as JSON (trimmed, one fenced block unwrapped,
 own properties only). `regex` patterns and the `pattern` keywords of schemas share a 1 second
 budget per assertion, and an assertion that runs out fails the case. Reasons are at most 160
 characters and quote at most 60 characters of the actual value.
 
+## Judge and labels
+
+An `llm-judge` assertion sends the response, or its `field`, to a rubric. The rubric is a prompt of
+the project, compiled, hashed and checked like any other, and it must not be the prompt under
+test. Its output must be exactly `verdict` (an enum of `pass` and `fail`) and `reason` (a string).
+`checkSuites` refuses a rubric that does not fit (PS6207, PS6208, PS6209).
+
+The rubric gets the inputs it declares, all of them strings, and no others: `response` (the
+judged text, required), `case_inputs` and `expected` (canonical JSON, `expected` empty when the row
+has none), `criteria` (from the assertion, empty without one) and `boundary`. Any other input
+needs a default. `response`, `case_inputs` and `expected` must stay out of the system messages
+(PS6212), because text a model wrote would read there as instructions. The way to show the
+response is a fence in a user message:
+
+```
+<response-{{input.boundary}}>{{input.response}}</response-{{input.boundary}}>
+```
+
+`boundary` is the first 16 hex characters of the SHA-256 of the response, so the response cannot
+close its own fence. A rubric that shows the response without it gets a warning (PS6216). Values are
+inserted as text and never read as slots again. A response over 64 KiB is not judged (PS6602).
+Majority voting removes sampling noise, not instructions inside the response, so keep a
+deterministic assertion next to the judge.
+
+Each assertion makes `runs` calls (1, 3 or 5, from the assertion, then the suite `judge`, then 3).
+They are separate calls with their own cache entries; the sample index is the run number from 1,
+so raising `runs` from 3 to 5 reuses the first three entries. The key covers the rubric hash, the
+inputs without the boundary, the judge model, its params and the sample. The judge model comes from
+the assertion, then the suite `judge`, then the rubric's own model; a run-wide `--model` does not
+change it. Params come from the rubric as written, with the output cap folded in. A temperature is
+not added: set `temperature` in the rubric where the model accepts it.
+
+The assertion passes when more than half of the runs made say `pass`. When more than half give no
+valid verdict, the case is an error (PS6601). A verdict is valid only as a JSON object with the two
+keys; there is no search for the word `pass` in free text. A judge that failed does not hide the
+other results: the case keeps its finished assertions. Judges run on every answered case, also when
+a deterministic assertion failed.
+
+Judge calls spend like case calls: each reserves its worst case from its real messages, the judge
+model needs a price, and the cost of a case includes them. A case that is not cached has no
+response yet, so before the run its judge calls are estimated at 4 bytes per output token of the
+model under test, at most 64 KiB. That is an estimate, not a bound; the reservation of each call
+uses the real bytes. A case the cache answers has its judge entries looked up before the run, so a
+dry run of a full cache shows no calls.
+
+A suite's `labels` file holds human verdicts: rows of `id`, `assertion`, `verdict` and `note`, in
+JSONL, CSV or YAML by extension. An `assertion` must be an `llm-judge` assertion of the suite
+(PS6211). Ids and verdicts are checked, a pair is labelled once, and the file is capped like a
+dataset; a bad file is PS6603. The `note` is for people and is never output. Labels for rows the run
+did not read are one warning (PS6604). Labels never change a result. Each model entry gets
+`judgeAgreement`: per judge assertion, `labelled` cases (a label, and the judge ran to a majority)
+and `agreed` (the majority matches the label). Cases in error or with no judged target are not
+counted. It is a raw count, not a chance-corrected score.
+
 ## Runs
 
 `runEval` renders every row with `@promptscript/runtime` before any call; a row the renderer
 refuses is a setup error. It never reads the environment and never prints: the caller passes the
 providers, the cache mode and the budget, and gets the report back. A failed case never throws; it
-becomes a case with status `error`. `llm-judge` assertions are refused (PS6600). A run with no
+becomes a case with status `error`. A run with no
 case is an error too, and so is a budget, concurrency, row limit or output cap that is not a plain
 number (PS6504, PS6309), reported together with the suite check errors.
 

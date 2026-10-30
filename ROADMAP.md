@@ -299,7 +299,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
   - [x] Define test cases for prompts - eval suites with JSONL, CSV or YAML datasets and assertions
   - [x] Run against multiple models - `prs eval run` with a replay cache and a cost budget, `prs eval compare` for reports
   - [x] Run suites against what an environment serves - `prs eval run --label <env>`
-  - [ ] Score effectiveness with an LLM judge
+  - [x] Score effectiveness with an LLM judge - llm-judge assertions with rubric prompts, majority runs and agreement with human labels
 
 - [ ] **Model version targeting**
   - [x] Model catalog with lifecycle status, successors, and per-target model names (`models` in `promptscript.yaml`)
