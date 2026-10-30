@@ -200,6 +200,15 @@ export function parsePath(path: string): ParsedPath {
 }
 ````
 
+### API Reports
+
+Packages with an `api-extractor.json` have a committed report in `api/<pkg>.api.md`. Today that is `core`.
+
+- `pnpm api:check` builds the package and fails if the exported API changed and the report was not updated.
+- `pnpm api:update` rewrites the report. Review the diff, it is the list of exported types and functions.
+- A type used by an exported declaration must be exported too. A missing export fails the check.
+- Do not edit the report by hand and do not format it.
+
 ## Testing
 
 ### Running Tests
