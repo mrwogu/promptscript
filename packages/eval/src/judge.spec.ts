@@ -318,6 +318,9 @@ describe('readVerdict', () => {
     ['text that is not JSON', 'pass'],
     ['free text with the word', 'verdict: pass'],
     ['an array', '[{"verdict":"pass","reason":"x"}]'],
+    ['a repeated verdict', '{"verdict":"fail","reason":"x","verdict":"pass"}'],
+    ['a repeated reason', '{"verdict":"pass","reason":"x","reason":"y"}'],
+    ['a repeated key in a fence', '```json\n{"verdict":"fail","verdict":"pass","reason":"x"}\n```'],
     ['a verdict after other text', 'Sure! {"verdict":"pass","reason":"x"}'],
   ])('refuses %s', (_name, text) => {
     expect(readVerdict(text)).toBeUndefined();

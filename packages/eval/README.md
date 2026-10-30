@@ -112,7 +112,10 @@ response is a fence in a user message:
 ```
 
 `boundary` is the first 16 hex characters of the SHA-256 of the response, so the response cannot
-close its own fence. A rubric that shows the response without it gets a warning (PS6216). Values are
+close its own fence. A rubric that shows `response`, `case_inputs` or `expected` outside such a
+fence (an opening tag named with the boundary right before the slot and its closing tag right
+after) gets a warning (PS6216). Case inputs are untrusted text too: a dataset can come from
+`prs eval import`, so fence them like the response. Values are
 inserted as text and never read as slots again. A response over 64 KiB is not judged (PS6602).
 Majority voting removes sampling noise, not instructions inside the response, so keep a
 deterministic assertion next to the judge.
@@ -127,7 +130,7 @@ not added: set `temperature` in the rubric where the model accepts it.
 
 The assertion passes when more than half of the runs made say `pass`. When more than half give no
 valid verdict, the case is an error (PS6601). A verdict is valid only as a JSON object with the two
-keys; there is no search for the word `pass` in free text. A judge that failed does not hide the
+keys, each once; there is no search for the word `pass` in free text. A judge that failed does not hide the
 other results: the case keeps its finished assertions. Judges run on every answered case, also when
 a deterministic assertion failed.
 
@@ -152,9 +155,9 @@ counted. It is a raw count, not a chance-corrected score.
 `runEval` renders every row with `@promptscript/runtime` before any call; a row the renderer
 refuses is a setup error. It never reads the environment and never prints: the caller passes the
 providers, the cache mode and the budget, and gets the report back. A failed case never throws; it
-becomes a case with status `error`. A run with no
-case is an error too, and so is a budget, concurrency, row limit or output cap that is not a plain
-number (PS6504, PS6309), reported together with the suite check errors.
+becomes a case with status `error`. A run with no case is an error too, and so is a budget,
+concurrency, row limit or output cap that is not a plain number (PS6504, PS6309), reported
+together with the suite check errors.
 
 | Cache mode | Hit     | Miss                                      |
 | :--------- | :------ | :---------------------------------------- |

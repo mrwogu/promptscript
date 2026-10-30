@@ -140,8 +140,10 @@ function judgeAgreement(
   cases: readonly EvalCaseResultV1[]
 ): EvalJudgeAgreementV1[] {
   const ids = [...new Set(suite.judges.map((judge) => judge.assertion.id))];
+  // A case in error stopped early; what it judged is not a verdict to compare
+  const done = cases.filter((result) => result.status !== 'error');
   return ids.map((id) => {
-    const pairs = cases.flatMap((result) => {
+    const pairs = done.flatMap((result) => {
       const label = suite.labels?.get(result.id)?.get(id);
       const judged = result.assertions.find(
         (entry) => entry.id === id && entry.judge !== undefined

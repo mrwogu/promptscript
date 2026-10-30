@@ -75,6 +75,22 @@ describe('readLabels', () => {
       expect(plain(labels)).toEqual(expected);
     });
 
+    it('reads a JSONL file that starts with a BOM', async () => {
+      const { labels } = await read(
+        'l.jsonl',
+        '\uFEFF{"id":"late","assertion":"tone","verdict":"pass"}\n'
+      );
+
+      expect(plain(labels)).toEqual([['late', { tone: 'pass' }]]);
+    });
+
+    it('reads an empty CSV file as no labels', async () => {
+      const { labels, findings } = await read('l.csv', '');
+
+      expect(labels.size).toBe(0);
+      expect(findings).toEqual([]);
+    });
+
     it('reads CSV with only the required columns', async () => {
       const { labels } = await read('l.csv', 'id,assertion,verdict\nlate,tone,pass\n');
 
@@ -146,7 +162,7 @@ describe('readLabels', () => {
 
       expect(error.code).toBe('PS6603');
       expect(error.message).toContain('more than 20000');
-    }, 30_000);
+    });
 
     it('accepts exactly 20000 labels of distinct rows', async () => {
       const text = Array.from(
@@ -157,7 +173,7 @@ describe('readLabels', () => {
       const { labels } = await read('limit.jsonl', text);
 
       expect(labels.size).toBe(20_000);
-    }, 30_000);
+    });
   });
 
   describe('rows', () => {
@@ -202,6 +218,18 @@ describe('readLabels', () => {
       );
 
       expect(error.code).toBe('PS6603');
+    });
+
+    it('shows at most 64 characters of an unknown key in the message', async () => {
+      const key = 'k'.repeat(100);
+
+      const error = await failure(
+        'l.jsonl',
+        `{"id":"a","assertion":"tone","verdict":"pass","${key}":1}\n`
+      );
+
+      expect(error.message).toContain(`"${'k'.repeat(64)}..."`);
+      expect(error.message).not.toContain('k'.repeat(65));
     });
 
     it('refuses a YAML key named __proto__', async () => {

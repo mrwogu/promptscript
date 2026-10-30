@@ -47,7 +47,6 @@ import {
   type SuitePlan,
 } from './report.js';
 import { checkSuites } from './suite/check.js';
-import { judgeModelRef } from './suite/rubric.js';
 import type { LoadedSuite } from './suite/load.js';
 
 /** Something that happened during a run, for the caller to show. */
@@ -138,7 +137,8 @@ function priceOf(
   target: { priceRef: string; apiId: string },
   options: RunEvalOptions,
   file: string,
-  add: Add
+  add: Add,
+  label = 'model'
 ): ModelPricing | undefined {
   const ref = target.priceRef;
   const resolution = options.catalog.resolve(ref);
@@ -146,7 +146,7 @@ function priceOf(
   if (pricing === undefined) {
     add(
       EVAL_CODES.PRICING_MISSING,
-      `Suite ${file}: model "${ref}" has no price and the run has a budget; add pricing under models.profiles in promptscript.yaml.`,
+      `Suite ${file}: ${label} "${ref}" has no price and the run has a budget; add pricing under models.profiles in promptscript.yaml.`,
       file
     );
     return undefined;
@@ -238,11 +238,12 @@ function planOf(
   priced: boolean,
   loaded: LoadedSuite,
   options: RunEvalOptions,
-  add: Add
+  add: Add,
+  label = 'model'
 ): ModelPlan {
   const merged = { ...own?.params, ...target.params };
   const maxOutputTokens = merged.maxTokens ?? options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS;
-  const pricing = priced ? priceOf(target, options, loaded.file, add) : undefined;
+  const pricing = priced ? priceOf(target, options, loaded.file, add, label) : undefined;
   return {
     ref: target.ref,
     provider: target.provider,
@@ -253,56 +254,63 @@ function planOf(
   };
 }
 
-// The model of a judge assertion; --model never changes it
-function judgeModelPlan(
+// The model of a judge assertion, as a list of at most one plan; --model never changes it.
+// checkSuites refused an assertion with no model or an unknown one, so the list is not empty here.
+function judgeModelPlans(
   assertion: EvalLlmJudgeAssertion,
   rubric: PromptBundleV1,
   loaded: LoadedSuite,
   options: RunEvalOptions,
   add: Add
-): ModelPlan | undefined {
-  const chosen = judgeModelRef(assertion, loaded.suite, rubric);
+): ModelPlan[] {
   const own = rubric.model;
-  if (chosen === undefined) return undefined;
   const priced = options.budget !== undefined || hasCostThreshold(loaded);
+  const written = assertion.model ?? loaded.suite.judge?.model;
   const targets =
-    chosen.fromRubric && own !== undefined
-      ? [
-          {
-            ref: own.ref,
-            priceRef: own.profile ?? own.ref,
-            provider: own.provider,
-            apiId: own.apiId,
+    written === undefined
+      ? [own]
+          .filter((model) => model !== undefined)
+          .map((model) => ({
+            ref: model.ref,
+            priceRef: model.profile ?? model.ref,
+            provider: model.provider,
+            apiId: model.apiId,
             params: {},
-          },
-        ]
-      : entryTarget(chosen.ref, options, loaded.file, add);
-  const [target] = targets;
-  return target === undefined ? undefined : planOf(target, own, priced, loaded, options, add);
+          }))
+      : entryTarget(written, options, loaded.file, add);
+  return targets.map((target) => planOf(target, own, priced, loaded, options, add, 'judge model'));
 }
 
-// The judge assertions of a suite, with their rubrics loaded and their models resolved
+// The judge assertions of a suite, with their rubrics loaded and their models resolved.
+// checkSuites refused a rubric that is not compiled, so each assertion finds exactly one.
 function prepareJudges(loaded: LoadedSuite, options: RunEvalOptions, add: Add): JudgePlan[] {
   const plans: JudgePlan[] = [];
+  const seen = new Set<string>();
+  // The same unpriced judge model is reported once, however many assertions use it
+  const once: Add = (code, message, file, line) => {
+    if (seen.has(message)) return;
+    seen.add(message);
+    add(code, message, file, line);
+  };
   for (const assertion of loaded.suite.assertions) {
     if (assertion.kind !== 'llm-judge') continue;
-    const rubric = options.bundles.find((candidate) => candidate.id === assertion.rubric);
-    if (rubric === undefined) continue;
-    let prompt: Prompt;
-    try {
-      prompt = loadPrompt(rubric);
-    } catch (error) {
-      add(
-        EVAL_CODES.UNKNOWN_PROMPT,
-        `Suite ${loaded.file}: rubric "${rubric.id}" did not load: ${messageOf(error)}`,
-        loaded.file
-      );
-      continue;
+    for (const rubric of options.bundles.filter((entry) => entry.id === assertion.rubric)) {
+      let prompt: Prompt;
+      try {
+        prompt = loadPrompt(rubric);
+      } catch (error) {
+        once(
+          EVAL_CODES.UNKNOWN_PROMPT,
+          `Suite ${loaded.file}: rubric "${rubric.id}" did not load: ${messageOf(error)}`,
+          loaded.file
+        );
+        continue;
+      }
+      const runs = assertion.runs ?? loaded.suite.judge?.runs ?? DEFAULT_JUDGE_RUNS;
+      for (const model of judgeModelPlans(assertion, rubric, loaded, options, once)) {
+        plans.push({ assertion, rubric, prompt, model, runs });
+      }
     }
-    const model = judgeModelPlan(assertion, rubric, loaded, options, add);
-    if (model === undefined) continue;
-    const runs = assertion.runs ?? loaded.suite.judge?.runs ?? DEFAULT_JUDGE_RUNS;
-    plans.push({ assertion, rubric, prompt, model, runs });
   }
   return plans;
 }
@@ -410,8 +418,14 @@ async function prepareLabels(
     }
     return read.labels;
   } catch (error) {
-    if (!(error instanceof EvalError)) throw error;
-    add(error.code as EvalCode, error.message, error.location?.file ?? path, error.location?.line);
+    // A file system error names absolute paths, so only a fixed text is kept
+    const known = error instanceof EvalError;
+    add(
+      known ? (error.code as EvalCode) : EVAL_CODES.LABELS_INVALID,
+      known ? error.message : `Labels ${path}: the file could not be read.`,
+      known ? (error.location?.file ?? path) : path,
+      known ? error.location?.line : undefined
+    );
     return undefined;
   }
 }

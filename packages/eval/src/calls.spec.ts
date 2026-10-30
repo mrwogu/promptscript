@@ -3,7 +3,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cacheKey, inputsHash } from './cache.js';
-import { obtain, type RunContext } from './calls.js';
+import { fileProblem, messageOf, obtain, type RunContext } from './calls.js';
+import { Budget } from './cost.js';
+import { EvalError, EvalProviderError } from './errors.js';
 import { createMockProvider, type MockProvider } from './provider.js';
 import type { CallPlan } from './report.js';
 import type { EvalProgress, RunEvalOptions } from './run.js';
@@ -148,5 +150,83 @@ describe('obtain', () => {
     const got = await obtain(planOf(), 'row', contextOf('replay'));
 
     expect(got).toMatchObject({ code: 'PS6402', flags: { cacheMiss: true } });
+  });
+
+  it('keeps the text of a provider that throws something that is not an Error', async () => {
+    provider = createMockProvider(() => {
+      throw 'plain text failure';
+    });
+
+    const got = await obtain(planOf(), 'row', contextOf('off'));
+
+    expect(got).toMatchObject({ code: 'PS6300', message: 'plain text failure' });
+  });
+
+  it('waits for the retry-after of the provider, then calls again', async () => {
+    let attempts = 0;
+    provider = createMockProvider(() => {
+      attempts += 1;
+      if (attempts === 1) {
+        throw new EvalProviderError('Busy.', 'PS6300', { status: 429, retryAfterMs: 1 });
+      }
+      return 'answer';
+    });
+
+    const got = await obtain(planOf(), 'row', contextOf('off'));
+
+    expect('live' in got && got.live).toBe(true);
+    expect(attempts).toBe(2);
+  });
+
+  it('backs off from a base of half a second when the options set none', async () => {
+    let attempts = 0;
+    provider = createMockProvider(() => {
+      attempts += 1;
+      if (attempts === 1) throw new EvalProviderError('Down.', 'PS6300', { status: 503 });
+      return 'answer';
+    });
+
+    const got = await obtain(planOf(), 'row', contextOf('off'));
+
+    expect('live' in got && got.live).toBe(true);
+    expect(attempts).toBe(2);
+  });
+
+  it('settles a priced run for a call whose model has no price', async () => {
+    const context = contextOf('off');
+    context.budget = new Budget(1);
+
+    const got = await obtain(planOf(), 'row', context);
+
+    expect('live' in got).toBe(true);
+    expect(context.budget.spent).toBe(0);
+  });
+});
+
+describe('messageOf and fileProblem', () => {
+  it('turns anything into text', () => {
+    expect(messageOf(new Error('boom'))).toBe('boom');
+    expect(messageOf('boom')).toBe('boom');
+  });
+
+  it('keeps an eval error as it is', () => {
+    const error = new EvalError('Tree is bad.', 'PS6403');
+
+    expect(fileProblem(error)).toEqual({ code: 'PS6403', message: 'Tree is bad.' });
+  });
+
+  it('keeps only the errno of a file system error, never a path', () => {
+    const error = Object.assign(new Error('EACCES: /secret/path'), { code: 'EACCES' });
+
+    const problem = fileProblem(error);
+
+    expect(problem.code).toBe('PS6404');
+    expect(problem.message).toContain('EACCES');
+    expect(problem.message).not.toContain('/secret');
+  });
+
+  it('names an unknown error when there is no errno or no error', () => {
+    expect(fileProblem(new Error('x')).message).toContain('an unknown error');
+    expect(fileProblem(undefined).message).toContain('an unknown error');
   });
 });

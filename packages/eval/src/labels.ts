@@ -64,24 +64,26 @@ async function guarded<T>(path: string, work: () => Promise<T> | T): Promise<T> 
     return await work();
   } catch (error) {
     if (!(error instanceof EvalDatasetError)) throw error;
-    const line = error.location?.line ?? 1;
     const message = error.message.replace(/^Dataset /, 'Labels ');
     throw new EvalError(message, EVAL_CODES.LABELS_INVALID, {
-      location: { file: path, line, column: error.location?.column ?? 1 },
+      location: { line: 1, column: 1, ...error.location, file: path },
     });
   }
 }
 
 function jsonlLabels(text: string, path: string): RawLabel[] {
   const labels: RawLabel[] = [];
-  const lines = (text.startsWith('\uFEFF') ? text.slice(1) : text).split('\n');
+  // The strict UTF-8 reader already dropped a BOM
+  const lines = text.split('\n');
   for (const [index, raw] of lines.entries()) {
     const line = index + 1;
     const source = raw.endsWith('\r') ? raw.slice(0, -1) : raw;
     if (source.trim() === '') continue;
-    const parsed = parseDocumentText(source, true);
-    if (!parsed.ok) throw labelsError({ file: path, line }, 'the line is not valid JSON.');
-    labels.push({ value: parsed.value, line });
+    try {
+      labels.push({ value: JSON.parse(source), line });
+    } catch {
+      throw labelsError({ file: path, line }, 'the line is not valid JSON.');
+    }
   }
   return labels;
 }
@@ -97,7 +99,10 @@ function yamlLabels(text: string, path: string): RawLabel[] {
   if (!Array.isArray(parsed.value)) {
     throw labelsError({ file: path, line: 1 }, 'a YAML label file must be a list of rows.');
   }
-  return parsed.value.map((value: unknown, index) => ({ value, line: parsed.line([index]) ?? 1 }));
+  return parsed.value.map((value: unknown, index) => ({
+    value,
+    line: Number(parsed.line([index])),
+  }));
 }
 
 function csvLabels(text: string, path: string): RawLabel[] {
@@ -121,7 +126,7 @@ function csvLabels(text: string, path: string): RawLabel[] {
     }
     const value = Object.create(null) as Record<string, string>;
     for (const [index, name] of names.entries()) {
-      const cell = fields[index] ?? '';
+      const cell = String(fields[index]);
       if (name !== 'note' || cell !== '') value[name] = cell;
     }
     return { value, line };
@@ -144,7 +149,10 @@ async function rawLabels(file: string, path: string, written: string): Promise<R
   const rows = await parseRows(extension, text, path);
   if (rows.length > MAX_LABELS) {
     throw labelsError(
-      { file: path, line: rows[MAX_LABELS]?.line ?? 1 },
+      {
+        file: path,
+        line: Math.min(...rows.slice(MAX_LABELS, MAX_LABELS + 1).map((row) => row.line)),
+      },
       `the file has more than ${MAX_LABELS} labels.`
     );
   }

@@ -26,13 +26,39 @@ export function judgeModelRef(
   return rubric.model === undefined ? undefined : { ref: rubric.model.ref, fromRubric: true };
 }
 
-// Slot names of the messages of a role, with the message they are in
-function slotsOf(messages: readonly PromptBundleMessage[]): Array<{ name: string; text: string }> {
+interface Slot {
+  name: string;
+  /** The message the slot is in */
+  text: string;
+  offset: number;
+  length: number;
+}
+
+// The slots of the messages of a role, with where they are in their message
+function slotsOf(messages: readonly PromptBundleMessage[]): Slot[] {
   return messages.flatMap((message) =>
-    findRuntimeSlots(message.content).flatMap((slot) =>
-      slot.kind === 'slot' && slot.name !== null ? [{ name: slot.name, text: message.content }] : []
-    )
+    findRuntimeSlots(message.content)
+      .filter((slot) => slot.kind === 'slot')
+      .map((slot) => ({
+        name: String(slot.name),
+        text: message.content,
+        offset: slot.offset,
+        length: slot.length,
+      }))
   );
+}
+
+const OPEN_FENCE = /<([A-Za-z][A-Za-z0-9_-]*)-\{\{input\.boundary\}\}>$/;
+
+// True when a tag named with the boundary stands right before the slot and its closing tag right after
+function fenced(slot: Slot): boolean {
+  const open = OPEN_FENCE.exec(slot.text.slice(0, slot.offset).trimEnd());
+  if (open === null) return false;
+  const close = `</${open[1]}-{{input.boundary}}>`;
+  return slot.text
+    .slice(slot.offset + slot.length)
+    .trimStart()
+    .startsWith(close);
 }
 
 function checkInputs(assertion: EvalLlmJudgeAssertion, rubric: PromptBundleV1, add: Add): void {
@@ -85,15 +111,17 @@ function checkSlots(assertion: EvalLlmJudgeAssertion, rubric: PromptBundleV1, ad
       `rubric "${rubric.id}" of assertion "${id}" never shows the response to the judge; add {{input.response}} to a user message`
     );
   }
-  const unfenced = user.some(
-    (slot) =>
-      slot.name === 'response' &&
-      !slotsOf([{ role: 'user', content: slot.text }]).some((other) => other.name === 'boundary')
-  );
-  if (unfenced) {
+  const loose = [
+    ...new Set(
+      user
+        .filter((slot) => UNTRUSTED_INPUTS.has(slot.name) && !fenced(slot))
+        .map((slot) => slot.name)
+    ),
+  ].sort();
+  if (loose.length > 0) {
     add(
       EVAL_CODES.RUBRIC_UNFENCED,
-      `rubric "${rubric.id}" of assertion "${id}" shows the response without a fence; wrap it in <response-{{input.boundary}}> and </response-{{input.boundary}}>`,
+      `rubric "${rubric.id}" of assertion "${id}" shows ${loose.join(', ')} outside a fence; wrap each in <name-{{input.boundary}}> and </name-{{input.boundary}}>, such as <response-{{input.boundary}}>{{input.response}}</response-{{input.boundary}}>`,
       'warning'
     );
   }
@@ -149,6 +177,7 @@ function checkJudgeModel(
   suite: EvalSuiteV1,
   rubric: PromptBundleV1,
   tested: readonly string[],
+  unpriced: Set<string>,
   context: CheckContext,
   add: Add
 ): void {
@@ -170,8 +199,10 @@ function checkJudgeModel(
   const limits = suite.thresholds;
   if (
     (limits?.maxCostUsd !== undefined || limits?.maxCostPerCaseUsd !== undefined) &&
-    profile?.pricing === undefined
+    profile?.pricing === undefined &&
+    !unpriced.has(model.ref)
   ) {
+    unpriced.add(model.ref);
     add(
       EVAL_CODES.PRICING_MISSING,
       `the suite has a cost threshold, but judge model "${model.ref}" of assertion "${id}" has no price; add pricing under models.profiles.${profile?.id ?? model.ref} in promptscript.yaml`
@@ -199,6 +230,8 @@ export function checkJudges(
   add: Add
 ): void {
   const tested = modelsUnderTest(suite, bundle, context);
+  // One price finding per judge model, however many assertions use it
+  const unpriced = new Set<string>();
   for (const assertion of suite.assertions) {
     if (assertion.kind !== 'llm-judge') continue;
     const rubric = context.bundles.find((candidate) => candidate.id === assertion.rubric);
@@ -224,6 +257,6 @@ export function checkJudges(
     checkInputs(assertion, rubric, add);
     checkSlots(assertion, rubric, add);
     checkOutput(assertion, rubric, add);
-    checkJudgeModel(assertion, suite, rubric, tested, context, add);
+    checkJudgeModel(assertion, suite, rubric, tested, unpriced, context, add);
   }
 }

@@ -60,7 +60,7 @@ export const EVAL_CODES = {
   ASSERTION_ERROR: 'PS6214',
   /** The judge runs on a model under test */
   JUDGE_SAME_MODEL: 'PS6215',
-  /** A judge rubric message holds the response without a boundary fence */
+  /** A judge rubric shows the response, case inputs or expected value outside a boundary fence */
   RUBRIC_UNFENCED: 'PS6216',
   /** A provider call failed */
   PROVIDER_FAILED: 'PS6300',

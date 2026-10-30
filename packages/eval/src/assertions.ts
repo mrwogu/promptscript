@@ -81,8 +81,8 @@ function show(value: unknown): string {
   return JSON.stringify(text.length > MAX_VALUE ? `${text.slice(0, MAX_VALUE)}...` : text);
 }
 
-// Trim, unwrap one fenced block, parse; only a JSON object counts.
-export function parseResponse(response: string): Record<string, unknown> | undefined {
+/** Trim a response and unwrap one fenced block. */
+export function unwrapResponse(response: string): string {
   let text = response.trim();
   const start = text.indexOf('\n');
   if (
@@ -93,8 +93,13 @@ export function parseResponse(response: string): Record<string, unknown> | undef
   ) {
     text = text.slice(start + 1, -FENCE.length).trim();
   }
+  return text;
+}
+
+// Trim, unwrap one fenced block, parse; only a JSON object counts.
+export function parseResponse(response: string): Record<string, unknown> | undefined {
   try {
-    const value: unknown = JSON.parse(text);
+    const value: unknown = JSON.parse(unwrapResponse(response));
     return isRecord(value) ? value : undefined;
   } catch {
     return undefined;

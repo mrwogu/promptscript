@@ -10,13 +10,15 @@ import {
   type PromptBundleV1,
 } from '@promptscript/core';
 import type { Prompt } from '@promptscript/runtime';
-import { parseResponse, targetOf } from './assertions.js';
+import { targetOf, unwrapResponse } from './assertions.js';
 import { cacheKey, inputsHash } from './cache.js';
 import { obtain, type Failure, type RunContext } from './calls.js';
 import { callCost, roundUsd, worstCaseCost } from './cost.js';
 import type { DatasetRecord } from './dataset/read.js';
 import { EVAL_CODES, type EvalCode } from './errors.js';
 import { effectiveInputs } from './inputs.js';
+import { parseDocumentText } from './parse-document.js';
+import { isRecord } from './shape.js';
 import type { CallPlan, ModelPlan } from './report.js';
 
 /** Longest text a judge reads, in UTF-8 bytes. */
@@ -70,13 +72,15 @@ export interface JudgeVerdict {
 
 /**
  * The verdict of one judge run: the response must be a JSON object with
- * exactly `verdict` (`pass` or `fail`) and `reason` (a string), after the same
- * trim and fence unwrap the assertions use. Anything else, such as the word
+ * exactly `verdict` (`pass` or `fail`) and `reason` (a string), each key once,
+ * after the same trim and fence unwrap the assertions use. Anything else, such as the word
  * "pass" in free text, is no verdict.
  */
 export function readVerdict(text: string): JudgeVerdict | undefined {
-  const object = parseResponse(text);
-  if (object === undefined) return undefined;
+  // The document parser refuses a repeated key, so the last of two verdicts cannot win
+  const parsed = parseDocumentText(unwrapResponse(text), true);
+  if (!parsed.ok || !isRecord(parsed.value)) return undefined;
+  const object = parsed.value;
   const keys = Object.keys(object).sort();
   if (keys.length !== 2 || keys[0] !== 'reason' || keys[1] !== 'verdict') return undefined;
   const { verdict, reason } = object;
@@ -220,7 +224,7 @@ function setupOf(
   const target = targetOf(plan.assertion.field, text);
   if (!target.ok) return { kind: 'skipped', plan, reason: target.reason };
   const judged =
-    typeof target.value === 'string' ? target.value : (JSON.stringify(target.value) ?? '');
+    typeof target.value === 'string' ? target.value : String(JSON.stringify(target.value));
   if (Buffer.byteLength(judged, 'utf8') > MAX_JUDGED_BYTES) {
     return {
       kind: 'refused',
@@ -344,6 +348,7 @@ export async function judgeCase(
         reason: setup.reason,
       });
     } else if (setup.kind === 'calls') {
+      // One assertion after the other, so the reservations and the cache keys keep their order
       const result = await runJudge(setup, caseId, context, done.uses);
       if ('code' in result) return { ...done, failure: result };
       done.results.push(result);

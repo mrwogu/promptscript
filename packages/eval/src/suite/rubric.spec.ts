@@ -208,7 +208,10 @@ describe('checkSuites with llm-judge assertions', () => {
           inputs: { response: stringInput(true), boundary: stringInput(), [name]: stringInput() },
           messages: [
             { role: 'system', content: `Context {{input.${name}}}` },
-            { role: 'user', content: '{{input.response}} {{input.boundary}}' },
+            {
+              role: 'user',
+              content: '<r-{{input.boundary}}>{{input.response}}</r-{{input.boundary}}>',
+            },
           ],
         })
       );
@@ -410,6 +413,62 @@ describe('checkSuites with llm-judge assertions', () => {
   });
 
   describe('fence', () => {
+    const user = (content: string): Partial<PromptBundleV1> => ({
+      inputs: {
+        response: stringInput(true),
+        boundary: stringInput(),
+        case_inputs: stringInput(),
+        expected: stringInput(),
+      },
+      messages: [{ role: 'user', content }],
+    });
+    const warned = (content: string): string[] =>
+      check(suiteOf(), rubric(user(content))).map((finding) => finding.code);
+
+    it('accepts a fence with any tag name and space around the slot', () => {
+      expect(
+        warned('<reply-{{input.boundary}}>\n{{input.response}}\n</reply-{{input.boundary}}>')
+      ).toEqual([]);
+    });
+
+    it('warns when the closing tag does not match the opening one', () => {
+      expect(warned('<a-{{input.boundary}}>{{input.response}}</b-{{input.boundary}}>')).toEqual([
+        'PS6216',
+      ]);
+    });
+
+    it('warns when only one side of the slot has a tag', () => {
+      expect(warned('<a-{{input.boundary}}>{{input.response}}')).toEqual(['PS6216']);
+      expect(warned('{{input.response}}</a-{{input.boundary}}>')).toEqual(['PS6216']);
+    });
+
+    it('warns when the tag has no boundary', () => {
+      expect(warned('<a>{{input.response}}</a> {{input.boundary}}')).toEqual(['PS6216']);
+    });
+
+    it('warns once, naming each slot outside a fence', () => {
+      const findings = check(
+        suiteOf(),
+        rubric(
+          user(
+            'Inputs {{input.case_inputs}} expected {{input.expected}} <r-{{input.boundary}}>{{input.response}}</r-{{input.boundary}}>'
+          )
+        )
+      );
+
+      expect(codes(findings)).toEqual(['PS6216']);
+      expect(findings[0]?.message).toContain('case_inputs, expected');
+      expect(findings[0]?.message).not.toContain('response,');
+    });
+
+    it('accepts case inputs and the expected value inside fences', () => {
+      expect(
+        warned(
+          '<i-{{input.boundary}}>{{input.case_inputs}}</i-{{input.boundary}}> <e-{{input.boundary}}>{{input.expected}}</e-{{input.boundary}}> <r-{{input.boundary}}>{{input.response}}</r-{{input.boundary}}>'
+        )
+      ).toEqual([]);
+    });
+
     it('warns when a message holds the response without a boundary', () => {
       const findings = check(
         suiteOf(),
@@ -420,6 +479,19 @@ describe('checkSuites with llm-judge assertions', () => {
         ['PS6216', 'warning'],
       ]);
     });
+  });
+
+  it('reports a missing judge price once per model, however many assertions use it', () => {
+    const suite = suiteOf({}, { thresholds: { maxCostUsd: 1 } });
+    suite.suite.assertions = [
+      { id: 'one', kind: 'llm-judge', rubric: 'acme/judge', model: 'test-unpriced' },
+      { id: 'two', kind: 'llm-judge', rubric: 'acme/judge', model: 'test-unpriced' },
+    ];
+
+    const findings = check(suite);
+
+    expect(codes(findings)).toEqual(['PS6501']);
+    expect(findings[0]?.message).toContain('judge model "test-unpriced"');
   });
 
   it('reports each finding once per assertion id', () => {

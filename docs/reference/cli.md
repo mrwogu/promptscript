@@ -1408,7 +1408,7 @@ of the runs say pass, and the case is an error when more than half give no valid
 The judge model is the one of the assertion, else the suite `judge`, else the rubric's own model;
 `--model` does not change it. The rubric gets `response`, `case_inputs`, `expected`, `criteria` and
 `boundary`, the ones it declares. It must keep the first three out of its system message (`PS6212`),
-and should wrap the response in a fence made with `boundary`:
+and should wrap the response, and the case inputs and expected value if it shows them, in a fence made with `boundary`. Case inputs are untrusted text too, since a dataset can come from `prs eval import`:
 
 ```
 <response-{{input.boundary}}>{{input.response}}</response-{{input.boundary}}>
@@ -1430,7 +1430,7 @@ Markdown print it as a count and a percentage.
 | `PS6211` | A label names an assertion that is not an `llm-judge` assertion of the suite    |
 | `PS6212` | `response`, `case_inputs` or `expected` in a system message of the rubric       |
 | `PS6215` | Warning: the judge model is also a model under test                             |
-| `PS6216` | Warning: the rubric shows the response without a `boundary` fence               |
+| `PS6216` | Warning: the response or case data is shown outside a `boundary` fence          |
 | `PS6601` | More than half of the judge runs gave no valid verdict                          |
 | `PS6602` | The judged text is over 64 KiB                                                  |
 | `PS6603` | A label file cannot be read, is too big, or has a bad or duplicate row          |

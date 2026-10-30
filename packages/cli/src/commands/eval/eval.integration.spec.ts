@@ -967,11 +967,12 @@ describe('prs eval run with an llm judge', () => {
     ) => {
       sent.push(String(init?.headers?.['x-api-key']));
       const body = String(init?.body);
-      const text = body.includes('You grade replies')
-        ? '{"verdict":"pass","reason":"Fine"}'
-        : body.includes('Late parcel')
-          ? '{"decision":"approve"}'
-          : '{"decision":"escalate"}';
+      const answers: Array<[string, string]> = [
+        ['You grade replies', '{"verdict":"pass","reason":"Fine"}'],
+        ['Late parcel', '{"decision":"approve"}'],
+      ];
+      const text =
+        answers.find(([marker]) => body.includes(marker))?.[1] ?? '{"decision":"escalate"}';
       return new Response(
         JSON.stringify({
           content: [{ type: 'text', text }],

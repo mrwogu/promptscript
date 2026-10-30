@@ -7,6 +7,7 @@ import {
   realpathSync,
   rmSync,
   writeFileSync,
+  chmodSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -59,6 +60,9 @@ const USAGE = { inputTokens: 20, outputTokens: 5 };
 const JUDGE_USAGE = { inputTokens: 10, outputTokens: 2 };
 const PASS = '{"verdict":"pass","reason":"Polite enough"}';
 const FAIL = '{"verdict":"fail","reason":"Curt and rude"}';
+
+// Computed by the runner of main before judges existed, for the same suite and answers
+const PLAIN_DIGEST = 'sha256-46e75059921595f5bcd8acea3aa95da110d327f17f1f72cebe4226e96c762a9c';
 
 const reportSchema = new Ajv({ strict: true, allowUnionTypes: true }).compile(
   JSON.parse(
@@ -152,6 +156,12 @@ function catalogOf(): ModelCatalog {
       'test-model': profile('test', 'anthropic', 'test-model-api'),
       'test-judge': profile('test-judge', 'anthropic', 'test-judge-api'),
       'test-openai': profile('test-openai', 'openai', 'gpt-test'),
+      'test-unpriced': {
+        provider: 'anthropic',
+        family: 'test-free',
+        version: '1',
+        apiId: 'free-api',
+      },
     },
   });
 }
@@ -435,6 +445,39 @@ describe('runEval with llm-judge assertions', () => {
     expect(judgeSamples).toEqual([]);
   });
 
+  it('replays a case whose judge assertion was skipped, and counts no label for it', async () => {
+    mkdirSync(join(evals, 'labels'), { recursive: true });
+    writeFileSync(
+      join(evals, 'labels', 'tone.jsonl'),
+      '{"id":"late","assertion":"tone","verdict":"pass"}\n'
+    );
+    writeFileSync(
+      join(evals, 'refund.eval.yaml'),
+      `${SUITE.replace('runs: 3 }', 'runs: 3, field: decision }')}labels: labels/tone.jsonl\n`
+    );
+    await record({ answers: { late: '{}', rude: '{}' } });
+
+    const replayed = await runEval(await options());
+
+    expect(casesOf(replayed)[0]?.assertions[1]?.passed).toBe(false);
+    expect(replayed.suites[0]?.models[0]?.judgeAgreement).toEqual([
+      { assertion: 'tone', labelled: 0, agreed: 0 },
+    ]);
+  });
+
+  it('reports an unpriced judge model once, however many assertions use it', async () => {
+    writeFileSync(
+      join(evals, 'refund.eval.yaml'),
+      `${SUITE}  - { id: again, kind: llm-judge, rubric: ${JUDGE_ID}, model: test-unpriced }\n` +
+        `  - { id: third, kind: llm-judge, rubric: ${JUDGE_ID}, model: test-unpriced }\n`
+    );
+
+    const { report } = await record();
+
+    expect(report.errors.map((error) => error.code)).toEqual(['PS6501']);
+    expect(report.errors[0]?.message).toContain('judge model "test-unpriced"');
+  });
+
   it('judges the field of the response when the assertion names one', async () => {
     writeFileSync(
       join(evals, 'refund.eval.yaml'),
@@ -586,6 +629,28 @@ describe('runEval with llm-judge assertions', () => {
     });
   });
 
+  it('calls only the missing judge entry when every case is cached, and sets up its provider', async () => {
+    const { report: recorded } = await record();
+    const key = casesOf(recorded)[0]?.cacheKeys[1] ?? '';
+    rmSync(cacheFiles().find((file) => file.endsWith(`${key}.json`)) ?? '');
+    judgeSamples = [];
+
+    const { report, mock, names } = await record();
+
+    expect(mock.calls).toHaveLength(1);
+    expect(judgeSamples.map((call) => call.sample)).toEqual([1]);
+    expect(names).toEqual(['anthropic']);
+    expect(report.cache).toMatchObject({ live: 1, replayed: 7 });
+  });
+
+  it('keeps the cache digest of a suite without judges, byte for byte', async () => {
+    writeFileSync(join(evals, 'refund.eval.yaml'), SUITE.split('\n').slice(0, 4).join('\n') + '\n');
+
+    const { report } = await record();
+
+    expect(report.cache.digest).toBe(PLAIN_DIGEST);
+  });
+
   describe('plan', () => {
     it('counts judge hits of a recorded cache, and a missing judge entry as one call', async () => {
       const { report: recorded } = await record();
@@ -615,6 +680,23 @@ describe('runEval with llm-judge assertions', () => {
       );
 
       expect(plan).toMatchObject({ hits: 0, misses: 2, calls: 2, judgeHits: 0, judgeCalls: 6 });
+    });
+
+    it('adds up a suite with judges and one without', async () => {
+      writeFileSync(
+        join(evals, 'plain.eval.yaml'),
+        SUITE.split('\n').slice(0, 4).join('\n') + '\n'
+      );
+
+      const plan = await planEval(
+        await options({
+          cache: { mode: 'record', dir: '.promptscript/eval-cache' },
+          budget: { maxCostUsd: 1 },
+        })
+      );
+
+      expect(plan).toMatchObject({ judgeHits: 0, judgeCalls: 6 });
+      expect(plan.suites.map((suite) => suite.models[0]?.judgeCalls)).toEqual([undefined, 6]);
     });
 
     it('reports no judge calls in replay and leaves the fields out of a suite without judges', async () => {
@@ -872,6 +954,50 @@ describe('runEval with llm-judge assertions', () => {
 
       expect(report.errors.map((error) => error.code)).toEqual(['PS6603']);
       expect(report.errors[0]?.file).toBe('.promptscript/evals/labels/tone.jsonl');
+    });
+
+    it('does not count a judge that finished in a case that ended in an error', async () => {
+      writeFileSync(
+        join(evals, 'refund.eval.yaml'),
+        `${SUITE}  - { id: polite, kind: llm-judge, rubric: acme-support/judge-b, runs: 1 }\nlabels: labels/tone.jsonl\n`
+      );
+      mkdirSync(join(evals, 'labels'), { recursive: true });
+      writeFileSync(
+        join(evals, 'labels', 'tone.jsonl'),
+        `${LABELS}{"id":"late","assertion":"polite","verdict":"pass"}\n`
+      );
+      const { providers } = script({
+        judge: (_sample, request) => (request.promptId === 'acme-support/judge-b' ? 'nope' : PASS),
+      });
+
+      const report = await runEval(
+        await options({
+          bundles: [makeBundle(), makeRubric(), makeRubric('acme-support/judge-b')],
+          providers,
+          cache: { mode: 'record', dir: '.promptscript/eval-cache' },
+          budget: { maxCostUsd: 1 },
+        })
+      );
+
+      expect(casesOf(report).map((entry) => entry.status)).toEqual(['error', 'error']);
+      expect(report.suites[0]?.models[0]?.judgeAgreement).toEqual([
+        { assertion: 'tone', labelled: 0, agreed: 0 },
+        { assertion: 'polite', labelled: 0, agreed: 0 },
+      ]);
+    });
+
+    it('stops a run whose label file cannot be read, without a path in the message', async () => {
+      withLabels(LABELS);
+      const file = join(evals, 'labels', 'tone.jsonl');
+      chmodSync(file, 0o000);
+
+      const report = await runEval(await options());
+
+      chmodSync(file, 0o644);
+      expect(report.errors.map((error) => error.code)).toEqual(['PS6603']);
+      expect(report.errors[0]?.message).toBe(
+        'Labels .promptscript/evals/labels/tone.jsonl: the file could not be read.'
+      );
     });
 
     it('leaves judgeAgreement out of a suite without labels', async () => {
