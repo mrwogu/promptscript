@@ -181,7 +181,7 @@ function toRow(value: unknown, index: number, at: At): DatasetRecord['row'] {
   return row;
 }
 
-async function checkFile(file: string, path: string): Promise<void> {
+export async function checkFile(file: string, path: string): Promise<void> {
   const info = await stat(file).catch(() => undefined);
   if (!info?.isFile()) {
     throw datasetError(
@@ -194,7 +194,7 @@ async function checkFile(file: string, path: string): Promise<void> {
 
 // Reads at most the cap plus one byte, so a file that grew after the check
 // is still refused, and decodes strict UTF-8 like the JSONL reader.
-async function readText(file: string, path: string): Promise<string> {
+export async function readText(file: string, path: string): Promise<string> {
   const at = { file: path, line: 1 };
   const chunks: Buffer[] = [];
   let size = 0;

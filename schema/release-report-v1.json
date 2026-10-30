@@ -25,7 +25,7 @@
     },
     "command": {
       "type": "string",
-      "enum": ["build", "promote", "rollback", "status"]
+      "enum": ["build", "promote", "rollback", "split", "status"]
     },
     "success": {
       "type": "boolean",
@@ -220,6 +220,39 @@
         "previousContentHash": {
           "$ref": "#/definitions/ContentHash",
           "description": "Hash the entry held before the command."
+        },
+        "experiment": {
+          "$ref": "#/definitions/ChangeExperiment",
+          "description": "Present on an arm item of a split, rollback or status --base: the experiment arm the item describes."
+        }
+      }
+    },
+    "ChangeExperiment": {
+      "type": "object",
+      "required": ["name", "variant"],
+      "additionalProperties": false,
+      "description": "A removed control arm means the experiment ended, not the entry.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+        },
+        "variant": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "description": "Arm name, control for the first arm."
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Share in basis points after the command. Absent for a removed arm."
+        },
+        "previousWeight": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Share in basis points before the command. Absent for a new arm."
         }
       }
     },
@@ -276,6 +309,62 @@
         "inBuild": {
           "type": "boolean",
           "description": "Whether the latest build manifest holds this hash for the id."
+        },
+        "experiment": {
+          "$ref": "#/definitions/ExperimentStatus",
+          "description": "Present while the entry runs an experiment."
+        }
+      }
+    },
+    "ExperimentStatus": {
+      "type": "object",
+      "required": ["name", "arms"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+        },
+        "arms": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/definitions/ArmStatus"
+          },
+          "description": "The control arm first, in label order."
+        }
+      }
+    },
+    "ArmStatus": {
+      "type": "object",
+      "required": ["variant", "contentHash", "weight", "file", "exists", "verified"],
+      "additionalProperties": false,
+      "properties": {
+        "variant": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$"
+        },
+        "contentHash": {
+          "$ref": "#/definitions/ContentHash"
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Share in basis points."
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Project-relative path of the bundle file."
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "Whether the bundle file recomputes to its hash."
         }
       }
     },

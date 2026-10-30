@@ -115,6 +115,23 @@ no exception event.
 A failure of the tracer never changes the call. It goes to `onError` as `telemetry-failed`, with
 a fixed message and no cause.
 
+## Experiments
+
+While an entry of a label runs an experiment (`prs release split`), the label is version 2 and
+`client.get(ref, { key })` picks an arm by key. The same key always gets the same arm, a read
+without a key gets the entry hash, and a pinned ref ignores the experiment. The result has
+`meta.experiment` and `meta.variant` when an arm was picked. A key of 1 to 256 characters without
+control characters, format characters, U+2028, U+2029 or lone surrogates is hashed and never
+kept; anything else throws `invalid-key`. A label of a version newer than this runtime knows fails with
+`unsupported-label`, or serves the last verified prompt as stale in open mode. A runtime from before label v2 cannot read the label at all and keeps serving
+stale prompts, so upgrade the readers before the first split. The rules and test vectors are in
+[`conformance/prompt-release-label/v2`](https://github.com/mrwogu/promptscript/blob/main/conformance/prompt-release-label/v2/README.md).
+
+```typescript
+const prompt = await client.get('acme-support/refund-reply', { key: user.id });
+prompt.meta.variant; // 'control', or the arm name
+```
+
 ## Rules
 
 - Every load checks `$schema`, the structure and the `contentHash`. Verification cannot be
