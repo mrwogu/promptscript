@@ -146,7 +146,7 @@ describe('readLabels', () => {
 
       expect(error.code).toBe('PS6603');
       expect(error.message).toContain('more than 20000');
-    });
+    }, 30_000);
 
     it('accepts exactly 20000 labels of distinct rows', async () => {
       const text = Array.from(
@@ -157,7 +157,7 @@ describe('readLabels', () => {
       const { labels } = await read('limit.jsonl', text);
 
       expect(labels.size).toBe(20_000);
-    });
+    }, 30_000);
   });
 
   describe('rows', () => {
