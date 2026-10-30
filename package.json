@@ -29,6 +29,8 @@
     "prs": "node --import @swc-node/register/esm-register packages/cli/src/cli.ts",
     "skill:sync": "./scripts/sync-skill.sh",
     "skill:check": "./scripts/sync-skill.sh --check",
+    "api:check": "node --import @swc-node/register/esm-register scripts/api-report.mts",
+    "api:update": "node --import @swc-node/register/esm-register scripts/api-report.mts --update",
     "grammar:check": "node --import @swc-node/register/esm-register scripts/check-grammar.mts",
     "deno:check": "node --import @swc-node/register/esm-register scripts/check-deno-bundle.mts",
     "deno:suite": "node --import @swc-node/register/esm-register scripts/test-deno-cli.mts",
@@ -41,6 +43,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
     "@eslint/js": "^10.0.1",
+    "@microsoft/api-extractor": "7.59.4",
     "@nx/esbuild": "23.2.1",
     "@nx/eslint": "23.2.1",
     "@nx/eslint-plugin": "23.2.1",

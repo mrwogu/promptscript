@@ -84,6 +84,7 @@
       6. pnpm schema:check   # Verify JSON schemas are current
       7. pnpm skill:check    # Verify SKILL.md copies are in sync
       8. pnpm grammar:check  # Verify TextMate grammar covers all tokens
+      9. pnpm api:check      # Verify API reports are current
 
       If any step fails, fix the issue before proceeding.
     """
@@ -218,6 +219,7 @@
     pnpm schema:check         # 6. Verify JSON schemas are current
     pnpm skill:check          # 7. Verify SKILL.md copies are in sync
     pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
+    pnpm api:check            # 9. Verify API reports are current
     ```
     If any step fails, fix the issue and re-run from that step.
   """

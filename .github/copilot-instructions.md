@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-<!-- PromptScript 2026-10-27T08:22:13.362Z | source: .promptscript/project.prs | target: github - do not edit -->
+<!-- PromptScript 2026-10-30T16:57:29.704Z | source: .promptscript/project.prs | target: github - do not edit -->
 
 ## project
 
@@ -113,7 +113,7 @@ flowchart TB
 - branchStrategy: gitflow — branch from main, never commit to main
 - newTask: follow the new-task workflow: branch, atomic commits, full verification pipeline, push, PR, watch CI
 - prMonitoring: use `gh pr checks --watch` to monitor CI status; do not consider work done until all checks pass
-- verification: follow the verify workflow after any code change - all eight steps, in order
+- verification: follow the verify workflow after any code change - all nine steps, in order
 
 ## shortcuts
 
@@ -172,6 +172,7 @@ pnpm prs validate --strict  # 5. Validate .prs files
 pnpm schema:check         # 6. Verify JSON schemas are current
 pnpm skill:check          # 7. Verify SKILL.md copies are in sync
 pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
+pnpm api:check            # 9. Verify API reports are current
 ```
 
 ## donts

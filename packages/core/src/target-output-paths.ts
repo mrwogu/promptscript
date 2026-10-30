@@ -69,5 +69,4 @@ const DEFAULT_OUTPUT_PATH_VALUES = {
   'prompt-text': 'prompts/README.md',
 } as const satisfies Record<KnownTarget, string>;
 
-export const DEFAULT_OUTPUT_PATHS: typeof DEFAULT_OUTPUT_PATH_VALUES & DefaultOutputPathMap =
-  DEFAULT_OUTPUT_PATH_VALUES;
+export const DEFAULT_OUTPUT_PATHS: DefaultOutputPathMap = DEFAULT_OUTPUT_PATH_VALUES;
