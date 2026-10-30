@@ -880,14 +880,14 @@ describe('prs eval compare', () => {
 });
 
 describe('registerEvalCommands', () => {
-  it('registers run and compare with the flags of the spec', () => {
+  it('registers run, compare and import with the flags of the spec', () => {
     const program = new Command();
 
     registerEvalCommands(program.command('eval'));
 
     const evalCommand = program.commands.find((command) => command.name() === 'eval');
     const names = evalCommand?.commands.map((command) => command.name());
-    expect(names).toEqual(['run', 'compare']);
+    expect(names).toEqual(['run', 'compare', 'import']);
     const flags = (name: string): string[] =>
       evalCommand?.commands
         .find((command) => command.name() === name)
@@ -933,8 +933,14 @@ describe('registered actions', () => {
     const compare = process.exitCode;
     process.exitCode = undefined;
 
+    await program.parseAsync(['node', 'prs', 'eval', 'import', 'nope.jsonl', '--format', 'xml']);
+    const imported = process.exitCode;
+    process.exitCode = undefined;
+
     expect(run).toBe(1);
     expect(compare).toBe(1);
+    expect(imported).toBe(1);
+    expect(err.join('\n')).toContain('--format must be text or json');
     expect(err.join('\n')).toContain('Invalid output format: xml');
     expect(err.join('\n')).toContain(EVAL_CODES.REPORT_INVALID);
   });

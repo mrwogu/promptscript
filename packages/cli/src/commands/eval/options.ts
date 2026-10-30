@@ -1,5 +1,9 @@
 import type { EvalCacheMode } from '@promptscript/core';
-import type { EvalComparisonFormat, EvalReportFormat } from '@promptscript/eval';
+import {
+  FEEDBACK_LABEL_PATTERN,
+  type EvalComparisonFormat,
+  type EvalReportFormat,
+} from '@promptscript/eval';
 import type { ProjectPathOptions } from '../../utils/project-config.js';
 
 /** Options of `prs eval run`, as commander hands them over. */
@@ -27,6 +31,37 @@ export interface EvalCompareOptions {
   tolerance?: string;
   cwd?: string;
 }
+
+/** Options of `prs eval import`. */
+export interface EvalImportOptions extends ProjectPathOptions {
+  suite?: string;
+  out?: string;
+  maxRows?: string;
+  seed?: string;
+  maxScore?: string;
+  label?: string[];
+  redactInput?: string[];
+  expectedFromOutput?: boolean;
+  format?: string;
+  dryRun?: boolean;
+}
+
+/** The import options once checked. */
+export interface ParsedImportOptions {
+  suite: string;
+  out: string;
+  format: EvalImportFormat;
+  maxRows: number;
+  seed: number;
+  maxScore?: number;
+  labels: string[];
+  redactInputs: string[];
+  expectedFromOutput: boolean;
+  dryRun: boolean;
+}
+
+/** Output formats of `eval import`. */
+export type EvalImportFormat = 'text' | 'json';
 
 /** The run options once checked. */
 export interface ParsedRunOptions {
@@ -68,6 +103,12 @@ export function parseRunFormat(value: string | undefined): EvalReportFormat | un
 export function parseCompareFormat(value: string | undefined): EvalComparisonFormat | undefined {
   return oneOf(value, COMPARE_FORMATS, 'text');
 }
+
+const IMPORT_FORMATS: readonly EvalImportFormat[] = ['text', 'json'];
+const MAX_IMPORT_ROWS = 1000;
+const DEFAULT_IMPORT_ROWS = 200;
+const MAX_SEED = 4_294_967_295;
+const INPUT_NAME = /^[A-Za-z_]\w*$/;
 
 /** A plain decimal number, not `1e3`, `NaN`, `Infinity` or a sign. */
 export function parseDecimal(value: string): number | undefined {
@@ -145,6 +186,106 @@ export function parseRunOptions(
         ...(options.allowHost ?? []),
         ...hostsFromEnv(env['PROMPTSCRIPT_EVAL_ALLOWED_HOSTS']),
       ],
+    },
+  };
+}
+
+/** A whole number from 0 to 4294967295, written with digits only. */
+export function parseSeed(value: string): number | undefined {
+  if (!isDigits(value)) return undefined;
+  const number = Number(value);
+  return number <= MAX_SEED ? number : undefined;
+}
+
+/** A decimal with an optional minus sign. */
+export function parseSignedDecimal(value: string): number | undefined {
+  return value.startsWith('-') ? negate(parseDecimal(value.slice(1))) : parseDecimal(value);
+}
+
+function negate(value: number | undefined): number | undefined {
+  return value === undefined ? undefined : -value;
+}
+
+// One flag of `eval import`: the parsed value, or a problem and the default
+function flag<T>(
+  value: string | undefined,
+  parse: (text: string) => T | undefined,
+  problem: string,
+  problems: string[],
+  fallback: T
+): T {
+  if (value === undefined) return fallback;
+  const parsed = parse(value);
+  if (parsed === undefined) problems.push(problem);
+  return parsed ?? fallback;
+}
+
+function parseRowLimit(text: string): number | undefined {
+  const parsed = parseWhole(text);
+  return parsed !== undefined && parsed <= MAX_IMPORT_ROWS ? parsed : undefined;
+}
+
+/**
+ * Check the flags of `eval import`. A flag that is not a plain number or a known name is
+ * a problem, never a default. Names given to `--redact-input` and `--label` are checked
+ * here against their patterns; the command checks the input names against the prompt.
+ *
+ * @param options - Flags as commander gave them
+ * @returns The parsed options and the problems found, all of them
+ */
+export function parseImportOptions(options: EvalImportOptions): {
+  parsed?: ParsedImportOptions;
+  problems: string[];
+} {
+  const problems: string[] = [];
+  const format = oneOf(options.format, IMPORT_FORMATS, 'text');
+  if (format === undefined) problems.push('--format must be text or json.');
+  const { suite, out } = options;
+  if (suite === undefined || suite === '') problems.push('--suite is required.');
+  if (out === undefined || out === '') problems.push('--out is required.');
+  const maxRows = flag(
+    options.maxRows,
+    parseRowLimit,
+    `--max-rows must be a whole number from 1 to ${MAX_IMPORT_ROWS}.`,
+    problems,
+    DEFAULT_IMPORT_ROWS
+  );
+  const seed = flag(
+    options.seed,
+    parseSeed,
+    `--seed must be a whole number from 0 to ${MAX_SEED}.`,
+    problems,
+    1
+  );
+  const maxScore = flag(
+    options.maxScore,
+    parseSignedDecimal,
+    '--max-score must be a plain number, such as 0.',
+    problems,
+    undefined
+  );
+  const labels = options.label ?? [];
+  if (labels.some((label) => !FEEDBACK_LABEL_PATTERN.test(label))) {
+    problems.push('--label must be a feedback label: lowercase letters, digits, - and _.');
+  }
+  const redactInputs = options.redactInput ?? [];
+  if (redactInputs.some((name) => !INPUT_NAME.test(name))) {
+    problems.push('--redact-input must be an input name of the prompt.');
+  }
+  if (problems.length > 0 || format === undefined || !suite || !out) return { problems };
+  return {
+    problems,
+    parsed: {
+      suite,
+      out,
+      format,
+      maxRows,
+      seed,
+      ...(maxScore === undefined ? {} : { maxScore }),
+      labels,
+      redactInputs,
+      expectedFromOutput: options.expectedFromOutput === true,
+      dryRun: options.dryRun === true,
     },
   };
 }

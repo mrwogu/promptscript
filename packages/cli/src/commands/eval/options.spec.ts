@@ -3,8 +3,11 @@ import {
   hostsFromEnv,
   parseCompareFormat,
   parseDecimal,
+  parseImportOptions,
   parseRunFormat,
   parseRunOptions,
+  parseSeed,
+  parseSignedDecimal,
   parseTolerance,
   parseWhole,
 } from './options.js';
@@ -125,5 +128,82 @@ describe('parseRunOptions', () => {
     const { problems } = parseRunOptions({ dryRun: true, format: 'json' }, {});
 
     expect(problems).toEqual([expect.stringContaining('--dry-run prints a text plan')]);
+  });
+});
+
+describe('parseSeed and parseSignedDecimal', () => {
+  it('accepts digits from 0 and refuses the rest', () => {
+    expect(parseSeed('0')).toBe(0);
+    expect(parseSeed('42')).toBe(42);
+    expect(parseSeed('4294967295')).toBe(4_294_967_295);
+    expect(['', '-1', '1.5', 'x', '4294967296'].map(parseSeed)).toEqual(Array(5).fill(undefined));
+  });
+
+  it('accepts a minus sign and refuses forms a typo could take', () => {
+    expect(parseSignedDecimal('-0.5')).toBe(-0.5);
+    expect(parseSignedDecimal('2')).toBe(2);
+    expect(['', '-', '--1', '1e3', 'NaN'].map(parseSignedDecimal)).toEqual(
+      Array(5).fill(undefined)
+    );
+  });
+});
+
+describe('parseImportOptions', () => {
+  const base = { suite: 'refund', out: 'rows.jsonl' };
+
+  it('applies the defaults', () => {
+    expect(parseImportOptions(base).parsed).toEqual({
+      suite: 'refund',
+      out: 'rows.jsonl',
+      format: 'text',
+      maxRows: 200,
+      seed: 1,
+      labels: [],
+      redactInputs: [],
+      expectedFromOutput: false,
+      dryRun: false,
+    });
+  });
+
+  it('reads every flag', () => {
+    const { parsed } = parseImportOptions({
+      ...base,
+      maxRows: '1000',
+      seed: '0',
+      maxScore: '-1',
+      label: ['negative'],
+      redactInput: ['message'],
+      expectedFromOutput: true,
+      format: 'json',
+      dryRun: true,
+    });
+
+    expect(parsed).toMatchObject({
+      maxRows: 1000,
+      seed: 0,
+      maxScore: -1,
+      labels: ['negative'],
+      redactInputs: ['message'],
+      expectedFromOutput: true,
+      format: 'json',
+      dryRun: true,
+    });
+  });
+
+  it.each([
+    [{ ...base, maxRows: '1001' }, '--max-rows'],
+    [{ ...base, maxRows: '0' }, '--max-rows'],
+    [{ ...base, seed: '1.5' }, '--seed'],
+    [{ ...base, maxScore: 'low' }, '--max-score'],
+    [{ ...base, label: ['Negative'] }, '--label'],
+    [{ ...base, redactInput: ['a.b'] }, '--redact-input'],
+    [{ ...base, format: 'markdown' }, '--format'],
+    [{ out: 'rows.jsonl' }, '--suite'],
+    [{ suite: 'refund' }, '--out'],
+  ])('refuses %j with a message that names the flag', (options, flag) => {
+    const { parsed, problems } = parseImportOptions(options);
+
+    expect(parsed).toBeUndefined();
+    expect(problems.join(' ')).toContain(flag);
   });
 });

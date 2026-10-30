@@ -1346,7 +1346,8 @@ prs approve acme-support/refund-reply@sha256-<64 hex> --role legal --approver @j
 
 ### prs eval
 
-Run eval suites against the prompts of the project and compare two reports. A suite is a file
+Run eval suites against the prompts of the project, compare two reports and import production
+samples into a dataset. A suite is a file
 `<name>.eval.yaml`, `.eval.yml` or `.eval.json` under `.promptscript/evals/` that names a prompt, a
 dataset and assertions. The prompts come from a fresh in-memory compile of the source, with the
 `bundle` target. The settings are in [`eval`](config.md#eval).
@@ -1463,6 +1464,130 @@ so an unreadable report or a bad option goes to stderr in every format, with exi
 ```bash
 prs eval compare main-report.json pr-report.json
 prs eval compare main-report.json pr-report.json --fail-on-regression --tolerance 0.05
+```
+
+#### prs eval import
+
+Turn production samples into a dataset for a suite. The command reads a JSONL file, scrubs it,
+and writes a new dataset file. It calls no model and needs no key.
+
+```bash
+prs eval import <samples.jsonl> --suite <name> --out <dataset.jsonl> [options]
+```
+
+| Option                   | Description                                                           | Default |
+| ------------------------ | --------------------------------------------------------------------- | ------- |
+| `--suite <name>`         | Suite the dataset is for; its prompt picks the samples                | -       |
+| `--out <file>`           | New dataset file, `.jsonl`, inside the project; must not exist        | -       |
+| `--max-rows <n>`         | Most rows to keep, 1 to 1000                                          | 200     |
+| `--seed <n>`             | Seed of the row sampling, so a rerun gives the same rows              | 1       |
+| `--max-score <n>`        | Keep only samples with a feedback score at or below `n`               | -       |
+| `--label <label>`        | Keep only samples with this feedback label; repeatable                | -       |
+| `--redact-input <name>`  | Replace a string input with `[redacted]` before the scrub; repeatable | -       |
+| `--expected-from-output` | Copy the scrubbed `output` of a sample as the row's `expected`        | off     |
+| `--format <format>`      | `text` or `json`                                                      | `text`  |
+| `--dry-run`              | Print the counts and write nothing                                    | -       |
+| `--cwd <dir>`            | Working directory (project root)                                      | -       |
+| `-c, --config <path>`    | Path to custom config file                                            | -       |
+
+**Sample format.** One JSON object per line, checked against
+`https://getpromptscript.dev/schema/eval-sample/v1.json`:
+
+```json
+{
+  "prompt": "acme-support/refund-reply",
+  "contentHash": "sha256-aaaa...",
+  "variant": "warm",
+  "inputs": { "message": "...", "orderTotal": 120 },
+  "output": "...",
+  "feedback": { "name": "user.thumbs", "score": 0, "label": "negative" }
+}
+```
+
+`prompt` and `inputs` are required. The schema is closed at every level. There is no field for a
+feedback comment, an assignment key, a user, a session or a trace, so a line that has one is
+skipped. Input values are strings, numbers or booleans; a nested value skips the line. A line is
+limited to 1 MiB and a string to 64 KiB, and the file to 100000 lines (`PS6712`). A line that fails
+is counted by reason and its content is never printed.
+
+**What the command does**, in this order, all before anything is written:
+
+1. Refuses a sample file that Git tracks, or that sits in a Git repository and is neither tracked
+   nor ignored (`PS6716`). Raw samples hold personal data that was never scrubbed, so only the
+   dataset belongs in Git, and a later `git add .` must not be able to pick the file up. Put it
+   outside the repository or in `.gitignore`. The command also refuses when Git cannot say (it
+   cannot be run, or answers with an error); the message names the exit status. A file outside
+   every repository is fine.
+2. Keeps the samples of the suite's prompt and applies `--max-score` and `--label`. A sample
+   without a score fails `--max-score`; a sample without a label fails `--label`.
+3. Checks the inputs against the prompt. The contract is the verified bundle of the sample's
+   `contentHash` under `.promptscript/releases/bundles/` when that file exists, else the current
+   compile. A bundle file that does not verify is not used, and the summary warns. An input the
+   prompt does not declare skips the whole sample, as does an input of another type or a missing
+   required input. The inputs must fit the current compile as well, because `prs eval run` checks
+   rows against it; a sample that fits only an older bundle is skipped as `staleContract`. Nothing
+   is repaired or passed through.
+4. Scrubs every string input and, with `--expected-from-output`, the output. Emails, payment card
+   numbers (Luhn check) and IBANs (mod-97 check) become `[email]`, `[card]` and `[iban]`. The same
+   detectors then run on the result, and a value that still matches stops the import with `PS6714`
+   and writes nothing. A number input with 13 or more digits skips the sample (`numericPii`), since
+   it could be a card number and cannot be replaced without changing its type. A millisecond
+   timestamp is such a number; pass it as a string input instead. A string that hides
+   a value from the detectors with zero-width or other invisible characters, fullwidth forms
+   (`＠`, fullwidth digits) or dots between card groups also skips the sample (`obfuscatedPii`).
+   The scrub reads email addresses of any script, IBANs in any case with spaces or dashes between
+   groups, and card numbers with up to three spaces, dashes, underscores, slashes or commas between digits,
+   or with other digits next to them. A run of 13 to 19 digits that passes the Luhn check is
+   replaced as `[card]` as a whole, so about 1 in 10 plain ids of that length is replaced too, and a
+   number of 20 to 64 digits is nearly always replaced, since every 13 to 19 digit part of it is tried.
+   There is no option to turn the scrub off.
+5. Drops duplicates (same scrubbed inputs). The row id is `imp-` plus 12 hex digits of the hash of
+   the scrubbed inputs. Tags are `imported`, plus `variant:<name>` when the sample has one.
+6. Samples down to `--max-rows` with a seeded reservoir, and keeps the file order.
+7. Runs the dataset security scan on the rows. Findings are printed with the row id and the path,
+   never the value, and do not stop the import. Production text can hold injection attempts; the
+   suite that uses the dataset decides with `allow` entries.
+8. Writes `--out` atomically, with mode 0600. It must stay inside the project and must not exist
+   (`PS6713`), so an import never replaces a reviewed dataset. The file is not added to any suite;
+   name it in the `dataset` field of one. When the suite has an `equals` assertion without a value
+   and the rows have no `expected`, `prs eval run` would refuse the dataset (`PS6105`); the summary
+   warns with a count, and `--expected-from-output` or hand-written values fix it.
+
+**The scrub lowers risk, it does not remove it.** It catches emails, card numbers and IBANs only.
+Names, phone numbers, postal addresses and ids in free text stay in the dataset, and so do values
+that are encoded (URL-encoded or base64 text, `jan%40example.com`) or spelled out with spaces
+around the at sign. The second pass
+with the same detectors is a check on the replacer, not a second line of defence. The person who
+reviews the dataset in the pull request decides whether it is fit to commit. Use `--redact-input`
+for inputs that hold free text about a person. A name given to it must be a string input of the
+prompt, so a typo is an error and never a silent no-op.
+
+The summary, also under `--dry-run`, gives counts per step, per skip reason and per kind of
+replacement, such as `email: 14, card: 2, iban: 0, redacted: 31`. Replacements are counted for every
+sample that reached the scrub, including those dropped later as duplicates or by sampling. It never holds
+a sample value. With `--format json`, stdout holds one document that matches
+`https://getpromptscript.dev/schema/eval-import-summary/v1.json`. Strings that come from a sample or
+a finding have control and bidi characters removed. Errors go to stderr in both formats.
+
+Exit code 0 when the import ran, also under `--dry-run`. Exit 1 for a bad flag (`PS6309`), an
+unknown suite (`PS6200`), a project that does not load or compile (`PS6310`) or a prompt it does
+not compile (`PS6203`), a refused path or
+sample file, a scrub failure, or when no sample matched the suite (`PS6715`; the counts are still
+printed).
+
+| Code     | Meaning                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------- |
+| `PS6711` | The sample file does not exist or is not a regular file                                           |
+| `PS6712` | The sample file has more than 100000 lines                                                        |
+| `PS6713` | The output path exists, is not `.jsonl`, or leaves the project                                    |
+| `PS6714` | The scrub left personal data in a value; nothing was written                                      |
+| `PS6715` | No sample matched the suite                                                                       |
+| `PS6716` | The sample file is tracked by Git, sits in a repository without an ignore rule, or Git cannot say |
+
+```bash
+prs eval import samples.jsonl --suite refund --out .promptscript/evals/datasets/prod.jsonl --dry-run
+prs eval import ~/samples.jsonl --suite refund --out .promptscript/evals/datasets/prod.jsonl --max-score 0
+prs eval import ~/samples.jsonl --suite refund --out .promptscript/evals/datasets/prod.jsonl --redact-input message
 ```
 
 ### prs governance
@@ -1930,7 +2055,8 @@ See the [Configuration Reference](./config.md) for every field, default, and adv
 | 2    | Warning (with --strict) |
 | 130  | Interrupted (Ctrl+C)    |
 
-`prs eval run` maps its outcomes onto these codes; see [`prs eval run`](#prs-eval-run).
+`prs eval run` maps its outcomes onto these codes; see [`prs eval run`](#prs-eval-run). `prs eval import`
+uses 0 and 1; see [`prs eval import`](#prs-eval-import).
 
 ## Troubleshooting
 

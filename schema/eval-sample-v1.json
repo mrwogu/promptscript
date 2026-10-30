@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/eval-sample/v1.json",
+  "title": "PromptScript Eval Sample v1",
+  "type": "object",
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "description": "Prompt id the sample was served from.",
+      "examples": [
+        "acme-support/refund-reply"
+      ],
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "contentHash": {
+      "type": "string",
+      "description": "Content hash of the served prompt: `sha256-` plus 64 lowercase hex characters.",
+      "pattern": "^sha256-[0-9a-f]{64}$"
+    },
+    "variant": {
+      "type": "string",
+      "description": "Arm of an online experiment, or `control`.",
+      "examples": [
+        "warm"
+      ],
+      "pattern": "^(?:control|[a-z][a-z0-9-]{0,31})$"
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/EvalInputValue"
+      },
+      "description": "Prompt input values by input name; scalars only",
+      "propertyNames": {
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+        "not": {
+          "enum": [
+            "__defineGetter__",
+            "__defineSetter__",
+            "__lookupGetter__",
+            "__lookupSetter__",
+            "__proto__",
+            "constructor",
+            "hasOwnProperty",
+            "isPrototypeOf",
+            "propertyIsEnumerable",
+            "prototype",
+            "toLocaleString",
+            "toString",
+            "valueOf"
+          ]
+        }
+      }
+    },
+    "output": {
+      "type": "string",
+      "description": "Model response text"
+    },
+    "feedback": {
+      "$ref": "#/definitions/EvalSampleFeedbackV1",
+      "description": "Feedback on the response"
+    }
+  },
+  "required": [
+    "prompt",
+    "inputs"
+  ],
+  "additionalProperties": false,
+  "description": "One production sample, version 1: a line of the JSONL file `prs eval import` reads. The schema is closed: there is no field for a comment, an assignment key, a user, a session or a trace.",
+  "definitions": {
+    "EvalInputValue": {
+      "type": [
+        "string",
+        "number",
+        "boolean"
+      ],
+      "description": "Scalar value of an eval case input."
+    },
+    "EvalSampleFeedbackV1": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Feedback name.",
+          "examples": [
+            "user.thumbs"
+          ],
+          "pattern": "^[a-z][a-z0-9_.-]{0,63}$"
+        },
+        "score": {
+          "type": "number",
+          "description": "Score, any finite number"
+        },
+        "label": {
+          "type": "string",
+          "description": "Feedback label.",
+          "examples": [
+            "negative"
+          ],
+          "pattern": "^[a-z][a-z0-9_-]{0,31}$"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "Feedback attached to a production sample. There is no free-text field on purpose."
+    }
+  }
+}

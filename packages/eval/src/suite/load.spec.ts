@@ -97,6 +97,13 @@ describe('loadSuites', () => {
     ]);
   });
 
+  it('gives an error finding and no suite for a name that is not there', async () => {
+    const { suites, findings } = await loadSuites({ projectRoot: root, names: ['missing'] });
+
+    expect(suites).toEqual([]);
+    expect(findings.map((finding) => finding.severity)).toEqual(['error']);
+  });
+
   it('refuses a file name that is not a suite name', async () => {
     suiteFile('Refund_Reply.eval.yaml', SUITE);
 

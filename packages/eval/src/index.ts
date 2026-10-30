@@ -20,6 +20,15 @@ export { resolveProjectPath } from './paths.js';
 export { readDataset, type DatasetRecord, type ReadDatasetOptions } from './dataset/read.js';
 export { checkDatasetRow, type DatasetCheckContext } from './dataset/check.js';
 export { scanDatasetRow, type ScanOptions } from './dataset/scan.js';
+export { detectPii, scrubPii, type ScrubCounts } from './dataset/pii.js';
+export {
+  importSamples,
+  type ImportContract,
+  type ImportResult,
+  type ImportRow,
+  type ImportSamplesOptions,
+} from './import/import.js';
+export { FEEDBACK_LABEL_PATTERN, parseSample } from './import/sample.js';
 export {
   loadSuites,
   type LoadedSuite,
@@ -59,7 +68,7 @@ export {
   type EvalReportFormat,
   type FormatOptions,
 } from './format.js';
-export { cleanText } from './sanitize.js';
+export { cleanText, cleanValue } from './sanitize.js';
 export {
   createAnthropicProvider,
   createOpenAICompatibleProvider,

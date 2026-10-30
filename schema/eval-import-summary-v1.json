@@ -1,0 +1,281 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://getpromptscript.dev/schema/eval-import-summary/v1.json",
+  "title": "PromptScript Eval Import Summary v1",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://getpromptscript.dev/schema/eval-import-summary/v1.json",
+      "description": "Schema URL, the version tag of the summary"
+    },
+    "suite": {
+      "type": "string",
+      "description": "Suite name"
+    },
+    "prompt": {
+      "type": "string",
+      "description": "Prompt id of the suite"
+    },
+    "out": {
+      "type": "string",
+      "description": "Dataset path, relative to the project root"
+    },
+    "dryRun": {
+      "type": "boolean",
+      "description": "True when nothing was written because of `--dry-run`"
+    },
+    "written": {
+      "type": "boolean",
+      "description": "True when the dataset file was written"
+    },
+    "steps": {
+      "$ref": "#/definitions/EvalImportStepsV1",
+      "description": "Counts per step"
+    },
+    "skipped": {
+      "$ref": "#/definitions/EvalImportSkippedV1",
+      "description": "Samples dropped, by reason"
+    },
+    "replacements": {
+      "$ref": "#/definitions/EvalImportReplacementsV1",
+      "description": "Values replaced, by kind"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/EvalFindingV1"
+      },
+      "description": "Findings of the dataset security scan; they do not stop the import"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Warnings, such as a sample file under the project root"
+    }
+  },
+  "required": [
+    "$schema",
+    "suite",
+    "prompt",
+    "out",
+    "dryRun",
+    "written",
+    "steps",
+    "skipped",
+    "replacements",
+    "findings",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "description": "Summary of `prs eval import --format json`: counts only, never sample values.",
+  "definitions": {
+    "EvalImportStepsV1": {
+      "type": "object",
+      "properties": {
+        "read": {
+          "type": "number",
+          "description": "Non-blank lines read"
+        },
+        "valid": {
+          "type": "number",
+          "description": "Lines that passed the sample schema"
+        },
+        "forPrompt": {
+          "type": "number",
+          "description": "Samples of the suite's prompt"
+        },
+        "filtered": {
+          "type": "number",
+          "description": "Samples left after `--max-score` and `--label`"
+        },
+        "fitted": {
+          "type": "number",
+          "description": "Samples whose inputs fit the prompt"
+        },
+        "unique": {
+          "type": "number",
+          "description": "Samples left after the duplicates are dropped"
+        },
+        "sampled": {
+          "type": "number",
+          "description": "Rows written, or that would be written"
+        }
+      },
+      "required": [
+        "read",
+        "valid",
+        "forPrompt",
+        "filtered",
+        "fitted",
+        "unique",
+        "sampled"
+      ],
+      "additionalProperties": false,
+      "description": "Counts of the import steps, in the order the steps run."
+    },
+    "EvalImportSkippedV1": {
+      "type": "object",
+      "properties": {
+        "invalidJson": {
+          "type": "number",
+          "description": "The line is not JSON"
+        },
+        "invalidSample": {
+          "type": "number",
+          "description": "The line breaks the sample schema or a size limit, before or after the scrub"
+        },
+        "otherPrompt": {
+          "type": "number",
+          "description": "The sample is of another prompt"
+        },
+        "filteredScore": {
+          "type": "number",
+          "description": "The feedback score is above `--max-score` or absent"
+        },
+        "filteredLabel": {
+          "type": "number",
+          "description": "The feedback label is not one of `--label` or absent"
+        },
+        "undeclaredInput": {
+          "type": "number",
+          "description": "An input the prompt does not declare"
+        },
+        "inputMismatch": {
+          "type": "number",
+          "description": "An input has another type, or a required input is missing"
+        },
+        "staleContract": {
+          "type": "number",
+          "description": "The sample fits the bundle of its hash but not the current prompt, so a run would refuse the row"
+        },
+        "numericPii": {
+          "type": "number",
+          "description": "A number input has 13 or more digits, so it could be a card number, and it cannot be replaced without changing its type"
+        },
+        "obfuscatedPii": {
+          "type": "number",
+          "description": "A value hides personal data with zero-width characters, fullwidth forms or dots"
+        },
+        "duplicate": {
+          "type": "number",
+          "description": "Same scrubbed inputs as an earlier sample"
+        },
+        "sampledOut": {
+          "type": "number",
+          "description": "Left out by sampling down to `--max-rows`"
+        }
+      },
+      "required": [
+        "invalidJson",
+        "invalidSample",
+        "otherPrompt",
+        "filteredScore",
+        "filteredLabel",
+        "undeclaredInput",
+        "inputMismatch",
+        "staleContract",
+        "numericPii",
+        "obfuscatedPii",
+        "duplicate",
+        "sampledOut"
+      ],
+      "additionalProperties": false,
+      "description": "Samples dropped, by reason."
+    },
+    "EvalImportReplacementsV1": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "number"
+        },
+        "card": {
+          "type": "number"
+        },
+        "iban": {
+          "type": "number"
+        },
+        "redacted": {
+          "type": "number",
+          "description": "Inputs replaced by `--redact-input`"
+        }
+      },
+      "required": [
+        "email",
+        "card",
+        "iban",
+        "redacted"
+      ],
+      "additionalProperties": false,
+      "description": "Values replaced by the scrub, by kind."
+    },
+    "EvalFindingV1": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Eval code of the finding.",
+          "examples": [
+            "PS6110"
+          ],
+          "pattern": "^PS\\d{3,4}$"
+        },
+        "rule": {
+          "type": "string",
+          "description": "Validator rule that fired, for a scan finding.",
+          "examples": [
+            "PS005"
+          ],
+          "pattern": "^PS\\d{3,4}$"
+        },
+        "ruleName": {
+          "type": "string",
+          "description": "Validator rule name, for a scan finding.",
+          "examples": [
+            "blocked-patterns"
+          ]
+        },
+        "severity": {
+          "$ref": "#/definitions/EvalFindingSeverity",
+          "description": "Severity after any downgrade"
+        },
+        "rowId": {
+          "type": "string",
+          "description": "Dataset row id"
+        },
+        "path": {
+          "type": "string",
+          "description": "JSON path of the value inside the row.",
+          "examples": [
+            "inputs.message"
+          ]
+        },
+        "line": {
+          "type": "integer",
+          "description": "Line of the row in the dataset file.",
+          "minimum": 1
+        },
+        "allowedBecause": {
+          "type": "string",
+          "description": "Reason from the suite's allow entry when the finding was downgraded"
+        }
+      },
+      "required": [
+        "code",
+        "severity"
+      ],
+      "additionalProperties": false,
+      "description": "One finding of the dataset scan."
+    },
+    "EvalFindingSeverity": {
+      "type": "string",
+      "enum": [
+        "error",
+        "warning"
+      ],
+      "description": "Severity of a dataset finding."
+    }
+  }
+}

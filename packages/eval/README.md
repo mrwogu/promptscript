@@ -165,6 +165,20 @@ like code. Every environment value of 8 or more characters is left out of error 
 `${VAR}` in a model profile stops the run too, replay included. `onUse` reports the provider, variable and host of each provider before its first call.
 `createMockProvider` gives scripted answers for tests, with no network code.
 
+## Sample import
+
+`importSamples` turns a JSONL file of production samples into dataset rows. It writes nothing; the
+CLI command `prs eval import` does the checks around it and the one write. A line is checked with
+`parseSample` against the closed schema `schema/eval-sample-v1.json`: no comment, key, user, session
+or trace field, scalar inputs only. Lines are read with a byte-counting splitter (1 MiB per line,
+64 KiB per string, 100000 lines). Inputs the prompt does not declare skip the sample.
+
+`scrubPii` replaces what `detectPii` finds with `[email]`, `[card]` or `[iban]`, using the same
+detectors. `importSamples` runs `detectPii` on every scrubbed value and throws PS6714 when anything
+is left, so a raw value is never returned. Names, phone numbers, postal addresses and ids in free
+text are not detected, and stay. Codes: PS6711 sample file, PS6712 line limit, PS6713 output path,
+PS6714 scrub left personal data, PS6715 no sample matched, PS6716 file tracked by Git, loose in a repository, or Git cannot say.
+
 ## Commands
 
 ```bash

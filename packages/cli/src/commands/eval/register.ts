@@ -1,12 +1,12 @@
 import type { Command } from 'commander';
-import type { EvalCompareOptions, EvalRunOptions } from './options.js';
+import type { EvalCompareOptions, EvalImportOptions, EvalRunOptions } from './options.js';
 
 function collect(value: string, previous: string[] = []): string[] {
   return [...previous, value];
 }
 
 /**
- * Register `prs eval run|compare`. Each action loads the command on first use, so the
+ * Register `prs eval run|compare|import`. Each action loads the command on first use, so the
  * eval engine is not read for any other command.
  *
  * Live modes, the budget and extra provider hosts have flags only; no config key turns
@@ -47,5 +47,28 @@ export function registerEvalCommands(evalCommand: Command): void {
     .action(async (baseline: string, candidate: string, opts: EvalCompareOptions) => {
       const { evalCompareCommand } = await import('./compare.js');
       await evalCompareCommand(baseline, candidate, opts);
+    });
+
+  evalCommand
+    .command('import <samples>')
+    .description('Turn production samples (JSONL) into a scrubbed dataset for a suite')
+    .option('--suite <name>', 'Suite the dataset is for (required)')
+    .option(
+      '--out <file>',
+      'New dataset file (.jsonl) inside the project, never replaced (required)'
+    )
+    .option('--max-rows <n>', 'Most rows to keep, at most 1000', '200')
+    .option('--seed <n>', 'Seed of the row sampling', '1')
+    .option('--max-score <n>', 'Keep only samples with a feedback score at or below n')
+    .option('--label <label>', 'Keep only samples with this feedback label', collect)
+    .option('--redact-input <name>', 'Replace a string input with [redacted]', collect)
+    .option('--expected-from-output', 'Copy the scrubbed output as the expected value')
+    .option('--format <format>', 'Output format (text, json)', 'text')
+    .option('--dry-run', 'Print the counts and write nothing')
+    .option('-c, --config <path>', 'Path to custom config file')
+    .option('--cwd <dir>', 'Working directory (project root)')
+    .action(async (samples: string, opts: EvalImportOptions) => {
+      const { evalImportCommand } = await import('./import.js');
+      await evalImportCommand(samples, opts);
     });
 }
