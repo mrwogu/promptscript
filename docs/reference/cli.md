@@ -1171,11 +1171,11 @@ prs registry add @company github.com/acme/promptscript-base --global
 
 ### prs release
 
-Build, promote, roll back and inspect content-hashed prompt bundles per environment. Releases need
+Build, promote, split, roll back and inspect content-hashed prompt bundles per environment. Releases need
 [`releases`](config.md#releases) in `promptscript.yaml`; without it every subcommand fails with
 `PS5001`. See the [releases guide](../guides/releases.md) for the flow.
 
-All four subcommands take these options:
+All five subcommands take these options:
 
 | Option                | Description                      | Default |
 | --------------------- | -------------------------------- | ------- |
@@ -1187,7 +1187,7 @@ With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/release-report/v1.json` and the human text goes to stderr. Exit
 code 0 means success or a no-op. Exit code 1 means an error or a failed verification.
 
-Errors use the codes `PS5001` to `PS5008` and `PS5010`, listed in the
+Errors use the codes `PS5001` to `PS5010`, listed in the
 [releases guide](../guides/releases.md#error-codes).
 
 #### prs release build
@@ -1233,7 +1233,8 @@ previous one holds. Then the [release gates](../guides/releases.md#release-gates
 policy on the bundle, and `required-approvals` against the approval records committed at `HEAD`.
 A gate of severity `error` that fails refuses the promotion with `PS030` and leaves the label
 unchanged. `required-evals` reports `unavailable` in the gates and blocks at severity `error`.
-There is no flag to skip the order or the gates.
+There is no flag to skip the order or the gates. An entry with a running experiment is refused with
+`PS5010`: end the experiment with `prs release split --end` first.
 
 ```bash
 prs release promote acme-support/refund-reply --to staging
@@ -1254,10 +1255,43 @@ prs release rollback <env> [options]
 
 Reads Git history, so the label must have no uncommitted change. Fails with `PS5006` at the first
 promotion, and in a shallow checkout (run `git fetch --unshallow`). Every hash the rollback brings
-back must pass the [release gates](../guides/releases.md#release-gates).
+back, experiment arms included, must pass the [release gates](../guides/releases.md#release-gates).
 
 ```bash
 prs release rollback prod
+```
+
+#### prs release split
+
+Send a share of the traffic of a prompt to other versions in a later environment.
+
+```bash
+prs release split <id> --env <env> --name <experiment> --arm <variant>@<hash>=<percent> [options]
+prs release split <id> --env <env> --end [--keep <variant>] [options]
+```
+
+| Option                         | Description                                      |
+| ------------------------------ | ------------------------------------------------ |
+| `--env <env>`                  | Environment that runs the experiment (required)  |
+| `--name <experiment>`          | Experiment name, required to start or change one |
+| `--arm <variant@hash=percent>` | Arm besides control, repeat for each (at most 3) |
+| `--end`                        | End the experiment of the entry                  |
+| `--keep <variant>`             | With `--end`, make this arm the entry hash       |
+| `--dry-run`                    | Show the split without writing the label         |
+
+Control is the entry hash and keeps the rest of the traffic, at least 0.01 %. `--arm` lists every
+arm that stays. The first environment runs no experiment (`PS5009`). A new arm must run in the
+previous environment, an arm that only runs there as an arm gets at most its weight there, and
+`--keep` needs the entry hash of the previous environment (`PS5005`). Every write runs the
+[release gates](../guides/releases.md#release-gates) for the entry hash and every arm with traffic.
+There is no flag to skip them. An arm must be a version the previous environment already runs, so
+in a short chain only the version of the previous environment is available. See [Split](../guides/releases.md#split) before the first use: the
+applications that read the environment need a runtime that reads label v2.
+
+```bash
+prs release split acme-support/refund-reply --env prod --name warm-tone-2026-11 \
+  --arm warm@sha256-1a2b3c4d=10
+prs release split acme-support/refund-reply --env prod --end --keep warm
 ```
 
 #### prs release status
@@ -1274,7 +1308,8 @@ prs release status [options]
 | `--base <ref>`  | Check every label entry changed since `<ref>` with the rules of `<ref>` |
 
 Shows, per environment, the prompt id, the hash, whether it is in the latest build and whether it
-verifies. Exits with code 1 when a referenced bundle is missing or does not verify. With prompt
+verifies. Under an entry with an experiment it lists the arms with their weights and verifies each
+arm bundle. Exits with code 1 when a referenced bundle is missing or does not verify. With prompt
 policies it also runs the [release gates](../guides/releases.md#release-gates) on every entry and
 shows an `approvals` column (`ok`, `missing: <roles>` or `-`); a failed gate is a warning there.
 
@@ -1286,7 +1321,9 @@ went through the check), or the first environment holds what the source compiles
 `policies`, `validation` and `models.supported` of `<ref>`, or a later one holds what the
 environment before it holds. Every new or changed entry also goes through the release gates with
 the policies, governance and releases of `<ref>` and the approval records committed at `HEAD`, a
-rollback too. A removed entry is listed as `removed` and not checked. The config is
+rollback too. An experiment is checked like a split: its arms follow the order and weight rules and
+every arm with traffic goes through the gates. A removed entry is listed as `removed` and not
+checked. The config is
 read at `<ref>`; `-c` and `PROMPTSCRIPT_CONFIG` are ignored with a warning. Any failure exits with
 code 1. A ref that is missing, not a commit, ambiguous (pass the full name, such as
 `refs/remotes/origin/main`) or not fetched in a shallow checkout fails with `PS5006`. See
@@ -1653,7 +1690,8 @@ Read the governance history of the project from Git.
 List prompt file changes, approvals, promotions, rollbacks, label entries removed, config changes
 and changes of the generated CODEOWNERS section, newest commit first, merges and side branches
 included, plus the changes a merge dropped from a parent. See [Audit log](../guides/releases.md#audit-log)
-in the releases guide.
+in the releases guide. Experiment arms and weights are not listed yet: read the label history with
+`git log -p`.
 
 ```bash
 prs audit log [options]

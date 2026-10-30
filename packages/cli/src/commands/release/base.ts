@@ -3,6 +3,7 @@ import { relative, resolve, sep } from 'node:path';
 import {
   compareCodeUnits,
   type PromptReleaseLabel,
+  type PromptReleaseLabelEntryV2,
   type PromptScriptConfig,
 } from '@promptscript/core';
 import { CONFIG_FILES, loadConfigFileWith } from '../../config/loader.js';
@@ -19,15 +20,22 @@ import {
   PS5004_VERIFICATION_FAILED,
   PS5005_PROMOTION_ORDER,
   PS5006_ROLLBACK_UNAVAILABLE,
+  PS5009_INVALID_SPLIT,
   ReleaseError,
 } from './errors.js';
+import {
+  armLimitWarnings,
+  entryHashes,
+  gateEntriesOf,
+  labelChanges,
+  sameEntry,
+  upstreamProblem,
+} from './experiment.js';
 import { checkPromotionGates } from './gates.js';
 import { runGit, stripControlCharacters } from './git.js';
 import {
   MANIFEST_FILE,
   PRICING_FILE,
-  addedOrChangedExperiments,
-  labelChanges,
   removedExperiments,
   parseLabel,
   readReleaseText,
@@ -55,8 +63,6 @@ export interface BaseCheck {
   gates: ReleaseGateResult[];
   warnings: ReleaseDiagnostic[];
   errors: ReleaseDiagnostic[];
-  /** How many entries keep their hash but lose their experiment */
-  endedExperiments: number;
 }
 
 function historyError(message: string): ReleaseError {
@@ -200,11 +206,11 @@ export async function loadBaseConfig(
   }
 }
 
-/** Prompt ids and hashes of one label. */
-type Entries = Map<string, string>;
+/** The entries of one label by prompt id, with their experiments. */
+type Entries = Map<string, PromptReleaseLabelEntryV2>;
 
-function entriesOf(label: PromptReleaseLabel | undefined): Entries {
-  return new Map((label?.prompts ?? []).map((entry) => [entry.id, entry.contentHash]));
+function entriesOf(label: PromptReleaseLabel): Entries {
+  return new Map(label.prompts.map((entry) => [entry.id, entry]));
 }
 
 /** A label at a commit; one that is missing, not a regular file or does not parse is empty. */
@@ -271,8 +277,6 @@ interface LabelPair {
   previous: Entries;
   /** A read or parse error of the checkout label that plain status does not report */
   error?: ReleaseError;
-  /** Ids whose experiment the checkout adds or changes */
-  experiments: string[];
   /** Ids whose experiment the checkout drops */
   removed: string[];
 }
@@ -303,20 +307,65 @@ interface BaseRules {
 const ROLLBACK_HINT = (environment: string): string =>
   `To roll back instead, restore the label from before its last change: prs release rollback ${environment}.`;
 
+/** The first error of the bundles an entry points at, or undefined when all verify. */
+async function firstBundleError(
+  project: ReleaseProject,
+  entry: PromptReleaseLabelEntryV2
+): Promise<unknown> {
+  const results = await Promise.all(
+    entryHashes(entry).map((hash) =>
+      readVerifiedBundle(project.paths, hash, entry.id).then(
+        () => undefined,
+        (error: unknown) => error
+      )
+    )
+  );
+  return results.find((error) => error !== undefined);
+}
+
+/** The first environment: the entry hash is what the source compiles to under the base rules. */
+async function freshProblem(
+  rules: BaseRules,
+  environment: string,
+  after: PromptReleaseLabelEntryV2
+): Promise<ReleaseError | undefined> {
+  const { base } = rules;
+  const labelPath = rules.project.paths.label(environment);
+  const entry = `${after.id}@${shortHash(after.contentHash)}`;
+  const fresh = (await rules.freshHashes()).get(after.id);
+  if (fresh === undefined) {
+    return new ReleaseError(
+      PS5003_BUNDLE_MISSING,
+      `${environment} holds ${entry}, but the source has no prompt ${after.id}. Remove the entry or add the prompt back.`,
+      labelPath
+    );
+  }
+  if (fresh === after.contentHash) return undefined;
+  return new ReleaseError(
+    PS5004_VERIFICATION_FAILED,
+    `${environment} holds ${entry}, but with the policies and validation of ${base.ref} the source compiles to ${shortHash(fresh)}. Run prs release build and prs release promote ${after.id} --to ${environment}, or revert the label. ${ROLLBACK_HINT(environment)}`,
+    labelPath
+  );
+}
+
 /**
  * Why one changed entry breaks the promotion rules of the base, or nothing when it holds.
- * A missing or broken bundle is thrown as the ReleaseError that reports it.
+ * `before` is the entry at the base. A missing or broken bundle of the entry hash or of an
+ * arm is thrown as the ReleaseError that reports it. The entry hash is checked against the
+ * source or the previous environment only when it changed; the arms follow the same order
+ * and weight rules as a split.
  */
 async function entryProblem(
   rules: BaseRules,
   environment: string,
-  change: ReleaseChange & { id: string; contentHash: string }
+  before: PromptReleaseLabelEntryV2 | undefined,
+  after: PromptReleaseLabelEntryV2
 ): Promise<ReleaseError | undefined> {
   const { project, base } = rules;
   const labelPath = project.paths.label(environment);
   const index = rules.environments.indexOf(environment);
   const shownEnvironment = stripControlCharacters(environment);
-  const entry = `${change.id}@${shortHash(change.contentHash)}`;
+  const entry = `${after.id}@${shortHash(after.contentHash)}`;
   if (index < 0) {
     return new ReleaseError(
       PS5002_UNKNOWN_ENVIRONMENT,
@@ -324,45 +373,35 @@ async function entryProblem(
       labelPath
     );
   }
-  const bundle = await readVerifiedBundle(project.paths, change.contentHash, change.id).then(
-    () => undefined,
-    (error: unknown) => error
-  );
+  const bundle = await firstBundleError(project, after);
   if (bundle !== undefined) {
     if (!(bundle instanceof ReleaseError)) throw bundle;
     // Plain status reports a missing or broken bundle of a configured environment itself.
     return project.environments.includes(environment) ? undefined : bundle;
   }
-  // A rollback restores what the label held before its last change. It only replaces an
-  // entry the base still holds: bringing back a removed entry is a new promotion. The hash
-  // passed these rules once, if every commit of the base was a checked pull request.
-  const rolledBack = await rules.rolledBack(environment);
-  const isRollback =
-    change.previousContentHash !== undefined && rolledBack?.get(change.id) === change.contentHash;
-  if (isRollback) return undefined;
-  if (index === 0) {
-    const fresh = (await rules.freshHashes()).get(change.id);
-    if (fresh === undefined) {
-      return new ReleaseError(
-        PS5003_BUNDLE_MISSING,
-        `${environment} holds ${entry}, but the source has no prompt ${change.id}. Remove the entry or add the prompt back.`,
-        labelPath
-      );
-    }
-    if (fresh === change.contentHash) return undefined;
+  if (index === 0 && after.experiment !== undefined) {
     return new ReleaseError(
-      PS5004_VERIFICATION_FAILED,
-      `${environment} holds ${entry}, but with the policies and validation of ${base.ref} the source compiles to ${shortHash(fresh)}. Run prs release build and prs release promote ${change.id} --to ${environment}, or revert the label. ${ROLLBACK_HINT(environment)}`,
+      PS5009_INVALID_SPLIT,
+      `${environment} is the first environment and holds an experiment of ${after.id}. The first environment follows the source and runs no experiment; revert the label. ${ROLLBACK_HINT(environment)}`,
       labelPath
     );
   }
+  // A rollback restores what the label held before its last change. It only replaces an
+  // entry the base still holds: bringing back a removed entry is a new promotion. The entry
+  // passed these rules once, if every commit of the base was a checked pull request.
+  const rolledBack = await rules.rolledBack(environment);
+  if (before !== undefined && sameEntry(rolledBack?.get(after.id), after)) return undefined;
+  if (index === 0) {
+    return after.contentHash === before?.contentHash
+      ? undefined
+      : freshProblem(rules, environment, after);
+  }
   const previous = rules.environments[index - 1] ?? '';
-  const held = rules.head.get(previous)?.get(change.id);
-  if (held === change.contentHash) return undefined;
-  const holds = held === undefined ? `does not hold ${change.id}` : `holds ${shortHash(held)}`;
+  const problem = upstreamProblem(before, after, rules.head.get(previous)?.get(after.id), previous);
+  if (problem === undefined) return undefined;
   return new ReleaseError(
     PS5005_PROMOTION_ORDER,
-    `${environment} holds ${entry}, but ${previous} ${holds}. Promote it to ${previous} first, in this pull request or an earlier one. ${ROLLBACK_HINT(environment)}`,
+    `${environment} holds ${entry}, but it breaks the promotion order: ${problem} Do it in this pull request or an earlier one. ${ROLLBACK_HINT(environment)}`,
     labelPath
   );
 }
@@ -420,11 +459,11 @@ async function labelPair(
   const unreadable = (error: unknown): LabelPair => {
     // Plain status reports a broken label of a configured environment itself.
     if (project.environments.includes(name)) {
-      return { name, head: new Map(), previous: atBase.entries, experiments: [], removed: [] };
+      return { name, head: new Map(), previous: atBase.entries, removed: [] };
     }
     // Anything but a release file error (a permission problem, say) fails the command.
     if (!(error instanceof ReleaseError)) throw error;
-    return { name, head: new Map(), previous: atBase.entries, experiments: [], removed: [], error };
+    return { name, head: new Map(), previous: atBase.entries, removed: [], error };
   };
   let text: string | undefined;
   try {
@@ -433,14 +472,14 @@ async function labelPair(
     return unreadable(error);
   }
   if (text === atBase.text) {
-    return { name, head: atBase.entries, previous: atBase.entries, experiments: [], removed: [] };
+    return { name, head: atBase.entries, previous: atBase.entries, removed: [] };
   }
   if (text === undefined) {
     return {
       name,
       head: new Map(),
       previous: atBase.entries,
-      experiments: [],
+
       removed: [],
     };
   }
@@ -450,7 +489,6 @@ async function labelPair(
       name,
       head: entriesOf(head),
       previous: atBase.entries,
-      experiments: addedOrChangedExperiments(atBase.label, head),
       removed: removedExperiments(atBase.label, head),
     };
   } catch (error) {
@@ -519,32 +557,13 @@ export async function checkAgainstBase(
       ...labels.flatMap((label) => endedExperimentWarnings(project, label)),
       ...checked.flatMap((result) => result.warnings),
     ]),
-    endedExperiments: labels.reduce((sum, label) => sum + endedExperimentIds(label).length, 0),
     errors: unique([
       ...labels.flatMap((label) =>
         label.error === undefined ? [] : [shownDiagnostic(label.error)]
       ),
-      ...labels.flatMap((label) => experimentDiagnostics(project, label)),
       ...checked.flatMap((result) => result.errors),
     ]),
   };
-}
-
-/**
- * An experiment that differs from the base is an error: its arm hashes are not verified or
- * gated by this prs, so a label that adds or changes one must not pass the check.
- */
-function experimentDiagnostics(project: ReleaseProject, label: LabelPair): ReleaseDiagnostic[] {
-  const path = project.paths.label(label.name);
-  return label.experiments.map((id) =>
-    shownDiagnostic(
-      new ReleaseError(
-        PS5004_VERIFICATION_FAILED,
-        `${project.paths.relative(path)}: the experiment of ${id} was added or changed. This prs does not check experiments, so remove it from the label.`,
-        path
-      )
-    )
-  );
 }
 
 /** Ids that lose an experiment and stay in the label, so their traffic goes to the entry hash. */
@@ -556,7 +575,7 @@ function endedExperimentIds(label: LabelPair): string[] {
 function endedExperimentWarnings(project: ReleaseProject, label: LabelPair): ReleaseDiagnostic[] {
   const path = project.paths.relative(project.paths.label(label.name));
   return endedExperimentIds(label).map((id) => ({
-    message: `${path}: the experiment of ${id} was removed; all traffic goes to ${label.head.get(id)}.`,
+    message: `${path}: the experiment of ${id} was removed; all traffic goes to ${label.head.get(id)?.contentHash}.`,
   }));
 }
 
@@ -565,6 +584,29 @@ function unique(diagnostics: ReleaseDiagnostic[]): ReleaseDiagnostic[] {
   return [
     ...new Map(diagnostics.map((diagnostic) => [JSON.stringify(diagnostic), diagnostic])).values(),
   ];
+}
+
+/**
+ * Warnings for entries that passed the checks, a rollback that skips the order rules above
+ * all, whose arms run more than the previous environment allows in the checkout.
+ */
+function limitWarnings(
+  rules: BaseRules,
+  environment: string,
+  path: string,
+  present: PromptReleaseLabelEntryV2[],
+  problems: unknown[]
+): ReleaseDiagnostic[] {
+  const previous = rules.environments[rules.environments.indexOf(environment) - 1];
+  if (previous === undefined) return [];
+  return present
+    .filter((_entry, index) => problems[index] === undefined)
+    .flatMap((entry) =>
+      armLimitWarnings(entry, rules.head.get(previous)?.get(entry.id), previous).map((message) => ({
+        message,
+        location: { file: path },
+      }))
+    );
 }
 
 /** The changed entries of one environment, checked and passed through the gates. */
@@ -580,32 +622,29 @@ async function checkEnvironment(
   const { project } = rules;
   const path = project.paths.relative(project.paths.label(label.name));
   const changes = labelChanges(path, label.previous, label.head);
-  const present = changes.filter(
-    (change): change is ReleaseChange & { id: string; contentHash: string } =>
-      change.id !== undefined && change.contentHash !== undefined
+  const present = [...label.head.values()].filter(
+    (after) => !sameEntry(label.previous.get(after.id), after)
   );
   if (present.length === 0) return { changes, gates: [], warnings: [], errors: [] };
   const problems = await Promise.all(
-    present.map((change) =>
-      entryProblem(rules, label.name, change).catch((error: unknown) =>
-        isEntryProblem(error) ? error : Promise.reject(error)
+    present.map((after) =>
+      entryProblem(rules, label.name, label.previous.get(after.id), after).catch(
+        (error: unknown) => (isEntryProblem(error) ? error : Promise.reject(error))
       )
     )
   );
   const errors = problemDiagnostics(problems);
+  const limits = limitWarnings(rules, label.name, path, present, problems);
   // Approvals are the records committed at HEAD; policies, governance and releases are the
   // base's. An environment the base does not know has no gates: its entries already fail.
   if (!rules.environments.includes(label.name)) {
-    return { changes, gates: [], warnings: [], errors };
+    return { changes, gates: [], warnings: limits, errors };
   }
-  // Only entries whose bundle verifies: plain status or the checks above already report
+  // Only entries whose bundles all verify: plain status or the checks above already report
   // the others.
   const verified = await Promise.all(
-    present.map(({ id, contentHash }) =>
-      readVerifiedBundle(project.paths, contentHash, id).then(
-        () => [{ id, contentHash }],
-        () => []
-      )
+    present.map((entry) =>
+      firstBundleError(project, entry).then((error) => (error === undefined ? [entry] : []))
     )
   );
   const gates = await checkPromotionGates({
@@ -613,11 +652,11 @@ async function checkEnvironment(
     config: rules.gateConfig,
     configFile: rules.configName,
     environment: label.name,
-    prompts: verified.flat(),
+    prompts: verified.flat().flatMap(gateEntriesOf),
     source: rules.freshBuild,
   });
   errors.push(...gates.findings);
-  return { changes, gates: gates.gates, warnings: gates.warnings, errors };
+  return { changes, gates: gates.gates, warnings: [...limits, ...gates.warnings], errors };
 }
 
 /** Errors that fail one entry; anything else fails the command. */

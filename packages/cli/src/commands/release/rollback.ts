@@ -1,14 +1,22 @@
-import type { PromptReleaseLabel } from '@promptscript/core';
-import { PS5006_ROLLBACK_UNAVAILABLE, ReleaseError } from './errors.js';
+import type { PromptReleaseLabel, PromptReleaseLabelEntryV2 } from '@promptscript/core';
+import type { ReleaseChange, ReleaseDiagnostic } from '../../utils/release-report.js';
+import { PS5006_ROLLBACK_UNAVAILABLE, PS5009_INVALID_SPLIT, ReleaseError } from './errors.js';
+import {
+  armChangeText,
+  armLimitWarnings,
+  entryHashes,
+  gateEntriesOf,
+  labelChanges,
+  sameEntry,
+} from './experiment.js';
 import { checkPromotionGates, gateLines } from './gates.js';
 import { runGit, stripControlCharacters } from './git.js';
 import {
   PROMPT_RELEASE_LABEL_SCHEMA_URL,
-  addedOrChangedExperiments,
   fileAction,
-  labelChanges,
   labelText,
   parseLabel,
+  readLabel,
   readReleaseText,
   readVerifiedBundle,
   shortHash,
@@ -20,6 +28,7 @@ import {
   environmentIndex,
   loadReleaseProject,
   type CompiledRelease,
+  type ReleaseProject,
 } from './project.js';
 import { runReleaseCommand, withReleaseLock, type ReleaseCommandOptions } from './run.js';
 
@@ -105,10 +114,64 @@ async function labelBeforeLastChange(
 }
 
 /**
- * Undo the last committed change of an environment's label. Every bundle the restored
- * label points at must exist and verify. A committed rollback is undone by a second one.
- * A rollback that would add or change the experiment of an entry is refused, because this
- * command does not verify or gate experiment arms. One that removes an experiment is allowed.
+ * Refuse to bring an experiment back into the first environment: it follows the source, so
+ * an experiment there can only come from a hand edit.
+ */
+function assertNoFirstEnvironmentExperiment(
+  index: number,
+  environment: string,
+  relativePath: string,
+  changed: PromptReleaseLabelEntryV2[]
+): void {
+  const ids = changed.filter((entry) => entry.experiment !== undefined).map((entry) => entry.id);
+  if (index !== 0 || ids.length === 0) return;
+  throw new ReleaseError(
+    PS5009_INVALID_SPLIT,
+    `${relativePath} would bring back the experiment of ${ids.map(stripControlCharacters).join(', ')}, but ${environment} is the first environment and runs no experiment. Revert the label in a reviewed change instead.`,
+    relativePath
+  );
+}
+
+/**
+ * Warnings for restored arms that run more than the environment before allows. They only
+ * inform, so a label of that environment that does not read gives none instead of failing.
+ */
+async function restoredLimitWarnings(
+  project: ReleaseProject,
+  index: number,
+  changed: PromptReleaseLabelEntryV2[],
+  relativePath: string
+): Promise<ReleaseDiagnostic[]> {
+  const previous = project.environments[index - 1];
+  if (previous === undefined) return [];
+  const upstream = await readLabel(project.paths, previous).catch(() => undefined);
+  if (upstream === undefined) return [];
+  return changed.flatMap((entry) =>
+    armLimitWarnings(
+      entry,
+      upstream.prompts.find((held) => held.id === entry.id),
+      previous
+    ).map((message) => ({ message, location: { file: relativePath } }))
+  );
+}
+
+/** One line of text per entry item, and one per arm item. */
+function changeLine(entry: ReleaseChange): string {
+  if (entry.experiment !== undefined) {
+    return `  ${stripControlCharacters(String(entry.id))} ${armChangeText(entry.experiment)}`;
+  }
+  const from =
+    entry.previousContentHash === undefined ? 'none' : shortHash(entry.previousContentHash);
+  const to = entry.contentHash === undefined ? 'removed' : shortHash(entry.contentHash);
+  return `${stripControlCharacters(String(entry.id))}  ${from} -> ${to}`;
+}
+
+/**
+ * Undo the last committed change of an environment's label. The label comes back whole,
+ * version 1 or 2. Every hash of a restored entry, experiment arms included, must exist and
+ * verify, and every hash of an entry that changes goes through the gates, the arms with
+ * traffic too. The order of the environments is not checked, as before. A committed rollback
+ * is undone by a second one.
  */
 export async function releaseRollbackCommand(
   environment: string,
@@ -116,7 +179,7 @@ export async function releaseRollbackCommand(
 ): Promise<void> {
   await runReleaseCommand('rollback', options, async (output) => {
     const project = await loadReleaseProject(options);
-    environmentIndex(project, environment);
+    const index = environmentIndex(project, environment);
     const dryRun = options.dryRun === true;
     const { paths } = project;
 
@@ -129,41 +192,38 @@ export async function releaseRollbackCommand(
           ? { $schema: PROMPT_RELEASE_LABEL_SCHEMA_URL, environment, prompts: [] }
           : parseLabel(currentText, environment, labelPath);
       const previous = await labelBeforeLastChange(paths, environment);
-      const experiments = addedOrChangedExperiments(current, previous.label);
-      if (experiments.length > 0) {
-        throw new ReleaseError(
-          PS5006_ROLLBACK_UNAVAILABLE,
-          `${relativePath} would add or change the experiment of ${experiments.map(stripControlCharacters).join(', ')}. This prs does not verify or gate experiment arms, so rollback is refused. Edit the label by hand in a reviewed change.`,
-          labelPath
-        );
-      }
+      const currentEntries = new Map(current.prompts.map((entry) => [entry.id, entry]));
+      const changed = previous.label.prompts.filter(
+        (entry) => !sameEntry(currentEntries.get(entry.id), entry)
+      );
+      assertNoFirstEnvironmentExperiment(index, environment, relativePath, changed);
       await Promise.all(
-        previous.label.prompts.map((entry) =>
-          readVerifiedBundle(paths, entry.contentHash, entry.id)
+        previous.label.prompts.flatMap((entry) =>
+          entryHashes(entry).map((hash) => readVerifiedBundle(paths, hash, entry.id))
         )
       );
 
+      const limits = await restoredLimitWarnings(project, index, changed, relativePath);
       const entries = labelChanges(
         relativePath,
-        new Map(current.prompts.map((entry) => [entry.id, entry.contentHash])),
-        new Map(previous.label.prompts.map((entry) => [entry.id, entry.contentHash]))
+        currentEntries,
+        new Map(previous.label.prompts.map((entry) => [entry.id, entry]))
       );
       // The gates judge every hash the rollback brings back, the entries status --base
-      // checks too; an entry the rollback leaves as it is was judged when it got there.
+      // checks too, arms with traffic included; an entry the rollback leaves as it is was
+      // judged when it got there.
       let compiled: Promise<CompiledRelease> | undefined;
       const gates = await checkPromotionGates({
         project,
         config: project.config,
         configFile: project.paths.relative(project.configPath),
         environment,
-        prompts: entries.flatMap(({ id, contentHash }) =>
-          id === undefined || contentHash === undefined ? [] : [{ id, contentHash }]
-        ),
+        prompts: changed.flatMap(gateEntriesOf),
         source: () => (compiled ??= compileRelease(project, output.json)),
       });
       if (!output.json) for (const gate of gates.gates) gateLines(gate).forEach(output.info);
       const gateReport = {
-        warnings: gates.warnings,
+        warnings: [...limits, ...gates.warnings],
         ...(gates.gates.length === 0 ? {} : { gates: gates.gates }),
       };
       if (!gates.passed) {
@@ -175,10 +235,9 @@ export async function releaseRollbackCommand(
       const action = fileAction(currentText, text);
       if (!dryRun && action !== 'unchanged') await writeReleaseFile(paths, labelPath, text);
       for (const entry of entries) {
-        const from =
-          entry.previousContentHash === undefined ? 'none' : shortHash(entry.previousContentHash);
-        const to = entry.contentHash === undefined ? 'removed' : shortHash(entry.contentHash);
-        output.info(`${stripControlCharacters(entry.id ?? '')}  ${from} -> ${to}`);
+        if (entry.experiment !== undefined || entry.action !== 'unchanged') {
+          output.info(changeLine(entry));
+        }
       }
       const restored = `${environment} to the label before commit ${previous.commit.slice(0, 12)} (${previous.subject})`;
       output.success(

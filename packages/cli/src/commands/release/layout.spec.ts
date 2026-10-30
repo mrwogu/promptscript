@@ -13,7 +13,6 @@ import {
   PROMPT_RELEASE_LABEL_V2_SCHEMA_URL,
   assertExactCase,
   assertRegularPath,
-  addedOrChangedExperiments,
   labelText,
   parseLabel,
   parseManifest,
@@ -388,55 +387,6 @@ describe('label v2', () => {
         message: `prod.json uses an unknown label format (${url}).`,
       })
     );
-  });
-
-  describe('addedOrChangedExperiments', () => {
-    const labelWith = (arms: unknown[]): ReturnType<typeof parseLabel> =>
-      parseLabel(
-        JSON.stringify({
-          ...v2(),
-          prompts: [{ id: 'a', contentHash: HASH, experiment: { name: 'warm-tone', arms } }],
-        }),
-        'prod',
-        'prod.json'
-      );
-    const [control, warm] = ARMS;
-    const cool = { variant: 'cool', contentHash: `sha256-${'cd'.repeat(32)}` };
-
-    it('does not list an equal experiment', () => {
-      expect(addedOrChangedExperiments(labelWith(ARMS), labelWith(ARMS))).toEqual([]);
-    });
-
-    it('lists a weight change and an arm reorder', () => {
-      const heavier = [
-        { ...control, weight: 8000 },
-        { ...warm, weight: 2000 },
-      ];
-      const three = [
-        { ...control, weight: 8000 },
-        { ...warm, weight: 1000 },
-        { ...cool, weight: 1000 },
-      ];
-      const swapped = [three[0], three[2], three[1]];
-
-      expect(addedOrChangedExperiments(labelWith(ARMS), labelWith(heavier))).toEqual(['a']);
-      expect(addedOrChangedExperiments(labelWith(three), labelWith(swapped))).toEqual(['a']);
-    });
-
-    it('lists an added experiment', () => {
-      expect(addedOrChangedExperiments(undefined, labelWith(ARMS))).toEqual(['a']);
-    });
-
-    it('does not list an experiment the after label drops', () => {
-      const plain = parseLabel(
-        JSON.stringify({ ...v2(), prompts: [{ id: 'a', contentHash: HASH }] }),
-        'prod',
-        'prod.json'
-      );
-
-      expect(addedOrChangedExperiments(labelWith(ARMS), plain)).toEqual([]);
-      expect(addedOrChangedExperiments(labelWith(ARMS), undefined)).toEqual([]);
-    });
   });
 
   it('writes arm keys in canonical order', () => {

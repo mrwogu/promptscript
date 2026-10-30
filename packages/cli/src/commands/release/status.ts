@@ -6,6 +6,7 @@ import type {
   ReleaseDiagnostic,
   ReleaseEnvironmentHistory,
   ReleaseEnvironmentStatus,
+  ReleaseExperimentStatus,
   ReleaseGateResult,
   ReleasePromptStatus,
 } from '../../utils/release-report.js';
@@ -23,6 +24,7 @@ import {
   type ReleasePaths,
 } from './layout.js';
 import { checkAgainstBase, type BaseCheck } from './base.js';
+import { armChangeText, armLimitWarnings, gateEntriesOf, percentText } from './experiment.js';
 import { checkPromotionGates, gateLines, type GateEntry } from './gates.js';
 import {
   compileRelease,
@@ -115,14 +117,14 @@ async function labelHistory(
   return { history: { environment, commits } };
 }
 
-/** One label entry: does its bundle exist, verify, and match the latest build. */
-async function promptStatus(
+/** Does the bundle of one hash exist and verify. */
+async function bundleState(
   paths: ReleasePaths,
   environment: string,
-  entry: { id: string; contentHash: string },
-  manifest: PromptBundleIndexV1 | undefined
-): Promise<Checked<ReleasePromptStatus>> {
-  const file = paths.bundle(entry.contentHash);
+  id: string,
+  contentHash: string
+): Promise<{ file: string; exists: boolean; verified: boolean; errors: ReleaseDiagnostic[] }> {
+  const file = paths.bundle(contentHash);
   const errors: ReleaseDiagnostic[] = [];
   // A file that is there but cannot be read (a link, too large) exists; only PS5003 is missing.
   let exists = true;
@@ -133,15 +135,52 @@ async function promptStatus(
       exists = false;
       throw new ReleaseError(
         PS5003_BUNDLE_MISSING,
-        `${paths.relative(file)} of ${entry.id} in ${environment} does not exist. Restore it from Git.`,
+        `${paths.relative(file)} of ${id} in ${environment} does not exist. Restore it from Git.`,
         file
       );
     }
-    verifyBundleText(bundleText, entry.contentHash, file, entry.id);
+    verifyBundleText(bundleText, contentHash, file, id);
     verified = true;
   } catch (error) {
     errors.push(toDiagnostic(error));
   }
+  return { file: paths.relative(file), exists, verified, errors };
+}
+
+/** The arms of an entry's experiment, each with the state of its bundle; control shares the entry's. */
+async function experimentStatus(
+  paths: ReleasePaths,
+  environment: string,
+  entry: PromptReleaseLabelEntryV2,
+  own: { file: string; exists: boolean; verified: boolean }
+): Promise<Checked<ReleaseExperimentStatus> | undefined> {
+  const experiment = entry.experiment;
+  if (experiment === undefined) return undefined;
+  const states = await Promise.all(
+    experiment.arms.map(async ({ variant, contentHash, weight }, index) => {
+      const state =
+        index === 0
+          ? { ...own, errors: [] }
+          : await bundleState(paths, environment, entry.id, contentHash);
+      const { errors, ...rest } = state;
+      return { arm: { variant, contentHash, weight, ...rest }, errors };
+    })
+  );
+  return {
+    value: { name: experiment.name, arms: states.map((state) => state.arm) },
+    errors: states.flatMap((state) => state.errors),
+  };
+}
+
+/** One label entry: do its bundles exist, verify, and match the latest build. */
+async function promptStatus(
+  paths: ReleasePaths,
+  environment: string,
+  entry: PromptReleaseLabelEntryV2,
+  manifest: PromptBundleIndexV1 | undefined
+): Promise<Checked<ReleasePromptStatus>> {
+  const { errors, ...state } = await bundleState(paths, environment, entry.id, entry.contentHash);
+  const experiment = await experimentStatus(paths, environment, entry, state);
   const inBuild = (manifest?.prompts ?? []).some(
     (built) => built.id === entry.id && built.contentHash === entry.contentHash
   );
@@ -149,12 +188,11 @@ async function promptStatus(
     value: {
       id: entry.id,
       contentHash: entry.contentHash,
-      file: paths.relative(file),
-      exists,
-      verified,
+      ...state,
       inBuild,
+      ...(experiment === undefined ? {} : { experiment: experiment.value }),
     },
-    errors,
+    errors: [...errors, ...(experiment?.errors ?? [])],
   };
 }
 
@@ -162,23 +200,10 @@ async function promptStatus(
 interface EnvironmentCheck extends Checked<ReleaseEnvironmentStatus> {
   /** The non-control arms with traffic; the report lists entries only */
   arms: GateEntry[];
-}
-
-/** The arms an entry's experiment serves besides control, without the ones at weight 0. */
-function armsOf(entry: PromptReleaseLabelEntryV2): GateEntry[] {
-  const experiment = entry.experiment;
-  if (experiment === undefined) return [];
-  return experiment.arms.slice(1).flatMap(({ variant, contentHash, weight }) =>
-    weight === 0
-      ? []
-      : [
-          {
-            id: entry.id,
-            contentHash,
-            exposure: { experiment: experiment.name, variant, weight },
-          },
-        ]
-  );
+  /** The entries of the label, to compare with the environment before */
+  entries: PromptReleaseLabelEntryV2[];
+  /** False when the label exists but does not read or parse; its entries are then unknown */
+  readable: boolean;
 }
 
 /** One environment: a missing label is an empty environment. */
@@ -193,7 +218,13 @@ async function environmentStatus(
   try {
     const text = await readReleaseText(labelPath);
     if (text === undefined) {
-      return { value: { name, path, exists: false, prompts: [] }, errors: [], arms: [] };
+      return {
+        value: { name, path, exists: false, prompts: [] },
+        errors: [],
+        arms: [],
+        entries: [],
+        readable: true,
+      };
     }
     entries = parseLabel(text, name, labelPath).prompts;
   } catch (error) {
@@ -202,6 +233,8 @@ async function environmentStatus(
       value: { name, path, exists: true, prompts: [] },
       errors: [toDiagnostic(error)],
       arms: [],
+      entries: [],
+      readable: false,
     };
   }
   const checked = await Promise.all(
@@ -210,7 +243,9 @@ async function environmentStatus(
   return {
     value: { name, path, exists: true, prompts: checked.map((entry) => entry.value) },
     errors: checked.flatMap((entry) => entry.errors),
-    arms: entries.flatMap(armsOf),
+    arms: entries.flatMap((entry) => gateEntriesOf(entry).slice(1)),
+    entries,
+    readable: true,
   };
 }
 
@@ -231,6 +266,16 @@ function approvalsText(
     )
   );
   return missing.size === 0 ? 'ok' : `missing: ${[...missing].join(', ')}`;
+}
+
+function printExperiment(experiment: ReleaseExperimentStatus | undefined): void {
+  if (experiment === undefined) return;
+  ConsoleOutput.info(`    experiment ${experiment.name}`);
+  for (const arm of experiment.arms) {
+    ConsoleOutput.info(
+      `    ${arm.variant}  ${shortHash(arm.contentHash)}  ${percentText(arm.weight)}  ${promptState(arm)}`
+    );
+  }
 }
 
 function printStatus(
@@ -261,6 +306,7 @@ function printStatus(
       ConsoleOutput.info(
         `  ${prompt.id}  ${shortHash(prompt.contentHash)}  ${promptState(prompt)}${build}${approvals}`
       );
+      printExperiment(prompt.experiment);
     }
     const commits = history?.find((entry) => entry.environment === environment.name)?.commits;
     for (const commit of commits ?? []) {
@@ -318,6 +364,23 @@ async function labelGates(
   return { gates, warnings: [...warnings.values()] };
 }
 
+/** Arms with traffic that run more than the environment before allows now. */
+function upstreamArmWarnings(checked: readonly EnvironmentCheck[]): ReleaseDiagnostic[] {
+  return checked.flatMap((environment, index) => {
+    const upstream = checked[index - 1];
+    // An upstream label that does not read is reported for that environment; its entries are
+    // unknown, so no arm can be judged against them.
+    if (!upstream?.readable) return [];
+    return environment.entries.flatMap((entry) =>
+      armLimitWarnings(
+        entry,
+        upstream.entries.find((held) => held.id === entry.id),
+        upstream.value.name
+      ).map((message) => ({ message, location: { file: environment.value.path } }))
+    );
+  });
+}
+
 /** With --base the config is found by name; say so when the caller pointed elsewhere. */
 function ignoredConfigWarnings(options: ReleaseStatusOptions): ReleaseDiagnostic[] {
   if (options.base === undefined) return [];
@@ -336,25 +399,23 @@ function ignoredConfigWarnings(options: ReleaseStatusOptions): ReleaseDiagnostic
 function printBaseCheck(check: BaseCheck): void {
   const { base, changes } = check;
   ConsoleOutput.header(`Changes since ${base.ref} (${base.commit.slice(0, 12)})`);
-  if (changes.length === 0) {
-    ConsoleOutput.info(
-      check.endedExperiments > 0
-        ? '  no label entry hash changed, an experiment was removed'
-        : '  no label entry changed'
-    );
-  }
+  if (changes.length === 0) ConsoleOutput.info('  no label entry changed');
   for (const change of changes) {
+    const path = stripControlCharacters(change.path);
+    const id = stripControlCharacters(String(change.id));
+    if (change.experiment !== undefined) {
+      ConsoleOutput.info(`  ${path}  ${id} ${armChangeText(change.experiment)}`);
+      continue;
+    }
     const from =
       change.previousContentHash === undefined ? 'none' : shortHash(change.previousContentHash);
     const to = change.contentHash === undefined ? 'removed' : shortHash(change.contentHash);
-    ConsoleOutput.info(
-      `  ${stripControlCharacters(change.path)}  ${stripControlCharacters(change.id ?? '')}  ${from} -> ${to}`
-    );
+    ConsoleOutput.info(`  ${path}  ${id}  ${from} -> ${to}`);
   }
   for (const gate of check.gates) gateLines(gate).forEach((line) => ConsoleOutput.info(line));
 }
 
-function promptState(prompt: ReleasePromptStatus): string {
+function promptState(prompt: { exists: boolean; verified: boolean }): string {
   if (!prompt.exists) return 'missing';
   return prompt.verified ? 'ok' : 'corrupt';
 }
@@ -371,7 +432,11 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
       project.environments.map((name) => environmentStatus(paths, name, manifest))
     );
     const environments = checked.map((entry) => entry.value);
-    const warnings = [...ignoredConfigWarnings(options), ...(await strayLabels(project))];
+    const warnings = [
+      ...ignoredConfigWarnings(options),
+      ...(await strayLabels(project)),
+      ...upstreamArmWarnings(checked),
+    ];
 
     let history: ReleaseEnvironmentHistory[] | undefined;
     if (historyCount !== undefined) {

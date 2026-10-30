@@ -436,7 +436,7 @@ with the rules of the base branch. See the
 `prs approve` records that a person approved one exact bundle hash in a role from
 `governance.roles`, as a JSON file under `.promptscript/approvals/`. The record is a claim; the
 review of the pull request that adds it is what binds it. See
-[approvals](https://getpromptscript.dev/guides/releases/#approvals). Promote, rollback and
+[approvals](https://getpromptscript.dev/guides/releases/#approvals). Promote, split, rollback and
 `status --base` run the prompt policies as release gates: a `required-approvals` policy refuses a
 version until a committed record approves that hash for the environment. A record binds only with
 code owner review of its role directory. See
@@ -469,7 +469,8 @@ still change. See the [releases guide](https://getpromptscript.dev/guides/releas
   project `promptscript.yaml` can `extends` a shared base file. Base policies are kept. See
   [user configuration](https://getpromptscript.dev/guides/user-config/).
 - **Governed prompt releases** - `prs release promote` and `prs release rollback` move application
-  prompt labels through environments. `prs approve` records approvals that the release gates check,
+  prompt labels through environments, and `prs release split` runs a weighted experiment between two
+  reviewed versions in a later environment. `prs approve` records approvals that the release gates check,
   and `prs governance codeowners` writes CODEOWNERS lines that route prompt files, approvals and
   release labels to the right teams. Turn on required code-owner review in branch protection. See
   [enterprise setup](https://getpromptscript.dev/guides/enterprise/#governed-application-prompts).
