@@ -14,6 +14,7 @@ export type {
   PromptLoadErrorCode,
   PromptMapErrorCode,
   PromptRenderErrorCode,
+  PromptTelemetryErrorCode,
 } from './errors.js';
 export { httpSource } from './http-source.js';
 export { loadPrompt } from './load.js';
