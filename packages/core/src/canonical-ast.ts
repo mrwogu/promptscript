@@ -529,6 +529,7 @@ export function reconcileValueNode(node: ValueNode, value: Value): ValueNode {
   return createValueNode(value, node.loc);
 }
 
+/** @internal Used by the resolver for block composition. */
 export function mergeValueNodeLocations(
   base: ValueNode | undefined,
   incoming: ValueNode | undefined,
@@ -896,6 +897,7 @@ export function reconcileBlockBody(body: BlockBody, content: BlockContent): Bloc
   });
 }
 
+/** @internal Used by the resolver for block composition. */
 export function prepareBlockContentForMerge(
   body: BlockBody | undefined,
   content: BlockContent
@@ -924,6 +926,7 @@ export function prepareBlockContentForMerge(
   return prepared;
 }
 
+/** @internal Used by the resolver for block composition. */
 export function composeBlockBodies(
   baseBody: BlockBody | undefined,
   incomingBody: BlockBody | undefined,
@@ -1247,6 +1250,7 @@ function mergeValueNodeAtPath(
   };
 }
 
+/** @internal Used by the resolver for block composition. */
 export function reconcileBlockBodyAtPath(
   baseBody: BlockBody | undefined,
   incomingBody: BlockBody | undefined,
@@ -1632,6 +1636,7 @@ export function getBlockItems(block: BlockInput): Value[] {
   return [];
 }
 
+/** @internal Used by the resolver for block composition. */
 export function getInlineUses(block: BlockInput): InlineUseDeclaration[] {
   const content = isCanonicalBlock(block) ? blockBodyToContent(block.body) : block.content;
   if (content.type !== 'ObjectContent' && content.type !== 'MixedContent') return [];

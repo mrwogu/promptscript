@@ -24,6 +24,7 @@ import { ResolveError } from './errors/index.js';
 import { deepClone } from './utils/index.js';
 import { resolveAgentTargetPath } from './agent-names.js';
 
+/** @internal Used by the resolver for @override. */
 export const SKILL_REPLACE_PROPERTY_NAMES = [
   'content',
   'description',
@@ -521,12 +522,15 @@ function replaceNestedContent(
   };
 }
 
+/** @internal Used by the resolver for @override. */
 export interface ApplyOverrideOptions {
   readonly importMarkerPrefix?: string;
 }
 
 /**
  * Atomically replace one existing block or nested value.
+ *
+ * @internal Used by the resolver for @override.
  */
 export function applyOverride(
   ast: Program,

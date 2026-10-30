@@ -69,4 +69,5 @@ const DEFAULT_OUTPUT_PATH_VALUES = {
   'prompt-text': 'prompts/README.md',
 } as const satisfies Record<KnownTarget, string>;
 
+/** @internal Used by the CLI, see getDefaultOutputPath. */
 export const DEFAULT_OUTPUT_PATHS: DefaultOutputPathMap = DEFAULT_OUTPUT_PATH_VALUES;

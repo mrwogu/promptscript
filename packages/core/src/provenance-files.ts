@@ -6,7 +6,11 @@ import type {
   SourceLocation,
 } from './types/index.js';
 
-/** Options of {@link normalizeProvenanceFiles}. */
+/**
+ * Options of {@link normalizeProvenanceFiles}.
+ *
+ * @internal Used by the compilers for provenance paths.
+ */
 export interface NormalizeProvenanceOptions {
   /**
    * Resolves symbolic links of an absolute path. Left out where there is no file system
@@ -200,6 +204,7 @@ function traceOf(normalizer: FileNormalizer, source: ProvenanceTrace): Provenanc
  *
  * @example
  * const safe = normalizeProvenanceFiles(program.provenance, '/work/app');
+ * @internal Used by the compilers for provenance paths.
  */
 export function normalizeProvenanceFiles(
   trace: ProvenanceTrace,

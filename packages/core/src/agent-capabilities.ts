@@ -198,6 +198,8 @@ export function listNativeAgentTargets(): KnownTarget[] {
  * emitted field, and every matrix status group must only name targets that
  * actually have native agent output. Inputs are injectable so tests can
  * validate broken fixtures, mirroring validateTargetCapabilities.
+ *
+ * @internal Self-consistency check, not part of the API.
  */
 export function validateAgentFieldMatrix(
   groups: AgentFieldMatrix = AGENT_FIELD_STATUS_GROUPS,

@@ -11,6 +11,8 @@ function unsupported(kind: string, path: string): PSError {
 /**
  * Compare two strings by UTF-16 code units, the order RFC 8785 requires.
  * Unlike `localeCompare` it gives the same order on every host.
+ *
+ * @internal Used for bundle hashing.
  */
 export function compareCodeUnits(a: string, b: string): number {
   return Number(a > b) - Number(a < b);
@@ -86,6 +88,7 @@ function serializeContainer(value: object, path: string, ancestors: Set<object>)
  *
  * @example
  * canonicalizeJson({ b: 1, a: [true, null] }); // '{"a":[true,null],"b":1}'
+ * @internal Used for bundle hashing.
  */
 export function canonicalizeJson(value: unknown): string {
   return serialize(value, '', new Set());

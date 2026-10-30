@@ -3,7 +3,7 @@ import type { PathReference, SourceLocation } from '../types/index.js';
 
 /**
  * Parsed path components.
- * @internal Used by the resolver for path resolution.
+ * @internal Shared helper, not part of the API.
  */
 export interface ParsedPath {
   /** Namespace (without @) */
@@ -31,6 +31,7 @@ export interface ParsedPath {
  * parsePath('./local/file')
  * // { namespace: undefined, segments: ['local', 'file'], version: undefined, isRelative: true }
  * ```
+ * @internal Shared helper, not part of the API.
  */
 export function parsePath(path: string): ParsedPath {
   // Relative path (handle both Unix and Windows separators)
@@ -74,6 +75,8 @@ export function parsePath(path: string): ParsedPath {
 
 /**
  * Check if a path is absolute (starts with @namespace).
+ *
+ * @internal Shared helper, not part of the API.
  */
 export function isAbsolutePath(path: string): boolean {
   return path.startsWith('@') && !path.startsWith('@/');
@@ -81,6 +84,8 @@ export function isAbsolutePath(path: string): boolean {
 
 /**
  * Check if a path is relative.
+ *
+ * @internal Shared helper, not part of the API.
  */
 export function isRelativePath(path: string): boolean {
   return (
@@ -97,6 +102,7 @@ export function isRelativePath(path: string): boolean {
  * @param path - Path to resolve
  * @param options - Resolution options
  * @returns Resolved filesystem path
+ * @internal Shared helper, not part of the API.
  */
 export function resolvePath(
   path: string,
@@ -118,6 +124,8 @@ export function resolvePath(
 
 /**
  * Create a PathReference AST node from a path string.
+ *
+ * @internal Shared helper, not part of the API.
  */
 export function createPathReference(path: string, loc: SourceLocation): PathReference {
   const parsed = parsePath(path);
@@ -135,6 +143,8 @@ export function createPathReference(path: string, loc: SourceLocation): PathRefe
 
 /**
  * Get the file name from a path (last segment).
+ *
+ * @internal Shared helper, not part of the API.
  */
 export function getFileName(path: string): string {
   const parsed = parsePath(path);
@@ -155,6 +165,7 @@ export function getFileName(path: string): string {
  * formatPath({ segments: ['local', 'file'], isRelative: true })
  * // './local/file'
  * ```
+ * @internal Shared helper, not part of the API.
  */
 export function formatPath(ref: PathReference | ParsedPath): string {
   if (ref.isRelative) {

@@ -208,6 +208,7 @@ Packages with an `api-extractor.json` have a committed report in `api/<pkg>.api.
 - `pnpm api:update` rewrites the report. Review the diff, it is the list of exported types and functions.
 - A type used by an exported declaration must be exported too. A missing export fails the check.
 - Do not edit the report by hand and do not format it.
+- Exports that only other PromptScript packages use get `@internal` in their TSDoc. The report marks them with `// @internal` and they are not part of the API contract.
 
 ## Testing
 

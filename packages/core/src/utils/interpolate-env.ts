@@ -3,6 +3,8 @@ export type EnvironmentVariableProvider = (name: string) => string | undefined;
 /**
  * Interpolate environment variables without regex backtracking.
  * Supports ${VAR} and ${VAR:-default} syntax.
+ *
+ * @internal Used by the CLI and parser for env interpolation.
  */
 export function interpolateEnvVars(
   text: string,
