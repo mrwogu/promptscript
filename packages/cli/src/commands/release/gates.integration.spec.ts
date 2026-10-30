@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
+import { deflateSync } from 'node:zlib';
 import {
   approvalRecordPath,
   hashPromptBundle,
@@ -15,6 +16,7 @@ import { checkPromotionGates, gateLines, type PromotionGateContext } from './gat
 import { loadReleaseProject, ReleaseCompileError, type CompiledRelease } from './project.js';
 
 const ID = 'acme-support/refund-reply';
+const OTHER = 'acme-support/other-reply';
 
 const GOVERNANCE = `governance:
   roles:
@@ -345,6 +347,94 @@ describe('checkPromotionGates', () => {
     await expect(gates(root, shipped, built(shipped))).rejects.toMatchObject({
       code: 'PS5109',
       message: expect.stringContaining('differ only in case'),
+    });
+  });
+
+  it('reads the records of every entry of a run and judges each entry by its own', async () => {
+    const root = await project(config(SIGNOFF));
+    const shipped = await bundle(root, { risk: 'high' });
+    const other = await bundle(root, { risk: 'high' }, { id: OTHER });
+    await record(root, { contentHash: shipped.contentHash, environment: 'prod' });
+    for (let index = 0; index < 60; index++) {
+      const contentHash = `sha256-${index.toString(16).padStart(64, '0')}`;
+      const approver = { source: 'asserted' as const, value: `@user${index}` };
+      await record(root, { prompt: OTHER, contentHash, approver });
+    }
+    commitAll(root);
+    const loaded = await loadReleaseProject({ cwd: root });
+
+    const result = await checkPromotionGates({
+      project: loaded,
+      config: loaded.config,
+      configFile: loaded.paths.relative(loaded.configPath),
+      environment: 'prod',
+      prompts: [shipped, other].map(({ id, contentHash }) => ({ id, contentHash })),
+      source: built(shipped, other),
+    });
+
+    expect(result.gates.map((gate) => [gate.prompt, gate.passed])).toEqual([
+      [ID, true],
+      [OTHER, false],
+    ]);
+    expect(result.gates[0]?.checks[0]?.approvals?.[0]).toMatchObject({ found: ['@jane'] });
+    expect(result.gates[1]?.checks[0]?.approvals?.[0]?.found).toEqual([]);
+    expect(result.gates[1]?.checks[0]?.approvals?.[0]?.stale).toHaveLength(60);
+  });
+
+  it('fails closed with PS5108 for a record Git does not have, only in a run that needs it', async () => {
+    const root = await project(config(SIGNOFF));
+    const shipped = await bundle(root, { risk: 'high' });
+    const other = await bundle(root, { risk: 'high' }, { id: OTHER });
+    await record(root, { contentHash: shipped.contentHash, environment: 'prod' });
+    const path = await record(root, { prompt: OTHER, contentHash: other.contentHash });
+    commitAll(root);
+    const blob = git(root, 'rev-parse', `HEAD:${path}`).trim();
+    // As in a partial clone: HEAD names the blob, the object store does not have it.
+    await rm(join(root, '.git', 'objects', blob.slice(0, 2), blob.slice(2)));
+    const loaded = await loadReleaseProject({ cwd: root });
+    const run = (bundles: PromptBundleV1[]): ReturnType<typeof checkPromotionGates> =>
+      checkPromotionGates({
+        project: loaded,
+        config: loaded.config,
+        configFile: loaded.paths.relative(loaded.configPath),
+        environment: 'prod',
+        prompts: bundles.map(({ id, contentHash }) => ({ id, contentHash })),
+        source: built(...bundles),
+      });
+
+    const alone = await run([shipped]);
+
+    expect(alone.passed).toBe(true);
+    await expect(run([shipped, other])).rejects.toMatchObject({
+      code: 'PS5108',
+      message: expect.stringMatching(
+        new RegExp(
+          `^Git cannot read the approval records in .*Git has no blob ${blob}\\. A partial clone`
+        )
+      ),
+    });
+  });
+
+  it('fails closed with PS5108 when a loose object holds other bytes than its id', async () => {
+    const root = await project(config(SIGNOFF));
+    const shipped = await bundle(root, { risk: 'high' });
+    const fields = { contentHash: shipped.contentHash, environment: 'staging' };
+    const path = await record(root, fields);
+    commitAll(root);
+    const blob = git(root, 'rev-parse', `HEAD:${path}`).trim();
+    const object = join(root, '.git', 'objects', blob.slice(0, 2), blob.slice(2));
+    const forged = Buffer.from(
+      serializeApprovalRecord({ ...fieldsOf(fields), environment: 'prod' })
+    );
+    await chmod(object, 0o644);
+    await writeFile(
+      object,
+      deflateSync(Buffer.concat([Buffer.from(`blob ${forged.length}\0`), forged]))
+    );
+
+    await expect(gates(root, shipped, built(shipped))).rejects.toMatchObject({
+      code: 'PS5108',
+      message: expect.stringContaining(`holds other bytes for blob ${blob}`),
     });
   });
 

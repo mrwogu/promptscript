@@ -27,10 +27,10 @@ import type {
   ReleaseGateResult,
 } from '../../utils/release-report.js';
 import {
+  approvalFilesOf,
   committedApprovalFiles,
-  committedApprovals,
+  committedRecords,
   type CommittedApproval,
-  type CommittedFile,
 } from '../approve/records.js';
 import { ReleaseError } from './errors.js';
 import { stripControlCharacters } from './git.js';
@@ -319,8 +319,13 @@ interface GateRun {
   policies: readonly PolicyDefinition[];
   evaluation: PolicyContext;
   source: CompiledRelease;
-  /** The committed approval files, listed once per run and only when a policy needs them */
-  files: () => Promise<CommittedFile[]>;
+  /** Roles that `required-approvals` policies ask for */
+  roles: readonly string[];
+  /**
+   * The committed records of every entry of the run, listed and read once per run, with one
+   * `git cat-file --batch`, and only when a policy needs them
+   */
+  records: () => Promise<CommittedApproval[]>;
 }
 
 /** The gates of one label entry. */
@@ -340,14 +345,6 @@ async function gateOf(
     promptPolicyRisk(shipped, policies),
     fromSource === undefined ? 'low' : promptPolicyRisk(fromSource, policies)
   );
-  let records: Promise<CommittedApproval[]> | undefined;
-  const roles = [
-    ...new Set(
-      policies.flatMap((policy) =>
-        policy.kind === 'required-approvals' ? policy.approvals.map(({ role }) => role) : []
-      )
-    ),
-  ];
   const judged: Judged = {
     entry,
     bundle,
@@ -355,9 +352,7 @@ async function gateOf(
     risk,
     selects: unionSelects(shipped, fromSource, risk),
     approvals: () =>
-      (records ??= run
-        .files()
-        .then((files) => committedApprovals(context.project.root, files, entry.id, roles))),
+      run.records().then((records) => approvalFilesOf(records, [entry.id], run.roles)),
   };
   const checks = (
     await Promise.all(policies.map((policy) => checkOf(policy, judged, context, evaluation)))
@@ -457,12 +452,25 @@ export async function checkPromotionGates(
     ]);
   }
 
-  let files: Promise<CommittedFile[]> | undefined;
+  const { root } = context.project;
+  const roles = [
+    ...new Set(
+      policies.flatMap((policy) =>
+        policy.kind === 'required-approvals' ? policy.approvals.map(({ role }) => role) : []
+      )
+    ),
+  ];
+  const prompts = context.prompts.map((entry) => entry.id);
+  let records: Promise<CommittedApproval[]> | undefined;
   return judgeEntries(context, {
     policies,
     evaluation,
     source,
-    files: () => (files ??= committedApprovalFiles(context.project.root)),
+    roles,
+    records: () =>
+      (records ??= committedApprovalFiles(root).then((files) =>
+        committedRecords(root, approvalFilesOf(files, prompts, roles))
+      )),
   });
 }
 
