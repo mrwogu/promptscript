@@ -10,7 +10,7 @@
  *   1 - Report is out of date or missing (check), or api-extractor failed
  */
 
-import { existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, relative, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -62,20 +62,28 @@ for (const name of names) {
   const result = Extractor.invoke(config, { localBuild: update, showVerboseMessages: false });
 
   const fileName = config.reportConfigs[0].fileName;
-  const report = relative(root, resolve(config.reportFolder, fileName));
+  const reportPath = resolve(config.reportFolder, fileName);
+  const tempPath = resolve(config.reportTempFolder, fileName);
+  const report = relative(root, reportPath);
+
+  // api-extractor ignores whitespace when it compares reports, so compare the files here.
+  const readReport = (path: string): string | undefined =>
+    existsSync(path) ? readFileSync(path, 'utf8').replaceAll('\r\n', '\n') : undefined;
+  const differs = result.succeeded && readReport(tempPath) !== readReport(reportPath);
 
   if (!result.succeeded) {
     failed = true;
-    if (!update && result.apiReportChanged) {
-      const temp = relative(root, resolve(config.reportTempFolder, fileName));
-      console.error(`\nAPI report for ${config.packageJson?.name ?? name} is out of date.`);
-      console.error(`  Compare: git diff --no-index ${report} ${temp}`);
-      console.error(`  Fix:     pnpm api:update, review the diff, commit ${report}`);
-    } else {
-      console.error(
-        `api-extractor failed for ${name}: ${result.errorCount} error(s), ${result.warningCount} warning(s), see above.`
-      );
-    }
+    console.error(
+      `api-extractor failed for ${name}: ${result.errorCount} error(s), ${result.warningCount} warning(s), see above.`
+    );
+  } else if (differs && update) {
+    copyFileSync(tempPath, reportPath);
+    console.log(`${name}: API report updated (${report})`);
+  } else if (differs) {
+    failed = true;
+    console.error(`\nAPI report for ${config.packageJson?.name ?? name} is out of date.`);
+    console.error(`  Compare: git diff --no-index ${report} ${relative(root, tempPath)}`);
+    console.error(`  Fix:     pnpm api:update, review the diff, commit ${report}`);
   } else if (update) {
     console.log(
       `${name}: API report ${result.apiReportChanged ? 'updated' : 'unchanged'} (${report})`
