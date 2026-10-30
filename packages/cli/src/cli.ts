@@ -403,7 +403,7 @@ const release = program
   .description('Build, promote and roll back prompt releases');
 registerReleaseCommands(release);
 
-const evalCommand = program.command('eval').description('Run and compare prompt evals');
+const evalCommand = program.command('eval').description('Run, compare and import prompt evals');
 registerEvalCommands(evalCommand);
 
 registerApproveCommand(program);

@@ -3,7 +3,7 @@ import { PSError, type EvalFindingSeverity, type SourceLocation } from '@prompts
 /**
  * Codes of eval errors and findings: `PS61xx` datasets, `PS62xx` suites,
  * `PS63xx` providers and the run, `PS64xx` cache, `PS65xx` cost, `PS66xx` judge,
- * `PS67xx` reports.
+ * `PS67xx` reports and sample imports.
  */
 export const EVAL_CODES = {
   /** Dataset file cannot be read or parsed, or a row has the wrong shape */
@@ -96,6 +96,18 @@ export const EVAL_CODES = {
   REPORT_INVALID: 'PS6701',
   /** A report directory or file cannot be written */
   REPORT_WRITE_FAILED: 'PS6702',
+  /** A sample file cannot be read, or has a shape the import cannot use */
+  SAMPLE_INVALID: 'PS6711',
+  /** A sample file has more lines than the import reads */
+  SAMPLE_LIMIT: 'PS6712',
+  /** The import output path exists or is refused */
+  IMPORT_OUT_REFUSED: 'PS6713',
+  /** The scrub left personal data in a value */
+  SCRUB_LEFT_PII: 'PS6714',
+  /** No sample matched the suite */
+  NO_SAMPLE_MATCHED: 'PS6715',
+  /** The sample file is tracked by Git */
+  SAMPLE_TRACKED: 'PS6716',
 } as const;
 
 /** One eval code. */

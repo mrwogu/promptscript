@@ -126,6 +126,20 @@ const GENERATED_SCHEMAS: SchemaTarget[] = [
     title: 'PromptScript Approval Record v1',
     output: '../schema/approval-record-v1.json',
   },
+  {
+    source: 'eval-import.ts',
+    type: 'EvalSampleV1',
+    schemaId: 'https://getpromptscript.dev/schema/eval-sample/v1.json',
+    title: 'PromptScript Eval Sample v1',
+    output: '../schema/eval-sample-v1.json',
+  },
+  {
+    source: 'eval-import.ts',
+    type: 'EvalImportSummaryV1',
+    schemaId: 'https://getpromptscript.dev/schema/eval-import-summary/v1.json',
+    title: 'PromptScript Eval Import Summary v1',
+    output: '../schema/eval-import-summary-v1.json',
+  },
 ];
 
 /**
@@ -199,6 +213,11 @@ function generateTypeSchema(target: SchemaTarget): JsonObject {
     if (!isObject(expectedObject))
       throw new Error('Generated schema has no "expected" object to patch');
     expectedObject['propertyNames'] = KEY_NAMES;
+  }
+
+  // Input keys of a sample follow the same bundle key rule as dataset rows
+  if (target.type === 'EvalSampleV1') {
+    mapNode(mapNode(schema, 'properties'), 'inputs')['propertyNames'] = KEY_NAMES;
   }
 
   // The metaschema URL stays the first key of the file

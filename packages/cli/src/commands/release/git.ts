@@ -82,6 +82,19 @@ function gitEnvironment(): NodeJS.ProcessEnv {
   };
 }
 
+/** The environment with `overrides` applied; an undefined value removes the variable. */
+function withOverrides(
+  base: NodeJS.ProcessEnv,
+  overrides: Readonly<Record<string, string | undefined>> = {}
+): NodeJS.ProcessEnv {
+  const env = { ...base };
+  for (const [name, value] of Object.entries(overrides)) {
+    if (value === undefined) delete env[name];
+    else env[name] = value;
+  }
+  return env;
+}
+
 export interface GitResult {
   stdout: string;
   stderr: string;
@@ -102,13 +115,17 @@ function failureDetail(args: string[], error: ExecException, maxBuffer: number):
 
 /**
  * Run Git in the project with an argument array, no prompts, no pager, no fsmonitor hook,
- * literal pathspecs and no optional index refresh. Paths must follow `--` in `args`.
+ * literal pathspecs and no optional index refresh. Paths must follow `--` in `args`. `env`
+ * overrides single variables of that environment; an undefined value removes one.
  * Spawn failures, timeouts and more output than `maxBuffer` bytes (1 MiB by default) throw.
  */
 export function runGit(
   args: string[],
   cwd: string,
-  { maxBuffer = MAX_GIT_OUTPUT_BYTES }: { maxBuffer?: number } = {}
+  {
+    maxBuffer = MAX_GIT_OUTPUT_BYTES,
+    env: overrides,
+  }: { maxBuffer?: number; env?: Readonly<Record<string, string | undefined>> } = {}
 ): Promise<GitResult> {
   return new Promise((resolvePromise, reject) => {
     execFile(
@@ -120,7 +137,7 @@ export function runGit(
         timeout: gitTimeout(),
         maxBuffer,
         encoding: 'utf-8',
-        env: gitEnvironment(),
+        env: withOverrides(gitEnvironment(), overrides),
       },
       (error, stdout, stderr) => {
         if (error && typeof error.code === 'number') {
