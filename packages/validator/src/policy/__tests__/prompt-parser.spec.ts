@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PolicyDefinition } from '@promptscript/core';
-import { parsePolicies } from '../parser.js';
+import { parsePolicies, percentToBasisPoints } from '../parser.js';
 import type { PolicyContext } from '../types.js';
 
 const CONTEXT: PolicyContext = {
@@ -596,6 +596,199 @@ describe('parsePolicies - prompt kinds', () => {
       expect(result.errors).toEqual([
         'Policy "content": deny phrase "\u200B\u200B" is empty after normalization, so it would match every text',
       ]);
+    });
+  });
+
+  describe('max-experiment-weight', () => {
+    const exposure = (fields: Record<string, unknown>): Record<string, unknown> => ({
+      name: 'exposure',
+      kind: 'max-experiment-weight',
+      severity: 'error',
+      ...fields,
+    });
+
+    it('parses a full policy and keeps the percents', () => {
+      // Act
+      const result = parse(
+        exposure({
+          match: { minRisk: 'high' },
+          environments: ['prod'],
+          maxWeight: 5,
+          approvals: [{ role: 'legal' }, { role: 'security', count: 1 }],
+          ceiling: 25,
+        })
+      );
+
+      // Assert
+      expect(result.errors).toEqual([]);
+      expect(result.policies).toEqual([
+        {
+          name: 'exposure',
+          kind: 'max-experiment-weight',
+          severity: 'error',
+          match: { minRisk: 'high' },
+          environments: ['prod'],
+          maxWeight: 5,
+          approvals: [{ role: 'legal' }, { role: 'security', count: 1 }],
+          ceiling: 25,
+        },
+      ]);
+    });
+
+    it.each([
+      ['a hard cap', { maxWeight: 10 }],
+      ['a zero cap', { maxWeight: 0 }],
+      ['two decimals', { maxWeight: 0.07, approvals: [{ role: 'legal' }], ceiling: 12.35 }],
+      ['the full range', { maxWeight: 0, approvals: [{ role: 'legal' }], ceiling: 100 }],
+      ['ceiling equal to maxWeight', { maxWeight: 5, approvals: [{ role: 'legal' }], ceiling: 5 }],
+      ['approvals without ceiling', { maxWeight: 5, approvals: [{ role: 'legal' }] }],
+    ])('accepts %s', (_name, fields) => {
+      // Act
+      const result = parse(exposure(fields));
+
+      // Assert
+      expect(result.errors).toEqual([]);
+      expect(result.policies).toHaveLength(1);
+    });
+
+    it.each([2.505, 0.001, -1, 100.01, Number.NaN, Number.POSITIVE_INFINITY, '5', null])(
+      'refuses maxWeight %j',
+      (maxWeight) => {
+        // Act
+        const result = parse(exposure({ maxWeight }));
+
+        // Assert
+        expect(result.policies).toEqual([]);
+        expect(result.errors).toEqual([
+          'Policy "exposure": "maxWeight" must be a percent from 0 to 100 with at most two decimals, such as 5 or 2.5',
+        ]);
+      }
+    );
+
+    it('refuses a ceiling with more than two decimals', () => {
+      // Act
+      const result = parse(
+        exposure({ maxWeight: 5, approvals: [{ role: 'legal' }], ceiling: 12.345 })
+      );
+
+      // Assert
+      expect(result.errors).toEqual([
+        'Policy "exposure": "ceiling" must be a percent from 0 to 100 with at most two decimals, such as 5 or 2.5',
+      ]);
+    });
+
+    it('requires maxWeight', () => {
+      // Act
+      const result = parse(exposure({ approvals: [{ role: 'legal' }] }));
+
+      // Assert
+      expect(result.errors).toEqual([
+        'Policy "exposure": max-experiment-weight requires "maxWeight", the percent an arm may get',
+      ]);
+    });
+
+    it('refuses a ceiling below maxWeight', () => {
+      // Act
+      const result = parse(
+        exposure({ maxWeight: 10, approvals: [{ role: 'legal' }], ceiling: 9.99 })
+      );
+
+      // Assert
+      expect(result.policies).toEqual([]);
+      expect(result.errors).toEqual([
+        'Policy "exposure": "ceiling" (9.99) is below "maxWeight" (10). Set it to at least 10.',
+      ]);
+    });
+
+    it('compares ceiling and maxWeight in basis points, so float noise is not below', () => {
+      // Act
+      const result = parse(
+        exposure({ maxWeight: 0.1 + 0.2, approvals: [{ role: 'legal' }], ceiling: 0.3 })
+      );
+
+      // Assert
+      expect(result.errors).toEqual([]);
+      expect(result.policies[0]).toMatchObject({ maxWeight: 0.3, ceiling: 0.3 });
+    });
+
+    it('refuses a ceiling without approvals, since the cap is then maxWeight', () => {
+      // Act
+      const result = parse(exposure({ maxWeight: 5, ceiling: 25 }));
+
+      // Assert
+      expect(result.policies).toEqual([]);
+      expect(result.errors).toEqual([
+        'Policy "exposure": "ceiling" needs "approvals": without them the cap is maxWeight. Add approvals or remove ceiling.',
+      ]);
+    });
+
+    it('refuses an empty approvals list', () => {
+      // Act
+      const result = parse(exposure({ maxWeight: 5, approvals: [] }));
+
+      // Assert
+      expect(result.errors).toEqual([
+        'Policy "exposure": "approvals" must be a non-empty list of roles, or left out for a hard cap',
+      ]);
+    });
+
+    it('refuses an unknown role and an unknown environment', () => {
+      // Act
+      const result = parse(
+        exposure({ environments: ['production'], maxWeight: 5, approvals: [{ role: 'product' }] })
+      );
+
+      // Assert
+      expect(result.policies).toEqual([]);
+      expect(result.errors).toEqual([
+        'Policy "exposure": environment "production" is not in releases.environments. Add it there or fix the name.',
+        'Policy "exposure": approvals[0]: role "product" is not in governance.roles. Add it there with the teams that review it.',
+      ]);
+    });
+
+    it('refuses an approval count of 2, like required-approvals', () => {
+      // Act
+      const result = parse(exposure({ maxWeight: 5, approvals: [{ role: 'legal', count: 2 }] }));
+
+      // Assert
+      expect(result.policies).toEqual([]);
+      expect(result.errors).toEqual([
+        'Policy "exposure": approvals[0]: role "legal" asks for 2 approvals, but approval records are unsigned and cannot tell two approvers apart under one review. Use count: 1.',
+      ]);
+    });
+
+    it('refuses an unknown key, such as a weight written as maxweight', () => {
+      // Act
+      const result = parse(exposure({ maxweight: 5, maxWeight: 5 }));
+
+      // Assert
+      expect(result.errors).toEqual([
+        'Policy "exposure": unknown key "maxweight". Did you mean "maxWeight"?',
+      ]);
+    });
+  });
+
+  describe('percentToBasisPoints', () => {
+    it.each([
+      [0, 0],
+      [0.07, 7],
+      [2.5, 250],
+      [12.35, 1235],
+      [100, 10000],
+    ])('turns %j percent into %j basis points', (percent, points) => {
+      // Act
+      const result = percentToBasisPoints(percent);
+
+      // Assert
+      expect(result).toBe(points);
+    });
+
+    it.each([2.505, -0.01, 100.01, Number.NaN, '5', undefined])('refuses %j', (value) => {
+      // Act
+      const result = percentToBasisPoints(value);
+
+      // Assert
+      expect(result).toBeUndefined();
     });
   });
 });

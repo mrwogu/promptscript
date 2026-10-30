@@ -507,6 +507,127 @@ describe('checkPromotionGates', () => {
     expect(staging.gates[0]?.checks).toEqual([]);
   });
 
+  it('reports max-experiment-weight as unavailable for an arm with traffic, so it fails closed', async () => {
+    const exposure = (severity: string): string =>
+      `  - name: high-risk-exposure\n    kind: max-experiment-weight\n    severity: ${severity}\n    match: { minRisk: high }\n    environments: [prod]\n    maxWeight: 5\n    approvals: [{ role: legal }]\n    ceiling: 25\n`;
+    const strict = await project(config(exposure('error')));
+    const lenient = await project(config(exposure('warning')));
+    const strictBundle = await bundle(strict, { risk: 'high' });
+    const lenientBundle = await bundle(lenient, { risk: 'high' });
+    const judge = async (
+      root: string,
+      shipped: PromptBundleV1,
+      entry: Partial<PromotionGateContext['prompts'][number]>,
+      environment = 'prod'
+    ): Promise<Awaited<ReturnType<typeof checkPromotionGates>>> => {
+      const loaded = await loadReleaseProject({ cwd: root });
+      return checkPromotionGates({
+        project: loaded,
+        config: loaded.config,
+        configFile: loaded.paths.relative(loaded.configPath),
+        environment,
+        prompts: [{ id: shipped.id, contentHash: shipped.contentHash, ...entry }],
+        source: built(shipped),
+      });
+    };
+    const arm = { exposure: { experiment: 'tone', variant: 'warm', weight: 250 } };
+
+    const failed = await judge(strict, strictBundle, arm);
+    const warned = await judge(lenient, lenientBundle, arm);
+    const entryHash = await judge(strict, strictBundle, {});
+    const unused = await judge(strict, strictBundle, {
+      exposure: { experiment: 'tone', variant: 'warm', weight: 0 },
+    });
+    const staging = await judge(strict, strictBundle, arm, 'staging');
+
+    expect(failed.passed).toBe(false);
+    expect(failed.gates[0]?.checks).toEqual([
+      {
+        policy: 'high-risk-exposure',
+        kind: 'max-experiment-weight',
+        severity: 'error',
+        status: 'unavailable',
+        message: `warm of ${ID} runs 2.5 % in prod, but release gates do not judge experiment weights in this version of prs`,
+        suggestion:
+          'This version of prs cannot judge the arm. Keep it at weight 0, narrow the policy with match or environments, or set severity: warning to only warn.',
+      },
+    ]);
+    expect(failed.findings).toEqual([
+      {
+        code: 'PS030',
+        message: `[high-risk-exposure] warm of ${ID} runs 2.5 % in prod, but release gates do not judge experiment weights in this version of prs. This version of prs cannot judge the arm. Keep it at weight 0, narrow the policy with match or environments, or set severity: warning to only warn.`,
+        location: { file: '.promptscript/releases/prod.json' },
+      },
+    ]);
+    expect(warned.passed).toBe(true);
+    expect(warned.warnings).toHaveLength(1);
+    expect(entryHash.passed).toBe(true);
+    expect(entryHash.gates[0]?.checks).toEqual([]);
+    expect(unused.gates[0]?.checks).toEqual([]);
+    expect(staging.gates[0]?.checks).toEqual([]);
+  });
+
+  it('skips max-experiment-weight for an arm its match does not select', async () => {
+    const root = await project(
+      config(
+        '  - name: exposure\n    kind: max-experiment-weight\n    severity: error\n    match: { minRisk: high }\n    maxWeight: 5\n'
+      )
+    );
+    const shipped = await bundle(root, { risk: 'low' });
+    const loaded = await loadReleaseProject({ cwd: root });
+
+    const result = await checkPromotionGates({
+      project: loaded,
+      config: loaded.config,
+      configFile: 'promptscript.yaml',
+      environment: 'prod',
+      prompts: [
+        {
+          id: ID,
+          contentHash: shipped.contentHash,
+          exposure: { experiment: 'tone', variant: 'warm', weight: 3000 },
+        },
+      ],
+      source: built(shipped),
+    });
+
+    expect(result.passed).toBe(true);
+    expect(result.gates[0]?.checks).toEqual([]);
+  });
+
+  it('fails every gate when a max-experiment-weight policy does not parse', async () => {
+    const root = await project(config(SIGNOFF));
+    const shipped = await bundle(root, { risk: 'high' });
+    const loaded = await loadReleaseProject({ cwd: root });
+    // A base config of status --base is parsed by the gates only.
+    const hardCapWithCeiling = {
+      ...loaded.config,
+      policies: [
+        {
+          name: 'exposure',
+          kind: 'max-experiment-weight',
+          severity: 'warning',
+          maxWeight: 5,
+          ceiling: 25,
+        },
+      ],
+    } as typeof loaded.config;
+
+    const result = await checkPromotionGates({
+      project: loaded,
+      config: hardCapWithCeiling,
+      configFile: 'promptscript.yaml',
+      environment: 'prod',
+      prompts: [{ id: ID, contentHash: shipped.contentHash }],
+      source: built(shipped),
+    });
+
+    expect(result.passed).toBe(false);
+    expect(result.findings.map((finding) => finding.message)).toEqual([
+      'The policies cannot be evaluated, so no gate passes: Policy "exposure": "ceiling" needs "approvals": without them the cap is maxWeight. Add approvals or remove ceiling. Fix the policy definitions.',
+    ]);
+  });
+
   it('runs content rules with the project patterns, whatever validation turns off', async () => {
     const content = `  - name: payments-content
     kind: content-rules

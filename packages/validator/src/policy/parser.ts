@@ -8,6 +8,7 @@ import {
   type ContentRulesPolicy,
   type GovernanceMeta,
   type LayerBoundaryPolicy,
+  type MaxExperimentWeightPolicy,
   type ModelAllowlistPolicy,
   type PolicyDefinition,
   type PolicyKind,
@@ -37,6 +38,7 @@ const VALID_KINDS = [
   'required-approvals',
   'required-evals',
   'content-rules',
+  'max-experiment-weight',
 ] as const satisfies readonly PolicyKind[];
 
 const VALID_SEVERITIES: readonly PolicySeverity[] = ['error', 'warning'];
@@ -480,6 +482,83 @@ function validateContentRules(
   };
 }
 
+/**
+ * A traffic percent with at most two decimals, in basis points, or undefined when the
+ * value is not one. The tolerance absorbs binary float noise such as 0.07 * 100.
+ */
+export function percentToBasisPoints(value: unknown): number | undefined {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 100) {
+    return undefined;
+  }
+  const points = Math.round(value * 100);
+  return Math.abs(value * 100 - points) < 1e-6 ? points : undefined;
+}
+
+/** A percent field as written and in basis points, which comparisons use. */
+interface Percent {
+  percent: number;
+  points: number;
+}
+
+function readPercent(raw: Raw, key: string, bad: Errors): Percent | undefined {
+  const value = own(raw, key);
+  if (value === undefined) return undefined;
+  const points = percentToBasisPoints(value);
+  if (points === undefined) {
+    bad(`"${key}" must be a percent from 0 to 100 with at most two decimals, such as 5 or 2.5`);
+    return undefined;
+  }
+  return { percent: points / 100, points };
+}
+
+function validateMaxExperimentWeight(
+  raw: Raw,
+  base: PolicyBase,
+  context: PolicyContext,
+  bad: Errors
+): MaxExperimentWeightPolicy | null {
+  const match = readMatch(raw, context, bad);
+  const environments = readEnvironments(raw, context, bad);
+  const rawApprovals = own(raw, 'approvals');
+  let approvals: RequiredApproval[] | undefined;
+  if (rawApprovals !== undefined) {
+    if (!Array.isArray(rawApprovals) || rawApprovals.length === 0) {
+      bad('"approvals" must be a non-empty list of roles, or left out for a hard cap');
+    } else {
+      approvals = rawApprovals
+        .map((approval, index) => readApproval(approval, index, context, bad))
+        .filter((row): row is RequiredApproval => row !== undefined);
+    }
+  }
+  if (own(raw, 'maxWeight') === undefined) {
+    bad('max-experiment-weight requires "maxWeight", the percent an arm may get');
+    return null;
+  }
+  const maxWeight = readPercent(raw, 'maxWeight', bad);
+  const ceiling = readPercent(raw, 'ceiling', bad);
+  if (maxWeight === undefined) return null;
+  // Without approvals nothing can pass above maxWeight, so a ceiling would only mislead.
+  if (own(raw, 'ceiling') !== undefined && rawApprovals === undefined) {
+    bad(
+      '"ceiling" needs "approvals": without them the cap is maxWeight. Add approvals or remove ceiling.'
+    );
+  }
+  if (ceiling !== undefined && ceiling.points < maxWeight.points) {
+    bad(
+      `"ceiling" (${ceiling.percent}) is below "maxWeight" (${maxWeight.percent}). Set it to at least ${maxWeight.percent}.`
+    );
+  }
+  return {
+    ...base,
+    kind: 'max-experiment-weight',
+    ...(match ? { match } : {}),
+    ...(environments ? { environments } : {}),
+    maxWeight: maxWeight.percent,
+    ...(approvals ? { approvals } : {}),
+    ...(ceiling === undefined ? {} : { ceiling: ceiling.percent }),
+  };
+}
+
 const PROMPT_KIND_KEYS: Readonly<Record<string, readonly string[]>> = {
   'required-metadata': ['match', 'fields'],
   'risk-floor': ['floors'],
@@ -487,6 +566,7 @@ const PROMPT_KIND_KEYS: Readonly<Record<string, readonly string[]>> = {
   'required-approvals': ['match', 'environments', 'approvals'],
   'required-evals': ['match', 'environments'],
   'content-rules': ['match', 'checks', 'deny', 'allow'],
+  'max-experiment-weight': ['match', 'environments', 'maxWeight', 'approvals', 'ceiling'],
 };
 
 function validateKind(
@@ -518,6 +598,8 @@ function validateKind(
       return validateRequiredEvals(raw, base, context, bad);
     case 'content-rules':
       return validateContentRules(raw, base, context, bad);
+    case 'max-experiment-weight':
+      return validateMaxExperimentWeight(raw, base, context, bad);
   }
 }
 

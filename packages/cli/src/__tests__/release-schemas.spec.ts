@@ -149,6 +149,12 @@ describe('release report schema', () => {
           approvals: [{ role: 'legal', required: 1, found: [], stale: ['@bob for sha256-1'] }],
         },
         { policy: 'evals', kind: 'required-evals', severity: 'warning', status: 'unavailable' },
+        {
+          policy: 'exposure',
+          kind: 'max-experiment-weight',
+          severity: 'error',
+          status: 'unavailable',
+        },
       ],
     };
     const report = createReleaseReport('promote', {

@@ -190,8 +190,9 @@ function evaluateOne(
     case 'content-rules':
       return selects(policy.match) ? runContentRules(policy, subject, context) : [];
     default:
-      // Skill kinds run in evaluatePolicies. required-approvals and required-evals
-      // need approval records and eval results, which validation does not read.
+      // Skill kinds run in evaluatePolicies. required-approvals, required-evals and
+      // max-experiment-weight need approval records, eval results and label weights,
+      // which validation does not read.
       return [];
   }
 }
@@ -235,7 +236,8 @@ export interface PromptPolicyScope {
  *
  * Every policy matches on policy risk: the higher of the effective risk (unset
  * counts as low) and the floor of every risk-floor policy, whatever its
- * severity. `required-approvals` and `required-evals` are not evaluated here.
+ * severity. `required-approvals`, `required-evals` and `max-experiment-weight` are not
+ * evaluated here.
  *
  * @param policies - Parsed policy definitions
  * @param subjects - Prompts as policies see them

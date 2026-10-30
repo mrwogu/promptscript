@@ -19,7 +19,8 @@ export type PolicyKind =
   | 'model-allowlist'
   | 'required-approvals'
   | 'required-evals'
-  | 'content-rules';
+  | 'content-rules'
+  | 'max-experiment-weight';
 
 /**
  * Base policy definition shared by all kinds.
@@ -199,6 +200,39 @@ export interface RequiredEvalsPolicy extends BasePolicyDefinition {
   environments?: ReleaseEnvironmentName[];
 }
 
+/**
+ * Max-experiment-weight policy: caps the traffic share of a non-control arm of a label
+ * experiment. Arms above `maxWeight` need `approvals`, and nothing passes above `ceiling`.
+ */
+export interface MaxExperimentWeightPolicy extends BasePolicyDefinition {
+  kind: 'max-experiment-weight';
+  /** Prompts the policy applies to */
+  match?: PromptPolicyMatch;
+  /**
+   * Environments from `releases.environments` the policy applies to. Absent means all.
+   * @minItems 1
+   */
+  environments?: ReleaseEnvironmentName[];
+  /**
+   * Percent of traffic an arm may get without extra approvals, at most two decimals
+   * @minimum 0
+   * @maximum 100
+   */
+  maxWeight: number;
+  /**
+   * Approvals per role an arm above `maxWeight` needs. Absent means the cap is hard.
+   * @minItems 1
+   */
+  approvals?: RequiredApproval[];
+  /**
+   * Percent above which no arm passes, at most two decimals and at least `maxWeight`.
+   * Only with `approvals`.
+   * @minimum 0
+   * @maximum 100
+   */
+  ceiling?: number;
+}
+
 /** Content check of a content-rules policy, by rule name or id. */
 export type ContentRuleCheck =
   | 'blocked-patterns'
@@ -239,7 +273,8 @@ export type PolicyDefinition =
   | ModelAllowlistPolicy
   | RequiredApprovalsPolicy
   | RequiredEvalsPolicy
-  | ContentRulesPolicy;
+  | ContentRulesPolicy
+  | MaxExperimentWeightPolicy;
 
 /**
  * A prompt as prompt policies see it, built from source or from a release bundle.
