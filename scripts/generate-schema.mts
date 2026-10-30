@@ -71,6 +71,13 @@ const GENERATED_SCHEMAS: SchemaTarget[] = [
     output: '../schema/prompt-release-label-v2.json',
   },
   {
+    source: 'prompt-pricing.ts',
+    type: 'PromptReleasePricingV1',
+    schemaId: 'https://getpromptscript.dev/schema/prompt-release-pricing/v1.json',
+    title: 'PromptScript Prompt Release Pricing v1',
+    output: '../schema/prompt-release-pricing-v1.json',
+  },
+  {
     source: 'eval.ts',
     type: 'EvalDatasetRowV1',
     schemaId: 'https://getpromptscript.dev/schema/eval-dataset-row/v1.json',

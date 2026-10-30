@@ -40,6 +40,7 @@ schema/prompt-bundle-v1.json
 schema/prompt-bundle-index-v1.json
 schema/prompt-release-label-v1.json
 schema/prompt-release-label-v2.json
+schema/prompt-release-pricing-v1.json
 schema/eval-dataset-row-v1.json
 schema/eval-suite-v1.json
 schema/eval-label-row-v1.json

@@ -10,6 +10,7 @@ import {
   validateBundle,
   validateIndex,
   validateLabel,
+  validatePricing,
   validateReleaseReport,
 } from '../../__tests__/prompt-bundle-validators.js';
 import type { ReleaseReport } from '../../utils/release-report.js';
@@ -66,6 +67,7 @@ releases:
   environments: [staging, prod]
 `;
 
+const PRICING_SCHEMA = 'https://getpromptscript.dev/schema/prompt-release-pricing/v1.json';
 const directories: string[] = [];
 
 async function project(
@@ -223,8 +225,12 @@ describe('prs release build', () => {
         contentHash: bundle['contentHash'],
       },
     ]);
-    expect(first.changes.map((change) => change.action)).toEqual(['created', 'created']);
-    expect(second.changes.map((change) => change.action)).toEqual(['unchanged', 'unchanged']);
+    expect(first.changes.map((change) => change.action)).toEqual(['created', 'created', 'created']);
+    expect(second.changes.map((change) => change.action)).toEqual([
+      'unchanged',
+      'unchanged',
+      'unchanged',
+    ]);
   });
 
   it('keeps old bundles and updates the manifest when the source changes', async () => {
@@ -235,7 +241,11 @@ describe('prs release build', () => {
     const result = await build(root);
 
     expect(await bundleFiles(root)).toHaveLength(2);
-    expect(result.changes.map((change) => change.action)).toEqual(['created', 'updated']);
+    expect(result.changes.map((change) => change.action)).toEqual([
+      'created',
+      'updated',
+      'unchanged',
+    ]);
   });
 
   it('writes nothing under --dry-run', async () => {
@@ -244,7 +254,11 @@ describe('prs release build', () => {
     const result = await build(root, { dryRun: true });
 
     expect(result.dryRun).toBe(true);
-    expect(result.changes.map((change) => change.action)).toEqual(['created', 'created']);
+    expect(result.changes.map((change) => change.action)).toEqual([
+      'created',
+      'created',
+      'created',
+    ]);
     expect(existsSync(releases(root))).toBe(false);
   });
 
@@ -448,6 +462,344 @@ policies:
 
     expect(result.errors).toEqual([]);
     expect(result.success).toBe(true);
+  });
+});
+
+describe('prs release build pricing file', () => {
+  const PROMPTS = `@meta {
+  id: "acme-support"
+  syntax: "1.6.0"
+}
+
+@prompts {
+  zeta: {
+    description: "Zeta"
+    model: { ref: "claude-sonnet-5-5" }
+    system: "You answer."
+    user: "{{input.message}}"
+    inputs: { ${MESSAGE_INPUT} }
+  }
+  alpha: {
+    description: "Alpha"
+    model: { ref: "claude-opus-5-5" }
+    system: "You answer."
+    user: "{{input.message}}"
+    inputs: { ${MESSAGE_INPUT} }
+  }
+  twin: {
+    description: "Twin"
+    model: { ref: "claude-sonnet-5-5" }
+    system: "You answer."
+    user: "{{input.message}}"
+    inputs: { ${MESSAGE_INPUT} }
+  }
+  plain: {
+    description: "No model"
+    system: "You answer."
+    user: "{{input.message}}"
+    inputs: { ${MESSAGE_INPUT} }
+  }
+}
+`;
+
+  it('lists the priced models of all bundles, sorted, valid against the schema', async () => {
+    const root = await project(CONFIG, PROMPTS);
+
+    const result = await build(root);
+    const pricing = await readJson(releases(root, 'pricing.json'));
+
+    expect(result.errors).toEqual([]);
+    expect(validatePricing(pricing), JSON.stringify(validatePricing.errors)).toBe(true);
+    expect(Object.keys(pricing)).toEqual(['$schema', 'models']);
+    const models = pricing['models'] as { ref: string; apiId: string; provider: string }[];
+    expect(models.map((model) => model.ref)).toEqual(['claude-opus-5-5', 'claude-sonnet-5-5']);
+    expect(models.every((model) => model.provider === 'anthropic')).toBe(true);
+    expect(result.changes?.map((change) => change.path)).toContain(
+      '.promptscript/releases/pricing.json'
+    );
+  });
+
+  it('leaves out a model without a price', async () => {
+    const config = `${CONFIG}models:
+  profiles:
+    acme-model: { provider: openai, family: acme, apiId: acme-1 }
+`;
+    const prs = PROMPTS.replace('"claude-opus-5-5"', '"acme-model"');
+    const root = await project(config, prs);
+
+    await build(root);
+    const pricing = await readJson(releases(root, 'pricing.json'));
+
+    const refs = (pricing['models'] as { ref: string }[]).map((model) => model.ref);
+    expect(refs).toEqual(['claude-sonnet-5-5']);
+  });
+
+  it('writes an empty list when no bundle has a priced model', async () => {
+    const root = await project();
+
+    await build(root);
+
+    expect(await readJson(releases(root, 'pricing.json'))).toMatchObject({ models: [] });
+  });
+
+  it('writes nothing on a second build', async () => {
+    const root = await project(CONFIG, PROMPTS);
+    await build(root);
+    const before = await readFile(releases(root, 'pricing.json'), 'utf8');
+
+    const second = await build(root);
+
+    expect(await readFile(releases(root, 'pricing.json'), 'utf8')).toBe(before);
+    const change = second.changes?.find((entry) => entry.path.endsWith('pricing.json'));
+    expect(change?.action).toBe('unchanged');
+  });
+
+  it('uses the price of a project profile', async () => {
+    const config = `${CONFIG}models:
+  profiles:
+    claude-sonnet-5-5:
+      pricing: { inputUsdPerMillion: 1.5, outputUsdPerMillion: 7.5, checkedOn: '2026-10-01' }
+`;
+    const root = await project(config, PROMPTS);
+
+    await build(root);
+    const pricing = await readJson(releases(root, 'pricing.json'));
+
+    expect(pricing['models']).toContainEqual({
+      ref: 'claude-sonnet-5-5',
+      apiId: 'claude-sonnet-5-5',
+      provider: 'anthropic',
+      inputUsdPerMillion: 1.5,
+      outputUsdPerMillion: 7.5,
+      checkedOn: '2026-10-01',
+    });
+  });
+
+  it('does not change a bundle or the manifest when only a price changes', async () => {
+    const root = await project(CONFIG, PROMPTS);
+    await build(root);
+    const manifest = await readFile(releases(root, 'manifest.json'), 'utf8');
+    const files = await bundleFiles(root);
+    const priced = `${CONFIG}models:
+  profiles:
+    claude-sonnet-5-5:
+      pricing: { inputUsdPerMillion: 99, outputUsdPerMillion: 199, checkedOn: '2026-10-02' }
+`;
+    await writeFile(join(root, 'promptscript.yaml'), priced);
+
+    const result = await build(root);
+
+    expect(await readFile(releases(root, 'manifest.json'), 'utf8')).toBe(manifest);
+    expect(await bundleFiles(root)).toEqual(files);
+    const change = result.changes?.find((entry) => entry.path.endsWith('pricing.json'));
+    expect(change?.action).toBe('updated');
+  });
+
+  it('writes nothing on a dry run', async () => {
+    const root = await project(CONFIG, PROMPTS);
+
+    await build(root, { dryRun: true });
+
+    expect(existsSync(releases(root, 'pricing.json'))).toBe(false);
+  });
+
+  it('refuses to overwrite a pricing.json that is not a pricing file', async () => {
+    const root = await project(CONFIG, PROMPTS);
+    await mkdir(releases(root), { recursive: true });
+    await writeFile(releases(root, 'pricing.json'), '{"hello":1}\n');
+
+    const result = await build(root);
+
+    expect(errorCodes(result)).toEqual(['PS5004']);
+    expect(await readFile(releases(root, 'pricing.json'), 'utf8')).toBe('{"hello":1}\n');
+  });
+
+  it('is not taken for an environment label by status', async () => {
+    const root = await project(CONFIG, PROMPTS);
+    await build(root);
+
+    const result = await status(root);
+
+    expect(result.success).toBe(true);
+    expect(result.errors).toEqual([]);
+    expect(result.warnings.filter((warning) => warning.message.includes('pricing.json'))).toEqual(
+      []
+    );
+  });
+
+  it('refuses pricing as an environment name and names the migration', async () => {
+    const root = await project(CONFIG.replace('[staging, prod]', '[staging, pricing]'), PROMPTS);
+
+    const result = await build(root);
+
+    expect(errorCodes(result)).toEqual(['PS5001']);
+    expect(result.errors[0]?.message).toContain('Rename the environment');
+    expect(result.errors[0]?.message).toContain('pricing.json');
+  });
+
+  it('refuses Pricing.json, which differs only in case', async () => {
+    const root = await project(CONFIG, PROMPTS);
+    await mkdir(releases(root), { recursive: true });
+    await writeFile(releases(root, 'Pricing.json'), '{}\n');
+
+    const result = await build(root);
+
+    expect(errorCodes(result)).toEqual(['PS5004']);
+    expect(result.errors[0]?.message).toContain('must be named exactly pricing.json');
+  });
+
+  it('keeps the model of an older bundle that is still in bundles/', async () => {
+    const root = await project(CONFIG, PROMPTS);
+    await build(root);
+    await writeFile(
+      join(root, '.promptscript', 'project.prs'),
+      PROMPTS.replace('"claude-opus-5-5"', '"claude-sonnet-5-5"')
+    );
+
+    await build(root);
+    const pricing = await readJson(releases(root, 'pricing.json'));
+
+    const refs = (pricing['models'] as { ref: string }[]).map((model) => model.ref);
+    expect(refs).toEqual(['claude-opus-5-5', 'claude-sonnet-5-5']);
+  });
+
+  it('writes no bundle and no manifest when pricing.json is refused', async () => {
+    const root = await project(CONFIG, PROMPTS);
+    await mkdir(releases(root), { recursive: true });
+    await writeFile(releases(root, 'pricing.json'), '{"hello":1}\n');
+
+    await build(root);
+
+    expect(existsSync(releases(root, 'manifest.json'))).toBe(false);
+    expect(existsSync(releases(root, 'bundles'))).toBe(false);
+  });
+
+  it('picks the lowest profile id for one API id and warns when the prices differ', async () => {
+    const config = `${CONFIG}models:
+  profiles:
+    acme-b:
+      provider: anthropic
+      family: acme
+      apiId: acme-1
+      pricing: { inputUsdPerMillion: 2, outputUsdPerMillion: 4, checkedOn: '2026-10-01' }
+    acme-a:
+      provider: anthropic
+      family: acme
+      apiId: acme-1
+      pricing: { inputUsdPerMillion: 1, outputUsdPerMillion: 3, checkedOn: '2026-10-01' }
+`;
+    const prs = PROMPTS.replace('"claude-opus-5-5"', '"acme-b"').replaceAll(
+      '"claude-sonnet-5-5"',
+      '"acme-a"'
+    );
+    const root = await project(config, prs);
+
+    await build(root);
+    const result = await build(root);
+    const pricing = await readJson(releases(root, 'pricing.json'));
+
+    expect(pricing['models']).toEqual([
+      expect.objectContaining({ ref: 'acme-a', apiId: 'acme-1', inputUsdPerMillion: 1 }),
+    ]);
+    const messages = result.warnings.map((warning) => warning.message);
+    expect(messages.filter((message) => message.startsWith('Profiles '))).toEqual([
+      'Profiles acme-a and acme-b both map to anthropic acme-1 with different prices. pricing.json uses acme-a.',
+    ]);
+  });
+
+  it('stops on a stored bundle that is a dangling link', async () => {
+    const root = await project(CONFIG, PROMPTS);
+    await mkdir(releases(root, 'bundles'), { recursive: true });
+    const orphan = `sha256-${'b'.repeat(64)}`;
+    await symlink(join(root, 'missing.json'), releases(root, 'bundles', `${orphan}.json`));
+
+    const result = await build(root);
+
+    expect(errorCodes(result)).toEqual(['PS5004']);
+    expect(existsSync(releases(root, 'manifest.json'))).toBe(false);
+  });
+
+  it('breaks a tie of two API ids under one profile by provider and API id', async () => {
+    const profile = (apiId: string): string => `${CONFIG}models:
+  profiles:
+    acme-a:
+      provider: anthropic
+      family: acme
+      apiId: ${apiId}
+      pricing: { inputUsdPerMillion: 1, outputUsdPerMillion: 3, checkedOn: '2026-10-01' }
+`;
+    const prs = PROMPTS.replaceAll('"claude-sonnet-5-5"', '"acme-a"').replace(
+      '"claude-opus-5-5"',
+      '"acme-a"'
+    );
+    const root = await project(profile('acme-2'), prs);
+    await build(root);
+    await writeFile(join(root, 'promptscript.yaml'), profile('acme-1'));
+
+    await build(root);
+    const pricing = await readJson(releases(root, 'pricing.json'));
+
+    const apiIds = (pricing['models'] as { apiId: string }[]).map((model) => model.apiId);
+    expect(apiIds).toEqual(['acme-1', 'acme-2']);
+  });
+
+  it('warns when two profiles for one API id differ only in the output price', async () => {
+    const config = `${CONFIG}models:
+  profiles:
+    acme-b:
+      provider: anthropic
+      family: acme
+      apiId: acme-1
+      pricing: { inputUsdPerMillion: 1, outputUsdPerMillion: 4, checkedOn: '2026-10-01' }
+    acme-a:
+      provider: anthropic
+      family: acme
+      apiId: acme-1
+      pricing: { inputUsdPerMillion: 1, outputUsdPerMillion: 3, checkedOn: '2026-10-01' }
+`;
+    const prs = PROMPTS.replace('"claude-opus-5-5"', '"acme-b"').replaceAll(
+      '"claude-sonnet-5-5"',
+      '"acme-a"'
+    );
+    const root = await project(config, prs);
+
+    const result = await build(root);
+
+    const messages = result.warnings.map((warning) => warning.message);
+    expect(messages.filter((message) => message.startsWith('Profiles '))).toHaveLength(1);
+  });
+
+  it.skipIf(process.getuid?.() === 0 || process.platform === 'win32')(
+    'stops when bundles/ cannot be listed and writes nothing',
+    async () => {
+      const root = await project(CONFIG, PROMPTS);
+      await mkdir(releases(root, 'bundles'), { recursive: true });
+      await chmod(releases(root, 'bundles'), 0o000);
+
+      try {
+        const result = await build(root);
+
+        expect(errorCodes(result)).toEqual(['PS5003']);
+        expect(result.errors[0]?.message).toContain('cannot be listed');
+        expect(existsSync(releases(root, 'pricing.json'))).toBe(false);
+      } finally {
+        await chmod(releases(root, 'bundles'), 0o755);
+      }
+    }
+  );
+
+  it('stops on a stored bundle that does not verify and writes nothing', async () => {
+    const root = await project(CONFIG, PROMPTS);
+    await mkdir(releases(root, 'bundles'), { recursive: true });
+    const orphan = `sha256-${'a'.repeat(64)}`;
+    await writeFile(releases(root, 'bundles', `${orphan}.json`), '{"hello":1}\n');
+
+    const result = await build(root);
+
+    expect(errorCodes(result)).toEqual(['PS5004']);
+    expect(existsSync(releases(root, 'manifest.json'))).toBe(false);
+    expect(existsSync(releases(root, 'pricing.json'))).toBe(false);
+    expect(await readdir(releases(root, 'bundles'))).toEqual([`${orphan}.json`]);
   });
 });
 
@@ -1389,6 +1741,20 @@ async function policyRepository(baseConfigName = 'promptscript.yaml'): Promise<s
 }
 
 describe('prs release status --base', () => {
+  it('passes when only pricing.json changed since the base', async () => {
+    const root = await baseRepository();
+    await writeFile(
+      releases(root, 'pricing.json'),
+      `${JSON.stringify({ $schema: PRICING_SCHEMA, models: [] })}\n`
+    );
+    await commit(root, 'new prices');
+
+    const result = await statusBase(root, 'base');
+
+    expect(result.success).toBe(true);
+    expect(result.warnings.filter((warning) => warning.message.includes('pricing'))).toEqual([]);
+  });
+
   it('passes when the checkout ends an experiment the base had', async () => {
     const root = await baseRepository();
     const hash = (await labelHash(root, 'staging')) ?? '';

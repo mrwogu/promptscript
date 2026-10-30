@@ -1,0 +1,13 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/prompt-release-pricing/v1.json",
+  "models": [
+    {
+      "ref": "claude-sonnet-5-5",
+      "apiId": "claude-sonnet-5-5",
+      "provider": "anthropic",
+      "inputUsdPerMillion": 2,
+      "outputUsdPerMillion": 10,
+      "checkedOn": "2026-10-22"
+    }
+  ]
+}

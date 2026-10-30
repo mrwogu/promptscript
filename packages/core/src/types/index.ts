@@ -12,5 +12,6 @@ export * from './registries.js';
 export * from './source.js';
 export * from './prompts.js';
 export * from './prompt-bundle.js';
+export * from './prompt-pricing.js';
 export * from './eval.js';
 export * from './approval.js';

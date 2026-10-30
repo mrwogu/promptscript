@@ -399,6 +399,25 @@ describe('prs audit log', () => {
     ]);
   });
 
+  it('does not read pricing.json as a release label', async () => {
+    // Arrange
+    const root = await project();
+    await put(root, {
+      '.promptscript/releases/pricing.json': '{"$schema":"x","models":[]}\n',
+    });
+    commit(root, 'price');
+
+    // Act
+    const { report } = await run(root);
+
+    // Assert
+    expect(report.errors).toEqual([]);
+    expect(report.warnings).toEqual([]);
+    expect(report.events.map((event) => event.path)).not.toContain(
+      '.promptscript/releases/pricing.json'
+    );
+  });
+
   it('fails with PS5108 in a repository without a commit', async () => {
     // Arrange
     const root = await directory();

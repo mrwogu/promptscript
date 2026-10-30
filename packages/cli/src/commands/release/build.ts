@@ -1,11 +1,18 @@
-import { PROMPT_BUNDLE_INDEX_SCHEMA_URL, type PromptBundleIndexV1 } from '@promptscript/core';
+import {
+  PROMPT_BUNDLE_INDEX_SCHEMA_URL,
+  type PromptBundleIndexV1,
+  type PromptBundleV1,
+} from '@promptscript/core';
 import type { ReleaseChange } from '../../utils/release-report.js';
 import {
   BUNDLES_DIRECTORY,
   RELEASE_DIRECTORY,
+  assertPricingText,
   assertReleaseDirectories,
   fileAction,
+  listBundleHashes,
   parseManifest,
+  readVerifiedBundle,
   readReleaseText,
   shortHash,
   toReleaseJson,
@@ -13,6 +20,7 @@ import {
   writeReleaseFile,
   type ReleasePaths,
 } from './layout.js';
+import { buildPricing } from './pricing.js';
 import { compileRelease, loadReleaseProject, type CompiledBundle } from './project.js';
 import { runReleaseCommand, withReleaseLock, type ReleaseCommandOptions } from './run.js';
 
@@ -50,6 +58,12 @@ async function storeBundle(
   };
 }
 
+/** The verified bundles that already sit in the bundles directory, in hash order. */
+async function storedBundles(paths: ReleasePaths): Promise<PromptBundleV1[]> {
+  const hashes = await listBundleHashes(paths);
+  return Promise.all(hashes.map((hash) => readVerifiedBundle(paths, hash)));
+}
+
 /**
  * Compile the prompts and store each bundle under its content hash, then write the
  * manifest. A bundle file that exists is verified and never rewritten.
@@ -64,10 +78,6 @@ export async function releaseBuildCommand(options: ReleaseCommandOptions): Promi
       const compiled = await compileRelease(project, output.json);
       const { paths } = project;
       await assertReleaseDirectories(paths);
-      const changes: ReleaseChange[] = await Promise.all(
-        compiled.bundles.map((bundle) => storeBundle(paths, bundle, dryRun))
-      );
-
       const manifest: PromptBundleIndexV1 = {
         $schema: PROMPT_BUNDLE_INDEX_SCHEMA_URL,
         source: compiled.source,
@@ -82,11 +92,32 @@ export async function releaseBuildCommand(options: ReleaseCommandOptions): Promi
       const existingManifest = await readReleaseText(paths.manifest);
       // A file that is not a manifest is never overwritten.
       if (existingManifest !== undefined) parseManifest(existingManifest, paths.manifest);
+
+      // Outside every content hash, so a price update never touches a bundle or an approval.
+      // The models of the stored bundles stay in: a label may still serve an older one.
+      const stored = await storedBundles(paths);
+      const built = buildPricing(
+        [...stored, ...compiled.bundles.map((bundle) => bundle.bundle)],
+        project.config.models
+      );
+      const pricingText = toReleaseJson(built.pricing);
+      const existingPricing = await readReleaseText(paths.pricing);
+      if (existingPricing !== undefined) assertPricingText(existingPricing, paths.pricing);
+
+      // Every check is done, nothing was written so far.
+      const changes: ReleaseChange[] = await Promise.all(
+        compiled.bundles.map((bundle) => storeBundle(paths, bundle, dryRun))
+      );
       const action = fileAction(existingManifest, manifestText);
       if (action !== 'unchanged' && !dryRun) {
         await writeReleaseFile(paths, paths.manifest, manifestText);
       }
       changes.push({ path: paths.relative(paths.manifest), action });
+      const pricingAction = fileAction(existingPricing, pricingText);
+      if (pricingAction !== 'unchanged' && !dryRun) {
+        await writeReleaseFile(paths, paths.pricing, pricingText);
+      }
+      changes.push({ path: paths.relative(paths.pricing), action: pricingAction });
 
       for (const change of changes) {
         const detail =
@@ -95,7 +126,7 @@ export async function releaseBuildCommand(options: ReleaseCommandOptions): Promi
       }
       const written = changes.filter((change) => change.action !== 'unchanged').length;
       output.success(buildSummary(dryRun, written, compiled.bundles.length));
-      return { changes, warnings: compiled.warnings };
+      return { changes, warnings: [...compiled.warnings, ...built.warnings] };
     });
   });
 }

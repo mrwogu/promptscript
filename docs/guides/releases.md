@@ -36,6 +36,7 @@ All release files live in `.promptscript/releases/` and belong in Git:
 ```text
 .promptscript/releases/
   manifest.json                bundle index of the latest build
+  pricing.json                 list prices of the models the bundles use
   bundles/sha256-<hex>.json    one immutable file per content hash
   staging.json                 label of the staging environment
   prod.json                    label of the prod environment
@@ -44,6 +45,19 @@ All release files live in `.promptscript/releases/` and belong in Git:
 - A bundle file has exactly the bytes the `bundle` target writes. A release never rewrites it and
   never deletes it.
 - The manifest is a bundle index of the latest build. Its `file` entries point into `bundles/`.
+- `pricing.json` lists, for each model that a bundle in `bundles/` uses and that has a price in the
+  model catalog (built-in profiles plus `models.profiles` of the project), `ref`, `apiId`,
+  `provider`, `inputUsdPerMillion`, `outputUsdPerMillion` and `checkedOn`, sorted by `ref`. The
+  `ref` is the catalog profile id, not the reference the prompt author wrote. Older bundles stay
+  in the list, so a label that still serves one keeps its price. A model without a price is left
+  out. When two profiles share a provider and API id with different prices, the lowest profile id
+  wins and the build warns. The file is not part of any content hash, so a price change never
+  changes a bundle, an approval or a gate. It has no timestamp, so the same sources and catalog
+  give the same bytes, and `prs release build` plus `git diff --exit-code` in CI shows a hand edit.
+  Prices are list prices and ignore cache and batch discounts, so treat them as an estimate. Its
+  `$schema` is `https://getpromptscript.dev/schema/prompt-release-pricing/v1.json`. The name
+  `pricing` cannot be an environment. A project that already has an environment called `pricing`
+  renames it and moves `.promptscript/releases/pricing.json` to the new name.
 - A label has one entry per prompt, sorted by id, and lists each id once. The `$schema` is
   `https://getpromptscript.dev/schema/prompt-release-label/v1.json`.
 
@@ -63,8 +77,8 @@ All release files live in `.promptscript/releases/` and belong in Git:
 Release files must be regular files. A symbolic link in `.promptscript`, `.promptscript/releases`,
 `bundles/`, or for a release file itself is refused. Names must match in case exactly: a
 `Prod.json` or `Manifest.json` is refused, because a case-insensitive disk would read it as the
-real file. A manifest or label that does not parse as one is never overwritten, the error tells
-you to restore it from Git.
+real file. A manifest, pricing file or label that does not parse as one is never overwritten, the
+error tells you to restore it from Git.
 
 `prs compile` refuses any output inside `.promptscript/releases/` (`PS5008`), and watch mode ignores
 that directory. Compile cleanup never removes release files.
@@ -86,8 +100,9 @@ prs release build
 
 Build compiles the source in memory. It never reads the compiled `prompts/` directory, and it works
 whether or not `bundle` is in `targets`. It writes each new bundle file, checks the ones that exist,
-and writes the manifest only when its bytes change. A second run writes nothing. A program without
-prompts gives `prompts: []`.
+reads every `sha256-*.json` in `bundles/` for `pricing.json` and stops with PS5004, before it
+writes anything, on one that does not verify, and writes the manifest and `pricing.json` only when
+their bytes change. A second run writes nothing. A program without prompts gives `prompts: []`.
 
 A build always runs with these settings, so a release cannot ship what a normal compile would flag:
 
@@ -474,9 +489,9 @@ at a bundle that is missing or does not verify. All four commands accept
 `prs release status --base <ref>` compares the label files in the checkout with the labels at
 `<ref>`, usually the branch the pull request goes into. It looks at every label file: the
 environments configured at `<ref>`, the ones configured in the checkout and every other `*.json`
-file in `.promptscript/releases/` except `manifest.json`. A file whose text did not change passes.
-A changed file that does not read or parse as a label fails. Every entry that is new or changed
-must pass the promotion rules of `<ref>`:
+file in `.promptscript/releases/` except `manifest.json` and `pricing.json`. A file whose text did
+not change passes. A changed file that does not read or parse as a label fails. Every entry that
+is new or changed must pass the promotion rules of `<ref>`:
 
 - The environment is in `releases.environments` at `<ref>`.
 - The bundle file exists and verifies for that prompt id.

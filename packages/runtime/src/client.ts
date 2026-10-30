@@ -13,7 +13,7 @@ import type {
 const LABEL_SCHEMA_URL = 'https://getpromptscript.dev/schema/prompt-release-label/v1.json';
 const ENVIRONMENT = /^[a-z][a-z\d-]{0,31}$/;
 // Windows reserves COM0-COM9 and LPT0-LPT9 as device names
-const RESERVED_LABELS = /^(?:index|manifest|con|prn|aux|nul|com\d|lpt\d)$/;
+const RESERVED_LABELS = /^(?:index|manifest|pricing|con|prn|aux|nul|com\d|lpt\d)$/;
 const DEFAULT_TTL_MS = 60_000;
 const DEFAULT_MAX_PROMPTS = 256;
 const MAX_REF_LENGTH = 512;
