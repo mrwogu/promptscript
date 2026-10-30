@@ -1,4 +1,4 @@
-export { parsePolicies } from './parser.js';
+export { parsePolicies, percentToBasisPoints } from './parser.js';
 export { evaluatePolicies } from './evaluator.js';
 export {
   evaluatePromptPolicies,

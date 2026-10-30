@@ -77,6 +77,10 @@ export interface PromptMeta {
   readonly contentHash: string;
   /** Release label the prompt was resolved through, when one was used */
   readonly label?: string;
+  /** Experiment the prompt was assigned in, set only together with `variant` */
+  readonly experiment?: string;
+  /** Arm the key was assigned to, such as `control` */
+  readonly variant?: string;
   /** Source name: `inline`, a directory path or an origin plus path */
   readonly source: string;
   /** ISO time the bundle was last confirmed against its source */
@@ -170,13 +174,21 @@ export interface PromptClientOptions {
   readonly onError?: (error: PromptRuntimeError) => void;
 }
 
+/** Options of {@link PromptClient.get}. */
+export interface PromptGetOptions {
+  /** Assignment key, such as a pseudonymous user id: 1-256 UTF-16 code units, no control (Cc), format (Cf, such as U+200D), U+2028, U+2029 or lone surrogate (Cs) character */
+  readonly key?: string;
+}
+
 /** Resolves prompt references against a source. */
 export interface PromptClient {
   /**
    * Get a prompt by id, or by `id@sha256-...` to pin a content hash. A pinned reference
    * with a label reads the bundle directly; without a label it must match the index.
+   * When the label runs an experiment for the id, a `key` picks the arm, and the same key
+   * always gets the same arm. Without a key the entry hash is served, untagged.
    */
-  get(ref: string): Promise<Prompt>;
+  get(ref: string, options?: PromptGetOptions): Promise<Prompt>;
 }
 
 /** The host's `AbortSignal` type, found without naming a DOM or Node type. */

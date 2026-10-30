@@ -1,5 +1,6 @@
 import { PromptLoadError, PromptRuntimeError } from './errors.js';
 import { PROMPT_BUNDLE_INDEX_SCHEMA_URL } from './internal/prompt-bundle-hash.js';
+import { sha256Hex } from './internal/sha256.js';
 import { HASH_PATTERN, isObject, toPrompt, verifyBundle, type VerifiedBundle } from './load.js';
 import { assertFilePath, wholeNumber } from './paths.js';
 import type {
@@ -7,10 +8,18 @@ import type {
   PromptCacheStore,
   PromptClient,
   PromptClientOptions,
+  PromptGetOptions,
+  PromptMeta,
   PromptSource,
 } from './types.js';
 
-const LABEL_SCHEMA_URL = 'https://getpromptscript.dev/schema/prompt-release-label/v1.json';
+const LABEL_SCHEMA_PREFIX = 'https://getpromptscript.dev/schema/prompt-release-label/';
+const LABEL_SCHEMA_URL = `${LABEL_SCHEMA_PREFIX}v1.json`;
+const LABEL_V2_SCHEMA_URL = `${LABEL_SCHEMA_PREFIX}v2.json`;
+const EXPERIMENT_NAME = /^[a-z\d][a-z\d-]{0,63}$/;
+const VARIANT_NAME = /^[a-z][a-z\d-]{0,31}$/;
+const TOTAL_WEIGHT = 10_000;
+const MAX_KEY_LENGTH = 256;
 const ENVIRONMENT = /^[a-z][a-z\d-]{0,31}$/;
 // Windows reserves COM0-COM9 and LPT0-LPT9 as device names
 const RESERVED_LABELS = /^(?:index|manifest|pricing|con|prn|aux|nul|com\d|lpt\d)$/;
@@ -19,8 +28,25 @@ const DEFAULT_MAX_PROMPTS = 256;
 const MAX_REF_LENGTH = 512;
 // Control and format characters (C0, DEL, C1, bidi overrides) and the two line separators
 const UNSAFE_CHARACTER = /[\p{Cc}\p{Cf}\u2028\u2029]/u;
+// A key is also refused with a lone surrogate, which UTF-8 cannot encode; a format character
+// such as U+200D is refused like in a ref
+const UNSAFE_KEY = /[\p{Cc}\p{Cf}\p{Cs}\u2028\u2029]/u;
 
-type Entries = ReadonlyMap<string, { readonly hash: string; readonly file: string }>;
+interface Arm {
+  readonly variant: string;
+  readonly hash: string;
+  readonly weight: number;
+}
+
+interface Experiment {
+  readonly name: string;
+  readonly arms: readonly Arm[];
+}
+
+type Entries = ReadonlyMap<
+  string,
+  { readonly hash: string; readonly file: string; readonly experiment?: Experiment }
+>;
 
 interface Pointer {
   readonly entries: Entries;
@@ -28,6 +54,10 @@ interface Pointer {
   /** Time of the last read that confirmed it; never fresh after a failed read */
   readonly fetchedAt: number;
   readonly confirmedAt: string;
+  /** Entries of the pointer this one replaced, to find the record a key had before */
+  readonly previousEntries?: Entries;
+  /** The label text the entries came from, to tell a changed label from a re-read */
+  readonly text?: string;
   /** The source failure, when the text came from the store or the last read failed */
   readonly failure?: PromptRuntimeError;
 }
@@ -42,6 +72,8 @@ interface Served {
   readonly bundle: VerifiedBundle;
   readonly loadedAt: string;
   readonly label?: string;
+  readonly experiment?: string;
+  readonly variant?: string;
   /** Why the last refresh failed; a set error makes every serve stale */
   error?: PromptRuntimeError;
   attemptAt: number;
@@ -71,6 +103,140 @@ function parseJson(
   }
 }
 
+function hasOnlyKeys(value: Record<string, unknown>, keys: string[]): boolean {
+  return Object.keys(value).every((name) => keys.includes(name));
+}
+
+interface SeenArms {
+  readonly variants: Set<string>;
+  readonly hashes: Set<string>;
+}
+
+function isArmWeight(weight: unknown, control: boolean): weight is number {
+  return (
+    typeof weight === 'number' &&
+    Number.isInteger(weight) &&
+    weight >= (control ? 1 : 0) &&
+    weight <= TOTAL_WEIGHT
+  );
+}
+
+/** One arm, or undefined when it breaks a rule. `seen` holds the names and hashes before it. */
+function parseArm(
+  arm: unknown,
+  control: boolean,
+  entryHash: string,
+  seen: SeenArms
+): Arm | undefined {
+  if (!isObject(arm) || !hasOnlyKeys(arm, ['variant', 'contentHash', 'weight'])) return undefined;
+  const { variant, contentHash: hash, weight } = arm;
+  const named =
+    typeof variant === 'string' &&
+    (control ? variant === 'control' : variant !== 'control' && VARIANT_NAME.test(variant));
+  if (!named || !isArmWeight(weight, control)) return undefined;
+  if (typeof hash !== 'string' || !HASH_PATTERN.test(hash)) return undefined;
+  if (seen.variants.has(variant) || seen.hashes.has(hash)) return undefined;
+  if (control && hash !== entryHash) return undefined;
+  seen.variants.add(variant);
+  seen.hashes.add(hash);
+  return { variant, hash, weight };
+}
+
+/** The experiment of a v2 entry, or undefined when it breaks a rule of the label. */
+function parseExperiment(value: unknown, entryHash: string): Experiment | undefined {
+  if (!isObject(value) || !hasOnlyKeys(value, ['name', 'arms'])) return undefined;
+  const { name, arms } = value;
+  if (typeof name !== 'string' || !EXPERIMENT_NAME.test(name)) return undefined;
+  if (!Array.isArray(arms) || arms.length < 2 || arms.length > 4) return undefined;
+  const seen: SeenArms = { variants: new Set(), hashes: new Set() };
+  const read: Arm[] = [];
+  for (const arm of arms as unknown[]) {
+    const parsed = parseArm(arm, read.length === 0, entryHash, seen);
+    if (!parsed) return undefined;
+    read.push(parsed);
+  }
+  const total = read.reduce((sum, arm) => sum + arm.weight, 0);
+  return total === TOTAL_WEIGHT ? { name, arms: read } : undefined;
+}
+
+/**
+ * Pick the arm of a key. The bucket is the first 32 bits of a hash over the experiment, the
+ * id and the key, modulo 10000; the first arm whose cumulative weight passes it wins, so an
+ * arm with weight 0 is never picked.
+ */
+function assign(experiment: Experiment, id: string, key: string): Arm {
+  const text = `promptscript-assign-v1\0${experiment.name}\0${id}\0${key}`;
+  const bucket = Number.parseInt(sha256Hex(text).slice(0, 8), 16) % TOTAL_WEIGHT;
+  let total = 0;
+  for (const arm of experiment.arms) {
+    total += arm.weight;
+    if (total > bucket) return arm;
+  }
+  // The weights add up to 10000, so the loop returns before this
+  return experiment.arms[0] as Arm;
+}
+
+/** A label of a version this reader does not know, refused before its shape is read. */
+function unsupportedLabel(
+  data: unknown,
+  label: string,
+  where: string,
+  path: string
+): PromptLoadError | undefined {
+  const schema = isObject(data) ? data['$schema'] : undefined;
+  // Only a plain version number is echoed, never the schema text
+  const version =
+    typeof schema === 'string' && schema.startsWith(LABEL_SCHEMA_PREFIX)
+      ? /^v(\d{1,4})\.json$/.exec(schema.slice(LABEL_SCHEMA_PREFIX.length))?.[1]
+      : undefined;
+  if (version === undefined || schema === LABEL_SCHEMA_URL || schema === LABEL_V2_SCHEMA_URL) {
+    return undefined;
+  }
+  return new PromptLoadError(
+    'unsupported-label',
+    `Label ${label} uses prompt-release-label v${version}; upgrade @promptscript/runtime. ${where} was not read.`,
+    path
+  );
+}
+
+type PointerEntry = { hash: string; file: string; experiment?: Experiment };
+
+function hasHeader(data: Record<string, unknown>, label: string | undefined): boolean {
+  if (label === undefined) {
+    return data['$schema'] === PROMPT_BUNDLE_INDEX_SCHEMA_URL && typeof data['source'] === 'string';
+  }
+  const schema = data['$schema'];
+  return (
+    (schema === LABEL_SCHEMA_URL || schema === LABEL_V2_SCHEMA_URL) && data['environment'] === label
+  );
+}
+
+/** One entry of a label or index, or undefined when it breaks a rule. */
+function parseEntry(
+  entry: unknown,
+  seen: ReadonlyMap<string, PointerEntry>,
+  label: string | undefined,
+  v2: boolean,
+  path: string
+): [string, PointerEntry] | undefined {
+  if (!isObject(entry)) return undefined;
+  const { id, contentHash: hash, file, description } = entry;
+  const listed =
+    label !== undefined || (typeof file === 'string' && typeof description === 'string');
+  if (typeof id !== 'string' || typeof hash !== 'string' || !HASH_PATTERN.test(hash)) {
+    return undefined;
+  }
+  if (seen.has(id) || !listed) return undefined;
+  const filePath = label === undefined ? (file as string) : `bundles/${hash}.json`;
+  assertFilePath(filePath, path);
+  if (!v2) return [id, { hash, file: filePath }];
+  const raw = entry['experiment'];
+  const experiment = raw === undefined ? undefined : parseExperiment(raw, hash);
+  if (!hasOnlyKeys(entry, ['id', 'contentHash', 'experiment'])) return undefined;
+  if (raw !== undefined && !experiment) return undefined;
+  return [id, { hash, file: filePath, ...(experiment && { experiment }) }];
+}
+
 /** Read a label (with `label`) or an index into prompt id, hash and file path. */
 function parsePointer(
   text: string,
@@ -79,33 +245,23 @@ function parsePointer(
   path: string
 ): Entries {
   const data = parseJson(text, 'invalid-index', where, path);
-  const labelKind = `release label v1 for ${label}. Check the release files`;
+  const unsupported = label === undefined ? undefined : unsupportedLabel(data, label, where, path);
+  if (unsupported) throw unsupported;
+  const labelKind = `release label v1 or v2 for ${label}. Check the release files`;
   const kind =
     label === undefined ? 'prompt index v1. Compile it again with prs compile' : labelKind;
   const invalid = (): PromptLoadError =>
     new PromptLoadError('invalid-index', `${where} is not a valid ${kind}.`, path);
-  if (!isObject(data) || !Array.isArray(data['prompts'])) throw invalid();
-  const header =
-    label === undefined
-      ? data['$schema'] === PROMPT_BUNDLE_INDEX_SCHEMA_URL && typeof data['source'] === 'string'
-      : data['$schema'] === LABEL_SCHEMA_URL && data['environment'] === label;
-  if (!header) throw invalid();
-  const entries = new Map<string, { hash: string; file: string }>();
+  if (!isObject(data) || !Array.isArray(data['prompts']) || !hasHeader(data, label)) {
+    throw invalid();
+  }
+  const v2 = data['$schema'] === LABEL_V2_SCHEMA_URL;
+  if (v2 && !hasOnlyKeys(data, ['$schema', 'environment', 'prompts'])) throw invalid();
+  const entries = new Map<string, PointerEntry>();
   for (const entry of data['prompts'] as unknown[]) {
-    if (!isObject(entry)) throw invalid();
-    const { id, contentHash: hash, file, description } = entry;
-    const listed =
-      label !== undefined || (typeof file === 'string' && typeof description === 'string');
-    const valid =
-      typeof id === 'string' &&
-      typeof hash === 'string' &&
-      HASH_PATTERN.test(hash) &&
-      !entries.has(id) &&
-      listed;
-    if (!valid) throw invalid();
-    const filePath = label === undefined ? (file as string) : `bundles/${hash}.json`;
-    assertFilePath(filePath, path);
-    entries.set(id, { hash, file: filePath });
+    const read = parseEntry(entry, entries, label, v2, path);
+    if (!read) throw invalid();
+    entries.set(read[0], read[1]);
   }
   return entries;
 }
@@ -153,10 +309,24 @@ class CachingPromptClient implements PromptClient {
     this.pointerWhere = `${kind} ${this.pointerPath} from ${this.source.name}`;
   }
 
-  async get(ref: string): Promise<Prompt> {
+  async get(ref: string, options?: PromptGetOptions): Promise<Prompt> {
     // A ref can come from a request: a long one or one with a line break is not echoed or kept
     if (ref.length > MAX_REF_LENGTH || UNSAFE_CHARACTER.test(ref)) {
       throw new PromptLoadError('not-found', 'Prompt reference is not valid.');
+    }
+    const key = options?.key;
+    // The key is hashed and never kept or echoed, not even in this error
+    if (
+      key !== undefined &&
+      (typeof key !== 'string' ||
+        key.length < 1 ||
+        key.length > MAX_KEY_LENGTH ||
+        UNSAFE_KEY.test(key))
+    ) {
+      throw new PromptRuntimeError(
+        'invalid-key',
+        `Assignment key must be 1 to ${MAX_KEY_LENGTH} characters without control characters, format characters, line separators or lone surrogates.`
+      );
     }
     const at = ref.lastIndexOf('@');
     const pinned = at > 0 && HASH_PATTERN.test(ref.slice(at + 1)) ? ref.slice(at + 1) : undefined;
@@ -170,7 +340,7 @@ class CachingPromptClient implements PromptClient {
         const loaded = await this.loadBundle(`bundles/${pinned}.json`, id, pinned);
         return this.serve(loaded.bundle, loaded.readAt, loaded.failure);
       }
-      return await this.getListed(ref, id, pinned);
+      return await this.getListed(ref, id, pinned, key);
     } catch (error) {
       // A missing prompt and a wrong id with a pinned hash stay final until the ttl ends. Any
       // other mismatch can be a CDN with the new pointer but the old bundle, so it is retried.
@@ -184,32 +354,65 @@ class CachingPromptClient implements PromptClient {
     }
   }
 
-  private async getListed(ref: string, id: string, pinned: string | undefined): Promise<Prompt> {
-    const known = this.served.get(ref);
+  /** Where the record of a ref is kept, and the arm a key gets from the entries given. */
+  private slot(
+    entries: Entries | undefined,
+    ref: string,
+    id: string,
+    pinned: string | undefined,
+    key: string | undefined
+  ): { recordKey: string; experiment?: string; arm?: Arm } {
+    const experiment = pinned === undefined ? entries?.get(id)?.experiment : undefined;
+    if (!experiment || key === undefined) return { recordKey: ref };
+    const arm = assign(experiment, id, key);
+    // A ref holds no NUL character, so the arm name cannot be taken for part of it
+    return { recordKey: `${ref}\0${arm.variant}`, experiment: experiment.name, arm };
+  }
+
+  private async getListed(
+    ref: string,
+    id: string,
+    pinned: string | undefined,
+    key: string | undefined
+  ): Promise<Prompt> {
+    const { recordKey } = this.slot(this.pointer?.entries, ref, id, pinned, key);
+    const known = this.served.get(recordKey);
     const fresh = this.pointer !== undefined && Date.now() - this.pointer.fetchedAt < this.ttl;
     // A failed prompt waits for its own retry, so a missing bundle is not fetched on every get
     if (known && this.open && (!fresh || known.error)) {
       // Stale while revalidate: serve now, refresh in the background at most once per ttl
       if (!known.refreshing && Date.now() - known.attemptAt >= this.ttl) {
-        this.refreshInBackground(known, ref, id, pinned);
+        this.refreshInBackground(known, recordKey, ref, id, pinned, key);
       }
       return this.serveRecord(known);
     }
     try {
-      return this.serveRecord(await this.resolve(ref, id, pinned));
+      return this.serveRecord(await this.resolve(ref, id, pinned, key));
     } catch (error) {
-      const fallback = this.served.get(ref);
+      // After a weight change the key's new arm can be unreadable for a while: serve the
+      // record it had under the pointer before, with that arm's own tag
+      const before = this.pointer?.previousEntries;
+      const fallback =
+        this.served.get(recordKey) ??
+        (before && this.served.get(this.slot(before, ref, id, pinned, key).recordKey));
       if (!this.open || !fallback || !(error instanceof PromptRuntimeError)) throw error;
       fallback.error = error;
       return this.serveRecord(fallback);
     }
   }
 
-  private refreshInBackground(known: Served, ref: string, id: string, pinned?: string): void {
+  private refreshInBackground(
+    known: Served,
+    recordKey: string,
+    ref: string,
+    id: string,
+    pinned: string | undefined,
+    key: string | undefined
+  ): void {
     known.refreshing = true;
-    void this.resolve(ref, id, pinned)
+    void this.resolve(ref, id, pinned, key)
       .then(undefined, (error: unknown) => {
-        const current = this.served.get(ref);
+        const current = this.served.get(recordKey);
         if (current && error instanceof PromptRuntimeError) current.error = error;
       })
       .finally(() => {
@@ -217,43 +420,60 @@ class CachingPromptClient implements PromptClient {
       });
   }
 
-  private async resolve(ref: string, id: string, pinned: string | undefined): Promise<Served> {
-    const known = this.served.get(ref);
+  private async resolve(
+    ref: string,
+    id: string,
+    pinned: string | undefined,
+    key: string | undefined
+  ): Promise<Served> {
+    const before = this.slot(this.pointer?.entries, ref, id, pinned, key);
+    const known = this.served.get(before.recordKey);
     if (known) known.attemptAt = Date.now();
     const current = await this.freshPointer();
     const entry = current.entries.get(id);
     if (!entry || (pinned !== undefined && entry.hash !== pinned)) {
       if (current.failure) throw current.failure;
       // A verified pointer without the id is final, whatever the fail mode
-      this.served.delete(ref);
-      const what =
-        pinned === undefined ? `${id} is not listed` : `${id}@${pinned} is not the hash listed`;
-      throw new PromptLoadError('not-found', `${what} in ${this.pointerWhere}.`, this.pointerPath);
+      throw this.notListed(ref, id, pinned);
     }
-    const loaded = await this.loadBundle(entry.file, id, entry.hash);
+    const { recordKey, experiment, arm } = this.slot(current.entries, ref, id, pinned, key);
+    // The experiment ended or lost the arm in this label: the next get assigns again from it
+    const hash = arm?.hash ?? entry.hash;
+    const loaded = await this.loadBundle(arm ? `bundles/${hash}.json` : entry.file, id, hash);
     const failure = current.failure ?? loaded.failure;
     const record: Served = {
       bundle: loaded.bundle,
       loadedAt: current.confirmedAt,
       ...(this.label !== undefined && { label: this.label }),
+      ...(experiment !== undefined && arm && { experiment, variant: arm.variant }),
       ...(failure && { error: failure }),
       attemptAt: Date.now(),
     };
-    remember(this.served, ref, record, this.maxPrompts);
+    remember(this.served, recordKey, record, this.maxPrompts);
     return record;
+  }
+
+  /** Drop every record of the ref, whatever its arm, and build the final not-found error. */
+  private notListed(ref: string, id: string, pinned: string | undefined): PromptLoadError {
+    for (const recordKey of this.served.keys()) {
+      if (recordKey === ref || recordKey.startsWith(`${ref}\0`)) this.served.delete(recordKey);
+    }
+    const what =
+      pinned === undefined ? `${id} is not listed` : `${id}@${pinned} is not the hash listed`;
+    return new PromptLoadError('not-found', `${what} in ${this.pointerWhere}.`, this.pointerPath);
   }
 
   private serve(
     bundle: VerifiedBundle,
     loadedAt: string,
     error?: PromptRuntimeError,
-    label?: string
+    tags: Pick<PromptMeta, 'label' | 'experiment' | 'variant'> = {}
   ): Prompt {
     if (error) this.report(error);
     return toPrompt(bundle, {
       id: bundle.id,
       contentHash: bundle.contentHash,
-      ...(label !== undefined && { label }),
+      ...tags,
       source: this.source.name,
       loadedAt,
       stale: error !== undefined,
@@ -261,7 +481,12 @@ class CachingPromptClient implements PromptClient {
   }
 
   private serveRecord(record: Served): Prompt {
-    return this.serve(record.bundle, record.loadedAt, record.error, record.label);
+    const { label, experiment, variant } = record;
+    return this.serve(record.bundle, record.loadedAt, record.error, {
+      ...(label !== undefined && { label }),
+      ...(experiment !== undefined && { experiment }),
+      ...(variant !== undefined && { variant }),
+    });
   }
 
   private freshPointer(): Promise<Pointer> {
@@ -301,6 +526,11 @@ class CachingPromptClient implements PromptClient {
     const entries = parsePointer(read.text, this.label, this.pointerWhere, this.pointerPath);
     this.pointer = {
       entries,
+      text: read.text,
+      // Roll forward only when the text changed, so a re-read of the same label keeps it
+      ...(previous && {
+        previousEntries: previous.text === read.text ? previous.previousEntries : previous.entries,
+      }),
       ...(read.etag !== undefined && { etag: read.etag }),
       fetchedAt: read.failure ? -Infinity : Date.now(),
       confirmedAt,
@@ -429,6 +659,14 @@ class CachingPromptClient implements PromptClient {
  * `get` throws `not-found`. In `failMode: 'closed'` every refresh is awaited and every
  * failure throws. A reference above 512 characters or with a control, format or line
  * separator character throws `not-found` without a read.
+ *
+ * A label v2 can run an experiment on an id. `get(ref, { key })` then assigns the key to an
+ * arm by a hash of the experiment, the id and the key, so the same key always gets the same
+ * arm, and `meta.experiment` and `meta.variant` name it. Each arm keeps its own cached copy.
+ * Without a key the entry hash is served untagged, and a pinned ref skips assignment. A key
+ * outside 1 to 256 characters or with a control character, a format character, U+2028, U+2029 or a lone surrogate throws
+ * `invalid-key`. A label whose `$schema` has the form `.../prompt-release-label/vN.json` for
+ * a version this reader does not know throws `unsupported-label`, or serves stale in open mode.
  *
  * @param options - Source, label, cache, fail mode and error callback
  * @returns The client

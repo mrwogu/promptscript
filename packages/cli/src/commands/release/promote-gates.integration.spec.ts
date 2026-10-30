@@ -388,3 +388,126 @@ policies:
     expect(approved.gates?.map((gate) => gate.passed)).toEqual([true]);
   });
 });
+
+describe('prs release status experiment arms', () => {
+  function exposureConfig(policy: string): string {
+    return `version: '1'
+project:
+  id: acme-support
+targets:
+  - claude
+includePromptScriptSkill: false
+releases:
+  environments: [staging, prod]
+governance:
+  roles:
+    legal: ['@acme/legal']
+${policy}`;
+  }
+
+  const exposurePolicy = (severity: string): string => `policies:
+  - name: high-risk-exposure
+    kind: max-experiment-weight
+    severity: ${severity}
+    match: { minRisk: high }
+    environments: [prod]
+    maxWeight: 5
+    approvals: [{ role: legal }]
+    ceiling: 25
+`;
+
+  /** A prod label whose entry runs an experiment: control 90 %, warm 10 %, cold 0 %. */
+  async function experimentProject(
+    yaml: string
+  ): Promise<{ root: string; control: string; warm: string; cold: string }> {
+    const root = await project(yaml, 'You answer refund requests.');
+    await build(root);
+    const control = await builtHash(root);
+    const hashes: string[] = [];
+    for (const system of ['You answer refund requests warmly.', 'You answer refund requests.!']) {
+      await writeFile(join(root, '.promptscript', 'project.prs'), source(system));
+      await build(root);
+      hashes.push(await builtHash(root));
+    }
+    const [warm = '', cold = ''] = hashes;
+    await writeFile(
+      label(root, 'prod'),
+      `${JSON.stringify(
+        {
+          $schema: 'https://getpromptscript.dev/schema/prompt-release-label/v2.json',
+          environment: 'prod',
+          prompts: [
+            {
+              id: ID,
+              contentHash: control,
+              experiment: {
+                name: 'tone',
+                arms: [
+                  { variant: 'control', contentHash: control, weight: 9000 },
+                  { variant: 'warm', contentHash: warm, weight: 1000 },
+                  { variant: 'cold', contentHash: cold, weight: 0 },
+                ],
+              },
+            },
+          ],
+        },
+        null,
+        2
+      )}\n`
+    );
+    commit(root, 'experiment');
+    return { root, control, warm, cold };
+  }
+
+  it('reports an arm with traffic as unavailable at severity error, control and weight 0 skipped', async () => {
+    const { root, control, warm } = await experimentProject(
+      exposureConfig(exposurePolicy('error'))
+    );
+
+    const report = await json(() => releaseStatusCommand({ cwd: root, format: 'json' }));
+
+    expect(report.success).toBe(true);
+    expect(report.gates?.map((gate) => [gate.contentHash, gate.passed])).toEqual([
+      [control, true],
+      [warm, false],
+    ]);
+    expect(report.gates?.[0]?.checks).toEqual([]);
+    expect(report.gates?.[1]?.checks).toEqual([
+      expect.objectContaining({
+        kind: 'max-experiment-weight',
+        severity: 'error',
+        status: 'unavailable',
+        message: `warm of ${ID} runs 10 % in prod, but release gates do not judge experiment weights in this version of prs`,
+      }),
+    ]);
+    expect(report.warnings).toEqual([
+      expect.objectContaining({
+        code: 'PS030',
+        message: expect.stringContaining(`[high-risk-exposure] warm of ${ID} runs 10 % in prod`),
+      }),
+    ]);
+  });
+
+  it('lets the arm pass with a warning at severity warning', async () => {
+    const { root, warm } = await experimentProject(exposureConfig(exposurePolicy('warning')));
+
+    const report = await json(() => releaseStatusCommand({ cwd: root, format: 'json' }));
+
+    expect(report.success).toBe(true);
+    expect(report.gates?.find((gate) => gate.contentHash === warm)).toMatchObject({
+      passed: true,
+      checks: [{ kind: 'max-experiment-weight', status: 'unavailable' }],
+    });
+    expect(report.warnings.map((warning) => warning.code)).toEqual(['PS030']);
+  });
+
+  it('changes nothing without a prompt policy', async () => {
+    const { root } = await experimentProject(exposureConfig(''));
+
+    const report = await json(() => releaseStatusCommand({ cwd: root, format: 'json' }));
+
+    expect(report.success).toBe(true);
+    expect(report.gates).toBeUndefined();
+    expect(report.warnings).toEqual([]);
+  });
+});

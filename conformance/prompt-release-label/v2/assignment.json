@@ -1,0 +1,417 @@
+{
+  "description": "Sticky assignment of label v2. bucket = first 8 hex digits of sha256(\"promptscript-assign-v1\\0\" + experiment + \"\\0\" + id + \"\\0\" + key) as an unsigned 32-bit integer, modulo 10000. The arm is the first whose cumulative weight is strictly greater than the bucket.",
+  "cases": [
+    {
+      "name": "lowest bucket",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k4445",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 9000
+        },
+        {
+          "variant": "warm",
+          "weight": 1000
+        }
+      ],
+      "bucket": 0,
+      "variant": "control"
+    },
+    {
+      "name": "bucket in the variant range",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k8197",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 9000
+        },
+        {
+          "variant": "warm",
+          "weight": 1000
+        }
+      ],
+      "bucket": 9500,
+      "variant": "warm"
+    },
+    {
+      "name": "highest bucket",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k2888",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 9000
+        },
+        {
+          "variant": "warm",
+          "weight": 1000
+        }
+      ],
+      "bucket": 9999,
+      "variant": "warm"
+    },
+    {
+      "name": "bucket on the control boundary",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k7925",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 5000
+        },
+        {
+          "variant": "warm",
+          "weight": 5000
+        }
+      ],
+      "bucket": 5000,
+      "variant": "warm"
+    },
+    {
+      "name": "bucket just under the boundary",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k16484",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 5000
+        },
+        {
+          "variant": "warm",
+          "weight": 5000
+        }
+      ],
+      "bucket": 4999,
+      "variant": "control"
+    },
+    {
+      "name": "bucket just over the boundary",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k2146",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 5000
+        },
+        {
+          "variant": "warm",
+          "weight": 5000
+        }
+      ],
+      "bucket": 5001,
+      "variant": "warm"
+    },
+    {
+      "name": "zero weight arm is never picked",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k7925",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 5000
+        },
+        {
+          "variant": "paused",
+          "weight": 0
+        },
+        {
+          "variant": "warm",
+          "weight": 5000
+        }
+      ],
+      "bucket": 5000,
+      "variant": "warm"
+    },
+    {
+      "name": "zero weight arm at the end is never picked",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k2888",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 10000
+        },
+        {
+          "variant": "paused",
+          "weight": 0
+        }
+      ],
+      "bucket": 9999,
+      "variant": "control"
+    },
+    {
+      "name": "non-ASCII key",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "zażółć-ключ-🙂",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 9000
+        },
+        {
+          "variant": "warm",
+          "weight": 1000
+        }
+      ],
+      "bucket": 2590,
+      "variant": "control"
+    },
+    {
+      "name": "non-ASCII key, second",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "日本語",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 9000
+        },
+        {
+          "variant": "warm",
+          "weight": 1000
+        }
+      ],
+      "bucket": 4659,
+      "variant": "control"
+    },
+    {
+      "name": "ramp before: key stays in control",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k23477",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 9000
+        },
+        {
+          "variant": "warm",
+          "weight": 1000
+        }
+      ],
+      "bucket": 8500,
+      "variant": "control"
+    },
+    {
+      "name": "ramp after: the same key moves to the variant",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k23477",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 8000
+        },
+        {
+          "variant": "warm",
+          "weight": 2000
+        }
+      ],
+      "bucket": 8500,
+      "variant": "warm"
+    },
+    {
+      "name": "ramp before: key in the variant range",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k8197",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 9000
+        },
+        {
+          "variant": "warm",
+          "weight": 1000
+        }
+      ],
+      "bucket": 9500,
+      "variant": "warm"
+    },
+    {
+      "name": "ramp after: the same key stays in the variant",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k8197",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 8000
+        },
+        {
+          "variant": "warm",
+          "weight": 2000
+        }
+      ],
+      "bucket": 9500,
+      "variant": "warm"
+    },
+    {
+      "name": "ramp before: key low in control",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k10463",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 9000
+        },
+        {
+          "variant": "warm",
+          "weight": 1000
+        }
+      ],
+      "bucket": 500,
+      "variant": "control"
+    },
+    {
+      "name": "ramp after: the same key stays in control",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k10463",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 8000
+        },
+        {
+          "variant": "warm",
+          "weight": 2000
+        }
+      ],
+      "bucket": 500,
+      "variant": "control"
+    },
+    {
+      "name": "zero weight arm in the middle, bucket on the first boundary",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "k6992",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 3000
+        },
+        {
+          "variant": "paused",
+          "weight": 0
+        },
+        {
+          "variant": "warm",
+          "weight": 7000
+        }
+      ],
+      "bucket": 3000,
+      "variant": "warm"
+    },
+    {
+      "name": "NFC key, no normalization",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "café",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 5000
+        },
+        {
+          "variant": "warm",
+          "weight": 5000
+        }
+      ],
+      "bucket": 9576,
+      "variant": "warm"
+    },
+    {
+      "name": "NFD key of the same text gives another bucket",
+      "experiment": "warm-tone-2026-11",
+      "id": "acme-support/refund-reply",
+      "key": "café",
+      "arms": [
+        {
+          "variant": "control",
+          "weight": 5000
+        },
+        {
+          "variant": "warm",
+          "weight": 5000
+        }
+      ],
+      "bucket": 2917,
+      "variant": "control"
+    }
+  ],
+  "separators": [
+    {
+      "description": "(\"ab\",\"c/d\",\"e\") and (\"a\",\"bc/d\",\"e\") join to the same text without separators",
+      "a": {
+        "experiment": "ab",
+        "id": "c/d",
+        "key": "e",
+        "bucket": 2992
+      },
+      "b": {
+        "experiment": "a",
+        "id": "bc/d",
+        "key": "e",
+        "bucket": 7031
+      }
+    },
+    {
+      "description": "moving a character between id and key",
+      "a": {
+        "experiment": "warm",
+        "id": "a/bc",
+        "key": "d",
+        "bucket": 567
+      },
+      "b": {
+        "experiment": "warm",
+        "id": "a/b",
+        "key": "cd",
+        "bucket": 3595
+      }
+    }
+  ],
+  "invalidKeys": [
+    {
+      "description": "key with a NUL character",
+      "key": "a\u0000b"
+    },
+    {
+      "description": "empty key",
+      "key": ""
+    },
+    {
+      "description": "key of 257 characters",
+      "key": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+    },
+    {
+      "description": "key with a line feed",
+      "key": "a\nb"
+    },
+    {
+      "description": "key with a zero width joiner",
+      "key": "a\u200db"
+    },
+    {
+      "description": "key with a line separator",
+      "key": "a\u2028b"
+    },
+    {
+      "description": "key with a lone surrogate",
+      "key": "a\ud800b"
+    }
+  ]
+}
