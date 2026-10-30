@@ -163,8 +163,21 @@ describe('prs eval import', () => {
     expect(rows[1]?.tags).toEqual(['imported', 'variant:warm']);
     expect(result.stdout).toContain('scrubbed: email: 1, card: 1, iban: 1, redacted: 0');
     expect(result.stdout).toContain('names, phone numbers, postal addresses');
-    expect(statSync(dataset).mode & 0o777).toBe(0o600);
   });
+
+  // Windows reports 0o666 for every file
+  it.skipIf(process.platform === 'win32')(
+    'writes the dataset readable by its owner only',
+    async () => {
+      const root = await project();
+      const file = await outside([line('x')]);
+
+      await run(root, file);
+
+      const dataset = join(root, '.promptscript', 'evals', 'datasets', 'imported.jsonl');
+      expect(statSync(dataset).mode & 0o777).toBe(0o600);
+    }
+  );
 
   it('never prints a sample value, on stdout, stderr or in the JSON summary', async () => {
     const root = await project();
