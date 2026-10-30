@@ -231,8 +231,10 @@ export type GovernanceRoleName = string & { readonly __brand?: 'GovernanceRoleNa
 
 /**
  * Git host identity of an owner, in a form CODEOWNERS accepts: a user (`@jane`),
- * a team (`@acme/legal`, GitLab subgroups allowed) or an email address.
- * @pattern ^(?:@[A-Za-z0-9][A-Za-z0-9-]{0,38}|@[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})$
+ * a team (`@acme/legal`, GitLab subgroups allowed) or an email address. A user may
+ * hold `.`, `_` and `-` between letters or digits, like GitLab users (`@jane.doe`) and
+ * GitHub managed users (`@jane_acme`).
+ * @pattern ^(?:@[A-Za-z0-9]+(?:[_.-][A-Za-z0-9]+)*|@[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})$
  * @maxLength 254
  */
 export type GovernanceOwner = string & { readonly __brand?: 'GovernanceOwner' };
