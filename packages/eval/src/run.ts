@@ -5,13 +5,16 @@ import {
   compareCodeUnits,
   getModelCatalog,
   type EvalCacheMode,
+  type EvalAssertionResultV1,
   type EvalCaseStatus,
+  type EvalLlmJudgeAssertion,
   type EvalFindingV1,
   type EvalModelEntry,
   type EvalReportV1,
   type ModelCatalog,
   type ModelParams,
   type ModelPricing,
+  type PromptBundleModel,
   type PromptBundleV1,
 } from '@promptscript/core';
 import { loadPrompt, type Prompt, type PromptMessage } from '@promptscript/runtime';
@@ -19,6 +22,15 @@ import { evaluateAssertions, type DeterministicAssertion } from './assertions.js
 import { MAX_TOKENS, cacheKey, inputsHash } from './cache.js';
 import { messageOf, obtain, pool, searchCache, type Add, type RunContext } from './calls.js';
 import { Budget, callCost, roundUsd, worstCaseCost } from './cost.js';
+import {
+  judgeCase,
+  judgeEstimate,
+  judgeSetups,
+  setupCalls,
+  type JudgedCase,
+  type JudgePlan,
+} from './judge.js';
+import { effectiveInputs } from './inputs.js';
 import { checkDatasetRow } from './dataset/check.js';
 import { readDataset, type DatasetRecord } from './dataset/read.js';
 import { scanDatasetRow } from './dataset/scan.js';
@@ -28,11 +40,13 @@ import type { EvalProviderLookup, EvalResponse } from './provider.js';
 import {
   buildReport,
   type CaseOutcome,
+  type CallPlan,
   type CasePlan,
   type ModelPlan,
   type SuitePlan,
 } from './report.js';
 import { checkSuites } from './suite/check.js';
+import { judgeModelRef } from './suite/rubric.js';
 import type { LoadedSuite } from './suite/load.js';
 
 /** Something that happened during a run, for the caller to show. */
@@ -76,6 +90,7 @@ export interface RunEvalOptions {
 
 const DEFAULT_MAX_OUTPUT_TOKENS = 1024;
 const DEFAULT_CONCURRENCY = 4;
+const DEFAULT_JUDGE_RUNS = 3;
 const MAX_CONCURRENCY = 16;
 
 function collector(errors: EvalFinding[]): Add {
@@ -212,33 +227,83 @@ function resolveModels(
     entries.length === 0
       ? ownTarget
       : entries.flatMap((entry) => entryTarget(entry, options, file, add));
-  return targets.map((target) => {
-    const merged = { ...own?.params, ...target.params };
-    const maxOutputTokens =
-      merged.maxTokens ?? options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS;
-    const pricing = priced ? priceOf(target, options, file, add) : undefined;
-    return {
-      ref: target.ref,
-      provider: target.provider,
-      apiId: target.apiId,
-      params: { ...merged, maxTokens: maxOutputTokens },
-      maxOutputTokens,
-      ...(pricing === undefined ? {} : { pricing }),
-    };
-  });
+  return targets.map((target) => planOf(target, own, priced, loaded, options, add));
 }
 
-// Inputs after defaults, the values the cache key covers
-function effectiveInputs(
-  bundle: PromptBundleV1,
-  inputs: DatasetRecord['row']['inputs']
-): Record<string, unknown> {
-  const values: Record<string, unknown> = {};
-  for (const [name, spec] of Object.entries(bundle.inputs)) {
-    const value = Object.hasOwn(inputs, name) ? inputs[name] : spec.default;
-    if (value !== undefined) values[name] = value;
+// One model plan: the prompt's own parameters under the entry's, the output cap folded in
+function planOf(
+  target: ModelTarget,
+  own: PromptBundleModel | undefined,
+  priced: boolean,
+  loaded: LoadedSuite,
+  options: RunEvalOptions,
+  add: Add
+): ModelPlan {
+  const merged = { ...own?.params, ...target.params };
+  const maxOutputTokens = merged.maxTokens ?? options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS;
+  const pricing = priced ? priceOf(target, options, loaded.file, add) : undefined;
+  return {
+    ref: target.ref,
+    provider: target.provider,
+    apiId: target.apiId,
+    params: { ...merged, maxTokens: maxOutputTokens },
+    maxOutputTokens,
+    ...(pricing === undefined ? {} : { pricing }),
+  };
+}
+
+// The model of a judge assertion; --model never changes it
+function judgeModelPlan(
+  assertion: EvalLlmJudgeAssertion,
+  rubric: PromptBundleV1,
+  loaded: LoadedSuite,
+  options: RunEvalOptions,
+  add: Add
+): ModelPlan | undefined {
+  const chosen = judgeModelRef(assertion, loaded.suite, rubric);
+  const own = rubric.model;
+  if (chosen === undefined) return undefined;
+  const priced = options.budget !== undefined || hasCostThreshold(loaded);
+  const targets =
+    chosen.fromRubric && own !== undefined
+      ? [
+          {
+            ref: own.ref,
+            priceRef: own.profile ?? own.ref,
+            provider: own.provider,
+            apiId: own.apiId,
+            params: {},
+          },
+        ]
+      : entryTarget(chosen.ref, options, loaded.file, add);
+  const [target] = targets;
+  return target === undefined ? undefined : planOf(target, own, priced, loaded, options, add);
+}
+
+// The judge assertions of a suite, with their rubrics loaded and their models resolved
+function prepareJudges(loaded: LoadedSuite, options: RunEvalOptions, add: Add): JudgePlan[] {
+  const plans: JudgePlan[] = [];
+  for (const assertion of loaded.suite.assertions) {
+    if (assertion.kind !== 'llm-judge') continue;
+    const rubric = options.bundles.find((candidate) => candidate.id === assertion.rubric);
+    if (rubric === undefined) continue;
+    let prompt: Prompt;
+    try {
+      prompt = loadPrompt(rubric);
+    } catch (error) {
+      add(
+        EVAL_CODES.UNKNOWN_PROMPT,
+        `Suite ${loaded.file}: rubric "${rubric.id}" did not load: ${messageOf(error)}`,
+        loaded.file
+      );
+      continue;
+    }
+    const model = judgeModelPlan(assertion, rubric, loaded, options, add);
+    if (model === undefined) continue;
+    const runs = assertion.runs ?? loaded.suite.judge?.runs ?? DEFAULT_JUDGE_RUNS;
+    plans.push({ assertion, rubric, prompt, model, runs });
   }
-  return values;
+  return plans;
 }
 
 interface ReadRows {
@@ -330,14 +395,6 @@ async function prepareSuite(
   const { suite, file } = loaded;
   const bundle = options.bundles.find((candidate) => candidate.id === suite.prompt);
   if (bundle === undefined) return { errors };
-  const judged = suite.assertions.filter((assertion) => assertion.kind === 'llm-judge');
-  for (const assertion of judged) {
-    add(
-      EVAL_CODES.JUDGE_UNSUPPORTED,
-      `Suite ${file}: llm-judge assertion "${assertion.id}" cannot run in this version of eval; remove it to run the rest of the suite.`,
-      file
-    );
-  }
   let prompt: Prompt;
   try {
     prompt = loadPrompt(bundle);
@@ -350,8 +407,11 @@ async function prepareSuite(
     return { errors };
   }
   const models = resolveModels(loaded, bundle, options, add);
+  const judges = prepareJudges(loaded, options, add);
   // A profile is outside the eval config, so its values get the same secret check
-  const secret = options.providers.secretIn?.(JSON.stringify(models));
+  const secret = options.providers.secretIn?.(
+    JSON.stringify([...models, ...judges.map((judge) => judge.model)])
+  );
   if (secret !== undefined) {
     add(
       EVAL_CODES.KEY_IN_CONFIG,
@@ -410,6 +470,7 @@ async function prepareSuite(
       assertions: suite.assertions.filter(
         (assertion): assertion is DeterministicAssertion => assertion.kind !== 'llm-judge'
       ),
+      judges,
       priced: options.budget !== undefined || hasCostThreshold(loaded),
       cases,
       timedOut: new Set(),
@@ -426,12 +487,71 @@ async function lookUp(plans: readonly SuitePlan[], context: RunContext, add: Add
   );
 }
 
+// The judge calls of a case the cache answers are known now, so they are looked up like the case
+function judgeCallsOf(suite: SuitePlan, plan: CasePlan, context: RunContext): CallPlan[] {
+  if (plan.hit === undefined) {
+    // Without an answer the judge keys are unknown, so the plan only estimates them
+    if (context.mode !== 'replay') planEstimate(suite, plan);
+    return [];
+  }
+  try {
+    plan.judgeSetups = judgeSetups(suite.judges, suite.bundle, plan.row, plan.hit.response.text);
+  } catch {
+    // The run of the case reports why the judges cannot be set up
+    return [];
+  }
+  return setupCalls(plan.judgeSetups);
+}
+
+async function lookUpJudges(
+  plans: readonly SuitePlan[],
+  context: RunContext,
+  add: Add
+): Promise<void> {
+  const calls = plans
+    .filter((suite) => suite.judges.length > 0)
+    .flatMap((suite) => suite.cases.flatMap((plan) => judgeCallsOf(suite, plan, context)));
+  if (context.mode === 'replay' || context.mode === 'record') {
+    await searchCache(calls, context, add);
+  }
+}
+
+function planEstimate(suite: SuitePlan, plan: CasePlan): void {
+  try {
+    const estimate = judgeEstimate(suite.judges, suite.bundle, plan.row, plan.model);
+    plan.judgeEstimateUsd = estimate.usd;
+    plan.judgeEstimateCalls = estimate.calls;
+  } catch {
+    // The same rendering error stops the case when it runs
+  }
+}
+
+// Judge calls a record or off run would make: by key, rows with one request counted once
+function judgeMisses(cases: readonly CasePlan[]): Map<string, number> {
+  const misses = new Map<string, number>();
+  const calls = cases.flatMap((plan) => setupCalls(plan.judgeSetups ?? []));
+  for (const call of calls.filter((entry) => entry.hit === undefined)) {
+    misses.set(call.key, call.worstCaseUsd);
+  }
+  return misses;
+}
+
+// Providers of the calls the cache cannot answer: the models under test, and the judges
+// of a suite that has a case or a judge call to make
+function providerNames(plans: readonly SuitePlan[]): Set<string> {
+  const names = new Set<string>();
+  for (const suite of plans) {
+    const missed = suite.cases.filter((plan) => plan.hit === undefined);
+    for (const plan of missed) names.add(plan.model.provider);
+    if (missed.length > 0 || judgeMisses(suite.cases).size > 0) {
+      for (const judge of suite.judges) names.add(judge.model.provider);
+    }
+  }
+  return names;
+}
+
 function setUpProviders(plans: readonly SuitePlan[], context: RunContext, add: Add): void {
-  const names = new Set(
-    plans.flatMap((plan) =>
-      plan.cases.filter((c) => c.hit === undefined).map((c) => c.model.provider)
-    )
-  );
+  const names = providerNames(plans);
   for (const name of [...names].sort(compareCodeUnits)) {
     try {
       context.providers.set(name, context.options.providers(name));
@@ -474,20 +594,14 @@ async function respond(
   return 'code' in got ? errored(plan, got.code, got.message, got.flags) : got;
 }
 
-async function runCase(
+// The deterministic assertions, or the case as an error when one cannot run
+function checkCase(
   suite: SuitePlan,
   plan: CasePlan,
-  context: RunContext
-): Promise<CaseOutcome> {
-  if (context.options.signal?.aborted) {
-    return errored(plan, EVAL_CODES.RUN_STOPPED, 'The run stopped before this case ran.');
-  }
-  const answered = await respond(plan, context);
-  if ('result' in answered) return answered;
-  const { response, bytes, live } = answered;
-  let assertions;
+  text: string
+): EvalAssertionResultV1[] | CaseOutcome {
   try {
-    assertions = evaluateAssertions(suite.assertions, response.text, {
+    return evaluateAssertions(suite.assertions, text, {
       ...(suite.bundle.output === undefined ? {} : { output: suite.bundle.output }),
       ...(plan.row.expected === undefined ? {} : { expected: plan.row.expected }),
       timedOut: suite.timedOut,
@@ -499,25 +613,104 @@ async function runCase(
       `An assertion could not run: ${messageOf(error)}`
     );
   }
-  const costUsd =
-    suite.priced && plan.model.pricing !== undefined
-      ? callCost(response.usage, plan.model.pricing)
-      : undefined;
+}
+
+// Judge setups of a case: the ones known before the run, else made from the answer
+async function judgeOf(
+  suite: SuitePlan,
+  plan: CasePlan,
+  text: string,
+  context: RunContext
+): Promise<JudgedCase> {
+  if (suite.judges.length === 0) return { results: [], uses: [] };
+  try {
+    const setups = plan.judgeSetups ?? judgeSetups(suite.judges, suite.bundle, plan.row, text);
+    return await judgeCase(setups, plan.row.id, context);
+  } catch (error) {
+    const message = `A judge assertion could not run: ${messageOf(error)}`;
+    return { results: [], uses: [], failure: { code: EVAL_CODES.ASSERTION_ERROR, message } };
+  }
+}
+
+function statusOf(
+  assertions: readonly EvalAssertionResultV1[],
+  judged: JudgedCase
+): EvalCaseStatus {
+  if (judged.failure !== undefined) return 'error';
+  return assertions.every((result) => result.passed) ? 'passed' : 'failed';
+}
+
+interface Answered {
+  response: EvalResponse;
+  bytes: Buffer;
+  live: boolean;
+}
+
+// The case as it finished: the case call, the deterministic results and the judge runs together
+function finishCase(
+  suite: SuitePlan,
+  plan: CasePlan,
+  answered: Answered,
+  checked: readonly EvalAssertionResultV1[],
+  judged: JudgedCase
+): CaseOutcome {
+  const { response, bytes, live } = answered;
+  const results = new Map([...checked, ...judged.results].map((result) => [result.id, result]));
+  const assertions = suite.loaded.suite.assertions.flatMap((assertion) => {
+    const result = results.get(assertion.id);
+    return result === undefined ? [] : [result];
+  });
+  const priced = suite.priced && plan.model.pricing !== undefined;
+  const caseCost = priced && plan.model.pricing ? callCost(response.usage, plan.model.pricing) : 0;
+  const costUsd = judged.uses.reduce((sum, use) => sum + (use.costUsd ?? 0), caseCost);
+  const lives = [live, ...judged.uses.map((use) => use.live)].filter(Boolean).length;
+  const status = statusOf(assertions, judged);
   return {
-    bytes,
-    ...(costUsd === undefined ? {} : { costUsd }),
+    entries: [
+      { key: plan.key, bytes },
+      ...judged.uses.map(({ key, bytes: used }) => ({ key, bytes: used })),
+    ],
+    ...(priced ? { costUsd } : {}),
+    ...judged.failure?.flags,
     result: {
       id: plan.row.id,
       ...(plan.row.tags === undefined ? {} : { tags: plan.row.tags }),
-      status: assertions.every((result) => result.passed) ? 'passed' : 'failed',
+      status,
       assertions,
-      usage: { calls: 1, ...response.usage },
-      ...(costUsd === undefined ? {} : { costUsd: roundUsd(costUsd) }),
+      usage: judged.uses.reduce(
+        (total, use) => ({
+          calls: total.calls + 1,
+          inputTokens: total.inputTokens + use.usage.inputTokens,
+          outputTokens: total.outputTokens + use.usage.outputTokens,
+        }),
+        { calls: 1, ...response.usage }
+      ),
+      ...(priced ? { costUsd: roundUsd(costUsd) } : {}),
       latencyMs: response.latencyMs,
-      cache: { replayed: live ? 0 : 1, live: live ? 1 : 0 },
-      cacheKeys: [plan.key],
+      cache: { replayed: judged.uses.length + 1 - lives, live: lives },
+      cacheKeys: [plan.key, ...judged.uses.map((use) => use.key)],
+      ...(judged.failure === undefined
+        ? {}
+        : { error: { code: judged.failure.code, message: judged.failure.message } }),
     },
   };
+}
+
+async function runCase(
+  suite: SuitePlan,
+  plan: CasePlan,
+  context: RunContext
+): Promise<CaseOutcome> {
+  if (context.options.signal?.aborted) {
+    return errored(plan, EVAL_CODES.RUN_STOPPED, 'The run stopped before this case ran.');
+  }
+  const answered = await respond(plan, context);
+  if ('result' in answered) return answered;
+  const checked = checkCase(suite, plan, answered.response.text);
+  if ('result' in checked) return checked;
+  // Judges run whatever the deterministic assertions said, so their data does not depend on them
+  const judged = await judgeOf(suite, plan, answered.response.text, context);
+  return finishCase(suite, plan, answered, checked, judged);
 }
 
 // A limit that is not a plain number would switch off the check that uses it
@@ -593,13 +786,16 @@ function createContext(
   return context;
 }
 
-// Every miss at its worst case; rows with the same key share one call, so they count once
+// Every miss at its worst case; rows with the same key share one call, so they count once.
+// Judge calls of a case with no answer have no key yet, so each counts at its estimate.
 function checkPlanCost(plans: readonly SuitePlan[], context: RunContext, add: Add): void {
-  const calls = new Map<string, number>();
-  for (const plan of plans.flatMap((suite) => suite.cases)) {
+  const cases = plans.flatMap((suite) => suite.cases);
+  const calls = new Map<string, number>(judgeMisses(cases));
+  for (const plan of cases) {
     if (plan.hit === undefined) calls.set(plan.key, plan.worstCaseUsd);
   }
-  const worstCase = [...calls.values()].reduce((sum, usd) => sum + usd, 0);
+  const estimated = cases.reduce((sum, plan) => sum + (plan.judgeEstimateUsd ?? 0), 0);
+  const worstCase = [...calls.values()].reduce((sum, usd) => sum + usd, estimated);
   if (context.budget !== undefined && worstCase > context.budget.maxUsd) {
     add(
       EVAL_CODES.BUDGET_EXCEEDED,
@@ -650,6 +846,7 @@ async function setUp(
   const context = createContext(options, notify, add);
   if (errors.length > 0) return { plans, context, errors };
   await lookUp(plans, context, add);
+  if (errors.length === 0) await lookUpJudges(plans, context, add);
   if (mode === 'replay' || errors.length > 0) return { plans, context, errors };
   checkPlanCost(plans, context, add);
   if (errors.length > 0) return { plans, context, errors };
@@ -749,6 +946,13 @@ export interface EvalPlanModel {
   misses: number;
   /** Calls a record or off run would make: misses, rows with one request counted once */
   calls: number;
+  /** Judge calls the cache answers; only for a suite with judge assertions */
+  judgeHits?: number;
+  /**
+   * Judge calls a record or off run would make, 0 in replay. A case with no
+   * cached answer counts its judge runs at their estimate.
+   */
+  judgeCalls?: number;
   /** Price source, when the run is priced */
   priceSource?: PriceSource;
   /** Worst-case cost of its calls in USD, when the run is priced */
@@ -771,6 +975,10 @@ export interface EvalPlan {
   hits: number;
   misses: number;
   calls: number;
+  /** Judge calls the cache answers; only when a suite has judge assertions */
+  judgeHits?: number;
+  /** Judge calls a run would make; only when a suite has judge assertions */
+  judgeCalls?: number;
   /** Worst case of every planned call in USD, when a budget applies */
   worstCaseUsd?: number;
   /** The `--max-cost` limit, when given */
@@ -802,6 +1010,14 @@ function planModel(suite: SuitePlan, model: ModelPlan, mode: EvalCacheMode): Eva
       ? []
       : cases.filter((plan) => plan.hit === undefined).map((plan) => [plan.key, plan.worstCaseUsd])
   );
+  const judged = suite.judges.length > 0;
+  const judgeMiss = mode === 'replay' ? new Map<string, number>() : judgeMisses(cases);
+  const estimated = mode === 'replay' ? [] : cases.filter((plan) => plan.hit === undefined);
+  const judgeCalls =
+    judgeMiss.size + estimated.reduce((sum, plan) => sum + (plan.judgeEstimateCalls ?? 0), 0);
+  const worst =
+    [...calls.values(), ...judgeMiss.values()].reduce((sum, usd) => sum + usd, 0) +
+    estimated.reduce((sum, plan) => sum + (plan.judgeEstimateUsd ?? 0), 0);
   const source = priceSourceOf(model);
   return {
     ref: model.ref,
@@ -811,11 +1027,16 @@ function planModel(suite: SuitePlan, model: ModelPlan, mode: EvalCacheMode): Eva
     hits,
     misses: cases.length - hits,
     calls: calls.size,
+    ...(judged ? { judgeHits: judgeHitsOf(cases), judgeCalls } : {}),
     ...(source === undefined ? {} : { priceSource: source }),
-    ...(model.pricing === undefined || mode === 'replay'
-      ? {}
-      : { worstCaseUsd: roundUsd([...calls.values()].reduce((sum, usd) => sum + usd, 0)) }),
+    ...(model.pricing === undefined || mode === 'replay' ? {} : { worstCaseUsd: roundUsd(worst) }),
   };
+}
+
+function judgeHitsOf(cases: readonly CasePlan[]): number {
+  return cases
+    .flatMap((plan) => setupCalls(plan.judgeSetups ?? []))
+    .filter((call) => call.hit !== undefined).length;
 }
 
 /**
@@ -846,12 +1067,19 @@ export async function planEval(options: RunEvalOptions): Promise<EvalPlan> {
   const sum = (pick: (model: EvalPlanModel) => number): number =>
     models.reduce((total, model) => total + pick(model), 0);
   const priced = models.some((model) => model.worstCaseUsd !== undefined);
+  const judged = suites.some((suite) => suite.judges.length > 0);
   return {
     mode: context.mode,
     suites: described,
     hits: sum((model) => model.hits),
     misses: sum((model) => model.misses),
     calls: sum((model) => model.calls),
+    ...(judged
+      ? {
+          judgeHits: sum((model) => model.judgeHits ?? 0),
+          judgeCalls: sum((model) => model.judgeCalls ?? 0),
+        }
+      : {}),
     ...(priced ? { worstCaseUsd: roundUsd(sum((model) => model.worstCaseUsd ?? 0)) } : {}),
     ...(options.budget === undefined ? {} : { budgetUsd: options.budget.maxCostUsd }),
     errors,

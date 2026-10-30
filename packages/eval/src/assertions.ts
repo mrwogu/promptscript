@@ -43,7 +43,8 @@ interface Outcome {
   timedOut?: true;
 }
 
-type Target = { ok: true; value: unknown } | { ok: false; reason: string };
+/** The value an assertion reads, or why there is none. */
+export type Target = { ok: true; value: unknown } | { ok: false; reason: string };
 
 const MAX_REASON = 160;
 const MAX_VALUE = 60;
@@ -81,7 +82,7 @@ function show(value: unknown): string {
 }
 
 // Trim, unwrap one fenced block, parse; only a JSON object counts.
-function parseResponse(response: string): Record<string, unknown> | undefined {
+export function parseResponse(response: string): Record<string, unknown> | undefined {
   let text = response.trim();
   const start = text.indexOf('\n');
   if (
@@ -98,6 +99,28 @@ function parseResponse(response: string): Record<string, unknown> | undefined {
   } catch {
     return undefined;
   }
+}
+
+function fieldOf(object: Record<string, unknown>, field: string): Target {
+  if (!Object.hasOwn(object, field)) {
+    return { ok: false, reason: `Field ${show(field)} is missing from the response` };
+  }
+  return { ok: true, value: object[field] };
+}
+
+/**
+ * The target of an assertion that reads `field`, or the whole text without
+ * one, found the same way the deterministic kinds find it.
+ *
+ * @param field - Output property to read, absent for the whole response text
+ * @param response - Response text
+ * @returns The value, or why there is none
+ */
+export function targetOf(field: string | undefined, response: string): Target {
+  if (field === undefined) return { ok: true, value: response };
+  const object = parseResponse(response);
+  if (object === undefined) return { ok: false, reason: 'Response is not a JSON object' };
+  return fieldOf(object, field);
 }
 
 function normalize(text: string, trim: boolean, ignoreCase: boolean): string {
@@ -286,10 +309,7 @@ export function evaluateAssertions(
     const object = parsed.object;
     if (object === undefined) return { ok: false, reason: 'Response is not a JSON object' };
     if (assertion.field === undefined) return { ok: true, value: object };
-    if (!Object.hasOwn(object, assertion.field)) {
-      return { ok: false, reason: `Field ${show(assertion.field)} is missing from the response` };
-    }
-    return { ok: true, value: object[assertion.field] };
+    return fieldOf(object, assertion.field);
   };
 
   const evaluate = (assertion: DeterministicAssertion): Outcome => {

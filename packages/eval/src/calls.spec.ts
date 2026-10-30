@@ -135,6 +135,15 @@ describe('obtain', () => {
     expect(provider.calls).toHaveLength(1);
   });
 
+  it('fails a call whose provider is not set up', async () => {
+    const context = contextOf('off');
+    context.providers.clear();
+
+    const got = await obtain(planOf(), 'row', context);
+
+    expect(got).toMatchObject({ code: 'PS6301' });
+  });
+
   it('turns a replay miss into a failure that marks a cache miss', async () => {
     const got = await obtain(planOf(), 'row', contextOf('replay'));
 

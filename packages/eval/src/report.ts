@@ -8,6 +8,7 @@ import {
   type EvalCaseResultV1,
   type EvalDatasetRefV1,
   type EvalFindingV1,
+  type EvalJudgeRefV1,
   type EvalModelResultV1,
   type EvalOutcome,
   type EvalReportV1,
@@ -21,6 +22,7 @@ import {
 import type { DeterministicAssertion } from './assertions.js';
 import { roundUsd, type Budget } from './cost.js';
 import type { DatasetRecord } from './dataset/read.js';
+import type { JudgePlan, JudgeSetup } from './judge.js';
 import type { EvalFinding } from './errors.js';
 import type { EvalRequest } from './provider.js';
 import type { LoadedSuite } from './suite/load.js';
@@ -58,6 +60,12 @@ export interface CallPlan {
 /** One case: a dataset row on a model entry, ready to call or replay. */
 export interface CasePlan extends CallPlan {
   row: DatasetRecord['row'];
+  /** What the judge assertions do, known before the run for a case the cache answers */
+  judgeSetups?: JudgeSetup[];
+  /** Worst case of the judge calls of a case with no cached answer, in USD; their keys are not known yet */
+  judgeEstimateUsd?: number;
+  /** Number of those judge calls */
+  judgeEstimateCalls?: number;
 }
 
 /** One suite, checked and ready to run. */
@@ -68,6 +76,8 @@ export interface SuitePlan {
   findings: EvalFindingV1[];
   models: ModelPlan[];
   assertions: DeterministicAssertion[];
+  /** The llm-judge assertions, in suite order */
+  judges: JudgePlan[];
   /** Costs are reported when a budget or a cost threshold applies */
   priced: boolean;
   cases: CasePlan[];
@@ -80,8 +90,8 @@ export interface CaseOutcome {
   result: EvalCaseResultV1;
   /** Cost in USD, not rounded, when the suite is priced */
   costUsd?: number;
-  /** Bytes of the cache entry the case consumed, for the digest */
-  bytes?: Buffer;
+  /** Every cache entry the case consumed, with its file bytes, for the digest */
+  entries?: Array<{ key: string; bytes: Buffer }>;
   /** The case stopped because the budget ran out */
   budgetHit?: boolean;
   /** Replay found no entry for the case */
@@ -181,6 +191,15 @@ function thresholdResults(
   return results;
 }
 
+// One entry per rubric, by id, so editing a rubric shows in the report
+function judgeRefs(suite: SuitePlan): EvalJudgeRefV1[] {
+  const refs = new Map<string, EvalJudgeRefV1>();
+  for (const { rubric } of suite.judges) {
+    refs.set(rubric.id, { rubric: rubric.id, contentHash: rubric.contentHash });
+  }
+  return [...refs.values()].sort((a, b) => compareCodeUnits(a.rubric, b.rubric));
+}
+
 function suiteResult(
   suite: SuitePlan,
   input: ReportInput
@@ -193,6 +212,7 @@ function suiteResult(
       suiteHash: suite.loaded.hash,
       prompt: { id: suite.bundle.id, contentHash: suite.bundle.contentHash },
       dataset: suite.dataset,
+      ...(suite.judges.length === 0 ? {} : { judges: judgeRefs(suite) }),
       passed: thresholds.every((threshold) => threshold.passed),
       thresholds,
       findings: suite.findings,
@@ -206,8 +226,7 @@ function suiteResult(
 function cacheDigest(outcomes: readonly CaseOutcome[]): string {
   const bytes = new Map<string, Buffer>();
   for (const outcome of outcomes) {
-    const [key] = outcome.result.cacheKeys;
-    if (key !== undefined && outcome.bytes !== undefined) bytes.set(key, outcome.bytes);
+    for (const entry of outcome.entries ?? []) bytes.set(entry.key, entry.bytes);
   }
   const lines = [...bytes.keys()].sort(compareCodeUnits).map((key) =>
     createHash('sha256')

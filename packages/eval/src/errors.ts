@@ -106,8 +106,6 @@ export const EVAL_CODES = {
   BUDGET_REQUIRED: 'PS6504',
   /** A project price is lower than the built-in price of the same model */
   PRICE_LOWERED: 'PS6505',
-  /** The suite has an llm-judge assertion, which this version cannot run */
-  JUDGE_UNSUPPORTED: 'PS6600',
   /** More than half of the judge runs of a case gave no valid verdict */
   JUDGE_UNPARSABLE: 'PS6601',
   /** The judged text is over 64 KiB */
