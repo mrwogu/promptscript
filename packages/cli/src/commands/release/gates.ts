@@ -4,6 +4,7 @@ import {
   getModelCatalog,
   isPlainObject,
   RISK_LEVELS,
+  type MaxExperimentWeightPolicy,
   type ModelProfile,
   type PolicyDefinition,
   type PolicySubject,
@@ -285,6 +286,32 @@ function approvalsCheck(
   return { ...base, status: 'failed', message, suggestion: `Run: ${commands.join('; ')}` };
 }
 
+/**
+ * A max-experiment-weight policy on one arm: unavailable while gates cannot judge weights,
+ * or undefined when it does not apply.
+ */
+function exposureCheck(
+  policy: MaxExperimentWeightPolicy,
+  judged: Judged,
+  context: PromotionGateContext
+): ReleaseGateCheck | undefined {
+  const { exposure } = judged.entry;
+  // An arm at weight 0 gets no traffic; the entry hash and control are promotions.
+  if (exposure === undefined || exposure.weight === 0) return undefined;
+  if (!judged.selects(policy.match) || !appliesTo(policy.environments, context.environment)) {
+    return undefined;
+  }
+  return {
+    policy: policy.name,
+    kind: policy.kind,
+    severity: policy.severity,
+    status: 'unavailable',
+    message: `${exposure.variant} of ${judged.entry.id} runs ${exposure.weight / 100} % in ${context.environment}, but release gates do not judge experiment weights in this version of prs`,
+    suggestion:
+      'This version of prs cannot judge the arm. Keep it at weight 0, narrow the policy with match or environments, or set severity: warning to only warn.',
+  };
+}
+
 /** One policy as a check of one prompt version, or undefined when it does not apply. */
 async function checkOf(
   policy: PolicyDefinition,
@@ -310,21 +337,7 @@ async function checkOf(
       suggestion: 'Remove the policy or set severity: warning.',
     };
   }
-  if (policy.kind === 'max-experiment-weight') {
-    const { exposure } = judged.entry;
-    // An arm at weight 0 gets no traffic; the entry hash and control are promotions.
-    if (exposure === undefined || exposure.weight === 0) return undefined;
-    if (!judged.selects(policy.match) || !appliesTo(policy.environments, context.environment)) {
-      return undefined;
-    }
-    return {
-      ...base,
-      status: 'unavailable',
-      message: `${exposure.variant} of ${judged.entry.id} runs ${exposure.weight / 100} % in ${context.environment}, but release gates do not judge experiment weights in this version of prs`,
-      suggestion:
-        'This version of prs cannot judge the arm. Keep it at weight 0, narrow the policy with match or environments, or set severity: warning to only warn.',
-    };
-  }
+  if (policy.kind === 'max-experiment-weight') return exposureCheck(policy, judged, context);
   // A risk floor applies to every prompt; the other kinds where their match selects, and
   // no match selects every prompt.
   const match = 'match' in policy ? policy.match : undefined;
