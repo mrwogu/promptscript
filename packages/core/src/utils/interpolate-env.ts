@@ -1,4 +1,4 @@
-type EnvironmentVariableProvider = (name: string) => string | undefined;
+export type EnvironmentVariableProvider = (name: string) => string | undefined;
 
 /**
  * Interpolate environment variables without regex backtracking.

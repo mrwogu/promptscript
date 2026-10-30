@@ -37,6 +37,7 @@
       pnpm schema:check          # 6. Verify JSON schemas are current
       pnpm skill:check           # 7. Verify SKILL.md copies are in sync
       pnpm grammar:check         # 8. Verify TextMate grammar covers all tokens
+      pnpm api:check             # 9. Verify API reports are current
       ```
 
       `prs compile` output is not Prettier-clean on its own, so step 1 must run

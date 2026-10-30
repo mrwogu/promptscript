@@ -8,11 +8,14 @@ import {
   type EvalCaseResultV1,
   type EvalDatasetRefV1,
   type EvalFindingV1,
+  type EvalJudgeRefV1,
   type EvalModelResultV1,
   type EvalOutcome,
   type EvalReportV1,
   type EvalSuiteResultV1,
+  type EvalJudgeAgreementV1,
   type EvalThresholdResultV1,
+  type EvalVerdict,
   type EvalUsageV1,
   type ModelParams,
   type ModelPricing,
@@ -21,6 +24,7 @@ import {
 import type { DeterministicAssertion } from './assertions.js';
 import { roundUsd, type Budget } from './cost.js';
 import type { DatasetRecord } from './dataset/read.js';
+import type { JudgePlan, JudgeSetup } from './judge.js';
 import type { EvalFinding } from './errors.js';
 import type { EvalRequest } from './provider.js';
 import type { LoadedSuite } from './suite/load.js';
@@ -41,9 +45,8 @@ export interface ModelPlan {
   pricing?: ModelPricing;
 }
 
-/** One case: a dataset row on a model entry, ready to call or replay. */
-export interface CasePlan {
-  row: DatasetRecord['row'];
+/** The fields a provider call needs; a case call and a judge call both have them. */
+export interface CallPlan {
   model: ModelPlan;
   request: EvalRequest;
   cacheRequest: EvalCacheRequestV1;
@@ -52,6 +55,19 @@ export interface CasePlan {
   worstCaseUsd: number;
   /** Cache entry found before the run, with its file bytes */
   hit?: { response: EvalCacheResponseV1; bytes: Buffer };
+  /** The cache was already searched for this key, so a miss is final */
+  searched?: boolean;
+}
+
+/** One case: a dataset row on a model entry, ready to call or replay. */
+export interface CasePlan extends CallPlan {
+  row: DatasetRecord['row'];
+  /** What the judge assertions do, known before the run for a case the cache answers */
+  judgeSetups?: JudgeSetup[];
+  /** Worst case of the judge calls of a case with no cached answer, in USD; their keys are not known yet */
+  judgeEstimateUsd?: number;
+  /** Number of those judge calls */
+  judgeEstimateCalls?: number;
 }
 
 /** One suite, checked and ready to run. */
@@ -62,6 +78,10 @@ export interface SuitePlan {
   findings: EvalFindingV1[];
   models: ModelPlan[];
   assertions: DeterministicAssertion[];
+  /** The llm-judge assertions, in suite order */
+  judges: JudgePlan[];
+  /** Human labels by row id, then judge assertion id; present when the suite names a label file */
+  labels?: ReadonlyMap<string, ReadonlyMap<string, EvalVerdict>>;
   /** Costs are reported when a budget or a cost threshold applies */
   priced: boolean;
   cases: CasePlan[];
@@ -74,8 +94,8 @@ export interface CaseOutcome {
   result: EvalCaseResultV1;
   /** Cost in USD, not rounded, when the suite is priced */
   costUsd?: number;
-  /** Bytes of the cache entry the case consumed, for the digest */
-  bytes?: Buffer;
+  /** Every cache entry the case consumed, with its file bytes, for the digest */
+  entries?: Array<{ key: string; bytes: Buffer }>;
   /** The case stopped because the budget ran out */
   budgetHit?: boolean;
   /** Replay found no entry for the case */
@@ -114,6 +134,27 @@ interface ModelSummary {
   maxCaseUsd: number;
 }
 
+// How often the judge majority matched the human label, for the cases it judged and a human labelled
+function judgeAgreement(
+  suite: SuitePlan,
+  cases: readonly EvalCaseResultV1[]
+): EvalJudgeAgreementV1[] {
+  const ids = [...new Set(suite.judges.map((judge) => judge.assertion.id))];
+  // A case in error stopped early; what it judged is not a verdict to compare
+  const done = cases.filter((result) => result.status !== 'error');
+  return ids.map((id) => {
+    const pairs = done.flatMap((result) => {
+      const label = suite.labels?.get(result.id)?.get(id);
+      const judged = result.assertions.find(
+        (entry) => entry.id === id && entry.judge !== undefined
+      );
+      return label === undefined || judged === undefined ? [] : [{ label, passed: judged.passed }];
+    });
+    const agreed = pairs.filter((pair) => pair.passed === (pair.label === 'pass')).length;
+    return { assertion: id, labelled: pairs.length, agreed };
+  });
+}
+
 function modelSummary(suite: SuitePlan, model: ModelPlan, input: ReportInput): ModelSummary {
   const outcomes = suite.cases
     .filter((plan) => plan.model === model)
@@ -134,6 +175,7 @@ function modelSummary(suite: SuitePlan, model: ModelPlan, input: ReportInput): M
       usage: cases.reduce((total, result) => addUsage(total, result.usage), NO_USAGE),
       ...(suite.priced ? { costUsd: roundUsd(costUsd) } : {}),
       latencyMs: { p50: percentile(latencies, 0.5), p95: percentile(latencies, 0.95) },
+      ...(suite.labels === undefined ? {} : { judgeAgreement: judgeAgreement(suite, cases) }),
       cases,
     },
     costUsd,
@@ -175,6 +217,15 @@ function thresholdResults(
   return results;
 }
 
+// One entry per rubric, by id, so editing a rubric shows in the report
+function judgeRefs(suite: SuitePlan): EvalJudgeRefV1[] {
+  const refs = new Map<string, EvalJudgeRefV1>();
+  for (const { rubric } of suite.judges) {
+    refs.set(rubric.id, { rubric: rubric.id, contentHash: rubric.contentHash });
+  }
+  return [...refs.values()].sort((a, b) => compareCodeUnits(a.rubric, b.rubric));
+}
+
 function suiteResult(
   suite: SuitePlan,
   input: ReportInput
@@ -187,6 +238,7 @@ function suiteResult(
       suiteHash: suite.loaded.hash,
       prompt: { id: suite.bundle.id, contentHash: suite.bundle.contentHash },
       dataset: suite.dataset,
+      ...(suite.judges.length === 0 ? {} : { judges: judgeRefs(suite) }),
       passed: thresholds.every((threshold) => threshold.passed),
       thresholds,
       findings: suite.findings,
@@ -200,8 +252,7 @@ function suiteResult(
 function cacheDigest(outcomes: readonly CaseOutcome[]): string {
   const bytes = new Map<string, Buffer>();
   for (const outcome of outcomes) {
-    const [key] = outcome.result.cacheKeys;
-    if (key !== undefined && outcome.bytes !== undefined) bytes.set(key, outcome.bytes);
+    for (const entry of outcome.entries ?? []) bytes.set(entry.key, entry.bytes);
   }
   const lines = [...bytes.keys()].sort(compareCodeUnits).map((key) =>
     createHash('sha256')

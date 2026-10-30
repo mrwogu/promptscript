@@ -86,6 +86,6 @@
     branchStrategy: "gitflow — branch from main, never commit to main"
     newTask: "follow the new-task workflow: branch, atomic commits, full verification pipeline, push, PR, watch CI"
     prMonitoring: "use `gh pr checks --watch` to monitor CI status; do not consider work done until all checks pass"
-    verification: "follow the verify workflow after any code change - all eight steps, in order"
+    verification: "follow the verify workflow after any code change - all nine steps, in order"
   }
 }

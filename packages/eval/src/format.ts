@@ -2,6 +2,7 @@ import type {
   EvalCaseResultV1,
   EvalComparisonEntryV1,
   EvalComparisonV1,
+  EvalJudgeAgreementV1,
   EvalModelResultV1,
   EvalReportV1,
   EvalSuiteResultV1,
@@ -134,6 +135,18 @@ function textDelta(delta: EvalComparisonEntryV1 | undefined, paint: Paint): stri
   return lines;
 }
 
+// A rate for people; no percentage when nothing was labelled
+function agreementText(entry: EvalJudgeAgreementV1): string {
+  const rate = entry.labelled === 0 ? '' : ` (${percent(entry.agreed / entry.labelled)})`;
+  return `agreed with labels on ${entry.agreed} of ${entry.labelled}${rate}`;
+}
+
+function textAgreement(model: EvalModelResultV1): string[] {
+  return (model.judgeAgreement ?? []).map(
+    (entry) => `    judge ${entry.assertion}: ${agreementText(entry)}`
+  );
+}
+
 function textModel(
   report: EvalReportV1,
   suite: EvalSuiteResultV1,
@@ -150,7 +163,12 @@ function textModel(
     `p95 ${model.latencyMs.p95} ms`,
     ...(delta === undefined ? [] : [`delta ${signedPoints(delta.passRateDelta)}`]),
   ];
-  return [parts.join('   '), ...textFailed(model, paint), ...textDelta(delta, paint)];
+  return [
+    parts.join('   '),
+    ...textAgreement(model),
+    ...textFailed(model, paint),
+    ...textDelta(delta, paint),
+  ];
 }
 
 function textSuite(report: EvalReportV1, suite: EvalSuiteResultV1, paint: Paint): string[] {
@@ -221,6 +239,14 @@ function markdownFailures(
   );
 }
 
+// One bullet per judge assertion of a model that has labels
+function markdownAgreement(suite: EvalSuiteResultV1, model: EvalModelResultV1): string[] {
+  return (model.judgeAgreement ?? []).map(
+    (entry) =>
+      `- Judge ${markdownCode(entry.assertion)} on ${markdownCode(suite.name)}/${markdownCode(model.ref)} ${agreementText(entry)}`
+  );
+}
+
 function markdownSuite(
   report: EvalReportV1,
   suite: EvalSuiteResultV1
@@ -243,6 +269,8 @@ function markdownSuite(
       failures.push(...markdownFailures(suite, model, entry));
     }
   }
+  const agreement = suite.models.flatMap((model) => markdownAgreement(suite, model));
+  if (agreement.length > 0) lines.push('', ...agreement);
   return { lines: [...lines, ''], failures, failedCases };
 }
 
@@ -523,6 +551,9 @@ function planModelLine(model: EvalPlan['suites'][number]['models'][number]): str
     `hits ${model.hits}`,
     `misses ${model.misses}`,
     `calls ${model.calls}`,
+    ...(model.judgeHits === undefined
+      ? []
+      : [`judge hits ${model.judgeHits}`, `judge calls ${model.judgeCalls ?? 0}`]),
     ...(model.priceSource === undefined ? [] : [`price ${model.priceSource}`]),
     ...(model.worstCaseUsd === undefined ? [] : [`worst case ${usd(model.worstCaseUsd)}`]),
   ].join('   ');
@@ -530,7 +561,7 @@ function planModelLine(model: EvalPlan['suites'][number]['models'][number]): str
 
 /**
  * Format the plan of a dry run as text: per suite and model entry the cases,
- * cache hits and misses, calls, price source and worst-case cost, then the
+ * cache hits and misses, calls, judge hits and calls, price source and worst-case cost, then the
  * totals and any setup errors. Strings are cleaned like in a report.
  *
  * @param plan - From `planEval`
@@ -548,10 +579,11 @@ export function formatPlan(plan: EvalPlan, options: FormatOptions = {}): string 
     );
   }
   for (const error of clean.errors) lines.push(`${paint('red', 'error')} ${errorLine(error)}`);
+  const judge = clean.judgeCalls ? `, judge calls ${clean.judgeCalls}` : '';
   const worst = clean.worstCaseUsd === undefined ? '' : `, worst case ${usd(clean.worstCaseUsd)}`;
   const budget = clean.budgetUsd === undefined ? '' : `, budget ${usd(clean.budgetUsd)}`;
   lines.push(
-    `total: hits ${clean.hits}, misses ${clean.misses}, calls ${clean.calls}${worst}${budget}`,
+    `total: hits ${clean.hits}, misses ${clean.misses}, calls ${clean.calls}${judge}${worst}${budget}`,
     'dry run: no provider was called and nothing was written'
   );
   return `${lines.join('\n')}\n`;

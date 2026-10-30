@@ -3,7 +3,8 @@
  *
  * Loads suite files from `.promptscript/evals/`, reads and checks their
  * datasets, scans dataset values with the validator's security rules and PII
- * detectors, and checks responses with deterministic assertions.
+ * detectors, and checks responses with deterministic assertions and with
+ * `llm-judge` assertions that a rubric prompt scores, optionally against human labels.
  *
  * @packageDocumentation
  */
@@ -41,6 +42,8 @@ export {
   type AssertionContext,
   type DeterministicAssertion,
 } from './assertions.js';
+export { readLabels, unmatchedLabels, type LabelContext, type ReadLabels } from './labels.js';
+export { readVerdict, type JudgeVerdict } from './judge.js';
 export {
   planEval,
   runEval,

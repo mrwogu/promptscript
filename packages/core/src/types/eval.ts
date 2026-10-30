@@ -94,7 +94,7 @@ export interface EvalJudgeConfig {
 /** Kind of an eval assertion. */
 export type EvalAssertionKind = 'equals' | 'contains' | 'regex' | 'json-schema' | 'llm-judge';
 
-interface EvalAssertionBase {
+export interface EvalAssertionBase {
   /**
    * Assertion id, unique in the suite.
    * @pattern ^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$

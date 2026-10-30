@@ -886,3 +886,4 @@ export function customTarget(name: string): CustomTarget {
 }
 
 export { DEFAULT_OUTPUT_PATHS } from '../target-output-paths.js';
+export type { DefaultOutputPathMap } from '../target-output-paths.js';

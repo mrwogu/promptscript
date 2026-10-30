@@ -46,7 +46,7 @@ import type { SyntaxFeatureUsage } from './syntax-versions.js';
 import { deepClone } from './utils/index.js';
 import { selectPresentationEntries } from './presentation.js';
 
-type LegacyContentType = BlockContent['type'];
+export type LegacyContentType = BlockContent['type'];
 
 export interface BlockBodyOptions {
   readonly projection?: LegacyContentType;
