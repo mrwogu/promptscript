@@ -318,29 +318,81 @@ function approvalsCheck(
   return { ...base, status: 'failed', message, suggestion: `Run: ${commands.join('; ')}` };
 }
 
+function toBasisPoints(percent: number): number {
+  return Math.round(percent * 100);
+}
+
+/** The way out of a cap, for an arm that runs above what the policy allows. */
+function lowerSuggestion(variant: string, allowed: number): string {
+  return `Lower ${variant} to at most ${percentText(allowed)} with prs release split, or change the policy in a reviewed pull request.`;
+}
+
 /**
- * A max-experiment-weight policy on one arm: unavailable while gates cannot judge weights,
- * or undefined when it does not apply.
+ * A max-experiment-weight policy on one arm, or undefined when it does not apply: no
+ * exposure (the entry hash and control are promotions), weight 0, no match or another
+ * environment. Up to `maxWeight` the arm passes. Above it the policy needs `approvals`
+ * that count for the arm weight, and never above `ceiling`; without `approvals` the cap
+ * is `maxWeight`.
  */
-function exposureCheck(
+async function exposureCheck(
   policy: MaxExperimentWeightPolicy,
   judged: Judged,
   context: PromotionGateContext
-): ReleaseGateCheck | undefined {
-  const { exposure } = judged.entry;
-  // An arm at weight 0 gets no traffic; the entry hash and control are promotions.
+): Promise<ReleaseGateCheck | undefined> {
+  const { entry } = judged;
+  const { exposure } = entry;
   if (exposure === undefined || exposure.weight === 0) return undefined;
   if (!judged.selects(policy.match) || !appliesTo(policy.environments, context.environment)) {
     return undefined;
   }
+  const base = { policy: policy.name, kind: policy.kind, severity: policy.severity };
+  const { weight } = exposure;
+  // The parser allows at most two decimals, so the rounding only absorbs float noise.
+  const cap = toBasisPoints(policy.maxWeight);
+  if (weight <= cap) return { ...base, status: 'passed' };
+  const { environment } = context;
+  const runs = `${exposure.variant} of ${entry.id}@${shortHash(entry.contentHash)} runs ${percentText(weight)} in ${environment}`;
+  const { approvals: wanted } = policy;
+  if (wanted === undefined) {
+    return {
+      ...base,
+      status: 'failed',
+      message: `${runs}; ${policy.name} allows at most ${percentText(cap)}`,
+      suggestion: lowerSuggestion(exposure.variant, cap),
+    };
+  }
+  const ceiling = policy.ceiling === undefined ? undefined : toBasisPoints(policy.ceiling);
+  if (ceiling !== undefined && weight > ceiling) {
+    return {
+      ...base,
+      status: 'failed',
+      message: `${runs}; ${policy.name} allows at most ${percentText(ceiling)}`,
+      suggestion: lowerSuggestion(exposure.variant, ceiling),
+    };
+  }
+  const records = await judged.approvals();
+  const roles = configuredRoles(context.config);
+  const approvals = wanted.map(({ role, count }) =>
+    countApprovals(records, entry, role, count ?? 1, environment, roles)
+  );
+  const missing = approvals.filter((approval) => approval.found.length < approval.required);
+  if (missing.length === 0) return { ...base, status: 'passed', approvals };
+  const needs = missing
+    .map(
+      ({ role, found, stale, capped }) =>
+        `a ${role} approval up to at least ${percentText(weight)}, found ${found.length}${approvalNotes(stale, capped)}`
+    )
+    .join(', ');
+  const commands = missing.map(
+    ({ role }) =>
+      `prs approve ${entry.id}@${entry.contentHash} --role ${role} --approver @<you> --env ${environment}${maxWeightOption(entry)}`
+  );
   return {
-    policy: policy.name,
-    kind: policy.kind,
-    severity: policy.severity,
-    status: 'unavailable',
-    message: `${exposure.variant} of ${judged.entry.id} runs ${exposure.weight / 100} % in ${context.environment}, but release gates do not judge experiment weights in this version of prs`,
-    suggestion:
-      'This version of prs cannot judge the arm. Keep it at weight 0, narrow the policy with match or environments, or set severity: warning to only warn.',
+    ...base,
+    status: 'failed',
+    message: `${runs}; ${policy.name} needs ${needs}`,
+    suggestion: `Run: ${commands.join('; ')}`,
+    approvals,
   };
 }
 
@@ -396,7 +448,7 @@ interface GateRun {
   policies: readonly PolicyDefinition[];
   evaluation: PolicyContext;
   source: CompiledRelease;
-  /** Roles that `required-approvals` policies ask for */
+  /** Roles that `required-approvals` and `max-experiment-weight` policies ask for */
   roles: readonly string[];
   /**
    * The committed records of every entry of the run, listed and read once per run, with one
@@ -490,8 +542,7 @@ async function judgeEntries(
  * not apply. Policies are parsed fresh, and a parse error fails the gates. Static kinds
  * judge the bundle that ships; policy risk and selection take the higher risk and the
  * union of domains and data classes of the bundle and the fresh source build. Approvals
- * are the records committed at HEAD. `required-evals` is `unavailable`, never a pass, and
- * so is `max-experiment-weight` for an arm with traffic.
+ * are the records committed at HEAD. `required-evals` is `unavailable`, never a pass.
  *
  * Without a prompt policy the gates pass without building the source.
  */
@@ -534,7 +585,9 @@ export async function checkPromotionGates(
   const roles = [
     ...new Set(
       policies.flatMap((policy) =>
-        policy.kind === 'required-approvals' ? policy.approvals.map(({ role }) => role) : []
+        policy.kind === 'required-approvals' || policy.kind === 'max-experiment-weight'
+          ? (policy.approvals ?? []).map(({ role }) => role)
+          : []
       )
     ),
   ];

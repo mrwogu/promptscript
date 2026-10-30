@@ -517,7 +517,7 @@ ${policy}`;
     return { root, control, warm, cold };
   }
 
-  it('reports an arm with traffic as unavailable at severity error, control and weight 0 skipped', async () => {
+  it('fails an arm above the cap at severity error, control and weight 0 skipped', async () => {
     const { root, control, warm } = await experimentProject(
       exposureConfig(exposurePolicy('error'))
     );
@@ -534,17 +534,31 @@ ${policy}`;
       expect.objectContaining({
         kind: 'max-experiment-weight',
         severity: 'error',
-        status: 'unavailable',
-        message: `warm of ${ID} runs 10 % in prod, but release gates do not judge experiment weights in this version of prs`,
+        status: 'failed',
+        message: `warm of ${ID}@${warm.slice(0, 19)} runs 10 % in prod; high-risk-exposure needs a legal approval up to at least 10 %, found 0`,
       }),
     ]);
     // The hand-made arm is not in staging, so status also warns about the order.
     expect(report.warnings.filter((warning) => warning.code === 'PS030')).toEqual([
       expect.objectContaining({
         code: 'PS030',
-        message: expect.stringContaining(`[high-risk-exposure] warm of ${ID} runs 10 % in prod`),
+        message: expect.stringContaining(`[high-risk-exposure] warm of ${ID}@`),
       }),
     ]);
+  });
+
+  it('passes the arm once a committed record covers its weight', async () => {
+    const { root, warm } = await experimentProject(exposureConfig(exposurePolicy('error')));
+    await approve(root, warm, 'prod', { maxWeight: '10' });
+    commit(root, 'approval up to 10');
+
+    const report = await json(() => releaseStatusCommand({ cwd: root, format: 'json' }));
+
+    expect(report.gates?.find((gate) => gate.contentHash === warm)).toMatchObject({
+      passed: true,
+      checks: [{ kind: 'max-experiment-weight', status: 'passed' }],
+    });
+    expect(report.warnings.flatMap((warning) => warning.code ?? [])).toEqual([]);
   });
 
   it('lets the arm pass with a warning at severity warning', async () => {
@@ -555,7 +569,7 @@ ${policy}`;
     expect(report.success).toBe(true);
     expect(report.gates?.find((gate) => gate.contentHash === warm)).toMatchObject({
       passed: true,
-      checks: [{ kind: 'max-experiment-weight', status: 'unavailable' }],
+      checks: [{ kind: 'max-experiment-weight', status: 'failed' }],
     });
     expect(report.warnings.flatMap((warning) => warning.code ?? [])).toEqual(['PS030']);
     expect(report.warnings.map((warning) => warning.message)).toEqual(
