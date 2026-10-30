@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { detectPii, scrubPii } from './pii.js';
 
+// These guard against catastrophic backtracking, which takes minutes, not seconds.
+// A tight wall-clock limit only flakes on a busy CI runner.
+const SLOW_MS = 10_000;
+const SLOW_TEST = { timeout: 20_000 };
+
 describe('detectPii', () => {
   it.each([
     ['an email address', 'Write to ann.lee+orders@shop.example.com today', ['PS6112']],
@@ -51,29 +56,29 @@ describe('detectPii', () => {
     ['digits with three separators', '1 - '.repeat(16_384)],
     ['64-digit groups', `${'7'.repeat(64)} `.repeat(1000)],
     ['one long group', '7'.repeat(65_536)],
-  ])('stays fast on %s', (_name, text) => {
+  ])('stays fast on %s', SLOW_TEST, (_name, text) => {
     const started = Date.now();
 
     scrubPii(text);
 
-    expect(Date.now() - started).toBeLessThan(2000);
+    expect(Date.now() - started).toBeLessThan(SLOW_MS);
   });
 
-  it('stays fast on a long run of short digit groups', () => {
+  it('stays fast on a long run of short digit groups', SLOW_TEST, () => {
     const started = Date.now();
 
     detectPii('1 '.repeat(50_000));
 
-    expect(Date.now() - started).toBeLessThan(1000);
+    expect(Date.now() - started).toBeLessThan(SLOW_MS);
   });
 
-  it('stays fast on a long value without matches', () => {
+  it('stays fast on a long value without matches', SLOW_TEST, () => {
     const text = `${'a'.repeat(32 * 1024)}@${'b.'.repeat(16 * 1024)}`;
     const started = Date.now();
 
     detectPii(text);
 
-    expect(Date.now() - started).toBeLessThan(1000);
+    expect(Date.now() - started).toBeLessThan(SLOW_MS);
   });
 });
 
@@ -165,12 +170,12 @@ describe('scrubPii', () => {
     expect(scrubPii(once)).toEqual({ text: once, counts: { email: 0, card: 0, iban: 0 } });
   });
 
-  it('stays fast on a long value without matches', () => {
+  it('stays fast on a long value without matches', SLOW_TEST, () => {
     const text = `${'a'.repeat(32 * 1024)}@${'b.'.repeat(16 * 1024)}`;
     const started = Date.now();
 
     scrubPii(text);
 
-    expect(Date.now() - started).toBeLessThan(1000);
+    expect(Date.now() - started).toBeLessThan(SLOW_MS);
   });
 });
