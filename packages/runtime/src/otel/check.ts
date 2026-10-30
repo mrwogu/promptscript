@@ -1,5 +1,4 @@
 import { UNSAFE_KEY } from '../client.js';
-import { isObject } from '../load.js';
 
 type Json = Record<string, unknown>;
 
@@ -27,4 +26,4 @@ export const promptId = (value: unknown): value is string =>
 export const own = (object: Json, key: string): unknown =>
   Object.hasOwn(object, key) ? object[key] : undefined;
 
-export { isObject };
+export { isObject } from '../load.js';

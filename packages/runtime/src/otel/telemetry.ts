@@ -21,7 +21,7 @@ import type {
   PromptTelemetryOptions,
 } from './types.js';
 
-const OPERATIONS: readonly unknown[] = ['chat', 'text_completion', 'generate_content'];
+const OPERATIONS: ReadonlySet<unknown> = new Set(['chat', 'text_completion', 'generate_content']);
 const DEFAULT_TRACER = '@promptscript/runtime';
 
 // What the app gets when no span could start, and what a no-op API hands out
@@ -51,7 +51,7 @@ const OPTION_CHECKS: readonly (readonly [
   (value: unknown) => boolean,
 ])[] = [
   ['tracerName', (value) => text(value, 128)],
-  ['operation', (value) => OPERATIONS.includes(value)],
+  ['operation', (value) => OPERATIONS.has(value)],
   ['provider', (value) => matches(value, NAME)],
   ['pricing', (value) => isObject(value) && typeof value['find'] === 'function'],
   ['genAi', (value) => typeof value === 'boolean'],

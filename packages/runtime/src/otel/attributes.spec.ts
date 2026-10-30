@@ -203,7 +203,7 @@ describe('resultAttributes', () => {
   });
 
   it('drops a response id with a bidi override', () => {
-    expect(resultAttributes({ responseId: 'a‮b' }, rendered, SETTINGS)).toEqual({});
+    expect(resultAttributes({ responseId: 'a\u202Eb' }, rendered, SETTINGS)).toEqual({});
   });
 
   it('keeps the first eight finish reasons and skips values that are not strings', () => {
