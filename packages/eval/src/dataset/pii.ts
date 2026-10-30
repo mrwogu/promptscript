@@ -4,9 +4,9 @@ import { EVAL_CODES, type EvalCode } from '../errors.js';
 const EMAIL_LOCAL_CHAR = /[\p{L}\p{M}\p{N}_.%+-]/u;
 const EMAIL_DOMAIN = /^(?:[\p{L}\p{M}\p{N}-]+\.)+[\p{L}\p{M}]{2,}/u;
 // Up to three of these between two digits still read as one number
-const CARD_SEPARATORS = '[ \\-\u2013\u2014_/,]';
+const CARD_SEPARATORS = String.raw`[ \-\u2013\u2014_/,]`;
 // A run of digits with separators between them, whatever stands next to it
-const DIGIT_RUN = new RegExp(`(?<!\\d)\\d(?:${CARD_SEPARATORS}{0,3}\\d)*(?!\\d)`, 'g');
+const DIGIT_RUN = new RegExp(String.raw`(?<!\d)\d(?:${CARD_SEPARATORS}{0,3}\d)*(?!\d)`, 'g');
 const CARD_SEPARATOR_RUN = new RegExp(`${CARD_SEPARATORS}+`);
 // A group longer than this is an id, not a card with something glued to it, and is not slid over
 const MAX_SLID_GROUP = 64;

@@ -468,9 +468,9 @@ describe('prs eval import', () => {
     const root = await project();
     const file = await outside([line('x')]);
 
-    const result = await run(root, file, { out: 'a\nPS0000 fake‮.csv' });
+    const result = await run(root, file, { out: 'a\nPS0000 fake\u202e.csv' });
 
-    expect(result.stderr).not.toMatch(/‮/);
+    expect(result.stderr).not.toMatch(/\u202e/);
     expect(result.stderr.split('\n').filter((entry) => entry.startsWith('PS0000'))).toEqual([]);
   });
 });
