@@ -370,7 +370,7 @@ function upstreamArmWarnings(checked: readonly EnvironmentCheck[]): ReleaseDiagn
     const upstream = checked[index - 1];
     // An upstream label that does not read is reported for that environment; its entries are
     // unknown, so no arm can be judged against them.
-    if (upstream === undefined || !upstream.readable) return [];
+    if (!upstream?.readable) return [];
     return environment.entries.flatMap((entry) =>
       armLimitWarnings(
         entry,
