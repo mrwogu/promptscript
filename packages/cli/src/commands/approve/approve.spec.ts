@@ -207,6 +207,81 @@ describe('prs approve', () => {
     expect(stderr).toContain('Its pull request needs a review from @acme/legal.');
   });
 
+  it('writes a ceiling in basis points and says what it counts for', async () => {
+    const root = await project();
+    const hash = await builtHash(root);
+
+    const { report, stderr } = await run(`${ID}@${hash}`, approval(root, { maxWeight: '25' }));
+
+    const path = `.promptscript/approvals/legal/${ID}/${hash}.jane.json`;
+    const bytes = await readFile(join(root, path));
+    expect(report.success).toBe(true);
+    expect(report.record?.maxWeight).toBe(2500);
+    expect(parseApprovalRecord(bytes)).toEqual(report.record);
+    expect(bytes.toString('utf-8')).toBe(
+      serializeApprovalRecord(report.record as ApprovalRecordV1)
+    );
+    expect(stderr).toContain(`Approving ${ID}@${hash} as legal for prod up to 25 %\n`);
+  });
+
+  it('prints what a capped approval counts for', async () => {
+    const root = await project();
+    const hash = await storedBundle(root, ID, 'Stored');
+
+    const { stdout } = await runText(`${ID}@${hash}`, approval(root, { maxWeight: '2.5' }));
+
+    expect(stdout).toContain(
+      'It counts only for experiment arms at up to 2.5 % in prod, never for the entry hash or a promote.'
+    );
+  });
+
+  it.each([
+    ['0.01', 1],
+    ['100', 10000],
+    ['0.5', 50],
+  ])('writes --max-weight %s as %i basis points', async (percent, points) => {
+    const root = await project();
+    const hash = await storedBundle(root, ID, 'Stored');
+
+    const { report } = await run(`${ID}@${hash}`, approval(root, { maxWeight: percent }));
+
+    expect(report.record?.maxWeight).toBe(points);
+  });
+
+  it.each([
+    ['without --env', { env: undefined }],
+    ['with --all-environments', { env: undefined, allEnvironments: true }],
+    ['with --env and --all-environments', { allEnvironments: true }],
+  ])('refuses --max-weight %s with PS5110 and writes nothing', async (_name, extra) => {
+    const root = await project();
+    const hash = await storedBundle(root, ID, 'Stored');
+
+    const { report, stderr } = await run(
+      `${ID}@${hash}`,
+      approval(root, { maxWeight: '5', ...extra })
+    );
+
+    expect(codes(report)).toEqual(['PS5110']);
+    expect(report.errors[0]?.message).toContain('--max-weight needs --env');
+    expect(process.exitCode).toBe(1);
+    expect(stderr).not.toContain('Compiling');
+    expect(existsSync(join(root, '.promptscript/approvals'))).toBe(false);
+  });
+
+  it.each(['0', '0.00', '100.01', '101', '2.555', '5%', '1e1', ' 5', '-1', 'abc', ''])(
+    'refuses --max-weight "%s" with PS5110',
+    async (value) => {
+      const root = await project();
+      const hash = await storedBundle(root, ID, 'Stored');
+
+      const { report } = await run(`${ID}@${hash}`, approval(root, { maxWeight: value }));
+
+      expect(codes(report)).toEqual(['PS5110']);
+      expect(report.errors[0]?.message).toContain('a percent from 0.01 to 100');
+      expect(existsSync(join(root, '.promptscript/approvals'))).toBe(false);
+    }
+  );
+
   it('approves a stored release bundle without compiling, for every environment', async () => {
     const root = await project();
     const hash = await storedBundle(root, ID, 'Old wording');
@@ -268,9 +343,33 @@ describe('prs approve', () => {
 
     expect(codes(second.report)).toEqual(['PS5105']);
     expect(second.report.errors[0]?.location?.file).toBe(first.report.path);
-    expect(second.report.errors[0]?.message).toContain('Delete it in a commit to withdraw it');
+    expect(second.report.errors[0]?.message).toContain('To withdraw it, delete it in a commit');
     expect(process.exitCode).toBe(2);
     expect(await readFile(join(root, first.report.path ?? ''), 'utf-8')).toBe(before);
+  });
+
+  it('tells to delete a lower capped record in the same change before a higher one', async () => {
+    const root = await project();
+    const hash = await storedBundle(root, ID, 'Stored');
+    await run(`${ID}@${hash}`, approval(root, { maxWeight: '5' }));
+
+    const raised = await run(`${ID}@${hash}`, approval(root, { maxWeight: '25' }));
+
+    expect(codes(raised.report)).toEqual(['PS5105']);
+    expect(raised.report.errors[0]?.message).toContain(
+      'delete the file in the same change and approve again'
+    );
+    expect(raised.report.errors[0]?.message).toContain('ceiling');
+  });
+
+  it('cuts a long --max-weight value in the message', async () => {
+    const root = await project();
+    const hash = await storedBundle(root, ID, 'Stored');
+
+    const { report } = await run(`${ID}@${hash}`, approval(root, { maxWeight: 'x'.repeat(200) }));
+
+    expect(codes(report)).toEqual(['PS5110']);
+    expect(report.errors[0]?.message).toContain(`"${'x'.repeat(80)}..."`);
   });
 
   it('counts one file per approver, so a second approver writes a second record', async () => {
@@ -869,6 +968,37 @@ describe('prs approve --list', () => {
     expect(stdout).toContain('no approvals');
   });
 
+  it('shows the ceiling of a capped record in the scope', async () => {
+    const root = await project();
+    const hash = await builtHash(root);
+    await record(root, { contentHash: hash, environment: 'prod', maxWeight: 2500 });
+    await record(root, {
+      contentHash: hash,
+      approver: as('@bob'),
+      environment: 'staging',
+      maxWeight: 100,
+    });
+    git(root, 'add', '-A');
+
+    const { report } = await run(ID, { cwd: root, list: true });
+    const { stdout } = await runText(ID, { cwd: root, list: true });
+
+    const entries = report.prompts?.find((prompt) => prompt.id === ID)?.records ?? [];
+    expect(
+      entries.map((entry) => entry.record.maxWeight).sort((a, b) => (a ?? 0) - (b ?? 0))
+    ).toEqual([100, 2500]);
+    expect(stdout).toContain(`current  legal  @jane  prod up to 25 %  ${hash.slice(0, 19)}`);
+    expect(stdout).toContain(`current  legal  @bob  staging up to 1 %  ${hash.slice(0, 19)}`);
+  });
+
+  it('refuses --max-weight with --list', async () => {
+    const root = await project();
+
+    const { report } = await run(undefined, { cwd: root, list: true, maxWeight: '5' });
+
+    expect(report.errors[0]?.message).toContain('--max-weight');
+  });
+
   it('refuses approve options and a bad prompt id', async () => {
     const root = await project();
 
@@ -892,6 +1022,7 @@ describe('prs approve definition', () => {
       '--approver',
       '--env',
       '--all-environments',
+      '--max-weight',
       '--comment',
       '--list',
       '--format',

@@ -20,10 +20,12 @@ import {
   PS5104_APPROVER_IDENTITY,
   PS5105_APPROVAL_EXISTS,
   PS5109_APPROVAL_INVALID,
+  PS5110_APPROVAL_CEILING,
 } from '../../utils/governance-error.js';
 import { checkGovernanceConfig } from '../../utils/governance-config.js';
 import type { ProjectPathOptions } from '../../utils/project-config.js';
 import type { ReleaseDiagnostic } from '../../utils/release-report.js';
+import { parsePercent, percentText, shortened } from '../release/experiment.js';
 import { stripControlCharacters } from '../release/git.js';
 import {
   CONTENT_HASH_RE,
@@ -77,6 +79,8 @@ export interface ApproveOptions extends ProjectPathOptions {
   approver?: string;
   env?: string;
   allEnvironments?: boolean;
+  /** Percent text, such as `5` or `2.5`; needs `env` */
+  maxWeight?: string;
   comment?: string;
   list?: boolean;
   /** `text` (default) or `json` */
@@ -242,6 +246,26 @@ function approvalScope(project: ReleaseProject, options: ApproveOptions): string
   return options.env;
 }
 
+/** The ceiling in basis points, or undefined without --max-weight; PS5110 when it is not usable. */
+function checkCeiling(project: ReleaseProject, options: ApproveOptions): number | undefined {
+  const { maxWeight } = options;
+  if (maxWeight === undefined) return undefined;
+  if (options.allEnvironments === true || options.env === undefined) {
+    throw new GovernanceError(
+      PS5110_APPROVAL_CEILING,
+      `--max-weight needs --env <environment> and no --all-environments: a capped approval counts in one environment only. Configured: ${project.environments.join(', ')}.`
+    );
+  }
+  const points = parsePercent(maxWeight);
+  if (points === undefined || points < 1) {
+    throw new GovernanceError(
+      PS5110_APPROVAL_CEILING,
+      `--max-weight takes a percent from 0.01 to 100 with at most two decimals, such as 5 or 2.5; got "${shortened(stripControlCharacters(maxWeight))}".`
+    );
+  }
+  return points;
+}
+
 function checkComment(comment: string | undefined): string | undefined {
   if (comment !== undefined && !COMMENT_RE.test(comment)) {
     throw new Error(
@@ -327,6 +351,14 @@ function visible(text: string): string {
   return stripControlCharacters(marked);
 }
 
+/** The scope of a record: its environment, with the ceiling when it has one. */
+function scopeText(record: ApprovalRecordV1, none = 'every environment'): string {
+  const environment = record.environment ?? none;
+  return record.maxWeight === undefined
+    ? environment
+    : `${environment} up to ${percentText(record.maxWeight)}`;
+}
+
 function shownJson(value: unknown, none: string): string {
   const text = JSON.stringify(value);
   return text === undefined || text === '{}' ? none : visible(text);
@@ -342,7 +374,7 @@ function indented(text: string): string[] {
  */
 function showBundle(bundle: PromptBundleV1, record: ApprovalRecordV1): void {
   const lines = [
-    `Approving ${record.prompt}@${record.contentHash} as ${record.role} for ${record.environment ?? 'every environment'}`,
+    `Approving ${record.prompt}@${record.contentHash} as ${record.role} for ${scopeText(record)}`,
     `  Description: ${visible(String(bundle.description))}`,
     `  Governance: ${shownJson(bundle.governance, 'none')}`,
     `  Model: ${shownJson(bundle.model, 'none, the application picks it')}`,
@@ -364,6 +396,7 @@ async function approve(
   const project = await loadReleaseProject(options);
   const { role, owners } = checkRole(project, options.role);
   const { id, contentHash } = parseApprovalReference(reference);
+  const maxWeight = checkCeiling(project, options);
   const environment = approvalScope(project, options);
   const comment = checkComment(options.comment);
   const approver = checkApprover(options.approver);
@@ -378,6 +411,7 @@ async function approve(
     createdAt: new Date().toISOString(),
     ...(environment === undefined ? {} : { environment }),
     ...(comment === undefined ? {} : { comment }),
+    ...(maxWeight === undefined ? {} : { maxWeight }),
   };
   showBundle(bundle, record);
 
@@ -385,6 +419,11 @@ async function approve(
     const { path, warning } = writeApprovalRecord(project.root, record);
     if (warning !== undefined) warnings.push(warning);
     output.success(`Wrote ${path}`);
+    if (maxWeight !== undefined) {
+      output.info(
+        `It counts only for experiment arms at up to ${percentText(maxWeight)} in ${environment}, never for the entry hash or a promote.`
+      );
+    }
     output.info(`Commit the file. Its pull request needs a review from ${owners.join(' or ')}.`);
     return Promise.resolve({ record, path, warnings });
   });
@@ -466,7 +505,7 @@ function printList(prompts: ApprovalPromptStatus[]): void {
     if (prompt.records.length === 0) ConsoleOutput.muted('  no approvals');
     for (const entry of prompt.records) {
       const { record } = entry;
-      const scope = record.environment ?? 'all environments';
+      const scope = scopeText(record, 'all environments');
       const where =
         entry.state === 'misplaced' || entry.state === 'untracked'
           ? `  ${stripControlCharacters(entry.path)}`
@@ -573,11 +612,12 @@ function checkListOptions(options: ApproveOptions): void {
     options.approver,
     options.env,
     options.allEnvironments,
+    options.maxWeight,
     options.comment,
   ];
   if (approveOnly.some((value) => value !== undefined)) {
     throw new Error(
-      '--list takes only an optional prompt id. Drop --role, --approver, --env, --all-environments and --comment.'
+      '--list takes only an optional prompt id. Drop --role, --approver, --env, --all-environments, --max-weight and --comment.'
     );
   }
 }

@@ -50,13 +50,18 @@ function splitError(message: string): ReleaseError {
   return new ReleaseError(PS5009_INVALID_SPLIT, message);
 }
 
+/** A percent as written, up to two decimals, in basis points, or undefined when it is not one. */
+export function parsePercent(text: string): number | undefined {
+  return PERCENT_RE.test(text) ? percentToBasisPoints(Number(text)) : undefined;
+}
+
 /** A weight as the text of its percent, `10 %` or `0.5 %`. */
 export function percentText(weight: number): string {
   return `${weight / 100} %`;
 }
 
 /** A value echoed in a message, cut at 80 characters. */
-function shortened(text: string): string {
+export function shortened(text: string): string {
   return text.length > 80 ? `${text.slice(0, 80)}...` : text;
 }
 
@@ -80,7 +85,7 @@ export function parseArmOption(value: string): ArmRequest {
     );
   }
   const percent = value.slice(equals + 1);
-  const weight = PERCENT_RE.test(percent) ? percentToBasisPoints(Number(percent)) : undefined;
+  const weight = parsePercent(percent);
   if (weight === undefined) {
     throw splitError(
       `The percent in --arm ${shown} is not a number from 0 to 100 with at most two decimals. Write it as 10 or 0.5.`
