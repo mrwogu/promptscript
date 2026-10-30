@@ -42,12 +42,26 @@ export const EVAL_CODES = {
   NO_SCHEMA: 'PS6205',
   /** A model reference does not resolve, is retired or deprecated */
   MODEL_REF: 'PS6206',
+  /** A judge rubric is the prompt under test, or its inputs do not fit the judge call */
+  RUBRIC_INVALID: 'PS6207',
+  /** A judge rubric output is not exactly a `verdict` of pass or fail and a `reason` */
+  RUBRIC_OUTPUT: 'PS6208',
+  /** No judge model on the assertion, the suite or the rubric */
+  JUDGE_MODEL_MISSING: 'PS6209',
   /** A regex assertion repeats a group that holds a quantifier */
   REGEX_RISK: 'PS6210',
+  /** A label names an assertion that is not an llm-judge assertion of the suite */
+  LABEL_ASSERTION: 'PS6211',
+  /** A judge rubric system message holds the response, the case inputs or the expected value */
+  RUBRIC_SLOT_IN_SYSTEM: 'PS6212',
   /** A dataset allow entry without a deterministic assertion */
   ALLOW_WITHOUT_ASSERTION: 'PS6213',
   /** An assertion could not run on a case */
   ASSERTION_ERROR: 'PS6214',
+  /** The judge runs on a model under test */
+  JUDGE_SAME_MODEL: 'PS6215',
+  /** A judge rubric message holds the response without a boundary fence */
+  RUBRIC_UNFENCED: 'PS6216',
   /** A provider call failed */
   PROVIDER_FAILED: 'PS6300',
   /** A model's provider has no entry in `eval.providers` and no built-in default */
@@ -94,6 +108,14 @@ export const EVAL_CODES = {
   PRICE_LOWERED: 'PS6505',
   /** The suite has an llm-judge assertion, which this version cannot run */
   JUDGE_UNSUPPORTED: 'PS6600',
+  /** More than half of the judge runs of a case gave no valid verdict */
+  JUDGE_UNPARSABLE: 'PS6601',
+  /** The judged text is over 64 KiB */
+  JUDGE_TARGET_TOO_LONG: 'PS6602',
+  /** A label file cannot be read, is too big, or holds a bad or duplicate row */
+  LABELS_INVALID: 'PS6603',
+  /** Labels name rows the run did not read */
+  LABELS_UNMATCHED: 'PS6604',
   /** A report file cannot be read or is not an eval report of this version */
   REPORT_INVALID: 'PS6701',
   /** A report directory or file cannot be written */
