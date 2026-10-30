@@ -381,44 +381,50 @@ describe('assignment edge cases', () => {
         expect(errors.length).toBeGreaterThan(0);
       });
 
-      it('keeps serving the previous arm while the label stays unchanged', async () => {
-        if (mode === 'closed') return;
-        const { prompts, errors } = await setup();
+      it.skipIf(mode === 'closed')(
+        'keeps serving the previous arm while the label stays unchanged',
+        async () => {
+          const { prompts, errors } = await setup();
 
-        const served = [];
-        for (let i = 0; i < 4; i++) {
-          await flush();
-          served.push(await prompts.get(ID, { key: 'k8197' }));
-          vi.setSystemTime(Date.now() + 61_000);
+          const served = [];
+          for (let i = 0; i < 4; i++) {
+            await flush();
+            served.push(await prompts.get(ID, { key: 'k8197' }));
+            vi.setSystemTime(Date.now() + 61_000);
+          }
+
+          expect(served.slice(1).map((prompt) => [prompt.meta.variant, prompt.meta.stale])).toEqual(
+            [
+              ['control', true],
+              ['control', true],
+              ['control', true],
+            ]
+          );
+          expect(errors.length).toBeGreaterThanOrEqual(3);
         }
+      );
 
-        expect(served.slice(1).map((prompt) => [prompt.meta.variant, prompt.meta.stale])).toEqual([
-          ['control', true],
-          ['control', true],
-          ['control', true],
-        ]);
-        expect(errors.length).toBeGreaterThanOrEqual(3);
-      });
+      // Known limit: only the entries before the last change are remembered
+      it.skipIf(mode === 'closed')(
+        'throws after a second label change with the arm still unreadable',
+        async () => {
+          const { source, prompts } = await setup();
+          await flush();
+          await prompts.get(ID, { key: 'k8197' });
+          await flush();
+          const label = JSON.parse(source.files.get('prod.json')!) as {
+            prompts: { experiment: { arms: { weight: number }[] } }[];
+          };
+          label.prompts[0]!.experiment.arms[0]!.weight = 2;
+          label.prompts[0]!.experiment.arms[1]!.weight = 9998;
+          source.files.set('prod.json', JSON.stringify(label));
+          vi.setSystemTime(Date.now() + 61_000);
 
-      it('throws after a second label change with the arm still unreadable', async () => {
-        // Known limit: only the entries before the last change are remembered
-        if (mode === 'closed') return;
-        const { source, prompts } = await setup();
-        await flush();
-        await prompts.get(ID, { key: 'k8197' });
-        await flush();
-        const label = JSON.parse(source.files.get('prod.json')!) as {
-          prompts: { experiment: { arms: { weight: number }[] } }[];
-        };
-        label.prompts[0]!.experiment.arms[0]!.weight = 2;
-        label.prompts[0]!.experiment.arms[1]!.weight = 9998;
-        source.files.set('prod.json', JSON.stringify(label));
-        vi.setSystemTime(Date.now() + 61_000);
-
-        await expect(prompts.get(ID, { key: 'k8197' })).rejects.toMatchObject({
-          code: 'source-error',
-        });
-      });
+          await expect(prompts.get(ID, { key: 'k8197' })).rejects.toMatchObject({
+            code: 'source-error',
+          });
+        }
+      );
 
       it('moves to the new arm once its bundle is readable', async () => {
         const { source, prompts, warm, warmPath } = await setup();

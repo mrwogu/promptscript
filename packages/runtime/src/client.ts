@@ -106,37 +106,55 @@ function hasOnlyKeys(value: Record<string, unknown>, keys: string[]): boolean {
   return Object.keys(value).every((name) => keys.includes(name));
 }
 
+interface SeenArms {
+  readonly variants: Set<string>;
+  readonly hashes: Set<string>;
+}
+
+function isArmWeight(weight: unknown, control: boolean): weight is number {
+  return (
+    typeof weight === 'number' &&
+    Number.isInteger(weight) &&
+    weight >= (control ? 1 : 0) &&
+    weight <= TOTAL_WEIGHT
+  );
+}
+
+/** One arm, or undefined when it breaks a rule. `seen` holds the names and hashes before it. */
+function parseArm(
+  arm: unknown,
+  control: boolean,
+  entryHash: string,
+  seen: SeenArms
+): Arm | undefined {
+  if (!isObject(arm) || !hasOnlyKeys(arm, ['variant', 'contentHash', 'weight'])) return undefined;
+  const { variant, contentHash: hash, weight } = arm;
+  const named =
+    typeof variant === 'string' &&
+    (control ? variant === 'control' : variant !== 'control' && VARIANT_NAME.test(variant));
+  if (!named || !isArmWeight(weight, control)) return undefined;
+  if (typeof hash !== 'string' || !HASH_PATTERN.test(hash)) return undefined;
+  if (seen.variants.has(variant) || seen.hashes.has(hash)) return undefined;
+  if (control && hash !== entryHash) return undefined;
+  seen.variants.add(variant);
+  seen.hashes.add(hash);
+  return { variant, hash, weight };
+}
+
 /** The experiment of a v2 entry, or undefined when it breaks a rule of the label. */
 function parseExperiment(value: unknown, entryHash: string): Experiment | undefined {
   if (!isObject(value) || !hasOnlyKeys(value, ['name', 'arms'])) return undefined;
   const { name, arms } = value;
   if (typeof name !== 'string' || !EXPERIMENT_NAME.test(name)) return undefined;
   if (!Array.isArray(arms) || arms.length < 2 || arms.length > 4) return undefined;
-  const variants = new Set<string>();
-  const hashes = new Set<string>();
+  const seen: SeenArms = { variants: new Set(), hashes: new Set() };
   const read: Arm[] = [];
-  let total = 0;
   for (const arm of arms as unknown[]) {
-    if (!isObject(arm) || !hasOnlyKeys(arm, ['variant', 'contentHash', 'weight'])) return undefined;
-    const { variant, contentHash: hash, weight } = arm;
-    const control = read.length === 0;
-    const named =
-      typeof variant === 'string' &&
-      (control ? variant === 'control' : variant !== 'control' && VARIANT_NAME.test(variant));
-    const heavy =
-      typeof weight === 'number' &&
-      Number.isInteger(weight) &&
-      weight >= (control ? 1 : 0) &&
-      weight <= TOTAL_WEIGHT;
-    if (!named || !heavy || typeof hash !== 'string' || !HASH_PATTERN.test(hash)) return undefined;
-    if (variants.has(variant) || hashes.has(hash) || (control && hash !== entryHash)) {
-      return undefined;
-    }
-    variants.add(variant);
-    hashes.add(hash);
-    total += weight;
-    read.push({ variant, hash, weight });
+    const parsed = parseArm(arm, read.length === 0, entryHash, seen);
+    if (!parsed) return undefined;
+    read.push(parsed);
   }
+  const total = read.reduce((sum, arm) => sum + arm.weight, 0);
   return total === TOTAL_WEIGHT ? { name, arms: read } : undefined;
 }
 
@@ -147,7 +165,7 @@ function parseExperiment(value: unknown, entryHash: string): Experiment | undefi
  */
 function assign(experiment: Experiment, id: string, key: string): Arm {
   const text = `promptscript-assign-v1\0${experiment.name}\0${id}\0${key}`;
-  const bucket = parseInt(sha256Hex(text).slice(0, 8), 16) % TOTAL_WEIGHT;
+  const bucket = Number.parseInt(sha256Hex(text).slice(0, 8), 16) % TOTAL_WEIGHT;
   let total = 0;
   for (const arm of experiment.arms) {
     total += arm.weight;
@@ -180,6 +198,44 @@ function unsupportedLabel(
   );
 }
 
+type PointerEntry = { hash: string; file: string; experiment?: Experiment };
+
+function hasHeader(data: Record<string, unknown>, label: string | undefined): boolean {
+  if (label === undefined) {
+    return data['$schema'] === PROMPT_BUNDLE_INDEX_SCHEMA_URL && typeof data['source'] === 'string';
+  }
+  const schema = data['$schema'];
+  return (
+    (schema === LABEL_SCHEMA_URL || schema === LABEL_V2_SCHEMA_URL) && data['environment'] === label
+  );
+}
+
+/** One entry of a label or index, or undefined when it breaks a rule. */
+function parseEntry(
+  entry: unknown,
+  seen: ReadonlyMap<string, PointerEntry>,
+  label: string | undefined,
+  v2: boolean,
+  path: string
+): [string, PointerEntry] | undefined {
+  if (!isObject(entry)) return undefined;
+  const { id, contentHash: hash, file, description } = entry;
+  const listed =
+    label !== undefined || (typeof file === 'string' && typeof description === 'string');
+  if (typeof id !== 'string' || typeof hash !== 'string' || !HASH_PATTERN.test(hash)) {
+    return undefined;
+  }
+  if (seen.has(id) || !listed) return undefined;
+  const filePath = label === undefined ? (file as string) : `bundles/${hash}.json`;
+  assertFilePath(filePath, path);
+  if (!v2) return [id, { hash, file: filePath }];
+  const raw = entry['experiment'];
+  const experiment = raw === undefined ? undefined : parseExperiment(raw, hash);
+  if (!hasOnlyKeys(entry, ['id', 'contentHash', 'experiment'])) return undefined;
+  if (raw !== undefined && !experiment) return undefined;
+  return [id, { hash, file: filePath, ...(experiment && { experiment }) }];
+}
+
 /** Read a label (with `label`) or an index into prompt id, hash and file path. */
 function parsePointer(
   text: string,
@@ -195,39 +251,16 @@ function parsePointer(
     label === undefined ? 'prompt index v1. Compile it again with prs compile' : labelKind;
   const invalid = (): PromptLoadError =>
     new PromptLoadError('invalid-index', `${where} is not a valid ${kind}.`, path);
-  if (!isObject(data) || !Array.isArray(data['prompts'])) throw invalid();
-  const header =
-    label === undefined
-      ? data['$schema'] === PROMPT_BUNDLE_INDEX_SCHEMA_URL && typeof data['source'] === 'string'
-      : (data['$schema'] === LABEL_SCHEMA_URL || data['$schema'] === LABEL_V2_SCHEMA_URL) &&
-        data['environment'] === label;
-  if (!header) throw invalid();
+  if (!isObject(data) || !Array.isArray(data['prompts']) || !hasHeader(data, label)) {
+    throw invalid();
+  }
   const v2 = data['$schema'] === LABEL_V2_SCHEMA_URL;
   if (v2 && !hasOnlyKeys(data, ['$schema', 'environment', 'prompts'])) throw invalid();
-  const entries = new Map<string, { hash: string; file: string; experiment?: Experiment }>();
+  const entries = new Map<string, PointerEntry>();
   for (const entry of data['prompts'] as unknown[]) {
-    if (!isObject(entry)) throw invalid();
-    const { id, contentHash: hash, file, description } = entry;
-    const listed =
-      label !== undefined || (typeof file === 'string' && typeof description === 'string');
-    const valid =
-      typeof id === 'string' &&
-      typeof hash === 'string' &&
-      HASH_PATTERN.test(hash) &&
-      !entries.has(id) &&
-      listed;
-    if (!valid) throw invalid();
-    const filePath = label === undefined ? (file as string) : `bundles/${hash}.json`;
-    assertFilePath(filePath, path);
-    if (!v2) {
-      entries.set(id, { hash, file: filePath });
-      continue;
-    }
-    const experiment =
-      entry['experiment'] === undefined ? undefined : parseExperiment(entry['experiment'], hash);
-    if (!hasOnlyKeys(entry, ['id', 'contentHash', 'experiment'])) throw invalid();
-    if (entry['experiment'] !== undefined && !experiment) throw invalid();
-    entries.set(id, { hash, file: filePath, ...(experiment && { experiment }) });
+    const read = parseEntry(entry, entries, label, v2, path);
+    if (!read) throw invalid();
+    entries.set(read[0], read[1]);
   }
   return entries;
 }
@@ -400,12 +433,7 @@ class CachingPromptClient implements PromptClient {
     if (!entry || (pinned !== undefined && entry.hash !== pinned)) {
       if (current.failure) throw current.failure;
       // A verified pointer without the id is final, whatever the fail mode
-      for (const recordKey of [...this.served.keys()]) {
-        if (recordKey === ref || recordKey.startsWith(`${ref}\0`)) this.served.delete(recordKey);
-      }
-      const what =
-        pinned === undefined ? `${id} is not listed` : `${id}@${pinned} is not the hash listed`;
-      throw new PromptLoadError('not-found', `${what} in ${this.pointerWhere}.`, this.pointerPath);
+      throw this.notListed(ref, id, pinned);
     }
     const { recordKey, experiment, arm } = this.slot(current.entries, ref, id, pinned, key);
     // The experiment ended or lost the arm in this label: the next get assigns again from it
@@ -422,6 +450,16 @@ class CachingPromptClient implements PromptClient {
     };
     remember(this.served, recordKey, record, this.maxPrompts);
     return record;
+  }
+
+  /** Drop every record of the ref, whatever its arm, and build the final not-found error. */
+  private notListed(ref: string, id: string, pinned: string | undefined): PromptLoadError {
+    for (const recordKey of this.served.keys()) {
+      if (recordKey === ref || recordKey.startsWith(`${ref}\0`)) this.served.delete(recordKey);
+    }
+    const what =
+      pinned === undefined ? `${id} is not listed` : `${id}@${pinned} is not the hash listed`;
+    return new PromptLoadError('not-found', `${what} in ${this.pointerWhere}.`, this.pointerPath);
   }
 
   private serve(
