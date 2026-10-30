@@ -43,6 +43,12 @@ export interface ReleasePromoteOptions extends ReleaseCommandOptions {
 /** A full hash or a prefix of at least 8 hex digits, with or without `sha256-`. */
 const HASH_SUFFIX_RE = /^(sha256-)?[0-9a-f]{8,64}$/;
 
+/** The `sha256-` form of a hash or hash prefix, or undefined when it is not one. */
+export function toHashReference(suffix: string): string | undefined {
+  if (!HASH_SUFFIX_RE.test(suffix)) return undefined;
+  return suffix.startsWith('sha256-') ? suffix : `sha256-${suffix}`;
+}
+
 /**
  * Split `<id>[@<hash>]`. A leading `@` belongs to a scoped id; any later `@` must be
  * followed by a hash, so a typo there fails here instead of as an unknown prompt.
@@ -51,15 +57,13 @@ export function parsePromptReference(reference: string): { id: string; hash?: st
   const at = reference.lastIndexOf('@');
   if (at <= 0) return { id: reference };
   const suffix = reference.slice(at + 1);
-  if (!HASH_SUFFIX_RE.test(suffix)) {
+  const hash = toHashReference(suffix);
+  if (hash === undefined) {
     throw new Error(
       `"${suffix}" after @ in ${reference} is not a content hash. Use the full sha256-<64 hex> or at least 8 lowercase hex digits of it.`
     );
   }
-  return {
-    id: reference.slice(0, at),
-    hash: suffix.startsWith('sha256-') ? suffix : `sha256-${suffix}`,
-  };
+  return { id: reference.slice(0, at), hash };
 }
 
 /**
@@ -85,7 +89,11 @@ export function pickCandidate(
  * The full hash a prefix names among the bundle files of one id. A full hash is
  * returned as it is; the bundle check that follows reports a missing file.
  */
-async function resolveHash(paths: ReleasePaths, id: string, wanted: string): Promise<string> {
+export async function resolveHash(
+  paths: ReleasePaths,
+  id: string,
+  wanted: string
+): Promise<string> {
   if (CONTENT_HASH_RE.test(wanted)) return wanted;
   let names: string[] = [];
   try {
@@ -304,7 +312,7 @@ export async function releasePromoteCommand(
       if (running !== undefined) {
         throw new ReleaseError(
           PS5010_PROMOTE_ON_EXPERIMENT,
-          `${id} in ${environment} has a running experiment ${running.name}. Remove the experiment from ${paths.relative(labelPath)} first, then promote again.`,
+          `${id} in ${environment} runs the experiment ${running.name}. End it with prs release split ${id} --env ${environment} --end [--keep <variant>], then promote again.`,
           labelPath
         );
       }

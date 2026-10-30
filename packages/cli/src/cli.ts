@@ -400,7 +400,7 @@ registerRegistryCommands(registry);
 
 const release = program
   .command('release')
-  .description('Build, promote and roll back prompt releases');
+  .description('Build, promote, split and roll back prompt releases');
 registerReleaseCommands(release);
 
 const evalCommand = program.command('eval').description('Run, compare and import prompt evals');

@@ -12,7 +12,7 @@ import {
   type PromptReleaseLabel,
   type PromptReleaseLabelEntryV2,
 } from '@promptscript/core';
-import type { ReleaseChange, ReleaseChangeAction } from '../../utils/release-report.js';
+import type { ReleaseChangeAction } from '../../utils/release-report.js';
 import { writeFileAtomic } from '../../utils/write-file-atomic.js';
 import {
   PS5003_BUNDLE_MISSING,
@@ -95,35 +95,6 @@ export function shortHash(contentHash: string): string {
 export function fileAction(existing: string | undefined, next: string): ReleaseChangeAction {
   if (existing === undefined) return 'created';
   return existing === next ? 'unchanged' : 'updated';
-}
-
-/**
- * The entries of a label that differ between two versions, by prompt id, with the hash
- * before and after. An entry only before is removed, one only after is created.
- */
-export function labelChanges(
-  path: string,
-  before: ReadonlyMap<string, string>,
-  after: ReadonlyMap<string, string>
-): ReleaseChange[] {
-  const ids = [...new Set([...before.keys(), ...after.keys()])].sort(compareCodeUnits);
-  return ids.flatMap((id): ReleaseChange[] => {
-    const contentHash = after.get(id);
-    const previousContentHash = before.get(id);
-    if (contentHash === previousContentHash) return [];
-    let action: ReleaseChangeAction = 'updated';
-    if (previousContentHash === undefined) action = 'created';
-    if (contentHash === undefined) action = 'removed';
-    return [
-      {
-        path,
-        action,
-        id,
-        ...(contentHash === undefined ? {} : { contentHash }),
-        ...(previousContentHash === undefined ? {} : { previousContentHash }),
-      },
-    ];
-  });
 }
 
 /** Serialize a release file the way the bundle target writes its files. */
@@ -315,13 +286,16 @@ function parseJson(text: string, path: string, what: string): unknown {
   }
 }
 
-const EXPERIMENT_NAME_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
-const VARIANT_NAME_RE = /^[a-z][a-z0-9-]{0,31}$/;
+/** Experiment names, as the label schema allows them. */
+export const EXPERIMENT_NAME_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
+/** Arm names; `control` is the first arm and no other arm may use it. */
+export const VARIANT_NAME_RE = /^[a-z][a-z0-9-]{0,31}$/;
 const LABEL_KEYS = ['$schema', 'environment', 'prompts'];
 const ENTRY_KEYS = ['id', 'contentHash', 'experiment'];
 const EXPERIMENT_KEYS = ['name', 'arms'];
 const ARM_KEYS = ['variant', 'contentHash', 'weight'];
-const TOTAL_WEIGHT = 10000;
+/** The weights of one experiment add up to this many basis points. */
+export const TOTAL_WEIGHT = 10000;
 const LABEL_SCHEMA_PREFIX = 'https://getpromptscript.dev/schema/prompt-release-label/';
 
 function hasOnlyKeys(value: Record<string, unknown>, keys: string[]): boolean {
@@ -490,19 +464,6 @@ export function experimentsOf(label: PromptReleaseLabel | undefined): Map<string
     }
   }
   return found;
-}
-
-/**
- * Ids whose experiment the after label adds or changes, sorted. An experiment the after
- * label drops is not listed: removing one only cuts exposure.
- */
-export function addedOrChangedExperiments(
-  before: PromptReleaseLabel | undefined,
-  after: PromptReleaseLabel | undefined
-): string[] {
-  const left = experimentsOf(before);
-  const right = experimentsOf(after);
-  return [...right.keys()].filter((id) => left.get(id) !== right.get(id)).sort(compareCodeUnits);
 }
 
 /** Ids whose experiment the before label has and the after label drops, sorted. */
