@@ -15,6 +15,7 @@ import {
   resolveProjectPath,
   type EvalCode,
 } from '@promptscript/eval';
+import { ReleaseError } from '../release/errors.js';
 import { writeFileAtomic } from '../../utils/write-file-atomic.js';
 
 /** Exit code of a run that was interrupted. */
@@ -25,9 +26,11 @@ export function reportError(code: EvalCode, message: string): EvalReportErrorV1 
   return { code, message };
 }
 
-/** The error of a thrown value: its eval code when it has one, else `fallback`. */
+/** The error of a thrown value: its eval or release code when it has one, else `fallback`. */
 export function errorOf(error: unknown, fallback: EvalCode): EvalReportErrorV1 {
   if (error instanceof EvalError) return reportError(error.code as EvalCode, error.message);
+  // A release file problem keeps its PS50xx code, so the fix in the releases guide applies
+  if (error instanceof ReleaseError) return { code: error.code, message: error.message };
   return reportError(fallback, error instanceof Error ? error.message : String(error));
 }
 

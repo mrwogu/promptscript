@@ -13,6 +13,7 @@ import {
   writeSuiteReports,
 } from './output.js';
 import { EVAL_CODES, EvalError } from '@promptscript/eval';
+import { PS5004_VERIFICATION_FAILED, ReleaseError } from '../release/errors.js';
 
 function reportOf(passed: boolean, extra: Partial<EvalReportV1> = {}): EvalReportV1 {
   return { ...errorReport('replay', []), passed, outcome: passed ? 'passed' : 'failed', ...extra };
@@ -64,6 +65,17 @@ describe('errorOf', () => {
       message: 'boom',
     });
     expect(errorOf('text', EVAL_CODES.PROJECT_INVALID).message).toBe('text');
+  });
+});
+
+describe('errorOf with a release error', () => {
+  it('keeps the PS50xx code of the release error', () => {
+    const error = new ReleaseError(PS5004_VERIFICATION_FAILED, 'x does not verify', 'f');
+
+    expect(errorOf(error, EVAL_CODES.PROJECT_INVALID)).toEqual({
+      code: 'PS5004',
+      message: 'x does not verify',
+    });
   });
 });
 

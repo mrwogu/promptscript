@@ -26,6 +26,8 @@ export function registerEvalCommands(evalCommand: Command): void {
     .option('--concurrency <n>', 'Calls in flight at once, at most 16')
     .option('--cache <mode>', 'Cache mode (replay, record, refresh, off)', 'replay')
     .option('--model <ref>', 'Run every suite against this model only')
+    .option('--label <env>', 'Run the prompts a release environment serves, not a fresh compile')
+    .option('--variant <name>', 'With --label, run this experiment arm instead of the entry hash')
     .option('--allow-host <host>', 'Allow a provider host besides the built-in ones', collect)
     .option('--allow-local', 'Allow loopback hosts, over http too')
     .option('--dry-run', 'Show the plan, cache hits and worst-case cost; no calls')

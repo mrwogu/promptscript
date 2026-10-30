@@ -572,6 +572,19 @@ What `--base` does not do:
   lockfile, so it can swap the CLI that runs the check. Protect them as below, or run the check
   as a required workflow from a repository ruleset.
 
+## Eval what an environment serves
+
+`prs eval run --label <env>` runs your eval suites against the bundles a label points at, not
+against a fresh compile of the source. Each bundle is verified against its hash first, so the run
+uses what the environment serves even when the source has moved on. For an experiment it runs the
+entry hash, and `--variant <name>` runs one arm. Every result carries the hash that ran, in
+`prompt.contentHash`. See [prs eval run](../reference/cli.md#prs-eval-run).
+
+```bash
+prs eval run --label prod
+prs eval run --label prod --variant warm --cache record --max-cost 0.5
+```
+
 ## Read a release in your application
 
 The `@promptscript/runtime` package loads the bundles this flow writes. It has no dependencies. It

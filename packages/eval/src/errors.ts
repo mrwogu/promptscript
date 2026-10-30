@@ -70,6 +70,8 @@ export const EVAL_CODES = {
   RUN_OPTION_INVALID: 'PS6309',
   /** The project config cannot be loaded, or the project does not compile */
   PROJECT_INVALID: 'PS6310',
+  /** A suite's prompt is not in the release label, or has no arm of the variant */
+  LABEL_PROMPT_MISSING: 'PS6311',
   /** A cache entry is unreadable or does not match its key; it counts as a miss */
   CACHE_ENTRY_INVALID: 'PS6401',
   /** Replay found no cache entry for a call */
