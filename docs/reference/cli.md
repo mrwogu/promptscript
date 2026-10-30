@@ -1430,10 +1430,48 @@ the cache, and stops with `PS6503` when it passes `--max-cost`. During the run e
 worst case first; when the budget runs out, the remaining cases are errors and the outcome is
 `budget-exceeded`. Live modes, the budget and extra hosts come from these flags only. No config key
 turns them on. `PROMPTSCRIPT_EVAL_ALLOWED_HOSTS` (comma-separated) adds hosts like `--allow-host`.
+Judge calls count like any other call: each reserves its worst case, judge models need a price, and
+case costs and `maxCostPerCaseUsd` include them. Before a case is answered, the plan estimates its
+judge calls at 4 bytes per output token of the model under test.
 
 **Keys.** A key is read from an environment variable at call time, never from the config. Before the
 first live call stderr prints `sending <VAR> to <host>` for each provider of the run. A key sent to
 a host that is not a built-in default needs `--allow-host`.
+
+**LLM judge.** An `llm-judge` assertion sends the response, or its `field`, to a rubric: a prompt of
+the project with a `verdict` (`pass` or `fail`) and a `reason` as output. It makes 1, 3 or 5 runs
+(default 3), each a separate call with its own cache entry. The assertion passes when more than half
+of the runs say pass, and the case is an error when more than half give no valid verdict (`PS6601`).
+The judge model is the one of the assertion, else the suite `judge`, else the rubric's own model;
+`--model` does not change it. The rubric gets `response`, `case_inputs`, `expected`, `criteria` and
+`boundary`, the ones it declares. It must keep the first three out of its system message (`PS6212`),
+and should wrap the response, and the case inputs and expected value if it shows them, in a fence made with `boundary`. Case inputs are untrusted text too, since a dataset can come from `prs eval import`:
+
+```
+<response-{{input.boundary}}>{{input.response}}</response-{{input.boundary}}>
+```
+
+Text over 64 KiB is not judged (`PS6602`). A judge can be steered by the text it reads. Majority
+voting removes noise, not that, so keep deterministic assertions next to it.
+
+**Labels.** The `labels` file of a suite (JSONL, CSV or YAML with `id`, `assertion`, `verdict` and
+`note`) holds human verdicts for judge assertions. Labels never change a result. Each model in the
+report gets `judgeAgreement`, with `labelled` and `agreed` cases per judge assertion; text and
+Markdown print it as a count and a percentage.
+
+| Code     | Meaning                                                                         |
+| -------- | ------------------------------------------------------------------------------- |
+| `PS6207` | The rubric is the prompt under test, or its inputs do not fit the judge call    |
+| `PS6208` | The rubric output is not exactly a `verdict` of `pass` or `fail` and a `reason` |
+| `PS6209` | No judge model on the assertion, the suite or the rubric                        |
+| `PS6211` | A label names an assertion that is not an `llm-judge` assertion of the suite    |
+| `PS6212` | `response`, `case_inputs` or `expected` in a system message of the rubric       |
+| `PS6215` | Warning: the judge model is also a model under test                             |
+| `PS6216` | Warning: the response or case data is shown outside a `boundary` fence          |
+| `PS6601` | More than half of the judge runs gave no valid verdict                          |
+| `PS6602` | The judged text is over 64 KiB                                                  |
+| `PS6603` | A label file cannot be read, is too big, or has a bad or duplicate row          |
+| `PS6604` | Warning: labels name rows the run did not read                                  |
 
 **Output.** With `json`, `markdown` or `junit`, stdout holds exactly one document. The JSON report
 matches `https://getpromptscript.dev/schema/eval-report/v1.json` and holds no timestamp, so two replay

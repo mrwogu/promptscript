@@ -297,7 +297,8 @@ describe('checkSuites', () => {
         assertions: [{ id: 'tone', kind: 'llm-judge', rubric: 'acme-support/judge' }],
       });
 
-      expect(messages(suite)).toEqual([
+      // The rubric is not compiled here, which the judge checks report on their own
+      expect(messages(suite).filter((line) => line.startsWith('PS6213'))).toEqual([
         'PS6213 error: Suite .promptscript/evals/refund.eval.yaml: the dataset allows scan findings, so the suite needs at least one equals, contains, regex or json-schema assertion.',
       ]);
     });

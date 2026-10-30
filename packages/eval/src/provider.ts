@@ -35,6 +35,8 @@ export interface EvalProviderContext {
   signal: AbortSignal;
   /** Dataset row id of the case the call is for */
   caseId: string;
+  /** Run index of a judge call, from 1; 0 for the call of a case */
+  sample?: number;
 }
 
 /**
