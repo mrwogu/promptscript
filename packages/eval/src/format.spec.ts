@@ -264,6 +264,58 @@ describe('formatComparison', () => {
   });
 });
 
+describe('judge agreement', () => {
+  function judged(
+    agreement: Array<{ assertion: string; labelled: number; agreed: number }>
+  ): EvalReportV1 {
+    return report([
+      suiteResult('refund', [
+        modelResult(MODEL, [caseResult('c1')], { judgeAgreement: agreement }),
+      ]),
+    ]);
+  }
+
+  it('prints the agreement of each judge assertion in text', () => {
+    const text = formatReport(
+      judged([
+        { assertion: 'tone', labelled: 4, agreed: 3 },
+        { assertion: 'polite', labelled: 0, agreed: 0 },
+      ]),
+      'text'
+    );
+
+    expect(text).toContain('    judge tone: agreed with labels on 3 of 4 (75.0%)');
+    expect(text).toContain('    judge polite: agreed with labels on 0 of 0\n');
+  });
+
+  it('prints the agreement in Markdown and escapes the ids', () => {
+    const markdown = formatReport(
+      judged([{ assertion: 'to`ne', labelled: 2, agreed: 2 }]),
+      'markdown'
+    );
+
+    expect(markdown).toContain(
+      '- Judge `` to`ne `` on `refund`/`claude-sonnet-5-5` agreed with labels on 2 of 2 (100.0%)'
+    );
+  });
+
+  it('cleans control characters out of the ids', () => {
+    const text = formatReport(
+      judged([{ assertion: `to${ESC}[31mne`, labelled: 1, agreed: 1 }]),
+      'text'
+    );
+
+    expect(text).not.toContain(ESC);
+  });
+
+  it('prints nothing for a model without labels', () => {
+    const plain = report([suiteResult('refund', [modelResult(MODEL, [caseResult('c1')])])]);
+
+    expect(formatReport(plain, 'text')).not.toContain('agreed with labels');
+    expect(formatReport(plain, 'markdown')).not.toContain('Judge');
+  });
+});
+
 describe('reportFileName', () => {
   it('joins the suite name and 12 hex characters of the content hash', () => {
     const suite = suiteResult('refund', []);
@@ -313,6 +365,32 @@ describe('formatPlan', () => {
     );
     expect(text).toContain('total: hits 1, misses 1, calls 1, worst case $0.0021, budget $1');
     expect(text).toContain('no provider was called');
+  });
+
+  it('shows judge hits and calls only for a suite with judges', () => {
+    const judged: EvalPlan = {
+      ...plan,
+      judgeHits: 3,
+      judgeCalls: 6,
+      suites: [
+        {
+          ...plan.suites[0]!,
+          models: [{ ...plan.suites[0]!.models[0]!, judgeHits: 3, judgeCalls: 6 }],
+        },
+      ],
+    };
+
+    const text = formatPlan(judged);
+
+    expect(text).toContain('calls 1   judge hits 3   judge calls 6   price built-in');
+    expect(text).toContain('calls 1, judge calls 6, worst case $0.0021, budget $1');
+    expect(formatPlan(plan)).not.toContain('judge');
+  });
+
+  it('leaves judge calls out of the totals when there are none', () => {
+    const text = formatPlan({ ...plan, judgeHits: 2, judgeCalls: 0 });
+
+    expect(text).not.toContain('judge calls');
   });
 
   it('lists setup errors and cleans their text', () => {

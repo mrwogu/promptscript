@@ -791,6 +791,96 @@ describe('runEval with llm-judge assertions', () => {
     expect(judgeSamples).toEqual([]);
   });
 
+  describe('labels', () => {
+    const LABELS = [
+      '{"id":"late","assertion":"tone","verdict":"pass","note":"Fine"}',
+      '{"id":"rude","assertion":"tone","verdict":"pass"}',
+      '',
+    ].join('\n');
+
+    const withLabels = (text: string): void => {
+      mkdirSync(join(evals, 'labels'), { recursive: true });
+      writeFileSync(join(evals, 'labels', 'tone.jsonl'), text);
+      writeFileSync(join(evals, 'refund.eval.yaml'), `${SUITE}labels: labels/tone.jsonl\n`);
+    };
+
+    it('counts how often the judge agreed with the human, and never changes a result', async () => {
+      withLabels(LABELS);
+
+      const { report } = await record({
+        judge: (_sample, request) =>
+          request.messages[1]?.content.includes('reject') ? FAIL : PASS,
+      });
+
+      expect(casesOf(report).map((entry) => [entry.id, entry.status])).toEqual([
+        ['late', 'passed'],
+        ['rude', 'failed'],
+      ]);
+      expect(report.suites[0]?.models[0]?.judgeAgreement).toEqual([
+        { assertion: 'tone', labelled: 2, agreed: 1 },
+      ]);
+      expectValid(report);
+    });
+
+    it('does not count a case that errored or was not judged', async () => {
+      withLabels(LABELS);
+
+      const { report } = await record({ judge: (sample) => (sample === 1 ? PASS : 'nope') });
+
+      expect(report.suites[0]?.models[0]?.judgeAgreement).toEqual([
+        { assertion: 'tone', labelled: 0, agreed: 0 },
+      ]);
+    });
+
+    it('gives the same agreement from a replay', async () => {
+      withLabels(LABELS);
+      const { report: recorded } = await record();
+
+      const replayed = await runEval(await options());
+
+      expect(replayed.suites[0]?.models[0]?.judgeAgreement).toEqual(
+        recorded.suites[0]?.models[0]?.judgeAgreement
+      );
+    });
+
+    it('warns once for labels of rows that were not read, and keeps going', async () => {
+      withLabels(`${LABELS}{"id":"gone","assertion":"tone","verdict":"fail"}\n`);
+
+      const { report } = await record();
+
+      const warnings = progress.filter((event) => event.type === 'warning');
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0]).toMatchObject({ finding: { code: 'PS6604', severity: 'warning' } });
+      expect(report.outcome).toBe('passed');
+      expect(report.suites[0]?.models[0]?.judgeAgreement?.[0]?.labelled).toBe(2);
+    });
+
+    it('stops a run whose label names an assertion that is not a judge assertion', async () => {
+      withLabels('{"id":"late","assertion":"decision","verdict":"pass"}\n');
+
+      const report = await runEval(await options());
+
+      expect(report.outcome).toBe('error');
+      expect(report.errors.map((error) => error.code)).toEqual(['PS6211']);
+      expect(report.errors[0]).toMatchObject({ line: 1 });
+    });
+
+    it('stops a run whose label file is malformed', async () => {
+      withLabels('{"id":"late","assertion":"tone","verdict":"maybe"}\n');
+
+      const report = await runEval(await options());
+
+      expect(report.errors.map((error) => error.code)).toEqual(['PS6603']);
+      expect(report.errors[0]?.file).toBe('.promptscript/evals/labels/tone.jsonl');
+    });
+
+    it('leaves judgeAgreement out of a suite without labels', async () => {
+      const { report } = await record();
+
+      expect(report.suites[0]?.models[0]).not.toHaveProperty('judgeAgreement');
+    });
+  });
+
   it('lists each rubric once in the suite, sorted by id', async () => {
     writeFileSync(
       join(evals, 'refund.eval.yaml'),

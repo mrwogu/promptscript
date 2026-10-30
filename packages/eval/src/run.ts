@@ -31,6 +31,7 @@ import {
   type JudgePlan,
 } from './judge.js';
 import { effectiveInputs } from './inputs.js';
+import { readLabels, unmatchedLabels } from './labels.js';
 import { checkDatasetRow } from './dataset/check.js';
 import { readDataset, type DatasetRecord } from './dataset/read.js';
 import { scanDatasetRow } from './dataset/scan.js';
@@ -386,6 +387,35 @@ async function readRows(
   return read;
 }
 
+// Human labels of a suite; a file problem or a label for another assertion stops the run
+async function prepareLabels(
+  loaded: LoadedSuite,
+  options: RunEvalOptions,
+  add: Add
+): Promise<SuitePlan['labels']> {
+  if (loaded.labelsFile === undefined) return undefined;
+  const { suite } = loaded;
+  const path = projectRelative(options.projectRoot, loaded.labelsFile);
+  try {
+    const read = await readLabels(loaded.labelsFile, path, {
+      judgeIds: new Set(
+        suite.assertions.filter((entry) => entry.kind === 'llm-judge').map((entry) => entry.id)
+      ),
+      assertionIds: new Set(suite.assertions.map((entry) => entry.id)),
+      suiteFile: loaded.file,
+      ...(suite.labels === undefined ? {} : { writtenPath: suite.labels }),
+    });
+    for (const finding of read.findings) {
+      add(finding.code, finding.message, finding.file, finding.line);
+    }
+    return read.labels;
+  } catch (error) {
+    if (!(error instanceof EvalError)) throw error;
+    add(error.code as EvalCode, error.message, error.location?.file ?? path, error.location?.line);
+    return undefined;
+  }
+}
+
 async function prepareSuite(
   loaded: LoadedSuite,
   options: RunEvalOptions
@@ -419,6 +449,7 @@ async function prepareSuite(
       file
     );
   }
+  const labels = await prepareLabels(loaded, options, add);
   const read = await readRows(loaded, bundle, prompt, options, add);
   if (read === undefined || errors.length > 0) return { errors };
 
@@ -471,6 +502,7 @@ async function prepareSuite(
         (assertion): assertion is DeterministicAssertion => assertion.kind !== 'llm-judge'
       ),
       judges,
+      ...(labels === undefined ? {} : { labels }),
       priced: options.budget !== undefined || hasCostThreshold(loaded),
       cases,
       timedOut: new Set(),
@@ -804,6 +836,20 @@ function checkPlanCost(plans: readonly SuitePlan[], context: RunContext, add: Ad
   }
 }
 
+// Labels of rows the run did not read are no error: the row limit and dataset edits cause them
+function warnUnmatchedLabels(
+  plans: readonly SuitePlan[],
+  notify: (event: EvalProgress) => void
+): void {
+  for (const plan of plans) {
+    if (plan.labels === undefined) continue;
+    const rows = new Set(plan.cases.map((entry) => entry.row.id));
+    for (const finding of unmatchedLabels(plan.labels, rows, plan.loaded.file)) {
+      notify({ type: 'warning', finding });
+    }
+  }
+}
+
 // Suites, datasets, cache, providers and the budget plan, all before any call
 async function setUp(
   options: RunEvalOptions,
@@ -839,6 +885,7 @@ async function setUp(
   );
   errors.push(...prepared.flatMap((entry) => entry.errors));
   const plans = prepared.flatMap((entry) => (entry.plan === undefined ? [] : [entry.plan]));
+  if (errors.length === 0) warnUnmatchedLabels(plans, notify);
 
   if (errors.length === 0 && plans.every((plan) => plan.cases.length === 0)) {
     add(EVAL_CODES.RUN_OPTION_INVALID, 'There is no case to run; pass at least one suite.');

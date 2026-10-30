@@ -13,7 +13,9 @@ import {
   type EvalOutcome,
   type EvalReportV1,
   type EvalSuiteResultV1,
+  type EvalJudgeAgreementV1,
   type EvalThresholdResultV1,
+  type EvalVerdict,
   type EvalUsageV1,
   type ModelParams,
   type ModelPricing,
@@ -78,6 +80,8 @@ export interface SuitePlan {
   assertions: DeterministicAssertion[];
   /** The llm-judge assertions, in suite order */
   judges: JudgePlan[];
+  /** Human labels by row id, then judge assertion id; present when the suite names a label file */
+  labels?: ReadonlyMap<string, ReadonlyMap<string, EvalVerdict>>;
   /** Costs are reported when a budget or a cost threshold applies */
   priced: boolean;
   cases: CasePlan[];
@@ -130,6 +134,25 @@ interface ModelSummary {
   maxCaseUsd: number;
 }
 
+// How often the judge majority matched the human label, for the cases it judged and a human labelled
+function judgeAgreement(
+  suite: SuitePlan,
+  cases: readonly EvalCaseResultV1[]
+): EvalJudgeAgreementV1[] {
+  const ids = [...new Set(suite.judges.map((judge) => judge.assertion.id))];
+  return ids.map((id) => {
+    const pairs = cases.flatMap((result) => {
+      const label = suite.labels?.get(result.id)?.get(id);
+      const judged = result.assertions.find(
+        (entry) => entry.id === id && entry.judge !== undefined
+      );
+      return label === undefined || judged === undefined ? [] : [{ label, passed: judged.passed }];
+    });
+    const agreed = pairs.filter((pair) => pair.passed === (pair.label === 'pass')).length;
+    return { assertion: id, labelled: pairs.length, agreed };
+  });
+}
+
 function modelSummary(suite: SuitePlan, model: ModelPlan, input: ReportInput): ModelSummary {
   const outcomes = suite.cases
     .filter((plan) => plan.model === model)
@@ -150,6 +173,7 @@ function modelSummary(suite: SuitePlan, model: ModelPlan, input: ReportInput): M
       usage: cases.reduce((total, result) => addUsage(total, result.usage), NO_USAGE),
       ...(suite.priced ? { costUsd: roundUsd(costUsd) } : {}),
       latencyMs: { p50: percentile(latencies, 0.5), p95: percentile(latencies, 0.95) },
+      ...(suite.labels === undefined ? {} : { judgeAgreement: judgeAgreement(suite, cases) }),
       cases,
     },
     costUsd,
