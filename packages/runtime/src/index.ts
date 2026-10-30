@@ -10,6 +10,7 @@ export { createPromptClient } from './client.js';
 export { PromptLoadError, PromptRenderError, PromptRuntimeError } from './errors.js';
 export type {
   PromptErrorCode,
+  PromptKeyErrorCode,
   PromptLoadErrorCode,
   PromptMapErrorCode,
   PromptRenderErrorCode,

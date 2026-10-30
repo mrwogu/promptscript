@@ -8,6 +8,7 @@ export type PromptLoadErrorCode =
   | 'hash-mismatch'
   | 'index-mismatch'
   | 'invalid-index'
+  | 'unsupported-label'
   | 'not-found'
   | 'source-error'
   | 'timeout'
@@ -18,8 +19,12 @@ export type PromptLoadErrorCode =
 /** Codes of errors thrown while mapping to a provider request. */
 export type PromptMapErrorCode = 'provider-mismatch' | 'missing-model' | 'missing-max-tokens';
 
+/** Code of the error thrown for a bad assignment key. */
+export type PromptKeyErrorCode = 'invalid-key';
+
 /** Every runtime error code. */
-export type PromptErrorCode = PromptRenderErrorCode | PromptLoadErrorCode | PromptMapErrorCode;
+export type PromptErrorCode =
+  PromptRenderErrorCode | PromptLoadErrorCode | PromptMapErrorCode | PromptKeyErrorCode;
 
 /** Base of every error the runtime throws. Messages name keys and paths, never values. */
 export class PromptRuntimeError extends Error {
