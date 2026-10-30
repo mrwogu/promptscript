@@ -11,7 +11,7 @@
  */
 
 import { existsSync, mkdirSync, readdirSync } from 'node:fs';
-import { dirname, relative, resolve } from 'node:path';
+import { basename, dirname, relative, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { Extractor, ExtractorConfig } from '@microsoft/api-extractor';
@@ -34,7 +34,7 @@ if (names.length === 0) {
 // pnpm sets npm_execpath to its own entry (a JS file, or a standalone binary), so the
 // build starts from an absolute path and needs no PATH lookup.
 const pnpmEntry = process.env.npm_execpath;
-if (!pnpmEntry) {
+if (!pnpmEntry || !basename(pnpmEntry).includes('pnpm')) {
   console.error('Run this through pnpm (pnpm api:check or pnpm api:update).');
   process.exit(1);
 }
