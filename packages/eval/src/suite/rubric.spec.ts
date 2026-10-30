@@ -171,7 +171,12 @@ describe('checkSuites with llm-judge assertions', () => {
     it('refuses a response input that is not a string', () => {
       const findings = check(
         suiteOf(),
-        rubric({ inputs: { response: { type: 'number', description: 'n', required: true } } })
+        rubric({
+          inputs: {
+            response: { type: 'number', description: 'n', required: true },
+            boundary: stringInput(),
+          },
+        })
       );
 
       expect(codes(findings)).toEqual(['PS6207']);
@@ -257,6 +262,40 @@ describe('checkSuites with llm-judge assertions', () => {
 
       expect(codes(without)).toEqual(['PS6207']);
       expect(withDefault).toEqual([]);
+    });
+
+    it.each(['boundary', 'criteria', 'tone'])(
+      'refuses a slot for the undeclared input %s',
+      (name) => {
+        const findings = check(
+          suiteOf(),
+          rubric({
+            inputs: { response: stringInput(true) },
+            messages: [{ role: 'user', content: `{{input.response}} {{input.${name}}}` }],
+          })
+        );
+
+        const missing = findings.filter((finding) => finding.message.includes(`"${name}" input`));
+        expect(missing.map((finding) => finding.code)).toEqual(['PS6207']);
+        expect(missing[0]?.message).toContain(`uses {{input.${name}}} but does not declare`);
+      }
+    );
+
+    it('names an undeclared input once, however many messages use it', () => {
+      const findings = check(
+        suiteOf(),
+        rubric({
+          inputs: { response: stringInput(true) },
+          messages: [
+            { role: 'system', content: 'Fence {{input.boundary}}' },
+            { role: 'user', content: '{{input.response}} {{input.boundary}}' },
+          ],
+        })
+      );
+
+      expect(
+        findings.filter((finding) => finding.message.includes('uses {{input.boundary}}'))
+      ).toHaveLength(1);
     });
 
     it('refuses criteria on the assertion when the rubric has no criteria input', () => {

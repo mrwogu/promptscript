@@ -79,6 +79,15 @@ function checkInputs(assertion: EvalLlmJudgeAssertion, rubric: PromptBundleV1, a
       );
     }
   }
+  // A slot with no declared input makes the render throw at judge time, so say it now
+  const used = new Set(slotsOf(rubric.messages).map((slot) => slot.name));
+  for (const name of [...used].sort(compareCodeUnits)) {
+    if (name === 'response' || Object.hasOwn(rubric.inputs, name)) continue;
+    add(
+      EVAL_CODES.RUBRIC_INVALID,
+      `rubric "${rubric.id}" of assertion "${id}" uses {{input.${name}}} but does not declare a "${name}" input; declare it or remove the slot`
+    );
+  }
   if (!Object.hasOwn(rubric.inputs, 'response')) {
     add(
       EVAL_CODES.RUBRIC_INVALID,
