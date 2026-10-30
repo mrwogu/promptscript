@@ -6,6 +6,7 @@ import {
   RELEASE_REPORT_SCHEMA_URL,
   RELEASE_REPORT_VERSION,
   toReleaseLocation,
+  type ReleaseArmStatus,
 } from '../utils/release-report.js';
 import {
   validateLabel,
@@ -170,7 +171,7 @@ describe('release report schema', () => {
   });
 
   it('accepts an empty report of every command', () => {
-    for (const command of ['build', 'promote', 'rollback', 'status'] as const) {
+    for (const command of ['build', 'promote', 'rollback', 'split', 'status'] as const) {
       const report = createReleaseReport(command);
 
       expect(validate(report), JSON.stringify(validate.errors)).toBe(true);
@@ -219,6 +220,98 @@ describe('release report schema', () => {
     expect(validate({ ...report, base: { ref: 'origin/main', commit: 'b'.repeat(7) } })).toBe(
       false
     );
+  });
+
+  describe('experiments', () => {
+    const path = '.promptscript/releases/prod.json';
+    const armChange = (experiment: unknown): unknown => ({
+      path,
+      action: 'updated',
+      id: 'a/b',
+      contentHash: hash,
+      experiment,
+    });
+    const splitReport = (change: unknown): unknown => ({
+      ...createReleaseReport('split'),
+      changes: [change],
+    });
+
+    it('accepts a split report with arm items', () => {
+      const report = {
+        ...createReleaseReport('split'),
+        changes: [
+          { path, action: 'unchanged', id: 'a/b', contentHash: hash },
+          armChange({ name: 'warm-tone', variant: 'control', weight: 9000, previousWeight: 9500 }),
+          armChange({ name: 'warm-tone', variant: 'warm', weight: 1000 }),
+          { ...(armChange({ name: 'warm-tone', variant: 'old', previousWeight: 5 }) as object) },
+        ],
+      };
+
+      expect(validate(report), JSON.stringify(validate.errors)).toBe(true);
+    });
+
+    it.each([
+      ['a weight above 10000', { name: 'x', variant: 'warm', weight: 10001 }],
+      ['a fractional weight', { name: 'x', variant: 'warm', weight: 2.5 }],
+      ['a negative previous weight', { name: 'x', variant: 'warm', previousWeight: -1 }],
+      ['an unknown key', { name: 'x', variant: 'warm', weight: 1, extra: 1 }],
+      ['an uppercase variant', { name: 'x', variant: 'Warm', weight: 1 }],
+      ['a bad experiment name', { name: '-x', variant: 'warm', weight: 1 }],
+      ['no variant', { name: 'x', weight: 1 }],
+    ])('rejects a change with %s', (_name, experiment) => {
+      expect(validate(splitReport(armChange(experiment)))).toBe(false);
+    });
+
+    const arm = (variant: string, weight: number): object => ({
+      variant,
+      contentHash: hash,
+      weight,
+      file: `.promptscript/releases/bundles/${hash}.json`,
+      exists: true,
+      verified: true,
+    });
+    const statusWith = (arms: object[]): unknown =>
+      createReleaseReport('status', {
+        environments: [
+          {
+            name: 'prod',
+            path,
+            exists: true,
+            prompts: [
+              {
+                id: 'a/b',
+                contentHash: hash,
+                file: `.promptscript/releases/bundles/${hash}.json`,
+                exists: true,
+                verified: true,
+                inBuild: false,
+                experiment: { name: 'warm-tone', arms: arms as ReleaseArmStatus[] },
+              },
+            ],
+          },
+        ],
+      });
+
+    it('accepts a status report with experiment arms', () => {
+      const report = statusWith([arm('control', 9000), arm('warm', 1000)]);
+
+      expect(validate(report), JSON.stringify(validate.errors)).toBe(true);
+    });
+
+    it('refuses a status experiment with one arm or five', () => {
+      const one = statusWith([arm('control', 10000)]);
+      const five = statusWith(['control', 'a', 'b', 'c', 'd'].map((variant) => arm(variant, 2000)));
+
+      expect(validate(one)).toBe(false);
+      expect(validate(five)).toBe(false);
+    });
+
+    it('refuses a status arm without its verification fields', () => {
+      const partial: Record<string, unknown> = { ...arm('warm', 1000) };
+      delete partial['verified'];
+
+      expect(validate(statusWith([arm('control', 9000), partial]))).toBe(false);
+    });
   });
 
   it('pins the schema URL and version the cli writes', () => {

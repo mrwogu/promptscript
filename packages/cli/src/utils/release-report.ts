@@ -9,10 +9,22 @@ export const RELEASE_REPORT_SCHEMA_URL =
   'https://getpromptscript.dev/schema/release-report/v1.json';
 export const RELEASE_REPORT_VERSION = 1 as const;
 
-export type ReleaseCommandName = 'build' | 'promote' | 'rollback' | 'status';
+export type ReleaseCommandName = 'build' | 'promote' | 'rollback' | 'split' | 'status';
 
 /** What a command did, or would do under `--dry-run`, to one file entry. */
 export type ReleaseChangeAction = 'created' | 'updated' | 'unchanged' | 'removed';
+
+/** The experiment arm a label change describes. */
+export interface ReleaseChangeExperiment {
+  /** Experiment name */
+  name: string;
+  /** Arm name, `control` for the first arm */
+  variant: string;
+  /** Share in basis points after the command; absent for a removed arm */
+  weight?: number;
+  /** Share in basis points before the command; absent for a new arm */
+  previousWeight?: number;
+}
 
 export interface ReleaseChange {
   /** Project-relative path of the file */
@@ -24,6 +36,26 @@ export interface ReleaseChange {
   contentHash?: string;
   /** Content hash the entry held before the command */
   previousContentHash?: string;
+  /** Set on an arm item of an experiment; the entry item has none */
+  experiment?: ReleaseChangeExperiment;
+}
+
+/** One arm of a label entry in status. */
+export interface ReleaseArmStatus {
+  variant: string;
+  contentHash: string;
+  /** Share in basis points */
+  weight: number;
+  /** Project-relative path of the bundle file */
+  file: string;
+  exists: boolean;
+  verified: boolean;
+}
+
+export interface ReleaseExperimentStatus {
+  name: string;
+  /** The control arm first, in label order */
+  arms: ReleaseArmStatus[];
 }
 
 export interface ReleasePromptStatus {
@@ -35,6 +67,8 @@ export interface ReleasePromptStatus {
   verified: boolean;
   /** Whether the manifest of the latest build holds this hash for the id */
   inBuild: boolean;
+  /** Present while the entry runs an experiment */
+  experiment?: ReleaseExperimentStatus;
 }
 
 export interface ReleaseEnvironmentStatus {

@@ -16,6 +16,8 @@ export const PS5006_ROLLBACK_UNAVAILABLE = 'PS5006';
 export const PS5007_RELEASE_LOCKED = 'PS5007';
 /** A compile output path lies inside the release directory. */
 export const PS5008_OUTPUT_IN_RELEASE_DIRECTORY = 'PS5008';
+/** A split breaks the experiment rules, or targets the first environment. */
+export const PS5009_INVALID_SPLIT = 'PS5009';
 /** A promotion would drop a running experiment of the entry. */
 export const PS5010_PROMOTE_ON_EXPERIMENT = 'PS5010';
 
@@ -28,6 +30,7 @@ export type ReleaseErrorCode =
   | typeof PS5006_ROLLBACK_UNAVAILABLE
   | typeof PS5007_RELEASE_LOCKED
   | typeof PS5008_OUTPUT_IN_RELEASE_DIRECTORY
+  | typeof PS5009_INVALID_SPLIT
   | typeof PS5010_PROMOTE_ON_EXPERIMENT;
 
 /** An error of a `prs release` command. Every message ends with the fix. */

@@ -2,7 +2,13 @@ import type { Command } from 'commander';
 import { releaseBuildCommand } from './build.js';
 import { releasePromoteCommand } from './promote.js';
 import { releaseRollbackCommand } from './rollback.js';
+import { releaseSplitCommand } from './split.js';
 import { releaseStatusCommand } from './status.js';
+
+/** Collect a repeated option into a list. */
+function collect(value: string, previous: string[]): string[] {
+  return [...previous, value];
+}
 
 function withProjectOptions(command: Command): Command {
   return command
@@ -12,7 +18,7 @@ function withProjectOptions(command: Command): Command {
 }
 
 /**
- * Register `prs release build|promote|rollback|status`.
+ * Register `prs release build|promote|rollback|split|status`.
  *
  * None of them defines a way around the security rules, the hash check or the promotion
  * order; a release that needs one is not a release.
@@ -39,6 +45,18 @@ export function registerReleaseCommands(release: Command): void {
       .description('Restore the previous label of an environment from Git')
       .option('--dry-run', 'Show the rollback without writing the label')
   ).action((env, opts) => releaseRollbackCommand(env, opts));
+
+  withProjectOptions(
+    release
+      .command('split <prompt>')
+      .description('Split the traffic of a prompt between versions in a later environment')
+      .requiredOption('--env <env>', 'Environment that runs the experiment')
+      .option('--name <experiment>', 'Experiment name, required to start or change one')
+      .option('--arm <variant@hash=percent>', 'Arm besides control, repeat for each', collect, [])
+      .option('--end', 'End the experiment of the entry')
+      .option('--keep <variant>', 'With --end, make this arm the entry hash')
+      .option('--dry-run', 'Show the split without writing the label')
+  ).action((prompt, opts) => releaseSplitCommand(prompt, opts));
 
   withProjectOptions(
     release

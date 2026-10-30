@@ -620,6 +620,7 @@ review applies to them. Three pieces work together:
 | --------------------------- | --------------------------------------------------------------------------------------------- |
 | `prs release build`         | Store bundles under their content hash                                                        |
 | `prs release promote`       | Move an environment label (for example `staging` or `prod`) to a bundle hash in a reviewed PR |
+| `prs release split`         | Run a weighted experiment between two reviewed versions in a later environment                |
 | `prs release rollback`      | Restore a previous state of an environment label                                              |
 | `prs release status`        | Verify and report the release state, never changes labels                                     |
 | `prs approve`               | Record that a role (for example `legal`) approved one exact bundle hash                       |
