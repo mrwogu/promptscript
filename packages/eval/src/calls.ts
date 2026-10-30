@@ -79,7 +79,8 @@ export async function pool<T>(
 ): Promise<void> {
   let next = 0;
   const worker = async (): Promise<void> => {
-    const item = items[next++];
+    const item = items[next];
+    next += 1;
     if (item === undefined) return;
     await work(item);
     return worker();
