@@ -402,6 +402,14 @@
       "key": "a\nb"
     },
     {
+      "description": "key with a zero width joiner",
+      "key": "a\u200db"
+    },
+    {
+      "description": "key with a line separator",
+      "key": "a\u2028b"
+    },
+    {
       "description": "key with a lone surrogate",
       "key": "a\ud800b"
     }

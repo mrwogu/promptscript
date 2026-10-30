@@ -168,7 +168,7 @@ describe('assignment vectors', () => {
     expect(error).toBeInstanceOf(PromptRuntimeError);
     expect(error).toMatchObject({ code: 'invalid-key' });
     expect((error as Error).message).toBe(
-      'Assignment key must be 1 to 256 characters without control characters or lone surrogates.'
+      'Assignment key must be 1 to 256 characters without control characters, format characters, line separators or lone surrogates.'
     );
     expect(source.reads).toEqual([]);
   });

@@ -28,7 +28,8 @@ const DEFAULT_MAX_PROMPTS = 256;
 const MAX_REF_LENGTH = 512;
 // Control and format characters (C0, DEL, C1, bidi overrides) and the two line separators
 const UNSAFE_CHARACTER = /[\p{Cc}\p{Cf}\u2028\u2029]/u;
-// A key is also refused with a lone surrogate, which UTF-8 cannot encode
+// A key is also refused with a lone surrogate, which UTF-8 cannot encode; a format character
+// such as U+200D is refused like in a ref
 const UNSAFE_KEY = /[\p{Cc}\p{Cf}\p{Cs}\u2028\u2029]/u;
 
 interface Arm {
@@ -324,7 +325,7 @@ class CachingPromptClient implements PromptClient {
     ) {
       throw new PromptRuntimeError(
         'invalid-key',
-        `Assignment key must be 1 to ${MAX_KEY_LENGTH} characters without control characters or lone surrogates.`
+        `Assignment key must be 1 to ${MAX_KEY_LENGTH} characters without control characters, format characters, line separators or lone surrogates.`
       );
     }
     const at = ref.lastIndexOf('@');
@@ -663,7 +664,7 @@ class CachingPromptClient implements PromptClient {
  * arm by a hash of the experiment, the id and the key, so the same key always gets the same
  * arm, and `meta.experiment` and `meta.variant` name it. Each arm keeps its own cached copy.
  * Without a key the entry hash is served untagged, and a pinned ref skips assignment. A key
- * outside 1 to 256 characters or with a control character or lone surrogate throws
+ * outside 1 to 256 characters or with a control character, a format character, U+2028, U+2029 or a lone surrogate throws
  * `invalid-key`. A label whose `$schema` has the form `.../prompt-release-label/vN.json` for
  * a version this reader does not know throws `unsupported-label`, or serves stale in open mode.
  *

@@ -176,7 +176,7 @@ export interface PromptClientOptions {
 
 /** Options of {@link PromptClient.get}. */
 export interface PromptGetOptions {
-  /** Assignment key, such as a pseudonymous user id: 1-256 characters, no control characters */
+  /** Assignment key, such as a pseudonymous user id: 1-256 UTF-16 code units, no control (Cc), format (Cf, such as U+200D), U+2028, U+2029 or lone surrogate (Cs) character */
   readonly key?: string;
 }
 

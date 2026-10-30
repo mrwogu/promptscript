@@ -37,5 +37,6 @@ weight is strictly greater than the bucket, so an arm with weight 0 is never pic
 - `invalidKeys`: keys a runtime refuses. The label rules already keep `\0` out of names and ids.
 - The key is hashed as given, as UTF-8, with no Unicode normalization: an NFC and an NFD spelling
   of the same text are different keys with different buckets (see the two `café` cases). A key
-  is 1 to 256 UTF-16 code units, and a lone surrogate makes it invalid, because UTF-8 cannot
-  encode it.
+  is 1 to 256 UTF-16 code units. A runtime refuses a key with a control character (`\p{Cc}`),
+  a format character (`\p{Cf}`, such as U+200D), U+2028, U+2029 or a lone surrogate (`\p{Cs}`,
+  which UTF-8 cannot encode).
