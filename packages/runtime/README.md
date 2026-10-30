@@ -60,13 +60,29 @@ imports the entry pays no bytes for it.
 ```typescript
 import * as otel from '@opentelemetry/api';
 import { readFile } from 'node:fs/promises';
-import { anthropicResult, createPromptTelemetry, readPricing } from '@promptscript/runtime/otel';
+import type { RenderedPrompt } from '@promptscript/runtime';
+import {
+  anthropicResult,
+  createPromptTelemetry,
+  readPricing,
+  type PromptSpanRef,
+} from '@promptscript/runtime/otel';
 
 const pricing = readPricing(await readFile('.promptscript/releases/pricing.json', 'utf8'));
 const telemetry = createPromptTelemetry(otel, { pricing });
 
+// Your own server-side store, here a map by session id
+const calls = new Map<string, { span: PromptSpanRef; meta: RenderedPrompt['meta'] }>();
+
 // callModel is your own function that sends the request and returns the parsed response
-const reply = await telemetry.trace(rendered, (span) => callModel(body), anthropicResult);
+const reply = await telemetry.trace(
+  rendered,
+  (span) => {
+    calls.set(sessionId, { span, meta: rendered.meta });
+    return callModel(body);
+  },
+  anthropicResult
+);
 ```
 
 `trace` returns what `call` returns and rethrows what it throws, the same error object. `call`
@@ -74,8 +90,10 @@ gets a `span` ref with `traceId`, `spanId` and `traceFlags`. Keep it on the serv
 session. When the user rates the answer, record it on a new span under the call span:
 
 ```typescript
-// span is the ref you stored from the call
-telemetry.feedback({ span, name: 'user.thumbs', score: 1, prompt: rendered.meta });
+const call = calls.get(sessionId);
+if (call) {
+  telemetry.feedback({ span: call.span, name: 'user.thumbs', score: 1, prompt: call.meta });
+}
 ```
 
 A feedback has a name, a score, a label and the prompt meta. It has no free text field: a
