@@ -202,6 +202,8 @@ interface EnvironmentCheck extends Checked<ReleaseEnvironmentStatus> {
   arms: GateEntry[];
   /** The entries of the label, to compare with the environment before */
   entries: PromptReleaseLabelEntryV2[];
+  /** False when the label exists but does not read or parse; its entries are then unknown */
+  readable: boolean;
 }
 
 /** One environment: a missing label is an empty environment. */
@@ -221,6 +223,7 @@ async function environmentStatus(
         errors: [],
         arms: [],
         entries: [],
+        readable: true,
       };
     }
     entries = parseLabel(text, name, labelPath).prompts;
@@ -231,6 +234,7 @@ async function environmentStatus(
       errors: [toDiagnostic(error)],
       arms: [],
       entries: [],
+      readable: false,
     };
   }
   const checked = await Promise.all(
@@ -241,6 +245,7 @@ async function environmentStatus(
     errors: checked.flatMap((entry) => entry.errors),
     arms: entries.flatMap((entry) => gateEntriesOf(entry).slice(1)),
     entries,
+    readable: true,
   };
 }
 
@@ -363,7 +368,9 @@ async function labelGates(
 function upstreamArmWarnings(checked: readonly EnvironmentCheck[]): ReleaseDiagnostic[] {
   return checked.flatMap((environment, index) => {
     const upstream = checked[index - 1];
-    if (upstream === undefined) return [];
+    // An upstream label that does not read is reported for that environment; its entries are
+    // unknown, so no arm can be judged against them.
+    if (upstream === undefined || !upstream.readable) return [];
     return environment.entries.flatMap((entry) =>
       armLimitWarnings(
         entry,

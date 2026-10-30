@@ -160,8 +160,7 @@ function sameArms(a: Entry, b: Entry): boolean {
     left.every((arm, index) => {
       const other = right[index];
       return (
-        other !== undefined &&
-        arm.variant === other.variant &&
+        arm.variant === other?.variant &&
         arm.contentHash === other.contentHash &&
         arm.weight === other.weight
       );

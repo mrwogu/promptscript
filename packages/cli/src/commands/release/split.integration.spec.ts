@@ -1176,6 +1176,16 @@ describe('arms that the environment before no longer runs', () => {
     ]);
   });
 
+  it('does not warn when the label of the environment before does not read', async () => {
+    const { root } = await movedOn();
+    await writeFile(labelPath(root, 'dev'), '{ not json');
+
+    const result = await status(root);
+
+    expect(result.errors.map((error) => error.code)).toEqual(['PS5004']);
+    expect(result.warnings.map((warning) => warning.message)).toEqual([]);
+  });
+
   it('warns in status --base for a rolled back arm and does not fail', async () => {
     const { root, b } = await fixture();
     await split(root, 'staging', 'warm-tone', [`warm@${b}=10`]);
@@ -1197,8 +1207,9 @@ describe('arms that the environment before no longer runs', () => {
 });
 
 describe('unreadable bundles in status --base', () => {
-  it('fails the command, not just the entry, on an error that is no release error', async () => {
-    if (process.getuid?.() === 0) return;
+  it('fails the command, not just the entry, on an error that is no release error', async (context) => {
+    // A file mode cannot lock out root.
+    if (process.getuid?.() === 0) context.skip();
     const { root, a, c } = await fixture();
     commit(root, 'base');
     git(root, 'tag', 'base');
