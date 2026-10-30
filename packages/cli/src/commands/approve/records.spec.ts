@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { link, mkdir, mkdtemp, readdir, rm, symlink, writeFile } from 'node:fs/promises';
+import { chmod, link, mkdir, mkdtemp, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -11,7 +11,8 @@ import {
 } from '@promptscript/core';
 import {
   committedApprovalFiles,
-  committedApprovals,
+  committedRecords,
+  approvalFilesOf,
   ensureApprovalAttributes,
   findApprovalRecords,
   gitBlobId,
@@ -275,7 +276,7 @@ describe('Git path identity', () => {
   );
 });
 
-describe('committedApprovals', () => {
+describe('committedRecords', () => {
   const git = (cwd: string, ...args: string[]): string =>
     execFileSync(
       'git',
@@ -307,7 +308,10 @@ describe('committedApprovals', () => {
     await writeFile(join(project, path), '{}');
 
     const files = await committedApprovalFiles(project);
-    const found = await committedApprovals(project, files, RECORD.prompt, ['legal', 'security']);
+    const found = await committedRecords(
+      project,
+      approvalFilesOf(files, [RECORD.prompt], ['legal', 'security'])
+    );
 
     expect(found.sort((a, b) => a.path.localeCompare(b.path))).toEqual([
       { path: path.replace(/[^/]+$/, 'big.json') },
@@ -324,16 +328,15 @@ describe('committedApprovals', () => {
     git(project, 'add', '-A');
     git(project, 'commit', '-q', '-m', 'records');
     const files = await committedApprovalFiles(project);
-    const gone = [{ path, blob: '0'.repeat(40) }];
+    const gone = [{ path, blob: '0'.repeat(40), size: 10 }];
 
-    await expect(committedApprovals(project, gone, RECORD.prompt, ['legal'])).rejects.toMatchObject(
-      { code: 'PS5108', message: expect.stringContaining('0000000000') }
-    );
+    await expect(committedRecords(project, gone)).rejects.toMatchObject({
+      code: 'PS5108',
+      message: expect.stringContaining('0000000000'),
+    });
     try {
       vi.stubEnv('PATH', '');
-      await expect(
-        committedApprovals(project, files, RECORD.prompt, ['legal'])
-      ).rejects.toMatchObject({
+      await expect(committedRecords(project, files)).rejects.toMatchObject({
         code: 'PS5108',
         message: expect.stringContaining('git is not installed'),
       });
@@ -354,4 +357,35 @@ describe('committedApprovals', () => {
       vi.unstubAllEnvs();
     }
   });
+  it.skipIf(process.platform === 'win32')(
+    'refuses a size git ls-tree should not print, but lists a blob Git does not have',
+    async () => {
+      const project = await root();
+      const blob = 'a'.repeat(40);
+      const entry = (size: string): string =>
+        `100644 blob ${blob} ${size}\\t.promptscript/approvals/legal/x/${size}.json\\0`;
+      const fake = async (size: string): Promise<void> => {
+        await writeFile(join(project, 'git'), `#!/bin/sh\nprintf '${entry(size)}'\n`);
+        await chmod(join(project, 'git'), 0o755);
+      };
+      vi.stubEnv('PATH', project);
+
+      try {
+        await fake('BAD');
+        const listed = await committedApprovalFiles(project);
+        await fake('-');
+        const refused = committedApprovalFiles(project);
+
+        expect(listed).toEqual([
+          { blob, path: '.promptscript/approvals/legal/x/BAD.json', size: undefined },
+        ]);
+        await expect(refused).rejects.toMatchObject({
+          code: 'PS5108',
+          message: expect.stringContaining('git ls-tree printed size "-"'),
+        });
+      } finally {
+        vi.unstubAllEnvs();
+      }
+    }
+  );
 });

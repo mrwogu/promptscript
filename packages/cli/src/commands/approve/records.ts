@@ -16,7 +16,14 @@ import {
 } from '../../utils/governance-error.js';
 import type { ReleaseDiagnostic } from '../../utils/release-report.js';
 import { createFileExclusive } from '../../utils/write-file-atomic.js';
-import { runGit, stripControlCharacters, type GitResult } from '../release/git.js';
+import {
+  errorMessage,
+  readBlobs,
+  runGit,
+  stripControlCharacters,
+  type BlobBatch,
+  type GitResult,
+} from '../release/git.js';
 import { readRegularFile, UnreadableFileError } from '../release/layout.js';
 
 /** Approval records live here, next to the release files. */
@@ -281,8 +288,14 @@ export async function trackedApprovals(root: string): Promise<Map<string, string
   return blobs;
 }
 
-/** A `git ls-tree -r -z` entry of a regular file: `<mode> blob <blob id>\t<path>`. */
-const TREE_ENTRY_RE = /^100(?:644|755) blob ([0-9a-f]{40}|[0-9a-f]{64})\t(.+)$/s;
+/**
+ * A `git ls-tree -r -z -l` entry of a regular file: `<mode> blob <blob id> <size>\t<path>`.
+ * The size is `BAD` for a blob Git does not have.
+ */
+const TREE_ENTRY_RE = /^100(?:644|755) blob ([0-9a-f]{40}|[0-9a-f]{64}) +(\S+)\t(.+)$/s;
+/** What to do about a blob at HEAD that Git does not have. */
+const MISSING_BLOB_FIX =
+  'A partial clone (--filter, or actions/checkout `filter:`) does not have it. Clone without a filter, or include .promptscript/approvals in the sparse checkout';
 
 /** One record file as committed at HEAD. */
 export interface CommittedApproval {
@@ -309,41 +322,13 @@ function refuseCaseDuplicates(paths: readonly string[]): void {
   }
 }
 
-/** Git printed more than `maxBuffer` bytes. */
-function isOutputLimit(error: unknown): boolean {
-  const cause = error instanceof Error ? error.cause : undefined;
-  return (
-    cause instanceof Error && 'code' in cause && cause.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'
-  );
-}
-
-/**
- * A committed record; a blob that is too large or not a record has none. Any other Git
- * failure is PS5108, so a Git problem never shows as a missing approval.
- */
-async function committedRecord(root: string, blob: string): Promise<{ record?: ApprovalRecordV1 }> {
-  let shown: GitResult;
-  try {
-    shown = await runGit(['cat-file', 'blob', blob], root, { maxBuffer: MAX_RECORD_BYTES });
-  } catch (error) {
-    // Larger than a record can be: the record does not count.
-    if (isOutputLimit(error)) return {};
-    throw gitError(error instanceof Error ? error.message : String(error), root);
-  }
-  if (shown.status !== 0) throw gitError(stripControlCharacters(shown.stderr.trim()), root);
-  // runGit decodes UTF-8. The bytes count only when they hash back to the blob, so the
-  // decoding lost nothing.
-  const bytes = Buffer.from(shown.stdout, 'utf-8');
-  if (gitBlobId(bytes, blob.length) !== blob) return {};
-  const record = parseApprovalRecord(bytes);
-  return record === undefined ? {} : { record };
-}
-
 /** A regular file committed under the approvals directory. */
 export interface CommittedFile {
   /** Path relative to the project root, as Git has it */
   path: string;
   blob: string;
+  /** Size of the blob in bytes; undefined for a blob Git does not have, as in a partial clone */
+  size: number | undefined;
 }
 
 /**
@@ -355,33 +340,84 @@ export interface CommittedFile {
 export async function committedApprovalFiles(root: string): Promise<CommittedFile[]> {
   let listed: GitResult;
   try {
-    listed = await runGit(['ls-tree', '-r', '-z', 'HEAD', '--', APPROVALS_DIRECTORY], root, {
+    listed = await runGit(['ls-tree', '-r', '-z', '-l', 'HEAD', '--', APPROVALS_DIRECTORY], root, {
       maxBuffer: MAX_APPROVAL_ENTRIES * 1024,
     });
   } catch (error) {
     throw gitError(error instanceof Error ? error.message : String(error), root);
   }
   if (listed.status !== 0) throw gitError(stripControlCharacters(listed.stderr.trim()), root);
-  const files = listed.stdout.split('\0').flatMap((entry) => {
-    const [, blob, path] = TREE_ENTRY_RE.exec(entry) ?? [];
-    return blob === undefined || path === undefined ? [] : [{ blob, path }];
+  const files = listed.stdout.split('\0').flatMap((entry): CommittedFile[] => {
+    const [, blob, size, path] = TREE_ENTRY_RE.exec(entry) ?? [];
+    if (blob === undefined || size === undefined || path === undefined) return [];
+    // A blob this run does not need may be missing; committedRecords refuses one it needs.
+    if (size === 'BAD') return [{ blob, path, size: undefined }];
+    if (!/^\d+$/.test(size)) {
+      throw gitError(
+        `git ls-tree printed size "${stripControlCharacters(size)}" for ${blob}`,
+        root
+      );
+    }
+    return [{ blob, path, size: Number(size) }];
   });
   refuseCaseDuplicates(files.map((file) => file.path));
   return files;
 }
 
-/** The records among committed files below `<approvals>/<role>/<prompt>/` of each role. */
-export function committedApprovals(
-  root: string,
-  files: readonly CommittedFile[],
-  prompt: string,
+/** The files below `<approvals>/<role>/<prompt>/` of any of the prompts and roles. */
+export function approvalFilesOf<T extends { path: string }>(
+  files: readonly T[],
+  prompts: readonly string[],
   roles: readonly string[]
-): Promise<CommittedApproval[]> {
-  const prefixes = roles.map((role) => `${APPROVALS_DIRECTORY}/${role}/${prompt}/`);
-  const wanted = files.filter(({ path }) => prefixes.some((prefix) => path.startsWith(prefix)));
-  return Promise.all(
-    wanted.map(async ({ blob, path }) => ({ path, ...(await committedRecord(root, blob)) }))
+): T[] {
+  const prefixes = prompts.flatMap((prompt) =>
+    roles.map((role) => `${APPROVALS_DIRECTORY}/${role}/${prompt}/`)
   );
+  return files.filter(({ path }) => prefixes.some((prefix) => path.startsWith(prefix)));
+}
+
+/**
+ * The records of committed files, read with one `git cat-file --batch`. A blob larger than
+ * a record can be is never read and has no record, nor has a blob that is no record. A blob
+ * Git does not have, bytes that do not hash to their blob id, or any Git failure is PS5108,
+ * so a Git problem never shows as a missing approval.
+ */
+export async function committedRecords(
+  root: string,
+  files: readonly CommittedFile[]
+): Promise<CommittedApproval[]> {
+  const absent = files.filter((file) => file.size === undefined);
+  if (absent.length > 0) {
+    const blobs = absent.map((file) => file.blob).join(', ');
+    throw gitError(`Git has no blob ${blobs}. ${MISSING_BLOB_FIX}`, root);
+  }
+  const small = files.filter((file) => file.size !== undefined && file.size <= MAX_RECORD_BYTES);
+  let read: BlobBatch;
+  try {
+    read = await readBlobs(
+      small.map((file) => file.blob),
+      root,
+      { maxBytes: MAX_RECORD_BYTES }
+    );
+  } catch (error) {
+    throw gitError(errorMessage(error), root);
+  }
+  if (read.missing.size > 0) {
+    throw gitError(`Git has no blob ${[...read.missing].join(', ')}. ${MISSING_BLOB_FIX}`, root);
+  }
+  // cat-file does not check that an object holds what its id says.
+  const corrupt = [...read.blobs].filter(([blob, bytes]) => gitBlobId(bytes, blob.length) !== blob);
+  if (corrupt.length > 0) {
+    throw gitError(
+      `the object store holds other bytes for blob ${corrupt.map(([blob]) => blob).join(', ')}. Run git fsck and restore the object from a clean clone`,
+      root
+    );
+  }
+  return files.map(({ path, blob }) => {
+    const bytes = read.blobs.get(blob);
+    const record = bytes === undefined ? undefined : parseApprovalRecord(bytes);
+    return record === undefined ? { path } : { path, record };
+  });
 }
 
 function gitError(reason: string, root: string): GovernanceError {
