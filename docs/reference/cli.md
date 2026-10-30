@@ -1343,21 +1343,22 @@ record it checks the whole [`governance`](config.md#governance) section, and a p
 [Approvals](../guides/releases.md#approvals) in the releases guide.
 
 ```bash
-prs approve <id>@<hash> --role <role> --approver @<handle> (--env <env> | --all-environments) [options]
+prs approve <id>@<hash> --role <role> --approver @<handle> (--env <env> | --all-environments) [--max-weight <percent>] [options]
 prs approve --list [<id>] [options]
 ```
 
-| Option                | Description                                                                  | Default |
-| --------------------- | ---------------------------------------------------------------------------- | ------- |
-| `--role <role>`       | Approval role from `governance.roles` (required to approve)                  | -       |
-| `--approver <handle>` | Your Git host user handle, like `@jane` or `@jane.doe` (required to approve) | -       |
-| `--env <env>`         | The one environment the approval counts for                                  | -       |
-| `--all-environments`  | Let the approval count for every environment                                 | -       |
-| `--comment <text>`    | Note in the record, at most 2000 characters                                  | -       |
-| `--list`              | List records with their scope and state                                      | -       |
-| `--format <format>`   | `text` or `json`                                                             | `text`  |
-| `-c, --config <path>` | Path to a custom config file                                                 | -       |
-| `--cwd <dir>`         | Working directory (project root)                                             | -       |
+| Option                   | Description                                                                  | Default |
+| ------------------------ | ---------------------------------------------------------------------------- | ------- |
+| `--role <role>`          | Approval role from `governance.roles` (required to approve)                  | -       |
+| `--approver <handle>`    | Your Git host user handle, like `@jane` or `@jane.doe` (required to approve) | -       |
+| `--env <env>`            | The one environment the approval counts for                                  | -       |
+| `--all-environments`     | Let the approval count for every environment                                 | -       |
+| `--max-weight <percent>` | Highest arm weight in percent the approval counts for; needs `--env`         | -       |
+| `--comment <text>`       | Note in the record, at most 2000 characters                                  | -       |
+| `--list`                 | List records with their scope and state                                      | -       |
+| `--format <format>`      | `text` or `json`                                                             | `text`  |
+| `-c, --config <path>`    | Path to a custom config file                                                 | -       |
+| `--cwd <dir>`            | Working directory (project root)                                             | -       |
 
 `<hash>` is the full `sha256-<64 hex>`. It must be what the source builds now or a release bundle of
 that prompt. Give `--env` or `--all-environments`, one of the two. Before writing, the command
@@ -1366,6 +1367,13 @@ stderr, with invisible characters shown as `<U+XXXX>`. It writes
 `.promptscript/approvals/<role>/<id>/<hash>.<approver>.json` and, the first time,
 `.promptscript/approvals/.gitattributes`. An existing record is never replaced: the command fails
 with `PS5105` and exit code 2. Other errors exit with code 1.
+
+`--max-weight` caps the approval at an experiment arm weight, a percent from 0.01 to 100 with at
+most two decimals. It needs `--env` and is refused with `--all-environments`, and a bad value is
+`PS5110`. The record gets `maxWeight` in basis points. It counts only for an arm at or under that
+weight, never for the entry hash, a promote, `--end --keep` or a plain rollback, see
+[Capped approvals](../guides/releases.md#capped-approvals). `--list` shows such a record as
+`prod up to 25 %` and does not take the option.
 
 `--list` prints per prompt the hash the checkout builds and every record as `current`,
 `labelled:<env>`, `stale`, `untracked`, `modified`, `misplaced` or `unknown-role`. It compares the
@@ -1377,6 +1385,7 @@ With `--format json`, stdout holds one document that matches
 ```bash
 prs approve --list acme-support/refund-reply
 prs approve acme-support/refund-reply@sha256-<64 hex> --role legal --approver @jane --env prod
+prs approve acme-support/refund-reply@sha256-<64 hex> --role legal --approver @jane --env prod --max-weight 25
 ```
 
 ---
