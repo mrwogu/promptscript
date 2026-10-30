@@ -69,15 +69,20 @@ for (const name of names) {
   // api-extractor ignores whitespace when it compares reports, so compare the files here.
   const readReport = (path: string): string | undefined =>
     existsSync(path) ? readFileSync(path, 'utf8').replaceAll('\r\n', '\n') : undefined;
-  const differs = result.succeeded && readReport(tempPath) !== readReport(reportPath);
+  // A changed report makes api-extractor fail in check mode, that is not an extractor failure.
+  const otherFailure = result.errorCount > 0 || (!result.succeeded && !result.apiReportChanged);
+  const differs =
+    !otherFailure && (result.apiReportChanged || readReport(tempPath) !== readReport(reportPath));
 
-  if (!result.succeeded) {
+  if (otherFailure) {
     failed = true;
     console.error(
       `api-extractor failed for ${name}: ${result.errorCount} error(s), ${result.warningCount} warning(s), see above.`
     );
   } else if (differs && update) {
-    copyFileSync(tempPath, reportPath);
+    if (readReport(tempPath) !== readReport(reportPath)) {
+      copyFileSync(tempPath, reportPath);
+    }
     console.log(`${name}: API report updated (${report})`);
   } else if (differs) {
     failed = true;
