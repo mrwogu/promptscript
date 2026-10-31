@@ -245,7 +245,12 @@ function matchesHash(event: AuditEvent, hash: string | undefined): boolean {
   const hashes =
     event.type === 'label-removed'
       ? [event.previousContentHash]
-      : [event.contentHash, event.droppedContentHash];
+      : [
+          event.contentHash,
+          event.droppedContentHash,
+          ...(event.arms ?? []).map((arm) => arm.contentHash),
+          ...(event.previousArms ?? []).map((arm) => arm.contentHash),
+        ];
   return hashes.some((contentHash) => contentHash?.startsWith(hash) === true);
 }
 

@@ -3,6 +3,7 @@ import {
   compareCodeUnits,
   parseApprovalRecord,
   type ApprovalRecordV1,
+  type PromptReleaseLabelEntryV2,
 } from '@promptscript/core';
 import { gitBlobId } from '../approve/records.js';
 import { parseLabel, RELEASE_DIRECTORY, RESERVED_RELEASE_NAMES } from '../release/layout.js';
@@ -14,6 +15,7 @@ import {
   type GitPerson,
   type HistoryCommit,
 } from './history.js';
+import { experimentEvents } from './experiments.js';
 import { inSequence } from './sequence.js';
 
 export type AuditEventType =
@@ -25,7 +27,10 @@ export type AuditEventType =
   | 'label-removed'
   | 'merge-dropped'
   | 'generated'
-  | 'config-changed';
+  | 'config-changed'
+  | 'experiment-started'
+  | 'experiment-changed'
+  | 'experiment-ended';
 
 /**
  * State of an approval record from its bytes and its path alone: `well-formed` sits at the
@@ -33,6 +38,13 @@ export type AuditEventType =
  * A well-formed record still counts in a gate only with a configured role and the review.
  */
 export type AuditRecordState = 'well-formed' | 'misplaced' | 'invalid';
+
+/** One arm of an experiment as a label has it; the weight is in basis points. */
+export interface AuditExperimentArm {
+  variant: string;
+  contentHash: string;
+  weight: number;
+}
 
 /** One audit event. Fields past `path` depend on the type. */
 export interface AuditEvent {
@@ -68,6 +80,14 @@ export interface AuditEvent {
   droppedContentHash?: string;
   /** A label of an environment that is not in `releases.environments` */
   configured?: false;
+  /** Experiment events: the experiment name */
+  experiment?: string;
+  /** Experiment events: the arms after the change; for `experiment-ended`, the last arms */
+  arms?: AuditExperimentArm[];
+  /** `experiment-changed`: the arms before the change */
+  previousArms?: AuditExperimentArm[];
+  /** `experiment-ended`: the arm whose hash the entry serves now */
+  keptVariant?: string;
 }
 
 /** The files the log covers, by their path relative to the repository top level. */
@@ -202,9 +222,36 @@ async function approvalEvents(
 }
 
 /**
- * Prompt id to hash of one side of a label change: empty when there is no file, undefined
+ * Prompt id to entry of one side of a label change: empty when there is no file, undefined
  * with a warning when the file is no readable label.
  */
+export async function labelEntryMap(
+  read: BlobReader,
+  blob: string,
+  mode: string,
+  environment: string,
+  path: string,
+  where: string,
+  warn: AuditWarn
+): Promise<Map<string, PromptReleaseLabelEntryV2> | undefined> {
+  if (isNullBlob(blob)) return new Map();
+  const text = isRegularMode(mode) ? await read(blob) : undefined;
+  try {
+    if (text === undefined) throw new Error('not a regular file or too large');
+    const label = parseLabel(text, environment, path);
+    const prompts: PromptReleaseLabelEntryV2[] = label.prompts;
+    return new Map(prompts.map((entry) => [entry.id, entry]));
+  } catch {
+    warn(`${path} at ${where} is not a release label, so its entries were not read.`);
+    return undefined;
+  }
+}
+
+function hashesOf(entries: ReadonlyMap<string, PromptReleaseLabelEntryV2>): Map<string, string> {
+  return new Map([...entries].map(([prompt, entry]) => [prompt, entry.contentHash]));
+}
+
+/** Prompt id to hash of one side of a label change, see `labelEntryMap`. */
 export async function labelEntries(
   read: BlobReader,
   blob: string,
@@ -214,16 +261,8 @@ export async function labelEntries(
   where: string,
   warn: AuditWarn
 ): Promise<Map<string, string> | undefined> {
-  if (isNullBlob(blob)) return new Map();
-  const text = isRegularMode(mode) ? await read(blob) : undefined;
-  try {
-    if (text === undefined) throw new Error('not a regular file or too large');
-    const label = parseLabel(text, environment, path);
-    return new Map(label.prompts.map((entry) => [entry.id, entry.contentHash]));
-  } catch {
-    warn(`${path} at ${where} is not a release label, so its entries were not read.`);
-    return undefined;
-  }
+  const entries = await labelEntryMap(read, blob, mode, environment, path, where, warn);
+  return entries === undefined ? undefined : hashesOf(entries);
 }
 
 /**
@@ -254,37 +293,15 @@ function heldHashes(context: LabelContext, environment: string, prompt: string):
   return seen;
 }
 
-async function labelEvents(
+/** Entry events of one label file change: removed, then promoted or rolled back. */
+function entryEvents(
   commit: AuditCommit,
-  file: FileChange,
+  path: string,
   environment: string,
   context: LabelContext,
-  read: BlobReader,
-  warn: AuditWarn
-): Promise<AuditEvent[]> {
-  const short = commit.commit.slice(0, 12);
-  const parent = commit.parents[0]?.slice(0, 12) ?? 'the parent';
-  const previous = await labelEntries(
-    read,
-    file.oldBlob,
-    file.oldMode,
-    environment,
-    file.path,
-    parent,
-    warn
-  );
-  const next = await labelEntries(
-    read,
-    file.newBlob,
-    file.newMode,
-    environment,
-    file.path,
-    short,
-    warn
-  );
-  if (previous === undefined || next === undefined) context.unreadable.add(file.path);
-  // A label that does not parse changes nothing: no entry was promoted or removed by it.
-  if (next === undefined) return [];
+  previous: Map<string, string> | undefined,
+  next: Map<string, string>
+): AuditEvent[] {
   const remember = (seen: Set<string>, hash: string): void => {
     if (context.mainline) seen.add(hash);
   };
@@ -294,7 +311,7 @@ async function labelEvents(
     if (next.has(prompt)) continue;
     remember(heldHashes(context, environment, prompt), before);
     events.push({
-      ...baseEvent(commit, 'label-removed', file.path),
+      ...baseEvent(commit, 'label-removed', path),
       environment,
       prompt,
       previousContentHash: before,
@@ -307,7 +324,7 @@ async function labelEvents(
     if (before !== undefined) remember(seen, before);
     if (before === contentHash) continue;
     events.push({
-      ...baseEvent(commit, seen.has(contentHash) ? 'rolled-back' : 'promoted', file.path),
+      ...baseEvent(commit, seen.has(contentHash) ? 'rolled-back' : 'promoted', path),
       environment,
       prompt,
       contentHash,
@@ -317,6 +334,60 @@ async function labelEvents(
     remember(seen, contentHash);
   }
   return events;
+}
+
+/**
+ * Events of one label file change: ended experiments, then the entry events, then started
+ * and changed experiments, so a kept variant reads as ended and then promoted.
+ */
+async function labelEvents(
+  commit: AuditCommit,
+  file: FileChange,
+  environment: string,
+  context: LabelContext,
+  read: BlobReader,
+  warn: AuditWarn
+): Promise<AuditEvent[]> {
+  const short = commit.commit.slice(0, 12);
+  const parent = commit.parents[0]?.slice(0, 12) ?? 'the parent';
+  const previous = await labelEntryMap(
+    read,
+    file.oldBlob,
+    file.oldMode,
+    environment,
+    file.path,
+    parent,
+    warn
+  );
+  const next = await labelEntryMap(
+    read,
+    file.newBlob,
+    file.newMode,
+    environment,
+    file.path,
+    short,
+    warn
+  );
+  if (previous === undefined || next === undefined) context.unreadable.add(file.path);
+  // A label that does not parse changes nothing: no entry was promoted or removed by it.
+  if (next === undefined) return [];
+  const entries = entryEvents(
+    commit,
+    file.path,
+    environment,
+    context,
+    previous === undefined ? undefined : hashesOf(previous),
+    hashesOf(next)
+  );
+  const configured = context.configured ? {} : { configured: false as const };
+  const { ended, startedOrChanged } = experimentEvents(
+    (type) => baseEvent(commit, type, file.path),
+    environment,
+    previous,
+    next,
+    configured
+  );
+  return [...ended, ...entries, ...startedOrChanged];
 }
 
 /** The lines from this project's marker to the end, or undefined without the marker. */
