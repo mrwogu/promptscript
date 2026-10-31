@@ -446,7 +446,7 @@ code owner review of its role directory. See
 prompt files go to their owners, approval directories to their role teams, and the config and
 release files to the admins. See [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/).
 
-`prs audit log` reads who changed, approved, promoted or rolled back a prompt from the Git history,
+`prs audit log` reads who changed, approved, promoted, rolled back or split a prompt from the Git history,
 as text, JSON or CEF for a SIEM. See [Audit log](https://getpromptscript.dev/guides/releases/#audit-log).
 
 The `@promptscript/runtime` package in this repository loads, verifies and renders the released

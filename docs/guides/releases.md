@@ -831,8 +831,8 @@ content hash before use, as described in [Application Prompts](application-promp
 ## Audit log
 
 `prs audit log` reads the governance history of the project from Git: who changed a prompt file,
-who approved which hash, who promoted, rolled back or removed a label entry, and who changed the
-config or the generated CODEOWNERS section. Nothing is stored besides the repository, so the log is as good as
+who approved which hash, who promoted, rolled back or removed a label entry, who started, changed
+or ended an experiment, and who changed the config or the generated CODEOWNERS section. Nothing is stored besides the repository, so the log is as good as
 the history on the branch.
 
 ```bash
@@ -859,17 +859,20 @@ them), `path` (relative to the repository top level) and `mainline`. `mainline` 
 commit on the first-parent chain of `HEAD`. An event with `mainline: false` is history of a branch:
 its change may never have reached `HEAD`, or reached it only through a merge.
 
-| Type               | When                                                                   | Extra fields                                                                                                                     |
-| ------------------ | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `changed`          | a `.prs` file of the project was added, modified or deleted            | `change` (`A`, `M`, `D`)                                                                                                         |
-| `approved`         | an approval record was added                                           | `prompt`, `contentHash`, `role`, `environment`, `approver`, `approverSource`, `recordCreatedAt`, `comment`, `maxWeight`, `state` |
-| `approval-removed` | an approval record was deleted, read from the parent commit            | the same                                                                                                                         |
-| `promoted`         | a label entry was added or changed                                     | `environment`, `prompt`, `contentHash`, `previousContentHash`                                                                    |
-| `rolled-back`      | a label entry was set to a hash it held before in that label           | the same                                                                                                                         |
-| `label-removed`    | a label entry was removed, or the label file deleted                   | `environment`, `prompt`, `previousContentHash`                                                                                   |
-| `merge-dropped`    | a merge did not keep a change of a parent after the first              | `parent`, `change`, and the record fields, or `environment`, `prompt`, `contentHash`, `droppedContentHash`                       |
-| `config-changed`   | a config file name of the project, the config or its `extends` changed | `change`                                                                                                                         |
-| `generated`        | the CODEOWNERS section under this project's marker changed             | none                                                                                                                             |
+| Type                 | When                                                                   | Extra fields                                                                                                                     |
+| -------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `changed`            | a `.prs` file of the project was added, modified or deleted            | `change` (`A`, `M`, `D`)                                                                                                         |
+| `approved`           | an approval record was added                                           | `prompt`, `contentHash`, `role`, `environment`, `approver`, `approverSource`, `recordCreatedAt`, `comment`, `maxWeight`, `state` |
+| `approval-removed`   | an approval record was deleted, read from the parent commit            | the same                                                                                                                         |
+| `promoted`           | a label entry was added or changed                                     | `environment`, `prompt`, `contentHash`, `previousContentHash`                                                                    |
+| `rolled-back`        | a label entry was set to a hash it held before in that label           | the same                                                                                                                         |
+| `label-removed`      | a label entry was removed, or the label file deleted                   | `environment`, `prompt`, `previousContentHash`                                                                                   |
+| `merge-dropped`      | a merge did not keep a change of a parent after the first              | `parent`, `change`, and the record fields, or `environment`, `prompt`, `contentHash`, `droppedContentHash`                       |
+| `config-changed`     | a config file name of the project, the config or its `extends` changed | `change`                                                                                                                         |
+| `experiment-started` | a label entry got an experiment                                        | `environment`, `prompt`, `experiment`, `arms`, `contentHash`                                                                     |
+| `experiment-changed` | the arms, their weights or their order changed, same name              | the same, and `previousArms`                                                                                                     |
+| `experiment-ended`   | a label entry lost its experiment, or the entry or label is gone       | `environment`, `prompt`, `experiment`, `arms` (the last ones), `contentHash`, `keptVariant`                                      |
+| `generated`          | the CODEOWNERS section under this project's marker changed             | none                                                                                                                             |
 
 A record file changed in place shows as `approval-removed` with the old content and `approved`
 with the new. `state` comes from the record bytes and the path alone: `well-formed` at the path
@@ -880,6 +883,22 @@ the role in `governance.roles` and the scope, and the review by the role team li
 log of the Git host. A misplaced or invalid record never counts in a gate. `approverSource` is
 always `asserted`. `maxWeight` is the ceiling of a capped record in basis points and is absent for a
 full approval; the text format prints it as `env=prod up to 5 %`.
+
+Experiments are read per label entry. Every arm is `variant`, `contentHash` and `weight` in basis
+points, the control first; JSON keeps basis points, text and CEF print percent. A new experiment
+on an entry is `experiment-started`, and a label that goes from v1 to v2 by `prs release split`
+starts one without a `promoted`, because the entry hash did not change. A change of a weight, an
+arm added, removed or paused at 0, or the arms in another order is `experiment-changed`, with
+`previousArms` for the comparison. The order matters because it decides which bucket a key lands
+in. `prs release split --end` gives `experiment-ended` with `keptVariant: "control"`. With
+`--keep <variant>` it gives `experiment-ended` with that variant and the hash it serves, and then
+the usual `promoted` (or `rolled-back`) for the entry. A rename, only possible by a hand edit or a
+rollback, is `experiment-ended` and then `experiment-started` in the same commit. When the entry
+or the label file goes while an experiment runs, `experiment-ended` has no `contentHash` and no
+`keptVariant`, and `label-removed` follows. Inside one label file the order is: ended
+experiments, `label-removed`, `promoted` or `rolled-back`, then started and changed experiments.
+`keptVariant` is also absent when a hand edit sets the entry to a hash that is no arm. Arm hashes
+do not count as hashes the label held, so `rolled-back` still means the entry hash held before.
 
 Commits of merged side branches are read too, each with its own events. A merge commit is read
 against its first parent: its events are what it brought to the branch it was merged into, and
@@ -902,7 +921,7 @@ what the parent did (`A`, `M` or `D`) and the record fields come from the parent
 from the merge's when the parent deleted it.
 
 After reading the history, the command replays the `mainline` events and compares the result with
-the approval records and label entries at `HEAD`. Any difference fails with `PS5108`: the history
+the approval records, label entries and experiments at `HEAD`. Any difference fails with `PS5108`: the history
 has a change the log cannot explain, and the log is not printed as if it were complete. Labels
 that did not parse at some commit are left out of this check.
 
@@ -915,14 +934,14 @@ carry `configured: false`, so a look-alike file such as `prodd.json` stands apar
 
 ### Filters
 
-| Option            | Keeps                                                                                                                                                                          |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--prompt <id>`   | approval and release events of the prompt, and `changed` events of the files it is built from in the checkout                                                                  |
-| `--env <env>`     | release events of the environment, and approvals for it or for every environment                                                                                               |
-| `--hash <prefix>` | events whose `contentHash` (for `label-removed`, `previousContentHash`; for `merge-dropped`, either hash) starts with these hex digits (`sha256-` optional, at least 4 digits) |
-| `--since <date>`  | events committed at or after the ISO date or date and time                                                                                                                     |
-| `--until <date>`  | events committed at or before it; a date alone means the end of that day, UTC                                                                                                  |
-| `--limit <n>`     | the newest `n` events after the other filters, at most 100000                                                                                                                  |
+| Option            | Keeps                                                                                                                                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--prompt <id>`   | approval and release events of the prompt, and `changed` events of the files it is built from in the checkout                                                                                                                        |
+| `--env <env>`     | release events of the environment, and approvals for it or for every environment                                                                                                                                                     |
+| `--hash <prefix>` | events whose `contentHash` (for `label-removed`, `previousContentHash`; for `merge-dropped`, either hash; for experiment events, any arm hash, before or after) starts with these hex digits (`sha256-` optional, at least 4 digits) |
+| `--since <date>`  | events committed at or after the ISO date or date and time                                                                                                                                                                           |
+| `--until <date>`  | events committed at or before it; a date alone means the end of that day, UTC                                                                                                                                                        |
+| `--limit <n>`     | the newest `n` events after the other filters, at most 100000                                                                                                                                                                        |
 
 An event without the filtered field does not match: with `--hash`, only approval and release
 events remain. `--prompt` finds the files of a prompt by resolving the checkout, so a prompt file
@@ -946,28 +965,33 @@ zero-width characters in strings are written as `\uXXXX` escapes.
 CEF:0|PromptScript|prs|<cli version>|prs-approved|Prompt approved|5|rt=1792591331000 act=approved suser=jane@acme.example duser=@jane filePath=... cs1=acme-support/refund-reply cs1Label=prompt cs2=sha256-... cs2Label=contentHash cs3=legal cs3Label=role cs4=prod cs4Label=environment cs5=9ffb3347... cs5Label=commit outcome=well-formed msg=Refund wording checked flexString1=4452d509... flexString1Label=head flexString2=asserted flexString2Label=approverSource
 ```
 
-| Key            | Value                                                                                                 |
-| -------------- | ----------------------------------------------------------------------------------------------------- |
-| `rt`           | commit time in milliseconds                                                                           |
-| `act`          | event type                                                                                            |
-| `suser`        | author email                                                                                          |
-| `duser`        | approver                                                                                              |
-| `filePath`     | path                                                                                                  |
-| `cs1` to `cs6` | prompt, contentHash, role, environment, commit, previous contentHash (the parent for `merge-dropped`) |
-| `outcome`      | record `state`, or `added`, `modified`, `deleted` for file changes                                    |
-| `msg`          | record comment                                                                                        |
-| `flexString1`  | `head`, the commit the log was read from                                                              |
-| `flexString2`  | `approverSource`, always `asserted`, on approval events                                               |
-| `flexNumber1`  | `maxWeight` in basis points, with `flexNumber1Label=maxWeight`, on capped approval events             |
-| `cn1`          | `1` with `cn1Label=viaMerge` on events of a merge                                                     |
-| `cn2`          | `0` with `cn2Label=configured` on labels of unconfigured environments                                 |
-| `cn3`          | `1` or `0` with `cn3Label=mainline`                                                                   |
-| `oldFileHash`  | `droppedContentHash` of a `merge-dropped` label entry                                                 |
+| Key            | Value                                                                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `rt`           | commit time in milliseconds                                                                                                          |
+| `act`          | event type                                                                                                                           |
+| `suser`        | author email                                                                                                                         |
+| `duser`        | approver                                                                                                                             |
+| `filePath`     | path                                                                                                                                 |
+| `cs1` to `cs6` | prompt, contentHash, role, environment, commit, previous contentHash (the parent for `merge-dropped`)                                |
+| `outcome`      | record `state`, or `added`, `modified`, `deleted` for file changes                                                                   |
+| `msg`          | record comment; on experiment events the arms, `; previous <arms>` or `; kept <variant>`                                             |
+| `flexString1`  | `head`, the commit the log was read from                                                                                             |
+| `flexString2`  | `approverSource`, always `asserted`, on approval events; the experiment name with `flexString2Label=experiment` on experiment events |
+| `flexNumber1`  | `maxWeight` in basis points, with `flexNumber1Label=maxWeight`, on capped approval events                                            |
+| `flexNumber2`  | sum of the variant weights in basis points, with `flexNumber2Label=variantWeight`, on `experiment-started` and `experiment-changed`  |
+| `cn1`          | `1` with `cn1Label=viaMerge` on events of a merge                                                                                    |
+| `cn2`          | `0` with `cn2Label=configured` on labels of unconfigured environments                                                                |
+| `cn3`          | `1` or `0` with `cn3Label=mainline`                                                                                                  |
+| `oldFileHash`  | `droppedContentHash` of a `merge-dropped` label entry                                                                                |
+
+`flexString2` means the approver source on approval events and the experiment name on experiment
+events, so a SIEM rule should check `flexString2Label` first.
 
 Severities: `changed` and `generated` 3, `approved` 5, `approval-removed`, `promoted` and
-`config-changed` 6, `rolled-back`, `label-removed` and `merge-dropped` 7. Header values escape `\` and `|`; extension values escape `\`
+`config-changed` and the three experiment events 6, `rolled-back`, `label-removed` and `merge-dropped` 7. Header values escape `\` and `|`; extension values escape `\`
 and `=`, line breaks become `\n`, and other control characters are dropped. Text and CEF output
-drop control, bidi and zero-width characters from Git and record fields.
+drop control, bidi and zero-width characters from Git and record fields. JSON keeps them as
+escapes, so take exact prompt ids and other values from the JSON export.
 
 ### Limits
 
@@ -990,8 +1014,17 @@ drop control, bidi and zero-width characters from Git and record fields.
 - Git runs with replace refs and grafts off, so a `git replace` ref or a `.git/info/grafts` file
   cannot change what the log shows.
 - The output holds email addresses. Treat exports like other personal data.
-- Experiment arms and weights are not listed in the log yet, and an experiment change that keeps
-  the entry hash shows no event. Read the label history with `git log -p` on the label.
+- A merge that drops an experiment change of a side branch shows no `merge-dropped`, because that
+  check compares hashes only. The change shows on the side commit.
+- A label that does not parse is read as no change. The next readable version of it shows its
+  experiments as `experiment-started`, like its entries as `promoted`, and the label stays out of
+  the check against `HEAD`. A change made while the label did not parse shows no
+  `experiment-ended`, `experiment-changed` or `label-removed`: an experiment that ended or changed,
+  or an entry that was removed, leaves no event, because the next readable version is compared
+  against nothing. A changed experiment then shows as `experiment-started` without `previousArms`.
+- The experiment events are new in the JSON document, and the schema URL and `version` stay 1. A
+  consumer that switches on `type` sees types it does not know, and one that validates against a
+  copy of the schema from before them rejects the document. Update the copy.
 
 ## Error codes
 
