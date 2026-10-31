@@ -14,6 +14,8 @@
   "targets": {
     "build": {
       "executor": "@nx/vite:build",
+      "cache": true,
+      "inputs": ["production", "^production", { "dependentTasksOutputFiles": "**/*.d.ts" }],
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/browser-compiler",
