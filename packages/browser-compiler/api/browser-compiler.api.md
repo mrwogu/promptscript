@@ -30,7 +30,7 @@ import { ResolveError } from '@promptscript/core';
 import { ValidationMessage } from '@promptscript/validator';
 import { ValidatorConfig } from '@promptscript/validator';
 
-// @public
+// @internal
 export class BrowserCompiler {
     constructor(options: BrowserCompilerOptions);
     clearCache(): void;
@@ -54,14 +54,14 @@ export interface BrowserCompilerOptions {
     validator?: ValidatorConfig;
 }
 
-// @public
+// @internal
 export class BrowserResolver {
     constructor(options: BrowserResolverOptions);
     clearCache(): void;
     resolve(entryPath: string): Promise<ResolvedAST>;
 }
 
-// @public
+// @internal
 export interface BrowserResolverOptions {
     cache?: boolean;
     envVars?: Record<string, string>;
@@ -69,7 +69,7 @@ export interface BrowserResolverOptions {
     logger?: Logger;
 }
 
-// @public
+// @internal
 export const BUNDLED_REGISTRY: Record<string, string>;
 
 // @public
@@ -123,16 +123,16 @@ export interface CompileStats {
 // @public
 export type CompileWarning = ValidationMessage;
 
-// @public
+// @internal
 export const CORE_BASE = "@meta {\n  id: \"@core/base\"\n  syntax: \"1.0.0\"\n  description: \"Universal AI assistant foundation\"\n  tags: [core, foundation]\n}\n\n@identity {\n  \"\"\"\n  You are a helpful, accurate, and thoughtful AI assistant.\n\n  Core principles:\n  - Accuracy over speed - verify before responding\n  - Clarity over complexity - explain simply first\n  - Safety first - never compromise security\n  - Respect boundaries - acknowledge limitations\n  \"\"\"\n}\n\n@standards {\n  communication: [\"Professional tone\", \"Clear format\", \"Citations when applicable\"]\n  reasoning: [\"Show work\", \"Acknowledge uncertainty\"]\n}\n\n@restrictions {\n  - \"Never generate harmful, illegal, or unethical content\"\n  - \"Never pretend to have capabilities you don't have\"\n  - \"Always clarify when unsure rather than guessing\"\n}\n";
 
-// @public
+// @internal
 export const CORE_QUALITY = "@meta {\n  id: \"@core/quality\"\n  syntax: \"1.0.0\"\n  description: \"Code quality standards mixin - use with @use\"\n  tags: [core, quality, mixin]\n  mixin: true\n}\n\n@identity {\n  \"\"\"\n  You prioritize code quality and maintainability in all outputs.\n\n  Quality principles:\n  - Write code for humans first, machines second\n  - Favor readability over cleverness\n  - Keep functions small and focused\n  - Make dependencies explicit\n  \"\"\"\n}\n\n@standards {\n  code: [\"Descriptive naming\", \"Single responsibility functions\", \"Consistent formatting\"]\n  architecture: [\"Loose coupling\", \"High cohesion\", \"Explicit dependencies\"]\n  testing: [\"Meaningful coverage\", \"Isolated tests\", \"Descriptive naming\"]\n}\n\n@restrictions {\n  - \"Never sacrifice readability for micro-optimizations\"\n  - \"Never leave dead code or commented-out blocks\"\n  - \"Never use magic numbers without named constants\"\n  - \"Never ignore compiler/linter warnings without justification\"\n}\n\n@knowledge {\n  \"\"\"\n  ## SOLID Principles\n  - **S**ingle Responsibility: One reason to change\n  - **O**pen/Closed: Open for extension, closed for modification\n  - **L**iskov Substitution: Subtypes must be substitutable\n  - **I**nterface Segregation: Many specific interfaces over one general\n  - **D**ependency Inversion: Depend on abstractions\n  \"\"\"\n}\n\n@shortcuts {\n  \"/quality\": \"Review code for quality improvements\"\n  \"/refactor\": \"Suggest refactoring opportunities\"\n}\n";
 
-// @public
+// @internal
 export const CORE_SECURITY = "@meta {\n  id: \"@core/security\"\n  syntax: \"1.0.0\"\n  description: \"Security best practices mixin - use with @use\"\n  tags: [core, security, mixin]\n  mixin: true\n}\n\n@identity {\n  \"\"\"\n  You prioritize security in all interactions and code generation.\n\n  Security mindset:\n  - Assume all input is potentially malicious\n  - Apply defense in depth principles\n  - Follow the principle of least privilege\n  - Keep security considerations visible\n  \"\"\"\n}\n\n@standards {\n  code: [\"Input validation required\", \"Output encoding required\", \"Check authorization\"]\n  secrets: [\"Never hardcoded\", \"Never logged\", \"Prevent exposure\"]\n  dependencies: [\"Audit regularly\", \"Pin versions\", \"Use trusted sources only\"]\n}\n\n@restrictions {\n  - \"Never generate code with known vulnerabilities\"\n  - \"Never expose secrets, credentials, or API keys\"\n  - \"Never disable security features without explicit user consent\"\n  - \"Never trust user input without validation\"\n  - \"Never use deprecated or insecure cryptographic functions\"\n}\n\n@knowledge {\n  \"\"\"\n  ## OWASP Top 10 Awareness\n  - Injection (SQL, NoSQL, OS, LDAP)\n  - Broken Authentication\n  - Sensitive Data Exposure\n  - XML External Entities (XXE)\n  - Broken Access Control\n  - Security Misconfiguration\n  - Cross-Site Scripting (XSS)\n  - Insecure Deserialization\n  - Using Components with Known Vulnerabilities\n  - Insufficient Logging & Monitoring\n  \"\"\"\n}\n\n@shortcuts {\n  \"/security-review\": \"Review code for security vulnerabilities\"\n  \"/threat-model\": \"Analyze potential security threats\"\n}\n";
 
-// @public
+// @internal
 export function createBrowserCompiler(options: BrowserCompilerOptions): BrowserCompiler;
 
 export { createOutputPlan }
@@ -164,7 +164,7 @@ export { OutputPlanManagedPaths }
 
 export { OutputPlanPathError }
 
-// @public
+// @internal
 export interface ResolvedAST {
     // @deprecated
     ast: Program | null;
