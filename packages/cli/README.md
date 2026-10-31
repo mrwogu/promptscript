@@ -320,6 +320,11 @@ promotion is a Git change you review, and
 with the rules of the base branch. See the
 [releases guide](https://getpromptscript.dev/guides/releases/).
 
+`prs eval run` runs a prompt over a dataset and checks every answer with assertions and, if you
+want, an LLM judge. The default cache mode replays recorded answers, so a pull request check needs
+no key and no network. `prs eval compare` fails when a later report is worse than an earlier one.
+See the [evals guide](https://getpromptscript.dev/guides/evals/).
+
 `prs approve` records that a person approved one exact bundle hash in a role from
 `governance.roles`, as a JSON file under `.promptscript/approvals/`. The record is a claim; the
 review of the pull request that adds it is what binds it. See
@@ -560,6 +565,7 @@ the build, not the agent. See the
 | `prs registry <init\|validate\|publish\|list\|add>` | Manage registries and aliases                             |
 | `prs pull`                                          | Pull updates from the registry                            |
 | `prs release <build\|promote\|rollback\|status>`    | Release prompt bundles through environments               |
+| `prs eval <run\|compare\|import>`                   | Run eval suites, compare reports, import samples          |
 | `prs approve <id>@<hash>` / `prs approve --list`    | Record or list approvals of one prompt version            |
 | `prs governance codeowners`                         | Write CODEOWNERS lines from the governance config         |
 | `prs audit log`                                     | List approvals, promotions, experiments and changes       |
