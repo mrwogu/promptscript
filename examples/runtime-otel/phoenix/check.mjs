@@ -56,22 +56,26 @@ async function waitHealthy(url) {
     } catch {
       // not up yet
     }
-    await sleep(1000);
+    await sleep(1000); // NOSONAR - the poll waits between tries on purpose
   }
   throw new Error(`Phoenix did not answer ${url}/healthz within ${WAIT_MS / 1000} s`);
+}
+
+async function fetchPage(url, cursor) {
+  const query = new URLSearchParams({ limit: '1000' });
+  if (cursor) query.set('cursor', cursor);
+  const response = await fetch(`${url}/v1/projects/default/spans?${query}`, {
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!response.ok) throw new Error(`Phoenix answered ${response.status} for the spans`);
+  return response.json();
 }
 
 async function fetchSpans(url) {
   const spans = [];
   let cursor;
   do {
-    const query = new URLSearchParams({ limit: '1000' });
-    if (cursor) query.set('cursor', cursor);
-    const response = await fetch(`${url}/v1/projects/default/spans?${query}`, {
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!response.ok) throw new Error(`Phoenix answered ${response.status} for the spans`);
-    const page = await response.json();
+    const page = await fetchPage(url, cursor); // NOSONAR - each page needs the cursor of the one before
     spans.push(...page.data);
     cursor = page.next_cursor || undefined;
   } while (cursor);
@@ -117,7 +121,7 @@ async function loadSpans(url) {
     const spans = (await fetchSpans(url)).map(normalize);
     seen = { calls: spans.filter(isCall).length, feedback: spans.filter(isFeedback).length };
     if (seen.calls >= KEYS.length && seen.feedback >= KEYS.length) return spans;
-    await sleep(2000);
+    await sleep(2000); // NOSONAR - the poll waits between tries on purpose
   }
   throw new Error(
     `Phoenix holds ${seen.calls} call spans and ${seen.feedback} feedback spans, wanted ${KEYS.length} each`
@@ -398,7 +402,9 @@ async function main() {
   process.exitCode = 1;
 }
 
-main().catch((error) => {
+try {
+  await main();
+} catch (error) {
   console.error(error.message);
   process.exit(1);
-});
+}

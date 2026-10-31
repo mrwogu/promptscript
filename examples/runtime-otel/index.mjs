@@ -64,8 +64,7 @@ async function callModel(key) {
 }
 
 // The app keeps the span ref of each session, as the runtime README asks
-const calls = new Map();
-for (const key of KEYS) calls.set(key, await callModel(key));
+const calls = new Map(await Promise.all(KEYS.map(async (key) => [key, await callModel(key)])));
 
 KEYS.forEach((key, index) => {
   const { span, meta } = calls.get(key);
