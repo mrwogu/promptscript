@@ -134,7 +134,8 @@ A failure of the tracer never changes the call. It goes to `onError` as `telemet
 a fixed message and no cause.
 
 The [`examples/runtime-otel`](https://github.com/mrwogu/promptscript/tree/main/examples/runtime-otel)
-example sends these spans and the feedback to Phoenix, and CI checks them there.
+example sends these spans and the feedback to Phoenix and Langfuse, and CI checks them there.
+Langfuse drops span events, so the feedback score is checked in Phoenix only.
 
 ## Experiments
 
