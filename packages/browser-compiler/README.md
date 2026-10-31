@@ -31,16 +31,13 @@ Used by: `@promptscript/playground`
 | ------------------------- | --------- | ------------------------------------------ |
 | `compile`                 | function  | Main entry point for browser compilation   |
 | `compileFor`              | function  | Compile for a single formatter             |
-| `BrowserCompiler`         | class     | Full compiler with manual configuration    |
-| `createBrowserCompiler`   | function  | Factory for `BrowserCompiler`              |
-| `VirtualFileSystem`       | class     | In-memory file system for browser use      |
-| `BrowserResolver`         | class     | Resolves imports/inheritance in-memory     |
 | `getBundledRegistryFiles` | function  | Returns bundled registry `.prs` files      |
 | `CompileResult`           | type      | Compilation result with outputs and errors |
 | `CompileError`            | type      | Structured compilation error               |
 | `CompileOptions`          | interface | Options for the `compile` function         |
 | `CompileStats`            | type      | Compilation statistics                     |
 | `TargetConfig`            | type      | Formatter target configuration             |
+| `VirtualFileSystem`       | class     | In-memory file system for browser use      |
 
 ## Usage
 

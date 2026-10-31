@@ -196,6 +196,8 @@ function filterSkillsBy(
 
 /**
  * Options for the browser resolver.
+ *
+ * @internal
  */
 export interface BrowserResolverOptions {
   /** Virtual file system containing all files */
@@ -214,6 +216,8 @@ export interface BrowserResolverOptions {
 
 /**
  * Result of resolving a PromptScript file.
+ *
+ * @internal
  */
 export interface ResolvedAST {
   /**
@@ -335,6 +339,8 @@ function isPlainSkillObject(v: unknown): v is Record<string, Value> {
  * Browser-compatible resolver for PromptScript files with inheritance and import support.
  *
  * This resolver uses an in-memory virtual file system instead of Node.js fs.
+ *
+ * @internal
  */
 export class BrowserResolver {
   private readonly fs: VirtualFileSystem;

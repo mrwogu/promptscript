@@ -7,6 +7,8 @@
 
 /**
  * Content of @core/base.prs
+ *
+ * @internal
  */
 export const CORE_BASE = `@meta {
   id: "@core/base"
@@ -41,6 +43,8 @@ export const CORE_BASE = `@meta {
 
 /**
  * Content of @core/quality.prs
+ *
+ * @internal
  */
 export const CORE_QUALITY = `@meta {
   id: "@core/quality"
@@ -94,6 +98,8 @@ export const CORE_QUALITY = `@meta {
 
 /**
  * Content of @core/security.prs
+ *
+ * @internal
  */
 export const CORE_SECURITY = `@meta {
   id: "@core/security"
@@ -154,6 +160,8 @@ export const CORE_SECURITY = `@meta {
 /**
  * Map of all bundled registry files.
  * Keys are the virtual paths, values are the file contents.
+ *
+ * @internal
  */
 export const BUNDLED_REGISTRY: Record<string, string> = {
   '@core/base.prs': CORE_BASE,
