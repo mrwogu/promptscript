@@ -184,7 +184,7 @@ jobs:
         if: matrix.node-version == '25.x'
         run: |
           # The cli spec that compares the copy only runs when cli is affected, this runs always
-          if ! diff -r -x releases packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/.promptscript examples/runtime-node/.promptscript; then
+          if ! diff -r -x releases -x evals -x eval-cache -x eval-reports packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/.promptscript examples/runtime-node/.promptscript; then
             echo "::error::examples/runtime-node/.promptscript must stay a byte copy of the support-refund-reply fixture."
             exit 1
           fi
