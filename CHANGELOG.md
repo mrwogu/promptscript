@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.25.0](https://github.com/mrwogu/promptscript/compare/v1.24.0...v1.25.0) (2026-10-31)
+
+
+### Features
+
+* **cli:** add experiment events to audit log ([#676](https://github.com/mrwogu/promptscript/issues/676)) ([44faec8](https://github.com/mrwogu/promptscript/commit/44faec84a03bfdc64efc2d38cf000f4bac21b392))
+* **cli:** add prs release split ([#652](https://github.com/mrwogu/promptscript/issues/652)) ([b2a7f1d](https://github.com/mrwogu/promptscript/commit/b2a7f1da0aea080af2e097dacad0e6935baf4611))
+* **cli:** cap experiment weights with approval ceilings ([#657](https://github.com/mrwogu/promptscript/issues/657)) ([5345281](https://github.com/mrwogu/promptscript/commit/5345281d54e8453e3357886dcdc528c619f5b99c))
+* **cli:** flag labelled prompts on retiring models ([#660](https://github.com/mrwogu/promptscript/issues/660)) ([790e31b](https://github.com/mrwogu/promptscript/commit/790e31b6134e9c7e385cd588398dbbf2efbb040c))
+* **cli:** run eval suites against a release label ([#649](https://github.com/mrwogu/promptscript/issues/649)) ([a80020f](https://github.com/mrwogu/promptscript/commit/a80020f6a22773609c39d24eed85bc994fa989d7))
+* **cli:** write model pricing next to release bundles ([#642](https://github.com/mrwogu/promptscript/issues/642)) ([9e263a7](https://github.com/mrwogu/promptscript/commit/9e263a74bbc53ed193a9208568eea4ef2262e2b4))
+* **core:** add release label v2 with weighted variants ([#644](https://github.com/mrwogu/promptscript/issues/644)) ([26930b1](https://github.com/mrwogu/promptscript/commit/26930b16f7ea66a5cfe6db788f6b54935bc2f113))
+* **docs:** move the promo video right under the homepage hero ([#659](https://github.com/mrwogu/promptscript/issues/659)) ([19e211d](https://github.com/mrwogu/promptscript/commit/19e211df8dd4e69090320a0a92074a3dde05e929))
+* **docs:** play the promo video on the homepage instead of YouTube ([#655](https://github.com/mrwogu/promptscript/issues/655)) ([37ef925](https://github.com/mrwogu/promptscript/commit/37ef925a83a912a25f5c14b47c293c88a531b3cd))
+* **eval:** add the llm-judge assertion and human labels ([#653](https://github.com/mrwogu/promptscript/issues/653)) ([eeb5c59](https://github.com/mrwogu/promptscript/commit/eeb5c591048ba96221fdd6734105306bc8da9c0a))
+* **eval:** import production samples with a PII scrub ([#648](https://github.com/mrwogu/promptscript/issues/648)) ([592defb](https://github.com/mrwogu/promptscript/commit/592defbe0d4e6aa9016a451dca5a152c7ac3100d))
+* **runtime:** add OpenTelemetry spans and feedback ([#650](https://github.com/mrwogu/promptscript/issues/650)) ([2976947](https://github.com/mrwogu/promptscript/commit/29769474229f52d3f14b797533bdb1d64eaf0463))
+* **runtime:** assign label variants by a sticky key ([#646](https://github.com/mrwogu/promptscript/issues/646)) ([da534f5](https://github.com/mrwogu/promptscript/commit/da534f52160923e21ecfc884a59d64fbdc36a950))
+* **validator:** add the max-experiment-weight policy kind ([#647](https://github.com/mrwogu/promptscript/issues/647)) ([4b1e17e](https://github.com/mrwogu/promptscript/commit/4b1e17ecf02e6516ed728c150a15119bec0720cb))
+
+
+### Bug Fixes
+
+* **cli:** accept dot and underscore in approver handles ([#641](https://github.com/mrwogu/promptscript/issues/641)) ([30ca09d](https://github.com/mrwogu/promptscript/commit/30ca09d2cc4ad5e63c604d5e820ad41d6a601b9e))
+* **cli:** read approval records with one git cat-file batch ([#643](https://github.com/mrwogu/promptscript/issues/643)) ([b8bc1d0](https://github.com/mrwogu/promptscript/commit/b8bc1d03473de31df399dc2161e862bc217a728a))
+
 ## [1.24.0](https://github.com/mrwogu/promptscript/compare/v1.23.0...v1.24.0) (2026-10-29)
 
 
