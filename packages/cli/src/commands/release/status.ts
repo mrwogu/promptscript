@@ -1,7 +1,11 @@
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ConsoleOutput } from '../../output/console.js';
-import type { PromptBundleIndexV1, PromptReleaseLabelEntryV2 } from '@promptscript/core';
+import {
+  getModelCatalog,
+  type PromptBundleIndexV1,
+  type PromptReleaseLabelEntryV2,
+} from '@promptscript/core';
 import type {
   ReleaseDiagnostic,
   ReleaseEnvironmentHistory,
@@ -26,6 +30,7 @@ import {
 } from './layout.js';
 import { checkAgainstBase, type BaseCheck } from './base.js';
 import { armChangeText, armLimitWarnings, gateEntriesOf } from './experiment.js';
+import { checkLabelModels, parseRetiringWithin, printModels } from './models.js';
 import { checkPromotionGates, gateLines, type GateEntry } from './gates.js';
 import {
   compileRelease,
@@ -40,6 +45,10 @@ export interface ReleaseStatusOptions extends ReleaseCommandOptions {
   history?: string;
   /** Check the label entries that differ from this Git ref against its promotion rules */
   base?: string;
+  /** Check the models of every labelled prompt against the model catalog */
+  checkModels?: boolean;
+  /** With checkModels, days ahead in which a deprecated model counts as retiring */
+  retiringWithin?: string;
 }
 
 function parseHistoryCount(value: string | undefined): number | undefined {
@@ -425,6 +434,7 @@ function promptState(prompt: { exists: boolean; verified: boolean }): string {
 export async function releaseStatusCommand(options: ReleaseStatusOptions): Promise<void> {
   await runReleaseCommand('status', options, async (output) => {
     const historyCount = parseHistoryCount(options.history);
+    const retiringDays = parseRetiringWithin(options.retiringWithin, options.checkModels === true);
     // With --base nothing outside the repository may choose the config: no -c, no env.
     const project = await loadReleaseProject(options, { discover: options.base !== undefined });
     const { paths } = project;
@@ -460,6 +470,21 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
         : { gates: baseCheck.gates, warnings: baseCheck.warnings };
     warnings.push(...gateRun.warnings);
 
+    const modelCheck =
+      retiringDays === undefined
+        ? undefined
+        : {
+            days: retiringDays,
+            ...(await checkLabelModels(
+              paths,
+              getModelCatalog(project.config.models),
+              environments,
+              retiringDays,
+              new Date()
+            )),
+          };
+    warnings.push(...(modelCheck?.warnings ?? []));
+
     if (!output.json) {
       printStatus(
         paths,
@@ -468,6 +493,7 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
         history,
         baseCheck === undefined ? gateRun.gates : []
       );
+      if (modelCheck !== undefined) printModels(modelCheck.models, modelCheck.days);
       if (baseCheck !== undefined) printBaseCheck(baseCheck);
     }
     return {
@@ -475,8 +501,13 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
       ...(history === undefined ? {} : { history }),
       ...(baseCheck === undefined ? {} : { base: baseCheck.base, changes: baseCheck.changes }),
       ...(gateRun.gates.length === 0 ? {} : { gates: gateRun.gates }),
+      ...(modelCheck === undefined ? {} : { models: modelCheck.models }),
       warnings,
-      errors: [...checked.flatMap((entry) => entry.errors), ...(baseCheck?.errors ?? [])],
+      errors: [
+        ...checked.flatMap((entry) => entry.errors),
+        ...(baseCheck?.errors ?? []),
+        ...(modelCheck?.errors ?? []),
+      ],
     };
   });
 }

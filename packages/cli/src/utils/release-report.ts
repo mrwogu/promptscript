@@ -3,7 +3,7 @@
  *
  * The shape is pinned by `schema/release-report-v1.json`.
  */
-import type { PolicyKind, PolicySeverity, RiskLevel } from '@promptscript/core';
+import type { ModelStatus, PolicyKind, PolicySeverity, RiskLevel } from '@promptscript/core';
 
 export const RELEASE_REPORT_SCHEMA_URL =
   'https://getpromptscript.dev/schema/release-report/v1.json';
@@ -170,6 +170,26 @@ export interface ReleaseBaseRef {
   commit: string;
 }
 
+/** One labelled hash and the model its bundle runs, as `status --check-models` judged it. */
+export interface ReleaseModelStatus {
+  environment: string;
+  prompt: string;
+  contentHash: string;
+  /** Arm name, for an experiment arm other than control */
+  variant?: string;
+  /** The model as the bundle carries it */
+  ref: string;
+  profile?: string;
+  provider: string;
+  apiId: string;
+  /** Catalog status of the profile that runs it, `unknown` when the catalog has none */
+  status: ModelStatus | 'unknown';
+  /** Retirement date from the catalog, YYYY-MM-DD */
+  retirementDate?: string;
+  /** True when PS5011 reports it: retired, or deprecated with a date within the window */
+  retiring: boolean;
+}
+
 export interface ReleaseReport {
   $schema: typeof RELEASE_REPORT_SCHEMA_URL;
   version: typeof RELEASE_REPORT_VERSION;
@@ -183,6 +203,8 @@ export interface ReleaseReport {
   base?: ReleaseBaseRef;
   /** The gates of every prompt version a policy applies to; absent without prompt policies */
   gates?: ReleaseGateResult[];
+  /** Present when status runs with --check-models */
+  models?: ReleaseModelStatus[];
   warnings: ReleaseDiagnostic[];
   errors: ReleaseDiagnostic[];
 }
@@ -204,6 +226,7 @@ export function createReleaseReport(
     ...(partial.history === undefined ? {} : { history: partial.history }),
     ...(partial.base === undefined ? {} : { base: partial.base }),
     ...(partial.gates === undefined ? {} : { gates: partial.gates }),
+    ...(partial.models === undefined ? {} : { models: partial.models }),
     warnings: partial.warnings ?? [],
     errors,
   };

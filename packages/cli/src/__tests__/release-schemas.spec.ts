@@ -7,6 +7,7 @@ import {
   RELEASE_REPORT_VERSION,
   toReleaseLocation,
   type ReleaseArmStatus,
+  type ReleaseModelStatus,
 } from '../utils/release-report.js';
 import {
   validateLabel,
@@ -338,6 +339,43 @@ describe('release report schema', () => {
       delete partial['verified'];
 
       expect(validate(statusWith([arm('control', 9000), partial]))).toBe(false);
+    });
+  });
+
+  describe('model status', () => {
+    const item: ReleaseModelStatus = {
+      environment: 'prod',
+      prompt: 'a/b',
+      contentHash: hash,
+      variant: 'warm',
+      ref: 'acme-old',
+      profile: 'acme-old',
+      provider: 'acme',
+      apiId: 'acme-old-api',
+      status: 'retired',
+      retirementDate: '2026-06-15',
+      retiring: true,
+    };
+
+    it('accepts a report with models and keeps them', () => {
+      const report = createReleaseReport('status', { models: [item] });
+
+      expect(report.models).toEqual([item]);
+      expect(validate(report), JSON.stringify(validate.errors)).toBe(true);
+    });
+
+    it('omits models when none were checked', () => {
+      expect(createReleaseReport('status')).not.toHaveProperty('models');
+    });
+
+    it.each([
+      ['a status the catalog does not have', { ...item, status: 'gone' }],
+      ['an extra key', { ...item, extra: 1 }],
+      ['a bad date', { ...item, retirementDate: 'June 2026' }],
+    ])('refuses %s', (_name, bad) => {
+      const report = createReleaseReport('status', { models: [bad as ReleaseModelStatus] });
+
+      expect(validate(report)).toBe(false);
     });
   });
 

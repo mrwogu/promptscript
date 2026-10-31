@@ -67,5 +67,13 @@ export function registerReleaseCommands(release: Command): void {
         '--base <ref>',
         'Check the label entries changed since <ref> against the promotion rules of <ref>'
       )
+      .option(
+        '--check-models',
+        'Check the models of every labelled prompt against the model catalog'
+      )
+      .option(
+        '--retiring-within <days>',
+        'With --check-models, flag deprecated models that retire within this many days (default 30)'
+      )
   ).action((opts) => releaseStatusCommand(opts));
 }

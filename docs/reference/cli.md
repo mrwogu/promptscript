@@ -1187,7 +1187,7 @@ With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/release-report/v1.json` and the human text goes to stderr. Exit
 code 0 means success or a no-op. Exit code 1 means an error or a failed verification.
 
-Errors use the codes `PS5001` to `PS5010`, listed in the
+Errors use the codes `PS5001` to `PS5011`, listed in the
 [releases guide](../guides/releases.md#error-codes).
 
 #### prs release build
@@ -1302,10 +1302,12 @@ List the released prompts of every environment and verify their bundles.
 prs release status [options]
 ```
 
-| Option          | Description                                                             |
-| --------------- | ----------------------------------------------------------------------- |
-| `--history <n>` | Show commit, date and subject of the last n label commits (1-1000)      |
-| `--base <ref>`  | Check every label entry changed since `<ref>` with the rules of `<ref>` |
+| Option                     | Description                                                                                           |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `--history <n>`            | Show commit, date and subject of the last n label commits (1-1000)                                    |
+| `--base <ref>`             | Check every label entry changed since `<ref>` with the rules of `<ref>`                               |
+| `--check-models`           | Check the models of every labelled prompt against the model catalog                                   |
+| `--retiring-within <days>` | With `--check-models`, days ahead in which a deprecated model counts as retiring (0-3650, default 30) |
 
 Shows, per environment, the prompt id, the hash, whether it is in the latest build and whether it
 verifies. Under an entry with an experiment it lists the arms with their weights and verifies each
@@ -1329,8 +1331,15 @@ code 1. A ref that is missing, not a commit, ambiguous (pass the full name, such
 `refs/remotes/origin/main`) or not fetched in a shallow checkout fails with `PS5006`. See
 [Check label changes with `--base`](../guides/releases.md#check-label-changes-with---base).
 
+With `--check-models`, the model of every verified label entry and experiment arm is checked
+against the model catalog of the running `prs` plus `models.profiles`. A retired model, or a
+deprecated one whose retirement date is within `--retiring-within` days, fails with `PS5011`; a
+model the catalog does not know gives a warning. See
+[Check the models of the labels](../guides/releases.md#check-the-models-of-the-labels).
+
 ```bash
 prs release status --history 5
+prs release status --check-models --retiring-within 14
 prs release status --base refs/remotes/origin/main
 ```
 

@@ -327,6 +327,40 @@ an `approvals` column: `ok`, `missing: <roles>`, or `-` when no `required-approv
 Plain status only reports: a gate that fails is a warning and the exit code does not change. The
 check that fails on it is `--base`.
 
+#### Check the models of the labels
+
+```bash
+prs release status --check-models
+prs release status --check-models --retiring-within 14
+```
+
+`--check-models` reads the model of every verified bundle that a label holds and checks it against
+the [model catalog](../reference/models.md). It looks at every entry and at every experiment arm
+besides control, an arm with weight 0 too, because a 0 arm can be ramped up without another check.
+A bundle that is missing or does not verify gives `PS5003` or `PS5004` as before and no model line.
+
+A model is retiring when the catalog marks it `retired`, or marks it `deprecated` with a
+retirement date that is not later than today plus `--retiring-within` days (0 to 3650, default
+30; today is the UTC date). A date that has already passed counts. Each one is a `PS5011` error
+at the label, with the environment, the prompt, the short hash, the arm, the
+model, the date and the replacement from the catalog, and the exit code is 1. A `deprecated`
+model with a later date, or with no date, is listed and does not fail. A model the catalog does
+not know gives a warning only.
+
+The catalog is the one of the `prs` you run, plus `models.profiles` of the checkout, the same as
+`prs release build` uses for prices. The built-in part changes with each `prs` release, so run the
+newest CLI to see current dates. A profile in `models.profiles` can change a built-in status. The
+profile that is judged is the one whose provider and API id equal the bundle's, so a floating
+alias in the source is not re-resolved to a newer model here.
+
+`PS041` checks the model of the source when you validate. This check covers what the labels run,
+so it also finds a released bundle whose source has moved on. In text output a Models section lists
+every labelled model, and control characters of label and bundle values are removed. In JSON the
+report has a `models` list with one item per labelled hash (`environment`, `prompt`,
+`contentHash`, `variant` for an arm, `ref`, `profile`, `provider`, `apiId`, `status`,
+`retirementDate`, `retiring`), with the values as they are in the files. Without `--check-models`
+the list is absent.
+
 ## One pull request per promotion
 
 Every promotion is a reviewed pull request, and Git history is the release log:
@@ -637,7 +671,8 @@ prs release status --base refs/remotes/origin/main
 Build writes whatever the committed release files miss, so the `test -z` check fails when a pull
 request changes prompts without the build. It also catches new bundle files, which
 `git diff --exit-code` would not see because they are untracked. `status` fails when a label points
-at a bundle that is missing or does not verify. All five commands accept
+at a bundle that is missing or does not verify. `prs release status --check-models` can run as an
+extra step to fail on labels that run a retired or retiring model. All five commands accept
 `--format json`, which prints one document on stdout that matches
 `https://getpromptscript.dev/schema/release-report/v1.json`, and prints the human text on stderr.
 
@@ -972,6 +1007,7 @@ drop control, bidi and zero-width characters from Git and record fields.
 | PS5008 | A compile output lies inside `.promptscript/releases/`                               |
 | PS5009 | A split breaks the experiment rules, or targets the first environment                |
 | PS5010 | A promote on an entry with a running experiment                                      |
+| PS5011 | A labelled prompt runs a retired model, or one that retires within the window        |
 
 `prs approve` uses these codes:
 
