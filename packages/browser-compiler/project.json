@@ -19,14 +19,18 @@
         "outputPath": "dist/packages/browser-compiler",
         "main": "packages/browser-compiler/src/index.ts",
         "tsConfig": "packages/browser-compiler/tsconfig.lib.json",
-        "assets": ["packages/browser-compiler/*.md"],
-        "skipTypeCheck": true
+        "assets": ["packages/browser-compiler/*.md"]
       },
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "typecheck"]
     },
     "typecheck": {
-      "__comment": "Typecheck is skipped because browser-compiler bundles Node.js packages (@promptscript/resolver, @promptscript/formatters) into a browser-compatible build via Vite. The Node.js-specific types (fs, path) used internally by those packages would fail tsc --noEmit in a browser tsconfig. The Vite build handles type-stripping and bundling correctly.",
-      "command": "echo 'Skipping typecheck for browser-compiler (browser-only package)'"
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default", "{workspaceRoot}/tsconfig.base.json"],
+      "outputs": ["{workspaceRoot}/dist/declarations/browser-compiler"],
+      "options": {
+        "command": "tsc -p packages/browser-compiler/tsconfig.lib.json --emitDeclarationOnly --outDir dist/declarations/browser-compiler"
+      }
     },
     "nx-release-publish": {
       "options": {
