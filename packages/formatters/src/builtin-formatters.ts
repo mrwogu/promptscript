@@ -78,6 +78,8 @@ import { GitlabDuoFormatter } from './formatters/gitlab-duo.js';
  * Exhaustive map of built-in target names to their formatter classes.
  * `satisfies Record<KnownTarget, FormatterClass>` ensures every known
  * target has a formatter.
+ *
+ * @internal
  */
 export const BUILTIN_FORMATTERS = {
   // Original 7
