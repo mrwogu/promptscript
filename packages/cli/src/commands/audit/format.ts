@@ -1,6 +1,6 @@
 import { stripControlCharacters } from '../release/git.js';
 import { percentText } from '../release/layout.js';
-import type { AuditEvent, AuditEventType } from './events.js';
+import type { AuditEvent, AuditEventType, AuditExperimentArm } from './events.js';
 
 /** CEF severity and name of each event type. */
 const CEF_TYPES: Readonly<Record<AuditEventType, { name: string; severity: number }>> = {
@@ -13,6 +13,9 @@ const CEF_TYPES: Readonly<Record<AuditEventType, { name: string; severity: numbe
   'merge-dropped': { name: 'Merge dropped a change', severity: 7 },
   generated: { name: 'CODEOWNERS section generated', severity: 3 },
   'config-changed': { name: 'Config changed', severity: 6 },
+  'experiment-started': { name: 'Experiment started', severity: 6 },
+  'experiment-changed': { name: 'Experiment changed', severity: 6 },
+  'experiment-ended': { name: 'Experiment ended', severity: 6 },
 };
 
 const CHANGE_WORDS = { A: 'added', M: 'modified', D: 'deleted' } as const;
@@ -34,6 +37,46 @@ export function cefExtensionValue(value: string): string {
     .replaceAll('=', String.raw`\=`)
     .replace(/\r\n|\r|\n/g, String.raw`\n`);
   return stripControlCharacters(escaped);
+}
+
+/** `control@hash=90 %, warm@hash=10 %`: the arms with their share. */
+function armsText(arms: readonly AuditExperimentArm[]): string {
+  return arms
+    .map((arm) => `${arm.variant}@${arm.contentHash}=${percentText(arm.weight)}`)
+    .join(', ');
+}
+
+/** The CEF `msg` of an experiment event: the arms, and what they replaced or what was kept. */
+function experimentMessage(event: AuditEvent): string | undefined {
+  if (event.arms === undefined) return event.comment;
+  const previous =
+    event.previousArms === undefined ? [] : [`previous ${armsText(event.previousArms)}`];
+  const kept = event.type === 'experiment-ended' ? [`kept ${event.keptVariant ?? '-'}`] : [];
+  return [`arms ${armsText(event.arms)}`, ...previous, ...kept].join('; ');
+}
+
+/** Total weight of the variants (every arm but the control) in basis points. */
+function variantWeight(event: AuditEvent): string | undefined {
+  if (event.type === 'experiment-ended' || event.arms === undefined) return undefined;
+  return String(event.arms.slice(1).reduce((total, arm) => total + arm.weight, 0));
+}
+
+function approverLabel(event: AuditEvent): string | undefined {
+  return event.approverSource === undefined ? undefined : 'approverSource';
+}
+
+/**
+ * flexString2 is the approver source on approval events and the experiment name on experiment
+ * events; flexNumber2 is the variant weight of an experiment event.
+ */
+function experimentFields(event: AuditEvent): [string, string | undefined][] {
+  const weight = variantWeight(event);
+  return [
+    ['flexString2', event.experiment ?? event.approverSource],
+    ['flexString2Label', event.experiment === undefined ? approverLabel(event) : 'experiment'],
+    ['flexNumber2', weight],
+    ['flexNumber2Label', weight === undefined ? undefined : 'variantWeight'],
+  ];
 }
 
 /** One CEF line for an event; `head` is the commit the log was read from. */
@@ -72,13 +115,12 @@ export function cefLine(event: AuditEvent, head: string, version: string): strin
       [`cs${index + 1}Label`, value === undefined ? undefined : label],
     ]),
     ['outcome', outcome],
-    ['msg', event.comment],
+    ['msg', experimentMessage(event)],
     ['flexString1', head],
     ['flexString1Label', 'head'],
-    ['flexString2', event.approverSource],
-    ['flexString2Label', event.approverSource === undefined ? undefined : 'approverSource'],
     ['flexNumber1', event.maxWeight === undefined ? undefined : String(event.maxWeight)],
     ['flexNumber1Label', event.maxWeight === undefined ? undefined : 'maxWeight'],
+    ...experimentFields(event),
     ['cn1', event.viaMerge === true ? '1' : undefined],
     ['cn1Label', event.viaMerge === true ? 'viaMerge' : undefined],
     ['cn2', event.configured === false ? '0' : undefined],
@@ -129,11 +171,29 @@ function details(event: AuditEvent): string[] {
     case 'changed':
     case 'config-changed':
       return [event.change ?? 'M', shown(event.path)];
+    case 'experiment-started':
+    case 'experiment-changed':
+    case 'experiment-ended':
+      return experimentDetails(event);
     case 'generated':
       return [shown(event.path)];
     case 'merge-dropped':
       return droppedDetails(event);
   }
+}
+
+function experimentDetails(event: AuditEvent): string[] {
+  const previous =
+    event.previousArms === undefined ? [] : [`previous=${shown(armsText(event.previousArms))}`];
+  const kept = event.type === 'experiment-ended' ? [`kept=${shown(event.keptVariant ?? '-')}`] : [];
+  return [
+    shown(event.prompt ?? ''),
+    `env=${shown(event.environment ?? '')}`,
+    `experiment=${shown(event.experiment ?? '')}`,
+    `arms=${shown(armsText(event.arms ?? []))}`,
+    ...previous,
+    ...kept,
+  ];
 }
 
 /** What the merge dropped: a label entry, a record change or the CODEOWNERS section. */

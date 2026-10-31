@@ -1509,6 +1509,40 @@ describe('prs audit log experiments', () => {
     });
   });
 
+  it('escapes the names of an experiment event in CEF, JSON and text', async () => {
+    // Arrange
+    const root = await project();
+    const id = 'acme|x=y\\z\u200b';
+    const running = experimentOf('tone', arm('control', H1, 9000), arm('warm', H2, 1000));
+    await put(root, { [PROD]: labelWith('prod', H1, running, id) });
+    commit(root, 'start', 'Na|me=x\\y <a@example.com>');
+
+    // Act
+    const { report } = await run(root);
+    const cef = (await printed(root, { format: 'cef' })).find((line) =>
+      line.includes('experiment-started')
+    );
+    const text = (await printed(root, { format: 'text' })).find((line) =>
+      line.includes('experiment-started')
+    );
+    const json = jsonText(report);
+
+    // Assert
+    expect(validateAuditLog(report), JSON.stringify(validateAuditLog.errors)).toBe(true);
+    expect(cef).toContain(String.raw`cs1=acme|x\=y\\z `);
+    expect(cef).toContain('flexString2=tone flexString2Label=experiment');
+    expect(cef).toContain('flexNumber2=1000 flexNumber2Label=variantWeight');
+    expect(cef).toContain(String.raw`msg=arms control@${H1}\=90 %, warm@${H2}\=10 %`);
+    expect(cef).toMatch(
+      /^CEF:0\|PromptScript\|prs\|[^|]*\|prs-experiment-started\|Experiment started\|6\|/
+    );
+    expect(json).toContain(String.raw`acme|x=y\\z\u200b`);
+    expect(json).not.toContain('\u200b');
+    expect(text).toContain('acme|x=y\\z  env=prod');
+    expect(text).not.toContain('\u200b');
+    expect(text).toContain('experiment=tone');
+  });
+
   it('checks the experiment events by the schema', async () => {
     // Arrange
     const root = await project();

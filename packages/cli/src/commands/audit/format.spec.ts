@@ -98,6 +98,9 @@ describe('cefLine', () => {
       ['label-removed', 7],
       ['generated', 3],
       ['config-changed', 6],
+      ['experiment-started', 6],
+      ['experiment-changed', 6],
+      ['experiment-ended', 6],
     ];
 
     // Act
@@ -271,5 +274,132 @@ describe('textLines', () => {
     expect(lines).toEqual([
       `-  ${approved.at}  generated  cccccccccccc  .github/CODEOWNERS  by Jane Doe <jane@example.com>`,
     ]);
+  });
+});
+
+const HASH_B = `sha256-${'b'.repeat(64)}`;
+
+const started: AuditEvent = {
+  type: 'experiment-started',
+  commit: approved.commit,
+  at: approved.at,
+  author: approved.author,
+  committer: approved.committer,
+  path: '.promptscript/releases/prod.json',
+  mainline: true,
+  environment: 'prod',
+  prompt: 'acme-support/refund-reply',
+  contentHash: HASH,
+  experiment: 'tone',
+  arms: [
+    { variant: 'control', contentHash: HASH, weight: 9000 },
+    { variant: 'warm', contentHash: HASH_B, weight: 1000 },
+  ],
+};
+
+describe('experiment events', () => {
+  it('writes a started experiment as text with the arms in percent', () => {
+    // Arrange, Act
+    const text = textLines(started);
+
+    // Assert
+    expect(text).toEqual([
+      [
+        HASH,
+        started.at,
+        'experiment-started',
+        'cccccccccccc',
+        'acme-support/refund-reply',
+        'env=prod',
+        'experiment=tone',
+        `arms=control@${HASH}=90 %, warm@${HASH_B}=10 %`,
+        'by Jane Doe <jane@example.com>',
+      ].join('  '),
+    ]);
+  });
+
+  it('adds the previous arms of a changed experiment', () => {
+    // Arrange
+    const changed: AuditEvent = {
+      ...started,
+      type: 'experiment-changed',
+      arms: [
+        { variant: 'control', contentHash: HASH, weight: 8000 },
+        { variant: 'warm', contentHash: HASH_B, weight: 2000 },
+      ],
+      previousArms: started.arms ?? [],
+    };
+
+    // Act
+    const text = textLines(changed)[0] ?? '';
+    const line = cefLine(changed, HEAD, '1');
+
+    // Assert
+    expect(text).toContain(`arms=control@${HASH}=80 %, warm@${HASH_B}=20 %  previous=control@`);
+    expect(text).toContain(`warm@${HASH_B}=10 %  by Jane Doe`);
+    expect(line).toContain(String.raw`=20 %; previous control@${HASH}\=90 %, warm@`);
+    expect(line).toContain(' flexNumber2=2000 flexNumber2Label=variantWeight');
+  });
+
+  it('shows the kept variant of an ended experiment, and dashes without hash or variant', () => {
+    // Arrange
+    const kept: AuditEvent = { ...started, type: 'experiment-ended', keptVariant: 'warm' };
+    const gone: AuditEvent = { ...kept };
+    delete gone.contentHash;
+    delete gone.keptVariant;
+
+    // Act
+    const keptText = textLines(kept)[0] ?? '';
+    const goneText = textLines(gone)[0] ?? '';
+    const line = cefLine(kept, HEAD, '1');
+
+    // Assert
+    expect(keptText).toContain('=10 %  kept=warm  by Jane Doe');
+    expect(goneText.startsWith(`-  ${started.at}  experiment-ended  `)).toBe(true);
+    expect(goneText).toContain('  kept=-  by Jane Doe');
+    expect(line).toContain(String.raw`; kept warm flexString1=`);
+    expect(cefLine(gone, HEAD, '1')).toContain('; kept - flexString1=');
+    expect(line).not.toContain('flexNumber2');
+  });
+
+  it('writes the experiment name and arms into CEF fields next to the approval ones', () => {
+    // Arrange, Act
+    const line = cefLine(started, HEAD, '1.2.3');
+
+    // Assert
+    expect(line).toBe(
+      [
+        'CEF:0|PromptScript|prs|1.2.3|prs-experiment-started|Experiment started|6|',
+        `rt=${Date.parse(started.at)} act=experiment-started suser=jane@example.com`,
+        ` filePath=${started.path}`,
+        ' cs1=acme-support/refund-reply cs1Label=prompt',
+        ` cs2=${HASH} cs2Label=contentHash cs4=prod cs4Label=environment`,
+        ` cs5=${'c'.repeat(40)} cs5Label=commit`,
+        String.raw` msg=arms control@${HASH}\=90 %, warm@${HASH_B}\=10 %`,
+        ` flexString1=${HEAD} flexString1Label=head`,
+        ' flexString2=tone flexString2Label=experiment',
+        ' flexNumber2=1000 flexNumber2Label=variantWeight cn3=1 cn3Label=mainline',
+      ].join('')
+    );
+  });
+
+  it('escapes a path and persons with separators, line breaks and controls', () => {
+    // Arrange
+    const event: AuditEvent = {
+      ...started,
+      path: 'a|b=c\\d\ne',
+      author: { name: 'Na|me=\u0007x', email: 'a|b@x' },
+    };
+
+    // Act
+    const line = cefLine(event, HEAD, '1');
+
+    // Assert
+    expect(line).toContain(String.raw` filePath=a|b\=c\\d\ne `);
+    expect(line).toContain(' suser=a|b@x ');
+    expect(textLines(event)[0]).toContain('by Na|me=x <a|b@x>');
+    expect(line).toMatch(
+      /^CEF:0\|PromptScript\|prs\|1\|prs-experiment-started\|Experiment started\|6\|rt=/
+    );
   });
 });
