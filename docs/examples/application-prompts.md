@@ -111,7 +111,7 @@ hr-policy-assistant/
 
 ## Support Refund Reply
 
-A customer asks for a refund and the model decides what happens next. The inputs are numbers and a string. The output is a `decision` enum with three values and a `reply`. The prompt is marked as high risk and it handles personal data, so the bundle carries both in `governance`. The org file holds the identity, the standards and the restrictions, and the prompt composes all three.
+A customer asks for a refund and the model decides what happens next. The inputs are numbers and a string. The output is a `decision` enum with three values and a `reply`. The prompt is marked as high risk and it handles personal data, so the bundle carries both in `governance`. The org file holds the identity, the standards and the restrictions, and the prompt composes all three. The project file has a second prompt, `judge-refund-reply`. It is not part of the refund flow. It is the rubric of an eval suite, see [Evaluating Prompts](../guides/evals.md).
 
 ```text
 support-refund-reply/
