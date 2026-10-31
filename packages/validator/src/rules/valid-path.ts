@@ -13,6 +13,8 @@ const VALID_PATH_PATTERNS = {
 
 /**
  * Check if a path reference is valid.
+ *
+ * @internal
  */
 export function isValidPath(path: string): boolean {
   return (

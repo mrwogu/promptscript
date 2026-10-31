@@ -3,6 +3,8 @@ import type { ValidationRule } from '../types.js';
 /**
  * Check if a string is a valid semantic version.
  * Validates MAJOR.MINOR.PATCH format with optional prerelease and build metadata.
+ *
+ * @internal
  */
 export function isValidSemver(version: string): boolean {
   if (!version) {

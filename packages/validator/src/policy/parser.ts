@@ -485,6 +485,8 @@ function validateContentRules(
 /**
  * A traffic percent with at most two decimals, in basis points, or undefined when the
  * value is not one. The tolerance absorbs binary float noise such as 0.07 * 100.
+ *
+ * @internal
  */
 export function percentToBasisPoints(value: unknown): number | undefined {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 100) {
