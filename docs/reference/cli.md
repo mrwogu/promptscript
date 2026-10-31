@@ -1522,7 +1522,15 @@ runs that arm instead, only for prompts that have it. One run covers one arm, be
 each suite once. A suite whose prompt is not in the label, or has no such arm, is skipped with a
 warning `PS6311`, which counts for `--strict`. A suite you name on the command line is an error
 instead, and so is a run where every suite is skipped. The report records the hash of every suite
-under `prompt.contentHash`, and `--report-dir` names files after that hash. The cache is keyed by
+under `prompt.contentHash`, and `--report-dir` names files after that hash. Only the prompt under
+test comes from the label. The suite, its dataset and the rubric prompts of `llm-judge` assertions
+come from the working tree, so a run with a judge compiles the project (`PS6310` when it does not
+compile, `PS6203` when the rubric is not in it), and a run without judges does not. The rubrics are
+compiled with the validator settings of a release build, so `validation.excludes` cannot switch off
+the forced security rules for them. A rubric always comes from the working tree, also when the label
+serves the same prompt id; `judges` in the report holds the hash of the rubric that judged, and
+stderr gets one line `label <env>: suite <name> judged by <rubric> at <short hash> (working tree)`
+per judged suite, next to the `runs` line. The cache is keyed by
 the hash too: replay answers only from entries recorded for that hash, so a label that is behind the
 source needs `--cache record` once, or `--cache off --max-cost <usd>` for a live check of what the
 environment serves. Release gates do not read eval reports, so a report of a label run is not gate
