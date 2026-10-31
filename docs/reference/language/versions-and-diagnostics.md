@@ -119,7 +119,7 @@ their replacement, models outside `models.supported`, and inconsistent
 | PS5107     | CODEOWNERS owner or path refused                                                                | Use Git host identities and plain paths                                |
 | PS5108     | Git missing, no repository, shallow history, Git failed or history that does not explain `HEAD` | Run it in a full Git checkout with git on PATH, see the releases guide |
 | PS5109     | Approval record invalid or misplaced                                                            | Fix, move or delete it in a commit                                     |
-| PS5110     | Invalid `--max-weight`, or `--max-weight` without `--env`                                       | Give a percent like 5 or 2.5 together with `--env`                     |
+| PS5110     | Invalid `--max-weight`, or `--max-weight` without `--env` or with `--all-environments`          | Give a percent like 5 or 2.5 with `--env` and no `--all-environments`  |
 
 PS5109 is a warning when `prs approve --list` reads such a record, or a modified one (its bytes are
 not the ones Git has) or one with a role that is not in `governance.roles`. It is an error, with

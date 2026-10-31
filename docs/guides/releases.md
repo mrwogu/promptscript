@@ -290,9 +290,10 @@ Approvals and evals bind to a hash, not to a weight. Without an exposure policy,
 1 % to 99 % passes when 1 % did. Treat a weight change as a release: put CODEOWNERS on
 `.promptscript/releases/` and review it. A `max-experiment-weight` policy changes that: the gates
 judge the weight of every arm with traffic in split, rollback and `status --base`, and warn in plain
-`status`. Up to `maxWeight` an arm needs nothing. Above it, the policy asks for a record of each
-role that covers the weight, made with `prs approve --env <env> --max-weight <percent>`, and above
-`ceiling` nothing passes. An arm at weight 0, the entry hash and the control arm are not judged. See
+`status`. Up to `maxWeight` an arm needs nothing. If the policy defines `approvals`, a higher weight
+needs a record from each role that covers the weight, made with
+`prs approve --env <env> --max-weight <percent>`. Without `approvals`, `maxWeight` is a hard cap.
+Above `ceiling` nothing passes. An arm at weight 0, the entry hash and the control arm are not judged. See
 [Max Experiment Weight](policy-engine.md#max-experiment-weight).
 
 A promote on an entry with a running experiment is refused with `PS5010`, so it can never drop
