@@ -1,12 +1,13 @@
 /**
  * Runs the built runtime package under Deno: every render case of the prompt bundle
- * conformance vectors, and the prod label of the Node example read through the node entry,
- * from the dist files a consumer installs.
+ * conformance vectors, the prod label of the Node example read through the node entry, and a
+ * traced call through the telemetry entry, from the dist files a consumer installs.
  *
  * Usage (after `pnpm nx build runtime`):
  *   deno run --allow-read scripts/runtime-deno-smoke.mjs
  *
- * It needs read access only: no environment and no network permission.
+ * It needs read access only: no environment and no network permission. The telemetry entry
+ * gets a fake API, so no OpenTelemetry package is needed.
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -16,6 +17,11 @@ import {
   toAnthropicMessages,
 } from '../dist/packages/runtime/src/index.js';
 import { directorySource } from '../dist/packages/runtime/src/node.js';
+import {
+  anthropicResult,
+  createPromptTelemetry,
+  readPricing,
+} from '../dist/packages/runtime/src/otel.js';
 
 const vectors = new URL('../conformance/prompt-bundle/v1/', import.meta.url);
 const names = (await readdir(vectors)).filter((name) => /^\d{3}-.*\.json$/.test(name)).sort();
@@ -81,6 +87,47 @@ if (`${JSON.stringify(toAnthropicMessages(rendered), null, 2)}\n` !== expected) 
     'The example prod label does not render as examples/runtime-node/expected-output.json'
   );
 }
+// The telemetry entry imports nothing, so a small fake of the OpenTelemetry API is enough
+const recorded = {};
+const span = {
+  spanContext: () => ({ traceId: '1'.repeat(32), spanId: '2'.repeat(16), traceFlags: 1 }),
+  setAttribute: (key, value) => {
+    recorded[key] = value;
+  },
+  setStatus: () => undefined,
+  addEvent: () => undefined,
+  end: () => undefined,
+};
+const fakeApi = {
+  trace: {
+    getTracer: () => ({
+      startSpan: (_name, options) => {
+        Object.assign(recorded, options.attributes);
+        return span;
+      },
+    }),
+    wrapSpanContext: () => span,
+    setSpan: () => undefined,
+  },
+  context: { active: () => undefined, with: (_context, fn) => fn() },
+  SpanKind: { CLIENT: 2, INTERNAL: 0 },
+  SpanStatusCode: { ERROR: 2 },
+};
+const pricing = readPricing(
+  await readFile(new URL('.promptscript/releases/pricing.json', example), 'utf8')
+);
+const telemetry = createPromptTelemetry(fakeApi, { pricing });
+await telemetry.trace(
+  rendered,
+  async () => ({ usage: { input_tokens: 1000, output_tokens: 500 } }),
+  anthropicResult
+);
+if (
+  recorded['promptscript.prompt.content_hash'] !== rendered.meta.contentHash ||
+  typeof recorded['promptscript.usage.cost_usd'] !== 'number'
+) {
+  throw new Error('The telemetry entry did not record the prompt hash and the cost');
+}
 console.log(
-  `runtime: ${names.length} vectors, ${cases} render cases and the example prod label pass`
+  `runtime: ${names.length} vectors, ${cases} render cases, the example prod label and a traced call pass`
 );
