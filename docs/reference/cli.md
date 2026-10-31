@@ -1743,11 +1743,10 @@ Read the governance history of the project from Git.
 
 #### prs audit log
 
-List prompt file changes, approvals, promotions, rollbacks, label entries removed, config changes
-and changes of the generated CODEOWNERS section, newest commit first, merges and side branches
-included, plus the changes a merge dropped from a parent. See [Audit log](../guides/releases.md#audit-log)
-in the releases guide. Experiment arms and weights are not listed yet: read the label history with
-`git log -p`.
+List prompt file changes, approvals, promotions, rollbacks, label entries removed, experiments
+started, changed or ended, config changes and changes of the generated CODEOWNERS section, newest
+commit first, merges and side branches included, plus the changes a merge dropped from a parent.
+See [Audit log](../guides/releases.md#audit-log) in the releases guide.
 
 ```bash
 prs audit log [options]

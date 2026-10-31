@@ -231,7 +231,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
   - [x] Track who changed what and when
   - [x] Git-native audit trail
   - [x] Export to SIEM systems (JSON and CEF)
-  - [ ] Experiment arms and weights as audit log events (today `git log -p` on the label shows them)
+  - [x] Experiment arms and weights as audit log events (`experiment-started`, `experiment-changed`, `experiment-ended`)
 
 ### 8. Security & Compliance
 
