@@ -148,7 +148,7 @@ export interface Formatter {
     transformInjectedSkillContent?(content: string): string;
 }
 
-// @public
+// @internal
 export type FormatterConstructor = new () => Formatter;
 
 // @public
@@ -169,7 +169,7 @@ export interface FormatterOutput extends OutputArtifact {
 // @public
 export type LegacyFormatter = Omit<Formatter, 'formatCanonical'>;
 
-// @public
+// @internal
 export const MAX_ENTRY_RESOLVERS = 50;
 
 export { normalizeOutputCollisionKey }
