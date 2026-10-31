@@ -103,7 +103,7 @@ export function experimentEvents(
     const after = next.get(prompt);
     const was = before?.experiment;
     const now = after?.experiment;
-    const sameName = was !== undefined && now !== undefined && was.name === now.name;
+    const sameName = was !== undefined && was.name === now?.name;
     if (was !== undefined && !sameName) {
       result.ended.push({ ...endedEvent(base, environment, prompt, was, after), ...configured });
     }
