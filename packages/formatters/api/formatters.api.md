@@ -132,16 +132,16 @@ export class AntigravityFormatter extends BaseFormatter {
 // @public
 export type AntigravityVersion = 'simple' | 'frontmatter' | 'agents-md';
 
-// @public (undocumented)
+// @internal (undocumented)
 export function appendResourceCapabilityWarnings(output: FormatterOutput, ast: Program, target: string, version: string | undefined): FormatterOutput;
 
-// @public (undocumented)
+// @internal (undocumented)
 export function appendTargetHookCapabilityWarnings(output: FormatterOutput, ast: Program, target: string, version: string): FormatterOutput;
 
-// @public (undocumented)
+// @internal (undocumented)
 export function applyHookTargetOverrides(hooks: HookDefinition[], target: HookTarget): HookDefinition[];
 
-// @public
+// @internal
 export function applyMergeOperations(target: Record<string, unknown>, plan: StructuredMergePlan): Record<string, unknown>;
 
 // @public (undocumented)
@@ -245,7 +245,7 @@ export abstract class BaseFormatter implements Formatter {
 // @public
 export function buildPromptBundles(program: Program, options: FormatOptions | undefined, target: string): BuiltPrompts;
 
-// @public
+// @internal
 export const BUILTIN_FORMATTERS: {
     readonly github: typeof GitHubFormatter;
     readonly claude: typeof ClaudeFormatter;
@@ -409,6 +409,20 @@ export const BUILTIN_FORMATTERS: {
     };
 };
 
+// @public
+interface BuiltPrompt {
+    bundle: PromptBundleV1;
+    key: string;
+    loc: SourceLocation;
+}
+
+// @public
+interface BuiltPrompts {
+    // Warning: (ae-forgotten-export) The symbol "BuiltPrompt" needs to be exported by the entry point index.d.ts
+    prompts: BuiltPrompt[];
+    source: string;
+}
+
 // @public (undocumented)
 export const BUNDLE_VERSIONS: {
     readonly v1: {
@@ -537,6 +551,16 @@ export const CommandCodeFormatter: {
 // @public (undocumented)
 export type CommandCodeVersion = 'simple' | 'multifile' | 'full';
 
+// @public
+interface ConfigStandards {
+    // (undocumented)
+    readonly [key: string]: string | undefined;
+    // (undocumented)
+    readonly eslint?: string;
+    // (undocumented)
+    readonly vite?: string;
+}
+
 // @public (undocumented)
 export const CONTINUE_VERSIONS: SimpleFormatterVersions;
 
@@ -580,7 +604,7 @@ export const conventionRenderers: {
     readonly markdown: ConventionRenderer;
 };
 
-// @public
+// @internal
 export function convertTimeout(timeoutMs: number, target: HookTarget): number;
 
 // @public (undocumented)
@@ -614,6 +638,46 @@ export const CrushFormatter: {
 
 // @public (undocumented)
 export type CrushVersion = 'simple' | 'multifile' | 'full';
+
+// @public
+const CURSOR_VERSIONS: {
+    readonly modern: {
+        readonly name: "modern";
+        readonly description: "MDC format with YAML frontmatter (.cursor/rules/project.mdc) + slash commands (.cursor/commands/)";
+        readonly outputPath: ".cursor/rules/project.mdc";
+        readonly cursorVersion: "0.45+";
+        readonly introduced: "2024-12";
+    };
+    readonly 'agents-md': {
+        readonly name: "agents-md";
+        readonly description: "Plain markdown at AGENTS.md (Cursor 2.4+) — no frontmatter required";
+        readonly outputPath: "AGENTS.md";
+        readonly cursorVersion: "2.4+";
+        readonly introduced: "2025-06";
+    };
+    readonly full: {
+        readonly name: "full";
+        readonly description: "MDC + skills (.agents/skills/<name>/SKILL.md) + subagents (.cursor/agents/<name>.md)";
+        readonly outputPath: ".cursor/rules/project.mdc";
+        readonly cursorVersion: "2.5+";
+        readonly introduced: "2025-06";
+    };
+    readonly multifile: {
+        readonly name: "multifile";
+        readonly description: "Multiple MDC files with glob-based targeting + slash commands";
+        readonly outputPath: ".cursor/rules/project.mdc";
+        readonly cursorVersion: "0.45+";
+        readonly introduced: "2024-12";
+    };
+    readonly legacy: {
+        readonly name: "legacy";
+        readonly description: "Plain text format (.cursorrules) - DEPRECATED";
+        readonly outputPath: ".cursorrules";
+        readonly cursorVersion: "< 0.45";
+        readonly deprecated: true;
+        readonly deprecatedSince: "2024-12";
+    };
+};
 
 // @public
 export class CursorFormatter extends BaseFormatter {
@@ -662,6 +726,37 @@ export const DevinFormatter: {
 export type DevinVersion = 'simple' | 'multifile' | 'full';
 
 // @public
+interface DiagramStandards {
+    readonly format?: string;
+    // (undocumented)
+    readonly rawValue?: Value;
+    // (undocumented)
+    readonly types?: string[];
+}
+
+// @public
+interface DocumentationStandards {
+    // (undocumented)
+    readonly items: string[];
+    // (undocumented)
+    readonly rawValue?: Value;
+}
+
+// @public
+interface ExtractedStandards {
+    // Warning: (ae-forgotten-export) The symbol "StandardsEntry" needs to be exported by the entry point index.d.ts
+    readonly codeStandards: Map<string, StandardsEntry>;
+    // Warning: (ae-forgotten-export) The symbol "ConfigStandards" needs to be exported by the entry point index.d.ts
+    readonly config?: ConfigStandards;
+    // Warning: (ae-forgotten-export) The symbol "DiagramStandards" needs to be exported by the entry point index.d.ts
+    readonly diagrams?: DiagramStandards;
+    // Warning: (ae-forgotten-export) The symbol "DocumentationStandards" needs to be exported by the entry point index.d.ts
+    readonly documentation?: DocumentationStandards;
+    // Warning: (ae-forgotten-export) The symbol "GitStandards" needs to be exported by the entry point index.d.ts
+    readonly git?: GitStandards;
+}
+
+// @internal
 export function extractHooks(hooksBlock: {
     content: {
         type: string;
@@ -680,7 +775,7 @@ export interface ExtractionRule {
     propertyPath?: string;
 }
 
-// @public
+// @internal
 export function extractSectionsFromOutput(content: string): string[];
 
 // @public
@@ -701,6 +796,25 @@ export const FACTORY_VERSIONS: {
         readonly outputPath: "AGENTS.md";
     };
 };
+
+// @public
+interface FactoryCommandConfig extends MarkdownCommandConfig {
+    agent?: string;
+    // Warning: (ae-forgotten-export) The symbol "FactoryHandoff" needs to be exported by the entry point index.d.ts
+    handoffs?: FactoryHandoff[];
+    tools?: string[];
+}
+
+// @public
+interface FactoryDroidConfig extends MarkdownAgentConfig {
+    mcpServers?: string[];
+    model?: string;
+    // Warning: (ae-forgotten-export) The symbol "FactoryReasoningEffort" needs to be exported by the entry point index.d.ts
+    reasoningEffort?: FactoryReasoningEffort;
+    specModel?: string;
+    specReasoningEffort?: FactoryReasoningEffort;
+    tools?: string | string[];
+}
 
 // @public
 export class FactoryFormatter extends MarkdownInstructionFormatter {
@@ -735,6 +849,24 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     // (undocumented)
     referencesMode(): 'directory' | 'inline' | 'none';
     transformInjectedSkillContent(content: string): string;
+}
+
+// @public
+interface FactoryHandoff {
+    agent: string;
+    label: string;
+    prompt: string;
+    send?: boolean;
+}
+
+// @public
+type FactoryReasoningEffort = 'low' | 'medium' | 'high';
+
+// @public
+interface FactorySkillConfig extends MarkdownSkillConfig {
+    allowedTools?: string[];
+    disableModelInvocation: boolean;
+    userInvocable: boolean;
 }
 
 // @public
@@ -778,7 +910,7 @@ export interface FeatureSpec {
 // @public
 export type FeatureStatus = TargetFeatureStatus;
 
-// @public
+// @internal
 export function findMissingSections(outputSections: string[], expectedSections: string[]): string[];
 
 // @public (undocumented)
@@ -915,46 +1047,46 @@ export class GeminiFormatter extends MarkdownInstructionFormatter {
 // @public
 export type GeminiVersion = 'simple' | 'multifile' | 'full';
 
-// @public
+// @internal
 export function generateClaudeHooks(hooks: HookDefinition[]): Record<string, unknown>;
 
-// @public
+// @internal
 export function generateCodexHooks(hooks: HookDefinition[]): string;
 
-// @public
+// @internal
 export function generateCursorHooks(hooks: HookDefinition[]): Record<string, unknown>;
 
-// @public
+// @internal
 export function generateFactoryHooks(hooks: HookDefinition[]): Record<string, unknown[]>;
 
 // @public
 export function generateFeatureMatrixReport(): string;
 
-// @public
+// @internal
 export function generateGeminiHooks(hooks: HookDefinition[]): Record<string, unknown[]>;
 
-// @public
+// @internal
 export function generateGitHubHooks(hooks: HookDefinition[]): Record<string, unknown[]>;
 
-// @public
+// @internal
 export function generateGrokHooks(hooks: HookDefinition[]): Record<string, unknown[]>;
 
-// @public
+// @internal
 export function generateOpenCodePlugin(hooks: HookDefinition[]): string | null;
 
-// @public
+// @internal
 export function generateVSCodeHooks(hooks: HookDefinition[]): Record<string, unknown[]>;
 
-// @public
+// @internal
 export function generateWindsurfHooks(hooks: HookDefinition[]): Record<string, unknown[]>;
 
 // @public
 export function getAllSections(formatter: FormatterName): SectionSpec[];
 
-// @public (undocumented)
+// @internal (undocumented)
 export function getEnabledHookScriptResources(hook: HookDefinition): HookScriptDefinition[];
 
-// @public
+// @internal
 export function getExpectedSections(availableBlocks: string[]): string[];
 
 // @public (undocumented)
@@ -966,7 +1098,7 @@ export function getFeaturesByCategory(category: FeatureCategory): FeatureSpec[];
 // @public
 export function getFormatter(name: string): Formatter;
 
-// @public (undocumented)
+// @internal (undocumented)
 export function getHookCompatibilityWarnings(hooks: HookDefinition[], target: HookTarget): FormatterWarning[];
 
 // @public
@@ -978,13 +1110,13 @@ export function getPlannedFeatures(tool: ToolName): FeatureSpec[];
 // @public
 export function getRequiredSections(formatter: FormatterName): SectionSpec[];
 
-// @public
+// @internal
 export function getResourceCapabilityWarnings(ast: Program, target: string, version: string | undefined): FormatterWarning[];
 
 // @public
 export function getSourceBlocks(sectionId: string): string[];
 
-// @public (undocumented)
+// @internal (undocumented)
 export function getTargetHookCapabilityWarnings(ast: Program, target: string, version: string): FormatterWarning[];
 
 // @public
@@ -1045,6 +1177,18 @@ export const GitlabDuoFormatter: {
 // @public (undocumented)
 export type GitlabDuoVersion = 'simple' | 'multifile' | 'full';
 
+// @public
+interface GitStandards {
+    // (undocumented)
+    readonly example?: string;
+    // (undocumented)
+    readonly format?: string;
+    // (undocumented)
+    readonly scope?: string;
+    // (undocumented)
+    readonly types?: string[];
+}
+
 // @public (undocumented)
 export const GOOSE_VERSIONS: SimpleFormatterVersions;
 
@@ -1092,7 +1236,7 @@ export type GrokVersion = 'simple' | 'multifile' | 'full';
 // @public
 export function hasFormatter(name: string): boolean;
 
-// @public
+// @internal
 export function hasOwnedEntries(data: Record<string, unknown>): boolean;
 
 // @public (undocumented)
@@ -1107,7 +1251,7 @@ export const HermesFormatter: {
 // @public (undocumented)
 export type HermesVersion = 'simple' | 'multifile' | 'full';
 
-// @public
+// @internal
 export interface HookDefinition {
     command?: string[];
     continueOnFailure?: boolean;
@@ -1122,17 +1266,17 @@ export interface HookDefinition {
     timeoutMs?: number;
 }
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface HookScriptDefinition {
     args: string[];
     interpreter: PortableHookInterpreter;
     path: string;
 }
 
-// @public (undocumented)
+// @internal (undocumented)
 export type HookTarget = 'claude' | 'cursor' | 'codex' | 'factory' | 'github' | 'vscode' | 'gemini' | 'windsurf' | 'grok' | 'opencode';
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface HookTargetOverride {
     // (undocumented)
     command?: string[];
@@ -1169,7 +1313,7 @@ export type IflowVersion = 'simple' | 'multifile' | 'full';
 // @public (undocumented)
 export function isCanonicalFormatter(formatter: Formatter): formatter is CanonicalFormatter;
 
-// @public
+// @internal
 export function isCanonicalTarget(value: string): value is KnownTarget;
 
 // @public (undocumented)
@@ -1242,7 +1386,7 @@ export class KiroFormatter extends MarkdownInstructionFormatter {
 // @public (undocumented)
 export type KiroVersion = 'simple' | 'multifile' | 'full';
 
-// @public
+// @internal
 export const KNOWN_SECTIONS: SectionInfo[];
 
 // @public (undocumented)
@@ -1263,7 +1407,7 @@ export type LegacyFormatter = Omit<Formatter, 'formatCanonical'>;
 // @public
 export function listFormatters(): string[];
 
-// @public
+// @internal
 export function mapEvent(event: PortableHookEvent, target: HookTarget): string | null;
 
 // @public
@@ -1488,7 +1632,7 @@ export { normalizeOutputCollisionKey }
 
 export { normalizeOutputPath }
 
-// @public
+// @internal
 export function normalizeSectionName(name: string): string;
 
 // @public (undocumented)
@@ -1503,7 +1647,7 @@ export const OpenClawFormatter: {
 // @public (undocumented)
 export type OpenClawVersion = 'simple' | 'multifile' | 'full';
 
-// @public
+// @internal
 export const OPENCODE_PLUGIN_PATH = ".opencode/plugins/promptscript.ts";
 
 // @public
@@ -1518,7 +1662,7 @@ export class OpenCodeFormatter extends MarkdownInstructionFormatter {
     static getSupportedVersions(): SimpleFormatterVersions;
 }
 
-// @public
+// @internal
 export interface OpenCodeHookRule {
     // (undocumented)
     command: string[];
@@ -1567,7 +1711,7 @@ export { OutputPlanManagedPaths }
 
 export { OutputPlanPathError }
 
-// @public
+// @internal
 export const OWNERSHIP_KEY = "_promptscript";
 
 // @public
@@ -1590,7 +1734,7 @@ export interface ParityReport {
     presentSections: string[];
 }
 
-// @public
+// @internal
 export function parsePath(path: string): string[];
 
 // @public (undocumented)
@@ -1617,7 +1761,7 @@ export const PochiFormatter: {
 // @public (undocumented)
 export type PochiVersion = 'simple' | 'multifile' | 'full';
 
-// @public
+// @internal
 export type PortableHookEvent = 'pre-terminal-command' | 'pre-tool-use' | 'post-tool-use' | 'session-start' | 'setup' | 'subagent-start' | 'notification' | 'stop';
 
 export { PROMPT_BUNDLE_INDEX_SCHEMA }
@@ -1636,6 +1780,39 @@ export const PROMPT_TEXT_VERSIONS: {
 // @public
 export class PromptFormatError extends PSError {
     constructor(message: string, location?: SourceLocation);
+}
+
+// @public
+abstract class PromptFormatter implements Formatter {
+    protected constructor(name: string, outputPath: string, description: string);
+    // (undocumented)
+    readonly defaultConvention = "markdown";
+    // (undocumented)
+    readonly description: string;
+    // (undocumented)
+    format(ast: Program, options?: FormatOptions): FormatterOutput;
+    // (undocumented)
+    getSkillBasePath(): string | null;
+    // (undocumented)
+    getSkillFileName(): string | null;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    readonly outputPath: string;
+    // (undocumented)
+    referencesMode(): 'none';
+    // (undocumented)
+    protected abstract render(built: BuiltPrompts): PromptRender;
+}
+
+// @public
+interface PromptRender {
+    files: Array<{
+        name: string;
+        content: string;
+    }>;
+    primary?: string;
+    warnings?: FormatterWarning[];
 }
 
 // @public
@@ -1677,13 +1854,13 @@ export type QwenCodeVersion = 'simple' | 'multifile' | 'full';
 // @public
 export function registerFormatter(name: string, ctorOrFactory: FormatterClass | FormatterFactory): void;
 
-// @public
+// @internal
 export function removeStaleOwned(target: Record<string, unknown>, plan: StructuredMergePlan): void;
 
-// @public
+// @internal
 export function resolveSectionTitle(ast: Program, sectionIdOrAlias: string, options?: SectionTitleOptions): string;
 
-// @public (undocumented)
+// @internal (undocumented)
 export function resolveSourceSectionTitle(ast: Program, sectionIdOrAlias: string): string | undefined;
 
 // @public (undocumented)
@@ -1698,7 +1875,7 @@ export const RooFormatter: {
 // @public (undocumented)
 export type RooVersion = 'simple' | 'multifile' | 'full';
 
-// @public
+// @internal
 export interface SectionInfo {
     description: string;
     id: string;
@@ -1722,7 +1899,7 @@ export interface SectionSpec {
     sources: SourceBlockConfig[];
 }
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface SectionTitleOptions {
     // (undocumented)
     readonly defaultTitle?: string;
@@ -1732,7 +1909,7 @@ export interface SectionTitleOptions {
     readonly sourceOverrides?: boolean;
 }
 
-// @public
+// @internal
 export function serializeMerged(data: Record<string, unknown>, format: 'json' | 'toml'): string;
 
 // @public
@@ -1775,6 +1952,29 @@ export interface SimpleFormatterVersions {
 }
 
 // @public
+interface SkillFileConfig {
+    argumentHint?: string;
+    content: string;
+    description: string;
+    examples?: Array<{
+        name: string;
+        input: string;
+        output: string;
+        description?: string;
+    }>;
+    license?: string;
+    name: string;
+    outputDir?: string;
+    rawFrontmatter?: string;
+    resources?: Array<{
+        relativePath: string;
+        content: string;
+        origin?: string;
+        executable?: boolean;
+    }>;
+}
+
+// @public
 export interface SourceBlockConfig {
     block: string;
     property?: string;
@@ -1784,6 +1984,31 @@ export interface SourceBlockConfig {
 // @public
 export interface StandaloneFormatOptions extends FormatOptions {
     formatter?: string | Formatter | FormatterFactory;
+}
+
+// @public
+interface StandardsEntry {
+    readonly items: string[];
+    readonly key: string;
+    readonly rawValue: Value;
+    readonly sectionName: string;
+    readonly title: string;
+}
+
+// @public
+interface StandardsExtractionOptions {
+    readonly supportLegacyFormat?: boolean;
+    readonly supportObjectFormat?: boolean;
+}
+
+// @public
+class StandardsExtractor {
+    // Warning: (ae-forgotten-export) The symbol "StandardsExtractionOptions" needs to be exported by the entry point index.d.ts
+    constructor(options?: StandardsExtractionOptions);
+    // Warning: (ae-forgotten-export) The symbol "ExtractedStandards" needs to be exported by the entry point index.d.ts
+    extract(content: BlockContent): ExtractedStandards;
+    extractFromProgram(ast: Program): ExtractedStandards | null;
+    stringify(value: Value): string;
 }
 
 export { StructuredMergeOperation }
@@ -1818,7 +2043,7 @@ export type TraeVersion = 'simple' | 'multifile' | 'full';
 // @public
 export function unregisterFormatter(name: string): boolean;
 
-// @public
+// @internal
 export function validateBuiltinFormatterCapabilities(): string[];
 
 // @public

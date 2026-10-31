@@ -34,6 +34,8 @@ function hasEntries(block: Block): boolean {
 /**
  * Warn when `@skills`, `@mcpServers` or `@plugins` is authored but the target,
  * or the resolved target version, cannot emit it.
+ *
+ * @internal
  */
 export function getResourceCapabilityWarnings(
   ast: Program,
@@ -75,6 +77,7 @@ export function getResourceCapabilityWarnings(
   return warnings;
 }
 
+/** @internal */
 export function appendResourceCapabilityWarnings(
   output: FormatterOutput,
   ast: Program,
