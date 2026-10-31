@@ -29,6 +29,7 @@
     "prs": "node --import @swc-node/register/esm-register packages/cli/src/cli.ts",
     "skill:sync": "./scripts/sync-skill.sh",
     "skill:check": "./scripts/sync-skill.sh --check",
+    "package:check": "node --import @swc-node/register/esm-register scripts/package-check.mts",
     "api:check": "node --import @swc-node/register/esm-register scripts/api-report.mts",
     "api:update": "node --import @swc-node/register/esm-register scripts/api-report.mts --update",
     "grammar:check": "node --import @swc-node/register/esm-register scripts/check-grammar.mts",
@@ -41,6 +42,7 @@
   },
   "private": true,
   "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
     "@eslint/eslintrc": "^3.3.7",
     "@eslint/js": "^10.0.1",
     "@microsoft/api-extractor": "7.60.0",
@@ -71,6 +73,7 @@
     "nx": "23.2.1",
     "path-browserify": "^1.0.1",
     "prettier": "~3.9.10",
+    "publint": "0.3.25",
     "shiki": "^4.5.0",
     "ts-json-schema-generator": "^2.9.0",
     "ts-node": "^10.9.2",
