@@ -19,7 +19,7 @@
         "outputPath": "dist/packages/compiler",
         "main": "packages/compiler/src/index.ts",
         "tsConfig": "packages/compiler/tsconfig.lib.json",
-        "assets": ["packages/compiler/*.md"]
+        "assets": ["packages/compiler/*.md", { "input": ".", "glob": "LICENSE", "output": "." }]
       }
     },
     "nx-release-publish": {
