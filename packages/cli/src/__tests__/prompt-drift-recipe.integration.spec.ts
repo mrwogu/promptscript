@@ -1,14 +1,27 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from 'node:fs';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { spawnSync } from 'node:child_process';
+import {
+  chmodSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parse } from 'yaml';
+import { compareCodeUnits } from '@promptscript/core';
 import { createMockProvider, type MockAnswer } from '@promptscript/eval';
 import { defaultFileSystem, defaultPrompts } from '../services.js';
 import { evalRunCommand, type EvalCommandServices } from '../commands/eval/run.js';
 
-const REPO = new URL('../../../../', import.meta.url).pathname;
+const REPO = fileURLToPath(new URL('../../../../', import.meta.url));
 const RECIPE = join(REPO, 'examples', 'workflows', 'prompt-drift.yml');
 const GUIDE = join(REPO, 'docs', 'guides', 'ci.md');
 const EXAMPLE = join(REPO, 'examples', 'runtime-node');
@@ -80,6 +93,14 @@ interface Workflow {
   };
 }
 
+interface LabelFile {
+  prompts: { contentHash: string }[];
+}
+
+interface BaselineFile {
+  suites: { prompt: { contentHash: string } }[];
+}
+
 const recipeText = readFileSync(RECIPE, 'utf8');
 const workflow = parse(recipeText) as Workflow;
 const steps = workflow.jobs.drift.steps;
@@ -91,7 +112,9 @@ function stepById(id: string): Step {
 }
 
 function stepUsing(action: string): Step {
-  const step = steps.find((candidate) => candidate.uses?.startsWith(`${action}@`));
+  const step = steps.find(
+    (candidate) => candidate.uses !== undefined && candidate.uses.startsWith(`${action}@`)
+  );
   if (step === undefined) throw new Error(`the recipe has no step that uses ${action}`);
   return step;
 }
@@ -138,7 +161,7 @@ function treeOf(root: string, dir: string): Map<string, string> {
     }
   };
   walk(join(root, dir));
-  return new Map([...files].sort(([a], [b]) => a.localeCompare(b)));
+  return new Map([...files].sort(([a], [b]) => compareCodeUnits(a, b)));
 }
 
 function replaceCommitted(copy: string): void {
@@ -181,9 +204,11 @@ describe('the drift example cache', () => {
     expect(fetch).not.toHaveBeenCalled();
     const label = JSON.parse(
       readFileSync(join(copy, PROMPTSCRIPT, 'releases', 'prod.json'), 'utf8')
+    ) as LabelFile;
+    const baseline = JSON.parse(readFileSync(join(copy, BASELINE), 'utf8')) as BaselineFile;
+    expect(baseline.suites.map((suite) => suite.prompt.contentHash)).toEqual(
+      label.prompts.map((prompt) => prompt.contentHash)
     );
-    const baseline = JSON.parse(readFileSync(join(copy, BASELINE), 'utf8'));
-    expect(baseline.suites[0].prompt.contentHash).toBe(label.prompts[0].contentHash);
     if (process.env['UPDATE_DRIFT_EXAMPLE'] === 'true') replaceCommitted(copy);
     for (const dir of GENERATED) {
       expect(
@@ -198,7 +223,7 @@ describe('the prompt drift recipe', () => {
   it('runs on a schedule and by hand only', () => {
     const triggers = Object.keys(workflow.on);
 
-    expect(triggers.sort((a, b) => a.localeCompare(b))).toEqual(['schedule', 'workflow_dispatch']);
+    expect(triggers.sort(compareCodeUnits)).toEqual(['schedule', 'workflow_dispatch']);
     expect(workflow.on['schedule']).toHaveLength(1);
     for (const forbidden of ['push', 'pull_request', 'pull_request_target', 'workflow_run']) {
       expect(triggers).not.toContain(forbidden);
@@ -301,10 +326,7 @@ describe('the prompt drift recipe', () => {
     expect(job.needs).toBe('drift');
     expect(job.if).toBe(`failure() && (${JOB_IF})`);
     expect(job.environment).toBeUndefined();
-    expect(Object.keys(job.env).sort((a, b) => a.localeCompare(b))).toEqual([
-      'GH_REPO',
-      'GH_TOKEN',
-    ]);
+    expect(Object.keys(job.env).sort(compareCodeUnits)).toEqual(['GH_REPO', 'GH_TOKEN']);
     expect(job.steps).toHaveLength(1);
     expect(job.steps.map((step) => step.run)).toEqual([ISSUE_RUN]);
     expect(job['timeout-minutes']).toBeGreaterThan(0);
@@ -314,3 +336,165 @@ describe('the prompt drift recipe', () => {
     expect(guideBlock()).toBe(recipeText);
   });
 });
+
+interface DriftReport {
+  outcome: string;
+  cache: unknown;
+  comparison: unknown;
+  usage: unknown;
+}
+
+interface StepRun {
+  status: number | null;
+  output: string;
+}
+
+describe.skipIf(process.platform === 'win32')(
+  'the recipe on the example, no key and no network',
+  () => {
+    let home: string;
+    let project: string;
+    let runner: string;
+    let summary: string;
+    let env: NodeJS.ProcessEnv;
+
+    beforeAll(async () => {
+      home = await mkdtemp(join(tmpdir(), 'promptscript-drift-recipe-'));
+      project = join(home, 'project');
+      runner = join(home, 'runner');
+      summary = join(home, 'summary.md');
+      cpSync(EXAMPLE, project, { recursive: true });
+      // The loader resolves its own package from the working directory
+      symlinkSync(join(REPO, 'node_modules'), join(project, 'node_modules'));
+      mkdirSync(runner);
+      mkdirSync(join(home, 'bin'));
+      const preload = join(home, 'preload.mjs');
+      writeFileSync(
+        preload,
+        "globalThis.fetch = () => { throw new Error('no network in the drift recipe check'); };\n"
+      );
+      const register = pathToFileURL(
+        join(REPO, 'node_modules', '@swc-node', 'register', 'esm', 'esm-register.mjs')
+      ).href;
+      const cli = join(REPO, 'packages', 'cli', 'src', 'cli.ts');
+      const shim = join(home, 'bin', 'prs');
+      writeFileSync(
+        shim,
+        `#!/bin/sh\nexec node --no-warnings --import ${pathToFileURL(preload).href} --import ${register} ${cli} "$@"\n`
+      );
+      chmodSync(shim, 0o755);
+      env = {
+        ...process.env,
+        // The recipe calls the CLI by its full path and keeps node_modules/.bin off PATH
+        PRS: shim,
+        RUNNER_TEMP: runner,
+        GITHUB_STEP_SUMMARY: summary,
+        PROMPTSCRIPT_NO_UPDATE_CHECK: '1',
+        DO_NOT_TRACK: '1',
+        // The loader reads the tsconfig of the working directory unless told where it is
+        SWC_NODE_PROJECT: join(REPO, 'tsconfig.json'),
+      };
+      delete env['ANTHROPIC_API_KEY'];
+    });
+
+    afterAll(async () => {
+      await rm(home, { recursive: true, force: true });
+    });
+
+    beforeEach(() => {
+      rmSync(join(runner, 'prompt-drift.json'), { force: true });
+      rmSync(summary, { force: true });
+    });
+
+    /** Run a step the way Actions does: bash with -e and pipefail, in the checkout. */
+    function runStep(run: string, extra: NodeJS.ProcessEnv = {}, cwd = project): StepRun {
+      const result = spawnSync('bash', ['--noprofile', '--norc', '-eo', 'pipefail', '-c', run], {
+        cwd,
+        env: { ...env, ...extra },
+        encoding: 'utf8',
+        timeout: 50_000,
+      });
+      return { status: result.status, output: `${result.stdout}${result.stderr}` };
+    }
+
+    const evalRun = (): string => stepById('eval').run ?? '';
+    const replayRun = (): string => evalRun().replace('--cache off', '--cache replay');
+    const report = (): DriftReport =>
+      JSON.parse(readFileSync(join(runner, 'prompt-drift.json'), 'utf8')) as DriftReport;
+
+    it('passes the models check', () => {
+      const result = runStep(stepById('models').run ?? '');
+
+      expect(result.status, result.output).toBe(0);
+    });
+
+    it('replays the suite from the cache and finds no regression', () => {
+      const result = runStep(replayRun());
+
+      expect(result.status, result.output).toBe(0);
+      const document = report();
+      expect(document.outcome).toBe('passed');
+      expect(document.cache).toMatchObject({ live: 0, replayed: 4 });
+      expect(document.comparison).toMatchObject({ regression: false });
+    });
+
+    it('writes the comparison into the job summary', () => {
+      runStep(replayRun());
+
+      const result = runStep(stepById('summary').run ?? '');
+
+      expect(result.status, result.output).toBe(0);
+      const text = readFileSync(summary, 'utf8');
+      expect(text).toContain('Eval comparison: **no regression**');
+      expect(text).toContain('| Suite | Model | Pass rate |');
+      expect(text).toContain('refund-reply');
+    });
+
+    it('exits 1 and names the case in the summary when a replayed answer regresses', () => {
+      const regressed = join(home, 'regressed');
+      cpSync(EXAMPLE, regressed, { recursive: true });
+      symlinkSync(join(REPO, 'node_modules'), join(regressed, 'node_modules'));
+      const cache = join(regressed, PROMPTSCRIPT, 'eval-cache');
+      const entries = readdirSync(cache, { recursive: true, encoding: 'utf8' }).filter((name) =>
+        name.endsWith('.json')
+      );
+      // Turn the deny answer of late-return into an approve, so the decision assertion fails
+      const changed = entries.filter((name) => {
+        const file = join(cache, name);
+        const text = readFileSync(file, 'utf8');
+        if (!text.includes('\\"decision\\":\\"deny\\"')) return false;
+        writeFileSync(
+          file,
+          text.replace('\\"decision\\":\\"deny\\"', '\\"decision\\":\\"approve\\"')
+        );
+        return true;
+      });
+      expect(changed).toHaveLength(1);
+
+      const result = runStep(replayRun(), {}, regressed);
+      const compared = runStep(stepById('summary').run ?? '', {}, regressed);
+
+      expect(result.status, result.output).toBe(1);
+      expect(compared.status, compared.output).toBe(0);
+      const text = readFileSync(summary, 'utf8');
+      expect(text).toContain('Eval comparison: **regression**');
+      expect(text).toMatch(/\| `?refund-reply`? \|.*\| `?late-return`? \|/);
+    });
+
+    it('fails on a blocked network, so the replay above is not a pass by luck', () => {
+      const result = runStep(evalRun(), { ANTHROPIC_API_KEY: 'not-a-key' });
+
+      expect(result.status, result.output).toBe(1);
+      expect(report().outcome).toBe('failed');
+      expect(JSON.stringify(report())).toContain('PS6300');
+      expect(report().usage).toMatchObject({ calls: 0 });
+    });
+
+    it('fails with PS6306 and no call when the key is missing', () => {
+      const result = runStep(evalRun());
+
+      expect(result.status, result.output).toBe(1);
+      expect(JSON.stringify(report())).toContain('PS6306');
+    });
+  }
+);

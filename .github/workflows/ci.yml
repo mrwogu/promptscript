@@ -203,6 +203,15 @@ jobs:
           fi
           pnpm prs release status --cwd examples/runtime-otel
 
+      - name: Prompt drift recipe replays on the runtime example
+        if: matrix.node-version == '25.x'
+        run: |
+          # No key and no network: the recipe's commands run on a copy with fetch blocked
+          if ! pnpm exec vitest run --config packages/cli/vitest.config.mts prompt-drift-recipe; then
+            echo "::error::The drift recipe, its guide copy or the example cache is out of sync. See the spec output; regenerate the cache with UPDATE_DRIFT_EXAMPLE=true only after reviewing why."
+            exit 1
+          fi
+
       - name: Analyze CLI bundle
         if: matrix.node-version == '25.x'
         run: pnpm nx run cli:analyze-bundle
