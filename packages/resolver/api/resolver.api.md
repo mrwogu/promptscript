@@ -36,7 +36,7 @@ export function applyExtends(ast: Program, logger?: Logger): Program;
 
 export { bindParams }
 
-// @public
+// @internal
 export interface BlockFilterOptions {
     exclude?: string[];
     only?: string[];
@@ -48,7 +48,7 @@ export function buildAuthenticatedUrl(url: string, token: string): string;
 // @public
 export function buildReferenceKey(repoUrl: string, relativePath: string, version: string): string;
 
-// @public
+// @internal
 export function buildRegistryMarker(repoUrl: string, path: string, version: string): string;
 
 // @public
@@ -76,14 +76,14 @@ export interface CacheMetadata {
     version: 1;
 }
 
-// @public
+// @internal
 export interface CollectedSkillResources {
     errors: ResolveError[];
     // Warning: (ae-forgotten-export) The symbol "SkillResource" needs to be exported by the entry point index.d.ts
     resources: SkillResource[];
 }
 
-// @public
+// @internal
 export function collectSkillResources(skillMdPath: string, parsed: ParsedSkillMd, logger?: Logger): Promise<CollectedSkillResources>;
 
 // @public
@@ -149,13 +149,13 @@ export const DEFAULT_GIT_TIMEOUT_MS = 60000;
 // @public (undocumented)
 export function detectContentType(content: string): ContentType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export function discoverNativeContent(dir: string, logger?: Logger): Promise<Program | null>;
 
-// @public
+// @internal
 export function expandAlias(aliasPath: string, registries: RegistriesConfig): ExpandedAlias;
 
-// @public
+// @internal
 export interface ExpandedAlias {
     fallbackUrl?: string;
     path: string;
@@ -166,7 +166,7 @@ export interface ExpandedAlias {
 // @public
 export function extractReservedParams(params: ParamArgument[] | undefined): ReservedParamsResult;
 
-// @public
+// @internal
 export function extractSkillFrontmatter(content: string, sourceFile?: string): SkillFrontmatterBlock | null;
 
 // @public
@@ -196,16 +196,16 @@ export interface FileSystemRegistryOptions {
     rootPath: string;
 }
 
-// @public
+// @internal
 export function filterBlocks(blocks: Block[], options: BlockFilterOptions): Block[];
 
-// @public
+// @internal
 export function filterSkillsBlock(program: Program, options: SkillFilterOptions): Program;
 
-// @public
+// @internal
 export function findFallbackUrl(repoUrl: string, registries: RegistriesConfig): string | undefined;
 
-// @public
+// @internal
 export function findRegistryEntry(repoUrl: string, registries: RegistriesConfig): RegistryAliasEntry | undefined;
 
 // @public
@@ -214,13 +214,13 @@ export function formatSkillValidationIssues(issues: readonly SkillValidationIssu
 // @public
 export function getCacheKey(url: string, ref?: string): string;
 
-// @public
+// @internal
 export function getImportAlias(blockName: string): string | undefined;
 
-// @public
+// @internal
 export function getOriginalBlockName(blockName: string): string | undefined;
 
-// @public
+// @internal
 export function getSkillFrontmatterLocations(parsed: ParsedSkillMd): SkillFrontmatterLocations | undefined;
 
 // @public (undocumented)
@@ -369,7 +369,7 @@ export { interpolateAST }
 
 export { interpolateContent }
 
-// @public
+// @internal
 export function interpolateSkillContent(content: string, params: ParamDefinition[] | undefined, args: Record<string, Value>): string;
 
 export { interpolateText }
@@ -377,7 +377,7 @@ export { interpolateText }
 // @public
 export function isGitUrl(url: string): boolean;
 
-// @public
+// @internal
 export function isImportMarker(blockName: string): boolean;
 
 // @public
@@ -410,13 +410,13 @@ export interface LoaderOptions {
 // @public (undocumented)
 export function loadVendorManifest(vendorDir: string): Promise<VendorManifest | null>;
 
-// @public
+// @internal
 export function makeBlock(name: string, content: ObjectContent | TextContent, file?: string): Block;
 
-// @public
+// @internal
 export function makeObjectContent(properties: Record<string, Value>, file?: string): ObjectContent;
 
-// @public
+// @internal
 export function makeTextContent(value: string, file?: string): TextContent;
 
 // @public
@@ -441,7 +441,7 @@ export interface ParsedGitUrl {
     repo: string;
 }
 
-// @public
+// @internal
 export interface ParsedSkillMd {
     // (undocumented)
     allowedTools?: string[];
@@ -487,7 +487,7 @@ export function parseRegistryMarker(marker: string): {
     version: string;
 } | null;
 
-// @public
+// @internal
 export function parseSkillMd(content: string, sourceFile?: string): ParsedSkillMd;
 
 // @public
@@ -506,7 +506,7 @@ export interface Registry {
     list(path: string): Promise<string[]>;
 }
 
-// @public
+// @internal
 export const REGISTRY_MARKER_PREFIX = "__registry__:";
 
 // @public
@@ -578,10 +578,10 @@ export function resolveGuardRequires(ast: Program, options: GuardRequiresOptions
 // @public
 export function resolveInheritance(parent: Program, child: Program): Program;
 
-// @public
+// @internal
 export function resolveNativeCommands(ast: Program, sourceFile: string, localPath?: string, options?: NativeSkillOptions): Promise<Program>;
 
-// @public
+// @internal
 export function resolveNativeSkills(ast: Program, registryPath: string, sourceFile: string, localPath?: string, options?: NativeSkillOptions): Promise<Program>;
 
 // @public
@@ -628,13 +628,13 @@ export const resolveUses: typeof resolveUseImport;
 // @public (undocumented)
 export function resolveVendoredRepository(vendorDir: string, repoUrl: string, expectedVersion: string, expectedCommit: string | null): Promise<string | null>;
 
-// @public
+// @internal
 export interface SkillFilterOptions {
     excludes?: string[];
     includes?: string[];
 }
 
-// @public
+// @internal
 export interface SkillFrontmatterBlock {
     // (undocumented)
     body: string;
@@ -646,7 +646,7 @@ export interface SkillFrontmatterBlock {
     yamlLocation: SourceLocation;
 }
 
-// @public
+// @internal
 export interface SkillFrontmatterLocations {
     // (undocumented)
     fields: ReadonlyMap<string, SourceLocation>;
@@ -656,7 +656,7 @@ export interface SkillFrontmatterLocations {
     items: ReadonlyMap<string, readonly SourceLocation[]>;
 }
 
-// @public
+// @internal
 export function skillNameFromPath(filePath: string): string;
 
 // @public
@@ -697,7 +697,7 @@ export type SkillValidationSeverity = 'error' | 'warning';
 
 export { TemplateContext }
 
-// @public
+// @internal
 export function toSkillResourceValues(resources: readonly SkillResource[]): Value[];
 
 // @public
@@ -757,7 +757,7 @@ export function verifyVendoredGitRepository(directory: string, expectedCommit: s
 // @public (undocumented)
 export function versionSatisfiesRange(version: string, range: string): boolean;
 
-// @public
+// @internal
 export const VIRTUAL_LOC: SourceLocation;
 
 ```

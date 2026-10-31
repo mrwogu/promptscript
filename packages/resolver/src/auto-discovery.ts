@@ -314,6 +314,9 @@ async function safeIsDirectory(dir: string): Promise<boolean> {
   }
 }
 
+/**
+ * @internal
+ */
 export async function discoverNativeContent(dir: string, logger?: Logger): Promise<Program | null> {
   // Check the directory exists
   if (!(await safeIsDirectory(dir))) return null;
