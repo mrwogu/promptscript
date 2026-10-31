@@ -40,3 +40,14 @@ CI does the same with a packed tarball of that build: it installs the tarball in
 directory without the registry, runs it and compares the output with `expected-output.json`. It
 also runs `prs release build` here and fails when the committed release files are not what the
 CLI builds.
+
+## Drift check
+
+`examples/workflows/prompt-drift.yml` is a weekly GitHub Actions workflow that runs eval suites
+against the `prod` label with live model calls. CI replays its commands on this example from the
+recorded cache, with no key and with `fetch` blocked, so the recipe and the cache stay in sync.
+When a change here makes the cache or the baseline stale, review the diff and regenerate them with:
+
+```bash
+UPDATE_DRIFT_EXAMPLE=true pnpm exec vitest run --config packages/cli/vitest.config.mts prompt-drift-recipe
+```

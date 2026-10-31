@@ -1,0 +1,99 @@
+# Scheduled prompt drift check: runs the eval suites against the prompts the prod label
+# serves, with live model calls, and checks that their models are not retiring.
+# Copy to .github/workflows/prompt-drift.yml. Setup and the reason for every guard:
+# https://getpromptscript.dev/guides/ci/#scheduled-drift-check
+name: Prompt drift
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prompt-drift
+  cancel-in-progress: false
+
+jobs:
+  drift:
+    # Scheduled runs use the default branch; a manual run from another branch is skipped
+    if: github.event_name == 'schedule' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    # A job timeout is a cancel, not a failure, so the eval step has its own shorter limit
+    timeout-minutes: 30
+    environment: prompt-drift
+    env:
+      PROMPTSCRIPT_NO_UPDATE_CHECK: '1'
+      DO_NOT_TRACK: '1'
+      # Full path, node_modules/.bin is not on PATH so a dependency cannot shadow a tool
+      PRS: ${{ github.workspace }}/.github/prompt-drift/node_modules/.bin/prs
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Install the pinned CLI
+        id: install
+        run: npm ci --ignore-scripts --no-audit --no-fund --prefix .github/prompt-drift
+
+      - name: Check the models of labelled prompts
+        id: models
+        run: |
+          "$PRS" release status --check-models
+
+      - name: Run the suites against prod
+        id: eval
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 20
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: >-
+          "$PRS" eval run --label prod --cache off --max-cost 0.50 --max-cases 50
+          --baseline .promptscript/eval-baselines/prod.json --fail-on-regression
+          --format json --out "$RUNNER_TEMP/prompt-drift.json" > /dev/null
+
+      - name: Write the job summary
+        id: summary
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: |
+          if [ -f "$RUNNER_TEMP/prompt-drift.json" ]; then
+            "$PRS" eval compare .promptscript/eval-baselines/prod.json "$RUNNER_TEMP/prompt-drift.json" --format markdown >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Keep the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: prompt-drift-report
+          path: ${{ runner.temp }}/prompt-drift.json
+          retention-days: 90
+          if-no-files-found: ignore
+
+  issue:
+    needs: drift
+    if: failure() && (github.event_name == 'schedule' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Open or update the drift issue
+        run: |
+          title='Scheduled prompt drift check failed'
+          body="The scheduled prompt drift check failed. The job summary and the report artifact of the run have the details: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          number="$(gh issue list --state open --search "in:title \"$title\"" --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)"
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi
