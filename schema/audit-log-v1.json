@@ -218,6 +218,12 @@
             "comment": {
               "type": "string"
             },
+            "maxWeight": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "description": "Highest arm weight in basis points the approval counts for. Such a record never approves an entry hash. Absent: a full approval."
+            },
             "state": {
               "type": "string",
               "enum": ["well-formed", "misplaced", "invalid"],
@@ -434,6 +440,12 @@
             },
             "comment": {
               "type": "string"
+            },
+            "maxWeight": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "description": "Highest arm weight in basis points the approval counts for. Such a record never approves an entry hash. Absent: a full approval."
             },
             "state": {
               "type": "string",

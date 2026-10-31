@@ -1,4 +1,5 @@
 import { stripControlCharacters } from '../release/git.js';
+import { percentText } from '../release/layout.js';
 import type { AuditEvent, AuditEventType } from './events.js';
 
 /** CEF severity and name of each event type. */
@@ -76,6 +77,8 @@ export function cefLine(event: AuditEvent, head: string, version: string): strin
     ['flexString1Label', 'head'],
     ['flexString2', event.approverSource],
     ['flexString2Label', event.approverSource === undefined ? undefined : 'approverSource'],
+    ['flexNumber1', event.maxWeight === undefined ? undefined : String(event.maxWeight)],
+    ['flexNumber1Label', event.maxWeight === undefined ? undefined : 'maxWeight'],
     ['cn1', event.viaMerge === true ? '1' : undefined],
     ['cn1Label', event.viaMerge === true ? 'viaMerge' : undefined],
     ['cn2', event.configured === false ? '0' : undefined],
@@ -96,6 +99,11 @@ function person(event: AuditEvent): string {
   return `by ${shown(event.author.name)} <${shown(event.author.email)}>`;
 }
 
+/** ` up to 5 %` for a record with a ceiling, so a capped approval never reads as a full one. */
+function ceilingText(event: AuditEvent): string {
+  return event.maxWeight === undefined ? '' : ` up to ${percentText(event.maxWeight)}`;
+}
+
 function details(event: AuditEvent): string[] {
   switch (event.type) {
     case 'approved':
@@ -106,7 +114,7 @@ function details(event: AuditEvent): string[] {
             shown(event.prompt),
             `role=${shown(event.role ?? '')}`,
             `approver=${shown(event.approver ?? '')} (${event.approverSource ?? 'asserted'})`,
-            `env=${shown(event.environment ?? 'all')}`,
+            `env=${shown(event.environment ?? 'all')}${ceilingText(event)}`,
             `state=${event.state ?? 'well-formed'}`,
             shown(event.path),
           ];

@@ -114,14 +114,20 @@ const promote = (cwd: string, to: string): Promise<ReleaseReport> =>
 const rollback = (cwd: string, env: string): Promise<ReleaseReport> =>
   json(() => releaseRollbackCommand(env, { cwd, format: 'json' }));
 
-async function approve(cwd: string, hash: string, env?: string): Promise<void> {
+async function approve(
+  cwd: string,
+  hash: string,
+  env?: string,
+  extra: { approver?: string; maxWeight?: string } = {}
+): Promise<void> {
   await capture(() =>
     approveCommand(`${ID}@${hash}`, {
       cwd,
       role: 'legal',
-      approver: '@jane',
+      approver: extra.approver ?? '@jane',
       format: 'json',
       ...(env === undefined ? { allEnvironments: true } : { env }),
+      ...(extra.maxWeight === undefined ? {} : { maxWeight: extra.maxWeight }),
     })
   );
   expect(process.exitCode).toBe(0);
@@ -172,6 +178,28 @@ describe('prs release promote gates', () => {
     expect(approved.success).toBe(true);
     expect(approved.gates?.[0]).toMatchObject({ passed: true, policyRisk: 'high' });
     expect(existsSync(label(root, 'prod'))).toBe(true);
+  });
+
+  it('never lets a capped record approve a promote, even one at 100 %', async () => {
+    const root = await project(config('', PROD_ONLY));
+    await build(root);
+    await promote(root, 'staging');
+    commit(root, 'staging');
+    const hash = await builtHash(root);
+    await approve(root, hash, 'prod', { maxWeight: '100' });
+    commit(root, 'capped approval');
+
+    const capped = await promote(root, 'prod');
+    await approve(root, hash, 'prod', { approver: '@bob' });
+    commit(root, 'full approval');
+    const approved = await promote(root, 'prod');
+
+    expect(capped.success).toBe(false);
+    expect(capped.gates?.[0]?.checks[0]?.approvals?.[0]).toMatchObject({
+      found: [],
+      capped: ['@jane up to 100 %'],
+    });
+    expect(approved.success).toBe(true);
   });
 
   it('does not count a staging record for prod', async () => {
@@ -244,6 +272,36 @@ describe('prs release rollback gates', () => {
     expect(refused.success).toBe(false);
     expect(refused.gates?.map((gate) => gate.contentHash)).toEqual([first]);
     expect(unchanged).toBe(before);
+    expect(restored.success).toBe(true);
+  });
+});
+
+describe('prs release rollback with a capped record', () => {
+  it('never lets a capped record bring a hash back', async () => {
+    const root = await project(config());
+    await build(root);
+    const first = await builtHash(root);
+    await approve(root, first);
+    commit(root, 'approve first');
+    await promote(root, 'staging');
+    commit(root, 'staging first');
+    await writeFile(join(root, '.promptscript', 'project.prs'), source('You answer refunds.'));
+    await build(root);
+    await approve(root, await builtHash(root));
+    commit(root, 'approve second');
+    await promote(root, 'staging');
+    commit(root, 'staging second');
+    await rm(join(root, '.promptscript', 'approvals', 'legal', ID, `${first}.jane.json`));
+    await approve(root, first, 'staging', { maxWeight: '100' });
+    commit(root, 'replace the approval of first by a capped one');
+
+    const refused = await rollback(root, 'staging');
+    await approve(root, first, 'staging', { approver: '@bob' });
+    commit(root, 'a full approval of first');
+    const restored = await rollback(root, 'staging');
+
+    expect(refused.success).toBe(false);
+    expect(refused.gates?.[0]?.checks[0]?.approvals?.[0]?.capped).toEqual(['@jane up to 100 %']);
     expect(restored.success).toBe(true);
   });
 });
@@ -459,7 +517,7 @@ ${policy}`;
     return { root, control, warm, cold };
   }
 
-  it('reports an arm with traffic as unavailable at severity error, control and weight 0 skipped', async () => {
+  it('fails an arm above the cap at severity error, control and weight 0 skipped', async () => {
     const { root, control, warm } = await experimentProject(
       exposureConfig(exposurePolicy('error'))
     );
@@ -476,17 +534,31 @@ ${policy}`;
       expect.objectContaining({
         kind: 'max-experiment-weight',
         severity: 'error',
-        status: 'unavailable',
-        message: `warm of ${ID} runs 10 % in prod, but release gates do not judge experiment weights in this version of prs`,
+        status: 'failed',
+        message: `warm of ${ID}@${warm.slice(0, 19)} runs 10 % in prod; high-risk-exposure needs a legal approval up to at least 10 %, found 0`,
       }),
     ]);
     // The hand-made arm is not in staging, so status also warns about the order.
     expect(report.warnings.filter((warning) => warning.code === 'PS030')).toEqual([
       expect.objectContaining({
         code: 'PS030',
-        message: expect.stringContaining(`[high-risk-exposure] warm of ${ID} runs 10 % in prod`),
+        message: expect.stringContaining(`[high-risk-exposure] warm of ${ID}@`),
       }),
     ]);
+  });
+
+  it('passes the arm once a committed record covers its weight', async () => {
+    const { root, warm } = await experimentProject(exposureConfig(exposurePolicy('error')));
+    await approve(root, warm, 'prod', { maxWeight: '10' });
+    commit(root, 'approval up to 10');
+
+    const report = await json(() => releaseStatusCommand({ cwd: root, format: 'json' }));
+
+    expect(report.gates?.find((gate) => gate.contentHash === warm)).toMatchObject({
+      passed: true,
+      checks: [{ kind: 'max-experiment-weight', status: 'passed' }],
+    });
+    expect(report.warnings.flatMap((warning) => warning.code ?? [])).toEqual([]);
   });
 
   it('lets the arm pass with a warning at severity warning', async () => {
@@ -497,7 +569,7 @@ ${policy}`;
     expect(report.success).toBe(true);
     expect(report.gates?.find((gate) => gate.contentHash === warm)).toMatchObject({
       passed: true,
-      checks: [{ kind: 'max-experiment-weight', status: 'unavailable' }],
+      checks: [{ kind: 'max-experiment-weight', status: 'failed' }],
     });
     expect(report.warnings.flatMap((warning) => warning.code ?? [])).toEqual(['PS030']);
     expect(report.warnings.map((warning) => warning.message)).toEqual(

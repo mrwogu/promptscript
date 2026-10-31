@@ -362,6 +362,26 @@ describe('prs audit log', () => {
     expect(brief(byEnvironment.report.events)).toEqual(['approved 1 well-formed']);
   });
 
+  it('shows the ceiling of a capped record in the event and the text', async () => {
+    // Arrange
+    const root = await project();
+    const capped = record({ maxWeight: 500 });
+    await put(root, { [approvalRecordPath(capped)]: serializeApprovalRecord(capped) });
+    commit(root, 'capped approval');
+
+    // Act
+    const { report } = await run(root);
+    const lines = await printed(root, { format: 'text' });
+
+    // Assert
+    expect(validateAuditLog(report), JSON.stringify(validateAuditLog.errors)).toBe(true);
+    expect(report.events[0]).toMatchObject({ type: 'approved', maxWeight: 500 });
+    expect(lines.join('\n')).toContain('env=prod up to 5 %');
+    expect((await printed(root, { format: 'cef' })).join('\n')).toContain(
+      'flexNumber1=500 flexNumber1Label=maxWeight'
+    );
+  });
+
   it('reads a replaced record as removed and added, an extends file as config, and warns on a broken label', async () => {
     // Arrange
     const root = await project();

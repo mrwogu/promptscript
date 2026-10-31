@@ -10,6 +10,10 @@ export function registerApproveCommand(program: Command): void {
     .option('--approver <handle>', 'Your Git host user handle, for example @jane')
     .option('--env <env>', 'The one environment the approval counts for')
     .option('--all-environments', 'Let the approval count for every environment')
+    .option(
+      '--max-weight <percent>',
+      'Highest arm weight in percent the approval counts for; needs --env'
+    )
     .option('--comment <text>', 'Note stored in the record, at most 2000 characters')
     .option('--list', 'List approval records with their scope and state, for one prompt id or all')
     .option('--format <format>', 'Output format (text, json)', 'text')

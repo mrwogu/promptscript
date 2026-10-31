@@ -35,7 +35,7 @@ function source(system: string): string {
 `;
 }
 
-type Kind = 'plain' | 'approvals' | 'cap-error' | 'cap-warning' | 'single';
+type Kind = 'plain' | 'approvals' | 'cap-error' | 'cap-warning' | 'cap-approvals' | 'single';
 
 const POLICIES: Record<Kind, string> = {
   plain: '',
@@ -54,6 +54,16 @@ const POLICIES: Record<Kind, string> = {
     severity: error
     match: { minRisk: high }
     maxWeight: 5
+`,
+  'cap-approvals': `policies:
+  - name: cap
+    kind: max-experiment-weight
+    severity: error
+    match: { minRisk: high }
+    environments: [prod]
+    maxWeight: 5
+    approvals: [{ role: legal }]
+    ceiling: 50
 `,
   'cap-warning': `policies:
   - name: cap
@@ -149,14 +159,19 @@ function end(cwd: string, env: string, keep?: string): Promise<ReleaseReport> {
   );
 }
 
-async function approve(cwd: string, hash: string): Promise<void> {
+async function approve(
+  cwd: string,
+  hash: string,
+  extra: { approver?: string; maxWeight?: string } = {}
+): Promise<void> {
   await capture(() =>
     approveCommand(`${ID}@${hash}`, {
       cwd,
       role: 'legal',
-      approver: '@jane',
+      approver: extra.approver ?? '@jane',
       format: 'json',
       env: 'prod',
+      ...(extra.maxWeight === undefined ? {} : { maxWeight: extra.maxWeight }),
     })
   );
   expect(process.exitCode).toBe(0);
@@ -382,6 +397,30 @@ describe('prs release split order', () => {
     expect(first.success).toBe(true);
     expect(codes(result)).toEqual(['PS030']);
     expect(await labelFile(root, 'prod')).toBe(before);
+  });
+
+  it('refuses --end --keep of an arm that only a capped record approved', async () => {
+    const { root, b } = await fixture('approvals');
+    await split(root, 'staging', 'warm-tone', [`warm@${b}=10`]);
+    await approve(root, b, { maxWeight: '10' });
+    commit(root, 'staging and a capped approval');
+    const running = await split(root, 'prod', 'warm-tone', [`warm@${b}=10`]);
+    commit(root, 'prod');
+    await end(root, 'staging', 'warm');
+    commit(root, 'staging keeps warm');
+    const before = await labelFile(root, 'prod');
+
+    const kept = await end(root, 'prod', 'warm');
+    const unchanged = await labelFile(root, 'prod');
+    await approve(root, b, { approver: '@bob' });
+    commit(root, 'a full approval');
+    const approved = await end(root, 'prod', 'warm');
+
+    expect(running.success).toBe(true);
+    expect(codes(kept)).toEqual(['PS030']);
+    expect(kept.gates?.[0]?.checks[0]?.approvals?.[0]?.capped).toEqual(['@jane up to 10 %']);
+    expect(unchanged).toBe(before);
+    expect(approved.success).toBe(true);
   });
 
   it('refuses --end --keep of a hash that only ran as an upstream arm', async () => {
@@ -714,18 +753,23 @@ describe('prs release split', () => {
     expect(ended.warnings).toEqual([]);
   });
 
-  it('refuses an arm with traffic under max-experiment-weight at severity error', async () => {
+  it('refuses an arm above a hard cap under max-experiment-weight at severity error', async () => {
     const { root, b } = await fixture('cap-error');
     const before = await labelFile(root, 'staging');
 
     const refused = await split(root, 'staging', 'warm-tone', [`warm@${b}=10`]);
     const paused = await split(root, 'staging', 'warm-tone', [`warm@${b}=0`]);
+    const atCap = await split(root, 'staging', 'warm-tone', [`warm@${b}=5`]);
 
     expect(codes(refused)).toEqual(['PS030']);
-    expect(refused.gates?.some((gate) => gate.checks.some((c) => c.status === 'unavailable'))).toBe(
-      true
-    );
+    expect(refused.gates?.flatMap((gate) => gate.checks)).toEqual([
+      expect.objectContaining({
+        status: 'failed',
+        message: expect.stringContaining('allows at most 5 %'),
+      }),
+    ]);
     expect(paused.success).toBe(true);
+    expect(atCap.success).toBe(true);
     expect(before).not.toBe(await labelFile(root, 'staging'));
   });
 
@@ -878,6 +922,124 @@ async function writeExperiment(
     })
   );
 }
+
+describe('prs release split with approval ceilings', () => {
+  /** Staging runs B at `percent`, so prod may run it up to that. */
+  async function stagingRuns(root: string, b: string, percent: number): Promise<void> {
+    expect((await split(root, 'staging', 'warm-tone', [`warm@${b}=${percent}`])).success).toBe(
+      true
+    );
+    commit(root, 'staging');
+  }
+
+  it('starts at the cap with no record and gates every weight change after that', async () => {
+    const { root, b } = await fixture('cap-approvals');
+    await stagingRuns(root, b, 30);
+    const start = await split(root, 'prod', 'warm-tone', [`warm@${b}=5`]);
+    commit(root, 'prod 5');
+    const before = await labelFile(root, 'prod');
+
+    const none = await split(root, 'prod', 'warm-tone', [`warm@${b}=30`]);
+    await approve(root, b, { maxWeight: '25' });
+    commit(root, 'approval up to 25');
+    const low = await split(root, 'prod', 'warm-tone', [`warm@${b}=30`]);
+    await approve(root, b, { approver: '@bob', maxWeight: '30' });
+    commit(root, 'approval up to 30');
+    const enough = await split(root, 'prod', 'warm-tone', [`warm@${b}=30`]);
+
+    expect(start.success).toBe(true);
+    expect(codes(none)).toEqual(['PS030']);
+    expect(codes(low)).toEqual(['PS030']);
+    expect(low.gates?.flatMap((gate) => gate.checks)[0]?.approvals?.[0]?.capped).toEqual([
+      '@jane up to 25 %',
+    ]);
+    expect(await labelFile(root, 'prod')).not.toBe(before);
+    expect(enough.success).toBe(true);
+    expect((await entryOf(root, 'prod'))?.experiment?.arms[1]?.weight).toBe(3000);
+  });
+
+  it('refuses above the ceiling of the policy whatever the records say', async () => {
+    const { root, b } = await fixture('cap-approvals');
+    await stagingRuns(root, b, 60);
+    await approve(root, b, { maxWeight: '100' });
+    commit(root, 'approval up to 100');
+
+    const result = await split(root, 'prod', 'warm-tone', [`warm@${b}=51`]);
+
+    expect(codes(result)).toEqual(['PS030']);
+    expect(result.errors[0]?.message).toContain('allows at most 50 %');
+  });
+
+  it('keeps the upstream limits next to a record of 100 %', async () => {
+    const { root, b } = await fixture('cap-approvals');
+    await stagingRuns(root, b, 10);
+    await approve(root, b, { maxWeight: '100' });
+    commit(root, 'approval up to 100');
+
+    const above = await split(root, 'prod', 'warm-tone', [`warm@${b}=11`]);
+    const control = await split(root, 'prod', 'warm-tone', [`warm@${b}=100`]);
+
+    expect(codes(above)).toEqual(['PS5005']);
+    expect(codes(control)).toEqual(['PS5009']);
+  });
+
+  it('judges the weights a rollback restores', async () => {
+    const { root, b } = await fixture('cap-approvals');
+    await stagingRuns(root, b, 30);
+    await approve(root, b, { maxWeight: '30' });
+    commit(root, 'approval up to 30');
+    expect((await split(root, 'prod', 'warm-tone', [`warm@${b}=30`])).success).toBe(true);
+    commit(root, 'prod 30');
+    expect((await end(root, 'prod')).success).toBe(true);
+    commit(root, 'prod ends');
+    await removeApprovalsOf(root, b);
+    await approve(root, b, { maxWeight: '25' });
+    commit(root, 'approval up to 25 only');
+    const before = await labelFile(root, 'prod');
+
+    const refused = await rollback(root, 'prod');
+    const unchanged = await labelFile(root, 'prod');
+    await approve(root, b, { approver: '@bob', maxWeight: '30' });
+    commit(root, 'approval up to 30 again');
+    const restored = await rollback(root, 'prod');
+
+    expect(codes(refused)).toEqual(['PS030']);
+    expect(unchanged).toBe(before);
+    expect(restored.success).toBe(true);
+  });
+
+  it('judges status --base with the policies of the base and the records of HEAD', async () => {
+    const fixed = await fixture('cap-approvals');
+    const { root, a, b } = fixed;
+    await writeExperiment(root, 'staging', a, [['warm', b, 5000]]);
+    await writeExperiment(root, 'prod', a, [['warm', b, 500]]);
+    commit(root, 'base');
+    git(root, 'tag', 'base');
+    await writeExperiment(root, 'prod', a, [['warm', b, 3000]]);
+
+    const none = await status(root, 'base');
+    await approve(root, b, { maxWeight: '30' });
+    commit(root, 'approval and weight');
+    const approved = await status(root, 'base');
+
+    expect(codes(none)).toEqual(['PS030']);
+    expect(approved.success).toBe(true);
+  });
+
+  it('does not apply a policy that only HEAD has under status --base', async () => {
+    const { root, a, b } = await fixture();
+    await writeExperiment(root, 'staging', a, [['warm', b, 5000]]);
+    await writeExperiment(root, 'prod', a, [['warm', b, 500]]);
+    commit(root, 'base');
+    git(root, 'tag', 'base');
+    await writeExperiment(root, 'prod', a, [['warm', b, 3000]]);
+    await writeFile(join(root, 'promptscript.yaml'), config('cap-error'));
+
+    const result = await status(root, 'base');
+
+    expect(result.success).toBe(true);
+  });
+});
 
 describe('experiments in rollback', () => {
   /** Staging runs B at 10 %, prod runs it at 1 % and then ends; B is approved for prod. */

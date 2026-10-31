@@ -21,7 +21,6 @@ import {
   entryHashes,
   gateEntriesOf,
   parseSplitRequest,
-  percentText,
   sameEntry,
   startOrChangeEntry,
   upstreamProblem,
@@ -34,6 +33,7 @@ import { stripControlCharacters } from './git.js';
 import {
   PROMPT_RELEASE_LABEL_V2_SCHEMA_URL,
   labelText,
+  percentText,
   readLabel,
   readVerifiedBundle,
   shortHash,

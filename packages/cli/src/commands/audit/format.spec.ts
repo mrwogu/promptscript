@@ -24,6 +24,17 @@ const approved: AuditEvent = {
   state: 'well-formed',
 };
 
+describe('a capped approval', () => {
+  it('shows its ceiling in text and as a CEF number, and nothing without one', () => {
+    const capped: AuditEvent = { ...approved, maxWeight: 250 };
+
+    expect(textLines(capped)[0]).toContain('  env=prod up to 2.5 %  state=well-formed  ');
+    expect(cefLine(capped, HEAD, '1')).toContain(' flexNumber1=250 flexNumber1Label=maxWeight');
+    expect(textLines(approved)[0]).toContain('  env=prod  state=well-formed  ');
+    expect(cefLine(approved, HEAD, '1')).not.toContain('flexNumber1');
+  });
+});
+
 describe('CEF escaping', () => {
   it.each([
     ['plain', 'plain'],

@@ -77,11 +77,14 @@ promptscript.yaml policies
  evaluatePolicies(ast)      evaluatePromptPolicies(promptPolicySubjects(ast))
  layer-boundary             required-metadata, risk-floor,
  property-protection        model-allowlist, content-rules
- registry-allowlist         (required-approvals, required-evals: parsed only)
+ registry-allowlist         (required-approvals, required-evals,
+                            max-experiment-weight: parsed only)
           |                           |
           +------------ PS030 --------+
                  (prompt findings at the entry)
 ```
+
+The release gates of the CLI judge `required-approvals` and `max-experiment-weight`. `required-evals` is reported as unavailable.
 
 Prompt policies match on policy risk, the higher of the effective `risk` (unset counts as
 `low`) and every `risk-floor`. `content-rules` calls PS005, PS010, PS011, PS012 and PS014
