@@ -200,6 +200,8 @@ describe('approval record schema', () => {
     ['a comment with newlines', { ...record(), comment: 'line one\nline two' }],
     ['a comment of 2000 code points', { ...record(), comment: '\u{1F600}'.repeat(2000) }],
     ['the reserved signature fields', { ...record(), signatureType: 'ssh', signature }],
+    ['the lowest ceiling', { ...record(), maxWeight: 1 }],
+    ['the highest ceiling', { ...record(), maxWeight: 10000 }],
   ])('accepts %s, like the guard', (_name, value) => {
     expect(validate(value), JSON.stringify(validate.errors)).toBe(true);
     expect(isApprovalRecordV1(value)).toBe(true);
@@ -248,8 +250,24 @@ describe('approval record schema', () => {
     ['a comment with a lone surrogate', { ...record(), comment: 'a\uDC00b' }],
     ['another signature type', { ...record(), signatureType: 'gpg' }],
     ['a bare signature', { ...record(), signature: 'U1NIU0lH' }],
+    ['a ceiling without environment', { ...without('environment'), maxWeight: 500 }],
+    ['a ceiling of 0', { ...record(), maxWeight: 0 }],
+    ['a ceiling of 10001', { ...record(), maxWeight: 10001 }],
+    ['a fractional ceiling', { ...record(), maxWeight: 2.5 }],
+    ['a string ceiling', { ...record(), maxWeight: '2500' }],
   ])('rejects %s, like the guard', (_name, value) => {
     expect(validate(value)).toBe(false);
     expect(isApprovalRecordV1(value)).toBe(false);
+  });
+
+  it('fails closed for a reader of the schema before maxWeight existed', () => {
+    const schema = JSON.parse(
+      readFileSync(new URL('../../../../schema/approval-record-v1.json', import.meta.url), 'utf8')
+    ) as { properties: Record<string, unknown> };
+    delete schema.properties['maxWeight'];
+    const older = new Ajv({ strict: false }).compile(schema);
+
+    expect(older({ ...record(), maxWeight: 10000 })).toBe(false);
+    expect(older(record())).toBe(true);
   });
 });

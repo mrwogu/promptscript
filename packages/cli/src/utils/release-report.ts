@@ -131,6 +131,11 @@ export interface ReleaseGateApprovals {
   found: string[];
   /** Records of this prompt and role for another hash, as `<approver> for <short hash>` */
   stale: string[];
+  /**
+   * Records of this hash and role that do not count, as `<approver> up to <percent> %`: the
+   * ceiling is below the arm weight, or the item is not an arm. Absent when there are none.
+   */
+  capped?: string[];
 }
 
 /** One policy as a release gate judged it for one prompt. */

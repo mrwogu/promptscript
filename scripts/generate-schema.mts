@@ -215,6 +215,12 @@ function generateTypeSchema(target: SchemaTarget): JsonObject {
     expectedObject['propertyNames'] = KEY_NAMES;
   }
 
+  // A ceiling counts in one environment only, so a record with it names that environment
+  if (target.type === 'ApprovalRecordV1') {
+    // draft-07 spells dependentRequired as dependencies
+    schema['dependencies'] = { maxWeight: ['environment'] };
+  }
+
   // Input keys of a sample follow the same bundle key rule as dataset rows
   if (target.type === 'EvalSampleV1') {
     mapNode(mapNode(schema, 'properties'), 'inputs')['propertyNames'] = KEY_NAMES;

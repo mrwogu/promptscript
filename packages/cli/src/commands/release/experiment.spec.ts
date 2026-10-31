@@ -9,12 +9,12 @@ import {
   labelChanges,
   parseArmOption,
   parseSplitRequest,
-  percentText,
   sameEntry,
   startOrChangeEntry,
   upstreamProblem,
   type ReleaseSplitOptions,
 } from './experiment.js';
+import { percentText } from './layout.js';
 
 const ID = 'acme/refund';
 const hash = (digit: string): string => `sha256-${digit.repeat(64)}`;

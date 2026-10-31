@@ -13,6 +13,7 @@ import {
   type PromptBundleV1,
 } from '@promptscript/core';
 import { checkPromotionGates, gateLines, type PromotionGateContext } from './gates.js';
+import type { ReleaseGateCheck } from '../../utils/release-report.js';
 import { loadReleaseProject, ReleaseCompileError, type CompiledRelease } from './project.js';
 
 const ID = 'acme-support/refund-reply';
@@ -485,6 +486,127 @@ describe('checkPromotionGates', () => {
     ]);
   });
 
+  describe('capped approvals under required-approvals', () => {
+    const arm = (weight: number): GateEntryOverride => ({
+      exposure: { experiment: 'tone', variant: 'warm', weight },
+    });
+    type GateEntryOverride = Partial<PromotionGateContext['prompts'][number]>;
+
+    async function judge(
+      root: string,
+      shipped: PromptBundleV1,
+      entry: GateEntryOverride
+    ): Promise<Awaited<ReturnType<typeof checkPromotionGates>>> {
+      const loaded = await loadReleaseProject({ cwd: root });
+      return checkPromotionGates({
+        project: loaded,
+        config: loaded.config,
+        configFile: loaded.paths.relative(loaded.configPath),
+        environment: 'prod',
+        prompts: [{ id: shipped.id, contentHash: shipped.contentHash, ...entry }],
+        source: built(shipped),
+      });
+    }
+
+    async function capped(maxWeight: number): Promise<[string, PromptBundleV1]> {
+      const root = await project(config(SIGNOFF));
+      const shipped = await bundle(root, { risk: 'high' });
+      await record(root, {
+        contentHash: shipped.contentHash,
+        approver: { source: 'asserted', value: '@bob' },
+        environment: 'prod',
+        maxWeight,
+      });
+      commitAll(root);
+      return [root, shipped];
+    }
+
+    it('never lets a capped record approve the entry hash, even at 10000', async () => {
+      const [root, shipped] = await capped(10000);
+
+      const result = await judge(root, shipped, {});
+
+      expect(result.passed).toBe(false);
+      expect(result.gates[0]?.checks[0]?.approvals).toEqual([
+        { role: 'legal', required: 1, found: [], stale: [], capped: ['@bob up to 100 %'] },
+      ]);
+      expect(result.gates[0]?.checks[0]?.message).toBe(
+        `${ID}@${shipped.contentHash.slice(0, 19)} needs 1 legal approval for prod, found 0 (capped: @bob up to 100 %)`
+      );
+      expect(result.gates[0]?.checks[0]?.suggestion).toBe(
+        `Run: prs approve ${ID}@${shipped.contentHash} --role legal --approver @<you> --env prod`
+      );
+    });
+
+    it('counts a capped record for an arm at or under its ceiling', async () => {
+      const [root, shipped] = await capped(2500);
+
+      const under = await judge(root, shipped, arm(1000));
+      const equal = await judge(root, shipped, arm(2500));
+
+      expect(under.passed).toBe(true);
+      expect(equal.passed).toBe(true);
+      expect(equal.gates[0]?.checks[0]?.approvals?.[0]).toEqual({
+        role: 'legal',
+        required: 1,
+        found: ['@bob'],
+        stale: [],
+      });
+    });
+
+    it('never counts a capped record for an arm above its ceiling', async () => {
+      const [root, shipped] = await capped(2500);
+
+      const result = await judge(root, shipped, arm(3000));
+
+      expect(result.passed).toBe(false);
+      expect(result.gates[0]?.checks[0]).toMatchObject({
+        message: `warm of ${ID}@${shipped.contentHash.slice(0, 19)} at 30 % needs 1 legal approval for prod, found 0 (capped: @bob up to 25 %)`,
+        suggestion: `Run: prs approve ${ID}@${shipped.contentHash} --role legal --approver @<you> --env prod --max-weight 30`,
+        approvals: [
+          { role: 'legal', required: 1, found: [], stale: [], capped: ['@bob up to 25 %'] },
+        ],
+      });
+      expect(gateLines(result.gates[0] as NonNullable<(typeof result.gates)[number]>)).toContain(
+        '  failed       high-risk-signoff  legal 0 of 1 (capped: @bob up to 25 %)'
+      );
+    });
+
+    it('still counts a record without a ceiling for an arm and for the entry hash', async () => {
+      const root = await project(config(SIGNOFF));
+      const shipped = await bundle(root, { risk: 'high' });
+      await record(root, { contentHash: shipped.contentHash, environment: 'prod' });
+      commitAll(root);
+
+      const entry = await judge(root, shipped, {});
+      const warm = await judge(root, shipped, arm(10000));
+
+      expect(entry.passed).toBe(true);
+      expect(warm.passed).toBe(true);
+      expect(entry.gates[0]?.checks[0]?.approvals?.[0]).not.toHaveProperty('capped');
+    });
+
+    it('never counts a hand-written capped record without environment', async () => {
+      const root = await project(config(SIGNOFF));
+      const shipped = await bundle(root, { risk: 'high' });
+      const fields = { contentHash: shipped.contentHash };
+      await record(root, { ...fields, maxWeight: 500 }, approvalRecordPath(fieldsOf(fields)));
+      commitAll(root);
+
+      const entry = await judge(root, shipped, {});
+      const warm = await judge(root, shipped, arm(500));
+
+      expect(entry.passed).toBe(false);
+      expect(warm.passed).toBe(false);
+      expect(warm.gates[0]?.checks[0]?.approvals?.[0]).toEqual({
+        role: 'legal',
+        required: 1,
+        found: [],
+        stale: [],
+      });
+    });
+  });
+
   it('reports required-evals as unavailable, which only a warning severity lets pass', async () => {
     const evals = (severity: string): string =>
       `  - name: prod-evals\n    kind: required-evals\n    severity: ${severity}\n    environments: [prod]\n`;
@@ -507,64 +629,278 @@ describe('checkPromotionGates', () => {
     expect(staging.gates[0]?.checks).toEqual([]);
   });
 
-  it('reports max-experiment-weight as unavailable for an arm with traffic, so it fails closed', async () => {
-    const exposure = (severity: string): string =>
-      `  - name: high-risk-exposure\n    kind: max-experiment-weight\n    severity: ${severity}\n    match: { minRisk: high }\n    environments: [prod]\n    maxWeight: 5\n    approvals: [{ role: legal }]\n    ceiling: 25\n`;
-    const strict = await project(config(exposure('error')));
-    const lenient = await project(config(exposure('warning')));
-    const strictBundle = await bundle(strict, { risk: 'high' });
-    const lenientBundle = await bundle(lenient, { risk: 'high' });
-    const judge = async (
+  describe('max-experiment-weight', () => {
+    const POLICY = (extra = ''): string =>
+      `  - name: high-risk-exposure\n    kind: max-experiment-weight\n    severity: error\n    match: { minRisk: high }\n    environments: [prod]\n    maxWeight: 5\n    approvals: [{ role: legal }]\n    ceiling: 25\n${extra}`;
+    const bob = { source: 'asserted' as const, value: '@bob' };
+
+    async function setup(
+      policies = POLICY(),
+      governance: PromptBundleV1['governance'] = { risk: 'high' }
+    ): Promise<[string, PromptBundleV1]> {
+      const root = await project(config(policies));
+      return [root, await bundle(root, governance)];
+    }
+
+    async function judge(
       root: string,
       shipped: PromptBundleV1,
-      entry: Partial<PromotionGateContext['prompts'][number]>,
+      weight: number | undefined,
       environment = 'prod'
-    ): Promise<Awaited<ReturnType<typeof checkPromotionGates>>> => {
+    ): Promise<Awaited<ReturnType<typeof checkPromotionGates>>> {
       const loaded = await loadReleaseProject({ cwd: root });
       return checkPromotionGates({
         project: loaded,
         config: loaded.config,
         configFile: loaded.paths.relative(loaded.configPath),
         environment,
-        prompts: [{ id: shipped.id, contentHash: shipped.contentHash, ...entry }],
+        prompts: [
+          {
+            id: shipped.id,
+            contentHash: shipped.contentHash,
+            ...(weight === undefined
+              ? {}
+              : { exposure: { experiment: 'tone', variant: 'warm', weight } }),
+          },
+        ],
         source: built(shipped),
       });
-    };
-    const arm = { exposure: { experiment: 'tone', variant: 'warm', weight: 250 } };
+    }
 
-    const failed = await judge(strict, strictBundle, arm);
-    const warned = await judge(lenient, lenientBundle, arm);
-    const entryHash = await judge(strict, strictBundle, {});
-    const unused = await judge(strict, strictBundle, {
-      exposure: { experiment: 'tone', variant: 'warm', weight: 0 },
-    });
-    const staging = await judge(strict, strictBundle, arm, 'staging');
+    const checkOf = (
+      result: Awaited<ReturnType<typeof checkPromotionGates>>
+    ): ReleaseGateCheck | undefined => result.gates[0]?.checks[0];
 
-    expect(failed.passed).toBe(false);
-    expect(failed.gates[0]?.checks).toEqual([
-      {
+    it('passes an arm at the cap without a record', async () => {
+      const [root, shipped] = await setup();
+
+      const result = await judge(root, shipped, 500);
+
+      expect(result.passed).toBe(true);
+      expect(checkOf(result)).toEqual({
         policy: 'high-risk-exposure',
         kind: 'max-experiment-weight',
         severity: 'error',
-        status: 'unavailable',
-        message: `warm of ${ID} runs 2.5 % in prod, but release gates do not judge experiment weights in this version of prs`,
+        status: 'passed',
+      });
+    });
+
+    it('fails an arm above the cap without a record and names the approve command', async () => {
+      const [root, shipped] = await setup();
+
+      const result = await judge(root, shipped, 501);
+
+      expect(result.passed).toBe(false);
+      expect(checkOf(result)).toEqual({
+        policy: 'high-risk-exposure',
+        kind: 'max-experiment-weight',
+        severity: 'error',
+        status: 'failed',
+        message: `warm of ${ID}@${shipped.contentHash.slice(0, 19)} runs 5.01 % in prod; high-risk-exposure needs a legal approval up to at least 5.01 %, found 0`,
+        suggestion: `Run: prs approve ${ID}@${shipped.contentHash} --role legal --approver @<you> --env prod --max-weight 5.01`,
+        approvals: [{ role: 'legal', required: 1, found: [], stale: [] }],
+      });
+      expect(result.findings[0]?.code).toBe('PS030');
+    });
+
+    it('fails above the ceiling even with a record of 10000 and one without a ceiling', async () => {
+      const [root, shipped] = await setup();
+      await record(root, {
+        contentHash: shipped.contentHash,
+        environment: 'prod',
+        maxWeight: 10000,
+      });
+      await record(root, { contentHash: shipped.contentHash, approver: bob });
+      commitAll(root);
+
+      const result = await judge(root, shipped, 2600);
+
+      expect(result.passed).toBe(false);
+      expect(checkOf(result)).toMatchObject({
+        status: 'failed',
+        message: `warm of ${ID}@${shipped.contentHash.slice(0, 19)} runs 26 % in prod; high-risk-exposure allows at most 25 %`,
         suggestion:
-          'This version of prs cannot judge the arm. Keep it at weight 0, narrow the policy with match or environments, or set severity: warning to only warn.',
-      },
-    ]);
-    expect(failed.findings).toEqual([
-      {
-        code: 'PS030',
-        message: `[high-risk-exposure] warm of ${ID} runs 2.5 % in prod, but release gates do not judge experiment weights in this version of prs. This version of prs cannot judge the arm. Keep it at weight 0, narrow the policy with match or environments, or set severity: warning to only warn.`,
-        location: { file: '.promptscript/releases/prod.json' },
-      },
-    ]);
-    expect(warned.passed).toBe(true);
-    expect(warned.warnings).toHaveLength(1);
-    expect(entryHash.passed).toBe(true);
-    expect(entryHash.gates[0]?.checks).toEqual([]);
-    expect(unused.gates[0]?.checks).toEqual([]);
-    expect(staging.gates[0]?.checks).toEqual([]);
+          'Lower warm to at most 25 % with prs release split, or change the policy in a reviewed pull request.',
+      });
+      expect(checkOf(result)?.approvals).toBeUndefined();
+    });
+
+    it('has no upper limit without a ceiling, only the records', async () => {
+      const [root, shipped] = await setup(POLICY().replace('    ceiling: 25\n', ''));
+      await record(root, {
+        contentHash: shipped.contentHash,
+        environment: 'prod',
+        maxWeight: 9000,
+      });
+      commitAll(root);
+
+      const covered = await judge(root, shipped, 9000);
+      const above = await judge(root, shipped, 9001);
+
+      expect(covered.passed).toBe(true);
+      expect(above.passed).toBe(false);
+    });
+
+    it('fails an arm above a hard cap that has no approvals', async () => {
+      const [root, shipped] = await setup(
+        '  - name: hard\n    kind: max-experiment-weight\n    severity: error\n    maxWeight: 5\n'
+      );
+
+      const result = await judge(root, shipped, 600);
+
+      expect(checkOf(result)).toMatchObject({
+        status: 'failed',
+        message: `warm of ${ID}@${shipped.contentHash.slice(0, 19)} runs 6 % in prod; hard allows at most 5 %`,
+        suggestion:
+          'Lower warm to at most 5 % with prs release split, or change the policy in a reviewed pull request.',
+      });
+    });
+
+    it('counts a capped record for an arm at its ceiling', async () => {
+      const [root, shipped] = await setup();
+      await record(root, {
+        contentHash: shipped.contentHash,
+        environment: 'prod',
+        maxWeight: 1000,
+      });
+      commitAll(root);
+
+      const result = await judge(root, shipped, 1000);
+
+      expect(result.passed).toBe(true);
+      expect(checkOf(result)).toMatchObject({
+        status: 'passed',
+        approvals: [{ role: 'legal', required: 1, found: ['@jane'], stale: [] }],
+      });
+    });
+
+    it('does not count a record whose ceiling is one basis point below the arm', async () => {
+      const [root, shipped] = await setup();
+      await record(root, {
+        contentHash: shipped.contentHash,
+        approver: bob,
+        environment: 'prod',
+        maxWeight: 999,
+      });
+      commitAll(root);
+
+      const result = await judge(root, shipped, 1000);
+
+      expect(result.passed).toBe(false);
+      expect(checkOf(result)).toMatchObject({
+        status: 'failed',
+        message: `warm of ${ID}@${shipped.contentHash.slice(0, 19)} runs 10 % in prod; high-risk-exposure needs a legal approval up to at least 10 %, found 0 (capped: @bob up to 9.99 %)`,
+        approvals: [
+          { role: 'legal', required: 1, found: [], stale: [], capped: ['@bob up to 9.99 %'] },
+        ],
+      });
+    });
+
+    it('counts a record without a ceiling for an arm up to the ceiling of the policy', async () => {
+      const [root, shipped] = await setup();
+      await record(root, { contentHash: shipped.contentHash });
+      commitAll(root);
+
+      const result = await judge(root, shipped, 2000);
+
+      expect(result.passed).toBe(true);
+    });
+
+    it('does not count a record of another environment or of another hash', async () => {
+      const [root, shipped] = await setup();
+      await record(root, { contentHash: shipped.contentHash, environment: 'staging' });
+      await record(root, { approver: bob });
+      commitAll(root);
+
+      const result = await judge(root, shipped, 1000);
+
+      expect(result.passed).toBe(false);
+      expect(checkOf(result)?.approvals).toEqual([
+        { role: 'legal', required: 1, found: [], stale: ['@bob for sha256-000000000000'] },
+      ]);
+    });
+
+    it('judges no check for an arm at weight 0, the entry hash or the control', async () => {
+      const [root, shipped] = await setup();
+
+      const paused = await judge(root, shipped, 0);
+      const entry = await judge(root, shipped, undefined);
+
+      expect(paused.passed).toBe(true);
+      expect(paused.gates[0]?.checks).toEqual([]);
+      expect(entry.passed).toBe(true);
+      expect(entry.gates[0]?.checks).toEqual([]);
+    });
+
+    it('does not apply when the match does not select or the environment differs', async () => {
+      const [root, shipped] = await setup(POLICY(), { risk: 'low' });
+      const [other, risky] = await setup();
+
+      const low = await judge(root, shipped, 3000);
+      const staging = await judge(other, risky, 3000, 'staging');
+
+      expect(low.gates[0]?.checks).toEqual([]);
+      expect(staging.gates[0]?.checks).toEqual([]);
+    });
+
+    it('only warns at severity warning', async () => {
+      const [root, shipped] = await setup(POLICY().replace('severity: error', 'severity: warning'));
+
+      const result = await judge(root, shipped, 3000);
+
+      expect(result.passed).toBe(true);
+      expect(result.findings).toEqual([]);
+      expect(result.warnings.map((warning) => warning.code)).toEqual(['PS030']);
+    });
+
+    it('lets every stacked policy judge the arm', async () => {
+      const hard =
+        '  - name: hard\n    kind: max-experiment-weight\n    severity: error\n    maxWeight: 5\n';
+      const [root, shipped] = await setup(
+        `${hard}${POLICY().replace('maxWeight: 5', 'maxWeight: 20').replace('ceiling: 25', 'ceiling: 50')}`
+      );
+      await record(root, { contentHash: shipped.contentHash });
+      commitAll(root);
+
+      const result = await judge(root, shipped, 1000);
+
+      expect(result.passed).toBe(false);
+      expect(result.gates[0]?.checks.map((check) => [check.policy, check.status])).toEqual([
+        ['hard', 'failed'],
+        ['high-risk-exposure', 'passed'],
+      ]);
+    });
+
+    it('reads the records of a role only this policy asks for', async () => {
+      const [root, shipped] = await setup(POLICY().replace('role: legal', 'role: security'), {
+        risk: 'high',
+      });
+      await record(root, { contentHash: shipped.contentHash, role: 'security' });
+      commitAll(root);
+
+      const result = await judge(root, shipped, 1000);
+
+      expect(result.passed).toBe(true);
+      expect(checkOf(result)?.approvals?.[0]?.found).toEqual(['@jane']);
+    });
+
+    it('names every missing role', async () => {
+      const [root, shipped] = await setup(
+        POLICY().replace('[{ role: legal }]', '[{ role: legal }, { role: security }]')
+      );
+      await record(root, { contentHash: shipped.contentHash });
+      commitAll(root);
+
+      const result = await judge(root, shipped, 1000);
+
+      expect(checkOf(result)).toMatchObject({
+        message: expect.stringContaining('needs a security approval up to at least 10 %, found 0'),
+        suggestion: `Run: prs approve ${ID}@${shipped.contentHash} --role security --approver @<you> --env prod --max-weight 10`,
+      });
+      expect(
+        gateLines(result.gates[0] as NonNullable<(typeof result.gates)[number]>).at(-1)
+      ).toContain('security 0 of 1');
+    });
   });
 
   it('skips max-experiment-weight for an arm its match does not select', async () => {

@@ -86,6 +86,11 @@ export function releasePaths(projectRoot: string): ReleasePaths {
   };
 }
 
+/** A weight as the text of its percent, `10 %` or `0.5 %`. */
+export function percentText(weight: number): string {
+  return `${weight / 100} %`;
+}
+
 /** The 12 hex digits after the prefix, for human output. */
 export function shortHash(contentHash: string): string {
   return contentHash.slice(0, 'sha256-'.length + 12);

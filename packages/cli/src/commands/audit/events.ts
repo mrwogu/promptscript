@@ -54,6 +54,8 @@ export interface AuditEvent {
   approverSource?: 'asserted';
   recordCreatedAt?: string;
   comment?: string;
+  /** Approval record ceiling in basis points; such a record never approves an entry hash */
+  maxWeight?: number;
   state?: AuditRecordState;
   previousContentHash?: string;
   /** The commit is on the first-parent chain of the head; off it, a branch's history */
@@ -137,6 +139,7 @@ export function recordFields(record: ApprovalRecordV1): Partial<AuditEvent> {
     approverSource: record.approver.source,
     recordCreatedAt: record.createdAt,
     ...(record.comment === undefined ? {} : { comment: record.comment }),
+    ...(record.maxWeight === undefined ? {} : { maxWeight: record.maxWeight }),
   };
 }
 

@@ -21,6 +21,7 @@ import {
   PRICING_FILE,
   RELEASE_DIRECTORY,
   parseLabel,
+  percentText,
   readManifest,
   readReleaseText,
   shortHash,
@@ -28,7 +29,7 @@ import {
   type ReleasePaths,
 } from './layout.js';
 import { checkAgainstBase, type BaseCheck } from './base.js';
-import { armChangeText, armLimitWarnings, gateEntriesOf, percentText } from './experiment.js';
+import { armChangeText, armLimitWarnings, gateEntriesOf } from './experiment.js';
 import { checkLabelModels, parseRetiringWithin, printModels } from './models.js';
 import { checkPromotionGates, gateLines, type GateEntry } from './gates.js';
 import {

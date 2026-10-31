@@ -101,7 +101,7 @@ function assertDirectory(path: string, details: Stats): void {
 function existsError(record: ApprovalRecordV1, path: string): GovernanceError {
   return new GovernanceError(
     PS5105_APPROVAL_EXISTS,
-    `An approval by ${record.approver.value} as ${record.role} for this hash exists: ${path}. Delete it in a commit to withdraw it; approve again after that to change its scope or comment.`,
+    `An approval by ${record.approver.value} as ${record.role} for this hash exists: ${path}. To withdraw it, delete it in a commit. To change its scope, comment or ceiling, delete the file in the same change and approve again.`,
     path
   );
 }

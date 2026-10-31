@@ -194,6 +194,13 @@
             "type": "string"
           },
           "description": "Records of this prompt and role for another hash, as <approver> for <short hash>."
+        },
+        "capped": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Records of this hash and role whose maxWeight is below the arm weight, or any capped record for an item that is not an arm, as <approver> up to <percent> %."
         }
       }
     },
