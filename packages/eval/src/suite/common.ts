@@ -12,6 +12,8 @@ import { EVAL_CODES, type EvalCode } from '../errors.js';
 export interface CheckContext {
   /** Prompt bundles the project compiles */
   bundles: readonly PromptBundleV1[];
+  /** Where judge rubrics are looked up; defaults to `bundles` */
+  rubrics?: readonly PromptBundleV1[];
   /** Model catalog with the project's profiles */
   catalog: ModelCatalog;
 }

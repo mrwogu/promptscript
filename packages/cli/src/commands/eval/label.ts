@@ -129,6 +129,29 @@ function runLine(target: LabelTarget, item: Picked): string {
   return `label ${target.environment}: suite ${item.loaded.name} runs ${item.id} at ${shortHash(item.hash)}${variant}`;
 }
 
+/** One line per judged suite and rubric: the rubrics come from the working tree, not the label. */
+export function judgeLines(
+  target: LabelTarget,
+  suites: LoadedSuite[],
+  rubrics: PromptBundleV1[]
+): string[] {
+  const lines: string[] = [];
+  for (const { name, suite } of suites) {
+    const ids = new Set<string>();
+    for (const assertion of suite.assertions) {
+      if (assertion.kind === 'llm-judge') ids.add(assertion.rubric);
+    }
+    for (const id of [...ids].sort(compareCodeUnits)) {
+      const rubric = rubrics.find((entry) => entry.id === id);
+      if (rubric === undefined) continue;
+      lines.push(
+        `label ${target.environment}: suite ${name} judged by ${id} at ${shortHash(rubric.contentHash)} (working tree)`
+      );
+    }
+  }
+  return lines;
+}
+
 /**
  * Pick the suites whose prompt the label serves and read their verified bundles.
  * A suite the label cannot serve is skipped, or an error when its name was given.

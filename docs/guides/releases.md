@@ -777,7 +777,8 @@ What `--base` does not do:
 against a fresh compile of the source. Each bundle is verified against its hash first, so the run
 uses what the environment serves even when the source has moved on. For an experiment it runs the
 entry hash, and `--variant <name>` runs one arm. Every result carries the hash that ran, in
-`prompt.contentHash`. See [prs eval run](../reference/cli.md#prs-eval-run).
+`prompt.contentHash`. Judge rubrics of `llm-judge` assertions are the exception: they are compiled
+from the working tree, and `judges` in the report holds their hash. See [prs eval run](../reference/cli.md#prs-eval-run).
 
 ```bash
 prs eval run --label prod
