@@ -40,6 +40,14 @@ import type { ValueNode } from '@promptscript/core';
 // @internal
 export const allTokens: TokenType[];
 
+// @public (undocumented)
+interface ArrayCstCtx {
+    // (undocumented)
+    LBracket: IToken[];
+    // (undocumented)
+    value?: CstNode[];
+}
+
 // @internal (undocumented)
 export const As: TokenType;
 
@@ -48,6 +56,35 @@ export const At: TokenType;
 
 // @internal (undocumented)
 export const Bang: TokenType;
+
+// @public (undocumented)
+const BaseVisitor: new (...args: any[]) => ICstVisitor<any, any>;
+
+// @public (undocumented)
+interface BlockContentCstCtx {
+    // (undocumented)
+    field?: CstNode[];
+    // (undocumented)
+    headerDirective?: CstNode[];
+    // (undocumented)
+    inlineUse?: CstNode[];
+    // (undocumented)
+    restrictionItem?: CstNode[];
+    // (undocumented)
+    TextBlock?: IToken[];
+}
+
+// @public (undocumented)
+interface BlockCstCtx {
+    // (undocumented)
+    At: IToken[];
+    // (undocumented)
+    blockContent: CstNode[];
+    // (undocumented)
+    Identifier: IToken[];
+    // (undocumented)
+    LBrace: IToken[];
+}
 
 // @internal (undocumented)
 export const BooleanType: TokenType;
@@ -95,8 +132,22 @@ export const Dot: TokenType;
 // @internal (undocumented)
 export const DotDot: TokenType;
 
+// @public (undocumented)
+interface DotPathCstCtx {
+    // (undocumented)
+    Identifier: IToken[];
+}
+
 // @internal (undocumented)
 export const Enum: TokenType;
+
+// @public (undocumented)
+interface EnumTypeCstCtx {
+    // (undocumented)
+    Enum: IToken[];
+    // (undocumented)
+    StringLiteral: IToken[];
+}
 
 // @public
 export type EnvProvider = (name: string) => string | undefined;
@@ -110,14 +161,80 @@ export const Equals: TokenType;
 // @internal (undocumented)
 export const Extend: TokenType;
 
+// @public (undocumented)
+interface ExtendBlockCstCtx {
+    // (undocumented)
+    At: IToken[];
+    // (undocumented)
+    blockContent: CstNode[];
+    // (undocumented)
+    dotPath: CstNode[];
+    // (undocumented)
+    LBrace: IToken[];
+}
+
 // @internal (undocumented)
 export const False: TokenType;
+
+// @public (undocumented)
+interface FieldCstCtx {
+    // (undocumented)
+    Bang?: IToken[];
+    // (undocumented)
+    BooleanType?: IToken[];
+    // (undocumented)
+    Identifier?: IToken[];
+    // (undocumented)
+    NumberType?: IToken[];
+    // (undocumented)
+    Question?: IToken[];
+    // (undocumented)
+    StringLiteral?: IToken[];
+    // (undocumented)
+    StringType?: IToken[];
+    // (undocumented)
+    value: CstNode[];
+}
+
+// @public (undocumented)
+interface HeaderDirectiveCstCtx {
+    // (undocumented)
+    At: IToken[];
+    // (undocumented)
+    Identifier: IToken[];
+    // (undocumented)
+    StringLiteral: IToken[];
+}
 
 // @internal (undocumented)
 export const Identifier: TokenType;
 
 // @internal (undocumented)
 export const Inherit: TokenType;
+
+// @public (undocumented)
+interface InheritDeclCstCtx {
+    // (undocumented)
+    At: IToken[];
+    // (undocumented)
+    paramCallList?: CstNode[];
+    // (undocumented)
+    pathRef: CstNode[];
+}
+
+// @public (undocumented)
+interface InlineUseCstCtx {
+    // (undocumented)
+    At: IToken[];
+    // (undocumented)
+    Identifier?: IToken[];
+    // (undocumented)
+    paramCallList?: CstNode[];
+    // (undocumented)
+    pathRef: CstNode[];
+    // (undocumented)
+    StringLiteral?: IToken[];
+}
 
 // @internal (undocumented)
 export const Into: TokenType;
@@ -137,6 +254,14 @@ export const LParen: TokenType;
 // @internal (undocumented)
 export const Meta: TokenType;
 
+// @public (undocumented)
+interface MetaBlockCstCtx {
+    // (undocumented)
+    At: IToken[];
+    // (undocumented)
+    field?: CstNode[];
+}
+
 // @internal (undocumented)
 export const Null: TokenType;
 
@@ -145,6 +270,78 @@ export const NumberLiteral: TokenType;
 
 // @internal (undocumented)
 export const NumberType: TokenType;
+
+// @public (undocumented)
+interface ObjectCstCtx {
+    // (undocumented)
+    field?: CstNode[];
+    // (undocumented)
+    LBrace: IToken[];
+}
+
+// @public (undocumented)
+interface OverrideBlockCstCtx {
+    // (undocumented)
+    At: IToken[];
+    // (undocumented)
+    dotPath: CstNode[];
+    // (undocumented)
+    LBrace: IToken[];
+    // (undocumented)
+    overrideBody: CstNode[];
+}
+
+// @public (undocumented)
+interface OverrideBodyCstCtx {
+    // (undocumented)
+    blockContent?: CstNode[];
+    // (undocumented)
+    value?: CstNode[];
+}
+
+// @public (undocumented)
+interface ParamArgCstCtx {
+    // (undocumented)
+    Identifier: IToken[];
+    // (undocumented)
+    value: CstNode[];
+}
+
+// @public (undocumented)
+interface ParamCallListCstCtx {
+    // (undocumented)
+    paramArg?: CstNode[];
+}
+
+// @public (undocumented)
+interface ParamDefCstCtx {
+    // (undocumented)
+    Identifier: IToken[];
+    // (undocumented)
+    paramType: CstNode[];
+    // (undocumented)
+    Question?: IToken[];
+    // (undocumented)
+    value?: CstNode[];
+}
+
+// @public (undocumented)
+interface ParamDefListCstCtx {
+    // (undocumented)
+    paramDef?: CstNode[];
+}
+
+// @public (undocumented)
+interface ParamTypeCstCtx {
+    // (undocumented)
+    BooleanType?: IToken[];
+    // (undocumented)
+    enumType?: CstNode[];
+    // (undocumented)
+    NumberType?: IToken[];
+    // (undocumented)
+    StringType?: IToken[];
+}
 
 // @public
 export function parse(source: string, options?: ParseOptions): ParseResult;
@@ -160,6 +357,50 @@ export function parseCanonicalFileOrThrow(filePath: string, options?: Omit<Parse
 
 // @public
 export function parseCanonicalOrThrow(source: string, options?: ParseOptions): CanonicalProgram;
+
+// @public (undocumented)
+interface ParsedBlockContent {
+    // (undocumented)
+    body: BlockBody;
+    // (undocumented)
+    replacements: ReplaceModifier[];
+}
+
+// @public (undocumented)
+interface ParsedField {
+    // (undocumented)
+    defaultValue?: Value;
+    // (undocumented)
+    defaultValueNode?: ValueNode;
+    // (undocumented)
+    isParamsDef?: boolean;
+    // (undocumented)
+    loc: SourceLocation;
+    // (undocumented)
+    name: string;
+    // (undocumented)
+    optional?: boolean;
+    // (undocumented)
+    paramsDefs?: ParamDefinition[];
+    // (undocumented)
+    replace?: boolean;
+    // (undocumented)
+    replaceLoc?: SourceLocation;
+    // (undocumented)
+    value: Value;
+    // (undocumented)
+    valueNode: ValueNode;
+}
+
+// @public (undocumented)
+interface ParsedRestrictionItem {
+    // (undocumented)
+    markerLoc: SourceLocation;
+    // (undocumented)
+    value: string;
+    // (undocumented)
+    valueLoc: SourceLocation;
+}
 
 // @public
 export function parseFile(filePath: string, options?: Omit<ParseOptions, 'filename'>): ParseResult;
@@ -195,16 +436,118 @@ export interface ParseResult {
     errors: ParseError[];
 }
 
+// @public (undocumented)
+interface PathRefCstCtx {
+    // (undocumented)
+    PathReference?: IToken[];
+    // (undocumented)
+    RelativePath?: IToken[];
+    // (undocumented)
+    SshPath?: IToken[];
+    // (undocumented)
+    UrlPath?: IToken[];
+}
+
 // @internal (undocumented)
 export const PathReference: TokenType;
 
 // @public
 export function printProgram(program: DeepReadonly<CanonicalProgram>, comments?: readonly Comment[]): string;
 
+// @public (undocumented)
+interface ProgramCstCtx {
+    // (undocumented)
+    block?: CstNode[];
+    // (undocumented)
+    extendBlock?: CstNode[];
+    // (undocumented)
+    inheritDecl?: CstNode[];
+    // (undocumented)
+    metaBlock?: CstNode[];
+    // (undocumented)
+    overrideBlock?: CstNode[];
+    // (undocumented)
+    useDecl?: CstNode[];
+}
+
 // @public
 export class PromptScriptParser extends CstParser {
     constructor();
     program: ParserMethod<[], CstNode>;
+}
+
+// Warning: (ae-forgotten-export) The symbol "BaseVisitor" needs to be exported by the entry point index.d.ts
+//
+// @public
+class PromptScriptVisitor extends BaseVisitor {
+    constructor();
+    // Warning: (ae-forgotten-export) The symbol "ArrayCstCtx" needs to be exported by the entry point index.d.ts
+    array(ctx: ArrayCstCtx): Value[];
+    // Warning: (ae-forgotten-export) The symbol "BlockCstCtx" needs to be exported by the entry point index.d.ts
+    block(ctx: BlockCstCtx): CanonicalBlock;
+    // Warning: (ae-forgotten-export) The symbol "BlockContentCstCtx" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "ParsedBlockContent" needs to be exported by the entry point index.d.ts
+    blockContent(ctx: BlockContentCstCtx): ParsedBlockContent;
+    // Warning: (ae-forgotten-export) The symbol "DotPathCstCtx" needs to be exported by the entry point index.d.ts
+    dotPath(ctx: DotPathCstCtx): string;
+    // Warning: (ae-forgotten-export) The symbol "EnumTypeCstCtx" needs to be exported by the entry point index.d.ts
+    enumType(ctx: EnumTypeCstCtx): TypeExpression;
+    // Warning: (ae-forgotten-export) The symbol "ExtendBlockCstCtx" needs to be exported by the entry point index.d.ts
+    extendBlock(ctx: ExtendBlockCstCtx): CanonicalExtendBlock;
+    // Warning: (ae-forgotten-export) The symbol "FieldCstCtx" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "ParsedField" needs to be exported by the entry point index.d.ts
+    field(ctx: FieldCstCtx): ParsedField;
+    // Warning: (ae-forgotten-export) The symbol "HeaderDirectiveCstCtx" needs to be exported by the entry point index.d.ts
+    headerDirective(ctx: HeaderDirectiveCstCtx): PresentationEntry;
+    // Warning: (ae-forgotten-export) The symbol "InheritDeclCstCtx" needs to be exported by the entry point index.d.ts
+    inheritDecl(ctx: InheritDeclCstCtx): InheritDeclaration;
+    // Warning: (ae-forgotten-export) The symbol "InlineUseCstCtx" needs to be exported by the entry point index.d.ts
+    inlineUse(ctx: InlineUseCstCtx): InlineUseDeclaration;
+    // Warning: (ae-forgotten-export) The symbol "MetaBlockCstCtx" needs to be exported by the entry point index.d.ts
+    metaBlock(ctx: MetaBlockCstCtx): MetaBlock;
+    // Warning: (ae-forgotten-export) The symbol "ObjectCstCtx" needs to be exported by the entry point index.d.ts
+    object(ctx: ObjectCstCtx): Record<string, Value>;
+    // Warning: (ae-forgotten-export) The symbol "OverrideBlockCstCtx" needs to be exported by the entry point index.d.ts
+    overrideBlock(ctx: OverrideBlockCstCtx): CanonicalOverrideBlock;
+    // Warning: (ae-forgotten-export) The symbol "OverrideBodyCstCtx" needs to be exported by the entry point index.d.ts
+    overrideBody(ctx: OverrideBodyCstCtx): OverrideReplacement;
+    // Warning: (ae-forgotten-export) The symbol "ParamArgCstCtx" needs to be exported by the entry point index.d.ts
+    paramArg(ctx: ParamArgCstCtx): ParamArgument;
+    // Warning: (ae-forgotten-export) The symbol "ParamCallListCstCtx" needs to be exported by the entry point index.d.ts
+    paramCallList(ctx: ParamCallListCstCtx): ParamArgument[];
+    // Warning: (ae-forgotten-export) The symbol "ParamDefCstCtx" needs to be exported by the entry point index.d.ts
+    paramDef(ctx: ParamDefCstCtx): ParamDefinition;
+    // Warning: (ae-forgotten-export) The symbol "ParamDefListCstCtx" needs to be exported by the entry point index.d.ts
+    paramDefList(ctx: ParamDefListCstCtx): ParamDefinition[];
+    // Warning: (ae-forgotten-export) The symbol "ParamTypeCstCtx" needs to be exported by the entry point index.d.ts
+    paramType(ctx: ParamTypeCstCtx): ParamType;
+    // Warning: (ae-forgotten-export) The symbol "PathRefCstCtx" needs to be exported by the entry point index.d.ts
+    pathRef(ctx: PathRefCstCtx): PathReference_2;
+    // Warning: (ae-forgotten-export) The symbol "ProgramCstCtx" needs to be exported by the entry point index.d.ts
+    program(ctx: ProgramCstCtx, filename?: string): CanonicalProgram;
+    // Warning: (ae-forgotten-export) The symbol "RangeTypeCstCtx" needs to be exported by the entry point index.d.ts
+    rangeType(ctx: RangeTypeCstCtx): TypeExpression;
+    // (undocumented)
+    resetDiagnostics(): void;
+    resetEnvProvider(): void;
+    // Warning: (ae-forgotten-export) The symbol "RestrictionItemCstCtx" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "ParsedRestrictionItem" needs to be exported by the entry point index.d.ts
+    restrictionItem(ctx: RestrictionItemCstCtx): ParsedRestrictionItem;
+    setEnvProvider(provider: EnvProvider): void;
+    setFilename(filename: string): void;
+    setInterpolateEnv(enabled: boolean): void;
+    // Warning: (ae-incompatible-release-tags) The symbol "takeDiagnostics" is marked as @public, but its signature references "VisitorDiagnostic" which is marked as @internal
+    //
+    // (undocumented)
+    takeDiagnostics(): VisitorDiagnostic[];
+    // Warning: (ae-forgotten-export) The symbol "TemplateExprCstCtx" needs to be exported by the entry point index.d.ts
+    templateExpr(ctx: TemplateExprCstCtx): TemplateExpression;
+    // Warning: (ae-forgotten-export) The symbol "TypeExprCstCtx" needs to be exported by the entry point index.d.ts
+    typeExpr(ctx: TypeExprCstCtx): TypeExpression;
+    // Warning: (ae-forgotten-export) The symbol "UseDeclCstCtx" needs to be exported by the entry point index.d.ts
+    useDecl(ctx: UseDeclCstCtx): UseDeclaration;
+    // Warning: (ae-forgotten-export) The symbol "ValueCstCtx" needs to be exported by the entry point index.d.ts
+    value(ctx: ValueCstCtx): Value;
 }
 
 // @public
@@ -216,6 +559,14 @@ export const Question: TokenType;
 // @internal (undocumented)
 export const Range: TokenType;
 
+// @public (undocumented)
+interface RangeTypeCstCtx {
+    // (undocumented)
+    NumberLiteral: [IToken, IToken, ...IToken[]];
+    // (undocumented)
+    Range: IToken[];
+}
+
 // @internal (undocumented)
 export const RBrace: TokenType;
 
@@ -224,6 +575,14 @@ export const RBracket: TokenType;
 
 // @internal (undocumented)
 export const RelativePath: TokenType;
+
+// @public (undocumented)
+interface RestrictionItemCstCtx {
+    // (undocumented)
+    Dash: IToken[];
+    // (undocumented)
+    StringLiteral: IToken[];
+}
 
 // @internal (undocumented)
 export const RParen: TokenType;
@@ -240,6 +599,14 @@ export const StringType: TokenType;
 // @internal (undocumented)
 export const TemplateClose: TokenType;
 
+// @public (undocumented)
+interface TemplateExprCstCtx {
+    // (undocumented)
+    Identifier: IToken[];
+    // (undocumented)
+    TemplateOpen: IToken[];
+}
+
 // @internal (undocumented)
 export const TemplateOpen: TokenType;
 
@@ -252,11 +619,69 @@ export function tokenize(source: string): ILexingResult;
 // @internal (undocumented)
 export const True: TokenType;
 
+// @public (undocumented)
+interface TypeExprCstCtx {
+    // (undocumented)
+    BooleanType?: IToken[];
+    // (undocumented)
+    enumType?: CstNode[];
+    // (undocumented)
+    NumberType?: IToken[];
+    // (undocumented)
+    rangeType?: CstNode[];
+    // (undocumented)
+    StringType?: IToken[];
+}
+
 // @internal
 export const UrlPath: TokenType;
 
 // @internal (undocumented)
 export const Use: TokenType;
+
+// @public (undocumented)
+interface UseDeclCstCtx {
+    // (undocumented)
+    At: IToken[];
+    // (undocumented)
+    Identifier?: IToken[];
+    // (undocumented)
+    paramCallList?: CstNode[];
+    // (undocumented)
+    pathRef: CstNode[];
+    // (undocumented)
+    StringLiteral?: IToken[];
+}
+
+// @public (undocumented)
+interface ValueCstCtx {
+    // (undocumented)
+    array?: CstNode[];
+    // (undocumented)
+    EnvVar?: IToken[];
+    // (undocumented)
+    False?: IToken[];
+    // (undocumented)
+    Identifier?: IToken[];
+    // (undocumented)
+    Null?: IToken[];
+    // (undocumented)
+    NumberLiteral?: IToken[];
+    // (undocumented)
+    object?: CstNode[];
+    // (undocumented)
+    paramDefList?: CstNode[];
+    // (undocumented)
+    StringLiteral?: IToken[];
+    // (undocumented)
+    templateExpr?: CstNode[];
+    // (undocumented)
+    TextBlock?: IToken[];
+    // (undocumented)
+    True?: IToken[];
+    // (undocumented)
+    typeExpr?: CstNode[];
+}
 
 // @public @deprecated
 export const visitor: PromptScriptVisitor;
