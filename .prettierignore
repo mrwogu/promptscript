@@ -56,3 +56,7 @@ schema/eval-import-summary-v1.json
 
 # Lock files - machine generated
 pnpm-lock.yaml
+
+# Release files are compared byte for byte in CI, the lockfile is npm's
+/examples/runtime-otel/.promptscript/releases
+/examples/runtime-otel/package-lock.json
