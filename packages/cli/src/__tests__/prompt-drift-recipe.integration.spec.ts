@@ -26,8 +26,8 @@ const RECIPE = join(REPO, 'examples', 'workflows', 'prompt-drift.yml');
 const GUIDE = join(REPO, 'docs', 'guides', 'ci.md');
 const EXAMPLE = join(REPO, 'examples', 'runtime-node');
 const PROMPTSCRIPT = '.promptscript';
-const BASELINE = join(PROMPTSCRIPT, 'eval-reports', 'prod-baseline.json');
-const GENERATED = [join(PROMPTSCRIPT, 'eval-cache'), join(PROMPTSCRIPT, 'eval-reports')];
+const BASELINE = join(PROMPTSCRIPT, 'eval-baselines', 'prod.json');
+const GENERATED = [join(PROMPTSCRIPT, 'eval-cache'), join(PROMPTSCRIPT, 'eval-baselines')];
 const UPDATE_COMMAND =
   'UPDATE_DRIFT_EXAMPLE=true pnpm exec vitest run --config packages/cli/vitest.config.mts prompt-drift-recipe';
 
@@ -145,7 +145,7 @@ async function freshCopy(): Promise<string> {
     recursive: true,
     filter: (source) => !GENERATED.some((dir) => source === join(EXAMPLE, dir)),
   });
-  mkdirSync(join(root, PROMPTSCRIPT, 'eval-reports'), { recursive: true });
+  mkdirSync(join(root, PROMPTSCRIPT, 'eval-baselines'), { recursive: true });
   return root;
 }
 
@@ -308,7 +308,7 @@ describe('the prompt drift recipe', () => {
     expect(run.match(/--cache off/g)).toHaveLength(1);
     expect(run).toContain('--max-cost ');
     expect(run).toContain('--max-cases ');
-    expect(run).toContain('--baseline .promptscript/eval-reports/prod-baseline.json');
+    expect(run).toContain('--baseline .promptscript/eval-baselines/prod.json');
     expect(run).toContain('--fail-on-regression');
     expect(run).toContain('--format json');
   });

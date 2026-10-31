@@ -1,5 +1,6 @@
 {
   "$schema": "https://getpromptscript.dev/schema/eval-report/v1.json",
+  "version": 1,
   "outcome": "passed",
   "passed": true,
   "cache": {
