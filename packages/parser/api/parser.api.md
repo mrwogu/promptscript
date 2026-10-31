@@ -37,19 +37,19 @@ import type { UseDeclaration } from '@promptscript/core';
 import type { Value } from '@promptscript/core';
 import type { ValueNode } from '@promptscript/core';
 
-// @public
+// @internal
 export const allTokens: TokenType[];
 
-// @public (undocumented)
+// @internal (undocumented)
 export const As: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const At: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Bang: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const BooleanType: TokenType;
 
 // @public
@@ -59,10 +59,10 @@ export interface CanonicalParseResult {
     errors: ParseError[];
 }
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Colon: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Comma: TokenType;
 
 // @public
@@ -75,73 +75,75 @@ export interface Comment {
     readonly trailing: boolean;
 }
 
-// @public
+// @internal
 export const COMMENT_GROUP = "comments";
 
 // @public
 export function createParser(): PromptScriptParser;
 
+// Warning: (ae-forgotten-export) The symbol "PromptScriptVisitor" needs to be exported by the entry point index.d.ts
+//
 // @public
 export function createVisitor(): PromptScriptVisitor;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Dash: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Dot: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const DotDot: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Enum: TokenType;
 
 // @public
 export type EnvProvider = (name: string) => string | undefined;
 
-// @public
+// @internal
 export const EnvVar: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Equals: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Extend: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const False: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Identifier: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Inherit: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Into: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const LBrace: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const LBracket: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const LineComment: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const LParen: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Meta: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Null: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const NumberLiteral: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const NumberType: TokenType;
 
 // @public
@@ -193,7 +195,7 @@ export interface ParseResult {
     errors: ParseError[];
 }
 
-// @public (undocumented)
+// @internal (undocumented)
 export const PathReference: TokenType;
 
 // @public
@@ -208,58 +210,58 @@ export class PromptScriptParser extends CstParser {
 // @public
 export const PSLexer: Lexer;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Question: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Range: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const RBrace: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const RBracket: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const RelativePath: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const RParen: TokenType;
 
-// @public
+// @internal
 export const SshPath: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const StringLiteral: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const StringType: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const TemplateClose: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const TemplateOpen: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const TextBlock: TokenType;
 
 // @public
 export function tokenize(source: string): ILexingResult;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const True: TokenType;
 
-// @public
+// @internal
 export const UrlPath: TokenType;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const Use: TokenType;
 
 // @public @deprecated
 export const visitor: PromptScriptVisitor;
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface VisitorDiagnostic {
     // (undocumented)
     readonly loc: SourceLocation;
@@ -267,7 +269,7 @@ export interface VisitorDiagnostic {
     readonly message: string;
 }
 
-// @public (undocumented)
+// @internal (undocumented)
 export const WhiteSpace: TokenType;
 
 ```
