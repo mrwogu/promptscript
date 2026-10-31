@@ -14,6 +14,8 @@ import { limitSkillResources } from './skill-resource-limits.js';
 /**
  * Resource files that belong to a SKILL.md, plus any problems found while
  * loading the explicitly declared ones.
+ *
+ * @internal
  */
 export interface CollectedSkillResources {
   /** Files to ship alongside the skill, deduplicated by relative path */
@@ -37,6 +39,8 @@ export interface CollectedSkillResources {
  * @param parsed - Parsed SKILL.md metadata
  * @param logger - Optional logger for reporting skipped files
  * @returns Deduplicated resources and any resource errors
+ *
+ * @internal
  */
 export async function collectSkillResources(
   skillMdPath: string,
@@ -113,6 +117,8 @@ export async function collectSkillResources(
  *
  * @param resources - Resources collected for a skill
  * @returns Plain AST values ready to assign to the skill's `resources` property
+ *
+ * @internal
  */
 export function toSkillResourceValues(resources: readonly SkillResource[]): Value[] {
   return resources.map((resource) => ({

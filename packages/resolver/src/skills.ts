@@ -43,6 +43,8 @@ export interface SkillResource {
 
 /**
  * Result of parsing a native SKILL.md file.
+ *
+ * @internal
  */
 export interface ParsedSkillMd {
   name?: string;
@@ -89,6 +91,8 @@ const MAX_FRONTMATTER_STRING_LENGTH = 64 * 1024;
 
 /**
  * A parsed SKILL.md frontmatter block with source offsets preserved.
+ *
+ * @internal
  */
 export interface SkillFrontmatterBlock {
   raw: string;
@@ -99,6 +103,8 @@ export interface SkillFrontmatterBlock {
 
 /**
  * Source locations for fields declared in a SKILL.md frontmatter block.
+ *
+ * @internal
  */
 export interface SkillFrontmatterLocations {
   frontmatter: SourceLocation;
@@ -110,6 +116,8 @@ const parsedSkillFrontmatterLocations = new WeakMap<ParsedSkillMd, SkillFrontmat
 
 /**
  * Return source locations captured while parsing a SKILL.md frontmatter block.
+ *
+ * @internal
  */
 export function getSkillFrontmatterLocations(
   parsed: ParsedSkillMd
@@ -133,6 +141,8 @@ const YAML_FRONTMATTER_OPTIONS = {
  * @param content - Raw SKILL.md file content
  * @param sourceFile - Optional source path used in resolver diagnostics
  * @returns Parsed skill metadata and content
+ *
+ * @internal
  */
 export function parseSkillMd(content: string, sourceFile = '<skill>'): ParsedSkillMd {
   const frontmatter = extractSkillFrontmatter(content, sourceFile);
@@ -187,6 +197,8 @@ export function parseSkillMd(content: string, sourceFile = '<skill>'): ParsedSki
  *
  * @param filePath - Absolute or relative path to a .md file
  * @returns The filename without the .md extension
+ *
+ * @internal
  */
 export function skillNameFromPath(filePath: string): string {
   return basename(filePath, '.md');
@@ -203,6 +215,8 @@ function findFrontmatterStart(lines: string[]): number {
 /**
  * Extract a SKILL.md frontmatter block using the same delimiter rules as the
  * parser and validator.
+ *
+ * @internal
  */
 export function extractSkillFrontmatter(
   content: string,
@@ -1072,6 +1086,8 @@ function isSafeRelativePath(relPath: string): boolean {
  * @param params - Parameter definitions from SKILL.md frontmatter
  * @param args - Argument values provided at the call site
  * @returns Interpolated content string
+ *
+ * @internal
  */
 export function interpolateSkillContent(
   content: string,
@@ -1932,6 +1948,8 @@ async function discoverSkillDirs(basePath: string): Promise<Map<string, string>>
  * @param localPath - Optional path to local .promptscript directory
  * @param options - Optional skill resolution options
  * @returns Updated AST with native skill content
+ *
+ * @internal
  */
 export async function resolveNativeSkills(
   ast: Program,
@@ -2310,6 +2328,8 @@ async function discoverCommandFiles(
  * @param localPath - Path to local .promptscript directory
  * @param options - Skill resolution options (reuses universalDir and logger)
  * @returns Updated AST with discovered commands
+ *
+ * @internal
  */
 export async function resolveNativeCommands(
   ast: Program,
