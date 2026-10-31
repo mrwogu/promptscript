@@ -141,7 +141,7 @@ export function evaluatePolicies(policies: PolicyDefinition[], ast: Program): Po
 // @public
 export function evaluatePromptPolicies(policies: readonly PolicyDefinition[], subjects: readonly PolicySubject[], context?: PolicyContext, scope?: PromptPolicyScope): PolicyViolation[];
 
-// @public
+// @internal
 export function findLockfileDependency(importSource: string, lockfile: Lockfile): ResolvedImportDependency | undefined;
 
 // @public
@@ -181,10 +181,10 @@ export function getSecurityPreset(environment: 'production' | 'development' | 't
 // @public
 export function getSupportedLanguages(): SupportedLanguage[];
 
-// @public
+// @internal
 export function hasContent(content: BlockContent): boolean;
 
-// @public
+// @internal
 export function hasPathTraversal(path: string): boolean;
 
 // @public
@@ -197,31 +197,31 @@ export interface ImportRoot {
     path: string;
 }
 
-// @public
+// @internal
 export function isGitHostIdentity(value: string): boolean;
 
-// @public
+// @internal
 export function isRuleExcludedForLocation(rule: {
     name: string;
     id: string;
 }, loc: SourceLocation | undefined, config: ValidatorConfig): boolean;
 
-// @public
+// @internal
 export function isValidPath(path: string): boolean;
 
-// @public
+// @internal
 export function isValidSemver(version: string): boolean;
 
-// @public
+// @internal
 export function normalizeDenyText(text: string): string;
 
-// @public
+// @internal
 export function normalizeImportKey(value: string): string;
 
 // @public
 export const obfuscatedContent: ValidationRule;
 
-// @public
+// @internal
 export function offsetLocation(baseLoc: SourceLocation, text: string, charIndex: number): SourceLocation;
 
 // @public
@@ -236,7 +236,7 @@ export function parsePolicies(input: unknown, context?: PolicyContext): ParsedPo
 // @public
 export const pathTraversal: ValidationRule;
 
-// @public
+// @internal
 export function percentToBasisPoints(value: unknown): number | undefined;
 
 // @public
@@ -266,7 +266,7 @@ export const requiredMetaId: ValidationRule;
 // @public
 export const requiredMetaSyntax: ValidationRule;
 
-// @public
+// @internal
 export interface ResolvedImportDependency {
     commit: string;
     key: string;
@@ -404,15 +404,15 @@ export const validSemver: ValidationRule;
 
 // Warning: (ae-forgotten-export) The symbol "BlockCallback" needs to be exported by the entry point index.d.ts
 //
-// @public
+// @internal
 export function walkBlocks(ast: Program, callback: BlockCallback): void;
 
 // Warning: (ae-forgotten-export) The symbol "TextCallback" needs to be exported by the entry point index.d.ts
 //
-// @public
+// @internal
 export function walkText(ast: Program, callback: TextCallback, options?: WalkTextOptions): void;
 
-// @public
+// @internal
 export interface WalkTextOptions {
     excludeProperties?: string[];
     skipSkillResources?: boolean;
@@ -420,7 +420,7 @@ export interface WalkTextOptions {
 
 // Warning: (ae-forgotten-export) The symbol "UseCallback" needs to be exported by the entry point index.d.ts
 //
-// @public
+// @internal
 export function walkUses(ast: Program, callback: UseCallback): void;
 
 ```

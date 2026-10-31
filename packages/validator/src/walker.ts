@@ -28,6 +28,8 @@ export type UseCallback = (use: UseDeclaration) => void;
 
 /**
  * Options for walkText.
+ *
+ * @internal
  */
 export interface WalkTextOptions {
   /**
@@ -47,6 +49,8 @@ export interface WalkTextOptions {
 /**
  * Walk all text content in the AST.
  * Visits text in blocks, extend blocks, override replacements, and nested content.
+ *
+ * @internal
  */
 export function walkText(ast: Program, callback: TextCallback, options?: WalkTextOptions): void {
   const exclude = options?.excludeProperties ? new Set(options.excludeProperties) : undefined;
@@ -190,6 +194,8 @@ function walkPresentationTitles(body: BlockBody | undefined, callback: TextCallb
 
 /**
  * Walk all blocks in the AST.
+ *
+ * @internal
  */
 export function walkBlocks(ast: Program, callback: BlockCallback): void {
   for (const block of ast.blocks) {
@@ -211,6 +217,8 @@ export function getBlockName(block: Block | ExtendBlock): string {
 
 /**
  * Walk all use declarations in the AST.
+ *
+ * @internal
  */
 export function walkUses(ast: Program, callback: UseCallback): void {
   for (const use of ast.uses) {
@@ -306,6 +314,8 @@ function walkValue(
  * Compute the actual source location of a character offset within a text block.
  * Given the text block's starting location and a character index within the text,
  * returns the adjusted SourceLocation pointing to the exact line and column.
+ *
+ * @internal
  */
 export function offsetLocation(
   baseLoc: SourceLocation,
@@ -334,6 +344,8 @@ export function offsetLocation(
 
 /**
  * Check if a block has any meaningful content.
+ *
+ * @internal
  */
 export function hasContent(content: BlockContent): boolean {
   switch (content.type) {
