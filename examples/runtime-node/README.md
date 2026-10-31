@@ -7,9 +7,9 @@ It prints the request body for the Anthropic Messages API. It makes no API call 
 
 | Path                                     | What it is                                                                                         |
 | :--------------------------------------- | :------------------------------------------------------------------------------------------------- |
-| `.promptscript/`                         | The PromptScript source, one prompt: `acme-support/refund-reply`                                   |
+| `.promptscript/`                         | The PromptScript source: `acme-support/refund-reply` and `judge-refund-reply`, a rubric for evals  |
 | `promptscript.yaml`                      | Project config with two environments, `staging` and `prod`                                         |
-| `.promptscript/releases`                 | The release the CLI built: `manifest.json`, `pricing.json`, the bundle and one label each          |
+| `.promptscript/releases`                 | The release the CLI built: `manifest.json`, `pricing.json`, the bundles and one label each         |
 | `.promptscript/evals`                    | One eval suite for the prompt, `refund-reply.eval.yaml`, and its four-row dataset                  |
 | `.promptscript/eval-cache`               | Recorded model answers of that suite, written by a test from a scripted mock provider, no API call |
 | `.promptscript/eval-baselines/prod.json` | The report of the suite on the `prod` label, written by the same test                              |
