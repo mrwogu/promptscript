@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-11-01T01:52:11.906Z | source: .promptscript/project.prs | target: claude - do not edit -->
+<!-- PromptScript 2026-11-01T20:29:22.041Z | source: .promptscript/project.prs | target: claude - do not edit -->
 
 ## Project
 
@@ -14,7 +14,7 @@ You write clean, type-safe, and well-tested code following strict TypeScript pra
 
 ## Tech Stack
 
-typescript, Node.js 20+, Nx + pnpm
+typescript, Node.js 22.22+, Nx + pnpm
 
 ## Architecture
 

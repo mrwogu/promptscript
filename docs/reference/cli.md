@@ -107,7 +107,7 @@ Notes:
   `deno run` the worker gets read and write access scoped to the output
   directory, and a compiled binary re-executes itself.
 - Telemetry reports `runtime: deno`; `DO_NOT_TRACK=1` keeps it disabled.
-- Node.js 20+ remains fully supported with unchanged behavior.
+- Node.js 22.22+ remains fully supported with unchanged behavior.
 
 ## Global Options
 

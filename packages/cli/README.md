@@ -9,7 +9,7 @@ skills, agents, MCP servers, hooks, and policies once, inherit them like code, a
 files for every tool.
 
 [![npm version](https://img.shields.io/npm/v/@promptscript/cli.svg)](https://www.npmjs.com/package/@promptscript/cli)
-[![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-5FA04E?logo=nodedotjs&logoColor=white)](https://getpromptscript.dev/getting-started/#installation)
+[![Node.js 22.22+](https://img.shields.io/badge/Node.js-22.22%2B-5FA04E?logo=nodedotjs&logoColor=white)](https://getpromptscript.dev/getting-started/#installation)
 [![Deno 2.9+](https://img.shields.io/badge/Deno-2.9%2B-70FFAF?logo=deno&logoColor=000000)](https://getpromptscript.dev/reference/cli/#running-under-deno)
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/mrwogu/promptscript/blob/main/LICENSE)
@@ -59,7 +59,7 @@ reproducible. Adding or switching tools does not require rewriting the source. S
 
 ## Install
 
-Requires Node.js 20 or later.
+Requires Node.js 22.22 or later.
 
 ```bash
 npm install -g @promptscript/cli
@@ -124,7 +124,7 @@ Guarded managed-output cleanup re-executes the CLI through a hidden worker
 command: under `deno run` the worker is spawned with read and write access
 scoped to the output directory, and a compiled binary re-executes itself.
 Telemetry reports `runtime: deno` and is disabled with `DO_NOT_TRACK=1`.
-Node.js 20+ remains fully supported with unchanged behavior.
+Node.js 22.22+ remains fully supported with unchanged behavior.
 
 ## 60-Second Quick Start
 

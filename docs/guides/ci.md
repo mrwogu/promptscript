@@ -80,7 +80,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript CLI
         run: npm install -g @promptscript/cli
@@ -117,7 +117,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript CLI
         run: npm install -g @promptscript/cli
@@ -185,7 +185,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript CLI
         run: npm install -g @promptscript/cli
@@ -242,7 +242,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript CLI
         run: npm install -g @promptscript/cli
@@ -301,7 +301,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript CLI
         run: npm install -g @promptscript/cli
@@ -601,7 +601,7 @@ stages:
 
 promptscript:
   stage: validate
-  image: node:20-alpine
+  image: node:22-alpine
   before_script:
     - apk add --no-cache git
     - npm install -g @promptscript/cli
@@ -628,7 +628,7 @@ stages:
 
 promptscript:
   stage: validate
-  image: node:20-alpine
+  image: node:22-alpine
   variables:
     GITHUB_TOKEN: $REGISTRY_TOKEN
   before_script:
@@ -655,7 +655,7 @@ stages:
 
 promptscript:
   stage: validate
-  image: node:20-alpine
+  image: node:22-alpine
   variables:
     HOME: ${CI_PROJECT_DIR}/.promptscript-home
   cache:
@@ -685,7 +685,7 @@ stages:
 
 promptscript:
   stage: validate
-  image: node:20-alpine
+  image: node:22-alpine
   before_script:
     - apk add --no-cache git
     - npm install -g @promptscript/cli
@@ -887,7 +887,7 @@ Create `Jenkinsfile`:
 pipeline {
     agent {
         docker {
-            image 'node:20-alpine'
+            image 'node:22-alpine'
         }
     }
 
@@ -944,7 +944,7 @@ pipeline {
 pipeline {
     agent {
         docker {
-            image 'node:20-alpine'
+            image 'node:22-alpine'
         }
     }
 
@@ -992,7 +992,7 @@ pipeline {
 pipeline {
     agent {
         docker {
-            image 'node:20-alpine'
+            image 'node:22-alpine'
         }
     }
 
@@ -1040,7 +1040,7 @@ version: 2.1
 jobs:
   promptscript:
     docker:
-      - image: cimg/node:20.0
+      - image: cimg/node:22.22
     steps:
       - checkout
       - run:
@@ -1105,7 +1105,7 @@ parameters:
 jobs:
   validate-promptscript:
     docker:
-      - image: cimg/node:20.0
+      - image: cimg/node:22.22
     steps:
       - checkout
       - run: npm install -g @promptscript/cli
@@ -1346,7 +1346,7 @@ Run `prs compile` locally and commit the generated files.
 Error: Unsupported Node.js version
 ```
 
-PromptScript requires Node.js 20+. Update your CI configuration to use `node:20` or higher.
+PromptScript requires Node.js 22.22 or newer. Update your CI configuration to use `node:22` or higher.
 
 ### Debug Mode
 
