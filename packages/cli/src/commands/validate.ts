@@ -435,11 +435,12 @@ function handleValidationError(
   spinner: ReturnType<typeof createSpinner>
 ): void {
   if (isJsonFormat) {
+    const cause = error instanceof PSError ? causeCodeOf(error) : undefined;
     const entry =
       error instanceof PSError && PS_CODE.test(error.code)
         ? {
             code: error.code,
-            ...(causeCodeOf(error) ? { cause: causeCodeOf(error) } : {}),
+            ...(cause ? { cause } : {}),
             message: error.message,
             location: toLocation(error.location),
           }
