@@ -104,15 +104,18 @@ The `@inherit` or `@use` target cannot be resolved. Check:
 - The registry is configured if using `@scope/package` syntax
 - Run `prs registry list` to verify configured registries
 
-### `PS1001: Unexpected token`
+### `PS2000: Expecting token ...`
 
-The parser encountered invalid syntax, such as an unknown directive or misplaced token. Check the
-reported location and compare it with the [Language Reference](../reference/language.md).
+The parser found invalid syntax, such as a missing closing brace or a misplaced token, for example
+`Expecting token of type --> RBrace <-- but found --> '?' <--`. The resolver reports every parse
+error with the code `PS2000`, which you see in `prs validate --format json`. Check the reported
+location and compare it with the [Language Reference](../reference/language.md). A parse error that
+has no position reports line and column `-1`.
 
-### `PS3001: Required field`
+### `PS001: @meta block is required`
 
-A required field is missing. The error message identifies the block and field to add. Other
-validation failures use `PS3000` or a more specific `PS300x` code.
+The file has no `@meta` block. Add one with at least an `id` and a `syntax` version, as in the
+[Language Reference](../reference/language.md).
 
 ### Compiled output doesn't match expected format
 

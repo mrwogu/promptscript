@@ -13,32 +13,16 @@ import {
   getSyntaxFeatureUsages,
   compareVersions,
   isValidLockfile,
+  PSError,
   type Lockfile,
+  type ValidateLocationV1,
+  type ValidateReportV1,
 } from '@promptscript/core';
 import { parse } from '@promptscript/parser';
 import { Resolver } from '@promptscript/resolver';
 import { parse as parseYaml } from 'yaml';
 
-/**
- * JSON output structure for validation results.
- */
-interface ValidationJsonOutput {
-  success: boolean;
-  errors: Array<{
-    message: string;
-    location?: { file?: string; line?: number; column?: number };
-  }>;
-  warnings: Array<{
-    ruleId: string;
-    message: string;
-    suggestion?: string;
-    location?: { file?: string; line?: number; column?: number };
-  }>;
-  summary: {
-    errorCount: number;
-    warningCount: number;
-  };
-}
+const PS_CODE = /^PS\d{3,4}$/;
 
 type ValidationResult = Pick<CompileResult, 'errors' | 'warnings'>;
 
@@ -115,12 +99,7 @@ function handleEntryNotFound(
   spinner: ReturnType<typeof createSpinner>
 ): void {
   if (isJsonFormat) {
-    outputJsonResult({
-      success: false,
-      errors: [{ message: `File not found: ${entryPath}` }],
-      warnings: [],
-      summary: { errorCount: 1, warningCount: 0 },
-    });
+    outputJsonResult(createValidateReport(false, [{ message: `File not found: ${entryPath}` }]));
   } else {
     spinner.fail('Entry file not found');
     ConsoleOutput.error(`File not found: ${entryPath}`);
@@ -156,26 +135,54 @@ function outputTextResult(
 }
 
 /**
- * Convert compile result to JSON output format.
+ * Build a validate report with its version marker and counts.
  */
-function toJsonOutput(result: ValidationResult, success: boolean): ValidationJsonOutput {
+function createValidateReport(
+  success: boolean,
+  errors: ValidateReportV1['errors'],
+  warnings: ValidateReportV1['warnings'] = []
+): ValidateReportV1 {
   return {
+    $schema: 'https://getpromptscript.dev/schema/validate-report/v1.json',
+    version: 1,
     success,
-    errors: result.errors.map((e) => ({
+    errors,
+    warnings,
+    summary: { errorCount: errors.length, warningCount: warnings.length },
+  };
+}
+
+/**
+ * Keep only the location fields the report schema allows.
+ */
+function toLocation(location?: ValidateLocationV1): ValidateLocationV1 | undefined {
+  if (!location) return undefined;
+  return {
+    file: location.file,
+    line: location.line,
+    column: location.column,
+    offset: location.offset,
+  };
+}
+
+/**
+ * Convert compile result to the validate report.
+ */
+function toJsonOutput(result: ValidationResult, success: boolean): ValidateReportV1 {
+  return createValidateReport(
+    success,
+    result.errors.map((e) => ({
+      code: PS_CODE.test(e.code) ? e.code : undefined,
       message: e.message,
-      location: e.location,
+      location: toLocation(e.location),
     })),
-    warnings: result.warnings.map((w) => ({
+    result.warnings.map((w) => ({
       ruleId: w.ruleId,
       message: w.message,
       suggestion: w.suggestion,
-      location: w.location,
-    })),
-    summary: {
-      errorCount: result.errors.length,
-      warningCount: result.warnings.length,
-    },
-  };
+      location: toLocation(w.location),
+    }))
+  );
 }
 
 /**
@@ -314,8 +321,16 @@ function loadValidationLockfile(): Lockfile | undefined {
  * Validate PromptScript files without generating output.
  */
 export async function validateCommand(options: ValidateOptions): Promise<void> {
+  if (options.format !== undefined && options.format !== 'text' && options.format !== 'json') {
+    ConsoleOutput.error(`Invalid output format: ${options.format}. Expected text or json.`);
+    process.exitCode = 1;
+    return;
+  }
+
   if (options.fix && options.format === 'json') {
-    throw new Error('--fix is incompatible with --format json');
+    ConsoleOutput.error('--fix cannot be combined with --format json');
+    process.exitCode = 1;
+    return;
   }
 
   if (options.fix) {
@@ -414,12 +429,11 @@ function handleValidationError(
   spinner: ReturnType<typeof createSpinner>
 ): void {
   if (isJsonFormat) {
-    outputJsonResult({
-      success: false,
-      errors: [{ message: error.message }],
-      warnings: [],
-      summary: { errorCount: 1, warningCount: 0 },
-    });
+    const entry =
+      error instanceof PSError && PS_CODE.test(error.code)
+        ? { code: error.code, message: error.message, location: toLocation(error.location) }
+        : { message: error.message };
+    outputJsonResult(createValidateReport(false, [entry]));
   } else {
     spinner.fail('Error');
     ConsoleOutput.error(error.message);
@@ -430,7 +444,7 @@ function handleValidationError(
 /**
  * Output validation result as JSON.
  */
-function outputJsonResult(result: ValidationJsonOutput): void {
+function outputJsonResult(result: ValidateReportV1): void {
   console.log(JSON.stringify(result, null, 2));
 }
 

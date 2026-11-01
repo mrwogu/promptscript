@@ -36,6 +36,7 @@ const OUTPUT_SCHEMAS = new Set([
   'eval-import-summary-v1.json',
   'eval-report-v1.json',
   'release-report-v1.json',
+  'validate-report-v1.json',
 ]);
 
 const ANNOTATIONS = new Set([

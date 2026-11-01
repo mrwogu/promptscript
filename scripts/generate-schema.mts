@@ -140,6 +140,13 @@ const GENERATED_SCHEMAS: SchemaTarget[] = [
     title: 'PromptScript Eval Import Summary v1',
     output: '../schema/eval-import-summary-v1.json',
   },
+  {
+    source: 'validate-report.ts',
+    type: 'ValidateReportV1',
+    schemaId: 'https://getpromptscript.dev/schema/validate-report/v1.json',
+    title: 'PromptScript Validate Report v1',
+    output: '../schema/validate-report-v1.json',
+  },
 ];
 
 /**

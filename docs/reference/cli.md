@@ -554,6 +554,17 @@ prs validate --format json
 | 0    | Validation passed                                    |
 | 1    | Validation errors found, or warnings with `--strict` |
 
+With `--format json`, stdout holds one document that matches
+[`validate-report/v1.json`](json-output.md). It has `success`, `errors`, `warnings` and a `summary`
+with the counts. With `--strict`, a warning sets `success` to `false`, and it stays in `warnings`.
+An error has a `code` when it is a PromptScript error (`PS` and three or four digits). The code is
+absent when the run stops before the compile with another error, such as a missing entry file or a
+registry clone failure. A parse error carries the resolve code `PS2000`. A location has `file`,
+`line`, `column` and, on some warnings, `offset`. A parse error without a position reports `-1` for
+`line` and `column`. Paths are as the compiler reports them, usually absolute. With several files,
+`errors` and `warnings` hold the results of all of them in file order.
+`--fix` cannot be combined with `--format json`: the command prints an error to stderr and exits 1.
+
 ---
 
 ### prs fmt

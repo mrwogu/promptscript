@@ -22,11 +22,12 @@ command and checks stdout against its schema.
 | [`prs audit log`](cli.md#prs-audit-log)                                                  | `https://getpromptscript.dev/schema/audit-log/v1.json`       |
 | [`prs eval run`](cli.md#prs-eval-run)                                                    | `https://getpromptscript.dev/schema/eval-report/v1.json`     |
 | [`prs eval compare`](cli.md#prs-eval-compare)                                            | `https://getpromptscript.dev/schema/eval-comparison/v1.json` |
+| [`prs validate`](cli.md#prs-validate)                                                    | `https://getpromptscript.dev/schema/validate-report/v1.json` |
 
 ## Experimental
 
 `--format json` of every other command is experimental, and its output may change in any minor
-release. This covers `prs validate`, `prs inspect`, `prs explain`, `prs resolve`,
+release. This covers `prs inspect`, `prs explain`, `prs resolve`,
 `prs registry validate`, `prs registry list` and `prs governance codeowners`. `prs eval import` has
 a schema (`eval-import-summary/v1.json`), but it is not declared stable either.
 
@@ -47,10 +48,11 @@ them from the document.
 When a stable command fails, the document is still printed. It has `success: false`, or for
 `prs eval run` an `outcome` other than `passed`. Do not read the shape of the document from the exit
 code alone: `prs eval compare --fail-on-regression` exits 1 with `regression: true` in a normal
-comparison, and `prs eval run --strict` exits 2 with `outcome: "passed"` when there are warnings. There are three cases with nothing on stdout, only a
+comparison, and `prs eval run --strict` exits 2 with `outcome: "passed"` when there are warnings. There are four cases with nothing on stdout, only a
 message on stderr and exit code 1:
 
 - any error of `prs eval compare`, also a bad `--tolerance` value, because a comparison has no place for errors,
+- `prs validate --fix` together with `--format json`, which is refused before anything runs,
 - a usage error of Commander, like an unknown option,
 - a `--format` value the command does not know.
 
@@ -71,14 +73,15 @@ Eval reports and comparisons written by older CLI versions have only `$schema`. 
 
 ## Exit codes
 
-| Command                                                       | 0                                          | 1                                                                                              | Other                                                   |
-| ------------------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `prs diff`                                                    | Report written, also when it has changes   | `success: false`: a compile or report error                                                    | -                                                       |
-| `prs release build`, `promote`, `rollback`, `split`, `status` | `success: true`, also a no-op or a dry run | `success: false`, also a failed gate of `status --base`                                        | -                                                       |
-| `prs approve`                                                 | Record written or listed                   | Any other error                                                                                | 2: the record exists already (`PS5105`)                 |
-| `prs audit log`                                               | Log read                                   | Error                                                                                          | -                                                       |
-| `prs eval run`                                                | `passed`                                   | `failed`, `regression`, `budget-exceeded` or `error` (a bad option is `PS6309`, still as JSON) | 2: `passed` with warnings under `--strict`. 130: Ctrl+C |
-| `prs eval compare`                                            | Compared, also when something regressed    | A regression with `--fail-on-regression`, or any error (no JSON)                               | -                                                       |
+| Command                                                       | 0                                           | 1                                                                                              | Other                                                   |
+| ------------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `prs diff`                                                    | Report written, also when it has changes    | `success: false`: a compile or report error                                                    | -                                                       |
+| `prs release build`, `promote`, `rollback`, `split`, `status` | `success: true`, also a no-op or a dry run  | `success: false`, also a failed gate of `status --base`                                        | -                                                       |
+| `prs approve`                                                 | Record written or listed                    | Any other error                                                                                | 2: the record exists already (`PS5105`)                 |
+| `prs audit log`                                               | Log read                                    | Error                                                                                          | -                                                       |
+| `prs eval run`                                                | `passed`                                    | `failed`, `regression`, `budget-exceeded` or `error` (a bad option is `PS6309`, still as JSON) | 2: `passed` with warnings under `--strict`. 130: Ctrl+C |
+| `prs eval compare`                                            | Compared, also when something regressed     | A regression with `--fail-on-regression`, or any error (no JSON)                               | -                                                       |
+| `prs validate`                                                | No errors, and no warnings under `--strict` | `success: false`: errors, warnings under `--strict`, or any error before the compile           | -                                                       |
 
 ## Schema versioning
 
