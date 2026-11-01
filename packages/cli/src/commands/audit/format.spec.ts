@@ -35,14 +35,32 @@ describe('a capped approval', () => {
   });
 });
 
+/** What a SIEM gets from a CEF extension value: `\\`, `\=` and `\|` as the character, `\n` as a line break. */
+function cefDecode(value: string): string {
+  return value.replace(/\\(.)/g, (_, char: string) => (char === 'n' ? '\n' : char));
+}
+
 describe('CEF escaping', () => {
+  it('decodes to the visible text, so a hidden and a literal escape stay distinct', () => {
+    // Arrange
+    const hidden = cefExtensionValue('acme/ref\u200bund');
+    const literal = cefExtensionValue(String.raw`acme/ref\u200Bund`);
+
+    // Act, Assert
+    expect(hidden).not.toBe(literal);
+    expect(cefDecode(hidden)).toBe(String.raw`acme/ref\u200Bund`);
+    expect(cefDecode(literal)).toBe(String.raw`acme/ref\\u200Bund`);
+    expect(cefDecode(hidden)).not.toBe(cefDecode(literal));
+    expect(cefDecode(cefExtensionValue('a\nb=c'))).toBe('a\nb=c');
+  });
+
   it.each([
     ['plain', 'plain'],
     ['a|b', 'a\\|b'],
-    ['back\\slash', 'back\\\\slash'],
+    ['back\\slash', String.raw`back\\\\slash`],
     ['a=b', 'a=b'],
-    ['bell\u0007\u009b[2J', String.raw`bell\u0007\u009B[2J`],
-    ['line\nbreak', String.raw`line\u000Abreak`],
+    ['bell\u0007\u009b[2J', String.raw`bell\\u0007\\u009B[2J`],
+    ['line\nbreak', String.raw`line\\u000Abreak`],
   ])('escapes the header value %j', (input, expected) => {
     // Arrange, Act
     const escaped = cefHeaderValue(input);
@@ -54,11 +72,11 @@ describe('CEF escaping', () => {
   it.each([
     ['plain', 'plain'],
     ['a=b', 'a\\=b'],
-    ['back\\slash', 'back\\\\slash'],
+    ['back\\slash', String.raw`back\\\\slash`],
     ['a|b', 'a|b'],
     ['one\ntwo\r\nthree\rfour', 'one\\ntwo\\nthree\\nfour'],
-    ['esc\u001b[31m\u202eflip\u200b', String.raw`esc\u001B[31m\u202Eflip\u200B`],
-    ['\\=', '\\\\\\='],
+    ['esc\u001b[31m\u202eflip\u200b', String.raw`esc\\u001B[31m\\u202Eflip\\u200B`],
+    ['\\=', String.raw`\\\\\=`],
   ])('escapes the extension value %j', (input, expected) => {
     // Arrange, Act
     const escaped = cefExtensionValue(input);
@@ -275,7 +293,7 @@ describe('textLines', () => {
 
     // Assert
     expect(text[0]).toContain(String.raw`a\uE0041b\uFE0Fc\uD800d`);
-    expect(cef).toContain(String.raw`cs1=a\uE0041b\uFE0Fc\uD800d `);
+    expect(cef).toContain(String.raw`cs1=a\\uE0041b\\uFE0Fc\\uD800d `);
     expect(text.join('\n')).not.toContain('u000D');
   });
 
@@ -292,7 +310,7 @@ describe('textLines', () => {
     expect(texts[0]).not.toBe(texts[1]);
     expect(texts[1]).toContain(String.raw`acme/ref\u200Bund`);
     expect(cef[0]).not.toBe(cef[1]);
-    expect(cef[1]).toContain(String.raw`acme/ref\u200Bund`);
+    expect(cef[1]).toContain(String.raw`acme/ref\\u200Bund`);
   });
 
   it('shows a bidi override as an escape in text and CEF, and a backslash as two', () => {
@@ -312,8 +330,8 @@ describe('textLines', () => {
     expect(text).toContain(String.raw`acme/a\u202Eb`);
     expect(text).toContain(String.raw`by Ann\u202E <`);
     expect(text).toContain(String.raw`dir\\u200bx`);
-    expect(cef).toContain(String.raw`suser=ann@example.com\u202E `);
-    expect(cef).toContain(String.raw`dir\\u200bx`);
+    expect(cef).toContain(String.raw`suser=ann@example.com\\u202E `);
+    expect(cef).toContain(String.raw`dir\\\\u200bx`);
   });
 
   it('shows a dash for events without a hash', () => {
@@ -450,7 +468,7 @@ describe('experiment events', () => {
     const line = cefLine(event, HEAD, '1');
 
     // Assert
-    expect(line).toContain(String.raw` filePath=a|b\=c\\d\ne `);
+    expect(line).toContain(String.raw` filePath=a|b\=c\\\\d\ne `);
     expect(line).toContain(' suser=a|b@x ');
     expect(line).not.toContain('\u0007');
     expect(textLines(event)[0]).toContain(String.raw`by Na|me=\u0007x <a|b@x>`);

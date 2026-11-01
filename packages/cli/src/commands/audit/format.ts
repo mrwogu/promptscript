@@ -20,23 +20,34 @@ const CEF_TYPES: Readonly<Record<AuditEventType, { name: string; severity: numbe
 
 const CHANGE_WORDS = { A: 'added', M: 'modified', D: 'deleted' } as const;
 
-/** A CEF header value: `\` and `|` escaped, control characters shown as `\uXXXX`. */
-export function cefHeaderValue(value: string): string {
-  return escapeControlCharacters(
-    value.replaceAll('\\', String.raw`\\`).replaceAll('|', String.raw`\|`)
-  );
+/** The visible text of a value: `\` doubled, invisible characters written as `\uXXXX`. */
+function visibleText(value: string): string {
+  return escapeControlCharacters(value.replaceAll('\\', String.raw`\\`));
 }
 
 /**
- * A CEF extension value: `\` and `=` escaped, line breaks as `\n`, other control
- * characters shown as `\uXXXX`.
+ * A CEF header value: the visible text with `\` and `|` escaped the CEF way, so a SIEM that
+ * decodes the line gets the same text as the text output.
+ */
+export function cefHeaderValue(value: string): string {
+  return visibleText(value)
+    .replaceAll('\\', String.raw`\\`)
+    .replaceAll('|', String.raw`\|`);
+}
+
+/**
+ * A CEF extension value: each line of the visible text with `\` and `=` escaped the CEF way,
+ * and the line breaks written as `\n`.
  */
 export function cefExtensionValue(value: string): string {
-  const escaped = value
-    .replaceAll('\\', String.raw`\\`)
-    .replaceAll('=', String.raw`\=`)
-    .replace(/\r\n|\r|\n/g, String.raw`\n`);
-  return escapeControlCharacters(escaped);
+  return value
+    .split(/\r\n|\r|\n/)
+    .map((line) =>
+      visibleText(line)
+        .replaceAll('\\', String.raw`\\`)
+        .replaceAll('=', String.raw`\=`)
+    )
+    .join(String.raw`\n`);
 }
 
 /** `control@hash=90 %, warm@hash=10 %`: the arms with their share. */
@@ -136,8 +147,7 @@ export function cefLine(event: AuditEvent, head: string, version: string): strin
 }
 
 /** Text output: `\` doubled, control, bidi and zero-width characters shown as `\uXXXX`. */
-const shown = (value: string): string =>
-  escapeControlCharacters(value.replaceAll('\\', String.raw`\\`));
+const shown = visibleText;
 
 function person(event: AuditEvent): string {
   return `by ${shown(event.author.name)} <${shown(event.author.email)}>`;

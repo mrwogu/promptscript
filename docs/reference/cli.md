@@ -1791,7 +1791,7 @@ failure or a history the log cannot explain is `PS5108`. A malformed `--prompt` 
 read, 1 an error. With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/audit-log/v1.json`, with `head`, the commit the log was read
 from. `--format cef` prints one CEF line per event. Text and CEF lines show invisible and
-control characters as `\uXXXX`. That is not a standard CEF escape, so a SIEM shows it literally.
+control characters as `\uXXXX`. In CEF that text is escaped like any other, so a SIEM shows `\uXXXX` and a literal backslash stays distinct.
 `--format json` keeps the exact values.
 
 ```bash

@@ -1638,7 +1638,7 @@ describe('prs audit log experiments', () => {
 
     // Assert
     expect(validateAuditLog(report), JSON.stringify(validateAuditLog.errors)).toBe(true);
-    expect(cef).toContain(String.raw`cs1=acme|x\=y\\z\u200B `);
+    expect(cef).toContain(String.raw`cs1=acme|x\=y\\\\z\\u200B `);
     expect(cef).toContain('flexString2=tone flexString2Label=experiment');
     expect(cef).toContain('flexNumber2=1000 flexNumber2Label=variantWeight');
     expect(cef).toContain(String.raw`msg=arms control@${H1}\=90 %, warm@${H2}\=10 %`);

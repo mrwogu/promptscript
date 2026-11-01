@@ -993,10 +993,10 @@ Severities: `changed` and `generated` 3, `approved` 5, `approval-removed`, `prom
 and `=`, and line breaks become `\n`. The raw text and CEF lines show other control, bidi,
 zero-width and similar invisible characters, tag characters and lone surrogates of Git and record
 fields as `\u` and 4 to 6 hex digits, so two ids that differ only by an invisible character print
-differently, and the text output doubles a backslash. In CEF this is not a standard escape, so a
-SIEM shows it literally and a literal `\u200B` in a value looks like a real zero-width space after
-a lenient decode. `--format json` keeps the exact value, so take prompt ids and other values from
-the JSON export.
+differently, and the text output doubles a backslash. In CEF that visible text is escaped like any
+other text, so each backslash of it is doubled: a SIEM that decodes the line shows `\u200B` for a
+hidden character, and a literal backslash stays distinct from it. `--format json` keeps the exact
+value, so take prompt ids and other values from the JSON export.
 
 ### Limits
 
@@ -1025,9 +1025,11 @@ the JSON export.
   The next readable version of it on the mainline is compared against the last readable version
   before it, so an entry or experiment removed or changed meanwhile shows as `label-removed`,
   `experiment-ended` or `experiment-changed` on that commit. A label with no readable version
-  before it on the mainline, and a commit of a side branch, are compared against nothing: its
-  experiments show as `experiment-started` and its entries as `promoted`, or as `rolled-back` when
-  the hash was held before. The warning about an unreadable label is printed once.
+  before it on the mainline, and a side-branch commit whose parent label is unreadable, are
+  compared against nothing: its experiments show as `experiment-started` and its entries as
+  `promoted`, or as `rolled-back` when the hash was held before. A side-branch commit with a
+  readable parent label is diffed against that parent as usual. The warning about an unreadable
+  label is printed once.
 - The experiment events are new in the JSON document, and the schema URL and `version` stay 1. A
   consumer that switches on `type` sees types it does not know, and one that validates against a
   copy of the schema from before them rejects the document. Update the copy.
