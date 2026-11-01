@@ -37,6 +37,7 @@ export const SIDEBAR = [
       { label: 'Target Output Families', slug: 'features/target-platforms' },
       { label: 'Application Prompts', slug: 'guides/application-prompts' },
       { label: 'Releasing Prompts', slug: 'guides/releases' },
+      { label: 'Evaluating Prompts', slug: 'guides/evals' },
       { label: 'AI Tool Hooks', slug: 'guides/hooks' },
       { label: 'Examples (Few-Shot)', slug: 'guides/examples' },
     ],

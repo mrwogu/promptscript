@@ -35,18 +35,20 @@ flowchart LR
 
 ## Key Commands for CI
 
-| Command                             | Purpose                                       | Exit Code                                                                     |
-| ----------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| `prs validate`                      | Validate syntax and structure                 | 0=pass, 1=error                                                               |
-| `prs validate --strict`             | Treat warnings as errors                      | 0=pass, 1=error or warning                                                    |
-| `prs validate --format json`        | JSON report for parsing                       | Same as above                                                                 |
-| `prs compile`                       | Compile to all targets                        | 0=success, 1=error                                                            |
-| `prs compile --dry-run`             | Preview without writing                       | 0=success, 1=error                                                            |
-| `prs check`                         | Check config and dependencies                 | 0=healthy, 1=issues                                                           |
-| `prs diff --all`                    | Show uncommitted changes                      | 0=shown, 1=error                                                              |
-| `prs diff --format json`            | Machine-readable diff report                  | 0=report produced, 1=error                                                    |
-| `prs release status --check-models` | Check the models of labelled prompts          | 0=ok, 1=`PS5011` or any other release error (a missing or corrupt bundle)     |
-| `prs eval run --label <env>`        | Run eval suites on what an environment serves | 0=passed, 1=failed, regression, budget or error, 2=warnings (with `--strict`) |
+| Command                             | Purpose                                       | Exit Code                                                                                        |
+| ----------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `prs validate`                      | Validate syntax and structure                 | 0=pass, 1=error                                                                                  |
+| `prs validate --strict`             | Treat warnings as errors                      | 0=pass, 1=error or warning                                                                       |
+| `prs validate --format json`        | JSON report for parsing                       | Same as above                                                                                    |
+| `prs compile`                       | Compile to all targets                        | 0=success, 1=error                                                                               |
+| `prs compile --dry-run`             | Preview without writing                       | 0=success, 1=error                                                                               |
+| `prs check`                         | Check config and dependencies                 | 0=healthy, 1=issues                                                                              |
+| `prs diff --all`                    | Show uncommitted changes                      | 0=shown, 1=error                                                                                 |
+| `prs diff --format json`            | Machine-readable diff report                  | 0=report produced, 1=error                                                                       |
+| `prs release status --check-models` | Check the models of labelled prompts          | 0=ok, 1=`PS5011` or any other release error (a missing or corrupt bundle)                        |
+| `prs eval run --label <env>`        | Run eval suites on what an environment serves | 0=passed, 1=failed, regression, budget or error, 2=warnings (with `--strict`)                    |
+| `prs eval run`                      | Replay eval suites from the committed cache   | 0=passed, 1=failed, regression or error (a cache miss is `PS6402`), 2=warnings (with `--strict`) |
+| `prs eval compare <a> <b>`          | Compare two eval reports offline              | 0=compared, 1=error, or regression with `--fail-on-regression`                                   |
 
 ## GitHub Actions
 
@@ -312,6 +314,76 @@ jobs:
           prs compile
           git diff --exit-code
 ```
+
+### Eval replay on pull requests
+
+Eval suites do not need a model in a pull request. Record the answers once with `--cache record`,
+commit `.promptscript/eval-cache/`, and replay them in CI. A replay calls no provider, so the replay step
+needs no secret and no network. Only the install step needs the network, for npm. Write the suites, the dataset and the recording as shown in
+[Evaluating Prompts](evals.md). The recipe needs `1.25.0` or newer, the first release with the LLM
+judge, `prs eval import` and `prs eval run --label`.
+
+```yaml
+name: Eval replay
+on:
+  pull_request:
+    paths:
+      - '.promptscript/**'
+      - 'promptscript.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    env:
+      PROMPTSCRIPT_NO_UPDATE_CHECK: '1'
+      DO_NOT_TRACK: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Install PromptScript CLI
+        run: npm install -g --ignore-scripts @promptscript/cli@1.25.0
+
+      - name: Replay the eval suites
+        run: prs eval run --cache replay --strict --format markdown >> "$GITHUB_STEP_SUMMARY"
+```
+
+If someone changes a prompt, an input, a model or a model parameter, the cache has no entry for the
+new call and the job fails with `PS6402`. That is the point. Record again with a key of your own,
+read the new answers, and commit them with the change.
+
+Two rules keep this safe:
+
+- Whoever can edit `.promptscript/evals/` or `.promptscript/eval-cache/` can change what the job
+  checks, so put them under CODEOWNERS, for example `/.promptscript/evals/ @acme/prompt-platform`
+  and `/.promptscript/eval-cache/ @acme/prompt-platform`. Owners only bind with "Require review
+  from Code Owners" in the branch protection. Give `.github/workflows/` and the CODEOWNERS file
+  itself an owner too, or a pull request can change the job or the rule. See
+  [CODEOWNERS](codeowners.md).
+- Run this job on `pull_request`, never on `pull_request_target`, and give it no provider key. A
+  live cache mode with a key on code from a pull request would send the key to whatever that code
+  asks for.
+
+The `paths:` filter keeps the job off pull requests that cannot change a result. If you make the
+check required, a run skipped by the filter leaves the pull request blocked, so drop the filter or
+add a job that always passes. Sources outside `.promptscript/` (inherited or from a registry) do
+not trigger the job.
+
+The install step uses `npm install -g --ignore-scripts` with the version in the command, so a
+dependency cannot run install scripts in a job that checks out pull request code. For a lockfile
+that also pins the dependencies, use the pattern in
+[Scheduled drift check](#scheduled-drift-check).
+
+For a live check on a schedule, see the next section.
 
 ### Scheduled drift check
 
