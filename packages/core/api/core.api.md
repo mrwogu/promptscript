@@ -869,6 +869,7 @@ export interface EvalComparisonV1 {
     entries: EvalComparisonEntryV1[];
     regression: boolean;
     tolerance: number;
+    version?: 1;
 }
 
 // @public
@@ -1146,6 +1147,7 @@ export interface EvalReportV1 {
     passed: boolean;
     suites: EvalSuiteResultV1[];
     usage: EvalUsageV1;
+    version?: 1;
 }
 
 // @public

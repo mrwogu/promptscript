@@ -280,6 +280,7 @@ describe('eval report schema', () => {
   });
   const report = (): Doc => ({
     $schema: 'https://getpromptscript.dev/schema/eval-report/v1.json',
+    version: 1,
     outcome: 'passed',
     passed: true,
     cache: { mode: 'replay', replayed: 4, live: 0, digest: HASH },
@@ -316,6 +317,14 @@ describe('eval report schema', () => {
 
   it('accepts the example report', () => {
     expect(validate(report()), JSON.stringify(validate.errors)).toBe(true);
+  });
+
+  it('accepts a report without version, as older CLIs wrote', () => {
+    expect(validate({ ...report(), version: undefined })).toBe(true);
+  });
+
+  it('rejects version 2', () => {
+    expect(validate({ ...report(), version: 2 })).toBe(false);
   });
 
   it.each(['replay', 'record', 'refresh', 'off'])('accepts the %s cache mode', (mode) => {
@@ -386,6 +395,7 @@ describe('eval comparison schema', () => {
   });
   const comparison = (): Doc => ({
     $schema: 'https://getpromptscript.dev/schema/eval-comparison/v1.json',
+    version: 1,
     tolerance: 0.02,
     regression: true,
     entries: [entry()],
@@ -393,6 +403,14 @@ describe('eval comparison schema', () => {
 
   it('accepts the example comparison', () => {
     expect(validate(comparison()), JSON.stringify(validate.errors)).toBe(true);
+  });
+
+  it('accepts a comparison without version, as older CLIs wrote', () => {
+    expect(validate({ ...comparison(), version: undefined })).toBe(true);
+  });
+
+  it('rejects version 2', () => {
+    expect(validate({ ...comparison(), version: 2 })).toBe(false);
   });
 
   it('accepts a comparison without $schema, as embedded in a report', () => {

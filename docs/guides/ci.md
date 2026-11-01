@@ -35,16 +35,16 @@ flowchart LR
 
 ## Key Commands for CI
 
-| Command                      | Purpose                       | Exit Code                                    |
-| ---------------------------- | ----------------------------- | -------------------------------------------- |
-| `prs validate`               | Validate syntax and structure | 0=pass, 1=error, 2=warning (with `--strict`) |
-| `prs validate --strict`      | Treat warnings as errors      | 0=pass, 1=error, 2=warning                   |
-| `prs validate --format json` | JSON output for parsing       | Same as above                                |
-| `prs compile`                | Compile to all targets        | 0=success, 1=error                           |
-| `prs compile --dry-run`      | Preview without writing       | 0=success, 1=error                           |
-| `prs check`                  | Check config and dependencies | 0=healthy, 1=issues                          |
-| `prs diff --all`             | Show uncommitted changes      | Always 0                                     |
-| `prs diff --format json`     | Machine-readable diff report  | 0=report produced, 1=error                   |
+| Command                      | Purpose                       | Exit Code                  |
+| ---------------------------- | ----------------------------- | -------------------------- |
+| `prs validate`               | Validate syntax and structure | 0=pass, 1=error            |
+| `prs validate --strict`      | Treat warnings as errors      | 0=pass, 1=error or warning |
+| `prs validate --format json` | JSON output for parsing       | Same as above              |
+| `prs compile`                | Compile to all targets        | 0=success, 1=error         |
+| `prs compile --dry-run`      | Preview without writing       | 0=success, 1=error         |
+| `prs check`                  | Check config and dependencies | 0=healthy, 1=issues        |
+| `prs diff --all`             | Show uncommitted changes      | 0=shown, 1=error           |
+| `prs diff --format json`     | Machine-readable diff report  | 0=report produced, 1=error |
 
 ## GitHub Actions
 

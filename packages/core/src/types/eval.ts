@@ -768,6 +768,12 @@ export interface EvalComparisonV1 {
    */
   $schema?: 'https://getpromptscript.dev/schema/eval-comparison/v1.json';
   /**
+   * Format version, 1 in standalone comparisons this CLI writes. Absent
+   * inside a report and in comparisons from older versions; read a missing
+   * value as 1.
+   */
+  version?: 1;
+  /**
    * Pass-rate drop that counts as a regression.
    * @minimum 0
    * @maximum 1
@@ -790,6 +796,11 @@ export interface EvalReportV1 {
    * @example "https://getpromptscript.dev/schema/eval-report/v1.json"
    */
   $schema: 'https://getpromptscript.dev/schema/eval-report/v1.json';
+  /**
+   * Format version, always 1 in reports this CLI writes. Older reports lack
+   * it; read a missing value as 1.
+   */
+  version?: 1;
   /** Outcome of the run */
   outcome: EvalOutcome;
   /** Whether every suite passed and nothing else went wrong */

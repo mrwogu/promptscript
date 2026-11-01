@@ -231,10 +231,10 @@ describe('formatComparison', () => {
   ]);
   const comparison = compareReports(base, next, { tolerance: 0 });
 
-  it('prints JSON with the schema URL first', () => {
+  it('prints JSON with the schema URL and version first', () => {
     const parsed = JSON.parse(formatComparison(comparison, 'json'));
 
-    expect(Object.keys(parsed)[0]).toBe('$schema');
+    expect(Object.keys(parsed).slice(0, 2)).toEqual(['$schema', 'version']);
     expect(parsed.$schema).toBe('https://getpromptscript.dev/schema/eval-comparison/v1.json');
     expect(parsed.regression).toBe(true);
   });

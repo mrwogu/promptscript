@@ -12,6 +12,11 @@
         "https://getpromptscript.dev/schema/eval-report/v1.json"
       ]
     },
+    "version": {
+      "type": "number",
+      "const": 1,
+      "description": "Format version, always 1 in reports this CLI writes. Older reports lack it; read a missing value as 1."
+    },
     "outcome": {
       "$ref": "#/definitions/EvalOutcome",
       "description": "Outcome of the run"
@@ -731,6 +736,11 @@
           "examples": [
             "https://getpromptscript.dev/schema/eval-comparison/v1.json"
           ]
+        },
+        "version": {
+          "type": "number",
+          "const": 1,
+          "description": "Format version, 1 in standalone comparisons this CLI writes. Absent inside a report and in comparisons from older versions; read a missing value as 1."
         },
         "tolerance": {
           "type": "number",

@@ -495,7 +495,9 @@ prs diff --format json
 change kind, deterministic content hashes, warnings, and unsupported capability entries. Content is
 omitted by default; add `--include-content` when automation needs canonical output text. Reports
 with changes exit 0; compilation and report errors emit `success: false` and exit 1. See the
-[diff schema](https://getpromptscript.dev/schema/diff/v1.json). Diff uses the complete configured
+[diff schema](https://getpromptscript.dev/schema/diff/v1.json). The JSON output of `prs diff`,
+`prs release`, `prs approve`, `prs audit log`, `prs eval run` and `prs eval compare` is stable; the rules are on the
+[JSON Output](https://getpromptscript.dev/reference/json-output/) page. Diff uses the complete configured
 target when `--target` selects one, never writes generated files or registry cache metadata, and
 requires Git registries to already exist in vendor mode or a valid local cache.
 
@@ -626,6 +628,7 @@ for syntax highlighting, bracket matching, code folding, and file icons.
 - [Agent Platform](https://getpromptscript.dev/features/)
 - [Language Reference](https://getpromptscript.dev/reference/language/)
 - [Configuration Reference](https://getpromptscript.dev/reference/config/)
+- [JSON Output](https://getpromptscript.dev/reference/json-output/)
 - [Target Matrix](https://getpromptscript.dev/reference/formatters/)
 - [Security Guide](https://getpromptscript.dev/guides/security/)
 - [Model Catalog](https://getpromptscript.dev/reference/models/)
