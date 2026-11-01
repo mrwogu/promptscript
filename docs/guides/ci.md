@@ -35,16 +35,18 @@ flowchart LR
 
 ## Key Commands for CI
 
-| Command                      | Purpose                       | Exit Code                  |
-| ---------------------------- | ----------------------------- | -------------------------- |
-| `prs validate`               | Validate syntax and structure | 0=pass, 1=error            |
-| `prs validate --strict`      | Treat warnings as errors      | 0=pass, 1=error or warning |
-| `prs validate --format json` | JSON report for parsing       | Same as above              |
-| `prs compile`                | Compile to all targets        | 0=success, 1=error         |
-| `prs compile --dry-run`      | Preview without writing       | 0=success, 1=error         |
-| `prs check`                  | Check config and dependencies | 0=healthy, 1=issues        |
-| `prs diff --all`             | Show uncommitted changes      | 0=shown, 1=error           |
-| `prs diff --format json`     | Machine-readable diff report  | 0=report produced, 1=error |
+| Command                             | Purpose                                       | Exit Code                                                                     |
+| ----------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------- |
+| `prs validate`                      | Validate syntax and structure                 | 0=pass, 1=error                                                               |
+| `prs validate --strict`             | Treat warnings as errors                      | 0=pass, 1=error or warning                                                    |
+| `prs validate --format json`        | JSON report for parsing                       | Same as above                                                                 |
+| `prs compile`                       | Compile to all targets                        | 0=success, 1=error                                                            |
+| `prs compile --dry-run`             | Preview without writing                       | 0=success, 1=error                                                            |
+| `prs check`                         | Check config and dependencies                 | 0=healthy, 1=issues                                                           |
+| `prs diff --all`                    | Show uncommitted changes                      | 0=shown, 1=error                                                              |
+| `prs diff --format json`            | Machine-readable diff report                  | 0=report produced, 1=error                                                    |
+| `prs release status --check-models` | Check the models of labelled prompts          | 0=ok, 1=`PS5011` or any other release error (a missing or corrupt bundle)     |
+| `prs eval run --label <env>`        | Run eval suites on what an environment serves | 0=passed, 1=failed, regression, budget or error, 2=warnings (with `--strict`) |
 
 ## GitHub Actions
 
@@ -310,6 +312,208 @@ jobs:
           prs compile
           git diff --exit-code
 ```
+
+### Scheduled drift check
+
+A prompt can drift without a single line of it changing. The `prod` label still serves the same
+hash, but the model behind it answers differently, or the provider retires it. This workflow
+runs the eval suites against the prompts the `prod` label serves once a week, with live model
+calls, and runs `prs release status --check-models`. It is not the same as
+[Drift Detection](#drift-detection) above, which compares compiled files with the source.
+
+Before you copy it:
+
+1. Write suites under `.promptscript/evals/` with deterministic assertions, see
+   [`prs eval`](../reference/cli.md#prs-eval).
+2. Pin the CLI. Create `.github/prompt-drift/package.json` with
+   `{ "private": true, "dependencies": { "@promptscript/cli": "1.25.0" } }`, run
+   `npm install --package-lock-only --ignore-scripts --prefix .github/prompt-drift` and commit
+   both files. `1.25.0` is the first release that has `prs eval run --label` and
+   `prs release status --check-models`. Pin it or a newer one. The model catalog that
+   `--check-models` reads is the one inside the CLI, so upgrade the pin on purpose.
+3. Record the baseline and commit it. `--out` does not create the folder, so make it first, or the
+   command fails after the paid calls:
+
+   ```bash
+   mkdir -p .promptscript/eval-baselines
+   prs eval run --label prod --cache record --max-cost 0.5 --max-cases 50 \
+     --format json --out .promptscript/eval-baselines/prod.json
+   ```
+
+   Use the same `--max-cases` value as the workflow. It is a hard limit, not a cut: a dataset with
+   more rows fails the run. Review the baseline first. Make it again after each promote to `prod`,
+   or a prompt change shows up as drift. If the promote changes the model of a prompt, `compare`
+   matches models by ref, so the new model is only new in the candidate and is not judged as a
+   regression, and the old one shows as "Only in the baseline, not run" in the summary and as a
+   warning on stderr. Record a new baseline after such a promote.
+
+4. Create the environment: Settings > Environments > `prompt-drift`, deployment branches set to
+   the default branch only, and a secret `ANTHROPIC_API_KEY`. Use a dedicated key in its own
+   provider workspace with a low monthly limit. That limit is the real cap. `--max-cost` is the
+   CLI estimate from catalog prices, checked for the worst case before the first call (`PS6503`).
+5. Copy the file below to `.github/workflows/prompt-drift.yml` and set `--max-cost` and
+   `--max-cases` to your own values.
+
+CI checks that this block and `examples/workflows/prompt-drift.yml` stay the same.
+
+```yaml
+# Scheduled prompt drift check: runs the eval suites against the prompts the prod label
+# serves, with live model calls, and checks that their models are not retiring.
+# Copy to .github/workflows/prompt-drift.yml. Setup and the reason for every guard:
+# https://getpromptscript.dev/guides/ci/#scheduled-drift-check
+name: Prompt drift
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prompt-drift
+  cancel-in-progress: false
+
+jobs:
+  drift:
+    # Scheduled runs use the default branch; a manual run from another branch is skipped
+    if: github.event_name == 'schedule' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    # A job timeout is a cancel, not a failure, so the eval step has its own shorter limit
+    timeout-minutes: 30
+    environment: prompt-drift
+    env:
+      PROMPTSCRIPT_NO_UPDATE_CHECK: '1'
+      DO_NOT_TRACK: '1'
+      # Full path, node_modules/.bin is not on PATH so a dependency cannot shadow a tool
+      PRS: ${{ github.workspace }}/.github/prompt-drift/node_modules/.bin/prs
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Install the pinned CLI
+        id: install
+        run: npm ci --ignore-scripts --no-audit --no-fund --prefix .github/prompt-drift
+
+      - name: Check the models of labelled prompts
+        id: models
+        run: |
+          "$PRS" release status --check-models
+
+      - name: Run the suites against prod
+        id: eval
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 20
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: >-
+          "$PRS" eval run --label prod --cache off --max-cost 0.50 --max-cases 50
+          --baseline .promptscript/eval-baselines/prod.json --fail-on-regression --strict
+          --format json --out "$RUNNER_TEMP/prompt-drift.json" > /dev/null
+
+      - name: Write the job summary
+        id: summary
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: |
+          if [ -f "$RUNNER_TEMP/prompt-drift.json" ]; then
+            "$PRS" eval compare .promptscript/eval-baselines/prod.json "$RUNNER_TEMP/prompt-drift.json" --format markdown >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Keep the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: prompt-drift-report
+          path: ${{ runner.temp }}/prompt-drift.json
+          retention-days: 90
+          if-no-files-found: ignore
+
+  issue:
+    needs: drift
+    if: failure() && (github.event_name == 'schedule' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Open or update the drift issue
+        run: |
+          title='Scheduled prompt drift check failed'
+          body="The scheduled prompt drift check failed. The job summary and the report artifact of the run have the details: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          number="$(gh issue list --state open --search "in:title \"$title\"" --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)"
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi
+```
+
+What the guards do:
+
+- Triggers are `schedule` and `workflow_dispatch`. There are no pull request triggers, so code from
+  a fork never runs with the key.
+- The `if` on the job lets scheduled runs through (they always run on the default branch) and skips
+  a manual run from any other branch. The environment branch rule is the second lock.
+- The key is only in the `env` of the eval step. Install, status and summary steps never see it, and
+  the issue job is a different job without it.
+- The drift job has `contents: read` and nothing else, and checkout does not keep the token
+  (`persist-credentials: false`). Only the `issue` job has `issues: write`. It has no checkout and no
+  install, so no repository or dependency code runs next to that token.
+- `node_modules/.bin` is not put on `PATH`. The steps call the CLI by its full path in `PRS`, so a
+  dependency with a bin named `gh` or `head` cannot take the place of a tool.
+- The `issue` job needs `drift`, runs only on `failure()` and has the same default branch guard.
+- Actions are pinned by commit SHA. The CLI is installed with `npm ci --ignore-scripts` from the
+  committed lockfile. `package-manager-cache: false` on setup-node turns off the cache that v7 enables by itself when
+  `packageManager` or `devEngines` in the root `package.json` names npm, so there is no cache to
+  poison.
+- No `${{ }}` expression is inside a `run:` block. Expressions are only in `if`, `env` and `with`.
+- The job `env` turns off the update check and telemetry. The only network the CLI uses is the
+  provider call in the eval step.
+- The eval step has its own `timeout-minutes`, shorter than the one of the job. A step timeout is a
+  failure, so the issue opens. A job timeout is a cancel and `failure()` is false for it.
+- `--strict` makes a pass with warnings exit 2. Without it, a prompt that `prod` no longer serves
+  is skipped with a warning, and a suite that is only in the baseline is reported as "only in the
+  baseline, not run". Both exit 0, and the check would quietly cover less every week. With
+  `--strict` the job fails and the issue opens.
+- The eval step runs even when the models check failed. A retiring model should not hide this
+  week's drift data. If the install fails, everything stops and the issue opens.
+
+The limit: the install runs before the eval step in the same job. A step-scoped secret is not in
+the environment of the install step, but a malicious dependency could still change files the eval
+step runs later. The frozen lockfile, ignored scripts and dependency review are the controls.
+
+Results:
+
+- `prs eval run` exits 1 on a failed case, a regression, a budget stop or an error.
+  `prs release status --check-models` exits 1 on `PS5011` and on any other release error, for example
+  a missing or corrupt bundle.
+- With `--strict`, `prs eval run` exits 2 on a pass with warnings, for example a skipped suite.
+- The job summary has the comparison with the baseline: the pass rate change and the regressed and
+  fixed case ids per suite and model.
+- The JSON report is kept as an artifact for 90 days. A reason in it can quote up to 60 characters
+  of model output, and the text of a provider error up to 200. On a public repository any signed-in user can download artifacts.
+- There is no trend command. The trend is the summaries and the artifacts.
+
+When the `drift` job fails, the `issue` job opens an issue with a fixed title and a fixed body that has the run link
+only, or comments on the open one. Report text, case ids and reasons can carry model output or
+dataset text, and an issue may be public, so none of it goes there. A missing or dead key fails the
+eval step too and opens the same issue.
+
+For another provider, change the variable name in the `env` of the eval step to the one the eval
+provider config names, for example `OPENAI_API_KEY` for the built-in `openai`.
+
+PromptScript tests this recipe in its own CI on `examples/runtime-node`, with a replay cache, no key
+and `fetch` stubbed.
 
 ---
 
