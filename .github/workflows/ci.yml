@@ -184,7 +184,7 @@ jobs:
         if: matrix.node-version == '25.x'
         run: |
           # The cli spec that compares the copy only runs when cli is affected, this runs always
-          if ! diff -r -x releases packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/.promptscript examples/runtime-node/.promptscript; then
+          if ! diff -r -x releases -x evals -x eval-cache -x eval-baselines packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/.promptscript examples/runtime-node/.promptscript; then
             echo "::error::examples/runtime-node/.promptscript must stay a byte copy of the support-refund-reply fixture."
             exit 1
           fi
@@ -202,6 +202,15 @@ jobs:
             exit 1
           fi
           pnpm prs release status --cwd examples/runtime-otel
+
+      - name: Prompt drift recipe replays on the runtime example
+        if: matrix.node-version == '25.x'
+        run: |
+          # No key and no network: the recipe's commands run on a copy with fetch blocked
+          if ! pnpm exec vitest run --config packages/cli/vitest.config.mts prompt-drift-recipe; then
+            echo "::error::The drift recipe, its guide copy or the example cache is out of sync. See the spec output; regenerate the cache with UPDATE_DRIFT_EXAMPLE=true only after reviewing why."
+            exit 1
+          fi
 
       - name: Analyze CLI bundle
         if: matrix.node-version == '25.x'
