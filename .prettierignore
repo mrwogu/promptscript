@@ -33,6 +33,10 @@ CHANGELOG.md
 # CI compares both byte for byte with what the CLI and the example write.
 /examples/runtime-node/.promptscript/releases
 /examples/runtime-node/expected-output.json
+/examples/runtime-node/.promptscript/eval-cache
+/examples/runtime-node/.promptscript/eval-baselines
+/packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/.promptscript/eval-cache
+/packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/reports
 
 # Vendored third-party skill assets (HTML copied verbatim from upstream)
 **/skills/skill-creator/**/*.html

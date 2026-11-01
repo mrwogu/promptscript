@@ -1,0 +1,25 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/eval-cache-entry/v1.json",
+  "key": "938ed98dc2e0e3408dda727e6c3396557c1d9ab57c1b0ef7485a3bcb39cd24c9",
+  "request": {
+    "contentHash": "sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824",
+    "inputsHash": "sha256-43fb6d7c93f7e76a2e6325ccfbba11a1e81a551dc8888e3cc0a6934198d9dd3b",
+    "modelRef": "claude-sonnet-5-5",
+    "provider": "anthropic",
+    "apiId": "claude-sonnet-5-5",
+    "params": {
+      "maxTokens": 600
+    },
+    "sample": 0
+  },
+  "response": {
+    "text": "{\"decision\":\"deny\",\"reply\":\"Hello, thank you for contacting Acme. I am sorry, but we can only refund orders within 30 days of delivery, and your order was delivered 40 days ago. This means we cannot offer a refund for the mug. If there is a problem with the item, such as damage or a defect, please let us know and we will look at what else we can do. Kind regards, Acme Support\"}",
+    "usage": {
+      "inputTokens": 457,
+      "outputTokens": 131
+    },
+    "latencyMs": 2044,
+    "status": 200,
+    "stopReason": "end_turn"
+  }
+}

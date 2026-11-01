@@ -11,6 +11,16 @@ updates:
       default-days: 1
     open-pull-requests-limit: 10
     groups:
+      # Nx packages share one version, so they move in one PR. Listed first so it wins
+      # over dev-dependencies (Dependabot uses the first matching group).
+      nx:
+        patterns:
+          - 'nx'
+          - '@nx/*'
+        update-types:
+          - 'major'
+          - 'minor'
+          - 'patch'
       dev-dependencies:
         dependency-type: 'development'
         update-types:

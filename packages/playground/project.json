@@ -5,25 +5,13 @@
   "projectType": "application",
   "tags": ["scope:playground", "type:app"],
   "targets": {
+    "typecheck": {
+      "command": "tsc -p tsconfig.lib.json --noEmit",
+      "options": { "cwd": "{projectRoot}" }
+    },
     "build": {
-      "executor": "@nx/vite:build",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/packages/playground"
-      },
-      "dependsOn": ["^build"]
-    },
-    "serve": {
-      "executor": "@nx/vite:dev-server",
-      "options": {
-        "buildTarget": "playground:build"
-      }
-    },
-    "preview": {
-      "executor": "@nx/vite:preview-server",
-      "options": {
-        "buildTarget": "playground:build"
-      }
+      "dependsOn": ["^build"],
+      "outputs": ["{workspaceRoot}/dist/packages/playground"]
     }
   }
 }

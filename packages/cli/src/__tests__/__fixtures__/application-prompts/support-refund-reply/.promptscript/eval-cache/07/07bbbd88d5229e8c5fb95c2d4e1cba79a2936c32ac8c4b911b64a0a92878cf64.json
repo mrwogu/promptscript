@@ -1,0 +1,25 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/eval-cache-entry/v1.json",
+  "key": "07bbbd88d5229e8c5fb95c2d4e1cba79a2936c32ac8c4b911b64a0a92878cf64",
+  "request": {
+    "contentHash": "sha256-9eda77937050f385c2da0ef1242ce5bc51d7ed34b86d93b2cfd7b1ce299e5f55",
+    "inputsHash": "sha256-cdc66851ba11999d7d1aee807eea970f095c838c415550f55d5986d6eb54565e",
+    "modelRef": "claude-haiku-5-5",
+    "provider": "anthropic",
+    "apiId": "claude-haiku-5-5",
+    "params": {
+      "maxTokens": 200
+    },
+    "sample": 1
+  },
+  "response": {
+    "text": "{\"verdict\":\"pass\",\"reason\":\"The reply politely declines the refund correctly, citing the 30-day policy after delivery without promising anything the policy disallows.\"}",
+    "usage": {
+      "inputTokens": 609,
+      "outputTokens": 56
+    },
+    "latencyMs": 797,
+    "status": 200,
+    "stopReason": "end_turn"
+  }
+}

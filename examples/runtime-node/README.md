@@ -5,13 +5,16 @@ It prints the request body for the Anthropic Messages API. It makes no API call 
 
 ## Files
 
-| Path                     | What it is                                                                                |
-| :----------------------- | :---------------------------------------------------------------------------------------- |
-| `.promptscript/`         | The PromptScript source, one prompt: `acme-support/refund-reply`                          |
-| `promptscript.yaml`      | Project config with two environments, `staging` and `prod`                                |
-| `.promptscript/releases` | The release the CLI built: `manifest.json`, `pricing.json`, the bundle and one label each |
-| `index.mjs`              | Loads the `prod` label, renders the prompt with sample inputs, prints JSON                |
-| `expected-output.json`   | What `index.mjs` prints                                                                   |
+| Path                                     | What it is                                                                                         |
+| :--------------------------------------- | :------------------------------------------------------------------------------------------------- |
+| `.promptscript/`                         | The PromptScript source: `acme-support/refund-reply` and `judge-refund-reply`, a rubric for evals  |
+| `promptscript.yaml`                      | Project config with two environments, `staging` and `prod`                                         |
+| `.promptscript/releases`                 | The release the CLI built: `manifest.json`, `pricing.json`, the bundles and one label each         |
+| `.promptscript/evals`                    | One eval suite for the prompt, `refund-reply.eval.yaml`, and its four-row dataset                  |
+| `.promptscript/eval-cache`               | Recorded model answers of that suite, written by a test from a scripted mock provider, no API call |
+| `.promptscript/eval-baselines/prod.json` | The report of the suite on the `prod` label, written by the same test                              |
+| `index.mjs`                              | Loads the `prod` label, renders the prompt with sample inputs, prints JSON                         |
+| `expected-output.json`                   | What `index.mjs` prints                                                                            |
 
 The release files were made with these commands, run from the repository root as CI does:
 
@@ -37,3 +40,14 @@ CI does the same with a packed tarball of that build: it installs the tarball in
 directory without the registry, runs it and compares the output with `expected-output.json`. It
 also runs `prs release build` here and fails when the committed release files are not what the
 CLI builds.
+
+## Drift check
+
+`examples/workflows/prompt-drift.yml` is a weekly GitHub Actions workflow that runs eval suites
+against the `prod` label with live model calls. CI replays its commands on this example from the
+recorded cache, with no key and with `fetch` blocked, so the recipe and the cache stay in sync.
+When a change here makes the cache or the baseline stale, review the diff and regenerate them with:
+
+```bash
+UPDATE_DRIFT_EXAMPLE=true pnpm exec vitest run --config packages/cli/vitest.config.mts prompt-drift-recipe
+```

@@ -25,7 +25,7 @@ x-langfuse-env: &langfuse-env
 
 services:
   langfuse-worker:
-    image: docker.io/langfuse/langfuse-worker:4.63.0@sha256:ca32a8fb2a214c7b5f42dd9c540c8072e41db659cb621f317911ce695ad6bca2
+    image: docker.io/langfuse/langfuse-worker:4.72.0@sha256:aa1724b989a00f1e4ca9930709202489c73deaaf2f1116bbd3d71c77edb8fedb
     restart: always
     depends_on: &stores
       postgres:
@@ -41,7 +41,7 @@ services:
     environment: *langfuse-env
 
   langfuse-web:
-    image: docker.io/langfuse/langfuse:4.63.0@sha256:67f48d12a190e4ad585249c75ae1ce172b449de3dbbe7486b8179cd28e21408e
+    image: docker.io/langfuse/langfuse:4.72.0@sha256:c311fd9db4b69f6514fdcb1b86a2a105d5a4ed51fbf0ded033ff2722459c804a
     restart: always
     depends_on: *stores
     ports:
@@ -72,7 +72,7 @@ services:
       start_period: 1s
 
   minio:
-    image: cgr.dev/chainguard/minio:latest@sha256:3b6e40c30ecd5cea627e382ff0b82ca841f58c52294578787043ee80c8ef7c82
+    image: cgr.dev/chainguard/minio:latest@sha256:0a01100085e30fb08d2f39e39c9f5c9d83a95707f220b007d813b690cd41622d
     restart: always
     entrypoint: sh
     command: -c 'mkdir -p /data/langfuse && minio server --address ":9000" --console-address ":9001" /data'

@@ -1347,7 +1347,8 @@ With `--check-models`, the model of every verified label entry and experiment ar
 against the model catalog of the running `prs` plus `models.profiles`. A retired model, or a
 deprecated one whose retirement date is within `--retiring-within` days, fails with `PS5011`; a
 model the catalog does not know gives a warning. See
-[Check the models of the labels](../guides/releases.md#check-the-models-of-the-labels).
+[Check the models of the labels](../guides/releases.md#check-the-models-of-the-labels). For a weekly check in GitHub Actions, see
+[Scheduled drift check](../guides/ci.md#scheduled-drift-check).
 
 ```bash
 prs release status --history 5
@@ -1417,7 +1418,8 @@ Run eval suites against the prompts of the project, compare two reports and impo
 samples into a dataset. A suite is a file
 `<name>.eval.yaml`, `.eval.yml` or `.eval.json` under `.promptscript/evals/` that names a prompt, a
 dataset and assertions. The prompts come from a fresh in-memory compile of the source, with the
-`bundle` target. The settings are in [`eval`](config.md#eval).
+`bundle` target. The settings are in [`eval`](config.md#eval). For a worked example, see
+[Evaluating Prompts](../guides/evals.md).
 
 #### prs eval run
 
@@ -1545,7 +1547,8 @@ stderr gets one line `label <env>: suite <name> judged by <rubric> at <short has
 per judged suite, next to the `runs` line. The cache is keyed by
 the hash too: replay answers only from entries recorded for that hash, so a label that is behind the
 source needs `--cache record` once, or `--cache off --max-cost <usd>` for a live check of what the
-environment serves. Release gates do not read eval reports, so a report of a label run is not gate
+environment serves. For a weekly check in GitHub Actions, see
+[Scheduled drift check](../guides/ci.md#scheduled-drift-check). Release gates do not read eval reports, so a report of a label run is not gate
 evidence.
 
 | Exit code | Outcome (`outcome` in JSON)                                                                   |
@@ -1788,7 +1791,11 @@ The command runs in a Git checkout with the full history; a shallow clone, no re
 failure or a history the log cannot explain is `PS5108`. A malformed `--prompt` or `--hash` is `PS5102`. Exit code 0 means the log was
 read, 1 an error. With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/audit-log/v1.json`, with `head`, the commit the log was read
-from. `--format cef` prints one CEF line per event.
+from. `--format cef` prints one CEF line per event. Text and CEF lines show invisible and
+control characters as `\u` plus 4 to 6 hex digits, for example `\u200B` or `\uE0001`. Two
+exceptions: a line break in a CEF extension value is the CEF `\n`, and a comment in the text
+output goes on separate lines. In CEF that text is escaped like any other, so a SIEM shows
+`\u200B` and a literal backslash stays distinct. `--format json` keeps the exact values.
 
 ```bash
 prs audit log --prompt acme-support/refund-reply --env prod --hash 850dce44

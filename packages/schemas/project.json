@@ -5,6 +5,10 @@
   "tags": ["scope:schemas", "type:lib"],
   "implicitDependencies": ["@promptscript/source"],
   "targets": {
+    "typecheck": {
+      "command": "tsc -p tsconfig.json --noEmit",
+      "options": { "cwd": "{projectRoot}" }
+    },
     "build": {
       "executor": "nx:run-commands",
       "inputs": ["default", "{workspaceRoot}/schema/*.json"],

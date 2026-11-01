@@ -1,0 +1,25 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/eval-cache-entry/v1.json",
+  "key": "f4b0e2e7f53b42319c2a1d8227f657cbadf3ffcc212d065cb400056c4f763dba",
+  "request": {
+    "contentHash": "sha256-9eda77937050f385c2da0ef1242ce5bc51d7ed34b86d93b2cfd7b1ce299e5f55",
+    "inputsHash": "sha256-665fa341892837a6543af7a89ad773900befa9e72dce18a5e11bf0a07bbcad1b",
+    "modelRef": "claude-haiku-5-5",
+    "provider": "anthropic",
+    "apiId": "claude-haiku-5-5",
+    "params": {
+      "maxTokens": 200
+    },
+    "sample": 1
+  },
+  "response": {
+    "text": "{\"verdict\":\"pass\",\"reason\":\"The reply is polite, correctly declines the refund since 45 days exceeds the 30-day limit, and does not promise any refund.\"}",
+    "usage": {
+      "inputTokens": 600,
+      "outputTokens": 58
+    },
+    "latencyMs": 1375,
+    "status": 200,
+    "stopReason": "end_turn"
+  }
+}

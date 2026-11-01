@@ -1,7 +1,7 @@
 # Phoenix for the OpenTelemetry example. Pinned by digest; Dependabot updates it.
 services:
   phoenix:
-    image: docker.io/arizephoenix/phoenix:version-20.22.0@sha256:fa28e9cd96dd554a63ff9bf55ca40799d470ec75bdd7dd85a2dee97b9e8c704c
+    image: docker.io/arizephoenix/phoenix:version-20.26.1@sha256:623813cbf1bbd4811456bb4936f21666ae50a1fbf862cf59ea0e3ca824b6b114
     ports:
       - '127.0.0.1:6006:6006'
     environment:

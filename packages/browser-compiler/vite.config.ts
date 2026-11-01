@@ -2,8 +2,6 @@
 import { cpSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 
 const browserFsShim = resolve(__dirname, 'src/shims/fs.ts');
 
@@ -13,7 +11,7 @@ export const BROWSER_NODE_ALIASES = {
   'node:path': 'path-browserify',
 } as const;
 
-// nxCopyAssetsPlugin skips gitignored folders, and dist is one of them.
+// Copies package.json, README, LICENSE and the type declarations next to the bundle.
 // The declarations come from the typecheck target, which build depends on.
 const copyPackageFiles = (): Plugin => ({
   name: 'copy-package-files',
@@ -25,18 +23,22 @@ const copyPackageFiles = (): Plugin => ({
       { recursive: true, filter: (src) => !src.endsWith('.map') }
     );
     cpSync(resolve(__dirname, '../../LICENSE'), resolve(outDir, 'LICENSE'));
+    cpSync(resolve(__dirname, 'README.md'), resolve(outDir, 'README.md'));
+    cpSync(resolve(__dirname, 'package.json'), resolve(outDir, 'package.json'));
   },
 });
 
 export default defineConfig(() => ({
   root: __dirname,
   cacheDir: '../../node_modules/.vite/packages/browser-compiler',
-  plugins: [nxViteTsPaths(), nxCopyAssetsPlugin(['*.md']), copyPackageFiles()],
+  plugins: [copyPackageFiles()],
   resolve: {
+    tsconfigPaths: true,
     // Keep prefixed imports browser-safe after the Deno portability sweep.
     alias: BROWSER_NODE_ALIASES,
   },
   build: {
+    outDir: '../../dist/packages/browser-compiler',
     lib: {
       entry: 'src/index.ts',
       name: 'BrowserCompiler',
