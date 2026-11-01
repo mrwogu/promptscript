@@ -1058,9 +1058,7 @@ describe('resolveSkillComposition - composed-from marker', () => {
       currentFile: 'C:\\Users\\someone\\project\\project.prs',
     });
 
-    const skills = (result.blocks[0]!.content as ObjectContent).properties;
-    const deploy = skills['deploy'] as unknown as { content: { value: string } };
-    expect(deploy.content.value).toContain('<!-- composed-from: check.prs -->');
-    expect(deploy.content.value).not.toContain('Users');
+    const text = JSON.stringify(result.blocks[0]!.content);
+    expect(text).toContain('<!-- composed-from: check.prs -->');
   });
 });

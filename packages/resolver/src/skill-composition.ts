@@ -202,8 +202,7 @@ async function resolveSkillsBlockComposition(
       updatedProperties[skillName] = composeIntoSkill(
         skillValue as Record<string, Value>,
         phases,
-        options.currentFile,
-        options.projectRoot
+        options.currentFile
       );
     } else {
       updatedProperties[skillName] = skillValue;
@@ -230,6 +229,8 @@ interface ResolvedPhase {
   name: string;
   /** Absolute source path */
   source: string;
+  /** Portable label for the `composed-from` marker. */
+  label: string;
   /** Source location of the parent @use declaration */
   loc: SourceLocation;
   /** Source location of the composed skill definition */
@@ -345,6 +346,7 @@ async function resolveInlineUse(
     phaseNumber,
     name: phaseName,
     source: absPath,
+    label: getSkillPhaseSourceLabel(absPath, options.projectRoot),
     loc: inlineUse.loc,
     ...(skillDef.definitionLoc ? { definitionLoc: skillDef.definitionLoc } : {}),
     alias: inlineUse.alias,
@@ -522,8 +524,7 @@ function extractBlockText(block: Block): string | null {
 function composeIntoSkill(
   skill: Record<string, Value>,
   phases: ResolvedPhase[],
-  currentFile: string,
-  projectRoot?: string
+  currentFile: string
 ): Record<string, Value> {
   const result = deepClone(skill) as Record<string, Value>;
 
@@ -542,10 +543,7 @@ function composeIntoSkill(
 
   for (const phase of phases) {
     // Build phase section
-    const section = buildSkillPhaseSection(
-      phase,
-      getSkillPhaseSourceLabel(phase.source, projectRoot)
-    );
+    const section = buildSkillPhaseSection(phase, phase.label);
     phaseSections.push(section);
 
     // Union allowedTools
