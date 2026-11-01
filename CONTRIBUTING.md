@@ -12,6 +12,9 @@ First off, thank you for considering contributing to PromptScript! 🎉
 - [Testing](#testing)
 - [Documentation](#documentation)
 - [Updating the Model Catalog](#updating-the-model-catalog)
+- [Publishing (Maintainers Only)](#publishing-maintainers-only)
+  - [Library Packages](#library-packages)
+  - [Deprecation Policy](#deprecation-policy)
 
 ## Code of Conduct
 
@@ -226,7 +229,7 @@ export function parsePath(path: string): ParsedPath {
 
 ### API Reports
 
-Packages with an `api-extractor.json` have a committed report in `api/<pkg>.api.md`. Today that is `core`.
+Packages with an `api-extractor.json` have a committed report in `api/<pkg>.api.md`. That is `core`, `parser`, `resolver`, `validator`, `formatters`, `compiler` and `browser-compiler`.
 
 - `pnpm api:check` builds the package and fails if the exported API changed and the report was not updated.
 - `pnpm api:update` rewrites the report. Review the diff, it is the list of exported types and functions.
@@ -235,7 +238,7 @@ Packages with an `api-extractor.json` have a committed report in `api/<pkg>.api.
 
 ### Package Checks
 
-`pnpm package:check` packs `core`, `parser`, `resolver`, `validator`, `formatters`, `compiler` and `browser-compiler` the way a registry would ship them. Nothing is published and the packages stay private.
+`pnpm package:check` first checks the release wiring of the library packages (see [Library Packages](#library-packages)), then packs `core`, `parser`, `resolver`, `validator`, `formatters`, `compiler` and `browser-compiler` the way a registry would ship them. It also packs `schemas`, runs publint on it and imports every exported JSON file. Nothing is published and the packages stay private.
 
 - It builds the packages, packs them from a copy in a temp folder and runs publint (strict) and are-the-types-wrong (`--profile esm-only`) on each tarball.
 - It installs all tarballs into a temp project, checks the packed `package.json` files (exports, `files`, `engines`, `license`, the MIT `LICENSE` file, no test files and no declaration maps), imports every package in plain Node and compiles one tiny file with `compiler` and with `browser-compiler`.
@@ -431,6 +434,36 @@ pnpm pack --dry-run
 - **Prereleases** (1.0.0-alpha.0) → published as `next`
 
 Install prerelease: `npm install @promptscript/cli@next`
+
+### Library Packages
+
+Eight packages are wired for a future npm publish: `core`, `parser`, `resolver`, `validator`, `formatters`, `compiler`, `browser-compiler` and `schemas`. They are all `"private": true` and nothing is on npm yet.
+
+- **Lockstep with the CLI.** They share the CLI version. One tag, one release-please PR. The manifests are listed in `extra-files` of `release-please-config.json`, so release-please bumps them with the CLI. They are also in `release.projects` in `nx.json`.
+- **Breaking library API means a CLI major.** There is no separate version for a library.
+- **Node.** `engines.node` is `>=22` in every library manifest.
+- **Internal dependencies.** In the repo they are `workspace:*`. `pnpm library:prepare-publish` rewrites them to the exact version in `dist/packages/<lib>/package.json`. `pnpm publish` would rewrite `workspace:*` too, but the prepare step pins explicitly and checks the wiring first.
+- **Checks.** `pnpm package:check` fails when a version, an `extra-files` entry, an `nx.json` project, the `nx-release-publish` target, `private` or `engines` is out of line. The CI step "Publish dry run" builds the libraries, runs `library:prepare-publish` and `nx release publish --dry-run`. Private libraries get no `nx-release-publish` target, so only the CLI runs here. `package:check` covers the libraries.
+
+The list of libraries and the `LIBRARIES_PUBLISHED` flag live in `scripts/library-packages.mts`.
+
+Checklist for the PR that really publishes them:
+
+1. Remove `"private": true` from the 8 manifests.
+2. Set `LIBRARIES_PUBLISHED` to `true` in `scripts/library-packages.mts`.
+3. Add the `pnpm library:prepare-publish` step to `.github/workflows/publish.yml`, after the build and before `nx release publish`.
+4. Rewrite the 8 package READMEs.
+5. Add `docs/guides/library-usage.md`.
+6. Answer issue #658.
+
+### Deprecation Policy
+
+- Mark the old API with a TSDoc `@deprecated` tag that names the replacement.
+- Keep it for at least one minor release and at least 90 days. Both must pass before removal.
+- Remove it only in a major release.
+- Mention the deprecation in the changelog.
+
+JSON schemas follow their own rules, see [Schema versioning](docs/reference/json-output.md#schema-versioning).
 
 ## Questions?
 

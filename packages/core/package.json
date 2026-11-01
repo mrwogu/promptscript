@@ -1,6 +1,6 @@
 {
   "name": "@promptscript/core",
-  "version": "0.0.1",
+  "version": "1.26.0",
   "description": "Core types, errors and utilities for PromptScript",
   "keywords": [
     "cli",
@@ -43,6 +43,7 @@
     "@swc/helpers": "~0.5.23"
   },
   "publishConfig": {
+    "access": "public",
     "main": "./src/index.js",
     "exports": {
       ".": {

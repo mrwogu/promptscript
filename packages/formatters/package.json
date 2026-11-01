@@ -1,6 +1,6 @@
 {
   "name": "@promptscript/formatters",
-  "version": "0.0.1",
+  "version": "1.26.0",
   "description": "Output formatters for PromptScript (GitHub Copilot, Claude, Cursor, etc.)",
   "keywords": [
     "cli",
@@ -41,9 +41,10 @@
   "types": "./src/index.d.ts",
   "dependencies": {
     "@swc/helpers": "~0.5.23",
-    "@promptscript/core": "workspace:^"
+    "@promptscript/core": "workspace:*"
   },
   "publishConfig": {
+    "access": "public",
     "main": "./src/index.js",
     "exports": {
       ".": {
