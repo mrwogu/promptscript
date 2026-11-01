@@ -156,6 +156,14 @@ jobs:
             exit 1
           fi
 
+      - name: Package Check
+        if: matrix.node-version == '22.x'
+        run: |
+          if ! pnpm package:check; then
+            echo "::error::Package check failed, see the log above. Run 'pnpm package:check' locally."
+            exit 1
+          fi
+
       - name: Runtime example against the packed runtime
         if: matrix.node-version == '25.x'
         run: |

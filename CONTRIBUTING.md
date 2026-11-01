@@ -209,6 +209,16 @@ Packages with an `api-extractor.json` have a committed report in `api/<pkg>.api.
 - A type used by an exported declaration must be exported too. A missing export fails the check.
 - Do not edit the report by hand and do not format it.
 
+### Package Checks
+
+`pnpm package:check` packs `core`, `parser`, `resolver`, `validator`, `formatters`, `compiler` and `browser-compiler` the way a registry would ship them. Nothing is published and the packages stay private.
+
+- It builds the packages, packs them from a copy in a temp folder and runs publint (strict) and are-the-types-wrong (`--profile esm-only`) on each tarball.
+- It installs all tarballs into a temp project, checks the packed `package.json` files (exports, `files`, `engines`, `license`, the MIT `LICENSE` file, no test files and no declaration maps), imports every package in plain Node and compiles one tiny file with `compiler` and with `browser-compiler`.
+- It bundles `browser-compiler` with esbuild for the browser platform.
+- Run it on Node.js 22 or newer, the `engines` minimum of these packages. CI runs it on the Node 22 leg. The install needs network for the third-party dependencies.
+- In these `package.json` files the top-level `main` points at the TypeScript source, because workspace tools such as the docs app resolve the packages that way. What ships (`main` and `exports`, and `types` for `browser-compiler`) is in `publishConfig`, which `pnpm pack` applies. A plain `npm pack` of a dist folder does not apply it.
+
 ## Testing
 
 ### Running Tests

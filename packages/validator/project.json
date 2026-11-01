@@ -19,7 +19,7 @@
         "outputPath": "dist/packages/validator",
         "main": "packages/validator/src/index.ts",
         "tsConfig": "packages/validator/tsconfig.lib.json",
-        "assets": ["packages/validator/*.md"]
+        "assets": ["packages/validator/*.md", { "input": ".", "glob": "LICENSE", "output": "." }]
       }
     },
     "nx-release-publish": {
