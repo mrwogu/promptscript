@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,6 +8,7 @@ import { defaultFileSystem, defaultPrompts } from '../services.js';
 import { parse as parseYaml } from 'yaml';
 import type { PromptBundleOutput } from '@promptscript/core';
 import { evaluateAssertions, type DeterministicAssertion } from '@promptscript/eval';
+import { useOfflineEval } from './offline-eval-hooks.js';
 import { evalRunCommand, type EvalCommandServices } from '../commands/eval/run.js';
 
 const FIXTURE = join(
@@ -36,9 +37,7 @@ interface EntryFile {
 
 const roots: string[] = [];
 
-const noNetwork = vi.fn(() => {
-  throw new Error('no network in the eval example check');
-});
+useOfflineEval(roots, 'eval example');
 
 function services(): EvalCommandServices {
   return { fs: defaultFileSystem, prompts: defaultPrompts, cwd: process.cwd(), env: {} };
@@ -95,20 +94,6 @@ function expectSame(path: string, actual: string): void {
     readFileSync(path, 'utf8')
   );
 }
-
-beforeEach(() => {
-  vi.stubGlobal('fetch', noNetwork);
-  noNetwork.mockClear();
-  vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
-  vi.spyOn(console, 'error').mockImplementation(() => undefined);
-});
-
-afterEach(async () => {
-  vi.restoreAllMocks();
-  vi.unstubAllGlobals();
-  process.exitCode = undefined;
-  await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
-});
 
 describe('the evals guide', () => {
   const read = (path: string): string => readFileSync(join(FIXTURE, '.promptscript', path), 'utf8');
