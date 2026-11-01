@@ -1015,7 +1015,9 @@ value, so take prompt ids and other values from the JSON export.
   reads from `git log`, which fails with `PS5108`.
 - A shallow clone, a missing `git`, a timeout or a blob a partial clone would fetch fails with
   `PS5108`. In CI check out the full history, for example `actions/checkout` with
-  `fetch-depth: 0`.
+  `fetch-depth: 0`. `PROMPTSCRIPT_GIT_TIMEOUT` applies to each Git call, and the log reads files
+  with a few calls that each take up to 256 files, so a very slow disk or network mount may need
+  a higher value.
 - Git runs with replace refs and grafts off, so a `git replace` ref or a `.git/info/grafts` file
   cannot change what the log shows.
 - The output holds email addresses. Treat exports like other personal data.
