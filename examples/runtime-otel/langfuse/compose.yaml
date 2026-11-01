@@ -25,7 +25,7 @@ x-langfuse-env: &langfuse-env
 
 services:
   langfuse-worker:
-    image: docker.io/langfuse/langfuse-worker:4.63.0@sha256:ca32a8fb2a214c7b5f42dd9c540c8072e41db659cb621f317911ce695ad6bca2
+    image: docker.io/langfuse/langfuse-worker:4.71.0@sha256:68c9020b8352d49ad80d768981b21bd465edfcb7de602e76d9b13949bfa85e0e
     restart: always
     depends_on: &stores
       postgres:
@@ -41,7 +41,7 @@ services:
     environment: *langfuse-env
 
   langfuse-web:
-    image: docker.io/langfuse/langfuse:4.63.0@sha256:67f48d12a190e4ad585249c75ae1ce172b449de3dbbe7486b8179cd28e21408e
+    image: docker.io/langfuse/langfuse:4.71.0@sha256:480b07885c0dc2ad8f542826d66986050ce58c630a1a7830eea15c373ffce5bd
     restart: always
     depends_on: *stores
     ports:
