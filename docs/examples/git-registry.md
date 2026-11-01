@@ -276,7 +276,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
@@ -619,7 +619,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Install PromptScript
         run: npm install -g @promptscript/cli

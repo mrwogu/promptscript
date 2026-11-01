@@ -427,7 +427,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
       - run: npm install -g @promptscript/cli@1.19.0
       - run: prs validate --strict
       - run: prs compile
