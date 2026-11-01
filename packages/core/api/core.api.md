@@ -869,6 +869,7 @@ export interface EvalComparisonV1 {
     entries: EvalComparisonEntryV1[];
     regression: boolean;
     tolerance: number;
+    version?: 1;
 }
 
 // @public
@@ -1146,6 +1147,7 @@ export interface EvalReportV1 {
     passed: boolean;
     suites: EvalSuiteResultV1[];
     usage: EvalUsageV1;
+    version?: 1;
 }
 
 // @public
@@ -4834,16 +4836,55 @@ export function usesSequentialOperations(ast: Program): boolean;
 export function validateAgentFieldMatrix(groups?: AgentFieldMatrix, nativeTargets?: readonly KnownTarget[]): string[];
 
 // @public
+export interface ValidateErrorV1 {
+    code?: string;
+    location?: ValidateLocationV1;
+    message: string;
+}
+
+// @public
 export function validateGovernanceFields(fields: Record<string, Value>): string[];
 
 // @public
+export interface ValidateLocationV1 {
+    column?: number;
+    file?: string;
+    line?: number;
+    offset?: number;
+}
+
+// @public
 export function validateModelCatalog(profiles?: readonly ModelProfile[]): string[];
+
+// @public
+export interface ValidateReportV1 {
+    $schema: 'https://getpromptscript.dev/schema/validate-report/v1.json';
+    errors: ValidateErrorV1[];
+    success: boolean;
+    summary: ValidateSummaryV1;
+    version: 1;
+    warnings: ValidateWarningV1[];
+}
+
+// @public
+export interface ValidateSummaryV1 {
+    errorCount: number;
+    warningCount: number;
+}
 
 // @public
 export function validateTargetCapabilities(capabilities: Readonly<Partial<Record<KnownTarget, TargetCapability>>>): string[];
 
 // @public
 export function validateTargetDefinitionConsistency(definitions?: Readonly<Record<KnownTarget, TargetDefinition>>): string[];
+
+// @public
+export interface ValidateWarningV1 {
+    location?: ValidateLocationV1;
+    message: string;
+    ruleId: string;
+    suggestion?: string;
+}
 
 // @public
 export class ValidationError extends PSError {

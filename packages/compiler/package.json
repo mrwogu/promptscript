@@ -26,6 +26,16 @@
     "url": "https://github.com/mrwogu/promptscript.git",
     "directory": "packages/compiler"
   },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "src",
+    "!src/**/__tests__/**",
+    "!src/**/*.d.ts.map",
+    "README.md"
+  ],
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
@@ -37,5 +47,15 @@
     "@promptscript/validator": "workspace:^",
     "chokidar": "^6.0.0",
     "minimatch": "^10.2.6"
+  },
+  "publishConfig": {
+    "main": "./src/index.js",
+    "exports": {
+      ".": {
+        "types": "./src/index.d.ts",
+        "default": "./src/index.js"
+      },
+      "./package.json": "./package.json"
+    }
   }
 }

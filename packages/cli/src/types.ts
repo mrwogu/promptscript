@@ -102,8 +102,8 @@ export interface ValidateOptions {
   files?: string[];
   /** Treat warnings as errors */
   strict?: boolean;
-  /** Output format (text, json) */
-  format?: 'text' | 'json';
+  /** Output format: text or json, anything else is rejected */
+  format?: string;
   /** Auto-fix syntax version issues */
   fix?: boolean;
   /** Skip policy evaluation */

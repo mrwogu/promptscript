@@ -19,7 +19,7 @@
         "outputPath": "dist/packages/formatters",
         "main": "packages/formatters/src/index.ts",
         "tsConfig": "packages/formatters/tsconfig.lib.json",
-        "assets": ["packages/formatters/*.md"]
+        "assets": ["packages/formatters/*.md", { "input": ".", "glob": "LICENSE", "output": "." }]
       }
     },
     "nx-release-publish": {

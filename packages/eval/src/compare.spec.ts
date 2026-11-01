@@ -177,10 +177,23 @@ describe('readReport', () => {
     expect(readReport(GOOD, 'base.json').suites[0]?.name).toBe('refund');
   });
 
+  it('accepts a report with version 1 and one without version', () => {
+    const parsed = JSON.parse(GOOD);
+
+    expect(readReport(JSON.stringify({ ...parsed, version: 1 }), 'base.json').suites).toHaveLength(
+      1
+    );
+    expect(
+      readReport(JSON.stringify({ ...parsed, version: undefined }), 'base.json').suites
+    ).toHaveLength(1);
+  });
+
   it.each([
     ['not JSON', '{nope'],
     ['not an object', '[]'],
     ['a wrong schema url', JSON.stringify({ ...JSON.parse(GOOD), $schema: 'https://x/y.json' })],
+    ['version 2', JSON.stringify({ ...JSON.parse(GOOD), version: 2 })],
+    ['a version that is a string', JSON.stringify({ ...JSON.parse(GOOD), version: '1' })],
     ['no suites', JSON.stringify({ ...JSON.parse(GOOD), suites: undefined })],
     [
       'a pass rate out of range',

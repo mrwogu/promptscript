@@ -107,6 +107,9 @@ export function readReport(text: string, label: string): EvalReportV1 {
   }
   if (!isRecord(parsed)) throw invalid(label, 'the document is not an object');
   if (parsed['$schema'] !== REPORT_SCHEMA) throw invalid(label, `$schema is not ${REPORT_SCHEMA}`);
+  if (parsed['version'] !== undefined && parsed['version'] !== 1) {
+    throw invalid(label, 'version is not 1');
+  }
   const suites = parsed['suites'];
   if (!Array.isArray(suites)) throw invalid(label, 'suites must be a list');
   const names = new Set<string>();

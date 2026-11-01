@@ -6,6 +6,7 @@ import {
   type SectionContract,
 } from '@promptscript/core';
 
+/** @internal */
 export interface SectionTitleOptions {
   readonly formatterTitles?: Readonly<Record<string, string | undefined>>;
   readonly defaultTitle?: string;
@@ -38,6 +39,7 @@ function sourceTitle(ast: Program, section: SectionContract): string | undefined
   return undefined;
 }
 
+/** @internal */
 export function resolveSourceSectionTitle(
   ast: Program,
   sectionIdOrAlias: string
@@ -60,6 +62,8 @@ function configuredTitle(
 
 /**
  * Resolve a generated section title without changing its output protocol.
+ *
+ * @internal
  */
 export function resolveSectionTitle(
   ast: Program,

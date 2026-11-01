@@ -357,7 +357,7 @@ describe('cli', () => {
     it('should guard detached telemetry flush and finish command telemetry', async () => {
       const preAction = mockHook.mock.calls.find((call) => call[0] === 'preAction')?.[1] as (
         thisCommand: { opts: () => Record<string, unknown> },
-        actionCommand: { name: () => string }
+        actionCommand: { name: () => string; opts: () => Record<string, unknown> }
       ) => Promise<void>;
       const postAction = mockHook.mock.calls.find((call) => call[0] === 'postAction')?.[1] as (
         thisCommand: unknown,
@@ -365,11 +365,14 @@ describe('cli', () => {
       ) => void;
 
       process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'] = '1';
-      await preAction({ opts: () => ({}) }, { name: () => '__telemetry-flush' });
+      await preAction({ opts: () => ({}) }, { name: () => '__telemetry-flush', opts: () => ({}) });
       expect(mockPrepareCliTelemetry).not.toHaveBeenCalled();
 
       delete process.env['PROMPTSCRIPT_TELEMETRY_FLUSH'];
-      await preAction({ opts: () => ({ quiet: true }) }, { name: () => 'telemetry' });
+      await preAction(
+        { opts: () => ({ quiet: true }) },
+        { name: () => 'telemetry', opts: () => ({}) }
+      );
       expect(mockPrepareCliTelemetry).toHaveBeenCalledWith(
         expect.objectContaining({ name: expect.any(Function) }),
         expect.stringMatching(/^\d+\.\d+\.\d+/)

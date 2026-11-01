@@ -57,7 +57,11 @@ interface LoadedFormatter {
   config?: TargetConfig;
 }
 
-/** Maximum number of project-scoped resolvers retained by a long-lived compiler. */
+/**
+ * Maximum number of project-scoped resolvers retained by a long-lived compiler.
+ *
+ * @internal
+ */
 export const MAX_ENTRY_RESOLVERS = 50;
 /** Maximum number of resolved dependency sets retained by a compiler. */
 export const MAX_RESOLVED_DEPENDENCIES = 50;

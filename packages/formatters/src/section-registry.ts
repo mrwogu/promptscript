@@ -8,6 +8,8 @@ export { SECTION_REGISTRY } from '@promptscript/core';
 
 /**
  * Section metadata for documentation and validation.
+ *
+ * @internal
  */
 export interface SectionInfo {
   /** Section identifier (kebab-case) */
@@ -25,6 +27,8 @@ export interface SectionInfo {
 /**
  * All known sections that formatters should support.
  * This is the source of truth for section parity.
+ *
+ * @internal
  */
 export const KNOWN_SECTIONS: SectionInfo[] = SECTION_REGISTRY.map((section) => ({
   id: section.id,
@@ -36,6 +40,8 @@ export const KNOWN_SECTIONS: SectionInfo[] = SECTION_REGISTRY.map((section) => (
 
 /**
  * Get section IDs that a formatter should generate given available source blocks.
+ *
+ * @internal
  */
 export function getExpectedSections(availableBlocks: string[]): string[] {
   return KNOWN_SECTIONS.filter((section) =>
@@ -46,6 +52,8 @@ export function getExpectedSections(availableBlocks: string[]): string[] {
 /**
  * Extract section headers from formatted output.
  * Works with both markdown (## section) and XML (<section>) formats.
+ *
+ * @internal
  */
 export function extractSectionsFromOutput(content: string): string[] {
   const sections: string[] = [];
@@ -69,6 +77,8 @@ export function extractSectionsFromOutput(content: string): string[] {
 
 /**
  * Find sections that are missing from output but expected.
+ *
+ * @internal
  */
 export function findMissingSections(
   outputSections: string[],
@@ -81,6 +91,8 @@ export function findMissingSections(
 /**
  * Normalize section names for comparison.
  * Handles variations like "donts" vs "restrictions", "code-style" vs "code-standards".
+ *
+ * @internal
  */
 export function normalizeSectionName(name: string): string {
   const aliases: Record<string, string> = {

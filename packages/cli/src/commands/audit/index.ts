@@ -9,7 +9,7 @@ export function registerAuditCommands(program: Command): void {
   audit
     .command('log')
     .description(
-      'List prompt changes, approvals, promotions, rollbacks and config changes, newest first'
+      'List prompt changes, approvals, promotions, rollbacks, experiments and config changes, newest first'
     )
     .option('--prompt <id>', 'Only events of this prompt id')
     .option('--env <environment>', 'Only events of this environment')

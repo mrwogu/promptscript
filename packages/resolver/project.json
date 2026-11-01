@@ -19,7 +19,7 @@
         "outputPath": "dist/packages/resolver",
         "main": "packages/resolver/src/index.ts",
         "tsConfig": "packages/resolver/tsconfig.lib.json",
-        "assets": ["packages/resolver/*.md"]
+        "assets": ["packages/resolver/*.md", { "input": ".", "glob": "LICENSE", "output": "." }]
       }
     },
     "nx-release-publish": {

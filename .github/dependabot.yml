@@ -6,6 +6,9 @@ updates:
     schedule:
       interval: 'weekly'
       day: 'monday'
+    # Same release age as the local pnpm policy and the package check install.
+    cooldown:
+      default-days: 1
     open-pull-requests-limit: 10
     groups:
       dev-dependencies:
@@ -40,6 +43,25 @@ updates:
     directory: '/examples/runtime-otel/phoenix'
     schedule:
       interval: 'monthly'
+    commit-message:
+      prefix: 'chore(ci)'
+    labels:
+      - 'ci'
+      - 'dependencies'
+
+  # Langfuse and the stores it runs on, for the OpenTelemetry example (pinned by digest).
+  # One group, so the web and worker images move together. Major versions stay manual.
+  - package-ecosystem: 'docker-compose'
+    directory: '/examples/runtime-otel/langfuse'
+    schedule:
+      interval: 'monthly'
+    groups:
+      langfuse:
+        patterns:
+          - '*'
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
     commit-message:
       prefix: 'chore(ci)'
     labels:

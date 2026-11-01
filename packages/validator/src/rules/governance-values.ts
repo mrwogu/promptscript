@@ -34,6 +34,8 @@ function isEmail(value: string): boolean {
 /**
  * A user (`@jane`), a team (`@acme/legal`, GitLab subgroups allowed) or an email
  * address of at most 254 characters, the owner forms CODEOWNERS takes.
+ *
+ * @internal
  */
 export function isGitHostIdentity(value: string): boolean {
   return (

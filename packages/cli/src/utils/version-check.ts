@@ -1,7 +1,8 @@
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { ConsoleOutput, isQuiet, isVerbose } from '../output/console.js';
+import chalk from 'chalk';
+import { isQuiet, isVerbose } from '../output/console.js';
 
 const NPM_REGISTRY_URL = 'https://registry.npmjs.org/@promptscript/cli/latest';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -140,6 +141,11 @@ function isCacheValid(cache: VersionCache): boolean {
   }
 }
 
+// stderr on purpose: stdout may carry a JSON, markdown or junit document.
+function reportCheckFailure(reason: string): void {
+  console.error(chalk.gray(`  [verbose] Could not check for updates: ${reason}`));
+}
+
 /**
  * Fetch the latest version from npm registry.
  * Returns null on any network error.
@@ -158,7 +164,7 @@ export async function fetchLatestVersion(): Promise<string | null> {
 
     if (!response.ok) {
       if (isVerbose()) {
-        ConsoleOutput.verbose(`Could not check for updates: HTTP ${response.status}`);
+        reportCheckFailure(`HTTP ${response.status}`);
       }
       return null;
     }
@@ -178,7 +184,7 @@ export async function fetchLatestVersion(): Promise<string | null> {
     if (isVerbose()) {
       const code = (error as NodeJS.ErrnoException).code;
       const message = error instanceof Error ? error.message : 'Unknown error';
-      ConsoleOutput.verbose(`Could not check for updates: ${code ?? message}`);
+      reportCheckFailure(code ?? message);
     }
     return null;
   } finally {

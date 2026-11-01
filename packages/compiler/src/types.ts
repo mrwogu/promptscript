@@ -117,6 +117,8 @@ export interface CanonicalFormatter extends Formatter {
 
 /**
  * Formatter class constructor type.
+ *
+ * @internal
  */
 export type FormatterConstructor = new () => Formatter;
 

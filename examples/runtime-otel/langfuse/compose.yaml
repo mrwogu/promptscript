@@ -1,0 +1,114 @@
+# Langfuse for the OpenTelemetry example, with the stores it runs on. Every image is pinned by
+# digest; Dependabot updates them. Keys and passwords are throwaway values: nothing is kept in a
+# volume and only 127.0.0.1 reaches Langfuse.
+x-langfuse-env: &langfuse-env
+  NEXTAUTH_URL: http://localhost:3000
+  DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
+  SALT: example-salt
+  # Quoted, YAML would read it as the number 0
+  ENCRYPTION_KEY: '0000000000000000000000000000000000000000000000000000000000000000'
+  TELEMETRY_ENABLED: 'false'
+  CLICKHOUSE_MIGRATION_URL: clickhouse://clickhouse:9000
+  CLICKHOUSE_URL: http://clickhouse:8123
+  CLICKHOUSE_USER: clickhouse
+  CLICKHOUSE_PASSWORD: clickhouse
+  CLICKHOUSE_CLUSTER_ENABLED: 'false'
+  LANGFUSE_S3_EVENT_UPLOAD_BUCKET: langfuse
+  LANGFUSE_S3_EVENT_UPLOAD_REGION: auto
+  LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: minio
+  LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: miniosecret
+  LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: http://minio:9000
+  LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: 'true'
+  REDIS_HOST: redis
+  REDIS_PORT: '6379'
+  REDIS_AUTH: myredissecret
+
+services:
+  langfuse-worker:
+    image: docker.io/langfuse/langfuse-worker:4.63.0@sha256:ca32a8fb2a214c7b5f42dd9c540c8072e41db659cb621f317911ce695ad6bca2
+    restart: always
+    depends_on: &stores
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - '127.0.0.1:3030:3030'
+    environment: *langfuse-env
+
+  langfuse-web:
+    image: docker.io/langfuse/langfuse:4.63.0@sha256:67f48d12a190e4ad585249c75ae1ce172b449de3dbbe7486b8179cd28e21408e
+    restart: always
+    depends_on: *stores
+    ports:
+      - '127.0.0.1:3000:3000'
+    environment:
+      <<: *langfuse-env
+      NEXTAUTH_SECRET: example-secret
+      LANGFUSE_INIT_ORG_ID: example-org
+      LANGFUSE_INIT_PROJECT_ID: example-project
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: pk-lf-promptscript-example
+      LANGFUSE_INIT_PROJECT_SECRET_KEY: sk-lf-promptscript-example
+      LANGFUSE_INIT_USER_EMAIL: admin@example.com
+      LANGFUSE_INIT_USER_PASSWORD: example-password
+
+  clickhouse:
+    image: docker.io/clickhouse/clickhouse-server:25.12.11.4@sha256:8a790dd3468db22b1d4e7b18a176f378ff5ff6053b9c48dd4ea1fa71a24c5ba6
+    restart: always
+    user: '101:101'
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: clickhouse
+      CLICKHOUSE_PASSWORD: clickhouse
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 1s
+
+  minio:
+    image: cgr.dev/chainguard/minio:latest@sha256:3b6e40c30ecd5cea627e382ff0b82ca841f58c52294578787043ee80c8ef7c82
+    restart: always
+    entrypoint: sh
+    command: -c 'mkdir -p /data/langfuse && minio server --address ":9000" --console-address ":9001" /data'
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: miniosecret
+    healthcheck:
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 1s
+      timeout: 5s
+      retries: 5
+      start_period: 1s
+
+  redis:
+    image: docker.io/redis:7.4.12@sha256:b6b6e3dc0c0952737748e55d5d885272840c7e42ba41ab1d5489f693419882f5
+    restart: always
+    command: >
+      --requirepass myredissecret
+      --maxmemory-policy noeviction
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 3s
+      timeout: 10s
+      retries: 10
+
+  postgres:
+    image: docker.io/postgres:17.11@sha256:31ba9c94a03ada9988f2bb493a22a75eef3a185884533e5cdbcd498ea835b08f
+    restart: always
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      TZ: UTC
+      PGTZ: UTC

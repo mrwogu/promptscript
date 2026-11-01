@@ -1,6 +1,6 @@
 {
   "name": "@promptscript/cli",
-  "version": "1.24.0",
+  "version": "1.25.0",
   "description": "CLI for PromptScript - standardize AI instructions across GitHub Copilot, Claude, Cursor and other AI tools",
   "keywords": [
     "cli",
@@ -36,7 +36,7 @@
     "promptscript": "./bin/prs.js"
   },
   "dependencies": {
-    "@inquirer/prompts": "^8.7.4",
+    "@inquirer/prompts": "^8.7.5",
     "@promptscript/browser-compiler": "workspace:^",
     "@promptscript/compiler": "workspace:^",
     "@promptscript/eval": "workspace:^",

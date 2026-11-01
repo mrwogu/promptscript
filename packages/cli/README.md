@@ -333,7 +333,7 @@ code owner review of its role directory. See
 prompt files go to their owners, approval directories to their role teams, and the config and
 release files to the admins. See [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/).
 
-`prs audit log` reads who changed, approved, promoted or rolled back a prompt from the Git history,
+`prs audit log` reads who changed, approved, promoted, rolled back or split a prompt from the Git history,
 as text, JSON or CEF for a SIEM. See [Audit log](https://getpromptscript.dev/guides/releases/#audit-log).
 
 Applications read the released bundles with `@promptscript/runtime`, which checks the content
@@ -495,7 +495,9 @@ prs diff --format json
 change kind, deterministic content hashes, warnings, and unsupported capability entries. Content is
 omitted by default; add `--include-content` when automation needs canonical output text. Reports
 with changes exit 0; compilation and report errors emit `success: false` and exit 1. See the
-[diff schema](https://getpromptscript.dev/schema/diff/v1.json). Diff uses the complete configured
+[diff schema](https://getpromptscript.dev/schema/diff/v1.json). The JSON output of `prs diff`,
+`prs release`, `prs approve`, `prs audit log`, `prs eval run`, `prs eval compare` and `prs validate` is stable; the rules are on the
+[JSON Output](https://getpromptscript.dev/reference/json-output/) page. Diff uses the complete configured
 target when `--target` selects one, never writes generated files or registry cache metadata, and
 requires Git registries to already exist in vendor mode or a valid local cache.
 
@@ -533,6 +535,9 @@ $ prs validate --strict
 the build, not the agent. See the
 [security guide](https://getpromptscript.dev/guides/security/).
 
+`prs validate --format json` prints one versioned report, see
+[JSON Output](https://getpromptscript.dev/reference/json-output/).
+
 ## CLI Commands
 
 | Command                                             | Purpose                                                   |
@@ -557,7 +562,7 @@ the build, not the agent. See the
 | `prs release <build\|promote\|rollback\|status>`    | Release prompt bundles through environments               |
 | `prs approve <id>@<hash>` / `prs approve --list`    | Record or list approvals of one prompt version            |
 | `prs governance codeowners`                         | Write CODEOWNERS lines from the governance config         |
-| `prs audit log`                                     | List approvals, promotions and prompt changes from Git    |
+| `prs audit log`                                     | List approvals, promotions, experiments and changes       |
 | `prs lock` / `prs update`                           | Pin or refresh remote dependencies                        |
 | `prs vendor sync` / `prs vendor check`              | Prepare and verify offline dependencies                   |
 | `prs resolve <import>`                              | Explain import resolution                                 |
@@ -626,6 +631,7 @@ for syntax highlighting, bracket matching, code folding, and file icons.
 - [Agent Platform](https://getpromptscript.dev/features/)
 - [Language Reference](https://getpromptscript.dev/reference/language/)
 - [Configuration Reference](https://getpromptscript.dev/reference/config/)
+- [JSON Output](https://getpromptscript.dev/reference/json-output/)
 - [Target Matrix](https://getpromptscript.dev/reference/formatters/)
 - [Security Guide](https://getpromptscript.dev/guides/security/)
 - [Model Catalog](https://getpromptscript.dev/reference/models/)

@@ -1,0 +1,42 @@
+{
+  "name": "@promptscript/schemas",
+  "version": "0.0.1",
+  "private": true,
+  "description": "JSON Schemas for PromptScript config and report files",
+  "keywords": [
+    "promptscript",
+    "json-schema"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrwogu/promptscript.git",
+    "directory": "packages/schemas"
+  },
+  "exports": {
+    "./approval-record-v1.json": "./approval-record-v1.json",
+    "./approval-report-v1.json": "./approval-report-v1.json",
+    "./audit-log-v1.json": "./audit-log-v1.json",
+    "./config.json": "./config.json",
+    "./diff-v1.json": "./diff-v1.json",
+    "./eval-cache-entry-v1.json": "./eval-cache-entry-v1.json",
+    "./eval-comparison-v1.json": "./eval-comparison-v1.json",
+    "./eval-dataset-row-v1.json": "./eval-dataset-row-v1.json",
+    "./eval-import-summary-v1.json": "./eval-import-summary-v1.json",
+    "./eval-label-row-v1.json": "./eval-label-row-v1.json",
+    "./eval-report-v1.json": "./eval-report-v1.json",
+    "./eval-sample-v1.json": "./eval-sample-v1.json",
+    "./eval-suite-v1.json": "./eval-suite-v1.json",
+    "./prompt-bundle-index-v1.json": "./prompt-bundle-index-v1.json",
+    "./prompt-bundle-v1.json": "./prompt-bundle-v1.json",
+    "./prompt-release-label-v1.json": "./prompt-release-label-v1.json",
+    "./prompt-release-label-v2.json": "./prompt-release-label-v2.json",
+    "./prompt-release-pricing-v1.json": "./prompt-release-pricing-v1.json",
+    "./release-report-v1.json": "./release-report-v1.json",
+    "./validate-report-v1.json": "./validate-report-v1.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "*.json"
+  ]
+}

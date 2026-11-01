@@ -9,6 +9,8 @@ Complete reference for the PromptScript command-line interface.
 
 ## Commands at a Glance
 
+The JSON output of `prs diff`, `prs release`, `prs approve`, `prs audit log`, `prs eval run` and `prs eval compare` is stable. See [JSON Output](json-output.md) for the rules.
+
 | Task                          | Command                                                                                                        |
 | ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | Start a project               | [`prs init`](#prs-init)                                                                                        |
@@ -547,11 +549,21 @@ prs validate --format json
 
 **Exit Codes:**
 
-| Code | Meaning                                   |
-| ---- | ----------------------------------------- |
-| 0    | Validation passed                         |
-| 1    | Validation errors found                   |
-| 2    | Validation warnings found (with --strict) |
+| Code | Meaning                                              |
+| ---- | ---------------------------------------------------- |
+| 0    | Validation passed                                    |
+| 1    | Validation errors found, or warnings with `--strict` |
+
+With `--format json`, stdout holds one document that matches
+[`validate-report/v1.json`](json-output.md). It has `success`, `errors`, `warnings` and a `summary`
+with the counts. With `--strict`, a warning sets `success` to `false`, and it stays in `warnings`.
+An error has a `code` when it is a PromptScript error (`PS` and three or four digits). The code is
+absent when the run stops before the compile with another error, such as a missing entry file or a
+registry clone failure. A parse error carries the resolve code `PS2000`. A location has `file`,
+`line`, `column` and, on some warnings, `offset`. A parse error without a position reports `-1` for
+`line` and `column`. Paths are as the compiler reports them, usually absolute. With several files,
+`errors` and `warnings` hold the results of all of them in file order.
+`--fix` cannot be combined with `--format json`: the command prints an error to stderr and exits 1.
 
 ---
 
@@ -1492,7 +1504,7 @@ Markdown print it as a count and a percentage.
 | `PS6604` | Warning: labels name rows the run did not read                                  |
 
 **Output.** With `json`, `markdown` or `junit`, stdout holds exactly one document. The JSON report
-matches `https://getpromptscript.dev/schema/eval-report/v1.json` and holds no timestamp, so two replay
+matches `https://getpromptscript.dev/schema/eval-report/v1.json`, starts with `$schema` and `version`, and holds no timestamp, so two replay
 runs give the same bytes. Progress, warnings and `sending` lines go to stderr. In JSON mode errors are
 inside the document, under `errors`. Control and bidi characters are removed from every string that
 comes from a model, a provider or a dataset, in all formats. Reports hold no responses, but a
@@ -1522,7 +1534,15 @@ runs that arm instead, only for prompts that have it. One run covers one arm, be
 each suite once. A suite whose prompt is not in the label, or has no such arm, is skipped with a
 warning `PS6311`, which counts for `--strict`. A suite you name on the command line is an error
 instead, and so is a run where every suite is skipped. The report records the hash of every suite
-under `prompt.contentHash`, and `--report-dir` names files after that hash. The cache is keyed by
+under `prompt.contentHash`, and `--report-dir` names files after that hash. Only the prompt under
+test comes from the label. The suite, its dataset and the rubric prompts of `llm-judge` assertions
+come from the working tree, so a run with a judge compiles the project (`PS6310` when it does not
+compile, `PS6203` when the rubric is not in it), and a run without judges does not. The rubrics are
+compiled with the validator settings of a release build, so `validation.excludes` cannot switch off
+the forced security rules for them. A rubric always comes from the working tree, also when the label
+serves the same prompt id; `judges` in the report holds the hash of the rubric that judged, and
+stderr gets one line `label <env>: suite <name> judged by <rubric> at <short hash> (working tree)`
+per judged suite, next to the `runs` line. The cache is keyed by
 the hash too: replay answers only from entries recorded for that hash, so a label that is behind the
 source needs `--cache record` once, or `--cache off --max-cost <usd>` for a live check of what the
 environment serves. Release gates do not read eval reports, so a report of a label run is not gate
@@ -1569,8 +1589,8 @@ baseline and does not pass in the candidate. A drop of the pass rate above the t
 regression too. Only cases both reports have are compared. When the dataset hash differs, that is
 noted, and a suite or model that only one report has is listed with its cases and is not a
 regression, but it is shown as a warning: on stderr for `json`, inside the document for `text` and
-`markdown`. With `--format json`, stdout holds one document that matches
-`https://getpromptscript.dev/schema/eval-comparison/v1.json`. A comparison has no place for errors,
+`markdown`. With `--format json`, stdout holds one document that starts with `$schema` and `version`
+and matches `https://getpromptscript.dev/schema/eval-comparison/v1.json`. A comparison has no place for errors,
 so an unreadable report or a bad option goes to stderr in every format, with exit code 1.
 
 ```bash
@@ -1743,11 +1763,10 @@ Read the governance history of the project from Git.
 
 #### prs audit log
 
-List prompt file changes, approvals, promotions, rollbacks, label entries removed, config changes
-and changes of the generated CODEOWNERS section, newest commit first, merges and side branches
-included, plus the changes a merge dropped from a parent. See [Audit log](../guides/releases.md#audit-log)
-in the releases guide. Experiment arms and weights are not listed yet: read the label history with
-`git log -p`.
+List prompt file changes, approvals, promotions, rollbacks, label entries removed, experiments
+started, changed or ended, config changes and changes of the generated CODEOWNERS section, newest
+commit first, merges and side branches included, plus the changes a merge dropped from a parent.
+See [Audit log](../guides/releases.md#audit-log) in the releases guide.
 
 ```bash
 prs audit log [options]

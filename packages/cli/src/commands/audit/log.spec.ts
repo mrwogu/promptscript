@@ -8,6 +8,7 @@ import {
   approvalRecordPath,
   serializeApprovalRecord,
   type ApprovalRecordV1,
+  type PromptReleaseExperiment,
 } from '@promptscript/core';
 import { validateAuditLog } from '../../__tests__/prompt-bundle-validators.js';
 import { codeownersMarker } from '../governance/codeowners-file.js';
@@ -1209,5 +1210,377 @@ describe('prs audit log', () => {
     // Assert
     expect(valid).toBe(false);
     expect(validateAuditLog({ ...report, head: 'a'.repeat(40) })).toBe(true);
+  });
+});
+
+interface TestArm {
+  variant: string;
+  contentHash: string;
+  weight: number;
+}
+
+function experimentOf(name: string, ...arms: TestArm[]): PromptReleaseExperiment {
+  return { name, arms: arms as unknown as PromptReleaseExperiment['arms'] };
+}
+
+function arm(variant: string, contentHash: string, weight: number): TestArm {
+  return { variant, contentHash, weight };
+}
+
+/** A label of one prompt; with an experiment the text is a v2 label. */
+function labelWith(
+  environment: string,
+  contentHash: string,
+  experiment?: PromptReleaseExperiment,
+  id = PROMPT
+): string {
+  return labelText({
+    $schema: PROMPT_RELEASE_LABEL_SCHEMA_URL,
+    environment,
+    prompts: [{ id, contentHash, ...(experiment === undefined ? {} : { experiment }) }],
+  });
+}
+
+const typesOf = (events: AuditEvent[], sha: string): string[] =>
+  events.filter((event) => event.commit === sha).map((event) => event.type);
+
+describe('prs audit log experiments', () => {
+  /** One commit per step of a label that starts, changes, renames and ends experiments. */
+  async function experimentHistory(): Promise<{ root: string; step: Record<string, string> }> {
+    const root = await project();
+    const step: Record<string, string> = {};
+    const tone = (...arms: TestArm[]): PromptReleaseExperiment => experimentOf('tone', ...arms);
+    const edit = async (name: string, text: string): Promise<void> => {
+      await put(root, { [PROD]: text });
+      step[name] = commit(root, name);
+    };
+    await edit('promote', label('prod', H1));
+    await edit(
+      'start',
+      labelWith('prod', H1, tone(arm('control', H1, 9000), arm('warm', H2, 1000)))
+    );
+    await edit(
+      'weight',
+      labelWith('prod', H1, tone(arm('control', H1, 8000), arm('warm', H2, 2000)))
+    );
+    await edit(
+      'add-arm',
+      labelWith(
+        'prod',
+        H1,
+        tone(arm('control', H1, 7500), arm('warm', H2, 2000), arm('cool', H3, 500))
+      )
+    );
+    await edit(
+      'reorder',
+      labelWith(
+        'prod',
+        H1,
+        tone(arm('control', H1, 7500), arm('cool', H3, 500), arm('warm', H2, 2000))
+      )
+    );
+    await edit('keep', label('prod', H2));
+    await edit(
+      'start-2',
+      labelWith('prod', H2, experimentOf('tone-2', arm('control', H2, 9000), arm('warm', H4, 1000)))
+    );
+    await edit(
+      'rename',
+      labelWith('prod', H2, experimentOf('tone-3', arm('control', H2, 9000), arm('warm', H4, 1000)))
+    );
+    return { root, step };
+  }
+
+  it('lists start, change, keep and rename in order, and replay explains the head', async () => {
+    // Arrange
+    const { root, step } = await experimentHistory();
+
+    // Act
+    const { report, exitCode } = await run(root);
+
+    // Assert
+    expect(exitCode).toBe(0);
+    expect(validateAuditLog(report), JSON.stringify(validateAuditLog.errors)).toBe(true);
+    const events = report.events;
+    expect(typesOf(events, step['promote'] ?? '')).toEqual(['promoted']);
+    expect(typesOf(events, step['start'] ?? '')).toEqual(['experiment-started']);
+    expect(typesOf(events, step['weight'] ?? '')).toEqual(['experiment-changed']);
+    expect(typesOf(events, step['add-arm'] ?? '')).toEqual(['experiment-changed']);
+    expect(typesOf(events, step['reorder'] ?? '')).toEqual(['experiment-changed']);
+    expect(typesOf(events, step['keep'] ?? '')).toEqual(['experiment-ended', 'promoted']);
+    expect(typesOf(events, step['start-2'] ?? '')).toEqual(['experiment-started']);
+    expect(typesOf(events, step['rename'] ?? '')).toEqual([
+      'experiment-ended',
+      'experiment-started',
+    ]);
+    expect(events.find((event) => event.commit === step['start'])).toMatchObject({
+      environment: 'prod',
+      prompt: PROMPT,
+      experiment: 'tone',
+      contentHash: H1,
+      arms: [
+        { variant: 'control', contentHash: H1, weight: 9000 },
+        { variant: 'warm', contentHash: H2, weight: 1000 },
+      ],
+      mainline: true,
+    });
+    const weight = events.find((event) => event.commit === step['weight']);
+    expect(weight?.previousArms?.[1]).toEqual({ variant: 'warm', contentHash: H2, weight: 1000 });
+    expect(weight?.arms?.[1]).toEqual({ variant: 'warm', contentHash: H2, weight: 2000 });
+    const keep = events.filter((event) => event.commit === step['keep']);
+    expect(keep[0]).toMatchObject({
+      experiment: 'tone',
+      keptVariant: 'warm',
+      contentHash: H2,
+    });
+    expect(keep[0]).not.toHaveProperty('previousContentHash');
+    expect(keep[1]).toMatchObject({ contentHash: H2, previousContentHash: H1 });
+    const rename = events.filter((event) => event.commit === step['rename']);
+    expect(rename[0]).toMatchObject({ experiment: 'tone-2', keptVariant: 'control' });
+    expect(rename[1]).toMatchObject({ experiment: 'tone-3' });
+  });
+
+  it('shows a broken label as a warning, then a fixed one with an experiment as started', async () => {
+    // Arrange
+    const { root, step } = await experimentHistory();
+    await put(root, { [PROD]: '{"not":"a label"}\n' });
+    step['broken'] = commit(root, 'broken');
+    await put(root, {
+      [PROD]: labelWith(
+        'prod',
+        H2,
+        experimentOf('tone-4', arm('control', H2, 9000), arm('warm', H4, 1000))
+      ),
+    });
+    step['fixed'] = commit(root, 'fixed');
+    git(root, 'rm', '-q', PROD);
+    step['delete'] = commit(root, 'delete');
+
+    // Act
+    const { report, exitCode } = await run(root);
+
+    // Assert
+    expect(exitCode).toBe(0);
+    expect(validateAuditLog(report), JSON.stringify(validateAuditLog.errors)).toBe(true);
+    expect(typesOf(report.events, step['broken'] ?? '')).toEqual([]);
+    expect(typesOf(report.events, step['fixed'] ?? '')).toEqual([
+      'rolled-back',
+      'experiment-started',
+    ]);
+    const deleted = report.events.filter((event) => event.commit === step['delete']);
+    expect(deleted.map((event) => event.type)).toEqual(['experiment-ended', 'label-removed']);
+    expect(deleted[0]).toMatchObject({ experiment: 'tone-4' });
+    expect(deleted[0]).not.toHaveProperty('contentHash');
+    expect(deleted[0]).not.toHaveProperty('keptVariant');
+    expect(report.warnings.map((warning) => warning.message)).toEqual([
+      expect.stringContaining('is not a release label'),
+    ]);
+  });
+
+  it('shows an experiment that the first commit of the repository already has', async () => {
+    // Arrange
+    const root = await directory();
+    git(root, 'init', '-q');
+    clock = 0;
+    const running = experimentOf('tone', arm('control', H1, 9000), arm('warm', H2, 1000));
+    await put(root, {
+      'promptscript.yaml': CONFIG,
+      '.promptscript/project.prs': PROJECT,
+      [PROD]: labelWith('prod', H1, running),
+    });
+    commit(root, 'init');
+
+    // Act
+    const { report, exitCode } = await run(root);
+
+    // Assert
+    expect(exitCode).toBe(0);
+    expect(brief(report.events.filter((event) => event.environment !== undefined))).toEqual([
+      'promoted prod 1',
+      'experiment-started prod 1',
+    ]);
+  });
+
+  it('reports a plain end as kept control without an entry event', async () => {
+    // Arrange
+    const root = await project();
+    const running = experimentOf('tone', arm('control', H1, 9000), arm('warm', H2, 1000));
+    await put(root, { [PROD]: labelWith('prod', H1, running) });
+    commit(root, 'start');
+    await put(root, { [PROD]: label('prod', H1) });
+    const end = commit(root, 'end');
+
+    // Act
+    const { report, exitCode } = await run(root);
+
+    // Assert
+    expect(exitCode).toBe(0);
+    expect(typesOf(report.events, end)).toEqual(['experiment-ended']);
+    expect(report.events[0]).toMatchObject({ keptVariant: 'control', contentHash: H1 });
+  });
+
+  it('leaves out keptVariant when the hash is no arm of the experiment', async () => {
+    // Arrange
+    const root = await project();
+    const running = experimentOf('tone', arm('control', H1, 9000), arm('warm', H2, 1000));
+    await put(root, { [PROD]: labelWith('prod', H1, running) });
+    commit(root, 'start');
+    await put(root, { [PROD]: label('prod', H3) });
+    commit(root, 'hand edit');
+
+    // Act
+    const { report } = await run(root);
+
+    // Assert
+    expect(report.events[0]).toMatchObject({ type: 'experiment-ended', contentHash: H3 });
+    expect(report.events[0]).not.toHaveProperty('keptVariant');
+    expect(report.events[1]).toMatchObject({ type: 'promoted', contentHash: H3 });
+  });
+
+  it('applies --hash to any arm, and --env, --prompt and the time window as for entries', async () => {
+    // Arrange
+    const { root } = await experimentHistory();
+
+    // Act
+    const byArm = await run(root, { hash: H3.slice(0, 12) });
+    const staging = await run(root, { env: 'staging' });
+    const prod = await run(root, { env: 'prod', prompt: PROMPT });
+    const other = await run(root, { prompt: 'acme-support/other' });
+    const window = await run(root, { since: '2026-10-04', until: '2026-10-06T10:00:00Z' });
+
+    // Assert
+    expect(byArm.report.events.map((event) => event.type)).toEqual([
+      'experiment-ended',
+      'experiment-changed',
+      'experiment-changed',
+    ]);
+    expect(staging.report.events).toEqual([]);
+    expect(prod.report.events).toHaveLength(10);
+    expect(other.report.events).toEqual([]);
+    expect(window.report.events.map((event) => event.type)).toEqual([
+      'experiment-changed',
+      'experiment-changed',
+      'experiment-changed',
+    ]);
+  });
+
+  it('shows an experiment started on a side branch and again on the merge', async () => {
+    // Arrange
+    const root = await project();
+    const main = branch(root);
+    await put(root, { [PROD]: label('prod', H1) });
+    commit(root, 'prod');
+    git(root, 'checkout', '-q', '-b', 'side');
+    const running = experimentOf('tone', arm('control', H1, 9000), arm('warm', H2, 1000));
+    await put(root, { [PROD]: labelWith('prod', H1, running) });
+    const sideCommit = commit(root, 'start on side');
+    git(root, 'checkout', '-q', main);
+    await put(root, { 'main.txt': 'main\n' });
+    commit(root, 'main');
+    dated(root, 'merge', '--no-ff', '-m', 'merge side', 'side');
+
+    // Act
+    const { report, exitCode } = await run(root);
+
+    // Assert
+    expect(exitCode).toBe(0);
+    const started = report.events.filter((event) => event.type === 'experiment-started');
+    expect(started).toHaveLength(2);
+    expect(started[0]).toMatchObject({ viaMerge: true, mainline: true });
+    expect(started[1]).toMatchObject({ commit: sideCommit, mainline: false });
+    expect(started[1]).not.toHaveProperty('viaMerge');
+  });
+
+  it('marks experiment events of an unconfigured environment', async () => {
+    // Arrange
+    const root = await project();
+    const running = experimentOf('tone', arm('control', H1, 9000), arm('warm', H2, 1000));
+    await put(root, { '.promptscript/releases/qa.json': labelWith('qa', H1, running) });
+    commit(root, 'qa experiment');
+
+    // Act
+    const { report } = await run(root);
+
+    // Assert
+    expect(validateAuditLog(report), JSON.stringify(validateAuditLog.errors)).toBe(true);
+    expect(report.events.find((event) => event.type === 'experiment-started')).toMatchObject({
+      environment: 'qa',
+      configured: false,
+    });
+  });
+
+  it('escapes the names of an experiment event in CEF, JSON and text', async () => {
+    // Arrange
+    const root = await project();
+    const id = 'acme|x=y\\z\u200b';
+    const running = experimentOf('tone', arm('control', H1, 9000), arm('warm', H2, 1000));
+    await put(root, { [PROD]: labelWith('prod', H1, running, id) });
+    commit(root, 'start', 'Na|me=x\\y <a@example.com>');
+
+    // Act
+    const { report } = await run(root);
+    const cef = (await printed(root, { format: 'cef' })).find((line) =>
+      line.includes('experiment-started')
+    );
+    const text = (await printed(root, { format: 'text' })).find((line) =>
+      line.includes('experiment-started')
+    );
+    const json = jsonText(report);
+
+    // Assert
+    expect(validateAuditLog(report), JSON.stringify(validateAuditLog.errors)).toBe(true);
+    expect(cef).toContain(String.raw`cs1=acme|x\=y\\z `);
+    expect(cef).toContain('flexString2=tone flexString2Label=experiment');
+    expect(cef).toContain('flexNumber2=1000 flexNumber2Label=variantWeight');
+    expect(cef).toContain(String.raw`msg=arms control@${H1}\=90 %, warm@${H2}\=10 %`);
+    expect(cef).toMatch(
+      /^CEF:0\|PromptScript\|prs\|[^|]*\|prs-experiment-started\|Experiment started\|6\|/
+    );
+    expect(json).toContain(String.raw`acme|x=y\\z\u200b`);
+    expect(json).not.toContain('\u200b');
+    expect(text).toContain('acme|x=y\\z  env=prod');
+    expect(text).not.toContain('\u200b');
+    expect(text).toContain('experiment=tone');
+  });
+
+  it('checks the experiment events by the schema', async () => {
+    // Arrange
+    const root = await project();
+    await put(root, {
+      [PROD]: labelWith(
+        'prod',
+        H1,
+        experimentOf('tone', arm('control', H1, 9000), arm('warm', H2, 1000))
+      ),
+    });
+    commit(root, 'start');
+    const { report } = await run(root);
+    const started = report.events.find((event) => event.type === 'experiment-started');
+    if (started === undefined) throw new Error('no experiment-started event');
+    const arms = started.arms ?? [];
+    const changed = { ...started, type: 'experiment-changed', previousArms: arms };
+    const ended = { ...started, type: 'experiment-ended', keptVariant: 'warm' };
+    const valid = (event: unknown): boolean => validateAuditLog({ ...report, events: [event] });
+
+    // Act
+    const rejected = {
+      'changed without previousArms': { ...started, type: 'experiment-changed' },
+      'started with previousArms': { ...started, previousArms: arms },
+      'ended with previousArms': { ...ended, previousArms: arms },
+      'started with keptVariant': { ...started, keptVariant: 'warm' },
+      'changed with keptVariant': { ...changed, keptVariant: 'warm' },
+      'one arm': { ...started, arms: arms.slice(0, 1) },
+      'first arm not control': { ...started, arms: [arms[1], arms[0]] },
+      'control without a share': { ...started, arms: [{ ...arms[0], weight: 0 }, arms[1]] },
+      'control as a later arm': { ...started, arms: [arms[0], { ...arms[1], variant: 'control' }] },
+    };
+
+    // Assert
+    expect(valid(started)).toBe(true);
+    expect(valid(changed)).toBe(true);
+    expect(valid(ended)).toBe(true);
+    for (const [name, event] of Object.entries(rejected)) {
+      expect(valid(event), name).toBe(false);
+    }
   });
 });

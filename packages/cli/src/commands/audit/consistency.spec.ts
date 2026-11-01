@@ -41,6 +41,42 @@ describe('replayMainline', () => {
     expect(state.labels.get(LABEL)).toEqual(new Map([['acme/a', H2]]));
   });
 
+  it('replays started, changed and ended experiments', () => {
+    // Arrange
+    const arms = (weight: number): AuditEvent['arms'] => [
+      { variant: 'control', contentHash: H1, weight: 10000 - weight },
+      { variant: 'warm', contentHash: H2, weight },
+    ];
+    const fields = { path: LABEL, prompt: 'acme/a', experiment: 'tone' };
+    const events = [
+      event('d', { ...fields, type: 'experiment-ended', arms: arms(2000) }),
+      event('c', { ...fields, type: 'experiment-changed', arms: arms(2000) }),
+      event('b', { ...fields, type: 'experiment-started', arms: arms(1000) }),
+      event('a', { ...fields, type: 'experiment-started', prompt: 'acme/b', arms: arms(500) }),
+    ];
+
+    // Act
+    const state = replayMainline(events);
+    const midway = replayMainline(events.slice(1));
+
+    // Assert
+    expect([...(state.experiments.get(LABEL)?.keys() ?? [])]).toEqual(['acme/b']);
+    expect(midway.experiments.get(LABEL)?.get('acme/a')).toBe(
+      `tone control@${H1}=8000 warm@${H2}=2000`
+    );
+  });
+
+  it('keeps a started experiment that carries no name or arms as empty', () => {
+    // Arrange
+    const events = [event('a', { type: 'experiment-started', path: LABEL, prompt: 'acme/a' })];
+
+    // Act
+    const state = replayMainline(events);
+
+    // Assert
+    expect(state.experiments.get(LABEL)?.get('acme/a')).toBe(' ');
+  });
+
   it('leaves out events of commits off the first-parent chain', () => {
     // Arrange
     const events = [
@@ -59,16 +95,52 @@ describe('replayMainline', () => {
   });
 });
 
+const experimentKey = `tone control@${H1}=9000 warm@${H2}=1000`;
+
 describe('stateMismatches', () => {
+  it('reports an experiment at the head without an event, and an event without one', () => {
+    // Arrange
+    const other = 'other ';
+    const third = 'third ';
+    const replayed = {
+      records: new Set<string>(),
+      labels: new Map(),
+      experiments: new Map([
+        [
+          LABEL,
+          new Map([
+            ['acme/c', third],
+            ['acme/b', other],
+          ]),
+        ],
+      ]),
+    };
+    const head = {
+      records: new Set<string>(),
+      labels: new Map(),
+      experiments: new Map([[LABEL, new Map([['acme/a', experimentKey]])]]),
+    };
+
+    // Act
+    const problems = stateMismatches(replayed, head, new Set());
+
+    // Assert
+    expect(problems).toEqual([
+      `${LABEL} runs [acme/a:tone control@${H1}=9000 warm@${H2}=1000] at the head, but the log leads to [acme/b:other , acme/c:third ]`,
+    ]);
+  });
+
   it('names records and label entries the log and the head disagree on', () => {
     // Arrange
     const replayed = {
       records: new Set([RECORD]),
       labels: new Map([[LABEL, new Map([['acme/a', H1]])]]),
+      experiments: new Map(),
     };
     const head = {
       records: new Set(['.promptscript/approvals/legal/acme/a/y.max.json']),
       labels: new Map([[LABEL, new Map([['acme/a', H2]])]]),
+      experiments: new Map(),
     };
 
     // Act
@@ -85,10 +157,16 @@ describe('stateMismatches', () => {
 
   it('accepts an empty label as no label, and skips labels that did not parse', () => {
     // Arrange
-    const replayed = { records: new Set<string>(), labels: new Map([[LABEL, new Map()]]) };
+    const qa = '.promptscript/releases/qa.json';
+    const replayed = {
+      records: new Set<string>(),
+      labels: new Map([[LABEL, new Map()]]),
+      experiments: new Map(),
+    };
     const head = {
       records: new Set<string>(),
-      labels: new Map([['.promptscript/releases/qa.json', new Map([['acme/a', H1]])]]),
+      labels: new Map([[qa, new Map([['acme/a', H1]])]]),
+      experiments: new Map([[qa, new Map([['acme/a', experimentKey]])]]),
     };
 
     // Act
