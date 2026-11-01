@@ -6,7 +6,7 @@
 
 # Interface: EvalContainsAssertion
 
-Defined in: [core/src/types/eval.ts:122](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L122)
+Defined in: [core/src/types/eval.ts:122](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L122)
 
 Passes when the target contains the values.
 
@@ -20,7 +20,7 @@ Passes when the target contains the values.
 
 > `optional` **field?**: `string`
 
-Defined in: [core/src/types/eval.ts:105](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L105)
+Defined in: [core/src/types/eval.ts:105](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L105)
 
 Output property the assertion reads; absent means the whole response text
 
@@ -34,7 +34,7 @@ Output property the assertion reads; absent means the whole response text
 
 > **id**: `string`
 
-Defined in: [core/src/types/eval.ts:103](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L103)
+Defined in: [core/src/types/eval.ts:103](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L103)
 
 Assertion id, unique in the suite.
 
@@ -58,7 +58,7 @@ Assertion id, unique in the suite.
 
 > `optional` **ignoreCase?**: `boolean`
 
-Defined in: [core/src/types/eval.ts:135](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L135)
+Defined in: [core/src/types/eval.ts:135](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L135)
 
 Compare case-insensitively
 
@@ -68,7 +68,7 @@ Compare case-insensitively
 
 > **kind**: `"contains"`
 
-Defined in: [core/src/types/eval.ts:123](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L123)
+Defined in: [core/src/types/eval.ts:123](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L123)
 
 ***
 
@@ -76,7 +76,7 @@ Defined in: [core/src/types/eval.ts:123](https://github.com/mrwogu/promptscript/
 
 > `optional` **mode?**: `"all"` \| `"any"`
 
-Defined in: [core/src/types/eval.ts:133](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L133)
+Defined in: [core/src/types/eval.ts:133](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L133)
 
 Whether every value or any value must appear; default all
 
@@ -86,7 +86,7 @@ Whether every value or any value must appear; default all
 
 > `optional` **negate?**: `boolean`
 
-Defined in: [core/src/types/eval.ts:125](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L125)
+Defined in: [core/src/types/eval.ts:125](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L125)
 
 Inverts the result
 
@@ -96,7 +96,7 @@ Inverts the result
 
 > **values**: `string`[]
 
-Defined in: [core/src/types/eval.ts:131](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L131)
+Defined in: [core/src/types/eval.ts:131](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L131)
 
 Substrings to look for.
 

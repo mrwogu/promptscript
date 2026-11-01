@@ -6,7 +6,7 @@
 
 # Interface: CLIContext
 
-Defined in: [cli/src/output/console.ts:21](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/cli/src/output/console.ts#L21)
+Defined in: [cli/src/output/console.ts:21](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/output/console.ts#L21)
 
 Global CLI context for sharing state across commands.
 
@@ -16,7 +16,7 @@ Global CLI context for sharing state across commands.
 
 > **colors**: `boolean`
 
-Defined in: [cli/src/output/console.ts:25](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/cli/src/output/console.ts#L25)
+Defined in: [cli/src/output/console.ts:25](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/output/console.ts#L25)
 
 Whether colors are enabled
 
@@ -26,7 +26,7 @@ Whether colors are enabled
 
 > **logLevel**: [`LogLevel`](https://getpromptscript.dev/api-reference/cli/src/enumerations/LogLevel/index.md)
 
-Defined in: [cli/src/output/console.ts:23](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/cli/src/output/console.ts#L23)
+Defined in: [cli/src/output/console.ts:23](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/output/console.ts#L23)
 
 Current log level
 
@@ -36,6 +36,6 @@ Current log level
 
 > **outputStream**: `"stdout"` \| `"stderr"`
 
-Defined in: [cli/src/output/console.ts:27](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/cli/src/output/console.ts#L27)
+Defined in: [cli/src/output/console.ts:27](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/output/console.ts#L27)
 
 Stream for human-readable command output

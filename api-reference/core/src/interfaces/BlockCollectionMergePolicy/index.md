@@ -6,7 +6,7 @@
 
 # Interface: BlockCollectionMergePolicy
 
-Defined in: [core/src/block-merge.ts:29](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/block-merge.ts#L29)
+Defined in: [core/src/block-merge.ts:29](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/block-merge.ts#L29)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [core/src/block-merge.ts:29](https://github.com/mrwogu/promptscript/
 
 > `readonly` **content**: [`BlockMergePolicy`](https://getpromptscript.dev/api-reference/core/src/interfaces/BlockMergePolicy/index.md)
 
-Defined in: [core/src/block-merge.ts:30](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/block-merge.ts#L30)
+Defined in: [core/src/block-merge.ts:30](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/block-merge.ts#L30)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [core/src/block-merge.ts:30](https://github.com/mrwogu/promptscript/
 
 > `readonly` **outputOrder**: `"base"` \| `"incoming"`
 
-Defined in: [core/src/block-merge.ts:31](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/block-merge.ts#L31)
+Defined in: [core/src/block-merge.ts:31](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/block-merge.ts#L31)

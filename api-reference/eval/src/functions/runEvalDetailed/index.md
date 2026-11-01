@@ -8,7 +8,7 @@
 
 > **runEvalDetailed**(`options`): `Promise`\<[`EvalRun`](https://getpromptscript.dev/api-reference/eval/src/interfaces/EvalRun/index.md)\>
 
-Defined in: [eval/src/run.ts:953](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L953)
+Defined in: [eval/src/run.ts:953](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L953)
 
 Run suites: check them, read and scan every dataset, render every row,
 look up the cache and check the budget plan, all before the first call.

@@ -6,7 +6,7 @@
 
 # Interface: Watcher
 
-Defined in: [compiler/src/types.ts:282](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/compiler/src/types.ts#L282)
+Defined in: [compiler/src/types.ts:282](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/compiler/src/types.ts#L282)
 
 Handle returned by watch() to control the watcher.
 
@@ -16,7 +16,7 @@ Handle returned by watch() to control the watcher.
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [compiler/src/types.ts:284](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/compiler/src/types.ts#L284)
+Defined in: [compiler/src/types.ts:284](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/compiler/src/types.ts#L284)
 
 Stop watching and clean up
 

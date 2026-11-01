@@ -8,7 +8,7 @@
 
 > **getAgentProperties**(`program`): `Record`\<`string`, [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)\>
 
-Defined in: [core/src/agent-names.ts:95](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/agent-names.ts#L95)
+Defined in: [core/src/agent-names.ts:95](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/agent-names.ts#L95)
 
 Return the agents object from a resolved program.
 

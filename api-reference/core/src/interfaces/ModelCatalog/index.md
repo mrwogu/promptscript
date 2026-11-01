@@ -6,7 +6,7 @@
 
 # Interface: ModelCatalog
 
-Defined in: [core/src/model-catalog.ts:53](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-catalog.ts#L53)
+Defined in: [core/src/model-catalog.ts:53](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-catalog.ts#L53)
 
 Built-in profiles merged with the project's `models.profiles`.
 
@@ -16,7 +16,7 @@ Built-in profiles merged with the project's `models.profiles`.
 
 > `readonly` **profiles**: readonly [`ModelProfile`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelProfile/index.md)[]
 
-Defined in: [core/src/model-catalog.ts:55](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-catalog.ts#L55)
+Defined in: [core/src/model-catalog.ts:55](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-catalog.ts#L55)
 
 Every profile: built-in entries first, then custom ones in config order
 
@@ -26,7 +26,7 @@ Every profile: built-in entries first, then custom ones in config order
 
 > **getLatest**(`family`): [`ModelProfile`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelProfile/index.md) \| `undefined`
 
-Defined in: [core/src/model-catalog.ts:59](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-catalog.ts#L59)
+Defined in: [core/src/model-catalog.ts:59](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-catalog.ts#L59)
 
 Newest non-retired release of a family
 
@@ -46,7 +46,7 @@ Newest non-retired release of a family
 
 > **getProfile**(`id`): [`ModelProfile`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelProfile/index.md) \| `undefined`
 
-Defined in: [core/src/model-catalog.ts:57](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-catalog.ts#L57)
+Defined in: [core/src/model-catalog.ts:57](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-catalog.ts#L57)
 
 Find a profile by id (case-insensitive)
 
@@ -66,7 +66,7 @@ Find a profile by id (case-insensitive)
 
 > **getReplacement**(`id`): [`ModelProfile`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelProfile/index.md) \| `undefined`
 
-Defined in: [core/src/model-catalog.ts:67](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-catalog.ts#L67)
+Defined in: [core/src/model-catalog.ts:67](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-catalog.ts#L67)
 
 Replacement for a profile, found by following successor links until a
 current release. Undefined when the chain has no current release: no
@@ -88,7 +88,7 @@ successor, a missing one, or a loop.
 
 > **resolve**(`reference`): [`ModelResolution`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ModelResolution/index.md) \| `undefined`
 
-Defined in: [core/src/model-catalog.ts:61](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-catalog.ts#L61)
+Defined in: [core/src/model-catalog.ts:61](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-catalog.ts#L61)
 
 Resolve a profile id, floating alias, alias, API id, or display name
 

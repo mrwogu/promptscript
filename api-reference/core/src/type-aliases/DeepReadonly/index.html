@@ -75,7 +75,7 @@
 <blockquote>
 <p><strong>DeepReadonly</strong>&#x3C;<code>T</code>> = <code>T</code> <em>extends</em> <a href="/api-reference/core/src/type-aliases/PrimitiveValue/"><code>PrimitiveValue</code></a> ? <code>T</code> : <code>T</code> <em>extends</em> readonly infer Item[] ? readonly <code>DeepReadonly</code>&#x3C;<code>Item</code>>[] : <code>T</code> <em>extends</em> <code>object</code> ? <code>{ readonly [Key in keyof T]: DeepReadonly&#x3C;T[Key]> }</code> : <code>T</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L22">core/src/types/ast.ts:22</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L22">core/src/types/ast.ts:22</a></p>
 <p>Recursive readonly projection used by the canonical AST.</p>
 <h2 id="type-parameters">Type Parameters</h2>
 <h3 id="t">T</h3>

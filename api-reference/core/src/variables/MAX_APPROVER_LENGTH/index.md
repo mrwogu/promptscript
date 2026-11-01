@@ -8,7 +8,7 @@
 
 > `const` **MAX\_APPROVER\_LENGTH**: `101` = `101`
 
-Defined in: [core/src/types/approval.ts:97](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/approval.ts#L97)
+Defined in: [core/src/types/approval.ts:97](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/approval.ts#L97)
 
 Longest approver handle, `@` included. The handle is part of the record file name,
 so it stays far below the 255 byte limit of a file name.

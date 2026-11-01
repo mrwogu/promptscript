@@ -6,7 +6,7 @@
 
 # Interface: ValidationExclude
 
-Defined in: [core/src/types/config.ts:195](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/config.ts#L195)
+Defined in: [core/src/types/config.ts:195](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/config.ts#L195)
 
 Per-import validation exclusion, bound to the commit pinned in promptscript.lock.
 
@@ -21,7 +21,7 @@ fails, so the consumer consciously re-reviews the new content.
 
 > `optional` **commit?**: `string`
 
-Defined in: [core/src/types/config.ts:199](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/config.ts#L199)
+Defined in: [core/src/types/config.ts:199](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/config.ts#L199)
 
 Commit SHA the exclude was reviewed at; must match the lockfile pin
 
@@ -31,7 +31,7 @@ Commit SHA the exclude was reviewed at; must match the lockfile pin
 
 > **import**: `string`
 
-Defined in: [core/src/types/config.ts:197](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/config.ts#L197)
+Defined in: [core/src/types/config.ts:197](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/config.ts#L197)
 
 Import source as declared in `@use` or as pinned in promptscript.lock
 
@@ -41,6 +41,6 @@ Import source as declared in `@use` or as pinned in promptscript.lock
 
 > **rules**: `string`[]
 
-Defined in: [core/src/types/config.ts:201](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/config.ts#L201)
+Defined in: [core/src/types/config.ts:201](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/config.ts#L201)
 
 Rule names (e.g. `blocked-patterns`) or IDs (e.g. `PS005`) to skip for this import

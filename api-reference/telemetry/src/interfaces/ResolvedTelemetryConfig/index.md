@@ -6,7 +6,7 @@
 
 # Interface: ResolvedTelemetryConfig
 
-Defined in: [telemetry/src/types.ts:61](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/telemetry/src/types.ts#L61)
+Defined in: [telemetry/src/types.ts:61](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/telemetry/src/types.ts#L61)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [telemetry/src/types.ts:61](https://github.com/mrwogu/promptscript/b
 
 > **cacheDirectory**: `string`
 
-Defined in: [telemetry/src/types.ts:64](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/telemetry/src/types.ts#L64)
+Defined in: [telemetry/src/types.ts:64](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/telemetry/src/types.ts#L64)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [telemetry/src/types.ts:64](https://github.com/mrwogu/promptscript/b
 
 > **enabled**: `boolean`
 
-Defined in: [telemetry/src/types.ts:62](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/telemetry/src/types.ts#L62)
+Defined in: [telemetry/src/types.ts:62](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/telemetry/src/types.ts#L62)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [telemetry/src/types.ts:62](https://github.com/mrwogu/promptscript/b
 
 > **endpoint**: `string`
 
-Defined in: [telemetry/src/types.ts:63](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/telemetry/src/types.ts#L63)
+Defined in: [telemetry/src/types.ts:63](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/telemetry/src/types.ts#L63)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [telemetry/src/types.ts:63](https://github.com/mrwogu/promptscript/b
 
 > **vetoes**: `string`[]
 
-Defined in: [telemetry/src/types.ts:65](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/telemetry/src/types.ts#L65)
+Defined in: [telemetry/src/types.ts:65](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/telemetry/src/types.ts#L65)

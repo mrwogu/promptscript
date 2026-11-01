@@ -6,7 +6,7 @@
 
 # Interface: PromptBundleMessage
 
-Defined in: [core/src/types/prompt-bundle.ts:8](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L8)
+Defined in: [core/src/types/prompt-bundle.ts:8](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L8)
 
 One message of a prompt bundle.
 
@@ -16,7 +16,7 @@ One message of a prompt bundle.
 
 > **content**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:15](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L15)
+Defined in: [core/src/types/prompt-bundle.ts:15](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L15)
 
 Message text with runtime slots left unrendered. Line endings are `\n`.
 
@@ -32,6 +32,6 @@ Message text with runtime slots left unrendered. Line endings are `\n`.
 
 > **role**: [`PromptBundleRole`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PromptBundleRole/index.md)
 
-Defined in: [core/src/types/prompt-bundle.ts:10](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L10)
+Defined in: [core/src/types/prompt-bundle.ts:10](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L10)
 
 Message role

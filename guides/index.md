@@ -15,6 +15,7 @@ delivery:
 - [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md)
 - [Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md)
 - [Releasing Application Prompts](https://getpromptscript.dev/guides/releases/index.md)
+- [Evaluating Prompts](https://getpromptscript.dev/guides/evals/index.md)
 
 - [Registry](https://getpromptscript.dev/guides/registry/index.md): Create, manage, and share PromptScript registries for your organization.
 - [Inheritance](https://getpromptscript.dev/guides/inheritance/index.md): Build scalable instruction hierarchies with inheritance patterns.

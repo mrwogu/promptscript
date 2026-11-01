@@ -6,7 +6,7 @@
 
 # Interface: OutputPlanCollision
 
-Defined in: [core/src/output-plan.ts:70](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/output-plan.ts#L70)
+Defined in: [core/src/output-plan.ts:70](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/output-plan.ts#L70)
 
 Collision observed while constructing an output plan.
 
@@ -16,7 +16,7 @@ Collision observed while constructing an output plan.
 
 > **existingOwner**: `string`
 
-Defined in: [core/src/output-plan.ts:74](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/output-plan.ts#L74)
+Defined in: [core/src/output-plan.ts:74](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/output-plan.ts#L74)
 
 Owner of the already selected artifact.
 
@@ -26,7 +26,7 @@ Owner of the already selected artifact.
 
 > **identical**: `boolean`
 
-Defined in: [core/src/output-plan.ts:80](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/output-plan.ts#L80)
+Defined in: [core/src/output-plan.ts:80](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/output-plan.ts#L80)
 
 Whether write semantics are identical.
 
@@ -36,7 +36,7 @@ Whether write semantics are identical.
 
 > **incomingOwner**: `string`
 
-Defined in: [core/src/output-plan.ts:76](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/output-plan.ts#L76)
+Defined in: [core/src/output-plan.ts:76](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/output-plan.ts#L76)
 
 Owner of the incoming artifact.
 
@@ -46,7 +46,7 @@ Owner of the incoming artifact.
 
 > **incomingRole**: [`OutputPlanArtifactRole`](https://getpromptscript.dev/api-reference/core/src/type-aliases/OutputPlanArtifactRole/index.md)
 
-Defined in: [core/src/output-plan.ts:78](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/output-plan.ts#L78)
+Defined in: [core/src/output-plan.ts:78](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/output-plan.ts#L78)
 
 Role of the incoming artifact.
 
@@ -56,7 +56,7 @@ Role of the incoming artifact.
 
 > **path**: `string`
 
-Defined in: [core/src/output-plan.ts:72](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/output-plan.ts#L72)
+Defined in: [core/src/output-plan.ts:72](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/output-plan.ts#L72)
 
 Normalized colliding path.
 
@@ -66,6 +66,6 @@ Normalized colliding path.
 
 > **resolution**: [`OutputPlanCollisionResolution`](https://getpromptscript.dev/api-reference/core/src/type-aliases/OutputPlanCollisionResolution/index.md)
 
-Defined in: [core/src/output-plan.ts:82](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/output-plan.ts#L82)
+Defined in: [core/src/output-plan.ts:82](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/output-plan.ts#L82)
 
 Deterministic resolution applied by the planner.

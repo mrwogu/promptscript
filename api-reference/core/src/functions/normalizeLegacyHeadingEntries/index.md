@@ -8,7 +8,7 @@
 
 > **normalizeLegacyHeadingEntries**(`blockName`, `entries`, `syntaxVersion`): readonly [`BlockEntry`](https://getpromptscript.dev/api-reference/core/src/type-aliases/BlockEntry/index.md)[]
 
-Defined in: [core/src/presentation.ts:85](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/presentation.ts#L85)
+Defined in: [core/src/presentation.ts:85](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/presentation.ts#L85)
 
 Promote an initial text heading for opted-in blocks in syntax 1.5.0+.
 

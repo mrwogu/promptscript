@@ -6,7 +6,7 @@
 
 # Interface: EvalImportReplacementsV1
 
-Defined in: [core/src/types/eval-import.ts:100](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L100)
+Defined in: [core/src/types/eval-import.ts:100](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L100)
 
 Values replaced by the scrub, by kind.
 
@@ -16,7 +16,7 @@ Values replaced by the scrub, by kind.
 
 > **card**: `number`
 
-Defined in: [core/src/types/eval-import.ts:102](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L102)
+Defined in: [core/src/types/eval-import.ts:102](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L102)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [core/src/types/eval-import.ts:102](https://github.com/mrwogu/prompt
 
 > **email**: `number`
 
-Defined in: [core/src/types/eval-import.ts:101](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L101)
+Defined in: [core/src/types/eval-import.ts:101](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L101)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [core/src/types/eval-import.ts:101](https://github.com/mrwogu/prompt
 
 > **iban**: `number`
 
-Defined in: [core/src/types/eval-import.ts:103](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L103)
+Defined in: [core/src/types/eval-import.ts:103](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L103)
 
 ***
 
@@ -40,6 +40,6 @@ Defined in: [core/src/types/eval-import.ts:103](https://github.com/mrwogu/prompt
 
 > **redacted**: `number`
 
-Defined in: [core/src/types/eval-import.ts:105](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L105)
+Defined in: [core/src/types/eval-import.ts:105](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L105)
 
 Inputs replaced by `--redact-input`

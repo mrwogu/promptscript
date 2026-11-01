@@ -8,6 +8,6 @@
 
 > `const` **GROK\_VERSIONS**: `Readonly`\<`Record`\<`string`, \{ `description`: `string`; `name`: `string`; `outputPath`: `string`; \}\>\>
 
-Defined in: [formatters/src/formatters/grok.ts:19](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/formatters/grok.ts#L19)
+Defined in: [formatters/src/formatters/grok.ts:19](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/formatters/grok.ts#L19)
 
 Version configuration for the Grok Build formatter.

@@ -6,7 +6,7 @@
 
 # Interface: SimpleFormatterVersions
 
-Defined in: [formatters/src/create-simple-formatter.ts:15](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/create-simple-formatter.ts#L15)
+Defined in: [formatters/src/create-simple-formatter.ts:15](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/create-simple-formatter.ts#L15)
 
 Standard three-version map returned by `getSupportedVersions()`.
 
@@ -20,7 +20,7 @@ Standard three-version map returned by `getSupportedVersions()`.
 
 > `readonly` **full**: [`VersionEntry`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/VersionEntry/index.md)
 
-Defined in: [formatters/src/create-simple-formatter.ts:19](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/create-simple-formatter.ts#L19)
+Defined in: [formatters/src/create-simple-formatter.ts:19](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/create-simple-formatter.ts#L19)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [formatters/src/create-simple-formatter.ts:19](https://github.com/mr
 
 > `readonly` **multifile**: [`VersionEntry`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/VersionEntry/index.md)
 
-Defined in: [formatters/src/create-simple-formatter.ts:18](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/create-simple-formatter.ts#L18)
+Defined in: [formatters/src/create-simple-formatter.ts:18](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/create-simple-formatter.ts#L18)
 
 ***
 
@@ -36,4 +36,4 @@ Defined in: [formatters/src/create-simple-formatter.ts:18](https://github.com/mr
 
 > `readonly` **simple**: [`VersionEntry`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/VersionEntry/index.md)
 
-Defined in: [formatters/src/create-simple-formatter.ts:17](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/create-simple-formatter.ts#L17)
+Defined in: [formatters/src/create-simple-formatter.ts:17](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/create-simple-formatter.ts#L17)

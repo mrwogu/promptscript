@@ -8,7 +8,7 @@
 
 > **parseFileCanonical**(`filePath`, `options?`): [`CanonicalParseResult`](https://getpromptscript.dev/api-reference/parser/src/interfaces/CanonicalParseResult/index.md)
 
-Defined in: [parser/src/parse.ts:311](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/parser/src/parse.ts#L311)
+Defined in: [parser/src/parse.ts:311](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/parser/src/parse.ts#L311)
 
 Compatibility alias for parseCanonicalFile.
 

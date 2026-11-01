@@ -6,7 +6,7 @@
 
 # Interface: EvalLatencyThresholds
 
-Defined in: [core/src/types/eval.ts:191](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L191)
+Defined in: [core/src/types/eval.ts:191](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L191)
 
 Latency limits over the recorded latencies of a run.
 
@@ -16,7 +16,7 @@ Latency limits over the recorded latencies of a run.
 
 > `optional` **p50?**: `number`
 
-Defined in: [core/src/types/eval.ts:197](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L197)
+Defined in: [core/src/types/eval.ts:197](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L197)
 
 Median latency limit in milliseconds.
 
@@ -34,7 +34,7 @@ integer
 
 > `optional` **p95?**: `number`
 
-Defined in: [core/src/types/eval.ts:203](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L203)
+Defined in: [core/src/types/eval.ts:203](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L203)
 
 95th percentile latency limit in milliseconds.
 

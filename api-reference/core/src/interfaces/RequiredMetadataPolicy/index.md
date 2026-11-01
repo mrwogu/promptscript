@@ -6,7 +6,7 @@
 
 # Interface: RequiredMetadataPolicy
 
-Defined in: [core/src/types/policy.ts:92](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L92)
+Defined in: [core/src/types/policy.ts:92](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L92)
 
 Required-metadata policy: matched prompts must set governance fields.
 
@@ -20,7 +20,7 @@ Required-metadata policy: matched prompts must set governance fields.
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/policy.ts:32](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L32)
+Defined in: [core/src/types/policy.ts:32](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L32)
 
 Human-readable description
 
@@ -34,7 +34,7 @@ Human-readable description
 
 > **fields**: (keyof [`GovernanceMeta`](https://getpromptscript.dev/api-reference/core/src/interfaces/GovernanceMeta/index.md))[]
 
-Defined in: [core/src/types/policy.ts:101](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L101)
+Defined in: [core/src/types/policy.ts:101](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L101)
 
 Governance fields every matched prompt must have
 
@@ -52,7 +52,7 @@ true
 
 > **kind**: `"required-metadata"`
 
-Defined in: [core/src/types/policy.ts:93](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L93)
+Defined in: [core/src/types/policy.ts:93](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L93)
 
 Policy kind discriminator
 
@@ -66,7 +66,7 @@ Policy kind discriminator
 
 > `optional` **match?**: [`PromptPolicyMatch`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptPolicyMatch/index.md)
 
-Defined in: [core/src/types/policy.ts:95](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L95)
+Defined in: [core/src/types/policy.ts:95](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L95)
 
 Prompts the policy applies to
 
@@ -76,7 +76,7 @@ Prompts the policy applies to
 
 > **name**: `string`
 
-Defined in: [core/src/types/policy.ts:30](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L30)
+Defined in: [core/src/types/policy.ts:30](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L30)
 
 Unique policy name within the config
 
@@ -90,7 +90,7 @@ Unique policy name within the config
 
 > **severity**: [`PolicySeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicySeverity/index.md)
 
-Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L36)
+Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L36)
 
 Violation severity
 

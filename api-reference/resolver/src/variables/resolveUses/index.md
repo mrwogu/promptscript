@@ -8,7 +8,7 @@
 
 > `const` **resolveUses**: (`target`, `declaration`, `imported`) => [`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md) = `resolveUseImport`
 
-Defined in: [resolver/src/imports.ts:10](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/imports.ts#L10)
+Defined in: [resolver/src/imports.ts:10](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/imports.ts#L10)
 
 Merge one resolved top-level import into a program.
 

@@ -6,7 +6,7 @@
 
 # Class: GitRefNotFoundError
 
-Defined in: [resolver/src/git-registry.ts:160](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/git-registry.ts#L160)
+Defined in: [resolver/src/git-registry.ts:160](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/git-registry.ts#L160)
 
 Git ref not found error.
 
@@ -20,7 +20,7 @@ Git ref not found error.
 
 > **new GitRefNotFoundError**(`ref`, `url`): `GitRefNotFoundError`
 
-Defined in: [resolver/src/git-registry.ts:161](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/git-registry.ts#L161)
+Defined in: [resolver/src/git-registry.ts:161](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/git-registry.ts#L161)
 
 #### Parameters
 
@@ -46,7 +46,7 @@ Defined in: [resolver/src/git-registry.ts:161](https://github.com/mrwogu/prompts
 
 > `readonly` **ref**: `string`
 
-Defined in: [resolver/src/git-registry.ts:162](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/git-registry.ts#L162)
+Defined in: [resolver/src/git-registry.ts:162](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/git-registry.ts#L162)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [resolver/src/git-registry.ts:162](https://github.com/mrwogu/prompts
 
 > `readonly` **url**: `string`
 
-Defined in: [resolver/src/git-registry.ts:163](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/git-registry.ts#L163)
+Defined in: [resolver/src/git-registry.ts:163](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/git-registry.ts#L163)

@@ -6,7 +6,7 @@
 
 # Interface: ObjectContent
 
-Defined in: [core/src/types/ast.ts:417](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L417)
+Defined in: [core/src/types/ast.ts:417](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L417)
 
 Object/map content with key-value pairs.
 
@@ -20,7 +20,7 @@ Object/map content with key-value pairs.
 
 > `optional` **inlineUses?**: [`InlineUseDeclaration`](https://getpromptscript.dev/api-reference/core/src/interfaces/InlineUseDeclaration/index.md)[]
 
-Defined in: [core/src/types/ast.ts:424](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L424)
+Defined in: [core/src/types/ast.ts:424](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L424)
 
 Inline
 
@@ -34,7 +34,7 @@ declarations (consumed by resolver, ephemeral)
 
 > `optional` **listItems?**: [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)[]
 
-Defined in: [core/src/types/ast.ts:422](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L422)
+Defined in: [core/src/types/ast.ts:422](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L422)
 
 Dash-list entries interleaved with properties
 
@@ -44,7 +44,7 @@ Dash-list entries interleaved with properties
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -58,7 +58,7 @@ Source location
 
 > **properties**: `Record`\<`string`, [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)\>
 
-Defined in: [core/src/types/ast.ts:420](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L420)
+Defined in: [core/src/types/ast.ts:420](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L420)
 
 Properties
 
@@ -68,7 +68,7 @@ Properties
 
 > `readonly` **type**: `"ObjectContent"`
 
-Defined in: [core/src/types/ast.ts:418](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L418)
+Defined in: [core/src/types/ast.ts:418](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L418)
 
 Node type discriminator
 

@@ -6,7 +6,7 @@
 
 # Interface: CompositionOptions
 
-Defined in: [resolver/src/skill-composition.ts:40](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/skill-composition.ts#L40)
+Defined in: [resolver/src/skill-composition.ts:40](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/skill-composition.ts#L40)
 
 Options for skill composition resolution.
 
@@ -16,7 +16,7 @@ Options for skill composition resolution.
 
 > **currentFile**: `string`
 
-Defined in: [resolver/src/skill-composition.ts:49](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/skill-composition.ts#L49)
+Defined in: [resolver/src/skill-composition.ts:49](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/skill-composition.ts#L49)
 
 Absolute path of the file being resolved (for cycle detection).
 
@@ -26,7 +26,7 @@ Absolute path of the file being resolved (for cycle detection).
 
 > `optional` **depth?**: `number`
 
-Defined in: [resolver/src/skill-composition.ts:53](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/skill-composition.ts#L53)
+Defined in: [resolver/src/skill-composition.ts:53](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/skill-composition.ts#L53)
 
 Current nesting depth (0-based).
 
@@ -36,7 +36,7 @@ Current nesting depth (0-based).
 
 > `optional` **resolutionStack?**: `Set`\<`string`\>
 
-Defined in: [resolver/src/skill-composition.ts:51](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/skill-composition.ts#L51)
+Defined in: [resolver/src/skill-composition.ts:51](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/skill-composition.ts#L51)
 
 Accumulated resolution stack for cycle detection.
 
@@ -46,7 +46,7 @@ Accumulated resolution stack for cycle detection.
 
 > **resolveFile**: (`absPath`, `context?`) => `Promise`\<[`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md) \| `ResolvedCompositionFile`\>
 
-Defined in: [resolver/src/skill-composition.ts:42](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/skill-composition.ts#L42)
+Defined in: [resolver/src/skill-composition.ts:42](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/skill-composition.ts#L42)
 
 Resolve a sub-skill file through the full resolver pipeline.
 
@@ -70,7 +70,7 @@ Resolve a sub-skill file through the full resolver pipeline.
 
 > **resolvePath**: (`ref`, `fromFile`) => `string`
 
-Defined in: [resolver/src/skill-composition.ts:47](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/skill-composition.ts#L47)
+Defined in: [resolver/src/skill-composition.ts:47](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/skill-composition.ts#L47)
 
 Resolve a path reference string to an absolute path.
 

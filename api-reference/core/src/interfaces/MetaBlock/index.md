@@ -6,7 +6,7 @@
 
 # Interface: MetaBlock
 
-Defined in: [core/src/types/ast.ts:174](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L174)
+Defined in: [core/src/types/ast.ts:174](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L174)
 
 Metadata block containing file identification.
 
@@ -33,7 +33,7 @@ Metadata block containing file identification.
 
 > **fields**: `Record`\<`string`, [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)\>
 
-Defined in: [core/src/types/ast.ts:177](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L177)
+Defined in: [core/src/types/ast.ts:177](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L177)
 
 Key-value pairs
 
@@ -43,7 +43,7 @@ Key-value pairs
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -57,7 +57,7 @@ Source location
 
 > `optional` **params?**: [`ParamDefinition`](https://getpromptscript.dev/api-reference/core/src/interfaces/ParamDefinition/index.md)[]
 
-Defined in: [core/src/types/ast.ts:179](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L179)
+Defined in: [core/src/types/ast.ts:179](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L179)
 
 Template parameter definitions (for parameterized inheritance)
 
@@ -67,7 +67,7 @@ Template parameter definitions (for parameterized inheritance)
 
 > `readonly` **type**: `"MetaBlock"`
 
-Defined in: [core/src/types/ast.ts:175](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L175)
+Defined in: [core/src/types/ast.ts:175](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L175)
 
 Node type discriminator
 

@@ -6,7 +6,7 @@
 
 # Interface: PromptReleaseLabelEntryV2
 
-Defined in: [core/src/types/prompt-bundle.ts:277](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L277)
+Defined in: [core/src/types/prompt-bundle.ts:277](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L277)
 
 One prompt a v2 release label points at, with an optional experiment.
 
@@ -20,7 +20,7 @@ One prompt a v2 release label points at, with an optional experiment.
 
 > **contentHash**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:196](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L196)
+Defined in: [core/src/types/prompt-bundle.ts:196](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L196)
 
 Content hash of the released bundle.
 
@@ -38,7 +38,7 @@ Content hash of the released bundle.
 
 > `optional` **experiment?**: [`PromptReleaseExperiment`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptReleaseExperiment/index.md)
 
-Defined in: [core/src/types/prompt-bundle.ts:279](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L279)
+Defined in: [core/src/types/prompt-bundle.ts:279](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L279)
 
 Arms assigned by key. Without a key, readers serve `contentHash`.
 
@@ -48,7 +48,7 @@ Arms assigned by key. Without a key, readers serve `contentHash`.
 
 > **id**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:191](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L191)
+Defined in: [core/src/types/prompt-bundle.ts:191](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L191)
 
 Prompt id.
 

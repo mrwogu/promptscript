@@ -6,7 +6,7 @@
 
 # Interface: ProviderConfig
 
-Defined in: [eval/src/http-provider.ts:15](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/http-provider.ts#L15)
+Defined in: [eval/src/http-provider.ts:15](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/http-provider.ts#L15)
 
 Settings of one HTTP provider.
 
@@ -16,7 +16,7 @@ Settings of one HTTP provider.
 
 > `optional` **allowedHosts?**: readonly `string`[]
 
-Defined in: [eval/src/http-provider.ts:25](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/http-provider.ts#L25)
+Defined in: [eval/src/http-provider.ts:25](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/http-provider.ts#L25)
 
 Hosts allowed besides the built-in defaults, from `--allow-host`
 
@@ -26,7 +26,7 @@ Hosts allowed besides the built-in defaults, from `--allow-host`
 
 > `optional` **allowLocal?**: `boolean`
 
-Defined in: [eval/src/http-provider.ts:27](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/http-provider.ts#L27)
+Defined in: [eval/src/http-provider.ts:27](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/http-provider.ts#L27)
 
 Allow loopback hosts, and plain http for them, from `--allow-local`
 
@@ -36,7 +36,7 @@ Allow loopback hosts, and plain http for them, from `--allow-local`
 
 > **apiKey**: () => `string`
 
-Defined in: [eval/src/http-provider.ts:21](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/http-provider.ts#L21)
+Defined in: [eval/src/http-provider.ts:21](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/http-provider.ts#L21)
 
 Returns the API key; read at call time and never stored
 
@@ -50,7 +50,7 @@ Returns the API key; read at call time and never stored
 
 > **baseUrl**: `string`
 
-Defined in: [eval/src/http-provider.ts:19](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/http-provider.ts#L19)
+Defined in: [eval/src/http-provider.ts:19](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/http-provider.ts#L19)
 
 API base URL
 
@@ -60,7 +60,7 @@ API base URL
 
 > **name**: `string`
 
-Defined in: [eval/src/http-provider.ts:17](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/http-provider.ts#L17)
+Defined in: [eval/src/http-provider.ts:17](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/http-provider.ts#L17)
 
 Name of the provider entry, such as `anthropic`; messages name it
 
@@ -70,7 +70,7 @@ Name of the provider entry, such as `anthropic`; messages name it
 
 > `optional` **secrets?**: () => readonly `string`[]
 
-Defined in: [eval/src/http-provider.ts:23](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/http-provider.ts#L23)
+Defined in: [eval/src/http-provider.ts:23](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/http-provider.ts#L23)
 
 Other values to keep out of error echoes, such as every environment value
 
@@ -84,6 +84,6 @@ readonly `string`[]
 
 > `optional` **timeoutMs?**: `number`
 
-Defined in: [eval/src/http-provider.ts:29](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/http-provider.ts#L29)
+Defined in: [eval/src/http-provider.ts:29](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/http-provider.ts#L29)
 
 Time limit of one call in milliseconds, response body included; default 60000

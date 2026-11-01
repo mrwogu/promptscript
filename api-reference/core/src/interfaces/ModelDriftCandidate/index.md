@@ -6,7 +6,7 @@
 
 # Interface: ModelDriftCandidate
 
-Defined in: [core/src/model-drift.ts:46](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-drift.ts#L46)
+Defined in: [core/src/model-drift.ts:46](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-drift.ts#L46)
 
 A new release of a family the catalog already tracks.
 
@@ -16,7 +16,7 @@ A new release of a family the catalog already tracks.
 
 > `readonly` **displayName**: `string`
 
-Defined in: [core/src/model-drift.ts:54](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-drift.ts#L54)
+Defined in: [core/src/model-drift.ts:54](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-drift.ts#L54)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [core/src/model-drift.ts:54](https://github.com/mrwogu/promptscript/
 
 > `readonly` **family**: `string`
 
-Defined in: [core/src/model-drift.ts:49](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-drift.ts#L49)
+Defined in: [core/src/model-drift.ts:49](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-drift.ts#L49)
 
 The catalog family the release belongs to.
 
@@ -34,7 +34,7 @@ The catalog family the release belongs to.
 
 > `readonly` **id**: `string`
 
-Defined in: [core/src/model-drift.ts:53](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-drift.ts#L53)
+Defined in: [core/src/model-drift.ts:53](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-drift.ts#L53)
 
 Catalog id for the new release.
 
@@ -44,7 +44,7 @@ Catalog id for the new release.
 
 > `readonly` `optional` **pricing?**: [`OpenRouterPricing`](https://getpromptscript.dev/api-reference/core/src/type-aliases/OpenRouterPricing/index.md)
 
-Defined in: [core/src/model-drift.ts:58](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-drift.ts#L58)
+Defined in: [core/src/model-drift.ts:58](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-drift.ts#L58)
 
 List price OpenRouter carries, to be verified against the provider page.
 
@@ -54,7 +54,7 @@ List price OpenRouter carries, to be verified against the provider page.
 
 > `readonly` **provider**: `string`
 
-Defined in: [core/src/model-drift.ts:47](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-drift.ts#L47)
+Defined in: [core/src/model-drift.ts:47](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-drift.ts#L47)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [core/src/model-drift.ts:47](https://github.com/mrwogu/promptscript/
 
 > `readonly` **releaseDate**: `string`
 
-Defined in: [core/src/model-drift.ts:55](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-drift.ts#L55)
+Defined in: [core/src/model-drift.ts:55](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-drift.ts#L55)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [core/src/model-drift.ts:55](https://github.com/mrwogu/promptscript/
 
 > `readonly` `optional` **retirementDate?**: `string`
 
-Defined in: [core/src/model-drift.ts:56](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-drift.ts#L56)
+Defined in: [core/src/model-drift.ts:56](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-drift.ts#L56)
 
 ***
 
@@ -78,6 +78,6 @@ Defined in: [core/src/model-drift.ts:56](https://github.com/mrwogu/promptscript/
 
 > `readonly` **version**: `string`
 
-Defined in: [core/src/model-drift.ts:51](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-drift.ts#L51)
+Defined in: [core/src/model-drift.ts:51](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-drift.ts#L51)
 
 Version inside the family (e.g. '4.5').

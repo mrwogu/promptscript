@@ -6,7 +6,7 @@
 
 # Interface: RiskFloorPolicy
 
-Defined in: [core/src/types/policy.ts:132](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L132)
+Defined in: [core/src/types/policy.ts:132](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L132)
 
 Risk-floor policy: derives a minimum risk from data classes, domains and input
 types. Every other policy matches on the higher of authored risk and this floor.
@@ -21,7 +21,7 @@ types. Every other policy matches on the higher of authored risk and this floor.
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/policy.ts:32](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L32)
+Defined in: [core/src/types/policy.ts:32](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L32)
 
 Human-readable description
 
@@ -35,7 +35,7 @@ Human-readable description
 
 > **floors**: [`RiskFloorRow`](https://getpromptscript.dev/api-reference/core/src/interfaces/RiskFloorRow/index.md)[]
 
-Defined in: [core/src/types/policy.ts:138](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L138)
+Defined in: [core/src/types/policy.ts:138](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L138)
 
 Rows; the floor is the highest `minimum` of the matching rows
 
@@ -49,7 +49,7 @@ Rows; the floor is the highest `minimum` of the matching rows
 
 > **kind**: `"risk-floor"`
 
-Defined in: [core/src/types/policy.ts:133](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L133)
+Defined in: [core/src/types/policy.ts:133](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L133)
 
 Policy kind discriminator
 
@@ -63,7 +63,7 @@ Policy kind discriminator
 
 > **name**: `string`
 
-Defined in: [core/src/types/policy.ts:30](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L30)
+Defined in: [core/src/types/policy.ts:30](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L30)
 
 Unique policy name within the config
 
@@ -77,7 +77,7 @@ Unique policy name within the config
 
 > **severity**: [`PolicySeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicySeverity/index.md)
 
-Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L36)
+Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L36)
 
 Violation severity
 

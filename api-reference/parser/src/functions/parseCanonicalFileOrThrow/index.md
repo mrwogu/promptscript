@@ -8,7 +8,7 @@
 
 > **parseCanonicalFileOrThrow**(`filePath`, `options?`): [`CanonicalProgram`](https://getpromptscript.dev/api-reference/core/src/interfaces/CanonicalProgram/index.md)
 
-Defined in: [parser/src/parse.ts:354](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/parser/src/parse.ts#L354)
+Defined in: [parser/src/parse.ts:354](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/parser/src/parse.ts#L354)
 
 Parse a PromptScript file into the canonical AST, throwing on error.
 

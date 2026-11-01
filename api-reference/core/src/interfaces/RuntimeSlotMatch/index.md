@@ -6,7 +6,7 @@
 
 # Interface: RuntimeSlotMatch
 
-Defined in: [core/src/utils/runtime-slots.ts:5](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/utils/runtime-slots.ts#L5)
+Defined in: [core/src/utils/runtime-slots.ts:5](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/utils/runtime-slots.ts#L5)
 
 One `{{` occurrence found in prompt text.
 
@@ -16,7 +16,7 @@ One `{{` occurrence found in prompt text.
 
 > **kind**: `"slot"` \| `"escaped"` \| `"invalid"`
 
-Defined in: [core/src/utils/runtime-slots.ts:11](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/utils/runtime-slots.ts#L11)
+Defined in: [core/src/utils/runtime-slots.ts:11](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/utils/runtime-slots.ts#L11)
 
 - `slot`: a valid `{{input.<name>}}`
 - `escaped`: `\{{`, rendered as `{{`
@@ -28,7 +28,7 @@ Defined in: [core/src/utils/runtime-slots.ts:11](https://github.com/mrwogu/promp
 
 > **length**: `number`
 
-Defined in: [core/src/utils/runtime-slots.ts:17](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/utils/runtime-slots.ts#L17)
+Defined in: [core/src/utils/runtime-slots.ts:17](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/utils/runtime-slots.ts#L17)
 
 UTF-16 length of the match
 
@@ -38,7 +38,7 @@ UTF-16 length of the match
 
 > **name**: `string` \| `null`
 
-Defined in: [core/src/utils/runtime-slots.ts:13](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/utils/runtime-slots.ts#L13)
+Defined in: [core/src/utils/runtime-slots.ts:13](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/utils/runtime-slots.ts#L13)
 
 Input name for a slot, `null` otherwise
 
@@ -48,6 +48,6 @@ Input name for a slot, `null` otherwise
 
 > **offset**: `number`
 
-Defined in: [core/src/utils/runtime-slots.ts:15](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/utils/runtime-slots.ts#L15)
+Defined in: [core/src/utils/runtime-slots.ts:15](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/utils/runtime-slots.ts#L15)
 
 UTF-16 offset of the match in the text

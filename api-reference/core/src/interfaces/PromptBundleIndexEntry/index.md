@@ -6,7 +6,7 @@
 
 # Interface: PromptBundleIndexEntry
 
-Defined in: [core/src/types/prompt-bundle.ts:149](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L149)
+Defined in: [core/src/types/prompt-bundle.ts:149](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L149)
 
 One prompt listed in a bundle index.
 
@@ -16,7 +16,7 @@ One prompt listed in a bundle index.
 
 > **contentHash**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:166](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L166)
+Defined in: [core/src/types/prompt-bundle.ts:166](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L166)
 
 Content hash of the bundle.
 
@@ -30,7 +30,7 @@ Content hash of the bundle.
 
 > **description**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:161](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L161)
+Defined in: [core/src/types/prompt-bundle.ts:161](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L161)
 
 What the prompt does
 
@@ -40,7 +40,7 @@ What the prompt does
 
 > **file**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:159](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L159)
+Defined in: [core/src/types/prompt-bundle.ts:159](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L159)
 
 Bundle file, relative to the index.
 
@@ -56,7 +56,7 @@ Bundle file, relative to the index.
 
 > **id**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:154](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L154)
+Defined in: [core/src/types/prompt-bundle.ts:154](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L154)
 
 Prompt id.
 

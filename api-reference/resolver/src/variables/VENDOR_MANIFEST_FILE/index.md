@@ -8,4 +8,4 @@
 
 > `const` **VENDOR\_MANIFEST\_FILE**: `".vendor-manifest.json"` = `'.vendor-manifest.json'`
 
-Defined in: [resolver/src/vendor-manifest.ts:9](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/vendor-manifest.ts#L9)
+Defined in: [resolver/src/vendor-manifest.ts:9](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/vendor-manifest.ts#L9)

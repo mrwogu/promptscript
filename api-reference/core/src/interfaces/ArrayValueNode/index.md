@@ -6,7 +6,7 @@
 
 # Interface: ArrayValueNode
 
-Defined in: [core/src/types/ast.ts:543](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L543)
+Defined in: [core/src/types/ast.ts:543](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L543)
 
 Canonical array value.
 
@@ -20,7 +20,7 @@ Canonical array value.
 
 > `readonly` **elements**: readonly [`ArrayElementNode`](https://getpromptscript.dev/api-reference/core/src/interfaces/ArrayElementNode/index.md)[]
 
-Defined in: [core/src/types/ast.ts:545](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L545)
+Defined in: [core/src/types/ast.ts:545](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L545)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [core/src/types/ast.ts:545](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L497)
+Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L497)
 
 #### column
 
@@ -64,7 +64,7 @@ Byte offset from start of file
 
 > `readonly` **type**: `"ArrayValueNode"`
 
-Defined in: [core/src/types/ast.ts:544](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L544)
+Defined in: [core/src/types/ast.ts:544](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L544)
 
 #### Overrides
 

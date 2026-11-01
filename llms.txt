@@ -32,6 +32,7 @@ Every page below is plain Markdown. The whole documentation in one file: https:/
 - [Target Platforms](https://getpromptscript.dev/features/target-platforms/index.md): Configure 50 built-in AI coding agent targets and two prompt targets, and choose native output modes for instructions, skills, agents, integrations, and automation.
 - [Application Prompts](https://getpromptscript.dev/guides/application-prompts/index.md): Write the prompts of an application in .prs files and compile them to content-hashed JSON bundles and Markdown previews with the bundle and prompt-text targets.
 - [Releasing Application Prompts](https://getpromptscript.dev/guides/releases/index.md): Promote content-hashed prompt bundles through staging and production environments with prs release, and keep Git history as the release log.
+- [Evaluating Prompts](https://getpromptscript.dev/guides/evals/index.md): Test application prompts with eval suites: datasets, assertions, an LLM judge, a replay cache you commit, and reports you compare in CI.
 - [AI Tool Hooks](https://getpromptscript.dev/guides/hooks/index.md): Auto-compile .prs files and protect generated outputs using native AI tool hooks
 - [Examples (Few-Shot Prompting)](https://getpromptscript.dev/guides/examples/index.md): Teach AI assistants with structured input/output examples using @examples
 

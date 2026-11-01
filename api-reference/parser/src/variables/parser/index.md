@@ -8,7 +8,7 @@
 
 > `const` **parser**: [`PromptScriptParser`](https://getpromptscript.dev/api-reference/parser/src/classes/PromptScriptParser/index.md)
 
-Defined in: [parser/src/grammar/parser.ts:579](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/parser/src/grammar/parser.ts#L579)
+Defined in: [parser/src/grammar/parser.ts:579](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/parser/src/grammar/parser.ts#L579)
 
 Legacy parser instance kept for direct consumers of the parser API.
 

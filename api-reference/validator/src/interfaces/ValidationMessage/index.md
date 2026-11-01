@@ -6,7 +6,7 @@
 
 # Interface: ValidationMessage
 
-Defined in: [validator/src/types.ts:22](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L22)
+Defined in: [validator/src/types.ts:22](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/validator/src/types.ts#L22)
 
 A validation message produced by a rule.
 
@@ -16,7 +16,7 @@ A validation message produced by a rule.
 
 > `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [validator/src/types.ts:32](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L32)
+Defined in: [validator/src/types.ts:32](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/validator/src/types.ts#L32)
 
 Source location where the issue was found
 
@@ -26,7 +26,7 @@ Source location where the issue was found
 
 > **message**: `string`
 
-Defined in: [validator/src/types.ts:30](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L30)
+Defined in: [validator/src/types.ts:30](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/validator/src/types.ts#L30)
 
 Human-readable message
 
@@ -36,7 +36,7 @@ Human-readable message
 
 > **ruleId**: `string`
 
-Defined in: [validator/src/types.ts:24](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L24)
+Defined in: [validator/src/types.ts:24](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/validator/src/types.ts#L24)
 
 Rule identifier (e.g., "PS001")
 
@@ -46,7 +46,7 @@ Rule identifier (e.g., "PS001")
 
 > **ruleName**: `string`
 
-Defined in: [validator/src/types.ts:26](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L26)
+Defined in: [validator/src/types.ts:26](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/validator/src/types.ts#L26)
 
 Rule name (e.g., "required-meta-id")
 
@@ -56,7 +56,7 @@ Rule name (e.g., "required-meta-id")
 
 > **severity**: [`Severity`](https://getpromptscript.dev/api-reference/validator/src/type-aliases/Severity/index.md)
 
-Defined in: [validator/src/types.ts:28](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L28)
+Defined in: [validator/src/types.ts:28](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/validator/src/types.ts#L28)
 
 Message severity
 
@@ -66,6 +66,6 @@ Message severity
 
 > `optional` **suggestion?**: `string`
 
-Defined in: [validator/src/types.ts:34](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L34)
+Defined in: [validator/src/types.ts:34](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/validator/src/types.ts#L34)
 
 Suggested fix

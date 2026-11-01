@@ -6,7 +6,7 @@
 
 # Interface: ModelInvocation
 
-Defined in: [core/src/types/prompts.ts:61](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L61)
+Defined in: [core/src/types/prompts.ts:61](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompts.ts#L61)
 
 A model catalog reference plus invocation parameters.
 
@@ -16,7 +16,7 @@ A model catalog reference plus invocation parameters.
 
 > **params**: [`ModelParams`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelParams/index.md)
 
-Defined in: [core/src/types/prompts.ts:65](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L65)
+Defined in: [core/src/types/prompts.ts:65](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompts.ts#L65)
 
 Invocation parameters
 
@@ -26,6 +26,6 @@ Invocation parameters
 
 > **ref**: `string`
 
-Defined in: [core/src/types/prompts.ts:63](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L63)
+Defined in: [core/src/types/prompts.ts:63](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompts.ts#L63)
 
 Model catalog reference as authored

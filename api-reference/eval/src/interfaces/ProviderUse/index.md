@@ -6,7 +6,7 @@
 
 # Interface: ProviderUse
 
-Defined in: [eval/src/provider-setup.ts:13](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/provider-setup.ts#L13)
+Defined in: [eval/src/provider-setup.ts:13](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/provider-setup.ts#L13)
 
 A provider the run will call, announced before its first call.
 
@@ -16,7 +16,7 @@ A provider the run will call, announced before its first call.
 
 > **host**: `string`
 
-Defined in: [eval/src/provider-setup.ts:19](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/provider-setup.ts#L19)
+Defined in: [eval/src/provider-setup.ts:19](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/provider-setup.ts#L19)
 
 Host the key is sent to
 
@@ -26,7 +26,7 @@ Host the key is sent to
 
 > **keyVariable**: `string`
 
-Defined in: [eval/src/provider-setup.ts:17](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/provider-setup.ts#L17)
+Defined in: [eval/src/provider-setup.ts:17](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/provider-setup.ts#L17)
 
 Environment variable the key is read from
 
@@ -36,6 +36,6 @@ Environment variable the key is read from
 
 > **provider**: `string`
 
-Defined in: [eval/src/provider-setup.ts:15](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/provider-setup.ts#L15)
+Defined in: [eval/src/provider-setup.ts:15](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/provider-setup.ts#L15)
 
 Provider name

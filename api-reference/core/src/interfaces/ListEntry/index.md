@@ -6,7 +6,7 @@
 
 # Interface: ListEntry
 
-Defined in: [core/src/types/ast.ts:598](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L598)
+Defined in: [core/src/types/ast.ts:598](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L598)
 
 Canonical dash-list entry.
 
@@ -20,7 +20,7 @@ Canonical dash-list entry.
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L497)
+Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L497)
 
 #### column
 
@@ -56,7 +56,7 @@ Byte offset from start of file
 
 > `readonly` **type**: `"ListEntry"`
 
-Defined in: [core/src/types/ast.ts:599](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L599)
+Defined in: [core/src/types/ast.ts:599](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L599)
 
 #### Overrides
 
@@ -68,4 +68,4 @@ Defined in: [core/src/types/ast.ts:599](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **value**: [`ValueNode`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ValueNode/index.md)
 
-Defined in: [core/src/types/ast.ts:600](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L600)
+Defined in: [core/src/types/ast.ts:600](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L600)

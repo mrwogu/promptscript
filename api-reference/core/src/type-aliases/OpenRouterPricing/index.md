@@ -8,6 +8,6 @@
 
 > **OpenRouterPricing** = `Pick`\<[`ModelPricing`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelPricing/index.md), `"inputUsdPerMillion"` \| `"outputUsdPerMillion"`\>
 
-Defined in: [core/src/model-drift.ts:19](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-drift.ts#L19)
+Defined in: [core/src/model-drift.ts:19](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-drift.ts#L19)
 
 List price OpenRouter carries for a model, in USD per million tokens.

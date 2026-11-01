@@ -8,7 +8,7 @@
 
 > **findAgentConflicts**(`target`, `source`, `sourceImportPath`, `importLocation?`): [`AgentConflict`](https://getpromptscript.dev/api-reference/core/src/interfaces/AgentConflict/index.md)[]
 
-Defined in: [core/src/agent-names.ts:151](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/agent-names.ts#L151)
+Defined in: [core/src/agent-names.ts:151](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/agent-names.ts#L151)
 
 Collect conflicting agent definitions before a merge.
 

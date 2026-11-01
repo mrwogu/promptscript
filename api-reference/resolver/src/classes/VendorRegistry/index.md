@@ -6,7 +6,7 @@
 
 # Class: VendorRegistry
 
-Defined in: [resolver/src/vendor-registry.ts:22](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/vendor-registry.ts#L22)
+Defined in: [resolver/src/vendor-registry.ts:22](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/vendor-registry.ts#L22)
 
 Registry that reads from a local vendor directory (e.g. .promptscript/vendor/).
 Used for offline/CI builds where network access is restricted.
@@ -22,7 +22,7 @@ Takes priority over network registries when placed first in a CompositeRegistry.
 
 > **new VendorRegistry**(`vendorDir`): `VendorRegistry`
 
-Defined in: [resolver/src/vendor-registry.ts:23](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/vendor-registry.ts#L23)
+Defined in: [resolver/src/vendor-registry.ts:23](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/vendor-registry.ts#L23)
 
 #### Parameters
 
@@ -40,7 +40,7 @@ Defined in: [resolver/src/vendor-registry.ts:23](https://github.com/mrwogu/promp
 
 > **exists**(`path`): `Promise`\<`boolean`\>
 
-Defined in: [resolver/src/vendor-registry.ts:51](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/vendor-registry.ts#L51)
+Defined in: [resolver/src/vendor-registry.ts:51](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/vendor-registry.ts#L51)
 
 Check if a file exists in the vendor directory.
 
@@ -68,7 +68,7 @@ True if the file exists
 
 > **fetch**(`path`): `Promise`\<`string`\>
 
-Defined in: [resolver/src/vendor-registry.ts:32](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/vendor-registry.ts#L32)
+Defined in: [resolver/src/vendor-registry.ts:32](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/vendor-registry.ts#L32)
 
 Fetch the content of a vendored file.
 
@@ -100,7 +100,7 @@ FileNotFoundError if the file is not in the vendor directory
 
 > **list**(`path`): `Promise`\<`string`[]\>
 
-Defined in: [resolver/src/vendor-registry.ts:66](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/vendor-registry.ts#L66)
+Defined in: [resolver/src/vendor-registry.ts:66](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/vendor-registry.ts#L66)
 
 List entries in a vendor subdirectory.
 

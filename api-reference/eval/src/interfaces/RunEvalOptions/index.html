@@ -72,21 +72,21 @@
 	StarlightThemeProvider.updatePickers();
 </script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-b56t5n4m"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-wev4cowi"><aside class="right-sidebar-container print:hidden astro-wev4cowi"><div class="right-sidebar astro-wev4cowi"><div class="lg:sl-hidden astro-7skzcknv"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-f6vzfndy"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-f6vzfndy"><details id="starlight__mobile-toc" class="astro-f6vzfndy"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-f6vzfndy"><span class="toggle sl-flex astro-f6vzfndy">On this page<svg aria-hidden="true" class="caret astro-f6vzfndy astro-rmctsetc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-f6vzfndy"></span></summary><div class="dropdown astro-f6vzfndy"><ul class="isMobile astro-bt6hbrvn" style="--depth: 0;"><li style="--depth: 0;" class="astro-bt6hbrvn"><a href="#_top" style="--depth: 0;" class="astro-bt6hbrvn"><span style="--depth: 0;" class="astro-bt6hbrvn">Overview</span></a></li><li style="--depth: 0;" class="astro-bt6hbrvn"><a href="#properties" style="--depth: 0;" class="astro-bt6hbrvn"><span style="--depth: 0;" class="astro-bt6hbrvn">Properties</span></a><ul class="isMobile astro-bt6hbrvn" style="--depth: 1;"><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#allowedpatterns" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">allowedPatterns?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#budget" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">budget?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#bundles" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">bundles</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#cache" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">cache</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#catalog" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">catalog</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#concurrency" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">concurrency?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#maxcases" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">maxCases?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#maxoutputtokens" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">maxOutputTokens?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#modeloverride" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">modelOverride?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#onprogress" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">onProgress?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#projectroot" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">projectRoot</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#providers" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">providers</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#retrybasems" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">retryBaseMs?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#rubrics" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">rubrics?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#signal" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">signal?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#suites" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">suites</span></a></li></ul></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-7skzcknv"><div class="sl-container astro-7skzcknv"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-bt6hbrvn" style="--depth: 0;"><li style="--depth: 0;" class="astro-bt6hbrvn"><a href="#_top" style="--depth: 0;" class="astro-bt6hbrvn"><span style="--depth: 0;" class="astro-bt6hbrvn">Overview</span></a></li><li style="--depth: 0;" class="astro-bt6hbrvn"><a href="#properties" style="--depth: 0;" class="astro-bt6hbrvn"><span style="--depth: 0;" class="astro-bt6hbrvn">Properties</span></a><ul class="astro-bt6hbrvn" style="--depth: 1;"><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#allowedpatterns" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">allowedPatterns?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#budget" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">budget?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#bundles" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">bundles</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#cache" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">cache</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#catalog" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">catalog</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#concurrency" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">concurrency?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#maxcases" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">maxCases?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#maxoutputtokens" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">maxOutputTokens?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#modeloverride" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">modelOverride?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#onprogress" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">onProgress?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#projectroot" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">projectRoot</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#providers" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">providers</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#retrybasems" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">retryBaseMs?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#rubrics" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">rubrics?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#signal" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">signal?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#suites" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">suites</span></a></li></ul></li></ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-wev4cowi"><main data-pagefind-body class="astro-m7l5bppj" lang="en" dir="ltr"><div class="content-panel astro-oidld6ms"><div class="sl-container astro-oidld6ms"><h1 id="_top" class="astro-cadt3647">RunEvalOptions</h1><script type="module">document.querySelectorAll(`[data-copy-page]`).forEach(e=>{let t=e.textContent;e.addEventListener(`click`,async()=>{try{let t=new URL(e.dataset.copyPage??``).pathname,n=await fetch(t);if(!n.ok)throw Error(`HTTP ${n.status}`);await navigator.clipboard.writeText(await n.text()),e.textContent=`Copied`}catch{e.textContent=`Copy failed`}setTimeout(()=>e.textContent=t,2e3)})});</script></div></div><div class="content-panel astro-oidld6ms"><div class="sl-container astro-oidld6ms"><div class="sl-markdown-content"><p><a href="/api-reference/"><strong>PromptScript API</strong></a></p>
 <hr>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L58">eval/src/run.ts:58</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L58">eval/src/run.ts:58</a></p>
 <p>Options of <a href="/api-reference/eval/src/functions/runEval/">runEval</a>.</p>
 <h2 id="properties">Properties</h2>
 <h3 id="allowedpatterns">allowedPatterns?</h3>
 <blockquote>
 <p><code>optional</code> <strong>allowedPatterns?</strong>: readonly <code>string</code>[]</p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L87">eval/src/run.ts:87</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L87">eval/src/run.ts:87</a></p>
 <p><code>validation.allowedPatterns</code> of the project, for the dataset scan</p>
 <hr>
 <h3 id="budget">budget?</h3>
 <blockquote>
 <p><code>optional</code> <strong>budget?</strong>: <code>object</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L77">eval/src/run.ts:77</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L77">eval/src/run.ts:77</a></p>
 <p>Spending limit in USD; required by every mode that calls a provider</p>
 <h4 id="maxcostusd">maxCostUsd</h4>
 <blockquote>
@@ -97,14 +97,14 @@
 <blockquote>
 <p><strong>bundles</strong>: readonly <a href="/api-reference/core/src/interfaces/PromptBundleV1/"><code>PromptBundleV1</code></a>[]</p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L64">eval/src/run.ts:64</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L64">eval/src/run.ts:64</a></p>
 <p>Prompt bundles the project compiles; each is verified again before use</p>
 <hr>
 <h3 id="cache">cache</h3>
 <blockquote>
 <p><strong>cache</strong>: <code>object</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L75">eval/src/run.ts:75</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L75">eval/src/run.ts:75</a></p>
 <p>Cache mode and directory, relative to the project root</p>
 <h4 id="dir">dir</h4>
 <blockquote>
@@ -119,42 +119,42 @@
 <blockquote>
 <p><strong>catalog</strong>: <a href="/api-reference/core/src/interfaces/ModelCatalog/"><code>ModelCatalog</code></a></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L71">eval/src/run.ts:71</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L71">eval/src/run.ts:71</a></p>
 <p>Model catalog with the project’s profiles</p>
 <hr>
 <h3 id="concurrency">concurrency?</h3>
 <blockquote>
 <p><code>optional</code> <strong>concurrency?</strong>: <code>number</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L81">eval/src/run.ts:81</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L81">eval/src/run.ts:81</a></p>
 <p>Calls in flight at once; default 4, at most 16</p>
 <hr>
 <h3 id="maxcases">maxCases?</h3>
 <blockquote>
 <p><code>optional</code> <strong>maxCases?</strong>: <code>number</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L79">eval/src/run.ts:79</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L79">eval/src/run.ts:79</a></p>
 <p>Row limit of a dataset; default 1000</p>
 <hr>
 <h3 id="maxoutputtokens">maxOutputTokens?</h3>
 <blockquote>
 <p><code>optional</code> <strong>maxOutputTokens?</strong>: <code>number</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L83">eval/src/run.ts:83</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L83">eval/src/run.ts:83</a></p>
 <p>Output token cap when a prompt sets no <code>maxTokens</code>; default 1024</p>
 <hr>
 <h3 id="modeloverride">modelOverride?</h3>
 <blockquote>
 <p><code>optional</code> <strong>modelOverride?</strong>: <code>string</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L85">eval/src/run.ts:85</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L85">eval/src/run.ts:85</a></p>
 <p>Run every suite on this model only</p>
 <hr>
 <h3 id="onprogress">onProgress?</h3>
 <blockquote>
 <p><code>optional</code> <strong>onProgress?</strong>: (<code>event</code>) => <code>void</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L91">eval/src/run.ts:91</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L91">eval/src/run.ts:91</a></p>
 <p>Receives warnings and finished cases; after it throws once it gets no more</p>
 <h4 id="parameters">Parameters</h4>
 <h5 id="event">event</h5>
@@ -166,28 +166,28 @@
 <blockquote>
 <p><strong>projectRoot</strong>: <code>string</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L60">eval/src/run.ts:60</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L60">eval/src/run.ts:60</a></p>
 <p>Project root directory</p>
 <hr>
 <h3 id="providers">providers</h3>
 <blockquote>
 <p><strong>providers</strong>: <a href="/api-reference/eval/src/interfaces/EvalProviderLookup/"><code>EvalProviderLookup</code></a></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L73">eval/src/run.ts:73</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L73">eval/src/run.ts:73</a></p>
 <p>Provider of a name; called only for calls the cache cannot answer</p>
 <hr>
 <h3 id="retrybasems">retryBaseMs?</h3>
 <blockquote>
 <p><code>optional</code> <strong>retryBaseMs?</strong>: <code>number</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L93">eval/src/run.ts:93</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L93">eval/src/run.ts:93</a></p>
 <p>First retry delay in milliseconds when a provider gives none; default 500</p>
 <hr>
 <h3 id="rubrics">rubrics?</h3>
 <blockquote>
 <p><code>optional</code> <strong>rubrics?</strong>: readonly <a href="/api-reference/core/src/interfaces/PromptBundleV1/"><code>PromptBundleV1</code></a>[]</p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L69">eval/src/run.ts:69</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L69">eval/src/run.ts:69</a></p>
 <p>Bundles judge rubrics are looked up in; defaults to <code>bundles</code>. A rubric is not the
 prompt under test, so it may come from another source than the tested prompt.</p>
 <hr>
@@ -195,12 +195,12 @@ prompt under test, so it may come from another source than the tested prompt.</p
 <blockquote>
 <p><code>optional</code> <strong>signal?</strong>: <code>AbortSignal</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L89">eval/src/run.ts:89</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L89">eval/src/run.ts:89</a></p>
 <p>Stops new calls; finished cases stay in the report</p>
 <hr>
 <h3 id="suites">suites</h3>
 <blockquote>
 <p><strong>suites</strong>: readonly <a href="/api-reference/eval/src/interfaces/LoadedSuite/"><code>LoadedSuite</code></a>[]</p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L62">eval/src/run.ts:62</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/eval/src/run.ts#L62">eval/src/run.ts:62</a></p>
 <p>Suites from <code>loadSuites</code></p></div><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.BDHoxbn-.js"></script><footer class="sl-flex astro-saadddsc"><div class="meta sl-flex astro-saadddsc"></div><div class="pagination-links print:hidden astro-tymgqbsy" dir="ltr"></div></footer><div class="ps-footer astro-jo6i4kqk"><p class="ps-footer__love astro-jo6i4kqk">Loved by a growing community of developers and AI enthusiasts around the world.</p><p class="astro-jo6i4kqk">Created by <a href="https://github.com/mrwogu" rel="author" class="astro-jo6i4kqk">Wojciech Guziak</a> - Released under the <a href="https://github.com/mrwogu/promptscript/blob/main/LICENSE" class="astro-jo6i4kqk">MIT License</a></p><p class="ps-footer__links astro-jo6i4kqk"><a href="https://github.com/mrwogu/promptscript" class="astro-jo6i4kqk">GitHub</a><a href="https://www.linkedin.com/in/wojciechguziak/" rel="author" class="astro-jo6i4kqk">LinkedIn</a><a href="https://www.npmjs.com/org/promptscript" class="astro-jo6i4kqk">npm</a><a href="https://github.com/mrwogu/promptscript/releases" class="astro-jo6i4kqk">Changelog</a><a href="/playground/" class="astro-jo6i4kqk">Playground</a></p></div></div></div></main></div></div></div></div></body></html>

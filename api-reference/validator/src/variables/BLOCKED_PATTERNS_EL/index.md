@@ -8,6 +8,6 @@
 
 > `const` **BLOCKED\_PATTERNS\_EL**: `RegExp`[]
 
-Defined in: [validator/src/rules/blocked-patterns.ts:424](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/rules/blocked-patterns.ts#L424)
+Defined in: [validator/src/rules/blocked-patterns.ts:424](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/validator/src/rules/blocked-patterns.ts#L424)
 
 Greek (Ελληνικά) prompt injection patterns.

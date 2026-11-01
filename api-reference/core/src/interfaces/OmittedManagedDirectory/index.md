@@ -6,7 +6,7 @@
 
 # Interface: OmittedManagedDirectory
 
-Defined in: [core/src/output-plan.ts:94](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/output-plan.ts#L94)
+Defined in: [core/src/output-plan.ts:94](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/output-plan.ts#L94)
 
 A managed directory of an output that a formatter omitted.
 
@@ -16,7 +16,7 @@ A managed directory of an output that a formatter omitted.
 
 > **directory**: `string`
 
-Defined in: [core/src/output-plan.ts:98](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/output-plan.ts#L98)
+Defined in: [core/src/output-plan.ts:98](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/output-plan.ts#L98)
 
 Managed directory, project-relative
 
@@ -26,7 +26,7 @@ Managed directory, project-relative
 
 > **owner**: `string`
 
-Defined in: [core/src/output-plan.ts:96](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/output-plan.ts#L96)
+Defined in: [core/src/output-plan.ts:96](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/output-plan.ts#L96)
 
 Target that owns the directory
 
@@ -36,6 +36,6 @@ Target that owns the directory
 
 > **primaryFile**: `string`
 
-Defined in: [core/src/output-plan.ts:100](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/output-plan.ts#L100)
+Defined in: [core/src/output-plan.ts:100](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/output-plan.ts#L100)
 
 File name of the omitted output, for example `index.json`

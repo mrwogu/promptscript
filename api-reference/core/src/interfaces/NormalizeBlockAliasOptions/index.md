@@ -6,7 +6,7 @@
 
 # Interface: NormalizeBlockAliasOptions
 
-Defined in: [core/src/block-aliases.ts:31](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/block-aliases.ts#L31)
+Defined in: [core/src/block-aliases.ts:31](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/block-aliases.ts#L31)
 
 ## Properties
 
@@ -14,4 +14,4 @@ Defined in: [core/src/block-aliases.ts:31](https://github.com/mrwogu/promptscrip
 
 > `readonly` `optional` **preserveDeclarationOrder?**: `boolean`
 
-Defined in: [core/src/block-aliases.ts:32](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/block-aliases.ts#L32)
+Defined in: [core/src/block-aliases.ts:32](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/block-aliases.ts#L32)

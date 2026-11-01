@@ -72,63 +72,63 @@
 	StarlightThemeProvider.updatePickers();
 </script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-b56t5n4m"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-wev4cowi"><aside class="right-sidebar-container print:hidden astro-wev4cowi"><div class="right-sidebar astro-wev4cowi"><div class="lg:sl-hidden astro-7skzcknv"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-f6vzfndy"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-f6vzfndy"><details id="starlight__mobile-toc" class="astro-f6vzfndy"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-f6vzfndy"><span class="toggle sl-flex astro-f6vzfndy">On this page<svg aria-hidden="true" class="caret astro-f6vzfndy astro-rmctsetc" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-f6vzfndy"></span></summary><div class="dropdown astro-f6vzfndy"><ul class="isMobile astro-bt6hbrvn" style="--depth: 0;"><li style="--depth: 0;" class="astro-bt6hbrvn"><a href="#_top" style="--depth: 0;" class="astro-bt6hbrvn"><span style="--depth: 0;" class="astro-bt6hbrvn">Overview</span></a></li><li style="--depth: 0;" class="astro-bt6hbrvn"><a href="#properties" style="--depth: 0;" class="astro-bt6hbrvn"><span style="--depth: 0;" class="astro-bt6hbrvn">Properties</span></a><ul class="isMobile astro-bt6hbrvn" style="--depth: 1;"><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#defaultconvention" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">defaultConvention</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#description" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">description</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#dotdir" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">dotDir</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#hasagents" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">hasAgents</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#hascommands" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">hasCommands</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#hasskills" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">hasSkills</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#hookadaptertarget" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">hookAdapterTarget?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#hooksconfigpath" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">hooksConfigPath?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#mainfileheader" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">mainFileHeader</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#mcpconfigformat" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">mcpConfigFormat?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#mcpconfigpath" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">mcpConfigPath?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#name" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">name</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#outputpath" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">outputPath</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#restrictionstransform" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">restrictionsTransform?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#sectionnames" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">sectionNames?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#skillfilename" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">skillFileName</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#skillsdir" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">skillsDir?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#skillsinmultifile" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">skillsInMultifile?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#unsupportedblocks" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">unsupportedBlocks?</span></a></li></ul></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-7skzcknv"><div class="sl-container astro-7skzcknv"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-bt6hbrvn" style="--depth: 0;"><li style="--depth: 0;" class="astro-bt6hbrvn"><a href="#_top" style="--depth: 0;" class="astro-bt6hbrvn"><span style="--depth: 0;" class="astro-bt6hbrvn">Overview</span></a></li><li style="--depth: 0;" class="astro-bt6hbrvn"><a href="#properties" style="--depth: 0;" class="astro-bt6hbrvn"><span style="--depth: 0;" class="astro-bt6hbrvn">Properties</span></a><ul class="astro-bt6hbrvn" style="--depth: 1;"><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#defaultconvention" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">defaultConvention</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#description" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">description</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#dotdir" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">dotDir</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#hasagents" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">hasAgents</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#hascommands" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">hasCommands</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#hasskills" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">hasSkills</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#hookadaptertarget" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">hookAdapterTarget?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#hooksconfigpath" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">hooksConfigPath?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#mainfileheader" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">mainFileHeader</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#mcpconfigformat" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">mcpConfigFormat?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#mcpconfigpath" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">mcpConfigPath?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#name" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">name</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#outputpath" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">outputPath</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#restrictionstransform" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">restrictionsTransform?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#sectionnames" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">sectionNames?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#skillfilename" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">skillFileName</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#skillsdir" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">skillsDir?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#skillsinmultifile" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">skillsInMultifile?</span></a></li><li style="--depth: 1;" class="astro-bt6hbrvn"><a href="#unsupportedblocks" style="--depth: 1;" class="astro-bt6hbrvn"><span style="--depth: 1;" class="astro-bt6hbrvn">unsupportedBlocks?</span></a></li></ul></li></ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-wev4cowi"><main data-pagefind-body class="astro-m7l5bppj" lang="en" dir="ltr"><div class="content-panel astro-oidld6ms"><div class="sl-container astro-oidld6ms"><h1 id="_top" class="astro-cadt3647">MarkdownFormatterConfig</h1><script type="module">document.querySelectorAll(`[data-copy-page]`).forEach(e=>{let t=e.textContent;e.addEventListener(`click`,async()=>{try{let t=new URL(e.dataset.copyPage??``).pathname,n=await fetch(t);if(!n.ok)throw Error(`HTTP ${n.status}`);await navigator.clipboard.writeText(await n.text()),e.textContent=`Copied`}catch{e.textContent=`Copy failed`}setTimeout(()=>e.textContent=t,2e3)})});</script></div></div><div class="content-panel astro-oidld6ms"><div class="sl-container astro-oidld6ms"><div class="sl-markdown-content"><p><a href="/api-reference/"><strong>PromptScript API</strong></a></p>
 <hr>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L100">formatters/src/markdown-instruction-formatter.ts:100</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L100">formatters/src/markdown-instruction-formatter.ts:100</a></p>
 <p>Configuration for a markdown instruction formatter.</p>
 <h2 id="properties">Properties</h2>
 <h3 id="defaultconvention">defaultConvention</h3>
 <blockquote>
 <p><strong>defaultConvention</strong>: <code>string</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L108">formatters/src/markdown-instruction-formatter.ts:108</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L108">formatters/src/markdown-instruction-formatter.ts:108</a></p>
 <p>Default output convention</p>
 <hr>
 <h3 id="description">description</h3>
 <blockquote>
 <p><strong>description</strong>: <code>string</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L106">formatters/src/markdown-instruction-formatter.ts:106</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L106">formatters/src/markdown-instruction-formatter.ts:106</a></p>
 <p>Human-readable description</p>
 <hr>
 <h3 id="dotdir">dotDir</h3>
 <blockquote>
 <p><strong>dotDir</strong>: <code>string</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L112">formatters/src/markdown-instruction-formatter.ts:112</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L112">formatters/src/markdown-instruction-formatter.ts:112</a></p>
 <p>Dot directory for additional files (e.g. ‘.opencode’)</p>
 <hr>
 <h3 id="hasagents">hasAgents</h3>
 <blockquote>
 <p><strong>hasAgents</strong>: <code>boolean</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L116">formatters/src/markdown-instruction-formatter.ts:116</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L116">formatters/src/markdown-instruction-formatter.ts:116</a></p>
 <p>Whether this formatter supports agents</p>
 <hr>
 <h3 id="hascommands">hasCommands</h3>
 <blockquote>
 <p><strong>hasCommands</strong>: <code>boolean</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L118">formatters/src/markdown-instruction-formatter.ts:118</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L118">formatters/src/markdown-instruction-formatter.ts:118</a></p>
 <p>Whether this formatter supports commands</p>
 <hr>
 <h3 id="hasskills">hasSkills</h3>
 <blockquote>
 <p><strong>hasSkills</strong>: <code>boolean</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L120">formatters/src/markdown-instruction-formatter.ts:120</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L120">formatters/src/markdown-instruction-formatter.ts:120</a></p>
 <p>Whether this formatter supports skills</p>
 <hr>
 <h3 id="hookadaptertarget">hookAdapterTarget?</h3>
 <blockquote>
 <p><code>optional</code> <strong>hookAdapterTarget?</strong>: <code>"claude"</code> | <code>"cursor"</code> | <code>"factory"</code> | <code>"codex"</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L136">formatters/src/markdown-instruction-formatter.ts:136</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L136">formatters/src/markdown-instruction-formatter.ts:136</a></p>
 <p>Hook adapter target name (default: same as formatter name)</p>
 <hr>
 <h3 id="hooksconfigpath">hooksConfigPath?</h3>
 <blockquote>
 <p><code>optional</code> <strong>hooksConfigPath?</strong>: <code>string</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L134">formatters/src/markdown-instruction-formatter.ts:134</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L134">formatters/src/markdown-instruction-formatter.ts:134</a></p>
 <p>Hook settings file path (e.g. ‘.cursor/hooks.json’). If set,</p>
 <h4 id="hooks">Hooks</h4>
 <p>block is emitted to this path.</p>
@@ -137,21 +137,21 @@
 <blockquote>
 <p><strong>mainFileHeader</strong>: <code>string</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L110">formatters/src/markdown-instruction-formatter.ts:110</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L110">formatters/src/markdown-instruction-formatter.ts:110</a></p>
 <p>Main file header (e.g. ’# OPENCODE.md’)</p>
 <hr>
 <h3 id="mcpconfigformat">mcpConfigFormat?</h3>
 <blockquote>
 <p><code>optional</code> <strong>mcpConfigFormat?</strong>: <code>"json"</code> | <code>"toml"</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L132">formatters/src/markdown-instruction-formatter.ts:132</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L132">formatters/src/markdown-instruction-formatter.ts:132</a></p>
 <p>MCP config format (default: ‘json’)</p>
 <hr>
 <h3 id="mcpconfigpath">mcpConfigPath?</h3>
 <blockquote>
 <p><code>optional</code> <strong>mcpConfigPath?</strong>: <code>string</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L130">formatters/src/markdown-instruction-formatter.ts:130</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L130">formatters/src/markdown-instruction-formatter.ts:130</a></p>
 <p>MCP config file path (e.g. ‘.windsurf/mcp_config.json’). If set,</p>
 <h4 id="mcp-servers">Mcp Servers</h4>
 <p>block is emitted to this path.</p>
@@ -160,21 +160,21 @@
 <blockquote>
 <p><strong>name</strong>: <code>string</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L102">formatters/src/markdown-instruction-formatter.ts:102</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L102">formatters/src/markdown-instruction-formatter.ts:102</a></p>
 <p>Formatter name (e.g. ‘opencode’, ‘gemini’)</p>
 <hr>
 <h3 id="outputpath">outputPath</h3>
 <blockquote>
 <p><strong>outputPath</strong>: <code>string</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L104">formatters/src/markdown-instruction-formatter.ts:104</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L104">formatters/src/markdown-instruction-formatter.ts:104</a></p>
 <p>Default output file path (e.g. ‘OPENCODE.md’)</p>
 <hr>
 <h3 id="restrictionstransform">restrictionsTransform?</h3>
 <blockquote>
 <p><code>optional</code> <strong>restrictionsTransform?</strong>: (<code>s</code>) => <code>string</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L128">formatters/src/markdown-instruction-formatter.ts:128</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L128">formatters/src/markdown-instruction-formatter.ts:128</a></p>
 <p>Transform function for restriction items</p>
 <h4 id="parameters">Parameters</h4>
 <h5 id="s">s</h5>
@@ -186,33 +186,33 @@
 <blockquote>
 <p><code>optional</code> <strong>sectionNames?</strong>: <code>Partial</code>&#x3C;<code>Record</code>&#x3C;<a href="/api-reference/formatters/src/type-aliases/SectionNameKey/"><code>SectionNameKey</code></a>, <code>string</code>>></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L126">formatters/src/markdown-instruction-formatter.ts:126</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L126">formatters/src/markdown-instruction-formatter.ts:126</a></p>
 <p>Custom section header names</p>
 <hr>
 <h3 id="skillfilename">skillFileName</h3>
 <blockquote>
 <p><strong>skillFileName</strong>: <code>string</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L114">formatters/src/markdown-instruction-formatter.ts:114</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L114">formatters/src/markdown-instruction-formatter.ts:114</a></p>
 <p>Skill file name (e.g. ‘SKILL.md’ or ‘skill.md’)</p>
 <hr>
 <h3 id="skillsdir">skillsDir?</h3>
 <blockquote>
 <p><code>optional</code> <strong>skillsDir?</strong>: <code>string</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L124">formatters/src/markdown-instruction-formatter.ts:124</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L124">formatters/src/markdown-instruction-formatter.ts:124</a></p>
 <p>Skill directory override (default: <code>&#x3C;dotDir>/skills</code>)</p>
 <hr>
 <h3 id="skillsinmultifile">skillsInMultifile?</h3>
 <blockquote>
 <p><code>optional</code> <strong>skillsInMultifile?</strong>: <code>boolean</code></p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L122">formatters/src/markdown-instruction-formatter.ts:122</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L122">formatters/src/markdown-instruction-formatter.ts:122</a></p>
 <p>Whether skills are included in multifile mode (default: false, only in full)</p>
 <hr>
 <h3 id="unsupportedblocks">unsupportedBlocks?</h3>
 <blockquote>
 <p><code>optional</code> <strong>unsupportedBlocks?</strong>: readonly <code>string</code>[]</p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/markdown-instruction-formatter.ts#L138">formatters/src/markdown-instruction-formatter.ts:138</a></p>
+<p>Defined in: <a href="https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/markdown-instruction-formatter.ts#L138">formatters/src/markdown-instruction-formatter.ts:138</a></p>
 <p>PromptScript blocks omitted by this target with compatibility warnings.</p></div><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.BDHoxbn-.js"></script><footer class="sl-flex astro-saadddsc"><div class="meta sl-flex astro-saadddsc"></div><div class="pagination-links print:hidden astro-tymgqbsy" dir="ltr"></div></footer><div class="ps-footer astro-jo6i4kqk"><p class="ps-footer__love astro-jo6i4kqk">Loved by a growing community of developers and AI enthusiasts around the world.</p><p class="astro-jo6i4kqk">Created by <a href="https://github.com/mrwogu" rel="author" class="astro-jo6i4kqk">Wojciech Guziak</a> - Released under the <a href="https://github.com/mrwogu/promptscript/blob/main/LICENSE" class="astro-jo6i4kqk">MIT License</a></p><p class="ps-footer__links astro-jo6i4kqk"><a href="https://github.com/mrwogu/promptscript" class="astro-jo6i4kqk">GitHub</a><a href="https://www.linkedin.com/in/wojciechguziak/" rel="author" class="astro-jo6i4kqk">LinkedIn</a><a href="https://www.npmjs.com/org/promptscript" class="astro-jo6i4kqk">npm</a><a href="https://github.com/mrwogu/promptscript/releases" class="astro-jo6i4kqk">Changelog</a><a href="/playground/" class="astro-jo6i4kqk">Playground</a></p></div></div></div></main></div></div></div></div></body></html>

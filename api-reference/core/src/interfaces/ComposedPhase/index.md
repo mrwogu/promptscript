@@ -6,7 +6,7 @@
 
 # Interface: ComposedPhase
 
-Defined in: [core/src/types/ast.ts:801](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L801)
+Defined in: [core/src/types/ast.ts:801](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L801)
 
 Metadata about a composed phase in a skill.
 Set by the resolver during skill composition — not user-authored.
@@ -17,7 +17,7 @@ Set by the resolver during skill composition — not user-authored.
 
 > `optional` **alias?**: `string`
 
-Defined in: [core/src/types/ast.ts:811](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L811)
+Defined in: [core/src/types/ast.ts:811](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L811)
 
 Alias if
 
@@ -31,7 +31,7 @@ Alias if
 
 > **composedBlocks**: `string`[]
 
-Defined in: [core/src/types/ast.ts:819](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L819)
+Defined in: [core/src/types/ast.ts:819](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L819)
 
 Which context blocks were composed from this phase
 
@@ -41,7 +41,7 @@ Which context blocks were composed from this phase
 
 > `optional` **definitionLoc?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:809](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L809)
+Defined in: [core/src/types/ast.ts:809](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L809)
 
 Source location of the composed child skill definition.
 
@@ -51,7 +51,7 @@ Source location of the composed child skill definition.
 
 > `optional` **inputs?**: `Record`\<`string`, [`SkillContractField`](https://getpromptscript.dev/api-reference/core/src/interfaces/SkillContractField/index.md)\>
 
-Defined in: [core/src/types/ast.ts:815](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L815)
+Defined in: [core/src/types/ast.ts:815](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L815)
 
 Extracted inputs contract (if defined)
 
@@ -61,7 +61,7 @@ Extracted inputs contract (if defined)
 
 > `optional` **loc?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:807](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L807)
+Defined in: [core/src/types/ast.ts:807](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L807)
 
 Source location of the parent `@use` declaration.
 
@@ -71,7 +71,7 @@ Source location of the parent `@use` declaration.
 
 > **name**: `string`
 
-Defined in: [core/src/types/ast.ts:803](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L803)
+Defined in: [core/src/types/ast.ts:803](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L803)
 
 Phase name (alias or skill name)
 
@@ -81,7 +81,7 @@ Phase name (alias or skill name)
 
 > `optional` **outputs?**: `Record`\<`string`, [`SkillContractField`](https://getpromptscript.dev/api-reference/core/src/interfaces/SkillContractField/index.md)\>
 
-Defined in: [core/src/types/ast.ts:817](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L817)
+Defined in: [core/src/types/ast.ts:817](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L817)
 
 Extracted outputs contract (if defined)
 
@@ -91,7 +91,7 @@ Extracted outputs contract (if defined)
 
 > `optional` **provenance?**: [`ProvenanceTrace`](https://getpromptscript.dev/api-reference/core/src/interfaces/ProvenanceTrace/index.md)
 
-Defined in: [core/src/types/ast.ts:813](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L813)
+Defined in: [core/src/types/ast.ts:813](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L813)
 
 Provenance trace resolved from the child skill.
 
@@ -101,6 +101,6 @@ Provenance trace resolved from the child skill.
 
 > **source**: `string`
 
-Defined in: [core/src/types/ast.ts:805](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L805)
+Defined in: [core/src/types/ast.ts:805](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L805)
 
 Source file path

@@ -8,7 +8,7 @@
 
 > `const` **unicodeSecurity**: [`ValidationRule`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationRule/index.md)
 
-Defined in: [validator/src/rules/unicode-security.ts:236](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/rules/unicode-security.ts#L236)
+Defined in: [validator/src/rules/unicode-security.ts:236](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/validator/src/rules/unicode-security.ts#L236)
 
 PS014: Detect Unicode-based security attacks.
 

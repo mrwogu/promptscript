@@ -6,7 +6,7 @@
 
 # Interface: ContentRulesPolicy
 
-Defined in: [core/src/types/policy.ts:252](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L252)
+Defined in: [core/src/types/policy.ts:252](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L252)
 
 Content-rules policy: runs content checks and denied phrases on matched prompts.
 
@@ -20,7 +20,7 @@ Content-rules policy: runs content checks and denied phrases on matched prompts.
 
 > `optional` **allow?**: `string`[]
 
-Defined in: [core/src/types/policy.ts:261](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L261)
+Defined in: [core/src/types/policy.ts:261](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L261)
 
 Blocked-pattern sources exempt for matched prompts, as exact source text
 
@@ -30,7 +30,7 @@ Blocked-pattern sources exempt for matched prompts, as exact source text
 
 > `optional` **checks?**: [`ContentRuleCheck`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ContentRuleCheck/index.md)[]
 
-Defined in: [core/src/types/policy.ts:257](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L257)
+Defined in: [core/src/types/policy.ts:257](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L257)
 
 Validation rules to run on the prompt text
 
@@ -40,7 +40,7 @@ Validation rules to run on the prompt text
 
 > `optional` **deny?**: `string`[]
 
-Defined in: [core/src/types/policy.ts:259](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L259)
+Defined in: [core/src/types/policy.ts:259](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L259)
 
 Literal phrases the prompt text must not contain
 
@@ -50,7 +50,7 @@ Literal phrases the prompt text must not contain
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/policy.ts:32](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L32)
+Defined in: [core/src/types/policy.ts:32](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L32)
 
 Human-readable description
 
@@ -64,7 +64,7 @@ Human-readable description
 
 > **kind**: `"content-rules"`
 
-Defined in: [core/src/types/policy.ts:253](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L253)
+Defined in: [core/src/types/policy.ts:253](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L253)
 
 Policy kind discriminator
 
@@ -78,7 +78,7 @@ Policy kind discriminator
 
 > `optional` **match?**: [`PromptPolicyMatch`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptPolicyMatch/index.md)
 
-Defined in: [core/src/types/policy.ts:255](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L255)
+Defined in: [core/src/types/policy.ts:255](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L255)
 
 Prompts the policy applies to
 
@@ -88,7 +88,7 @@ Prompts the policy applies to
 
 > **name**: `string`
 
-Defined in: [core/src/types/policy.ts:30](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L30)
+Defined in: [core/src/types/policy.ts:30](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L30)
 
 Unique policy name within the config
 
@@ -102,7 +102,7 @@ Unique policy name within the config
 
 > **severity**: [`PolicySeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicySeverity/index.md)
 
-Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L36)
+Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L36)
 
 Violation severity
 

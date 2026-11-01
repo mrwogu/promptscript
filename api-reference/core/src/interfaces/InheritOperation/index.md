@@ -6,7 +6,7 @@
 
 # Interface: InheritOperation
 
-Defined in: [core/src/types/ast.ts:675](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L675)
+Defined in: [core/src/types/ast.ts:675](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L675)
 
 Canonical inheritance operation.
 
@@ -20,7 +20,7 @@ Canonical inheritance operation.
 
 > `readonly` **declaration**: `object`
 
-Defined in: [core/src/types/ast.ts:677](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L677)
+Defined in: [core/src/types/ast.ts:677](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L677)
 
 #### loc
 
@@ -142,7 +142,7 @@ Node type discriminator
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L497)
+Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L497)
 
 #### column
 
@@ -178,7 +178,7 @@ Byte offset from start of file
 
 > `readonly` **sourceLayerId**: `string`
 
-Defined in: [core/src/types/ast.ts:678](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L678)
+Defined in: [core/src/types/ast.ts:678](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L678)
 
 ***
 
@@ -186,7 +186,7 @@ Defined in: [core/src/types/ast.ts:678](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **type**: `"InheritOperation"`
 
-Defined in: [core/src/types/ast.ts:676](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L676)
+Defined in: [core/src/types/ast.ts:676](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L676)
 
 #### Overrides
 

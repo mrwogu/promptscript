@@ -6,7 +6,7 @@
 
 # Interface: EvalImportSkippedV1
 
-Defined in: [core/src/types/eval-import.ts:72](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L72)
+Defined in: [core/src/types/eval-import.ts:72](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L72)
 
 Samples dropped, by reason.
 
@@ -16,7 +16,7 @@ Samples dropped, by reason.
 
 > **duplicate**: `number`
 
-Defined in: [core/src/types/eval-import.ts:94](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L94)
+Defined in: [core/src/types/eval-import.ts:94](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L94)
 
 Same scrubbed inputs as an earlier sample
 
@@ -26,7 +26,7 @@ Same scrubbed inputs as an earlier sample
 
 > **filteredLabel**: `number`
 
-Defined in: [core/src/types/eval-import.ts:82](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L82)
+Defined in: [core/src/types/eval-import.ts:82](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L82)
 
 The feedback label is not one of `--label` or absent
 
@@ -36,7 +36,7 @@ The feedback label is not one of `--label` or absent
 
 > **filteredScore**: `number`
 
-Defined in: [core/src/types/eval-import.ts:80](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L80)
+Defined in: [core/src/types/eval-import.ts:80](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L80)
 
 The feedback score is above `--max-score` or absent
 
@@ -46,7 +46,7 @@ The feedback score is above `--max-score` or absent
 
 > **inputMismatch**: `number`
 
-Defined in: [core/src/types/eval-import.ts:86](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L86)
+Defined in: [core/src/types/eval-import.ts:86](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L86)
 
 An input has another type, or a required input is missing
 
@@ -56,7 +56,7 @@ An input has another type, or a required input is missing
 
 > **invalidJson**: `number`
 
-Defined in: [core/src/types/eval-import.ts:74](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L74)
+Defined in: [core/src/types/eval-import.ts:74](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L74)
 
 The line is not JSON
 
@@ -66,7 +66,7 @@ The line is not JSON
 
 > **invalidSample**: `number`
 
-Defined in: [core/src/types/eval-import.ts:76](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L76)
+Defined in: [core/src/types/eval-import.ts:76](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L76)
 
 The line breaks the sample schema or a size limit, before or after the scrub
 
@@ -76,7 +76,7 @@ The line breaks the sample schema or a size limit, before or after the scrub
 
 > **numericPii**: `number`
 
-Defined in: [core/src/types/eval-import.ts:90](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L90)
+Defined in: [core/src/types/eval-import.ts:90](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L90)
 
 A number input has 13 or more digits, so it could be a card number, and it cannot be replaced without changing its type
 
@@ -86,7 +86,7 @@ A number input has 13 or more digits, so it could be a card number, and it canno
 
 > **obfuscatedPii**: `number`
 
-Defined in: [core/src/types/eval-import.ts:92](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L92)
+Defined in: [core/src/types/eval-import.ts:92](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L92)
 
 A value hides personal data with zero-width characters, fullwidth forms or dots
 
@@ -96,7 +96,7 @@ A value hides personal data with zero-width characters, fullwidth forms or dots
 
 > **otherPrompt**: `number`
 
-Defined in: [core/src/types/eval-import.ts:78](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L78)
+Defined in: [core/src/types/eval-import.ts:78](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L78)
 
 The sample is of another prompt
 
@@ -106,7 +106,7 @@ The sample is of another prompt
 
 > **sampledOut**: `number`
 
-Defined in: [core/src/types/eval-import.ts:96](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L96)
+Defined in: [core/src/types/eval-import.ts:96](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L96)
 
 Left out by sampling down to `--max-rows`
 
@@ -116,7 +116,7 @@ Left out by sampling down to `--max-rows`
 
 > **staleContract**: `number`
 
-Defined in: [core/src/types/eval-import.ts:88](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L88)
+Defined in: [core/src/types/eval-import.ts:88](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L88)
 
 The sample fits the bundle of its hash but not the current prompt, so a run would refuse the row
 
@@ -126,6 +126,6 @@ The sample fits the bundle of its hash but not the current prompt, so a run woul
 
 > **undeclaredInput**: `number`
 
-Defined in: [core/src/types/eval-import.ts:84](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L84)
+Defined in: [core/src/types/eval-import.ts:84](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval-import.ts#L84)
 
 An input the prompt does not declare

@@ -6,7 +6,7 @@
 
 # Interface: Block
 
-Defined in: [core/src/types/ast.ts:313](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L313)
+Defined in: [core/src/types/ast.ts:313](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L313)
 
 A content block in PromptScript.
 
@@ -30,7 +30,7 @@ A content block in PromptScript.
 
 > `optional` **canonicalBody?**: [`BlockBody`](https://getpromptscript.dev/api-reference/core/src/interfaces/BlockBody/index.md)
 
-Defined in: [core/src/types/ast.ts:320](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L320)
+Defined in: [core/src/types/ast.ts:320](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L320)
 
 Ordered compatibility metadata retained for canonical consumers
 
@@ -40,7 +40,7 @@ Ordered compatibility metadata retained for canonical consumers
 
 > **content**: [`BlockContent`](https://getpromptscript.dev/api-reference/core/src/type-aliases/BlockContent/index.md)
 
-Defined in: [core/src/types/ast.ts:318](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L318)
+Defined in: [core/src/types/ast.ts:318](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L318)
 
 Block content
 
@@ -50,7 +50,7 @@ Block content
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -64,7 +64,7 @@ Source location
 
 > **name**: `string`
 
-Defined in: [core/src/types/ast.ts:316](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L316)
+Defined in: [core/src/types/ast.ts:316](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L316)
 
 Block name (e.g., "identity", "context")
 
@@ -74,7 +74,7 @@ Block name (e.g., "identity", "context")
 
 > `readonly` **type**: `"Block"`
 
-Defined in: [core/src/types/ast.ts:314](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L314)
+Defined in: [core/src/types/ast.ts:314](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L314)
 
 Node type discriminator
 

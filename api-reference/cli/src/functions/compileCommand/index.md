@@ -8,7 +8,7 @@
 
 > **compileCommand**(`options`, `services?`): `Promise`\<`void`\>
 
-Defined in: [cli/src/commands/compile.ts:737](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/cli/src/commands/compile.ts#L737)
+Defined in: [cli/src/commands/compile.ts:737](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/commands/compile.ts#L737)
 
 Compile PromptScript files to target formats.
 

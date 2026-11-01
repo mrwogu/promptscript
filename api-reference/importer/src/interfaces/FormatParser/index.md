@@ -6,7 +6,7 @@
 
 # Interface: FormatParser
 
-Defined in: [importer/src/parsers/types.ts:3](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/importer/src/parsers/types.ts#L3)
+Defined in: [importer/src/parsers/types.ts:3](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/importer/src/parsers/types.ts#L3)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [importer/src/parsers/types.ts:3](https://github.com/mrwogu/promptsc
 
 > **name**: `string`
 
-Defined in: [importer/src/parsers/types.ts:4](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/importer/src/parsers/types.ts#L4)
+Defined in: [importer/src/parsers/types.ts:4](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/importer/src/parsers/types.ts#L4)
 
 ## Methods
 
@@ -22,7 +22,7 @@ Defined in: [importer/src/parsers/types.ts:4](https://github.com/mrwogu/promptsc
 
 > **canParse**(`filename`, `content`): `boolean`
 
-Defined in: [importer/src/parsers/types.ts:5](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/importer/src/parsers/types.ts#L5)
+Defined in: [importer/src/parsers/types.ts:5](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/importer/src/parsers/types.ts#L5)
 
 #### Parameters
 
@@ -44,7 +44,7 @@ Defined in: [importer/src/parsers/types.ts:5](https://github.com/mrwogu/promptsc
 
 > **parse**(`content`, `filename?`): [`MarkdownSection`](https://getpromptscript.dev/api-reference/importer/src/interfaces/MarkdownSection/index.md)[]
 
-Defined in: [importer/src/parsers/types.ts:6](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/importer/src/parsers/types.ts#L6)
+Defined in: [importer/src/parsers/types.ts:6](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/importer/src/parsers/types.ts#L6)
 
 #### Parameters
 

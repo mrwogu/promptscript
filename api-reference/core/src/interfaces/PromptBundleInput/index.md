@@ -6,7 +6,7 @@
 
 # Interface: PromptBundleInput
 
-Defined in: [core/src/types/prompt-bundle.ts:19](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L19)
+Defined in: [core/src/types/prompt-bundle.ts:19](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L19)
 
 One declared input of a prompt bundle.
 
@@ -16,7 +16,7 @@ One declared input of a prompt bundle.
 
 > `optional` **default?**: `string` \| `number` \| `boolean`
 
-Defined in: [core/src/types/prompt-bundle.ts:27](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L27)
+Defined in: [core/src/types/prompt-bundle.ts:27](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L27)
 
 Value used when the caller passes none
 
@@ -26,7 +26,7 @@ Value used when the caller passes none
 
 > **description**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:23](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L23)
+Defined in: [core/src/types/prompt-bundle.ts:23](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L23)
 
 Description of the input
 
@@ -36,7 +36,7 @@ Description of the input
 
 > `optional` **options?**: `string`[]
 
-Defined in: [core/src/types/prompt-bundle.ts:25](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L25)
+Defined in: [core/src/types/prompt-bundle.ts:25](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L25)
 
 Allowed values of an enum input
 
@@ -46,7 +46,7 @@ Allowed values of an enum input
 
 > **required**: `boolean`
 
-Defined in: [core/src/types/prompt-bundle.ts:32](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L32)
+Defined in: [core/src/types/prompt-bundle.ts:32](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L32)
 
 True when the input has no default.
 
@@ -62,6 +62,6 @@ true
 
 > **type**: `"string"` \| `"number"` \| `"boolean"` \| `"enum"`
 
-Defined in: [core/src/types/prompt-bundle.ts:21](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompt-bundle.ts#L21)
+Defined in: [core/src/types/prompt-bundle.ts:21](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/prompt-bundle.ts#L21)
 
 Value type

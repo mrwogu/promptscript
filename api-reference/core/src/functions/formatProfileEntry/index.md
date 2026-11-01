@@ -8,7 +8,7 @@
 
 > **formatProfileEntry**(`candidate`, `pricesCheckedOn`): `string`
 
-Defined in: [core/src/model-drift.ts:315](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-drift.ts#L315)
+Defined in: [core/src/model-drift.ts:315](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-drift.ts#L315)
 
 Draft text for model-profiles.ts: the helper call for one candidate,
 with the fields OpenRouter knows about. A price is dated with the day
