@@ -1621,6 +1621,38 @@ describe('prs release status', () => {
     expect(result.warnings[0]?.message).toContain('.promptscript/releases/qa[2J.json');
   });
 
+  it('warns about a label id that an approval could not name', async () => {
+    const root = await project();
+    await build(root);
+    await promote(root, ID, 'staging');
+    const label = await readJson(releases(root, 'staging.json'));
+    const [entry] = label['prompts'] as { id: string }[];
+    const lookalike = { ...entry, id: 'acme-support/refund\u200b-reply' };
+    await writeFile(
+      releases(root, 'staging.json'),
+      JSON.stringify({ ...label, prompts: [entry, lookalike] })
+    );
+
+    const result = await status(root);
+
+    const warnings = result.warnings.filter((warning) => warning.message.includes('an approval'));
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]?.message).toContain('"acme-support/refund\\u200B-reply" in staging');
+    expect(warnings[0]?.location?.file).toBe('.promptscript/releases/staging.json');
+  });
+
+  it('does not warn about a label id that an approval can name', async () => {
+    const root = await project();
+    await build(root);
+    await promote(root, ID, 'staging');
+
+    const result = await status(root);
+
+    expect(result.warnings.filter((warning) => warning.message.includes('an approval'))).toEqual(
+      []
+    );
+  });
+
   it('reports a label that is not one', async () => {
     const root = await project();
     await build(root);

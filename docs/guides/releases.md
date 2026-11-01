@@ -317,6 +317,12 @@ Status lists every environment with the prompt id, the hash (12 hex digits), whe
 the latest build (equals the manifest) and whether the bundle verifies. A missing label means an
 empty environment. A label file for an environment that is not configured gives a warning.
 
+A label accepts more prompt ids than an approval does: it only refuses control and bidi characters,
+while an approval needs the id pattern (letters, digits, `_`, `-` and `.` in up to 7 segments). An
+entry with an id outside that pattern, a zero-width space inside a look-alike id for example, gives
+a warning with the id written with `\u` escapes for the invisible characters. No approval or gate
+can name that id. The label is still read and status does not fail on it.
+
 Under an entry with an experiment status lists every arm with its weight. Every referenced bundle,
 arms included, is verified, and a failure exits with code 1, so CI can run it.
 `--history <n>` (1 to 1000) adds the commit, date and subject of the last n commits of each label.

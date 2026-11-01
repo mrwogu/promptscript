@@ -15,7 +15,7 @@ import type {
   ReleasePromptStatus,
 } from '../../utils/release-report.js';
 import { PS5003_BUNDLE_MISSING, ReleaseError } from './errors.js';
-import { runGit, stripControlCharacters, type GitResult } from './git.js';
+import { escapeControlCharacters, runGit, stripControlCharacters, type GitResult } from './git.js';
 import {
   MANIFEST_FILE,
   PRICING_FILE,
@@ -28,6 +28,7 @@ import {
   verifyBundleText,
   type ReleasePaths,
 } from './layout.js';
+import { isApprovalPromptId } from '../approve/records.js';
 import { checkAgainstBase, type BaseCheck } from './base.js';
 import { armChangeText, armLimitWarnings, gateEntriesOf } from './experiment.js';
 import { checkLabelModels, parseRetiringWithin, printModels } from './models.js';
@@ -314,7 +315,7 @@ function printStatus(
           ? ''
           : `  approvals: ${approvalsText(gates, environment.name, prompt.id)}`;
       ConsoleOutput.info(
-        `  ${prompt.id}  ${shortHash(prompt.contentHash)}  ${promptState(prompt)}${build}${approvals}`
+        `  ${escapeControlCharacters(prompt.id)}  ${shortHash(prompt.contentHash)}  ${promptState(prompt)}${build}${approvals}`
       );
       printExperiment(prompt.experiment);
     }
@@ -391,6 +392,21 @@ function upstreamArmWarnings(checked: readonly EnvironmentCheck[]): ReleaseDiagn
   });
 }
 
+/**
+ * Entries whose id an approval could not name. A label accepts more ids than an approval
+ * record does, so a zero-width character can make an id look like another prompt.
+ */
+function labelIdWarnings(checked: readonly EnvironmentCheck[]): ReleaseDiagnostic[] {
+  return checked.flatMap((environment) =>
+    environment.entries
+      .filter((entry) => !isApprovalPromptId(entry.id))
+      .map((entry) => ({
+        message: `The prompt id "${escapeControlCharacters(entry.id)}" in ${environment.value.name} is not an id an approval can name, so no approval or gate can cover it. Check it for hidden or look-alike characters.`,
+        location: { file: environment.value.path },
+      }))
+  );
+}
+
 /** With --base the config is found by name; say so when the caller pointed elsewhere. */
 function ignoredConfigWarnings(options: ReleaseStatusOptions): ReleaseDiagnostic[] {
   if (options.base === undefined) return [];
@@ -447,6 +463,7 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
       ...ignoredConfigWarnings(options),
       ...(await strayLabels(project)),
       ...upstreamArmWarnings(checked),
+      ...labelIdWarnings(checked),
     ];
 
     let history: ReleaseEnvironmentHistory[] | undefined;

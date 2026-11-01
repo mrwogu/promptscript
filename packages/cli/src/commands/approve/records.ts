@@ -5,6 +5,7 @@ import {
   approvalRecordPath,
   compareCodeUnits,
   parseApprovalRecord,
+  PROMPT_ID_PATTERN,
   serializeApprovalRecord,
   type ApprovalRecordV1,
 } from '@promptscript/core';
@@ -30,6 +31,13 @@ import { readRegularFile, UnreadableFileError } from '../release/layout.js';
 export const APPROVALS_DIRECTORY = '.promptscript/approvals';
 /** Directory levels read below the approvals directory: the role and up to 7 id segments. */
 export const MAX_APPROVAL_DEPTH = 8;
+
+/** Is this a prompt id an approval can name: the pattern, and few enough segments to fit. */
+export function isApprovalPromptId(id: string): boolean {
+  // The role takes one directory level, each id segment one more.
+  return PROMPT_ID_PATTERN.test(id) && id.split('/').length <= MAX_APPROVAL_DEPTH - 1;
+}
+
 /** Most files and directories one read takes. */
 export const MAX_APPROVAL_ENTRIES = 10_000;
 /** Largest record file read. */

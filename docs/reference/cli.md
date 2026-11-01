@@ -1327,6 +1327,11 @@ arm bundle. Exits with code 1 when a referenced bundle is missing or does not ve
 policies it also runs the [release gates](../guides/releases.md#release-gates) on every entry and
 shows an `approvals` column (`ok`, `missing: <roles>` or `-`); a failed gate is a warning there.
 
+A label entry whose prompt id does not match the id pattern of an approval (for example one with a
+zero-width space) gives a warning with the id's invisible characters escaped as `\u200B`. The
+label is still valid and the exit code stays; it has no error code. The warning is in `warnings` of
+the JSON report with the label file as its `location`.
+
 With `--base <ref>`, every label file in the checkout and at `<ref>` is compared, configured or
 not, and every entry that is new or changed must pass the promotion rules of `<ref>`: the
 environment is configured there, the bundle verifies, and the entry is a rollback of the label's

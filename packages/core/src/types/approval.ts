@@ -101,9 +101,10 @@ export function isApproverHandle(value: string): boolean {
   return value.length <= MAX_APPROVER_LENGTH && GIT_HOST_USER_PATTERN.test(value);
 }
 
-// Same patterns as the schema JSDoc; the schema spec checks that both agree.
-const PROMPT_ID =
+/** The prompt id of an approval record, as the schema JSDoc states it. */
+export const PROMPT_ID_PATTERN =
   /^(?!.*\.\.)(?:@?[A-Za-z0-9][A-Za-z0-9_.-]{0,63}(?<!\.)\/)+[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/u;
+// The patterns below are the same as the schema JSDoc; the schema spec checks that both agree.
 const CONTENT_HASH = /^sha256-[0-9a-f]{64}$/u;
 const ROLE = /^(?!(?:con|prn|aux|nul|com\d|lpt\d)$)[a-z][a-z0-9-]{0,31}$/u;
 const CREATED_AT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u;
@@ -158,7 +159,7 @@ export function isApprovalRecordV1(value: unknown): value is ApprovalRecordV1 {
     !Object.hasOwn(value, key) || matches(value[key], pattern);
   return (
     value['$schema'] === APPROVAL_RECORD_SCHEMA_URL &&
-    matches(value['prompt'], PROMPT_ID) &&
+    matches(value['prompt'], PROMPT_ID_PATTERN) &&
     matches(value['contentHash'], CONTENT_HASH) &&
     matches(value['role'], ROLE) &&
     isApprover(value['approver']) &&

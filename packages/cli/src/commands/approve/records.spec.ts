@@ -17,6 +17,7 @@ import {
   findApprovalRecords,
   gitBlobId,
   gitPathsOf,
+  isApprovalPromptId,
   MAX_APPROVAL_DEPTH,
   MAX_APPROVAL_ENTRIES,
   trackedApprovals,
@@ -388,4 +389,24 @@ describe('committedRecords', () => {
       }
     }
   );
+});
+
+describe('isApprovalPromptId', () => {
+  it.each(['acme-support/refund-reply', '@acme/support/reply'])('accepts %s', (id) => {
+    expect(isApprovalPromptId(id)).toBe(true);
+  });
+
+  it.each(['acme/refund\u200b-reply', 'refund-reply', 'acme/../x', 'acme./x', ''])(
+    'refuses %j',
+    (id) => {
+      expect(isApprovalPromptId(id)).toBe(false);
+    }
+  );
+
+  it('refuses an id with more segments than a record path holds', () => {
+    const segments = Array.from({ length: MAX_APPROVAL_DEPTH }, () => 'a');
+
+    expect(isApprovalPromptId(segments.slice(1).join('/'))).toBe(true);
+    expect(isApprovalPromptId(segments.join('/'))).toBe(false);
+  });
 });

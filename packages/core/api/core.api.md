@@ -3663,6 +3663,9 @@ export const PROMPT_BUNDLE_SCHEMA_URL = "https://getpromptscript.dev/schema/prom
 export const PROMPT_ENTRY_KEYS: readonly string[];
 
 // @public
+export const PROMPT_ID_PATTERN: RegExp;
+
+// @public
 export const PROMPT_INPUT_NAME_PATTERN: RegExp;
 
 // @public
