@@ -44,6 +44,7 @@ export function compile(entryPath: string, options?: CompileOptions): Promise<Co
 // @public
 export interface CompileError {
     agentName?: string;
+    causeCode?: string;
     code: string;
     conflicts?: AgentConflict[];
     format?: () => string;

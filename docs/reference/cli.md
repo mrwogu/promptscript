@@ -107,7 +107,7 @@ Notes:
   `deno run` the worker gets read and write access scoped to the output
   directory, and a compiled binary re-executes itself.
 - Telemetry reports `runtime: deno`; `DO_NOT_TRACK=1` keeps it disabled.
-- Node.js 20+ remains fully supported with unchanged behavior.
+- Node.js 22.22+ remains fully supported with unchanged behavior.
 
 ## Global Options
 
@@ -559,10 +559,12 @@ With `--format json`, stdout holds one document that matches
 with the counts. With `--strict`, a warning sets `success` to `false`, and it stays in `warnings`.
 An error has a `code` when it is a PromptScript error (`PS` and three or four digits). The code is
 absent when the run stops before the compile with another error, such as a missing entry file or a
-registry clone failure. A parse error carries the resolve code `PS2000`. A location has `file`,
-`line`, `column` and, on some warnings, `offset`. A parse error without a position reports `-1` for
-`line` and `column`. Paths are as the compiler reports them, usually absolute. With several files,
-`errors` and `warnings` hold the results of all of them in file order.
+registry clone failure. A parse error carries the resolve code `PS2000`, and the parser code, such
+as `PS1000`, is in the optional `cause` field of the error. `cause` is absent on errors that do not
+wrap another PromptScript error. A location has `file`, `line`, `column` and, on some warnings,
+`offset`. A parse error without a position reports `-1` for `line` and `column`. Paths are as the
+compiler reports them, usually absolute. With several files, `errors` and `warnings` hold the
+results of all of them in file order.
 `--fix` cannot be combined with `--format json`: the command prints an error to stderr and exits 1.
 
 ---
