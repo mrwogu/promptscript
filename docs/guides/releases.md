@@ -990,9 +990,13 @@ events, so a SIEM rule should check `flexString2Label` first.
 
 Severities: `changed` and `generated` 3, `approved` 5, `approval-removed`, `promoted` and
 `config-changed` and the three experiment events 6, `rolled-back`, `label-removed` and `merge-dropped` 7. Header values escape `\` and `|`; extension values escape `\`
-and `=`, line breaks become `\n`, and other control characters are dropped. Text and CEF output
-drop control, bidi and zero-width characters from Git and record fields. JSON keeps them as
-escapes, so take exact prompt ids and other values from the JSON export.
+and `=`, and line breaks become `\n`. The raw text and CEF lines show other control, bidi,
+zero-width and similar invisible characters, tag characters and lone surrogates of Git and record
+fields as `\u` and 4 to 6 hex digits, so two ids that differ only by an invisible character print
+differently, and the text output doubles a backslash. In CEF that visible text is escaped like any
+other text, so each backslash of it is doubled: a SIEM that decodes the line shows `\u200B` for a
+hidden character, and a literal backslash stays distinct from it. `--format json` keeps the exact
+value, so take prompt ids and other values from the JSON export.
 
 ### Limits
 
@@ -1017,12 +1021,15 @@ escapes, so take exact prompt ids and other values from the JSON export.
 - The output holds email addresses. Treat exports like other personal data.
 - A merge that drops an experiment change of a side branch shows no `merge-dropped`, because that
   check compares hashes only. The change shows on the side commit.
-- A label that does not parse is read as no change. The next readable version of it shows its
-  experiments as `experiment-started`, like its entries as `promoted`, and the label stays out of
-  the check against `HEAD`. A change made while the label did not parse shows no
-  `experiment-ended`, `experiment-changed` or `label-removed`: an experiment that ended or changed,
-  or an entry that was removed, leaves no event, because the next readable version is compared
-  against nothing. A changed experiment then shows as `experiment-started` without `previousArms`.
+- A label that does not parse is read as no change, and it stays out of the check against `HEAD`.
+  The next readable version of it on the mainline is compared against the last readable version
+  before it, so an entry or experiment removed or changed meanwhile shows as `label-removed`,
+  `experiment-ended` or `experiment-changed` on that commit. A label with no readable version
+  before it on the mainline, and a side-branch commit whose parent label is unreadable, are
+  compared against nothing: its experiments show as `experiment-started` and its entries as
+  `promoted`, or as `rolled-back` when the hash was held before. A side-branch commit with a
+  readable parent label is diffed against that parent as usual. The warning about an unreadable
+  label is printed once.
 - The experiment events are new in the JSON document, and the schema URL and `version` stay 1. A
   consumer that switches on `type` sees types it does not know, and one that validates against a
   copy of the schema from before them rejects the document. Update the copy.
