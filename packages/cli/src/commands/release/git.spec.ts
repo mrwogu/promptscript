@@ -40,6 +40,9 @@ describe('escapeControlCharacters', () => {
     expect(escapeControlCharacters('a\u{e0001}b\ufe0fc\u00ad\u2063')).toBe(
       String.raw`a\uE0001b\uFE0Fc\u00AD\u2063`
     );
+    expect(escapeControlCharacters('a\u180bb\u180fc\u{e0100}d\u{e01ef}')).toBe(
+      String.raw`a\u180Bb\u180Fc\uE0100d\uE01EF`
+    );
     expect(escapeControlCharacters('x\ud800y\udc00z')).toBe(String.raw`x\uD800y\uDC00z`);
     expect(escapeControlCharacters('ok \u{1f600} \ud83d\ude00')).toBe('ok \u{1f600} \ud83d\ude00');
   });

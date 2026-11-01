@@ -386,13 +386,13 @@ export function errorMessage(error: unknown): string {
 /**
  * Characters that move, recolor or hide terminal text: C0, DEL, C1, soft hyphen, combining grapheme
  * joiner, the bidi controls and marks, zero-width characters, invisible math operators, line and
- * paragraph separators, word joiner, variation selectors, BOM, Unicode tag characters and lone
+ * paragraph separators, word joiner, variation selectors (also Mongolian and supplementary), BOM, Unicode tag characters and lone
  * surrogates.
  */
 const TERMINAL_CONTROL_RE =
   // Combining characters are listed on purpose: they are matched one by one.
   // eslint-disable-next-line no-control-regex, no-misleading-character-class
-  /[\u0000-\u001f\u007f-\u009f\u00ad\u034f\u061c\u180e\u200b-\u200f\u2028\u2029\u202a-\u202e\u2060-\u2064\u2066-\u206f\ufe00-\ufe0f\ufeff\u{e0000}-\u{e007f}\p{Cs}]/gu;
+  /[\u0000-\u001f\u007f-\u009f\u00ad\u034f\u061c\u180b-\u180f\u200b-\u200f\u2028\u2029\u202a-\u202e\u2060-\u2064\u2066-\u206f\ufe00-\ufe0f\ufeff\u{e0000}-\u{e007f}\u{e0100}-\u{e01ef}\p{Cs}]/gu;
 
 /** Remove the characters that could rewrite terminal output, from text Git or a file supplies. */
 export function stripControlCharacters(text: string): string {
