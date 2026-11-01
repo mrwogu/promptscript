@@ -53,6 +53,7 @@
         "generatePackageJson": false
       }
     },
+    "typecheck": {},
     "nx-release-publish": {
       "options": {
         "packageRoot": "dist/{projectRoot}"

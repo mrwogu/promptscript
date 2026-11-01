@@ -13,16 +13,16 @@
   "tags": ["scope:browser-compiler", "type:lib"],
   "targets": {
     "build": {
-      "executor": "@nx/vite:build",
-      "cache": true,
-      "inputs": ["production", "^production", { "dependentTasksOutputFiles": "**/*.d.ts" }],
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/packages/browser-compiler",
-        "main": "packages/browser-compiler/src/index.ts",
-        "tsConfig": "packages/browser-compiler/tsconfig.lib.json",
-        "assets": ["packages/browser-compiler/*.md"]
-      },
+      "inputs": [
+        "production",
+        "^production",
+        {
+          "dependentTasksOutputFiles": "**/*.d.ts"
+        },
+        {
+          "externalDependencies": ["vite"]
+        }
+      ],
       "dependsOn": ["^build", "typecheck"]
     },
     "typecheck": {
@@ -31,6 +31,7 @@
       "inputs": ["default", "^default", "{workspaceRoot}/tsconfig.base.json"],
       "outputs": ["{workspaceRoot}/dist/declarations/browser-compiler"],
       "options": {
+        "cwd": "{workspaceRoot}",
         "command": "tsc -p packages/browser-compiler/tsconfig.lib.json --emitDeclarationOnly --outDir dist/declarations/browser-compiler"
       }
     },
