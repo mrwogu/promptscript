@@ -261,8 +261,9 @@
         <span class="home-capability__token">approval</span>
         <h3>Sign-off for one exact version</h3>
         <p>
-          <code>prs approve</code> records that legal or security approved one hash. Release gates
-          refuse a version without the approvals your policy asks for.
+          <code>prs approve</code> records a sign-off of legal or security for one hash. A policy
+          with error severity makes the release gate refuse a version without it. The pull request
+          review is what binds.
         </p>
       </a>
       <a href="guides/codeowners/" class="home-capability">
@@ -278,22 +279,23 @@
         <h3>Test what an environment serves</h3>
         <p>
           <code>prs eval run --label prod</code> runs datasets and assertions, with an LLM judge, a
-          replay cache, and a cost limit. Compare with a baseline report to catch regressions.
+          replay cache. Record the answers once with a cost limit, replay them for free, and compare
+          with a baseline report to catch regressions.
         </p>
       </a>
       <a href="guides/releases/#audit-log" class="home-capability">
         <span class="home-capability__token">audit</span>
         <h3>An audit log from Git history</h3>
         <p>
-          <code>prs audit log</code> shows who changed, approved, promoted, or rolled back a prompt.
-          Read it as text or JSON, or export CEF for your SIEM.
+          <code>prs audit log</code> shows who changed, promoted, or rolled back a prompt, and the
+          recorded sign-offs. Read it as text or JSON, or export CEF for your SIEM.
         </p>
       </a>
       <a href="guides/releases/#in-ci" class="home-capability">
         <span class="home-capability__token">ci</span>
         <h3>Checks in every pull request</h3>
         <p>
-          <code>prs release status --base</code> checks label changes, and
+          <code>prs release status --base refs/remotes/origin/main</code> checks label changes, and
           <code>--check-models</code> flags labels that run a retiring model. The JSON output is
           stable, so your pipeline can build on it.
         </p>
