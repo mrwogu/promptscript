@@ -25,7 +25,8 @@
     },
     "command": {
       "type": "string",
-      "enum": ["build", "promote", "rollback", "split", "status"]
+      "enum": ["build", "promote", "rollback", "split", "status"],
+      "description": "Open enum: new values can be added in this version, so handle unknown values."
     },
     "success": {
       "type": "boolean",
@@ -107,7 +108,7 @@
         "policyRisk": {
           "type": "string",
           "enum": ["low", "medium", "high", "critical"],
-          "description": "The highest of the bundle's and the source's risk and risk floors."
+          "description": "The highest of the bundle's and the source's risk and risk floors. Closed enum: a new value needs a new schema version."
         },
         "passed": {
           "type": "boolean",
@@ -143,16 +144,18 @@
             "required-evals",
             "content-rules",
             "max-experiment-weight"
-          ]
+          ],
+          "description": "Open enum: new values can be added in this version, so handle unknown values."
         },
         "severity": {
           "type": "string",
-          "enum": ["error", "warning"]
+          "enum": ["error", "warning"],
+          "description": "Closed enum: a new value needs a new schema version."
         },
         "status": {
           "type": "string",
           "enum": ["passed", "failed", "unavailable"],
-          "description": "unavailable never passes at severity error."
+          "description": "unavailable never passes at severity error. Closed enum: a new value needs a new schema version."
         },
         "message": {
           "type": "string"
@@ -220,7 +223,8 @@
         },
         "action": {
           "type": "string",
-          "enum": ["created", "updated", "unchanged", "removed"]
+          "enum": ["created", "updated", "unchanged", "removed"],
+          "description": "Closed enum: a new value needs a new schema version."
         },
         "id": {
           "type": "string",
@@ -477,7 +481,7 @@
         },
         "status": {
           "enum": ["current", "legacy", "deprecated", "retired", "unknown"],
-          "description": "Catalog status of the profile that runs the model, unknown when the catalog has none."
+          "description": "Catalog status of the profile that runs the model, unknown when the catalog has none. Open enum: new values can be added in this version, so handle unknown values."
         },
         "retirementDate": {
           "type": "string",

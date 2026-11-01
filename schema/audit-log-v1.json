@@ -116,7 +116,8 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["changed", "config-changed"]
+              "enum": ["changed", "config-changed"],
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
             },
             "commit": {
               "type": "string",
@@ -142,7 +143,7 @@
             "change": {
               "type": "string",
               "enum": ["A", "M", "D"],
-              "description": "Added, modified or deleted."
+              "description": "Added, modified or deleted. Closed enum: a new value needs a new schema version."
             },
             "viaMerge": {
               "const": true,
@@ -162,7 +163,8 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["approved", "approval-removed"]
+              "enum": ["approved", "approval-removed"],
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
             },
             "commit": {
               "type": "string",
@@ -208,7 +210,7 @@
             },
             "approverSource": {
               "const": "asserted",
-              "description": "The approver is a claim; the host review of the commit binds it."
+              "description": "The approver is a claim; the host review of the commit binds it. Open enum: new values can be added in this version, so handle unknown values."
             },
             "recordCreatedAt": {
               "type": "string",
@@ -227,7 +229,7 @@
             "state": {
               "type": "string",
               "enum": ["well-formed", "misplaced", "invalid"],
-              "description": "From the record and its path alone: well-formed sits at the path its fields give. Well-formed does not mean a gate accepts it. An invalid record has no other record fields."
+              "description": "From the record and its path alone: well-formed sits at the path its fields give. Well-formed does not mean a gate accepts it. An invalid record has no other record fields. Open enum: new values can be added in this version, so handle unknown values."
             },
             "viaMerge": {
               "const": true,
@@ -258,7 +260,8 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["promoted", "rolled-back"]
+              "enum": ["promoted", "rolled-back"],
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
             },
             "commit": {
               "type": "string",
@@ -329,7 +332,8 @@
           "additionalProperties": false,
           "properties": {
             "type": {
-              "const": "label-removed"
+              "const": "label-removed",
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
             },
             "commit": {
               "type": "string",
@@ -398,7 +402,8 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["experiment-started", "experiment-changed", "experiment-ended"]
+              "enum": ["experiment-started", "experiment-changed", "experiment-ended"],
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
             },
             "commit": {
               "type": "string",
@@ -540,7 +545,8 @@
           "additionalProperties": false,
           "properties": {
             "type": {
-              "const": "merge-dropped"
+              "const": "merge-dropped",
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
             },
             "commit": {
               "type": "string",
@@ -587,7 +593,7 @@
             },
             "approverSource": {
               "const": "asserted",
-              "description": "The approver is a claim; the host review of the commit binds it."
+              "description": "The approver is a claim; the host review of the commit binds it. Open enum: new values can be added in this version, so handle unknown values."
             },
             "recordCreatedAt": {
               "type": "string",
@@ -606,7 +612,7 @@
             "state": {
               "type": "string",
               "enum": ["well-formed", "misplaced", "invalid"],
-              "description": "From the record and its path alone: well-formed sits at the path its fields give. Well-formed does not mean a gate accepts it. An invalid record has no other record fields."
+              "description": "From the record and its path alone: well-formed sits at the path its fields give. Well-formed does not mean a gate accepts it. An invalid record has no other record fields. Open enum: new values can be added in this version, so handle unknown values."
             },
             "viaMerge": {
               "const": true
@@ -622,7 +628,7 @@
             "change": {
               "type": "string",
               "enum": ["A", "M", "D"],
-              "description": "What the parent did to the file: added, modified or deleted."
+              "description": "What the parent did to the file: added, modified or deleted. Closed enum: a new value needs a new schema version."
             },
             "parent": {
               "type": "string",
@@ -654,7 +660,8 @@
           "additionalProperties": false,
           "properties": {
             "type": {
-              "const": "generated"
+              "const": "generated",
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
             },
             "commit": {
               "type": "string",

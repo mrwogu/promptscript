@@ -94,6 +94,8 @@ export interface ApproveOptions extends ProjectPathOptions {
  * count: `untracked` (not added to Git yet), `modified` (the bytes on disk are not the
  * ones Git has), `misplaced` (Git tracks it at another path than its fields give) and
  * `unknown-role` (the role is not in governance.roles).
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
  */
 export type ApprovalState =
   'current' | 'labelled' | 'stale' | 'untracked' | 'modified' | 'misplaced' | 'unknown-role';
@@ -122,6 +124,7 @@ export interface ApprovalPromptStatus {
 export interface ApprovalReport {
   $schema: typeof APPROVAL_REPORT_SCHEMA_URL;
   version: 1;
+  /** Open enum: new values can be added in this version, so handle unknown values. */
   command: 'approve' | 'list';
   success: boolean;
   /** The record written */

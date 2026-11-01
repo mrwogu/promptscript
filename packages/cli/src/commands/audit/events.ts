@@ -18,6 +18,11 @@ import {
 import { experimentEvents } from './experiments.js';
 import { inSequence } from './sequence.js';
 
+/**
+ * What an audit event records.
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
+ */
 export type AuditEventType =
   | 'changed'
   | 'approved'
@@ -36,6 +41,8 @@ export type AuditEventType =
  * State of an approval record from its bytes and its path alone: `well-formed` sits at the
  * path its fields give, `misplaced` elsewhere, `invalid` is no v1 record in the exact form.
  * A well-formed record still counts in a gate only with a configured role and the review.
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
  */
 export type AuditRecordState = 'well-formed' | 'misplaced' | 'invalid';
 
@@ -56,13 +63,18 @@ export interface AuditEvent {
   committer: GitPerson;
   /** Path relative to the repository top level */
   path: string;
-  /** `changed` and `config-changed`: added, modified or deleted */
+  /**
+   * `changed` and `config-changed`: added, modified or deleted.
+   *
+   * Closed enum: a new value needs a new schema version.
+   */
   change?: 'A' | 'M' | 'D';
   prompt?: string;
   contentHash?: string;
   role?: string;
   environment?: string;
   approver?: string;
+  /** Open enum: new values can be added in this version, so handle unknown values. */
   approverSource?: 'asserted';
   recordCreatedAt?: string;
   comment?: string;

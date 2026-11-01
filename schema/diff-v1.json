@@ -85,11 +85,13 @@
         },
         "kind": {
           "type": "string",
-          "enum": ["added", "changed", "removed", "unsupported", "user-owned"]
+          "enum": ["added", "changed", "removed", "unsupported", "user-owned"],
+          "description": "Open enum: new values can be added in this version, so handle unknown values."
         },
         "ownership": {
           "type": "string",
-          "enum": ["promptscript", "user", "unknown"]
+          "enum": ["promptscript", "user", "unknown"],
+          "description": "Closed enum: a new value needs a new schema version."
         },
         "mode": {
           "type": "integer",
