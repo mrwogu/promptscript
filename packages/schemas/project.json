@@ -3,5 +3,15 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "tags": ["scope:schemas", "type:lib"],
-  "targets": {}
+  "implicitDependencies": ["@promptscript/source"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "inputs": ["default", "{workspaceRoot}/schema/*.json"],
+      "outputs": ["{workspaceRoot}/dist/packages/schemas"],
+      "options": {
+        "command": "rm -rf dist/packages/schemas && mkdir -p dist/packages/schemas && cp schema/*.json LICENSE packages/schemas/package.json packages/schemas/README.md dist/packages/schemas/"
+      }
+    }
+  }
 }
