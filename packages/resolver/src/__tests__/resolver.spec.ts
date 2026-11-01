@@ -435,6 +435,42 @@ describe('Resolver', () => {
       }
     });
 
+    it('should keep the parser code for a recovered .md file with PRS content', async () => {
+      const directory = mkdtempSync(join(tmpdir(), 'promptscript-resolver-md-recovered-'));
+      const entry = join(directory, 'entry.md');
+      writeFileSync(entry, '@meta { id: "md" syntax: "1.0.0" }\n@identity {\n  """Hello"""\n}\n');
+      const recovered = new ParseError('Recovered parser diagnostic', {
+        file: entry,
+        line: 1,
+        column: 1,
+      });
+      const originalParse = parser.parse;
+      const parseSpy = vi.spyOn(parser, 'parse');
+      parseSpy.mockImplementation((source, options) => {
+        const result = originalParse(source, options);
+        return options?.filename === entry && result.ast
+          ? { ...result, errors: [recovered] }
+          : result;
+      });
+
+      try {
+        const mdResolver = new Resolver({
+          registryPath: directory,
+          localPath: directory,
+          cache: false,
+        });
+
+        const result = await mdResolver.resolve(entry);
+
+        expect(result.ast).not.toBeNull();
+        expect(result.errors[0]?.code).toBe('PS2000');
+        expect(result.errors[0]?.cause).toBe(recovered);
+      } finally {
+        parseSpy.mockRestore();
+        rmSync(directory, { recursive: true, force: true });
+      }
+    });
+
     it('should handle missing parent file in inheritance', async () => {
       const result = await resolver.resolve('./inherits-missing.prs');
 
