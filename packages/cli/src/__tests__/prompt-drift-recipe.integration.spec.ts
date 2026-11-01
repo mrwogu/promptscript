@@ -137,13 +137,24 @@ function services(patch: Partial<EvalCommandServices>): EvalCommandServices {
   return { fs: defaultFileSystem, prompts: defaultPrompts, cwd: process.cwd(), env: {}, ...patch };
 }
 
+/** The example with the repo node_modules linked in, so the loader resolves its own package. */
+function linkedCopy(target: string): void {
+  cpSync(EXAMPLE, target, {
+    recursive: true,
+    filter: (source) => source !== join(EXAMPLE, 'node_modules'),
+  });
+  symlinkSync(join(REPO, 'node_modules'), join(target, 'node_modules'));
+}
+
 /** The example without the files the test writes, in a temp directory. */
 async function freshCopy(): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), 'promptscript-drift-example-'));
   roots.push(root);
   cpSync(EXAMPLE, root, {
     recursive: true,
-    filter: (source) => !GENERATED.some((dir) => source === join(EXAMPLE, dir)),
+    filter: (source) =>
+      source !== join(EXAMPLE, 'node_modules') &&
+      !GENERATED.some((dir) => source === join(EXAMPLE, dir)),
   });
   mkdirSync(join(root, PROMPTSCRIPT, 'eval-baselines'), { recursive: true });
   return root;
@@ -364,9 +375,7 @@ describe.skipIf(process.platform === 'win32')(
       project = join(home, 'project');
       runner = join(home, 'runner');
       summary = join(home, 'summary.md');
-      cpSync(EXAMPLE, project, { recursive: true });
-      // The loader resolves its own package from the working directory
-      symlinkSync(join(REPO, 'node_modules'), join(project, 'node_modules'));
+      linkedCopy(project);
       mkdirSync(runner);
       mkdirSync(join(home, 'bin'));
       const preload = join(home, 'preload.mjs');
@@ -453,8 +462,7 @@ describe.skipIf(process.platform === 'win32')(
 
     it('exits 1 and names the case in the summary when a replayed answer regresses', () => {
       const regressed = join(home, 'regressed');
-      cpSync(EXAMPLE, regressed, { recursive: true });
-      symlinkSync(join(REPO, 'node_modules'), join(regressed, 'node_modules'));
+      linkedCopy(regressed);
       const cache = join(regressed, PROMPTSCRIPT, 'eval-cache');
       const entries = readdirSync(cache, { recursive: true, encoding: 'utf8' }).filter((name) =>
         name.endsWith('.json')
@@ -484,8 +492,7 @@ describe.skipIf(process.platform === 'win32')(
 
     it('exits 2 and names the suite when the baseline has one that was not run', () => {
       const widened = join(home, 'widened');
-      cpSync(EXAMPLE, widened, { recursive: true });
-      symlinkSync(join(REPO, 'node_modules'), join(widened, 'node_modules'));
+      linkedCopy(widened);
       const file = join(widened, BASELINE);
       const baseline = JSON.parse(readFileSync(file, 'utf8')) as {
         suites: { name: string; prompt: { id: string } }[];
