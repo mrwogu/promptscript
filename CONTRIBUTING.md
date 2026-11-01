@@ -149,6 +149,29 @@ fix(cli): handle missing config file gracefully
 docs(readme): update installation instructions
 ```
 
+### Breaking Changes
+
+`pnpm api:breaking` runs in CI on every pull request to `main`. It is not part of the local verify steps. It compares `packages/*/api/*.api.md` and `schema/*.json` with the merge base of your branch and `main`.
+
+What counts as breaking:
+
+- In an API report: a removed or changed line. `@internal` declarations and comment lines are ignored.
+- In a schema: a removed property, a new required property, a narrowed type, enum or union, a changed `const`, a type added to an untyped property, or `additionalProperties` narrowed or set to `false`.
+- For the schemas that only `prs` writes (`approval-report-v1`, `audit-log-v1`, `diff-v1`, `eval-comparison-v1`, `eval-import-summary-v1`, `eval-report-v1` and `release-report-v1`), a new required property is fine and a removed one is breaking.
+- Not checked: `if`, `not`, `pattern`, min and max bounds, `propertyNames` and `dependencies`. A new `allOf` entry and a new `then` or `else` are not checked. Also not caught: a base union branch split across two head branches and a narrowing `type` added next to a union. A missing `additionalProperties` changed to `{}` is reported, even though it changes nothing.
+
+Additions pass. Reports of private packages are listed but not enforced.
+
+Pull requests are squash-merged. With one commit, the subject of that commit becomes the commit on `main`. With more commits, the pull request title does. A merge commit from "Update branch" counts as a commit, so after it the pull request title is the one that is checked. The commit messages go into the squash body, the pull request description is not used. So mark a breaking change with `!` in that subject, for example `feat(core)!: drop parseLegacy`. A line that starts with `BREAKING CHANGE:` in any commit message also passes the check.
+
+To run it locally:
+
+```bash
+pnpm api:breaking
+PR_TITLE='feat(core)!: drop parseLegacy' pnpm api:breaking   # with more than one commit
+pnpm exec vitest run --dir scripts                           # the spec of the check
+```
+
 ## Coding Standards
 
 ### TypeScript
