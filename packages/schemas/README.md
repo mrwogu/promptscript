@@ -1,11 +1,18 @@
-# schemas
+# @promptscript/schemas
 
-This library was generated with [Nx](https://nx.dev).
+The JSON Schemas of PromptScript, one subpath per file. No code, only data.
 
-## Building
+```text
+@promptscript/schemas/config.json
+@promptscript/schemas/diff-v1.json
+@promptscript/schemas/prompt-bundle-v1.json
+...
+```
 
-Run `nx build schemas` to build the library.
+The files are copied from `schema/` in the repository when the package is built. The `$id` URL inside each schema stays the canonical id.
 
-## Running unit tests
+This package is private for now and not published. Inside this repository read the files in `schema/` directly.
 
-Run `nx test schemas` to execute the unit tests via [Vitest](https://vitest.dev/).
+## Adding a schema
+
+Add the file to `schema/`, then add a matching line to `exports` in `package.json`. The spec in `src/exports.spec.ts` fails until you do.

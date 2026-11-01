@@ -55,6 +55,7 @@ promptscript/
 │   ├── browser-compiler/ # Browser-compatible compiler bundle
 │   ├── playground/     # Web-based playground UI (private)
 │   ├── server/         # Local dev server for playground (private)
+│   ├── schemas/        # schema/*.json as package subpaths (private)
 │   └── cli/            # CLI application
 ├── apps/docs/          # Docs site (Astro Starlight, reads docs/)
 ├── docs/               # Documentation
