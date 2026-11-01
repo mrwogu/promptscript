@@ -276,7 +276,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
@@ -302,7 +302,7 @@ jobs:
 ```yaml
 # .gitlab-ci.yml
 promptscript:
-  image: node:20
+  image: node:22
   script:
     - npm install -g @promptscript/cli
     - prs pull
@@ -619,7 +619,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
@@ -646,7 +646,7 @@ jobs:
 ```yaml
 # .gitlab-ci.yml
 promptscript:
-  image: node:20
+  image: node:22
   script:
     - npm install -g @promptscript/cli
     - prs vendor check
