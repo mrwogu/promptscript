@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.27.0](https://github.com/mrwogu/promptscript/compare/v1.26.0...v1.27.0) (2026-11-01)
+
+
+### Features
+
+* **resolver:** keep the parser code as cause of PS2000 ([#721](https://github.com/mrwogu/promptscript/issues/721)) ([77e1d09](https://github.com/mrwogu/promptscript/commit/77e1d09d1d43ade0233b6f117940d4d4eb28eb59))
+
+
+### Bug Fixes
+
+* **cli:** require Node.js 22.22 or newer ([#719](https://github.com/mrwogu/promptscript/issues/719)) ([5fd8e4c](https://github.com/mrwogu/promptscript/commit/5fd8e4c5ae33c5e5e0a8325ac4e12bcf8ad97ca2))
+
 ## [1.26.0](https://github.com/mrwogu/promptscript/compare/v1.25.0...v1.26.0) (2026-11-01)
 
 
