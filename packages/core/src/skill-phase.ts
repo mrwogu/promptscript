@@ -19,16 +19,14 @@ function toSlashes(path: string): string {
  *
  * The label is the source path relative to the project root, with `/`
  * separators. When the source is outside the root, or no root is given,
- * only the file name is returned. An empty root means the virtual root.
+ * only the file name is returned. An empty root means the virtual root,
+ * where Windows drive paths also fall back to the file name.
  * Absolute paths and `..` segments are never returned.
  */
 export function getSkillPhaseSourceLabel(source: string, projectRoot?: string): string {
   const normalizedSource = toSlashes(source);
-  const fileName =
-    normalizedSource
-      .split('/')
-      .filter((part) => part.length > 0)
-      .pop() ?? source;
+  const trimmedSource = normalizedSource.replace(/\/+$/, '');
+  const fileName = trimmedSource.slice(trimmedSource.lastIndexOf('/') + 1) || source;
   if (projectRoot === undefined) {
     return fileName;
   }
@@ -39,6 +37,10 @@ export function getSkillPhaseSourceLabel(source: string, projectRoot?: string): 
     .filter((part) => part !== '' && part !== '.')
     .join('/');
   const prefix = root === '' ? '' : `${root}/`;
+  // A drive path at the virtual root is absolute, never project relative.
+  if (root === '' && /^[A-Za-z]:/.test(relativeSource)) {
+    return fileName;
+  }
   if (!relativeSource.startsWith(prefix)) {
     return fileName;
   }

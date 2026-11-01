@@ -380,14 +380,20 @@ export class BrowserResolver {
       throw new CircularDependencyError([...this.resolving, absPath]);
     }
 
+    if (this.resolving.size === 0) {
+      const entryDir = this.dirname(absPath);
+      // Composed skill markers are relative to the entry directory when no
+      // project root is set, so cached results from another entry are stale.
+      if (this.projectRoot === undefined && entryDir !== this.entryDir) {
+        this.cache.clear();
+      }
+      this.entryDir = entryDir;
+    }
+
     // Check cache
     if (this.cacheEnabled && this.cache.has(absPath)) {
       this.logger.debug(`Cache hit: ${absPath}`);
       return this.cache.get(absPath)!;
-    }
-
-    if (this.resolving.size === 0) {
-      this.entryDir = this.dirname(absPath);
     }
     this.resolving.add(absPath);
     this.logger.verbose(`Parsing ${absPath}`);
