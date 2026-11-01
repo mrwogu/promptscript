@@ -1,0 +1,7 @@
+{
+  "name": "schemas",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "tags": ["scope:schemas", "type:lib"],
+  "targets": {}
+}
