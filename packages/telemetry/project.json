@@ -14,6 +14,7 @@
         "tsConfig": "packages/telemetry/tsconfig.lib.json",
         "assets": ["packages/telemetry/*.md", "packages/telemetry/telemetry-schema/**/*"]
       }
-    }
+    },
+    "typecheck": {}
   }
 }

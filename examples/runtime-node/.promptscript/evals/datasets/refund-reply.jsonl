@@ -1,0 +1,4 @@
+{"id":"broken-kettle","inputs":{"order_total":42.5,"days_since_delivery":12,"message":"The kettle arrived broken. Can I get my money back?"},"expected":{"decision":"approve"}}
+{"id":"late-return","inputs":{"order_total":39,"days_since_delivery":45,"message":"I would like to return the lamp."},"expected":{"decision":"deny"}}
+{"id":"large-order","inputs":{"order_total":820,"days_since_delivery":5,"message":"The sofa has a torn seat."},"expected":{"decision":"escalate"}}
+{"id":"last-day","inputs":{"order_total":120,"days_since_delivery":30,"message":"The shoes are the wrong size."},"expected":{"decision":"approve"}}

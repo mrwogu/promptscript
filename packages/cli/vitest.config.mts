@@ -1,6 +1,4 @@
 import { configDefaults, defineConfig } from 'vitest/config';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 
 /**
  * Specs that compile in a temp project, run Git, the CLI or the output worker as a process,
@@ -43,9 +41,11 @@ const INTEGRATION_SPECS = [
 const INTEGRATION_TIMEOUT_MS = 60_000;
 
 export default defineConfig(() => ({
+  resolve: {
+    tsconfigPaths: true,
+  },
   root: __dirname,
   cacheDir: '../../node_modules/.vite/packages/cli',
-  plugins: [nxViteTsPaths(), nxCopyAssetsPlugin(['*.md'])],
   test: {
     name: 'cli',
     watch: false,
